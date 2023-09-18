@@ -3,24 +3,9 @@
     <v-row class="mx-0 mt-n4">
       Retrieve an existing business or Name Request to manage:
     </v-row>
-    <v-row class="mx-0 mt-n2">
-      <v-radio-group
-        v-model="searchType"
-        row
-      >
-        <v-radio
-          label="Existing business"
-          value="Incorporated"
-        />
-        <v-radio
-          label="Name Request"
-          value="NameRequest"
-        />
-      </v-radio-group>
-    </v-row>
     <v-row
       :key="clearSearch"
-      class="mx-n4 mt-n12"
+      class="mx-n4 mt-n6"
     >
       <v-col cols="6">
         <v-form
@@ -49,6 +34,21 @@
           />
         </v-form>
       </v-col>
+    </v-row>
+    <v-row class="mx-0 mt-n6">
+      <v-radio-group
+        v-model="searchType"
+        row
+      >
+        <v-radio
+          label="Existing business"
+          value="Incorporated"
+        />
+        <v-radio
+          label="Name Request"
+          value="NameRequest"
+        />
+      </v-radio-group>
     </v-row>
 
     <ManageBusinessDialog
