@@ -97,7 +97,10 @@ export default defineComponent({
         let display = true
 
         for (let col in props.filters.filterPayload) {
-          const colValue = props.headers[headerTypes[col].index].customFilter.items[i].text
+          const headersArray = props.headers
+          const index = headersArray.findIndex(item => item.col === col)
+
+          const colValue = props.headers[index].customFilter.items[i].text
           const filterValue = props.filters.filterPayload[col]
 
           if (headerTypes[col].type === 'select') {
