@@ -135,6 +135,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
     HTTP_ORIGIN = os.getenv('HTTP_ORIGIN', 'localhost')
     WEB_APP_URL = os.getenv('WEB_APP_URL', 'localhost')
+    DASHBOARD_URL = os.getenv('DASHBOARD_URL', 'localhost')
     AUTH_WEB_TOKEN_CONFIRM_PATH = os.getenv('AUTH_WEB_TOKEN_CONFIRM_PATH')
     # PAD TOS PDF file name.
     PAD_TOS_FILE = os.getenv('PAD_TOS_FILE', 'BCROS-Business-Pre-Authorized-Debit-Agreement.pdf')

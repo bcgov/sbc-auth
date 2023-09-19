@@ -32,3 +32,9 @@ def get_login_url():
     """Get application login url."""
     login_url = current_app.config.get('WEB_APP_URL')
     return login_url
+
+
+def get_dashboard_url():
+    """Get application dashboard url."""
+    login_url = current_app.config.get('DASHBOARD_URL')
+    return login_url

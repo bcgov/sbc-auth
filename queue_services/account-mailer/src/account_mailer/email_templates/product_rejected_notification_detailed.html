@@ -8,7 +8,7 @@ You will continue to have search access only to {{ category_descriptor }}.
 
 BC Registries staff have reviewed your application to have **{{ product_name }}** access to {{ category_descriptor }}, and you have been rejected for the following reason(s):
 
-**{{ remarks }}**
+^ **{{ remarks }}**
 
 {% if contact_type == 'BCOL' %}
 Please contact BC OnLine at 1-800-663-6102 or email bcolhelp@gov.bc.ca to discuss further actions.
@@ -16,6 +16,10 @@ Please contact BC OnLine at 1-800-663-6102 or email bcolhelp@gov.bc.ca to discus
 Please contact BC Registries at 1-877-526-1526 or email bcregistries@gov.bc.ca to discuss further actions.
 {% endif %}
 
+{% if product_access_descriptor.upper() == 'QUALIFIED SUPPLIER' %}
+You can now submit a new {{ product_access_descriptor }} access request from {{ category_descriptor }} (or Asset Registries) dashboard once you have all the required information.
+{% else %}
 You can now submit a new {{ product_access_descriptor }} access request from {{ category_descriptor }} dashboard once you have all the required information.
+{% endif %}
 
-[Log in to access {{ category_descriptor }}]({{ url }})
+[Log in to access {{ category_descriptor }}]({{ dashboard_url }})
