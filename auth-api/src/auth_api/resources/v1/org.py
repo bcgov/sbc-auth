@@ -380,16 +380,6 @@ def post_organization_affiliation(org_id):
     return response, status
 
 
-def _get_environment():
-    env = os.getenv('FLASK_ENV')
-    sandbox_host = current_app.config['SANDBOX_HOST_NAME']
-    if env == 'production':
-        host_url = request.host_url
-        if sandbox_host in host_url:
-            env = 'sandbox'
-    return env
-
-
 @bp.route('/affiliation/<string:business_identifier>', methods=['GET', 'OPTIONS'])
 @cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
@@ -598,3 +588,11 @@ def get_org_payment_info(org_id):
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
     return response, status
+
+
+def _get_environment():
+    env = os.getenv('FLASK_ENV')
+    sandbox_host = current_app.config['AUTH_WEB_SANDBOX_HOST']
+    if env == 'production' and sandbox_host in request.host_url:
+        env = 'sandbox'
+    return env

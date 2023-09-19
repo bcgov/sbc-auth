@@ -206,7 +206,7 @@ class Affiliation:
         return True
 
     @staticmethod
-    def create_new_business_affiliation(org_id,  # pylint: disable=too-many-arguments, too-many-locals
+    def create_new_business_affiliation(org_id,  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches, too-many-statements  # noqa: E501
                                         environment,
                                         business_identifier=None, email=None, phone=None, certified_by_name=None,
                                         bearer_token: str = None):
@@ -225,7 +225,7 @@ class Affiliation:
 
         # Call the legal-api to verify the NR details
         if not (nr_json := Affiliation._get_nr_details(business_identifier, bearer_token)):
-             raise BusinessException(Error.NR_NOT_FOUND, None)
+            raise BusinessException(Error.NR_NOT_FOUND, None)
 
         status = nr_json.get('state')
 
@@ -355,7 +355,7 @@ class Affiliation:
         return invoices
 
     @staticmethod
-    def delete_affiliation(org_id, business_identifier, environment: str = None, email_addresses: str = None,
+    def delete_affiliation(org_id, business_identifier, environment: str = None, email_addresses: str = None,   # pylint: disable=too-many-arguments  # noqa: E501
                            reset_passcode: bool = False, log_delete_draft: bool = False):
         """Delete the affiliation for the provided org id and business id."""
         current_app.logger.info(f'<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}')

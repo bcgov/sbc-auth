@@ -233,9 +233,7 @@ def _verify_permissions(user, affiliation_invitation_id):
 
 def _get_environment():
     env = os.getenv('FLASK_ENV')
-    sandbox_host = current_app.config['SANDBOX_HOST_NAME']
-    if env == 'production':
-        host_url = request.host_url
-        if sandbox_host in host_url:
-            env = 'sandbox'
+    sandbox_host = current_app.config['AUTH_WEB_SANDBOX_HOST']
+    if env == 'production' and sandbox_host in request.host_url:
+        env = 'sandbox'
     return env
