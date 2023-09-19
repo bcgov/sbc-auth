@@ -7,6 +7,7 @@
       :show-help="true"
       dialog-class="notify-dialog"
       max-width="640"
+      @open-help="openHelp"
     >
       <template #icon>
         <v-icon

@@ -59,6 +59,7 @@
       </ExpandableHelp>
 
       <SearchBusinessNameRequest
+        ref="searchBusinessNameRequest"
         :orgId="orgId"
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
         :showManageBusinessDialog="showManageBusinessDialog"
@@ -87,7 +88,7 @@
         @remove-business="showConfirmationOptionsModal($event)"
         @business-unavailable-error="showBusinessUnavailableModal($event)"
         @resend-affiliation-invitation="resendAffiliationInvitation($event)"
-        @show-manage-business-dialog="showManageBusinessDialogForBusiness($event)"
+        @show-manage-business-dialog="selectBusiness($event)"
       />
 
       <PasscodeResetOptionsModal
@@ -399,6 +400,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     businessUnavailableDialog: InstanceType<typeof ModalDialog>
     linkExpireErrorDialog: InstanceType<typeof ModalDialog>
     helpDialog: InstanceType<typeof ModalDialog>
+    searchBusinessNameRequest: SearchBusinessNameRequest
   }
 
   async mounted () {
@@ -575,6 +577,11 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   showManageBusinessDialogForBusiness (business: Business) {
     this.businessIdentifier = business.businessIdentifier
     this.showManageBusinessDialog = true
+  }
+
+  selectBusiness (business: Business) {
+    const event = { name: business.name, identifier: business.businessIdentifier, legalType: business.corpType?.code }
+    this.$refs?.searchBusinessNameRequest.selectBusiness(event)
   }
 
   hideManageBusinessDialog () {

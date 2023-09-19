@@ -18,7 +18,7 @@
           <BusinessLookup
             :key="businessLookupKey"
             :lookupType="lookupType.BUSINESS"
-            @business="businessEvent"
+            @business="selectBusiness"
           />
         </v-form>
         <v-form
@@ -187,10 +187,10 @@ export default class SearchBusinessNameRequest extends Vue {
     this.$emit('on-authorization-email-sent-close', event)
   }
 
-  async businessEvent (event: { name: string, identifier: string, legalType: string }) {
-    this.businessName = event?.name || ''
-    this.businessIdentifier = event?.identifier || ''
-    this.businessLegalType = event?.legalType || ''
+  async selectBusiness (business: { name: string, identifier: string, legalType: string }) {
+    this.businessName = business?.name || ''
+    this.businessIdentifier = business?.identifier || ''
+    this.businessLegalType = business?.legalType || ''
     if (this.isGovStaffAccount) {
       try {
         let businessData: LoginPayload = { businessIdentifier: this.businessIdentifier }
