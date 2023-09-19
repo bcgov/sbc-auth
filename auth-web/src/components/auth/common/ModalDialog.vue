@@ -50,15 +50,15 @@
 
       <!-- actions -->
       <v-card-actions v-if="showActions">
-        <span
-          id="help-button"
-          class="pl-2 pr-2 mr-auto"
-          @click.stop="openHelp()"
-        >
-          <v-icon>mdi-help-circle-outline</v-icon>
-          Help
-        </span>
         <slot name="actions">
+          <span
+            id="help-button"
+            class="pl-2 pr-2 mr-auto"
+            @click.stop="openHelp()"
+          >
+            <v-icon>mdi-help-circle-outline</v-icon>
+            Help
+          </span>
           <v-btn
             large
             color="success"
