@@ -124,7 +124,7 @@ export default defineComponent({
     item: { type: Object as PropType<Business>, required: true },
     index: { type: Number, required: true }
   },
-  emits: ['popup-manage-business-dialog', 'unknown-error', 'remove-affiliation-invitation',
+  emits: ['show-manage-business-dialog', 'unknown-error', 'remove-affiliation-invitation',
     'remove-business', 'business-unavailable-error', 'resend-affiliation-invitation'],
   setup (props, context) {
     const orgStore = useOrgStore()
@@ -515,7 +515,7 @@ export default defineComponent({
     }
 
     const openNewAffiliationInvite = (business: Business) => {
-      context.emit('popup-manage-business-dialog', business)
+      context.emit('show-manage-business-dialog', business)
     }
 
     const showOpenButton = (item: Business): boolean => {

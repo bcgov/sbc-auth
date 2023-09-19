@@ -59,8 +59,10 @@
       </ExpandableHelp>
 
       <SearchBusinessNameRequest
+        ref="searchBusinessNameRequest"
         :orgId="orgId"
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
+        :showManageBusinessDialog="showManageBusinessDialog"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
         @add-success="showAddSuccessModal"
@@ -69,7 +71,8 @@
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
         @unknown-error="showUnknownErrorModal"
         @business-already-added="showBusinessAlreadyAdded($event)"
-        @on-cancel="cancelAddBusiness()"
+        @hide-manage-business-dialog="hideManageBusinessDialog()"
+        @show-manage-business-dialog="showManageBusinessDialogForBusiness($event)"
         @on-business-identifier="businessIdentifier = $event"
         @add-success-nr="showAddSuccessModalNR"
         @add-nr-error="showNRErrorModal()"
@@ -85,7 +88,7 @@
         @remove-business="showConfirmationOptionsModal($event)"
         @business-unavailable-error="showBusinessUnavailableModal($event)"
         @resend-affiliation-invitation="resendAffiliationInvitation($event)"
-        @popup-manage-business-dialog="popupBusinessDialog($event)"
+        @show-manage-business-dialog="selectBusiness($event)"
       />
 
       <PasscodeResetOptionsModal
@@ -354,19 +357,19 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   @Prop({ default: '' }) readonly orgId: string
   @Prop({ default: '' }) readonly base64Token: string
   @Prop({ default: '' }) readonly base64OrgName: string
-  @Action(useOrgStore) protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
+  @Action(useOrgStore) addOrgSettings!: (org: Organization) => Promise<UserSettings>
   // for template
   readonly CorpTypes = CorpTypes
-  private removeBusinessPayload = null
+  removeBusinessPayload = null
   dialogTitle = ''
   dialogText = ''
   isLoading: boolean = false // truthy
   businessIdentifier: string = null
-  private primaryBtnText = ''
-  private secondaryBtnText = ''
-  private primaryBtnHandler: () => void = undefined
-  private secondaryBtnHandler: () => void = undefined
-  private lastSyncBusinesses = 0
+  primaryBtnText = ''
+  secondaryBtnText = ''
+  primaryBtnHandler: () => void = undefined
+  secondaryBtnHandler: () => void = undefined
+  lastSyncBusinesses = 0
   showManageBusinessDialog = false
   isAuthorizationEmailSentDialogVisible = false
   businessContactEmail = ''
@@ -376,16 +379,16 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   highlightRowIndex = NaN // for newly added NR or Business
 
   /** V-model for dropdown menus. */
-  private addAffiliationDropdown: boolean = false
+  addAffiliationDropdown: boolean = false
 
   readonly searchBusinessIndex!: (identifier: string) => Promise<number>
   readonly getBusinessNameByIdentifier!: (identifier: string) => Promise<string | null>
   readonly searchNRIndex!: (identifier: string) => Promise<number>
-  private readonly syncBusinesses!: () => Promise<void>
-  private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
-  private readonly createNumberedBusiness!: ({ filingType, business }) => Promise<void>
-  private readonly currentOrgAddress!: Address
-  private readonly syncAddress!: () => Address
+  readonly syncBusinesses!: () => Promise<void>
+  readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
+  readonly createNumberedBusiness!: ({ filingType, business }) => Promise<void>
+  readonly currentOrgAddress!: Address
+  readonly syncAddress!: () => Address
   highlightIndex = -1
 
   $refs: {
@@ -397,9 +400,10 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     businessUnavailableDialog: InstanceType<typeof ModalDialog>
     linkExpireErrorDialog: InstanceType<typeof ModalDialog>
     helpDialog: InstanceType<typeof ModalDialog>
+    searchBusinessNameRequest: SearchBusinessNameRequest
   }
 
-  private async mounted () {
+  async mounted () {
     if (this.currentMembership === undefined) {
       this.$router?.push(`/${Pages.CREATE_ACCOUNT}`)
       return
@@ -435,7 +439,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
   }
 
-  protected async handleMagicLink (token: any, legalName: string) {
+  async handleMagicLink (token: any, legalName: string) {
     const currentOrgId = JSON.parse(sessionStorage.getItem(SessionStorageKeys.CurrentAccount)).id
     if (currentOrgId !== Number(this.orgId)) {
       this.setCurrentAccountSettings({
@@ -461,7 +465,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   // Function to parse the URL and extract the parameters, used for magic link email
-  protected async parseUrlAndAddAffiliation (token: any, legalName: string, base64Token: string) {
+  async parseUrlAndAddAffiliation (token: any, legalName: string, base64Token: string) {
     if (!this.$route.meta.checkMagicLink) {
       return
     }
@@ -543,7 +547,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.helpDialog.open()
   }
 
-  private async setup (): Promise<void> {
+  async setup (): Promise<void> {
     // ensure syncBusinesses isn't already running
     if (this.isLoading === true) {
       return
@@ -558,7 +562,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.lastSyncBusinesses = Date.now()
   }
 
-  private get enableMandatoryAddress (): boolean {
+  get enableMandatoryAddress (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
   }
 
@@ -566,13 +570,22 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     return this.isStaffAccount ? 'My Staff Business Registry' : 'My Business Registry'
   }
 
-  private onClickGoToNameRequest (): void {
+  onClickGoToNameRequest (): void {
     window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl())
   }
 
-  async popupBusinessDialog (business: Business) {
+  showManageBusinessDialogForBusiness (business: Business) {
     this.businessIdentifier = business.businessIdentifier
     this.showManageBusinessDialog = true
+  }
+
+  selectBusiness (business: Business) {
+    const event = { name: business.name, identifier: business.businessIdentifier, legalType: business.corpType?.code }
+    this.$refs?.searchBusinessNameRequest.selectBusiness(event)
+  }
+
+  hideManageBusinessDialog () {
+    this.showManageBusinessDialog = false
   }
 
   async showAddSuccessModal (businessIdentifier: string) {
@@ -752,7 +765,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.businessUnavailableDialog.open()
   }
 
-  private populateNRmodalValues () {
+  populateNRmodalValues () {
     this.dialogTitle = this.$t('removeNRConfirmTitle').toString()
     this.dialogText = this.$t('removeNRConfirmText').toString()
     this.primaryBtnText = 'Remove Name Request'
@@ -761,7 +774,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.secondaryBtnHandler = this.cancelRemoval
   }
 
-  private populateIAmodalValues () {
+  populateIAmodalValues () {
     this.dialogTitle = this.$t('removeIAConfirmTitle').toString()
     this.dialogText = this.$t('removeIAConfirmText').toString()
     this.primaryBtnText = 'Delete Incorporation Application'
@@ -770,7 +783,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.secondaryBtnHandler = this.cancelRemoval
   }
 
-  private populateRegistrationModalValues () {
+  populateRegistrationModalValues () {
     this.dialogTitle = this.$t('removeRegistrationConfirmTitle').toString()
     this.dialogText = this.$t('removeRegistrationConfirmText').toString()
     this.primaryBtnText = 'Delete Registration'
@@ -778,7 +791,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.primaryBtnHandler = this.confirmRemovalRegistration
     this.secondaryBtnHandler = this.cancelRemoval
   }
-  private populateFirmModalValues () {
+
+  populateFirmModalValues () {
     this.dialogTitle = this.$t('removeFirmConfirmTitle').toString()
     this.dialogText = this.$t('removeFirmConfirmText').toString()
     this.primaryBtnText = 'Remove Registration'
@@ -809,10 +823,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   confirmRemovalFirm () {
     this.$refs.removalConfirmDialog.close()
     this.remove('', false, 'removeFirmSuccessTitle', 'removeFirmSuccessText')
-  }
-
-  cancelAddBusiness () {
-    this.showManageBusinessDialog = false
   }
 
   async remove (resetPasscodeEmail: string, resetPasscode = true, dialogTitleKey = 'removeBusiness', dialogTextKey = 'removedBusinessSuccessText') {

@@ -1,5 +1,5 @@
 import { Action, Applicant, Business, CorpType, Names } from '@/models/business'
-import { AffiliationInvitationStatus, CorpTypes, NrTargetTypes } from '@/util/constants'
+import { AffiliationInvitationStatus, AffiliationInvitationType, CorpTypes, NrTargetTypes } from '@/util/constants'
 import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 import { OrgNameAndId, Organization } from '@/models/Organization'
 import { Contact } from './contact'
@@ -23,7 +23,7 @@ export interface Affiliation {
 
 export class AffiliationInviteInfo {
   id: number
-  type: string
+  type: AffiliationInvitationType
   status: string
   entity: Business
   fromOrg: OrgNameAndId

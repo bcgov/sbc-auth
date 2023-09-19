@@ -18,7 +18,7 @@
           <BusinessLookup
             :key="businessLookupKey"
             :lookupType="lookupType.BUSINESS"
-            @business="businessEvent"
+            @business="selectBusiness"
           />
         </v-form>
         <v-form
@@ -66,7 +66,7 @@
       @add-failed-no-entity="showEntityNotFoundModal()"
       @add-failed-passcode-claimed="showPasscodeClaimedModal()"
       @unknown-error="showUnknownErrorModal('business')"
-      @on-cancel="cancelEvent"
+      @hide-manage-business-dialog="cancelEvent"
       @on-business-identifier="businessIdentifier = $event"
       @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
     />
@@ -129,6 +129,7 @@ export default class SearchBusinessNameRequest extends Vue {
   @Prop({ default: false }) readonly isGovStaffAccount: boolean
   @Prop({ default: '' }) readonly userFirstName: string
   @Prop({ default: '' }) readonly userLastName: string
+  @Prop({ default: false }) readonly showManageBusinessDialog: boolean
 
   // local variables
   searchType = 'Incorporated'
@@ -137,7 +138,6 @@ export default class SearchBusinessNameRequest extends Vue {
   businessIdentifier = '' // aka incorporation number or registration number
   businessLegalType = ''
   clearSearch = 0
-  showManageBusinessDialog = false
   showNRDialog = false
   businessLookupKey = 0 // force re-mount of BusinessLookup component
   lookupType = LookupType
@@ -150,7 +150,6 @@ export default class SearchBusinessNameRequest extends Vue {
 
   showAddSuccessModal (event) {
     this.clearSearch++
-    this.showManageBusinessDialog = false
     this.$emit('add-success', event)
   }
   showInvalidCodeModal (event) {
@@ -167,12 +166,6 @@ export default class SearchBusinessNameRequest extends Vue {
   }
   showBusinessAlreadyAdded (event) {
     this.$emit('business-already-added', event)
-  }
-  cancelAddBusiness () {
-    this.$emit('on-cancel')
-  }
-  cancelAddNameRequest () {
-    this.$refs.addNRDialog.close()
   }
   showAddSuccessModalNR (event) {
     this.clearSearch++
@@ -194,10 +187,10 @@ export default class SearchBusinessNameRequest extends Vue {
     this.$emit('on-authorization-email-sent-close', event)
   }
 
-  async businessEvent (event: { name: string, identifier: string, legalType: string }) {
-    this.businessName = event?.name || ''
-    this.businessIdentifier = event?.identifier || ''
-    this.businessLegalType = event?.legalType || ''
+  async selectBusiness (business: { name: string, identifier: string, legalType: string }) {
+    this.businessName = business?.name || ''
+    this.businessIdentifier = business?.identifier || ''
+    this.businessLegalType = business?.legalType || ''
     if (this.isGovStaffAccount) {
       try {
         let businessData: LoginPayload = { businessIdentifier: this.businessIdentifier }
@@ -210,7 +203,7 @@ export default class SearchBusinessNameRequest extends Vue {
         console.error('Error adding business: ', err)
       }
     } else {
-      this.showManageBusinessDialog = true
+      this.$emit('show-manage-business-dialog', this.businessIdentifier)
     }
   }
 
@@ -247,7 +240,7 @@ export default class SearchBusinessNameRequest extends Vue {
 
   cancelEvent () {
     this.$refs.addNRDialog.close()
-    this.showManageBusinessDialog = false
+    this.$emit('hide-manage-business-dialog')
     this.showNRDialog = false
     this.businessIdentifier = ''
     this.businessLegalType = ''
@@ -257,7 +250,7 @@ export default class SearchBusinessNameRequest extends Vue {
   }
 
   onAuthorizationEmailSentClose (event) {
-    this.showManageBusinessDialog = false
+    this.$emit('hide-manage-business-dialog')
     this.showNRDialog = false
     this.businessIdentifier = ''
     this.businessLegalType = ''

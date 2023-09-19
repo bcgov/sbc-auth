@@ -163,7 +163,7 @@
             @remove-business="$emit('remove-business', $event)"
             @business-unavailable-error="$emit('business-unavailable-error', $event)"
             @resend-affiliation-invitation="$emit('resend-affiliation-invitation', $event)"
-            @popup-manage-business-dialog="$emit('popup-manage-business-dialog', $event)"
+            @show-manage-business-dialog="$emit('show-manage-business-dialog', $event)"
           />
         </template>
       </base-v-data-table>
@@ -174,6 +174,7 @@
 <script lang='ts'>
 import {
   AffiliationInvitationStatus,
+  AffiliationInvitationType,
   AffiliationTypes,
   EntityAlertTypes,
   LDFlags,
@@ -200,7 +201,7 @@ export default defineComponent({
     highlightIndex: { default: -1 }
   },
   emits: ['unknown-error', 'remove-affiliation-invitation', 'remove-business',
-    'business-unavailable-error', 'resend-affiliation-invitation', 'popup-manage-business-dialog'],
+    'business-unavailable-error', 'resend-affiliation-invitation', 'show-manage-business-dialog'],
   setup () {
     const isloading = false
     const { loadAffiliations, affiliations, entityCount, clearAllFilters,
@@ -285,13 +286,15 @@ export default defineComponent({
       if (isCurrentOrganization(affiliationWithSmallestId.toOrg?.id)) {
         // incoming request for access
         const andOtherAccounts = affiliationInviteInfos.length > 1 ? ` and ${affiliationInviteInfos.length - 1} other account(s)` : ''
-        return `Request for Authorization to manage from: ${affiliationWithSmallestId.fromOrg.name}${andOtherAccounts}`
+        return `Request for Authorization to manage from: <strong>${affiliationWithSmallestId.fromOrg.name}${andOtherAccounts}</strong>`
       } else {
         let statusText = ''
         // outgoing request for access
         switch (affiliationWithSmallestId.status) {
           case AffiliationInvitationStatus.Pending:
-            statusText = 'Confirmation email sent, pending authorization.'
+            statusText = affiliationWithSmallestId.type === AffiliationInvitationType.REQUEST
+              ? 'Request' : 'Confirmation Email'
+            statusText += ' sent, pending authorization.'
             break
           case AffiliationInvitationStatus.Accepted:
             statusText = '<strong>Authorized</strong> - you can now manage this business.'
