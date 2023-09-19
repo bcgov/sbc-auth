@@ -2,7 +2,11 @@
 
 BC Registries staff have received your application to have **{{ product_name }}** access to {{ category_descriptor }}, and your request is under review.
 
-{% if has_agreement_attachment %}
+{% if has_agreement_attachment%}
+    {% if product_access_descriptor == 'Qualified Supplier' %}
+        {% set product_access_descriptor = "Qualified Suppliers'" %}
+    {% endif %}
+
 Please find a copy of the {{ product_access_descriptor }} Agreement attached for your records.
 {% endif %}
 

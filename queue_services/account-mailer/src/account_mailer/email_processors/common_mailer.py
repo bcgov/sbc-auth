@@ -17,7 +17,7 @@ from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
 
-from account_mailer.auth_utils import get_login_url
+from account_mailer.auth_utils import get_dashboard_url, get_login_url
 from account_mailer.email_processors import generate_template
 
 
@@ -38,6 +38,7 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
         'account_name': account_name,
         'url': get_login_url(),
         'logo_url': logo_url,
+        'dashboard_url': get_dashboard_url(),
         **kwargs
     }
     logger.debug('notification args: %s', jinja_kwargs)
