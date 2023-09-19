@@ -1,5 +1,5 @@
 import '../test-utils/composition-api-setup' // important to import this first
-import { EntityAlertTypes, SessionStorageKeys } from '@/util/constants'
+import { AffiliationInvitationStatus, AffiliationInvitationType, EntityAlertTypes, SessionStorageKeys } from '@/util/constants'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { actions, businesses, moreBusinesses } from './../test-utils/test-data/affiliations'
 import { useBusinessStore, useOrgStore } from '@/stores'
@@ -267,5 +267,44 @@ describe('AffiliatedEntityTable.vue', () => {
       // check that all with invites have the entry in table too
       expect(allRows.at(i).html()).toContain('affiliationInvitesStatus')
     }
+  })
+
+  it('getRequestForAuthorizationStatusText returns correct text', async () => {
+    wrapper = mount(AffiliatedEntityTable, {
+      localVue,
+      vuetify,
+      propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
+      mocks: { $t: () => '' }
+    })
+    const affiliationInvitation = {
+      id: 1,
+      type: AffiliationInvitationType.REQUEST,
+      status: null,
+      toOrg: null
+    }
+    affiliationInvitation.status = AffiliationInvitationStatus.Accepted
+    expect(wrapper.vm.getRequestForAuthorizationStatusText([affiliationInvitation]))
+      .toBe('Authorization to manage: <strong>Authorized</strong> - you can now manage this business.')
+    // Expired will never happen as REQUEST never expire.
+    affiliationInvitation.status = AffiliationInvitationStatus.Pending
+    expect(wrapper.vm.getRequestForAuthorizationStatusText([affiliationInvitation]))
+      .toBe('Authorization to manage: Request sent, pending authorization.')
+    affiliationInvitation.status = AffiliationInvitationStatus.Failed
+    expect(wrapper.vm.getRequestForAuthorizationStatusText([affiliationInvitation]))
+      .toBe('Authorization to manage: <strong>Not Authorized</strong>. Your request to manage this business has been declined.')
+
+    affiliationInvitation.type = AffiliationInvitationType.EMAIL
+    affiliationInvitation.status = AffiliationInvitationStatus.Accepted
+    expect(wrapper.vm.getRequestForAuthorizationStatusText([affiliationInvitation]))
+      .toBe('Authorization to manage: <strong>Authorized</strong> - you can now manage this business.')
+    affiliationInvitation.status = AffiliationInvitationStatus.Expired
+    expect(wrapper.vm.getRequestForAuthorizationStatusText([affiliationInvitation]))
+      .toBe('Authorization to manage: Not authorized. The <strong>confirmation email has expired.</strong>')
+    affiliationInvitation.status = AffiliationInvitationStatus.Pending
+    expect(wrapper.vm.getRequestForAuthorizationStatusText([affiliationInvitation]))
+      .toBe('Authorization to manage: Confirmation Email sent, pending authorization.')
+    affiliationInvitation.status = AffiliationInvitationStatus.Failed
+    expect(wrapper.vm.getRequestForAuthorizationStatusText([affiliationInvitation]))
+      .toBe('Authorization to manage: <strong>Not Authorized</strong>. Your request to manage this business has been declined.')
   })
 })

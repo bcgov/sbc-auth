@@ -51,6 +51,7 @@
       <!-- actions -->
       <v-card-actions v-if="showActions">
         <span
+          v-if="showHelp"
           id="help-button"
           class="pl-2 pr-2 mr-auto"
           @click.stop="openHelp()"
@@ -83,6 +84,7 @@ export default defineComponent({
     text: { type: String, default: '' },
     showIcon: { type: Boolean, default: true },
     showActions: { type: Boolean, default: true },
+    showHelp: { type: Boolean, default: false },
     isPersistent: { type: Boolean, default: false },
     fullscreenOnMobile: { type: Boolean, default: false },
     isScrollable: { type: Boolean, default: false },

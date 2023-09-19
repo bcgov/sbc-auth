@@ -1,5 +1,5 @@
+import { CorpTypes, SessionStorageKeys } from '@/util/constants'
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
-import { CorpTypes } from '@/util/constants'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
 import Vuetify from 'vuetify'
@@ -131,7 +131,8 @@ const testCaseList = [
     hasBusinessEmail: false
   }
 ]
-describe('ManageBusinessDialog Component', () => {
+
+describe('ManageBusinessDialog grouped tests', () => {
   testCaseList.forEach(test => {
     let wrapper: Wrapper<any>
 
@@ -208,6 +209,9 @@ describe('ManageBusinessDialog Component', () => {
       }
     })
   })
+})
+
+describe('ManageBusinessDialog Component', () => {
   let wrapper: Wrapper<any>
 
   beforeAll(() => {
@@ -219,15 +223,18 @@ describe('ManageBusinessDialog Component', () => {
       }
     })
   })
+
   afterAll(() => {
     wrapper.destroy()
   })
+
   it('Should compute the correct boolean for isDialogVisible()', async () => {
     await wrapper.setProps({ showBusinessDialog: true })
     expect(wrapper.vm.isDialogVisible).toBe(true)
     await wrapper.setProps({ showBusinessDialog: false })
     expect(wrapper.vm.isDialogVisible).toBe(false)
   })
+
   it('Should compute the correct boolean for isBusinessLegalTypeFirm()', async () => {
     await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
     expect(wrapper.vm.isBusinessLegalTypeFirm).toBe(true)
@@ -236,24 +243,28 @@ describe('ManageBusinessDialog Component', () => {
     await wrapper.setProps({ businessLegalType: CorpTypes.COOP })
     expect(wrapper.vm.isBusinessLegalTypeFirm).toBe(false)
   })
+
   it('Should compute the correct boolean for isBusinessLegalTypeCorporation()', async () => {
     await wrapper.setProps({ businessLegalType: CorpTypes.BC_COMPANY })
     expect(wrapper.vm.isBusinessLegalTypeCorporation).toBe(true)
     await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
     expect(wrapper.vm.isBusinessLegalTypeCorporation).toBe(false)
   })
+
   it('Should compute the correct boolean for isBusinessLegalTypeBenefit()', async () => {
     await wrapper.setProps({ businessLegalType: CorpTypes.BENEFIT_COMPANY })
     expect(wrapper.vm.isBusinessLegalTypeBenefit).toBe(true)
     await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
     expect(wrapper.vm.isBusinessLegalTypeCorporation).toBe(false)
   })
+
   it('Should compute the correct boolean for isBusinessLegalTypeCoOp()', async () => {
     await wrapper.setProps({ businessLegalType: CorpTypes.COOP })
     expect(wrapper.vm.isBusinessLegalTypeCoOp).toBe(true)
     await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
     expect(wrapper.vm.isBusinessLegalTypeCorporation).toBe(false)
   })
+
   it('Should compute the correct boolean for showAuthorization()', async () => {
     await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
     await wrapper.setProps({ isStaffOrSbcStaff: true })
@@ -264,6 +275,7 @@ describe('ManageBusinessDialog Component', () => {
     await wrapper.setProps({ isStaffOrSbcStaff: true })
     expect(wrapper.vm.showAuthorization).toBe(false)
   })
+
   it('Should compute the correct value for passcodeLabel(), passcodeHint() and passcodeMaxLength()', async () => {
     await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
     expect(wrapper.vm.passcodeLabel).toBe('Proprietor or Partner Name (e.g., Last Name, First Name Middlename)')
@@ -274,8 +286,39 @@ describe('ManageBusinessDialog Component', () => {
     expect(wrapper.vm.passcodeHint).toBe('Password must be 8 to 15 characters')
     expect(wrapper.vm.passcodeMaxLength).toBe(15)
   })
+
   it('Should compute the correct value for certifiedBy()', async () => {
     await wrapper.setProps({ isStaffOrSbcStaff: false })
     expect(wrapper.vm.certifiedBy).toBe('Woodie, Nadia')
+  })
+
+  it('showPasscodeOption shows correct business types by default', async () => {
+    // Defaults for no connection to LD.
+    wrapper.vm.hasBusinessAuthentication = true
+    await wrapper.setProps({ businessLegalType: CorpTypes.BC_COMPANY })
+    expect(wrapper.vm.showPasscodeOption).toBe(true)
+    await wrapper.setProps({ businessLegalType: CorpTypes.PARTNERSHIP })
+    expect(wrapper.vm.showPasscodeOption).toBe(true)
+    await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
+    expect(wrapper.vm.showPasscodeOption).toBe(true)
+    await wrapper.setProps({ businessLegalType: CorpTypes.BENEFIT_COMPANY })
+    expect(wrapper.vm.showPasscodeOption).toBe(false)
+    await wrapper.setProps({ businessLegalType: CorpTypes.COOP })
+    expect(wrapper.vm.showPasscodeOption).toBe(false)
+
+    // Launch darkly flags, show for all
+    sessionStorage[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'allowable-business-passcode-types': 'CP' })
+    wrapper = shallowMount(ManageBusinessDialog, {
+      vuetify,
+      propsData: {
+        userFirstName: 'Nadia',
+        userLastName: 'Woodie'
+      }
+    })
+    wrapper.vm.hasBusinessAuthentication = true
+    await wrapper.setProps({ businessLegalType: CorpTypes.COOP })
+    expect(wrapper.vm.showPasscodeOption).toBe(true)
+    await wrapper.setProps({ businessLegalType: CorpTypes.BENEFIT_COMPANY })
+    expect(wrapper.vm.showPasscodeOption).toBe(false)
   })
 })
