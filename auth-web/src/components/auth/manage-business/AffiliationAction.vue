@@ -385,10 +385,12 @@ export default defineComponent({
       return !isShowRemoveAsPrimaryAction(item) && !showAffiliationInvitationNewRequestButton(item)
     }
 
-    const handleTemporaryBusinessRedirect = (item): void => {
+    const handleTemporaryBusinessRedirect = (item): boolean => {
       if (isTemporaryBusiness(item)) {
         goToDashboard(item.businessIdentifier)
+        return true
       }
+      return false
     }
 
     const handleApprovedNameRequestRenew = (item: Business): void => {
@@ -445,34 +447,43 @@ export default defineComponent({
       }
     }
 
-    const handleNameRequestRedirect = (item: Business): void => {
+    const handleNameRequestRedirect = (item: Business): boolean => {
       if (!isNameRequest(item)) {
-        return
+        return false
       }
       if (status(item) === NrDisplayStates.APPROVED) {
         const nrRequestActionCd = item.nameRequest?.requestActionCd
         handleApprovedNameRequest(item, nrRequestActionCd)
+        return true
       } else {
         goToNameRequest(item.nameRequest)
+        return true
       }
     }
 
-    const handleBusinessRedirect = (item): void => {
+    const handleBusinessRedirect = (item): boolean => {
       if (isNameRequest(item)) {
-        return
+        return false
       }
       if (isModernizedEntity(item)) {
         goToDashboard(item.businessIdentifier)
+        return true
       } else if (isSocieties(item)) {
         goToSocieties()
+        return true
       } else {
         goToCorpOnline()
+        return true
       }
     }
 
-    const redirect = (item: Business): void => {
-      handleTemporaryBusinessRedirect(item)
-      handleNameRequestRedirect(item)
+    const redirect = (item: Business): boolean => {
+      if (handleTemporaryBusinessRedirect(item)) {
+        return
+      }
+      if (handleNameRequestRedirect(item)) {
+        return
+      }
       handleBusinessRedirect(item)
     }
 
