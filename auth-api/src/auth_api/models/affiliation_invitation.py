@@ -15,7 +15,7 @@
 
 from datetime import datetime, timedelta
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, or_
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, or_
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
@@ -50,6 +50,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     invitation_status_code = Column(ForeignKey('invitation_statuses.code'), nullable=False, default='PENDING')
     type = Column(ForeignKey('affiliation_invitation_types.code'), nullable=False, default='EMAIL')
     additional_message = Column(String(4000), nullable=True)
+    is_deleted = Column(Boolean(), default=False)
 
     invitation_status = relationship('InvitationStatus', foreign_keys=[invitation_status_code])
     sender = relationship('User', foreign_keys=[sender_id])
@@ -147,6 +148,8 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         if search_filter.invitation_types:
             results = results.filter(AffiliationInvitation.type.in_(search_filter.invitation_types))
             filter_set = True
+
+        results = results.filter(AffiliationInvitation.is_deleted == search_filter.is_deleted)
 
         if not filter_set:
             raise ValueError('At least one filter has to be set!')

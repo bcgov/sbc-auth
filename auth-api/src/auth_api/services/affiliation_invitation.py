@@ -369,12 +369,13 @@ class AffiliationInvitation:
         if not (invitation := AffiliationInvitationModel.find_invitation_by_id(invitation_id)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        if invitation.status == InvitationStatus.ACCEPTED.value:
-            raise BusinessException(Error.ACTIONED_AFFILIATION_INVITATION, None)
-
         check_auth(org_id=invitation.from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
-        invitation.delete()
+        if invitation.status == InvitationStatus.ACCEPTED.value:
+            invitation.is_deleted = True
+            invitation.save()
+        else:
+            invitation.delete()
 
     @staticmethod
     def search_invitations(search_filter: AffiliationInvitationSearch, mask_email=True):

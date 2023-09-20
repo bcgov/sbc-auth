@@ -162,6 +162,34 @@ def test_delete_affiliation_invitation(session, auth_mock, keycloak_mock, busine
         assert invitation is None
 
 
+def test_delete_accepted_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock,
+                                                monkeypatch):  # pylint:disable=unused-argument
+    """Delete the specified accepted affiliation invitation."""
+    with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
+        user = factory_user_model(TestUserInfo.user_test)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
+        from_org_dictionary, to_org_dictionary, entity_dictionary = setup_org_and_entity(user)
+
+        affiliation_invitation_info = factory_affiliation_invitation(
+            from_org_id=from_org_dictionary['id'],
+            to_org_id=to_org_dictionary['id'],
+            business_identifier=entity_dictionary['business_identifier'])
+
+        new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
+                                                                                    User(user), '').as_dict()
+
+        invitation = AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'],
+                                                                                User(user),
+                                                                                '').as_dict()
+        assert invitation
+        assert invitation['status'] == InvitationStatus.ACCEPTED.value
+
+        AffiliationInvitationService.delete_affiliation_invitation(new_invitation['id'])
+        deleted_invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(new_invitation['id'])
+        assert deleted_invitation
+        assert deleted_invitation.as_dict().get('is_deleted')
+
+
 def test_delete_affiliation_invitation_exception(session, auth_mock):  # pylint:disable=unused-argument
     """Delete the specified affiliation invitation with exception."""
     with pytest.raises(BusinessException) as exception:
