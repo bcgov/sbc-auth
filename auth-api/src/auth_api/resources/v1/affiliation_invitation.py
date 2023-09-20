@@ -13,8 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an Affiliation Invitation resource."""
 
-import os
-from flask import Blueprint, current_app, request
+from flask import Blueprint, request
 from flask_cors import cross_origin
 
 from auth_api import status as http_status
@@ -29,6 +28,7 @@ from auth_api.services.authorization import check_auth
 from auth_api.tracer import Tracer
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import Role
+from auth_api.utils.util import get_request_environment
 
 
 bp = Blueprint('AFFILIATION_INVITATIONS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/affiliationInvitations')
@@ -84,7 +84,7 @@ def get_affiliation_invitations():
     [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def post_affiliation_invitation():
     """Send a new affiliation invitation using the details in request and saves the affiliation invitation."""
-    environment = _get_environment()
+    environment = get_request_environment()
     origin = request.environ.get('HTTP_ORIGIN', 'localhost')
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, 'affiliation_invitation')
@@ -164,7 +164,7 @@ def delete_affiliation_invitation(affiliation_invitation_id):
 def accept_affiliation_invitation_token(affiliation_invitation_id, affiliation_invitation_token):
     """Check whether the passed token is valid and add affiliation from the affiliation invitation."""
     origin = request.environ.get('HTTP_ORIGIN', 'localhost')
-    environment = _get_environment()
+    environment = get_request_environment()
 
     try:
         if not (user := UserService.find_by_jwt_token()):
@@ -189,7 +189,7 @@ def accept_affiliation_invitation_token(affiliation_invitation_id, affiliation_i
 def patch_affiliation_invitation_authorization(affiliation_invitation_id, authorize_action):
     """Check if user is active part of the Org. Authorize/Refuse Authorization invite if he is."""
     origin = request.environ.get('HTTP_ORIGIN', 'localhost')
-    env = _get_environment()
+    env = get_request_environment()
 
     try:
         user = UserService.find_by_jwt_token()
@@ -229,11 +229,3 @@ def _verify_permissions(user, affiliation_invitation_id):
     to_org_id = affiliation_invitation.as_dict()['to_org']['id']
     if not UserService.is_user_admin_or_coordinator(user=user, org_id=to_org_id):
         raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
-
-
-def _get_environment():
-    env = os.getenv('FLASK_ENV')
-    sandbox_host = current_app.config['AUTH_WEB_SANDBOX_HOST']
-    if env == 'production' and sandbox_host in request.host_url:
-        env = 'sandbox'
-    return env

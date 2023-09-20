@@ -27,6 +27,7 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.affiliation_invitation import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
+from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
@@ -145,7 +146,8 @@ class Affiliation:
         affiliation = AffiliationModel.find_affiliation_by_org_id_and_business_identifier(org_id,
                                                                                           business_identifier,
                                                                                           environment)
-
+        if affiliation is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
         return Affiliation(affiliation).as_dict()
 
     @staticmethod
@@ -177,7 +179,6 @@ class Affiliation:
 
         affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=certified_by_name,
                                        environment=environment)
-        affiliation.environment = environment
         affiliation.save()
 
         if entity_type not in ['SP', 'GP']:
@@ -206,11 +207,16 @@ class Affiliation:
         return True
 
     @staticmethod
-    def create_new_business_affiliation(org_id,  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches, too-many-statements  # noqa: E501
+    def create_new_business_affiliation(affiliation_data: AffiliationData,  # pylint: disable=too-many-locals, too-many-branches, too-many-statements  # noqa: E501
                                         environment,
-                                        business_identifier=None, email=None, phone=None, certified_by_name=None,
                                         bearer_token: str = None):
         """Initiate a new incorporation."""
+        org_id = affiliation_data.org_id
+        business_identifier = affiliation_data.business_identifier
+        email = affiliation_data.email
+        phone = affiliation_data.phone
+        certified_by_name = affiliation_data.certified_by_name
+
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
         user_is_staff = Affiliation.is_staff_or_sbc_staff()
         if not user_is_staff and (not email and not phone):

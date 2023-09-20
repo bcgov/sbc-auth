@@ -13,33 +13,35 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 import asyncio
-import os
 
+import orjson
 from flask import Blueprint, current_app, g, jsonify, request
 from flask_cors import cross_origin
-import orjson
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
-from auth_api.models import Affiliation as AffiliationModel, Org as OrgModel
+from auth_api.models import Affiliation as AffiliationModel
+from auth_api.models import Org as OrgModel
+from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.dataclass import PaginationInfo  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Affiliation as AffiliationService
-from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
+from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.tracer import Tracer
 from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.enums import AccessType, NotificationType, PatchActions
-from auth_api.utils.enums import Status
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role  # noqa: I005
+from auth_api.utils.enums import AccessType, NotificationType, PatchActions, Status
 from auth_api.utils.role_validator import validate_roles
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role  # noqa: I005
+from auth_api.utils.util import get_request_environment
+
 
 bp = Blueprint('ORGS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/orgs')
 TRACER = Tracer.get_instance()
@@ -52,7 +54,7 @@ TRACER = Tracer.get_instance()
     [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def search_organizations():
     """Search orgs."""
-    env = _get_environment()
+    env = get_request_environment()
     org_search = OrgSearch(
         request.args.get('name', None),
         request.args.get('branchName', None),
@@ -317,7 +319,7 @@ def delete_organzization_contact(org_id):
 def get_organization_affiliations(org_id):
     """Get all affiliated entities for the given org."""
     try:
-        env = _get_environment()
+        env = get_request_environment()
         # keep old response until UI is updated
         if (request.args.get('new', 'false')).lower() != 'true':
             return jsonify(
@@ -348,7 +350,7 @@ def get_organization_affiliations(org_id):
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def post_organization_affiliation(org_id):
     """Post a new Affiliation for an org using the request body."""
-    env = _get_environment()
+    env = get_request_environment()
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, 'affiliation')
     bearer_token = request.headers['Authorization'].replace('Bearer ', '')
@@ -361,10 +363,12 @@ def post_organization_affiliation(org_id):
         return {'message': 'Business identifier requires at least 1 digit.'}, http_status.HTTP_400_BAD_REQUEST
     try:
         if is_new_business:
+            affiliation_data = AffiliationData(org_id=org_id, business_identifier=business_identifier,
+                                               email=request_json.get('email'), phone=request_json.get('phone'),
+                                               certified_by_name=request_json.get('certifiedByName'))
+
             response, status = AffiliationService.create_new_business_affiliation(
-                org_id, env, business_identifier, request_json.get('email'),
-                request_json.get('phone'), request_json.get('certifiedByName'),
-                bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
+                affiliation_data, env, bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
         else:
             response, status = AffiliationService.create_affiliation(
                 org_id, business_identifier, env, request_json.get('passCode'),
@@ -387,7 +391,7 @@ def post_organization_affiliation(org_id):
     [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_org_details_by_affiliation(business_identifier):
     """Search orgs by BusinessIdentifier and return org Name and UUID."""
-    environment = _get_environment()
+    environment = get_request_environment()
     pagination_info = PaginationInfo(
         limit=int(request.args.get('limit', 10)),
         page=int(request.args.get('page', 1))
@@ -413,7 +417,7 @@ def get_org_affiliation_by_business_identifier(org_id, business_identifier):
     # Note this is used by LEAR - which passes in the user's token to query for an affiliation for an NR.
     try:
         if AuthorizationService.get_user_authorizations_for_entity(business_identifier):
-            environment = _get_environment()
+            environment = get_request_environment()
             # get affiliation
             response, status = AffiliationService.find_affiliation(
                 org_id, business_identifier, environment), http_status.HTTP_200_OK
@@ -434,7 +438,7 @@ def get_org_affiliation_by_business_identifier(org_id, business_identifier):
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def delete_org_affiliation_by_business_identifier(org_id, business_identifier):
     """Delete an affiliation between an org and an entity."""
-    env = _get_environment()
+    env = get_request_environment()
     request_json = request.get_json(silent=True) or {}
     email_addresses = request_json.get('passcodeResetEmail')
     reset_passcode = request_json.get('resetPasscode', False)
@@ -588,11 +592,3 @@ def get_org_payment_info(org_id):
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
     return response, status
-
-
-def _get_environment():
-    env = os.getenv('FLASK_ENV')
-    sandbox_host = current_app.config['AUTH_WEB_SANDBOX_HOST']
-    if env == 'production' and sandbox_host in request.host_url:
-        env = 'sandbox'
-    return env
