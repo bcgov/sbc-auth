@@ -567,7 +567,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   get viewTitle (): string {
-    return this.isStaffAccount ? 'My Staff Business Registry' : 'My Business Registry'
+    return this.isSbcStaffAccount || this.isStaffAccount
+      ? 'My Staff Business Registry'
+      : 'My Business Registry'
   }
 
   onClickGoToNameRequest (): void {
