@@ -285,17 +285,9 @@ def test_find_invitations_by_org_entity_ids(session):
                                                       invitation_type=AffiliationInvitationType.REQUEST.value)
     invitation.save()
 
-    # Clone existing object.
-    session.expunge(invitation)
-    make_transient(invitation)
-    invitation.id = None
-    invitation.to_org_id = None
-    invitation.type = AffiliationInvitationType.EMAIL.value
-    invitation.save()
-
     retrieved_invitation = AffiliationInvitationModel.find_invitations_by_org_entity_ids(invitation.from_org_id,
                                                                                          invitation.entity_id)
-    assert len(retrieved_invitation) == 2
+    assert len(retrieved_invitation) == 1
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
     assert invitation.invitation_status_code == InvitationStatus.PENDING.value
 

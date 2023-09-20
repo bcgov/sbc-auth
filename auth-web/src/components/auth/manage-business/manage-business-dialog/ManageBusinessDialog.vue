@@ -663,6 +663,7 @@ export default defineComponent({
       }
     }
 
+    // Note this can only be triggered by New Request on an existing affiliation invitation with REQUEST type.
     const handleRemoveExistingAffiliationInvitation = async () => {
       const businessStore = useBusinessStore()
       if (!businessStore.removeExistingAffiliationInvitation) {
@@ -671,9 +672,10 @@ export default defineComponent({
       try {
         const pendingInvitations = await AffiliationInvitationService.getAffiliationInvitations(
           props.orgId, AffiliationInvitationStatus.Pending) || []
-        pendingInvitations.forEach(async invitation => {
+        // More than likely will ever only be one row.
+        for (const invitation of pendingInvitations) {
           await AffiliationInvitationService.removeAffiliationInvitation(invitation.id)
-        })
+        }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log(err)
