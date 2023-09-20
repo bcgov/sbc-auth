@@ -665,28 +665,28 @@ def _create_affiliations_for_test(client, headers,
             from_org_id=org_id1,
             to_org_id=org_id2,
             business_identifier=business_identifier1,
-            affiliation_invitation_type='REQUEST'
+            invitation_type='REQUEST'
         ),
         factory_affiliation_invitation(
             from_org_id=org_id2,
             to_org_id=org_id3,
             business_identifier=business_identifier1,
-            affiliation_invitation_type='REQUEST'),
+            invitation_type='REQUEST'),
         factory_affiliation_invitation(
             from_org_id=org_id3,
             to_org_id=org_id4,
             business_identifier=business_identifier1,
-            affiliation_invitation_type='REQUEST'),
+            invitation_type='REQUEST'),
         factory_affiliation_invitation(
             from_org_id=org_id4,
             to_org_id=org_id1,
             business_identifier=business_identifier1,
-            affiliation_invitation_type='REQUEST'),
+            invitation_type='REQUEST'),
         factory_affiliation_invitation(
             from_org_id=org_id4,
             to_org_id=org_id1,
             business_identifier=business_identifier2,
-            affiliation_invitation_type='REQUEST')]
+            invitation_type='REQUEST')]
 
     # create affiliation invitation in test
     for i in range(len(sample_invites)):

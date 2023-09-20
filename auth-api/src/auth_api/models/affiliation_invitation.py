@@ -15,7 +15,7 @@
 
 from datetime import datetime, timedelta
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, and_, or_
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, or_
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
@@ -185,13 +185,10 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         return cls.query.filter_by(affiliation_id=affiliation_id).all()
 
     @staticmethod
-    def find_invitations_by_org_entity_ids(from_org_id: int, to_org_id: int, entity_id: int):
+    def find_invitations_by_org_entity_ids(from_org_id: int, entity_id: int):
         """Find all affiliation invitation for org and entity ids."""
         return db.session.query(AffiliationInvitation) \
             .filter(AffiliationInvitation.from_org_id == from_org_id) \
-            .filter(or_(AffiliationInvitation.to_org_id == to_org_id,
-                    and_(AffiliationInvitation.to_org_id.is_(None),
-                         AffiliationInvitation.type == AffiliationInvitationTypeEnum.EMAIL.value))) \
             .filter(AffiliationInvitation.entity_id == entity_id) \
             .filter(or_(AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value,
                         AffiliationInvitation.invitation_status_code == InvitationStatuses.ACCEPTED.value)).all()

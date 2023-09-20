@@ -173,7 +173,6 @@ class AffiliationInvitation:
 
         # Check if an affiliation invitation already exists
         if AffiliationInvitationModel.find_invitations_by_org_entity_ids(from_org_id=from_org_id,
-                                                                         to_org_id=to_org_id,
                                                                          entity_id=entity.identifier):
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
         return entity, from_org, business
