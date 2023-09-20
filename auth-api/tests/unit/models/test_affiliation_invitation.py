@@ -16,6 +16,7 @@
 Test suite to ensure that the  model routines are working as expected.
 """
 from _datetime import datetime, timedelta
+from sqlalchemy.orm.session import make_transient
 from typing import List
 from uuid import uuid4
 
@@ -28,6 +29,7 @@ from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import User
 from auth_api.models.dataclass import AffiliationInvitationSearch
+from auth_api.utils.enums import AffiliationInvitationType, InvitationStatus
 
 
 def _get_random_affiliation_invitation_model(
@@ -42,7 +44,7 @@ def _get_random_affiliation_invitation_model(
         invitation_token='ABCD',
         sent_date=datetime.now(),
         recipient_email=None,
-        invitation_status_code='PENDING',
+        invitation_status_code=InvitationStatus.PENDING.value,
         approver_id=None,
         additional_message=None
 ):
@@ -74,25 +76,21 @@ def _create_org(new_org_id, org_type: OrgTypeModel, org_status: OrgStatusModel, 
     return random_org
 
 
-def factory_affiliation_invitation_model(session, status, sent_date=datetime.now(), affiliation_invitation_type=None):
+def factory_affiliation_invitation_model(session, status, sent_date=datetime.now(),
+                                         invitation_type: AffiliationInvitationType = None):
     """Produce a templated affiliation_invitation model."""
     user = User(username='CP1234567',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
-
-    session.add(user)
-    session.commit()
+    user.save()
 
     org_type = OrgTypeModel(code='TEST', description='Test')
-    session.add(org_type)
-    session.commit()
+    org_type.save()
 
     org_status = OrgStatusModel(code='TEST', description='Test')
-    session.add(org_status)
-    session.commit()
+    org_status.save()
 
     preferred_payment = PaymentTypeModel(code='TEST', description='Test')
-    session.add(preferred_payment)
-    session.commit()
+    preferred_payment.save()
 
     from_org = OrgModel()
     from_org.name = 'Test From Org'
@@ -121,8 +119,8 @@ def factory_affiliation_invitation_model(session, status, sent_date=datetime.now
     affiliation_invitation.from_org_id = from_org.id
     affiliation_invitation.to_org_id = to_org.id
     affiliation_invitation.entity_id = entity.id
-    if affiliation_invitation_type is not None:
-        affiliation_invitation.type = affiliation_invitation_type
+    if invitation_type is not None:
+        affiliation_invitation.type = invitation_type
 
     affiliation_invitation.save()
     return affiliation_invitation
@@ -130,17 +128,15 @@ def factory_affiliation_invitation_model(session, status, sent_date=datetime.now
 
 def test_create_affiliation_invitation(session):
     """Assert that an Affiliation Invitation can be stored in the service."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
     assert invitation.id is not None
 
 
 def test_find_invitation_by_id(session):
     """Assert that an Affiliation Invitation can be retrieved by its id."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
 
     retrieved_invitation = AffiliationInvitationModel.find_invitation_by_id(invitation.id)
     assert retrieved_invitation
@@ -149,9 +145,8 @@ def test_find_invitation_by_id(session):
 
 def test_find_invitations_by_sender(session):
     """Assert that an Affiliation Invitation sender can be retrieved by the user id."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
 
     retrieved_invitation = AffiliationInvitationModel \
         .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id))
@@ -162,102 +157,96 @@ def test_find_invitations_by_sender(session):
 
 def test_update_invitation_as_retried(session):
     """Assert that an Affiliation Invitation can be updated."""
-    invitation = factory_affiliation_invitation_model(session=session, status='FAILED')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.FAILED.value)
+    invitation.save()
     invitation.update_invitation_as_retried(invitation.sender.id)
     assert invitation
-    assert invitation.invitation_status_code == 'PENDING'
+    assert invitation.invitation_status_code == InvitationStatus.PENDING.value
 
 
 def test_find_invitations_from_org(session):
     """Assert that Affiliation Invitations from a specified org can be retrieved."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
 
     found_invitations = AffiliationInvitationModel \
         .filter_by(AffiliationInvitationSearch(from_org_id=invitation.from_org_id))
     assert found_invitations
     assert len(found_invitations) == 1
     assert found_invitations[0].from_org_id == invitation.from_org_id
-    assert invitation.invitation_status_code == 'PENDING'
+    assert invitation.invitation_status_code == InvitationStatus.PENDING.value
 
 
 def test_find_invitations_to_org(session):  # pylint:disable=unused-argument
     """Assert that Affiliation Invitations to a specified org can be retrieved."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
 
     found_invitations = AffiliationInvitationModel \
         .filter_by(AffiliationInvitationSearch(to_org_id=invitation.to_org_id))
     assert found_invitations
     assert len(found_invitations) == 1
     assert found_invitations[0].to_org_id == invitation.to_org_id
-    assert invitation.invitation_status_code == 'PENDING'
+    assert invitation.invitation_status_code == InvitationStatus.PENDING.value
 
 
 def test_find_invitations_by_entity(session):  # pylint:disable=unused-argument
     """Assert that Affiliation Invitation for an entity can be retrieved."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
 
     found_invitations = AffiliationInvitationModel.find_invitations_by_entity(invitation.entity_id)
     assert found_invitations
     assert len(found_invitations) == 1
     assert found_invitations[0].entity_id == invitation.entity_id
-    assert invitation.invitation_status_code == 'PENDING'
+    assert invitation.invitation_status_code == InvitationStatus.PENDING.value
 
 
 def test_find_pending_invitations_by_sender(session):  # pylint:disable=unused-argument
     """Assert that pending Affiliation Invitations can be retrieved by the sender user id."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
 
     retrieved_invitation = AffiliationInvitationModel \
-        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id, status_codes=['PENDING']))
+        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id,
+                                               status_codes=[InvitationStatus.PENDING.value]))
     assert len(retrieved_invitation) == 1
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
-    assert invitation.invitation_status_code == 'PENDING'
+    assert invitation.invitation_status_code == InvitationStatus.PENDING.value
 
 
 def test_find_pending_invitations_by_from_org(session):  # pylint:disable=unused-argument
     """Assert that an Affiliation Invitation can be retrieved by the from org id."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
 
     retrieved_invitation = AffiliationInvitationModel \
         .filter_by(AffiliationInvitationSearch(from_org_id=invitation.from_org_id))
     assert len(retrieved_invitation) == 1
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
-    assert invitation.invitation_status_code == 'PENDING'
+    assert invitation.invitation_status_code == InvitationStatus.PENDING.value
 
 
 def test_find_pending_invitations_by_to_org(session):  # pylint:disable=unused-argument
     """Assert that an Affiliation Invitation can be retrieved by the to org id."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
 
     retrieved_invitation = AffiliationInvitationModel \
         .filter_by(AffiliationInvitationSearch(to_org_id=invitation.to_org_id))
     assert len(retrieved_invitation) == 1
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
-    assert invitation.invitation_status_code == 'PENDING'
+    assert invitation.invitation_status_code == InvitationStatus.PENDING.value
 
 
 def test_invitations_by_status(session):
     """Assert that an Affiliation Invitation can be retrieved by the status."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
 
     retrieved_invitation = AffiliationInvitationModel \
-        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id, status_codes=['PENDING']))
+        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id,
+                                               status_codes=[InvitationStatus.PENDING.value]))
     assert len(retrieved_invitation) == 1
 
     retrieved_invitation = AffiliationInvitationModel \
@@ -267,12 +256,12 @@ def test_invitations_by_status(session):
 
 def test_invitations_by_expired_status(session):
     """Assert that an Affiliation Invitation can be retrieved when explicitly set EXPIRED."""
-    invitation = factory_affiliation_invitation_model(session=session, status='EXPIRED')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.EXPIRED.value)
+    invitation.save()
 
     retrieved_invitation = AffiliationInvitationModel \
-        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id, status_codes=['EXPIRED']))
+        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id,
+                                               status_codes=[InvitationStatus.EXPIRED.value]))
     assert len(retrieved_invitation) == 1
 
     retrieved_invitation = AffiliationInvitationModel \
@@ -282,9 +271,8 @@ def test_invitations_by_expired_status(session):
 
 def test_invitations_by_invalid_status(session):
     """Assert that an Affiliation Invitations are not returned with an invalid status."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
 
     retrieved_invitation = AffiliationInvitationModel \
         .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id, status_codes=['INVALID']))
@@ -293,37 +281,42 @@ def test_invitations_by_invalid_status(session):
 
 def test_find_invitations_by_org_entity_ids(session):
     """Assert that an Affiliation Invitation can be retrieved by the org and entity ids."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value,
+                                                      invitation_type=AffiliationInvitationType.REQUEST.value)
+    invitation.save()
+
+    to_org_id = invitation.to_org_id
+
+    # Clone existing object.
+    session.expunge(invitation)
+    make_transient(invitation)
+    invitation.id = None
+    invitation.to_org_id = None
+    invitation.type = AffiliationInvitationType.EMAIL.value
+    invitation.save()
 
     retrieved_invitation = AffiliationInvitationModel.find_invitations_by_org_entity_ids(invitation.from_org_id,
-                                                                                         invitation.to_org_id,
+                                                                                         to_org_id,
                                                                                          invitation.entity_id)
-    assert len(retrieved_invitation) == 1
+    assert len(retrieved_invitation) == 2
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
-    assert invitation.invitation_status_code == 'PENDING'
+    assert invitation.invitation_status_code == InvitationStatus.PENDING.value
 
 
 def test_create_from_dict(session):
     """Assert that an Entity can be created from schema."""
     user = User(username='CP1234567',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
-
-    session.add(user)
-    session.commit()
+    user.save()
 
     org_type = OrgTypeModel(code='TEST', description='Test')
-    session.add(org_type)
-    session.commit()
+    org_type.save()
 
     org_status = OrgStatusModel(code='TEST', description='Test')
-    session.add(org_status)
-    session.commit()
+    org_status.save()
 
     preferred_payment = PaymentTypeModel(code='TEST', description='Test')
-    session.add(preferred_payment)
-    session.commit()
+    preferred_payment.save()
 
     from_org = OrgModel()
     from_org.name = 'Test From Org'
@@ -359,9 +352,7 @@ def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
     """Assert that an affiliation invitation can not be created without schema."""
     user = User(username='CP1234567',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
-
-    session.add(user)
-    session.commit()
+    user.save()
 
     result_invitation = AffiliationInvitationModel.create_from_dict(None, user.id)
 
@@ -371,38 +362,37 @@ def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
 def test_invitations_status_expiry(session):
     """Assert can set the status from PENDING to EXPIRED."""
     sent_date = datetime.now() - timedelta(minutes=int(get_named_config().AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS))
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING', sent_date=sent_date)
-    session.add(invitation)
-    session.commit()
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value,
+                                                      sent_date=sent_date)
+    invitation.save()
 
     result: str = invitation.status
 
-    assert result == 'EXPIRED'
+    assert result == InvitationStatus.EXPIRED.value
 
 
 def test_invitations_status_for_request_does_not_expire(session):
     """Assert status stays PENDING for invitation of type REQUEST."""
     sent_date = datetime.now() - timedelta(minutes=int(get_named_config().AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS))
     invitation = factory_affiliation_invitation_model(session=session,
-                                                      status='PENDING',
+                                                      status=InvitationStatus.PENDING.value,
                                                       sent_date=sent_date,
-                                                      affiliation_invitation_type='REQUEST')
+                                                      invitation_type=AffiliationInvitationType.REQUEST.value)
     session.add(invitation)
     session.commit()
 
     result: str = invitation.status
 
-    assert result == 'PENDING'
+    assert result == InvitationStatus.PENDING.value
 
 
 def test_update_invitation_as_failed(session):
     """Assert that an Affiliation Invitation can be FAILED (e.g. reject authorization request for REQUEST type)."""
-    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
-    session.add(invitation)
-    session.commit()
-    invitation.set_status('FAILED')
+    invitation = factory_affiliation_invitation_model(session=session, status=InvitationStatus.PENDING.value)
+    invitation.save()
+    invitation.set_status(InvitationStatus.FAILED.value)
     assert invitation
-    assert invitation.invitation_status_code == 'FAILED'
+    assert invitation.invitation_status_code == InvitationStatus.FAILED.value
 
 
 def _setup_multiple_orgs_and_invites(session, create_org_count=5, create_affiliation_invitation_count=5):
@@ -413,16 +403,13 @@ def _setup_multiple_orgs_and_invites(session, create_org_count=5, create_affilia
     session.commit()
 
     org_type = OrgTypeModel(code='TEST', description='Test')
-    session.add(org_type)
-    session.commit()
+    org_type.save()
 
     org_status = OrgStatusModel(code='TEST', description='Test')
-    session.add(org_status)
-    session.commit()
+    org_status.save()
 
     preferred_payment = PaymentTypeModel(code='TEST', description='Test')
-    session.add(preferred_payment)
-    session.commit()
+    preferred_payment.save()
 
     for i in range(1, create_org_count + 1):
         new_org = _create_org(new_org_id=i, org_type=org_type, org_status=org_status,
@@ -433,8 +420,7 @@ def _setup_multiple_orgs_and_invites(session, create_org_count=5, create_affilia
 
     entity = EntityModel(business_identifier='CP1234567', business_number='791861073BC0001', name='Interesting, Inc.',
                          corp_type_code='CP', id=1)
-    session.add(entity)
-    session.commit()
+    entity.save()
 
     for i in range(1, create_affiliation_invitation_count + 1):
         if i == 1:
