@@ -325,6 +325,7 @@
 <script lang="ts">
 import { AffiliationInvitationStatus, CorpTypes, LDFlags } from '@/util/constants'
 import { Ref, computed, defineComponent, ref, watch } from '@vue/composition-api'
+import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountAuthorizationRequest from '@/components/auth/manage-business/manage-business-dialog/AccountAuthorizationRequest.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import BusinessService from '@/services/business.services'
@@ -337,7 +338,6 @@ import { LoginPayload } from '@/models/business'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import OrgService from '@/services/org.services'
 import { StatusCodes } from 'http-status-codes'
-import { useBusinessStore } from '@/stores'
 
 export default defineComponent({
   components: {
@@ -366,18 +366,6 @@ export default defineComponent({
     showBusinessDialog: {
       type: Boolean,
       default: false
-    },
-    isStaffOrSbcStaff: {
-      type: Boolean,
-      default: false
-    },
-    userFirstName: {
-      type: String,
-      default: ''
-    },
-    userLastName: {
-      type: String,
-      default: ''
     }
   },
   emits: ['hide-manage-business-dialog', 'on-authorization-email-sent-close', 'add-failed-invalid-code',
@@ -426,6 +414,7 @@ export default defineComponent({
     const hasBusinessEmail = ref(false)
     const hasBusinessAuthentication = ref(false)
     const hasAffiliatedAccount = ref(false)
+    const orgStore = useOrgStore()
 
     const successDialog = computed(() => {
       return invitationRequestSentDialog.value?.isOpen || authorizationRequestSentDialog.value?.isOpen
@@ -468,7 +457,7 @@ export default defineComponent({
     })
 
     const showAuthorization = computed(() => {
-      return isBusinessLegalTypeFirm.value && props.isStaffOrSbcStaff
+      return isBusinessLegalTypeFirm.value && orgStore.isCurrentOrgStaffOrSbcStaff
     })
 
     const isAuthorizationRequestSentDialogOpen = computed(() => {
@@ -476,7 +465,8 @@ export default defineComponent({
     })
 
     const certifiedBy = computed(() => {
-      return props.isStaffOrSbcStaff ? authorizationName.value : `${props.userLastName}, ${props.userFirstName}`
+      const currentUser = useUserStore().currentUser
+      return orgStore.isCurrentOrgStaffOrSbcStaff ? authorizationName.value : `${currentUser.lastName}, ${currentUser.firstName}`
     })
 
     const authorizationRules = computed(() => {
@@ -606,6 +596,7 @@ export default defineComponent({
       if (emitCancel) {
         emit('hide-manage-business-dialog')
       }
+      businessStore.setRemoveExistingAffiliationInvitation(false)
     }
 
     const onAuthorizationRequestSentDialogClose = () => {
@@ -672,7 +663,28 @@ export default defineComponent({
       }
     }
 
+    const handleRemoveExistingAffiliationInvitation = async () => {
+      const businessStore = useBusinessStore()
+      if (!businessStore.removeExistingAffiliationInvitation) {
+        return
+      }
+      try {
+        const pendingInvitations = await AffiliationInvitationService.getAffiliationInvitations(
+          props.orgId, AffiliationInvitationStatus.Pending) || []
+        pendingInvitations.forEach(async invitation => {
+          await AffiliationInvitationService.removeAffiliationInvitation(invitation.id)
+        })
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log(err)
+      } finally {
+        businessStore.setRemoveExistingAffiliationInvitation(false)
+      }
+    }
+
     const manageBusiness = async () => {
+      await handleRemoveExistingAffiliationInvitation()
+
       if (requestAuthBusinessOption.value) {
         await handleAuthBusinessOption()
         return
@@ -689,7 +701,7 @@ export default defineComponent({
         isLoading.value = true
         try {
           let businessData: LoginPayload = { businessIdentifier: businessIdentifier.value }
-          if (!props.isStaffOrSbcStaff) {
+          if (!orgStore.isCurrentOrgStaffOrSbcStaff) {
             businessData = {
               ...businessData,
               certifiedByName: authorizationName.value,
@@ -751,7 +763,7 @@ export default defineComponent({
     })
 
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
-      if (props.isStaffOrSbcStaff) { return }
+      if (orgStore.isCurrentOrgStaffOrSbcStaff) { return }
       if (newBusinessIdentifier) {
         businessIdentifier.value = newBusinessIdentifier
         businessName.value = props.initialBusinessName

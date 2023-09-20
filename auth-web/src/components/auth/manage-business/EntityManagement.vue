@@ -61,10 +61,7 @@
       <SearchBusinessNameRequest
         ref="searchBusinessNameRequest"
         :orgId="orgId"
-        :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
         :showManageBusinessDialog="showManageBusinessDialog"
-        :userFirstName="currentUser.firstName"
-        :userLastName="currentUser.lastName"
         @add-success="showAddSuccessModal"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
         @add-failed-no-entity="showEntityNotFoundModal()"

@@ -525,7 +525,9 @@ export default defineComponent({
       return false
     }
 
+    // This is called even when a affiliation invitation request already exists.
     const openNewAffiliationInvite = (business: Business) => {
+      businessStore.setRemoveExistingAffiliationInvitation(true)
       context.emit('show-manage-business-dialog', business)
     }
 

@@ -1,5 +1,7 @@
 import { CorpTypes, SessionStorageKeys } from '@/util/constants'
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
+import { useOrgStore, useUserStore } from '@/stores'
+import { AccountTypes } from '@bcrs-shared-components/enums'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
 import Vuetify from 'vuetify'
@@ -135,18 +137,25 @@ const testCaseList = [
 describe('ManageBusinessDialog grouped tests', () => {
   testCaseList.forEach(test => {
     let wrapper: Wrapper<any>
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
 
     beforeAll(() => {
       wrapper = shallowMount(ManageBusinessDialog, {
         localVue,
         vuetify,
         propsData: {
-          isStaffOrSbcStaff: test.isStaffOrSbcStaff,
-          userFirstName: test.userFirstName,
-          userLastName: test.userLastName,
+
           businessLegalType: test.businessLegalType
         }
       })
+      orgStore.currentOrganization = {
+        orgType: test.isStaffOrSbcStaff ? AccountTypes.SBC_STAFF : AccountTypes.PREMIUM 
+      } as any
+      userStore.currentUser = {
+        firstName: test.userFirstName,
+        lastName: test.userLastName
+      } as any
     })
 
     afterAll(() => {
@@ -178,15 +187,6 @@ describe('ManageBusinessDialog grouped tests', () => {
       expect(wrapper.find('#add-button span').text()).toBe('Manage This Business')
       expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
 
-      // *** UN-COMMENT THIS WHEN BUSINESS LOOKUP IS ENABLED ***
-      // // verify data list
-      // const dl = wrapper.find('dl')
-      // const dt = dl.findAll('dt')
-      // const dd = dl.findAll('dd')
-      // expect(dt.at(0).text()).toBe('Business Name:')
-      // expect(dd.at(0).text()).toBe('My Business Inc')
-      // expect(dt.at(1).text()).toBe('Incorporation Number:')
-      // expect(dd.at(1).text()).toBe(test.businessIdentifier)
       if (!test.isStaffOrSbcStaff) {
         expect(wrapper.find('.authorization').exists())
         expect(wrapper.find('.authorization').exists()).toBe(test.isStaffOrSbcStaff)
@@ -213,15 +213,17 @@ describe('ManageBusinessDialog grouped tests', () => {
 
 describe('ManageBusinessDialog Component', () => {
   let wrapper: Wrapper<any>
+  const orgStore = useOrgStore()
+  const userStore = useUserStore()
 
   beforeAll(() => {
     wrapper = shallowMount(ManageBusinessDialog, {
-      vuetify,
-      propsData: {
-        userFirstName: 'Nadia',
-        userLastName: 'Woodie'
-      }
+      vuetify
     })
+    userStore.currentUser = {
+      firstName: 'Nadia',
+      lastName: 'Woodie'
+    } as any
   })
 
   afterAll(() => {
@@ -267,12 +269,13 @@ describe('ManageBusinessDialog Component', () => {
 
   it('Should compute the correct boolean for showAuthorization()', async () => {
     await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
+    orgStore.currentOrganization = { orgType: AccountTypes.SBC_STAFF } as any
     await wrapper.setProps({ isStaffOrSbcStaff: true })
     expect(wrapper.vm.showAuthorization).toBe(true)
-    await wrapper.setProps({ isStaffOrSbcStaff: false })
+    orgStore.currentOrganization = { orgType: AccountTypes.PREMIUM } as any
     expect(wrapper.vm.showAuthorization).toBe(false)
     await wrapper.setProps({ businessLegalType: CorpTypes.COOP })
-    await wrapper.setProps({ isStaffOrSbcStaff: true })
+    orgStore.currentOrganization = { orgType: AccountTypes.SBC_STAFF } as any
     expect(wrapper.vm.showAuthorization).toBe(false)
   })
 
@@ -288,7 +291,7 @@ describe('ManageBusinessDialog Component', () => {
   })
 
   it('Should compute the correct value for certifiedBy()', async () => {
-    await wrapper.setProps({ isStaffOrSbcStaff: false })
+    orgStore.currentOrganization = { orgType: AccountTypes.PREMIUM } as any
     expect(wrapper.vm.certifiedBy).toBe('Woodie, Nadia')
   })
 
@@ -309,11 +312,7 @@ describe('ManageBusinessDialog Component', () => {
     // Launch darkly flags, show for all
     sessionStorage[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'allowable-business-passcode-types': 'CP' })
     wrapper = shallowMount(ManageBusinessDialog, {
-      vuetify,
-      propsData: {
-        userFirstName: 'Nadia',
-        userLastName: 'Woodie'
-      }
+      vuetify
     })
     wrapper.vm.hasBusinessAuthentication = true
     await wrapper.setProps({ businessLegalType: CorpTypes.COOP })
