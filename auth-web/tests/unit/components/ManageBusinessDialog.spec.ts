@@ -270,7 +270,6 @@ describe('ManageBusinessDialog Component', () => {
   it('Should compute the correct boolean for showAuthorization()', async () => {
     await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
     orgStore.currentOrganization = { orgType: AccountTypes.SBC_STAFF } as any
-    await wrapper.setProps({ isStaffOrSbcStaff: true })
     expect(wrapper.vm.showAuthorization).toBe(true)
     orgStore.currentOrganization = { orgType: AccountTypes.PREMIUM } as any
     expect(wrapper.vm.showAuthorization).toBe(false)
