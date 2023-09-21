@@ -233,7 +233,7 @@
                 </v-list-group>
 
                 <v-list-group
-                  v-if="hasAffiliatedAccount"
+                  v-if="hasAffiliatedAccount && enableDelegationFeature"
                   id="account-authorization-request"
                   v-model="requestAuthBusinessOption"
                 >
@@ -278,19 +278,6 @@
                     <p>Monday to Friday, 8:30am - 4:30pm Pacific Time</p>
                   </div>
                 </v-list-group>
-
-                <template v-if="enableDelegationFeature">
-                  <v-list-group
-                    v-model="requestAuthRegistryOption"
-                  >
-                    <template #activator>
-                      <v-list-item-title>Request authorization from the Business Registry</v-list-item-title>
-                    </template>
-                    <div class="list-body">
-                      <!-- Placeholder for Relationships-->
-                    </div>
-                  </v-list-group>
-                </template>
               </v-list>
             </v-card>
           </v-form>
@@ -400,7 +387,6 @@ export default defineComponent({
     const passcodeOption = ref(false)
     const emailOption = ref(false)
     const nameOption = ref(false)
-    const enableDelegationFeature = ref(false)
     const requestAuthBusinessOption = ref(false)
     const requestAuthBusinessRegistryOption = ref(false)
     const requestAuthRegistryOption = ref(false)
@@ -415,6 +401,10 @@ export default defineComponent({
     const hasBusinessAuthentication = ref(false)
     const hasAffiliatedAccount = ref(false)
     const orgStore = useOrgStore()
+
+    const enableDelegationFeature = computed(() => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableAffiliationDelegation) || false
+    })
 
     const successDialog = computed(() => {
       return invitationRequestSentDialog.value?.isOpen || authorizationRequestSentDialog.value?.isOpen
@@ -457,7 +447,7 @@ export default defineComponent({
     })
 
     const showAuthorization = computed(() => {
-      return isBusinessLegalTypeFirm.value && orgStore.isCurrentOrgStaffOrSbcStaff
+      return isBusinessLegalTypeFirm.value && orgStore.isStaffOrSbcStaff
     })
 
     const isAuthorizationRequestSentDialogOpen = computed(() => {
@@ -466,7 +456,7 @@ export default defineComponent({
 
     const certifiedBy = computed(() => {
       const currentUser = useUserStore().currentUser
-      return orgStore.isCurrentOrgStaffOrSbcStaff ? authorizationName.value : `${currentUser.lastName}, ${currentUser.firstName}`
+      return orgStore.isStaffOrSbcStaff ? authorizationName.value : `${currentUser.lastName}, ${currentUser.firstName}`
     })
 
     const authorizationRules = computed(() => {
@@ -704,7 +694,7 @@ export default defineComponent({
         isLoading.value = true
         try {
           let businessData: LoginPayload = { businessIdentifier: businessIdentifier.value }
-          if (!orgStore.isCurrentOrgStaffOrSbcStaff) {
+          if (!orgStore.isStaffOrSbcStaff) {
             businessData = {
               ...businessData,
               certifiedByName: authorizationName.value,
@@ -756,8 +746,7 @@ export default defineComponent({
 
     const businessHasNoEmailAndNoAuthenticationAndNoAffiliation = computed(() => {
       const hasAuthenticationOption = isBusinessLegalTypeCorporationOrBenefitOrCoop.value && hasBusinessAuthentication.value
-      return !hasAuthenticationOption && !isBusinessLegalTypeFirm.value && !showEmailOption.value && !hasAffiliatedAccount.value &&
-      !enableDelegationFeature.value
+      return !hasAuthenticationOption && !isBusinessLegalTypeFirm.value && !showEmailOption.value && !hasAffiliatedAccount.value
     })
 
     const showPasscodeOption = computed(() => {
@@ -766,7 +755,7 @@ export default defineComponent({
     })
 
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
-      if (orgStore.isCurrentOrgStaffOrSbcStaff) { return }
+      if (orgStore.isStaffOrSbcStaff) { return }
       if (newBusinessIdentifier) {
         businessIdentifier.value = newBusinessIdentifier
         businessName.value = props.initialBusinessName

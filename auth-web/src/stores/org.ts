@@ -150,10 +150,11 @@ export const useOrgStore = defineStore('org', () => {
     return state.currentOrganization?.isBusinessAccount === true
   })
 
-  // Note this will only work while the current organization is set.
-  // This is always true for staff, but for SBC_STAFF users it's possible to have multiple orgs but very unlikely.
-  const isCurrentOrgStaffOrSbcStaff = computed<boolean>(() => {
-    return [Account.STAFF, Account.SBC_STAFF].includes(state.currentOrganization?.orgType as Account)
+  // Note this will only work while the current organization is set for SBC_STAFF.
+  // This should work for STAFF on any org.
+  const isStaffOrSbcStaff = computed<boolean>(() => {
+    const currentOrgIsStaff = [Account.STAFF, Account.SBC_STAFF].includes(state.currentOrganization?.orgType as Account)
+    return currentOrgIsStaff || useUserStore().currentUser.roles.includes(Role.Staff)
   })
 
   function setAccessType (accessType:string) {
@@ -1099,6 +1100,6 @@ export const useOrgStore = defineStore('org', () => {
     revokeOrgApiKeys,
     updateOrganizationAccessType,
     $reset,
-    isCurrentOrgStaffOrSbcStaff
+    isStaffOrSbcStaff
   }
 })

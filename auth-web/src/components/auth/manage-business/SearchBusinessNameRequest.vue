@@ -186,7 +186,7 @@ export default class SearchBusinessNameRequest extends Vue {
     this.businessName = business?.name || ''
     this.businessIdentifier = business?.identifier || ''
     this.businessLegalType = business?.legalType || ''
-    if (this.orgStore.isCurrentOrgStaffOrSbcStaff) {
+    if (this.orgStore.isStaffOrSbcStaff) {
       try {
         let businessData: LoginPayload = { businessIdentifier: this.businessIdentifier }
         await this.businessStore.addBusiness(businessData)
@@ -205,7 +205,7 @@ export default class SearchBusinessNameRequest extends Vue {
   async nameRequestEvent (event: { names: string[], nrNum: string }) {
     this.nrNames = event?.names || []
     this.businessIdentifier = event?.nrNum || ''
-    if (this.orgStore.isCurrentOrgStaffOrSbcStaff) {
+    if (this.orgStore.isStaffOrSbcStaff) {
       await this.addNameRequestForStaffSilently()
     } else {
       this.showNRDialog = true

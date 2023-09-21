@@ -1,5 +1,6 @@
 import {
   AffiliationInvitationStatus,
+  AffiliationInvitationType,
   CorpTypes,
   FilingTypes,
   LDFlags,
@@ -149,6 +150,11 @@ export const useBusinessStore = defineStore('business', () => {
     const pendingAffiliationInvitations = await AffiliationInvitationService.getAffiliationInvitations(currentOrganization.value.id) || []
 
     for (const affiliationInvite of pendingAffiliationInvitations) {
+      // Skip over affiliation requests for type REQUEST for now.
+      if (affiliationInvite.type === AffiliationInvitationType.REQUEST &&
+          (!LaunchDarklyService.getFlag(LDFlags.EnableAffiliationDelegation) || false)) {
+        continue
+      }
       const isFromOrg = affiliationInvite.fromOrg.id === currentOrganization.value.id
       const isToOrgAndPending = affiliationInvite.toOrg?.id === currentOrganization.value.id &&
         affiliationInvite.status === AffiliationInvitationStatus.Pending
