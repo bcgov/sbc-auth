@@ -148,11 +148,11 @@ export const useBusinessStore = defineStore('business', () => {
     }
 
     const pendingAffiliationInvitations = await AffiliationInvitationService.getAffiliationInvitations(currentOrganization.value.id) || []
+    const includeAffiliationInviteRequest = LaunchDarklyService.getFlag(LDFlags.EnableAffiliationDelegation) || false
 
     for (const affiliationInvite of pendingAffiliationInvitations) {
       // Skip over affiliation requests for type REQUEST for now.
-      if (affiliationInvite.type === AffiliationInvitationType.REQUEST &&
-          (!LaunchDarklyService.getFlag(LDFlags.EnableAffiliationDelegation) || false)) {
+      if (affiliationInvite.type === AffiliationInvitationType.REQUEST && !includeAffiliationInviteRequest) {
         continue
       }
       const isFromOrg = affiliationInvite.fromOrg.id === currentOrganization.value.id
