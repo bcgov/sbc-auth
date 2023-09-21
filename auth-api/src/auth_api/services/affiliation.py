@@ -28,6 +28,7 @@ from auth_api.models.affiliation_invitation import AffiliationInvitation as Affi
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
 from auth_api.models.dataclass import Affiliation as AffiliationData
+from auth_api.models.dataclass import DeleteAffiliationRequest
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
@@ -207,7 +208,7 @@ class Affiliation:
         return True
 
     @staticmethod
-    def create_new_business_affiliation(affiliation_data: AffiliationData,  # pylint: disable=too-many-locals, too-many-branches, too-many-statements  # noqa: E501
+    def create_new_business_affiliation(affiliation_data: AffiliationData,  # pylint: disable=too-many-locals
                                         environment,
                                         bearer_token: str = None):
         """Initiate a new incorporation."""
@@ -232,64 +233,6 @@ class Affiliation:
         # Call the legal-api to verify the NR details
         if not (nr_json := Affiliation._get_nr_details(business_identifier, bearer_token)):
             raise BusinessException(Error.NR_NOT_FOUND, None)
-
-        status = nr_json.get('state')
-
-        if status not in (NRStatus.APPROVED.value, NRStatus.CONDITIONAL.value, NRStatus.DRAFT.value):
-            raise BusinessException(Error.NR_INVALID_STATUS, None)
-
-        if not nr_json.get('applicants'):
-            raise BusinessException(Error.NR_INVALID_APPLICANTS, None)
-
-        nr_phone = nr_json.get('applicants').get('phoneNumber')
-        nr_email = nr_json.get('applicants').get('emailAddress')
-
-        if status == NRStatus.DRAFT.value:
-            invoices = Affiliation.get_nr_payment_details(business_identifier)
-
-            # Ideally there should be only one or two (priority fees) payment request for the NR.
-            if not (invoices and invoices['invoices'] and invoices['invoices'][0].get('statusCode') == 'COMPLETED'):
-                raise BusinessException(Error.NR_NOT_PAID, None)
-
-        # If consentFlag is not R, N or Null for a CONDITIONAL NR throw error
-        if status == NRStatus.CONDITIONAL.value and nr_json.get('consentFlag', None) not in (None, 'R', 'N'):
-            raise BusinessException(Error.NR_NOT_APPROVED, None)
-
-        if not user_is_staff and ((phone and phone != nr_phone) or
-                                  (email and email.casefold() != nr_email.casefold())):
-            raise BusinessException(Error.NR_INVALID_CONTACT, None)
-
-        # Create an entity with the Name from NR if entity doesn't exist
-        if not entity:
-            # Filter the names from NR response and get the name which has status APPROVED as the name.
-            # Filter the names from NR response and get the name which has status CONDITION as the name.
-            nr_name_state = NRNameStatus.APPROVED.value if status == NRStatus.APPROVED.value \
-                else NRNameStatus.CONDITION.value
-            name = next((name.get('name') for name in nr_json.get('names') if
-                         name.get('state', None) == nr_name_state), None)
-
-            entity = EntityService.save_entity({
-                'businessIdentifier': business_identifier,
-                'name': name or business_identifier,
-                'corpTypeCode': CorpType.NR.value,
-                'passCodeClaimed': True
-            })
-
-        # Affiliation may already already exist.
-        if not (affiliation_model :=
-                AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier, environment)):
-            # Create an affiliation with org
-            affiliation_model = AffiliationModel(
-                org_id=org_id, entity_id=entity.identifier, certified_by_name=certified_by_name,
-                environment=environment)
-
-            if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
-                ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                                               name=entity.name, id=entity.business_identifier))
-        affiliation_model.certified_by_name = certified_by_name
-        affiliation_model.environment = environment
-        affiliation_model.save()
-        entity.set_pass_code_claimed(True)
 
         status = nr_json.get('state')
 
@@ -336,7 +279,7 @@ class Affiliation:
 
         # Affiliation may already already exist.
         if not (affiliation_model :=
-                AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier)):
+                AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier, environment)):
             # Create an affiliation with org
             affiliation_model = AffiliationModel(
                 org_id=org_id, entity_id=entity.identifier, certified_by_name=certified_by_name)
@@ -345,6 +288,7 @@ class Affiliation:
                 ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
                                                                name=entity.name, id=entity.business_identifier))
         affiliation_model.certified_by_name = certified_by_name
+        affiliation_model.environment = environment
         affiliation_model.save()
         entity.set_pass_code_claimed(True)
 
@@ -361,9 +305,14 @@ class Affiliation:
         return invoices
 
     @staticmethod
-    def delete_affiliation(org_id, business_identifier, environment: str = None, email_addresses: str = None,   # pylint: disable=too-many-arguments  # noqa: E501
-                           reset_passcode: bool = False, log_delete_draft: bool = False):
+    def delete_affiliation(delete_affiliation_request: DeleteAffiliationRequest, environment: str = None):
         """Delete the affiliation for the provided org id and business id."""
+        org_id = delete_affiliation_request.org_id
+        business_identifier = delete_affiliation_request.business_identifier
+        reset_passcode = delete_affiliation_request.reset_passcode
+        log_delete_draft = delete_affiliation_request.log_delete_draft
+        email_addresses = delete_affiliation_request.email_addresses
+
         current_app.logger.info(f'<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}')
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if org is None:

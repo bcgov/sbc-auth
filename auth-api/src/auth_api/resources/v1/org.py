@@ -24,6 +24,7 @@ from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
+from auth_api.models.dataclass import DeleteAffiliationRequest
 from auth_api.models.dataclass import PaginationInfo  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.schemas import InvitationSchema, MembershipSchema
@@ -440,13 +441,13 @@ def delete_org_affiliation_by_business_identifier(org_id, business_identifier):
     """Delete an affiliation between an org and an entity."""
     env = get_request_environment()
     request_json = request.get_json(silent=True) or {}
-    email_addresses = request_json.get('passcodeResetEmail')
-    reset_passcode = request_json.get('resetPasscode', False)
-    log_delete_draft = request_json.get('logDeleteDraft', False)
-
     try:
-        AffiliationService.delete_affiliation(org_id, business_identifier, email_addresses,
-                                              reset_passcode, log_delete_draft, env)
+        delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id, business_identifier=business_identifier,
+                                                              email_addresses=request_json.get('passcodeResetEmail'),
+                                                              reset_passcode=request_json.get('resetPasscode', False),
+                                                              log_delete_draft=request_json.get('logDeleteDraft', False)
+                                                              )
+        AffiliationService.delete_affiliation(delete_affiliation_request, env)
         response, status = {}, http_status.HTTP_200_OK
 
     except BusinessException as exception:

@@ -23,6 +23,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.dataclass import Activity
 from auth_api.models.dataclass import Affiliation as AffiliationData
+from auth_api.models.dataclass import DeleteAffiliationRequest
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.services import ActivityLogPublisher
@@ -328,8 +329,8 @@ def test_delete_affiliation(session, auth_mock, monkeypatch):  # pylint:disable=
                                              org_id=ANY, name=ANY, id=ANY))
 
     with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
-        AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier, environment=env,
-                                              email_addresses=None)
+        delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id, business_identifier=business_identifier)
+        AffiliationService.delete_affiliation(delete_affiliation_request, environment=env)
         mock_alp.assert_called_with(Activity(action=ActivityAction.REMOVE_AFFILIATION.value,
                                              org_id=ANY, name=ANY, id=ANY))
 
@@ -356,8 +357,8 @@ def test_delete_affiliation_no_org(session, auth_mock, monkeypatch):  # pylint:d
                                           TestEntityInfo.entity_lear_mock['passCode'])
 
     with pytest.raises(BusinessException) as exception:
-        AffiliationService.delete_affiliation(org_id=None, business_identifier=business_identifier, environment=env,
-                                              email_addresses=None)
+        delete_affiliation_request = DeleteAffiliationRequest(org_id=None, business_identifier=business_identifier)
+        AffiliationService.delete_affiliation(delete_affiliation_request, environment=env)
 
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
@@ -381,8 +382,8 @@ def test_delete_affiliation_no_entity(session, auth_mock, monkeypatch):  # pylin
                                           TestEntityInfo.entity_lear_mock['passCode'])
 
     with pytest.raises(BusinessException) as exception:
-        AffiliationService.delete_affiliation(org_id=org_id, business_identifier=None, environment=env,
-                                              email_addresses=None)
+        delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id, business_identifier=None)
+        AffiliationService.delete_affiliation(delete_affiliation_request, environment=env)
 
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
@@ -404,12 +405,12 @@ def test_delete_affiliation_no_affiliation(session, auth_mock, monkeypatch):  # 
                                           business_identifier,
                                           env,
                                           TestEntityInfo.entity_lear_mock['passCode'])
-    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier, environment=env,
-                                          email_addresses=None)
+    delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id, business_identifier=business_identifier)
+    AffiliationService.delete_affiliation(delete_affiliation_request, environment=env)
 
     with pytest.raises(BusinessException) as exception:
-        AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier, environment=env,
-                                              email_addresses=None)
+        delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id, business_identifier=business_identifier)
+        AffiliationService.delete_affiliation(delete_affiliation_request, environment=env)
 
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
@@ -431,9 +432,8 @@ def test_delete_affiliation_implicit(session, auth_mock, monkeypatch):  # pylint
                                                         business_identifier,
                                                         env,
                                                         TestEntityInfo.entity_lear_mock['passCode'])
-
-    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier, environment=env,
-                                          email_addresses=None)
+    delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id, business_identifier=business_identifier)
+    AffiliationService.delete_affiliation(delete_affiliation_request, environment=env)
 
     found_affiliation = AffiliationModel.query.filter_by(id=affiliation.identifier).first()
     assert found_affiliation is None
@@ -456,10 +456,9 @@ def test_delete_affiliation_reset_passcode(session, auth_mock, monkeypatch):  # 
                                                         business_identifier,
                                                         env,
                                                         TestEntityInfo.entity_lear_mock['passCode'])
-
-    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier,
-                                          environment=env,
-                                          email_addresses=None, reset_passcode=True)
+    delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id, business_identifier=business_identifier,
+                                                          email_addresses=None, reset_passcode=True)
+    AffiliationService.delete_affiliation(delete_affiliation_request, environment=env)
 
     found_affiliation = AffiliationModel.query.filter_by(id=affiliation.identifier).first()
     assert found_affiliation is None
@@ -557,8 +556,8 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock, monkeyp
     assert affiliated_entities[0]['nr_number'] == business_identifier1
     assert affiliated_entities[0]['name'] == name1
 
-    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier2, environment=env,
-                                          email_addresses=None)
+    delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id, business_identifier=business_identifier2)
+    AffiliationService.delete_affiliation(delete_affiliation_request, environment=env)
 
     affiliated_entities = AffiliationService.find_visible_affiliations_by_org_id(org_id, env)
 
@@ -606,9 +605,11 @@ def test_find_affiliations_for_new_business_incorporation_complete(session, auth
     assert affiliated_entities[0]['business_identifier'] == tmp_business_identifier
 
     # Delete the NR And TEMP IA affiliation and entities
-    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=tmp_business_identifier, environment=env)
+    delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id, business_identifier=tmp_business_identifier)
+    AffiliationService.delete_affiliation(delete_affiliation_request, environment=env)
     tmp_entity.delete()
-    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=nr_business_identifier, environment=env)
+    delete_affiliation_request.business_identifier = nr_business_identifier
+    AffiliationService.delete_affiliation(delete_affiliation_request, environment=env)
     nr_entity.delete()
 
     # Create entities for a TEMP with name as BC... number and incorporated entity
@@ -762,8 +763,8 @@ def test_delete_affiliation_multiple_environments(session, auth_mock, monkeypatc
     assert affiliation_test.as_dict()['organization']['id'] == org_dictionary['id']
 
     with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None):
-        AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier,
-                                              environment='test', email_addresses=None)
+        delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id, business_identifier=business_identifier)
+        AffiliationService.delete_affiliation(delete_affiliation_request, environment='test')
 
     with pytest.raises(BusinessException) as exception:
         AffiliationService.find_affiliation(org_id, business_identifier, 'test')
