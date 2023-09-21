@@ -672,7 +672,6 @@ export default defineComponent({
       try {
         const pendingInvitations = await AffiliationInvitationService.getAffiliationInvitations(
           props.orgId, AffiliationInvitationStatus.Pending) || []
-        // More than likely will ever only be one row.
         for (const invitation of pendingInvitations) {
           if (invitation.entity.businessIdentifier === businessIdentifier.value) {
             await AffiliationInvitationService.removeAffiliationInvitation(invitation.id)
