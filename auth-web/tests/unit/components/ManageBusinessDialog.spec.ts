@@ -150,7 +150,7 @@ describe('ManageBusinessDialog grouped tests', () => {
         }
       })
       orgStore.currentOrganization = {
-        orgType: test.isStaffOrSbcStaff ? AccountTypes.SBC_STAFF : AccountTypes.PREMIUM 
+        orgType: test.isStaffOrSbcStaff ? AccountTypes.SBC_STAFF : AccountTypes.PREMIUM
       } as any
       userStore.currentUser = {
         firstName: test.userFirstName,
@@ -222,7 +222,8 @@ describe('ManageBusinessDialog Component', () => {
     })
     userStore.currentUser = {
       firstName: 'Nadia',
-      lastName: 'Woodie'
+      lastName: 'Woodie',
+      roles: []
     } as any
   })
 

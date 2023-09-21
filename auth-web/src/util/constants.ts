@@ -435,7 +435,8 @@ export enum LDFlags {
     SentryEnable = 'sentry-enable',
     SupportRestorationEntities = 'supported-restoration-entities',
     AllowableBusinessSearchTypes = 'allowable-business-search-types',
-    AllowableBusinessPasscodeTypes = 'allowable-business-passcode-types'
+    AllowableBusinessPasscodeTypes = 'allowable-business-passcode-types',
+    EnableAffiliationDelegation = 'enable-affiliation-delegation'
 }
 
 export enum DateFilterCodes {
