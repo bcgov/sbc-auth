@@ -105,8 +105,9 @@ def post_affiliation_invitation():
 @_jwt.requires_auth
 def get_affiliation_invitation(affiliation_invitation_id):
     """Get the affiliation invitation specified by the provided id."""
-    if not (affiliation_invitation := AffiliationInvitationService.
-            find_affiliation_invitation_by_id(affiliation_invitation_id)):
+    affiliation_invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(affiliation_invitation_id)
+
+    if not affiliation_invitation or affiliation_invitation.as_dict().get('is_deleted'):
         response, status = {'message': 'The requested affiliation invitation could not be found.'}, \
             http_status.HTTP_404_NOT_FOUND
     else:
