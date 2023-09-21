@@ -24,6 +24,7 @@ from auth_api import status as http_status
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
 from auth_api.services.keycloak import KeycloakService
+from auth_api.utils.enums import InvitationStatus
 from auth_api.utils.util import mask_email
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_affiliation_invitation, factory_auth_header
@@ -362,6 +363,52 @@ def test_delete_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert dictionary['message'] == 'The requested affiliation invitation could not be found.'
 
 
+def test_delete_accepted_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
+    """Assert that an accepted affiliation invitation can be deleted."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                             jwt,
+                                                                                             session,
+                                                                                             keycloak_mock)
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(
+            from_org_id=from_org_id,
+            to_org_id=to_org_id,
+            business_identifier=business_identifier)),
+                                headers=headers, content_type='application/json')
+
+    invitation_dictionary = json.loads(rv_invitation.data)
+    affiliation_invitation_id = invitation_dictionary['id']
+
+    affiliation_invitation_token = AffiliationInvitationService.generate_confirmation_token(affiliation_invitation_id,
+                                                                                            from_org_id,
+                                                                                            to_org_id,
+                                                                                            business_identifier)
+
+    assert affiliation_invitation_token is not None
+
+    # Accept invitation
+    rv_invitation = client.put('/api/v1/affiliationInvitations/{}/token/{}'.format(affiliation_invitation_id,
+                                                                                   affiliation_invitation_token),
+                               headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv_invitation.data)
+
+    assert rv_invitation.status_code == http_status.HTTP_200_OK
+    assert dictionary['status'] == InvitationStatus.ACCEPTED.value
+
+    # Delete the accepted invitation
+    rv_invitation = client.delete('/api/v1/affiliationInvitations/{}'.format(affiliation_invitation_id),
+                                  headers=headers, content_type='application/json')
+    assert rv_invitation.status_code == http_status.HTTP_200_OK
+
+    rv_invitation = client.get('/api/v1/affiliationInvitations/{}'.format(affiliation_invitation_id),
+                               headers=headers, content_type='application/json')
+    assert rv_invitation.status_code == http_status.HTTP_404_NOT_FOUND
+    dictionary = json.loads(rv_invitation.data)
+    assert dictionary['message'] == 'The requested affiliation invitation could not be found.'
+
+
 def test_add_affiliation_invitation_invalid(client, jwt, session, business_mock):
     """Assert that POSTing an invalid affiliation invitation returns a 400."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -620,6 +667,64 @@ def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, busine
 
     # Assert email is masked
     assert_masked_email(TestContactInfo.contact1['email'], result_json['affiliationInvitations'][0]['recipientEmail'])
+
+
+def test_get_affiliation_invitations_deleted(client, jwt, session, keycloak_mock, business_mock, stan_server):
+    """Assert that affiliation invitations that are soft deleted are not returned."""
+    headers, from_org_id, to_org_id, business_identifier = \
+        setup_affiliation_invitation_data(client, jwt, session, keycloak_mock)
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(
+            from_org_id=from_org_id,
+            to_org_id=to_org_id,
+            business_identifier=business_identifier)),
+        headers=headers, content_type='application/json')
+
+    invitation_dictionary = json.loads(rv_invitation.data)
+    affiliation_invitation_id = invitation_dictionary['id']
+
+    affiliation_invitation_token = AffiliationInvitationService.generate_confirmation_token(affiliation_invitation_id,
+                                                                                            from_org_id,
+                                                                                            to_org_id,
+                                                                                            business_identifier)
+
+    assert affiliation_invitation_token is not None
+
+    # Accept invitation
+    rv_invitation = client.put('/api/v1/affiliationInvitations/{}/token/{}'.format(affiliation_invitation_id,
+                                                                                   affiliation_invitation_token),
+                               headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv_invitation.data)
+
+    assert rv_invitation.status_code == http_status.HTTP_200_OK
+    assert dictionary['status'] == InvitationStatus.ACCEPTED.value
+
+    # Delete invitation - soft delete
+    client.delete('/api/v1/affiliationInvitations/{}'.format(affiliation_invitation_id),
+                  headers=headers, content_type='application/json')
+    assert rv_invitation.status_code == http_status.HTTP_200_OK
+
+    # Confirm soft deleted invitation does not return on search with fromOrgId
+    rv_invitations = client.get('/api/v1/affiliationInvitations?fromOrgId={}'.format(from_org_id),
+                                headers=headers,
+                                content_type='application/json')
+
+    result_json = rv_invitations.json
+
+    assert rv_invitations.status_code == http_status.HTTP_200_OK
+    assert len(result_json['affiliationInvitations']) == 0
+
+    # Confirm soft deleted invitation does not return on search with orgId
+    rv_invitations = client.get('/api/v1/affiliationInvitations?orgId={}'.format(from_org_id),
+                                headers=headers,
+                                content_type='application/json')
+
+    result_json = rv_invitations.json
+
+    assert rv_invitations.status_code == http_status.HTTP_200_OK
+    assert len(result_json['affiliationInvitations']) == 0
 
 
 def setup_affiliation_invitation_data(client, jwt, session, keycloak_mock,

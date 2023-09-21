@@ -52,6 +52,7 @@ class AffiliationInvitationSearch:  # pylint: disable=too-many-instance-attribut
     approver_id: Optional[str] = None
     entity_id: Optional[str] = None
     affiliation_id: Optional[str] = None
+    is_deleted: bool = False
 
 
 @dataclass
