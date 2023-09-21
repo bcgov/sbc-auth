@@ -222,7 +222,8 @@ describe('ManageBusinessDialog Component', () => {
     })
     userStore.currentUser = {
       firstName: 'Nadia',
-      lastName: 'Woodie'
+      lastName: 'Woodie',
+      roles: []
     } as any
   })
 
