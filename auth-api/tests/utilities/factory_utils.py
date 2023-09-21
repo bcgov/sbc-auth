@@ -197,13 +197,13 @@ def factory_affiliation_invitation(from_org_id,
                                    business_identifier,
                                    to_org_id=None,
                                    to_org_uuid=None,
-                                   affiliation_invitation_type='EMAIL'):
+                                   invitation_type='EMAIL'):
     """Produce an affiliation invitation for the given from/to org, business and email."""
     affiliation_invitation_dict = {
         'fromOrgId': from_org_id,
         'toOrgId': to_org_id,
         'businessIdentifier': business_identifier,
-        'type': affiliation_invitation_type
+        'type': invitation_type
     }
 
     if to_org_uuid:

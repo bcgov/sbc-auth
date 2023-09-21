@@ -1,15 +1,19 @@
 import { AffiliationInvitation, CreateAffiliationInvitation } from '@/models/affiliation-invitation'
+import { AffiliationInvitationStatus } from '@/util/constants'
 import { AffiliationInviteInfo } from '@/models/affiliation'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { axios } from '@/util/http-util'
 
 export default class AffiliationInvitationService {
-  static async getAffiliationInvitations (orgIdentifier: number) : Promise<AffiliationInviteInfo[]> {
+  static async getAffiliationInvitations (orgIdentifier: number | string, status: AffiliationInvitationStatus = null)
+    : Promise<AffiliationInviteInfo[]> {
     try {
-      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`,
-        { params: { orgId: orgIdentifier, businessDetails: true } }
-      )
+      let params: any = { orgId: orgIdentifier, businessDetails: true }
+      if (status) {
+        params = { ...params, status: status }
+      }
+      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`, { params: params })
       return response.data.affiliationInvitations
     } catch (err) {
       // eslint-disable-line no-console

@@ -58,9 +58,6 @@
       :showBusinessDialog="showManageBusinessDialog"
       :initialBusinessIdentifier="businessIdentifier"
       :initialBusinessName="businessName"
-      :isStaffOrSbcStaff="isGovStaffAccount"
-      :userFirstName="userFirstName"
-      :userLastName="userLastName"
       @add-success="showAddSuccessModal"
       @add-failed-invalid-code="showInvalidCodeModal($event)"
       @add-failed-no-entity="showEntityNotFoundModal()"
@@ -98,6 +95,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { useBusinessStore, useOrgStore } from '@/stores'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import BusinessLookup from './BusinessLookup.vue'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
@@ -107,7 +105,6 @@ import { LookupType } from '@/models/business-nr-lookup'
 import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { mapActions } from 'pinia'
-import { useBusinessStore } from '@/stores'
 
 @Component({
   components: {
@@ -126,9 +123,6 @@ import { useBusinessStore } from '@/stores'
 })
 export default class SearchBusinessNameRequest extends Vue {
   @Prop({ default: '' }) readonly orgId: string
-  @Prop({ default: false }) readonly isGovStaffAccount: boolean
-  @Prop({ default: '' }) readonly userFirstName: string
-  @Prop({ default: '' }) readonly userLastName: string
   @Prop({ default: false }) readonly showManageBusinessDialog: boolean
 
   // local variables
@@ -142,6 +136,7 @@ export default class SearchBusinessNameRequest extends Vue {
   businessLookupKey = 0 // force re-mount of BusinessLookup component
   lookupType = LookupType
   businessStore = useBusinessStore()
+  orgStore = useOrgStore()
 
   $refs: {
     addNRDialog: InstanceType<typeof ModalDialog>
@@ -191,7 +186,7 @@ export default class SearchBusinessNameRequest extends Vue {
     this.businessName = business?.name || ''
     this.businessIdentifier = business?.identifier || ''
     this.businessLegalType = business?.legalType || ''
-    if (this.isGovStaffAccount) {
+    if (this.orgStore.isCurrentOrgStaffOrSbcStaff) {
       try {
         let businessData: LoginPayload = { businessIdentifier: this.businessIdentifier }
         await this.businessStore.addBusiness(businessData)
@@ -210,7 +205,7 @@ export default class SearchBusinessNameRequest extends Vue {
   async nameRequestEvent (event: { names: string[], nrNum: string }) {
     this.nrNames = event?.names || []
     this.businessIdentifier = event?.nrNum || ''
-    if (this.isGovStaffAccount) {
+    if (this.orgStore.isCurrentOrgStaffOrSbcStaff) {
       await this.addNameRequestForStaffSilently()
     } else {
       this.showNRDialog = true

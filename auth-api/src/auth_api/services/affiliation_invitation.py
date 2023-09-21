@@ -45,7 +45,6 @@ from auth_api.utils.user_context import UserContext, user_context
 from ..schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
 
 from ..utils.account_mailer import publish_to_mailer
-from ..utils.passcode import validate_passcode
 from ..utils.util import escape_wam_friendly_url
 from .authorization import check_auth
 from .rest_service import RestService
@@ -174,7 +173,6 @@ class AffiliationInvitation:
 
         # Check if an affiliation invitation already exists
         if AffiliationInvitationModel.find_invitations_by_org_entity_ids(from_org_id=from_org_id,
-                                                                         to_org_id=to_org_id,
                                                                          entity_id=entity.identifier):
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
         return entity, from_org, business
@@ -259,14 +257,6 @@ class AffiliationInvitation:
             mandatory_login_source = getattr(account_login_options, 'login_source',
                                              default_login_option_based_on_accesstype)
 
-        # If a pass code is provided check if it is correct
-        if pass_code := affiliation_invitation_info.get('passCode'):
-            if not validate_passcode(pass_code, entity.pass_code):
-                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-
-            affiliation_invitation_info['recipientEmail'] = None
-            affiliation_invitation_info['type'] = AffiliationInvitationType.PASSCODE.value
-
         affiliation_invitation_info['recipientEmail'] = \
             AffiliationInvitation._get_invitation_email(affiliation_invitation_info=affiliation_invitation_info,
                                                         entity=entity,
@@ -281,17 +271,12 @@ class AffiliationInvitation:
         affiliation_invitation.login_source = mandatory_login_source
         affiliation_invitation.save()
 
-        if affiliation_invitation.type != AffiliationInvitationType.PASSCODE.value:
-            AffiliationInvitation\
-                .send_affiliation_invitation(affiliation_invitation=affiliation_invitation,
-                                             business_name=business['business']['legalName'],
-                                             app_url=AffiliationInvitation._get_app_url(invitation_origin,
-                                                                                        context_path),
-                                             email_addresses=affiliation_invitation.recipient_email)
-        else:
-            return AffiliationInvitation.accept_affiliation_invitation(affiliation_invitation.id,
-                                                                       user, invitation_origin,
-                                                                       **kwargs)
+        AffiliationInvitation\
+            .send_affiliation_invitation(affiliation_invitation=affiliation_invitation,
+                                         business_name=business['business']['legalName'],
+                                         app_url=AffiliationInvitation._get_app_url(invitation_origin,
+                                                                                    context_path),
+                                         email_addresses=affiliation_invitation.recipient_email)
         return AffiliationInvitation(affiliation_invitation)
 
     @staticmethod
