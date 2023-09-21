@@ -135,107 +135,6 @@ def test_add_affiliation_invitation_exclude_to_org(client, jwt, session, keycloa
     assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
 
 
-@pytest.mark.parametrize('from_org_info, to_org_info, entity_info, role, claims', [
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'ADMIN',
-     TestJwtClaims.public_user_role),
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'USER',
-     TestJwtClaims.public_user_role),
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'COORDINATOR',
-     TestJwtClaims.public_user_role),
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'ADMIN',
-     TestJwtClaims.public_bceid_user),
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'USER',
-     TestJwtClaims.public_bceid_user),
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'COORDINATOR',
-     TestJwtClaims.public_bceid_user)
-])
-def test_add_affiliation_invitation_with_passcode(client, jwt, session, keycloak_mock, business_mock, stan_server,
-                                                  from_org_info, to_org_info, entity_info, role,
-                                                  claims):
-    """Assert that an affiliation invitation can be POSTed."""
-    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
-                                                                                             jwt,
-                                                                                             session,
-                                                                                             keycloak_mock,
-                                                                                             from_org_info,
-                                                                                             to_org_info,
-                                                                                             entity_info,
-                                                                                             claims)
-
-    invitation_payload = factory_affiliation_invitation(from_org_id=from_org_id,
-                                                        to_org_id=to_org_id,
-                                                        business_identifier=business_identifier)
-    invitation_payload['passCode'] = entity_info['passCode']
-
-    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
-        invitation_payload), headers=headers, content_type='application/json')
-    dictionary = json.loads(rv_invitation.data)
-
-    assert rv_invitation.status_code == http_status.HTTP_201_CREATED
-    assert dictionary.get('token') is not None
-    result_json = rv_invitation.json
-
-    assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
-    assert result_json['fromOrg']
-    assert result_json['fromOrg']['id'] == from_org_id
-    assert result_json['toOrg']
-    assert result_json['toOrg']['id'] == to_org_id
-    assert result_json['businessIdentifier'] == business_identifier
-    assert result_json['status'] == 'ACCEPTED'
-    assert result_json['type'] == 'PASSCODE'
-    assert result_json.get('recipientEmail') is None
-
-
-@pytest.mark.parametrize('from_org_info, to_org_info, entity_info, role, claims', [
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'ADMIN',
-     TestJwtClaims.public_user_role),
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'USER',
-     TestJwtClaims.public_user_role),
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'COORDINATOR',
-     TestJwtClaims.public_user_role),
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'ADMIN',
-     TestJwtClaims.public_bceid_user),
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'USER',
-     TestJwtClaims.public_bceid_user),
-    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'COORDINATOR',
-     TestJwtClaims.public_bceid_user)
-])
-def test_add_affiliation_invitation_with_passcode_exclude_to_org(client, jwt, session, keycloak_mock, business_mock,
-                                                                 stan_server, from_org_info, to_org_info, entity_info,
-                                                                 role, claims):
-    """Assert that an affiliation invitation can be POSTed."""
-    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
-                                                                                             jwt,
-                                                                                             session,
-                                                                                             keycloak_mock,
-                                                                                             from_org_info,
-                                                                                             to_org_info,
-                                                                                             entity_info,
-                                                                                             claims)
-
-    invitation_payload = factory_affiliation_invitation(from_org_id=from_org_id,
-                                                        to_org_id=None,
-                                                        business_identifier=business_identifier)
-    invitation_payload['passCode'] = entity_info['passCode']
-
-    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
-        invitation_payload), headers=headers, content_type='application/json')
-    dictionary = json.loads(rv_invitation.data)
-
-    assert rv_invitation.status_code == http_status.HTTP_201_CREATED
-    assert dictionary.get('token') is not None
-    result_json = rv_invitation.json
-
-    assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
-    assert result_json['fromOrg']
-    assert result_json['fromOrg']['id'] == from_org_id
-    assert result_json.get('toOrg') is None
-    assert result_json['businessIdentifier'] == business_identifier
-    assert result_json['status'] == 'ACCEPTED'
-    assert result_json['type'] == 'PASSCODE'
-    assert result_json.get('recipientEmail') is None
-
-
 def test_affiliation_invitation_already_exists(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that POSTing an already existing affiliation invitation returns a 400."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -871,28 +770,28 @@ def _create_affiliations_for_test(client, headers,
             from_org_id=org_id1,
             to_org_id=org_id2,
             business_identifier=business_identifier1,
-            affiliation_invitation_type='REQUEST'
+            invitation_type='REQUEST'
         ),
         factory_affiliation_invitation(
             from_org_id=org_id2,
             to_org_id=org_id3,
             business_identifier=business_identifier1,
-            affiliation_invitation_type='REQUEST'),
+            invitation_type='REQUEST'),
         factory_affiliation_invitation(
             from_org_id=org_id3,
             to_org_id=org_id4,
             business_identifier=business_identifier1,
-            affiliation_invitation_type='REQUEST'),
+            invitation_type='REQUEST'),
         factory_affiliation_invitation(
             from_org_id=org_id4,
             to_org_id=org_id1,
             business_identifier=business_identifier1,
-            affiliation_invitation_type='REQUEST'),
+            invitation_type='REQUEST'),
         factory_affiliation_invitation(
             from_org_id=org_id4,
             to_org_id=org_id1,
             business_identifier=business_identifier2,
-            affiliation_invitation_type='REQUEST')]
+            invitation_type='REQUEST')]
 
     # create affiliation invitation in test
     for i in range(len(sample_invites)):

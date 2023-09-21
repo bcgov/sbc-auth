@@ -33,7 +33,8 @@ import { useOrgStore } from './org'
 export const useBusinessStore = defineStore('business', () => {
   const state = reactive({
     currentBusiness: undefined as Business,
-    businesses: [] as Business[]
+    businesses: [] as Business[],
+    removeExistingAffiliationInvitation: false
   })
 
   function $reset () {
@@ -477,6 +478,10 @@ export const useBusinessStore = defineStore('business', () => {
     await BusinessService.resetBusinessPasscode(passCodeResetLoad)
   }
 
+  function setRemoveExistingAffiliationInvitation (value: boolean) {
+    state.removeExistingAffiliationInvitation = value
+  }
+
   return {
     ...toRefs(state),
     currentOrganization,
@@ -503,6 +508,7 @@ export const useBusinessStore = defineStore('business', () => {
     resetCurrentBusiness,
     resetBusinessPasscode,
     searchNRIndex,
+    setRemoveExistingAffiliationInvitation,
     $reset
   }
 })
