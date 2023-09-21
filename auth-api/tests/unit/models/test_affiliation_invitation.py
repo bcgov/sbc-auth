@@ -16,7 +16,6 @@
 Test suite to ensure that the  model routines are working as expected.
 """
 from _datetime import datetime, timedelta
-from sqlalchemy.orm.session import make_transient
 from typing import List
 from uuid import uuid4
 
