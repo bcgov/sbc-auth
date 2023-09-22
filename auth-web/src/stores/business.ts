@@ -123,7 +123,8 @@ export const useBusinessStore = defineStore('business', () => {
       requestActionCd: nr.requestActionCd,
       natureOfBusiness: nr.natureBusinessInfo,
       expirationDate: nr.expirationDate,
-      applicants: nr.applicants
+      applicants: nr.applicants,
+      corpNum: nr.corpNum
     }
   }
 
