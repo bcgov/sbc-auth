@@ -420,7 +420,6 @@ export enum LDFlags {
     EnableFasDashboard = 'enable-fas-dashboard',
     EnableGovmInvite = 'enable-govm-account-invite',
     EnableMandatoryAddress = 'enable-mandatory-address',
-    EnableNameRequestType = 'enable-name-request-type',
     EnableOrgNameAutoComplete = 'enable-org-name-auto-complete',
     HideProductPackage = 'hide-product-packages',
     IaSupportedEntities = 'ia-supported-entities',
