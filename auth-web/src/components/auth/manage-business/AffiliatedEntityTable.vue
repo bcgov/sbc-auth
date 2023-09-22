@@ -177,7 +177,6 @@ import {
   AffiliationInvitationType,
   AffiliationTypes,
   EntityAlertTypes,
-  LDFlags,
   NrDisplayStates,
   NrState
 } from '@/util/constants'
@@ -189,7 +188,6 @@ import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import EntityDetails from './EntityDetails.vue'
 
-import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useAffiliations } from '@/composables'
 import { useOrgStore } from '@/stores/org'
 
