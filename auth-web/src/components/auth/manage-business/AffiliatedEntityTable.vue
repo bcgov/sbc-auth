@@ -127,7 +127,7 @@
           </div>
           <!-- Need to keep the NR type separate or else the table filter treats each distinctly. See PR 2389 -->
           <div
-            v-if="enableNameRequestType && isNameRequest(item)"
+            v-if="isNameRequest(item)"
             class="gray-9 font-weight-bold d-inline-block ml-1"
           >
             {{ nameRequestType(item) }}
@@ -177,7 +177,6 @@ import {
   AffiliationInvitationType,
   AffiliationTypes,
   EntityAlertTypes,
-  LDFlags,
   NrDisplayStates,
   NrState
 } from '@/util/constants'
@@ -189,7 +188,6 @@ import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import EntityDetails from './EntityDetails.vue'
 
-import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useAffiliations } from '@/composables'
 import { useOrgStore } from '@/stores/org'
 
@@ -312,10 +310,6 @@ export default defineComponent({
       }
     }
 
-    const enableNameRequestType = (): boolean => {
-      return launchdarklyServices.getFlag(LDFlags.EnableNameRequestType) || false
-    }
-
     const getAffiliationInvitationStatus = (affiliationInviteInfos: AffiliationInviteInfo[]): string => {
       return affiliationInviteInfos.length > 0 && affiliationInviteInfos[0].status
     }
@@ -331,7 +325,6 @@ export default defineComponent({
       headers,
       affiliations,
       entityCount,
-      enableNameRequestType,
       getHeaders,
       isNameRequest,
       isRejectedName,
