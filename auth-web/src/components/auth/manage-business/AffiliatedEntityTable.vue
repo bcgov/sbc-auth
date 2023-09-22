@@ -312,10 +312,6 @@ export default defineComponent({
       }
     }
 
-    const enableNameRequestType = (): boolean => {
-      return launchdarklyServices.getFlag(LDFlags.EnableNameRequestType) || false
-    }
-
     const getAffiliationInvitationStatus = (affiliationInviteInfos: AffiliationInviteInfo[]): string => {
       return affiliationInviteInfos.length > 0 && affiliationInviteInfos[0].status
     }
@@ -331,7 +327,6 @@ export default defineComponent({
       headers,
       affiliations,
       entityCount,
-      enableNameRequestType,
       getHeaders,
       isNameRequest,
       isRejectedName,
