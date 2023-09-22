@@ -43,7 +43,7 @@ export const useAffiliations = () => {
   }
 
   const isBusinessAffiliated = (businessIdentifier: string): boolean => {
-    if (businessIdentifier === undefined) {
+    if (!businessIdentifier) {
       return false
     }
     return affiliations.results.some(business => businessIdentifier === business.businessIdentifier)
