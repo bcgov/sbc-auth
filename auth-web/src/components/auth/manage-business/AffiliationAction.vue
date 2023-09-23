@@ -461,11 +461,21 @@ export default defineComponent({
       }
     }
 
-    const handleBusinessRedirect = (item): boolean => {
+    /** Remove Accepted affiliation invitations from business. */
+    const removeAcceptedAffiliationInvitations = (business: Business) => {
+      for (const affiliationInvitation of business.affiliationInvites) {
+        if (affiliationInvitation.status === AffiliationInvitationStatus.Accepted) {
+          AffiliationInvitationService.removeAffiliationInvitation(affiliationInvitation.id)
+        }
+      }
+    }
+
+    const handleBusinessRedirect = (item: Business): boolean => {
       if (isNameRequest(item)) {
         return false
       }
       if (isModernizedEntity(item)) {
+        removeAcceptedAffiliationInvitations(item)
         goToDashboard(item.businessIdentifier)
         return true
       } else if (isSocieties(item)) {
