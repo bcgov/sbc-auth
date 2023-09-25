@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row class="mx-0 mt-n4">
-      Retrieve an existing business or Name Request to manage:
+      Retrieve an existing business or active Name Request to manage:
     </v-row>
     <v-row
       :key="clearSearch"
