@@ -463,7 +463,8 @@ export default defineComponent({
 
     /** Remove Accepted affiliation invitations from business. */
     const removeAcceptedAffiliationInvitations = (business: Business) => {
-      for (const affiliationInvitation of business.affiliationInvites) {
+      const invitations = business.affiliationInvites || []
+      for (const affiliationInvitation of invitations) {
         if (affiliationInvitation.status === AffiliationInvitationStatus.Accepted) {
           AffiliationInvitationService.removeAffiliationInvitation(affiliationInvitation.id)
         }
