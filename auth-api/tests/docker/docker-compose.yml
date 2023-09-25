@@ -62,7 +62,7 @@ services:
     image: stoplight/prism:3.3.0
     command: >
       mock -p 4010 --host 0.0.0.0
-      https://raw.githubusercontent.com/bcgov/sbc-pay/main/docs/docs/api_contract/pay-api-1.0.4.yaml
+      https://raw.githubusercontent.com/bcgov/sbc-pay/main/docs/docs/api_contract/pay-api-1.0.5.yaml
 
   minio:
     image: 'bitnami/minio:2022.2.5'
