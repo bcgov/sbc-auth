@@ -34,10 +34,13 @@
 
       <template #no-data>
         <p class="pl-5 font-weight-bold">
-          {{ lookupType === LookupType.NR ? 'No Name Request found' : 'No active B.C. business found' }}
+          {{ lookupType === LookupType.NR ? 'No active Name Request found' : 'No active B.C. business found' }}
         </p>
         <p class="pl-5">
-          Ensure you have entered the correct business name or number.
+          {{ lookupType === LookupType.NR ?
+           'Ensure you have entered a Name Request that has not expired or been cancelled.' :
+           'Ensure you have entered the correct business name or number.'
+          }}
         </p>
       </template>
 
