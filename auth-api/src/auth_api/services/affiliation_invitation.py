@@ -183,12 +183,13 @@ class AffiliationInvitation:
                              org_id: Optional[int] = None) -> Optional[str]:
         """Get affiliation invitation email based on provided params."""
         if affiliation_invitation_type == AffiliationInvitationType.REQUEST:
-            contacts_dict = OrgService.get_contacts(org_id=org_id)
-            if contacts := contacts_dict.get('contacts', None):
-                return contacts[0].get('email', None) if contacts else None
+            admin_emails = UserService.get_admin_emails_for_org(org_id)
+            if admin_emails != '':
+                current_app.logger.debug(f'Sending emails to: ${admin_emails}')
+                return admin_emails
 
-            # this guardrail is due to the fact that previously contact was not mandatory on Orgs. It is now.
-            current_app.logger.error(f'failed to retrieve contact for org_id:{org_id}')
+            # continue but log error
+            current_app.logger.error('No admin email record for org id %s', org_id)
             return None
 
         if affiliation_invitation_type == AffiliationInvitationType.EMAIL:
@@ -592,13 +593,23 @@ class AffiliationInvitation:
     def get_all_invitations_with_details_related_to_org(cls, org_id: int, search_filter: AffiliationInvitationSearch) \
             -> List[Dict]:
         """Get affiliation invitations for from org and for to org."""
-        # If staff return full list
         current_user: UserService = UserService.find_by_jwt_token()
-        if UserService.is_context_user_staff() or \
-                UserService.is_user_member_of_org(org_id=org_id, user=current_user):
-            return cls.affiliation_invitations_to_dict_list(
-                AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, search_filter=search_filter)
-            )
+
+        affiliation_invitations = AffiliationInvitationModel.find_all_related_to_org(org_id=org_id,
+                                                                                     search_filter=search_filter)
+
+        is_org_admin = UserService.is_user_admin_or_coordinator(user=current_user, org_id=org_id)
+
+        # If staff or admin return full list
+        if UserService.is_context_user_staff() or is_org_admin:
+            return cls.affiliation_invitations_to_dict_list(affiliation_invitations)
+
+        # if is member of org, but not admin, do not return request type
+        if UserService.is_user_member_of_org(org_id=org_id, user=current_user):
+            filtered_affiliation_invitations = list(filter(
+                lambda affiliation_invitation: affiliation_invitation.type != AffiliationInvitationType.REQUEST.value,
+                affiliation_invitations))
+            return cls.affiliation_invitations_to_dict_list(filtered_affiliation_invitations)
 
         return []
 
