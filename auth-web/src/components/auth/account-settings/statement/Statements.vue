@@ -35,9 +35,8 @@
       </v-btn>
     </header>
     <div
-      id="statement-owing"
       v-if="enableEFTPaymentMethod"
-      class="totals"
+      class="statement-owing"
     >
       <div
         v-if="paymentOwingAmount && paymentDueDate"
@@ -290,7 +289,7 @@ export default class Statements extends Mixins(AccountChangeMixin) {
 </script>
 
 <style lang="scss" scoped>
-.totals {
+.statement-owing {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
