@@ -660,14 +660,3 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             return False
 
         return current_user_membership.membership_type_code in CLIENT_ADMIN_ROLES
-
-    @staticmethod
-    def is_user_member_of_org(user, org_id: int) -> bool:
-        """Verify if user (UserService wrapper) is active member of the provided org."""
-        if not user:
-            return False
-
-        current_user_membership: MembershipModel = \
-            MembershipModel.find_membership_by_user_and_org(user_id=user.identifier, org_id=org_id)
-
-        return current_user_membership is not None and current_user_membership.status == Status.ACTIVE.value
