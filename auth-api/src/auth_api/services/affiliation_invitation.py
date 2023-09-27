@@ -364,9 +364,38 @@ class AffiliationInvitation:
             invitation.delete()
 
     @staticmethod
+    def _filter_request_invites_role_based(affiliation_invitation_models: List[AffiliationInvitationModel],
+                                           org_id: int,
+                                           user: UserService = None) -> List[AffiliationInvitationModel]:
+        """Filter out affiliation invitations of type REQUEST if current user is not staff or org admin/coordinator."""
+        if UserService.is_context_user_staff():
+            return affiliation_invitation_models
+
+        if org_id is None:
+            return []
+
+        current_user: UserService = user or UserService.find_by_jwt_token()
+        is_org_admin_or_coordinator = UserService.is_user_admin_or_coordinator(user=current_user, org_id=org_id)
+        if is_org_admin_or_coordinator:
+            return affiliation_invitation_models
+
+        # filter out affiliation invitations of type request
+        return list(filter(
+            lambda affiliation_invitation: affiliation_invitation.type != AffiliationInvitationType.REQUEST.value,
+            affiliation_invitation_models))
+
+    @staticmethod
     def search_invitations(search_filter: AffiliationInvitationSearch, mask_email=True):
         """Search affiliation invitations."""
-        invitation_models = AffiliationInvitationModel().filter_by(search_filter=search_filter)
+        try:
+            org_id = int(search_filter.to_org_id or search_filter.from_org_id)
+        except ValueError:
+            org_id = None
+
+        searched_invitations = AffiliationInvitationModel().filter_by(search_filter=search_filter)
+        invitation_models = (AffiliationInvitation.
+                             _filter_request_invites_role_based(affiliation_invitation_models=searched_invitations,
+                                                                org_id=org_id))
         return [AffiliationInvitation(invitation).as_dict(mask_email=mask_email) for invitation in invitation_models]
 
     @staticmethod
@@ -590,28 +619,17 @@ class AffiliationInvitation:
         return AffiliationInvitation(affiliation_invitation)
 
     @classmethod
-    def get_all_invitations_with_details_related_to_org(cls, org_id: int, search_filter: AffiliationInvitationSearch) \
-            -> List[Dict]:
+    def get_all_invitations_with_details_related_to_org(cls,
+                                                        org_id: int,
+                                                        search_filter: AffiliationInvitationSearch) -> List[Dict]:
         """Get affiliation invitations for from org and for to org."""
-        current_user: UserService = UserService.find_by_jwt_token()
-
         affiliation_invitations = AffiliationInvitationModel.find_all_related_to_org(org_id=org_id,
                                                                                      search_filter=search_filter)
 
-        is_org_admin = UserService.is_user_admin_or_coordinator(user=current_user, org_id=org_id)
+        filtered_affiliation_invitations = AffiliationInvitation._filter_request_invites_role_based(
+            affiliation_invitation_models=affiliation_invitations, org_id=org_id)
 
-        # If staff or admin return full list
-        if UserService.is_context_user_staff() or is_org_admin:
-            return cls.affiliation_invitations_to_dict_list(affiliation_invitations)
-
-        # if is member of org, but not admin, do not return request type
-        if UserService.is_user_member_of_org(org_id=org_id, user=current_user):
-            filtered_affiliation_invitations = list(filter(
-                lambda affiliation_invitation: affiliation_invitation.type != AffiliationInvitationType.REQUEST.value,
-                affiliation_invitations))
-            return cls.affiliation_invitations_to_dict_list(filtered_affiliation_invitations)
-
-        return []
+        return cls.affiliation_invitations_to_dict_list(filtered_affiliation_invitations)
 
     @staticmethod
     def refuse_affiliation_invitation(invitation_id: int, user: UserService):
