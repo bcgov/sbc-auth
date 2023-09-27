@@ -13,11 +13,12 @@
         />
       </div>
     </v-fade-transition>
-    <header class="view-header mb-6">
+    <header class="view-header">
       <h2 class="view-header__title">
         Statements
       </h2>
       <v-btn
+        v-if="!enableEFTPaymentMethod"
         large
         depressed
         aria-label="Statement Settings"
@@ -33,6 +34,26 @@
         Settings
       </v-btn>
     </header>
+    <div
+      id="statement-owing"
+      v-if="enableEFTPaymentMethod"
+      class="totals"
+    >
+      <div
+        v-if="paymentOwingAmount && paymentDueDate"
+        class="total"
+      >
+        <p class="amount">
+          Total Amount Owing: {{ formatAmount(paymentOwingAmount) }}
+        </p>
+        <p class="date">
+          Payment Due Date: {{ formatDate(paymentDueDate) }}
+        </p>
+      </div>
+      <div class="instructions">
+        <p><a>How to pay with electronic funds transfer</a></p>
+      </div>
+    </div>
     <div>
       <v-data-table
         class="statement-list"
@@ -96,13 +117,14 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages } from '@/util/constants'
+import { Account, LDFlags, Pages } from '@/util/constants'
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { StatementFilterParams, StatementListItem, StatementListResponse } from '@/models/statement'
 import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
 import moment from 'moment'
 import { useOrgStore } from '@/stores/org'
@@ -132,12 +154,15 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private readonly getStatement!: (statementParams: any) => any
   private readonly ITEMS_PER_PAGE = 5
   private readonly PAGINATION_COUNTER_STEP = 4
-  private formatDate = CommonUtils.formatDisplayDate
   private totalStatementsCount: number = 0
   private tableDataOptions: any = {}
   private isDataLoading: boolean = false
   private statementsList: StatementListItem[] = []
   private isLoading: boolean = false
+  formatDate = CommonUtils.formatDisplayDate
+  formatAmount = CommonUtils.formatAmount
+  paymentOwingAmount: number = 0
+  paymentDueDate: Date = null
 
   $refs: {
     statementSettingsModal: StatementsSettings
@@ -181,6 +206,11 @@ export default class Statements extends Mixins(AccountChangeMixin) {
     } else {
       await this.loadStatementsList()
     }
+  }
+
+  get enableEFTPaymentMethod (): string | null {
+    const enableEFTPaymentMethod: string = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod)
+    return enableEFTPaymentMethod
   }
 
   formatDateRange (date1, date2) {
@@ -260,7 +290,41 @@ export default class Statements extends Mixins(AccountChangeMixin) {
 </script>
 
 <style lang="scss" scoped>
+.totals {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  .total {
+    flex: 0 0 300px;
+    .amount {
+      font-size: 18px;
+      font-weight: 600;
+      color: #495057;
+      margin: 0;
+    }
+    .date {
+      font-size: 14px;
+      font-weight: 400;
+      color: #495057
+    }
+  }
+}
+.instructions {
+  margin-bottom: 30px;
+  flex: 1 0 auto;
+  p {
+    margin: 0;
+    text-align: right;
+    font-size: 16px;
+    a {
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
 .view-header {
+  margin-bottom: 20px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;

@@ -417,6 +417,7 @@ export enum LDFlags {
     EnableBcCccUlc = 'enable-bc-ccc-ulc',
     EnableBusinessNrSearch = 'enable-business-nr-search',
     EnableDetailsFilter = 'enable-transactions-detail-filter',
+    EnableEFTPaymentMethod = 'enable-eft-payment-method',
     EnableFasDashboard = 'enable-fas-dashboard',
     EnableGovmInvite = 'enable-govm-account-invite',
     EnableMandatoryAddress = 'enable-mandatory-address',
