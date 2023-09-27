@@ -365,8 +365,7 @@ class AffiliationInvitation:
 
     @staticmethod
     def _filter_request_invites_role_based(affiliation_invitation_models: List[AffiliationInvitationModel],
-                                           org_id: int,
-                                           user: UserService = None) -> List[AffiliationInvitationModel]:
+                                           org_id: int) -> List[AffiliationInvitationModel]:
         """Filter out affiliation invitations of type REQUEST if current user is not staff or org admin/coordinator."""
         if UserService.is_context_user_staff():
             return affiliation_invitation_models
@@ -374,9 +373,8 @@ class AffiliationInvitation:
         if org_id is None:
             return []
 
-        current_user: UserService = user or UserService.find_by_jwt_token()
-        is_org_admin_or_coordinator = UserService.is_user_admin_or_coordinator(user=current_user, org_id=org_id)
-        if is_org_admin_or_coordinator:
+        current_user: UserService = UserService.find_by_jwt_token()
+        if UserService.is_user_admin_or_coordinator(user=current_user, org_id=org_id):
             return affiliation_invitation_models
 
         # filter out affiliation invitations of type request
@@ -389,7 +387,7 @@ class AffiliationInvitation:
         """Search affiliation invitations."""
         try:
             org_id = int(search_filter.to_org_id or search_filter.from_org_id)
-        except ValueError:
+        except (TypeError, ValueError):
             org_id = None
 
         searched_invitations = AffiliationInvitationModel().filter_by(search_filter=search_filter)
