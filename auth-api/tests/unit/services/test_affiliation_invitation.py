@@ -36,9 +36,12 @@ from auth_api.services import AffiliationInvitation as AffiliationInvitationServ
 from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
+from auth_api.utils import roles
 from auth_api.utils.enums import InvitationStatus
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
-from tests.utilities.factory_utils import factory_affiliation_invitation, factory_user_model, patch_token_info
+from tests.utilities.factory_utils import (
+    factory_affiliation_invitation, factory_entity_model, factory_membership_model, factory_user_model,
+    patch_token_info)
 
 
 def create_test_entity():
@@ -514,9 +517,8 @@ def test_send_affiliation_invitation_request_authorized(publish_to_mailer_mock,
                                            affiliation_invitation_status_code=InvitationStatus.ACCEPTED.value)
     business_name = 'BarFoo, Inc.'  # will get it from business mock 'get_business' method
     expected_email = 'expected@email.com'
-    monkeypatch.setattr('auth_api.services.affiliation_invitation.OrgService.get_contacts',
-                        lambda org_id: {'contacts': [
-                            {'email': expected_email}]} if org_id == affiliation_invitation.from_org_id else None)
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.UserService.get_admin_emails_for_org',
+                        lambda org_id: expected_email if org_id == affiliation_invitation.from_org_id else None)
 
     # simulate subquery for entity
     entity = EntityModel()
@@ -555,9 +557,8 @@ def test_send_affiliation_invitation_request_refused(publish_to_mailer_mock,
                                            affiliation_invitation_status_code=InvitationStatus.FAILED.value)
 
     expected_email = 'expected@email.com'
-    monkeypatch.setattr('auth_api.services.affiliation_invitation.OrgService.get_contacts',
-                        lambda org_id: {'contacts': [
-                            {'email': expected_email}]} if org_id == affiliation_invitation.from_org_id else None)
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.UserService.get_admin_emails_for_org',
+                        lambda org_id: expected_email if org_id == affiliation_invitation.from_org_id else None)
 
     business_name = 'BarFoo, Inc.'  # will get it from business mock 'get_business' method
 
@@ -584,6 +585,57 @@ def test_send_affiliation_invitation_request_refused(publish_to_mailer_mock,
     publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitationRequestAuthorization',
                                               org_id=affiliation_invitation.from_org.id,
                                               data=expected_data)
+
+
+@pytest.mark.parametrize('test_name,member_type,expect_request_invites', [
+    ('test user is org admin', roles.ADMIN, True),
+    ('test user is org coordinator', roles.COORDINATOR, True),
+    ('test user is org user', roles.USER, False),
+])
+def test_get_all_invitations_with_details_related_to_org(session, auth_mock, keycloak_mock, business_mock, monkeypatch,
+                                                         test_name, member_type, expect_request_invites):
+    """Verify REQUEST affiliation invitations are returned only when user is org ADMIN/COORDINATOR."""
+    # setup an org
+    user = factory_user_model(TestUserInfo.user_test)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
+    org1 = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    assert org1
+    org2 = OrgService.create_org(TestOrgInfo.org3, user_id=user.id)
+    assert org2
+    org3 = OrgService.create_org(TestOrgInfo.org4, user_id=user.id)
+    assert org3
+    entity = factory_entity_model()
+
+    affiliation_invitation_model1 = AffiliationInvitationModel.create_from_dict(
+        invitation_info={
+            'fromOrgId': org1._model.id,
+            'toOrgId': org2._model.id,
+            'entityId': entity.id,
+            'type': 'REQUEST'
+        },
+        user_id=user.id)
+    affiliation_invitation_model1.save()
+
+    affiliation_invitation_model2 = AffiliationInvitationModel.create_from_dict(
+        invitation_info={
+            'fromOrgId': org1._model.id,
+            'toOrgId': org3._model.id,
+            'entityId': entity.id,
+            'type': 'REQUEST'
+        },
+        user_id=user.id)
+    affiliation_invitation_model2.save()
+
+    factory_membership_model(user.id, org1._model.id, member_type=member_type)
+
+    search_filter = AffiliationInvitationSearch()
+    result = AffiliationInvitationService.get_all_invitations_with_details_related_to_org(org_id=org1._model.id,
+                                                                                          search_filter=search_filter)
+
+    if expect_request_invites:
+        assert len(result) == 2
+    else:
+        assert result == []
 
 
 def test_app_url():
