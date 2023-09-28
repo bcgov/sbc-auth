@@ -242,6 +242,7 @@
                   </template>
                   <div class="list-body">
                     <AccountAuthorizationRequest
+                      :key="accountAuthorizationKey"
                       :business-identifier="initialBusinessIdentifier"
                       :business-name="initialBusinessName"
                       @change-request-access-message="invitationAdditionalMessage=$event"
@@ -372,6 +373,7 @@ export default defineComponent({
       }
     }
     // Local variables
+    const accountAuthorizationKey = ref(0)
     const businessName = ref('')
     const businessIdentifier = ref('') // aka incorporation number of registration number
     const businessIdentifierRules = ref(null)
@@ -571,6 +573,7 @@ export default defineComponent({
     }
 
     const resetForm = (emitCancel = false) => {
+      accountAuthorizationKey.value++
       passcode.value = ''
       proprietorPartnerName.value = ''
       authorizationName.value = ''
@@ -806,6 +809,7 @@ export default defineComponent({
 
     // Return the setup data - These will be removed with script setup.
     return {
+      accountAuthorizationKey,
       invitationToAccount,
       invitationAdditionalMessage,
       selectAccount,
