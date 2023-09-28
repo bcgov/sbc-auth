@@ -225,7 +225,6 @@
         dialog-class="info-dialog"
         :showIcon="false"
         :showCloseIcon="true"
-        closeButtonText="OK"
       >
         <template #text>
           <p>{{ dialogText }}</p>
@@ -250,7 +249,7 @@
             data-test="dialog-ok-button"
             @click="closeBusinessUnavailableDialog()"
           >
-            Close
+            OK
           </v-btn>
         </template>
       </ModalDialog>

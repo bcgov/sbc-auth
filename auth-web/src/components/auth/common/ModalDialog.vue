@@ -72,7 +72,7 @@
             data-test="dialog-ok-button"
             @click="close()"
           >
-            <span>{{ closeButtonText }}</span>
+            <span>Close</span>
           </v-btn>
         </slot>
       </v-card-actions>
@@ -96,8 +96,7 @@ export default defineComponent({
     isScrollable: { type: Boolean, default: false },
     dialogClass: { type: String, default: '' },
     maxWidth: { type: String, default: '' },
-    showCloseIcon: { type: Boolean, default: false },
-    closeButtonText: { type: String, default: 'Close' }
+    showCloseIcon: { type: Boolean, default: false }
   },
   setup (_, { emit }) {
     const isOpen = ref(false)
@@ -130,6 +129,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/scss/ModalDialog';
+@import '@/assets/scss/overrides';
   #help-button {
     cursor: pointer;
     color: var(--v-primary-base) !important;
