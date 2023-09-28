@@ -229,21 +229,18 @@
         <template #text>
           <p>{{ dialogText }}</p>
           <p><br>Please contact us if you require assistance.</p>
-          <p>
-            <br><v-icon small>
-              mdi-phone
-            </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
-          </p>
-          <p>
-            <v-icon small>
-              mdi-phone
-            </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
-          </p>
-          <p>
-            <v-icon small>
-              mdi-email
-            </v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a>
-          </p>
+          <br>
+          <v-icon small>
+            mdi-phone
+          </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
+          <br>
+          <v-icon small>
+            mdi-phone
+          </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
+          <br>
+          <v-icon small>
+            mdi-email
+          </v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a>
         </template>
         <template #actions>
           <v-btn
@@ -252,7 +249,7 @@
             data-test="dialog-ok-button"
             @click="closeBusinessUnavailableDialog()"
           >
-            Close
+            OK
           </v-btn>
         </template>
       </ModalDialog>
