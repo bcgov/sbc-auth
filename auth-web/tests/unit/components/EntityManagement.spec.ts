@@ -269,13 +269,13 @@ describe('Entity Management Component', () => {
   it('Should set the correct values when showBusinessUnavailableModal(action) is called', () => {
     let action = 'test'
     wrapper.vm.showBusinessUnavailableModal(action)
-    expect(wrapper.vm.dialogTitle).toBe('Business unavailable')
+    expect(wrapper.vm.dialogTitle).toBe('Business Unavailable')
     expect(wrapper.vm.dialogText).toBe(
       'You are not authorized to access the business you wish to test. Please add this business to your table to continue.'
     )
     action = 'change name'
     wrapper.vm.showBusinessUnavailableModal(action)
-    expect(wrapper.vm.dialogTitle).toBe('Business unavailable')
+    expect(wrapper.vm.dialogTitle).toBe('Business Unavailable')
     expect(wrapper.vm.dialogText).toBe(
       'You are not authorized to access the business to change its name. Please add this business to your table to continue.'
     )

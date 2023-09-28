@@ -107,7 +107,7 @@
         :title="dialogTitle"
         :text="dialogText"
         dialog-class="notify-dialog"
-        max-width="640"
+        max-width="720"
       />
 
       <!-- NR/IA removal confirm Dialog/A generic one -->
@@ -116,7 +116,7 @@
         :title="dialogTitle"
         :text="dialogText"
         dialog-class="notify-dialog"
-        max-width="640"
+        max-width="720"
         data-test="remove-confirm-dialog"
       >
         <template #icon>
@@ -157,7 +157,7 @@
         :title="dialogTitle"
         :text="dialogText"
         dialog-class="notify-dialog"
-        max-width="640"
+        max-width="720"
       >
         <template #icon>
           <v-icon
@@ -185,7 +185,7 @@
         :title="dialogTitle"
         :text="dialogText"
         dialog-class="notify-dialog"
-        max-width="640"
+        max-width="720"
       >
         <template #icon>
           <v-icon
@@ -221,7 +221,7 @@
         ref="businessUnavailableDialog"
         class="business-unavailable-dialog"
         :title="dialogTitle"
-        max-width="640"
+        max-width="720"
         dialog-class="info-dialog"
         :showIcon="false"
         :showCloseIcon="true"
@@ -260,7 +260,7 @@
         :title="dialogTitle"
         :text="dialogText"
         dialog-class="notify-dialog"
-        max-width="640"
+        max-width="720"
         :isPersistent="true"
       >
         <template #icon>
@@ -750,7 +750,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   showBusinessUnavailableModal (action: string) {
-    this.dialogTitle = 'Business unavailable'
+    this.dialogTitle = 'Business Unavailable'
     this.dialogText = 'You are not authorized to access the business'
     if (action === 'change name') {
       this.dialogText += ' to change its name'
