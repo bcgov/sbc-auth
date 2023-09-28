@@ -26,7 +26,7 @@
 
         <span
           :class="{
-            'has-close-button' : showCloseIcon,
+            'has-close-button': showCloseIcon,
             'no-close-button': !showCloseIcon,
             'modal-dialog-title': true
           }"
