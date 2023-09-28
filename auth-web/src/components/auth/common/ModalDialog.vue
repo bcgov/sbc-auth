@@ -72,7 +72,7 @@
             data-test="dialog-ok-button"
             @click="close()"
           >
-            <span>Close</span>
+            <span>{{ closeButtonText }}</span>
           </v-btn>
         </slot>
       </v-card-actions>
@@ -96,7 +96,8 @@ export default defineComponent({
     isScrollable: { type: Boolean, default: false },
     dialogClass: { type: String, default: '' },
     maxWidth: { type: String, default: '' },
-    showCloseIcon: { type: Boolean, default: false }
+    showCloseIcon: { type: Boolean, default: false },
+    closeButtonText: { type: String, default: 'Close' }
   },
   setup (_, { emit }) {
     const isOpen = ref(false)

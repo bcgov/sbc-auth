@@ -225,6 +225,7 @@
         dialog-class="info-dialog"
         :showIcon="false"
         :showCloseIcon="true"
+        closeButtonText="OK"
       >
         <template #text>
           <p>{{ dialogText }}</p>
