@@ -24,7 +24,13 @@
           </v-icon>
         </slot>
 
-        <span class="modal-dialog-title">
+        <span
+          :class="{
+            'has-close-button': showCloseIcon,
+            'no-close-button': !showCloseIcon,
+            'modal-dialog-title': true
+          }"
+        >
           <slot name="title">{{ title }}</slot>
         </span>
 
@@ -123,6 +129,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/scss/ModalDialog';
+@import '@/assets/scss/overrides';
   #help-button {
     cursor: pointer;
     color: var(--v-primary-base) !important;
@@ -135,12 +142,21 @@ export default defineComponent({
     background: red;
   }
   .modal-dialog-title {
-    width: 100%;
-    text-align: center;
     word-break: break-word;
     font-size: var(--FONT_SIZE_TITLE);
     color: var(--COLOR_GRAY9);
   }
+
+  .no-close-button {
+    text-align: center;
+    width: 100%
+  }
+
+  .has-close-button {
+    text-align: inherit;
+    width: auto;
+  }
+
   .modal-dialog-text {
     text-align: center;
     font-size: var(--FONT_SIZE_TEXT);
@@ -160,6 +176,10 @@ export default defineComponent({
 
   .notify-dialog .v-card__text {
     text-align: center;
+  }
+
+  .v-icon, .mdi-close {
+    color:$app-blue !important;
   }
 
   .notify-dialog .v-card__actions {

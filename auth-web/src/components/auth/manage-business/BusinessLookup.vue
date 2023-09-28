@@ -38,8 +38,8 @@
         </p>
         <p class="pl-5">
           {{ lookupType === LookupType.NR ?
-           'Ensure you have entered a Name Request that has not expired or been cancelled.' :
-           'Ensure you have entered the correct business name or number.'
+            'Ensure you have entered a Name Request that has not expired or been cancelled.' :
+            'Ensure you have entered the correct business name or number.'
           }}
         </p>
       </template>
