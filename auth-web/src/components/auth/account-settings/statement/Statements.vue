@@ -36,16 +36,16 @@
     </header>
     <div
       v-if="enableEFTPaymentMethod"
-      class="statement-owing"
+      class="statement-owing d-flex flex-wrap flex-row"
     >
       <div
         v-if="paymentOwingAmount && paymentDueDate"
         class="total"
       >
-        <p class="amount">
+        <p class="amount font-weight-bold">
           Total Amount Owing: {{ formatAmount(paymentOwingAmount) }}
         </p>
-        <p class="date">
+        <p class="date font-weight-regular">
           Payment Due Date: {{ formatDate(paymentDueDate) }}
         </p>
       </div>
@@ -325,20 +325,15 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .statement-owing {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
   .total {
     flex: 0 0 300px;
     .amount {
       font-size: 18px;
-      font-weight: 600;
       color: #495057;
       margin: 0;
     }
     .date {
       font-size: 14px;
-      font-weight: 400;
       color: #495057
     }
   }
