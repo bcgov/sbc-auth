@@ -134,6 +134,7 @@ export enum InvoiceStatus {
     COMPLETED = 'COMPLETED', // NOTE: this === PAID value (api alters it from PAID to COMPLETED in postdump)
     DELETE_ACCEPTED = 'DELETE_ACCEPTED',
     DELETED = 'DELETED',
+    OVERDUE = 'OVERDUE',
     PAID = 'PAID',
     PARTIAL = 'PARTIAL_PAID',
     PENDING = 'PENDING',

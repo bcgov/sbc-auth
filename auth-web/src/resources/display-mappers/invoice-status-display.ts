@@ -8,6 +8,7 @@ export const invoiceStatusDisplay = {
   [InvoiceStatus.CREDITED]: 'Credited',
   [InvoiceStatus.DELETED]: 'Deleted',
   [InvoiceStatus.DELETE_ACCEPTED]: 'Deleted',
+  [InvoiceStatus.OVERDUE]: 'Overdue',
   [InvoiceStatus.PAID]: 'Completed',
   [InvoiceStatus.PARTIAL]: 'Partial Paid',
   [InvoiceStatus.PENDING]: 'Pending',
