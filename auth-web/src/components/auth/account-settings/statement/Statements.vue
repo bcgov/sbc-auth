@@ -58,10 +58,10 @@
         class="statement-list"
         :headers="headerStatements"
         :items="statementsList"
-        :custom-sort="customSortActive"
         :no-data-text="$t('noStatementsList')"
         :server-items-length="totalStatementsCount"
         :options.sync="tableDataOptions"
+        :custom-sort="customSortActive"
         :loading="isDataLoading"
         loading-text="loading text"
         :footer-props="{ itemsPerPageOptions: [5, 10, 15, 20] }"
@@ -114,36 +114,35 @@
 </template>
 
 <script lang="ts">
-import { ComputedRef, PropType, Ref, computed, defineComponent, onMounted, ref, toRefs, watch } from '@vue/composition-api'
-import { useAccountChangeHandler } from '@/composables'
 import { Account, LDFlags, Pages } from '@/util/constants'
+import { ComputedRef, PropType, Ref, computed, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { StatementFilterParams, StatementListItem } from '@/models/statement'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
 import moment from 'moment'
+import { useAccountChangeHandler } from '@/composables'
 import { useOrgStore } from '@/stores/org'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
 export default defineComponent({
   name: 'StatementsView',
-  components: {
-    StatementsSettings
-  },
+  components: { StatementsSettings },
+  mixins: [AccountChangeMixin],
   props: {
     orgId: {
       type: String as PropType<string>,
       default: ''
     }
   },
-  setup (props, {root}) {
+  setup (props, { root }) {
     const orgStore = useOrgStore()
     const currentOrganization: ComputedRef<Organization> = computed(() => orgStore.currentOrganization)
     const currentMembership: ComputedRef<Member> = computed(() => orgStore.currentMembership)
     const { setAccountChangedHandler } = useAccountChangeHandler()
-    const getStatement = ref<(statementParams: any) => any>()
+    const getStatement: ComputedRef<any> = computed(() => orgStore.getStatement)
     const ITEMS_PER_PAGE = ref<number>(5)
     const PAGINATION_COUNTER_STEP = ref<number>(4)
     const totalStatementsCount = ref<number>(0)
@@ -154,10 +153,6 @@ export default defineComponent({
     const paymentOwingAmount = ref<number>(0)
     const paymentDueDate = ref<Date>(null)
     const statementSettingsModal: Ref<InstanceType<typeof ModalDialog>> = ref(null)
-
-    const getStatementsList = (filterParams: any): any => {
-      return computed(() => orgStore.getStatementsList(filterParams))
-}
 
     const headerStatements = ref([
       {
@@ -180,24 +175,16 @@ export default defineComponent({
       }
     ])
 
-    const formatDate = (val: string) => {
-      const date = moment.utc(val).toDate()
-      return CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY')
-    }
-
-    const formatAmount = (amount: number) => {
-      return CommonUtils.formatAmount(amount)
-    }
-
-    const getPaginationOptions = () => {
-      return [...Array(PAGINATION_COUNTER_STEP)].map((value, index) => ITEMS_PER_PAGE * (index + 1))
+    const getStatementsList = async (filterParams: any): Promise<any> => {
+      const data = await orgStore.getStatementsList(filterParams)
+      return data
     }
 
     const downloadStatement = async (item, type) => {
-      isLoading.value = true // to avoid rapid download clicks
+      isLoading.value = true
       try {
         const downloadType = (type === 'CSV') ? 'text/csv' : 'application/pdf'
-        const response = await getStatement({ statementId: item.id, type: downloadType })
+        const response = await getStatement.value({ statementId: item.id, type: downloadType })
         const contentDispArr = response?.headers['content-disposition'].split('=')
         const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-statement-${type.toLowerCase()}`
         CommonUtils.fileDownload(response.data, fileName, downloadType)
@@ -207,52 +194,15 @@ export default defineComponent({
       }
     }
 
-    const enableEFTPaymentMethod = async () => {
-      const enableEFTPaymentMethod: string = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod) || false
-      return enableEFTPaymentMethod
-    }
-
-    const customSortActive = async (items, index, isDescending) => {
-      const isDesc = isDescending.length > 0 && isDescending[0]
-      items.sort((a, b) => {
-        return (isDesc) ? (a[index[0]] < b[index[0]] ? -1 : 1) : (b[index[0]] < a[index[0]] ? -1 : 1)
-      })
-      return items
-    }
-
-    const getIndexedTag = async (tag, index) => {
-      return `${tag}-${index}`
-    }
-
-    const getMomentDateObj = async (dateStr) => {
-      return moment(dateStr, 'YYYY-MM-DD')
-    }
-
-    const formatDateRange = async (date1, date2) => {
-      let dateObj1 = getMomentDateObj(date1)
-      let dateObj2 = getMomentDateObj(date2)
-      let year = (dateObj1.year() === dateObj2.year()) ? dateObj1.year() : ''
-      let month = (dateObj1.month() === dateObj2.month()) ? dateObj1.format('MMMM') : ''
-      if (date1 === date2) {
-        return dateObj1.format('MMMM DD, YYYY')
-      } else if (year && !month) {
-        return `${dateObj1.format('MMMM DD')} - ${dateObj2.format('MMMM DD')}, ${year}`
-      } else if (year && month) {
-        return `${month} ${dateObj1.date()} - ${dateObj2.date()}, ${year}`
-      } else {
-        return `${dateObj1.format('MMMM DD, YYYY')} - ${dateObj2.format('MMMM DD, YYYY')}`
-      }
-    }
-
     const loadStatementsList = async (pageNumber?: number, itemsPerPage?: number) => {
       isDataLoading.value = true
       const filterParams: StatementFilterParams = {
         pageNumber: pageNumber,
         pageLimit: itemsPerPage
       }
-      const resp = await getStatementsList(filterParams)
-      statementsList.value = resp?.items || []
-      totalStatementsCount.value = resp?.total || 0
+      const getStatementsListResponse = await getStatementsList(filterParams)
+      statementsList.value = getStatementsListResponse?.items || []
+      totalStatementsCount.value = getStatementsListResponse?.total || 0
       isDataLoading.value = false
     }
 
@@ -273,6 +223,56 @@ export default defineComponent({
 
     const openSettingsModal = async () => {
       statementSettingsModal.value?.openSettings()
+    }
+
+    const customSortActive = (items, index, isDescending) => {
+      const isDesc = isDescending.length > 0 && isDescending[0]
+      items.sort((a, b) => {
+        return (isDesc) ? (a[index[0]] < b[index[0]] ? -1 : 1) : (b[index[0]] < a[index[0]] ? -1 : 1)
+      })
+      return items
+    }
+
+    const formatDate = (val: string) => {
+      const date = moment.utc(val).toDate()
+      return CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY')
+    }
+
+    const formatAmount = (amount: number) => {
+      return CommonUtils.formatAmount(amount)
+    }
+
+    const getPaginationOptions = () => {
+      return [...Array(PAGINATION_COUNTER_STEP.value)].map((value, index) => ITEMS_PER_PAGE.value * (index + 1))
+    }
+
+    const enableEFTPaymentMethod = async () => {
+      const enableEFTPaymentMethod: string = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod) || false
+      return enableEFTPaymentMethod
+    }
+
+    const getIndexedTag = (tag, index) => {
+      return `${tag}-${index}`
+    }
+
+    const getMomentDateObj = (dateStr) => {
+      return moment(dateStr, 'YYYY-MM-DD')
+    }
+
+    const formatDateRange = (date1, date2) => {
+      let dateObj1 = getMomentDateObj(date1)
+      let dateObj2 = getMomentDateObj(date2)
+      let year = (dateObj1.year() === dateObj2.year()) ? dateObj1.year() : ''
+      let month = (dateObj1.month() === dateObj2.month()) ? dateObj1.format('MMMM') : ''
+      if (date1 === date2) {
+        return dateObj1.format('MMMM DD, YYYY')
+      } else if (year && !month) {
+        return `${dateObj1.format('MMMM DD')} - ${dateObj2.format('MMMM DD')}, ${year}`
+      } else if (year && month) {
+        return `${month} ${dateObj1.date()} - ${dateObj2.date()}, ${year}`
+      } else {
+        return `${dateObj1.format('MMMM DD, YYYY')} - ${dateObj2.format('MMMM DD, YYYY')}`
+      }
     }
 
     onMounted(async () => {
