@@ -183,8 +183,10 @@ export default defineComponent({
       try {
         const downloadData = await DocumentService.getEftInstructions()
         CommonUtils.fileDownload(downloadData?.data, `bcrs_eft_instructions.pdf`, downloadData?.headers['content-type'])
-        isLoading.value = false
-      } catch (err) {
+      } catch (error) {
+        console.log(error)
+      }
+      finally {
         isLoading.value = false
       }
     }
@@ -202,8 +204,9 @@ export default defineComponent({
         const contentDispArr = response?.headers['content-disposition'].split('=')
         const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-statement-${type.toLowerCase()}`
         CommonUtils.fileDownload(response.data, fileName, downloadType)
-        isLoading.value = false
       } catch (error) {
+        console.log(error)
+      } finally {
         isLoading.value = false
       }
     }
@@ -221,7 +224,7 @@ export default defineComponent({
     }
 
     const isStatementsAllowed = async () => {
-      return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF].includes(currentOrganization.value?.orgType as Account) &&
+      return (orgStore.isStaffOrSbcStaff || currentOrganization.value?.orgType === Account.PREMIUM) &&
         [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
     }
 
@@ -235,7 +238,7 @@ export default defineComponent({
       }
     }
 
-    const openSettingsModal = async () => {
+    const openSettingsModal = () => {
       statementSettingsModal.value?.openSettings()
     }
 
@@ -261,10 +264,8 @@ export default defineComponent({
     }
 
     const enableEFTPaymentMethod = async () => {
-      const response = await orgStore.getOrgPayments()
-      const responseTypeEft = response.paymentMethod === PaymentTypes.EFT
-      const enableEFTPaymentMethod: string = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod) || false
-      return enableEFTPaymentMethod && responseTypeEft
+      const enableEFTPaymentMethod: string | boolean = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod) || false
+      return enableEFTPaymentMethod
     }
 
     const getIndexedTag = (tag, index) => {
