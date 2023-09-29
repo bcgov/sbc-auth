@@ -342,7 +342,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   protected async viewInBusinessRegistryDashboard (org: Organization) {
     await this.syncBeforeNavigate(org)
-    this.$router.push(`/account/business/business?accountid=${org.id}`)
+    this.$router.push(`/account/${org.id}/business`)
   }
 
   protected async view (org: Organization) {
