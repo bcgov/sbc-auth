@@ -108,6 +108,13 @@
             >
               mdi-check
             </v-icon>
+            <v-icon
+              v-if="InvoiceStatus.OVERDUE === item.statusCode"
+              color="error"
+              :style="{ 'margin-right': '2px' }"
+            >
+              mdi-alert
+            </v-icon>
             <b>{{ invoiceStatusDisplay[item.statusCode] }}</b>
             <br>
             <span
@@ -116,15 +123,16 @@
             />
           </v-col>
           <v-col
-            class="pl-2"
+            class="pl-1"
             align-self="center"
           >
             <icon-tooltip
-              v-if="[InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED].includes(item.statusCode)"
+              v-if="[InvoiceStatus.OVERDUE, InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED].includes(item.statusCode)"
               icon="mdi-information-outline"
               maxWidth="300px"
+              :location="{top: true}"
             >
-              <div v-html="getRefundHelpText(item)" />
+              <div v-sanitize="getHelpText(item)" />
             </icon-tooltip>
           </v-col>
         </v-row>
@@ -196,6 +204,7 @@ export default defineComponent({
     const statusCodeDescs = [
       { description: 'Transaction is cancelled', value: invoiceStatusDisplay[InvoiceStatus.CANCELLED].toUpperCase() },
       { description: 'Funds received', value: invoiceStatusDisplay[InvoiceStatus.PAID].toUpperCase() },
+      { description: 'Transaction created', value: invoiceStatusDisplay[InvoiceStatus.CREATED].toUpperCase() },
       { description: 'Funds have been credited', value: invoiceStatusDisplay[InvoiceStatus.CREDITED].toUpperCase() },
       { description: 'Transaction is waiting to be processed', value: invoiceStatusDisplay[InvoiceStatus.PENDING].toUpperCase() },
       { description: 'Transaction is in progress', value: invoiceStatusDisplay[InvoiceStatus.APPROVED].toUpperCase() },
@@ -205,12 +214,15 @@ export default defineComponent({
     const getStatusCodeHelpText = () => statusCodeDescs.reduce((text, statusCode) => {
       return `${text}<div class="mt-1">${statusCode.value} - ${statusCode.description}</div>`
     }, '')
-    const getRefundHelpText = (item: Transaction) => {
+    const getHelpText = (item: Transaction) => {
       if (item?.statusCode === InvoiceStatus.REFUND_REQUESTED) {
         return 'We are processing your refund request.<br/>It may take up to 7 business days to refund your total amount.'
       }
       if (item?.statusCode === InvoiceStatus.REFUNDED) {
         return '$' + (item?.total?.toFixed(2) || '') + ' has been refunded to the account used for this transaction.'
+      }
+      if (item?.statusCode === InvoiceStatus.OVERDUE) {
+        return 'Your monthly statement is overdue.<br/>Please make your payment as soon as possible.'
       }
       return ''
     }
@@ -245,7 +257,7 @@ export default defineComponent({
       invoiceStatusDisplay,
       showDatePicker,
       statusCodeDescs,
-      getRefundHelpText,
+      getHelpText,
       getStatusCodeHelpText,
       tableDataOptions,
       transactions,
