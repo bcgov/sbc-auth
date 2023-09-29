@@ -204,7 +204,14 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       type: 'select',
       value: ''
     },
-    itemFn: (val: Transaction) => invoiceStatusDisplay[val.statusCode],
+    itemFn: (val: Transaction) => {
+      // Special case for Online Banking - it shouldn't show NSF, should show Pending.
+      if (val.paymentMethod === PaymentTypes.ONLINE_BANKING &&
+          val.statusCode === InvoiceStatus.SETTLEMENT_SCHEDULED) {
+        return invoiceStatusDisplay[InvoiceStatus.PENDING]
+      }
+      return invoiceStatusDisplay[val.statusCode]
+    },
     hasFilter: true,
     minWidth: '195px',
     value: 'Payment Status'
