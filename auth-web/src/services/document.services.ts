@@ -21,6 +21,16 @@ export default class DocumentService {
     })
   }
 
+  static async getEftInstructions (): Promise<AxiosResponse> {
+    const instance = Axios.create()
+    return instance.get(`${ConfigHelper.getFileServerUrl()}/bcrs_eft_instructions.pdf`, {
+      responseType: 'arraybuffer',
+      headers: {
+        'Accept': 'application/pdf'
+      }
+    })
+  }
+
   static async getSignedAffidavit (documentUrl: string, fileName: string): Promise<void> {
     const data = await axios.get(documentUrl, {
       responseType: 'arraybuffer'

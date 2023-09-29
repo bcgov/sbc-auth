@@ -13,11 +13,12 @@
         />
       </div>
     </v-fade-transition>
-    <header class="view-header mb-6">
+    <header class="view-header">
       <h2 class="view-header__title">
         Statements
       </h2>
       <v-btn
+        v-if="!enableEFTPaymentMethod"
         large
         depressed
         aria-label="Statement Settings"
@@ -33,20 +34,37 @@
         Settings
       </v-btn>
     </header>
+    <div
+      v-if="enableEFTPaymentMethod && hasEFTPaymentMethod"
+      class="statement-owing d-flex flex-wrap flex-row"
+    >
+      <div
+        v-if="paymentOwingAmount && paymentDueDate"
+        class="total"
+      >
+        <p class="amount font-weight-bold">
+          Total Amount Owing: {{ formatAmount(paymentOwingAmount) }}
+        </p>
+        <p class="date font-weight-regular">
+          Payment Due Date: {{ formatDate(paymentDueDate) }}
+        </p>
+      </div>
+      <div class="instructions">
+        <p><a @click="getEftInstructions">How to pay with electronic funds transfer</a></p>
+      </div>
+    </div>
     <div>
       <v-data-table
         class="statement-list"
         :headers="headerStatements"
         :items="statementsList"
-        :custom-sort="customSortActive"
         :no-data-text="$t('noStatementsList')"
         :server-items-length="totalStatementsCount"
         :options.sync="tableDataOptions"
+        :custom-sort="customSortActive"
         :loading="isDataLoading"
         loading-text="loading text"
-        :footer-props="{
-          itemsPerPageOptions: getPaginationOptions
-        }"
+        :footer-props="{ itemsPerPageOptions: [5, 10, 15, 20] }"
       >
         <template #loading>
           Loading...
@@ -96,171 +114,260 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages } from '@/util/constants'
-import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { Account, LDFlags, Pages, PaymentTypes } from '@/util/constants'
+import { ComputedRef, PropType, Ref, computed, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
 import { Member, MembershipType, Organization } from '@/models/Organization'
-import { StatementFilterParams, StatementListItem, StatementListResponse } from '@/models/statement'
-import { mapActions, mapState } from 'pinia'
+import { StatementFilterParams, StatementListItem } from '@/models/statement'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
+import DocumentService from '@/services/document.services'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+
 import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
 import moment from 'moment'
+import { useAccountChangeHandler } from '@/composables'
 import { useOrgStore } from '@/stores/org'
 
-@Component({
-  components: {
-    StatementsSettings
+export default defineComponent({
+  name: 'StatementsView',
+  components: { StatementsSettings },
+  mixins: [AccountChangeMixin],
+  props: {
+    orgId: {
+      type: String as PropType<string>,
+      default: ''
+    }
   },
-  methods: {
-    ...mapActions(useOrgStore, [
-      'getStatementsList',
-      'getStatement'
+  setup (props, { root }) {
+    const orgStore = useOrgStore()
+    const { setAccountChangedHandler } = useAccountChangeHandler()
+    const currentOrganization: ComputedRef<Organization> = computed<Organization>(() => orgStore.currentOrganization)
+    const currentMembership: ComputedRef<Member> = computed<Member>(() => orgStore.currentMembership)
+    const getStatement: ComputedRef<any> = computed<any>(() => orgStore.getStatement)
+    const ITEMS_PER_PAGE = ref<number>(5)
+    const PAGINATION_COUNTER_STEP = ref<number>(4)
+    const totalStatementsCount = ref<number>(0)
+    const tableDataOptions = ref<any>({})
+    const isDataLoading = ref<boolean>(false)
+    const statementsList = ref<StatementListItem[]>([])
+    const isLoading = ref(false)
+    const paymentOwingAmount = ref<number>(0)
+    const paymentDueDate = ref<Date>(null)
+    const statementSettingsModal: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const hasEFTPaymentMethod = ref(false)
+
+    const headerStatements = ref([
+      {
+        text: 'Date',
+        align: 'left',
+        sortable: false,
+        value: 'dateRange'
+      },
+      {
+        text: 'Frequency',
+        align: 'left',
+        sortable: false,
+        value: 'frequency'
+      },
+      {
+        text: 'Downloads',
+        align: 'right',
+        sortable: false,
+        value: 'action'
+      }
     ])
-  },
-  computed: {
-    ...mapState(useOrgStore, [
-      'currentOrganization',
-      'currentMembership'
-    ])
+
+    const getEftInstructions = async (): Promise<any> => {
+      isLoading.value = true
+      try {
+        const downloadData = await DocumentService.getEftInstructions()
+        CommonUtils.fileDownload(downloadData?.data, `bcrs_eft_instructions.pdf`, downloadData?.headers['content-type'])
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error)
+      } finally {
+        isLoading.value = false
+      }
+    }
+
+    const getStatementsList = async (filterParams: any): Promise<any> => {
+      const data = await orgStore.getStatementsList(filterParams)
+      return data
+    }
+
+    const downloadStatement = async (item, type) => {
+      isLoading.value = true
+      try {
+        const downloadType = (type === 'CSV') ? 'text/csv' : 'application/pdf'
+        const response = await getStatement.value({ statementId: item.id, type: downloadType })
+        const contentDispArr = response?.headers['content-disposition'].split('=')
+        const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-statement-${type.toLowerCase()}`
+        CommonUtils.fileDownload(response.data, fileName, downloadType)
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error)
+      } finally {
+        isLoading.value = false
+      }
+    }
+
+    const loadStatementsList = async (pageNumber?: number, itemsPerPage?: number) => {
+      isDataLoading.value = true
+      const filterParams: StatementFilterParams = {
+        pageNumber: pageNumber,
+        pageLimit: itemsPerPage
+      }
+      const getStatementsListResponse = await getStatementsList(filterParams)
+      statementsList.value = getStatementsListResponse?.items || []
+      totalStatementsCount.value = getStatementsListResponse?.total || 0
+      isDataLoading.value = false
+    }
+
+    const isStatementsAllowed = async () => {
+      return (orgStore.isStaffOrSbcStaff || currentOrganization.value?.orgType === Account.PREMIUM) &&
+        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
+    }
+
+    const initialize = async () => {
+      if (!isStatementsAllowed) {
+        // if the account switching happening when the user is already in the statements page,
+        // redirect to account info if its a basic account
+        root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
+      } else {
+        await loadStatementsList()
+      }
+    }
+
+    const openSettingsModal = () => {
+      statementSettingsModal.value?.openSettings()
+    }
+
+    const customSortActive = (items, index, isDescending) => {
+      const isDesc = isDescending.length > 0 && isDescending[0]
+      items.sort((a, b) => {
+        return (isDesc) ? (a[index[0]] < b[index[0]] ? -1 : 1) : (b[index[0]] < a[index[0]] ? -1 : 1)
+      })
+      return items
+    }
+
+    const formatDate = (val: string) => {
+      const date = moment.utc(val).toDate()
+      return CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY')
+    }
+
+    const formatAmount = (amount: number) => {
+      return CommonUtils.formatAmount(amount)
+    }
+
+    const getPaginationOptions = () => {
+      return [...Array(PAGINATION_COUNTER_STEP.value)].map((value, index) => ITEMS_PER_PAGE.value * (index + 1))
+    }
+
+    const enableEFTPaymentMethod = async () => {
+      const enableEFTPaymentMethod: string | boolean = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod, false)
+      return enableEFTPaymentMethod
+    }
+
+    const getIndexedTag = (tag, index) => {
+      return `${tag}-${index}`
+    }
+
+    const getMomentDateObj = (dateStr) => {
+      return moment(dateStr, 'YYYY-MM-DD')
+    }
+
+    const formatDateRange = (date1, date2) => {
+      let dateObj1 = getMomentDateObj(date1)
+      let dateObj2 = getMomentDateObj(date2)
+      let year = (dateObj1.year() === dateObj2.year()) ? dateObj1.year() : ''
+      let month = (dateObj1.month() === dateObj2.month()) ? dateObj1.format('MMMM') : ''
+      if (date1 === date2) {
+        return dateObj1.format('MMMM DD, YYYY')
+      } else if (year && !month) {
+        return `${dateObj1.format('MMMM DD')} - ${dateObj2.format('MMMM DD')}, ${year}`
+      } else if (year && month) {
+        return `${month} ${dateObj1.date()} - ${dateObj2.date()}, ${year}`
+      } else {
+        return `${dateObj1.format('MMMM DD, YYYY')} - ${dateObj2.format('MMMM DD, YYYY')}`
+      }
+    }
+
+    const getOrgPayments = async () => {
+      const response = await orgStore.getOrgPayments()
+      const responseTypeEft = response.paymentMethod === PaymentTypes.EFT
+      hasEFTPaymentMethod.value = responseTypeEft
+    }
+
+    onMounted(async () => {
+      setAccountChangedHandler(initialize)
+      initialize()
+      getOrgPayments()
+    })
+
+    watch(tableDataOptions, (newValue) => {
+      const pageNumber = newValue.page || 1
+      const itemsPerPage = newValue.itemsPerPage
+      loadStatementsList(pageNumber, itemsPerPage)
+    }, { immediate: true })
+
+    return {
+      formatDate,
+      formatAmount,
+      isLoading,
+      downloadStatement,
+      enableEFTPaymentMethod,
+      paymentOwingAmount,
+      paymentDueDate,
+      headerStatements,
+      getEftInstructions,
+      getPaginationOptions,
+      customSortActive,
+      formatDateRange,
+      getIndexedTag,
+      openSettingsModal,
+      statementsList,
+      totalStatementsCount,
+      tableDataOptions,
+      isDataLoading,
+      statementSettingsModal,
+      hasEFTPaymentMethod
+    }
   }
 })
-export default class Statements extends Mixins(AccountChangeMixin) {
-  @Prop({ default: '' }) private orgId: string
-  private readonly currentMembership!: Member
-  private readonly currentOrganization!: Organization
-  private readonly getStatementsList!: (filterParams: StatementFilterParams) => StatementListResponse
-  private readonly getStatement!: (statementParams: any) => any
-  private readonly ITEMS_PER_PAGE = 5
-  private readonly PAGINATION_COUNTER_STEP = 4
-  private formatDate = CommonUtils.formatDisplayDate
-  private totalStatementsCount: number = 0
-  private tableDataOptions: any = {}
-  private isDataLoading: boolean = false
-  private statementsList: StatementListItem[] = []
-  private isLoading: boolean = false
-
-  $refs: {
-    statementSettingsModal: StatementsSettings
-  }
-
-  private readonly headerStatements = [
-    {
-      text: 'Date',
-      align: 'left',
-      sortable: false,
-      value: 'dateRange'
-    },
-    {
-      text: 'Frequency',
-      align: 'left',
-      sortable: false,
-      value: 'frequency'
-    },
-    {
-      text: 'Downloads',
-      align: 'right',
-      sortable: false,
-      value: 'action'
-    }
-  ]
-
-  private get getPaginationOptions () {
-    return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
-  }
-
-  private async mounted () {
-    this.setAccountChangedHandler(this.initialize)
-    this.initialize()
-  }
-
-  private async initialize () {
-    if (!this.isStatementsAllowed) {
-      // if the account switing happening when the user is already in the statements page,
-      // redirect to account info if its a basic account
-      this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
-    } else {
-      await this.loadStatementsList()
-    }
-  }
-
-  formatDateRange (date1, date2) {
-    let dateObj1 = this.getMomentDateObj(date1)
-    let dateObj2 = this.getMomentDateObj(date2)
-    let year = (dateObj1.year() === dateObj2.year()) ? dateObj1.year() : ''
-    let month = (dateObj1.month() === dateObj2.month()) ? dateObj1.format('MMMM') : ''
-    if (date1 === date2) {
-      return dateObj1.format('MMMM DD, YYYY')
-    } else if (year && !month) {
-      return `${dateObj1.format('MMMM DD')} - ${dateObj2.format('MMMM DD')}, ${year}`
-    } else if (year && month) {
-      return `${month} ${dateObj1.date()} - ${dateObj2.date()}, ${year}`
-    } else {
-      return `${dateObj1.format('MMMM DD, YYYY')} - ${dateObj2.format('MMMM DD, YYYY')}`
-    }
-  }
-
-  getMomentDateObj (dateStr) {
-    return moment(dateStr, 'YYYY-MM-DD')
-  }
-
-  @Watch('tableDataOptions', { deep: true })
-  async getTransactions (val) {
-    const pageNumber = val.page || 1
-    const itemsPerPage = val.itemsPerPage
-    await this.loadStatementsList(pageNumber, itemsPerPage)
-  }
-
-  private async loadStatementsList (pageNumber?: number, itemsPerPage?: number) {
-    this.isDataLoading = true
-    const filterParams: StatementFilterParams = {
-      pageNumber: pageNumber,
-      pageLimit: itemsPerPage
-    }
-    const resp = await this.getStatementsList(filterParams)
-    this.statementsList = resp?.items || []
-    this.totalStatementsCount = resp?.total || 0
-    this.isDataLoading = false
-  }
-
-  private get isStatementsAllowed (): boolean {
-    return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF].includes(this.currentOrganization?.orgType as Account) &&
-      [MembershipType.Admin, MembershipType.Coordinator].includes(this.currentMembership.membershipTypeCode)
-  }
-
-  private customSortActive (items, index, isDescending) {
-    const isDesc = isDescending.length > 0 && isDescending[0]
-    items.sort((a, b) => {
-      return (isDesc) ? (a[index[0]] < b[index[0]] ? -1 : 1) : (b[index[0]] < a[index[0]] ? -1 : 1)
-    })
-    return items
-  }
-
-  private getIndexedTag (tag, index): string {
-    return `${tag}-${index}`
-  }
-
-  private async downloadStatement (item, type) {
-    this.isLoading = true // to avoid rapid download clicks
-    try {
-      const downloadType = (type === 'CSV') ? 'text/csv' : 'application/pdf'
-      const response = await this.getStatement({ statementId: item.id, type: downloadType })
-      const contentDispArr = response?.headers['content-disposition'].split('=')
-      const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-statement-${type.toLowerCase()}`
-      CommonUtils.fileDownload(response.data, fileName, downloadType)
-      this.isLoading = false
-    } catch (error) {
-      this.isLoading = false
-    }
-  }
-
-  private openSettingsModal () {
-    this.$refs.statementSettingsModal.openSettings()
-  }
-}
 </script>
 
 <style lang="scss" scoped>
+.statement-owing {
+  .total {
+    flex: 0 0 300px;
+    .amount {
+      font-size: 18px;
+      color: #495057;
+      margin: 0;
+    }
+    .date {
+      font-size: 14px;
+      color: #495057
+    }
+  }
+}
+.instructions {
+  margin-bottom: 30px;
+  flex: 1 0 auto;
+  p {
+    margin: 0;
+    text-align: right;
+    font-size: 16px;
+    a {
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
 .view-header {
+  margin-bottom: 20px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;

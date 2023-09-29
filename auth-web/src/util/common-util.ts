@@ -103,6 +103,11 @@ export default class CommonUtils {
     } else return phoneNumber
   }
 
+  // Format amount for displaying dollar currency
+  static formatAmount (amount: number): string {
+    return `$${amount.toFixed(2)}`
+  }
+
   // Formatting date in the desired format for displaying in the template
   static formatDisplayDate (date: Date, format?: string) {
     // not working in CI (getting UTC datetime)
