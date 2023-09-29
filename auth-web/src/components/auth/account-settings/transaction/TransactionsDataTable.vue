@@ -111,7 +111,7 @@
             <v-icon
               v-if="InvoiceStatus.OVERDUE === item.statusCode"
               color="error"
-              :style="{ 'margin-top': '0px', 'margin-right': '2px' }"
+              :style="{ 'margin-right': '2px' }"
             >
               mdi-alert
             </v-icon>
@@ -131,7 +131,7 @@
               icon="mdi-information-outline"
               maxWidth="300px"
             >
-              <div v-html="getHelpText(item)" />
+              <div v-sanitize="getHelpText(item)" />
             </icon-tooltip>
           </v-col>
         </v-row>
