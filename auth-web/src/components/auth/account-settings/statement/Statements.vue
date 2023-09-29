@@ -35,7 +35,7 @@
       </v-btn>
     </header>
     <div
-      v-if="enableEFTPaymentMethod"
+      v-if="enableEFTPaymentMethod && hasEFTPaymentMethod"
       class="statement-owing d-flex flex-wrap flex-row"
     >
       <div
@@ -114,7 +114,7 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags, Pages } from '@/util/constants'
+import { Account, LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { ComputedRef, PropType, Ref, computed, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { StatementFilterParams, StatementListItem } from '@/models/statement'
@@ -123,6 +123,7 @@ import CommonUtils from '@/util/common-util'
 import DocumentService from '@/services/document.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+
 import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
 import moment from 'moment'
 import { useAccountChangeHandler } from '@/composables'
@@ -154,6 +155,7 @@ export default defineComponent({
     const paymentOwingAmount = ref<number>(0)
     const paymentDueDate = ref<Date>(null)
     const statementSettingsModal: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const hasEFTPaymentMethod = ref(false)
 
     const headerStatements = ref([
       {
@@ -259,8 +261,10 @@ export default defineComponent({
     }
 
     const enableEFTPaymentMethod = async () => {
+      const response = await orgStore.getOrgPayments()
+      const responseTypeEft = response.paymentMethod === PaymentTypes.EFT
       const enableEFTPaymentMethod: string = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod) || false
-      return enableEFTPaymentMethod
+      return enableEFTPaymentMethod && responseTypeEft
     }
 
     const getIndexedTag = (tag, index) => {
@@ -287,9 +291,16 @@ export default defineComponent({
       }
     }
 
+    const getOrgPayments = async () => {
+      const response = await orgStore.getOrgPayments()
+      const responseTypeEft = response.paymentMethod === 'EFT'
+      hasEFTPaymentMethod.value = responseTypeEft
+    }
+
     onMounted(async () => {
       setAccountChangedHandler(initialize)
       initialize()
+      getOrgPayments()
     })
 
     watch(tableDataOptions, (newValue) => {
@@ -317,7 +328,8 @@ export default defineComponent({
       totalStatementsCount,
       tableDataOptions,
       isDataLoading,
-      statementSettingsModal
+      statementSettingsModal,
+      hasEFTPaymentMethod
     }
   }
 })

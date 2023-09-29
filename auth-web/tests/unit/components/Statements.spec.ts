@@ -114,8 +114,8 @@ describe('Statements.vue', () => {
       router,
       mocks: { $t }
     })
-    expect(wrapper.vm.formatDate("1999-01-12")).toBe('January 11, 1999')
-    expect(wrapper.vm.formatDate("2023-09-24")).toBe('September 23, 2023')
+    expect(wrapper.vm.formatDate('1999-01-12')).toBe('January 11, 1999')
+    expect(wrapper.vm.formatDate('2023-09-24')).toBe('September 23, 2023')
     wrapper.destroy()
   })
 
