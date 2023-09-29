@@ -17,7 +17,7 @@ BC Registries authentication and authorization interface.
 - Fork and checkout this repository in to your local.
 - Open terminal or cmd.
 - Go to the **auth-web** folder (`cd /auth-web`)
-- install the dependencies by running the command: **`npm install`**
+- install the dependencies by running the command: **`npm i`**
 
 ## Running the environment in development mode
 Run the following command on the root(auth-web) folder:
