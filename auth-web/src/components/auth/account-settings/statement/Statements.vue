@@ -64,21 +64,8 @@
         :options.sync="tableDataOptions"
         :loading="isDataLoading"
         loading-text="loading text"
+        :footer-props="{ itemsPerPageOptions: [5, 10, 15, 20] }"
       >
-      <!-- <v-data-table
-        class="statement-list"
-        :headers="headerStatements"
-        :items="statementsList"
-        :custom-sort="customSortActive"
-        :no-data-text="$t('noStatementsList')"
-        :server-items-length="totalStatementsCount"
-        :options.sync="tableDataOptions"
-        :loading="isDataLoading"
-        loading-text="loading text"
-        :footer-props="{
-          itemsPerPageOptions: getPaginationOptions
-        }"
-      > -->
         <template #loading>
           Loading...
         </template>
