@@ -50,7 +50,7 @@
         </p>
       </div>
       <div class="instructions">
-        <p><a>How to pay with electronic funds transfer</a></p>
+        <p><a @click="getEftInstructions">How to pay with electronic funds transfer</a></p>
       </div>
     </div>
     <div>
@@ -120,6 +120,7 @@ import { Member, MembershipType, Organization } from '@/models/Organization'
 import { StatementFilterParams, StatementListItem } from '@/models/statement'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
+import DocumentService from '@/services/document.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
@@ -174,6 +175,17 @@ export default defineComponent({
         value: 'action'
       }
     ])
+
+    const getEftInstructions = async (): Promise<any> => {
+      isLoading.value = true
+      try {
+        const downloadData = await DocumentService.getEftInstructions()
+        CommonUtils.fileDownload(downloadData?.data, `bcrs_eft_instructions.pdf`, downloadData?.headers['content-type'])
+        isLoading.value = false
+      } catch (err) {
+        isLoading.value = false
+      }
+    }
 
     const getStatementsList = async (filterParams: any): Promise<any> => {
       const data = await orgStore.getStatementsList(filterParams)
@@ -295,6 +307,7 @@ export default defineComponent({
       paymentOwingAmount,
       paymentDueDate,
       headerStatements,
+      getEftInstructions,
       getPaginationOptions,
       customSortActive,
       formatDateRange,
