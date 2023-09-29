@@ -204,12 +204,12 @@ export default defineComponent({
     const statusCodeDescs = [
       { description: 'Transaction is cancelled', value: invoiceStatusDisplay[InvoiceStatus.CANCELLED].toUpperCase() },
       { description: 'Funds received', value: invoiceStatusDisplay[InvoiceStatus.PAID].toUpperCase() },
+      { description: 'Transaction created', value: invoiceStatusDisplay[InvoiceStatus.CREATED].toUpperCase() },
       { description: 'Funds have been credited', value: invoiceStatusDisplay[InvoiceStatus.CREDITED].toUpperCase() },
       { description: 'Transaction is waiting to be processed', value: invoiceStatusDisplay[InvoiceStatus.PENDING].toUpperCase() },
       { description: 'Transaction is in progress', value: invoiceStatusDisplay[InvoiceStatus.APPROVED].toUpperCase() },
       { description: 'Refund has been requested', value: invoiceStatusDisplay[InvoiceStatus.REFUND_REQUESTED].toUpperCase() },
-      { description: 'Refund process is completed', value: invoiceStatusDisplay[InvoiceStatus.REFUNDED].toUpperCase() },
-      { description: 'Transaction created', value: invoiceStatusDisplay[InvoiceStatus.CREATED].toUpperCase() }
+      { description: 'Refund process is completed', value: invoiceStatusDisplay[InvoiceStatus.REFUNDED].toUpperCase() }
     ]
     const getStatusCodeHelpText = () => statusCodeDescs.reduce((text, statusCode) => {
       return `${text}<div class="mt-1">${statusCode.value} - ${statusCode.description}</div>`
