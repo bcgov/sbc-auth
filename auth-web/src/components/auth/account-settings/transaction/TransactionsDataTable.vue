@@ -108,6 +108,13 @@
             >
               mdi-check
             </v-icon>
+            <v-icon
+              v-if="InvoiceStatus.OVERDUE === item.statusCode"
+              color="error"
+              :style="{ 'margin-top': '0px', 'margin-right': '2px' }"
+            >
+              mdi-alert
+            </v-icon>
             <b>{{ invoiceStatusDisplay[item.statusCode] }}</b>
             <br>
             <span
@@ -120,11 +127,11 @@
             align-self="center"
           >
             <icon-tooltip
-              v-if="[InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED].includes(item.statusCode)"
+              v-if="[InvoiceStatus.OVERDUE, InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED].includes(item.statusCode)"
               icon="mdi-information-outline"
               maxWidth="300px"
             >
-              <div v-html="getRefundHelpText(item)" />
+              <div v-html="getHelpText(item)" />
             </icon-tooltip>
           </v-col>
         </v-row>
@@ -205,12 +212,15 @@ export default defineComponent({
     const getStatusCodeHelpText = () => statusCodeDescs.reduce((text, statusCode) => {
       return `${text}<div class="mt-1">${statusCode.value} - ${statusCode.description}</div>`
     }, '')
-    const getRefundHelpText = (item: Transaction) => {
+    const getHelpText = (item: Transaction) => {
       if (item?.statusCode === InvoiceStatus.REFUND_REQUESTED) {
         return 'We are processing your refund request.<br/>It may take up to 7 business days to refund your total amount.'
       }
       if (item?.statusCode === InvoiceStatus.REFUNDED) {
         return '$' + (item?.total?.toFixed(2) || '') + ' has been refunded to the account used for this transaction.'
+      }
+      if (item?.statusCode === InvoiceStatus.OVERDUE) {
+        return 'Your monthly statement is overdue.<br/>Please make your payment as soon as possible.'
       }
       return ''
     }
@@ -245,7 +255,7 @@ export default defineComponent({
       invoiceStatusDisplay,
       showDatePicker,
       statusCodeDescs,
-      getRefundHelpText,
+      getHelpText,
       getStatusCodeHelpText,
       tableDataOptions,
       transactions,
