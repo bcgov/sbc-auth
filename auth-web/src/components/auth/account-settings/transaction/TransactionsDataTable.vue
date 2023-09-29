@@ -123,13 +123,14 @@
             />
           </v-col>
           <v-col
-            class="pl-2"
+            class="pl-1"
             align-self="center"
           >
             <icon-tooltip
               v-if="[InvoiceStatus.OVERDUE, InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED].includes(item.statusCode)"
               icon="mdi-information-outline"
               maxWidth="300px"
+              :location="{top: true}"
             >
               <div v-sanitize="getHelpText(item)" />
             </icon-tooltip>
