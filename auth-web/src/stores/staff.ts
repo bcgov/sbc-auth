@@ -158,9 +158,15 @@ export const useStaffStore = defineStore('staff', () => {
         break
     }
 
-    const affidavitResponse = await UserService.getAffidavitInfo(taskUserGuid, status)
-    if (affidavitResponse?.data && affidavitResponse?.status === 200) {
-      state.accountUnderReviewAffidavitInfo = affidavitResponse.data
+    try {
+      const affidavitResponse = await UserService.getAffidavitInfo(taskUserGuid, status)
+      if (affidavitResponse?.data && affidavitResponse?.status === 200) {
+        state.accountUnderReviewAffidavitInfo = affidavitResponse.data
+      }
+    } catch (err) {
+      // eslint-disable-line no-console
+      console.log(err)
+      state.accountUnderReviewAffidavitInfo = null
     }
   }
 
