@@ -185,8 +185,7 @@ export default defineComponent({
         CommonUtils.fileDownload(downloadData?.data, `bcrs_eft_instructions.pdf`, downloadData?.headers['content-type'])
       } catch (error) {
         console.log(error)
-      }
-      finally {
+      } finally {
         isLoading.value = false
       }
     }
@@ -294,7 +293,7 @@ export default defineComponent({
 
     const getOrgPayments = async () => {
       const response = await orgStore.getOrgPayments()
-      const responseTypeEft = response.paymentMethod === 'EFT'
+      const responseTypeEft = response.paymentMethod === PaymentTypes.EFT
       hasEFTPaymentMethod.value = responseTypeEft
     }
 
