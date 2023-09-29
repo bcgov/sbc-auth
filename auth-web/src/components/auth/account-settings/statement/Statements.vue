@@ -264,7 +264,7 @@ export default defineComponent({
     }
 
     const enableEFTPaymentMethod = async () => {
-      const enableEFTPaymentMethod: string | boolean = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod) || false
+      const enableEFTPaymentMethod: string | boolean = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod, false)
       return enableEFTPaymentMethod
     }
 
