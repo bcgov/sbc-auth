@@ -141,10 +141,10 @@ export default defineComponent({
   },
   setup (props, { root }) {
     const orgStore = useOrgStore()
-    const currentOrganization: ComputedRef<Organization> = computed(() => orgStore.currentOrganization)
-    const currentMembership: ComputedRef<Member> = computed(() => orgStore.currentMembership)
     const { setAccountChangedHandler } = useAccountChangeHandler()
-    const getStatement: ComputedRef<any> = computed(() => orgStore.getStatement)
+    const currentOrganization: ComputedRef<Organization> = computed<Organization>(() => orgStore.currentOrganization)
+    const currentMembership: ComputedRef<Member> = computed<Member>(() => orgStore.currentMembership)
+    const getStatement: ComputedRef<any> = computed<any>(() => orgStore.getStatement)
     const ITEMS_PER_PAGE = ref<number>(5)
     const PAGINATION_COUNTER_STEP = ref<number>(4)
     const totalStatementsCount = ref<number>(0)
