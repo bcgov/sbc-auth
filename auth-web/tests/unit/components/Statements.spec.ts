@@ -90,4 +90,56 @@ describe('Statements.vue', () => {
     expect(wrapper.find('h2').text()).toBe('Statements')
     wrapper.destroy()
   })
+
+  it('Should compute the correct value for formatAmount(amount)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    expect(wrapper.vm.formatAmount(0)).toBe('$0.00')
+    expect(wrapper.vm.formatAmount(1)).toBe('$1.00')
+    expect(wrapper.vm.formatAmount(1000)).toBe('$1000.00')
+    expect(wrapper.vm.formatAmount(1000.1)).toBe('$1000.10')
+    wrapper.destroy()
+  })
+
+  it('Should compute the correct value for getIndexedTag(tag, index)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    expect(wrapper.vm.formatDate("1999-01-12")).toBe('January 11, 1999')
+    expect(wrapper.vm.formatDate("2023-09-24")).toBe('September 23, 2023')
+    wrapper.destroy()
+  })
+
+  it('Should compute the correct value for getIndexedTag(tag, index)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    expect(wrapper.vm.getIndexedTag('abc', '123')).toBe('abc-123')
+    wrapper.destroy()
+  })
+
+  it('Should compute the correct value for getMomentDateObj(dateString)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    expect(wrapper.vm.formatDateRange('1999-01-01', '2022-01-02')).toBe('January 01, 1999 - January 02, 2022')
+    wrapper.destroy()
+  })
 })
