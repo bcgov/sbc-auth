@@ -184,6 +184,7 @@ export default defineComponent({
         const downloadData = await DocumentService.getEftInstructions()
         CommonUtils.fileDownload(downloadData?.data, `bcrs_eft_instructions.pdf`, downloadData?.headers['content-type'])
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log(error)
       } finally {
         isLoading.value = false
@@ -204,6 +205,7 @@ export default defineComponent({
         const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-statement-${type.toLowerCase()}`
         CommonUtils.fileDownload(response.data, fileName, downloadType)
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log(error)
       } finally {
         isLoading.value = false
