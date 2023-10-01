@@ -779,7 +779,6 @@ def test_delete_org_with_members(session, auth_mock, keycloak_mock, monkeypatch)
 def test_delete_org_with_affiliation(session, auth_mock, keycloak_mock,
                                      monkeypatch):  # pylint:disable=unused-argument
     """Assert that an org cannot be deleted."""
-    env = 'test'
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
@@ -791,14 +790,14 @@ def test_delete_org_with_affiliation(session, auth_mock, keycloak_mock,
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     entity_dictionary = entity_service.as_dict()
     business_identifier = entity_dictionary['business_identifier']
-    AffiliationService.create_affiliation(org_id, business_identifier, env,
+    AffiliationService.create_affiliation(org_id, business_identifier, None,
                                           TestEntityInfo.entity_lear_mock['passCode'])
 
     patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
     patch_pay_account_delete(monkeypatch)
     OrgService.delete_org(org_id)
 
-    assert len(AffiliationService.find_visible_affiliations_by_org_id(org_id, env)) == 0
+    assert len(AffiliationService.find_visible_affiliations_by_org_id(org_id)) == 0
 
 
 def test_delete_org_with_members_success(session, auth_mock, keycloak_mock,

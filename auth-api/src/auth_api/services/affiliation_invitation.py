@@ -224,7 +224,7 @@ class AffiliationInvitation:
     @user_context
     def create_affiliation_invitation(affiliation_invitation_info: Dict,
                                       # pylint:disable=unused-argument,too-many-locals
-                                      user, invitation_origin, environment, **kwargs):
+                                      user, invitation_origin, environment=None, **kwargs):
         """Create a new affiliation invitation."""
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         from_org_id = affiliation_invitation_info['fromOrgId']
@@ -580,7 +580,7 @@ class AffiliationInvitation:
     @user_context
     def accept_affiliation_invitation(affiliation_invitation_id,
                                       # pylint:disable=unused-argument
-                                      user: UserService, origin, environment, **kwargs):
+                                      user: UserService, origin, environment=None, **kwargs):
         """Add an affiliation from the affiliation invitation."""
         current_app.logger.debug('>accept_affiliation_invitation')
         affiliation_invitation: AffiliationInvitationModel = AffiliationInvitationModel.\

@@ -170,24 +170,24 @@ def factory_org_service(org_info: dict = TestOrgInfo.org1,
     return org_service
 
 
-def factory_affiliation_model(entity_id, org_id, env='test') -> AffiliationModel:
+def factory_affiliation_model(entity_id, org_id) -> AffiliationModel:
     """Produce a templated affiliation model."""
-    affiliation = AffiliationModel(entity_id=entity_id, org_id=org_id, environment=env)
+    affiliation = AffiliationModel(entity_id=entity_id, org_id=org_id)
     affiliation.save()
     return affiliation
 
 
-def factory_affiliation_model_by_identifier(business_identifier, org_id, env='test') -> AffiliationModel:
+def factory_affiliation_model_by_identifier(business_identifier, org_id) -> AffiliationModel:
     """Produce a templated affiliation model."""
     entity = EntityModel.find_by_business_identifier(business_identifier)
-    affiliation = AffiliationModel(entity_id=entity.id, org_id=org_id, environment=env)
+    affiliation = AffiliationModel(entity_id=entity.id, org_id=org_id)
     affiliation.save()
     return affiliation
 
 
-def factory_affiliation_service(entity_id, org_id, env='test'):
+def factory_affiliation_service(entity_id, org_id):
     """Produce a templated affiliation service."""
-    affiliation = AffiliationModel(entity=entity_id, org=org_id, environment=env)
+    affiliation = AffiliationModel(entity=entity_id, org=org_id)
     affiliation.save()
     affiliation_service = AffiliationService(affiliation)
     return affiliation_service

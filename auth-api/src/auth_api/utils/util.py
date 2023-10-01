@@ -92,8 +92,8 @@ def mask_email(email: str) -> str:
 
 def get_request_environment():
     """Return the environment corresponding to the user request."""
-    env = os.getenv('FLASK_ENV')
+    env = None
     sandbox_host = current_app.config['AUTH_WEB_SANDBOX_HOST']
-    if env == 'production' and sandbox_host in request.host_url:
+    if os.getenv('FLASK_ENV') == 'production' and sandbox_host in request.host_url:
         env = 'sandbox'
     return env

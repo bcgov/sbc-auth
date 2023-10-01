@@ -75,7 +75,7 @@ class Affiliation:
         return obj
 
     @staticmethod
-    def find_visible_affiliations_by_org_id(org_id, environment):
+    def find_visible_affiliations_by_org_id(org_id, environment=None):
         """Given an org_id, this will return the entities affiliated with it."""
         current_app.logger.debug(f'<find_visible_affiliations_by_org_id for org_id {org_id}')
         if not org_id:
@@ -138,11 +138,13 @@ class Affiliation:
             .filter(AffiliationModel.org_id == org_id, Entity.affiliations.any(AffiliationModel.org_id == org_id))
         if environment:
             entities = entities.filter(AffiliationModel.environment == environment)
+        else:
+            entities = entities.filter(AffiliationModel.environment.is_(None))
         entities = entities.order_by(AffiliationModel.created.desc()).all()
         return [EntityService(entity).as_dict() for entity in entities]
 
     @staticmethod
-    def find_affiliation(org_id, business_identifier, environment):
+    def find_affiliation(org_id, business_identifier, environment=None):
         """Return business affiliation by the org id and business identifier."""
         affiliation = AffiliationModel.find_affiliation_by_org_id_and_business_identifier(org_id,
                                                                                           business_identifier,
@@ -152,7 +154,7 @@ class Affiliation:
         return Affiliation(affiliation).as_dict()
 
     @staticmethod
-    def create_affiliation(org_id, business_identifier, environment, pass_code=None, certified_by_name=None):
+    def create_affiliation(org_id, business_identifier, environment=None, pass_code=None, certified_by_name=None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
@@ -209,7 +211,7 @@ class Affiliation:
 
     @staticmethod
     def create_new_business_affiliation(affiliation_data: AffiliationData,  # pylint: disable=too-many-locals
-                                        environment,
+                                        environment: str = None,
                                         bearer_token: str = None):
         """Initiate a new incorporation."""
         org_id = affiliation_data.org_id
@@ -359,7 +361,7 @@ class Affiliation:
 
     @staticmethod
     @user_context
-    def fix_stale_affiliations(org_id: int, entity_details: Dict, environment: str, **kwargs):
+    def fix_stale_affiliations(org_id: int, entity_details: Dict, environment: str = None, **kwargs):
         """Corrects affiliations to point at the latest entity."""
         # Example staff/client scenario:
         # 1. client creates an NR (that gets affiliated) - realizes they need help to create a business
