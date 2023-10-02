@@ -18,6 +18,7 @@ Test-Suite to ensure that the /users endpoint is working as expected.
 """
 import copy
 import json
+import pytest
 import time
 import uuid
 
@@ -684,8 +685,9 @@ def test_delete_unknown_user_returns_404(client, jwt, session):  # pylint:disabl
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
+@pytest.mark.parametrize('environment', ['test', None])
 def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mock,
-                                               monkeypatch):  # pylint:disable=unused-argument
+                                               monkeypatch, environment):  # pylint:disable=unused-argument
     """Test if the user is the only owner of a team assert status is 400."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -705,7 +707,7 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
 
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment='test')
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment=environment)
     affiliation.save()
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -714,8 +716,9 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+@pytest.mark.parametrize('environment', ['test', None])
 def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock,
-                                           monkeypatch):  # pylint:disable=unused-argument
+                                           monkeypatch, environment):  # pylint:disable=unused-argument
     """Test if the user is the member of a team assert status is 204."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -742,7 +745,7 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock,
     org_id = org_dictionary['id']
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment='test')
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment=environment)
     affiliation.save()
 
     membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='USER',

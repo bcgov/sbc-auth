@@ -70,7 +70,9 @@ def setup_org_and_entity(user):
     return from_org_dictionary, to_org_dictionary, entity_dictionary
 
 
-def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch):  # pylint:disable=unused-argument
+@pytest.mark.parametrize('environment', ['test', None])
+def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch,
+                 environment):  # pylint:disable=unused-argument
     """Assert that the Affiliation Invitation is exported correctly as a dictionary."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         user = factory_user_model()
@@ -84,19 +86,21 @@ def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch):
             business_identifier=entity_dictionary['business_identifier'])
 
         affiliation_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                            User(user), '', 'test')
+                                                                                            User(user), '', environment)
         affiliation_invitation_dictionary = affiliation_invitation.as_dict()
         assert affiliation_invitation_dictionary['recipient_email'] == affiliation_invitation_info['recipientEmail']
 
 
 @pytest.mark.parametrize(
-    'create_org_with', [
-        'id',
-        'uuid'
+    'create_org_with, environment', [
+        ('id', None),
+        ('id', 'test'),
+        ('uuid', None),
+        ('uuid', 'test'),
     ]
 )
 def test_create_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock,
-                                       monkeypatch, create_org_with):  # pylint:disable=unused-argument
+                                       monkeypatch, create_org_with, environment):  # pylint:disable=unused-argument
     """Assert that an Affiliation Invitation can be created."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -111,14 +115,15 @@ def test_create_affiliation_invitation(session, auth_mock, keycloak_mock, busine
             business_identifier=entity_dictionary['business_identifier'])
 
         affiliation_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                            User(user), '', 'test')
+                                                                                            User(user), '', environment)
         invitation_dictionary = affiliation_invitation.as_dict()
         assert invitation_dictionary['recipient_email'] == affiliation_invitation_info['recipientEmail']
         assert invitation_dictionary['id']
 
 
+@pytest.mark.parametrize('environment', ['test', None])
 def test_find_affiliation_invitation_by_id(session, auth_mock, keycloak_mock, business_mock,
-                                           monkeypatch):  # pylint:disable=unused-argument
+                                           monkeypatch, environment):  # pylint:disable=unused-argument
     """Find an existing affiliation invitation with the provided id."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -132,7 +137,8 @@ def test_find_affiliation_invitation_by_id(session, auth_mock, keycloak_mock, bu
             business_identifier=entity_dictionary['business_identifier'])
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                    User(user), '', 'test').as_dict()
+                                                                                    User(user), '',
+                                                                                    environment).as_dict()
         invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(new_invitation['id']).as_dict()
 
         assert invitation
@@ -145,8 +151,9 @@ def test_find_invitation_by_id_exception(session, auth_mock):  # pylint:disable=
     assert affiliation_invitation is None
 
 
+@pytest.mark.parametrize('environment', ['test', None])
 def test_delete_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock,
-                                       monkeypatch):  # pylint:disable=unused-argument
+                                       monkeypatch, environment):  # pylint:disable=unused-argument
     """Delete the specified affiliation invitation."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -159,7 +166,8 @@ def test_delete_affiliation_invitation(session, auth_mock, keycloak_mock, busine
             business_identifier=entity_dictionary['business_identifier'])
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                    User(user), '', 'test').as_dict()
+                                                                                    User(user), '',
+                                                                                    environment).as_dict()
         AffiliationInvitationService.delete_affiliation_invitation(new_invitation['id'])
         invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(new_invitation['id'])
         assert invitation is None
@@ -201,8 +209,9 @@ def test_delete_affiliation_invitation_exception(session, auth_mock):  # pylint:
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
+@pytest.mark.parametrize('environment', ['test', None])
 def test_update_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock,
-                                       monkeypatch):  # pylint:disable=unused-argument
+                                       monkeypatch, environment):  # pylint:disable=unused-argument
     """Update the specified affiliation invitation with new data."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -215,13 +224,15 @@ def test_update_affiliation_invitation(session, auth_mock, keycloak_mock, busine
             business_identifier=entity_dictionary['business_identifier'])
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                    User(user), '', 'test')
+                                                                                    User(user), '', environment)
         updated_invitation = new_invitation.update_affiliation_invitation(User(user), '', {}).as_dict()
         assert updated_invitation['status'] == 'PENDING'
 
 
+@pytest.mark.parametrize('environment', ['test', None])
 def test_update_invitation_verify_different_tokens(session, auth_mock, keycloak_mock,
-                                                   business_mock, monkeypatch):  # pylint:disable=unused-argument
+                                                   business_mock, monkeypatch,
+                                                   environment):  # pylint:disable=unused-argument
     """Update the specified affiliation invitation to check for token difference."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -234,7 +245,7 @@ def test_update_invitation_verify_different_tokens(session, auth_mock, keycloak_
             business_identifier=entity_dictionary['business_identifier'])
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                    User(user), '', 'test')
+                                                                                    User(user), '', environment)
         old_token = new_invitation.as_dict().get('token')
         with freeze_time(
                 lambda: datetime.now() + timedelta(seconds=1)):  # to give time difference..or else token will be same..
@@ -250,8 +261,9 @@ def test_generate_confirmation_token(session):  # pylint:disable=unused-argument
     assert confirmation_token is not None
 
 
+@pytest.mark.parametrize('environment', ['test', None])
 def test_validate_token_accepted(session, auth_mock, keycloak_mock, business_mock,
-                                 monkeypatch):  # pylint:disable=unused-argument
+                                 monkeypatch, environment):  # pylint:disable=unused-argument
     """Validate invalid invitation token."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -266,14 +278,15 @@ def test_validate_token_accepted(session, auth_mock, keycloak_mock, business_moc
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
                                                                                     User(user_invitee), '',
-                                                                                    'test').as_dict()
+                                                                                    environment).as_dict()
         token = AffiliationInvitationService\
             .generate_confirmation_token(new_invitation['id'],
                                          new_invitation['from_org']['id'],
                                          new_invitation['to_org']['id'],
                                          entity_dictionary['business_identifier'])
 
-        AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'], User(user_invitee), '', 'test')
+        AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'], User(user_invitee), '',
+                                                                   environment)
 
         with pytest.raises(BusinessException) as exception:
             AffiliationInvitationService.validate_token(token, new_invitation['id'])
@@ -289,12 +302,12 @@ def test_validate_token_exception(session):  # pylint:disable=unused-argument
     assert exception.value.code == Error.EXPIRED_AFFILIATION_INVITATION.name
 
 
+@pytest.mark.parametrize('environment', ['test', None])
 def test_accept_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock,
-                                       monkeypatch):  # pylint:disable=unused-argument
+                                       monkeypatch, environment):  # pylint:disable=unused-argument
     """Accept the affiliation invitation and add the affiliation from the invitation."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         with patch.object(auth, 'check_auth', return_value=True):
-            env = 'test'
             user_with_token = TestUserInfo.user_test
             user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
             user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
@@ -314,21 +327,22 @@ def test_accept_affiliation_invitation(session, auth_mock, keycloak_mock, busine
 
             new_invitation = AffiliationInvitationService \
                 .create_affiliation_invitation(affiliation_invitation_info,
-                                               User(user_invitee), '', env).as_dict()
+                                               User(user_invitee), '', environment).as_dict()
 
             invitation = AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'],
                                                                                     User(user_invitee),
-                                                                                    '', env).as_dict()
+                                                                                    '', environment).as_dict()
             patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
             affiliation = AffiliationService.find_affiliation(new_invitation['from_org']['id'],
-                                                              entity_dictionary['business_identifier'], env)
+                                                              entity_dictionary['business_identifier'], environment)
             assert affiliation
             assert invitation
             assert affiliation['id'] == invitation['affiliation_id']
 
 
+@pytest.mark.parametrize('environment', ['test', None])
 def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, business_mock,
-                                      monkeypatch):  # pylint:disable=unused-argument
+                                      monkeypatch, environment):  # pylint:disable=unused-argument
     """Accept the affiliation invitation exceptions."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         with patch.object(auth, 'check_auth', return_value=True):
@@ -345,22 +359,22 @@ def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, busines
 
             # Accepting a non-existent invitation should raise not found exception
             with pytest.raises(BusinessException) as exception:
-                AffiliationInvitationService.accept_affiliation_invitation(None, User(user_invitee), '', 'test')
+                AffiliationInvitationService.accept_affiliation_invitation(None, User(user_invitee), '', environment)
 
             assert exception.value.code == Error.DATA_NOT_FOUND.name
 
             # Accepting an invitation multiple times should raise actioned invitation exception
             new_invitation = AffiliationInvitationService \
                 .create_affiliation_invitation(affiliation_invitation_info,
-                                               User(user_invitee), '', 'test').as_dict()
+                                               User(user_invitee), '', environment).as_dict()
 
             AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'], User(user_invitee), '',
-                                                                       'test')
+                                                                       environment)
 
             with pytest.raises(BusinessException) as exception:
                 AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'],
                                                                            User(user_invitee), '',
-                                                                           'test')
+                                                                           environment)
 
             assert exception.value.code == Error.ACTIONED_AFFILIATION_INVITATION.name
 
@@ -372,12 +386,13 @@ def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, busines
                 expired_invitation.save()
                 AffiliationInvitationService.accept_affiliation_invitation(expired_invitation.id,
                                                                            User(user_invitee),
-                                                                           '', 'test')
+                                                                           '', environment)
             assert exception.value.code == Error.EXPIRED_AFFILIATION_INVITATION.name
 
 
+@pytest.mark.parametrize('environment', ['test', None])
 def test_get_invitations_by_from_org_id(session, auth_mock, keycloak_mock, business_mock,
-                                        monkeypatch):  # pylint:disable=unused-argument
+                                        monkeypatch, environment):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided from org id."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
@@ -394,7 +409,8 @@ def test_get_invitations_by_from_org_id(session, auth_mock, keycloak_mock, busin
             to_org_id=to_org_id,
             business_identifier=entity_dictionary['business_identifier'])
 
-        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '', 'test')
+        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '',
+                                                                   environment)
 
         invitations: list = AffiliationInvitationService \
             .search_invitations(AffiliationInvitationSearch(from_org_id=from_org_id,
@@ -403,8 +419,9 @@ def test_get_invitations_by_from_org_id(session, auth_mock, keycloak_mock, busin
         assert len(invitations) == 1
 
 
+@pytest.mark.parametrize('environment', ['test', None])
 def test_get_invitations_by_to_org_id(session, auth_mock, keycloak_mock, business_mock,
-                                      monkeypatch):  # pylint:disable=unused-argument
+                                      monkeypatch, environment):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided to org id."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
@@ -421,7 +438,8 @@ def test_get_invitations_by_to_org_id(session, auth_mock, keycloak_mock, busines
             to_org_id=to_org_id,
             business_identifier=entity_dictionary['business_identifier'])
 
-        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '', 'test')
+        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '',
+                                                                   environment)
 
         invitations: list = AffiliationInvitationService \
             .search_invitations(
