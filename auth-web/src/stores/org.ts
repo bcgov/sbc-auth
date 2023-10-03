@@ -699,6 +699,13 @@ export const useOrgStore = defineStore('org', () => {
     return result
   }
 
+  async function getStatementsSummary () {
+    const response = await PaymentService.getStatementsSummary(state.currentOrganization.id)
+    const result = response?.data || {} as StatementSettings
+    state.statementSettings = result
+    return result
+  }
+
   async function updateStatementSettings (statementFrequency) {
     const response = await PaymentService.updateStatementSettings(state.currentOrganization.id, statementFrequency)
     return response?.data || {}
@@ -1067,6 +1074,7 @@ export const useOrgStore = defineStore('org', () => {
     getStatementsList,
     getStatement,
     fetchStatementSettings,
+    getStatementsSummary,
     updateStatementSettings,
     getStatementRecipients,
     updateStatementNotifications,

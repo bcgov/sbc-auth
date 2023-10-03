@@ -71,7 +71,15 @@
         </template>
         <template #[`item.dateRange`]="{ item }">
           <div class="font-weight-bold">
-            {{ formatDateRange(item.fromDate, item.toDate) }}
+            <span>{{ formatDateRange(item.fromDate, item.toDate) }}</span>
+            <span
+              v-if="isStatementNew(item)"
+              class="label ml-2 px-2 d-inline-block"
+            >NEW</span>
+            <span
+              v-if="isStatementOverdue(item)"
+              class="label overdue ml-2 px-2 d-inline-block"
+            >OVERDUE</span>
           </div>
         </template>
         <template #[`item.action`]="{ item }">
@@ -140,13 +148,13 @@ export default defineComponent({
     }
   },
   setup (props, { root }) {
+    const ITEMS_PER_PAGE = 5
+    const PAGINATION_COUNTER_STEP = 4
     const orgStore = useOrgStore()
     const { setAccountChangedHandler } = useAccountChangeHandler()
     const currentOrganization: ComputedRef<Organization> = computed<Organization>(() => orgStore.currentOrganization)
     const currentMembership: ComputedRef<Member> = computed<Member>(() => orgStore.currentMembership)
     const getStatement: ComputedRef<any> = computed<any>(() => orgStore.getStatement)
-    const ITEMS_PER_PAGE = ref<number>(5)
-    const PAGINATION_COUNTER_STEP = ref<number>(4)
     const totalStatementsCount = ref<number>(0)
     const tableDataOptions = ref<any>({})
     const isDataLoading = ref<boolean>(false)
@@ -178,6 +186,15 @@ export default defineComponent({
       }
     ])
 
+    const isStatementNew = (item) => {
+      return Math.max(...statementsList.value.map(statement => statement.id)) === item.id
+    }
+
+    const isStatementOverdue = (item) => {
+      return (paymentOwingAmount.value && paymentDueDate.value) &&
+      [...new Set(statementsList.value.map(item => item.id))].sort((a, b) => b - a)[1] === item.id
+    }
+
     const getEftInstructions = async (): Promise<any> => {
       isLoading.value = true
       try {
@@ -193,6 +210,13 @@ export default defineComponent({
 
     const getStatementsList = async (filterParams: any): Promise<any> => {
       const data = await orgStore.getStatementsList(filterParams)
+      return data
+    }
+
+    const getStatementsSummary = async (): Promise<any> => {
+      const data = await orgStore.getStatementsSummary()
+      paymentOwingAmount.value = data?.totalDue
+      paymentDueDate.value = data?.oldestOverdueDate
       return data
     }
 
@@ -236,6 +260,7 @@ export default defineComponent({
         root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
       } else {
         await loadStatementsList()
+        await getStatementsSummary()
       }
     }
 
@@ -261,7 +286,7 @@ export default defineComponent({
     }
 
     const getPaginationOptions = () => {
-      return [...Array(PAGINATION_COUNTER_STEP.value)].map((value, index) => ITEMS_PER_PAGE.value * (index + 1))
+      return [...Array(PAGINATION_COUNTER_STEP)].map((value, index) => ITEMS_PER_PAGE * (index + 1))
     }
 
     const enableEFTPaymentMethod = async () => {
@@ -320,6 +345,8 @@ export default defineComponent({
       paymentOwingAmount,
       paymentDueDate,
       headerStatements,
+      isStatementNew,
+      isStatementOverdue,
       getEftInstructions,
       getPaginationOptions,
       customSortActive,
@@ -338,17 +365,25 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.label {
+  background: #1669bb;
+  color: white;
+  border-radius: 4px;
+  &.overdue {
+    background: #D3272C;
+  }
+}
 .statement-owing {
   .total {
     flex: 0 0 300px;
     .amount {
       font-size: 18px;
-      color: #495057;
+      color: #D3272C;
       margin: 0;
     }
     .date {
       font-size: 14px;
-      color: #495057
+      color: #D3272C
     }
   }
 }
