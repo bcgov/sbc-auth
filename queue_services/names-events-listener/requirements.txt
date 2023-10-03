@@ -29,7 +29,7 @@ six==1.16.0
 threadloop==1.0.2
 thrift==0.16.0
 tornado==6.3.3
-urllib3==1.26.12
+urllib3==1.26.17
 zipp==3.9.0
 -e git+https://github.com/bcgov/lear.git#egg=entity_queue_common&subdirectory=queue_services/common
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
