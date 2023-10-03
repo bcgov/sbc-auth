@@ -36,4 +36,4 @@ class WhatsNew(Resource):
         """Get the service schedule and return status and next schedule date/time."""
         print(current_app.config.get('WHATSNEW'))
         news_json = current_app.config.get('WHATSNEW')
-        return jsonify(news_json), HTTPStatus.OK
+        return news_json, HTTPStatus.OK
