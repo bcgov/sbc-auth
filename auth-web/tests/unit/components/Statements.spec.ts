@@ -142,4 +142,19 @@ describe('Statements.vue', () => {
     expect(wrapper.vm.formatDateRange('1999-01-01', '2022-01-02')).toBe('January 01, 1999 - January 02, 2022')
     wrapper.destroy()
   })
+
+  it('Should compute the correct value for isStatementOverdue(item)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    let item = { isOverdue: true }
+    expect(wrapper.vm.isStatementOverdue(item)).toBe(true)
+    item = { isOverdue: false }
+    expect(wrapper.vm.isStatementOverdue(item)).toBe(false)
+    wrapper.destroy()
+  })
 })

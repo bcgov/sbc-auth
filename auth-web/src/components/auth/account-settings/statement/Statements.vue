@@ -123,8 +123,8 @@
 
 <script lang="ts">
 import { Account, LDFlags, Pages, PaymentTypes } from '@/util/constants'
-import { ComputedRef, PropType, Ref, computed, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
-import { Member, MembershipType, Organization } from '@/models/Organization'
+import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
+import { PropType, Ref, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
 import { StatementFilterParams, StatementListItem } from '@/models/statement'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
@@ -151,10 +151,10 @@ export default defineComponent({
     const ITEMS_PER_PAGE = 5
     const PAGINATION_COUNTER_STEP = 4
     const orgStore = useOrgStore()
+    const currentOrganization: Organization = orgStore.currentOrganization
+    const currentMembership: Member = orgStore.currentMembership
+    const getStatement: any = orgStore.getStatement
     const { setAccountChangedHandler } = useAccountChangeHandler()
-    const currentOrganization: ComputedRef<Organization> = computed<Organization>(() => orgStore.currentOrganization)
-    const currentMembership: ComputedRef<Member> = computed<Member>(() => orgStore.currentMembership)
-    const getStatement: ComputedRef<any> = computed<any>(() => orgStore.getStatement)
     const totalStatementsCount = ref<number>(0)
     const tableDataOptions = ref<any>({})
     const isDataLoading = ref<boolean>(false)
@@ -186,13 +186,12 @@ export default defineComponent({
       }
     ])
 
-    const isStatementNew = (item) => {
+    const isStatementNew = (item: StatementListItem) => {
       return Math.max(...statementsList.value.map(statement => statement.id)) === item.id
     }
 
-    const isStatementOverdue = (item) => {
-      return (paymentOwingAmount.value && paymentDueDate.value) &&
-      [...new Set(statementsList.value.map(item => item.id))].sort((a, b) => b - a)[1] === item.id
+    const isStatementOverdue = (item: StatementListItem) => {
+      return item.isOverdue
     }
 
     const getEftInstructions = async (): Promise<any> => {
@@ -215,8 +214,8 @@ export default defineComponent({
 
     const getStatementsSummary = async (): Promise<any> => {
       const data = await orgStore.getStatementsSummary()
-      paymentOwingAmount.value = data?.totalDue
-      paymentDueDate.value = data?.oldestOverdueDate
+      paymentOwingAmount.value = data?.totalDue || 10
+      paymentDueDate.value = data?.oldestOverdueDate || '2021-01-01'
       return data
     }
 
@@ -224,7 +223,7 @@ export default defineComponent({
       isLoading.value = true
       try {
         const downloadType = (type === 'CSV') ? 'text/csv' : 'application/pdf'
-        const response = await getStatement.value({ statementId: item.id, type: downloadType })
+        const response = await getStatement({ statementId: item.id, type: downloadType })
         const contentDispArr = response?.headers['content-disposition'].split('=')
         const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-statement-${type.toLowerCase()}`
         CommonUtils.fileDownload(response.data, fileName, downloadType)
@@ -249,15 +248,15 @@ export default defineComponent({
     }
 
     const isStatementsAllowed = async () => {
-      return (orgStore.isStaffOrSbcStaff || currentOrganization.value?.orgType === Account.PREMIUM) &&
-        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
+      return (orgStore.isStaffOrSbcStaff || currentOrganization?.orgType === Account.PREMIUM) &&
+        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.membershipTypeCode)
     }
 
     const initialize = async () => {
       if (!isStatementsAllowed) {
         // if the account switching happening when the user is already in the statements page,
         // redirect to account info if its a basic account
-        root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
+        root.$router.push(`/${Pages.MAIN}/${currentOrganization.id}/settings/account-info`)
       } else {
         await loadStatementsList()
         await getStatementsSummary()
@@ -319,9 +318,14 @@ export default defineComponent({
     }
 
     const getOrgPayments = async () => {
-      const response = await orgStore.getOrgPayments()
-      const responseTypeEft = response.paymentMethod === PaymentTypes.EFT
-      hasEFTPaymentMethod.value = responseTypeEft
+      try {
+        const orgPayments: OrgPaymentDetails = await orgStore.getOrgPayments()
+        const paymentMethod = orgPayments.paymentMethod === PaymentTypes.EFT
+        hasEFTPaymentMethod.value = paymentMethod
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error)
+      }
     }
 
     onMounted(async () => {
