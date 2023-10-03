@@ -18,9 +18,11 @@ A simple decorator to add the options method to a Request Class.
 """
 
 import base64
+import os
 import re
 import urllib
 
+from flask import current_app, request
 from humps.main import camelize, decamelize
 
 
@@ -86,3 +88,12 @@ def mask_email(email: str) -> str:
             masked_domain = domain[:2] + '*' * (len(domain) - 2)
             email = masked_username + '@' + masked_domain
     return email
+
+
+def get_request_environment():
+    """Return the environment corresponding to the user request."""
+    env = None
+    sandbox_host = current_app.config['AUTH_WEB_SANDBOX_HOST']
+    if os.getenv('FLASK_ENV') == 'production' and sandbox_host in request.host_url:
+        env = 'sandbox'
+    return env

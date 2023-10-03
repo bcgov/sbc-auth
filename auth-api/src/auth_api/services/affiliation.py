@@ -27,6 +27,8 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.affiliation_invitation import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
+from auth_api.models.dataclass import Affiliation as AffiliationData
+from auth_api.models.dataclass import DeleteAffiliationRequest
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
@@ -73,7 +75,7 @@ class Affiliation:
         return obj
 
     @staticmethod
-    def find_visible_affiliations_by_org_id(org_id):
+    def find_visible_affiliations_by_org_id(org_id, environment=None):
         """Given an org_id, this will return the entities affiliated with it."""
         current_app.logger.debug(f'<find_visible_affiliations_by_org_id for org_id {org_id}')
         if not org_id:
@@ -83,7 +85,7 @@ class Affiliation:
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        data = Affiliation.find_affiliations_by_org_id(org_id)
+        data = Affiliation.find_affiliations_by_org_id(org_id, environment)
 
         # 3806 : Filter out the NR affiliation if there is IA affiliation for the same NR.
         # Dict with key as NR number and value as name
@@ -123,7 +125,7 @@ class Affiliation:
         return filtered_affiliations
 
     @staticmethod
-    def find_affiliations_by_org_id(org_id):
+    def find_affiliations_by_org_id(org_id, environment=None):
         """Return business affiliations for the org."""
         # Accomplished in service instead of model (easier to avoid circular reference issues).
         entities = db.session.query(Entity) \
@@ -133,22 +135,26 @@ class Affiliation:
                 subqueryload(Entity.contacts).subqueryload(ContactLink.contact),
                 subqueryload(Entity.created_by),
                 subqueryload(Entity.modified_by)) \
-            .filter(AffiliationModel.org_id == org_id, Entity.affiliations.any(AffiliationModel.org_id == org_id)) \
-            .order_by(AffiliationModel.created.desc()) \
-            .all()
-
+            .filter(AffiliationModel.org_id == org_id, Entity.affiliations.any(AffiliationModel.org_id == org_id))
+        if environment:
+            entities = entities.filter(AffiliationModel.environment == environment)
+        else:
+            entities = entities.filter(AffiliationModel.environment.is_(None))
+        entities = entities.order_by(AffiliationModel.created.desc()).all()
         return [EntityService(entity).as_dict() for entity in entities]
 
     @staticmethod
-    def find_affiliation(org_id, business_identifier):
+    def find_affiliation(org_id, business_identifier, environment=None):
         """Return business affiliation by the org id and business identifier."""
         affiliation = AffiliationModel.find_affiliation_by_org_id_and_business_identifier(org_id,
-                                                                                          business_identifier)
-
+                                                                                          business_identifier,
+                                                                                          environment)
+        if affiliation is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
         return Affiliation(affiliation).as_dict()
 
     @staticmethod
-    def create_affiliation(org_id, business_identifier, pass_code=None, certified_by_name=None):
+    def create_affiliation(org_id, business_identifier, environment=None, pass_code=None, certified_by_name=None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
@@ -170,11 +176,12 @@ class Affiliation:
 
         current_app.logger.debug('<create_affiliation find affiliation')
         # Ensure this affiliation does not already exist
-        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)
+        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id, environment)
         if affiliation is not None:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
-        affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=certified_by_name)
+        affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=certified_by_name,
+                                       environment=environment)
         affiliation.save()
 
         if entity_type not in ['SP', 'GP']:
@@ -203,10 +210,16 @@ class Affiliation:
         return True
 
     @staticmethod
-    def create_new_business_affiliation(org_id,  # pylint: disable=too-many-arguments, too-many-locals
-                                        business_identifier=None, email=None, phone=None, certified_by_name=None,
+    def create_new_business_affiliation(affiliation_data: AffiliationData,  # pylint: disable=too-many-locals
+                                        environment: str = None,
                                         bearer_token: str = None):
         """Initiate a new incorporation."""
+        org_id = affiliation_data.org_id
+        business_identifier = affiliation_data.business_identifier
+        email = affiliation_data.email
+        phone = affiliation_data.phone
+        certified_by_name = affiliation_data.certified_by_name
+
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
         user_is_staff = Affiliation.is_staff_or_sbc_staff()
         if not user_is_staff and (not email and not phone):
@@ -268,7 +281,7 @@ class Affiliation:
 
         # Affiliation may already already exist.
         if not (affiliation_model :=
-                AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier)):
+                AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier, environment)):
             # Create an affiliation with org
             affiliation_model = AffiliationModel(
                 org_id=org_id, entity_id=entity.identifier, certified_by_name=certified_by_name)
@@ -277,6 +290,7 @@ class Affiliation:
                 ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
                                                                name=entity.name, id=entity.business_identifier))
         affiliation_model.certified_by_name = certified_by_name
+        affiliation_model.environment = environment
         affiliation_model.save()
         entity.set_pass_code_claimed(True)
 
@@ -293,9 +307,14 @@ class Affiliation:
         return invoices
 
     @staticmethod
-    def delete_affiliation(org_id, business_identifier, email_addresses: str = None,
-                           reset_passcode: bool = False, log_delete_draft: bool = False):
+    def delete_affiliation(delete_affiliation_request: DeleteAffiliationRequest, environment: str = None):
         """Delete the affiliation for the provided org id and business id."""
+        org_id = delete_affiliation_request.org_id
+        business_identifier = delete_affiliation_request.business_identifier
+        reset_passcode = delete_affiliation_request.reset_passcode
+        log_delete_draft = delete_affiliation_request.log_delete_draft
+        email_addresses = delete_affiliation_request.email_addresses
+
         current_app.logger.info(f'<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}')
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if org is None:
@@ -308,7 +327,8 @@ class Affiliation:
 
         entity_id = entity.identifier
 
-        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=org_id, entity_id=entity_id)
+        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=org_id, entity_id=entity_id,
+                                                                              environment=environment)
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -341,7 +361,7 @@ class Affiliation:
 
     @staticmethod
     @user_context
-    def fix_stale_affiliations(org_id: int, entity_details: Dict, **kwargs):
+    def fix_stale_affiliations(org_id: int, entity_details: Dict, environment: str = None, **kwargs):
         """Corrects affiliations to point at the latest entity."""
         # Example staff/client scenario:
         # 1. client creates an NR (that gets affiliated) - realizes they need help to create a business
@@ -359,7 +379,7 @@ class Affiliation:
         # Find entity with nr_number (stale, because this is now a business)
         if from_entity and from_entity.corp_type == 'NR' and \
                 (to_entity := EntityService.find_by_business_identifier(identifier, skip_auth=True)):
-            affiliations = AffiliationModel.find_affiliations_by_entity_id(from_entity.identifier)
+            affiliations = AffiliationModel.find_affiliations_by_entity_id(from_entity.identifier, environment)
             for affiliation in affiliations:
                 # These are already handled by the filer.
                 if affiliation.org_id == org_id:
@@ -367,6 +387,7 @@ class Affiliation:
                 current_app.logger.debug(
                         f'Moving affiliation {affiliation.id} from {from_entity.identifier} to {to_entity.identifier}')
                 affiliation.entity_id = to_entity.identifier
+                affiliation.environment = environment
                 affiliation.save()
 
         current_app.logger.debug('>fix_stale_affiliations')
