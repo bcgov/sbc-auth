@@ -135,7 +135,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DEBUG = True
     TESTING = True
 
-    WHATSNEW = [{"id": 1,
+    WHATSNEW = json.dumps([{"id": 1,
                  "date": "2022-01-01",
                 "labels": "New Feature",
                  "title": "Modernization Update",
@@ -193,7 +193,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
                  "app": "ALL",
                  "priority": True,
                  "read": False
-                 }]
+                 }])
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

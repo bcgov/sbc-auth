@@ -22,7 +22,7 @@ from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
-from auth_api.models.dataclass import Activity, PaginationInfo
+from auth_api.models.dataclass import Activity, DeleteAffiliationRequest, PaginationInfo
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
@@ -470,11 +470,10 @@ class Org:  # pylint: disable=too-many-public-methods
         # Find all active affiliations and remove them.
         entities = AffiliationService.find_affiliations_by_org_id(org_id)
         for entity in entities:
-            AffiliationService.delete_affiliation(
-                org_id=org_id,
-                business_identifier=entity['business_identifier'],
-                reset_passcode=True
-            )
+            delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id,
+                                                                  business_identifier=entity['business_identifier'],
+                                                                  reset_passcode=True)
+            AffiliationService.delete_affiliation(delete_affiliation_request)
 
         # Deactivate all members.
         members = MembershipModel.find_members_by_org_id(org_id)
@@ -699,7 +698,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return MembershipModel.find_orgs_for_user(user_id, valid_statuses)
 
     @staticmethod
-    def search_orgs(search: OrgSearch):  # pylint: disable=too-many-locals
+    def search_orgs(search: OrgSearch, environment):  # pylint: disable=too-many-locals
         """Search for orgs based on input parameters."""
         orgs_result = {
             'orgs': [],
@@ -716,7 +715,7 @@ class Org:  # pylint: disable=too-many-public-methods
             org_models, orgs_result['total'] = OrgModel.search_pending_activation_orgs(name=search.name)
             include_invitations = True
         else:
-            org_models, orgs_result['total'] = OrgModel.search_org(search)
+            org_models, orgs_result['total'] = OrgModel.search_org(search, environment)
 
         for org in org_models:
             orgs_result['orgs'].append({
@@ -732,9 +731,9 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def search_orgs_by_affiliation(business_identifier,
-                                   pagination_info: PaginationInfo):
+                                   pagination_info: PaginationInfo, environment):
         """Search for orgs based on input parameters."""
-        orgs, total = OrgModel.search_orgs_by_business_identifier(business_identifier, pagination_info)
+        orgs, total = OrgModel.search_orgs_by_business_identifier(business_identifier, pagination_info, environment)
 
         return {
             'orgs': orgs,
