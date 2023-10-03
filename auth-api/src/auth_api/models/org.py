@@ -127,7 +127,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return query.all()
 
     @classmethod
-    def search_org(cls, search: OrgSearch):
+    def search_org(cls, search: OrgSearch, environment: str):
         """Find all orgs with the given type."""
         query = db.session.query(Org) \
             .outerjoin(ContactLink) \
@@ -149,7 +149,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         if search.name:
             query = query.filter(Org.name.ilike(f'%{search.name}%'))
 
-        query = cls._search_by_business_identifier(query, search.business_identifier)
+        query = cls._search_by_business_identifier(query, search.business_identifier, environment)
         query = cls._search_for_statuses(query, search.statuses)
 
         pagination = query.order_by(Org.created.desc()) \
@@ -158,12 +158,12 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return pagination.items, pagination.total
 
     @classmethod
-    def search_orgs_by_business_identifier(cls, business_identifier, pagination_info: PaginationInfo):
+    def search_orgs_by_business_identifier(cls, business_identifier, pagination_info: PaginationInfo, environment):
         """Find all orgs affiliated with provided business identifier."""
         query = db.session.query(Org)
 
         query = cls._search_for_statuses(query, [])
-        query = cls._search_by_business_identifier(query, business_identifier)
+        query = cls._search_by_business_identifier(query, business_identifier, environment)
 
         pagination = query.order_by(Org.name.desc()) \
             .paginate(per_page=pagination_info.limit, page=pagination_info.page)
@@ -171,9 +171,9 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return pagination.items, pagination.total
 
     @classmethod
-    def _search_by_business_identifier(cls, query, business_identifier):
+    def _search_by_business_identifier(cls, query, business_identifier, environment):
         if business_identifier:
-            affilliations = Affiliation.find_affiliations_by_business_identifier(business_identifier)
+            affilliations = Affiliation.find_affiliations_by_business_identifier(business_identifier, environment)
             affilliation_org_ids = [affilliation.org_id for affilliation in affilliations]
             query = query.filter(Org.id.in_(affilliation_org_ids))
         return query

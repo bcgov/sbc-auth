@@ -190,6 +190,7 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     # NR Supported Request types.
     NR_SUPPORTED_REQUEST_TYPES: List[str] = os.getenv('NR_SUPPORTED_REQUEST_TYPES', 'BC').replace(' ', '').split(',')
+    AUTH_WEB_SANDBOX_HOST = os.getenv('AUTH_WEB_SANDBOX_HOST', 'localhost')
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods

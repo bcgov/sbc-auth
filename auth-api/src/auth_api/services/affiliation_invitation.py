@@ -138,7 +138,7 @@ class AffiliationInvitation:
         return result
 
     @staticmethod
-    def _validate_prerequisites(business_identifier, from_org_id, to_org_id,
+    def _validate_prerequisites(business_identifier, from_org_id, to_org_id, environment,
                                 affiliation_invitation_type=AffiliationInvitationType.EMAIL):
         # Validate from organizations exists
         if not (from_org := OrgModel.find_by_org_id(from_org_id)):
@@ -168,7 +168,7 @@ class AffiliationInvitation:
             raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
 
         # Check if affiliation already exists
-        if AffiliationModel.find_affiliation_by_org_and_entity_ids(from_org_id, entity.identifier):
+        if AffiliationModel.find_affiliation_by_org_and_entity_ids(from_org_id, entity.identifier, environment):
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         # Check if an affiliation invitation already exists
@@ -224,7 +224,7 @@ class AffiliationInvitation:
     @user_context
     def create_affiliation_invitation(affiliation_invitation_info: Dict,
                                       # pylint:disable=unused-argument,too-many-locals
-                                      user, invitation_origin, **kwargs):
+                                      user, invitation_origin, environment=None, **kwargs):
         """Create a new affiliation invitation."""
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         from_org_id = affiliation_invitation_info['fromOrgId']
@@ -243,7 +243,9 @@ class AffiliationInvitation:
 
         entity, from_org, business = AffiliationInvitation. \
             _validate_prerequisites(business_identifier=business_identifier, from_org_id=from_org_id,
-                                    to_org_id=to_org_id, affiliation_invitation_type=affiliation_invitation_type)
+                                    to_org_id=to_org_id, environment=environment,
+                                    affiliation_invitation_type=affiliation_invitation_type
+                                    )
 
         affiliation_invitation_info['entityId'] = entity.identifier
 
@@ -578,7 +580,7 @@ class AffiliationInvitation:
     @user_context
     def accept_affiliation_invitation(affiliation_invitation_id,
                                       # pylint:disable=unused-argument
-                                      user: UserService, origin, **kwargs):
+                                      user: UserService, origin, environment=None, **kwargs):
         """Add an affiliation from the affiliation invitation."""
         current_app.logger.debug('>accept_affiliation_invitation')
         affiliation_invitation: AffiliationInvitationModel = AffiliationInvitationModel.\
@@ -596,9 +598,11 @@ class AffiliationInvitation:
         org_id = affiliation_invitation.from_org_id
         entity_id = affiliation_invitation.entity_id
 
-        if not (affiliation_model := AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)):
+        if not (affiliation_model := AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id,
+                                                                                             environment)):
             # Create an affiliation with to_org_id
-            affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=None)
+            affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=None,
+                                                 environment=environment)
             affiliation_model.save()
 
         affiliation_invitation.affiliation_id = affiliation_model.id

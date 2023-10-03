@@ -92,6 +92,28 @@ class AffiliationInvitationData:  # pylint: disable=too-many-instance-attributes
 
 
 @dataclass
+class Affiliation:
+    """Used for affiliation."""
+
+    org_id: str
+    business_identifier: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    certified_by_name: Optional[str] = None
+
+
+@dataclass
+class DeleteAffiliationRequest:
+    """Used for deleting affiliation."""
+
+    org_id: str
+    business_identifier: str
+    email_addresses: Optional[str] = None
+    reset_passcode: bool = False
+    log_delete_draft: bool = False
+
+
+@dataclass
 class OrgSearch:  # pylint: disable=too-many-instance-attributes
     """Used for searching organizations."""
 
