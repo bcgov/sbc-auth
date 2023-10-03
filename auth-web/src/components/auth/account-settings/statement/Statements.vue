@@ -365,12 +365,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import '@/assets/styles/theme.scss';
 .label {
-  background: #1669bb;
+  background: $app-blue;
   color: white;
   border-radius: 4px;
   &.overdue {
-    background: #D3272C;
+    background: $app-red;
   }
 }
 .statement-owing {
@@ -378,12 +379,12 @@ export default defineComponent({
     flex: 0 0 300px;
     .amount {
       font-size: 18px;
-      color: #D3272C;
+      color: $app-red;
       margin: 0;
     }
     .date {
       font-size: 14px;
-      color: #D3272C
+      color: $app-red
     }
   }
 }

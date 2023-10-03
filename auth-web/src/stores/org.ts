@@ -700,10 +700,14 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   async function getStatementsSummary () {
-    const response = await PaymentService.getStatementsSummary(state.currentOrganization.id)
-    const result = response?.data || {} as StatementSettings
-    state.statementSettings = result
-    return result
+    try {
+      const response = await PaymentService.getStatementsSummary(state.currentOrganization.id)
+      const result = response?.data || {} as StatementSettings
+      state.statementSettings = result
+      return result
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   async function updateStatementSettings (statementFrequency) {
