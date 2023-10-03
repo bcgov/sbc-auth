@@ -15,6 +15,7 @@
 from http import HTTPStatus
 
 from flask import current_app
+from flask.json import jsonify
 from flask_restx import Namespace, Resource, cors
 
 from status_api.utils.util import cors_preflight
@@ -35,4 +36,4 @@ class WhatsNew(Resource):
         """Get the service schedule and return status and next schedule date/time."""
         print(current_app.config.get('WHATSNEW'))
         news_json = current_app.config.get('WHATSNEW')
-        return news_json, HTTPStatus.OK
+        return jsonify(news_json), HTTPStatus.OK
