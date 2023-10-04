@@ -1,6 +1,6 @@
+import { CorpTypes, SessionStorageKeys } from './constants'
 import ConfigHelper from './config-helper'
 import { NameRequest } from '@/models/business'
-import { CorpTypes, SessionStorageKeys } from './constants'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 /** Navigation handler for entities dashboard. */
