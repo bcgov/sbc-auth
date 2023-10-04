@@ -213,10 +213,15 @@ export default defineComponent({
     }
 
     const getStatementsSummary = async (): Promise<any> => {
-      const data = await orgStore.getStatementsSummary()
-      paymentOwingAmount.value = data?.totalDue || 10
-      paymentDueDate.value = data?.oldestOverdueDate || '2021-01-01'
-      return data
+      try {
+        const data = await orgStore.getStatementsSummary()
+        paymentOwingAmount.value = data?.totalDue
+        paymentDueDate.value = data?.oldestOverdueDate
+        return data
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error)
+      }
     }
 
     const downloadStatement = async (item, type) => {
