@@ -115,6 +115,11 @@ export default class PaymentService {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/settings`)
   }
 
+  static getStatementsSummary (accountId: string | number): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/summary`
+    return axios.get(url)
+  }
+
   static getStatement (accountId: string | number, statementId: string, type: string): AxiosPromise<any> {
     const headers = {
       'Accept': type

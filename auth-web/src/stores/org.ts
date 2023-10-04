@@ -37,7 +37,7 @@ import {
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
-import { StatementFilterParams, StatementNotificationSettings, StatementSettings } from '@/models/statement'
+import { StatementFilterParams, StatementNotificationSettings, StatementSettings, StatementsSummary } from '@/models/statement'
 import { computed, reactive, toRefs } from '@vue/composition-api'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
@@ -88,6 +88,7 @@ export const useOrgStore = defineStore('org', () => {
     currentSelectedProducts: [] as any, // selected product list code in array
     currentStatementNotificationSettings: {} as StatementNotificationSettings,
     statementSettings: {} as StatementSettings,
+    statementsSummary: {} as StatementsSummary,
     orgProductFeeCodes: [] as OrgProductFeeCode[],
     currentAccountFees: [] as AccountFee[],
     currentOrgPaymentDetails: null as OrgPaymentDetails,
@@ -699,6 +700,17 @@ export const useOrgStore = defineStore('org', () => {
     return result
   }
 
+  async function getStatementsSummary () {
+    try {
+      const response = await PaymentService.getStatementsSummary(state.currentOrganization.id)
+      const result = response?.data || {} as StatementsSummary
+      state.statementsSummary = result
+      return result
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   async function updateStatementSettings (statementFrequency) {
     const response = await PaymentService.updateStatementSettings(state.currentOrganization.id, statementFrequency)
     return response?.data || {}
@@ -1067,6 +1079,7 @@ export const useOrgStore = defineStore('org', () => {
     getStatementsList,
     getStatement,
     fetchStatementSettings,
+    getStatementsSummary,
     updateStatementSettings,
     getStatementRecipients,
     updateStatementNotifications,
