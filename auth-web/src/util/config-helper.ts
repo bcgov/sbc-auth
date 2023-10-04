@@ -135,6 +135,18 @@ export default class ConfigHelper {
     return `${process.env.VUE_APP_CORP_FORMS_URL}`
   }
 
+  static getLLPFormsUrl () {
+    return `${process.env.VUE_APP_LLP_FORMS_URL}`
+  }
+
+  static getLPFormsUrl () {
+    return `${process.env.VUE_APP_LP_FORMS_URL}`
+  }
+
+  static getXLPFormsUrl () {
+    return `${process.env.VUE_APP_XLP_FORMS_URL}`
+  }
+
   static getFasWebUrl () {
     return `${import.meta.env.VUE_APP_FAS_WEB_URL}`
   }

@@ -164,7 +164,8 @@ export default defineComponent({
     }
 
     const isOtherEntities = (item: Business): boolean => {
-      return [CorpTypes.FINANCIAL, CorpTypes.PRIVATE_ACT, CorpTypes.PARISHES].includes(getEntityType(item))
+      return [CorpTypes.FINANCIAL, CorpTypes.PRIVATE_ACT, CorpTypes.PARISHES,
+        CorpTypes.LL_PARTNERSHIP, CorpTypes.LIM_PARTNERSHIP, CorpTypes.XPRO_LIM_PARTNR].includes(getEntityType(item))
     }
 
     const isForRestore = (item: Business): boolean => {
@@ -231,7 +232,7 @@ export default defineComponent({
       } else if (isSocieties(item)) {
         goToSocieties()
       } else if (isOtherEntities(item)) {
-        goToFormPage()
+        goToFormPage(getEntityType(item))
       } else {
         goToCorpOnline()
       }
