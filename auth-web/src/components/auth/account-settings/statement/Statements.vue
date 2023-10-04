@@ -71,7 +71,15 @@
         </template>
         <template #[`item.dateRange`]="{ item }">
           <div class="font-weight-bold">
-            {{ formatDateRange(item.fromDate, item.toDate) }}
+            <span>{{ formatDateRange(item.fromDate, item.toDate) }}</span>
+            <span
+              v-if="isStatementNew(item)"
+              class="label ml-2 px-2 d-inline-block"
+            >NEW</span>
+            <span
+              v-if="isStatementOverdue(item)"
+              class="label overdue ml-2 px-2 d-inline-block"
+            >OVERDUE</span>
           </div>
         </template>
         <template #[`item.action`]="{ item }">
@@ -115,8 +123,8 @@
 
 <script lang="ts">
 import { Account, LDFlags, Pages, PaymentTypes } from '@/util/constants'
-import { ComputedRef, PropType, Ref, computed, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
-import { Member, MembershipType, Organization } from '@/models/Organization'
+import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
+import { PropType, Ref, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
 import { StatementFilterParams, StatementListItem } from '@/models/statement'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
@@ -140,13 +148,13 @@ export default defineComponent({
     }
   },
   setup (props, { root }) {
+    const ITEMS_PER_PAGE = 5
+    const PAGINATION_COUNTER_STEP = 4
     const orgStore = useOrgStore()
+    const currentOrganization: Organization = orgStore.currentOrganization
+    const currentMembership: Member = orgStore.currentMembership
+    const getStatement: any = orgStore.getStatement
     const { setAccountChangedHandler } = useAccountChangeHandler()
-    const currentOrganization: ComputedRef<Organization> = computed<Organization>(() => orgStore.currentOrganization)
-    const currentMembership: ComputedRef<Member> = computed<Member>(() => orgStore.currentMembership)
-    const getStatement: ComputedRef<any> = computed<any>(() => orgStore.getStatement)
-    const ITEMS_PER_PAGE = ref<number>(5)
-    const PAGINATION_COUNTER_STEP = ref<number>(4)
     const totalStatementsCount = ref<number>(0)
     const tableDataOptions = ref<any>({})
     const isDataLoading = ref<boolean>(false)
@@ -178,6 +186,14 @@ export default defineComponent({
       }
     ])
 
+    const isStatementNew = (item: StatementListItem) => {
+      return Math.max(...statementsList.value.map(statement => statement.id)) === item.id
+    }
+
+    const isStatementOverdue = (item: StatementListItem) => {
+      return item.isOverdue
+    }
+
     const getEftInstructions = async (): Promise<any> => {
       isLoading.value = true
       try {
@@ -196,11 +212,18 @@ export default defineComponent({
       return data
     }
 
+    const getStatementsSummary = async (): Promise<any> => {
+      const data = await orgStore.getStatementsSummary()
+      paymentOwingAmount.value = data?.totalDue || 10
+      paymentDueDate.value = data?.oldestOverdueDate || '2021-01-01'
+      return data
+    }
+
     const downloadStatement = async (item, type) => {
       isLoading.value = true
       try {
         const downloadType = (type === 'CSV') ? 'text/csv' : 'application/pdf'
-        const response = await getStatement.value({ statementId: item.id, type: downloadType })
+        const response = await getStatement({ statementId: item.id, type: downloadType })
         const contentDispArr = response?.headers['content-disposition'].split('=')
         const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-statement-${type.toLowerCase()}`
         CommonUtils.fileDownload(response.data, fileName, downloadType)
@@ -225,17 +248,18 @@ export default defineComponent({
     }
 
     const isStatementsAllowed = async () => {
-      return (orgStore.isStaffOrSbcStaff || currentOrganization.value?.orgType === Account.PREMIUM) &&
-        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
+      return (orgStore.isStaffOrSbcStaff || currentOrganization?.orgType === Account.PREMIUM) &&
+        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.membershipTypeCode)
     }
 
     const initialize = async () => {
       if (!isStatementsAllowed) {
         // if the account switching happening when the user is already in the statements page,
         // redirect to account info if its a basic account
-        root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
+        root.$router.push(`/${Pages.MAIN}/${currentOrganization.id}/settings/account-info`)
       } else {
         await loadStatementsList()
+        await getStatementsSummary()
       }
     }
 
@@ -261,7 +285,7 @@ export default defineComponent({
     }
 
     const getPaginationOptions = () => {
-      return [...Array(PAGINATION_COUNTER_STEP.value)].map((value, index) => ITEMS_PER_PAGE.value * (index + 1))
+      return [...Array(PAGINATION_COUNTER_STEP)].map((value, index) => ITEMS_PER_PAGE * (index + 1))
     }
 
     const enableEFTPaymentMethod = async () => {
@@ -294,9 +318,14 @@ export default defineComponent({
     }
 
     const getOrgPayments = async () => {
-      const response = await orgStore.getOrgPayments()
-      const responseTypeEft = response.paymentMethod === PaymentTypes.EFT
-      hasEFTPaymentMethod.value = responseTypeEft
+      try {
+        const orgPayments: OrgPaymentDetails = await orgStore.getOrgPayments()
+        const paymentMethod = orgPayments.paymentMethod === PaymentTypes.EFT
+        hasEFTPaymentMethod.value = paymentMethod
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error)
+      }
     }
 
     onMounted(async () => {
@@ -320,6 +349,8 @@ export default defineComponent({
       paymentOwingAmount,
       paymentDueDate,
       headerStatements,
+      isStatementNew,
+      isStatementOverdue,
       getEftInstructions,
       getPaginationOptions,
       customSortActive,
@@ -338,17 +369,26 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import '@/assets/styles/theme.scss';
+.label {
+  background: $app-blue;
+  color: white;
+  border-radius: 4px;
+  &.overdue {
+    background: $app-red;
+  }
+}
 .statement-owing {
   .total {
     flex: 0 0 300px;
     .amount {
       font-size: 18px;
-      color: #495057;
+      color: $app-red;
       margin: 0;
     }
     .date {
       font-size: 14px;
-      color: #495057
+      color: $app-red
     }
   }
 }
