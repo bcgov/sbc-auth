@@ -1,6 +1,6 @@
+import { CorpTypes, SessionStorageKeys } from './constants'
 import ConfigHelper from './config-helper'
 import { NameRequest } from '@/models/business'
-import { SessionStorageKeys } from './constants'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 /** Navigation handler for entities dashboard. */
@@ -26,8 +26,23 @@ export const goToCorpOnline = (): void => {
   window.open(appendAccountId(ConfigHelper.getCorporateOnlineUrl()), '_blank')
 }
 
-export const goToFormPage = (): void => {
-  window.open(ConfigHelper.getCorpFormsUrl(), '_blank')
+export const goToFormPage = (entityType): void => {
+  let formUrl = ''
+  switch (entityType) {
+    case CorpTypes.LL_PARTNERSHIP:
+      formUrl = ConfigHelper.getLLPFormsUrl()
+      break
+    case CorpTypes.LIM_PARTNERSHIP:
+      formUrl = ConfigHelper.getLPFormsUrl()
+      break
+    case CorpTypes.XPRO_LIM_PARTNR:
+      formUrl = ConfigHelper.getXLPFormsUrl()
+      break
+    default:
+      formUrl = ConfigHelper.getCorpFormsUrl()
+      break
+  }
+  window.open(formUrl, '_blank')
 }
 
 /** Navigation handler for Societies Online */

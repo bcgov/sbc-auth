@@ -604,6 +604,50 @@ export const moreBusinesses: Business[] = [
       corpNum: 'corpNum'
     },
     status: 'REFUND_REQUESTED'
+  },
+  // LLP Name Request - Approved, Incorporation
+  {
+    businessIdentifier: 'NR 4045466',
+    corpType: { code: CorpTypes.NAME_REQUEST },
+    name: 'LLP NR INCORPORATION - APPROVED',
+    nameRequest: {
+      legalType: CorpTypes.LL_PARTNERSHIP,
+      names: [{
+        name: 'LLP NR INCORPORATION - APPROVED',
+        decision_text: 'Decision text',
+        name_type_cd: 'Name type code',
+        designation: 'Designation',
+        state: 'State'
+      }],
+      nrNumber: 'NR 4045476',
+      state: 'APPROVED',
+      expirationDate: new Date('2022-11-22T19:42:13+00:00'),
+      requestActionCd: 'NEW',
+      corpNum: 'corpNum'
+    },
+    status: 'APPROVED'
+  },
+  // XLP Name Request - Approved, Incorporation
+  {
+    businessIdentifier: 'NR 4045466',
+    corpType: { code: CorpTypes.NAME_REQUEST },
+    name: 'XLP NR INCORPORATION - APPROVED',
+    nameRequest: {
+      legalType: CorpTypes.XPRO_LIM_PARTNR,
+      names: [{
+        name: 'XLP NR INCORPORATION - APPROVED',
+        decision_text: 'Decision text',
+        name_type_cd: 'Name type code',
+        designation: 'Designation',
+        state: 'State'
+      }],
+      nrNumber: 'NR 4045477',
+      state: 'APPROVED',
+      expirationDate: new Date('2022-11-22T19:42:13+00:00'),
+      requestActionCd: 'NEW',
+      corpNum: 'corpNum'
+    },
+    status: 'APPROVED'
   }
 ]
 
@@ -639,7 +683,7 @@ export const actions = [
     'external': false
   },
   {
-    'primary': 'Register Now',
+    'primary': 'Download Form',
     'secondary': ['Open Name Request', 'Remove From Table'],
     'external': true
   },
@@ -707,5 +751,15 @@ export const actions = [
     'primary': 'Remove From Table',
     'secondary': ['Open Name Request'],
     'external': false
+  },
+  {
+    'primary': 'Download Form',
+    'secondary': ['Open Name Request', 'Remove From Table'],
+    'external': true
+  },
+  {
+    'primary': 'Download Form',
+    'secondary': ['Open Name Request', 'Remove From Table'],
+    'external': true
   }
 ]
