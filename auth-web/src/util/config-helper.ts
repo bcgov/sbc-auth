@@ -128,11 +128,23 @@ export default class ConfigHelper {
   }
 
   static getSocietiesUrl () {
-    return `${process.env.VUE_APP_SOCIETIES_URL}`
+    return `${import.meta.env.VUE_APP_SOCIETIES_URL}`
   }
 
   static getCorpFormsUrl () {
-    return `${process.env.VUE_APP_CORP_FORMS_URL}`
+    return `${import.meta.env.VUE_APP_CORP_FORMS_URL}`
+  }
+
+  static getLLPFormsUrl () {
+    return `${import.meta.env.VUE_APP_LLP_FORMS_URL}`
+  }
+
+  static getLPFormsUrl () {
+    return `${import.meta.env.VUE_APP_LP_FORMS_URL}`
+  }
+
+  static getXLPFormsUrl () {
+    return `${import.meta.env.VUE_APP_XLP_FORMS_URL}`
   }
 
   static getFasWebUrl () {
