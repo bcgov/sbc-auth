@@ -49,8 +49,10 @@
           Payment Due Date: {{ formatDate(paymentDueDate) }}
         </p>
       </div>
-      <div class="instructions">
-        <p><a @click="getEftInstructions">How to pay with electronic funds transfer</a></p>
+      <div class="instructions d-flex ma-0 justify-end align-end">
+        <p class="text-right ma-0">
+          <a @click="getEftInstructions">How to pay with electronic funds transfer</a>
+        </p>
       </div>
     </div>
     <div>
@@ -379,6 +381,7 @@ export default defineComponent({
   background: $app-blue;
   color: white;
   border-radius: 4px;
+  font-size: 10px;
   &.overdue {
     background: $app-red;
   }
@@ -393,7 +396,8 @@ export default defineComponent({
     }
     .date {
       font-size: 14px;
-      color: $app-red
+      color: $app-red;
+      margin: 0;
     }
   }
 }
@@ -401,13 +405,10 @@ export default defineComponent({
   margin-bottom: 30px;
   flex: 1 0 auto;
   p {
-    margin: 0;
-    text-align: right;
     font-size: 16px;
     a {
-      &:hover {
-        text-decoration: underline;
-      }
+      color: $app-blue;
+      text-decoration: underline;
     }
   }
 }
