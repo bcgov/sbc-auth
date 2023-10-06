@@ -251,34 +251,6 @@
                     />
                   </div>
                 </v-list-group>
-
-                <v-list-group v-model="requestAuthBusinessRegistryOption">
-                  <template #activator>
-                    <v-list-item-title>Request authorization or get help from the Business Registry</v-list-item-title>
-                  </template>
-                  <div class="list-body contact-us">
-                    <p>Contact the Business Registry to request authorization to manage this business.</p>
-                    <ol>
-                      <li>
-                        <v-icon small>
-                          mdi-phone
-                        </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
-                      </li>
-                      <li>
-                        <v-icon small>
-                          mdi-phone
-                        </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
-                      </li>
-                      <li>
-                        <v-icon small>
-                          mdi-email
-                        </v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a>
-                      </li>
-                    </ol>
-                    <h4>Hours of Operation:</h4>
-                    <p>Monday to Friday, 8:30am - 4:30pm Pacific Time</p>
-                  </div>
-                </v-list-group>
               </v-list>
             </v-card>
           </v-form>
