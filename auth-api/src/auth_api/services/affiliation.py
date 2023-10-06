@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service for managing Affiliation data."""
 import datetime
+import re
 from typing import Dict, List
 
 from flask import current_app
@@ -259,7 +260,7 @@ class Affiliation:
         if status == NRStatus.CONDITIONAL.value and nr_json.get('consentFlag', None) not in (None, 'R', 'N'):
             raise BusinessException(Error.NR_NOT_APPROVED, None)
 
-        if not user_is_staff and ((phone and phone != nr_phone) or
+        if not user_is_staff and ((phone and re.sub(r'\D', '', phone) != re.sub(r'\D', '', nr_phone)) or
                                   (email and email.casefold() != nr_email.casefold())):
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
