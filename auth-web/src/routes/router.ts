@@ -536,7 +536,7 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true }
     },
     {
-      path: '/businessprofile',
+      path: '/businessprofile/:businessIdentifier',
       name: 'businessprofile',
       component: BusinessProfileView,
       meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true }

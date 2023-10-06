@@ -97,7 +97,7 @@ export default class BusinessProfileView extends Mixins(AccountChangeMixin, Next
   private editing = false
   private isLoading = true
   private readonly currentBusiness!: Business
-  private readonly loadBusiness!: () => Business
+  private readonly loadBusiness!: (businessIdentifier: string) => Business
 
   private navigateBack (): void {
     if (this.$route.query.redirect) {
@@ -114,7 +114,7 @@ export default class BusinessProfileView extends Mixins(AccountChangeMixin, Next
   async mounted () {
     this.isLoading = true
     // Check if there is already contact info so that we display the appropriate copy
-    await this.loadBusiness()
+    await this.loadBusiness(this.$route.params.businessIdentifier)
     if ((this.currentBusiness?.contacts?.length || 0) > 0) {
       this.editing = true
     }

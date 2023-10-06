@@ -208,8 +208,8 @@ export const useBusinessStore = defineStore('business', () => {
     state.businesses = [...affiliatedEntities]
   }
 
-  async function loadBusiness () {
-    const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
+  async function loadBusiness (businessIdentifier = null) {
+    businessIdentifier = businessIdentifier || ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
     const response = await BusinessService.getBusiness(businessIdentifier)
     if (response?.data && response.status === 200) {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, response.data.businessIdentifier)
