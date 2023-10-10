@@ -406,7 +406,9 @@ export default defineComponent({
     }
 
     const handleApprovedNameRequestChangeName = (item: Business, nrRequestActionCd: NrRequestActionCodes): void => {
-      if (isBusinessAffiliated(item.nameRequest?.corpNum)) {
+      if (!isModernizedEntity(item)) {
+        goToCorpOnline()
+      } else if (isBusinessAffiliated(item.nameRequest?.corpNum)) {
         goToDashboard(item.nameRequest?.corpNum)
       } else {
         let action = ''
