@@ -76,7 +76,7 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags, LoginSource } from '@/util/constants'
+import { Account, LoginSource } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
@@ -84,7 +84,6 @@ import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vu
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
 import { useOrgStore } from '@/stores/org'
@@ -151,7 +150,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+    return true
   }
 
   private get address () {

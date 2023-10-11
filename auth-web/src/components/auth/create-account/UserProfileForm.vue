@@ -358,15 +358,13 @@
 </template>
 
 <script lang="ts">
-
-import { AccessType, Account, LDFlags, LoginSource, Pages, Role } from '@/util/constants'
+import { AccessType, Account, LoginSource, Pages, Role } from '@/util/constants'
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 import { User, UserProfileData } from '@/models/user'
 import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Contact } from '@/models/contact'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
@@ -477,7 +475,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     }
 
     private get enablePaymentMethodSelectorStep (): boolean {
-      return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+      return true
     }
 
     private emailMustMatch (): string {

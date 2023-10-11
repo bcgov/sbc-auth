@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, DisplayModeValues, LDFlags, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { AccessType, DisplayModeValues, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
@@ -60,7 +60,6 @@ import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
@@ -245,7 +244,7 @@ export default class NonBcscAccountSetupView extends Vue {
   }
 
   private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+    return true
   }
 
   private async verifyAndCreateAccount () {

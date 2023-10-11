@@ -297,7 +297,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { CorpTypes, LDFlags, LoginSource, MagicLinkInvitationStatus, Pages } from '@/util/constants'
+import { CorpTypes, LoginSource, MagicLinkInvitationStatus, Pages } from '@/util/constants'
 import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
@@ -314,7 +314,6 @@ import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import ExpandableHelp from '@/components/auth/common/ExpandableHelp.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -557,7 +556,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   get enableMandatoryAddress (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
+    return true
   }
 
   get viewTitle (): string {

@@ -68,13 +68,12 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins } from 'vue-property-decorator'
-import { LDFlags, LoginSource } from '@/util/constants'
 import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LearnMoreBCEID from '@/components/auth/common/LearnMoreBCEID.vue'
 import LearnMoreBCSC from '@/components/auth/common/LearnMoreBCSC.vue'
+import { LoginSource } from '@/util/constants'
 import { Organization } from '@/models/Organization'
 import { useOrgStore } from '@/stores/org'
 
@@ -152,7 +151,7 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
   }
 
   private get showLearnMore (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.AuthLearnMore) || false
+    return true
   }
 
   private get loginSourceEnum () {

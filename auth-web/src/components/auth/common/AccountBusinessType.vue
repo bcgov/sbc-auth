@@ -176,12 +176,11 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { OrgBusinessType, Organization } from '@/models/Organization'
+import { Account } from '@/util/constants'
 import { Code } from '@/models/Code'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
@@ -281,7 +280,7 @@ export default class AccountBusinessType extends Vue {
   }
 
   private get enableOrgNameAutoComplete (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableOrgNameAutoComplete) || false
+    return true
   }
 
   private get getOrgNameLabel (): string {

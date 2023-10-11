@@ -208,7 +208,6 @@
                 </a>
               </div>
               <div
-                v-if="!disableGovnAccountCreation"
                 class="mb-6"
               >
                 <v-checkbox
@@ -406,9 +405,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import ConfigHelper from '@/util/config-helper'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 // Remove with Vue3 upgrade.
 import { mapGetters } from 'vuex'
@@ -458,10 +456,6 @@ export default class ChooseAuthMethodView extends Vue {
 
   get serviceCardLearnMoreURL (): string {
     return 'https://www2.gov.bc.ca/gov/content?id=B2B3A21E797A421A8FD39EEA86E245D6'
-  }
-
-  get disableGovnAccountCreation (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.DisableGovNAccountCreation) || false
   }
 
   selectBCSCAuth () {
