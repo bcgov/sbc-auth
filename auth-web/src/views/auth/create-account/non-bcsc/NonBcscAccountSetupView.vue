@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, DisplayModeValues, LDFlags, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { AccessType, DisplayModeValues, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
@@ -60,7 +60,6 @@ import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
@@ -195,17 +194,15 @@ export default class NonBcscAccountSetupView extends Vue {
     ]
 
   private async beforeMount () {
-    if (this.enablePaymentMethodSelectorStep) {
-      const paymentMethodStep = {
-        title: 'Payment Method',
-        stepName: 'Payment Method',
-        component: PaymentMethodSelector,
-        componentProps: {}
-      }
-      this.accountStepperConfig.push(paymentMethodStep)
-      // use the new premium chooser account when flag is enabled
-      this.accountStepperConfig[3].alternate.component = PremiumChooser
+    const paymentMethodStep = {
+      title: 'Payment Method',
+      stepName: 'Payment Method',
+      component: PaymentMethodSelector,
+      componentProps: {}
     }
+    this.accountStepperConfig.push(paymentMethodStep)
+    // use the new premium chooser account when flag is enabled
+    this.accountStepperConfig[3].alternate.component = PremiumChooser
     // Loading user details if not exist and check user already verified with affidavit
     if (!this.userProfile) {
       await this.getUserProfile('@me')
@@ -235,17 +232,11 @@ export default class NonBcscAccountSetupView extends Vue {
       this.accountStepperConfig[4].componentProps = { ...this.accountStepperConfig[4].componentProps, clearForm: true }
       this.accountStepperConfig[0].componentProps = { ...this.accountStepperConfig[0].componentProps, readOnly: true, orgId }
 
-      if (this.enablePaymentMethodSelectorStep) {
-        this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[3].componentProps, readOnly: true }
-        this.accountStepperConfig[5].componentProps = { ...this.accountStepperConfig[5].componentProps, readOnly: true }
-      }
+      this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[3].componentProps, readOnly: true }
+      this.accountStepperConfig[5].componentProps = { ...this.accountStepperConfig[5].componentProps, readOnly: true }
     } else {
       this.setViewOnlyMode('')
     }
-  }
-
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
 
   private async verifyAndCreateAccount () {
