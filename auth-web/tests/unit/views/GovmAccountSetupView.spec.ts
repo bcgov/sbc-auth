@@ -3,6 +3,7 @@ import GovmAccountSetupView from '@/views/auth/create-account/GovmAccountSetupVi
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import Vuelidate from 'vuelidate'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
@@ -20,6 +21,7 @@ describe('GovmAccountSetupView.vue', () => {
   beforeEach(async () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    localVue.use(Vuelidate)
 
     const orgModule = {
       namespaced: true,

@@ -102,7 +102,7 @@
             @keyup="onOrgNameChange"
           />
           <org-name-auto-complete
-            v-if="enableOrgNameAutoComplete && isBusinessAccount"
+            v-if="isBusinessAccount"
             :searchValue="autoCompleteSearchValue"
             :setAutoCompleteIsActive="autoCompleteIsActive"
             @auto-complete-value="setAutoCompleteSearchValue"
@@ -176,12 +176,11 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { OrgBusinessType, Organization } from '@/models/Organization'
+import { Account } from '@/util/constants'
 import { Code } from '@/models/Code'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
@@ -280,19 +279,13 @@ export default class AccountBusinessType extends Vue {
     }
   }
 
-  private get enableOrgNameAutoComplete (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableOrgNameAutoComplete) || false
-  }
-
   private get getOrgNameLabel (): string {
     return this.govmAccount ? 'Ministry Name' : this.isBusinessAccount ? 'Legal Business Name' : 'Account Name'
   }
 
   private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
-    if (this.enableOrgNameAutoComplete) {
-      this.autoCompleteIsActive = false
-      this.name = autoCompleteSearchValue
-    }
+    this.autoCompleteIsActive = false
+    this.name = autoCompleteSearchValue
     // emit the update value to the parent
     this.emitUpdatedOrgBusinessType()
   }
@@ -301,7 +294,7 @@ export default class AccountBusinessType extends Vue {
   // similar to PPR - watch logic
   async onOrgNameChange () {
     // suggest auto complete values
-    if (this.enableOrgNameAutoComplete && this.isBusinessAccount) {
+    if (this.isBusinessAccount) {
       if (this.name) {
         this.autoCompleteSearchValue = this.name
       }

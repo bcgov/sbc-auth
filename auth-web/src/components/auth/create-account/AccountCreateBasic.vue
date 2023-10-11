@@ -13,7 +13,6 @@
     />
 
     <fieldset
-      v-if="isExtraProvUser || enablePaymentMethodSelectorStep "
       v-display-mode
     >
       <legend class="mb-3">
@@ -76,7 +75,7 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags, LoginSource } from '@/util/constants'
+import { Account, LoginSource } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
@@ -84,7 +83,6 @@ import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vu
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
 import { useOrgStore } from '@/stores/org'
@@ -122,7 +120,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   @Prop() cancelUrl: string
   @Prop({ default: false }) govmAccount: boolean
   @Prop({ default: false }) readOnly: boolean
-  private isBaseAddressValid = !this.isExtraProvUser && !this.enablePaymentMethodSelectorStep
+  private isBaseAddressValid = false
   private readonly currentOrgAddress!: Address
   private readonly currentOrganizationType!: string
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
@@ -145,13 +143,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     if (this.govmAccount) {
       this.orgId = this.currentOrganization.id
     }
-    if (this.enablePaymentMethodSelectorStep) {
-      this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
-    }
-  }
-
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+    this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
   }
 
   private get address () {
