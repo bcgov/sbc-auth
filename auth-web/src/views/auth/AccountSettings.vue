@@ -185,7 +185,6 @@
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
               <v-list-item
-                v-if="enablePaymentMethodSelectorStep"
                 v-can:VIEW_PAYMENT_METHODS.hide
                 dense
                 class="py-1 px-4"
@@ -205,7 +204,6 @@
                 <v-list-item-title>Payment Methods</v-list-item-title>
               </v-list-item>
               <v-list-item
-                v-if="!hideProductPackage"
                 v-can:VIEW_REQUEST_PRODUCT_PACKAGE.hide
                 dense
                 class="py-1 px-4"
@@ -439,12 +437,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     return `/account/${this.orgId}/settings/${page}`
   }
 
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return true
-  }
-  private get hideProductPackage (): boolean {
-    return false
-  }
   // show menu header if statment of activity log present
   get accountActivityMenuPermission () {
     return [Permission.VIEW_ACTIVITYLOG, Permission.MANAGE_STATEMENTS].some(per => this.permissions.includes(per))

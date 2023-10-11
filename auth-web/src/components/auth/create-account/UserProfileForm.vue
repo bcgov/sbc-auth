@@ -219,11 +219,10 @@
           data-test="next-button"
           @click="next"
         >
-          <span v-if="enablePaymentMethodSelectorStep">
+          <span>
             Next
             <v-icon class="ml-2">mdi-arrow-right</v-icon>
           </span>
-          <span v-if="!enablePaymentMethodSelectorStep">Create Account</span>
         </v-btn>
         <ConfirmCancelButton
           v-if="!isAffidavitUpload"
@@ -474,10 +473,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       return this.currentUser?.loginSource === LoginSource.BCEID
     }
 
-    private get enablePaymentMethodSelectorStep (): boolean {
-      return true
-    }
-
     private emailMustMatch (): string {
       return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
     }
@@ -563,12 +558,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       }
       this.setUserProfileData(userProfile)
 
-      // if payment method selector ld flag is enabled, the navigate to next step, otherwise emit & create account
-      if (this.enablePaymentMethodSelectorStep) {
-        this.stepForward()
-      } else {
-        this.createAccount()
-      }
+      this.stepForward()
     }
 
     @Emit('final-step-action')

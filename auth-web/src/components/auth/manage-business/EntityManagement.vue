@@ -408,7 +408,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
     // check if address info is complete
     const isNotAnonUser = this.currentUser?.loginSource !== LoginSource.BCROS
-    if (isNotAnonUser && this.enableMandatoryAddress) {
+    if (isNotAnonUser) {
       // do it only if address is not already fetched.Or else try to fetch from DB
       if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
         // sync and try again
@@ -553,10 +553,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
     await this.syncBusinessesAndToggleLoading()
     this.lastSyncBusinesses = Date.now()
-  }
-
-  get enableMandatoryAddress (): boolean {
-    return true
   }
 
   get viewTitle (): string {

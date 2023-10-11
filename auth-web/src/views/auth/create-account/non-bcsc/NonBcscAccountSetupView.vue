@@ -194,17 +194,15 @@ export default class NonBcscAccountSetupView extends Vue {
     ]
 
   private async beforeMount () {
-    if (this.enablePaymentMethodSelectorStep) {
-      const paymentMethodStep = {
-        title: 'Payment Method',
-        stepName: 'Payment Method',
-        component: PaymentMethodSelector,
-        componentProps: {}
-      }
-      this.accountStepperConfig.push(paymentMethodStep)
-      // use the new premium chooser account when flag is enabled
-      this.accountStepperConfig[3].alternate.component = PremiumChooser
+    const paymentMethodStep = {
+      title: 'Payment Method',
+      stepName: 'Payment Method',
+      component: PaymentMethodSelector,
+      componentProps: {}
     }
+    this.accountStepperConfig.push(paymentMethodStep)
+    // use the new premium chooser account when flag is enabled
+    this.accountStepperConfig[3].alternate.component = PremiumChooser
     // Loading user details if not exist and check user already verified with affidavit
     if (!this.userProfile) {
       await this.getUserProfile('@me')
@@ -234,17 +232,11 @@ export default class NonBcscAccountSetupView extends Vue {
       this.accountStepperConfig[4].componentProps = { ...this.accountStepperConfig[4].componentProps, clearForm: true }
       this.accountStepperConfig[0].componentProps = { ...this.accountStepperConfig[0].componentProps, readOnly: true, orgId }
 
-      if (this.enablePaymentMethodSelectorStep) {
-        this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[3].componentProps, readOnly: true }
-        this.accountStepperConfig[5].componentProps = { ...this.accountStepperConfig[5].componentProps, readOnly: true }
-      }
+      this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[3].componentProps, readOnly: true }
+      this.accountStepperConfig[5].componentProps = { ...this.accountStepperConfig[5].componentProps, readOnly: true }
     } else {
       this.setViewOnlyMode('')
     }
-  }
-
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return true
   }
 
   private async verifyAndCreateAccount () {

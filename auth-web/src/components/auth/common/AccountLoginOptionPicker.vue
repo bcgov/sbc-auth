@@ -29,7 +29,6 @@
           </div>
           <div class="account-type__buttons">
             <v-btn
-              v-if="showLearnMore"
               large
               depressed
               block
@@ -148,10 +147,6 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
       default:
         // do nothing
     }
-  }
-
-  private get showLearnMore (): boolean {
-    return true
   }
 
   private get loginSourceEnum () {

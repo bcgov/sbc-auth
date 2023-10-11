@@ -193,21 +193,15 @@ export default class AccountSetupView extends Vue {
     ]
 
   private beforeMount () {
-    if (this.enablePaymentMethodSelectorStep) {
-      const paymentMethodStep = {
-        title: 'Payment Method',
-        stepName: 'Payment Method',
-        component: PaymentMethodSelector,
-        componentProps: {}
-      }
-      this.stepperConfig.push(paymentMethodStep)
-      // use the new premium chooser account when flag is enabled
-      this.stepperConfig[2].alternate.component = PremiumChooser
+    const paymentMethodStep = {
+      title: 'Payment Method',
+      stepName: 'Payment Method',
+      component: PaymentMethodSelector,
+      componentProps: {}
     }
-  }
-
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return true
+    this.stepperConfig.push(paymentMethodStep)
+    // use the new premium chooser account when flag is enabled
+    this.stepperConfig[2].alternate.component = PremiumChooser
   }
 
   private async verifyAndCreateAccount () {

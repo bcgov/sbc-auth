@@ -201,10 +201,6 @@ export default class StaffAccountManagement extends Vue {
     }
   ]
 
-  private get isGovmInviteEnable (): boolean {
-    return true
-  }
-
   private async mounted () {
     await this.getCodes()
     await this.syncTasks()
@@ -215,11 +211,7 @@ export default class StaffAccountManagement extends Vue {
   }
 
   openCreateAccount () {
-    if (this.isGovmInviteEnable) {
-      this.$refs.staffCreateAccountDialog.open()
-    } else {
-      this.$router.push({ path: `/${Pages.STAFF_SETUP_ACCOUNT}` })
-    }
+    this.$refs.staffCreateAccountDialog.open()
   }
 
   private get canManageAccounts () {

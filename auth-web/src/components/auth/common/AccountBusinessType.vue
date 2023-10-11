@@ -102,7 +102,7 @@
             @keyup="onOrgNameChange"
           />
           <org-name-auto-complete
-            v-if="enableOrgNameAutoComplete && isBusinessAccount"
+            v-if="isBusinessAccount"
             :searchValue="autoCompleteSearchValue"
             :setAutoCompleteIsActive="autoCompleteIsActive"
             @auto-complete-value="setAutoCompleteSearchValue"
@@ -279,19 +279,13 @@ export default class AccountBusinessType extends Vue {
     }
   }
 
-  private get enableOrgNameAutoComplete (): boolean {
-    return true
-  }
-
   private get getOrgNameLabel (): string {
     return this.govmAccount ? 'Ministry Name' : this.isBusinessAccount ? 'Legal Business Name' : 'Account Name'
   }
 
   private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
-    if (this.enableOrgNameAutoComplete) {
-      this.autoCompleteIsActive = false
-      this.name = autoCompleteSearchValue
-    }
+    this.autoCompleteIsActive = false
+    this.name = autoCompleteSearchValue
     // emit the update value to the parent
     this.emitUpdatedOrgBusinessType()
   }
@@ -300,7 +294,7 @@ export default class AccountBusinessType extends Vue {
   // similar to PPR - watch logic
   async onOrgNameChange () {
     // suggest auto complete values
-    if (this.enableOrgNameAutoComplete && this.isBusinessAccount) {
+    if (this.isBusinessAccount) {
       if (this.name) {
         this.autoCompleteSearchValue = this.name
       }

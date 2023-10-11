@@ -13,7 +13,6 @@
     />
 
     <fieldset
-      v-if="isExtraProvUser || enablePaymentMethodSelectorStep "
       v-display-mode
     >
       <legend class="mb-3">
@@ -121,7 +120,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   @Prop() cancelUrl: string
   @Prop({ default: false }) govmAccount: boolean
   @Prop({ default: false }) readOnly: boolean
-  private isBaseAddressValid = !this.isExtraProvUser && !this.enablePaymentMethodSelectorStep
+  private isBaseAddressValid = false
   private readonly currentOrgAddress!: Address
   private readonly currentOrganizationType!: string
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
@@ -144,13 +143,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     if (this.govmAccount) {
       this.orgId = this.currentOrganization.id
     }
-    if (this.enablePaymentMethodSelectorStep) {
-      this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
-    }
-  }
-
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return true
+    this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
   }
 
   private get address () {
