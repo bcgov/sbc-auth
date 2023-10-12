@@ -48,7 +48,7 @@ def get_payment_statements_url(org_id: str) -> str:
     web_app_url = current_app.config.get('WEB_APP_URL')
     web_app_statement_path_url = current_app.config.get('WEB_APP_STATEMENT_PATH_URL')
 
-    web_app_statement_path_url = web_app_statement_path_url.replace('orgId', org_id)
+    web_app_statement_path_url = web_app_statement_path_url.replace('orgId', str(org_id))
     statement_path_url = web_app_url + web_app_statement_path_url
 
     return statement_path_url
