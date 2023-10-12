@@ -60,6 +60,7 @@ class MessageType(Enum):
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'bc.registry.auth.resubmitBceidAdmin'
     AFFILIATION_INVITATION_REQUEST = 'bc.registry.auth.affiliationInvitationRequest'
     AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = 'bc.registry.auth.affiliationInvitationRequestAuthorization'
+    STATEMENT_NOTIFICATION = 'bc.registry.payment.statementNotification'
 
 
 class SubjectType(Enum):
@@ -116,6 +117,7 @@ class SubjectType(Enum):
     AFFILIATION_INVITATION_REQUEST = '[BC Registries and Online Services] Request to manage {business_name}'
     AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = '[BC Registries and Online Services] ' \
                                                    'Request to manage {business_name}'
+    STATEMENT_NOTIFICATION = 'Your BC Registries statement is available'
 
 
 class TitleType(Enum):
@@ -189,6 +191,7 @@ class TemplateType(Enum):
     RESUBMIT_BCEID_ADMIN_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_admin'
     AFFILIATION_INVITATION_REQUEST_TEMPLATE_NAME = 'affiliation_invitation_request'
     AFFILIATION_INVITATION_REQUEST_AUTHORIZATION_TEMPLATE_NAME = 'affiliation_invitation_request_authorization'
+    STATEMENT_NOTIFICATION_TEMPLATE_NAME = 'statement_notification'
 
 
 class Constants(Enum):
