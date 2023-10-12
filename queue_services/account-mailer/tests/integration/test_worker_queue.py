@@ -608,7 +608,7 @@ async def test_statement_notification_email(app, session, stan_server, event_loo
         msg_payload = {
             'accountId': id,
             'from_date': '2023-09-15 00:00:00',
-            'to_date': '2023-010-15 00:00:00',
+            'to_date': '2023-10-15 00:00:00',
             'emailAddresses': 'test@test.com',
             'statementFrequency': 'MONTHLY',
             'totalAmountOwing': 351.5
