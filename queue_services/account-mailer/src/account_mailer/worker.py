@@ -36,19 +36,15 @@ from auth_api.services.rest_service import RestService
 from auth_api.utils.roles import ADMIN, COORDINATOR
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
-from flask import Flask  # pylint: disable=wrong-import-order
+from flask import Flask
 
-from account_mailer import config  # pylint: disable=wrong-import-order
+from account_mailer import config
 from account_mailer.auth_utils import get_member_emails
-from account_mailer.email_processors import ejv_failures  # pylint: disable=wrong-import-order
-from account_mailer.email_processors import pad_confirmation  # pylint: disable=wrong-import-order
-from account_mailer.email_processors import payment_completed  # pylint: disable=wrong-import-order
-from account_mailer.email_processors import refund_requested  # pylint: disable=wrong-import-order
-from account_mailer.email_processors import common_mailer, product_confirmation  # pylint: disable=wrong-import-order
+from account_mailer.email_processors import (
+    common_mailer, ejv_failures, pad_confirmation, payment_completed, product_confirmation, refund_requested)
 from account_mailer.enums import Constants, MessageType, SubjectType, TemplateType, TitleType
-from account_mailer.services import minio_service  # pylint: disable=wrong-import-order
-from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
-from account_mailer.utils import format_currency, get_local_formatted_date  # pylint: disable=wrong-import-order
+from account_mailer.services import minio_service, notification_service
+from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
 
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
@@ -244,6 +240,23 @@ async def process_event(event_message: dict, flask_app):
                 })
 
             email_dict = product_confirmation.process_attachment(email_dict, attachment_type)
+
+        elif message_type in {MessageType.STATEMENT_NOTIFICATION.value}:
+            from_date = datetime.fromisoformat(email_msg.get('fromDate'))
+            to_date = datetime.fromisoformat(email_msg.get('toDate'))
+
+            email_dict = common_mailer.process(
+                **{
+                    'org_id': email_msg.get('accountId'),
+                    'recipients': email_msg.get('emailAddresses'),
+                    'template_name': TemplateType[f'{MessageType(message_type).name}_TEMPLATE_NAME'].value,
+                    'subject': SubjectType[MessageType(message_type).name].value,
+                    'logo_url': logo_url,
+                    'from_date': from_date.strftime('%B ') + format_day_with_suffix(from_date.day),
+                    'to_date': to_date.strftime('%B ') + format_day_with_suffix(to_date.day),
+                    'total_amount_owing': format_currency(email_msg.get('totalAmountOwing')),
+                    'statement_frequency': email_msg.get('statementFrequency').lower()
+                })
 
         else:
             if any(x for x in MessageType if x.value == message_type):
