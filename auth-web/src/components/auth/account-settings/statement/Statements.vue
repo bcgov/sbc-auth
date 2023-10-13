@@ -189,7 +189,7 @@ export default defineComponent({
     ])
 
     const isStatementNew = (item: StatementListItem) => {
-      return Math.max(...statementsList.value.map(statement => statement.id)) === item.id
+      return item.isNew
     }
 
     const isStatementOverdue = (item: StatementListItem) => {
@@ -249,6 +249,12 @@ export default defineComponent({
         pageLimit: itemsPerPage
       }
       const getStatementsListResponse = await getStatementsList(filterParams)
+
+      if ((pageNumber === 1 || !pageNumber) && getStatementsListResponse?.items?.length > 0) {
+        const maxId = Math.max(...getStatementsListResponse.items.map(item => item.id))
+        getStatementsListResponse.items.forEach(item => { item.isNew = item.id === maxId })
+      }
+
       statementsList.value = getStatementsListResponse?.items || []
       totalStatementsCount.value = getStatementsListResponse?.total || 0
       isDataLoading.value = false
