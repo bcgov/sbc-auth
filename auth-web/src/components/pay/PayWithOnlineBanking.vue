@@ -47,7 +47,7 @@
         <li>Sign in to your financial institution's online banking website or app</li>
         <li>Go to your financial institution's bill payment page</li>
         <li>Enter "BC Registries and Online Services" as payee</li>
-        <li>Enter BC Registries and Online Services account number</li>
+        <li>Enter BC Registries and Online Services account number: {{ cfsAccountId }}</li>
         <li>Submit your payment for the balance due</li>
       </ol>
       <v-divider class="my-6" />
@@ -75,6 +75,7 @@ export default class PayWithOnlineBanking extends Vue {
 
   @Watch('onlineBankingData', { deep: true })
   async updateonlineBankingData () {
+    console.log('Here!!')
     this.setData()
   }
 
