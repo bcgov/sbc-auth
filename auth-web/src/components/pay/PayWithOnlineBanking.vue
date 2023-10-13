@@ -75,7 +75,6 @@ export default class PayWithOnlineBanking extends Vue {
 
   @Watch('onlineBankingData', { deep: true })
   async updateonlineBankingData () {
-    console.log('Here!!')
     this.setData()
   }
 
