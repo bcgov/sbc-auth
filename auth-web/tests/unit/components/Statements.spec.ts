@@ -157,4 +157,19 @@ describe('Statements.vue', () => {
     expect(wrapper.vm.isStatementOverdue(item)).toBe(false)
     wrapper.destroy()
   })
+
+  it('Should compute the correct value for isStatementNew(item)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    let item = { isNew: true }
+    expect(wrapper.vm.isStatementNew(item)).toBe(true)
+    item = { isNew: false }
+    expect(wrapper.vm.isStatementNew(item)).toBe(false)
+    wrapper.destroy()
+  })
 })
