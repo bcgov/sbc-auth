@@ -185,7 +185,6 @@
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
               <v-list-item
-                v-if="enablePaymentMethodSelectorStep"
                 v-can:VIEW_PAYMENT_METHODS.hide
                 dense
                 class="py-1 px-4"
@@ -205,7 +204,6 @@
                 <v-list-item-title>Payment Methods</v-list-item-title>
               </v-list-item>
               <v-list-item
-                v-if="!hideProductPackage"
                 v-can:VIEW_REQUEST_PRODUCT_PACKAGE.hide
                 dense
                 class="py-1 px-4"
@@ -352,8 +350,7 @@
 </template>
 
 <script lang="ts">
-
-import { AccountStatus, LDFlags, LoginSource, Pages, Permission, Role } from '@/util/constants'
+import { AccountStatus, LoginSource, Pages, Permission, Role } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
@@ -361,7 +358,6 @@ import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -441,12 +437,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     return `/account/${this.orgId}/settings/${page}`
   }
 
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
-  }
-  private get hideProductPackage (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.HideProductPackage) || false
-  }
   // show menu header if statment of activity log present
   get accountActivityMenuPermission () {
     return [Permission.VIEW_ACTIVITYLOG, Permission.MANAGE_STATEMENTS].some(per => this.permissions.includes(per))

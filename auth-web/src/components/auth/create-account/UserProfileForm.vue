@@ -219,11 +219,10 @@
           data-test="next-button"
           @click="next"
         >
-          <span v-if="enablePaymentMethodSelectorStep">
+          <span>
             Next
             <v-icon class="ml-2">mdi-arrow-right</v-icon>
           </span>
-          <span v-if="!enablePaymentMethodSelectorStep">Create Account</span>
         </v-btn>
         <ConfirmCancelButton
           v-if="!isAffidavitUpload"
@@ -358,15 +357,13 @@
 </template>
 
 <script lang="ts">
-
-import { AccessType, Account, LDFlags, LoginSource, Pages, Role } from '@/util/constants'
+import { AccessType, Account, LoginSource, Pages, Role } from '@/util/constants'
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 import { User, UserProfileData } from '@/models/user'
 import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Contact } from '@/models/contact'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
@@ -476,10 +473,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       return this.currentUser?.loginSource === LoginSource.BCEID
     }
 
-    private get enablePaymentMethodSelectorStep (): boolean {
-      return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
-    }
-
     private emailMustMatch (): string {
       return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
     }
@@ -565,12 +558,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       }
       this.setUserProfileData(userProfile)
 
-      // if payment method selector ld flag is enabled, the navigate to next step, otherwise emit & create account
-      if (this.enablePaymentMethodSelectorStep) {
-        this.stepForward()
-      } else {
-        this.createAccount()
-      }
+      this.stepForward()
     }
 
     @Emit('final-step-action')

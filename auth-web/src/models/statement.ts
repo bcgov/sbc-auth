@@ -4,6 +4,7 @@ export interface StatementListItem {
   fromDate?: string
   id?: number
   isOverdue?: boolean
+  isNew?: boolean
   toDate?: string
 }
 

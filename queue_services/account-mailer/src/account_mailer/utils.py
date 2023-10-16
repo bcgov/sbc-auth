@@ -52,3 +52,13 @@ def get_local_formatted_date(date_val: datetime, dt_format: str = '%Y-%m-%d'):
 def format_currency(amount: str):
     """Format currency to two decimal places."""
     return f'{float(amount):0,.2f}'
+
+
+def format_day_with_suffix(day: int) -> str:
+    """Format a day with its suffix."""
+    # e.g 15 --> 15th
+    if 11 <= day <= 13:
+        suffix = 'th'
+    else:
+        suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
+    return f'{day}{suffix}'
