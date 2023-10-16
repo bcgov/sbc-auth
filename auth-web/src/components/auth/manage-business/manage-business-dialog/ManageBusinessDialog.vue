@@ -484,7 +484,7 @@ export default defineComponent({
     })
 
     const passwordText = computed(() => {
-      return (isCooperative.value ? 'passcode' : 'password')
+      return (isCooperative.value || isBusinessLegalTypeBenefit.value ? 'passcode' : 'password')
     })
 
     const helpDialogBlurb = computed(() => {
