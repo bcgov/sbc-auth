@@ -623,7 +623,8 @@ async def test_statement_notification_email(app, session, stan_server, event_loo
 
 
 @pytest.mark.asyncio
-async def test_payment_reminder_notification_email(app, session, stan_server, event_loop, client_id, events_stan, future):
+async def test_payment_reminder_notification_email(app, session, stan_server, event_loop, client_id, events_stan,
+                                                   future):
     """Assert that payment reminder notification events can be retrieved and decoded from the Queue."""
     # Call back for the subscription
     from account_mailer.worker import cb_subscription_handler
