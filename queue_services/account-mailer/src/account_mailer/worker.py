@@ -257,6 +257,21 @@ async def process_event(event_message: dict, flask_app):
                     'total_amount_owing': format_currency(email_msg.get('totalAmountOwing')),
                     'statement_frequency': email_msg.get('statementFrequency').lower()
                 })
+        elif message_type in {MessageType.PAYMENT_REMINDER_NOTIFICATION.value,
+                              MessageType.PAYMENT_DUE_NOTIFICATION.value}:
+            due_date = datetime.fromisoformat(email_msg.get('dueDate'))
+
+            email_dict = common_mailer.process(
+                **{
+                    'org_id': email_msg.get('accountId'),
+                    'recipients': email_msg.get('emailAddresses'),
+                    'template_name': TemplateType[f'{MessageType(message_type).name}_TEMPLATE_NAME'].value,
+                    'subject': SubjectType[MessageType(message_type).name].value,
+                    'logo_url': logo_url,
+                    'due_date': due_date.strftime('%B ') + format_day_with_suffix(due_date.day) + f' {due_date.year}',
+                    'total_amount_owing': format_currency(email_msg.get('totalAmountOwing')),
+                    'statement_frequency': email_msg.get('statementFrequency').lower()
+                })
 
         else:
             if any(x for x in MessageType if x.value == message_type):

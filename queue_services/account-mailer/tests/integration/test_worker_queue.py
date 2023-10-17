@@ -620,3 +620,84 @@ async def test_statement_notification_email(app, session, stan_server, event_loo
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.STATEMENT_NOTIFICATION.value
+
+
+@pytest.mark.asyncio
+async def test_payment_reminder_notification_email(app, session, stan_server, event_loop, client_id, events_stan, future):
+    """Assert that payment reminder notification events can be retrieved and decoded from the Queue."""
+    # Call back for the subscription
+    from account_mailer.worker import cb_subscription_handler
+
+    # set up org
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    id = org.id
+
+    events_subject = 'test_subject'
+    events_queue = 'test_queue'
+    events_durable_name = 'test_durable'
+    with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
+        # register the handler to test it
+        await subscribe_to_queue(events_stan,
+                                 events_subject,
+                                 events_queue,
+                                 events_durable_name,
+                                 cb_subscription_handler)
+
+        # add an event to queue
+        msg_payload = {
+            'accountId': id,
+            'dueDate': '2023-09-15 00:00:00',
+            'emailAddresses': 'test@test.com',
+            'statementFrequency': 'MONTHLY',
+            'totalAmountOwing': 351.5
+        }
+        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
+                                        msg_type=MessageType.PAYMENT_REMINDER_NOTIFICATION.value,
+                                        mail_details=msg_payload)
+
+        mock_send.assert_called
+        assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
+        assert mock_send.call_args.args[0].\
+            get('content').get('subject') == SubjectType.PAYMENT_REMINDER_NOTIFICATION.value
+
+
+@pytest.mark.asyncio
+async def test_payment_due_notification_email(app, session, stan_server, event_loop, client_id, events_stan, future):
+    """Assert that payment due notification events can be retrieved and decoded from the Queue."""
+    # Call back for the subscription
+    from account_mailer.worker import cb_subscription_handler
+
+    # set up org
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    id = org.id
+
+    events_subject = 'test_subject'
+    events_queue = 'test_queue'
+    events_durable_name = 'test_durable'
+    with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
+        # register the handler to test it
+        await subscribe_to_queue(events_stan,
+                                 events_subject,
+                                 events_queue,
+                                 events_durable_name,
+                                 cb_subscription_handler)
+
+        # add an event to queue
+        msg_payload = {
+            'accountId': id,
+            'dueDate': '2023-09-15 00:00:00',
+            'emailAddresses': 'test@test.com',
+            'statementFrequency': 'MONTHLY',
+            'totalAmountOwing': 351.5
+        }
+        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
+                                        msg_type=MessageType.PAYMENT_DUE_NOTIFICATION.value,
+                                        mail_details=msg_payload)
+
+        mock_send.assert_called
+        assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
+        assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.PAYMENT_DUE_NOTIFICATION.value
