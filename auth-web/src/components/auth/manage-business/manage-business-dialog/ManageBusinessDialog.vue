@@ -252,6 +252,32 @@
                   </div>
                 </v-list-group>
               </v-list>
+              <div
+                v-if="noAuthenticationOptions"
+                class="list-body contact-us"
+              >
+                The business doesn't have a password / passcode or email on record. Please Contact the Business Registry for help.
+                <p>Contact the Business Registry to request authorization to manage this business.</p>
+                <ol>
+                  <li>
+                    <v-icon small>
+                      mdi-phone
+                    </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
+                  </li>
+                  <li>
+                    <v-icon small>
+                      mdi-phone
+                    </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
+                  </li>
+                  <li>
+                    <v-icon small>
+                      mdi-email
+                    </v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a>
+                  </li>
+                </ol>
+                <h4>Hours of Operation:</h4>
+                <p>Monday to Friday, 8:30am - 4:30pm Pacific Time</p>
+              </div>
             </v-card>
           </v-form>
         </v-card-text>
@@ -539,6 +565,7 @@ export default defineComponent({
       }
     })
 
+
     // Methods
     const closeAuthorizationRequestSentDialog = () => {
       authorizationRequestSentDialog.value?.close()
@@ -729,6 +756,11 @@ export default defineComponent({
       return allowableBusinessPasscodeTypes.includes(props.businessLegalType) && hasBusinessAuthentication.value
     })
 
+    const noAuthenticationOptions = computed(() => {
+      return !((hasAffiliatedAccount.value && enableDelegationFeature.value) ||
+        showEmailOption.value || isBusinessLegalTypeFirm.value || showPasscodeOption.value)
+    })
+
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
       if (orgStore.isStaffOrSbcStaff) { return }
       if (newBusinessIdentifier) {
@@ -847,7 +879,8 @@ export default defineComponent({
       closeCreateAffiliationInvitationErrorDialog,
       showEmailOption,
       isBusinessLegalTypeCorporationOrBenefitOrCoop,
-      showPasscodeOption
+      showPasscodeOption,
+      noAuthenticationOptions
     }
   }
 })
