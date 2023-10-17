@@ -61,6 +61,8 @@ class MessageType(Enum):
     AFFILIATION_INVITATION_REQUEST = 'bc.registry.auth.affiliationInvitationRequest'
     AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = 'bc.registry.auth.affiliationInvitationRequestAuthorization'
     STATEMENT_NOTIFICATION = 'bc.registry.payment.statementNotification'
+    PAYMENT_REMINDER_NOTIFICATION = 'bc.registry.payment.statementReminderNotification'
+    PAYMENT_DUE_NOTIFICATION = 'bc.registry.payment.statementDueNotification'
 
 
 class SubjectType(Enum):
@@ -118,6 +120,8 @@ class SubjectType(Enum):
     AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = '[BC Registries and Online Services] ' \
                                                    'Request to manage {business_name}'
     STATEMENT_NOTIFICATION = 'Your BC Registries statement is available'
+    PAYMENT_REMINDER_NOTIFICATION = 'Your BC Registries payment reminder'
+    PAYMENT_DUE_NOTIFICATION = 'Your BC Registries payment is due'
 
 
 class TitleType(Enum):
@@ -192,6 +196,8 @@ class TemplateType(Enum):
     AFFILIATION_INVITATION_REQUEST_TEMPLATE_NAME = 'affiliation_invitation_request'
     AFFILIATION_INVITATION_REQUEST_AUTHORIZATION_TEMPLATE_NAME = 'affiliation_invitation_request_authorization'
     STATEMENT_NOTIFICATION_TEMPLATE_NAME = 'statement_notification'
+    PAYMENT_REMINDER_NOTIFICATION_TEMPLATE_NAME = 'payment_reminder_notification'
+    PAYMENT_DUE_NOTIFICATION_TEMPLATE_NAME = 'payment_due_notification'
 
 
 class Constants(Enum):
