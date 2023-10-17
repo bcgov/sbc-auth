@@ -257,7 +257,6 @@
                 class="list-body contact-us"
               >
                 The business doesn't have a password / passcode or email on record. Please Contact the Business Registry for help.
-                <p>Contact the Business Registry to request authorization to manage this business.</p>
                 <ol>
                   <li>
                     <v-icon small>
