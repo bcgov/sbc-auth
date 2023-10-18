@@ -46,8 +46,8 @@
       <ol class="mb-5">
         <li>Sign in to your financial institution's online banking website or app</li>
         <li>Go to your financial institution's bill payment page</li>
-        <li>Enter <b>"BC Registries and Online Services"</b> as payee</li>
-        <li>Enter BC Registries and Online Services account number: <b>{{ cfsAccountId }}</b></li>
+        <li>Enter "BC Registries and Online Services" as payee</li>
+        <li>Enter BC Registries and Online Services account number: <span class="cfs-account-id">{{ cfsAccountId }}</span></li>
         <li>Submit your payment for the balance due</li>
       </ol>
       <v-divider class="my-6" />
