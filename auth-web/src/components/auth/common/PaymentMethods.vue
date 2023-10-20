@@ -132,7 +132,7 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { OrgProduct, Organization, PADInfo } from '@/models/Organization'
+import { Organization, PADInfo } from '@/models/Organization'
 import { Action } from 'pinia-class'
 import { BcolProfile } from '@/models/bcol'
 import CommonUtils from '@/util/common-util'
