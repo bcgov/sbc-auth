@@ -82,6 +82,18 @@
                   />
                 </div>
 
+                <!-- EFT -->
+                <div
+                  v-else-if="(payment.type === paymentTypes.EFT)"
+                  class="pt-7"
+                >
+                  <v-divider class="mb-7" />
+                  <div>
+                    To send us a payment through electronic funds transfer (EFT), please read the
+                    <a @click="getEftInstructions">Electronic Funds Transfer Payment Instructions</a>.
+                  </div>
+                </div>
+
                 <!-- Other Payment Types -->
                 <div
                   v-else
@@ -120,10 +132,12 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { Organization, PADInfo } from '@/models/Organization'
+import { OrgProduct, Organization, PADInfo } from '@/models/Organization'
 import { Action } from 'pinia-class'
 import { BcolProfile } from '@/models/bcol'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import DocumentService from '@/services/document.services'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
@@ -138,6 +152,14 @@ const PAYMENT_METHODS = {
     subtitle: 'Pay for transactions individually with your credit card.',
     description: `You don't need to provide any credit card information with your account. Credit card information will
                   be requested when you are ready to complete a transaction.`,
+    isSelected: false
+  },
+  [PaymentTypes.EFT]: {
+    type: PaymentTypes.EFT,
+    icon: 'mdi-arrow-right-circle-outline',
+    title: 'Electronic Funds Transfer',
+    subtitle: 'Make payments from your bank account. Statement will be issued monthly.',
+    description: ``,
     isSelected: false
   },
   [PaymentTypes.PAD]: {
@@ -254,6 +276,16 @@ export default class PaymentMethods extends Vue {
 
   isPaymentSelected (payment) {
     return (this.selectedPaymentMethod === payment.type)
+  }
+
+  private async getEftInstructions () {
+    try {
+      const downloadData = await DocumentService.getEftInstructions()
+      CommonUtils.fileDownload(downloadData?.data, `bcrs_eft_instructions.pdf`, downloadData?.headers['content-type'])
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error)
+    }
   }
 
   @Emit()
