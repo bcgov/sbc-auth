@@ -132,7 +132,7 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { Organization, PADInfo } from '@/models/Organization'
+import { OrgPaymentDetails, Organization, PADInfo } from '@/models/Organization'
 import { Action } from 'pinia-class'
 import { BcolProfile } from '@/models/bcol'
 import CommonUtils from '@/util/common-util'
@@ -142,6 +142,7 @@ import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import { PaymentTypes } from '@/util/constants'
+import { mapState } from 'pinia'
 import { useOrgStore } from '@/stores/org'
 
 const PAYMENT_METHODS = {
@@ -215,9 +216,16 @@ const PAYMENT_METHODS = {
     PADInfoForm,
     LinkedBCOLBanner,
     GLPaymentForm
+  },
+  computed: {
+    ...mapState(useOrgStore, [
+      'currentOrgPaymentDetails'
+    ])
   }
 })
 export default class PaymentMethods extends Vue {
+  private currentOrgPaymentDetails!: OrgPaymentDetails
+
   @Prop({ default: '' }) currentOrgType: string
   @Prop({ default: undefined }) currentOrganization: Organization
   @Prop({ default: '' }) currentSelectedPaymentMethod: string
@@ -228,7 +236,7 @@ export default class PaymentMethods extends Vue {
   @Prop({ default: false }) isInitialTOSAccepted: boolean
   @Prop({ default: false }) isInitialAcknowledged: boolean
 
-  @Action(useOrgStore) public fetchCurrentOrganizationGLInfo!:(accountId: number) =>Promise<any>
+  @Action(useOrgStore) public fetchCurrentOrganizationGLInfo!: (accountId: number) => Promise<any>
 
   selectedPaymentMethod: string = ''
   paymentTypes = PaymentTypes
@@ -248,6 +256,9 @@ export default class PaymentMethods extends Vue {
           paymentMethods.push(PAYMENT_METHODS[paymentType])
         }
       })
+    }
+    if (this.currentOrgPaymentDetails?.eftEnable) {
+      paymentMethods.push(PaymentTypes.EFT)
     }
     return paymentMethods
   }
