@@ -31,7 +31,7 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     validator_response = ValidatorResponse()
     non_ejv_payment_methods = (
             PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value,
-            PaymentMethod.PAD.value, PaymentMethod.BCOL.value)
+            PaymentMethod.PAD.value, PaymentMethod.BCOL.value, PaymentMethod.EFT.value)
     org_payment_method_mapping = {
         OrgType.BASIC: (
             PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value, PaymentMethod.ONLINE_BANKING.value),

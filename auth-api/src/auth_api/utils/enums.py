@@ -77,6 +77,7 @@ class PaymentMethod(Enum):
     ONLINE_BANKING = 'ONLINE_BANKING'
     PAD = 'PAD'
     EJV = 'EJV'
+    EFT = 'EFT'
 
 
 class PaymentAccountStatus(Enum):
