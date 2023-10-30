@@ -307,7 +307,6 @@ export default defineComponent({
         paymentMethodSelected({ type: PaymentTypes.PAD }, isTouched.value)
       }
       emit('is-pad-valid', isValid && isTouched.value)
-      return isValid && isTouched.value
     }
 
     onMounted(async () => {
