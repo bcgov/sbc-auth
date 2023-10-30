@@ -15,6 +15,7 @@
 from flask import current_app
 from ldclient import get as ldclient_get, set_config as ldclient_set_config  # noqa: I001
 from ldclient.config import Config  # noqa: I005
+from ldclient import Context
 from ldclient.integrations import Files
 
 from auth_api.models import User
@@ -80,18 +81,13 @@ class Flags():
 
     @staticmethod
     def _get_anonymous_user():
-        return {
-            'key': 'anonymous'
-        }
+        return Context.create('anonymous')
 
     @staticmethod
     def _user_as_key(user: User):
-        user_json = {
-            'key': user.idp_userid,
-            'firstName': user.firstname,
-            'lastName': user.lastname
-        }
-        return user_json
+        return Context.builder(user.idp_userid)\
+            .set('firstName', user.firstname)\
+            .set('lastName', user.lastname).build()
 
     def is_on(self, flag: str, user: User = None) -> bool:
         """Assert that the flag is set for this user."""
