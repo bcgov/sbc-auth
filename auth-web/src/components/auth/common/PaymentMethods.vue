@@ -250,7 +250,7 @@ export default defineComponent({
         })
       }
       if (currentOrgPaymentDetails?.eftEnable) {
-        paymentMethods.push(PaymentTypes.EFT)
+        paymentMethods.push(PAYMENT_METHODS[PaymentTypes.EFT])
       }
       return paymentMethods
     })
