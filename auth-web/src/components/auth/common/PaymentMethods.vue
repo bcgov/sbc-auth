@@ -82,6 +82,18 @@
                   />
                 </div>
 
+                <!-- EFT -->
+                <div
+                  v-else-if="(payment.type === paymentTypes.EFT)"
+                  class="pt-7"
+                >
+                  <v-divider class="mb-7" />
+                  <div>
+                    To send us a payment through electronic funds transfer (EFT), please read the
+                    <a @click="getEftInstructions">Electronic Funds Transfer Payment Instructions</a>.
+                  </div>
+                </div>
+
                 <!-- Other Payment Types -->
                 <div
                   v-else
@@ -119,11 +131,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { Organization, PADInfo } from '@/models/Organization'
-import { Action } from 'pinia-class'
+import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import DocumentService from '@/services/document.services'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
@@ -138,6 +150,14 @@ const PAYMENT_METHODS = {
     subtitle: 'Pay for transactions individually with your credit card.',
     description: `You don't need to provide any credit card information with your account. Credit card information will
                   be requested when you are ready to complete a transaction.`,
+    isSelected: false
+  },
+  [PaymentTypes.EFT]: {
+    type: PaymentTypes.EFT,
+    icon: 'mdi-arrow-right-circle-outline',
+    title: 'Electronic Funds Transfer',
+    subtitle: 'Make payments from your bank account. Statement will be issued monthly.',
+    description: ``,
     isSelected: false
   },
   [PaymentTypes.PAD]: {
@@ -188,105 +208,133 @@ const PAYMENT_METHODS = {
   }
 }
 
-@Component({
+export default defineComponent({
+  name: 'PaymentMethods',
   components: {
     PADInfoForm,
     LinkedBCOLBanner,
     GLPaymentForm
+  },
+  props: {
+    currentOrgType: { default: '' },
+    currentOrganization: { default: undefined },
+    currentSelectedPaymentMethod: { default: '' },
+    currentOrgPaymentType: { default: undefined },
+    isChangeView: { default: false },
+    isAcknowledgeNeeded: { default: true },
+    isTouchedUpdate: { default: false },
+    isInitialTOSAccepted: { default: false },
+    isInitialAcknowledged: { default: false }
+  },
+  emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'payment-method-selected'],
+  setup (props, { emit }) {
+    const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails } = useOrgStore()
+
+    const selectedPaymentMethod = ref('')
+    const paymentTypes = PaymentTypes
+    const padInfo = ref({})
+    const isTouched = ref(false)
+    const ejvPaymentInformationTitle = 'General Ledger Information'
+
+    // this object can define the payment methods allowed for each account tyoes
+    const paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
+
+    const allowedPaymentMethods = computed(() => {
+      const paymentMethods = []
+      if (props.currentOrgType) {
+        const paymentTypes = paymentsPerAccountType[props.currentOrgType]
+        paymentTypes.forEach((paymentType) => {
+          if (PAYMENT_METHODS[paymentType]) {
+            paymentMethods.push(PAYMENT_METHODS[paymentType])
+          }
+        })
+      }
+      if (currentOrgPaymentDetails?.eftEnable) {
+        paymentMethods.push(PaymentTypes.EFT)
+      }
+      return paymentMethods
+    })
+
+    const forceEditModeBCOL = computed(() =>
+      props.currentSelectedPaymentMethod === PaymentTypes.BCOL &&
+      props.currentOrgPaymentType !== undefined &&
+      props.currentOrgPaymentType !== PaymentTypes.BCOL
+    )
+
+    const isPaymentEJV = computed(() => selectedPaymentMethod.value === PaymentTypes.EJV)
+
+    // set on change of input only for single allowed payments
+    const isPadInfoTouched = (isTouch: boolean) => {
+      isTouched.value = isTouch
+    }
+
+    const isPaymentSelected = (payment) => {
+      return (selectedPaymentMethod.value === payment.type)
+    }
+
+    const getEftInstructions = async () => {
+      try {
+        const downloadData = await DocumentService.getEftInstructions()
+        CommonUtils.fileDownload(downloadData?.data, `bcrs_eft_instructions.pdf`, downloadData?.headers['content-type'])
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error)
+      }
+    }
+
+    const paymentMethodSelected = (payment, isTouch = true) => {
+      selectedPaymentMethod.value = payment.type
+      isTouched.value = isTouch
+      // Emit touched flag for the parent element
+      if (props.isTouchedUpdate) {
+        emit('payment-method-selected', { selectedPaymentMethod: selectedPaymentMethod.value, isTouched: isTouched.value })
+      } else {
+        emit('payment-method-selected', selectedPaymentMethod.value)
+      }
+    }
+
+    const getPADInfo = (padInfoValue) => {
+      padInfo.value = padInfoValue
+      emit('get-PAD-info', padInfoValue)
+    }
+
+    const setBcolInfo = (bcolProfile: BcolProfile) => {
+      emit('emit-bcol-info', bcolProfile)
+    }
+
+    const isPADValid = (isValid) => {
+      if (isValid) {
+        paymentMethodSelected({ type: PaymentTypes.PAD }, isTouched.value)
+      }
+      return isValid && isTouched.value
+    }
+
+    onMounted(async () => {
+      paymentMethodSelected({ type: props.currentSelectedPaymentMethod }, false)
+      if (isPaymentEJV.value) {
+        await fetchCurrentOrganizationGLInfo(props.currentOrganization?.id)
+      }
+    })
+
+    return {
+      selectedPaymentMethod,
+      paymentTypes,
+      padInfo,
+      isTouched,
+      ejvPaymentInformationTitle,
+      allowedPaymentMethods,
+      forceEditModeBCOL,
+      isPaymentEJV,
+      getEftInstructions,
+      paymentMethodSelected,
+      getPADInfo,
+      setBcolInfo,
+      isPADValid,
+      isPadInfoTouched,
+      isPaymentSelected
+    }
   }
 })
-export default class PaymentMethods extends Vue {
-  @Prop({ default: '' }) currentOrgType: string
-  @Prop({ default: undefined }) currentOrganization: Organization
-  @Prop({ default: '' }) currentSelectedPaymentMethod: string
-  @Prop({ default: undefined }) currentOrgPaymentType: string
-  @Prop({ default: false }) isChangeView: boolean
-  @Prop({ default: true }) isAcknowledgeNeeded: boolean
-  @Prop({ default: false }) isTouchedUpdate: boolean
-  @Prop({ default: false }) isInitialTOSAccepted: boolean
-  @Prop({ default: false }) isInitialAcknowledged: boolean
-
-  @Action(useOrgStore) public fetchCurrentOrganizationGLInfo!:(accountId: number) =>Promise<any>
-
-  selectedPaymentMethod: string = ''
-  paymentTypes = PaymentTypes
-  padInfo: PADInfo = {} as PADInfo
-  isTouched: boolean = false
-  ejvPaymentInformationTitle = 'General Ledger Information'
-
-  // this object can define the payment methods allowed for each account tyoes
-  paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
-
-  get allowedPaymentMethods () {
-    const paymentMethods = []
-    if (this.currentOrgType) {
-      const paymentTypes = this.paymentsPerAccountType[this.currentOrgType]
-      paymentTypes.forEach(paymentType => {
-        if (PAYMENT_METHODS[paymentType]) {
-          paymentMethods.push(PAYMENT_METHODS[paymentType])
-        }
-      })
-    }
-    return paymentMethods
-  }
-
-  get forceEditModeBCOL () {
-    return this.currentSelectedPaymentMethod === PaymentTypes.BCOL &&
-           this.currentOrgPaymentType !== undefined &&
-           this.currentOrgPaymentType !== PaymentTypes.BCOL
-  }
-
-  get isPaymentEJV () {
-    return this.currentSelectedPaymentMethod === PaymentTypes.EJV
-  }
-
-  // set on change of input only for single allowed payments
-  isPadInfoTouched (isTouched: boolean) {
-    this.isTouched = isTouched
-  }
-
-  private async mounted () {
-    this.paymentMethodSelected({ type: this.currentSelectedPaymentMethod }, false)
-    if (this.isPaymentEJV) {
-      await this.fetchCurrentOrganizationGLInfo(this.currentOrganization?.id)
-    }
-  }
-
-  isPaymentSelected (payment) {
-    return (this.selectedPaymentMethod === payment.type)
-  }
-
-  @Emit()
-  paymentMethodSelected (payment, isTouched = true) {
-    this.selectedPaymentMethod = payment.type
-    this.isTouched = isTouched
-    // emit touched flag for parent element
-    if (this.isTouchedUpdate) {
-      return { selectedPaymentMethod: this.selectedPaymentMethod, isTouched }
-    }
-    return this.selectedPaymentMethod
-  }
-
-  @Emit('get-PAD-info')
-  getPADInfo (padInfo: PADInfo) {
-    this.padInfo = padInfo
-    return this.padInfo
-  }
-
-  @Emit('emit-bcol-info')
-  setBcolInfo (bcolProfile: BcolProfile) {
-    return bcolProfile
-  }
-
-  @Emit('is-pad-valid')
-  isPADValid (isValid) {
-    if (isValid) {
-      this.paymentMethodSelected({ type: PaymentTypes.PAD }, this.isTouched)
-    }
-    // if !this.isTouched then nothing has changed (keeps save btn disabled)
-    return isValid && this.isTouched
-  }
-}
 </script>
 
 <style lang="scss" scoped>

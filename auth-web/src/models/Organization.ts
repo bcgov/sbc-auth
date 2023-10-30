@@ -219,6 +219,7 @@ export interface OrgPaymentDetails {
   padTosAcceptedBy:string
   padTosAcceptedDate:string
   futurePaymentMethod: string
+  eftEnable?: boolean
 }
 
 export interface CFSAccountDetails {
