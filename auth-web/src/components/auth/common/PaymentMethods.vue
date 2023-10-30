@@ -304,6 +304,7 @@ export default defineComponent({
 
     const isPADValid = (isValid) => {
       if (isValid) {
+        emit('is-pad-valid', isValid)
         paymentMethodSelected({ type: PaymentTypes.PAD }, isTouched.value)
       }
       return isValid && isTouched.value
