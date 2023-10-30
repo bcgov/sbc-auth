@@ -86,8 +86,8 @@ class Flags():
     @staticmethod
     def _user_as_key(user: User):
         return Context.builder(user.idp_userid)\
-            .set('userName', user.user_name)\
-            .set('firstName', user.first_name).build()
+            .set('firstName', user.firstname)\
+            .set('lastName', user.lastname).build()
 
     def is_on(self, flag: str, user: User = None) -> bool:
         """Assert that the flag is set for this user."""
