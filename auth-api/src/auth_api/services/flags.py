@@ -85,7 +85,7 @@ class Flags():
 
     @staticmethod
     def _user_as_key(user: User):
-        return Context.builder(user.sub)\
+        return Context.builder(user.idp_userid)\
             .set('userName', user.user_name)\
             .set('firstName', user.first_name).build()
 
