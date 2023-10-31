@@ -125,6 +125,7 @@ class SubjectType(Enum):
     PAYMENT_DUE_NOTIFICATION = 'Your BC Registries payment is due'
     EFT_AVAILABLE_NOTIFICATION = 'New Payment Method Available'
 
+
 class TitleType(Enum):
     """Event Title Types."""
 
