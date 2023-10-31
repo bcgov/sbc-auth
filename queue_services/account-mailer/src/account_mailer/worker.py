@@ -76,12 +76,13 @@ async def process_event(event_message: dict, flask_app):
             email_msg['registry_logo_url'] = minio_service.MinioService.get_minio_public_url('bc_registry_logo_pdf.svg')
             email_dict = pad_confirmation.process(email_msg, token)
         elif message_type == MessageType.EFT_AVAILABLE_NOTIFICATION.value:
-            org_id = email_msg.get('accountId')
             template_name = TemplateType.EFT_AVAILABLE_NOTIFICATION_TEMPLATE_NAME.value
+            org_id = email_msg.get('accountId')
+            admin_emails = get_member_emails(org_id, (ADMIN))
             subject = SubjectType.EFT_AVAILABLE_NOTIFICATION.value
             context_url = f'{get_login_url()}/account/{org_id}/settings/payment-option'
-            admin_emails = get_member_emails(org_id, (ADMIN))
-            email_dict = common_mailer.process(org_id, admin_emails, template_name, subject, context_url)
+            email_dict = common_mailer.process(org_id, admin_emails, template_name, subject, logo_url=logo_url,
+                                               context_url=context_url)
         elif message_type == MessageType.NSF_LOCK_ACCOUNT.value:
             logger.debug('lock account message recieved:')
             template_name = TemplateType.NSF_LOCK_ACCOUNT_TEMPLATE_NAME.value
