@@ -78,7 +78,7 @@ async def process_event(event_message: dict, flask_app):
         elif message_type == MessageType.EFT_AVAILABLE_NOTIFICATION.value:
             template_name = TemplateType.EFT_AVAILABLE_NOTIFICATION_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
-            admin_emails = get_member_emails(org_id, (ADMIN))
+            admin_emails = get_member_emails(org_id, (ADMIN,))
             subject = SubjectType.EFT_AVAILABLE_NOTIFICATION.value
             context_url = f'{get_login_url()}/account/{org_id}/settings/payment-option'
             email_dict = common_mailer.process(org_id, admin_emails, template_name, subject, logo_url=logo_url,
