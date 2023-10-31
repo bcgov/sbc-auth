@@ -39,7 +39,7 @@ from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask
 
 from account_mailer import config
-from account_mailer.auth_utils import get_member_emails
+from account_mailer.auth_utils import get_login_url, get_member_emails
 from account_mailer.email_processors import (
     common_mailer, ejv_failures, pad_confirmation, payment_completed, product_confirmation, refund_requested)
 from account_mailer.enums import Constants, MessageType, SubjectType, TemplateType, TitleType
@@ -75,6 +75,13 @@ async def process_event(event_message: dict, flask_app):
         elif message_type == MessageType.PAD_ACCOUNT_CREATE.value:
             email_msg['registry_logo_url'] = minio_service.MinioService.get_minio_public_url('bc_registry_logo_pdf.svg')
             email_dict = pad_confirmation.process(email_msg, token)
+        elif message_type == MessageType.EFT_AVAILABLE_NOTIFICATION.value:
+            org_id = email_msg.get('accountId')
+            template_name = TemplateType.EFT_AVAILABLE_NOTIFICATION_TEMPLATE_NAME.value
+            subject = SubjectType.EFT_AVAILABLE_NOTIFICATION.value
+            context_url = f'{get_login_url()}/account/{org_id}/settings/payment-option'
+            admin_emails = get_member_emails(org_id, (ADMIN))
+            email_dict = common_mailer.process(org_id, admin_emails, template_name, subject, context_url)
         elif message_type == MessageType.NSF_LOCK_ACCOUNT.value:
             logger.debug('lock account message recieved:')
             template_name = TemplateType.NSF_LOCK_ACCOUNT_TEMPLATE_NAME.value

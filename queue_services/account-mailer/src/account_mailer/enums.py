@@ -200,6 +200,7 @@ class TemplateType(Enum):
     STATEMENT_NOTIFICATION_TEMPLATE_NAME = 'statement_notification'
     PAYMENT_REMINDER_NOTIFICATION_TEMPLATE_NAME = 'payment_reminder_notification'
     PAYMENT_DUE_NOTIFICATION_TEMPLATE_NAME = 'payment_due_notification'
+    EFT_AVAILABLE_NOTIFICATION_TEMPLATE_NAME = 'eft_available_notification'
 
 
 class Constants(Enum):
