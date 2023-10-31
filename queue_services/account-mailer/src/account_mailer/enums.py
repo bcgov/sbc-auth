@@ -63,6 +63,7 @@ class MessageType(Enum):
     STATEMENT_NOTIFICATION = 'bc.registry.payment.statementNotification'
     PAYMENT_REMINDER_NOTIFICATION = 'bc.registry.payment.statementReminderNotification'
     PAYMENT_DUE_NOTIFICATION = 'bc.registry.payment.statementDueNotification'
+    EFT_AVAILABLE_NOTIFICATION = 'bc.registry.payment.eftAvailableNotification'
 
 
 class SubjectType(Enum):
@@ -122,7 +123,7 @@ class SubjectType(Enum):
     STATEMENT_NOTIFICATION = 'Your BC Registries statement is available'
     PAYMENT_REMINDER_NOTIFICATION = 'Your BC Registries payment reminder'
     PAYMENT_DUE_NOTIFICATION = 'Your BC Registries payment is due'
-
+    EFT_AVAILABLE_NOTIFICATION = 'New Payment Method Available'
 
 class TitleType(Enum):
     """Event Title Types."""
