@@ -34,3 +34,4 @@ pylint
 pylint-flask
 pep8
 autopep8
+requests
