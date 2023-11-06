@@ -41,7 +41,7 @@ from flask import Flask
 from account_mailer import config
 from account_mailer.auth_utils import get_login_url, get_member_emails
 from account_mailer.email_processors import (
-    common_mailer, ejv_failures, pad_confirmation, payment_completed, product_confirmation, refund_requested)
+    account_restored_nsf, common_mailer, ejv_failures, pad_confirmation, payment_completed, product_confirmation, refund_requested)
 from account_mailer.enums import Constants, MessageType, SubjectType, TemplateType, TitleType
 from account_mailer.services import minio_service, notification_service
 from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
@@ -93,14 +93,26 @@ async def process_event(event_message: dict, flask_app):
             email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
                                                subject, logo_url=logo_url)
         elif message_type == MessageType.NSF_UNLOCK_ACCOUNT.value:
-            logger.debug('unlock account message recieved')
+            logger.debug('unlock account message received')
             template_name = TemplateType.NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
             admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
             subject = SubjectType.NSF_UNLOCK_ACCOUNT_SUBJECT.value
             logo_url = email_msg.get('logo_url')
-            email_dict = common_mailer.process(org_id, admin_coordinator_emails,
-                                               template_name, subject, logo_url=logo_url)
+            account_name = email_msg.get('toOrgName'),
+
+            email_dict = common_mailer.process(
+                **{
+                    'account_name': account_name,
+                    'logo_url': logo_url,
+                    'template_name': template_name,
+                    'subject': subject,
+                    'org_id': org_id,
+                    'admin_coordinator_emails': admin_coordinator_emails,
+                })
+
+            email_dict = account_restored_nsf.process(email_dict, token=token)
+            
         elif message_type == MessageType.ACCOUNT_CONFIRMATION_PERIOD_OVER.value:
             template_name = TemplateType.ACCOUNT_CONF_OVER_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
