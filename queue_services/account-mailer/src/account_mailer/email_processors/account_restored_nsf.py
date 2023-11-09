@@ -61,7 +61,7 @@ def _get_account_restored_nsf_pdf(email_msg, token):
     current_time = datetime.datetime.now()
     template_vars = {
         **email_msg,
-        'corpName': email_msg.get('account_name'),
+        'corpName': email_msg.get('accountName'),
         'receiptNumber': email_msg.get('receipt_number'),
         'filingDate': current_time.strftime('%Y-%m-%d'),
         'effectiveDateTime': current_time.strftime('%Y-%m-%d %H:%M:%S'),
