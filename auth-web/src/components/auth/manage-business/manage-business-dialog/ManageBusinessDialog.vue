@@ -564,7 +564,6 @@ export default defineComponent({
       }
     })
 
-
     // Methods
     const closeAuthorizationRequestSentDialog = () => {
       authorizationRequestSentDialog.value?.close()

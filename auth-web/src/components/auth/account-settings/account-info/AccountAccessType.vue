@@ -60,7 +60,6 @@
                 v-model="selectedAccessType"
                 class="mt-0"
                 req
-                :rules="[selectedAccessTypeRules]"
               >
                 <v-radio
                   :key="AccessType.REGULAR"
@@ -75,19 +74,6 @@
                   data-test="radio-govn"
                 />
               </v-radio-group>
-              <div
-                v-if="!isPad"
-                class="d-flex pb-3"
-              >
-                <v-icon
-                  size="30"
-                  color="error"
-                  class="mt-1 mr-4"
-                >
-                  mdi-alert-circle-outline
-                </v-icon>
-                <span class="error-text">{{ $t('accountAccessTypeUpdateWarning') }}</span>
-              </div>
 
               <v-card-actions class="px-0 pt-0">
                 <v-row>
@@ -130,7 +116,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, PaymentTypes } from '@/util/constants'
+import { AccessType, Account } from '@/util/constants'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Organization } from '@/models/Organization'
 
@@ -150,16 +136,13 @@ export default class AccountAccessType extends Vue {
   public AccessType = AccessType
   public isLoading = false
 
-  public get isPad (): boolean {
-    return this.currentOrgPaymentType && this.currentOrgPaymentType === PaymentTypes.PAD
-  }
-
+  // Only allow PREMIUM -> GOVN and GOVN -> PREMIUM
   public get isChangeButtonEnabled (): boolean {
     // Check access type and orgtype must be premium
     const accessType: any = this.organization.accessType
     const isAllowedAccessType = this.organization.orgType === Account.PREMIUM &&
-      [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID].includes(accessType)
-    return isAllowedAccessType && this.canChangeAccessType // canChangeAccessType is the role based access pasased as property
+      [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID, AccessType.GOVN].includes(accessType)
+    return isAllowedAccessType && this.canChangeAccessType // canChangeAccessType is the role based access passed as a property
   }
 
   public get getAccessTypeText (): string {
@@ -178,16 +161,8 @@ export default class AccountAccessType extends Vue {
     this.selectedAccessType = this.organization.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
   }
 
-  // Custom rules for selectedAccessType v-model in form
-  public selectedAccessTypeRules (): any {
-    return this.selectedAccessType === AccessType.GOVN ? true : 'Please select Government agency'
-  }
-
-  // Currently, there is only one way change from Regular access type accounts to GovN. Not the other way around
   public updateDetails () {
-    if (this.isPad && this.$refs.accountAccessTypeForm.validate()) {
-      this.$emit('update:updateAndSaveAccessTypeDetails', this.selectedAccessType)
-    }
+    this.$emit('update:updateAndSaveAccessTypeDetails', this.selectedAccessType)
   }
 
   @Emit('update:viewOnlyMode')
