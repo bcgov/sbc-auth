@@ -343,7 +343,7 @@ export default class AccountInfo extends Mixins(
   @Action(useOrgStore) syncAddress!: () => Address
   @Action(useOrgStore) getOrgPayments!: () => any
   @Action(useOrgStore) updateOrganizationAccessType!: (accessType: string, orgId: number, syncOrg: boolean) =>
-    Promise<Organization>
+    Promise<boolean>
 
   @Action(useOrgStore) syncOrganization!: (currentAccount: number) => Promise<Organization>
   @Action(useOrgStore) suspendOrganization!: (selectedSuspensionReasonCode: string) => Promise<Organization>
