@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-form ref="accountAccessTypeForm">
+    <v-form>
       <v-card elevation="0">
         <div class="account-label">
           <div
@@ -88,7 +88,7 @@
                       color="primary"
                       :loading="false"
                       aria-label="Save Account Access Type"
-                      @click="updateDetails()"
+                      @click="updateDetails(false)"
                     >
                       <span class="save-btn__label">Save</span>
                     </v-btn>
@@ -159,77 +159,94 @@
 
 <script lang="ts">
 import { AccessType, Account } from '@/util/constants'
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { Organization } from '@/models/Organization'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { reactive, computed, defineComponent, watch, toRefs } from '@vue/composition-api'
 
-@Component({
+export default defineComponent({
+  name: 'AccountAccessType',
   components: {
     ModalDialog
+  },
+  props: {
+    organization: {
+      type: Object,
+      default: undefined,
+    },
+    viewOnlyMode: {
+      type: Boolean,
+      default: true,
+    },
+    canChangeAccessType: {
+      type: Boolean,
+      default: false,
+    },
+    currentOrgPaymentType: {
+      type: String,
+      default: undefined,
+    },
+  },
+  emits: ['update:updateAndSaveAccessTypeDetails', 'update:viewOnlyMode'],
+  setup(props , { emit }) {
+      // const AccessType = AccessType
+      const state = reactive({
+        changeAccessTypeToRegularDialog: null,
+        selectedAccessType: undefined,
+        isLoading: false,
+        // Only allow PREMIUM -> GOVN and GOVN -> PREMIUM
+        isChangeButtonEnabled: computed<boolean>(() => {
+          // Check access type and orgtype must be premium
+          const accessType: any = props.organization.accessType
+          const isAllowedAccessType = props.organization.orgType === Account.PREMIUM &&
+            [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID, AccessType.GOVN].includes(accessType)
+          return isAllowedAccessType && props.canChangeAccessType // canChangeAccessType is the role based access passed as a property
+        }),
+        getAccessTypeText: computed<string>(() => {
+          let accessTypeText = 'Regular Access'
+          if (props.organization.accessType === AccessType.GOVN) {
+            accessTypeText = 'Government agency (other than BC provincial)'
+          } else if (props.organization.accessType === AccessType.GOVM) {
+            accessTypeText = 'BC Government Ministry'
+          }
+          return accessTypeText
+        })
+      })
+
+      const updateDetails = (confirmed: boolean) => {
+        if (state.selectedAccessType === AccessType.REGULAR && !confirmed) {
+          state.changeAccessTypeToRegularDialog.open()
+        } else {
+          emit('update:updateAndSaveAccessTypeDetails', state.selectedAccessType)
+          state.changeAccessTypeToRegularDialog.close()
+        }
+      }
+
+      const closeDialog = () => {
+        state.changeAccessTypeToRegularDialog.close()
+      }
+
+      const cancelEdit = () => {
+        state.selectedAccessType = props.organization.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
+        emit('update:viewOnlyMode', {
+          component: 'accessType',
+          mode: true
+        })
+      }
+
+      // Watch property access type and update model
+      watch(() => props.organization, (newVal) => {
+        state.selectedAccessType = newVal.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
+      }, { deep: true, immediate: true })
+
+
+      return {
+        AccessType,
+        ...toRefs(state),
+        updateDetails,
+        closeDialog,
+        cancelEdit
+      }
   }
 })
-export default class AccountAccessType extends Vue {
-  @Prop({ default: undefined }) organization: Organization
-  @Prop({ default: true }) viewOnlyMode: boolean
-  @Prop({ default: false }) canChangeAccessType: boolean
-  @Prop({ default: undefined }) currentOrgPaymentType: string
-
-  $refs: {
-    accountAccessTypeForm: HTMLFormElement,
-    changeAccessTypeToRegularDialog: InstanceType<typeof ModalDialog>
-    selectedAccessType: HTMLFormElement,
-  }
-  selectedAccessType: string = undefined
-  AccessType = AccessType
-  isLoading = false
-
-  // Only allow PREMIUM -> GOVN and GOVN -> PREMIUM
-  get isChangeButtonEnabled (): boolean {
-    // Check access type and orgtype must be premium
-    const accessType: any = this.organization.accessType
-    const isAllowedAccessType = this.organization.orgType === Account.PREMIUM &&
-      [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID, AccessType.GOVN].includes(accessType)
-    return isAllowedAccessType && this.canChangeAccessType // canChangeAccessType is the role based access passed as a property
-  }
-
-  get getAccessTypeText (): string {
-    let accessTypeText = 'Regular Access'
-    if (this.organization.accessType === AccessType.GOVN) {
-      accessTypeText = 'Government agency (other than BC provincial)'
-    } else if (this.organization.accessType === AccessType.GOVM) {
-      accessTypeText = 'BC Government Ministry'
-    }
-    return accessTypeText
-  }
-
-  // Watch property access type and update model
-  @Watch('organization', { deep: true, immediate: true })
-  onOrganizationChange () {
-    this.selectedAccessType = this.organization.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
-  }
-
-  updateDetails (confirmed: boolean) {
-    if (this.selectedAccessType === AccessType.REGULAR && !confirmed) {
-      this.$refs.changeAccessTypeToRegularDialog.open()
-    } else {
-      this.$emit('update:updateAndSaveAccessTypeDetails', this.selectedAccessType)
-      this.$refs.changeAccessTypeToRegularDialog.close()
-    }
-  }
-
-  closeDialog () {
-    this.$refs.changeAccessTypeToRegularDialog.close()
-  }
-
-  @Emit('update:viewOnlyMode')
-  cancelEdit () {
-    this.selectedAccessType = this.organization.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
-    return {
-      component: 'accessType',
-      mode: true
-    }
-  }
-}
 </script>
 
 <style lang="scss" scoped>
