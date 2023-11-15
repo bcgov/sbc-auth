@@ -232,7 +232,6 @@ export default defineComponent({
         })
       }
 
-      // Watch property access type and update model
       watch(() => props.organization, (newVal) => {
         state.selectedAccessType = newVal.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
       }, { deep: true, immediate: true })
