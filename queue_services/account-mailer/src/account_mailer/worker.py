@@ -99,7 +99,7 @@ async def process_event(event_message: dict, flask_app):
             admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
             subject = SubjectType.NSF_UNLOCK_ACCOUNT_SUBJECT.value
             logo_url = email_msg.get('logo_url')
-            account_name = email_msg.get('toOrgName'),
+            account_name = email_msg.get('toOrgName')
 
             email_dict = common_mailer.process(
                 **{
@@ -112,7 +112,7 @@ async def process_event(event_message: dict, flask_app):
                 })
 
             email_dict = account_restored_nsf.process(email_dict, token=token)
-            
+
         elif message_type == MessageType.ACCOUNT_CONFIRMATION_PERIOD_OVER.value:
             template_name = TemplateType.ACCOUNT_CONF_OVER_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
