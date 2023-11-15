@@ -186,7 +186,7 @@ export default defineComponent({
     const taskRelationshipType: Ref<string> = ref('')
     const productFeeFormValid: Ref<boolean> = ref(false)
     const viewOnly = DisplayModeValues.VIEW_ONLY
-    const accountInfoAccessType = ref(null)
+    const accountInfoAccessType = ref<string>(null)
     const accountInfoValid: Ref<boolean> = ref(true)
     const showAccountInfoValidations: Ref<boolean> = ref(false)
 
@@ -598,11 +598,9 @@ export default defineComponent({
 
       try {
         if (accountInfoAccessType.value && accountInfoAccessType.value !== accountUnderReview.value.accessType) {
-          const success = await orgStore.updateOrganizationAccessType({
-            accessType: accountInfoAccessType.value as string,
-            orgId: accountUnderReview.value.id,
-            syncOrg: false
-          })
+          const success = await orgStore.updateOrganizationAccessType(
+            accountInfoAccessType.value, accountUnderReview.value.id, false
+          )
           if (!success) throw new Error('Error updating account access type prevented review completion.')
         }
         if (isApprove) {

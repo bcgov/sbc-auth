@@ -283,6 +283,7 @@
 
 <script lang="ts">
 import {
+  AccessType,
   AccountStatus,
   Pages,
   Permission,
@@ -341,10 +342,12 @@ export default class AccountInfo extends Mixins(
 
   @Action(useOrgStore) syncAddress!: () => Address
   @Action(useOrgStore) getOrgPayments!: () => any
-  @Action(useOrgStore) updateOrganizationAccessType!: (accessType: string) => Promise<Organization>
+  @Action(useOrgStore) updateOrganizationAccessType!: (accessType: string, orgId: number, syncOrg: boolean) =>
+    Promise<boolean>
 
   @Action(useOrgStore) syncOrganization!: (currentAccount: number) => Promise<Organization>
   @Action(useOrgStore) suspendOrganization!: (selectedSuspensionReasonCode: string) => Promise<Organization>
+  @Action(useOrgStore) removeOrgAccountFees!: (orgId: number) => Promise<void>
 
   private dialogTitle: string = ''
   private dialogText: string = ''
@@ -417,7 +420,11 @@ export default class AccountInfo extends Mixins(
 
   // update account access type from child component
   public async updateAndSaveAccessTypeDetails (accessType: string) {
-    await this.updateOrganizationAccessType(accessType)
+    await this.updateOrganizationAccessType(accessType, this.currentOrganization.id, true)
+    // Only remove the account fees if going from GOVN -> PREMIUM (REGULAR)
+    if (accessType === AccessType.REGULAR) {
+      await this.removeOrgAccountFees(this.currentOrganization.id)
+    }
     this.viewOnlyMode({ component: 'accessType', mode: true })
   }
 

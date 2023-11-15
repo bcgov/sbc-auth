@@ -87,7 +87,7 @@ describe('AccountAccessType.vue', () => {
     expect(wrapper.vm.currentOrgPaymentTypePad).toBeFalsy()
   })
 
-  it('validate view mode with govn org', () => {
+  it('validate view mode with govn org, should be able to change to PREMIUM', () => {
     const $t = () => ''
     const govnOrg = organization
     govnOrg.accessType = AccessType.GOVN
@@ -106,7 +106,7 @@ describe('AccountAccessType.vue', () => {
     expect(wrapper.find('[data-test="title"]').text()).toBe('Access Type')
     expect(wrapper.find('[data-test="txt-selected-access-type"]').text())
       .toBe('Government agency (other than BC provincial)')
-    expect(wrapper.find('[data-test="btn-edit"]').exists()).toBeFalsy()
+    expect(wrapper.find('[data-test="btn-edit"]').exists()).toBeTruthy()
   })
 
   it('validate view mode with govm org', () => {
