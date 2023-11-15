@@ -216,7 +216,7 @@ export default defineComponent({
           state.changeAccessTypeToRegularDialog.open()
         } else {
           emit('update:updateAndSaveAccessTypeDetails', state.selectedAccessType)
-          state.changeAccessTypeToRegularDialog.close()
+          closeDialog()
         }
       }
 
