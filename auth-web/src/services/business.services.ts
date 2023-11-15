@@ -64,10 +64,6 @@ export default class BusinessService {
       })
   }
 
-  static async getNrData (nrNumber: string): Promise<AxiosResponse<any>> {
-    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/nameRequests/${nrNumber}`)
-  }
-
   static async createBNRequest (request: BNRequest): Promise<AxiosResponse<any>> {
     let url = `${ConfigHelper.getLegalAPIV2Url()}/admin/bn/${request.businessIdentifier}`
     if (request.businessNumber) {
