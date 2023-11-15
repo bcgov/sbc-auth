@@ -21,7 +21,9 @@ from auth_api.utils.enums import AuthHeaderType, ContentType
 from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
+
 from account_mailer.email_processors import generate_template
+
 
 def process(email_msg: dict, token: str) -> dict:
     """Build the email for Account Restored NSF notification."""
@@ -44,6 +46,7 @@ def process(email_msg: dict, token: str) -> dict:
         }
     }
 
+
 def _get_account_restored_nsf_email(email_msg):
     filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), email_msg.get('template_name'))
     jnja_template = Template(filled_template, autoescape=True)
@@ -52,6 +55,7 @@ def _get_account_restored_nsf_email(email_msg):
         logo_url=email_msg.get('logo_url')
     )
     return html_out
+
 
 def _get_account_restored_nsf_pdf(email_msg, token):
     current_time = datetime.datetime.now()
