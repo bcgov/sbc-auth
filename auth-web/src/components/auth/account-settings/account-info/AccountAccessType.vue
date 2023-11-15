@@ -118,9 +118,9 @@
       title="Change Access Type To Regular?"
       text="Regular access will not have the option to modify product fees."
       dialog-class="notify-dialog"
-      max-width="680"
+      max-width="720"
       :isPersistent="true"
-      data-test="modal-suspension-complete"
+      data-test="modal-change-access-type"
     >
       <template #icon>
         <v-icon
