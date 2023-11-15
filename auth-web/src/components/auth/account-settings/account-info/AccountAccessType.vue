@@ -112,6 +112,48 @@
         </div>
       </v-card>
     </v-form>
+    <!-- Confirm Access Type To Regular Dialog -->
+    <ModalDialog
+      ref="changeAccessTypeToRegularDialog"
+      title="Change Access Type To Regular?"
+      text="Regular access will not have the option to modify product fees."
+      dialog-class="notify-dialog"
+      max-width="680"
+      :isPersistent="true"
+      data-test="modal-suspension-complete"
+    >
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
+      </template>
+      <template #actions>
+        <v-btn
+          large
+          depressed
+          class="font-weight-bold btn-dialog"
+          data-test="btn-confirm-change-access-type-dialog"
+          color="primary"
+          @click="updateDetails(true)"
+        >
+          Confirm
+        </v-btn>
+        <v-btn
+          outlined
+          large
+          depressed
+          class="btn-dialog"
+          color="primary"
+          data-test="btn-cancel-change-access-type-dialog"
+          @click="closeDialog"
+        >
+          Cancel
+        </v-btn>
+      </template>
+    </ModalDialog>
   </div>
 </template>
 
@@ -119,8 +161,12 @@
 import { AccessType, Account } from '@/util/constants'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Organization } from '@/models/Organization'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
 @Component({
+  components: {
+    ModalDialog
+  }
 })
 export default class AccountAccessType extends Vue {
   @Prop({ default: undefined }) organization: Organization
@@ -130,14 +176,15 @@ export default class AccountAccessType extends Vue {
 
   $refs: {
     accountAccessTypeForm: HTMLFormElement,
-    selectedAccessType: HTMLFormElement
+    changeAccessTypeToRegularDialog: InstanceType<typeof ModalDialog>
+    selectedAccessType: HTMLFormElement,
   }
-  private selectedAccessType: string = undefined
-  public AccessType = AccessType
-  public isLoading = false
+  selectedAccessType: string = undefined
+  AccessType = AccessType
+  isLoading = false
 
   // Only allow PREMIUM -> GOVN and GOVN -> PREMIUM
-  public get isChangeButtonEnabled (): boolean {
+  get isChangeButtonEnabled (): boolean {
     // Check access type and orgtype must be premium
     const accessType: any = this.organization.accessType
     const isAllowedAccessType = this.organization.orgType === Account.PREMIUM &&
@@ -145,7 +192,7 @@ export default class AccountAccessType extends Vue {
     return isAllowedAccessType && this.canChangeAccessType // canChangeAccessType is the role based access passed as a property
   }
 
-  public get getAccessTypeText (): string {
+  get getAccessTypeText (): string {
     let accessTypeText = 'Regular Access'
     if (this.organization.accessType === AccessType.GOVN) {
       accessTypeText = 'Government agency (other than BC provincial)'
@@ -161,8 +208,17 @@ export default class AccountAccessType extends Vue {
     this.selectedAccessType = this.organization.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
   }
 
-  public updateDetails () {
-    this.$emit('update:updateAndSaveAccessTypeDetails', this.selectedAccessType)
+  updateDetails (confirmed: boolean) {
+    if (this.selectedAccessType === AccessType.REGULAR && !confirmed) {
+      this.$refs.changeAccessTypeToRegularDialog.open()
+    } else {
+      this.$emit('update:updateAndSaveAccessTypeDetails', this.selectedAccessType)
+      this.$refs.changeAccessTypeToRegularDialog.close()
+    }
+  }
+
+  closeDialog () {
+    this.$refs.changeAccessTypeToRegularDialog.close()
   }
 
   @Emit('update:viewOnlyMode')
@@ -186,4 +242,8 @@ export default class AccountAccessType extends Vue {
   color: var(--v-error-base) !important;
 }
 
+.btn-dialog {
+  height: 2.75em;
+  width: 6.25em;
+}
 </style>
