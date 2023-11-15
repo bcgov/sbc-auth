@@ -159,8 +159,8 @@
 
 <script lang="ts">
 import { AccessType, Account } from '@/util/constants'
+import { computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { reactive, computed, defineComponent, watch, toRefs } from '@vue/composition-api'
 
 export default defineComponent({
   name: 'AccountAccessType',
@@ -170,80 +170,79 @@ export default defineComponent({
   props: {
     organization: {
       type: Object,
-      default: undefined,
+      default: undefined
     },
     viewOnlyMode: {
       type: Boolean,
-      default: true,
+      default: true
     },
     canChangeAccessType: {
       type: Boolean,
-      default: false,
+      default: false
     },
     currentOrgPaymentType: {
       type: String,
-      default: undefined,
-    },
+      default: undefined
+    }
   },
   emits: ['update:updateAndSaveAccessTypeDetails', 'update:viewOnlyMode'],
-  setup(props , { emit }) {
-      // const AccessType = AccessType
-      const state = reactive({
-        changeAccessTypeToRegularDialog: null,
-        selectedAccessType: undefined,
-        isLoading: false,
-        // Only allow PREMIUM -> GOVN and GOVN -> PREMIUM
-        isChangeButtonEnabled: computed<boolean>(() => {
-          // Check access type and orgtype must be premium
-          const accessType: any = props.organization.accessType
-          const isAllowedAccessType = props.organization.orgType === Account.PREMIUM &&
+  setup (props, { emit }) {
+    // const AccessType = AccessType
+    const state = reactive({
+      changeAccessTypeToRegularDialog: null,
+      selectedAccessType: undefined,
+      isLoading: false,
+      // Only allow PREMIUM -> GOVN and GOVN -> PREMIUM
+      isChangeButtonEnabled: computed<boolean>(() => {
+        // Check access type and orgtype must be premium
+        const accessType: any = props.organization.accessType
+        const isAllowedAccessType = props.organization.orgType === Account.PREMIUM &&
             [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID, AccessType.GOVN].includes(accessType)
-          return isAllowedAccessType && props.canChangeAccessType // canChangeAccessType is the role based access passed as a property
-        }),
-        getAccessTypeText: computed<string>(() => {
-          let accessTypeText = 'Regular Access'
-          if (props.organization.accessType === AccessType.GOVN) {
-            accessTypeText = 'Government agency (other than BC provincial)'
-          } else if (props.organization.accessType === AccessType.GOVM) {
-            accessTypeText = 'BC Government Ministry'
-          }
-          return accessTypeText
-        })
-      })
-
-      const updateDetails = (confirmed: boolean) => {
-        if (state.selectedAccessType === AccessType.REGULAR && !confirmed) {
-          state.changeAccessTypeToRegularDialog.open()
-        } else {
-          emit('update:updateAndSaveAccessTypeDetails', state.selectedAccessType)
-          closeDialog()
+        return isAllowedAccessType && props.canChangeAccessType // canChangeAccessType is the role based access passed as a property
+      }),
+      getAccessTypeText: computed<string>(() => {
+        let accessTypeText = 'Regular Access'
+        if (props.organization.accessType === AccessType.GOVN) {
+          accessTypeText = 'Government agency (other than BC provincial)'
+        } else if (props.organization.accessType === AccessType.GOVM) {
+          accessTypeText = 'BC Government Ministry'
         }
+        return accessTypeText
+      })
+    })
+
+    const closeDialog = () => {
+      state.changeAccessTypeToRegularDialog.close()
+    }
+
+    const updateDetails = (confirmed: boolean) => {
+      if (state.selectedAccessType === AccessType.REGULAR && !confirmed) {
+        state.changeAccessTypeToRegularDialog.open()
+      } else {
+        emit('update:updateAndSaveAccessTypeDetails', state.selectedAccessType)
+        closeDialog()
       }
+    }
 
-      const closeDialog = () => {
-        state.changeAccessTypeToRegularDialog.close()
-      }
+    const cancelEdit = () => {
+      state.selectedAccessType = props.organization.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
+      emit('update:viewOnlyMode', {
+        component: 'accessType',
+        mode: true
+      })
+    }
 
-      const cancelEdit = () => {
-        state.selectedAccessType = props.organization.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
-        emit('update:viewOnlyMode', {
-          component: 'accessType',
-          mode: true
-        })
-      }
+    watch(() => props.organization, (newVal) => {
+      state.selectedAccessType = newVal.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
+    }, { deep: true, immediate: true })
 
-      watch(() => props.organization, (newVal) => {
-        state.selectedAccessType = newVal.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
-      }, { deep: true, immediate: true })
-
-
-      return {
-        AccessType,
-        ...toRefs(state),
-        updateDetails,
-        closeDialog,
-        cancelEdit
-      }
+    return {
+      AccessType,
+      ...toRefs(state),
+      closeDialog,
+      updateDetails,
+      cancelEdit
+    }
   }
 })
 </script>
