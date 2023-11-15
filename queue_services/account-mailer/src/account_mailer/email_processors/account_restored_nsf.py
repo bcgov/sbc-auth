@@ -16,8 +16,6 @@
 import base64
 import datetime
 
-from auth_api.models import User as UserModel
-from auth_api.services.org import Org as OrgService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import AuthHeaderType, ContentType
 from entity_queue_common.service_utils import logger
@@ -25,7 +23,6 @@ from flask import current_app
 from jinja2 import Template
 
 from account_mailer.email_processors import generate_template
-from account_mailer.services import minio_service
 
 def process(email_msg: dict, token: str) -> dict:
     """Build the email for Account Restored NSF notification."""
