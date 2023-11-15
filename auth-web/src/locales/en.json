@@ -216,7 +216,6 @@
   "acceptInviteLandingMessageBCEID": "To accept the invitation to this account, log in to Business Registry with a registered BCeID account, and verify your identity by a notarized affidavit.",
   "pendingAffidavitAdminReviewTitle":"Your submission to join {team} has been requested ",
   "pendingAffidvitAdminReviewMessage":"Once your information has been reviewed and approved, you will receive an email allowing you to join the account. Please allow {days} business days for this process",
-  "accountAccessTypeUpdateWarning": "This account currently can't change access type. Contact account admin to update the payment method to PAD in order to change the access type.",
   "govnAccountDescription": "Service BC Staff will manually review your account information.",
   "govnConfirmText": "BC Registry Staff will manually review the account to verify the account user. <b>Account will be rejected if account admin does not verify as a government other than BC provincial. </b>This is a option for townships, cities, districts, municipalities, and federal government.",
   "searchAccountNoResult": "<h4>No Results</h4><p>None of the accounts matched this search. Try another search.</p>",

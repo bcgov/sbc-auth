@@ -997,7 +997,7 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data || {}
   }
 
-  async function updateOrganizationAccessType ({ accessType, orgId = null, syncOrg = true }): Promise<boolean> {
+  async function updateOrganizationAccessType (accessType: string, orgId: number = null, syncOrg = true): Promise<boolean> {
     if (!orgId) orgId = state.currentOrganization?.id as number
     if (orgId && accessType) {
       try {
@@ -1015,6 +1015,15 @@ export const useOrgStore = defineStore('org', () => {
         console.error('update Organization AccessType operation failed! - ', error)
         return false
       }
+    }
+  }
+
+  async function removeOrgAccountFees (orgId: number) {
+    try {
+      await PaymentService.removeAccountFees(orgId)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('remove org account fees operation failed! - ', error)
     }
   }
 
@@ -1113,6 +1122,7 @@ export const useOrgStore = defineStore('org', () => {
     revokeOrgApiKeys,
     updateOrganizationAccessType,
     $reset,
-    isStaffOrSbcStaff
+    isStaffOrSbcStaff,
+    removeOrgAccountFees
   }
 })
