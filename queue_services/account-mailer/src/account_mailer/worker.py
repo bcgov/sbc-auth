@@ -41,7 +41,8 @@ from flask import Flask
 from account_mailer import config
 from account_mailer.auth_utils import get_login_url, get_member_emails
 from account_mailer.email_processors import (
-    account_restored_nsf, common_mailer, ejv_failures, pad_confirmation, payment_completed, product_confirmation, refund_requested)
+    account_restored_nsf, common_mailer, ejv_failures, pad_confirmation, payment_completed, product_confirmation,
+    refund_requested)
 from account_mailer.enums import Constants, MessageType, SubjectType, TemplateType, TitleType
 from account_mailer.services import minio_service, notification_service
 from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
