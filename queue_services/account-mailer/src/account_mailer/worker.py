@@ -211,7 +211,7 @@ async def process_event(event_message: dict, flask_app):
                               MessageType.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value}:
             business_name = email_msg.get('businessName')
 
-            requesting_account = email_msg.get("fromOrgName")
+            requesting_account = email_msg.get('fromOrgName')
             if from_branch_name := email_msg.get('fromOrgBranchName'):
                 requesting_account += ' - ' + from_branch_name
 
