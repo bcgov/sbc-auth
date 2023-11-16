@@ -52,7 +52,9 @@ install: clean ## Install python virtrual environment
 	pip install -Ur requirements.txt
 
 install-dev: ## Install local application
-	. venv/bin/activate && pip install -e .
+	. venv/bin/activate ; \
+	pip install -Ur requirements/dev.txt; \
+	pip install -e .
 
 #################################################################################
 # COMMANDS - CI                                                                 #
