@@ -212,8 +212,7 @@ class Affiliation:
 
     @staticmethod
     def create_new_business_affiliation(affiliation_data: AffiliationData,  # pylint: disable=too-many-locals
-                                        environment: str = None,
-                                        bearer_token: str = None):
+                                        environment: str = None):
         """Initiate a new incorporation."""
         org_id = affiliation_data.org_id
         business_identifier = affiliation_data.business_identifier
