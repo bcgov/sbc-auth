@@ -112,7 +112,8 @@ async def process_name_events(event_message: Dict[str, any]):
     nr_entity.name = request_data.get('name', '')  # its not part of event now, this is to handle if they include it.
     nr_entity.last_modified_by = None  # TODO not present in event message.
     nr_entity.last_modified = parser.parse(event_message.get('time'))
-    if nr_status == 'DRAFT' and not AffiliationModel.find_affiliations_by_business_identifier(nr_number):
+    # Future - None needs to be replaced with whatever we decide to fill the data with.
+    if nr_status == 'DRAFT' and not AffiliationModel.find_affiliations_by_business_identifier(nr_number, None):
         logger.info('Status is DRAFT, getting invoices for account')
         # Find account details for the NR.
         invoices = RestService.get(
