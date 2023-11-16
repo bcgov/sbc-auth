@@ -36,16 +36,20 @@ clean-test: ## clean test files
 	rm -f .coverage
 	rm -fr htmlcov/
 
-install: clean ## Install python virtrual environment
-	test -f venv/bin/activate || python3 -m venv  $(CURRENT_ABS_DIR)/venv
+build-req: clean ## Upgrade requirements
+	test -f venv/bin/activate || python3 -m venv  $(CURRENT_ABS_DIR)/venv ;\
 	. venv/bin/activate ;\
 	pip install --upgrade pip ;\
 	pip install -Ur requirements/prod.txt ;\
 	pip freeze | sort > requirements.txt ;\
 	cat requirements/repo-libraries.txt >> requirements.txt ;\
-	pip install -Ur requirements/repo-libraries.txt ;\
-	pip install -Ur requirements/dev.txt  ;\
-	touch venv/bin/activate  # update so it's as new as requirements/prod.txt
+	pip install -Ur requirements/repo-libraries.txt
+
+install: clean ## Install python virtrual environment
+	test -f venv/bin/activate || python3 -m venv  $(CURRENT_ABS_DIR)/venv ;\
+	. venv/bin/activate ;\
+	pip install --upgrade pip ;\
+	pip install -Ur requirements.txt
 
 install-dev: ## Install local application
 	. venv/bin/activate && pip install -e .
