@@ -186,13 +186,13 @@
                     <v-text-field
                       v-model="proprietorPartnerName"
                       filled
-                      label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
+                      label="Proprietor or Partner Name (e.g., Last Name, First Name Middlename)"
                       hint="Name as it appears on the Business Summary or the Statement of Registration"
                       persistent-hint
                       :rules="proprietorPartnerNameRules"
                       maxlength="151"
                       autocomplete="off"
-                      aria-label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
+                      aria-label="Proprietor or Partner Name (e.g., Last Name, First Name Middlename)"
                     />
                   </div>
                   <Certify
@@ -256,8 +256,8 @@
                 v-if="noAuthenticationOptions"
                 class="list-body contact-us"
               >
-                The business doesn't have a password / passcode or email on record. Please Contact the Business Registry for help.
-                <ol>
+                The business doesn't have a password / passcode or email on record. Please contact us for help:
+                <ol class="mt-4">
                   <li>
                     <v-icon small>
                       mdi-phone
