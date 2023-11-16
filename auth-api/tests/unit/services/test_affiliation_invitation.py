@@ -561,7 +561,9 @@ def test_send_affiliation_invitation_request_authorized(publish_to_mailer_mock,
         'emailAddresses': expected_email,
         'orgName': affiliation_invitation.from_org.name,
         'fromOrgName': affiliation_invitation.from_org.name,
+        'fromOrgBranchName': affiliation_invitation.from_org.branch_name,
         'toOrgName': affiliation_invitation.to_org.name,
+        'toOrgBranchName': affiliation_invitation.to_org.branch_name,
         'isAuthorized': True
     }
 
@@ -603,7 +605,9 @@ def test_send_affiliation_invitation_request_refused(publish_to_mailer_mock,
         'emailAddresses': expected_email,
         'orgName': affiliation_invitation.from_org.name,
         'fromOrgName': affiliation_invitation.from_org.name,
+        'fromOrgBranchName': affiliation_invitation.from_org.branch_name,
         'toOrgName': affiliation_invitation.to_org.name,
+        'toOrgBranchName': affiliation_invitation.to_org.branch_name,
         'isAuthorized': False
     }
 
