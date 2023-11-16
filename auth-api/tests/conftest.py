@@ -306,7 +306,7 @@ def business_mock(monkeypatch):
 def nr_mock(monkeypatch):
     """Mock nr get call."""
 
-    def get_nr(business_identifier, bearer_token):
+    def get_nr(business_identifier):
         return {
             'applicants': {
                 'emailAddress': 'test@test.com',
@@ -329,7 +329,7 @@ def nr_mock(monkeypatch):
 def minio_mock(monkeypatch):
     """Mock minio calls."""
 
-    def get_nr(business_identifier, bearer_token):
+    def get_nr(business_identifier):
         return {
             'applicants': {
                 'emailAddress': 'test@test.com',

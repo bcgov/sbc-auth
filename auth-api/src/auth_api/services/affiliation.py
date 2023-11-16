@@ -212,8 +212,7 @@ class Affiliation:
 
     @staticmethod
     def create_new_business_affiliation(affiliation_data: AffiliationData,  # pylint: disable=too-many-locals
-                                        environment: str = None,
-                                        bearer_token: str = None):
+                                        environment: str = None):
         """Initiate a new incorporation."""
         org_id = affiliation_data.org_id
         business_identifier = affiliation_data.business_identifier
@@ -234,7 +233,7 @@ class Affiliation:
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
 
         # Call the legal-api to verify the NR details
-        if not (nr_json := Affiliation._get_nr_details(business_identifier, bearer_token)):
+        if not (nr_json := Affiliation._get_nr_details(business_identifier)):
             raise BusinessException(Error.NR_NOT_FOUND, None)
 
         status = nr_json.get('state')
@@ -469,11 +468,13 @@ class Affiliation:
         return [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
 
     @staticmethod
-    def _get_nr_details(nr_number: str, token: str):
+    def _get_nr_details(nr_number: str):
         """Return NR details by calling legal-api."""
-        legal_api_url = current_app.config.get('LEGAL_API_URL') + current_app.config.get('LEGAL_API_VERSION_2')
-        get_nr_url = f'{ legal_api_url }/nameRequests/{nr_number}'
+        nr_api_url = current_app.config.get('NAMEX_API_URL')
+        get_nr_url = f'{nr_api_url}/requests/{nr_number}'
         try:
+            token = RestService.get_service_account_token(
+                config_id='ENTITY_SVC_CLIENT_ID', config_secret='ENTITY_SVC_CLIENT_SECRET')
             get_nr_response = RestService.get(get_nr_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
             current_app.logger.info(e)

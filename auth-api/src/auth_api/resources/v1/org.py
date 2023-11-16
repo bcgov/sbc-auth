@@ -354,7 +354,6 @@ def post_organization_affiliation(org_id):
     env = get_request_environment()
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, 'affiliation')
-    bearer_token = request.headers['Authorization'].replace('Bearer ', '')
     is_new_business = request.args.get('newBusiness', 'false').lower() == 'true'
     if not valid_format:
         return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
@@ -369,7 +368,7 @@ def post_organization_affiliation(org_id):
                                                certified_by_name=request_json.get('certifiedByName'))
 
             response, status = AffiliationService.create_new_business_affiliation(
-                affiliation_data, env, bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
+                affiliation_data, env).as_dict(), http_status.HTTP_201_CREATED
         else:
             response, status = AffiliationService.create_affiliation(
                 org_id, business_identifier, env, request_json.get('passCode'),
