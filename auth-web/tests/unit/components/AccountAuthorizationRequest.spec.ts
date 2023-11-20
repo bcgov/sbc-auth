@@ -13,7 +13,6 @@ import Vuetify from 'vuetify'
 import { axios } from '@/util/http-util'
 import flushPromises from 'flush-promises'
 import sinon from 'sinon'
-import { expect } from 'vitest'
 
 const vuetify = new Vuetify({})
 
