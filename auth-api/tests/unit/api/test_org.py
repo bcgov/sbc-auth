@@ -2136,11 +2136,11 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
      [('T12dfhsff1', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff2', CorpType.GP.value, 'NR 1234566')],
      ['NR 1234567', 'NR 1234566'], []),
     ('affiliations_order', [], [],
-        [], [('abcde1', CorpType.BC.value, 'NR 123456'),
-             ('abcde2', CorpType.BC.value, 'NR 123457'),
-             ('abcde3', CorpType.BC.value, 'NR 123458'),
-             ('abcde4', CorpType.BC.value, 'NR 123459')],
-        [datetime(2021, 1, 1), datetime(2022, 2, 1), datetime(2022, 3, 1), datetime(2023, 2, 1)]),
+     [], [('abcde1', CorpType.BC.value, 'NR 123456'),
+          ('abcde2', CorpType.BC.value, 'NR 123457'),
+          ('abcde3', CorpType.BC.value, 'NR 123458'),
+          ('abcde4', CorpType.BC.value, 'NR 123459')],
+     [datetime(2021, 1, 1), datetime(2022, 2, 1), datetime(2022, 3, 1), datetime(2023, 2, 1)]),
     ('all', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)],
      [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)],
      [('T12dfhsff3', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff4', CorpType.GP.value, 'NR 1234566')],
@@ -2248,12 +2248,15 @@ def _create_orgs_entities_and_affiliations(client, jwt, count):
 
         headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
         client.post('/api/v1/users', headers=headers, content_type='application/json')
-        new_org = TestOrgInfo.org_details
+        new_org = TestOrgInfo.org_details.copy()
         new_org['name'] = new_org['name'] + ' ' + str(i)
+        new_org['branchName'] = 'branch-for-' + new_org['name']
         rv = client.post('/api/v1/orgs', data=json.dumps(new_org),
                          headers=headers, content_type='application/json')
         dictionary = json.loads(rv.data)
         org_id = dictionary['id']
+        new_org['id'] = org_id
+        created_orgs.append(new_org)
 
         client.post('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers,
                     data=json.dumps(TestAffliationInfo.affiliation3), content_type='application/json')
@@ -2292,4 +2295,47 @@ def test_get_orgs_by_affiliation(client, jwt, session, keycloak_mock,
 
     for co in created_orgs:
         names = [od['name'] for od in orgs_details]
+        branches = [od['branchName'] for od in orgs_details]
         assert co['name'] in names
+        assert co['branchName'] in branches
+
+    for od in orgs_details:
+        assert 'name' in od
+        assert 'branchName' in od
+        assert 'uuid' in od
+        assert 'id' not in od
+
+
+def test_get_orgs_by_affiliation_filtering_out_staff_orgs(app, client, jwt, session, keycloak_mock):
+    """Assert that fetching orgs by affiliation do not return staff orgs."""
+    orig_val_max_number_of_orgs = app.config.get('MAX_NUMBER_OF_ORGS')
+    app.config.update(MAX_NUMBER_OF_ORGS=10)
+    create_org_count = 6
+
+    created_orgs = _create_orgs_entities_and_affiliations(client, jwt, create_org_count)
+    app.config.update(MAX_NUMBER_OF_ORGS=orig_val_max_number_of_orgs)
+
+    org3 = created_orgs[2]
+    org5 = created_orgs[4]
+
+    convert_org_to_staff_org(org3['id'], OrgType.SBC_STAFF.value)
+    convert_org_to_staff_org(org5['id'], OrgType.STAFF.value)
+
+    staff_org_names = [org3['name'], org5['name']]
+    expected_org_count = create_org_count - len(staff_org_names)
+
+    # Create a system token
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.get('/api/v1/orgs/affiliation/{}'.format(TestAffliationInfo.affiliation3.get('businessIdentifier')),
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'orgs_response')[1]
+
+    response = json.loads(rv.data)
+
+    assert len(response.get('orgsDetails')) == expected_org_count  # without org 3 and 5
+    orgs_details = response.get('orgsDetails')
+
+    for od in orgs_details:
+        assert od['name'] not in staff_org_names

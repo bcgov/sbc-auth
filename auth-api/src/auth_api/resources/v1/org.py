@@ -390,7 +390,7 @@ def post_organization_affiliation(org_id):
 @_jwt.has_one_of_roles(
     [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_org_details_by_affiliation(business_identifier):
-    """Search orgs by BusinessIdentifier and return org Name and UUID."""
+    """Search non staff orgs by BusinessIdentifier and return org Name, branch Name and UUID."""
     environment = get_request_environment()
     pagination_info = PaginationInfo(
         limit=int(request.args.get('limit', 10)),
@@ -400,7 +400,12 @@ def get_org_details_by_affiliation(business_identifier):
     try:
         data = OrgService.search_orgs_by_affiliation(business_identifier, pagination_info, environment)
 
-        org_details = [{'name': org.name, 'uuid': org.uuid} for org in data['orgs']]
+        org_details = \
+            [
+                {'name': org.name, 'uuid': org.uuid, 'branchName': org.branch_name} for org
+                in data['orgs']
+                if org.type_code.upper() not in ['SBC_STAFF', 'STAFF']
+            ]
         response, status = {'orgs_details': org_details}, http_status.HTTP_200_OK
 
     except BusinessException as exception:
