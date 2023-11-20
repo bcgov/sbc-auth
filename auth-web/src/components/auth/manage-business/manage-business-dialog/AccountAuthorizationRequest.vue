@@ -31,12 +31,12 @@
       >
         <template v-slot:selection="data">
           <!-- HTML that describe how select should render selected items -->
-          <span v-if="data.item.branchName">{{ data.item.name }} - {{ data.item.branchName }}</span>
-          <span v-else>{{ data.item.name }}</span>
+          <span v-if="data.item.branchName" data-test="account-authorization-request-selection">{{ data.item.name }} - {{ data.item.branchName }}</span>
+          <span v-else data-test="account-authorization-request-selection">{{ data.item.name }}</span>
         </template>
         <template  v-slot:item="data">
-          <span v-if="data.item.branchName">{{ data.item.name }} - {{ data.item.branchName }}</span>
-          <span v-else>{{ data.item.name }}</span>
+          <span v-if="data.item.branchName" data-test="account-authorization-request-option">{{ data.item.name }} - {{ data.item.branchName }}</span>
+          <span v-else data-test="account-authorization-request-option">{{ data.item.name }}</span>
         </template>
       </v-select>
       <span>You can add a message that will be included as part of your authorization request. </span>

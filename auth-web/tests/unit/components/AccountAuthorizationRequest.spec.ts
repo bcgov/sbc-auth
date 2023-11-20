@@ -13,6 +13,7 @@ import Vuetify from 'vuetify'
 import { axios } from '@/util/http-util'
 import flushPromises from 'flush-promises'
 import sinon from 'sinon'
+import { expect } from 'vitest'
 
 const vuetify = new Vuetify({})
 
@@ -85,10 +86,9 @@ describe('AccountAuthorizationRequest tests', () => {
 
     // verify that account is selected and selector disabled
     expect(wrapper.find('#account-authorization-request-request-account-select').attributes().disabled).toBeDefined()
-    expect(wrapper.find('.v-select__selection--comma').text())
-      .toBe(orgsDetailsByAffiliationSingleItemResponse.orgsDetails[0].name)
-    expect(wrapper.findAll('.v-list-item__title').length ===
-      orgsDetailsByAffiliationSingleItemResponse.orgsDetails.length)
+    expect(wrapper.find('[data-test="account-authorization-request-selection"]').text())
+      .toContain(orgsDetailsByAffiliationSingleItemResponse.orgsDetails[0].name)
+    expect(wrapper.findAll('[data-test="account-authorization-request-option"]').exists()).toBe(false)
   })
 
   it('renders enabled select with no preselected item, when multiple affiliated accounts found', async () => {
@@ -104,7 +104,7 @@ describe('AccountAuthorizationRequest tests', () => {
 
     // verify that account is selected and selector disabled
     expect(wrapper.find('#account-authorization-request-request-account-select').attributes().disabled).toBeUndefined()
-    expect(wrapper.findAll('.v-list-item__title').length ===
+    console.assert(wrapper.findAll('[data-test="account-authorization-request-option"]').length ===
       orgsDetailsByAffiliationMultipleItemsResponse.orgsDetails.length)
   })
 })
