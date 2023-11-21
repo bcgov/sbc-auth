@@ -730,10 +730,16 @@ class Org:  # pylint: disable=too-many-public-methods
         return orgs_result
 
     @staticmethod
-    def search_orgs_by_affiliation(business_identifier,
-                                   pagination_info: PaginationInfo, environment):
+    def search_orgs_by_affiliation(
+        business_identifier, pagination_info: PaginationInfo, environment, excluded_org_types
+    ):
         """Search for orgs based on input parameters."""
-        orgs, total = OrgModel.search_orgs_by_business_identifier(business_identifier, pagination_info, environment)
+        orgs, total = OrgModel.search_orgs_by_business_identifier(
+            business_identifier,
+            pagination_info,
+            environment,
+            excluded_org_types
+        )
 
         return {
             'orgs': orgs,

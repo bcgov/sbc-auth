@@ -38,7 +38,7 @@ from auth_api.services import User as UserService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.tracer import Tracer
 from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.enums import AccessType, NotificationType, PatchActions, Status
+from auth_api.utils.enums import AccessType, NotificationType, OrgType, PatchActions, Status
 from auth_api.utils.role_validator import validate_roles
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role  # noqa: I005
 from auth_api.utils.util import get_request_environment
@@ -390,17 +390,20 @@ def post_organization_affiliation(org_id):
 @_jwt.has_one_of_roles(
     [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_org_details_by_affiliation(business_identifier):
-    """Search orgs by BusinessIdentifier and return org Name and UUID."""
+    """Search non staff orgs by BusinessIdentifier and return org Name, branch Name and UUID."""
     environment = get_request_environment()
     pagination_info = PaginationInfo(
         limit=int(request.args.get('limit', 10)),
         page=int(request.args.get('page', 1))
     )
-
+    excluded_org_types = [OrgType.STAFF.value, OrgType.SBC_STAFF.value]
     try:
-        data = OrgService.search_orgs_by_affiliation(business_identifier, pagination_info, environment)
+        data = OrgService.search_orgs_by_affiliation(
+            business_identifier, pagination_info, environment, excluded_org_types
+        )
 
-        org_details = [{'name': org.name, 'uuid': org.uuid} for org in data['orgs']]
+        org_details = \
+            [{'name': org.name, 'uuid': org.uuid, 'branchName': org.branch_name} for org in data['orgs']]
         response, status = {'orgs_details': org_details}, http_status.HTTP_200_OK
 
     except BusinessException as exception:
