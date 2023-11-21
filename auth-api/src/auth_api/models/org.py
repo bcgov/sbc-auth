@@ -15,6 +15,7 @@
 
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
+from typing import List
 from flask import current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, event, func, text
 from sqlalchemy.orm import contains_eager, relationship
@@ -158,12 +159,19 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return pagination.items, pagination.total
 
     @classmethod
-    def search_orgs_by_business_identifier(cls, business_identifier, pagination_info: PaginationInfo, environment):
+    def search_orgs_by_business_identifier(cls,
+                                           business_identifier,
+                                           pagination_info: PaginationInfo,
+                                           environment,
+                                           excluded_org_types: List[str] = None
+                                           ):
         """Find all orgs affiliated with provided business identifier."""
         query = db.session.query(Org)
 
         query = cls._search_for_statuses(query, [])
         query = cls._search_by_business_identifier(query, business_identifier, environment)
+        if excluded_org_types:
+            query = query.filter(Org.type_code.notin_(excluded_org_types))
 
         pagination = query.order_by(Org.name.desc()) \
             .paginate(per_page=pagination_info.limit, page=pagination_info.page)
