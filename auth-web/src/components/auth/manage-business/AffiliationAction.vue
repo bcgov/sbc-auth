@@ -149,7 +149,7 @@ export default defineComponent({
           filingResponse = await businessStore.createNamedBusiness({
             filingType: FilingTypes.INCORPORATION_APPLICATION, business })
         }
-      } else if (business.nameRequest?.requestActionCd === NrRequestActionCodes.AMALGAMATE) { // If Amalgmation 
+      } else if (business.nameRequest?.requestActionCd === NrRequestActionCodes.AMALGAMATE) { // If Amalgmation
         if (amalgamationTypes.includes(business.nameRequest?.legalType)) {
           filingResponse = await businessStore.createNamedBusiness({ filingType: FilingTypes.AMALGAMATION, business })
         }

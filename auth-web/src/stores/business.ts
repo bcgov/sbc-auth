@@ -289,6 +289,7 @@ export const useBusinessStore = defineStore('business', () => {
             }
           }
         }
+        break
       }
 
       case FilingTypes.INCORPORATION_APPLICATION: {
