@@ -135,16 +135,24 @@ export default defineComponent({
 
     /** Create a business record in LEAR. */
     const createBusinessRecord = async (business: Business): Promise<string> => {
+      const amalgamationTypes = [CorpTypes.BENEFIT_COMPANY, CorpTypes.BC_CCC, CorpTypes.BC_COMPANY, CorpTypes.BC_ULC_COMPANY]
       const regTypes = [CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP]
       const iaTypes = [CorpTypes.BENEFIT_COMPANY, CorpTypes.COOP, CorpTypes.BC_CCC, CorpTypes.BC_COMPANY,
         CorpTypes.BC_ULC_COMPANY]
 
       let filingResponse = null
-      if (regTypes.includes(business.nameRequest?.legalType)) {
-        filingResponse = await businessStore.createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
-      } else if (iaTypes.includes(business.nameRequest?.legalType)) {
-        filingResponse = await businessStore.createNamedBusiness({
-          filingType: FilingTypes.INCORPORATION_APPLICATION, business })
+      // If Incorporation or Registration
+      if (business.nameRequest?.requestActionCd === NrRequestActionCodes.NEW_BUSINESS) {
+        if (regTypes.includes(business.nameRequest?.legalType)) {
+          filingResponse = await businessStore.createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
+        } else if (iaTypes.includes(business.nameRequest?.legalType)) {
+          filingResponse = await businessStore.createNamedBusiness({
+            filingType: FilingTypes.INCORPORATION_APPLICATION, business })
+        }
+      } else if (business.nameRequest?.requestActionCd === NrRequestActionCodes.AMALGAMATE) { // If Amalgmation 
+        if (amalgamationTypes.includes(business.nameRequest?.legalType)) {
+          filingResponse = await businessStore.createNamedBusiness({ filingType: FilingTypes.AMALGAMATION, business })
+        }
       }
 
       if (filingResponse?.errorMsg) {
@@ -183,6 +191,12 @@ export default defineComponent({
       return supportedEntityFlags.includes(entityType)
     }
 
+    const isSupportedAmalgamationEntities = (item: Business): boolean => {
+      const entityType = getEntityType(item)
+      const supportedEntityFlags = launchdarklyServices.getFlag(LDFlags.SupportedAmalgamationEntities)?.split(' ') || []
+      return supportedEntityFlags.includes(entityType)
+    }
+
     const isSupportedRestorationEntities = (item: Business): boolean => {
       const entityType = getEntityType(item)
       const supportedEntityFlags = launchdarklyServices.getFlag(LDFlags.SupportRestorationEntities)?.split(' ') || []
@@ -208,10 +222,13 @@ export default defineComponent({
         if (nrRequestActionCd === NrRequestActionCodes.NEW_BUSINESS) {
           return !isModernizedEntity(item)
         }
-        // temporarily show external icon for amalgamate and continue in
-        if (nrRequestActionCd === NrRequestActionCodes.AMALGAMATE ||
-          nrRequestActionCd === NrRequestActionCodes.MOVE) {
+        // temporarily show external icon for continue in
+        if (nrRequestActionCd === NrRequestActionCodes.MOVE) {
           return true
+        }
+        // temporary show external icon for amalgamate for some entity types
+        if (nrRequestActionCd === NrRequestActionCodes.AMALGAMATE) {
+          return !isSupportedAmalgamationEntities(item)
         }
         // temporarily show external icon for restore/reinstate for some entity types
         if (nrRequestActionCd === NrRequestActionCodes.RESTORE ||
@@ -233,6 +250,15 @@ export default defineComponent({
         goToSocieties()
       } else if (isOtherEntities(item)) {
         goToFormPage(getEntityType(item))
+      } else {
+        goToCorpOnline()
+      }
+    }
+
+    const goToAmalgamate = async (item: Business): Promise<void> => {
+      if (isSupportedAmalgamationEntities(item)) {
+        const businessIdentifier = await createBusinessRecord(item)
+        goToDashboard(businessIdentifier)
       } else {
         goToCorpOnline()
       }
@@ -424,9 +450,7 @@ export default defineComponent({
     const handleApprovedNameRequest = (item: Business, nrRequestActionCd: NrRequestActionCodes): void => {
       switch (nrRequestActionCd) {
         case NrRequestActionCodes.AMALGAMATE:
-          // For now, go to COLIN with external link + icon + matching hover text
-          // Future gotoAmagamate
-          goToCorpOnline()
+          goToAmalgamate(item)
           break
         case NrRequestActionCodes.MOVE:
           // Future - Relocate - Continue In

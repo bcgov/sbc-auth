@@ -122,6 +122,9 @@ export interface BusinessRequest {
         business?: {
             legalType: CorpTypes
         },
+        amalgamation?: {
+          nameRequest: NameRequest
+        },
         incorporationApplication?: {
             nameRequest: NameRequest
         },

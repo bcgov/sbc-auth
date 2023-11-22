@@ -147,12 +147,14 @@ export enum InvoiceStatus {
 
 export enum AffiliationTypes {
     NAME_REQUEST ='Name Request',
+    AMALGAMATION = 'Amalgamation Application',
     INCORPORATION_APPLICATION = 'Incorporation Application',
     CORPORATION = 'Corporation',
     REGISTRATION = 'Registration'
 }
 
 export enum FilingTypes {
+    AMALGAMATION = 'amalgamation',
     INCORPORATION_APPLICATION = 'incorporationApplication',
     REGISTRATION = 'registration'
 }
@@ -200,6 +202,7 @@ export enum CorpTypes {
     XPRO_SOCIETY = 'XS',
 
     // overloaded values
+    AMALGAMATION = 'ATMP',
     INCORPORATION_APPLICATION = 'TMP',
     NAME_REQUEST = 'NR',
     REGISTRATION = 'RTMP'
@@ -424,6 +427,7 @@ export enum LDFlags {
     ProductCSOStatus = 'product-CSO-status',
     ProductSiteRegistryStatus = 'product-ESRA-status',
     ProductWillsStatus = 'product-VS-status',
+    SupportedAmalgamationEntities = 'supported-amalgamation-entities',
     SentryEnable = 'sentry-enable',
     SupportRestorationEntities = 'supported-restoration-entities',
     AllowableBusinessSearchTypes = 'allowable-business-search-types',

@@ -271,6 +271,26 @@ export const useBusinessStore = defineStore('business', () => {
     }
 
     switch (filingType) {
+      case FilingTypes.AMALGAMATION: {
+        filingBody = {
+          filing: {
+            business: {
+              legalType: business.nameRequest.legalType
+            },
+            header: {
+              accountId: currentOrganization.value.id,
+              name: filingType
+            },
+            amalgamation: {
+              nameRequest: {
+                legalType: business.nameRequest.legalType,
+                nrNumber: business.businessIdentifier || business.nameRequest.nrNumber
+              }
+            }
+          }
+        }
+      }
+
       case FilingTypes.INCORPORATION_APPLICATION: {
         filingBody = {
           filing: {
