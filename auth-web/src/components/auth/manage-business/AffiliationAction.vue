@@ -135,7 +135,7 @@ export default defineComponent({
 
     /** Create a business record in LEAR. */
     const createBusinessRecord = async (business: Business): Promise<string> => {
-      const amalgamationTypes = [CorpTypes.BENEFIT_COMPANY, CorpTypes.BC_CCC, CorpTypes.BC_COMPANY, CorpTypes.BC_ULC_COMPANY]
+      const amalgamationTypes = launchdarklyServices.getFlag(LDFlags.SupportedAmalgamationEntities)?.split(' ') || []
       const regTypes = [CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP]
       const iaTypes = [CorpTypes.BENEFIT_COMPANY, CorpTypes.COOP, CorpTypes.BC_CCC, CorpTypes.BC_COMPANY,
         CorpTypes.BC_ULC_COMPANY]
