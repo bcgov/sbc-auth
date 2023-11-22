@@ -122,6 +122,16 @@ export const businesses: Business[] = [
     corpType: { code: CorpTypes.BENEFIT_COMPANY },
     status: 'HISTORICAL'
   },
+  // Amalgamation Application
+  {
+    businessIdentifier: 'TC6weERhbH',
+    corpType: {
+      code: CorpTypes.AMALGAMATION
+    },
+    corpSubType: {
+      code: CorpTypes.AMALGAMATION
+    }
+  },
   // request access (invitations)
   // single
   {
