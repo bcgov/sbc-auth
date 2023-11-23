@@ -25,7 +25,6 @@ from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.dataclass import DeleteAffiliationRequest
-from auth_api.models.dataclass import PaginationInfo  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
@@ -392,14 +391,10 @@ def post_organization_affiliation(org_id):
 def get_org_details_by_affiliation(business_identifier):
     """Search non staff orgs by BusinessIdentifier and return org Name, branch Name and UUID."""
     environment = get_request_environment()
-    pagination_info = PaginationInfo(
-        limit=int(request.args.get('limit', 10)),
-        page=int(request.args.get('page', 1))
-    )
     excluded_org_types = [OrgType.STAFF.value, OrgType.SBC_STAFF.value]
     try:
         data = OrgService.search_orgs_by_affiliation(
-            business_identifier, pagination_info, environment, excluded_org_types
+            business_identifier, environment, excluded_org_types
         )
 
         org_details = \

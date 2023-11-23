@@ -238,7 +238,9 @@
                   v-model="requestAuthBusinessOption"
                 >
                   <template #activator>
-                    <v-list-item-title>Request authorization from the business</v-list-item-title>
+                    <v-list-item-title>
+                      Request authorization from an account currently managing the business
+                    </v-list-item-title>
                   </template>
                   <div class="list-body">
                     <AccountAuthorizationRequest

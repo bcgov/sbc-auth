@@ -13,7 +13,7 @@
     </div>
 
     <div v-else-if="!isLoading && accounts && accounts.length > 0">
-      <span>Select the account you want to perform Registries activities for <strong>{{ businessName }}</strong></span>
+      <span>Select an account:</span>
       <v-select
         id="account-authorization-request-request-account-select"
         v-model="selectedAccount"
