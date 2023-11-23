@@ -1,5 +1,5 @@
-import { CorpTypes, LearFilingTypes, NrTargetTypes } from '@/util/constants'
 import { AmalgamationTypes, FilingTypes, NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
+import { CorpTypes, LearFilingTypes, NrTargetTypes } from '@/util/constants'
 import { AffiliationInviteInfo } from '@/models/affiliation'
 import { Contact } from './contact'
 

@@ -108,13 +108,13 @@
 <script lang='ts'>
 import { AffiliationInvitationStatus, AffiliationInvitationType, CorpTypes, LDFlags,
   NrDisplayStates, NrTargetTypes } from '@/util/constants'
+import { FilingTypes, NrRequestActionCodes } from '@bcrs-shared-components/enums'
 import { PropType, defineComponent } from '@vue/composition-api'
 import { goToCorpOnline, goToDashboard, goToFormPage, goToNameRequest,
   goToOneStop, goToSocieties } from '@/util/navigation'
 import { useBusinessStore, useOrgStore } from '@/stores'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import { Business } from '@/models/business'
-import { FilingTypes, NrRequestActionCodes } from '@bcrs-shared-components/enums'
 import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useAffiliations } from '@/composables'
 

@@ -16,6 +16,7 @@ import {
   CreateNRAffiliationRequestBody,
   NameRequestResponse
 } from '@/models/affiliation'
+import { AmalgamationTypes, FilingTypes } from '@bcrs-shared-components/enums'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, LoginPayload,
   PasscodeResetLoad } from '@/models/business'
@@ -29,7 +30,6 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import OrgService from '@/services/org.services'
 import { defineStore } from 'pinia'
 import { useOrgStore } from './org'
-import { AmalgamationTypes, FilingTypes } from '@bcrs-shared-components/enums'
 
 export const useBusinessStore = defineStore('business', () => {
   const state = reactive({
