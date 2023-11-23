@@ -129,7 +129,7 @@ export const businesses: Business[] = [
       code: CorpTypes.AMALGAMATION
     },
     corpSubType: {
-      code: CorpTypes.AMALGAMATION
+      code: CorpTypes.BENEFIT_COMPANY
     }
   },
   // request access (invitations)

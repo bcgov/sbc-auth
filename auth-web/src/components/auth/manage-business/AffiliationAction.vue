@@ -106,7 +106,7 @@
 </template>
 
 <script lang='ts'>
-import { AffiliationInvitationStatus, AffiliationInvitationType, CorpTypes, FilingTypes, LDFlags,
+import { AffiliationInvitationStatus, AffiliationInvitationType, CorpTypes, LDFlags,
   NrDisplayStates, NrTargetTypes } from '@/util/constants'
 import { PropType, defineComponent } from '@vue/composition-api'
 import { goToCorpOnline, goToDashboard, goToFormPage, goToNameRequest,
@@ -114,7 +114,7 @@ import { goToCorpOnline, goToDashboard, goToFormPage, goToNameRequest,
 import { useBusinessStore, useOrgStore } from '@/stores'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import { Business } from '@/models/business'
-import { NrRequestActionCodes } from '@bcrs-shared-components/enums'
+import { FilingTypes, NrRequestActionCodes } from '@bcrs-shared-components/enums'
 import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useAffiliations } from '@/composables'
 

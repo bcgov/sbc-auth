@@ -182,6 +182,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(0).text()).toBe('')
     expect(columns.at(1).text()).toBe('')
     expect(columns.at(2).text()).toContain('Amalgamation Application')
+    expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Resume Draft')
   })

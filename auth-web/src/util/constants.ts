@@ -1,3 +1,5 @@
+import { FilingNames } from "@bcrs-shared-components/enums"
+
 /* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 export enum SessionStorageKeys {
     KeyCloakToken = 'KEYCLOAK_TOKEN',
@@ -146,17 +148,11 @@ export enum InvoiceStatus {
 }
 
 export enum AffiliationTypes {
-    NAME_REQUEST ='Name Request',
-    AMALGAMATION = 'Amalgamation Application',
-    INCORPORATION_APPLICATION = 'Incorporation Application',
+    NAME_REQUEST = 'Name Request',
+    AMALGAMATION = FilingNames.AMALGAMATION,
+    INCORPORATION_APPLICATION = FilingNames.INCORPORATION_APPLICATION,
     CORPORATION = 'Corporation',
-    REGISTRATION = 'Registration'
-}
-
-export enum FilingTypes {
-    AMALGAMATION = 'amalgamation',
-    INCORPORATION_APPLICATION = 'incorporationApplication',
-    REGISTRATION = 'registration'
+    REGISTRATION = FilingNames.REGISTRATION
 }
 
 export enum LearFilingTypes {

@@ -2,7 +2,6 @@ import {
   AffiliationInvitationStatus,
   AffiliationInvitationType,
   CorpTypes,
-  FilingTypes,
   LDFlags,
   LearFilingTypes,
   NrConditionalStates,
@@ -30,6 +29,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import OrgService from '@/services/org.services'
 import { defineStore } from 'pinia'
 import { useOrgStore } from './org'
+import { AmalgamationTypes, FilingTypes } from '@bcrs-shared-components/enums'
 
 export const useBusinessStore = defineStore('business', () => {
   const state = reactive({
@@ -282,6 +282,7 @@ export const useBusinessStore = defineStore('business', () => {
               name: filingType
             },
             amalgamation: {
+              amalgamationType: AmalgamationTypes.REGULAR,
               nameRequest: {
                 legalType: business.nameRequest.legalType,
                 nrNumber: business.businessIdentifier || business.nameRequest.nrNumber
