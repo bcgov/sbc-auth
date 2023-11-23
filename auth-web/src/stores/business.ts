@@ -2,7 +2,6 @@ import {
   AffiliationInvitationStatus,
   AffiliationInvitationType,
   CorpTypes,
-  FilingTypes,
   LDFlags,
   LearFilingTypes,
   NrConditionalStates,
@@ -17,6 +16,7 @@ import {
   CreateNRAffiliationRequestBody,
   NameRequestResponse
 } from '@/models/affiliation'
+import { AmalgamationTypes, FilingTypes } from '@bcrs-shared-components/enums'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, LoginPayload,
   PasscodeResetLoad } from '@/models/business'
@@ -271,6 +271,28 @@ export const useBusinessStore = defineStore('business', () => {
     }
 
     switch (filingType) {
+      case FilingTypes.AMALGAMATION: {
+        filingBody = {
+          filing: {
+            business: {
+              legalType: business.nameRequest.legalType
+            },
+            header: {
+              accountId: currentOrganization.value.id,
+              name: filingType
+            },
+            amalgamation: {
+              amalgamationType: AmalgamationTypes.REGULAR,
+              nameRequest: {
+                legalType: business.nameRequest.legalType,
+                nrNumber: business.businessIdentifier || business.nameRequest.nrNumber
+              }
+            }
+          }
+        }
+        break
+      }
+
       case FilingTypes.INCORPORATION_APPLICATION: {
         filingBody = {
           filing: {
