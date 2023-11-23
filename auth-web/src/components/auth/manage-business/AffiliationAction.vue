@@ -141,18 +141,22 @@ export default defineComponent({
         CorpTypes.BC_ULC_COMPANY]
 
       let filingResponse = null
+      let payload = null
       // If Incorporation or Registration
       if (business.nameRequest?.requestActionCd === NrRequestActionCodes.NEW_BUSINESS) {
         if (regTypes.includes(business.nameRequest?.legalType)) {
-          filingResponse = await businessStore.createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
+          payload = { filingType: FilingTypes.REGISTRATION, business }
         } else if (iaTypes.includes(business.nameRequest?.legalType)) {
-          filingResponse = await businessStore.createNamedBusiness({
-            filingType: FilingTypes.INCORPORATION_APPLICATION, business })
+          payload = { filingType: FilingTypes.INCORPORATION_APPLICATION, business }
         }
       } else if (business.nameRequest?.requestActionCd === NrRequestActionCodes.AMALGAMATE) { // If Amalgmation
         if (amalgamationTypes.includes(business.nameRequest?.legalType)) {
-          filingResponse = await businessStore.createNamedBusiness({ filingType: FilingTypes.AMALGAMATION, business })
+          payload = { filingType: FilingTypes.AMALGAMATION, business }
         }
+      }
+
+      if (payload) {
+        filingResponse = await businessStore.createNamedBusiness(payload)
       }
 
       if (filingResponse?.errorMsg) {
