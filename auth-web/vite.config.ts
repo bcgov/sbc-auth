@@ -66,10 +66,7 @@ export default defineConfig({
       // Fix for module decorator unit tests fail
       'vuex-module-decorators': path.resolve(__dirname, './node_modules/vuex-module-decorators/dist/esm/index.js'),
       // Fix for multiple vue detected on fas-ui issue, set alias to force fas-ui to use /vue
-      // Conditionally set the Vue alias only for non-test environments
-      ...(process.env.NODE_ENV !== 'test' && {
-        'vue': path.resolve(__dirname, './node_modules/vue/dist/vue.esm.browser.js')
-      })
+      'vue': path.resolve(__dirname, './node_modules/vue/dist/vue.esm.browser.js')
     },
     extensions: ['.js', '.ts', '.vue', '.json', '.css']
   },
