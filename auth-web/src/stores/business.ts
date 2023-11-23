@@ -282,7 +282,7 @@ export const useBusinessStore = defineStore('business', () => {
               name: filingType
             },
             amalgamation: {
-              amalgamationType: AmalgamationTypes.REGULAR,
+              type: AmalgamationTypes.REGULAR,
               nameRequest: {
                 legalType: business.nameRequest.legalType,
                 nrNumber: business.businessIdentifier || business.nameRequest.nrNumber
