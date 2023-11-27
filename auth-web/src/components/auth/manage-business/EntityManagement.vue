@@ -232,11 +232,11 @@
           <br>
           <v-icon small>
             mdi-phone
-          </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
+          </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1-877-526-1526">1-877-526-1526</a>
           <br>
           <v-icon small>
             mdi-phone
-          </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
+          </v-icon>  Victoria Office: <a href="tel:+1-800-663-6102">1-800-663-6102</a>
           <br>
           <v-icon small>
             mdi-email
