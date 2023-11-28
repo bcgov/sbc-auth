@@ -270,12 +270,13 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         """Mark this membership as inactive."""
         current_app.logger.debug('<deactivate_membership')
         user_from_context: UserContext = kwargs['user_context']
+
         # if this is a member removing another member, check that they admin or owner
         if self._model.user.username != user_from_context.user_name:
             check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN))
 
         # check to ensure that owner isn't removed by anyone but an owner
-        if self._model.membership_type == ADMIN:
+        if self._model.membership_type_code == ADMIN:
             check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN))  # pylint: disable=superfluous-parens
 
         self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code('INACTIVE')
