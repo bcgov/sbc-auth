@@ -164,7 +164,8 @@ class AffiliationInvitation:
             raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
 
         # Validate that entity contact email exists
-        if contact and not contact.email:
+        if (contact and not contact.email) and \
+                affiliation_invitation_type != AffiliationInvitationType.REQUEST:
             raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
 
         # Check if affiliation already exists
