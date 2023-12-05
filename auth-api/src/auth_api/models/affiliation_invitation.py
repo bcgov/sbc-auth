@@ -42,7 +42,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     affiliation_id = Column(ForeignKey('affiliations.id'), nullable=True, index=True)
     sender_id = Column(ForeignKey('users.id'), nullable=False)
     approver_id = Column(ForeignKey('users.id'), nullable=True)
-    recipient_email = Column(String(100), nullable=True)
+    recipient_email = Column(String(8000), nullable=True)
     sent_date = Column(DateTime, nullable=False)
     accepted_date = Column(DateTime, nullable=True)
     token = Column(String(100), nullable=True)  # stores the one time affiliation invitation token
