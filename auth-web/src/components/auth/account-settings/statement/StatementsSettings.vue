@@ -38,7 +38,16 @@
           <!-- Statement Frequency-->
           <fieldset class="mb-5">
             <legend>Statement Period</legend>
-            <div class="mt-2">
+            <div
+              v-if="isEFT()"
+              class="mt-2"
+            >
+              Statement for electronic funds transfer will be issued monthly.
+            </div>
+            <div
+              v-else
+              class="mt-2"
+            >
               Set how often statements are generated for this account.
             </div>
             <v-radio-group
@@ -49,9 +58,14 @@
                 v-for="frequency in statementSettings.frequencies"
                 :key="frequency.frequency"
                 :value="frequency.frequency"
+                :disabled="isFrequencyLocked(frequency)"
               >
                 <template #label>
-                  <span>{{ capitalizeLabel(frequency.frequency) }}</span>
+                  <span
+                    :class="{'radio-btn': !isFrequencyLocked(frequency), 'radio-btn-disabled': isFrequencyLocked(frequency)}"
+                  >
+                    {{ capitalizeLabel(frequency.frequency) }}
+                  </span>
                   <span
                     v-if="showFrequencyChangeDate(frequency)"
                     class="ml-1"
@@ -66,10 +80,15 @@
             <legend>Statement Notifications</legend>
             <v-checkbox
               v-model="sendStatementNotifications"
-              class="mt-2 mb-0"
-              label="Send email notifications when account statements are available"
+              class="mt-2 mb-0 check-box"
               @change="toggleStatementNotification"
-            />
+            >
+              <template #label>
+                <span class="check-box">
+                  Send email notifications when account statements are available
+                </span>
+              </template>
+            </v-checkbox>
           </fieldset>
 
           <!-- Notification Recipients -->
@@ -200,10 +219,12 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { Member, MembershipType, Organization } from '@/models/Organization'
+import { LDFlags, PaymentTypes } from '@/util/constants'
+import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { StatementListItem, StatementNotificationSettings, StatementRecipient, StatementSettings } from '@/models/statement'
 import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import moment from 'moment'
 import { useOrgStore } from '@/stores/org'
@@ -220,6 +241,7 @@ import { useOrgStore } from '@/stores/org'
   },
   computed: {
     ...mapState(useOrgStore, [
+      'currentOrgPaymentDetails',
       'statementSettings',
       'currentStatementNotificationSettings',
       'activeOrgMembers',
@@ -236,6 +258,7 @@ export default class StatementsSettings extends Vue {
   private readonly statementSettings!: StatementSettings
   private readonly currentStatementNotificationSettings!: StatementNotificationSettings
   private readonly currentOrganization!: Organization
+  private readonly currentOrgPaymentDetails!: OrgPaymentDetails
   private activeOrgMembers!: Member[]
   private isSettingsModalOpen: boolean = false
   private frequencySelected: string = ''
@@ -274,6 +297,17 @@ export default class StatementsSettings extends Vue {
     } catch (error) {
       this.isLoading = false
     }
+  }
+
+  private isFrequencyLocked (frequency) {
+    return this.isEFT() && frequency.frequency !== this.frequencySelected
+  }
+
+  private isEFT () {
+    const isEFTPaymentMethod = this.currentOrgPaymentDetails.paymentMethod === PaymentTypes.EFT
+    const enableEFTPaymentMethod: boolean = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod, false)
+
+    return enableEFTPaymentMethod && isEFTPaymentMethod
   }
 
   // prepare list for org members as required for the auto complete component
@@ -395,6 +429,7 @@ export default class StatementsSettings extends Vue {
 </script>
 
 <style lang="scss" scoped>
+@import '@/assets/styles/theme.scss';
   .remove-user-btn {
     margin-right: -6px;
   }
@@ -411,4 +446,19 @@ export default class StatementsSettings extends Vue {
     margin-top: -5px;
     margin-right: 10px;
   }
+
+  .radio-btn {
+    color: $gray7;
+    opacity: 1;
+  }
+
+  .radio-btn-disabled {
+    color: $gray7;
+    opacity: .4;
+  }
+
+  .check-box {
+    color: $gray7;
+  }
+
 </style>
