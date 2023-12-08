@@ -36,6 +36,7 @@ import {
 } from '@/models/Organization'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
+import { FailedInvoice, NonSufficientFundsInvoiceListResponse } from '@/models/invoice'
 import { Products, ProductsRequestBody } from '@/models/Staff'
 import { StatementFilterParams, StatementNotificationSettings, StatementSettings, StatementsSummary } from '@/models/statement'
 import { computed, reactive, toRefs } from '@vue/composition-api'
@@ -47,7 +48,7 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
-import { InvoiceList } from '@/models/invoice'
+
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
@@ -741,39 +742,41 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data
   }
 
-  async function getFailedInvoices (): Promise<InvoiceList[]> {
-    const response = await PaymentService.getFailedInvoices(state.currentOrganization.id)
-    // if there is any failed payment which is partially paid, return only that payment.
-    let items = response?.data?.items || []
-    items.forEach(payment => {
-      if (payment.paidAmount > 0) {
-        items = [payment]
-      }
-    })
-    return items
+  async function getNSFInvoices (): Promise<NonSufficientFundsInvoiceListResponse> {
+    try {
+      const response = await PaymentService.getNSFInvoices(state.currentOrganization.id)
+      return response?.data || {}
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('get NSF invoices operation failed! - ', error)
+    }
   }
 
-  // to calculate failed invoices. need to move appropriate place since its returning data than commiting to store (which is not standard)
-  async function calculateFailedInvoices () {
-    let totalPaidAmount = 0
-    let totalAmountToPay = 0
-    let nsfCount = 0
-    let nsfFee = 0
-    let totalTransactionAmount = 0
-    const failedInvoices: InvoiceList[] = await getFailedInvoices()
-    failedInvoices?.forEach((failedInvoice) => {
-      totalPaidAmount += failedInvoice?.paidAmount
-      totalAmountToPay += failedInvoice?.invoices?.map(el => el.total).reduce((accumulator, invoiceTotal) => accumulator + invoiceTotal)
-      failedInvoice?.invoices?.forEach((invoice) => {
-        const nsfItems = invoice?.lineItems?.filter(lineItem => (lineItem.description === 'NSF'))
-          .map(el => el.total)
-        nsfCount += nsfItems.length
-        nsfFee += (nsfItems.length) ? nsfItems?.reduce((accumulator, currentValue) => accumulator + currentValue) : 0
-      })
-    })
-    totalTransactionAmount = totalAmountToPay - nsfFee
-    totalAmountToPay = totalAmountToPay - totalPaidAmount
-    return { totalTransactionAmount, totalAmountToPay, nsfFee, nsfCount }
+  async function downloadNSFInvoicesPDF (): Promise<any> {
+    try {
+      const response = await PaymentService.downloadNSFInvoicesPDF(state.currentOrganization.id)
+      CommonUtils.fileDownload(response?.data, `non-sufficient_funds_invoice.pdf`, response?.headers['content-type'])
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('download NSF invoices PDF operation failed! - ', error)
+    }
+  }
+
+  async function calculateFailedInvoices (): Promise<FailedInvoice> {
+    const nsfInvoices = await getNSFInvoices()
+    const invoices = nsfInvoices?.invoices || []
+    const totalAmount = nsfInvoices?.totalAmount || 0
+    const totalAmountRemaining = nsfInvoices?.totalAmountRemaining || 0
+    const totalNsfAmount = nsfInvoices?.totalNsfAmount || 0
+    const totalNsfCount = nsfInvoices?.totalNsfCount || 0
+
+    return {
+      invoices: invoices,
+      nsfCount: totalNsfCount,
+      nsfFee: totalNsfAmount,
+      totalAmountToPay: totalAmountRemaining,
+      totalTransactionAmount: totalAmount
+    }
   }
 
   async function resetAccountSetupProgress (): Promise<void> {
@@ -1093,7 +1096,6 @@ export const useOrgStore = defineStore('org', () => {
     getStatementRecipients,
     updateStatementNotifications,
     getOrgPayments,
-    getFailedInvoices,
     calculateFailedInvoices,
     resetAccountSetupProgress,
     resetAccountWhileSwitchingPremium,
@@ -1123,6 +1125,8 @@ export const useOrgStore = defineStore('org', () => {
     updateOrganizationAccessType,
     $reset,
     isStaffOrSbcStaff,
-    removeOrgAccountFees
+    removeOrgAccountFees,
+    getNSFInvoices,
+    downloadNSFInvoicesPDF
   }
 })
