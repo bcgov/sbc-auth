@@ -218,211 +218,200 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
 import { LDFlags, PaymentTypes } from '@/util/constants'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { StatementListItem, StatementNotificationSettings, StatementRecipient, StatementSettings } from '@/models/statement'
-import { mapActions, mapState } from 'pinia'
+import { computed, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-import moment from 'moment'
 import { useOrgStore } from '@/stores/org'
 
-@Component({
-  methods: {
-    ...mapActions(useOrgStore, [
-      'fetchStatementSettings',
-      'getStatementRecipients',
-      'updateStatementSettings',
-      'syncActiveOrgMembers',
-      'updateStatementNotifications'
-    ])
-  },
-  computed: {
-    ...mapState(useOrgStore, [
-      'currentOrgPaymentDetails',
-      'statementSettings',
-      'currentStatementNotificationSettings',
-      'activeOrgMembers',
-      'currentOrganization'
-    ])
-  }
-})
-export default class StatementsSettings extends Vue {
-  private readonly fetchStatementSettings!: () => StatementSettings
-  private readonly getStatementRecipients!: () => StatementNotificationSettings
-  private readonly updateStatementSettings!: (statementFrequency: StatementListItem) => any
-  private readonly updateStatementNotifications!: (statementNotification: StatementNotificationSettings) => any
-  private readonly syncActiveOrgMembers!: () => Member[]
-  private readonly statementSettings!: StatementSettings
-  private readonly currentStatementNotificationSettings!: StatementNotificationSettings
-  private readonly currentOrganization!: Organization
-  private readonly currentOrgPaymentDetails!: OrgPaymentDetails
-  private activeOrgMembers!: Member[]
-  private isSettingsModalOpen: boolean = false
-  private frequencySelected: string = ''
-  private sendStatementNotifications: boolean = false
-  private emailRecipientInput: StatementRecipient = {} as StatementRecipient
-  private emailRecipientList: StatementRecipient[] = []
-  private errorMessage: string = ''
-  private isFrequencyChanged: boolean = false
-  private isNotificationChanged: boolean = false
-  private isRecipientListChanged: boolean = false
-  private recipientAutoCompleteList: StatementRecipient[] = []
-  private isLoading: boolean = false
-  private isSaving: boolean = false
-  private showStatementNotification: boolean = false
+export default {
+  name: 'StatementSettings',
+  setup () {
+    const orgStore = useOrgStore()
 
-  private getIndexedTag (tag, index): string {
-    return `${tag}-${index}`
-  }
-
-  public async openSettings () {
-    this.isLoading = true
-    try {
-      this.errorMessage = ''
-      this.isFrequencyChanged = false
-      this.isNotificationChanged = false
-      this.isRecipientListChanged = false
-      await this.syncActiveOrgMembers()
-      const settings = await this.fetchStatementSettings()
-      const statementRecipients = await this.getStatementRecipients()
-      this.frequencySelected = settings?.currentFrequency?.frequency || settings?.frequencies[0].frequency
-      this.sendStatementNotifications = statementRecipients.statementNotificationEnabled
-      this.emailRecipientList = [ ...statementRecipients.recipients ]
-      await this.prepareAutoCompleteList()
-      this.isLoading = false
-      this.isSettingsModalOpen = true
-    } catch (error) {
-      this.isLoading = false
-    }
-  }
-
-  private isFrequencyLocked (frequency) {
-    return this.isEFT() && frequency.frequency !== this.frequencySelected
-  }
-
-  private isEFT () {
-    const isEFTPaymentMethod = this.currentOrgPaymentDetails.paymentMethod === PaymentTypes.EFT
-    const enableEFTPaymentMethod: boolean = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod, false)
-
-    return enableEFTPaymentMethod && isEFTPaymentMethod
-  }
-
-  // prepare list for org members as required for the auto complete component
-  private async prepareAutoCompleteList () {
-    this.activeOrgMembers.forEach((member) => {
-      const recipientIndex = this.emailRecipientList.findIndex((emailRecipient) => (emailRecipient.authUserId === member?.user?.id))
-      // add to auto complete only if the member is not already saved
-      if ((recipientIndex < 0) && (member.membershipTypeCode !== MembershipType.User)) {
-        this.recipientAutoCompleteList.push({
-          authUserId: member.user?.id,
-          firstname: member.user?.firstname,
-          lastname: member.user?.lastname,
-          name: `${member.user?.firstname || ''} ${member.user?.lastname || ''}`,
-          email: member.user?.contacts[0]?.email
-        })
-      }
+    const state = reactive({
+      isSettingsModalOpen: false,
+      frequencySelected: '',
+      sendStatementNotifications: false,
+      emailRecipientInput: {} as StatementRecipient,
+      emailRecipientList: [] as StatementRecipient[],
+      errorMessage: '',
+      isFrequencyChanged: false,
+      isNotificationChanged: false,
+      isRecipientListChanged: false,
+      recipientAutoCompleteList: [] as StatementRecipient[],
+      isLoading: false,
+      isSaving: false,
+      showStatementNotification: false,
+      activeOrgMembers: computed<Member[]>(() => orgStore.activeOrgMembers),
+      statementSettings: computed<StatementSettings>(() => orgStore.statementSettings),
+      currentStatementNotificationSettings: computed<StatementNotificationSettings>(() => orgStore.currentStatementNotificationSettings),
+      currentOrganization: computed<Organization>(() => orgStore.currentOrganization),
+      currentOrgPaymentDetails: computed<OrgPaymentDetails>(() => orgStore.currentOrgPaymentDetails),
+      isEFTPaymentMethod: computed<boolean>(() => orgStore.currentOrgPaymentDetails?.paymentMethod === PaymentTypes.EFT)
     })
-  }
 
-  private closeSettings () {
-    this.isSettingsModalOpen = false
-  }
+    const isEFT = () => {
+      const enableEFTPaymentMethod: boolean = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod, false)
+      return enableEFTPaymentMethod && state.isEFTPaymentMethod
+    }
+    const isFrequencyLocked = (frequency: StatementListItem) => {
+      return isEFT() && frequency.frequency !== state.frequencySelected
+    }
 
-  private async updateSettings () {
-    this.errorMessage = ''
-    try {
-      this.isSaving = true
-      if (this.isFrequencyChanged) {
-        await this.updateStatementSettings({ 'frequency': this.frequencySelected })
-      }
-      if (this.isNotificationChanged || this.isRecipientListChanged) {
-        // map only required values for api
-        const recipientList = this.emailRecipientList.map((recipient) => {
-          return {
-            authUserId: recipient.authUserId,
-            email: recipient.email,
-            firstname: recipient.firstname,
-            lastname: recipient.lastname
-          }
-        })
-        const statementNotification: StatementNotificationSettings = {
-          statementNotificationEnabled: this.sendStatementNotifications,
-          recipients: recipientList,
-          accountName: this.currentOrganization.name
+    const prepareAutoCompleteList = async () => {
+      state.activeOrgMembers.forEach((member) => {
+        const recipientIndex = state.emailRecipientList.findIndex((emailRecipient) => (emailRecipient.authUserId === member?.user?.id))
+        if ((recipientIndex < 0) && (member.membershipTypeCode !== MembershipType.User)) {
+          state.recipientAutoCompleteList.push({
+            authUserId: member.user?.id,
+            firstname: member.user?.firstname,
+            lastname: member.user?.lastname,
+            name: `${member.user?.firstname || ''} ${member.user?.lastname || ''}`,
+            email: member.user?.contacts[0]?.email
+          })
         }
-        await this.updateStatementNotifications(statementNotification)
+      })
+    }
+
+    const openSettings = async (): Promise<any> => {
+      state.isLoading = true
+      try {
+        state.errorMessage = ''
+        state.isFrequencyChanged = false
+        state.isNotificationChanged = false
+        state.isRecipientListChanged = false
+        await orgStore.syncActiveOrgMembers()
+        await orgStore.fetchStatementSettings()
+        await orgStore.getStatementRecipients()
+        state.frequencySelected = state.statementSettings?.currentFrequency?.frequency || state.statementSettings?.frequencies[0].frequency
+        state.sendStatementNotifications = state.currentStatementNotificationSettings.statementNotificationEnabled
+        state.emailRecipientList = [...state.currentStatementNotificationSettings.recipients]
+        await prepareAutoCompleteList()
+        state.isLoading = false
+        state.isSettingsModalOpen = true
+      } catch (error) {
+        state.isLoading = false
       }
-      this.showStatementNotification = true
-      this.isSaving = false
-      this.isSettingsModalOpen = false
-    } catch (error) {
-      this.errorMessage = 'Failed to update the settings, please try again.'
-      this.isSaving = false
     }
-  }
 
-  private frequencyChanged (frequency) {
-    this.isFrequencyChanged = (frequency !== this.statementSettings?.currentFrequency?.frequency)
-  }
+    const closeSettings = () => {
+      state.isSettingsModalOpen = false
+    }
 
-  private toggleStatementNotification (notification) {
-    this.isNotificationChanged = (notification !== this.currentStatementNotificationSettings.statementNotificationEnabled)
-  }
-
-  private setRecipientListChanged () {
-    this.isRecipientListChanged = (JSON.stringify(this.emailRecipientList) !== JSON.stringify(this.currentStatementNotificationSettings.recipients))
-  }
-
-  private get enableSaveBtn () {
-    return (this.isFrequencyChanged || this.isNotificationChanged || this.isRecipientListChanged)
-  }
-
-  private formatDate (value) {
-    return CommonUtils.formatDisplayDate(new Date(value))
-  }
-
-  private showFrequencyChangeDate (frequency) {
-    return (frequency.frequency === this.frequencySelected) && (frequency.frequency !== this.statementSettings?.currentFrequency?.frequency)
-  }
-
-  private capitalizeLabel (value) {
-    return (typeof value === 'string') ? `${value.charAt(0)}${value.slice(1).toLowerCase()}` : ''
-  }
-
-  private addEmailReceipient (item) {
-    if (item.authUserId) {
-      this.emailRecipientList.push({ ...item })
-      this.setRecipientListChanged()
-      // remove the added receipient from autocomplete list
-      const recipientIndex = this.recipientAutoCompleteList.findIndex((recipient) => recipient.authUserId === item.authUserId)
-      if (recipientIndex > -1) {
-        this.recipientAutoCompleteList.splice(recipientIndex, 1)
+    const updateSettings = async () => {
+      state.errorMessage = ''
+      try {
+        state.isSaving = true
+        if (state.isFrequencyChanged) {
+          await orgStore.updateStatementSettings({ 'frequency': state.frequencySelected })
+        }
+        if (state.isNotificationChanged || state.isRecipientListChanged) {
+          const recipientList = state.emailRecipientList.map((recipient) => {
+            return {
+              authUserId: recipient.authUserId,
+              email: recipient.email,
+              firstname: recipient.firstname,
+              lastname: recipient.lastname
+            }
+          })
+          const statementNotification: StatementNotificationSettings = {
+            statementNotificationEnabled: state.sendStatementNotifications,
+            recipients: recipientList,
+            accountName: state.currentOrganization.name
+          }
+          await orgStore.updateStatementNotifications(statementNotification)
+        }
+        state.showStatementNotification = true
+        state.isSaving = false
+        state.isSettingsModalOpen = false
+      } catch (error) {
+        state.errorMessage = 'Failed to update the settings, please try again.'
+        state.isSaving = false
       }
-      // required this delay to clear the selected item from input field
-      setTimeout(() => {
-        this.emailRecipientInput = {} as StatementRecipient
-      }, 100)
     }
-  }
 
-  private removeEmailReceipient (item) {
-    const index = this.emailRecipientList.indexOf(item)
-    if (index > -1) {
-      this.emailRecipientList.splice(index, 1)
+    const frequencyChanged = (frequency: string) => {
+      state.isFrequencyChanged = (frequency !== state.statementSettings?.currentFrequency?.frequency)
     }
-    this.setRecipientListChanged()
-    // add the removed item back to auto complete list
-    item.name = `${item.firstname || ''} ${item.lastname || ''}`
-    this.recipientAutoCompleteList.push(item)
-  }
 
-  // for selecting the receipient from the list using keyboard
-  private selectFromListUsingKey (itemIndex) {
-    if (itemIndex > -1) {
-      this.addEmailReceipient(this.emailRecipientInput)
+    const toggleStatementNotification = (notification) => {
+      state.isNotificationChanged = (notification !== state.currentStatementNotificationSettings.statementNotificationEnabled)
+    }
+
+    const setRecipientListChanged = () => {
+      state.isRecipientListChanged = (
+        JSON.stringify(state.emailRecipientList) !==
+        JSON.stringify(state.currentStatementNotificationSettings.recipients)
+      )
+    }
+
+    const enableSaveBtn = computed(() => {
+      return (state.isFrequencyChanged || state.isNotificationChanged || state.isRecipientListChanged)
+    })
+
+    const formatDate = (value) => {
+      return CommonUtils.formatDisplayDate(new Date(value))
+    }
+
+    const showFrequencyChangeDate = (frequency: StatementListItem) => {
+      return (frequency.frequency === state.frequencySelected) && (frequency.frequency !== state.statementSettings?.currentFrequency?.frequency)
+    }
+
+    const capitalizeLabel = (value) => {
+      return (typeof value === 'string') ? `${value.charAt(0)}${value.slice(1).toLowerCase()}` : ''
+    }
+
+    const addEmailReceipient = (item) => {
+      if (item.authUserId) {
+        state.emailRecipientList.push({ ...item })
+        setRecipientListChanged()
+        const recipientIndex = state.recipientAutoCompleteList.findIndex((recipient) => recipient.authUserId === item.authUserId)
+        if (recipientIndex > -1) {
+          state.recipientAutoCompleteList.splice(recipientIndex, 1)
+        }
+        setTimeout(() => {
+          state.emailRecipientInput = {} as StatementRecipient
+        }, 100)
+      }
+    }
+
+    const removeEmailReceipient = (item) => {
+      const index = state.emailRecipientList.indexOf(item)
+      if (index > -1) {
+        state.emailRecipientList.splice(index, 1)
+      }
+      setRecipientListChanged()
+      item.name = `${item.firstname || ''} ${item.lastname || ''}`
+      state.recipientAutoCompleteList.push(item)
+    }
+
+    const selectFromListUsingKey = (itemIndex) => {
+      if (itemIndex > -1) {
+        addEmailReceipient(state.emailRecipientInput)
+      }
+    }
+
+    return {
+      ...toRefs(state),
+      isFrequencyLocked,
+      isEFT,
+      prepareAutoCompleteList,
+      openSettings,
+      closeSettings,
+      updateSettings,
+      frequencyChanged,
+      toggleStatementNotification,
+      setRecipientListChanged,
+      enableSaveBtn,
+      formatDate,
+      showFrequencyChangeDate,
+      capitalizeLabel,
+      addEmailReceipient,
+      removeEmailReceipient,
+      selectFromListUsingKey
     }
   }
 }
