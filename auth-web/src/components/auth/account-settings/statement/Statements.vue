@@ -18,7 +18,6 @@
         Statements
       </h2>
       <v-btn
-        v-if="!enableEFTPaymentMethod"
         large
         depressed
         aria-label="Statement Settings"
