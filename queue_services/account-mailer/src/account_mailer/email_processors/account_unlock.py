@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""A Template for the Account Restored NSF Email."""
+"""A Template for the Account Unlocked Email."""
 
 import base64
 import datetime
@@ -26,10 +26,10 @@ from account_mailer.email_processors import generate_template
 
 
 def process(email_msg: dict, token: str) -> dict:
-    """Build the email for Account Restored NSF notification."""
+    """Build the email for Account Unlocked notification."""
     logger.debug('email_msg notification: %s', email_msg)
-    pdf_attachment = _get_account_restored_pdf(email_msg, token)
-    html_body = _get_account_restored_email(email_msg)
+    pdf_attachment = _get_account_unlock_pdf(email_msg, token)
+    html_body = _get_account_unlock_email(email_msg)
     return {
         'recipients': email_msg.get('admin_coordinator_emails'),
         'content': {
@@ -37,7 +37,7 @@ def process(email_msg: dict, token: str) -> dict:
             'body': f'{html_body}',
             'attachments': [
                 {
-                    'fileName': 'NSF_Fee_Receipt.pdf',
+                    'fileName': 'Account_Unlock_Receipt.pdf',
                     'fileBytes': pdf_attachment.decode('utf-8'),
                     'fileUrl': '',
                     'attachOrder': '1'
@@ -47,7 +47,7 @@ def process(email_msg: dict, token: str) -> dict:
     }
 
 
-def _get_account_restored_email(email_msg):
+def _get_account_unlock_email(email_msg):
     filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), email_msg.get('template_name'))
     jnja_template = Template(filled_template, autoescape=True)
     html_out = jnja_template.render(
@@ -57,7 +57,7 @@ def _get_account_restored_email(email_msg):
     return html_out
 
 
-def _get_account_restored_pdf(email_msg, token):
+def _get_account_unlock_pdf(email_msg, token):
     current_time = datetime.datetime.now()
     template_vars = {
         **email_msg,
@@ -69,7 +69,6 @@ def _get_account_restored_pdf(email_msg, token):
         'paymentMethodDescription': email_msg.get('payment_method_description'), # THIS TOO?
         'invoiceNumber': email_msg.get('invoice_number'), # NEED THIS
         'invoice': email_msg.get('invoice'), # THIS AS WELL?
-
     }
 
     pdf_payload = {
