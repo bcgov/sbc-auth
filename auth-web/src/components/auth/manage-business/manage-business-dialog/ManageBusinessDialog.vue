@@ -186,13 +186,13 @@
                     <v-text-field
                       v-model="proprietorPartnerName"
                       filled
-                      label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
+                      label="Proprietor or Partner Name (e.g., Last Name, First Name Middlename)"
                       hint="Name as it appears on the Business Summary or the Statement of Registration"
                       persistent-hint
                       :rules="proprietorPartnerNameRules"
                       maxlength="151"
                       autocomplete="off"
-                      aria-label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
+                      aria-label="Proprietor or Partner Name (e.g., Last Name, First Name Middlename)"
                     />
                   </div>
                   <Certify
@@ -238,7 +238,9 @@
                   v-model="requestAuthBusinessOption"
                 >
                   <template #activator>
-                    <v-list-item-title>Request authorization from the business</v-list-item-title>
+                    <v-list-item-title>
+                      Request authorization from an account currently managing the business
+                    </v-list-item-title>
                   </template>
                   <div class="list-body">
                     <AccountAuthorizationRequest
@@ -256,17 +258,17 @@
                 v-if="noAuthenticationOptions"
                 class="list-body contact-us"
               >
-                The business doesn't have a password / passcode or email on record. Please Contact the Business Registry for help.
-                <ol>
+                The business doesn't have a password / passcode or email on record. Please contact us for help:
+                <ol class="mt-4">
                   <li>
                     <v-icon small>
                       mdi-phone
-                    </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
+                    </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1-877-526-1526">1-877-526-1526</a>
                   </li>
                   <li>
                     <v-icon small>
                       mdi-phone
-                    </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
+                    </v-icon>  Victoria Office: <a href="tel:+1-800-663-6102">1-800-663-6102</a>
                   </li>
                   <li>
                     <v-icon small>
@@ -563,7 +565,6 @@ export default defineComponent({
         return ''
       }
     })
-
 
     // Methods
     const closeAuthorizationRequestSentDialog = () => {

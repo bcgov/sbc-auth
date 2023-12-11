@@ -1,35 +1,37 @@
-Attention **{{ account_name }}**.
+**Attention {{ account }}**
 
 Your BC Registries and Online Services account is listed as the account managing **{{ business_name }}**.
 
 The following account is requesting authorisation to manage Registries activities for {{ business_name }}:
 
 **{{ requesting_account }}**
-
-Only authorise this account if you recognize it.
-
-Allowing **{{ requesting_account }}** to manage all Registries activities for **{{ business_name }}**, will allow it to do the following (including but not limited to):
-* Authorisation of accounts to manage the business,
-* Appointment and cessation of directors,
-* Dissolution of the business,
-* Filing of Annual Reports, and
-* Changing the records office of the business.
-
+___
 {% if additional_message %}
-**Message from the Requesting Account:**
+**Message from the Requesting Account**
 
 {{ additional_message }}
+___
 {% endif %}
+Go to {{ business_name }} to respond to this request:
 
-**Note:** This request has been sent to all Account Administrators and Coordinators of {{ account_name }}.
+**[Log in to your BC Registries Dashboard]({{ url }})**
 
-To manage this request from **{{ requesting_account }}** to manage Registries activities for {{ business_name }} follow the link below:
+Only authorize this account if you recognize it.
 
-To authorise or not authorise **{{ requesting_account }}** to manage Registries activities for **{{ business_name }}**, log in to your BC Registries Account:
+Allowing **{{ requesting_account }}** to manage all Registries activities for **{{ business_name }}**, will allow it to do the following (including but not limited to):
 
-[Log in to my BC Registries Account]({{ url }})
+* Appoint and cease directors,
+* File dissolution,
+* File annual reports,
+* Change the registered and records office of the business, and
+* Authorize other accounts to manage this business.
+___
+**Note:** This request has been sent to all Account Administrators and Coordinators of {{ account }}.
 
-If you have questions about this request please contact the Business Registry:
-Toll Free: [1-877-370-1033](1-877-370-1033)
-Victoria Office: [250-370-1033](250-370-1033)
+If you have questions about this request please contact the Business Registry.
+___
+**Business Registry**
+BC Registries and Online Services
+Toll Free: [1-877-526-1526](1-877-526-1526)
+Victoria Office: [250-387-7848](250-387-7848)
 Email: [BCRegistries@gov.bc.ca](BCRegistries@gov.bc.ca)

@@ -188,4 +188,8 @@ export default class PaymentService {
     const { product } = accountFeePayload
     return axios.put(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/fees/${product}`, accountFeePayload)
   }
+
+  static removeAccountFees (accountId: string | number): AxiosPromise<any> {
+    return axios.delete(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/fees`)
+  }
 }

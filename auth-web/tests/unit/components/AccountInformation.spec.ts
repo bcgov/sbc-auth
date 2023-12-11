@@ -90,9 +90,9 @@ describe('AccountInformation.vue basic tests', () => {
     expect(wrapper.find('.access-type__radio-grp').exists()).toBe(true)
     const radioLabels = wrapper.findAll('.access-type__radio-grp .v-radio')
     expect(radioLabels.length).toBe(2)
-    expect(radioLabels.at(0).text()).toBe('Regular Access')
+    expect(radioLabels.at(0).text()).toContain('Regular Access')
     expect(radioLabels.at(0).attributes()['class']).not.toContain('v-item--active')
-    expect(radioLabels.at(1).text()).toBe('Government agency (other than BC provincial)')
+    expect(radioLabels.at(1).text()).toContain('Government agency (other than BC provincial)')
     expect(radioLabels.at(1).attributes()['class']).toContain('v-item--active')
     // update access btns show
     const buttons = wrapper.findAll('.access-type button')

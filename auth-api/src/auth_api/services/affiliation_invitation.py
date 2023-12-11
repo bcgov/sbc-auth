@@ -164,7 +164,8 @@ class AffiliationInvitation:
             raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
 
         # Validate that entity contact email exists
-        if contact and not contact.email:
+        if (contact and not contact.email) and \
+                affiliation_invitation_type != AffiliationInvitationType.REQUEST:
             raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
 
         # Check if affiliation already exists
@@ -495,7 +496,10 @@ class AffiliationInvitation:
 
             # if ACCESS REQUEST type, add data for access request type
             data['fromOrgName'] = affiliation_invitation.from_org.name
+            data['fromOrgBranchName'] = affiliation_invitation.from_org.branch_name
             data['toOrgName'] = to_org_name
+            data['toOrgBranchName'] = affiliation_invitation.to_org.branch_name
+
             if is_authorized is not None:
                 notification_type = 'affiliationInvitationRequestAuthorization'
                 data['isAuthorized'] = is_authorized

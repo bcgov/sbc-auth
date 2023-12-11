@@ -454,6 +454,7 @@ def _setup_affiliation_invitation_data(affiliation_invitation_type='EMAIL',
     from_org = OrgModel()
     from_org.id = 1
     from_org.name = 'From the moon inc.'
+    from_org.branch_name = 'Luna division'
     to_org = OrgModel()
     to_org.id = 2
     to_org.name = 'To the stars inc.'
@@ -518,7 +519,9 @@ def test_send_affiliation_invitation_request_sent(publish_to_mailer_mock,
         'emailAddresses': affiliation_invitation.recipient_email,
         'orgName': affiliation_invitation.from_org.name,
         'fromOrgName': affiliation_invitation.from_org.name,
+        'fromOrgBranchName': affiliation_invitation.from_org.branch_name,
         'toOrgName': affiliation_invitation.to_org.name,
+        'toOrgBranchName': affiliation_invitation.to_org.branch_name,
         'additionalMessage': additional_message
     }
 
@@ -558,7 +561,9 @@ def test_send_affiliation_invitation_request_authorized(publish_to_mailer_mock,
         'emailAddresses': expected_email,
         'orgName': affiliation_invitation.from_org.name,
         'fromOrgName': affiliation_invitation.from_org.name,
+        'fromOrgBranchName': affiliation_invitation.from_org.branch_name,
         'toOrgName': affiliation_invitation.to_org.name,
+        'toOrgBranchName': affiliation_invitation.to_org.branch_name,
         'isAuthorized': True
     }
 
@@ -600,7 +605,9 @@ def test_send_affiliation_invitation_request_refused(publish_to_mailer_mock,
         'emailAddresses': expected_email,
         'orgName': affiliation_invitation.from_org.name,
         'fromOrgName': affiliation_invitation.from_org.name,
+        'fromOrgBranchName': affiliation_invitation.from_org.branch_name,
         'toOrgName': affiliation_invitation.to_org.name,
+        'toOrgBranchName': affiliation_invitation.to_org.branch_name,
         'isAuthorized': False
     }
 

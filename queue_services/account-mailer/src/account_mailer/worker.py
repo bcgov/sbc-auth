@@ -223,6 +223,15 @@ async def process_event(event_message: dict, flask_app):
         elif message_type in {MessageType.AFFILIATION_INVITATION_REQUEST.value,
                               MessageType.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value}:
             business_name = email_msg.get('businessName')
+
+            requesting_account = email_msg.get('fromOrgName')
+            if from_branch_name := email_msg.get('fromOrgBranchName'):
+                requesting_account += ' - ' + from_branch_name
+
+            account = email_msg.get('toOrgName')
+            if to_branch_name := email_msg.get('toOrgBranchName'):
+                account += ' - ' + to_branch_name
+
             email_dict = common_mailer.process(
                 **{
                     'org_id': None,
@@ -231,8 +240,8 @@ async def process_event(event_message: dict, flask_app):
                     'subject': SubjectType[MessageType(message_type).name].value.format(business_name=business_name),
                     'logo_url': logo_url,
                     'business_name': business_name,
-                    'requesting_account': email_msg.get('fromOrgName'),
-                    'account_name': email_msg.get('toOrgName'),
+                    'requesting_account': requesting_account,
+                    'account': account,
                     'is_authorized': email_msg.get('isAuthorized', None),
                     'additional_message': email_msg.get('additionalMessage', None)
                 })

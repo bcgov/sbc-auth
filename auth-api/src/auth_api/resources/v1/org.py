@@ -25,7 +25,6 @@ from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.dataclass import DeleteAffiliationRequest
-from auth_api.models.dataclass import PaginationInfo  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
@@ -38,7 +37,7 @@ from auth_api.services import User as UserService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.tracer import Tracer
 from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.enums import AccessType, NotificationType, PatchActions, Status
+from auth_api.utils.enums import AccessType, NotificationType, OrgType, PatchActions, Status
 from auth_api.utils.role_validator import validate_roles
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role  # noqa: I005
 from auth_api.utils.util import get_request_environment
@@ -354,7 +353,6 @@ def post_organization_affiliation(org_id):
     env = get_request_environment()
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, 'affiliation')
-    bearer_token = request.headers['Authorization'].replace('Bearer ', '')
     is_new_business = request.args.get('newBusiness', 'false').lower() == 'true'
     if not valid_format:
         return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
@@ -369,7 +367,7 @@ def post_organization_affiliation(org_id):
                                                certified_by_name=request_json.get('certifiedByName'))
 
             response, status = AffiliationService.create_new_business_affiliation(
-                affiliation_data, env, bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
+                affiliation_data, env).as_dict(), http_status.HTTP_201_CREATED
         else:
             response, status = AffiliationService.create_affiliation(
                 org_id, business_identifier, env, request_json.get('passCode'),
@@ -391,17 +389,16 @@ def post_organization_affiliation(org_id):
 @_jwt.has_one_of_roles(
     [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_org_details_by_affiliation(business_identifier):
-    """Search orgs by BusinessIdentifier and return org Name and UUID."""
+    """Search non staff orgs by BusinessIdentifier and return org Name, branch Name and UUID."""
     environment = get_request_environment()
-    pagination_info = PaginationInfo(
-        limit=int(request.args.get('limit', 10)),
-        page=int(request.args.get('page', 1))
-    )
-
+    excluded_org_types = [OrgType.STAFF.value, OrgType.SBC_STAFF.value]
     try:
-        data = OrgService.search_orgs_by_affiliation(business_identifier, pagination_info, environment)
+        data = OrgService.search_orgs_by_affiliation(
+            business_identifier, environment, excluded_org_types
+        )
 
-        org_details = [{'name': org.name, 'uuid': org.uuid} for org in data['orgs']]
+        org_details = \
+            [{'name': org.name, 'uuid': org.uuid, 'branchName': org.branch_name} for org in data['orgs']]
         response, status = {'orgs_details': org_details}, http_status.HTTP_200_OK
 
     except BusinessException as exception:

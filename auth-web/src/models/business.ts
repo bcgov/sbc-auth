@@ -1,5 +1,5 @@
-import { CorpTypes, FilingTypes, LearFilingTypes, NrTargetTypes } from '@/util/constants'
-import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
+import { AmalgamationTypes, FilingTypes, NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
+import { CorpTypes, LearFilingTypes, NrTargetTypes } from '@/util/constants'
 import { AffiliationInviteInfo } from '@/models/affiliation'
 import { Contact } from './contact'
 
@@ -82,7 +82,6 @@ export interface NameRequest {
     natureOfBusiness?: string
     expirationDate?: Date
     nrNum?: string
-    requestActionCd?: string
     stateCd?: string
     natureBusinessInfo?: string
     applicants?: Array<Applicant>
@@ -121,6 +120,10 @@ export interface BusinessRequest {
         // business is only used in incorporationApplication filing
         business?: {
             legalType: CorpTypes
+        },
+        amalgamation?: {
+          type: AmalgamationTypes,
+          nameRequest: NameRequest
         },
         incorporationApplication?: {
             nameRequest: NameRequest

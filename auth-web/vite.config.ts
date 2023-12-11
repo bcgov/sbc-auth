@@ -64,7 +64,9 @@ export default defineConfig({
       '@bcrs-shared-components/mixins': path.resolve(__dirname, './node_modules/@bcrs-shared-components/mixins/index.ts'),
       '@bcrs-shared-components/enums': path.resolve(__dirname, './node_modules/@bcrs-shared-components/enums/index.ts'),
       // Fix for module decorator unit tests fail
-      'vuex-module-decorators': path.resolve(__dirname, './node_modules/vuex-module-decorators/dist/esm/index.js')
+      'vuex-module-decorators': path.resolve(__dirname, './node_modules/vuex-module-decorators/dist/esm/index.js'),
+      // Fix for multiple vue detected on fas-ui issue, set alias to force fas-ui to use /vue
+      'vue': path.resolve(__dirname, './node_modules/vue/dist/vue.runtime.esm.js')
     },
     extensions: ['.js', '.ts', '.vue', '.json', '.css']
   },
