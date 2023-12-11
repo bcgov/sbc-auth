@@ -28,8 +28,8 @@ from account_mailer.email_processors import generate_template
 def process(email_msg: dict, token: str) -> dict:
     """Build the email for Account Restored NSF notification."""
     logger.debug('email_msg notification: %s', email_msg)
-    pdf_attachment = _get_account_restored_nsf_pdf(email_msg, token)
-    html_body = _get_account_restored_nsf_email(email_msg)
+    pdf_attachment = _get_account_restored_pdf(email_msg, token)
+    html_body = _get_account_restored_email(email_msg)
     return {
         'recipients': email_msg.get('admin_coordinator_emails'),
         'content': {
@@ -47,7 +47,7 @@ def process(email_msg: dict, token: str) -> dict:
     }
 
 
-def _get_account_restored_nsf_email(email_msg):
+def _get_account_restored_email(email_msg):
     filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), email_msg.get('template_name'))
     jnja_template = Template(filled_template, autoescape=True)
     html_out = jnja_template.render(
@@ -57,18 +57,18 @@ def _get_account_restored_nsf_email(email_msg):
     return html_out
 
 
-def _get_account_restored_nsf_pdf(email_msg, token):
+def _get_account_restored_pdf(email_msg, token):
     current_time = datetime.datetime.now()
     template_vars = {
         **email_msg,
-        'corpName': email_msg.get('accountName'),
+        'corpName': email_msg.get('account_name'),
         'receiptNumber': email_msg.get('receipt_number'),
         'filingDate': current_time.strftime('%Y-%m-%d'),
         'effectiveDateTime': current_time.strftime('%Y-%m-%d %H:%M:%S'),
-        'invoiceNumber': email_msg.get('invoice_number'),
-        'paymentMethodDescription': email_msg.get('payment_method_description'),
         'filingIdentifier': email_msg.get('filing_identifier'),
-        'invoice': email_msg.get('invoice'),
+        'paymentMethodDescription': email_msg.get('payment_method_description'), # THIS TOO?
+        'invoiceNumber': email_msg.get('invoice_number'), # NEED THIS
+        'invoice': email_msg.get('invoice'), # THIS AS WELL?
 
     }
 
