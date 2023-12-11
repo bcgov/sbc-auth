@@ -84,9 +84,8 @@
 </template>
 
 <script lang="ts">
-
 import { Member, Organization } from '@/models/Organization'
-import { defineComponent, onMounted, ref } from '@vue/composition-api'
+import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
 import { useOrgStore } from '@/stores/org'
@@ -101,12 +100,15 @@ export default defineComponent({
     const calculateFailedInvoices: any = orgStore.calculateFailedInvoices
     const downloadNSFInvoicesPDF: any = orgStore.downloadNSFInvoicesPDF
     const formatDate = CommonUtils.formatDisplayDate
-    const nsfFee = ref<number>(0)
-    const nsfCount = ref<number>(0)
-    const totalTransactionAmount = ref<number>(0)
-    const totalAmountToPay = ref<number>(0)
-    const totalPaidAmount = ref<number>(0)
     const suspendedDate = (currentOrganization?.suspendedOn) ? formatDate(new Date(currentOrganization.suspendedOn)) : ''
+
+    const state = reactive({
+      nsfFee: 0,
+      nsfCount: 0,
+      totalTransactionAmount: 0,
+      totalAmountToPay: 0,
+      totalPaidAmount: 0
+    })
 
     const goNext = () => {
       emit('step-forward')
@@ -114,20 +116,16 @@ export default defineComponent({
 
     onMounted(async () => {
       const failedInvoices: FailedInvoice = await calculateFailedInvoices()
-      nsfCount.value = failedInvoices?.nsfCount || 0
-      totalTransactionAmount.value = failedInvoices?.totalTransactionAmount || 0
-      nsfFee.value = failedInvoices?.nsfFee || 0
-      totalAmountToPay.value = failedInvoices?.totalAmountToPay || 0
+      state.nsfCount = failedInvoices?.nsfCount || 0
+      state.totalTransactionAmount = failedInvoices?.totalTransactionAmount || 0
+      state.nsfFee = failedInvoices?.nsfFee || 0
+      state.totalAmountToPay = failedInvoices?.totalAmountToPay || 0
     })
 
     return {
+      ...toRefs(state),
       currentOrganization,
       currentMembership,
-      nsfFee,
-      nsfCount,
-      totalTransactionAmount,
-      totalAmountToPay,
-      totalPaidAmount,
       suspendedDate,
       downloadNSFInvoicesPDF,
       goNext
