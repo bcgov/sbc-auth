@@ -462,7 +462,7 @@ def get_organization_members(org_id):
     try:
 
         status = request.args.get('status').upper() if request.args.get('status') else None
-        roles = request.args.get('roles').upper() if request.args.get('roles') else None
+        roles = request.args.get('roles').upper().split(',') if request.args.get('roles') else None
 
         members = MembershipService.get_members_for_org(org_id, status=status, membership_roles=roles)
         if members:
