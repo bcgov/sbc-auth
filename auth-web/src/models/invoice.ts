@@ -51,6 +51,5 @@ export interface NonSufficientFundsInvoiceListResponse {
   total: number
   totalAmount: number
   totalAmountRemaining: number
-  totalNsfAmount: number
-  totalNsfCount: number
+  nsfAmount: number
 }

@@ -767,13 +767,11 @@ export const useOrgStore = defineStore('org', () => {
     const invoices = nsfInvoices?.invoices || []
     const totalAmount = nsfInvoices?.totalAmount || 0
     const totalAmountRemaining = nsfInvoices?.totalAmountRemaining || 0
-    const totalNsfAmount = nsfInvoices?.totalNsfAmount || 0
-    const totalNsfCount = nsfInvoices?.totalNsfCount || 0
+    const nsfAmount = nsfInvoices?.nsfAmount || 0
 
     return {
       invoices: invoices,
-      nsfCount: totalNsfCount,
-      nsfFee: totalNsfAmount,
+      nsfFee: nsfAmount,
       totalAmountToPay: totalAmountRemaining,
       totalTransactionAmount: totalAmount
     }

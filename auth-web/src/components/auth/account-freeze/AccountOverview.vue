@@ -27,7 +27,7 @@
             </div>
           </v-col>
           <v-col class="text-end">
-            ${{ nsfFee.toFixed(2) }}
+            ${{ nsfAmount.toFixed(2) }}
           </v-col>
         </v-row>
         <v-row>
@@ -35,7 +35,7 @@
             Total Transactions
           </v-col>
           <v-col class="text-end">
-            ${{ totalTransactionAmount.toFixed(2) }}
+            ${{ totalAmount.toFixed(2) }}
           </v-col>
         </v-row>
         <v-divider class="my-2" />
@@ -44,7 +44,7 @@
             Total Amount Due
           </v-col>
           <v-col class="text-end">
-            ${{ totalAmountToPay.toFixed(2) }}
+            ${{ totalAmountRemaining.toFixed(2) }}
           </v-col>
         </v-row>
       </v-card-text>
@@ -103,10 +103,9 @@ export default defineComponent({
     const suspendedDate = (currentOrganization?.suspendedOn) ? formatDate(new Date(currentOrganization.suspendedOn)) : ''
 
     const state = reactive({
-      nsfFee: 0,
-      nsfCount: 0,
-      totalTransactionAmount: 0,
-      totalAmountToPay: 0,
+      nsfAmount: 0,
+      totalAmount: 0,
+      totalAmountRemaining: 0,
       totalPaidAmount: 0
     })
 
@@ -116,10 +115,9 @@ export default defineComponent({
 
     onMounted(async () => {
       const failedInvoices: FailedInvoice = await calculateFailedInvoices()
-      state.nsfCount = failedInvoices?.nsfCount || 0
-      state.totalTransactionAmount = failedInvoices?.totalTransactionAmount || 0
-      state.nsfFee = failedInvoices?.nsfFee || 0
-      state.totalAmountToPay = failedInvoices?.totalAmountToPay || 0
+      state.totalAmount = failedInvoices?.totalTransactionAmount || 0
+      state.nsfAmount = failedInvoices?.nsfFee || 0
+      state.totalAmountRemaining = failedInvoices?.totalAmountToPay || 0
     })
 
     return {
