@@ -371,4 +371,3 @@ class NRActionCodes(Enum):
     RESTORATION = 'REST'  # FUTURE: unused? delete?
     RESUBMIT = 'RESUBMIT'  # FUTURE: unused? delete?
 
-    INFO = 'INFO'  # special value for sub-menu
