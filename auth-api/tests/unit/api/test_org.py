@@ -40,7 +40,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services import User as UserService
 from auth_api.utils.enums import (
-    AccessType, AffidavitStatus, CorpType, NRStatus, OrgStatus, OrgType, PatchActions, PaymentMethod,
+    AccessType, AffidavitStatus, CorpType, NRActionCodes, NRStatus, OrgStatus, OrgType, PatchActions, PaymentMethod,
     ProductCode, ProductSubscriptionStatus, Status,
     SuspensionReasonCode, TaskStatus, TaskRelationshipStatus)
 from auth_api.utils.roles import ADMIN  # noqa: I005
@@ -2228,6 +2228,8 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
         if draft_type := entity.get('draftType', None):
             expected = CorpType.RTMP.value if entity['legalType'] in [
                 CorpType.SP.value, CorpType.GP.value] else CorpType.TMP.value
+            if entity.get('nameRequest', {}).get('requestActionCd') == NRActionCodes.AMALGAMATE.value:
+                expected = CorpType.ATMP.value
 
             assert draft_type == expected
 

@@ -36,7 +36,7 @@ from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
-from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus
+from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
@@ -456,7 +456,12 @@ class Affiliation:
             # Only drafts have nrNumber coming back from legal-api.
             if 'nrNumber' in business and (nr_num := business['nrNumber']):
                 if business['nrNumber'] in name_requests:
-                    business['nameRequest'] = name_requests[nr_num]['nameRequest']
+                    name_request = name_requests[nr_num]['nameRequest']
+                    business['nameRequest'] = name_request
+                    # Update the draft type if the draft NR request is for amalgamation
+                    if name_request['request_action_cd'] == NRActionCodes.AMALGAMATE.value \
+                        and business.get('draftType', None):
+                        business['draftType'] = CorpType.ATMP.value
                     # Remove the business if the draft associated to the NR is consumed.
                     if business['nameRequest']['stateCd'] == NRStatus.CONSUMED.value:
                         drafts.remove(business)
