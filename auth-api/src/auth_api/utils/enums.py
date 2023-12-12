@@ -370,4 +370,3 @@ class NRActionCodes(Enum):
     RENEW = 'REN'  # restore with new name request
     RESTORATION = 'REST'  # FUTURE: unused? delete?
     RESUBMIT = 'RESUBMIT'  # FUTURE: unused? delete?
-
