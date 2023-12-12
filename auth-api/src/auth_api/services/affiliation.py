@@ -456,11 +456,10 @@ class Affiliation:
             # Only drafts have nrNumber coming back from legal-api.
             if 'nrNumber' in business and (nr_num := business['nrNumber']):
                 if business['nrNumber'] in name_requests:
-                    name_request = name_requests[nr_num]['nameRequest']
-                    business['nameRequest'] = name_request
+                    business['nameRequest'] = name_requests[nr_num]['nameRequest']
                     # Update the draft type if the draft NR request is for amalgamation
-                    if name_request['request_action_cd'] == NRActionCodes.AMALGAMATE.value \
-                        and business.get('draftType', None):
+                    if business.get('draftType', None) \
+                            and business['nameRequest']['request_action_cd'] == NRActionCodes.AMALGAMATE.value:
                         business['draftType'] = CorpType.ATMP.value
                     # Remove the business if the draft associated to the NR is consumed.
                     if business['nameRequest']['stateCd'] == NRStatus.CONSUMED.value:
