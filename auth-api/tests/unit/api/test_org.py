@@ -40,7 +40,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services import User as UserService
 from auth_api.utils.enums import (
-    AccessType, AffidavitStatus, CorpType, NRStatus, OrgStatus, OrgType, PatchActions, PaymentMethod,
+    AccessType, AffidavitStatus, CorpType, NRActionCodes, NRStatus, OrgStatus, OrgType, PatchActions, PaymentMethod,
     ProductCode, ProductSubscriptionStatus, Status,
     SuspensionReasonCode, TaskStatus, TaskRelationshipStatus)
 from auth_api.utils.roles import ADMIN  # noqa: I005
@@ -2131,10 +2131,10 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
 @pytest.mark.parametrize('test_name, businesses, drafts, drafts_with_nrs, nrs, dates', [
     ('businesses_only', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)], [], [], [], []),
     ('drafts_only', [], [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)], [], [], []),
-    ('nrs_only', [], [], [], ['NR 1234567', 'NR 1234566'], []),
+    ('nrs_only', [], [], [], [('NR 1234567', 'NEW'), ('NR 1234566', 'NEW')], []),
     ('drafts_with_nrs', [], [],
      [('T12dfhsff1', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff2', CorpType.GP.value, 'NR 1234566')],
-     ['NR 1234567', 'NR 1234566'], []),
+     [('NR 1234567', 'AML'), ('NR 1234566', 'AML')], []),
     ('affiliations_order', [], [],
      [], [('abcde1', CorpType.BC.value, 'NR 123456'),
           ('abcde2', CorpType.BC.value, 'NR 123457'),
@@ -2144,7 +2144,8 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     ('all', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)],
      [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)],
      [('T12dfhsff3', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff4', CorpType.GP.value, 'NR 1234566')],
-     ['NR 1234567', 'NR 1234566', 'NR 1234565'], [datetime(2021, 1, 1), datetime(2022, 2, 1)])
+     [('NR 1234567', 'AML'), ('NR 1234566', 'AML'), ('NR 1234565', 'AML')],
+     [datetime(2021, 1, 1), datetime(2022, 2, 1)])
 ])
 def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
                               test_name, businesses, drafts, drafts_with_nrs, nrs, dates):
@@ -2191,6 +2192,7 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
         }],
         'stateCd': 'APPROVED',
         'requestTypeCd': 'BC',
+        'request_action_cd': nr[1],
         'nrNum': nr
     } for nr in nrs]
 
@@ -2228,6 +2230,8 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
         if draft_type := entity.get('draftType', None):
             expected = CorpType.RTMP.value if entity['legalType'] in [
                 CorpType.SP.value, CorpType.GP.value] else CorpType.TMP.value
+            if entity.get('nameRequest', {}).get('requestActionCd') == NRActionCodes.AMALGAMATE.value:
+                expected = CorpType.ATMP.value
 
             assert draft_type == expected
 
