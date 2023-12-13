@@ -265,4 +265,5 @@ class ApiGateway:
     def _make_string_compatible(cls, target: str) -> str:
         """Make string compatible for API gateway."""
         # Length 255 max - alphanumeric, space, and the following: . _ -
-        return re.sub(r'[^a-zA-Z0-9_\- .]', '', target[:255])
+        target = re.sub(r'[^a-zA-Z0-9_\- .]', '', target)
+        return target[:255]
