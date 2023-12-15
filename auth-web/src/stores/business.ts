@@ -271,7 +271,7 @@ export const useBusinessStore = defineStore('business', () => {
     }
 
     switch (filingType) {
-      case FilingTypes.AMALGAMATION: {
+      case FilingTypes.AMALGAMATION_APPLICATION: {
         filingBody = {
           filing: {
             business: {
