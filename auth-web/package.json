@@ -18,7 +18,7 @@
     "@bcrs-shared-components/base-address": "2.0.3",
     "@bcrs-shared-components/bread-crumb": "1.0.8",
     "@bcrs-shared-components/corp-type-module": "1.0.13",
-    "@bcrs-shared-components/enums": "1.1.2",
+    "@bcrs-shared-components/enums": "1.1.4",
     "@bcrs-shared-components/interfaces": "1.0.71",
     "@mdi/font": "^4.5.95",
     "@sentry/vue": "^7.49.0",
