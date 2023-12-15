@@ -147,7 +147,7 @@ export enum InvoiceStatus {
 
 export enum AffiliationTypes {
     NAME_REQUEST = 'Name Request',
-    AMALGAMATION = 'Amalgamation Application',
+    AMALGAMATION_APPLICATION = 'Amalgamation Application',
     INCORPORATION_APPLICATION = 'Incorporation Application',
     CORPORATION = 'Corporation',
     REGISTRATION = 'Registration'
@@ -196,7 +196,7 @@ export enum CorpTypes {
     XPRO_SOCIETY = 'XS',
 
     // overloaded values
-    AMALGAMATION = 'ATMP',
+    AMALGAMATION_APPLICATION = 'ATMP',
     INCORPORATION_APPLICATION = 'TMP',
     NAME_REQUEST = 'NR',
     REGISTRATION = 'RTMP'

@@ -37,7 +37,7 @@ export const useAffiliations = () => {
   /** Returns true if the affiliation is a temporary business. */
   const isTemporaryBusiness = (business: Business): boolean => {
     return (
-      (business.corpType?.code || business.corpType) === CorpTypes.AMALGAMATION ||
+      (business.corpType?.code || business.corpType) === CorpTypes.AMALGAMATION_APPLICATION ||
       (business.corpType?.code || business.corpType) === CorpTypes.INCORPORATION_APPLICATION ||
       (business.corpType?.code || business.corpType) === CorpTypes.REGISTRATION
     )
@@ -53,8 +53,8 @@ export const useAffiliations = () => {
   /** Returns the temp business description. */
   const tempDescription = (business: Business): string => {
     switch ((business.corpType?.code || business.corpType) as CorpTypes) {
-      case CorpTypes.AMALGAMATION:
-        return AffiliationTypes.AMALGAMATION
+      case CorpTypes.AMALGAMATION_APPLICATION:
+        return AffiliationTypes.AMALGAMATION_APPLICATION
       case CorpTypes.INCORPORATION_APPLICATION:
         return AffiliationTypes.INCORPORATION_APPLICATION
       case CorpTypes.REGISTRATION:

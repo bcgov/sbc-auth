@@ -281,7 +281,7 @@ export const useBusinessStore = defineStore('business', () => {
               accountId: currentOrganization.value.id,
               name: filingType
             },
-            amalgamation: {
+            amalgamationApplication: {
               type: AmalgamationTypes.REGULAR,
               nameRequest: {
                 legalType: business.nameRequest.legalType,
