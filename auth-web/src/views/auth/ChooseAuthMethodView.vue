@@ -455,7 +455,7 @@ export default class ChooseAuthMethodView extends Vue {
   }
 
   get serviceCardLearnMoreURL (): string {
-    return 'https://www2.gov.bc.ca/gov/content?id=B2B3A21E797A421A8FD39EEA86E245D6'
+    return 'https://id.gov.bc.ca/'
   }
 
   selectBCSCAuth () {
