@@ -83,6 +83,22 @@
             >OVERDUE</span>
           </div>
         </template>
+        <template
+          v-if="enableEFTPaymentMethod && hasEFTPaymentMethod"
+          #[`item.frequency`]="{ item }"
+        >
+          <div>
+            <span>{{ frequencyDisplay(item) }}</span>
+          </div>
+        </template>
+        <template
+          v-if="enableEFTPaymentMethod && hasEFTPaymentMethod"
+          #[`item.paymentMethods`]="{ item }"
+        >
+          <div>
+            <span>{{ paymentMethodsDisplay(item.paymentMethods) }}</span>
+          </div>
+        </template>
         <template #[`item.action`]="{ item }">
           <div>
             <v-btn
@@ -135,6 +151,7 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
 import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
 import moment from 'moment'
+import { paymentTypeDisplay } from '../../../../resources/display-mappers'
 import { useAccountChangeHandler } from '@/composables'
 import { useOrgStore } from '@/stores/org'
 
@@ -165,27 +182,6 @@ export default defineComponent({
     const paymentDueDate = ref<Date>(null)
     const statementSettingsModal: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const hasEFTPaymentMethod = ref(false)
-
-    const headerStatements = ref([
-      {
-        text: 'Date',
-        align: 'left',
-        sortable: false,
-        value: 'dateRange'
-      },
-      {
-        text: 'Frequency',
-        align: 'left',
-        sortable: false,
-        value: 'frequency'
-      },
-      {
-        text: 'Downloads',
-        align: 'right',
-        sortable: false,
-        value: 'action'
-      }
-    ])
 
     const isStatementNew = (item: StatementListItem) => {
       return item.isNew
@@ -313,6 +309,18 @@ export default defineComponent({
       return moment(dateStr, 'YYYY-MM-DD')
     }
 
+    const frequencyDisplay = (item) => {
+      const paymentMethods = item.paymentMethods || []
+      if (paymentMethods.length > 1) {
+        return 'Payment Method Changed'
+      }
+      return item.frequency
+    }
+
+    const paymentMethodsDisplay = (paymentMethods: string[] = []) => {
+      return paymentMethods.map(method => paymentTypeDisplay[method]).join(', ')
+    }
+
     const formatDateRange = (date1, date2) => {
       let dateObj1 = getMomentDateObj(date1)
       let dateObj2 = getMomentDateObj(date2)
@@ -360,13 +368,14 @@ export default defineComponent({
       enableEFTPaymentMethod,
       paymentOwingAmount,
       paymentDueDate,
-      headerStatements,
       isStatementNew,
       isStatementOverdue,
       getEftInstructions,
       getPaginationOptions,
       customSortActive,
       formatDateRange,
+      frequencyDisplay,
+      paymentMethodsDisplay,
       getIndexedTag,
       openSettingsModal,
       statementsList,
@@ -375,6 +384,36 @@ export default defineComponent({
       isDataLoading,
       statementSettingsModal,
       hasEFTPaymentMethod
+    }
+  },
+  computed: {
+    headerStatements (): any[] {
+      const headers = [
+        {
+          text: 'Date',
+          align: 'left',
+          sortable: false,
+          value: 'dateRange'
+        },
+        {
+          text: 'Frequency',
+          align: 'left',
+          sortable: false,
+          value: 'frequency'
+        },
+        {
+          text: 'Downloads',
+          align: 'right',
+          sortable: false,
+          value: 'action'
+        }
+      ]
+
+      if (this.hasEFTPaymentMethod && this.enableEFTPaymentMethod()) {
+        headers.splice(2, 0, { text: 'Payment Methods', align: 'left', sortable: false, value: 'paymentMethods' })
+      }
+
+      return headers
     }
   }
 })
