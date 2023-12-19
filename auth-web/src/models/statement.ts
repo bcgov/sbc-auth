@@ -6,6 +6,7 @@ export interface StatementListItem {
   isOverdue?: boolean
   isNew?: boolean
   toDate?: string
+  paymentMethods?: string[]
 }
 
 export interface StatementSettings {
