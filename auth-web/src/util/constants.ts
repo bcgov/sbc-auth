@@ -534,7 +534,7 @@ export enum OnholdOrRejectCode {
 }
 
 export const ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT = 5
-export const ALLOWED_URIS_FOR_PENDING_ORGS: string[] = ['setup-non-bcsc-account']
+export const ALLOWED_URIS_FOR_PENDING_ORGS: string[] = ['setup-non-bcsc-account', 'signout']
 
 export const DEACTIVATE_ACCOUNT_MESSAGE : Map<string, string> = new Map([
   ['OUTSTANDING_CREDIT', 'deactivateCreditAccountMsg'],
