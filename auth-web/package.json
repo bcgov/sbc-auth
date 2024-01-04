@@ -33,7 +33,7 @@
     "moment": "^2.29.4",
     "pinia": "^2.1.6",
     "pinia-class": "^0.0.3",
-    "sbc-common-components": "3.0.10",
+    "sbc-common-components": "3.0.11",
     "vue": "2.6.14",
     "vue-debounce-decorator": "^1.0.1",
     "vue-hotjar": "^1.4.0",
