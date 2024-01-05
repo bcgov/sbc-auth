@@ -54,7 +54,7 @@
     </v-row>
     <template v-if="emailAddress === ''">
       <span
-        class="error-text mb-10"
+        class="red--text mb-10"
       >
         Please contact BCROS support, no email in Keycloak for this account.
       </span>
@@ -169,8 +169,5 @@ export default defineComponent({
   font-size: 1.25rem !important;
   font-weight: 700;
   letter-spacing: -0.02rem;
-}
-.error-text {
-  color: $app-red;
 }
 </style>
