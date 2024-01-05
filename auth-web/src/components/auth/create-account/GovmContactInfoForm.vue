@@ -128,12 +128,8 @@ export default defineComponent({
 
     const formRef = ref(null)
 
-    const getUserProfile = async (identifier) => {
-      state.userProfile = await userStore.getUserProfile(identifier)
-    }
-
     onMounted(async () => {
-      getUserProfile('@me')
+      state.userProfile = await userStore.getUserProfile('@me')
       state.emailAddress = state.userProfile?.email || ''
       state.confirmedEmailAddress = state.userProfile?.email || ''
     })
