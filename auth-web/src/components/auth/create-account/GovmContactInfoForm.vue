@@ -52,8 +52,13 @@
         />
       </v-col>
     </v-row>
+    <span
+      v-if="emailAddress === ''"
+      class="red--text mb-10"
+    >
+      Please contact BCROS support, no email in Keycloak for this account.
+    </span>
     <v-divider class="mt-7 mb-10" />
-
     <v-row>
       <v-col
         cols="12"
@@ -75,11 +80,13 @@
           <span>Back</span>
         </v-btn>
         <v-spacer />
+
         <v-btn
           large
           color="primary"
           class="save-continue-button mr-3"
           data-test="next-button"
+          :disabled="emailAddress === ''"
           @click="createAccount"
         >
           <span>
@@ -97,48 +104,58 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins } from 'vue-property-decorator'
-import { Action } from 'pinia-class'
+import { defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { User } from '@/models/user'
 import { useUserStore } from '@/stores/user'
 
-@Component({
+export default defineComponent({
+  name: 'GovmContactInfoForm',
   components: {
     ConfirmCancelButton
+  },
+  mixins: [NextPageMixin, Steppable],
+  emits: ['final-step-action'],
+  setup (props, { root, emit }) {
+    const userStore = useUserStore()
+    const state = reactive({
+      emailAddress: '',
+      confirmedEmailAddress: '',
+      userProfile: null
+    })
+
+    const formRef = ref(null)
+
+    onMounted(async () => {
+      state.userProfile = await userStore.getUserProfile('@me')
+      state.emailAddress = state.userProfile?.email || ''
+      state.confirmedEmailAddress = state.userProfile?.email || ''
+    })
+
+    const createAccount = () => {
+      // email is readonly to show. no need to save
+      emit('final-step-action')
+    }
+
+    const cancel = () => {
+      root.$router.push('/')
+    }
+
+    const goBack = () => {
+      // Vue 3 - get rid of MIXINS and use the composition-api instead.
+      (props as any).stepBack()
+    }
+
+    return {
+      ...toRefs(state),
+      formRef,
+      createAccount,
+      cancel,
+      goBack
+    }
   }
 })
-export default class GovmContactInfoForm extends Mixins(NextPageMixin, Steppable) {
-  @Action(useUserStore) public getUserProfile!: (identifer: string) => User
-
-  public emailAddress = ''
-  public confirmedEmailAddress = ''
-  // @Prop({ default: false }) isStepperView: boolean
-
-  $refs: {
-    form: HTMLFormElement
-  }
-
-  public async mounted () {
-    await this.getUserProfile('@me')
-    this.emailAddress = this.userProfile?.email || ''
-    this.emailAddress = this.confirmedEmailAddress = this.userProfile?.email || ''
-  }
-  // email is readonly to show. no need to save
-  @Emit('final-step-action')
-  public createAccount () {
-  }
-
-  public cancel () {
-    this.$router.push('/')
-  }
-
-  public goBack () {
-    this.stepBack()
-  }
-}
 </script>
 
 <style lang="scss" scoped>
