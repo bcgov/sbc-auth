@@ -52,13 +52,12 @@
         />
       </v-col>
     </v-row>
-    <template v-if="emailAddress === ''">
-      <span
-        class="red--text mb-10"
-      >
-        Please contact BCROS support, no email in Keycloak for this account.
-      </span>
-    </template>
+    <span
+      v-if="emailAddress === ''"
+      class="red--text mb-10"
+    >
+      Please contact BCROS support, no email in Keycloak for this account.
+    </span>
     <v-divider class="mt-7 mb-10" />
     <v-row>
       <v-col
