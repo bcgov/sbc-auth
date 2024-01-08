@@ -97,6 +97,17 @@ class _Config:  # pylint: disable=too-few-public-methods
     KEYCLOAK_ADMIN_USERNAME = os.getenv('SBC_AUTH_ADMIN_CLIENT_ID')
     KEYCLOAK_ADMIN_SECRET = os.getenv('SBC_AUTH_ADMIN_CLIENT_SECRET')
 
+    # keycloak service account token lifepan
+    try:
+        CACHE_DEFAULT_TIMEOUT = int(os.getenv('ACCESS_TOKEN_LIFESPAN'))
+    except:  # pylint:disable=bare-except # noqa: B901, E722
+        CACHE_DEFAULT_TIMEOUT = 300
+
+    CACHE_MEMCACHED_SERVERS = os.getenv('CACHE_MEMCACHED_SERVERS')
+
+    CACHE_REDIS_HOST = os.getenv('CACHE_REDIS_HOST')
+    CACHE_REDIS_PORT = os.getenv('CACHE_REDIS_PORT')
+
     # Service account details
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('SBC_AUTH_ADMIN_CLIENT_ID')
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('SBC_AUTH_ADMIN_CLIENT_SECRET')
