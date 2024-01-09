@@ -164,7 +164,7 @@ class RestService:
         return response
 
     @staticmethod
-    @cache.cached()
+    @cache.cached(query_string=True)
     def get_service_account_token(config_id='KEYCLOAK_SERVICE_ACCOUNT_ID',
                                   config_secret='KEYCLOAK_SERVICE_ACCOUNT_SECRET') -> str:
         """Generate a service account token."""
