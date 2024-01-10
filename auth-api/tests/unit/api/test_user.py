@@ -21,6 +21,7 @@ import json
 import pytest
 import time
 import uuid
+import mock
 
 from sqlalchemy import event
 
@@ -47,6 +48,7 @@ from tests.utilities.factory_utils import (
     factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_product_model,
     factory_user_model, patch_token_info)
 from tests.utilities.sqlalchemy import clear_event_listeners
+from tests.conftest import mock_token
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -59,6 +61,7 @@ def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     assert schema_utils.validate(rv.json, 'user_response')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_user_staff_org(client, jwt, session, keycloak_mock, monkeypatch):
     """Assert that adding and removing membership to a staff org occurs."""
     # Create a user and org
@@ -686,6 +689,7 @@ def test_delete_unknown_user_returns_404(client, jwt, session):  # pylint:disabl
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mock,
                                                monkeypatch, environment):  # pylint:disable=unused-argument
     """Test if the user is the only owner of a team assert status is 400."""
@@ -717,6 +721,7 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock,
                                            monkeypatch, environment):  # pylint:disable=unused-argument
     """Test if the user is the member of a team assert status is 204."""

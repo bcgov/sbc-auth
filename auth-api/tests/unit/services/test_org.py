@@ -18,6 +18,7 @@ Test suite to ensure that the Org service routines are working as expected.
 from http import HTTPStatus
 from unittest.mock import ANY, Mock, patch
 
+import mock
 import pytest
 from requests import Response
 from werkzeug.exceptions import HTTPException
@@ -53,6 +54,7 @@ from tests.utilities.factory_utils import (
     factory_membership_model, factory_org_model, factory_org_service, factory_user_model,
     factory_user_model_with_contact, patch_pay_account_delete, patch_pay_account_post, patch_pay_account_put,
     patch_token_info)
+from tests.conftest import mock_token
 
 # noqa: I005
 
@@ -66,6 +68,7 @@ def test_as_dict(session):  # pylint:disable=unused-argument
     assert dictionary['name'] == TestOrgInfo.org1['name']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model()
@@ -76,6 +79,7 @@ def test_create_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unus
     assert dictionary['name'] == TestOrgInfo.org1['name']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org_products(session, keycloak_mock, monkeypatch):
     """Assert that an Org with products can be created."""
     user = factory_user_model()
@@ -89,6 +93,7 @@ def test_create_org_products(session, keycloak_mock, monkeypatch):
     assert dictionary['name'] == TestOrgInfo.org_with_products['name']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
                                                         monkeypatch):  # pylint:disable=unused-argument
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
@@ -112,6 +117,7 @@ def test_create_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
         assert expected_data == actual_data
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_pay_request_is_correct_with_branch_name(session,
                                                  keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
@@ -135,6 +141,7 @@ def test_pay_request_is_correct_with_branch_name(session,
         assert expected_data == actual_data
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_basic_org_assert_pay_request_activity(session, keycloak_mock, monkeypatch):
     """Assert that while org payment update touches activity log."""
     user_with_token = TestUserInfo.user_test
@@ -157,6 +164,7 @@ def test_update_basic_org_assert_pay_request_activity(session, keycloak_mock, mo
                                              value=PaymentMethod.ONLINE_BANKING.value))
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
                                                         monkeypatch):  # pylint:disable=unused-argument
     """Assert that while org updation , pay-api gets called with proper data for basic accounts."""
@@ -201,6 +209,7 @@ def test_update_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
         assert expected_data == actual_data, 'updating bank  to Credit Card works.'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_basic_org_assert_pay_request_is_correct_online_banking(session,
                                                                        keycloak_mock,
                                                                        monkeypatch):  # pylint:disable=unused-argument
@@ -225,6 +234,7 @@ def test_create_basic_org_assert_pay_request_is_correct_online_banking(session,
         assert expected_data == actual_data
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_basic_org_assert_pay_request_is_govm(session,
                                                      keycloak_mock, staff_user_mock,
                                                      monkeypatch):  # pylint:disable=unused-argument
@@ -251,6 +261,7 @@ def test_create_basic_org_assert_pay_request_is_govm(session,
         assert expected_data == actual_data
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_put_basic_org_assert_pay_request_is_govm(session,
                                                   keycloak_mock, staff_user_mock,
                                                   monkeypatch):  # pylint:disable=unused-argument
@@ -295,6 +306,7 @@ def test_put_basic_org_assert_pay_request_is_govm(session,
         assert expected_data == actual_data
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock,
                                                           monkeypatch):  # pylint:disable=unused-argument
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
@@ -328,6 +340,7 @@ def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock
         assert actual_data == expected_data
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org_assert_payment_types(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model()
@@ -341,6 +354,7 @@ def test_create_org_assert_payment_types(session, keycloak_mock, monkeypatch):  
     assert dictionary.get('bcol_account_id', None) is None
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_product_single_subscription(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user_with_token = TestUserInfo.user_bceid_tester
@@ -359,6 +373,7 @@ def test_create_product_single_subscription(session, keycloak_mock, monkeypatch)
                 if prod.get('code') == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode'])
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_product_single_subscription_duplicate_error(session, keycloak_mock,
                                                             monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
@@ -385,6 +400,7 @@ def test_create_product_single_subscription_duplicate_error(session, keycloak_mo
     assert exception.value.code == Error.PRODUCT_SUBSCRIPTION_EXISTS.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_product_multiple_subscription(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user_with_token = TestUserInfo.user_bceid_tester
@@ -410,6 +426,7 @@ def test_create_product_multiple_subscription(session, keycloak_mock, monkeypatc
 @pytest.mark.parametrize(
     'org_type', [(OrgType.STAFF.value), (OrgType.SBC_STAFF.value)]
 )
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_product_subscription_staff(session, keycloak_mock, org_type, monkeypatch):
     """Assert that updating product subscription works for staff."""
     user = factory_user_model(TestUserInfo.user_test)
@@ -429,6 +446,7 @@ def test_create_product_subscription_staff(session, keycloak_mock, org_type, mon
                 if prod.get('code') == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode'])
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_product_subscription_nds(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert a product subscription for NDS can be created with a system admin token."""
     # setup an org
@@ -456,6 +474,7 @@ def test_create_product_subscription_nds(session, keycloak_mock, monkeypatch):  
     ('test_staff_manage_accounts', TestJwtClaims.staff_manage_accounts_role),
     ('test_staff_admin', TestJwtClaims.staff_admin_role)
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_product_subscription_nds_unauthorized(session,  # pylint:disable=unused-argument
                                                       keycloak_mock,
                                                       monkeypatch,
@@ -490,6 +509,7 @@ def test_create_org_with_duplicate_name(session, monkeypatch):  # pylint:disable
     assert exception.value.code == Error.DATA_CONFLICT.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org_with_similar_name(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org with similar name can be created."""
     user = factory_user_model()
@@ -523,6 +543,7 @@ def test_create_org_with_duplicate_name_bcol(session, keycloak_mock, monkeypatch
         assert exception.value.code == Error.DATA_CONFLICT.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_org_name(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org name cannot be updated."""
     org = factory_org_service()
@@ -673,6 +694,7 @@ def test_update_contact_no_contact(session):  # pylint:disable=unused-argument
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_members(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that members for an org can be retrieved."""
     user_with_token = TestUserInfo.user_test
@@ -691,6 +713,7 @@ def test_get_members(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     assert response[0].membership_type_code == 'ADMIN'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_invitations(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that invitations for an org can be retrieved."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
@@ -714,6 +737,7 @@ def test_get_invitations(session, auth_mock, keycloak_mock, monkeypatch):  # pyl
         assert response[0].recipient_email == invitation.as_dict()['recipient_email']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_owner_count_one_owner(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that count of owners is correct."""
     user_with_token = TestUserInfo.user_test
@@ -738,6 +762,7 @@ def test_create_staff_org_failure(session, keycloak_mock, staff_org, monkeypatch
     assert exception.value.code == Error.INVALID_INPUT.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_owner_count_two_owner_with_admins(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert wrong org cannot be created."""
     user_with_token = TestUserInfo.user_test
@@ -754,6 +779,7 @@ def test_get_owner_count_two_owner_with_admins(session, keycloak_mock, monkeypat
     assert MembershipService.get_owner_count(MembershipService, org._model) == 2
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_org_with_members(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an org can be deleted."""
     user_with_token = TestUserInfo.user_test
@@ -776,6 +802,7 @@ def test_delete_org_with_members(session, auth_mock, keycloak_mock, monkeypatch)
     assert len(MembershipService.get_members_for_org(org_id)) == 0
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_org_with_affiliation(session, auth_mock, keycloak_mock,
                                      monkeypatch):  # pylint:disable=unused-argument
     """Assert that an org cannot be deleted."""
@@ -800,6 +827,7 @@ def test_delete_org_with_affiliation(session, auth_mock, keycloak_mock,
     assert len(AffiliationService.find_visible_affiliations_by_org_id(org_id)) == 0
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_org_with_members_success(session, auth_mock, keycloak_mock,
                                          monkeypatch):  # pylint:disable=unused-argument
     """Assert that an org can be deleted."""
@@ -861,6 +889,7 @@ def test_delete_contact_org_link(session, auth_mock):  # pylint:disable=unused-a
     assert not exist_contact_link
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org_adds_user_to_account_holders_group(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org creation adds the user to account holders group."""
     # Create a user in keycloak
@@ -880,6 +909,7 @@ def test_create_org_adds_user_to_account_holders_group(session, monkeypatch):  #
     assert GROUP_ACCOUNT_HOLDERS in groups
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_org_removes_user_from_account_holders_group(session, auth_mock,
                                                             monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org deletion removes the user from account holders group."""
@@ -903,6 +933,7 @@ def test_delete_org_removes_user_from_account_holders_group(session, auth_mock,
     assert GROUP_ACCOUNT_HOLDERS not in groups
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypatch,
                                                                auth_mock):  # pylint:disable=unused-argument
     """Assert that if the user has multiple Orgs, and deleting one doesn't remove account holders group."""
@@ -926,6 +957,7 @@ def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypa
     assert GROUP_ACCOUNT_HOLDERS in groups
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org_with_linked_bcol_account(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model()
@@ -949,6 +981,7 @@ def test_bcol_account_exists(session):  # pylint:disable=unused-argument
     assert check_result
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org_with_different_name_than_bcol_account(session, keycloak_mock,
                                                           monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
@@ -974,6 +1007,7 @@ def test_bcol_account_not_exists(session):  # pylint:disable=unused-argument
     assert not check_result
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org_with_a_linked_bcol_details(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that org creation with an existing linked BCOL account fails."""
     user = factory_user_model()
@@ -987,6 +1021,7 @@ def test_create_org_with_a_linked_bcol_details(session, keycloak_mock, monkeypat
     assert exception.value.code == Error.BCOL_ACCOUNT_ALREADY_LINKED.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org_by_bceid_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model_with_contact()
@@ -1004,6 +1039,7 @@ def test_create_org_by_bceid_user(session, keycloak_mock, monkeypatch):  # pylin
         mock_notify.assert_called()
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org_by_in_province_bceid_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model_with_contact()
@@ -1032,6 +1068,7 @@ def test_create_org_invalid_access_type_user(session, keycloak_mock, monkeypatch
     assert exception.value.code == Error.USER_CANT_CREATE_REGULAR_ORG.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org_by_verified_bceid_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     # Steps
@@ -1063,6 +1100,7 @@ def test_create_org_by_verified_bceid_user(session, keycloak_mock, monkeypatch):
     assert org_result.status_code == OrgStatus.ACTIVE.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_org_by_rejected_bceid_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     # Steps
@@ -1178,6 +1216,7 @@ def test_patch_org_access_type(session, monkeypatch):  # pylint:disable=unused-a
 
 
 @pytest.mark.asyncio
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_product_single_subscription_qs(session, monkeypatch):
     """Assert that qualified supplier sub product subscriptions can be created."""
     # Create a user in keycloak
