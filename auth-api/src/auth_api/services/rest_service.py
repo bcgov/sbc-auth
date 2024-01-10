@@ -35,6 +35,10 @@ from auth_api.utils.cache import cache
 RETRY_ADAPTER = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[404]))
 
 
+def make_token_key(*args):
+    """Use client_id as token cache key."""
+    return args[0]
+
 class RestService:
     """Service to invoke Rest services which uses OAuth 2.0 implementation."""
 
@@ -164,7 +168,7 @@ class RestService:
         return response
 
     @staticmethod
-    @cache.cached(query_string=True)
+    @cache.cached(make_cache_key=make_token_key)
     def get_service_account_token(config_id='KEYCLOAK_SERVICE_ACCOUNT_ID',
                                   config_secret='KEYCLOAK_SERVICE_ACCOUNT_SECRET') -> str:
         """Generate a service account token."""
