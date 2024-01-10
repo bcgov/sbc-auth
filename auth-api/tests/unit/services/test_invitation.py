@@ -230,6 +230,7 @@ def test_accept_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
                 assert len(members) == 1
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_accept_invitation_for_govm(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Accept the invitation and add membership from the invitation to the org."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):

@@ -222,6 +222,7 @@ def test_change_authentication_non_govm(session, auth_mock, keycloak_mock, monke
             assert len(members) == 2
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_invitation_govm(session, auth_mock, keycloak_mock, monkeypatch):
     """Assert that government ministry organization invites can be accepted by IDIR only."""
     # Users setup
