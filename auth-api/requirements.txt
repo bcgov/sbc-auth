@@ -58,7 +58,7 @@ python-dotenv==1.0.0
 python-jose==3.3.0
 pytz==2022.7.1
 python-memcached==1.59
-redis==4.3.6
+redis==4.4.4
 requests==2.31.0
 rsa==4.9
 semver==2.13.0
