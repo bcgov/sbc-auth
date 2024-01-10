@@ -15,6 +15,7 @@
 
 Test suite to ensure that the affidavit service routines are working as expected.
 """
+import mock
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.models import Task as TaskModel
 from auth_api.services import Org as OrgService
@@ -23,7 +24,7 @@ from auth_api.utils.enums import (AffidavitStatus, LoginSource, OrgStatus, TaskS
                                   TaskRelationshipStatus)
 from tests.utilities.factory_scenarios import TestAffidavit, TestJwtClaims, TestOrgInfo, TestUserInfo  # noqa: I005
 from tests.utilities.factory_utils import factory_user_model, factory_user_model_with_contact, patch_token_info
-
+from tests.conftest import mock_token
 
 def test_create_affidavit(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be created."""
@@ -56,6 +57,7 @@ def test_create_affidavit_duplicate(session, keycloak_mock, monkeypatch):  # pyl
     assert affidavit3.as_dict().get('status', None) == AffidavitStatus.PENDING.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be approved."""
     user = factory_user_model_with_contact(user_info=TestUserInfo.user_bceid_tester)
@@ -82,6 +84,7 @@ def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     assert affidavit['status'] == AffidavitStatus.APPROVED.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_task_creation(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that affidavit reupload creates new task."""
     user = factory_user_model_with_contact()
@@ -102,6 +105,7 @@ def test_task_creation(session, keycloak_mock, monkeypatch):  # pylint:disable=u
     assert TaskModel.find_by_task_for_account(org_id, TaskStatus.OPEN.value) is not None
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_reject_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be rejected."""
     user = factory_user_model_with_contact(user_info=TestUserInfo.user_bceid_tester)

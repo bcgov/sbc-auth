@@ -15,6 +15,7 @@
 
 Test suite to ensure that the Task service routines are working as expected.
 """
+import mock
 import pytest
 from datetime import datetime
 from unittest.mock import patch
@@ -36,7 +37,7 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import (
     factory_org_model, factory_product_model, factory_task_service, factory_user_model, factory_user_model_with_contact,
     patch_token_info)
-
+from tests.conftest import mock_token
 
 def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that tasks can be fetched."""
@@ -110,6 +111,7 @@ def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-a
     ('has_contact', False),
     ('no_contact', True),
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_task(session, keycloak_mock, monkeypatch, test_name, rmv_contact):  # pylint:disable=unused-argument
     """Assert that a task can be updated."""
     user_with_token = TestUserInfo.user_bceid_tester
@@ -157,6 +159,7 @@ def test_update_task(session, keycloak_mock, monkeypatch, test_name, rmv_contact
     assert user.verified
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a task can be updated."""
     user_with_token = TestUserInfo.user_bceid_tester
@@ -198,7 +201,7 @@ def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unuse
     assert dictionary['relationship_status'] == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
     assert dictionary['remarks'] == ['Test Remark']
 
-
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_task_govm(session,
                           keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a task can be created when updating a GOVM account."""

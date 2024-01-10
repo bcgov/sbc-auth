@@ -16,7 +16,9 @@
 Test suite to ensure that the Product service routines are working as expected.
 """
 from unittest.mock import ANY, patch
+from tests.conftest import mock_token
 
+import mock
 import pytest
 
 from auth_api.models.contact_link import ContactLink as ContactLinkModel
@@ -50,6 +52,7 @@ def test_get_products(session):  # pylint:disable=unused-argument
     ('has_contact', True),
     ('no_contact', False),
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_product_subscription(session, keycloak_mock, monkeypatch, test_name, has_contact):
     """Assert that updating product subscription works."""
     user = factory_user_model(TestUserInfo.user_test)
@@ -86,6 +89,7 @@ def test_update_product_subscription(session, keycloak_mock, monkeypatch, test_n
                                              org_id=ANY, value=ANY, id=ANY, name='Personal Property Registry'))
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_users_product_subscriptions_kc_groups(session, keycloak_mock, monkeypatch):
     """Assert that our keycloak groups are returned correctly."""
     # Used these to test without the keycloak_mock.
@@ -242,7 +246,7 @@ def test_get_users_product_subscriptions_kc_groups(session, keycloak_mock, monke
     assert kc_groups[2].group_name == 'vs'
     assert kc_groups[2].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
 
-
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_users_sub_product_subscriptions_kc_groups(session, keycloak_mock, monkeypatch):
     """Assert that our keycloak groups are returned correctly for sub products."""
     # Used these to test without the keycloak_mock.

@@ -17,6 +17,7 @@ Test suite to ensure that the Invitation service authentication / login source c
 """
 from unittest.mock import ANY, patch
 
+import mock
 import pytest
 
 from auth_api.exceptions import BusinessException
@@ -32,6 +33,7 @@ from auth_api.utils.enums import AccessType, ActivityAction, InvitationStatus, L
 from auth_api.utils.user_context import UserContext, user_context
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import factory_invitation, factory_user_model, patch_token_info
+from tests.conftest import mock_token
 
 
 @user_context
@@ -84,6 +86,7 @@ def test_token_user_context(session, auth_mock, monkeypatch):
     assert_token_user_context(LoginSource.BCEID.value)
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_change_authentication_subsequent_invites(session, auth_mock, keycloak_mock, monkeypatch):
     """Assert that changing org authentication method changes new invitation required login source."""
     user_with_token = TestUserInfo.user_tester
@@ -137,7 +140,7 @@ def test_change_authentication_subsequent_invites(session, auth_mock, keycloak_m
             invitation_model = InvitationModel.find_invitation_by_id(invitation_bceid.as_dict()['id'])
             assert invitation_model.login_source == LoginSource.BCEID.value
 
-
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_change_authentication_non_govm(session, auth_mock, keycloak_mock, monkeypatch):
     """Assert that non government ministry organization invites can be accepted by different login sources."""
     # inviter/invitee user setup
@@ -277,7 +280,7 @@ def test_invitation_govm(session, auth_mock, keycloak_mock, monkeypatch):
             assert members
             assert len(members) == 1
 
-
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_invitation_anonymous(session, auth_mock, keycloak_mock, monkeypatch):
     """Assert that non government ministry organization invites can be accepted by different login sources."""
     # inviter/invitee user setup

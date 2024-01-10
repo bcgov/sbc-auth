@@ -16,6 +16,7 @@
 Test-Suite to ensure that the /tasks endpoint is working as expected.
 """
 import json
+import mock
 
 import datetime as dt
 import pytest
@@ -35,10 +36,11 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import (
     factory_auth_header, factory_task_model, factory_task_service, factory_user_model, factory_user_model_with_contact,
     patch_token_info)
+from tests.conftest import mock_token
+
 
 current_dt = dt.datetime.now()
 current_date_str = current_dt.strftime('%Y-%m-%d')
-
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
@@ -128,6 +130,7 @@ def test_fetch_tasks_end_of_day(client, jwt, session):
     assert rv.status_code == http_status.HTTP_200_OK
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the task can be updated."""
     # 1. Create User
@@ -185,6 +188,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     assert rv.json.get('orgStatus') == OrgStatus.ACTIVE.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the task can be updated."""
     # 1. Create User
@@ -243,7 +247,7 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     assert dictionary['id'] == org_id
     assert rv.json.get('orgStatus') == OrgStatus.PENDING_STAFF_REVIEW.value
 
-
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the task can be updated."""
     # 1. Create User
@@ -344,6 +348,7 @@ def test_fetch_task(client, jwt, session):  # pylint:disable=unused-argument
     (TestJwtClaims.public_bceid_user, AccessType.GOVN.value, TaskAction.AFFIDAVIT_REVIEW.value),
     (TestJwtClaims.public_user_role, AccessType.GOVN.value, TaskAction.ACCOUNT_REVIEW.value),
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_tasks_on_account_creation(client, jwt, session, keycloak_mock,  # pylint:disable=unused-argument
                                    monkeypatch, user_token, access_type, expected_task_action):
     """Assert that tasks are created."""

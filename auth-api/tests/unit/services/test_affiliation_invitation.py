@@ -18,6 +18,7 @@ Test suite to ensure that the Affiliation Invitation service routines are workin
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
+import mock
 import pytest
 from freezegun import freeze_time
 
@@ -42,7 +43,7 @@ from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, T
 from tests.utilities.factory_utils import (
     factory_affiliation_invitation, factory_entity_model, factory_membership_model, factory_user_model,
     patch_token_info)
-
+from tests.conftest import mock_token
 
 def create_test_entity():
     """Create test entity data."""
@@ -71,6 +72,7 @@ def setup_org_and_entity(user):
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch,
                  environment):  # pylint:disable=unused-argument
     """Assert that the Affiliation Invitation is exported correctly as a dictionary."""
@@ -99,6 +101,7 @@ def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch,
         ('uuid', 'test'),
     ]
 )
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock,
                                        monkeypatch, create_org_with, environment):  # pylint:disable=unused-argument
     """Assert that an Affiliation Invitation can be created."""
@@ -122,6 +125,7 @@ def test_create_affiliation_invitation(session, auth_mock, keycloak_mock, busine
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_find_affiliation_invitation_by_id(session, auth_mock, keycloak_mock, business_mock,
                                            monkeypatch, environment):  # pylint:disable=unused-argument
     """Find an existing affiliation invitation with the provided id."""
@@ -152,6 +156,7 @@ def test_find_invitation_by_id_exception(session, auth_mock):  # pylint:disable=
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock,
                                        monkeypatch, environment):  # pylint:disable=unused-argument
     """Delete the specified affiliation invitation."""
@@ -173,6 +178,7 @@ def test_delete_affiliation_invitation(session, auth_mock, keycloak_mock, busine
         assert invitation is None
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_accepted_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock,
                                                 monkeypatch):  # pylint:disable=unused-argument
     """Delete the specified accepted affiliation invitation."""
@@ -210,6 +216,7 @@ def test_delete_affiliation_invitation_exception(session, auth_mock):  # pylint:
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock,
                                        monkeypatch, environment):  # pylint:disable=unused-argument
     """Update the specified affiliation invitation with new data."""
@@ -230,6 +237,7 @@ def test_update_affiliation_invitation(session, auth_mock, keycloak_mock, busine
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_invitation_verify_different_tokens(session, auth_mock, keycloak_mock,
                                                    business_mock, monkeypatch,
                                                    environment):  # pylint:disable=unused-argument
@@ -262,6 +270,7 @@ def test_generate_confirmation_token(session):  # pylint:disable=unused-argument
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_validate_token_accepted(session, auth_mock, keycloak_mock, business_mock,
                                  monkeypatch, environment):  # pylint:disable=unused-argument
     """Validate invalid invitation token."""
@@ -303,6 +312,7 @@ def test_validate_token_exception(session):  # pylint:disable=unused-argument
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_accept_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock,
                                        monkeypatch, environment):  # pylint:disable=unused-argument
     """Accept the affiliation invitation and add the affiliation from the invitation."""
@@ -341,6 +351,7 @@ def test_accept_affiliation_invitation(session, auth_mock, keycloak_mock, busine
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, business_mock,
                                       monkeypatch, environment):  # pylint:disable=unused-argument
     """Accept the affiliation invitation exceptions."""
@@ -391,6 +402,7 @@ def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, busines
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_invitations_by_from_org_id(session, auth_mock, keycloak_mock, business_mock,
                                         monkeypatch, environment):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided from org id."""
@@ -420,6 +432,7 @@ def test_get_invitations_by_from_org_id(session, auth_mock, keycloak_mock, busin
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_invitations_by_to_org_id(session, auth_mock, keycloak_mock, business_mock,
                                       monkeypatch, environment):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided to org id."""
@@ -621,6 +634,7 @@ def test_send_affiliation_invitation_request_refused(publish_to_mailer_mock,
     ('test user is org coordinator', roles.COORDINATOR, True),
     ('test user is org user', roles.USER, False),
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_all_invitations_with_details_related_to_org(session, auth_mock, keycloak_mock, business_mock, monkeypatch,
                                                          test_name, member_type, expect_request_invites):
     """Verify REQUEST affiliation invitations are returned only when user is org ADMIN/COORDINATOR."""

@@ -28,6 +28,10 @@ from auth_api.exceptions import BusinessException, Error
 from auth_api.models import db as _db
 
 
+def mock_token():
+    return "TOKEN...."
+
+
 @pytest.fixture(scope='session')
 def app():
     """Return a session-wide application configured in TEST mode."""

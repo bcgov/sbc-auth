@@ -17,6 +17,7 @@ Test suite to ensure that the Affiliation service routines are working as expect
 """
 from unittest.mock import ANY, patch
 
+import mock
 import pytest
 
 from auth_api.exceptions import BusinessException
@@ -33,6 +34,7 @@ from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, Tes
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org, factory_entity_service, factory_membership_model, factory_org_service,
     factory_user_model_with_contact, patch_get_firms_parties, patch_token_info)
+from tests.conftest import mock_token
 
 
 @pytest.mark.parametrize('environment', ['test', None])
@@ -162,7 +164,7 @@ def test_create_affiliation_exists(session, auth_mock, environment):  # pylint:d
 
     assert affiliation
 
-
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('environment', ['test', None])
 def test_create_affiliation_firms(session, auth_mock, monkeypatch, environment):  # pylint:disable=unused-argument
     """Assert that an Affiliation can be created."""
@@ -222,7 +224,7 @@ def test_create_affiliation_staff_sbc_staff(
         with pytest.raises(BusinessException):
             affiliation = AffiliationService.create_affiliation(org_id, business_identifier, environment)
 
-
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('environment', ['test', None])
 def test_create_affiliation_firms_party_with_additional_space(session, auth_mock,
                                                               monkeypatch, environment):
@@ -245,6 +247,7 @@ def test_create_affiliation_firms_party_with_additional_space(session, auth_mock
     assert affiliation.as_dict()['organization']['id'] == org_dictionary['id']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('environment', ['test', None])
 def test_create_affiliation_firms_party_not_valid(session, auth_mock, monkeypatch,
                                                   environment):
