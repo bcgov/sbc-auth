@@ -140,6 +140,7 @@ def test_change_authentication_subsequent_invites(session, auth_mock, keycloak_m
             invitation_model = InvitationModel.find_invitation_by_id(invitation_bceid.as_dict()['id'])
             assert invitation_model.login_source == LoginSource.BCEID.value
 
+
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_change_authentication_non_govm(session, auth_mock, keycloak_mock, monkeypatch):
     """Assert that non government ministry organization invites can be accepted by different login sources."""
@@ -279,6 +280,7 @@ def test_invitation_govm(session, auth_mock, keycloak_mock, monkeypatch):
                                                             'ACTIVE')
             assert members
             assert len(members) == 1
+
 
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_invitation_anonymous(session, auth_mock, keycloak_mock, monkeypatch):

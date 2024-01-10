@@ -29,7 +29,8 @@ from auth_api.models import db as _db
 
 
 def mock_token():
-    return "TOKEN...."
+    """Mock token generator."""
+    return 'TOKEN....'
 
 
 @pytest.fixture(scope='session')

@@ -26,6 +26,7 @@ from tests.utilities.factory_scenarios import TestAffidavit, TestJwtClaims, Test
 from tests.utilities.factory_utils import factory_user_model, factory_user_model_with_contact, patch_token_info
 from tests.conftest import mock_token
 
+
 def test_create_affidavit(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be created."""
     user = factory_user_model()

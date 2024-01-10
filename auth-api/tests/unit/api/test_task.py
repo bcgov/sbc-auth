@@ -42,6 +42,7 @@ from tests.conftest import mock_token
 current_dt = dt.datetime.now()
 current_date_str = current_dt.strftime('%Y-%m-%d')
 
+
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
     user = factory_user_model()
@@ -246,6 +247,7 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
     assert rv.json.get('orgStatus') == OrgStatus.PENDING_STAFF_REVIEW.value
+
 
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument

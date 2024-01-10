@@ -25,6 +25,7 @@ from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUs
 from tests.utilities.factory_utils import factory_user_model, patch_token_info
 from tests.conftest import mock_token
 
+
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_user_settings(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a contact can not be deleted if contact link exists."""

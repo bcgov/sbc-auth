@@ -38,6 +38,7 @@ from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUs
 from tests.utilities.factory_utils import factory_invitation, factory_user_model, patch_token_info
 from tests.conftest import mock_token
 
+
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_as_dict(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the Invitation is exported correctly as a dictionary."""
@@ -50,6 +51,7 @@ def test_as_dict(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disa
         invitation = InvitationService.create_invitation(invitation_info, User(user), '')
         invitation_dictionary = invitation.as_dict()
         assert invitation_dictionary['recipient_email'] == invitation_info['recipientEmail']
+
 
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
@@ -72,6 +74,7 @@ def test_create_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
         assert invitation_dictionary['id']
         mock_notify.assert_called()
 
+
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_find_invitation_by_id(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided id."""
@@ -91,6 +94,7 @@ def test_find_invitation_by_id_exception(session, auth_mock):  # pylint:disable=
     """Find an existing invitation with the provided id with exception."""
     invitation = InvitationService.find_invitation_by_id(None)
     assert invitation is None
+
 
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
@@ -113,6 +117,7 @@ def test_delete_invitation_exception(session, auth_mock):  # pylint:disable=unus
         InvitationService.delete_invitation(None)
 
     assert exception.value.code == Error.DATA_NOT_FOUND.name
+
 
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
@@ -168,6 +173,7 @@ def test_validate_token_valid(session, auth_mock, keycloak_mock, monkeypatch):  
         invitation_id = InvitationService.validate_token(confirmation_token).as_dict().get('id')
         assert invitation_id == new_invitation['id']
 
+
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_validate_token_accepted(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Validate invalid invitation token."""
@@ -194,6 +200,7 @@ def test_validate_token_exception(session):  # pylint:disable=unused-argument
         InvitationService.validate_token(None)
 
     assert exception.value.code == Error.EXPIRED_INVITATION.name
+
 
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_accept_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
@@ -252,6 +259,7 @@ def test_accept_invitation_for_govm(session, auth_mock, keycloak_mock, monkeypat
                 assert members
                 assert len(members) == 1, 'user gets active membership'
 
+
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Accept the invitation and add membership from the invitation to the org."""
@@ -288,6 +296,7 @@ def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, monkeyp
                     InvitationService.accept_invitation(expired_invitation.id, User(user_invitee), '')
 
                 assert exception.value.code == Error.EXPIRED_INVITATION.name
+
 
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_invitations_by_org_id(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument

@@ -43,6 +43,7 @@ from tests.utilities.factory_utils import (
     factory_user_model, get_tos_latest_version, patch_token_info)
 from tests.conftest import mock_token
 
+
 def test_as_dict(session):  # pylint: disable=unused-argument
     """Assert that a user is rendered correctly as a dictionary."""
     user_model = factory_user_model()
@@ -667,6 +668,7 @@ def test_delete_contact_user_link(session, auth_mock, keycloak_mock, monkeypatch
     exist_contact_link = ContactLinkModel.find_by_org_id(org_id)
     assert exist_contact_link
 
+
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_user(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
@@ -691,6 +693,7 @@ def test_delete_user(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:
     user_orgs = MembershipModel.find_orgs_for_user(updated_user.id)
     for org in user_orgs:
         assert org.status_code == 'INACTIVE'
+
 
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('environment', ['test', None])

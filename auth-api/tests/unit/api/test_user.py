@@ -60,6 +60,7 @@ def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv.json, 'user_response')[0]
 
+
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_user_staff_org(client, jwt, session, keycloak_mock, monkeypatch):
     """Assert that adding and removing membership to a staff org occurs."""

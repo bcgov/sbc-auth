@@ -164,6 +164,7 @@ def test_create_affiliation_exists(session, auth_mock, environment):  # pylint:d
 
     assert affiliation
 
+
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('environment', ['test', None])
 def test_create_affiliation_firms(session, auth_mock, monkeypatch, environment):  # pylint:disable=unused-argument
@@ -223,6 +224,7 @@ def test_create_affiliation_staff_sbc_staff(
     else:
         with pytest.raises(BusinessException):
             affiliation = AffiliationService.create_affiliation(org_id, business_identifier, environment)
+
 
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('environment', ['test', None])

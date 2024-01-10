@@ -37,6 +37,7 @@ from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOr
 from tests.utilities.factory_utils import factory_user_model_with_contact, patch_token_info
 from tests.conftest import mock_token
 
+
 @pytest.mark.parametrize('org_product_info', [
     TestOrgProductsInfo.org_products_vs
 ])

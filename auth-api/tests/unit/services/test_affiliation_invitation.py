@@ -45,6 +45,7 @@ from tests.utilities.factory_utils import (
     patch_token_info)
 from tests.conftest import mock_token
 
+
 def create_test_entity():
     """Create test entity data."""
     entity = EntityService.save_entity({

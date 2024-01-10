@@ -246,6 +246,7 @@ def test_get_users_product_subscriptions_kc_groups(session, keycloak_mock, monke
     assert kc_groups[2].group_name == 'vs'
     assert kc_groups[2].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
 
+
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_users_sub_product_subscriptions_kc_groups(session, keycloak_mock, monkeypatch):
     """Assert that our keycloak groups are returned correctly for sub products."""

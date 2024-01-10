@@ -39,6 +39,7 @@ from tests.utilities.factory_utils import (
     patch_token_info)
 from tests.conftest import mock_token
 
+
 def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that tasks can be fetched."""
     user = factory_user_model()
@@ -200,6 +201,7 @@ def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unuse
     assert dictionary['status'] == TaskStatus.HOLD.value
     assert dictionary['relationship_status'] == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
     assert dictionary['remarks'] == ['Test Remark']
+
 
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_task_govm(session,

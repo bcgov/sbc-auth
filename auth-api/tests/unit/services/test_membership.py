@@ -30,6 +30,7 @@ from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, Tes
 from tests.utilities.factory_utils import factory_membership_model, factory_product_model, factory_user_model
 from tests.conftest import mock_token
 
+
 @mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that accepting an invite adds group to the user."""
