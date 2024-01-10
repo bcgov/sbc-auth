@@ -18,6 +18,7 @@ Test suite to ensure that the correct product notifications are generated.
 
 from unittest.mock import patch
 
+import mock
 import pytest
 
 import auth_api.utils.account_mailer
@@ -34,11 +35,13 @@ from auth_api.utils.notifications import (
     NotificationAttachmentType, ProductAccessDescriptor, ProductCategoryDescriptor, ProductSubjectDescriptor)
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOrgProductsInfo, TestUserInfo
 from tests.utilities.factory_utils import factory_user_model_with_contact, patch_token_info
+from tests.conftest import mock_token
 
 
 @pytest.mark.parametrize('org_product_info', [
     TestOrgProductsInfo.org_products_vs
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @patch.object(auth_api.services.products, 'publish_to_mailer')
 def test_default_approved_notification(mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info):
     """Assert product approved notification default is created."""
@@ -107,6 +110,7 @@ def test_default_approved_notification(mock_mailer, session, auth_mock, keycloak
 @pytest.mark.parametrize('org_product_info', [
     TestOrgProductsInfo.org_products_vs
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @patch.object(auth_api.services.products, 'publish_to_mailer')
 def test_default_rejected_notification(mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info):
     """Assert product rejected notification default is created."""
@@ -177,6 +181,7 @@ def test_default_rejected_notification(mock_mailer, session, auth_mock, keycloak
     TestOrgProductsInfo.mhr_qs_home_manufacturers,
     TestOrgProductsInfo.mhr_qs_home_dealers
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @patch.object(auth_api.services.products, 'publish_to_mailer')
 def test_detailed_approved_notification(mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info):
     """Assert product approved notification with details is created."""
@@ -259,6 +264,7 @@ def test_detailed_approved_notification(mock_mailer, session, auth_mock, keycloa
     (TestOrgProductsInfo.mhr_qs_home_manufacturers, 'BCREG'),
     (TestOrgProductsInfo.mhr_qs_home_dealers, 'BCREG')
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @patch.object(auth_api.services.products, 'publish_to_mailer')
 def test_detailed_rejected_notification(mock_mailer, session, auth_mock, keycloak_mock,
                                         monkeypatch, org_product_info, contact_type):
@@ -346,6 +352,7 @@ def test_detailed_rejected_notification(mock_mailer, session, auth_mock, keycloa
     TestOrgProductsInfo.mhr_qs_home_manufacturers,
     TestOrgProductsInfo.mhr_qs_home_dealers
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @patch.object(auth_api.services.products, 'publish_to_mailer')
 def test_hold_notification(mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info):
     """Assert product notification is not created for on hold state."""
@@ -417,6 +424,7 @@ def test_hold_notification(mock_mailer, session, auth_mock, keycloak_mock, monke
     (TestOrgProductsInfo.mhr_qs_home_manufacturers, 'BCREG'),
     (TestOrgProductsInfo.mhr_qs_home_dealers, 'BCREG')
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @patch.object(auth_api.services.products, 'publish_to_mailer')
 def test_confirmation_notification(mock_mailer, session, auth_mock, keycloak_mock,
                                    monkeypatch, org_product_info, contact_type):
@@ -467,6 +475,7 @@ def test_confirmation_notification(mock_mailer, session, auth_mock, keycloak_moc
 @pytest.mark.parametrize('org_product_info', [
     TestOrgProductsInfo.org_products_vs
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @patch.object(auth_api.services.products, 'publish_to_mailer')
 def test_no_confirmation_notification(mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info):
     """Assert product confirmation notification not created."""

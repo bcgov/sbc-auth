@@ -30,6 +30,7 @@ from urllib3.util.retry import Retry
 
 from auth_api.exceptions import ServiceUnavailableException
 from auth_api.utils.enums import AuthHeaderType, ContentType
+from auth_api.utils.cache import cache
 
 RETRY_ADAPTER = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[404]))
 
@@ -163,11 +164,13 @@ class RestService:
         return response
 
     @staticmethod
+    @cache.cached(query_string=True)
     def get_service_account_token(config_id='KEYCLOAK_SERVICE_ACCOUNT_ID',
                                   config_secret='KEYCLOAK_SERVICE_ACCOUNT_SECRET') -> str:
         """Generate a service account token."""
         kc_service_id = current_app.config.get(config_id)
         kc_secret = current_app.config.get(config_secret)
+
         issuer_url = current_app.config.get('JWT_OIDC_ISSUER')
         token_url = issuer_url + '/protocol/openid-connect/token'
         auth_response = requests.post(token_url, auth=(kc_service_id, kc_secret), headers={

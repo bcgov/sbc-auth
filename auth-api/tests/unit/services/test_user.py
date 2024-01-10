@@ -19,6 +19,7 @@ Test-Suite to ensure that the User Service is working as expected.
 import json
 from unittest.mock import patch
 
+import mock
 import pytest
 from werkzeug.exceptions import HTTPException
 
@@ -40,6 +41,7 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_membership_model, factory_org_model, factory_product_model,
     factory_user_model, get_tos_latest_version, patch_token_info)
+from tests.conftest import mock_token
 
 
 def test_as_dict(session):  # pylint: disable=unused-argument
@@ -523,6 +525,7 @@ def test_update_contact_for_user_no_contact(session, monkeypatch):  # pylint: di
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_contact_for_user(session, monkeypatch):  # pylint: disable=unused-argument
     """Assert that a contact can be deleted for a user."""
     user_with_token = TestUserInfo.user_test
@@ -632,6 +635,7 @@ def test_user_find_by_username_missing_username(session):  # pylint: disable=unu
     assert user is None
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_contact_user_link(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a contact can not be deleted if contact link exists."""
     user_with_token = TestUserInfo.user_test
@@ -666,6 +670,7 @@ def test_delete_contact_user_link(session, auth_mock, keycloak_mock, monkeypatch
     assert exist_contact_link
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_user(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     user_with_token = TestUserInfo.user_test
@@ -691,6 +696,7 @@ def test_delete_user(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:
         assert org.status_code == 'INACTIVE'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('environment', ['test', None])
 def test_delete_user_where_org_has_affiliations(session, auth_mock, keycloak_mock,
                                                 monkeypatch, environment):  # pylint:disable=unused-argument
@@ -725,6 +731,7 @@ def test_delete_user_where_org_has_affiliations(session, auth_mock, keycloak_moc
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mock,
                                                  monkeypatch, environment):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
@@ -771,6 +778,7 @@ def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mo
 
 
 @pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_user_where_org_has_another_owner(session, auth_mock, keycloak_mock,
                                                  monkeypatch, environment):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""

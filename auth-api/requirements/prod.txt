@@ -31,3 +31,5 @@ launchdarkly-server-sdk
 protobuf~=3.19.5
 aiohttp
 orjson
+python-memcached
+redis

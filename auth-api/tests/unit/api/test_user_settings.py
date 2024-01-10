@@ -17,6 +17,7 @@
 Test-Suite to ensure that the /users endpoint is working as expected.
 """
 import copy
+import mock
 
 from auth_api import status as http_status
 from auth_api.models import ContactLink as ContactLinkModel
@@ -25,8 +26,10 @@ from auth_api.services import Org as OrgService
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_auth_header, factory_contact_model, factory_user_model, patch_token_info)
+from tests.conftest import mock_token
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that get works and adhere to schema."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
