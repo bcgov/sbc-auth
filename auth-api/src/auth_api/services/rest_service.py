@@ -39,6 +39,7 @@ def make_token_key(*args):
     """Use client_id as token cache key."""
     return args[0]
 
+
 class RestService:
     """Service to invoke Rest services which uses OAuth 2.0 implementation."""
 
