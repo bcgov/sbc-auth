@@ -9,7 +9,7 @@ Werkzeug<2
 jaeger-client
 attrs
 itsdangerous==2.0.1
-Jinja2==3.0.3
+Jinja2==3.1.3
 markupsafe==2.0.1
 protobuf~=3.19.5
 launchdarkly-server-sdk==8.2.1
