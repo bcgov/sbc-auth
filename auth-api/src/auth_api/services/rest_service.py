@@ -35,9 +35,9 @@ from auth_api.utils.cache import cache
 RETRY_ADAPTER = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[404]))
 
 
-def make_token_key(*args):
+def make_token_key(config_id, config_secret):
     """Use client_id as token cache key."""
-    return args[0]
+    return config_id
 
 
 class RestService:
