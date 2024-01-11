@@ -18,6 +18,7 @@ Test-Suite to ensure that the /affiliationsInvitations endpoint is working as ex
 """
 import json
 
+import mock
 import pytest
 
 from auth_api import status as http_status
@@ -28,11 +29,13 @@ from auth_api.utils.enums import InvitationStatus
 from auth_api.utils.util import mask_email
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_affiliation_invitation, factory_auth_header
+from tests.conftest import mock_token
 
 
 KEYCLOAK_SERVICE = KeycloakService()
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('from_org_info, to_org_info, entity_info, role, claims', [
     (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'ADMIN',
      TestJwtClaims.public_user_role),
@@ -87,6 +90,7 @@ def test_add_affiliation_invitation(client, jwt, session, keycloak_mock, busines
     assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('from_org_info, entity_info, role, claims', [
     (TestOrgInfo.affiliation_from_org, TestEntityInfo.entity_lear_mock, 'ADMIN', TestJwtClaims.public_user_role),
     (TestOrgInfo.affiliation_from_org, TestEntityInfo.entity_lear_mock, 'USER', TestJwtClaims.public_user_role),
@@ -135,6 +139,7 @@ def test_add_affiliation_invitation_exclude_to_org(client, jwt, session, keycloa
     assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_affiliation_invitation_already_exists(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that POSTing an already existing affiliation invitation returns a 400."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -160,6 +165,7 @@ def test_affiliation_invitation_already_exists(client, jwt, session, keycloak_mo
     assert dictionary['message'] == 'The data you want to insert already exists.'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_affiliation_invitation_business_not_found(client, jwt, session, keycloak_mock, business_exception_mock,
                                                    stan_server):
     """Assert that POSTing with a business identifier not found in LEAR raises the appropriate exception."""
@@ -187,6 +193,7 @@ def test_affiliation_invitation_business_not_found(client, jwt, session, keycloa
     assert dictionary['code'] == 'AFFILIATION_INVITATION_BUSINESS_NOT_FOUND'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_affiliation_invitation_already_exists_exclude_to_org(client, jwt, session, keycloak_mock, business_mock,
                                                               stan_server):
     """Assert that POSTing an already existing affiliation invitation returns a 400."""
@@ -213,6 +220,7 @@ def test_affiliation_invitation_already_exists_exclude_to_org(client, jwt, sessi
     assert dictionary['message'] == 'The data you want to insert already exists.'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_affiliation_invitation_missing_contact(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that creating an invitation with a missing contact email returns a 400."""
     headers, from_org_id, to_org_id, \
@@ -234,6 +242,7 @@ def test_affiliation_invitation_missing_contact(client, jwt, session, keycloak_m
     assert dictionary['message'] == 'Business contact email not valid.'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation can be deleted."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -262,6 +271,7 @@ def test_delete_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert dictionary['message'] == 'The requested affiliation invitation could not be found.'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_accepted_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an accepted affiliation invitation can be deleted."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -320,6 +330,7 @@ def test_add_affiliation_invitation_invalid(client, jwt, session, business_mock)
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_affiliation_invitation_by_id(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an invitation can be retrieved."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -349,6 +360,7 @@ def test_get_affiliation_invitation_by_id(client, jwt, session, keycloak_mock, b
     assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation can be updated."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -383,6 +395,7 @@ def test_update_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_affiliation_invitation_exclude_to_org(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation can be updated."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -417,6 +430,7 @@ def test_update_affiliation_invitation_exclude_to_org(client, jwt, session, keyc
     assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_expire_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation can be expired."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -451,6 +465,7 @@ def test_expire_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_expire_affiliation_invitation_exclude_to_org(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation can be expired."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -485,6 +500,7 @@ def test_expire_affiliation_invitation_exclude_to_org(client, jwt, session, keyc
     assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation can be accepted."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -541,6 +557,7 @@ def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert len(affiliations['entities']) == 0
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that affiliation invitations can be retrieved."""
     headers, from_org_id, to_org_id, business_identifier = \
@@ -568,6 +585,7 @@ def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, busine
     assert_masked_email(TestContactInfo.contact1['email'], result_json['affiliationInvitations'][0]['recipientEmail'])
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_affiliation_invitations_deleted(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that affiliation invitations that are soft deleted are not returned."""
     headers, from_org_id, to_org_id, business_identifier = \
@@ -700,6 +718,7 @@ def setup_additional_affiliation_invitation_data(client, jwt, session, keycloak_
     return new_org_ids, new_entity_business_identifiers
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_authorize_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation (type REQUEST) can be authorized."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -729,6 +748,7 @@ def test_authorize_affiliation_invitation(client, jwt, session, keycloak_mock, b
     assert dictionary['status'] == 'ACCEPTED'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_reject_authorize_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation (type REQUEST) can be refused to be authorized."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
@@ -802,6 +822,7 @@ def _create_affiliations_for_test(client, headers,
             headers=headers, content_type='application/json')
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_getting_affiliation_invitations_for_the_org(app, client, jwt, session, keycloak_mock, business_mock,
                                                      stan_server):
     """Assert that correct count of affiliation invitations is returned for provided org id."""
@@ -840,6 +861,7 @@ def test_getting_affiliation_invitations_for_the_org(app, client, jwt, session, 
     app.config.update(MAX_NUMBER_OF_ORGS=orig_val_max_number_of_orgs)
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_getting_affiliation_invitations_sent_to_org_for_entity(app, client, jwt, session, keycloak_mock, business_mock,
                                                                 stan_server):
     """Assert that correct count of affiliation invitations is returned for provided org id and business identifier."""
