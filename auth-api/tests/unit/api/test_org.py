@@ -145,6 +145,7 @@ def test_search_org_by_client(client, jwt, session, keycloak_mock):  # pylint:di
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_duplicate_name(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be searched using multiple syntax."""
     # Create active org
@@ -181,6 +182,7 @@ def test_duplicate_name(client, jwt, session, keycloak_mock):  # pylint:disable=
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be searched using multiple syntax."""
     # Create active org
@@ -1652,6 +1654,7 @@ def test_get_org_admin_affidavits(client, jwt, session, keycloak_mock):  # pylin
     assert staff_response.json.get('id') == affidavit_response.json.get('id')
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that staff admin can approve pending affidavits."""
     # 1. Create User
