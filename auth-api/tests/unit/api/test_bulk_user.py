@@ -17,6 +17,7 @@
 Test-Suite to ensure that the /users endpoint is working as expected.
 """
 import json
+import mock
 import uuid
 from random import randint
 
@@ -28,6 +29,7 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.enums import IdpHint, ProductCode
 from tests.utilities.factory_scenarios import BulkUserTestScenario, TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation_anonymous
+from tests.conftest import mock_token
 
 
 KEYCLOAK_SERVICE = KeycloakService()
@@ -43,6 +45,7 @@ def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     assert schema_utils.validate(rv.json, 'user_response')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock, stan_server):  # pylint:disable=unused-argument
     """Assert that an org admin can create members."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_dir_search_role)

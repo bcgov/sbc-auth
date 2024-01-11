@@ -17,7 +17,7 @@
 Test-Suite to ensure that the /invitations endpoint is working as expected.
 """
 import json
-
+import mock
 import pytest
 
 from auth_api import status as http_status
@@ -28,10 +28,12 @@ from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS, GROUP_PUBLIC_USERS
 from auth_api.utils.enums import LoginSource, Status
 from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation
+from tests.conftest import mock_token
 
 KEYCLOAK_SERVICE = KeycloakService()
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('org_info, role, claims', [
     (TestOrgInfo.org_regular, 'ADMIN', TestJwtClaims.public_user_role),
     (TestOrgInfo.org_regular, 'USER', TestJwtClaims.public_user_role),
@@ -63,6 +65,7 @@ def test_add_invitation_invalid(client, jwt, session):  # pylint:disable=unused-
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_invitations_by_id(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -80,6 +83,7 @@ def test_get_invitations_by_id(client, jwt, session, keycloak_mock):  # pylint:d
     assert rv.status_code == http_status.HTTP_200_OK
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be deleted."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -101,6 +105,7 @@ def test_delete_invitation(client, jwt, session, keycloak_mock):  # pylint:disab
     assert dictionary['message'] == 'The requested invitation could not be found.'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be updated."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -122,6 +127,7 @@ def test_update_invitation(client, jwt, session, keycloak_mock):  # pylint:disab
     assert dictionary['status'] == 'PENDING'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_validate_token(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a token is valid."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -140,6 +146,7 @@ def test_validate_token(client, jwt, session, keycloak_mock):  # pylint:disable=
     assert rv.status_code == http_status.HTTP_200_OK
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('org_info, role, claims, source, exp_status', [
     (TestOrgInfo.org_regular, 'ADMIN', TestJwtClaims.public_account_holder_user, LoginSource.BCSC.value,
      Status.PENDING_APPROVAL),

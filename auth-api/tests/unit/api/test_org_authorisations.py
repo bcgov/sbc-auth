@@ -18,12 +18,15 @@ Test-Suite to ensure that the /orgs/authorisations endpoint is working as expect
 """
 
 import json
+import mock
 
 from auth_api import status as http_status
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOrgProductsInfo
 from tests.utilities.factory_utils import factory_auth_header
+from tests.conftest import mock_token
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -58,6 +61,7 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     assert len(org_authorisations_by_vs.get('roles')) == 0
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_ppr_auth(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that accounts get PPR authorization."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)

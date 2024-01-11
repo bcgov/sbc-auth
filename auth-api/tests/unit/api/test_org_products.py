@@ -18,6 +18,7 @@ Test-Suite to ensure that the /orgs endpoint is working as expected.
 """
 
 import json
+import mock
 
 import pytest
 
@@ -25,8 +26,10 @@ from auth_api import status as http_status
 from auth_api.schemas import utils as schema_utils
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOrgProductsInfo
 from tests.utilities.factory_utils import factory_auth_header
+from tests.conftest import mock_token
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_multiple_org_products(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -42,6 +45,7 @@ def test_add_multiple_org_products(client, jwt, session, keycloak_mock):  # pyli
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_single_org_product(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -57,6 +61,7 @@ def test_add_single_org_product(client, jwt, session, keycloak_mock):  # pylint:
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_single_org_product_vs(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -78,6 +83,7 @@ def test_add_single_org_product_vs(client, jwt, session, keycloak_mock):  # pyli
     assert vs_product.get('subscriptionStatus') == 'PENDING_STAFF_REVIEW'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_dir_search_doesnt_get_any_product(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert dir search doesnt get any active product subscriptions."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -96,6 +102,7 @@ def test_dir_search_doesnt_get_any_product(client, jwt, session, keycloak_mock):
     assert len([x for x in list_products if x.get('subscriptionStatus') != 'NOT_SUBSCRIBED']) == 0
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_new_dir_search_can_be_returned(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert new dir search product subscriptions can be subscribed to via system admin / returned via org user."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -137,6 +144,7 @@ def assert_product_parent_and_child_statuses(client, jwt, org_id,
     assert parent_mhr_product.get('subscriptionStatus') == parent_status
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('org_product_info', [
     TestOrgProductsInfo.mhr_qs_lawyer_and_notaries,
     TestOrgProductsInfo.mhr_qs_home_manufacturers,
@@ -200,6 +208,7 @@ def test_add_single_org_product_mhr_qualified_supplier_approve(client, jwt, sess
                                              org_product_info['subscriptions'][0]['productCode'], 'ACTIVE')
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('org_product_info', [
     TestOrgProductsInfo.mhr_qs_lawyer_and_notaries,
     TestOrgProductsInfo.mhr_qs_home_manufacturers,
@@ -263,6 +272,7 @@ def test_add_single_org_product_mhr_qualified_supplier_reject(client, jwt, sessi
                                              org_product_info['subscriptions'][0]['productCode'], 'REJECTED')
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('org_product_info', [
     TestOrgProductsInfo.mhr_qs_lawyer_and_notaries,
     TestOrgProductsInfo.mhr_qs_home_manufacturers,
@@ -340,6 +350,7 @@ def test_add_single_org_product_mhr_qualified_supplier_reject2(client, jwt, sess
                                              org_product_info['subscriptions'][0]['productCode'], 'REJECTED')
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_org_product_mhr_qualified_supplier_reject_approve(client, jwt, session, keycloak_mock):
     """Assert that MHR sub products subscriptions can be rejected and approved after with a different sub product."""
     # setup user and org

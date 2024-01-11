@@ -18,12 +18,15 @@ Test-Suite to ensure that the /orgs/api-keys endpoint is working as expected.
 """
 
 import json
+import mock
 
 from auth_api import status as http_status
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header
+from tests.conftest import mock_token
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_api_keys(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that api keys can be generated."""
     # First create an account
@@ -61,6 +64,7 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, monkeypatch):  # p
     assert rv.json.get('hasApiAccess')
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_list_api_keys(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that api keys can be listed."""
     # First create an account
@@ -91,6 +95,7 @@ def test_list_api_keys(client, jwt, session, keycloak_mock):  # pylint:disable=u
     assert rv.json['consumer']['consumerKey']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_revoke_api_key(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that api keys can be revoked."""
     # First create an account

@@ -17,6 +17,7 @@
 Test-Suite to ensure that the /orgs endpoint is working as expected.
 """
 import json
+import mock
 import uuid
 from unittest.mock import patch
 
@@ -51,10 +52,12 @@ from tests.utilities.factory_utils import (
     convert_org_to_staff_org, factory_affiliation_model, factory_auth_header, factory_entity_model, factory_invitation,
     factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_user_model,
     patch_pay_account_delete, patch_pay_account_delete_error)
+from tests.conftest import mock_token
 
 FAKE = Faker()
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('org_info', [TestOrgInfo.org1, TestOrgInfo.org_onlinebanking, TestOrgInfo.org_with_products,
                                       TestOrgInfo.org_regular, TestOrgInfo.org_with_all_info])
 def test_add_org(client, jwt, session, keycloak_mock, org_info):  # pylint:disable=unused-argument
@@ -88,6 +91,7 @@ def test_add_basic_org_with_pad_throws_error(client, jwt, session, keycloak_mock
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_search_org_by_client(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be searched."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -252,6 +256,7 @@ def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_moc
     assert orgs.get('total') == 1
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_search_org_for_dir_search(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be searched."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -292,6 +297,7 @@ def test_search_org_for_dir_search(client, jwt, session, keycloak_mock):  # pyli
     assert len(orgs.get('orgs')) == 1
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_govm_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -306,6 +312,7 @@ def test_add_govm_org_staff_admin(client, jwt, session, keycloak_mock):  # pylin
     assert schema_utils.validate(rv.json, 'org_response')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -386,6 +393,7 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
     assert vs_product.get('subscriptionStatus') == 'ACTIVE'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_anonymous_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -416,6 +424,7 @@ def test_add_anonymous_org_by_user_exception(client, jwt, session, keycloak_mock
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_org_staff_admin_anonymous_not_passed(client, jwt, session,
                                                   keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
@@ -428,6 +437,7 @@ def test_add_org_staff_admin_anonymous_not_passed(client, jwt, session,
     assert dictionary['accessType'] == 'ANONYMOUS'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_org_staff_admin_any_number_of_orgs(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -449,6 +459,7 @@ def test_add_org_staff_admin_any_number_of_orgs(client, jwt, session, keycloak_m
     assert rv.status_code == http_status.HTTP_201_CREATED
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_org_multiple(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed.But in limited number."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -469,6 +480,7 @@ def test_add_org_multiple(client, jwt, session, keycloak_mock):  # pylint:disabl
     assert rv4.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_same_org_409(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -559,6 +571,7 @@ def test_add_org_invalid_returns_exception(client, jwt, session):  # pylint:disa
         assert schema_utils.validate(rv.json, 'exception')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be retrieved via GET."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -577,6 +590,7 @@ def test_get_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     assert dictionary['id'] == org_id
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_org_no_auth_returns_401(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org cannot be retrieved without an authorization header."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -598,6 +612,7 @@ def test_get_org_no_org_returns_404(client, jwt, session):  # pylint:disable=unu
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_org_duplicate_branch_name(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -627,6 +642,7 @@ def test_update_org_duplicate_branch_name(client, jwt, session, keycloak_mock): 
     assert rv.status_code == http_status.HTTP_409_CONFLICT
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -681,6 +697,7 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     assert rv.json.get('isBusinessAccount') == all_org_info['isBusinessAccount']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_org_payment_method_for_basic_org(client, jwt, session, keycloak_mock):
     """Assert that an orgs payment details can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -701,6 +718,7 @@ def test_update_org_payment_method_for_basic_org(client, jwt, session, keycloak_
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST, 'Assert BCOL cant be used for Basic Account'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_upgrade_anon_org_fail(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -726,6 +744,7 @@ def test_upgrade_anon_org_fail(client, jwt, session, keycloak_mock):  # pylint:d
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -744,6 +763,7 @@ def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disa
     assert schema_utils.validate(rv.json, 'org_response')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_org_type_to_staff_fails(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that org type doesn't get updated."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -776,6 +796,7 @@ def test_update_org_type_to_staff_fails(client, jwt, session, keycloak_mock):  #
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -795,6 +816,7 @@ def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylin
     assert schema_utils.validate(rv.json, 'contacts')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_org_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can not be updated and return 400 error via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -817,6 +839,7 @@ def test_update_org_no_org_returns_404(client, jwt, session):  # pylint:disable=
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_org_returns_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that attempting to update a non-existent org returns an exception."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -833,6 +856,7 @@ def test_update_org_returns_exception(client, jwt, session, keycloak_mock):  # p
         assert schema_utils.validate(rv.json, 'exception')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -850,6 +874,7 @@ def test_add_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unu
     assert schema_utils.validate(rv.json, 'contact_response')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_contact_invalid_format_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that adding an invalidly formatted contact returns a 400."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -864,6 +889,7 @@ def test_add_contact_invalid_format_returns_400(client, jwt, session, keycloak_m
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_contact_valid_email_returns_201(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that adding an valid formatted contact with special characters in email returns a 201."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -887,6 +913,7 @@ def test_add_contact_no_org_returns_404(client, jwt, session):  # pylint:disable
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_contact_duplicate_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that adding a duplicate contact to an org returns 400."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -903,6 +930,7 @@ def test_add_contact_duplicate_returns_400(client, jwt, session, keycloak_mock):
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be updated on an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -925,6 +953,7 @@ def test_update_contact(client, jwt, session, keycloak_mock):  # pylint:disable=
     assert dictionary['email'] == TestContactInfo.contact2['email']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_contact_invalid_format_returns_400(client, jwt, session,
                                                    keycloak_mock):  # pylint:disable=unused-argument
     """Assert that updating with an invalidly formatted contact returns a 400."""
@@ -942,6 +971,7 @@ def test_update_contact_invalid_format_returns_400(client, jwt, session,
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_contact_valid_email_format_returns_200(client, jwt, session,
                                                        keycloak_mock):  # pylint:disable=unused-argument
     """Assert that updating with an validly formatted contact with special characters in email returns a 200."""
@@ -968,6 +998,7 @@ def test_update_contact_no_org_returns_404(client, jwt, session):  # pylint:disa
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_contact_missing_returns_404(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that updating a non-existant contact returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -982,6 +1013,7 @@ def test_update_contact_missing_returns_404(client, jwt, session, keycloak_mock)
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be deleted on an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -1009,6 +1041,7 @@ def test_delete_contact(client, jwt, session, keycloak_mock):  # pylint:disable=
     assert len(dictionary['contacts']) == 0
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_contact_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that deleting a contact on a non-existant entity returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -1017,6 +1050,7 @@ def test_delete_contact_no_org_returns_404(client, jwt, session):  # pylint:disa
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_contact_returns_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that attempting to delete an org returns an exception."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -1032,6 +1066,7 @@ def test_delete_contact_returns_exception(client, jwt, session, keycloak_mock): 
         assert schema_utils.validate(rv.json, 'exception')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_members(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a list of members for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -1052,6 +1087,7 @@ def test_get_members(client, jwt, session, keycloak_mock):  # pylint:disable=unu
     assert dictionary['members'][0]['membershipTypeCode'] == 'ADMIN'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_org(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an org can be deleted."""
     # 1 - assert org can be deleted without any dependencies like members or business affiliations.
@@ -1104,6 +1140,7 @@ def test_delete_org(client, jwt, session, keycloak_mock, monkeypatch):  # pylint
     assert AffidavitModel.find_by_id(affidavit_id).status_code == AffidavitStatus.INACTIVE.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_org_failures(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an org cannot be deleted."""
     patch_pay_account_delete_error(monkeypatch)
@@ -1119,6 +1156,7 @@ def test_delete_org_failures(client, jwt, session, keycloak_mock, monkeypatch): 
     assert rv.json.get('code') == 'OUTSTANDING_CREDIT'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_invitations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a list of invitations for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -1146,6 +1184,7 @@ def test_get_invitations(client, jwt, session, keycloak_mock):  # pylint:disable
     assert dictionary['invitations'][1]['recipientEmail'] == 'xyz456@email.com'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_anon_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -1168,6 +1207,7 @@ def test_update_anon_org(client, jwt, session, keycloak_mock):  # pylint:disable
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a member of an org can have their role updated."""
     # Set up: create/login user, create org
@@ -1218,6 +1258,7 @@ def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylin
     assert dictionary['membershipTypeCode'] == 'COORDINATOR'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
@@ -1239,6 +1280,7 @@ def test_add_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable
     assert dictionary['organization']['id'] == org_id
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_affiliation_invalid_format_returns_400(client, jwt, session,
                                                     keycloak_mock):  # pylint:disable=unused-argument
     """Assert that adding an invalidly formatted affiliations returns a 400."""
@@ -1262,6 +1304,7 @@ def test_add_affiliation_no_org_returns_404(client, jwt, session):  # pylint:dis
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that attempting to delete an affiliation returns an exception."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
@@ -1284,6 +1327,7 @@ def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):
         assert schema_utils.validate(rv.json, 'exception')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock, nr_mock):
     """Assert that an affiliation can be added by staff."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
@@ -1318,6 +1362,7 @@ def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock,
     assert affiliations['entities'][0]['affiliations'][0]['certifiedByName'] == certified_by_name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
@@ -1346,6 +1391,7 @@ def test_get_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable
     assert dictionary['business']['businessIdentifier'] == business_identifier
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
@@ -1372,6 +1418,7 @@ def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock):
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
@@ -1405,6 +1452,7 @@ def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disabl
     assert affiliations['entities'][0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_search_orgs_for_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that search org with affiliation works."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
@@ -1430,6 +1478,7 @@ def test_search_orgs_for_affiliation(client, jwt, session, keycloak_mock):  # py
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_unauthorized_search_orgs_for_affiliation(client, jwt, session,
                                                   keycloak_mock):  # pylint:disable=unused-argument
     """Assert that search org with affiliation works."""
@@ -1452,6 +1501,7 @@ def test_unauthorized_search_orgs_for_affiliation(client, jwt, session,
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -1506,6 +1556,7 @@ def test_add_bcol_linked_org_failure_mailing_address(client, jwt, session,
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_add_bcol_linked_org_different_name(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -1515,6 +1566,7 @@ def test_add_bcol_linked_org_different_name(client, jwt, session, keycloak_mock)
     assert rv.status_code == http_status.HTTP_201_CREATED
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('test_name, nr_status, payment_status, error', [
     ('NR_Approved', NRStatus.APPROVED.value, 'COMPLETED', None),
     ('NR_Draft', NRStatus.DRAFT.value, 'COMPLETED', None),
@@ -1569,6 +1621,7 @@ def test_new_business_affiliation(client, jwt, session, keycloak_mock, mocker, t
         assert rv.json['message'] == error.message
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_org_admin_affidavits(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that staff admin can get pending affidavits."""
     # 1. Create User
@@ -1659,6 +1712,7 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
     assert staff_response.json.get('status') == AffidavitStatus.APPROVED.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.skip(reason='Fix this later')
 def test_approve_org_with_pending_affidavits_duplicate_affidavit(client, jwt, session,
                                                                  keycloak_mock):  # pylint:disable=unused-argument
@@ -1737,6 +1791,7 @@ def test_approve_org_with_pending_affidavits_duplicate_affidavit(client, jwt, se
     assert affidavit_staff_response.json.get('contacts')[0].get('email') == new_contact_email
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_suspend_unsuspend(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that staff admin can approve pending affidavits."""
     # 1. Create User
@@ -1779,6 +1834,7 @@ def test_suspend_unsuspend(client, jwt, session, keycloak_mock):  # pylint:disab
     assert org_patch_response.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_org_suspended_reason(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be retrieved via GET."""
     public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
@@ -1809,6 +1865,7 @@ def test_org_suspended_reason(client, jwt, session, keycloak_mock):  # pylint:di
     assert dictionary['suspensionReasonCode'] == SuspensionReasonCode.OWNER_CHANGE.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_search_orgs_with_pending_affidavits(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that staff admin can approve pending affidavits."""
     # 1. Create User
@@ -1869,6 +1926,7 @@ def test_search_org_pagination(client, jwt, session, keycloak_mock):  # pylint:d
     assert len(orgs.get('orgs')) == 2
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_search_org_invitations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that pagination works."""
     # Create 2 anonymous org invitations
@@ -1901,6 +1959,7 @@ def test_search_org_invitations(client, jwt, session, keycloak_mock):  # pylint:
     assert len(orgs.get('orgs')[0].get('invitations')) == 1
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_affiliation_no_payload(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an affiliation for an org can be removed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
@@ -1935,6 +1994,7 @@ def test_delete_affiliation_no_payload(client, jwt, session, keycloak_mock):  # 
     assert da.status_code == http_status.HTTP_200_OK
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_affiliation_payload_no_mail(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an affiliation for an org can be removed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
@@ -1970,6 +2030,7 @@ def test_delete_affiliation_payload_no_mail(client, jwt, session, keycloak_mock)
     assert da.status_code == http_status.HTTP_200_OK
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_org_patch_validate_request_json(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Validate patch org endpoints based on different input."""
     public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
@@ -2015,6 +2076,7 @@ def test_org_patch_validate_request_json(client, jwt, session, keycloak_mock):  
     assert org_patch_response.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_org_patch_access_type(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert patch Org endpoint for access type."""
     public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
@@ -2034,6 +2096,7 @@ def test_org_patch_access_type(client, jwt, session, keycloak_mock):  # pylint:d
     assert org_patch_response.json.get('accessType') == AccessType.GOVN.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_search_org_govm(client, jwt, session, monkeypatch):  # pylint:disable=unused-argument
     """Create org_govm, find it in the search."""
     # Set up: create/login user, create org
@@ -2067,6 +2130,7 @@ def test_search_org_govm(client, jwt, session, monkeypatch):  # pylint:disable=u
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_new_active_search(client, jwt, session, keycloak_mock):
     """Check for id, accessType , orgType, decisionMadeBy."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -2128,6 +2192,7 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     assert orgs.get('orgs')[0].get('decisionMadeBy') == decision_made_by
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('test_name, businesses, drafts, drafts_with_nrs, nrs, dates', [
     ('businesses_only', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)], [], [], [], []),
     ('drafts_only', [], [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)], [], [], []),
@@ -2268,6 +2333,7 @@ def _create_orgs_entities_and_affiliations(client, jwt, count):
     return created_orgs
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 @pytest.mark.parametrize('expected_http_status, entries_count',
                          [
                              (http_status.HTTP_200_OK, 1),
@@ -2310,6 +2376,7 @@ def test_get_orgs_by_affiliation(client, jwt, session, keycloak_mock,
         assert 'id' not in od
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_orgs_by_affiliation_filtering_out_staff_orgs(app, client, jwt, session, keycloak_mock):
     """Assert that fetching orgs by affiliation do not return staff orgs."""
     orig_val_max_number_of_orgs = app.config.get('MAX_NUMBER_OF_ORGS')
