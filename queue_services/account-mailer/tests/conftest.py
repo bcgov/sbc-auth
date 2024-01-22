@@ -13,8 +13,10 @@
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
 import asyncio
+import logging
 import os
 import random
+import sys
 import time
 from contextlib import contextmanager
 
@@ -27,6 +29,19 @@ from sqlalchemy import event, text
 from stan.aio.client import Client as Stan
 
 from account_mailer.config import get_named_config
+
+def setup_logging(conf):
+    """Create the services logger.
+
+    TODO should be reworked to load in the proper loggers and remove others
+    """
+    # log_file_path = path.join(path.abspath(path.dirname(__file__)), conf)
+
+    if conf and os.path.isfile(conf):
+        logging.config.fileConfig(conf)
+        print(f'Configure logging, from conf:{conf}', file=sys.stdout)
+    else:
+        print(f'Unable to configure logging, attempted conf:{conf}', file=sys.stderr)
 
 
 @contextmanager
@@ -85,6 +100,8 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         Migrate(app, _db, directory=migration_path)
         upgrade()
 
+        # Restore the logging, alembic and sqlalchemy have their own logging from alembic.ini.
+        setup_logging(os.path.abspath('logging.conf'))
         return _db
 
 
