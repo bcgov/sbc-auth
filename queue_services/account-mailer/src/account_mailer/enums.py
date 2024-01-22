@@ -160,7 +160,7 @@ class TemplateType(Enum):
     """Template Types."""
 
     NSF_LOCK_ACCOUNT_TEMPLATE_NAME = 'account_suspended_email'
-    NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME = 'account_restored_email'
+    NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME = 'account_unlocked_email'
     ACCOUNT_CONF_OVER_TEMPLATE_NAME = 'account_conf_over_email'
     PAD_INVOICE_CREATED_TEMPLATE_NAME = 'pad_invoice_email'
     ADMIN_REMOVED_TEMPLATE_NAME = 'admin_removed_email'
