@@ -16,7 +16,6 @@ import asyncio
 import logging
 import os
 import random
-import sys
 import time
 from contextlib import contextmanager
 
@@ -30,6 +29,7 @@ from stan.aio.client import Client as Stan
 
 from account_mailer.config import get_named_config
 
+
 def setup_logging(conf):
     """Create the services logger.
 
@@ -39,9 +39,6 @@ def setup_logging(conf):
 
     if conf and os.path.isfile(conf):
         logging.config.fileConfig(conf)
-        print(f'Configure logging, from conf:{conf}', file=sys.stdout)
-    else:
-        print(f'Unable to configure logging, attempted conf:{conf}', file=sys.stderr)
 
 
 @contextmanager
