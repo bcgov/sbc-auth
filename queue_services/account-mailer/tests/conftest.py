@@ -18,7 +18,6 @@ import os
 import random
 import time
 from contextlib import contextmanager
-from unittest import mock
 
 import pytest
 from auth_api import db as _db
@@ -32,18 +31,11 @@ from stan.aio.client import Client as Stan
 from account_mailer.config import get_named_config
 
 
-
-def mock_token(config_id='', config_secret=''):
-    """Mock token generator."""
-    return 'TOKEN....'
-
 def setup_logging(conf):
     """Create the services logger.
 
     TODO should be reworked to load in the proper loggers and remove others
     """
-    # log_file_path = path.join(path.abspath(path.dirname(__file__)), conf)
-
     if conf and os.path.isfile(conf):
         logging.config.fileConfig(conf)
 
@@ -68,6 +60,7 @@ def app():
     _app.config.from_object(get_named_config('testing'))
     _db.init_app(_app)
     # Bypass caching.
+
     def get_service_token():
         pass
     RestService.get_service_account_token = get_service_token
