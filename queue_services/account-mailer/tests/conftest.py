@@ -18,9 +18,11 @@ import os
 import random
 import time
 from contextlib import contextmanager
+from unittest import mock
 
 import pytest
 from auth_api import db as _db
+from auth_api.services.rest_service import RestService
 from flask import Flask
 from flask_migrate import Migrate, upgrade
 from nats.aio.client import Client as Nats
@@ -29,6 +31,11 @@ from stan.aio.client import Client as Stan
 
 from account_mailer.config import get_named_config
 
+
+
+def mock_token(config_id='', config_secret=''):
+    """Mock token generator."""
+    return 'TOKEN....'
 
 def setup_logging(conf):
     """Create the services logger.
@@ -60,6 +67,10 @@ def app():
     _app = Flask(__name__)
     _app.config.from_object(get_named_config('testing'))
     _db.init_app(_app)
+    # Bypass caching.
+    def get_service_token():
+        pass
+    RestService.get_service_account_token = get_service_token
 
     return _app
 
