@@ -70,7 +70,7 @@ class SubjectType(Enum):
     """Event Types."""
 
     NSF_LOCK_ACCOUNT_SUBJECT = '[BC Registries and Online Services] Your account has been suspended'
-    NSF_UNLOCK_ACCOUNT_SUBJECT = '[BC Registries and Online Services] Your account has been reactivated'
+    NSF_UNLOCK_ACCOUNT_SUBJECT = 'Your Account Was Successfully Restored'
     ACCOUNT_CONF_OVER_SUBJECT = '[BC Registries and Online Services] Your account is now active'
     PAD_INVOICE_CREATED = '[BC Registries and Online Services] Your accounts PAD transaction details'
     ADMIN_REMOVED_SUBJECT = '[BC Registries and Online Services] You have been removed as an administrator'
@@ -160,7 +160,7 @@ class TemplateType(Enum):
     """Template Types."""
 
     NSF_LOCK_ACCOUNT_TEMPLATE_NAME = 'account_suspended_email'
-    NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME = 'account_restored_email'
+    NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME = 'account_unlocked_email'
     ACCOUNT_CONF_OVER_TEMPLATE_NAME = 'account_conf_over_email'
     PAD_INVOICE_CREATED_TEMPLATE_NAME = 'pad_invoice_email'
     ADMIN_REMOVED_TEMPLATE_NAME = 'admin_removed_email'
