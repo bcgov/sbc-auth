@@ -101,22 +101,6 @@ async def process_event(event_message: dict, flask_app):
             subject = SubjectType.NSF_UNLOCK_ACCOUNT_SUBJECT.value
             logo_url = email_msg.get('logo_url')
 
-            
-
-            # email_dict = common_mailer.process(
-            #     **{
-            #         'org_id': None,
-            #         'recipients': email_msg.get('emailAddresses'),
-            #         'template_name': TemplateType[f'{MessageType(message_type).name}_TEMPLATE_NAME'].value,
-            #         'subject': SubjectType[MessageType(message_type).name].value.format(business_name=business_name),
-            #         'logo_url': logo_url,
-            #         'business_name': business_name,
-            #         'requesting_account': requesting_account,
-            #         'account': account,
-            #         'is_authorized': email_msg.get('isAuthorized', None),
-            #         'additional_message': email_msg.get('additionalMessage', None)
-            #     })
-
             email_dict = {
                 'account_name': email_msg.get('toOrgName'),
                 'logo_url': logo_url,
@@ -126,7 +110,6 @@ async def process_event(event_message: dict, flask_app):
                 'admin_coordinator_emails': admin_coordinator_emails,
                 'filing_identifier': email_msg.get('filing_identifier'),
             }
-            
 
             email_dict = account_unlock.process(email_msg=email_dict, token=token)
 

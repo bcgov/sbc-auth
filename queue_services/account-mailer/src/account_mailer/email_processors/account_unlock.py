@@ -66,9 +66,9 @@ def _get_account_unlock_pdf(email_msg, token):
         'filingDate': current_time.strftime('%Y-%m-%d'),
         'effectiveDateTime': current_time.strftime('%Y-%m-%d %H:%M:%S'),
         'filingIdentifier': email_msg.get('filing_identifier'),
-        'paymentMethodDescription': email_msg.get('payment_method_description'), # THIS TOO?
-        'invoiceNumber': email_msg.get('invoice_number'), # NEED THIS
-        'invoice': email_msg.get('invoice'), # THIS AS WELL?
+        'paymentMethodDescription': email_msg.get('payment_method_description'),
+        'invoiceNumber': email_msg.get('invoice_number'),
+        'invoice': email_msg.get('invoice')
     }
 
     pdf_payload = {
