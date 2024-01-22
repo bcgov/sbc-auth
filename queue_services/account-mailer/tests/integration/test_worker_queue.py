@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test Suite to ensure the worker routines are working as expected."""
+import types
 from datetime import datetime
 from unittest.mock import patch
 
 import pytest
+from auth_api.services.rest_service import RestService
 from entity_queue_common.service_utils import subscribe_to_queue
 
 from account_mailer.enums import MessageType, SubjectType
@@ -157,28 +159,34 @@ async def test_unlock_account_mailer_queue(app, session, stan_server, event_loop
     events_subject = 'test_subject'
     events_queue = 'test_queue'
     events_durable_name = 'test_durable'
+    response = types.SimpleNamespace()
+    response.status_code = 200
+    response.content = bytes('foo', 'utf-8')
+    # patch RestService.post
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
         # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
+        with patch.object(RestService, 'post', return_value=response):
+            await subscribe_to_queue(events_stan,
+                                     events_subject,
+                                     events_queue,
+                                     events_durable_name,
+                                     cb_subscription_handler)
 
-        # add an event to queue
-        mail_details = {
-            'accountId': id,
-            'accountName': org.name
-        }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.NSF_UNLOCK_ACCOUNT.value, mail_details=mail_details)
+            # add an event to queue
+            mail_details = {
+                'accountId': id,
+                'accountName': org.name
+            }
+            await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
+                                            msg_type=MessageType.NSF_UNLOCK_ACCOUNT.value, mail_details=mail_details)
 
-        mock_send.assert_called
-        assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
-        assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.NSF_UNLOCK_ACCOUNT_SUBJECT.value
-        assert mock_send.call_args.args[0].get('attachments') is None
-        assert mock_send.call_args.args[0].get('content').get('body') is not None
-        assert True
+            mock_send.assert_called
+            assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
+            assert mock_send.call_args.args[0].get('content').get('subject') == \
+                SubjectType.NSF_UNLOCK_ACCOUNT_SUBJECT.value
+            assert mock_send.call_args.args[0].get('attachments') is None
+            assert mock_send.call_args.args[0].get('content').get('body') is not None
+            assert True
 
 
 @pytest.mark.asyncio
