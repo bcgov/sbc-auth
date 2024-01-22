@@ -24,10 +24,12 @@
     </div>
     <v-card flat>
       <Stepper
+        ref="stepper"
         :stepper-configuration="stepperConfig"
         :isLoading="isLoading"
         :stepperColor="'error'"
         @final-step-action="unlockAccount"
+        @step-forward="handleStepForward"
       />
     </v-card>
 
@@ -119,6 +121,7 @@ export default class AccountFreezeUnlockView extends Vue {
 
   $refs: {
     errorDialog: InstanceType<typeof ModalDialog>
+    stepper: InstanceType<typeof Stepper>
   }
 
   private stepperConfig: Array<StepConfiguration> =
@@ -156,6 +159,10 @@ export default class AccountFreezeUnlockView extends Vue {
   }
   private closeError () {
     this.$refs.errorDialog.close()
+  }
+
+  private handleStepForward () {
+    this.$refs.stepper.stepForward()
   }
 }
 </script>

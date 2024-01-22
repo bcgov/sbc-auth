@@ -62,6 +62,7 @@
             v-bind="getPropsForStep(step)"
             keep-alive
             @final-step-action="emitFinalStepAction"
+            @step-forward="emitStepForward"
           />
         </template>
       </div>
@@ -169,6 +170,10 @@ export default class Stepper extends Vue {
   @Emit('final-step-action')
   emitFinalStepAction (stepperData) {
     return stepperData
+  }
+
+  @Emit('step-forward')
+  emitStepForward () : void {
   }
 }
 </script>

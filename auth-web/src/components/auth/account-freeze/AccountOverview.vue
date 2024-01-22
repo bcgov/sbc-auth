@@ -1,4 +1,3 @@
-import { AccessType } from '@/util/constants'
 <template>
   <div>
     <p class="mb-10">
@@ -28,7 +27,7 @@ import { AccessType } from '@/util/constants'
             </div>
           </v-col>
           <v-col class="text-end">
-            ${{ nsfFee.toFixed(2) }}
+            ${{ nsfAmount.toFixed(2) }}
           </v-col>
         </v-row>
         <v-row>
@@ -36,7 +35,7 @@ import { AccessType } from '@/util/constants'
             Total Transactions
           </v-col>
           <v-col class="text-end">
-            ${{ totalTransactionAmount.toFixed(2) }}
+            ${{ totalAmount.toFixed(2) }}
           </v-col>
         </v-row>
         <v-divider class="my-2" />
@@ -45,7 +44,7 @@ import { AccessType } from '@/util/constants'
             Total Amount Due
           </v-col>
           <v-col class="text-end">
-            ${{ totalAmountToPay.toFixed(2) }}
+            ${{ totalAmountRemaining.toFixed(2) }}
           </v-col>
         </v-row>
       </v-card-text>
@@ -61,7 +60,7 @@ import { AccessType } from '@/util/constants'
           large
           text
           color="primary"
-          @click="downloadTransactionPDF"
+          @click="downloadNSFInvoicesPDF"
         >
           <v-icon class="ml-n2">
             mdi-download
@@ -85,56 +84,52 @@ import { AccessType } from '@/util/constants'
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator'
-import { mapActions, mapState } from 'pinia'
+import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
-import { Organization } from '@/models/Organization'
-import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { useOrgStore } from '@/stores/org'
 
-@Component({
-  computed: {
-    ...mapState(useOrgStore, [
-      'currentOrganization'
-    ])
-  },
-  methods: {
-    ...mapActions(useOrgStore, [
-      'calculateFailedInvoices'
-    ])
+export default defineComponent({
+  name: 'AccountOverviewView',
+  emits: ['step-forward'],
+  setup (_, { emit }) {
+    const orgStore = useOrgStore()
+    const currentOrganization = computed(() => orgStore.currentOrganization)
+    const currentMembership = computed(() => orgStore.currentMembership)
+    const calculateFailedInvoices: any = orgStore.calculateFailedInvoices
+    const downloadNSFInvoicesPDF: any = orgStore.downloadNSFInvoicesPDF
+    const formatDate = CommonUtils.formatDisplayDate
+    const suspendedDate = (currentOrganization.value?.suspendedOn) ? formatDate(new Date(currentOrganization.value.suspendedOn)) : ''
+
+    const state = reactive({
+      nsfAmount: 0,
+      totalAmount: 0,
+      totalAmountRemaining: 0,
+      totalPaidAmount: 0
+    })
+
+    const goNext = () => {
+      emit('step-forward')
+    }
+
+    onMounted(async () => {
+      const failedInvoices: FailedInvoice = await calculateFailedInvoices()
+      state.totalAmount = failedInvoices?.totalTransactionAmount || 0
+      state.nsfAmount = failedInvoices?.nsfFee || 0
+      state.totalAmountRemaining = failedInvoices?.totalAmountToPay || 0
+    })
+
+    return {
+      ...toRefs(state),
+      currentOrganization,
+      currentMembership,
+      suspendedDate,
+      downloadNSFInvoicesPDF,
+      goNext
+    }
   }
 })
-export default class AccountOverview extends Mixins(Steppable) {
-  private readonly currentOrganization!: Organization
-  private readonly calculateFailedInvoices!: () => FailedInvoice
-  private formatDate = CommonUtils.formatDisplayDate
-  private nsfFee: number = 0
-  private nsfCount: number = 0
-  private totalTransactionAmount: number = 0
-  private totalAmountToPay: number = 0
-  private totalPaidAmount: number = 0
 
-  private goNext () {
-    this.stepForward()
-  }
-
-  private get suspendedDate () {
-    return (this.currentOrganization?.suspendedOn) ? this.formatDate(new Date(this.currentOrganization.suspendedOn)) : ''
-  }
-
-  private downloadTransactionPDF () {
-    // download PDF
-  }
-
-  async mounted () {
-    const failedInvoices: FailedInvoice = await this.calculateFailedInvoices()
-    this.nsfCount = failedInvoices?.nsfCount || 0
-    this.totalTransactionAmount = failedInvoices?.totalTransactionAmount || 0
-    this.nsfFee = failedInvoices?.nsfFee || 0
-    this.totalAmountToPay = failedInvoices?.totalAmountToPay || 0
-  }
-}
 </script>
 
 <style lang="scss" scoped>

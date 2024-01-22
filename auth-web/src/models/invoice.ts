@@ -43,4 +43,13 @@ export interface FailedInvoice {
   nsfFee?:number
   totalTransactionAmount?: number
   totalAmountToPay?: number
+  invoices?: InvoiceList[]
+}
+
+export interface NonSufficientFundsInvoiceListResponse {
+  invoices: InvoiceList[]
+  total: number
+  totalAmount: number
+  totalAmountRemaining: number
+  nsfAmount: number
 }
