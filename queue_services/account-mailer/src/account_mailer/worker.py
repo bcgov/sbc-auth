@@ -366,6 +366,7 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
         event_message = json.loads(msg.data.decode('utf-8'))
         logger.debug('Event Message Received: %s', event_message)
         await process_event(event_message, FLASK_APP)
-    except Exception:  # NOQA # pylint: disable=broad-except
+    except Exception as e:  # NOQA # pylint: disable=broad-except
         # Catch Exception so that any error is still caught and the message is removed from the queue
         logger.error('Queue Error: %s', json.dumps(event_message), exc_info=True)
+        logger.error(e)
