@@ -271,7 +271,7 @@ export const useBusinessStore = defineStore('business', () => {
     }
 
     switch (filingType) {
-      case FilingTypes.AMALGAMATION: {
+      case FilingTypes.AMALGAMATION_APPLICATION: {
         filingBody = {
           filing: {
             business: {
@@ -281,7 +281,7 @@ export const useBusinessStore = defineStore('business', () => {
               accountId: currentOrganization.value.id,
               name: filingType
             },
-            amalgamation: {
+            amalgamationApplication: {
               type: AmalgamationTypes.REGULAR,
               nameRequest: {
                 legalType: business.nameRequest.legalType,

@@ -44,6 +44,7 @@ class CorpType(Enum):
     CP = 'CP'  # cooperative
     TMP = 'TMP'
     RTMP = 'RTMP'
+    ATMP = 'ATMP'  # Amalgamation
     BC = 'BC'  # bcomp
     CR = 'CR'  # corporation
     UL = 'UL'  # Unlimited Liability
@@ -353,3 +354,19 @@ class NotificationTypes(Enum):
     DETAILED_CONFIRMATION_PRODUCT = 'productConfirmationNotification'
     DETAILED_APPROVED_PRODUCT = 'productApprovedNotificationDetailed'
     DETAILED_REJECTED_PRODUCT = 'productRejectedNotificationDetailed'
+
+
+class NRActionCodes(Enum):
+    """Name Request Action Codes."""
+
+    AMALGAMATE = 'AML'
+    ASSUMED = 'ASSUMED'  # FUTURE: should be AS (as in LEAR)?
+    CHANGE_NAME = 'CHG'
+    CONVERSION = 'CNV'  # aka Alteration
+    DBA = 'DBA'  # doing business as
+    MOVE = 'MVE'  # continuation in
+    NEW_BUSINESS = 'NEW'  # incorporate or register
+    RESTORE = 'REH'  # restore or reinstate
+    RENEW = 'REN'  # restore with new name request
+    RESTORATION = 'REST'  # FUTURE: unused? delete?
+    RESUBMIT = 'RESUBMIT'  # FUTURE: unused? delete?

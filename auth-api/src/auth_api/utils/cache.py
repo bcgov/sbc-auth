@@ -12,8 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Bring in the common cache."""
+import os
 from flask_caching import Cache
 
+cache_servers = os.environ.get('CACHE_MEMCACHED_SERVERS')
 
-# lower case name as used by convention in most Flask apps
-cache = Cache(config={'CACHE_TYPE': 'simple'})  # pylint: disable=invalid-name
+if cache_servers:
+    cache = Cache(config={'CACHE_TYPE': 'MemcachedCache',
+                          'CACHE_MEMCACHED_SERVERS': cache_servers.split(',')})
+else:
+
+    redis_host = os.environ.get('CACHE_REDIS_HOST')
+    redis_port = os.environ.get('CACHE_REDIS_PORT')
+
+    if redis_host and redis_port:
+        cache = Cache(config={'CACHE_TYPE': 'RedisCache',
+                              'CACHE_REDIS_HOST': redis_host,
+                              'CACHE_REDIS_PORT': redis_port})
+
+    else:
+        cache = Cache(config={'CACHE_TYPE': 'simple'})  # pylint: disable=invalid-name

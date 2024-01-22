@@ -1,8 +1,8 @@
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
+import { TaskRelationshipStatus, TaskType } from '@/util/constants'
 
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import { TaskRelationshipStatus } from '@/util/constants'
 import { axios } from '@/util/http-util'
 
 export default class TaskService {
@@ -60,12 +60,16 @@ export default class TaskService {
       { status: TaskRelationshipStatus.HOLD, remarks, relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW })
   }
 
-  public static async getQsApplicantForTaskReview (accountId: number | string): Promise<AxiosResponse> {
+  public static async getQsApplicantForTaskReview (accountId: number | string, type: TaskType): Promise<AxiosResponse> {
     const apiKey = ConfigHelper.getMhrAPIKey()
     const headers = {
       'x-apikey': apiKey,
       'Account-Id': accountId
     }
-    return axios.get(`${ConfigHelper.getMhrAPIUrl()}/qualified-suppliers`, { headers })
+    const url = type === TaskType.MHR_MANUFACTURERS
+      ? `${ConfigHelper.getMhrAPIUrl()}/manufacturers`
+      : `${ConfigHelper.getMhrAPIUrl()}/qualified-suppliers`
+
+    return axios.get(url, { headers })
   }
 }

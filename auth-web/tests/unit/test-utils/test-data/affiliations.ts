@@ -126,7 +126,7 @@ export const businesses: Business[] = [
   {
     businessIdentifier: 'TC6weERhbH',
     corpType: {
-      code: CorpTypes.AMALGAMATION
+      code: CorpTypes.AMALGAMATION_APPLICATION
     },
     corpSubType: {
       code: CorpTypes.BENEFIT_COMPANY

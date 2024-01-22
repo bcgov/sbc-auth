@@ -439,7 +439,7 @@ export default class ChooseAuthMethodView extends Vue {
   }
 
   get serviceCardURL (): string {
-    return 'https://id.gov.bc.ca/account/'
+    return 'https://id.gov.bc.ca/'
   }
 
   get bceIdURL (): string {
@@ -451,11 +451,11 @@ export default class ChooseAuthMethodView extends Vue {
   }
 
   get bcTokenURL (): string {
-    return 'https://www2.gov.bc.ca/gov/content?id=1DEAA1AC5566450FA60F05F084CB157E'
+    return 'https://id.gov.bc.ca/account/setup-instruction'
   }
 
   get serviceCardLearnMoreURL (): string {
-    return 'https://www2.gov.bc.ca/gov/content?id=B2B3A21E797A421A8FD39EEA86E245D6'
+    return 'https://id.gov.bc.ca/'
   }
 
   selectBCSCAuth () {

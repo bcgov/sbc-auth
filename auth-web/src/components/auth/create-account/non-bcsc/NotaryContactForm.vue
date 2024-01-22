@@ -18,7 +18,6 @@
             label="Email Address"
             :rules="rules.email"
             :disabled="disabled"
-            hint="Optional"
             persistent-hint
           />
         </v-col>
@@ -72,6 +71,9 @@ export default class NotaryContactForm extends Vue {
 
   readonly rules = {
     email: [val => {
+      if (!val) {
+        return 'Email is required'
+      }
       if (val) {
         return !!CommonUtils.validateEmailFormat(val) || 'Email is invalid'
       }

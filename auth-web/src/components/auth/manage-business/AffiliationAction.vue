@@ -151,7 +151,7 @@ export default defineComponent({
         }
       } else if (business.nameRequest?.requestActionCd === NrRequestActionCodes.AMALGAMATE) { // If Amalgmation
         if (amalgamationTypes.includes(business.nameRequest?.legalType)) {
-          payload = { filingType: FilingTypes.AMALGAMATION, business }
+          payload = { filingType: FilingTypes.AMALGAMATION_APPLICATION, business }
         }
       }
 

@@ -16,6 +16,7 @@
 Test suite to ensure that the Membership service routines are working as expected.
 """
 
+import mock
 from unittest.mock import ANY, patch
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models.dataclass import Activity
@@ -27,8 +28,10 @@ from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 from auth_api.utils.enums import ActivityAction, ProductCode, Status
 from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import factory_membership_model, factory_product_model, factory_user_model
+from tests.conftest import mock_token
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that accepting an invite adds group to the user."""
     # Create a user in keycloak
@@ -79,6 +82,7 @@ def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:d
     assert GROUP_ACCOUNT_HOLDERS in groups
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that accepting an invite adds group to the user."""
     # Create a user in keycloak
