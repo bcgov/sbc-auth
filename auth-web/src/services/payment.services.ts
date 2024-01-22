@@ -192,4 +192,15 @@ export default class PaymentService {
   static removeAccountFees (accountId: string | number): AxiosPromise<any> {
     return axios.delete(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/fees`)
   }
+
+  static getNSFInvoices (accountId: string | number): AxiosPromise<any> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/nsf`)
+  }
+
+  static downloadNSFInvoicesPDF (accountId: string | number): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/nsf/statement`
+    const headers = { 'Accept': 'application/pdf' }
+    const body = {}
+    return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
+  }
 }
