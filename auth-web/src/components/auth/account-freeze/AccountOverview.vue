@@ -84,8 +84,7 @@
 </template>
 
 <script lang="ts">
-import { Member, Organization } from '@/models/Organization'
-import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
 import { useOrgStore } from '@/stores/org'
@@ -95,12 +94,12 @@ export default defineComponent({
   emits: ['step-forward'],
   setup (_, { emit }) {
     const orgStore = useOrgStore()
-    const currentOrganization: Organization = orgStore.currentOrganization
-    const currentMembership: Member = orgStore.currentMembership
+    const currentOrganization = computed(() => orgStore.currentOrganization)
+    const currentMembership = computed(() => orgStore.currentMembership)
     const calculateFailedInvoices: any = orgStore.calculateFailedInvoices
     const downloadNSFInvoicesPDF: any = orgStore.downloadNSFInvoicesPDF
     const formatDate = CommonUtils.formatDisplayDate
-    const suspendedDate = (currentOrganization?.suspendedOn) ? formatDate(new Date(currentOrganization.suspendedOn)) : ''
+    const suspendedDate = (currentOrganization.value?.suspendedOn) ? formatDate(new Date(currentOrganization.value.suspendedOn)) : ''
 
     const state = reactive({
       nsfAmount: 0,
