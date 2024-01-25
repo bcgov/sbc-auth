@@ -49,6 +49,9 @@ export const useBusinessStore = defineStore('business', () => {
   })
 
   function determineDisplayName (resp: AffiliationResponse): string {
+    if (!LaunchDarklyService.getFlag(LDFlags.AlternateNamesMbr, false)) {
+      return resp.legalName
+    }
     if ([CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP].includes(resp.legalType)) {
       // Intentionally show blank, if the alternate name is not found. This is to avoid showing the legal name.
       return resp.alternateNames?.find(alt => alt.identifier === resp.identifier)?.operatingName

@@ -407,6 +407,7 @@ export enum Permission {
 }
 
 export enum LDFlags {
+    AlternateNamesMbr = 'enable-alternate-names-mbr',
     AffiliationInvitationRequestAccess = 'enable-affiliation-invitation-request-access',
     BannerText = 'banner-text',
     BusSearchLink = 'bus-search-staff-link',

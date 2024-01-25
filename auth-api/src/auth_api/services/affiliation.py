@@ -400,7 +400,7 @@ class Affiliation:
         if affiliation.entity.corp_type_code == CorpType.NR.value:
             return current_app.config.get('NAMEX_AFFILIATION_DETAILS_URL')
         # Temporary until legal names is implemented.
-        if flags.is_on('USE_ALTERNATIVE_NAMES_MBR', default=False):
+        if flags.is_on('enable-alternate-names-mbr', default=False):
             return current_app.config.get('LEAR_ALTERNATE_AFFILIATION_DETAILS_URL')
         return current_app.config.get('LEAR_AFFILIATION_DETAILS_URL')
 
