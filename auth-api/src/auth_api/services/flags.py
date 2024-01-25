@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2022 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Manage the Feature Flags initialization, setup and service."""
+import logging
 from flask import current_app
 from ldclient import get as ldclient_get, set_config as ldclient_set_config  # noqa: I001
 from ldclient.config import Config  # noqa: I005
@@ -48,24 +49,18 @@ class Flags():
 
         if self.sdk_key or app.env != 'production':
 
-            if app.env == 'production':
-                config = Config(sdk_key=self.sdk_key)
-            else:
+            if app.env == 'testing':
                 factory = Files.new_data_source(paths=['flags.json'], auto_update=True)
                 config = Config(sdk_key=self.sdk_key,
                                 update_processor_class=factory,
                                 send_events=False)
+            else:
+                config = Config(sdk_key=self.sdk_key)
 
             ldclient_set_config(config)
             client = ldclient_get()
 
             app.extensions['featureflags'] = client
-            app.teardown_appcontext(self.teardown)
-
-    def teardown(self, exception):  # pylint: disable=unused-argument; flask method signature
-        """Destroy all objects created by this extension."""
-        client = current_app.extensions['featureflags']
-        client.close()
 
     def _get_client(self):
         try:
@@ -75,6 +70,7 @@ class Flags():
                 self.init_app(current_app)
                 client = current_app.extensions['featureflags']
             except KeyError:
+                logging.warning("Couldn\'t retrieve launch darkly client from extensions.")
                 client = None
 
         return client
@@ -89,24 +85,33 @@ class Flags():
             .set('firstName', user.firstname)\
             .set('lastName', user.lastname).build()
 
-    def is_on(self, flag: str, user: User = None) -> bool:
+    def is_on(self, flag: str, default: bool = False, user: User = None) -> bool:
         """Assert that the flag is set for this user."""
         client = self._get_client()
 
+        if not client:
+            return default
+
         if user:
             flag_user = self._user_as_key(user)
         else:
             flag_user = self._get_anonymous_user()
 
-        return bool(client.variation(flag, flag_user, None))
+        return bool(client.variation(flag, flag_user, default))
 
-    def value(self, flag: str, user: User = None) -> bool:
+    def value(self, flag: str, default=None, user: User = None):
         """Retrieve the value  of the (flag, user) tuple."""
         client = self._get_client()
 
+        if not client:
+            return default
+
         if user:
             flag_user = self._user_as_key(user)
         else:
             flag_user = self._get_anonymous_user()
 
-        return client.variation(flag, flag_user, None)
+        return client.variation(flag, flag_user, default)
+
+
+flags = Flags()
