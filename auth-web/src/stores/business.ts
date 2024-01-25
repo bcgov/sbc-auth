@@ -48,12 +48,21 @@ export const useBusinessStore = defineStore('business', () => {
     return useOrgStore().currentOrganization
   })
 
+  function determineDisplayName (resp: AffiliationResponse): string {
+    if ([CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP].includes(resp.legalType)) {
+      // Intentionally show blank, if the alternate name is not found. This is to avoid showing the legal name.
+      return resp.alternateNames?.find(alt => alt.identifier === resp.identifier)?.operatingName
+    } else {
+      return resp.legalName
+    }
+  }
+
   /* Internal function to build the business object. */
   function buildBusinessObject (resp: AffiliationResponse): Business {
     return {
       businessIdentifier: resp.identifier,
       ...(resp.businessNumber && { businessNumber: resp.businessNumber }),
-      ...(resp.legalName && { name: resp.legalName }),
+      ...(resp.legalName && { name: determineDisplayName(resp) }),
       ...(resp.contacts && { contacts: resp.contacts }),
       ...((resp.draftType || resp.legalType) && { corpType: { code: resp.draftType || resp.legalType } }),
       ...(resp.legalType && { corpSubType: { code: resp.legalType } }),

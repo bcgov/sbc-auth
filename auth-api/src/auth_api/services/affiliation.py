@@ -34,6 +34,7 @@ from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
+from auth_api.services.flags import flags
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus
@@ -393,11 +394,22 @@ class Affiliation:
         current_app.logger.debug('>fix_stale_affiliations')
 
     @staticmethod
+    def _affiliation_details_url(affiliation: AffiliationModel) -> str:
+        """Determine url to call for affiliation details."""
+        # only have LEAR and NAMEX affiliations
+        if affiliation.entity.corp_type_code == CorpType.NR.value:
+            return current_app.config.get('NAMEX_AFFILIATION_DETAILS_URL')
+        # Temporary until legal names is implemented.
+        if flags.is_on('USE_ALTERNATIVE_NAMES_MBR', default=False):
+            return current_app.config.get('LEAR_ALTERNATE_AFFILIATION_DETAILS_URL')
+        return current_app.config.get('LEAR_AFFILIATION_DETAILS_URL')
+
+    @staticmethod
     async def get_affiliation_details(affiliations: List[AffiliationModel]) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
         for affiliation in affiliations:
-            url = affiliation.affiliation_details_url
+            url = Affiliation._affiliation_details_url(affiliation)
             url_identifiers.setdefault(url, [affiliation.entity.business_identifier])\
                 .append(affiliation.entity.business_identifier)
 
@@ -428,8 +440,7 @@ class Affiliation:
             raise ServiceUnavailableException('Failed to get affiliation details') from err
 
     @staticmethod
-    def _combine_affiliation_details(details):
-        """Parse affiliation details responses and combine draft entities with NRs if applicable."""
+    def _group_details(details):
         name_requests = {}
         businesses = []
         drafts = []
@@ -450,7 +461,10 @@ class Affiliation:
                 drafts = [
                     {'draftType': CorpType.RTMP.value if draft['legalType'] in draft_reg_types
                         else CorpType.TMP.value, **draft} for draft in data[drafts_key]]
+        return name_requests, businesses, drafts
 
+    @staticmethod
+    def _combine_nrs(name_requests, businesses, drafts):
         # combine NRs
         for business in drafts + businesses:
             # Only drafts have nrNumber coming back from legal-api.
@@ -470,6 +484,12 @@ class Affiliation:
                     drafts.remove(business)
 
         return [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
+
+    @staticmethod
+    def _combine_affiliation_details(details):
+        """Parse affiliation details responses and combine draft entities with NRs if applicable."""
+        name_requests, businesses, drafts = Affiliation._group_details(details)
+        return Affiliation._combine_nrs(name_requests, businesses, drafts)
 
     @staticmethod
     def _get_nr_details(nr_number: str):
