@@ -27,7 +27,7 @@ def setup():
     """Initialize app with dev env for testing."""
     global app
     app = Flask(__name__)
-    app.env = 'development'
+    app.env = 'testing'
 
 
 def test_flags_constructor_no_app(setup):
@@ -152,8 +152,8 @@ def test_flags_read_flag_values_unique_user(setup, test_name, flag_name, expecte
     with app.app_context():
         flags = Flags()
         flags.init_app(app)
-        val = flags.value(flag_name, user)
-        flag_on = flags.is_on(flag_name, user)
+        val = flags.value(flag_name, user=user)
+        flag_on = flags.is_on(flag_name, user=user, default=False)
 
     assert val == expected
     assert flag_on
