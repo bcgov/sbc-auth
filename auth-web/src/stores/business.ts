@@ -51,14 +51,14 @@ export const useBusinessStore = defineStore('business', () => {
 
   function determineDisplayName (
     legalName: string,
-    legalType: string,
+    legalType: CorpTypes,
     identifier: string,
     alternateNames: AlternateNames[]
   ): string {
     if (!LaunchDarklyService.getFlag(LDFlags.AlternateNamesMbr, false)) {
       return legalName
     }
-    if ([CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP].includes(legalType as CorpTypes)) {
+    if ([CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP].includes(legalType)) {
       // Intentionally show blank, if the alternate name is not found. This is to avoid showing the legal name.
       return alternateNames?.find(alt => alt.identifier === identifier)?.operatingName
     } else {
@@ -236,7 +236,7 @@ export const useBusinessStore = defineStore('business', () => {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, response.data.businessIdentifier)
       const business = response.data
       business.name = determineDisplayName(
-        learBusiness.legalName, learBusiness.legalType, learBusiness.identifier, learBusiness.alternateNames)
+        learBusiness.legalName, learBusiness.legalType as CorpTypes, learBusiness.identifier, learBusiness.alternateNames)
       state.currentBusiness = business
       return response.data
     }
