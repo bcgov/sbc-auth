@@ -32,10 +32,10 @@ from auth_api.config import _Config
 from auth_api.extensions import mail
 from auth_api.models import db, ma
 from auth_api.resources import endpoints
+from auth_api.services.flags import flags
 from auth_api.utils.cache import cache
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
-from auth_api.services import flags
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
 

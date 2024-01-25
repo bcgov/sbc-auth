@@ -1,5 +1,5 @@
 import { BNRequest, ResubmitBNRequest } from '@/models/request-tracker'
-import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad, UpdateBusinessNamePayload } from '@/models/business'
+import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad } from '@/models/business'
 import { AxiosResponse } from 'axios'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -49,10 +49,6 @@ export default class BusinessService {
 
   static async updateFolioNumber (folioNumber: FolioNumberload): Promise<AxiosResponse<any>> {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/entities/${folioNumber.businessIdentifier}`, folioNumber)
-  }
-
-  static async updateBusinessName (updatePayload: UpdateBusinessNamePayload): Promise<AxiosResponse<any>> {
-    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/entities/${updatePayload.businessIdentifier}`, updatePayload)
   }
 
   static async resetBusinessPasscode (passcodeResetLoad: PasscodeResetLoad): Promise<AxiosResponse<any>> {

@@ -12,6 +12,7 @@ import {
 } from '@/util/constants'
 import {
   AffiliationResponse,
+  AlternateNames,
   CreateRequestBody as CreateAffiliationRequestBody,
   CreateNRAffiliationRequestBody,
   NameRequestResponse
@@ -48,12 +49,30 @@ export const useBusinessStore = defineStore('business', () => {
     return useOrgStore().currentOrganization
   })
 
+  function determineDisplayName (
+    legalName: string,
+    legalType: string,
+    identifier: string,
+    alternateNames: AlternateNames[]
+  ): string {
+    if (!LaunchDarklyService.getFlag(LDFlags.AlternateNamesMbr, false)) {
+      return legalName
+    }
+    if ([CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP].includes(legalType as CorpTypes)) {
+      // Intentionally show blank, if the alternate name is not found. This is to avoid showing the legal name.
+      return alternateNames?.find(alt => alt.identifier === identifier)?.operatingName
+    } else {
+      return legalName
+    }
+  }
+
   /* Internal function to build the business object. */
   function buildBusinessObject (resp: AffiliationResponse): Business {
     return {
       businessIdentifier: resp.identifier,
       ...(resp.businessNumber && { businessNumber: resp.businessNumber }),
-      ...(resp.legalName && { name: resp.legalName }),
+      ...(resp.legalName &&
+          { name: determineDisplayName(resp.legalName, resp.legalType, resp.identifier, resp.alternateNames) }),
       ...(resp.contacts && { contacts: resp.contacts }),
       ...((resp.draftType || resp.legalType) && { corpType: { code: resp.draftType || resp.legalType } }),
       ...(resp.legalType && { corpSubType: { code: resp.legalType } }),
@@ -210,10 +229,15 @@ export const useBusinessStore = defineStore('business', () => {
 
   async function loadBusiness () {
     const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
+    // Need to look at LEAR, because it has the up-to-date names.
+    const learBusiness = await searchBusiness(businessIdentifier)
     const response = await BusinessService.getBusiness(businessIdentifier)
     if (response?.data && response.status === 200) {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, response.data.businessIdentifier)
-      state.currentBusiness = response.data
+      const business = response.data
+      business.name = determineDisplayName(
+        learBusiness.legalName, learBusiness.legalType, learBusiness.identifier, learBusiness.alternateNames)
+      state.currentBusiness = business
       return response.data
     }
   }
@@ -227,29 +251,6 @@ export const useBusinessStore = defineStore('business', () => {
 
     // Create an affiliation between implicit org and requested business
     return OrgService.createAffiliation(currentOrganization.value.id, requestBody)
-  }
-
-  async function updateBusinessName (businessNumber: string) {
-    try {
-      const businessResponse = await BusinessService.searchBusiness(businessNumber)
-      if ((businessResponse?.status === 200) && businessResponse?.data?.business?.legalName) {
-        const updateBusinessResponse = await BusinessService.updateBusinessName({
-          businessIdentifier: businessNumber,
-          name: businessResponse.data.business.legalName
-        })
-        if (updateBusinessResponse?.status === 200) {
-          return updateBusinessResponse
-        }
-      }
-      throw Error('update failed')
-    } catch (error) {
-      // delete the created affiliation if the update failed for avoiding orphan records
-      // unable to do these from backend, since it causes a circular dependency
-      await OrgService.removeAffiliation(currentOrganization.value.id, businessNumber, undefined, false)
-      return {
-        errorMsg: 'Cannot add business due to some technical reasons'
-      }
-    }
   }
 
   async function addNameRequest (requestBody: CreateNRAffiliationRequestBody) {
@@ -517,7 +518,6 @@ export const useBusinessStore = defineStore('business', () => {
     syncBusinesses,
     loadBusiness,
     addBusiness,
-    updateBusinessName,
     addNameRequest,
     createNamedBusiness,
     searchBusiness,

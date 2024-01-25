@@ -1,6 +1,6 @@
+import { AffiliationInviteInfo, AlternateNames } from '@/models/affiliation'
 import { AmalgamationTypes, FilingTypes, NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 import { CorpTypes, LearFilingTypes, NrTargetTypes } from '@/util/constants'
-import { AffiliationInviteInfo } from '@/models/affiliation'
 import { Contact } from './contact'
 
 export interface LoginPayload {
@@ -55,11 +55,6 @@ export interface BusinessSearchResultDto {
 
 export interface Businesses {
     entities: Business[]
-}
-
-export interface UpdateBusinessNamePayload {
-    businessIdentifier: string
-    name: string
 }
 
 // see https://github.com/bcgov/business-schemas/blob/master/src/registry_schemas/schemas/name_request.json
@@ -145,7 +140,9 @@ export interface PasscodeResetLoad {
 }
 
 export interface LearBusiness {
-    identifier: string,
-    legalName: string,
+    identifier: string
+    legalName: string
+    legalType: string
+    alternateNames: AlternateNames[]
     taxId?: string
 }

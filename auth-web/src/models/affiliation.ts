@@ -55,6 +55,14 @@ export interface AffiliationFilter {
   actions?: string
 }
 
+export interface AlternateNames {
+  entityType?: string
+  identifier?: string
+  nameRegisteredDate?: string
+  nameStartDate?: string
+  operatingName?: string
+}
+
 export interface AffiliationResponse {
   identifier?: string
   draftType?: CorpTypes
@@ -62,6 +70,7 @@ export interface AffiliationResponse {
   businessNumber?: string
   name?: string
   legalName?: string
+  alternateNames?: AlternateNames[]
   contacts?: Contact[]
   corpType?: CorpType
   corpSubType?: CorpType
