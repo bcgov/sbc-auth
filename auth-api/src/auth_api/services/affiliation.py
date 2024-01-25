@@ -464,6 +464,13 @@ class Affiliation:
         return name_requests, businesses, drafts
 
     @staticmethod
+    def _update_draft_type_for_amalgamation_nr(business):
+        if business.get('draftType', None) \
+                            and business['nameRequest']['request_action_cd'] == NRActionCodes.AMALGAMATE.value:
+            business['draftType'] = CorpType.ATMP.value
+        return business
+
+    @staticmethod
     def _combine_nrs(name_requests, businesses, drafts):
         # combine NRs
         for business in drafts + businesses:
@@ -471,10 +478,7 @@ class Affiliation:
             if 'nrNumber' in business and (nr_num := business['nrNumber']):
                 if business['nrNumber'] in name_requests:
                     business['nameRequest'] = name_requests[nr_num]['nameRequest']
-                    # Update the draft type if the draft NR request is for amalgamation
-                    if business.get('draftType', None) \
-                            and business['nameRequest']['request_action_cd'] == NRActionCodes.AMALGAMATE.value:
-                        business['draftType'] = CorpType.ATMP.value
+                    business = Affiliation._update_draft_type_for_amalgamation_nr(business)
                     # Remove the business if the draft associated to the NR is consumed.
                     if business['nameRequest']['stateCd'] == NRStatus.CONSUMED.value:
                         drafts.remove(business)
