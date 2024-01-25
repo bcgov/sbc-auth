@@ -112,3 +112,6 @@ class Flags():
             flag_user = self._get_anonymous_user()
 
         return client.variation(flag, flag_user, default)
+
+
+flags = Flags()
