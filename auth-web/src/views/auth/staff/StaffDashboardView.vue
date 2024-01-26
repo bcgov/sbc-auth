@@ -195,6 +195,7 @@
 
 <script lang="ts">
 import { ComputedRef, Ref, computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
+import { Role, SessionStorageKeys } from '@/util/constants'
 import { BaseVExpansionPanel } from '@/components'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -202,7 +203,6 @@ import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import { Organization } from '@/models/Organization'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
-import { Role } from '@/util/constants'
 import SafeEmailView from '@/views/auth/staff/SafeEmailView.vue'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import { Transactions } from '@/components/auth/account-settings/transaction'
@@ -289,8 +289,7 @@ export default defineComponent({
         localVars.searchActive = true
 
         try {
-          // Search for business, action will set session storage
-          await businessStore.searchBusiness(localVars.businessIdentifier)
+          ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, localVars.businessIdentifier)
           localVars.errorMessage = ''
           await updateCurrentBusiness()
         } catch (exception) {
