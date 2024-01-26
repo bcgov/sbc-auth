@@ -34,6 +34,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import db
 from auth_api.services import Flags
 from auth_api.services.queue_publisher import publish
+from auth_api.utils.cache import cache
 from auth_api.utils.enums import OrgStatus
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
@@ -48,6 +49,7 @@ APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)
 FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
+cache.init_app(FLASK_APP)
 flag_service = Flags(FLASK_APP)
 
 UNLOCK_ACCOUNT_MESSAGE_TYPE = 'bc.registry.payment.unlockAccount'
