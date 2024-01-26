@@ -137,7 +137,7 @@ async def process_name_events(event_message: Dict[str, any], flask_app):
                     logger.info('Creating affiliation between Entity : %s and Org : %s', nr_entity, org)
                     affiliation: AffiliationModel = AffiliationModel(entity=nr_entity, org=org)
                     affiliation.flush()
-                    activity: ActivityModel = ActivityModel(org_id=org.id, 
+                    activity: ActivityModel = ActivityModel(org_id=org.id,
                                                             action=ActivityAction.CREATE_AFFILIATION.value,
                                                             item_name=nr_entity.business_identifier,
                                                             item_id=nr_entity.business_identifier,
