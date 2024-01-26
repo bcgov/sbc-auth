@@ -37,6 +37,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import db
 from auth_api.services import Flags
 from auth_api.services.rest_service import RestService
+from auth_api.utils.cache import cache
 from auth_api.utils.enums import AccessType, ActivityAction, CorpType
 from dateutil import parser
 from entity_queue_common.service import QueueServiceManager
@@ -151,4 +152,5 @@ APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)
 FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
+cache.init_app(FLASK_APP)
 flag_service = Flags(FLASK_APP)
