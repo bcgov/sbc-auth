@@ -116,34 +116,36 @@ async def process_name_events(event_message: Dict[str, any], flask_app):
     # Future - None needs to be replaced with whatever we decide to fill the data with.
     if nr_status == 'DRAFT' and not AffiliationModel.find_affiliations_by_business_identifier(nr_number, None):
         logger.info('Status is DRAFT, getting invoices for account')
+        token = None
         # Find account details for the NR.
         with flask_app.test_request_context('service_token'):
-            invoices = RestService.get(
-                f'{APP_CONFIG.PAY_API_URL}/payment-requests?businessIdentifier={nr_number}',
-                token=RestService.get_service_account_token()
-            ).json()
+            token=RestService.get_service_account_token()
+        invoices = RestService.get(
+            f'{APP_CONFIG.PAY_API_URL}/payment-requests?businessIdentifier={nr_number}',
+            token=token
+        ).json()
 
-            # Ideally there should be only one or two (priority fees) payment request for the NR.
-            if invoices and invoices['invoices'] \
-                    and (auth_account_id := invoices['invoices'][0].get('paymentAccount').get('accountId')) \
-                    and str(auth_account_id).isnumeric():
-                logger.info('Account ID received : %s', auth_account_id)
-                # Auth account id can be service account value too, so doing a query lookup than find_by_id
-                org: OrgModel = db.session.query(OrgModel).filter(OrgModel.id == auth_account_id).one_or_none()
-                # If account is present and is not a gov account, then affiliate.
-                if org and org.access_type != AccessType.GOVM.value:
-                    nr_entity.pass_code_claimed = True
-                    # Create an affiliation.
-                    logger.info('Creating affiliation between Entity : %s and Org : %s', nr_entity, org)
-                    affiliation: AffiliationModel = AffiliationModel(entity=nr_entity, org=org)
-                    affiliation.flush()
-                    activity: ActivityModel = ActivityModel(org_id=org.id,
-                                                            action=ActivityAction.CREATE_AFFILIATION.value,
-                                                            item_name=nr_entity.business_identifier,
-                                                            item_id=nr_entity.business_identifier,
-                                                            item_type=None, item_value=None, actor_id=None
-                                                            )
-                    activity.flush()
+        # Ideally there should be only one or two (priority fees) payment request for the NR.
+        if invoices and invoices['invoices'] \
+                and (auth_account_id := invoices['invoices'][0].get('paymentAccount').get('accountId')) \
+                and str(auth_account_id).isnumeric():
+            logger.info('Account ID received : %s', auth_account_id)
+            # Auth account id can be service account value too, so doing a query lookup than find_by_id
+            org: OrgModel = db.session.query(OrgModel).filter(OrgModel.id == auth_account_id).one_or_none()
+            # If account is present and is not a gov account, then affiliate.
+            if org and org.access_type != AccessType.GOVM.value:
+                nr_entity.pass_code_claimed = True
+                # Create an affiliation.
+                logger.info('Creating affiliation between Entity : %s and Org : %s', nr_entity, org)
+                affiliation: AffiliationModel = AffiliationModel(entity=nr_entity, org=org)
+                affiliation.flush()
+                activity: ActivityModel = ActivityModel(org_id=org.id,
+                                                        action=ActivityAction.CREATE_AFFILIATION.value,
+                                                        item_name=nr_entity.business_identifier,
+                                                        item_id=nr_entity.business_identifier,
+                                                        item_type=None, item_value=None, actor_id=None
+                                                        )
+                activity.flush()
 
     nr_entity.save()
     logger.debug('<<<<<<<process_name_events<<<<<<<<<<')
