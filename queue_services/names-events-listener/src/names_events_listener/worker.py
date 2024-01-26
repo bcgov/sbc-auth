@@ -119,7 +119,7 @@ async def process_name_events(event_message: Dict[str, any], flask_app):
         token = None
         # Find account details for the NR.
         with flask_app.test_request_context('service_token'):
-            token=RestService.get_service_account_token()
+            token = RestService.get_service_account_token()
         invoices = RestService.get(
             f'{APP_CONFIG.PAY_API_URL}/payment-requests?businessIdentifier={nr_number}',
             token=token
