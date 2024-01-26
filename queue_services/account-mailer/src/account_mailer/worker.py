@@ -69,7 +69,8 @@ async def process_event(event_message: dict, flask_app):
         email_msg = event_message.get('data')
         logo_url = email_msg['logo_url'] = minio_service.MinioService.get_minio_public_url('bc_logo_for_email.png')
         email_dict = None
-        token = RestService.get_service_account_token()
+        with flask_app.test_request_context('service_token'):
+            token = RestService.get_service_account_token()
         logger.debug('message_type recieved %s', message_type)
         if message_type == 'account.mailer':
             email_dict = payment_completed.process(email_msg)
