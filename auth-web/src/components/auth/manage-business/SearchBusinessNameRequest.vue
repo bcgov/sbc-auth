@@ -116,7 +116,6 @@ import { mapActions } from 'pinia'
   },
   methods: {
     ...mapActions(useBusinessStore, [
-      'updateBusinessName',
       'updateFolioNumber'
     ])
   }

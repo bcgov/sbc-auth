@@ -708,12 +708,6 @@ export default defineComponent({
           if (addResponse?.status !== StatusCodes.CREATED) {
             emit('unknown-error')
           }
-          // try to update business name
-          const businessResponse = await businessStore.updateBusinessName(businessIdentifier.value)
-          // check if update didn't succeed
-          if (businessResponse?.status !== StatusCodes.OK) {
-            emit('unknown-error')
-          }
           // let parent know that add was successful
           emit('add-success', businessIdentifier.value)
         } catch (exception) {
