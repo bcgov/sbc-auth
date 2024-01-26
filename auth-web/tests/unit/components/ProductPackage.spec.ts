@@ -15,7 +15,8 @@ describe('Account settings ProductPackage.vue', () => {
 
     const userStore = useUserStore()
     userStore.currentUser = {
-      fullName: 'user2'
+      fullName: 'user2',
+      roles: []
     } as any
     const orgStore = useOrgStore()
     orgStore.currentOrganization = {
