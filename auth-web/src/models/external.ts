@@ -1,4 +1,5 @@
 import { Address } from '@/models/address'
+import { ProductStatus } from '@/util/constants'
 
 // Interface describing response from MHR api for Qualified Supplier applicant info
 export interface QualifiedSupplierApplicant {
@@ -51,4 +52,11 @@ export interface MhrManufacturerInfoIF {
 export interface QualifiedSupplierRequirementsConfig {
   boldText?: string
   regularText?: string
+}
+
+export interface ProductStatusMsgContentIF {
+  status: ProductStatus
+  icon: string
+  color: string
+  msg: string
 }

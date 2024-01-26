@@ -39,6 +39,7 @@
           <Product
             v-if="!product.parentCode"
             :productDetails="product"
+            :activeSubProduct="subProduct"
             :userName="currentUser.fullName"
             :orgName="currentOrganization.name"
             :isexpandedView="product.code === expandedProductCode"
@@ -53,7 +54,28 @@
             @set-selected-product="setSelectedProduct"
             @toggle-product-details="toggleProductDetails"
             @save:saveProductFee="saveProductFee"
-          />
+          >
+            <!-- Show product status message content for pending or rejected sub-product applications -->
+            <template
+              v-if="product.code === ProductEnum.MHR && mhrSubProductMsgContent()"
+              #productContentSlot
+            >
+              <CautionBox
+                setImportantWord="Note"
+                :setAlert="mhrSubProductMsgContent().status === ProductStatus.REJECTED"
+                :setMsg="mhrSubProductMsgContent().msg"
+              >
+                <template #prependSLot>
+                  <v-icon
+                    class="mr-2"
+                    :color="mhrSubProductMsgContent().color"
+                  >
+                    {{ mhrSubProductMsgContent().icon }}
+                  </v-icon>
+                </template>
+              </CautionBox>
+            </template>
+          </Product>
         </div>
         <div class="align-right-container">
           <p
@@ -115,19 +137,49 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, ProductStatus, Role } from '@/util/constants'
-import { AccountFee, OrgProduct, OrgProductCode, OrgProductFeeCode, OrgProductsRequestBody, Organization } from '@/models/Organization'
+import {
+  AccessType,
+  Account,
+  AccountStatus,
+  Product as ProductEnum,
+  ProductStatus,
+  Role,
+  TaskType
+} from '@/util/constants'
+import {
+  AccountFee,
+  OrgProduct,
+  OrgProductCode,
+  OrgProductFeeCode,
+  OrgProductsRequestBody,
+  Organization
+} from '@/models/Organization'
 import { Action, State } from 'pinia-class'
 import { Component, Mixins } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import CautionBox from '@/components/auth/common/CautionBox.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Product from '@/components/auth/common/Product.vue'
+import { ProductStatusMsgContentIF } from '@/models/external'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
+import { userAccessDisplayNames } from '@/resources/QualifiedSupplierAccessResource'
 
 @Component({
+  computed: {
+    ProductStatus () {
+      return ProductStatus
+    },
+    AccountStatus () {
+      return AccountStatus
+    },
+    ProductEnum () {
+      return ProductEnum
+    }
+  },
   components: {
+    CautionBox,
     Product,
     ModalDialog
   }
@@ -211,6 +263,14 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     // check for role and account can have service fee (GOVM and GOVN account)
     return this.currentUser?.roles?.includes(Role.StaffManageAccounts) && this.isVariableFeeAccount()
   }
+
+  /** Return any sub-product that has a status indicating activity **/
+  public get subProduct (): OrgProduct {
+    return this.productList?.find(product =>
+      !!product.parentCode && product.subscriptionStatus !== ProductStatus.NOT_SUBSCRIBED
+    )
+  }
+
   private orgProductDetails (product) {
     const { code: productCode, subscriptionStatus } = product
 
@@ -239,6 +299,40 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
 
   private closeError () {
     this.$refs.confirmDialog.close()
+  }
+
+  /** Product status message content for CautionBox component */
+  private mhrSubProductMsgContent (): ProductStatusMsgContentIF {
+    // Return when no sub-products in pending or rejected state
+    if (!this.subProduct) return
+
+    const helpEmail = this.subProduct.description === TaskType.MHR_LAWYER_NOTARY
+      ? 'bcolhelp@gov.bc.ca'
+      : 'bcregistries@gov.bc.ca'
+
+    switch (this.subProduct.subscriptionStatus) {
+      case ProductStatus.PENDING_STAFF_REVIEW:
+        return {
+          status: this.subProduct.subscriptionStatus,
+          icon: 'mdi-clock-outline',
+          color: 'darkGray',
+          msg: `Your application for Qualified Supplier – ${userAccessDisplayNames[this.subProduct.description]}
+          access is under review. You will receive email notification once your request has been reviewed.`
+        }
+      case ProductStatus.REJECTED:
+        return {
+          status: this.subProduct.subscriptionStatus,
+          icon: 'mdi-alert',
+          color: 'error',
+          msg: `Your application for Qualified Supplier – ${userAccessDisplayNames[this.subProduct.description]}
+                access has been rejected. Refer to your notification email or contact
+                <a href="mailto:${helpEmail}">${helpEmail}</a> for details. You can submit a new Qualified Supplier
+                access request once you have all of the required information.`
+        }
+      case ProductStatus.ACTIVE:
+      default:
+        return null
+    }
   }
 
   private async submitProductRequest () {
