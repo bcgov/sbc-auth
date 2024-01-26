@@ -32,6 +32,7 @@ import nats
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import db
 from auth_api.services import Flags
+from auth_api.utils.cache import cache
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask  # pylint: disable=wrong-import-order
@@ -44,6 +45,7 @@ APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)
 FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
+cache.init_app(FLASK_APP)
 flag_service = Flags(FLASK_APP)
 
 
