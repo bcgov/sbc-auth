@@ -144,6 +144,9 @@
         </header>
 
         <div class="product-card-contents ml-9">
+          <!-- Product Content Slot -->
+          <slot name="productContentSlot" />
+
           <v-expand-transition>
             <div
               v-if="isexpandedView"
@@ -186,7 +189,7 @@
 <script lang="ts">
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
-import { DisplayModeValues, ProductStatus } from '@/util/constants'
+import { DisplayModeValues, Product as ProductEnum, ProductStatus } from '@/util/constants'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
@@ -202,6 +205,7 @@ const TOS_NEEDED_PRODUCT = ['VS']
 })
 export default class Product extends Mixins(AccountMixin) {
   @Prop({ default: undefined }) productDetails: OrgProduct
+  @Prop({ default: undefined }) activeSubProduct: OrgProduct
   @Prop({ default: undefined }) orgProduct: AccountFee // product available for orgs
   @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode // product
   @Prop({ default: false }) isProductActionLoading: boolean // loading
@@ -270,6 +274,11 @@ export default class Product extends Mixins(AccountMixin) {
       if (this.isBasicAccountAndPremiumProduct) {
         subTitle = `${code && code.toLowerCase()}CodeUnselectableSubtitle` || ''
         decisionMadeIcon = 'mdi-minus-box'
+      }
+      // Swap subtitle and details for sub-product specific content
+      if (this.productDetails.code === ProductEnum.MHR && this.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
+        subTitle = `mhrQsCodeActiveSubtitle`
+        details = `${this.activeSubProduct.code && this.activeSubProduct.code.toLowerCase()}CodeDescription` || ''
       }
     }
     return { subTitle, details, decisionMadeIcon, decisionMadeColorCode }

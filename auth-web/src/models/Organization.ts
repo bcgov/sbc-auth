@@ -1,5 +1,5 @@
+import { AccountStatus, ProductStatus } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { AccountStatus } from '@/util/constants'
 import { Address } from '@/models/address'
 import { Business } from '@/models/business'
 import { Invitation } from '@/models/Invitation'
@@ -245,7 +245,7 @@ export interface OrgProduct {
   description: string;
   url?: string;
   type?: string;
-  subscriptionStatus?: string;
+  subscriptionStatus?: ProductStatus;
   hidden?:boolean
   premiumOnly?:boolean
   needReview?:boolean
