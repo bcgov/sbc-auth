@@ -36,6 +36,7 @@ from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
 from auth_api.services.user import User as UserService
+from auth_api.services.electronic_funds_transfers import ElectronicFundsTransfersService
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
 from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
@@ -708,6 +709,9 @@ class Org:  # pylint: disable=too-many-public-methods
         }
         include_invitations: bool = False
         search.access_type, is_staff_admin = Org.refine_access_type(search.access_type)
+        if search.unlinked_eft:
+            ElectronicFundsTransfersService.
+
         if search.statuses and OrgStatus.PENDING_ACTIVATION.value in search.statuses:
             # only staff admin can see director search accounts
             if not is_staff_admin:
@@ -727,6 +731,8 @@ class Org:  # pylint: disable=too-many-public-methods
                 ]
                 if include_invitations and org.invitations else [],
             })
+            # if search.unlinked_eft:
+                # get unlinked EFT list, and see if you can find the authId
         return orgs_result
 
     @staticmethod

@@ -65,6 +65,7 @@ def search_organizations():
         request.args.get('id', None),
         request.args.get('decisionMadeBy', None),
         request.args.get('orgType', None),
+        request.args.get('unlinkedEft', None),
         int(request.args.get('page', 1)),
         int(request.args.get('limit', 10))
     )

@@ -118,6 +118,7 @@ class OrgSearch:  # pylint: disable=too-many-instance-attributes
     id: str
     decision_made_by: str
     org_type: str
+    unlinked_eft: bool
     page: int
     limit: int
 
