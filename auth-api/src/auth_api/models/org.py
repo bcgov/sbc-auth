@@ -229,7 +229,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return orgs, len(orgs)
 
     @classmethod
-    def search_active_eft_orgs(cls, search: OrgSearch, account_ids):
+    def search_orgs_by_ids(cls, search: OrgSearch, account_ids):
         """Find all orgs with the given type."""
         query = db.session.query(Org) \
             .outerjoin(ContactLink) \
