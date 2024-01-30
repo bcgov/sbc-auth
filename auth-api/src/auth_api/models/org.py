@@ -241,7 +241,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
                           .paginate(per_page=search.limit, page=search.page)
 
         return pagination.items, pagination.total
-    
+
     @classmethod
     def find_by_org_access_type(cls, org_type):
         """Find all orgs with the given type."""

@@ -140,18 +140,6 @@ class TaskSearch:   # pylint: disable=too-many-instance-attributes
 
 
 @dataclass
-class EftShortnamesSearch:
-    """Used for searching tasks."""
-    state: str = ''
-    page: int = 1
-    limit: int = 10
-    transaction_date: str = ''
-    deposit_amount: str = ''
-    deposit_date: str = ''
-    short_name: str = ''
-
-
-@dataclass
 class KeycloakGroupSubscription:
     """Used for entrying group subscriptions for keycloak."""
 

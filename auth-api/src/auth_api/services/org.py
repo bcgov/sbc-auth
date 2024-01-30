@@ -35,7 +35,6 @@ from auth_api.models import Task as TaskModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
-# from auth_api.services import ElectronicFundsTransfersService
 from auth_api.services.user import User as UserService
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
@@ -524,17 +523,8 @@ class Org:  # pylint: disable=too-many-public-methods
         token = RestService.get_service_account_token()
         response = RestService.get(endpoint=f'{pay_url}/accounts/{self._model.id}', token=token, retry_on_failure=True)
         return response.json()
-    
-    def is_payment_method_eft(org_id):
-        """Check if the org has a payment method."""
-        pay_api_url = current_app.config.get('PAY_API_URL')
-        token = RestService.get_service_account_token()
-        response = RestService.get(endpoint=f'{pay_api_url}/accounts/{org_id}', token=token, retry_on_failure=True)
-        if response.status_code == http_status.HTTP_200_OK:
-            payment_info = response.json()
-            return payment_info.get('paymentMethod') == 'EFT'
-        return False
-    
+
+    @staticmethod
     def get_eft_payment_accounts():
         """Get the EFT payment accounts."""
         pay_api_url = current_app.config.get('PAY_API_URL')
@@ -726,7 +716,7 @@ class Org:  # pylint: disable=too-many-public-methods
         }
         include_invitations: bool = False
         search.access_type, is_staff_admin = Org.refine_access_type(search.access_type)
-        
+
         if search.state:
             eft_payment_accounts = Org.get_eft_payment_accounts()
             items = eft_payment_accounts['items']

@@ -21,7 +21,6 @@ from .api_gateway import ApiGateway
 from .codes import Codes
 from .contact import Contact
 from .documents import Documents
-from .electronic_funds_transfers import ElectronicFundsTransfersService
 from .entity import Entity
 from .invitation import Invitation
 from .membership import Membership
