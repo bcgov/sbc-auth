@@ -229,6 +229,20 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return orgs, len(orgs)
 
     @classmethod
+    def search_active_eft_orgs(cls, search: OrgSearch, account_ids):
+        """Find all orgs with the given type."""
+        query = db.session.query(Org) \
+            .outerjoin(ContactLink) \
+            .outerjoin(Contact) \
+            .options(contains_eager('contacts').contains_eager('contact')) \
+            .filter(Org.id.in_(account_ids))
+
+        pagination = query.order_by(Org.created.desc()) \
+                          .paginate(per_page=search.limit, page=search.page)
+
+        return pagination.items, pagination.total
+    
+    @classmethod
     def find_by_org_access_type(cls, org_type):
         """Find all orgs with the given type."""
         return cls.query.filter_by(access_type=org_type).all()

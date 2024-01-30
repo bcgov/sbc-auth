@@ -118,7 +118,7 @@ class OrgSearch:  # pylint: disable=too-many-instance-attributes
     id: str
     decision_made_by: str
     org_type: str
-    unlinked_eft: bool
+    state: str
     page: int
     limit: int
 
@@ -137,6 +137,18 @@ class TaskSearch:   # pylint: disable=too-many-instance-attributes
     submitted_sort_order: str = 'asc'
     page: int = 1
     limit: int = 10
+
+
+@dataclass
+class EftShortnamesSearch:
+    """Used for searching tasks."""
+    state: str = ''
+    page: int = 1
+    limit: int = 10
+    transaction_date: str = ''
+    deposit_amount: str = ''
+    deposit_date: str = ''
+    short_name: str = ''
 
 
 @dataclass
