@@ -309,4 +309,10 @@ describe('Entity Management Component', () => {
     expect(wrapper.vm.primaryBtnText).toBe('Remove Registration')
     expect(wrapper.vm.secondaryBtnText).toBe('Keep Registration')
   })
+
+  it('Should set the correct values when populateAmalagmationModalValues() is called', () => {
+    wrapper.vm.populateAmalagmationModalValues()
+    expect(wrapper.vm.primaryBtnText).toBe('Delete Amalgamation Application')
+    expect(wrapper.vm.secondaryBtnText).toBe('Keep Amalgamation Application')
+  })
 })
