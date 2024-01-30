@@ -120,6 +120,9 @@ export interface BusinessRequest {
           type: AmalgamationTypes,
           nameRequest: NameRequest
         },
+        continuationIn?: {
+            nameRequest: NameRequest
+        },
         incorporationApplication?: {
             nameRequest: NameRequest
         },

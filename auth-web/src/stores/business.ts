@@ -343,6 +343,26 @@ export const useBusinessStore = defineStore('business', () => {
         addBusinessTypeforSP(filingBody, business)
         break
       }
+
+      case FilingTypes.CONTINUATION_IN: {
+        filingBody = {
+          filing: {
+            business: {
+              legalType: business.nameRequest.legalType
+            },
+            header: {
+              accountId: currentOrganization.value.id,
+              name: filingType
+            },
+            continuationIn: {
+              nameRequest: {
+                legalType: business.nameRequest.legalType,
+                nrNumber: business.nameRequest.nrNumber
+              }
+            }
+          }
+        }
+      }
     }
 
     // create an affiliation between implicit org and requested business

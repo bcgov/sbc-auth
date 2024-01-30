@@ -153,6 +153,8 @@ export default defineComponent({
         if (amalgamationTypes.includes(business.nameRequest?.legalType)) {
           payload = { filingType: FilingTypes.AMALGAMATION_APPLICATION, business }
         }
+      } else if (business.nameRequest?.requestActionCd === NrRequestActionCodes.MOVE) {
+        payload = { filingType: FilingTypes.CONTINUATION_IN, business }
       }
 
       if (payload) {
@@ -272,11 +274,11 @@ export default defineComponent({
       return isSocieties(item) ? 'Societies Online' : 'Corporate Online'
     }
 
-    /** Handler for draft IA creation and navigation */
+    /** Handler for draft entity creation and navigation */
     const useNameRequest = async (item: Business) => {
       switch (item.nameRequest.target) {
         case NrTargetTypes.LEAR: {
-          // Create new IA if the selected item is Name Request
+          // Create new entity if the selected item is Name Request
           if (item.corpType.code === CorpTypes.NAME_REQUEST) {
             const businessIdentifier = await createBusinessRecord(item)
             goToDashboard(businessIdentifier)
@@ -457,8 +459,7 @@ export default defineComponent({
           goToAmalgamate(item)
           break
         case NrRequestActionCodes.MOVE:
-          // Future - Relocate - Continue In
-          goToCorpOnline()
+          useNameRequest(item)
           break
         case NrRequestActionCodes.CONVERSION:
         case NrRequestActionCodes.CHANGE_NAME:
