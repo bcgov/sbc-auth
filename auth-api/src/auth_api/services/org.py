@@ -717,7 +717,7 @@ class Org:  # pylint: disable=too-many-public-methods
         include_invitations: bool = False
         search.access_type, is_staff_admin = Org.refine_access_type(search.access_type)
 
-        if search.state in [EFTShortnameState.UNLINKED]:
+        if search.state == EFTShortnameState.UNLINKED.value:
             eft_payment_accounts = Org.get_eft_payment_accounts()
             items = eft_payment_accounts['items']
             account_ids = [item['accountId'] for item in items]
