@@ -237,6 +237,8 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
             .options(contains_eager('contacts').contains_eager('contact')) \
             .filter(Org.id.in_(account_ids))
 
+        query = cls._search_for_statuses(query, [OrgStatusEnum.ACTIVE.value])
+
         pagination = query.order_by(Org.created.desc()) \
                           .paginate(per_page=search.limit, page=search.page)
 
