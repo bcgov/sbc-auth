@@ -7,17 +7,17 @@
     :loading="false"
     loadingText="Loading Transaction Records..."
     noDataText="No Transaction Records"
-    :setItems="linkedBankShortNames.results"
+    :setItems="tableState.results"
     :setHeaders="headers"
     :setTableDataOptions="tableDataOptions"
     title="Linked Bank Short Names"
-    :totalItems="linkedBankShortNames.totalResults"
+    :totalItems="tableState.totalResults"
     pageHide="true"
     @update-table-options="tableDataOptions = $event"
   >
     <template #header-filter-slot-actions>
       <v-btn
-        v-if="linkedBankShortNames.filters.isActive"
+        v-if="tableState.filters.isActive"
         class="clear-btn mx-auto mt-auto"
         color="primary"
         outlined
@@ -37,9 +37,9 @@ import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
+import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
 import debounce from '@/util/debounce'
-import PaymentService from '@/services/payment.services'
 
 export default defineComponent({
   name: 'ShortNameLinked',
@@ -175,7 +175,7 @@ export default defineComponent({
       headers,
       extended,
       tableDataOptions,
-      linkedBankShortNames: tableState
+      tableState
     }
   }
 })
