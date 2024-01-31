@@ -88,10 +88,13 @@ class PaymentAccountStatus(Enum):
     PENDING = 'PENDING'
     FAILED = 'FAILED'
 
+
 class EFTShortnameState(Enum):
     """EFT Short name search states."""
+
     LINKED = 'LINKED'
     UNLINKED = 'UNLINKED'
+
 
 class OrgType(Enum):
     """Org types."""
