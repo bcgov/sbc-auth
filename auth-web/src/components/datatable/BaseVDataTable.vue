@@ -67,7 +67,7 @@
                 :name="'header-filter-slot-' + header.col"
                 :header="header"
               />
-              <header-filter
+              <HeaderFilter
                 :filtering="filtering"
                 :filters="filters"
                 :header="header"
@@ -112,7 +112,7 @@
     <template #[`body.append`]>
       <tr v-if="pageHide && !reachedEnd">
         <td :colspan="headers.length">
-          <table-observer @intersect="getNext()" />
+          <TableObserver @intersect="getNext()" />
         </td>
       </tr>
     </template>
