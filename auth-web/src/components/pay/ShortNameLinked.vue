@@ -32,7 +32,7 @@
     <template #header-title-slot-statusCode="{ header }">
       {{ header.value }}
       <icon-tooltip icon="mdi-information-outline">
-        <div v-html="hello" />
+        <div v-sanitize="hello" />
       </icon-tooltip>
     </template>
     <!-- header filter slots -->
@@ -73,7 +73,7 @@
           <br>
           <span
             v-if="item.updatedOn"
-            v-html="item.updatedOn"
+            v-sanitize="item.updatedOn"
           />
         </v-col>
       </v-row>
