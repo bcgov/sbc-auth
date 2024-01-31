@@ -115,7 +115,6 @@ export interface BusinessRequest {
         // business is only used in incorporationApplication filing
         business?: {
             legalType: CorpTypes,
-            natureOfBusiness?: string
         },
         amalgamationApplication?: {
           type: AmalgamationTypes,
@@ -130,6 +129,9 @@ export interface BusinessRequest {
         registration?: {
             nameRequest: NameRequest
             businessType?: string // SP or DBA
+            business: {
+                natureOfBusiness?: string
+            }
         }
     }
 }
