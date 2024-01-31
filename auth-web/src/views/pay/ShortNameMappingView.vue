@@ -28,14 +28,14 @@
     >
       <v-tab
         id="search-tab"
-        :class="['tab-item-default', tab == '0' ? 'tab-item-active' : 'tab-item-inactive']"
+        :class="['tab-item-default', tab === 0 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
         <b class="ml-1">Unlinked Payments</b>
       </v-tab>
       <v-tab
         id="documents-tab"
-        :class="['tab-item-default', tab == '1' ? 'tab-item-active' : 'tab-item-inactive']"
+        :class="['tab-item-default', tab === 1 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
         <b class="mx-1">Linked Bank Short Names</b>
@@ -112,7 +112,7 @@ export default defineComponent({
 }
 
 .window-item-card {
-  padding: 0 30px 30px 30px;
+  padding: 30px 30px 30px 30px;
 }
 
 // Additional to make it work from business-search.

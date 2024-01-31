@@ -12,6 +12,7 @@
     :setTableDataOptions="tableDataOptions"
     title="Linked Bank Short Names"
     :totalItems="linkedBankShortNames.totalResults"
+    pageHide="true"
     @update-table-options="tableDataOptions = $event"
   >
     <template #header-filter-slot-actions>
@@ -27,56 +28,6 @@
           mdi-close
         </v-icon>
       </v-btn>
-    </template>
-    <!-- header title slots -->
-    <template #header-title-slot-statusCode="{ header }">
-      {{ header.value }}
-      <icon-tooltip icon="mdi-information-outline">
-        <div v-sanitize="hello" />
-      </icon-tooltip>
-    </template>
-    <!-- header filter slots -->
-    <template #header-filter-slot-createdOn>
-      <div>
-        <v-text-field
-          class="base-table__header__filter__textbox date-filter"
-          :append-icon="'mdi-calendar'"
-          clearable
-          dense
-          filled
-          hide-details
-          :placeholder="'Date'"
-          :value="dateRangeSelected ? 'Custom' : ''"
-        />
-      </div>
-    </template>
-    <!-- item slots -->
-    <template #item-slot-lineItemsAndDetails="{ item }">
-      <b
-        v-for="lineItem, i in item.lineItems"
-        :key="lineItem.description + i"
-        class="dark-text"
-      >
-        {{ lineItem.description }}
-      </b><br>
-      <span
-        v-for="detail, i in item.details"
-        :key="detail.label + i"
-      >
-        {{ detail.label }} {{ detail.value }}
-      </span><br>
-    </template>
-    <template #item-slot-statusCode="{ item }">
-      <v-row no-gutters>
-        <v-col cols="auto">
-          <b>{{ invoiceStatusDisplay[item.statusCode] }}</b>
-          <br>
-          <span
-            v-if="item.updatedOn"
-            v-sanitize="item.updatedOn"
-          />
-        </v-col>
-      </v-row>
     </template>
   </BaseVDataTable>
 </template>
@@ -166,7 +117,7 @@ export default defineComponent({
           id: 1
         }
       ],
-      totalResults: 0,
+      totalResults: 1,
       filters: {
         isActive: false
       }
