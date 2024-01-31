@@ -136,6 +136,7 @@ export default defineComponent({
     /** Create a business record in LEAR. */
     const createBusinessRecord = async (business: Business): Promise<string> => {
       const amalgamationTypes = launchdarklyServices.getFlag(LDFlags.SupportedAmalgamationEntities)?.split(' ') || []
+      const continuationInTypes = launchdarklyServices.getFlag(LDFlags.SupportedContinuationInEntities)?.split(' ') || []
       const regTypes = [CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP]
       const iaTypes = [CorpTypes.BENEFIT_COMPANY, CorpTypes.COOP, CorpTypes.BC_CCC, CorpTypes.BC_COMPANY,
         CorpTypes.BC_ULC_COMPANY]
@@ -154,7 +155,9 @@ export default defineComponent({
           payload = { filingType: FilingTypes.AMALGAMATION_APPLICATION, business }
         }
       } else if (business.nameRequest?.requestActionCd === NrRequestActionCodes.MOVE) {
-        payload = { filingType: FilingTypes.CONTINUATION_IN, business }
+        if (continuationInTypes.includes(business.nameRequest?.legalType)) {
+          payload = { filingType: FilingTypes.CONTINUATION_IN, business }
+        }
       }
 
       if (payload) {
@@ -203,6 +206,12 @@ export default defineComponent({
       return supportedEntityFlags.includes(entityType)
     }
 
+    const isSupportedContinuationInEntities = (item: Business): boolean => {
+      const entityType = getEntityType(item)
+      const supportedEntityFlags = launchdarklyServices.getFlag(LDFlags.SupportedContinuationInEntities)?.split(' ') || []
+      return supportedEntityFlags.includes(entityType)
+    }
+
     const isSupportedRestorationEntities = (item: Business): boolean => {
       const entityType = getEntityType(item)
       const supportedEntityFlags = launchdarklyServices.getFlag(LDFlags.SupportRestorationEntities)?.split(' ') || []
@@ -230,7 +239,7 @@ export default defineComponent({
         }
         // temporarily show external icon for continue in
         if (nrRequestActionCd === NrRequestActionCodes.MOVE) {
-          return true
+          return !isSupportedContinuationInEntities(item)
         }
         // temporary show external icon for amalgamate for some entity types
         if (nrRequestActionCd === NrRequestActionCodes.AMALGAMATE) {
@@ -458,9 +467,14 @@ export default defineComponent({
         case NrRequestActionCodes.AMALGAMATE:
           goToAmalgamate(item)
           break
-        case NrRequestActionCodes.MOVE:
-          useNameRequest(item)
+        case NrRequestActionCodes.MOVE: {
+          if (isSupportedContinuationInEntities) {
+            useNameRequest(item)
+          } else {
+            goToCorpOnline()
+          }
           break
+        }
         case NrRequestActionCodes.CONVERSION:
         case NrRequestActionCodes.CHANGE_NAME:
           handleApprovedNameRequestChangeName(item, nrRequestActionCd)
