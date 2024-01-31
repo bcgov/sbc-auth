@@ -1,20 +1,22 @@
 <template>
-  <base-v-data-table
+  <BaseVDataTable
+    id="linked-bank-short-names"
     class="transaction-list"
     :clearFiltersTrigger="clearFiltersTrigger"
     itemKey="id"
     :loading="false"
     loadingText="Loading Transaction Records..."
     noDataText="No Transaction Records"
-    :setItems="transactions.results"
+    :setItems="linkedBankShortNames.results"
     :setHeaders="headers"
     :setTableDataOptions="tableDataOptions"
-    :totalItems="transactions.totalResults"
+    title="Linked Bank Short Names"
+    :totalItems="linkedBankShortNames.totalResults"
     @update-table-options="tableDataOptions = $event"
   >
     <template #header-filter-slot-actions>
       <v-btn
-        v-if="transactions.filters.isActive"
+        v-if="linkedBankShortNames.filters.isActive"
         class="clear-btn mx-auto mt-auto"
         color="primary"
         outlined
@@ -76,14 +78,14 @@
         </v-col>
       </v-row>
     </template>
-  </base-v-data-table>
+  </BaseVDataTable>
 </template>
 <script lang="ts">
-import debounce from '@/util/debounce'
-import { BaseVDataTable } from '..'
+
 import { Ref, defineComponent, ref } from '@vue/composition-api'
-import { DataOptions } from 'vuetify'
+import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
+import { DataOptions } from 'vuetify'
 import _ from 'lodash'
 
 export default defineComponent({
@@ -92,7 +94,7 @@ export default defineComponent({
   setup () {
     const headers = [
       {
-        col: 'folioNumber',
+        col: 'bankShortName',
         customFilter: {
           clearable: true,
           label: 'Bank Short Name',
@@ -104,7 +106,7 @@ export default defineComponent({
         value: 'Bank Short Name'
       },
       {
-        col: 'folioNumber',
+        col: 'accountName',
         customFilter: {
           clearable: true,
           label: 'Account Name',
@@ -116,7 +118,7 @@ export default defineComponent({
         value: 'Account Name'
       },
       {
-        col: 'folioNumber',
+        col: 'branchName',
         customFilter: {
           clearable: true,
           label: 'Branch Name',
@@ -128,7 +130,7 @@ export default defineComponent({
         value: 'Branch Name'
       },
       {
-        col: 'folioNumber',
+        col: 'accountNumber',
         customFilter: {
           clearable: true,
           label: 'Account Number',
@@ -154,8 +156,16 @@ export default defineComponent({
       console.log('clear')
     }
 
-    const transactions = ref({
-      results: [],
+    const linkedBankShortNames = ref({
+      results: [
+        {
+          accountName: 'Test Account',
+          accountNumber: 'Test Account Number',
+          bankShortName: 'Test Bank Short Name',
+          branchName: 'Test Branch Name',
+          id: 1
+        }
+      ],
       totalResults: 0,
       filters: {
         isActive: false
@@ -164,7 +174,6 @@ export default defineComponent({
 
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
 
-    // clear filters
     const clearFiltersTrigger = ref(0)
 
     return {
@@ -173,8 +182,16 @@ export default defineComponent({
       headers,
       extended,
       tableDataOptions,
-      transactions
+      linkedBankShortNames
     }
   }
 })
 </script>
+
+<style lang="scss" scoped>
+@import '@/assets/scss/theme.scss';
+
+#linked-bank-short-names {
+  border: 1px solid #e9ecef
+}
+</style>

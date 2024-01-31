@@ -19,6 +19,18 @@
     <!-- Headers (two rows) -->
     <template #header>
       <thead class="base-table__header">
+        <tr
+          v-if="title"
+          :style="{ 'background-color': '#e0e7ed'}"
+        >
+          <th :colspan="headers.length">
+            <slot name="header-title">
+              <h2 class="ml-3 py-6">
+                {{ title }}
+              </h2>
+            </slot>
+          </th>
+        </tr>
         <!-- First row has titles. -->
         <slot
           name="header-title-slot"
@@ -161,7 +173,8 @@ export default defineComponent({
     filters: { default: { isActive: false, filterPayload: {} }, required: false },
     customPagination: { default: false },
     highlightIndex: { default: -1 },
-    highlightClass: { type: String, default: '' }
+    highlightClass: { type: String, default: '' },
+    title: { type: String, default: '' }
   },
   emits: ['update-table-options'],
   setup (props, { emit }) {
@@ -253,6 +266,11 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 .base-table {
+
+  h2 {
+    font-size: 1.125rem;
+    letter-spacing: 0.25px;
+  }
 
   &__header {
 

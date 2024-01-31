@@ -56,7 +56,7 @@
           class="window-item-card"
           flat
         >
-          <short-name-linked />
+          <ShortNameLinked />
         </v-card>
       </v-window-item>
     </v-window>
