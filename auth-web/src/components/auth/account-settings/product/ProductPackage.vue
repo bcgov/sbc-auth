@@ -312,7 +312,8 @@ export default defineComponent({
             msg: `Your application for Qualified Supplier – ${userAccessDisplayNames[localState.subProduct.description]}
                 access has been rejected. Refer to your notification email or contact
                 <a href="mailto:${helpEmail}">${helpEmail}</a> for details. You can submit a new Qualified Supplier
-                access request once you have all of the required information.`
+                access request from your Manufactured Home Registry (or Asset Registries) page once you have all the
+                required information.`
           }
         case ProductStatus.ACTIVE:
         default:
