@@ -279,6 +279,15 @@ export default defineComponent({
       }
     }
 
+    const goToContinuationIn = async (item: Business): Promise<void> => {
+      if (isSupportedContinuationInEntities(item)) {
+        const businessIdentifier = await createBusinessRecord(item)
+        goToDashboard(businessIdentifier)
+      } else {
+        goToCorpOnline()
+      }
+    }
+
     const getTooltipTargetDescription = (item: Business): string => {
       return isSocieties(item) ? 'Societies Online' : 'Corporate Online'
     }
@@ -468,11 +477,7 @@ export default defineComponent({
           goToAmalgamate(item)
           break
         case NrRequestActionCodes.MOVE: {
-          if (isSupportedContinuationInEntities) {
-            useNameRequest(item)
-          } else {
-            goToCorpOnline()
-          }
+          goToContinuationIn(item)
           break
         }
         case NrRequestActionCodes.CONVERSION:

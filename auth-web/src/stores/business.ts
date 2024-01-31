@@ -323,14 +323,15 @@ export const useBusinessStore = defineStore('business', () => {
       case FilingTypes.REGISTRATION: {
         filingBody = {
           filing: {
+            business: {
+              legalType: business.nameRequest.legalType,
+              natureOfBusiness: business.nameRequest.natureOfBusiness
+            },
             header: {
               accountId: currentOrganization.value.id,
               name: filingType
             },
             registration: {
-              business: {
-                natureOfBusiness: business.nameRequest.natureOfBusiness
-              },
               nameRequest: {
                 legalType: business.nameRequest.legalType,
                 nrNumber: business.nameRequest.nrNumber
