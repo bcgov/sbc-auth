@@ -33,11 +33,13 @@
 </template>
 <script lang="ts">
 
-import { Ref, defineComponent, ref } from '@vue/composition-api'
+import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
 import _ from 'lodash'
+import debounce from '@/util/debounce'
+import PaymentService from '@/services/payment.services'
 
 export default defineComponent({
   name: 'ShortNameLinked',
@@ -45,7 +47,7 @@ export default defineComponent({
   setup () {
     const headers = [
       {
-        col: 'bankShortName',
+        col: 'shortName',
         customFilter: {
           clearable: true,
           label: 'Bank Short Name',
@@ -81,7 +83,7 @@ export default defineComponent({
         value: 'Branch Name'
       },
       {
-        col: 'accountNumber',
+        col: 'accountId',
         customFilter: {
           clearable: true,
           label: 'Account Number',
@@ -107,20 +109,60 @@ export default defineComponent({
       console.log('clear')
     }
 
-    const linkedBankShortNames = ref({
+    const tableState = reactive({
       results: [
         {
-          accountName: 'Test Account',
-          accountNumber: 'Test Account Number',
-          bankShortName: 'Test Bank Short Name',
-          branchName: 'Test Branch Name',
+          accountName: 'RCPV',
+          shortName: 'RCPV',
+          accountBranch: 'Saanich',
+          accountId: '3199',
           id: 1
         }
       ],
       totalResults: 1,
       filters: {
-        isActive: false
+        isActive: false,
+        pageNumber: 1,
+        filterPayload: {
+          accountName: '',
+          shortName: '',
+          accountBranch: '',
+          accountId: ''
+        }
+      },
+      loading: false
+    })
+
+    const loadLinkedShortnameList = debounce(async (filterField?: string, value?: any) => {
+      tableState.loading = true
+      if (filterField) {
+        tableState.filters.pageNumber = 1
+        tableState.filters.filterPayload[filterField] = value
       }
+      let filtersActive = false
+      for (const key in tableState.filters.filterPayload) {
+        if (key === 'dateFilter') {
+          if (tableState.filters.filterPayload[key].endDate) filtersActive = true
+        } else if (tableState.filters.filterPayload[key]) filtersActive = true
+        if (filtersActive) break
+      }
+      tableState.filters.isActive = filtersActive
+
+      try {
+        const response = await PaymentService.getEFTShortNames('LINKED', tableState.filters)
+        if (response?.data) {
+          tableState.results = response.data.items || []
+          tableState.totalResults = response.data.total
+        } else throw new Error('No response from getEFTShortNames')
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to get eftShortNames list.', error)
+      }
+      tableState.loading = false
+    }, 200) as (filterField?: string, value?: any, viewAll?: boolean) => Promise<void>
+
+    onMounted(async () => {
+      await loadLinkedShortnameList()
     })
 
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
@@ -133,7 +175,7 @@ export default defineComponent({
       headers,
       extended,
       tableDataOptions,
-      linkedBankShortNames
+      linkedBankShortNames: tableState
     }
   }
 })

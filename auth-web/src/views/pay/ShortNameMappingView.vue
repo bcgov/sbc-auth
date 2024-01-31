@@ -117,6 +117,11 @@ export default defineComponent({
 
 // Additional to make it work from business-search.
 ::v-deep {
+  .base-table__header__filter {
+    padding-left: 16px;
+    padding-right: 4px;
+  }
+
   .v-tabs-slider-wrapper {
     display: none !important;
   }
