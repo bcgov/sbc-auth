@@ -323,6 +323,9 @@ export const useBusinessStore = defineStore('business', () => {
       case FilingTypes.REGISTRATION: {
         filingBody = {
           filing: {
+            business: {
+              legalType: business.nameRequest.legalType,
+            },
             header: {
               accountId: currentOrganization.value.id,
               name: filingType
@@ -342,6 +345,26 @@ export const useBusinessStore = defineStore('business', () => {
         // add in Business Type for SP
         addBusinessTypeforSP(filingBody, business)
         break
+      }
+
+      case FilingTypes.CONTINUATION_IN: {
+        filingBody = {
+          filing: {
+            business: {
+              legalType: business.nameRequest.legalType
+            },
+            header: {
+              accountId: currentOrganization.value.id,
+              name: filingType
+            },
+            continuationIn: {
+              nameRequest: {
+                legalType: business.nameRequest.legalType,
+                nrNumber: business.nameRequest.nrNumber
+              }
+            }
+          }
+        }
       }
     }
 
