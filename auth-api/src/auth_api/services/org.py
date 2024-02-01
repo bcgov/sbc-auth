@@ -199,8 +199,7 @@ class Org:  # pylint: disable=too-many-public-methods
         pay_request = {
             'accountId': org_model.id,
             # pay needs the most unique idenitfier.So combine name and branch name
-            'accountName': org_name_for_pay,
-            'branchName': org_model.branch_name
+            'accountName': org_name_for_pay
         }
 
         if payment_method:
