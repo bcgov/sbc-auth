@@ -105,10 +105,6 @@ export default defineComponent({
 
     const extended = ref(true)
 
-    const clearFilters = () => {
-      console.log('clear')
-    }
-
     const tableState = reactive({
       results: [
         {
@@ -133,6 +129,8 @@ export default defineComponent({
       },
       loading: false
     })
+
+    const clearFiltersTrigger = ref(0)
 
     const loadLinkedShortnameList = async (filterField?: string, value?: any) => {
       tableState.loading = true
@@ -160,6 +158,20 @@ export default defineComponent({
         console.error('Failed to getEFTShortNames list.', error)
       }
       tableState.loading = false
+    }
+
+    // TODO genericize
+    const clearAllFilters = async () => {
+      tableState.filters.filterPayload = { state: 'LINKED' } as any
+      tableState.filters.isActive = false
+      await loadLinkedShortnameList()
+    }
+
+    // TODO genericize
+    const clearFilters = () => {
+      clearFiltersTrigger.value++
+      // clear affiliation state filters and trigger search
+      clearAllFilters()
     }
 
     // TODO make this generic.
@@ -190,8 +202,6 @@ export default defineComponent({
     })
 
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
-
-    const clearFiltersTrigger = ref(0)
 
     return {
       clearFilters,

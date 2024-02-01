@@ -88,7 +88,7 @@ export default defineComponent({
   color: white !important;
   background-color: $BCgovBlue5;
   box-shadow: inset 0 0 5px 1px $gray9;
-  margin-top: 5px;
+  margin-top: 0px;
   transition: none !important;
 }
 

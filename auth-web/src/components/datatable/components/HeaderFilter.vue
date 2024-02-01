@@ -40,7 +40,6 @@
 import { BaseSelectFilter, BaseTextFilter } from '../resources/base-filters'
 import { PropType, defineComponent, reactive } from '@vue/composition-api'
 import { BaseTableHeaderI } from '../interfaces'
-import _ from 'lodash'
 import { headerTypes } from '@/resources/table-headers/affiliations-table/headers'
 
 const tempHeader = {
@@ -79,7 +78,7 @@ export default defineComponent({
 
     const filter = async (header: BaseTableHeaderI) => {
       if (header.customFilter.filterApiFn) {
-        _.debounce(serverSideFilter(header), 500)
+        serverSideFilter(header)
       } else {
         applyFilters(props, state, header)
       }
