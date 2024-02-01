@@ -13,6 +13,8 @@
     title="Linked Bank Short Names"
     :totalItems="tableState.totalResults"
     pageHide="true"
+    :filters="tableState.filters"
+    :updateFilter="updateFilter"
     @update-table-options="tableDataOptions = $event"
   >
     <template #header-filter-slot-actions>
@@ -32,14 +34,12 @@
   </BaseVDataTable>
 </template>
 <script lang="ts">
-
 import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
 import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
-import debounce from '@/util/debounce'
 
 export default defineComponent({
   name: 'ShortNameLinked',
@@ -127,13 +127,14 @@ export default defineComponent({
           accountName: '',
           shortName: '',
           accountBranch: '',
-          accountId: ''
+          accountId: '',
+          state: 'LINKED'
         }
       },
       loading: false
     })
 
-    const loadLinkedShortnameList = debounce(async (filterField?: string, value?: any) => {
+    const loadLinkedShortnameList = async (filterField?: string, value?: any) => {
       tableState.loading = true
       if (filterField) {
         tableState.filters.pageNumber = 1
@@ -149,17 +150,40 @@ export default defineComponent({
       tableState.filters.isActive = filtersActive
 
       try {
-        const response = await PaymentService.getEFTShortNames('LINKED', tableState.filters)
+        const response = await PaymentService.getEFTShortNames(tableState.filters)
         if (response?.data) {
           tableState.results = response.data.items || []
           tableState.totalResults = response.data.total
         } else throw new Error('No response from getEFTShortNames')
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error('Failed to get eftShortNames list.', error)
+        console.error('Failed to getEFTShortNames list.', error)
       }
       tableState.loading = false
-    }, 200) as (filterField?: string, value?: any, viewAll?: boolean) => Promise<void>
+    }
+
+    // TODO make this generic.
+    const updateFilter = (filterField?: string, value?: any) => {
+      if (filterField) {
+        if (value) {
+          tableState.filters.filterPayload[filterField] = value
+          tableState.filters.isActive = true
+        } else {
+          delete tableState.filters.filterPayload[filterField]
+        }
+      }
+      if (Object.keys(tableState.filters.filterPayload).length === 0) {
+        tableState.filters.isActive = false
+      } else {
+        tableState.filters.isActive = true
+      }
+    }
+
+    headers.forEach((header) => {
+      if (header.hasFilter) {
+        (header.customFilter as any).filterApiFn = (val: any) => loadLinkedShortnameList(header.col, val || '')
+      }
+    })
 
     onMounted(async () => {
       await loadLinkedShortnameList()
@@ -175,7 +199,8 @@ export default defineComponent({
       headers,
       extended,
       tableDataOptions,
-      tableState
+      tableState,
+      updateFilter
     }
   }
 })
