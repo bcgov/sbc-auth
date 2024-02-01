@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Organization data."""
-from datetime import datetime
 import json
+from datetime import datetime
 from typing import Dict, List, Tuple
 
 from flask import current_app, g
@@ -22,7 +22,6 @@ from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
-from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
@@ -30,10 +29,10 @@ from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
-from auth_api.models import User as UserModel
 from auth_api.models import Task as TaskModel
+from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
-from auth_api.models.dataclass import EftAccountsSearch
+from auth_api.models.dataclass import Activity, DeleteAffiliationRequest, EftAccountsSearch
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
 from auth_api.services.user import User as UserService
@@ -44,8 +43,8 @@ from auth_api.services.validators.duplicate_org_name import validate as duplicat
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
     AccessType, ActivityAction, AffidavitStatus, LoginSource, OrgStatus, OrgType, PatchActions, PaymentAccountStatus,
-    PaymentMethod, Status, SuspensionReasonCode, TaskRelationshipStatus, TaskRelationshipType, TaskStatus,
-    TaskTypePrefix, TaskAction)
+    PaymentMethod, Status, SuspensionReasonCode, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus,
+    TaskTypePrefix)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I005
 from auth_api.utils.util import camelback2snake
 
@@ -60,6 +59,7 @@ from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
 from .validators.validator_response import ValidatorResponse
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
