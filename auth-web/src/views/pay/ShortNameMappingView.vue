@@ -88,7 +88,7 @@ export default defineComponent({
   color: white !important;
   background-color: $BCgovBlue5;
   box-shadow: inset 0 0 5px 1px $gray9;
-  margin-top: 0px;
+  margin-top: 5px;
   transition: none !important;
 }
 
@@ -128,6 +128,7 @@ export default defineComponent({
 
   .v-tabs-bar {
     height: inherit !important;
+    background-color: transparent !important;
   }
 
   .v-tab--active:hover:before{
