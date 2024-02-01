@@ -27,18 +27,18 @@
       style="height: 65px; margin-top: 20px;"
     >
       <v-tab
-        id="search-tab"
+        id="unlinked-shortname-tab"
         :class="['tab-item-default', tab === 0 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
-        <b class="ml-1">Unlinked Payments</b>
+        <b>Unlinked Payments</b>
       </v-tab>
       <v-tab
-        id="documents-tab"
+        id="linked-shortname-tab"
         :class="['tab-item-default', tab === 1 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
-        <b class="mx-1">Linked Bank Short Names</b>
+        <b>Linked Bank Short Names</b>
       </v-tab>
     </v-tabs>
 
@@ -117,6 +117,9 @@ export default defineComponent({
 
 // Additional to make it work from business-search.
 ::v-deep {
+  .base-table__header > tr:first-child > th  {
+    padding: 0 0 0 0 !important;
+  }
   .base-table__header__filter {
     padding-left: 16px;
     padding-right: 4px;
