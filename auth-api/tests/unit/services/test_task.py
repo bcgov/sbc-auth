@@ -234,6 +234,7 @@ def test_create_task_govm(session,
         expected_data = {
             'accountId': dictionary.get('id'),
             'accountName': dictionary.get('name') + '-' + dictionary.get('branch_name'),
+            'branchName': dictionary.get('branch_name'),
             'paymentInfo': {
                 'methodOfPayment': 'EJV',
                 'revenueAccount': payment_details.get('paymentInfo').get('revenueAccount')

@@ -258,7 +258,7 @@ def test_create_basic_org_assert_pay_request_is_govm(session,
         expected_data = {
             'accountId': dictionary.get('id'),
             'accountName': dictionary.get('name') + '-' + dictionary.get('branch_name'),
-            'branchName':  dictionary.get('branch_name'),
+            'branchName': dictionary.get('branch_name'),
             'paymentInfo': {
                 'methodOfPayment': PaymentMethod.EJV.value
             }
@@ -569,6 +569,7 @@ def test_update_org_name(session, monkeypatch):  # pylint:disable=unused-argumen
         expected_data = {
             'accountId': dictionary.get('id'),
             'accountName': dictionary.get('name'),
+            'branchName': ''
         }
         assert expected_data == actual_data, 'name update work.'
 
