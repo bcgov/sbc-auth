@@ -204,7 +204,7 @@ export default class PaymentService {
     return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
   }
 
-  static getEFTShortNames (filterParams: TransactionFilterParams, viewAll = false): AxiosPromise<any> {
+  static getEFTShortNames (filterParams: TransactionFilterParams, state, viewAll = false): AxiosPromise<any> {
     const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
@@ -219,6 +219,8 @@ export default class PaymentService {
         params.append(key, value)
       }
     }
+    params.append('state', state)
+
     return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames?${new URLSearchParams(params).toString()}`)
   }
 }

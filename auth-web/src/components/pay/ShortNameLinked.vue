@@ -123,8 +123,7 @@ export default defineComponent({
           accountName: '',
           shortName: '',
           accountBranch: '',
-          accountId: '',
-          state: 'LINKED'
+          accountId: ''
         }
       },
       loading: false
@@ -148,7 +147,7 @@ export default defineComponent({
       tableState.filters.isActive = filtersActive
 
       try {
-        const response = await PaymentService.getEFTShortNames(tableState.filters)
+        const response = await PaymentService.getEFTShortNames(tableState.filters, 'LINKED')
         if (response?.data) {
           tableState.results = response.data.items || []
           tableState.totalResults = response.data.total
@@ -162,7 +161,7 @@ export default defineComponent({
 
     // TODO genericize
     const clearAllFilters = async () => {
-      tableState.filters.filterPayload = { state: 'LINKED' } as any
+      tableState.filters.filterPayload = {} as any
       tableState.filters.isActive = false
       await loadLinkedShortnameList()
     }
