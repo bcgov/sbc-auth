@@ -118,6 +118,14 @@ class OrgSearch:  # pylint: disable=too-many-instance-attributes
     id: str
     decision_made_by: str
     org_type: str
+    page: int
+    limit: int
+
+
+@dataclass
+class EftAccountsSearch:  # pylint: disable=too-many-instance-attributes
+    """Used for searching organizations."""
+
     state: str
     page: int
     limit: int

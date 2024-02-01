@@ -33,6 +33,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models import Task as TaskModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
+from auth_api.models.dataclass import EftAccountsSearch
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
 from auth_api.services.user import User as UserService
@@ -42,9 +43,9 @@ from auth_api.services.validators.bcol_credentials import validate as bcol_crede
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, AffidavitStatus, EFTShortnameState, LoginSource, OrgStatus, OrgType, PatchActions,
-    PaymentAccountStatus, PaymentMethod, Status, SuspensionReasonCode, TaskRelationshipStatus, TaskRelationshipType,
-    TaskStatus, TaskTypePrefix, TaskAction)
+    AccessType, ActivityAction, AffidavitStatus, LoginSource, OrgStatus, OrgType, PatchActions, PaymentAccountStatus,
+    PaymentMethod, Status, SuspensionReasonCode, TaskRelationshipStatus, TaskRelationshipType, TaskStatus,
+    TaskTypePrefix, TaskAction)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I005
 from auth_api.utils.util import camelback2snake
 
@@ -525,11 +526,13 @@ class Org:  # pylint: disable=too-many-public-methods
         return response.json()
 
     @staticmethod
-    def get_eft_payment_accounts():
+    def get_eft_payment_accounts(search: EftAccountsSearch):
         """Get the EFT payment accounts."""
         pay_api_url = current_app.config.get('PAY_API_URL')
         token = RestService.get_service_account_token()
-        response = RestService.get(endpoint=f'{pay_api_url}/eft-accounts', token=token)
+        response = RestService.get(
+            endpoint=f'{pay_api_url}/eft-accounts?page={search.page}&limit={search.limit}&state={search.state}',
+            token=token)
         return response.json()
 
     @staticmethod
@@ -717,12 +720,7 @@ class Org:  # pylint: disable=too-many-public-methods
         include_invitations: bool = False
         search.access_type, is_staff_admin = Org.refine_access_type(search.access_type)
 
-        if search.state == EFTShortnameState.UNLINKED.value:
-            eft_payment_accounts = Org.get_eft_payment_accounts()
-            items = eft_payment_accounts['items']
-            account_ids = [item['accountId'] for item in items]
-            org_models, orgs_result['total'] = OrgModel.search_orgs_by_ids(search, account_ids)
-        elif search.statuses and OrgStatus.PENDING_ACTIVATION.value in search.statuses:
+        if search.statuses and OrgStatus.PENDING_ACTIVATION.value in search.statuses:
             # only staff admin can see director search accounts
             if not is_staff_admin:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
@@ -740,6 +738,27 @@ class Org:  # pylint: disable=too-many-public-methods
                     InvitationSchema(exclude=('membership',)).dump(org.invitations[0].invitation, many=False)
                 ]
                 if include_invitations and org.invitations else [],
+            })
+        return orgs_result
+
+    @staticmethod
+    def get_eft_orgs(search: EftAccountsSearch):
+        """Search for orgs based on input parameters."""
+        orgs_result = {
+            'orgs': [],
+            'page': search.page,
+            'limit': search.limit,
+            'total': 0
+        }
+
+        eft_payment_accounts = Org.get_eft_payment_accounts(search)
+        items = eft_payment_accounts['items']
+        account_ids = [item['accountId'] for item in items]
+        org_models, orgs_result['total'] = OrgModel.search_orgs_by_ids(search, account_ids)
+
+        for org in org_models:
+            orgs_result['orgs'].append({
+                **Org(org).as_dict()
             })
         return orgs_result
 

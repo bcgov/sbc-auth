@@ -24,6 +24,7 @@ from .bulk_user import bp as bulk_user_bp
 from .codes import bp as codes_bp
 from .documents import bp as documents_bp
 from .documents_affidavit import bp as documents_affidavit_bp
+from .eft_accounts import bp as eft_accounts_bp
 from .entity import bp as entity_bp
 from .invitation import bp as invitation_bp
 from .meta import bp as meta_bp
@@ -61,6 +62,7 @@ class V1Endpoint:  # pylint: disable=too-few-public-methods,
         self.app.register_blueprint(codes_bp)
         self.app.register_blueprint(documents_bp)
         self.app.register_blueprint(documents_affidavit_bp)
+        self.app.register_blueprint(eft_accounts_bp)
         self.app.register_blueprint(entity_bp)
         self.app.register_blueprint(invitation_bp)
         self.app.register_blueprint(meta_bp)
