@@ -423,6 +423,7 @@ export enum LDFlags {
     ProductSiteRegistryStatus = 'product-ESRA-status',
     ProductWillsStatus = 'product-VS-status',
     SupportedAmalgamationEntities = 'supported-amalgamation-entities',
+    SupportedContinuationInEntities = 'supported-continuation-in-entities',
     SentryEnable = 'sentry-enable',
     SupportRestorationEntities = 'supported-restoration-entities',
     AllowableBusinessSearchTypes = 'allowable-business-search-types',

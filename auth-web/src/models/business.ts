@@ -114,11 +114,14 @@ export interface BusinessRequest {
         },
         // business is only used in incorporationApplication filing
         business?: {
-            legalType: CorpTypes
+            legalType: CorpTypes,
         },
         amalgamationApplication?: {
           type: AmalgamationTypes,
           nameRequest: NameRequest
+        },
+        continuationIn?: {
+            nameRequest: NameRequest
         },
         incorporationApplication?: {
             nameRequest: NameRequest
