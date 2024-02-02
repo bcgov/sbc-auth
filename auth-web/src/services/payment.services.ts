@@ -206,14 +206,18 @@ export default class PaymentService {
   }
 
   static getEFTShortNames (filterParams: LinkedShortNameFilterParams, state, viewAll = false): AxiosPromise<any> {
-    const params = new URLSearchParams()
+    const params = new URLSearchParams({
+      'state': state
+    })
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
     }
     if (filterParams.pageLimit) {
       params.append('limit', filterParams.pageLimit.toString())
     }
-    if (viewAll) params.append('viewAll', `${viewAll}`)
+    if (viewAll) {
+      params.append('viewAll', `${viewAll}`)
+    }
 
     if (filterParams.filterPayload) {
       for (const [key, value] of Object.entries(filterParams.filterPayload)) {
@@ -222,8 +226,7 @@ export default class PaymentService {
         }
       }
     }
-    params.append('state', state)
 
-    return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames?${new URLSearchParams(params).toString()}`)
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames?${params.toString()}`)
   }
 }
