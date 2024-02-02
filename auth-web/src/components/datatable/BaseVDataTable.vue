@@ -219,14 +219,13 @@ export default defineComponent({
     }
 
     watch(() => state.sortedItems, () => {
-      if (props.setItems && !props.useObserver) {
+      if (props.setItems && !props.observerCallback) {
         state.visibleItems = state.sortedItems.slice(0, perPage.value)
         firstItem.value = state.visibleItems[0]
         currentPage.value = 1
         reachedEnd.value = false
         scrollToTop()
       }
-      // Handle this logic in the observerCallback.
       if (props.observerCallback) {
         state.visibleItems = state.sortedItems
       }

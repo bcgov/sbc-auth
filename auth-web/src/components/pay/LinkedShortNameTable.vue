@@ -284,7 +284,6 @@ export default defineComponent({
   }
 }
 
-// Action buttons.
 .new-actions {
   height:30px;
   .open-action-btn {
