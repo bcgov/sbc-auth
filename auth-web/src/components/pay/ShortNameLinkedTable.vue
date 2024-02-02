@@ -42,7 +42,7 @@ import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
 
 export default defineComponent({
-  name: 'ShortNameLinked',
+  name: 'ShortNameLinkedTable',
   components: { BaseVDataTable },
   setup (props, { emit }) {
     const headers = [
