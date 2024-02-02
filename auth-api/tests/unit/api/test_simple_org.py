@@ -65,7 +65,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_view_accounts_role)
 
     # Assert status filter by inactive orgs
-    rv = client.get(f'/api/v1/simple-orgs?status={OrgStatus.INACTIVE.value}',
+    rv = client.get(f'/api/v1/orgs/simple?status={OrgStatus.INACTIVE.value}',
                     headers=headers, content_type='application/json')
 
     result = rv.json
@@ -78,7 +78,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][0], org_inactive)
 
     # Assert default search - returns active orgs
-    rv = client.get('/api/v1/simple-orgs', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/orgs/simple', headers=headers, content_type='application/json')
 
     result = rv.json
     assert rv.status_code == http_status.HTTP_200_OK
@@ -93,7 +93,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][3], org_no_branch_2)
 
     # Assert search id
-    rv = client.get(f'/api/v1/simple-orgs?id={org_no_branch_1.id}', headers=headers, content_type='application/json')
+    rv = client.get(f'/api/v1/orgs/simple?id={org_no_branch_1.id}', headers=headers, content_type='application/json')
 
     result = rv.json
     assert rv.status_code == http_status.HTTP_200_OK
@@ -105,7 +105,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][0], org_no_branch_1)
 
     # Assert search id
-    rv = client.get(f'/api/v1/simple-orgs?id={org_no_branch_1.id}', headers=headers, content_type='application/json')
+    rv = client.get(f'/api/v1/orgs/simple?id={org_no_branch_1.id}', headers=headers, content_type='application/json')
 
     result = rv.json
     assert rv.status_code == http_status.HTTP_200_OK
@@ -117,7 +117,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][0], org_no_branch_1)
 
     # Assert search name
-    rv = client.get('/api/v1/simple-orgs?name=Name 2', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/orgs/simple?name=Name 2', headers=headers, content_type='application/json')
 
     result = rv.json
     assert rv.status_code == http_status.HTTP_200_OK
@@ -130,7 +130,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][1], org_no_branch_2)
 
     # Assert search branch name
-    rv = client.get('/api/v1/simple-orgs?branchName=branch', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/orgs/simple?branchName=branch', headers=headers, content_type='application/json')
 
     result = rv.json
     assert rv.status_code == http_status.HTTP_200_OK
@@ -143,7 +143,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][1], org_branch_2)
 
     # Assert search branch name
-    rv = client.get('/api/v1/simple-orgs?branchName=ch 1', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/orgs/simple?branchName=ch 1', headers=headers, content_type='application/json')
 
     result = rv.json
     assert rv.status_code == http_status.HTTP_200_OK
@@ -155,7 +155,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][0], org_branch_1)
 
     # Assert search text with id
-    rv = client.get(f'/api/v1/simple-orgs?searchText={org_no_branch_2.id}', headers=headers,
+    rv = client.get(f'/api/v1/orgs/simple?searchText={org_no_branch_2.id}', headers=headers,
                     content_type='application/json')
 
     result = rv.json
@@ -168,7 +168,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][0], org_no_branch_2)
 
     # Assert search text with name
-    rv = client.get('/api/v1/simple-orgs?searchText=name 1', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/orgs/simple?searchText=name 1', headers=headers, content_type='application/json')
 
     result = rv.json
     assert rv.status_code == http_status.HTTP_200_OK
@@ -181,7 +181,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][1], org_no_branch_1)
 
     # Assert search text with branch name
-    rv = client.get('/api/v1/simple-orgs?searchText=ch 1', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/orgs/simple?searchText=ch 1', headers=headers, content_type='application/json')
 
     result = rv.json
     assert rv.status_code == http_status.HTTP_200_OK
@@ -193,7 +193,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][0], org_branch_1)
 
     # Assert page 1
-    rv = client.get('/api/v1/simple-orgs?page=1&limit=1', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/orgs/simple?page=1&limit=1', headers=headers, content_type='application/json')
 
     result = rv.json
     assert rv.status_code == http_status.HTTP_200_OK
@@ -205,7 +205,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][0], org_branch_1)
 
     # Assert page 2
-    rv = client.get('/api/v1/simple-orgs?page=2&limit=1', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/orgs/simple?page=2&limit=1', headers=headers, content_type='application/json')
 
     result = rv.json
     assert rv.status_code == http_status.HTTP_200_OK

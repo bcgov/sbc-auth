@@ -17,7 +17,7 @@ Basic users will have an internal Org that is not created explicitly, but implic
 """
 from typing import List
 from flask import current_app
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, event, func, text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, desc, event, func, text
 from sqlalchemy.orm import contains_eager, relationship
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -153,10 +153,19 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         query = cls._search_by_business_identifier(query, search.business_identifier, environment)
         query = cls._search_for_statuses(query, search.statuses)
 
-        pagination = query.order_by(Org.created.desc()) \
-                          .paginate(per_page=search.limit, page=search.page)
+        query = cls.get_order_by(search, query)
+        pagination = query.paginate(per_page=search.limit, page=search.page)
 
         return pagination.items, pagination.total
+
+    @classmethod
+    def get_order_by(cls, search, query):
+        """Handle search query order by."""
+        # If searching by id, surface the perfect matches to the top
+        if search.id:
+            return query.order_by(desc(Org.id == search.id), Org.created.desc())
+
+        return query.order_by(Org.created.desc())
 
     @classmethod
     def search_orgs_by_business_identifier(cls,
