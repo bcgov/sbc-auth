@@ -21,7 +21,7 @@
       <thead class="base-table__header">
         <tr
           v-if="title"
-          :style="{ 'background-color': '#e0e7ed'}"
+          class="table-title-row"
         >
           <th :colspan="headers.length">
             <slot name="header-title">
@@ -228,7 +228,6 @@ export default defineComponent({
       }
       // Handle this logic in the observerCallback.
       if (props.observerCallback) {
-        // TODO detect end?
         state.visibleItems = state.sortedItems
       }
     }, { immediate: true })
@@ -321,6 +320,10 @@ export default defineComponent({
     left: 0;
     flex-grow: 0;
     flex-shrink: 0;
+  }
+
+  .table-title-row {
+    background-color: $BCgovBlue0;
   }
 
   ::v-deep .v-data-footer {

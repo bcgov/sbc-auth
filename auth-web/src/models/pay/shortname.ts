@@ -1,7 +1,7 @@
 export interface LinkedShortNameFilterParams {
-  isActive: false,
-  pageNumber: 1,
-  pageLimit: 20,
+  isActive: boolean;
+  pageNumber: number;
+  pageLimit: number;
   filterPayload: {
     accountName?: string,
     shortName?: string,
