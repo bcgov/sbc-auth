@@ -93,6 +93,10 @@ export default defineComponent({
   setup (props, { emit }) {
     const actionDropdown: Ref<boolean[]> = ref([])
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
+    const title = computed(() => {
+      return `Linked Bank Short Names (${state.totalResults})`
+    })
+
     const headers = [
       {
         col: 'shortName',
@@ -150,10 +154,6 @@ export default defineComponent({
         width: '164px'
       }
     ]
-
-    const title = computed(() => {
-      return `Linked Bank Short Names (${state.totalResults})`
-    })
 
     const state = reactive({
       results: [
@@ -269,7 +269,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
-@import '@/assets/scss/overrides.scss';
 
 #linked-bank-short-names {
   border: 1px solid #e9ecef
