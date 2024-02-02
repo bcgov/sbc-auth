@@ -56,7 +56,7 @@
           class="window-item-card"
           flat
         >
-          <ShortNameLinked
+          <ShortNameLinkedTable
             @shortname-state-total="shortnameStateTotal = $event" 
           />
         </v-card>
@@ -66,13 +66,13 @@
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, ref } from '@vue/composition-api'
-import ShortNameLinked from '@/components/pay/ShortNameLinked.vue'
+import ShortNameLinkedTable from '@/components/pay/ShortNameLinkedTable.vue'
 import PaymentService from '@/services/payment.services'
 import { TransactionFilterParams } from '@/models'
 
 export default defineComponent({
   name: 'ShortNameMappingView',
-  components: { ShortNameLinked },
+  components: { ShortNameLinkedTable },
   setup () {
     const shortnameStateTotal = ref(0)
 
