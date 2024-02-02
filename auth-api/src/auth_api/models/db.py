@@ -20,11 +20,12 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_continuum import make_versioned
 from sqlalchemy_continuum.plugins import ActivityPlugin
 
+from auth_api.utils.custom_query import CustomQuery
 
 # by convention in the Flask community these are lower case,
 # whereas pylint wants them upper case
 ma = Marshmallow()  # pylint: disable=invalid-name
-db = SQLAlchemy()  # pylint: disable=invalid-name
+db = SQLAlchemy(query_class=CustomQuery)  # pylint: disable=invalid-name
 
 activity_plugin = ActivityPlugin()  # pylint: disable=invalid-name
 
