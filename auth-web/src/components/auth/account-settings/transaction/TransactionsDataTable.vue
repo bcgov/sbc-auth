@@ -28,7 +28,7 @@
         <span v-else>({{ transactions.totalResults }})</span>
       </h3>
     </div>
-    <base-v-data-table
+    <BaseVDataTable
       class="transaction-list"
       :clearFiltersTrigger="clearFiltersTrigger"
       itemKey="id"
@@ -137,7 +137,7 @@
           </v-col>
         </v-row>
       </template>
-    </base-v-data-table>
+    </BaseVDataTable>
   </div>
 </template>
 
@@ -157,7 +157,7 @@ import { useTransactions } from '@/composables'
 
 export default defineComponent({
   name: 'TransactionsDataTable',
-  components: { BaseVDataTable, DatePicker, IconTooltip },
+  components: { BaseVDataTable: BaseVDataTable, DatePicker, IconTooltip },
   props: {
     extended: { default: false },
     headers: { default: [] as BaseTableHeaderI[] }

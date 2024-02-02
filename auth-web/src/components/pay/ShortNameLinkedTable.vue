@@ -6,19 +6,21 @@
     :loading="false"
     loadingText="Loading Linked Bank Short Names..."
     noDataText="No records to show."
-    :setItems="tableState.results"
+    :setItems="state.results"
     :setHeaders="headers"
     :setTableDataOptions="tableDataOptions"
-    :title="tableTitle"
-    :totalItems="tableState.totalResults"
-    pageHide="true"
-    :filters="tableState.filters"
+    :title="title"
+    :totalItems="state.totalResults"
+    :pageHide="true"
+    :filters="state.filters"
     :updateFilter="updateFilter"
+    :useObserver="true"
+    :observerCallback="infiniteScrollCallback"
     @update-table-options="tableDataOptions = $event"
   >
     <template #header-filter-slot-actions>
       <v-btn
-        v-if="tableState.filters.isActive"
+        v-if="state.filters.isActive"
         class="clear-btn mx-auto mt-auto"
         color="primary"
         outlined
@@ -89,6 +91,8 @@ export default defineComponent({
   name: 'ShortNameLinkedTable',
   components: { BaseVDataTable },
   setup (props, { emit }) {
+    const actionDropdown: Ref<boolean[]> = ref([])
+    const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
     const headers = [
       {
         col: 'shortName',
@@ -147,11 +151,11 @@ export default defineComponent({
       }
     ]
 
-    const tableTitle = computed(() => {
-      return `Linked Bank Short Names (${tableState.totalResults})`
+    const title = computed(() => {
+      return `Linked Bank Short Names (${state.totalResults})`
     })
-    
-    const tableState = reactive({
+
+    const state = reactive({
       results: [
         {
           accountName: 'RCPV',
@@ -165,6 +169,7 @@ export default defineComponent({
       filters: {
         isActive: false,
         pageNumber: 1,
+        pageSize: 20,
         filterPayload: {
           accountName: '',
           shortName: '',
@@ -175,82 +180,87 @@ export default defineComponent({
       loading: false
     })
 
-    const clearFiltersTrigger = ref(0)
+    onMounted(async () => {
+      headers.forEach((header) => {
+        if (header.hasFilter) {
+          (header.customFilter as any).filterApiFn = (val: any) => loadTableData(header.col, val || '')
+        }
+      })
+      await loadTableData()
+    })
 
-    const loadLinkedShortnameList = async (filterField?: string, value?: any) => {
-      tableState.loading = true
+    async function loadTableData (filterField?: string, value?: any, appendToResults = false) {
+      state.loading = true
       if (filterField) {
-        tableState.filters.pageNumber = 1
-        tableState.filters.filterPayload[filterField] = value
+        state.filters.pageNumber = 1
+        state.filters.filterPayload[filterField] = value
       }
       let filtersActive = false
-      for (const key in tableState.filters.filterPayload) {
+      for (const key in state.filters.filterPayload) {
         if (key === 'dateFilter') {
-          if (tableState.filters.filterPayload[key].endDate) filtersActive = true
-        } else if (tableState.filters.filterPayload[key]) filtersActive = true
+          if (state.filters.filterPayload[key].endDate) filtersActive = true
+        } else if (state.filters.filterPayload[key]) filtersActive = true
         if (filtersActive) break
       }
-      tableState.filters.isActive = filtersActive
+      state.filters.isActive = filtersActive
 
       try {
-        const response = await PaymentService.getEFTShortNames(tableState.filters, 'LINKED')
+        const response = await PaymentService.getEFTShortNames(state.filters, 'LINKED')
         if (response?.data) {
-          tableState.results = response.data.items || []
-          tableState.totalResults = response.data.total
+          // We use appendToResults for infinite scroll, so we keep the existing results.
+          state.results = appendToResults ? state.results.concat(response.data.items) : response.data.items
+          state.totalResults = response.data.total
           emit('shortname-state-total', response.data.stateTotal)
-        } else throw new Error('No response from getEFTShortNames')
+        } else {
+          throw new Error('No response from getEFTShortNames')
+        }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Failed to getEFTShortNames list.', error)
       }
-      tableState.loading = false
+      state.loading = false
     }
 
-    const clearFilters = async () => {
+    const clearFiltersTrigger = ref(0)
+    // TODO: Make generic refactor
+    async function clearFilters () {
       clearFiltersTrigger.value++
-      tableState.filters.filterPayload = {} as any
-      tableState.filters.isActive = false
-      await loadLinkedShortnameList()
+      state.filters.filterPayload = {} as any
+      state.filters.isActive = false
+      await loadTableData()
     }
 
-    const updateFilter = (filterField?: string, value?: any) => {
+    // TODO: Make generic refactor
+    function updateFilter (filterField?: string, value?: any) {
       if (filterField) {
         if (value) {
-          tableState.filters.filterPayload[filterField] = value
-          tableState.filters.isActive = true
+          state.filters.filterPayload[filterField] = value
+          state.filters.isActive = true
         } else {
-          delete tableState.filters.filterPayload[filterField]
+          delete state.filters.filterPayload[filterField]
         }
       }
-      if (Object.keys(tableState.filters.filterPayload).length === 0) {
-        tableState.filters.isActive = false
+      if (Object.keys(state.filters.filterPayload).length === 0) {
+        state.filters.isActive = false
       } else {
-        tableState.filters.isActive = true
+        state.filters.isActive = true
       }
     }
 
-    headers.forEach((header) => {
-      if (header.hasFilter) {
-        (header.customFilter as any).filterApiFn = (val: any) => loadLinkedShortnameList(header.col, val || '')
-      }
-    })
-
-    onMounted(async () => {
-      await loadLinkedShortnameList()
-    })
-
-    const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
-
-    const actionDropdown: Ref<boolean[]> = ref([])
+    async function infiniteScrollCallback() {
+      state.filters.pageNumber++
+      await loadTableData(null, null, true)
+    }
 
     return {
       actionDropdown,
       clearFilters,
       clearFiltersTrigger,
+      infiniteScrollCallback,
       headers,
       tableDataOptions,
-      tableState,
-      tableTitle,
+      state,
+      title,
       updateFilter
     }
   }

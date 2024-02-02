@@ -110,7 +110,7 @@
       </tr>
     </template>
     <template #[`body.append`]>
-      <tr v-if="pageHide && !reachedEnd">
+      <tr v-if="useObserver && !reachedEnd">
         <td :colspan="headers.length">
           <TableObserver @intersect="getNext()" />
         </td>
@@ -174,7 +174,9 @@ export default defineComponent({
     customPagination: { default: false },
     highlightIndex: { default: -1 },
     highlightClass: { type: String, default: '' },
-    title: { type: String, default: '' }
+    title: { type: String, default: '' },
+    useObserver: { type: Boolean, required: false },
+    observerCallback: { type: Function as PropType<() => void>, required: false }
   },
   emits: ['update-table-options'],
   setup (props, { emit }) {
@@ -193,7 +195,10 @@ export default defineComponent({
     const reachedEnd = ref(false)
 
     const getNext = _.debounce(async () => {
-      if (!props.loading && !reachedEnd.value && state.sortedItems.length > state.visibleItems.length) {
+      if (props.loading) return
+      if (props.observerCallback) {
+        await props.observerCallback()
+      } else if (!reachedEnd.value && state.sortedItems.length > state.visibleItems.length) {
         currentPage.value++
         const start = (currentPage.value - 1) * perPage.value
         const end = start + perPage.value
@@ -214,12 +219,16 @@ export default defineComponent({
     }
 
     watch(() => state.sortedItems, () => {
-      if (props.setItems && props.pageHide) {
+      if (props.setItems && !props.useObserver) {
         state.visibleItems = state.sortedItems.slice(0, perPage.value)
         firstItem.value = state.visibleItems[0]
         currentPage.value = 1
         reachedEnd.value = false
         scrollToTop()
+      }
+      // Handle this logic in the observerCallback.
+      if (props.observerCallback) {
+        state.visibleItems = state.sortedItems
       }
     }, { immediate: true })
 
