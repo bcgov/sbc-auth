@@ -35,6 +35,7 @@ from .org_authorizations import bp as org_authorizations_bp
 from .org_products import bp as org_products_bp
 from .permissions import bp as permissions_bp
 from .products import bp as products_bp
+from .simple_org import bp as simple_org_bp
 from .task import bp as task_bp
 from .user import bp as user_bp
 from .user_settings import bp as user_settings_bp
@@ -72,6 +73,7 @@ class V1Endpoint:  # pylint: disable=too-few-public-methods,
         self.app.register_blueprint(org_products_bp)
         self.app.register_blueprint(permissions_bp)
         self.app.register_blueprint(products_bp)
+        self.app.register_blueprint(simple_org_bp)
         self.app.register_blueprint(task_bp)
         self.app.register_blueprint(user_bp)
         self.app.register_blueprint(user_settings_bp)

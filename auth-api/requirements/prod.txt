@@ -16,6 +16,7 @@ requests
 itsdangerous
 sentry-sdk[flask]
 bcrypt
+cattrs
 jaeger-client
 Werkzeug<2
 minio
