@@ -169,7 +169,7 @@ export default defineComponent({
       filters: {
         isActive: false,
         pageNumber: 1,
-        pageSize: 20,
+        pageLimit: 20,
         filterPayload: {
           accountName: '',
           shortName: '',

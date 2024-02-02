@@ -115,6 +115,11 @@
           <TableObserver @intersect="getNext()" />
         </td>
       </tr>
+      <tr v-if="useObserver && !reachedEnd">
+        <td :colspan="headers.length">
+          <TableObserver @intersect="getNext()" />
+        </td>
+      </tr>
     </template>
 
     <!-- Loading -->
@@ -228,6 +233,7 @@ export default defineComponent({
       }
       // Handle this logic in the observerCallback.
       if (props.observerCallback) {
+        // TODO detect end?
         state.visibleItems = state.sortedItems
       }
     }, { immediate: true })
