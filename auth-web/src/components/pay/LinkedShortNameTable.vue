@@ -176,8 +176,8 @@ export default defineComponent({
           shortName: '',
           accountBranch: '',
           accountId: ''
-        } as LinkedShortNameFilterParams
-      },
+        } 
+      } as LinkedShortNameFilterParams,
       loading: false
     })
 
