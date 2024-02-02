@@ -222,7 +222,6 @@ export default defineComponent({
     }
 
     const clearFiltersTrigger = ref(0)
-    // TODO: Make generic refactor
     async function clearFilters () {
       clearFiltersTrigger.value++
       state.filters.filterPayload = {} as any
@@ -230,7 +229,6 @@ export default defineComponent({
       await loadTableData()
     }
 
-    // TODO: Make generic refactor
     function updateFilter (filterField?: string, value?: any) {
       if (filterField) {
         if (value) {
