@@ -38,7 +38,7 @@
         :class="['tab-item-default', tab === 1 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
-        <b>Linked Bank Short Names ({{ shortnameStateTotal }})</b>
+        <b>Linked Bank Short Names</b><span class="text-pre-wrap"> ({{ shortnameStateTotal }})</span>
       </v-tab>
     </v-tabs>
 
@@ -65,22 +65,19 @@
   </v-container>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref } from '@vue/composition-api'
+import { defineComponent, ref } from '@vue/composition-api'
 import ShortNameLinkedTable from '@/components/pay/ShortNameLinkedTable.vue'
-import PaymentService from '@/services/payment.services'
-import { TransactionFilterParams } from '@/models'
 
 export default defineComponent({
   name: 'ShortNameMappingView',
   components: { ShortNameLinkedTable },
   setup () {
+    const tab = ref(null)
     const shortnameStateTotal = ref(0)
 
-    const tab = ref(null)
-
     return {
-      shortnameStateTotal,
-      tab
+      tab,
+      shortnameStateTotal
     }
   }
 })
@@ -117,6 +114,10 @@ export default defineComponent({
 
 .window-item-card {
   padding: 30px 30px 30px 30px;
+}
+
+.text-pre-wrap {
+  white-space: pre-wrap !important;
 }
 
 // Additional to make it work from business-search.

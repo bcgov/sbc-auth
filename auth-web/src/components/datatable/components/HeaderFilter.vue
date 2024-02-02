@@ -41,6 +41,7 @@ import { BaseSelectFilter, BaseTextFilter } from '../resources/base-filters'
 import { PropType, defineComponent, reactive } from '@vue/composition-api'
 import { BaseTableHeaderI } from '../interfaces'
 import { headerTypes } from '@/resources/table-headers/affiliations-table/headers'
+import debounce from '@/util/debounce'
 
 const tempHeader = {
   col: '',
@@ -70,15 +71,15 @@ export default defineComponent({
       sortedItems: [...props.sortedItems]
     }) as unknown) as BaseTableStateI
 
-    const serverSideFilter = async (header: BaseTableHeaderI) => {
+    const serverSideFilter = debounce(async (header: BaseTableHeaderI) => {
       props.setFiltering(true)
       await header.customFilter.filterApiFn(header.customFilter.value)
       props.setFiltering(false)
-    }
+    })
 
     const filter = async (header: BaseTableHeaderI) => {
       if (header.customFilter.filterApiFn) {
-        serverSideFilter(header)
+        await serverSideFilter(header)
       } else {
         applyFilters(props, state, header)
       }

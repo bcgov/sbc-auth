@@ -1,7 +1,6 @@
 <template>
   <BaseVDataTable
     id="linked-bank-short-names"
-    class="transaction-list"
     :clearFiltersTrigger="clearFiltersTrigger"
     itemKey="id"
     :loading="false"
@@ -30,6 +29,51 @@
           mdi-close
         </v-icon>
       </v-btn>
+    </template>
+    <template #item-slot-actions="{ item, index }">
+      <div
+          :id="`action-menu-${index}`"
+          class="mx-auto"
+        >
+        <v-btn
+          small
+          color="primary"
+          min-width="5rem"
+          min-height="2rem"
+          class="open-action-btn"
+        >
+          View
+        </v-btn>
+        <span class="more-actions">
+          <v-menu
+            v-model="actionDropdown[index]"
+            :attach="`#action-menu-${index}`"
+          >
+            <template #activator="{ on }">
+              <v-btn
+                small
+                color="primary"
+                min-height="2rem"
+                class="more-actions-btn"
+                v-on="on"
+              >
+                <v-icon>{{ actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+                class="actions-dropdown_item my-1"
+                data-test="remove-linkage-button"
+              >
+                <v-list-item-subtitle>
+                  <v-icon small>mdi-delete</v-icon>
+                  <span class="pl-1">Remove Linkage</span>
+                </v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </span>
+      </div>
     </template>
   </BaseVDataTable>
 </template>
@@ -103,8 +147,6 @@ export default defineComponent({
       }
     ]
 
-    const extended = ref(true)
-
     const tableTitle = computed(() => {
       return `Linked Bank Short Names (${tableState.totalResults})`
     })
@@ -164,21 +206,13 @@ export default defineComponent({
       tableState.loading = false
     }
 
-    // TODO genericize
-    const clearAllFilters = async () => {
+    const clearFilters = async () => {
+      clearFiltersTrigger.value++
       tableState.filters.filterPayload = {} as any
       tableState.filters.isActive = false
       await loadLinkedShortnameList()
     }
 
-    // TODO genericize
-    const clearFilters = () => {
-      clearFiltersTrigger.value++
-      // clear affiliation state filters and trigger search
-      clearAllFilters()
-    }
-
-    // TODO make this generic.
     const updateFilter = (filterField?: string, value?: any) => {
       if (filterField) {
         if (value) {
@@ -207,11 +241,13 @@ export default defineComponent({
 
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
 
+    const actionDropdown: Ref<boolean[]> = ref([])
+
     return {
+      actionDropdown,
       clearFilters,
       clearFiltersTrigger,
       headers,
-      extended,
       tableDataOptions,
       tableState,
       tableTitle,
@@ -223,12 +259,32 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
+@import '@/assets/scss/overrides.scss';
 
 #linked-bank-short-names {
   border: 1px solid #e9ecef
 }
 
+// For the dropdown text color. TODO: Refactor 
+::v-deep .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
+  color: $app-blue;
+  font-weight: normal;
+  .v-icon.v-icon {
+    color: $app-blue;
+  }
+}
+
+.open-action-btn {
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+  min-width: 4.9rem
+}
+
 ::v-deep {
+  .v-btn + .v-btn {
+      margin-left: 0.5rem;
+  }
+
   .base-table__header > tr:first-child > th  {
     padding: 0 0 0 0 !important;
   }
