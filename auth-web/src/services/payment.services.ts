@@ -1,7 +1,6 @@
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
 import { PADInfo, PADInfoValidation } from '@/models/Organization'
-import { LinkedShortNameFilterParams } from '@/models/pay/shortname'
 import {
   StatementFilterParams,
   StatementListItem,
@@ -13,6 +12,7 @@ import { TransactionFilter, TransactionFilterParams, TransactionListResponse } f
 
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
+import { LinkedShortNameFilterParams } from '@/models/pay/shortname'
 import { Payment } from '@/models/Payment'
 import { PaymentTypes } from '@/util/constants'
 import { axios } from '@/util/http-util'

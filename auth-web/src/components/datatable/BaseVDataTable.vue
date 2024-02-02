@@ -181,7 +181,7 @@ export default defineComponent({
     highlightClass: { type: String, default: '' },
     title: { type: String, default: '' },
     useObserver: { type: Boolean, required: false },
-    observerCallback: { type: Function as PropType<() => void>, required: false }
+    observerCallback: { type: Function as PropType<() => void>, required: false, default: null }
   },
   emits: ['update-table-options'],
   setup (props, { emit }) {

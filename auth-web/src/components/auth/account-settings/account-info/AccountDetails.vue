@@ -67,7 +67,7 @@
               </div>
             </div>
             <div v-else>
-              <account-business-type
+              <AccountBusinessType
                 :saving="false"
                 :isEditAccount="true"
                 @update:org-business-type="updateOrgBusinessType"

@@ -40,8 +40,8 @@
 import { BaseSelectFilter, BaseTextFilter } from '../resources/base-filters'
 import { PropType, defineComponent, reactive } from '@vue/composition-api'
 import { BaseTableHeaderI } from '../interfaces'
-import { headerTypes } from '@/resources/table-headers/affiliations-table/headers'
 import debounce from '@/util/debounce'
+import { headerTypes } from '@/resources/table-headers/affiliations-table/headers'
 
 const tempHeader = {
   col: '',

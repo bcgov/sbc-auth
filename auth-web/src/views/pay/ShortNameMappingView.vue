@@ -57,7 +57,7 @@
           flat
         >
           <LinkedShortNameTable
-            @shortname-state-total="shortnameStateTotal = $event" 
+            @shortname-state-total="shortnameStateTotal = $event"
           />
         </v-card>
       </v-window-item>

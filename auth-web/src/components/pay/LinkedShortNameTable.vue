@@ -32,11 +32,11 @@
         </v-icon>
       </v-btn>
     </template>
-    <template #item-slot-actions="{ item, index }">
+    <template #item-slot-actions="{ index }">
       <div
-          :id="`action-menu-${index}`"
-          class="mx-auto"
-        >
+        :id="`action-menu-${index}`"
+        class="mx-auto"
+      >
         <v-btn
           small
           color="primary"
@@ -84,8 +84,8 @@ import { Ref, computed, defineComponent, onMounted, reactive, ref } from '@vue/c
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
-import PaymentService from '@/services/payment.services'
 import { LinkedShortNameFilterParams } from '@/models/pay/shortname'
+import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
 
 export default defineComponent({
@@ -94,9 +94,6 @@ export default defineComponent({
   setup (props, { emit }) {
     const actionDropdown: Ref<boolean[]> = ref([])
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
-    const title = computed(() => {
-      return `Linked Bank Short Names (${state.totalResults})`
-    })
 
     const headers = [
       {
@@ -176,9 +173,13 @@ export default defineComponent({
           shortName: '',
           accountBranch: '',
           accountId: ''
-        } 
+        }
       } as LinkedShortNameFilterParams,
       loading: false
+    })
+
+    const title = computed(() => {
+      return `Linked Bank Short Names (${state.totalResults})`
     })
 
     onMounted(async () => {
@@ -247,7 +248,7 @@ export default defineComponent({
       }
     }
 
-    async function infiniteScrollCallback() {
+    async function infiniteScrollCallback () {
       state.filters.pageNumber++
       await loadTableData(null, null, true)
     }
@@ -274,7 +275,7 @@ export default defineComponent({
   border: 1px solid #e9ecef
 }
 
-// For the dropdown text color. TODO: Refactor 
+// For the dropdown text color. TODO: Refactor
 ::v-deep .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
   color: $app-blue;
   font-weight: normal;
