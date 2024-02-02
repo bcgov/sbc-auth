@@ -25,6 +25,7 @@ from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.dataclass import DeleteAffiliationRequest
+from auth_api.models.dataclass import SimpleOrgSearch
 from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
@@ -33,11 +34,12 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
+from auth_api.services import SimpleOrg as SimpleOrgService
 from auth_api.services import User as UserService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.tracer import Tracer
 from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.enums import AccessType, NotificationType, OrgType, PatchActions, Status
+from auth_api.utils.enums import AccessType, NotificationType, OrgStatus, OrgType, PatchActions, Status
 from auth_api.utils.role_validator import validate_roles
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role  # noqa: I005
 from auth_api.utils.util import get_request_environment
@@ -91,6 +93,36 @@ def search_organizations():
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
     return response, status
+
+
+@bp.route('/simple', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
+@TRACER.trace()
+@_jwt.has_one_of_roles(
+    [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value])
+def search_simple_orgs():
+    """Return simplified organization information."""
+    current_app.logger.info('<search_simple_orgs')
+
+    org_id = request.args.get('id', None)
+    page: int = int(request.args.get('page', '1'))
+    limit: int = int(request.args.get('limit', '10'))
+    name = request.args.get('name', None)
+    branch_name = request.args.get('branchName', None)
+    search_text = request.args.get('searchText', None)
+    status = request.args.get('status', OrgStatus.ACTIVE.value)
+
+    response, status = SimpleOrgService.search(SimpleOrgSearch(
+        id=org_id,
+        name=name,
+        branch_name=branch_name,
+        search_text=search_text,
+        status=status,
+        page=page,
+        limit=limit)), http_status.HTTP_200_OK
+
+    current_app.logger.info('>search_simple_orgs')
+    return jsonify(response), status
 
 
 @bp.route('', methods=['POST'])

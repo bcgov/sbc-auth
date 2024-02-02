@@ -15,7 +15,7 @@
 
 from jinja2 import Environment, FileSystemLoader
 from flask import current_app
-from sqlalchemy import String, and_, func, or_
+from sqlalchemy import String, and_, desc, func, or_
 
 from auth_api.config import get_named_config
 from auth_api.models import db
@@ -64,6 +64,7 @@ class SimpleOrg:  # pylint: disable=too-few-public-methods
                          OrgModel.branch_name != ''))
             ))
 
+        query = cls.get_order_by(search_criteria, query)
         pagination = query.paginate(per_page=search_criteria.limit,
                                     page=search_criteria.page)
 
@@ -78,3 +79,12 @@ class SimpleOrg:  # pylint: disable=too-few-public-methods
             'items': org_list,
             'total': pagination.total
         }
+
+    @classmethod
+    def get_order_by(cls, search, query):
+        """Handle search query order by."""
+        # If searching by id, surface the perfect matches to the top
+        if search.id:
+            return query.order_by(desc(OrgModel.id == search.id), OrgModel.created.desc())
+
+        return query.order_by(OrgModel.name)

@@ -284,7 +284,7 @@ def test_preflight_user(app, client, jwt, session):
 
 def test_preflight_simple_org(app, client, jwt, session):
     """Assert preflight responses for simple org are correct."""
-    rv = client.options('/api/v1/simple-orgs', headers={'Access-Control-Request-Method': 'GET'})
+    rv = client.options('/api/v1/orgs/simple', headers={'Access-Control-Request-Method': 'GET'})
     assert rv.status_code == http_status.HTTP_200_OK
     assert_access_control_headers(rv, '*', 'GET')
 
