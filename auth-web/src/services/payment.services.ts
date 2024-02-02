@@ -1,6 +1,7 @@
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
 import { PADInfo, PADInfoValidation } from '@/models/Organization'
+import { LinkedShortNameFilterParams } from '@/models/pay/shortname'
 import {
   StatementFilterParams,
   StatementListItem,
@@ -204,7 +205,7 @@ export default class PaymentService {
     return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
   }
 
-  static getEFTShortNames (filterParams: TransactionFilterParams, state, viewAll = false): AxiosPromise<any> {
+  static getEFTShortNames (filterParams: LinkedShortNameFilterParams, state, viewAll = false): AxiosPromise<any> {
     const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())

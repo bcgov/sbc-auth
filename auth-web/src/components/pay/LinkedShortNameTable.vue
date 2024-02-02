@@ -85,10 +85,11 @@ import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
 import PaymentService from '@/services/payment.services'
+import { LinkedShortNameFilterParams } from '@/models/pay/shortname'
 import _ from 'lodash'
 
 export default defineComponent({
-  name: 'ShortNameLinkedTable',
+  name: 'LinkedShortNameTable',
   components: { BaseVDataTable },
   setup (props, { emit }) {
     const actionDropdown: Ref<boolean[]> = ref([])
@@ -175,7 +176,7 @@ export default defineComponent({
           shortName: '',
           accountBranch: '',
           accountId: ''
-        }
+        } as LinkedShortNameFilterParams
       },
       loading: false
     })
@@ -189,6 +190,7 @@ export default defineComponent({
       await loadTableData()
     })
 
+    // This is also called inside of the HeaderFilter component inside of the BaseVDataTable component
     async function loadTableData (filterField?: string, value?: any, appendToResults = false) {
       state.loading = true
       if (filterField) {
@@ -224,7 +226,7 @@ export default defineComponent({
     const clearFiltersTrigger = ref(0)
     async function clearFilters () {
       clearFiltersTrigger.value++
-      state.filters.filterPayload = {} as any
+      state.filters.filterPayload = {}
       state.filters.isActive = false
       await loadTableData()
     }
