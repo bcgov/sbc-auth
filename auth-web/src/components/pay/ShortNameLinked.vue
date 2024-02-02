@@ -5,12 +5,12 @@
     :clearFiltersTrigger="clearFiltersTrigger"
     itemKey="id"
     :loading="false"
-    loadingText="Loading Transaction Records..."
-    noDataText="No Transaction Records"
+    loadingText="Loading Linked Bank Short Names..."
+    noDataText="No records to show."
     :setItems="tableState.results"
     :setHeaders="headers"
     :setTableDataOptions="tableDataOptions"
-    title="Linked Bank Short Names"
+    :title="tableTitle"
     :totalItems="tableState.totalResults"
     pageHide="true"
     :filters="tableState.filters"
@@ -34,7 +34,7 @@
   </BaseVDataTable>
 </template>
 <script lang="ts">
-import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
+import { Ref, computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
@@ -44,7 +44,7 @@ import _ from 'lodash'
 export default defineComponent({
   name: 'ShortNameLinked',
   components: { BaseVDataTable },
-  setup () {
+  setup (props, { emit }) {
     const headers = [
       {
         col: 'shortName',
@@ -71,7 +71,7 @@ export default defineComponent({
         value: 'Account Name'
       },
       {
-        col: 'branchName',
+        col: 'accountBranch',
         customFilter: {
           clearable: true,
           label: 'Branch Name',
@@ -105,6 +105,10 @@ export default defineComponent({
 
     const extended = ref(true)
 
+    const tableTitle = computed(() => {
+      return `Linked Bank Short Names (${tableState.totalResults})`
+    })
+    
     const tableState = reactive({
       results: [
         {
@@ -151,6 +155,7 @@ export default defineComponent({
         if (response?.data) {
           tableState.results = response.data.items || []
           tableState.totalResults = response.data.total
+          emit('shortname-state-total', response.data.stateTotal)
         } else throw new Error('No response from getEFTShortNames')
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -209,6 +214,7 @@ export default defineComponent({
       extended,
       tableDataOptions,
       tableState,
+      tableTitle,
       updateFilter
     }
   }
@@ -220,5 +226,23 @@ export default defineComponent({
 
 #linked-bank-short-names {
   border: 1px solid #e9ecef
+}
+
+::v-deep {
+  .base-table__header > tr:first-child > th  {
+    padding: 0 0 0 0 !important;
+  }
+  .base-table__header__filter {
+    padding-left: 16px;
+    padding-right: 4px;
+  }
+  .base-table__item-row {
+    color: #495057;
+    font-weight: bold;
+  }
+  .base-table__item-cell {
+    padding: 16px 0 16px 16px;
+    vertical-align: middle;
+  }
 }
 </style>

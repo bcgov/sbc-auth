@@ -214,9 +214,11 @@ export default class PaymentService {
     }
     if (viewAll) params.append('viewAll', `${viewAll}`)
 
-    for (const [key, value] of Object.entries(filterParams.filterPayload)) {
-      if (value) {
-        params.append(key, value)
+    if (filterParams.filterPayload) {
+      for (const [key, value] of Object.entries(filterParams.filterPayload)) {
+        if (value) {
+          params.append(key, value)
+        }
       }
     }
     params.append('state', state)

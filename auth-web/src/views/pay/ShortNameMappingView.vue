@@ -38,7 +38,7 @@
         :class="['tab-item-default', tab === 1 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
-        <b>Linked Bank Short Names</b>
+        <b>Linked Bank Short Names ({{ shortnameStateTotal }})</b>
       </v-tab>
     </v-tabs>
 
@@ -51,12 +51,14 @@
           Unlinked go here
         </v-card>
       </v-window-item>
-      <v-window-item>
+      <v-window-item eager>
         <v-card
           class="window-item-card"
           flat
         >
-          <ShortNameLinked />
+          <ShortNameLinked
+            @shortname-state-total="shortnameStateTotal = $event" 
+          />
         </v-card>
       </v-window-item>
     </v-window>
@@ -65,17 +67,19 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref } from '@vue/composition-api'
 import ShortNameLinked from '@/components/pay/ShortNameLinked.vue'
+import PaymentService from '@/services/payment.services'
+import { TransactionFilterParams } from '@/models'
 
 export default defineComponent({
   name: 'ShortNameMappingView',
   components: { ShortNameLinked },
-  props: {
-  },
   setup () {
-    onMounted(async () => {
-    })
+    const shortnameStateTotal = ref(0)
+
     const tab = ref(null)
+
     return {
+      shortnameStateTotal,
       tab
     }
   }
@@ -117,14 +121,6 @@ export default defineComponent({
 
 // Additional to make it work from business-search.
 ::v-deep {
-  .base-table__header > tr:first-child > th  {
-    padding: 0 0 0 0 !important;
-  }
-  .base-table__header__filter {
-    padding-left: 16px;
-    padding-right: 4px;
-  }
-
   .v-tabs-slider-wrapper {
     display: none !important;
   }
