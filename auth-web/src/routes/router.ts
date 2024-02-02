@@ -797,8 +797,8 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true }
     },
     {
-      path: '/shortname-mapping',
-      name: 'shortnamemapping',
+      path: '/pay/manage-shortnames',
+      name: 'manage-shortnames',
       component: ShortNameMappingView,
       meta: { requiresAuth: true },
       props: true
