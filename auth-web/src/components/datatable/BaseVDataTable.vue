@@ -115,11 +115,6 @@
           <TableObserver @intersect="getNext()" />
         </td>
       </tr>
-      <tr v-if="useObserver && !reachedEnd">
-        <td :colspan="headers.length">
-          <TableObserver @intersect="getNext()" />
-        </td>
-      </tr>
     </template>
 
     <!-- Loading -->
