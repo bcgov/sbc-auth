@@ -35,7 +35,7 @@
     <template #item-slot-actions="{ index }">
       <div
         :id="`action-menu-${index}`"
-        class="mx-auto"
+        class="new-actions mx-auto"
       >
         <v-btn
           small
@@ -275,7 +275,7 @@ export default defineComponent({
   border: 1px solid #e9ecef
 }
 
-// For the dropdown text color. TODO: Refactor
+// For the dropdown text color.
 ::v-deep .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
   color: $app-blue;
   font-weight: normal;
@@ -284,16 +284,25 @@ export default defineComponent({
   }
 }
 
-.open-action-btn {
-  border-top-right-radius: 0px;
-  border-bottom-right-radius: 0px;
-  min-width: 4.9rem
+// Action buttons.
+.new-actions {
+  height:30px;
+  .open-action-btn {
+    font-size: .875rem;
+    box-shadow: none;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-right: 1px;
+  }
+
+  .more-actions-btn {
+    box-shadow: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
 }
 
 ::v-deep {
-  .v-btn + .v-btn {
-      margin-left: 0.5rem;
-  }
 
   .base-table__header > tr:first-child > th  {
     padding: 0 0 0 0 !important;
