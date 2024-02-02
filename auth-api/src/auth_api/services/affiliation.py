@@ -94,7 +94,7 @@ class Affiliation:
         nr_number_name_dict = {d['business_identifier']: d['name']
                                for d in data if d['corp_type']['code'] == CorpType.NR.value}
         # Create a list of all temporary business names
-        temp_types = (CorpType.TMP.value, CorpType.RTMP.value)
+        temp_types = (CorpType.TMP.value, CorpType.RTMP.value, CorpType.ATMP.value)
         tmp_business_list = [d['name'] for d in data if d['corp_type']['code'] in temp_types]
 
         # NR Numbers
@@ -188,7 +188,7 @@ class Affiliation:
 
         if entity_type not in ['SP', 'GP']:
             entity.set_pass_code_claimed(True)
-        if entity_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
+        if entity_type not in [CorpType.RTMP.value, CorpType.TMP.value, CorpType.ATMP.value]:
             name = entity.name if len(entity.name) > 0 else entity.business_identifier
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
                                                            name=name, id=entity.business_identifier))
@@ -287,7 +287,7 @@ class Affiliation:
             affiliation_model = AffiliationModel(
                 org_id=org_id, entity_id=entity.identifier, certified_by_name=certified_by_name)
 
-            if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
+            if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value, CorpType.ATMP.value]:
                 ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
                                                                name=entity.name, id=entity.business_identifier))
         affiliation_model.certified_by_name = certified_by_name
@@ -342,7 +342,7 @@ class Affiliation:
         affiliation.delete()
         entity.set_pass_code_claimed(False)
 
-        if entity.corp_type in [CorpType.RTMP.value, CorpType.TMP.value]:
+        if entity.corp_type in [CorpType.RTMP.value, CorpType.TMP.value, CorpType.ATMP.value]:
             return
 
         # When registering a business (also RTMP and TMP in between):
@@ -456,11 +456,7 @@ class Affiliation:
             if businesses_key in data:
                 businesses = list(data[businesses_key])
             if drafts_key in data:
-                # set draft type so that UI knows its a draft entity
-                draft_reg_types = [CorpType.GP.value, CorpType.SP.value]
-                drafts = [
-                    {'draftType': CorpType.RTMP.value if draft['legalType'] in draft_reg_types
-                        else CorpType.TMP.value, **draft} for draft in data[drafts_key]]
+                drafts = [{'draftType': draft['draftType'], **draft} for draft in data[drafts_key]]
         return name_requests, businesses, drafts
 
     @staticmethod
