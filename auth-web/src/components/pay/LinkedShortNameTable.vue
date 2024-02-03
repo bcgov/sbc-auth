@@ -102,6 +102,7 @@ export default defineComponent({
     const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {
+        filterApiFn: hasFilter ? (val: any) => loadTableData(col, val || '') : null,
         clearable: true,
         label,
         type,
@@ -149,12 +150,6 @@ export default defineComponent({
         }
       } as LinkedShortNameFilterParams,
       loading: false
-    })
-
-    headers.forEach((header) => {
-      if (header.hasFilter) {
-        (header.customFilter as any).filterApiFn = (val: any) => loadTableData(header.col, val || '')
-      }
     })
 
     const title = computed(() => {
