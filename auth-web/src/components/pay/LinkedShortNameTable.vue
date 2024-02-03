@@ -280,7 +280,6 @@ export default defineComponent({
 }
 
 ::v-deep {
-
   .base-table__header > tr:first-child > th  {
     padding: 0 0 0 0 !important;
   }
