@@ -99,55 +99,24 @@ export default defineComponent({
     const actionDropdown: Ref<boolean[]> = ref([])
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
 
+    const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
+      col,
+      customFilter: {
+        clearable: true,
+        label,
+        type,
+        value
+      },
+      hasFilter,
+      minWidth,
+      value
+    })
+
     const headers = [
-      {
-        col: 'shortName',
-        customFilter: {
-          clearable: true,
-          label: 'Bank Short Name',
-          type: 'text',
-          value: ''
-        },
-        hasFilter: true,
-        minWidth: '125px',
-        value: 'Bank Short Name'
-      },
-      {
-        col: 'accountName',
-        customFilter: {
-          clearable: true,
-          label: 'Account Name',
-          type: 'text',
-          value: ''
-        },
-        hasFilter: true,
-        minWidth: '125px',
-        value: 'Account Name'
-      },
-      {
-        col: 'accountBranch',
-        customFilter: {
-          clearable: true,
-          label: 'Branch Name',
-          type: 'text',
-          value: ''
-        },
-        hasFilter: true,
-        minWidth: '125px',
-        value: 'Branch Name'
-      },
-      {
-        col: 'accountId',
-        customFilter: {
-          clearable: true,
-          label: 'Account Number',
-          type: 'text',
-          value: ''
-        },
-        hasFilter: true,
-        minWidth: '125px',
-        value: 'Account Number'
-      },
+      createHeader('shortName', 'Bank Short Name', 'text', '', true, '125px'),
+      createHeader('accountName', 'Account Name', 'text', '', true, '125px'),
+      createHeader('accountBranch', 'Branch Name', 'text', '', true, '125px'),
+      createHeader('accountId', 'Account Number', 'text', '', true, '125px'),
       {
         col: 'actions',
         hasFilter: false,
