@@ -152,7 +152,7 @@ export default defineComponent({
       loading: false
     })
 
-    const title = computed(() => {
+    const title = computed<string>(() => {
       return `Linked Bank Short Names (${state.totalResults})`
     })
 
@@ -163,7 +163,7 @@ export default defineComponent({
     /* This is also called inside of the HeaderFilter component inside of the BaseVDataTable component
      * Parts of this is duplicated inside of the other datatable components.
      */
-    async function loadTableData (filterField?: string, value?: any, appendToResults = false) {
+    async function loadTableData (filterField?: string, value?: any, appendToResults = false): Promise<void> {
       state.loading = true
       if (filterField) {
         state.filters.pageNumber = 1
@@ -196,7 +196,7 @@ export default defineComponent({
     }
 
     const clearFiltersTrigger = ref(0)
-    async function clearFilters () {
+    async function clearFilters (): Promise<void> {
       clearFiltersTrigger.value++
       state.filters.filterPayload = {}
       state.filters.isActive = false
@@ -204,7 +204,7 @@ export default defineComponent({
     }
 
     /* This cannot be done inside of the BaseDataTable component because it manupulates the state outside of it. */
-    function updateFilter (filterField?: string, value?: any) {
+    function updateFilter (filterField?: string, value?: any) : void {
       if (filterField) {
         if (value) {
           state.filters.filterPayload[filterField] = value
@@ -221,7 +221,7 @@ export default defineComponent({
     }
 
     /* Instead of slicing up the results, we handle the results inside of this function. */
-    async function infiniteScrollCallback () {
+    async function infiniteScrollCallback (): Promise<boolean> {
       if (state.totalResults < (state.filters.pageLimit * state.filters.pageNumber)) return true
       state.filters.pageNumber++
       await loadTableData(null, null, true)
