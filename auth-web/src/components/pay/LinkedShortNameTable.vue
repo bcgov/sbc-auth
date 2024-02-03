@@ -88,6 +88,10 @@ import { LinkedShortNameFilterParams } from '@/models/pay/shortname'
 import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
 
+/* This component differs from Transactions table, which has pagination, this has infinite scroll.
+ * This component also differs from the affiliations table, which has all of the results at once, where this grabs it
+ * one page at a time.
+ */
 export default defineComponent({
   name: 'LinkedShortNameTable',
   components: { BaseVDataTable },
@@ -192,7 +196,9 @@ export default defineComponent({
       await loadTableData()
     })
 
-    // This is also called inside of the HeaderFilter component inside of the BaseVDataTable component
+    /* This is also called inside of the HeaderFilter component inside of the BaseVDataTable component
+     * Parts of this is duplicated inside of the other datatable components.
+     */
     async function loadTableData (filterField?: string, value?: any, appendToResults = false) {
       state.loading = true
       if (filterField) {
@@ -211,7 +217,7 @@ export default defineComponent({
       try {
         const response = await PaymentService.getEFTShortNames(state.filters, 'LINKED')
         if (response?.data) {
-          // We use appendToResults for infinite scroll, so we keep the existing results.
+          /* We use appendToResults for infinite scroll, so we keep the existing results. */
           state.results = appendToResults ? state.results.concat(response.data.items) : response.data.items
           state.totalResults = response.data.total
           emit('shortname-state-total', response.data.stateTotal)
@@ -233,6 +239,7 @@ export default defineComponent({
       await loadTableData()
     }
 
+    /* This cannot be done inside of the BaseDataTable component because it manupulates the state outside of it. */
     function updateFilter (filterField?: string, value?: any) {
       if (filterField) {
         if (value) {
@@ -249,6 +256,7 @@ export default defineComponent({
       }
     }
 
+    /* Instead of slicing up the results, we handle the results inside of this function. */
     async function infiniteScrollCallback () {
       if (state.totalResults < (state.filters.pageLimit * state.filters.pageNumber)) return true
       state.filters.pageNumber++
