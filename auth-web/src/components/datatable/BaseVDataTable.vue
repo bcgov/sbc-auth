@@ -23,7 +23,10 @@
           v-if="title"
           class="table-title-row"
         >
-          <th :colspan="headers.length">
+          <th
+            id="table-title-cell"
+            :colspan="headers.length"
+          >
             <slot name="header-title">
               <h2 class="ml-3 py-6">
                 {{ title }}
