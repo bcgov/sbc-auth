@@ -176,7 +176,7 @@ export default defineComponent({
     highlightClass: { type: String, default: '' },
     title: { type: String, default: '' },
     useObserver: { type: Boolean, required: false },
-    observerCallback: { type: Function as PropType<() => void>, required: false, default: null }
+    observerCallback: { type: Function as PropType<() => Promise<boolean>>, required: false, default: null }
   },
   emits: ['update-table-options'],
   setup (props, { emit }) {
@@ -197,7 +197,7 @@ export default defineComponent({
     const getNext = _.debounce(async () => {
       if (props.loading) return
       if (props.observerCallback) {
-        await props.observerCallback()
+        reachedEnd.value = await props.observerCallback()
       } else if (!reachedEnd.value && state.sortedItems.length > state.visibleItems.length) {
         currentPage.value++
         const start = (currentPage.value - 1) * perPage.value

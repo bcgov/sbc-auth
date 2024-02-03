@@ -178,16 +178,17 @@ export default defineComponent({
       loading: false
     })
 
+    headers.forEach((header) => {
+      if (header.hasFilter) {
+        (header.customFilter as any).filterApiFn = (val: any) => loadTableData(header.col, val || '')
+      }
+    })
+
     const title = computed(() => {
       return `Linked Bank Short Names (${state.totalResults})`
     })
 
     onMounted(async () => {
-      headers.forEach((header) => {
-        if (header.hasFilter) {
-          (header.customFilter as any).filterApiFn = (val: any) => loadTableData(header.col, val || '')
-        }
-      })
       await loadTableData()
     })
 
@@ -249,8 +250,10 @@ export default defineComponent({
     }
 
     async function infiniteScrollCallback () {
+      if (state.totalResults < (state.filters.pageLimit * state.filters.pageNumber)) return true
       state.filters.pageNumber++
       await loadTableData(null, null, true)
+      return false
     }
 
     return {
