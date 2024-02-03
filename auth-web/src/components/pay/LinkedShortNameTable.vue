@@ -160,10 +160,7 @@ export default defineComponent({
       await loadTableData()
     })
 
-    /* This is also called inside of the HeaderFilter component inside of the BaseVDataTable component
-     * Parts of this is duplicated inside of the other datatable components.
-     */
-    async function loadTableData (filterField?: string, value?: any, appendToResults = false): Promise<void> {
+    function handleFilters (filterField?: string, value?: any): void {
       state.loading = true
       if (filterField) {
         state.filters.pageNumber = 1
@@ -177,7 +174,13 @@ export default defineComponent({
         if (filtersActive) break
       }
       state.filters.isActive = filtersActive
+    }
 
+    /* This is also called inside of the HeaderFilter component inside of the BaseVDataTable component
+     * Parts of this is duplicated inside of the other datatable components.
+     */
+    async function loadTableData (filterField?: string, value?: any, appendToResults = false): Promise<void> {
+      handleFilters(filterField, value)
       try {
         const response = await PaymentService.getEFTShortNames(state.filters, 'LINKED')
         if (response?.data) {
