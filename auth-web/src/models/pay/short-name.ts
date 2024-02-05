@@ -67,4 +67,5 @@ export interface UnlinkedShortNameState {
   selectedShortName: object
   showDatePicker: boolean
   dateRangeSelected: boolean
+  dateRangeText: string
 }

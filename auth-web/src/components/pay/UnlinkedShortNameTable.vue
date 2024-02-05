@@ -57,6 +57,8 @@
       ref="datePicker"
       :reset="state.dateRangeReset"
       class="date-picker"
+      :setEndDate="state.endDate"
+      :setStartDate="state.startDate"
       @submit="updateDateRange($event)"
     />
     <BaseVDataTable
@@ -81,6 +83,7 @@
       <template #header-filter-slot-depositDate>
         <div @click="clickDatePicker()">
           <v-text-field
+            v-model="state.dateRangeText"
             class="base-table__header__filter__textbox date-filter"
             :append-icon="'mdi-calendar'"
             clearable
@@ -202,7 +205,8 @@ export default defineComponent({
       clearFiltersTrigger: 0,
       selectedShortName: {},
       showDatePicker: false,
-      dateRangeSelected: false
+      dateRangeSelected: false,
+      dateRangeText: ''
     })
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
@@ -226,7 +230,7 @@ export default defineComponent({
         hasFilter: false,
         label: 'Initial Payment Received Date',
         value: 'Initial Payment Received Date',
-        minWidth: '165px'
+        minWidth: '260px'
       },
       createHeader('depositAmount', 'Initial Payment Amount', 'text', 'Initial Payment Amount'),
       {
@@ -256,6 +260,7 @@ export default defineComponent({
       state.showDatePicker = false
       state.dateRangeSelected = !!(endDate && startDate)
       if (!state.dateRangeSelected) { endDate = ''; startDate = '' }
+      state.dateRangeText = state.dateRangeSelected ? `${formatDate(startDate)} - ${formatDate(endDate)}` : ''
       loadTableData('depositDate', { endDate, startDate })
     }
 
