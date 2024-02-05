@@ -179,6 +179,7 @@ import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
+import { ShortNameStatus } from '@/util/constants'
 import { UnlinkedShortNameFilterParams } from '@/models/pay/shortname'
 import _ from 'lodash'
 import moment from 'moment'
@@ -315,7 +316,7 @@ export default defineComponent({
     async function loadTableData (filterField?: string, value?: any, appendToResults = false): Promise<void> {
       handleFilters(filterField, value)
       try {
-        const response = await PaymentService.getEFTShortNames(state.filters, 'UNLINKED')
+        const response = await PaymentService.getEFTShortNames(state.filters, ShortNameStatus.UNLINKED)
         if (response?.data) {
           /* We use appendToResults for infinite scroll, so we keep the existing results. */
           state.results = appendToResults ? state.results.concat(response.data.items) : response.data.items

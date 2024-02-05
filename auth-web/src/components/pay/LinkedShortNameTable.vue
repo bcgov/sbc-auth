@@ -86,6 +86,7 @@ import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
 import { LinkedShortNameFilterParams } from '@/models/pay/shortname'
 import PaymentService from '@/services/payment.services'
+import { ShortNameStatus } from '@/util/constants'
 import _ from 'lodash'
 
 /* This component differs from Transactions table, which has pagination, this has infinite scroll.
@@ -182,7 +183,7 @@ export default defineComponent({
     async function loadTableData (filterField?: string, value?: any, appendToResults = false): Promise<void> {
       handleFilters(filterField, value)
       try {
-        const response = await PaymentService.getEFTShortNames(state.filters, 'LINKED')
+        const response = await PaymentService.getEFTShortNames(state.filters, ShortNameStatus.LINKED)
         if (response?.data) {
           /* We use appendToResults for infinite scroll, so we keep the existing results. */
           state.results = appendToResults ? state.results.concat(response.data.items) : response.data.items
