@@ -174,7 +174,7 @@ export default defineComponent({
       const searchStatus = null // search all (ACTIVE + HISTORICAL)
       const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes)
       // Use appropriate service based on lookupType
-      
+
       const searchService = (props.lookupType === LookupType.NR)
         ? NameRequestLookupServices.search
         : (query) => BusinessLookupServices.search(query, legalType, searchStatus)

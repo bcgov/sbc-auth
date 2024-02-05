@@ -284,7 +284,10 @@ export default defineComponent({
     })
 
     function formatAmount (amount: number) {
-      return CommonUtils.formatAmount(amount)
+      if (amount) {
+        return CommonUtils.formatAmount(amount)
+      }
+      return ''
     }
 
     function formatDate (date: string) {
