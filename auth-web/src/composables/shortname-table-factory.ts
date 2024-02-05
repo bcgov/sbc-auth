@@ -1,7 +1,8 @@
+import { LinkedShortNameState } from '@/models/pay/shortname'
 import PaymentService from '@/services/payment.services'
 
 // Not using a global state here, state can be passed as a reactive object through to the factory.
-export function useShortnameTable (tableState, emit) {
+export function useShortnameTable (tableState: LinkedShortNameState, emit) {
   const state = tableState
 
   function handleFilters (filterField?: string, value?: any): void {
@@ -30,7 +31,7 @@ export function useShortnameTable (tableState, emit) {
   async function loadTableData (filterField?: string, value?: any, appendToResults = false): Promise<void> {
     handleFilters(filterField, value)
     try {
-      const response = await PaymentService.getEFTShortNames(state.filters, state.filters.state)
+      const response = await PaymentService.getEFTShortNames(state.filters)
       if (response?.data) {
         /* We use appendToResults for infinite scroll, so we keep the existing results. */
         state.results = appendToResults ? state.results.concat(response.data.items) : response.data.items
