@@ -205,10 +205,8 @@ export default class PaymentService {
     return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
   }
 
-  static getEFTShortNames (filterParams: LinkedShortNameFilterParams, state, viewAll = false): AxiosPromise<any> {
-    const params = new URLSearchParams({
-      'state': state
-    })
+  static getEFTShortNames (filterParams: LinkedShortNameFilterParams, viewAll = false): AxiosPromise<any> {
+    const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
     }

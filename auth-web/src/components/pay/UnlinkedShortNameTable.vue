@@ -10,7 +10,6 @@
         <h1 class="text-left">
           Linking to an Account
         </h1>
-        
         <v-card-title>
           Search by Account ID or Name to Link:
           <v-btn
@@ -20,7 +19,7 @@
             title="Close Dialog"
             :disabled="false"
             style="pointer-events: auto;"
-            @click="closeSettings"
+            @click="() => {}"
           >
             <v-icon>mdi-close</v-icon>
           </v-btn>
@@ -178,11 +177,11 @@ import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import PaymentService from '@/services/payment.services'
 import { ShortNameStatus } from '@/util/constants'
 import { UnlinkedShortNameFilterParams } from '@/models/pay/shortname'
 import _ from 'lodash'
 import moment from 'moment'
+import { useShortnameTable } from '@/composables/shortname-table-factory'
 
 export default defineComponent({
   name: 'UnlinkedShortNameTable',
@@ -197,7 +196,31 @@ export default defineComponent({
     const actionDropdown: Ref<boolean[]> = ref([])
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
     const accountLinkingDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
-
+    const state = reactive({
+      results: [
+        {
+          accountName: 'RCPV',
+          shortName: 'RCPV',
+          accountBranch: 'Saanich',
+          accountId: '3199',
+          id: 1
+        }
+      ],
+      totalResults: 1,
+      filters: {
+        isActive: false,
+        pageNumber: 1,
+        pageLimit: 20,
+        filterPayload: {
+          shortName: '',
+          depositDate: '',
+          depositAmount: '',
+          state: ShortNameStatus.UNLINKED
+        }
+      } as UnlinkedShortNameFilterParams,
+      loading: false
+    })
+    const { loadTableData, updateFilter } = useShortnameTable(state, emit)
     const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {
@@ -236,30 +259,6 @@ export default defineComponent({
       }
     ]
 
-    const state = reactive({
-      results: [
-        {
-          accountName: 'RCPV',
-          shortName: 'RCPV',
-          accountBranch: 'Saanich',
-          accountId: '3199',
-          id: 1
-        }
-      ],
-      totalResults: 1,
-      filters: {
-        isActive: false,
-        pageNumber: 1,
-        pageLimit: 20,
-        filterPayload: {
-          shortName: '',
-          depositDate: '',
-          depositAmount: ''
-        }
-      } as UnlinkedShortNameFilterParams,
-      loading: false
-    })
-
     const title = computed(() => {
       return `Unlinked Bank Short Names (${state.totalResults})`
     })
@@ -296,42 +295,6 @@ export default defineComponent({
       loadTableData('depositDate', endDate)
     }
 
-    function handleFilters (filterField?: string, value?: any): void {
-      state.loading = true
-      if (filterField) {
-        state.filters.pageNumber = 1
-        state.filters.filterPayload[filterField] = value
-      }
-      let filtersActive = false
-      for (const key in state.filters.filterPayload) {
-        if (key === 'dateFilter') {
-          if (state.filters.filterPayload[key].endDate) filtersActive = true
-        } else if (state.filters.filterPayload[key]) filtersActive = true
-        if (filtersActive) break
-      }
-      state.filters.isActive = filtersActive
-    }
-
-    // This is also called inside of the HeaderFilter component inside of the BaseVDataTable component
-    async function loadTableData (filterField?: string, value?: any, appendToResults = false): Promise<void> {
-      handleFilters(filterField, value)
-      try {
-        const response = await PaymentService.getEFTShortNames(state.filters, ShortNameStatus.UNLINKED)
-        if (response?.data) {
-          /* We use appendToResults for infinite scroll, so we keep the existing results. */
-          state.results = appendToResults ? state.results.concat(response.data.items) : response.data.items
-          state.totalResults = response.data.total
-          emit('shortname-state-total', response.data.stateTotal)
-        } else {
-          throw new Error('No response from getEFTShortNames')
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Failed to getEFTShortNames list.', error)
-      }
-      state.loading = false
-    }
-
     function openAccountLinkingDialog (item: any) {
       accountLinkingDialog.value.open()
     }
@@ -343,25 +306,9 @@ export default defineComponent({
     async function clearFilters () {
       clearFiltersTrigger.value++
       dateRangeReset.value++
-      state.filters.filterPayload = {}
+      state.filters.filterPayload = { state: ShortNameStatus.UNLINKED }
       state.filters.isActive = false
       await loadTableData()
-    }
-
-    function updateFilter (filterField?: string, value?: any) {
-      if (filterField) {
-        if (value) {
-          state.filters.filterPayload[filterField] = value
-          state.filters.isActive = true
-        } else {
-          delete state.filters.filterPayload[filterField]
-        }
-      }
-      if (Object.keys(state.filters.filterPayload).length === 0) {
-        state.filters.isActive = false
-      } else {
-        state.filters.isActive = true
-      }
     }
 
     async function infiniteScrollCallback () {
@@ -370,6 +317,7 @@ export default defineComponent({
     }
 
     return {
+      accountSearch,
       actionDropdown,
       clearFilters,
       clearFiltersTrigger,

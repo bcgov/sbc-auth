@@ -1,3 +1,5 @@
+import { ShortNameStatus } from '@/util/constants'
+
 export interface LinkedShortNameFilterParams {
   isActive: boolean;
   pageNumber: number;
@@ -6,7 +8,8 @@ export interface LinkedShortNameFilterParams {
     accountName?: string,
     shortName?: string,
     accountBranch?: string,
-    accountId?: string
+    accountId?: string,
+    state: ShortNameStatus
   }
 }
 
@@ -18,6 +21,7 @@ export interface UnlinkedShortNameFilterParams {
     accountName?: string,
     shortName?: string,
     accountBranch?: string,
-    accountId?: string
+    accountId?: string,
+    state: ShortNameStatus
   }
 }
