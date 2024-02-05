@@ -397,27 +397,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
-
+@import '@/assets/scss/ShortNameTables.scss';
 #linked-bank-short-names {
   border: 1px solid #e9ecef
 }
 
-::v-deep {
-
-  .base-table__header > tr:first-child > th  {
-    padding: 0 0 0 0 !important;
-  }
-  .base-table__header__filter {
-    padding-left: 16px;
-    padding-right: 4px;
-  }
-  .base-table__item-row {
-    color: #495057;
-    font-weight: bold;
-  }
-  .base-table__item-cell {
-    padding: 16px 0 16px 16px;
-    vertical-align: middle;
-  }
-}
 </style>
