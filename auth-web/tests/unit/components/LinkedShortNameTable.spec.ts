@@ -25,6 +25,7 @@ const headers = ['Bank Short Name', 'Account Name', 'Branch Name', 'Account Numb
 describe('LinkedShortNameTable.vue', () => {
   setupIntersectionObserverMock()
   let wrapper: Wrapper<any>
+  let sandbox: any
   let localVue: VueConstructor<any>
   let linkedShortNameResponse: any
 
@@ -64,9 +65,9 @@ describe('LinkedShortNameTable.vue', () => {
       total: 4
     }
 
-    const sandbox = sinon.createSandbox()
+    sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'get')
-    get.returns(new Promise(resolve => resolve({ data: linkedShortNameResponse })))
+    get.returns(Promise.resolve(resolve => resolve({ data: linkedShortNameResponse })))
 
     wrapper = mount(LinkedShortNameTableVue, {
       localVue,
@@ -78,6 +79,7 @@ describe('LinkedShortNameTable.vue', () => {
   afterEach(() => {
     wrapper.destroy()
     sessionStorage.clear()
+    sandbox.restore()
 
     vi.resetModules()
     vi.clearAllMocks()

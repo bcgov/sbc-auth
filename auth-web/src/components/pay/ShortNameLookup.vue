@@ -1,7 +1,7 @@
 <template>
   <!-- once in Summary state, need to re-mount to reuse this component -->
   <div id="business-lookup">
-    <v-autocomplete
+    <!--<v-autocomplete
       :search-input.sync="searchField"
       :hide-no-data="state != States.NO_RESULTS"
       :items="searchResults"
@@ -113,11 +113,17 @@
           </v-col>
         </v-row>
       </template>
-    </v-autocomplete>
+    </v-autocomplete>-->
   </div>
 </template>
 
 <script lang="ts">
+import { defineComponent } from '@vue/composition-api'
+
+export default defineComponent({
+  name: 'ShortNameLookup'
+})
+/*
 import { LookupType, NameRequestLookupResultIF } from '@/models/business-nr-lookup'
 import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BusinessLookupResultIF } from '@/models'
@@ -136,11 +142,12 @@ enum States {
   NO_RESULTS = 'no results',
   SUMMARY = 'summary'
 }
+*/
 
 /*
  * See PPR's BusinessSearchAutocomplete.vue for a Composition API example.
  */
-// @Component({})
+/*
 export default defineComponent({
   name: 'ShortNameLookup',
   props: {
@@ -151,6 +158,7 @@ export default defineComponent({
   },
   emits: [LookupType.NR, LookupType.BUSINESS],
   setup (props, { emit }) {
+    /*
     // local variables
     const states = reactive({
       state: States.INITIAL,
@@ -174,7 +182,7 @@ export default defineComponent({
       const searchStatus = null // search all (ACTIVE + HISTORICAL)
       const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes)
       // Use appropriate service based on lookupType
-      
+
       const searchService = (props.lookupType === LookupType.NR)
         ? NameRequestLookupServices.search
         : (query) => BusinessLookupServices.search(query, legalType, searchStatus)
@@ -223,15 +231,15 @@ export default defineComponent({
         states.state = States.INITIAL
       }
     }
-
     return {
-      ...toRefs(states),
-      onItemSelected,
+      // ...toRefs(states),
+      // onItemSelected,
       States,
       LookupType
     }
   }
 })
+*/
 </script>
 
 <style lang="scss" scoped>
