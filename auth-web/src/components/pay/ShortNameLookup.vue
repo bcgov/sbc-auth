@@ -151,6 +151,7 @@ export default defineComponent({
   },
   emits: [LookupType.NR, LookupType.BUSINESS],
   setup (props, { emit }) {
+    /*
     // local variables
     const states = reactive({
       state: States.INITIAL,
@@ -223,10 +224,11 @@ export default defineComponent({
         states.state = States.INITIAL
       }
     }
+*/
 
     return {
-      ...toRefs(states),
-      onItemSelected,
+      // ...toRefs(states),
+      // onItemSelected,
       States,
       LookupType
     }
