@@ -114,10 +114,10 @@ export default defineComponent({
     })
 
     const headers = [
-      createHeader('shortName', 'Bank Short Name', 'text', '', true, '125px'),
-      createHeader('accountName', 'Account Name', 'text', '', true, '125px'),
-      createHeader('accountBranch', 'Branch Name', 'text', '', true, '125px'),
-      createHeader('accountId', 'Account Number', 'text', '', true, '125px'),
+      createHeader('shortName', 'Bank Short Name', 'text', 'Bank Short Name', true, '125px'),
+      createHeader('accountName', 'Account Name', 'text', 'Account Name', true, '125px'),
+      createHeader('accountBranch', 'Branch Name', 'text', 'Branch Name', true, '125px'),
+      createHeader('accountId', 'Account Number', 'text', 'Account Number', true, '125px'),
       {
         col: 'actions',
         hasFilter: false,
