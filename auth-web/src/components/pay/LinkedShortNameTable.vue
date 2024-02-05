@@ -80,7 +80,7 @@
   </BaseVDataTable>
 </template>
 <script lang="ts">
-import { LinkedShortNameFilterParams, LinkedShortNameState } from '@/models/pay/shortname'
+import { LinkedShortNameFilterParams, LinkedShortNameState } from '@/models/pay/short-name'
 import { computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
