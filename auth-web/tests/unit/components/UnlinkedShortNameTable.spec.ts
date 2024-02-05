@@ -1,5 +1,6 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components'
+import CommonUtils from '@/util/common-util'
 import UnlinkedShortNameTableVue from '@/components/pay/UnlinkedShortNameTable.vue'
 import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
@@ -7,7 +8,6 @@ import { axios } from '@/util/http-util'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
 import sinon from 'sinon'
-import CommonUtils from '@/util/common-util'
 
 sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
   AUTH_API_URL: 'https://localhost:8080/api/v1/11',
