@@ -12,10 +12,10 @@
       autocomplete="chrome-off"
       class="mt-5 mb-n2"
       filled
-      hint="For example: &quot;Joe's Plumbing Inc.&quot;, &quot;BC1234567&quot;, &quot;FM1234567&quot;"
+      hint=""
       :item-text="lookupType === LookupType.NR ? 'nrNum' : 'name'"
       :item-value="lookupType === LookupType.NR ? 'nrNum' : 'identifier'"
-      :label="lookupType === LookupType.NR ? 'My business name or name request number' : 'My business name, incorporation, or registration number'"
+      label="Account ID or Account Name"
       no-filter
       persistent-hint
       return-object
@@ -142,7 +142,7 @@ enum States {
  */
 // @Component({})
 export default defineComponent({
-  name: 'BusinessLookup',
+  name: 'ShortNameLookup',
   props: {
     lookupType: {
       type: String as PropType<LookupType>,
@@ -174,6 +174,7 @@ export default defineComponent({
       const searchStatus = null // search all (ACTIVE + HISTORICAL)
       const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes)
       // Use appropriate service based on lookupType
+      
       const searchService = (props.lookupType === LookupType.NR)
         ? NameRequestLookupServices.search
         : (query) => BusinessLookupServices.search(query, legalType, searchStatus)

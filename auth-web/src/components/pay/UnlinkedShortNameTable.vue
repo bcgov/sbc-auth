@@ -29,7 +29,7 @@
         <h4>
           Search by Account ID or Name to Link:
         </h4>
-        <v-text-field
+        <!-- <v-text-field
           v-model="accountSearch"
           filled
           label="Account ID or Account Name"
@@ -39,6 +39,10 @@
           maxlength="50"
           class="passcode mt-0 mb-2"
           aria-label="Account ID or Account Name"
+        /> -->
+        <ShortNameLookup
+          :key="shortNameLookupKey"
+          @business="selectedShortName"
         />
       </template>
       <template #actions>
@@ -182,6 +186,7 @@ import { UnLinkedShortNameFilterParams } from '@/models/pay/short-name'
 import _ from 'lodash'
 import moment from 'moment'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
+import ShortNameLookup from './ShortNameLookup.vue'
 
 /* This component differs from Transactions table, which has pagination, this has infinite scroll.
  * This component also differs from the affiliations table, which has all of the results at once, where this grabs it
@@ -189,8 +194,9 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
  */
 export default defineComponent({
   name: 'UnlinkedShortNameTable',
-  components: { BaseVDataTable, DatePicker, ModalDialog },
+  components: { BaseVDataTable, DatePicker, ModalDialog, ShortNameLookup },
   setup (props, { emit }) {
+    const shortNameLookupKey = ref(0)
     const datePicker = ref(null)
     const dateRangeReset = ref(0)
     const showDatePicker = ref(false)
@@ -302,7 +308,6 @@ export default defineComponent({
     }
 
     function openAccountLinkingDialog (item: any) {
-      console.log(item)
       selectedShortName.value = item
       accountLinkingDialog.value.open()
     }
@@ -341,7 +346,8 @@ export default defineComponent({
       openAccountLinkingDialog,
       closeAccountLinkingDialog,
       datePicker,
-      selectedShortName
+      selectedShortName,
+      shortNameLookupKey
     }
   }
 })
