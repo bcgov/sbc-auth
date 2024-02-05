@@ -80,11 +80,10 @@
   </BaseVDataTable>
 </template>
 <script lang="ts">
-import { LinkedShortNameFilterParams, LinkedShortNameState } from '@/models/pay/short-name'
 import { computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
-import { DataOptions } from 'vuetify'
+import { LinkedShortNameState } from '@/models/pay/short-name'
 import { ShortNameStatus } from '@/util/constants'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
@@ -110,10 +109,10 @@ export default defineComponent({
           accountId: '',
           state: ShortNameStatus.LINKED
         }
-      } as LinkedShortNameFilterParams,
+      },
       loading: false,
       actionDropdown: [],
-      options: _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions
+      options: _.cloneDeep(DEFAULT_DATA_OPTIONS)
     })
 
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)

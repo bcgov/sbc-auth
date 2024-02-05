@@ -166,13 +166,12 @@
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
 import { Ref, computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
-import { UnlinkedShortNameFilterParams, UnlinkedShortNameState } from '@/models/pay/short-name'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
-import { DataOptions } from 'vuetify'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import ShortNameLookup from './ShortNameLookup.vue'
 import { ShortNameStatus } from '@/util/constants'
+import { UnlinkedShortNameState } from '@/models/pay/short-name'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
 
@@ -195,10 +194,10 @@ export default defineComponent({
           depositAmount: 0,
           state: ShortNameStatus.UNLINKED
         }
-      } as UnlinkedShortNameFilterParams,
+      },
       loading: false,
       actionDropdown: [],
-      options: _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions,
+      options: _.cloneDeep(DEFAULT_DATA_OPTIONS),
       shortNameLookupKey: 0,
       dateRangeReset: 0,
       clearFiltersTrigger: 0,
