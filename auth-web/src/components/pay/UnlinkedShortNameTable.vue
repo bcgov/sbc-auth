@@ -178,7 +178,7 @@ import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { ShortNameStatus } from '@/util/constants'
-import { UnlinkedShortNameFilterParams } from '@/models/pay/shortname'
+import { UnLinkedShortnameFilterParams } from '@/models/pay/shortname'
 import _ from 'lodash'
 import moment from 'moment'
 import { useShortnameTable } from '@/composables/shortname-table-factory'
@@ -218,7 +218,7 @@ export default defineComponent({
           depositAmount: '',
           state: ShortNameStatus.UNLINKED
         }
-      } as UnlinkedShortNameFilterParams,
+      } as UnLinkedShortnameFilterParams,
       loading: false
     })
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortnameTable(state, emit)

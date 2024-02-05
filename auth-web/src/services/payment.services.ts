@@ -12,7 +12,7 @@ import { TransactionFilter, TransactionFilterParams, TransactionListResponse } f
 
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import { LinkedShortNameFilterParams } from '@/models/pay/shortname'
+import { LinkedShortnameFilterParams } from '@/models/pay/shortname'
 import { Payment } from '@/models/Payment'
 import { PaymentTypes } from '@/util/constants'
 import { axios } from '@/util/http-util'
@@ -205,7 +205,7 @@ export default class PaymentService {
     return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
   }
 
-  static getEFTShortNames (filterParams: LinkedShortNameFilterParams, viewAll = false): AxiosPromise<any> {
+  static getEFTShortNames (filterParams: LinkedShortnameFilterParams, viewAll = false): AxiosPromise<any> {
     const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())

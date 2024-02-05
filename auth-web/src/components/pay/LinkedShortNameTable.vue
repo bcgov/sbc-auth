@@ -80,7 +80,7 @@
   </BaseVDataTable>
 </template>
 <script lang="ts">
-import { LinkedShortNameFilterParams, LinkedShortNameState } from '@/models/pay/shortname'
+import { LinkedShortnameFilterParams, LinkedShortnameState } from '@/models/pay/shortname'
 import { computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
@@ -97,7 +97,7 @@ export default defineComponent({
   name: 'LinkedShortNameTable',
   components: { BaseVDataTable },
   setup (props, { emit }) {
-    const state = reactive<LinkedShortNameState>({
+    const state = reactive<LinkedShortnameState>({
       results: [
         {
           accountName: 'RCPV',
@@ -119,7 +119,7 @@ export default defineComponent({
           accountId: '',
           state: ShortNameStatus.LINKED
         }
-      } as LinkedShortNameFilterParams,
+      } as LinkedShortnameFilterParams,
       loading: false,
       actionDropdown: [],
       options: _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions
