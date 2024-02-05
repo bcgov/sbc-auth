@@ -396,36 +396,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
+@import '@/assets/scss/actions.scss';
 
 #linked-bank-short-names {
   border: 1px solid #e9ecef
 }
 
-// For the dropdown text color.
-::v-deep .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
-  color: $app-blue;
-  font-weight: normal;
-  .v-icon.v-icon {
-    color: $app-blue;
-  }
-}
-
-.new-actions {
-  height:30px;
-  .open-action-btn {
-    font-size: .875rem;
-    box-shadow: none;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    margin-right: 1px;
-  }
-
-  .more-actions-btn {
-    box-shadow: none;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-  }
-}
 
 ::v-deep {
 
