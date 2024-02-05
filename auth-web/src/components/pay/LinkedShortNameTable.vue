@@ -97,15 +97,7 @@ export default defineComponent({
   components: { BaseVDataTable },
   setup (props, { emit }) {
     const state = reactive<LinkedShortNameState>({
-      results: [
-        {
-          accountName: 'RCPV',
-          shortName: 'RCPV',
-          accountBranch: 'Saanich',
-          accountId: '3199',
-          id: 1
-        }
-      ],
+      results: [],
       totalResults: 1,
       filters: {
         isActive: false,
