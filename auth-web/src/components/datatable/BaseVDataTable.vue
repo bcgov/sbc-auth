@@ -235,7 +235,6 @@ export default defineComponent({
     }, { immediate: true })
 
     const setFiltering = (filter: boolean) => {
-      debugger
       state.filtering = filter
       reachedEnd.value = false
     }
