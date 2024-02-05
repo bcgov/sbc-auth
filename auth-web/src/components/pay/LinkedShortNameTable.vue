@@ -250,7 +250,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
-@import '@/assets/scss/ShortNameTables.scss';
+@import '@/assets/scss/ShortnameTables.scss';
 
 #linked-bank-short-names {
   border: 1px solid #e9ecef
