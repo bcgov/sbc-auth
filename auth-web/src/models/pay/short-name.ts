@@ -36,10 +36,25 @@ export interface UnLinkedShortNameFilterParams {
   pageNumber: number
   pageLimit: number
   filterPayload: {
-    accountName?: string
     shortName?: string
-    accountBranch?: string
-    accountId?: string
+    depositDate?: string
+    depositAmount?: number
     state: ShortNameStatus
   }
+}
+
+export interface UnLinkedShortNameResults {
+  shortName?: string
+  depositDate?: string
+  depositAmount?: number
+  id: number
+}
+
+export interface UnLinkedShortNameState {
+  results: UnLinkedShortNameResults[]
+  totalResults: number
+  loading: boolean
+  filters: UnLinkedShortNameFilterParams
+  actionDropdown: any[]
+  options: DataOptions
 }
