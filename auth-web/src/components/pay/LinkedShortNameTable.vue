@@ -80,14 +80,14 @@
   </BaseVDataTable>
 </template>
 <script lang="ts">
-import { LinkedShortnameFilterParams, LinkedShortnameState } from '@/models/pay/shortname'
+import { LinkedShortNameFilterParams, LinkedShortNameState } from '@/models/pay/shortname'
 import { computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
 import { ShortNameStatus } from '@/util/constants'
 import _ from 'lodash'
-import { useShortnameTable } from '@/composables/shortname-table-factory'
+import { useShortNameTable } from '@/composables/short-name-table-factory'
 
 /* This component differs from Transactions table, which has pagination, this has infinite scroll.
  * This component also differs from the affiliations table, which has all of the results at once, where this grabs it
@@ -97,7 +97,7 @@ export default defineComponent({
   name: 'LinkedShortNameTable',
   components: { BaseVDataTable },
   setup (props, { emit }) {
-    const state = reactive<LinkedShortnameState>({
+    const state = reactive<LinkedShortNameState>({
       results: [
         {
           accountName: 'RCPV',
@@ -119,13 +119,13 @@ export default defineComponent({
           accountId: '',
           state: ShortNameStatus.LINKED
         }
-      } as LinkedShortnameFilterParams,
+      } as LinkedShortNameFilterParams,
       loading: false,
       actionDropdown: [],
       options: _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions
     })
 
-    const { infiniteScrollCallback, loadTableData, updateFilter } = useShortnameTable(state, emit)
+    const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {
