@@ -89,9 +89,8 @@ import { ShortNameStatus } from '@/util/constants'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
 
-/* This component differs from Transactions table, which has pagination, this has infinite scroll.
- * This component also differs from the affiliations table, which has all of the results at once, where this grabs it
- * one page at a time.
+/* Transactions table has pagination, this has infinite scroll.
+ * Affiliations table grabs all of the results at once, this grabs it one page at a time (through infinite scroll).
  */
 export default defineComponent({
   name: 'LinkedShortNameTable',
