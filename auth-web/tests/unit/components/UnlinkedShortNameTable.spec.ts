@@ -74,7 +74,7 @@ describe('UnlinkedShortNameTable.vue', () => {
 
     const sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'get')
-    get.returns(Promise.resolve(resolve => resolve({ data: unlinkedShortNameResponse })))
+    get.returns(new Promise(resolve => resolve({ data: unlinkedShortNameResponse })))
 
     wrapper = mount(UnlinkedShortNameTableVue, {
       localVue,
