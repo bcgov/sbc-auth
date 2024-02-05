@@ -1,7 +1,7 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components'
 import LinkedShortNameTableVue from '@/components/pay/LinkedShortNameTable.vue'
-import Vue, { VueConstructor } from 'vue'
+import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
 import { axios } from '@/util/http-util'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
