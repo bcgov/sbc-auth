@@ -402,7 +402,6 @@ export default defineComponent({
   border: 1px solid #e9ecef
 }
 
-
 ::v-deep {
 
   .base-table__header > tr:first-child > th  {
