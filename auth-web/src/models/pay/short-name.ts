@@ -31,7 +31,7 @@ export interface LinkedShortNameState {
   options: DataOptions
 }
 
-export interface UnLinkedShortNameFilterParams {
+export interface UnlinkedShortNameFilterParams {
   isActive: boolean
   pageNumber: number
   pageLimit: number
@@ -43,18 +43,24 @@ export interface UnLinkedShortNameFilterParams {
   }
 }
 
-export interface UnLinkedShortNameResults {
+export interface UnlinkedShortNameResults {
   shortName?: string
   depositDate?: string
   depositAmount?: number
   id: number
 }
 
-export interface UnLinkedShortNameState {
-  results: UnLinkedShortNameResults[]
+export interface UnlinkedShortNameState {
+  results: UnlinkedShortNameResults[]
   totalResults: number
   loading: boolean
-  filters: UnLinkedShortNameFilterParams
+  filters: UnlinkedShortNameFilterParams
   actionDropdown: any[]
   options: DataOptions
+  shortNameLookupKey: number
+  dateRangeReset: number
+  clearFiltersTrigger: number
+  selectedShortName: object
+  showDatePicker: boolean
+  dateRangeSelected: boolean
 }
