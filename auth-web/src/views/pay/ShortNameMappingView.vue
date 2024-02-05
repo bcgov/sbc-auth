@@ -48,7 +48,9 @@
           class="window-item-card"
           flat
         >
-          Unlinked go here
+          <UnlinkedShortNameTable
+            @shortname-state-total="shortnameStateTotal = $event"
+          />
         </v-card>
       </v-window-item>
       <v-window-item eager>
@@ -67,10 +69,11 @@
 <script lang="ts">
 import { defineComponent, ref } from '@vue/composition-api'
 import LinkedShortNameTable from '@/components/pay/LinkedShortNameTable.vue'
+import UnlinkedShortNameTable from '@/components/pay/UnlinkedShortNameTable.vue'
 
 export default defineComponent({
   name: 'ShortNameMappingView',
-  components: { LinkedShortNameTable },
+  components: { LinkedShortNameTable, UnlinkedShortNameTable },
   setup () {
     const tab = ref(null)
     const shortnameStateTotal = ref(0)
