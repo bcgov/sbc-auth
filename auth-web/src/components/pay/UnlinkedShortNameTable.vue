@@ -264,12 +264,13 @@ export default defineComponent({
       return `Unlinked Bank Short Names (${state.totalResults})`
     })
 
+    headers.forEach((header) => {
+      if (header.hasFilter) {
+        (header.customFilter as any).filterApiFn = (val: any) => loadTableData(header.col, val || '')
+      }
+    })
+
     onMounted(async () => {
-      headers.forEach((header) => {
-        if (header.hasFilter) {
-          (header.customFilter as any).filterApiFn = (val: any) => loadTableData(header.col, val || '')
-        }
-      })
       await loadTableData()
     })
 

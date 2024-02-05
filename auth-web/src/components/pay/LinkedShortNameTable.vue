@@ -8,7 +8,7 @@
     noDataText="No records to show."
     :setItems="state.results"
     :setHeaders="headers"
-    :setTableDataOptions="tableDataOptions"
+    :setTableDataOptions="state.options"
     :title="title"
     :totalItems="state.totalResults"
     :pageHide="true"
@@ -48,7 +48,7 @@
         </v-btn>
         <span class="more-actions">
           <v-menu
-            v-model="actionDropdown[index]"
+            v-model="state.actionDropdown[index]"
             :attach="`#action-menu-${index}`"
           >
             <template #activator="{ on }">
@@ -59,7 +59,7 @@
                 class="more-actions-btn"
                 v-on="on"
               >
-                <v-icon>{{ actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                <v-icon>{{ state.actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
               </v-btn>
             </template>
             <v-list>
@@ -80,7 +80,7 @@
   </BaseVDataTable>
 </template>
 <script lang="ts">
-import { Ref, computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
@@ -97,8 +97,6 @@ export default defineComponent({
   name: 'LinkedShortNameTable',
   components: { BaseVDataTable },
   setup (props, { emit }) {
-    const actionDropdown: Ref<boolean[]> = ref([])
-    const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
     const state = reactive({
       results: [
         {
@@ -122,8 +120,11 @@ export default defineComponent({
           state: ShortNameStatus.LINKED
         }
       } as LinkedShortNameFilterParams,
-      loading: false
+      loading: false,
+      actionDropdown: [],
+      options: _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions
     })
+
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortnameTable(state, emit)
     const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
       col,
@@ -170,12 +171,10 @@ export default defineComponent({
     }
 
     return {
-      actionDropdown,
       clearFilters,
       clearFiltersTrigger,
       infiniteScrollCallback,
       headers,
-      tableDataOptions,
       state,
       title,
       updateFilter
