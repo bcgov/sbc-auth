@@ -19,7 +19,6 @@
             title="Close Dialog"
             :disabled="false"
             style="pointer-events: auto;"
-            @click="() => {}"
           >
             <v-icon>mdi-close</v-icon>
           </v-btn>
