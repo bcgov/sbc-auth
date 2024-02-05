@@ -8,7 +8,7 @@
     >
       <template #title>
         <h1 class="text-left">
-          Linking {{ selectedShortName.shortName }} to an Account
+          Linking {{ state.selectedShortName.shortName }} to an Account
         </h1>
         <v-card-title>
           Search by Account ID or Name to Link:
@@ -29,20 +29,9 @@
         <h4>
           Search by Account ID or Name to Link:
         </h4>
-        <!-- <v-text-field
-          v-model="accountSearch"
-          filled
-          label="Account ID or Account Name"
-          persistent-hint
-          autocomplete="off"
-          type="text"
-          maxlength="50"
-          class="passcode mt-0 mb-2"
-          aria-label="Account ID or Account Name"
-        /> -->
         <ShortNameLookup
-          :key="shortNameLookupKey"
-          @business="selectedShortName"
+          :key="state.shortNameLookupKey"
+          @business="state.selectedShortName"
         />
       </template>
       <template #actions>
@@ -65,22 +54,22 @@
       </template>
     </ModalDialog>
     <DatePicker
-      v-show="showDatePicker"
+      v-show="state.showDatePicker"
       ref="datePicker"
-      :reset="dateRangeReset"
+      :reset="state.dateRangeReset"
       class="date-picker"
       @submit="updateDateRange($event)"
     />
     <BaseVDataTable
       id="linked-bank-short-names"
-      :clearFiltersTrigger="clearFiltersTrigger"
+      :clearFiltersTrigger="state.clearFiltersTrigger"
       itemKey="id"
       :loading="false"
       loadingText="Loading Unlinked Bank Short Names..."
       noDataText="No records to show."
       :setItems="state.results"
       :setHeaders="headers"
-      :setTableDataOptions="tableDataOptions"
+      :setTableDataOptions="state.options"
       :title="title"
       :totalItems="state.totalResults"
       :pageHide="true"
@@ -88,7 +77,7 @@
       :updateFilter="updateFilter"
       :useObserver="true"
       :observerCallback="infiniteScrollCallback"
-      @update-table-options="tableDataOptions = $event"
+      @update-table-options="options = $event"
     >
       <template #header-filter-slot-depositDate>
         <div @click="clickDatePicker()">
@@ -100,8 +89,8 @@
             filled
             hide-details
             :placeholder="'Date'"
-            :value="dateRangeSelected ? 'Custom' : ''"
-            @click:clear="dateRangeReset++"
+            :value="state.dateRangeSelected ? 'Custom' : ''"
+            @click:clear="state.dateRangeReset++"
           />
         </div>
       </template>
@@ -142,7 +131,7 @@
           </v-btn>
           <span class="more-actions">
             <v-menu
-              v-model="actionDropdown[index]"
+              v-model="state.actionDropdown[index]"
               :attach="`#action-menu-${index}`"
             >
               <template #activator="{ on }">
@@ -153,7 +142,7 @@
                   class="more-actions-btn"
                   v-on="on"
                 >
-                  <v-icon>{{ actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                  <v-icon>{{ state.actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
                 </v-btn>
               </template>
               <v-list>
@@ -176,46 +165,25 @@
 </template>
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
-import { Ref, computed, defineComponent, nextTick, onMounted, reactive, ref } from '@vue/composition-api'
+import { Ref, computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
+import { UnlinkedShortNameFilterParams, UnlinkedShortNameState } from '@/models/pay/short-name'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { ShortNameStatus } from '@/util/constants'
-import { UnLinkedShortNameFilterParams } from '@/models/pay/short-name'
-import _ from 'lodash'
-import moment from 'moment'
-import { useShortNameTable } from '@/composables/short-name-table-factory'
 import ShortNameLookup from './ShortNameLookup.vue'
+import { ShortNameStatus } from '@/util/constants'
+import _ from 'lodash'
+import { useShortNameTable } from '@/composables/short-name-table-factory'
 
-/* Transactions table has pagination, this has infinite scroll.
- * Affiliations table grabs all of the results at once, this grabs it one page at a time (through infinite scroll).
- */
 export default defineComponent({
   name: 'UnlinkedShortNameTable',
   components: { BaseVDataTable, DatePicker, ModalDialog, ShortNameLookup },
   setup (props, { emit }) {
-    const shortNameLookupKey = ref(0)
     const datePicker = ref(null)
-    const dateRangeReset = ref(0)
-    const showDatePicker = ref(false)
-    const dateRangeSelected = ref(false)
-    const clearFiltersTrigger = ref(0)
-    const selectedShortName = ref('123')
-    const accountSearch = ref('')
-    const actionDropdown: Ref<boolean[]> = ref([])
-    const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
     const accountLinkingDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
-    const state = reactive({
-      results: [
-        {
-          accountName: 'RCPV',
-          shortName: 'RCPV',
-          accountBranch: 'Saanich',
-          accountId: '3199',
-          id: 1
-        }
-      ],
+    const state = reactive<UnlinkedShortNameState>({
+      results: [],
       totalResults: 1,
       filters: {
         isActive: false,
@@ -224,11 +192,19 @@ export default defineComponent({
         filterPayload: {
           shortName: '',
           depositDate: '',
-          depositAmount: '',
+          depositAmount: 0,
           state: ShortNameStatus.UNLINKED
         }
-      } as UnLinkedShortNameFilterParams,
-      loading: false
+      } as UnlinkedShortNameFilterParams,
+      loading: false,
+      actionDropdown: [],
+      options: _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions,
+      shortNameLookupKey: 0,
+      dateRangeReset: 0,
+      clearFiltersTrigger: 0,
+      selectedShortName: {},
+      showDatePicker: false,
+      dateRangeSelected: false
     })
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
@@ -247,16 +223,10 @@ export default defineComponent({
 
     const headers = [
       createHeader('shortName', 'Bank Short Name', 'text', 'Bank Short Name'),
-      // createHeader('depositDate', 'Initial Payment Received Date', 'text', ''),
       {
         col: 'depositDate',
         hasFilter: false,
         label: 'Initial Payment Received Date',
-        itemFn: (val: any) => {
-          // Example format: 2023-03-11T00:55:05.909229 without timezone
-          // const createdOn = moment.utc().toDate()
-          // return CommonUtils.formatDisplayDate(createdOn, 'MMMM DD, YYYY<br/>h:mm A')
-        },
         value: 'Initial Payment Received Date',
         minWidth: '165px'
       },
@@ -273,16 +243,6 @@ export default defineComponent({
       return `Unlinked Bank Short Names (${state.totalResults})`
     })
 
-    headers.forEach((header) => {
-      if (header.hasFilter) {
-        (header.customFilter as any).filterApiFn = (val: any) => loadTableData(header.col, val || '')
-      }
-    })
-
-    onMounted(async () => {
-      await loadTableData()
-    })
-
     function formatAmount (amount: number) {
       if (amount) {
         return CommonUtils.formatAmount(amount)
@@ -294,23 +254,16 @@ export default defineComponent({
       return CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY')
     }
 
-    async function clickDatePicker () {
-      showDatePicker.value = true
-      // await for datePicker ref to update
-      await nextTick()
-      // datePicker.value.$el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
     function updateDateRange ({ endDate, startDate }: { endDate?: string, startDate?: string }): void {
-      showDatePicker.value = false
-      dateRangeSelected.value = !!(endDate && startDate)
-      if (!dateRangeSelected.value) { endDate = ''; startDate = '' }
+      state.showDatePicker = false
+      state.dateRangeSelected = !!(endDate && startDate)
+      if (!state.dateRangeSelected) { endDate = ''; startDate = '' }
       // loadTableData('depositDate', { endDate, startDate })
       loadTableData('depositDate', endDate)
     }
 
     function openAccountLinkingDialog (item: any) {
-      selectedShortName.value = item
+      state.selectedShortName = item
       accountLinkingDialog.value.open()
     }
 
@@ -318,38 +271,37 @@ export default defineComponent({
       accountLinkingDialog.value.close()
     }
 
+    async function clickDatePicker () {
+      state.showDatePicker = true
+    }
+
     async function clearFilters () {
-      clearFiltersTrigger.value++
-      dateRangeReset.value++
+      state.clearFiltersTrigger++
+      state.dateRangeReset++
       state.filters.filterPayload = { state: ShortNameStatus.UNLINKED }
       state.filters.isActive = false
       await loadTableData()
     }
 
+    onMounted(async () => {
+      await loadTableData()
+    })
+
     return {
-      accountSearch,
-      actionDropdown,
       clearFilters,
-      clearFiltersTrigger,
       infiniteScrollCallback,
       headers,
-      tableDataOptions,
       state,
       title,
       updateFilter,
       formatAmount,
       formatDate,
       updateDateRange,
-      showDatePicker,
-      dateRangeReset,
       clickDatePicker,
-      dateRangeSelected,
       accountLinkingDialog,
       openAccountLinkingDialog,
       closeAccountLinkingDialog,
-      datePicker,
-      selectedShortName,
-      shortNameLookupKey
+      datePicker
     }
   }
 })
