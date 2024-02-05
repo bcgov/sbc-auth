@@ -1,5 +1,6 @@
 import PaymentService from '@/services/payment.services'
 
+// Not using a global state here, state can be passed as a reactive object through to the factory.
 export function useShortnameTable (tableState, emit) {
   const state = tableState
 

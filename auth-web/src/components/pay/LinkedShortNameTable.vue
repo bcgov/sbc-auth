@@ -133,7 +133,7 @@ export default defineComponent({
         clearable: true,
         label,
         type,
-        value
+        value: ''
       },
       hasFilter,
       minWidth,
