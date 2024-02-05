@@ -27,7 +27,7 @@
           </v-col>
         </v-row>
       </div>
-      <base-v-data-table
+      <BaseVDataTable
         id="affiliated-entity-table"
         :clearFiltersTrigger="clearFiltersTrigger"
         itemKey="businessIdentifier"
@@ -43,6 +43,7 @@
         :pageHide="true"
         :fixedHeader="true"
         :highlight-index="highlightIndex"
+        :useObserver="true"
         highlight-class="base-table__item-row-green"
       >
         <template #header-filter-slot-Actions>
@@ -166,7 +167,7 @@
             @show-manage-business-dialog="$emit('show-manage-business-dialog', $event)"
           />
         </template>
-      </base-v-data-table>
+      </BaseVDataTable>
     </v-card>
   </div>
 </template>

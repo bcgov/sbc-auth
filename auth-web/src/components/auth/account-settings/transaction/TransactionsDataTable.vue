@@ -1,6 +1,6 @@
 <template>
   <div>
-    <date-picker
+    <DatePicker
       v-show="showDatePicker"
       ref="datePicker"
       :reset="dateRangeReset"
@@ -28,7 +28,7 @@
         <span v-else>({{ transactions.totalResults }})</span>
       </h3>
     </div>
-    <base-v-data-table
+    <BaseVDataTable
       class="transaction-list"
       :clearFiltersTrigger="clearFiltersTrigger"
       itemKey="id"
@@ -58,9 +58,9 @@
       <!-- header title slots -->
       <template #header-title-slot-statusCode="{ header }">
         {{ header.value }}
-        <icon-tooltip icon="mdi-information-outline">
+        <IconTooltip icon="mdi-information-outline">
           <div v-html="getStatusCodeHelpText()" />
-        </icon-tooltip>
+        </IconTooltip>
       </template>
       <!-- header filter slots -->
       <template #header-filter-slot-createdOn>
@@ -126,18 +126,18 @@
             class="pl-1"
             align-self="center"
           >
-            <icon-tooltip
+            <IconTooltip
               v-if="[InvoiceStatus.OVERDUE, InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED].includes(item.statusCode)"
               icon="mdi-information-outline"
               maxWidth="300px"
               :location="{top: true}"
             >
               <div v-sanitize="getHelpText(item)" />
-            </icon-tooltip>
+            </IconTooltip>
           </v-col>
         </v-row>
       </template>
-    </base-v-data-table>
+    </BaseVDataTable>
   </div>
 </template>
 
@@ -157,7 +157,7 @@ import { useTransactions } from '@/composables'
 
 export default defineComponent({
   name: 'TransactionsDataTable',
-  components: { BaseVDataTable, DatePicker, IconTooltip },
+  components: { BaseVDataTable: BaseVDataTable, DatePicker, IconTooltip },
   props: {
     extended: { default: false },
     headers: { default: [] as BaseTableHeaderI[] }

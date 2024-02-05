@@ -607,3 +607,8 @@ export enum AffiliationInvitationType {
   REQUEST = 'REQUEST',
   EMAIL = 'EMAIL'
 }
+
+export enum ShortNameStatus {
+    LINKED = 'LINKED',
+    UNLINKED = 'UNLINKED'
+}
