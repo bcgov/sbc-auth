@@ -49,7 +49,7 @@
           flat
         >
           <UnlinkedShortNameTable
-            @shortname-state-total="shortnameStateTotal.linked = $event"
+            @shortname-state-total="shortnameStateTotal.unlinked = $event"
           />
         </v-card>
       </v-window-item>
@@ -59,7 +59,7 @@
           flat
         >
           <LinkedShortNameTable
-            @shortname-state-total="shortnameStateTotal.unlinked = $event"
+            @shortname-state-total="shortnameStateTotal.linked = $event"
           />
         </v-card>
       </v-window-item>
