@@ -63,7 +63,16 @@ export function useShortnameTable (tableState, emit) {
     }
   }
 
+  /* Instead of slicing up the results, we handle the results inside of this function. */
+  async function infiniteScrollCallback () {
+    if (state.totalResults < (state.filters.pageLimit * state.filters.pageNumber)) return true
+    state.filters.pageNumber++
+    await loadTableData(null, null, true)
+    return false
+  }
+
   return {
+    infiniteScrollCallback,
     handleFilters,
     loadTableData,
     updateFilter

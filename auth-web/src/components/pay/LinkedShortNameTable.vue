@@ -124,7 +124,7 @@ export default defineComponent({
       } as LinkedShortNameFilterParams,
       loading: false
     })
-    const { loadTableData, updateFilter } = useShortnameTable(state, emit)
+    const { infiniteScrollCallback, loadTableData, updateFilter } = useShortnameTable(state, emit)
     const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {
@@ -167,14 +167,6 @@ export default defineComponent({
       state.filters.filterPayload = { state: ShortNameStatus.LINKED }
       state.filters.isActive = false
       await loadTableData()
-    }
-
-    /* Instead of slicing up the results, we handle the results inside of this function. */
-    async function infiniteScrollCallback (): Promise<boolean> {
-      if (state.totalResults < (state.filters.pageLimit * state.filters.pageNumber)) return true
-      state.filters.pageNumber++
-      await loadTableData(null, null, true)
-      return false
     }
 
     return {

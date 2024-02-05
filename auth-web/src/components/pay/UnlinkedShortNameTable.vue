@@ -221,7 +221,7 @@ export default defineComponent({
       } as UnlinkedShortNameFilterParams,
       loading: false
     })
-    const { loadTableData, updateFilter } = useShortnameTable(state, emit)
+    const { infiniteScrollCallback, loadTableData, updateFilter } = useShortnameTable(state, emit)
     const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {
@@ -312,11 +312,6 @@ export default defineComponent({
       state.filters.filterPayload = { state: ShortNameStatus.UNLINKED }
       state.filters.isActive = false
       await loadTableData()
-    }
-
-    async function infiniteScrollCallback () {
-      state.filters.pageNumber++
-      await loadTableData(null, null, true)
     }
 
     return {
