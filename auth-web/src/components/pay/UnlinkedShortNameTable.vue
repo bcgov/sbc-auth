@@ -257,8 +257,7 @@ export default defineComponent({
       state.showDatePicker = false
       state.dateRangeSelected = !!(endDate && startDate)
       if (!state.dateRangeSelected) { endDate = ''; startDate = '' }
-      // loadTableData('depositDate', { endDate, startDate })
-      loadTableData('depositDate', endDate)
+      loadTableData('depositDate', { endDate, startDate })
     }
 
     function openAccountLinkingDialog (item: any) {
