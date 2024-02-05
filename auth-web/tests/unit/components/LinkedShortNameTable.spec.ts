@@ -67,7 +67,7 @@ describe('LinkedShortNameTable.vue', () => {
 
     sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'get')
-    get.returns(new Promise(resolve => resolve({ data: linkedShortNameResponse })))
+    get.returns(Promise.resolve(resolve => resolve({ data: linkedShortNameResponse })))
 
     wrapper = mount(LinkedShortNameTableVue, {
       localVue,
