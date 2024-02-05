@@ -1,7 +1,7 @@
 <template>
   <!-- once in Summary state, need to re-mount to reuse this component -->
   <div id="business-lookup">
-    <v-autocomplete
+    <!--<v-autocomplete
       :search-input.sync="searchField"
       :hide-no-data="state != States.NO_RESULTS"
       :items="searchResults"
@@ -113,11 +113,12 @@
           </v-col>
         </v-row>
       </template>
-    </v-autocomplete>
+    </v-autocomplete>-->
   </div>
 </template>
 
 <script lang="ts">
+/*
 import { LookupType, NameRequestLookupResultIF } from '@/models/business-nr-lookup'
 import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BusinessLookupResultIF } from '@/models'
@@ -136,11 +137,12 @@ enum States {
   NO_RESULTS = 'no results',
   SUMMARY = 'summary'
 }
+*/
 
 /*
  * See PPR's BusinessSearchAutocomplete.vue for a Composition API example.
  */
-// @Component({})
+/*
 export default defineComponent({
   name: 'ShortNameLookup',
   props: {
@@ -224,8 +226,6 @@ export default defineComponent({
         states.state = States.INITIAL
       }
     }
-*/
-
     return {
       // ...toRefs(states),
       // onItemSelected,
@@ -234,6 +234,7 @@ export default defineComponent({
     }
   }
 })
+*/
 </script>
 
 <style lang="scss" scoped>
