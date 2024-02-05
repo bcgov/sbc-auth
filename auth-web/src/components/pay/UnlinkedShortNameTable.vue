@@ -60,7 +60,7 @@
       @submit="updateDateRange($event)"
     />
     <BaseVDataTable
-      id="linked-bank-short-names"
+      id="unlinked-bank-short-names"
       :clearFiltersTrigger="state.clearFiltersTrigger"
       itemKey="id"
       :loading="false"
@@ -309,7 +309,7 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
-#linked-bank-short-names {
+#unlinked-bank-short-names {
   border: 1px solid #e9ecef
 }
 
