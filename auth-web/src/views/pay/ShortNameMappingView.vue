@@ -31,14 +31,14 @@
         :class="['tab-item-default', tab === 0 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
-        <b>Unlinked Payments</b>
+        <b>Unlinked Payments</b><span class="text-pre-wrap"> ({{ shortnameStateTotal.unlinked }})</span>
       </v-tab>
       <v-tab
         id="linked-shortname-tab"
         :class="['tab-item-default', tab === 1 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
-        <b>Linked Bank Short Names</b><span class="text-pre-wrap"> ({{ shortnameStateTotal }})</span>
+        <b>Linked Bank Short Names</b><span class="text-pre-wrap"> ({{ shortnameStateTotal.linked }})</span>
       </v-tab>
     </v-tabs>
 
@@ -49,7 +49,7 @@
           flat
         >
           <UnlinkedShortNameTable
-            @shortname-state-total="shortnameStateTotal = $event"
+            @shortname-state-total="shortnameStateTotal.unlinked = $event"
           />
         </v-card>
       </v-window-item>
@@ -59,7 +59,7 @@
           flat
         >
           <LinkedShortNameTable
-            @shortname-state-total="shortnameStateTotal = $event"
+            @shortname-state-total="shortnameStateTotal.linked = $event"
           />
         </v-card>
       </v-window-item>
@@ -67,7 +67,7 @@
   </v-container>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api'
+import { defineComponent, reactive, ref } from '@vue/composition-api'
 import LinkedShortNameTable from '@/components/pay/LinkedShortNameTable.vue'
 import UnlinkedShortNameTable from '@/components/pay/UnlinkedShortNameTable.vue'
 
@@ -76,7 +76,10 @@ export default defineComponent({
   components: { LinkedShortNameTable, UnlinkedShortNameTable },
   setup () {
     const tab = ref(null)
-    const shortnameStateTotal = ref(0)
+    const shortnameStateTotal = reactive({
+      linked: 0,
+      unlinked: 0
+    })
 
     return {
       tab,
@@ -136,6 +139,25 @@ export default defineComponent({
 
   .v-tab--active:hover:before{
     opacity: 0 !important;
+  }
+}
+
+// Additional for tables
+::v-deep {
+  .base-table__header > tr:first-child > th  {
+    padding: 0 0 0 0 !important;
+  }
+  .base-table__header__filter {
+    padding-left: 16px;
+    padding-right: 4px;
+  }
+  .base-table__item-row {
+    color: #495057;
+    font-weight: bold;
+  }
+  .base-table__item-cell {
+    padding: 16px 0 16px 16px;
+    vertical-align: middle;
   }
 }
 </style>
