@@ -8,9 +8,8 @@
     >
       <template #title>
         <h1 class="text-left">
-          Linking to an Account
+          Linking {{ selectedShortName.shortName }} to an Account
         </h1>
-        
         <v-card-title>
           Search by Account ID or Name to Link:
           <v-btn
@@ -122,7 +121,7 @@
       <template #item-slot-depositDate="{ item }">
         <span>{{ formatDate(item.depositDate) }}</span>
       </template>
-      <template #item-slot-actions="{ index }">
+      <template #item-slot-actions="{ item, index }">
         <div
           :id="`action-menu-${index}`"
           class="new-actions mx-auto"
@@ -182,6 +181,7 @@ import PaymentService from '@/services/payment.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import _ from 'lodash'
 import moment from 'moment'
+import ShortNameLookup from './ShortNameLookup.vue'
 
 export default defineComponent({
   name: 'UnlinkedShortNameTable',
@@ -192,6 +192,7 @@ export default defineComponent({
     const showDatePicker = ref(false)
     const dateRangeSelected = ref(false)
     const clearFiltersTrigger = ref(0)
+    const selectedShortName = ref('123')
     const accountSearch = ref('')
     const actionDropdown: Ref<boolean[]> = ref([])
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
@@ -220,8 +221,8 @@ export default defineComponent({
         label: 'Initial Payment Received Date',
         itemFn: (val: any) => {
           // Example format: 2023-03-11T00:55:05.909229 without timezone
-          const createdOn = moment.utc().toDate()
-          return CommonUtils.formatDisplayDate(createdOn, 'MMMM DD, YYYY<br/>h:mm A')
+          // const createdOn = moment.utc().toDate()
+          // return CommonUtils.formatDisplayDate(createdOn, 'MMMM DD, YYYY<br/>h:mm A')
         },
         value: 'Initial Payment Received Date',
         minWidth: '165px'
@@ -277,7 +278,7 @@ export default defineComponent({
     }
 
     function formatDate (date: string) {
-      return CommonUtils.formatCurrentDate(date)
+      return CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY')
     }
 
     async function clickDatePicker () {
@@ -332,6 +333,8 @@ export default defineComponent({
     }
 
     function openAccountLinkingDialog (item: any) {
+      console.log(item)
+      selectedShortName.value = item
       accountLinkingDialog.value.open()
     }
 
@@ -388,7 +391,8 @@ export default defineComponent({
       accountLinkingDialog,
       openAccountLinkingDialog,
       closeAccountLinkingDialog,
-      datePicker
+      datePicker,
+      selectedShortName
     }
   }
 })
