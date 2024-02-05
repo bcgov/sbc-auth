@@ -12,7 +12,7 @@ import { TransactionFilter, TransactionFilterParams, TransactionListResponse } f
 
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import { LinkedShortNameFilterParams } from '@/models/pay/shortname'
+import { LinkedShortNameFilterParams } from '@/models/pay/short-name'
 import { Payment } from '@/models/Payment'
 import { PaymentTypes } from '@/util/constants'
 import { axios } from '@/util/http-util'

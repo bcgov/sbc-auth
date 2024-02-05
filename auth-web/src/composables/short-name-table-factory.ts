@@ -1,4 +1,4 @@
-import { LinkedShortNameState } from '@/models/pay/shortname'
+import { LinkedShortNameState } from '@/models/pay/short-name'
 import PaymentService from '@/services/payment.services'
 
 // Not using a global state here, state can be passed as a reactive object through to the factory.
