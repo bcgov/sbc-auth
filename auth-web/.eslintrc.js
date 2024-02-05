@@ -48,6 +48,7 @@ module.exports = {
     'no-unused-expressions': 'off',
     '@typescript-eslint/no-unused-expressions': ['error', { 'allowShortCircuit': true, 'allowTernary': true }],
     'vue/multi-word-component-names': ['error', { 'ignores': ['Transactions'] }],
+    'vue/component-name-in-template-casing': ['error', 'PascalCase'],
     // Not ideal but shallowOnly option isn't working for this, so leaving it off for now.
     // https://eslint.vuejs.org/rules/no-mutating-props.html
     'vue/no-mutating-props': 'off'

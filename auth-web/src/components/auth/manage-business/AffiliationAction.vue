@@ -646,37 +646,6 @@ export default defineComponent({
     text-align: center;
   }
 
-  .actions {
-    height:30px;
-    width: 140px;
-
-    .open-action {
-      border-right: 1px solid $gray1;
-    }
-
-    .open-action-btn {
-      font-size: .875rem;
-      box-shadow: none;
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      margin-right: 1px;
-      max-height: 36px !important;
-      min-height: 36px !important;
-    }
-
-    .more-actions-btn {
-      box-shadow: none;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-      max-height: 36px !important;
-      min-height: 36px !important;
-    }
-
-    .v-btn + .v-btn {
-      margin-left: 0.5rem;
-    }
-  }
-
   .new-actions {
     height:30px;
     width: 240px;

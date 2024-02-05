@@ -86,7 +86,7 @@
           Create a BC Registries Account
         </v-btn>
       </template>
-      <learn-more-button :redirect-url="learnMoreUrl" />
+      <LearnMoreButton :redirect-url="learnMoreUrl" />
     </div>
   </v-container>
 </template>

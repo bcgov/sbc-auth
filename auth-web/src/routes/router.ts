@@ -61,6 +61,7 @@ import { RouteConfig } from 'vue-router'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
 import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SetupGovmAccountView from '@/views/auth/staff/SetupGovmAccountView.vue'
+import ShortNameMappingView from '@/views/pay/ShortNameMappingView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
@@ -794,6 +795,13 @@ export function getRoutes (): RouteConfig[] {
       component: ViewAllTransactions,
       props: true,
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/pay/manage-shortnames',
+      name: 'manage-shortnames',
+      component: ShortNameMappingView,
+      meta: { requiresAuth: true, allowedRoles: [Role.Staff] }, // TODO rewire this in #19673
+      props: true
     },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]

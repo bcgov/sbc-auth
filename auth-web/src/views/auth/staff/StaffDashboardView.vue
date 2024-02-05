@@ -152,7 +152,7 @@
     </v-card>
 
     <!-- Transactions -->
-    <base-v-expansion-panel
+    <BaseVExpansionPanel
       v-if="canViewAllTransactions"
       class="mb-4"
       title="Transaction Records"
@@ -165,10 +165,10 @@
           :showExport="false"
         />
       </template>
-    </base-v-expansion-panel>
+    </BaseVExpansionPanel>
 
     <!-- FAS UI  -->
-    <base-v-expansion-panel
+    <BaseVExpansionPanel
       v-if="canSearchFAS && isFasDashboardEnabled"
       info="Search and manage routing slips"
       title="Fee Accounting System"
@@ -178,10 +178,10 @@
       <template #content>
         <fas-search-component :isLibraryMode="true" />
       </template>
-    </base-v-expansion-panel>
+    </BaseVExpansionPanel>
 
     <!-- Email Safe List -->
-    <base-v-expansion-panel
+    <BaseVExpansionPanel
       v-if="isDevOrTest"
       info="Please contact #registries-ops to add or remove email addresses from the safe list."
       title="Safe Email List (DEV/TEST)"
@@ -189,7 +189,7 @@
       <template #content>
         <SafeEmailView />
       </template>
-    </base-v-expansion-panel>
+    </BaseVExpansionPanel>
   </v-container>
 </template>
 

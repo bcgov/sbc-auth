@@ -19,6 +19,21 @@
     <!-- Headers (two rows) -->
     <template #header>
       <thead class="base-table__header">
+        <tr
+          v-if="title"
+          class="table-title-row"
+        >
+          <th
+            id="table-title-cell"
+            :colspan="headers.length"
+          >
+            <slot name="header-title">
+              <h2 class="ml-3 py-6">
+                {{ title }}
+              </h2>
+            </slot>
+          </th>
+        </tr>
         <!-- First row has titles. -->
         <slot
           name="header-title-slot"
@@ -55,7 +70,7 @@
                 :name="'header-filter-slot-' + header.col"
                 :header="header"
               />
-              <header-filter
+              <HeaderFilter
                 :filtering="filtering"
                 :filters="filters"
                 :header="header"
@@ -98,9 +113,9 @@
       </tr>
     </template>
     <template #[`body.append`]>
-      <tr v-if="pageHide && !reachedEnd">
+      <tr v-if="useObserver && !reachedEnd">
         <td :colspan="headers.length">
-          <table-observer @intersect="getNext()" />
+          <TableObserver @intersect="getNext()" />
         </td>
       </tr>
     </template>
@@ -161,7 +176,10 @@ export default defineComponent({
     filters: { default: { isActive: false, filterPayload: {} }, required: false },
     customPagination: { default: false },
     highlightIndex: { default: -1 },
-    highlightClass: { type: String, default: '' }
+    highlightClass: { type: String, default: '' },
+    title: { type: String, default: '' },
+    useObserver: { type: Boolean, required: false },
+    observerCallback: { type: Function as PropType<() => Promise<boolean>>, required: false, default: null }
   },
   emits: ['update-table-options'],
   setup (props, { emit }) {
@@ -180,7 +198,10 @@ export default defineComponent({
     const reachedEnd = ref(false)
 
     const getNext = _.debounce(async () => {
-      if (!props.loading && !reachedEnd.value && state.sortedItems.length > state.visibleItems.length) {
+      if (props.loading) return
+      if (props.observerCallback) {
+        reachedEnd.value = await props.observerCallback()
+      } else if (!reachedEnd.value && state.sortedItems.length > state.visibleItems.length) {
         currentPage.value++
         const start = (currentPage.value - 1) * perPage.value
         const end = start + perPage.value
@@ -201,17 +222,21 @@ export default defineComponent({
     }
 
     watch(() => state.sortedItems, () => {
-      if (props.setItems && props.pageHide) {
+      if (props.setItems && !props.observerCallback) {
         state.visibleItems = state.sortedItems.slice(0, perPage.value)
         firstItem.value = state.visibleItems[0]
         currentPage.value = 1
         reachedEnd.value = false
         scrollToTop()
       }
+      if (props.observerCallback) {
+        state.visibleItems = state.sortedItems
+      }
     }, { immediate: true })
 
     const setFiltering = (filter: boolean) => {
       state.filtering = filter
+      reachedEnd.value = false
     }
 
     const setSortedItems = (items: object[]) => {
@@ -254,6 +279,11 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 .base-table {
 
+  h2 {
+    font-size: 1.125rem;
+    letter-spacing: 0.25px;
+  }
+
   &__header {
 
     &__filter {
@@ -293,6 +323,10 @@ export default defineComponent({
     left: 0;
     flex-grow: 0;
     flex-shrink: 0;
+  }
+
+  .table-title-row {
+    background-color: $BCgovBlue0;
   }
 
   ::v-deep .v-data-footer {
