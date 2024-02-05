@@ -14,8 +14,16 @@ export interface LinkedShortNameFilterParams {
   }
 }
 
+export interface LinkedShortNameResults {
+  accountName?: string
+  shortName?: string
+  accountBranch?: string
+  accountId?: string
+  id: number
+}
+
 export interface LinkedShortNameState {
-  results: any[]
+  results: LinkedShortNameResults[]
   totalResults: number
   loading: boolean
   filters: LinkedShortNameFilterParams
