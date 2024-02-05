@@ -15,11 +15,7 @@ sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
 
 const vuetify = new Vuetify({})
 // Selectors
-const header = baseVdataTable.header
-const headerTitles = baseVdataTable.headerTitles
-const itemRow = baseVdataTable.itemRow
-const itemCell = baseVdataTable.itemCell
-
+const { header, headerTitles, itemRow, itemCell } = baseVdataTable
 const headers = ['Bank Short Name', 'Account Name', 'Branch Name', 'Account Number', 'Actions']
 
 describe('LinkedShortNameTable.vue', () => {
@@ -67,7 +63,7 @@ describe('LinkedShortNameTable.vue', () => {
 
     sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'get')
-    get.returns(Promise.resolve(resolve => resolve({ data: linkedShortNameResponse })))
+    get.returns(new Promise(resolve => resolve({ data: linkedShortNameResponse })))
 
     wrapper = mount(LinkedShortNameTableVue, {
       localVue,
