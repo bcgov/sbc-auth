@@ -182,10 +182,10 @@ import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { DataOptions } from 'vuetify'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { ShortNameStatus } from '@/util/constants'
-import { UnLinkedShortnameFilterParams } from '@/models/pay/shortname'
+import { UnLinkedShortNameFilterParams } from '@/models/pay/shortname'
 import _ from 'lodash'
 import moment from 'moment'
-import { useShortnameTable } from '@/composables/shortname-table-factory'
+import { useShortNameTable } from '@/composables/short-name-table-factory'
 import ShortNameLookup from './ShortNameLookup.vue'
 
 export default defineComponent({
@@ -224,10 +224,10 @@ export default defineComponent({
           depositAmount: '',
           state: ShortNameStatus.UNLINKED
         }
-      } as UnLinkedShortnameFilterParams,
+      } as UnLinkedShortNameFilterParams,
       loading: false
     })
-    const { infiniteScrollCallback, loadTableData, updateFilter } = useShortnameTable(state, emit)
+    const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {

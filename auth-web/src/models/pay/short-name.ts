@@ -1,7 +1,7 @@
 import { DataOptions } from 'vuetify'
 import { ShortNameStatus } from '@/util/constants'
 
-export interface LinkedShortnameFilterParams {
+export interface LinkedShortNameFilterParams {
   isActive: boolean
   pageNumber: number
   pageLimit: number
@@ -14,16 +14,16 @@ export interface LinkedShortnameFilterParams {
   }
 }
 
-export interface LinkedShortnameState {
+export interface LinkedShortNameState {
   results: any[]
   totalResults: number
   loading: boolean
-  filters: LinkedShortnameFilterParams
+  filters: LinkedShortNameFilterParams
   actionDropdown: any[]
   options: DataOptions
 }
 
-export interface UnLinkedShortnameFilterParams {
+export interface UnLinkedShortNameFilterParams {
   isActive: boolean
   pageNumber: number
   pageLimit: number

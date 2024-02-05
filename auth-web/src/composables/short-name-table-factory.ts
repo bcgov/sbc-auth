@@ -1,8 +1,8 @@
-import { LinkedShortnameState } from '@/models/pay/shortname'
+import { LinkedShortNameState } from '@/models/pay/shortname'
 import PaymentService from '@/services/payment.services'
 
 // Not using a global state here, state can be passed as a reactive object through to the factory.
-export function useShortnameTable (tableState: LinkedShortnameState, emit) {
+export function useShortNameTable (tableState: LinkedShortNameState, emit) {
   const state = tableState
 
   function handleFilters (filterField?: string, value?: any): void {
