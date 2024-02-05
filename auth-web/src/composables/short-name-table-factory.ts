@@ -1,10 +1,11 @@
 import { LinkedShortNameState } from '@/models/pay/short-name'
 import PaymentService from '@/services/payment.services'
 
-// Not using a global state here, state can be passed as a reactive object through to the factory.
+/* Not using a global state here, state can be passed as a reactive object through to the factory. */
 export function useShortNameTable (tableState: LinkedShortNameState, emit) {
   const state = tableState
 
+  /* Always includes state, which differes from the Affiliation table. */
   function handleFilters (filterField?: string, value?: any): void {
     state.loading = true
     if (filterField) {
@@ -57,7 +58,7 @@ export function useShortNameTable (tableState: LinkedShortNameState, emit) {
         delete state.filters.filterPayload[filterField]
       }
     }
-    // We always send over state in the filter payload.
+    /* We always send over state in the filter payload. */
     if (Object.keys(state.filters.filterPayload).length === 1) {
       state.filters.isActive = false
     } else {
