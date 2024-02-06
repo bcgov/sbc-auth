@@ -66,7 +66,7 @@
       :clearFiltersTrigger="state.clearFiltersTrigger"
       itemKey="id"
       :loading="false"
-      loadingText="Loading Unlinked Bank Short Names..."
+      loadingText="Loading Unlinked Payments..."
       noDataText="No records to show."
       :setItems="state.results"
       :setHeaders="headers"
