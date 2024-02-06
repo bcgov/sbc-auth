@@ -71,7 +71,7 @@
       :setItems="state.results"
       :setHeaders="headers"
       :setTableDataOptions="state.options"
-      :title="true"
+      :hasTitleSlot="true"
       :totalItems="state.totalResults"
       :pageHide="true"
       :filters="state.filters"

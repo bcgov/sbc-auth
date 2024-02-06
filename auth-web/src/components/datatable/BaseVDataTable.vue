@@ -20,18 +20,14 @@
     <template #header>
       <thead class="base-table__header">
         <tr
-          v-if="title"
+          v-if="hasTitleSlot"
           class="table-title-row"
         >
           <th
             id="table-title-cell"
             :colspan="headers.length"
           >
-            <slot name="header-title">
-              <h2 class="ml-3 py-6">
-                {{ title }}
-              </h2>
-            </slot>
+            <slot name="header-title" />
           </th>
         </tr>
         <!-- First row has titles. -->
@@ -177,7 +173,7 @@ export default defineComponent({
     customPagination: { default: false },
     highlightIndex: { default: -1 },
     highlightClass: { type: String, default: '' },
-    title: { type: Boolean },
+    hasTitleSlot: { type: Boolean },
     useObserver: { type: Boolean, required: false },
     observerCallback: { type: Function as PropType<() => Promise<boolean>>, required: false, default: null }
   },
