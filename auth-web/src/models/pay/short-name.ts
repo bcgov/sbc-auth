@@ -37,17 +37,17 @@ export interface UnlinkedShortNameFilterParams {
   pageLimit: number
   filterPayload: {
     shortName?: string
-    depositDate?: string
+    transactionDate?: string
     depositAmount?: number
     state: ShortNameStatus
-    depositStartDate?: string
-    depositEndDate?: string
+    transactionStartDate?: string
+    transactionEndDate?: string
   }
 }
 
 export interface UnlinkedShortNameResults {
   shortName?: string
-  depositDate?: string
+  transactionDate?: string
   depositAmount?: number
   id: number
 }

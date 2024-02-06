@@ -40,31 +40,31 @@ describe('UnlinkedShortNameTable.vue', () => {
       items: [
         {
           shortName: 'TST1',
-          depositDate: '2024-01-28T10:00:00',
+          transactionDate: '2024-01-28T10:00:00',
           depositAmount: 5,
           id: 1
         },
         {
           shortName: 'TST2',
-          depositDate: '2024-01-29T10:00:00',
+          transactionDate: '2024-01-29T10:00:00',
           depositAmount: 50,
           id: 2
         },
         {
           shortName: 'TST3',
-          depositDate: '2024-01-30T10:00:00',
+          transactionDate: '2024-01-30T10:00:00',
           depositAmount: 133.33,
           id: 3
         },
         {
           shortName: 'TST4',
-          depositDate: '2024-01-31T10:00:00',
+          transactionDate: '2024-01-31T10:00:00',
           depositAmount: 121.21,
           id: 4
         },
         {
           shortName: 'TST5',
-          depositDate: '2024-02-01T10:00:00',
+          transactionDate: '2024-02-01T10:00:00',
           depositAmount: 333.33,
           id: 5
         }
@@ -112,7 +112,7 @@ describe('UnlinkedShortNameTable.vue', () => {
       const columns = itemRows.at(i).findAll(itemCell)
       expect(columns.at(0).text()).toBe(unlinkedShortNameResponse.items[i].shortName)
       expect(columns.at(1).text()).toBe(
-        CommonUtils.formatDisplayDate(unlinkedShortNameResponse.items[i].depositDate, 'MMMM DD, YYYY'))
+        CommonUtils.formatDisplayDate(unlinkedShortNameResponse.items[i].transactionDate, 'MMMM DD, YYYY'))
       expect(columns.at(2).text()).toBe(
         CommonUtils.formatAmount(unlinkedShortNameResponse.items[i].depositAmount))
     }
