@@ -11,8 +11,6 @@ export interface LinkedShortNameFilterParams {
     accountBranch?: string
     accountId?: string
     state: ShortNameStatus
-    transactionStartDate: string
-    transactionEndDate: string
   }
 }
 
@@ -42,8 +40,8 @@ export interface UnlinkedShortNameFilterParams {
     depositDate?: string
     depositAmount?: number
     state: ShortNameStatus
-    transactionStartDate: string
-    transactionEndDate: string
+    transactionStartDate?: string
+    transactionEndDate?: string
   }
 }
 

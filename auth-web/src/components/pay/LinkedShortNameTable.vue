@@ -9,7 +9,7 @@
     :setItems="state.results"
     :setHeaders="headers"
     :setTableDataOptions="state.options"
-    :title="title"
+    :hasTitleSlot="true"
     :totalItems="state.totalResults"
     :pageHide="true"
     :filters="state.filters"
@@ -18,6 +18,14 @@
     :observerCallback="infiniteScrollCallback"
     @update-table-options="tableDataOptions = $event"
   >
+    <template #header-title>
+      <h2 class="ml-4 py-6">
+        Linked Bank Short Names
+        <span class="font-weight-regular">
+          ({{ state.totalResults }})
+        </span>
+      </h2>
+    </template>
     <template #header-filter-slot-actions>
       <v-btn
         v-if="state.filters.isActive"
@@ -80,7 +88,7 @@
   </BaseVDataTable>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
+import { defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { LinkedShortNameState } from '@/models/pay/short-name'
@@ -144,10 +152,6 @@ export default defineComponent({
       }
     ]
 
-    const title = computed<string>(() => {
-      return `Linked Bank Short Names (${state.totalResults})`
-    })
-
     onMounted(async () => {
       await loadTableData()
     })
@@ -166,7 +170,6 @@ export default defineComponent({
       infiniteScrollCallback,
       headers,
       state,
-      title,
       updateFilter
     }
   }

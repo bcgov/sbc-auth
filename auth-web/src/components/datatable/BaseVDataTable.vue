@@ -20,18 +20,14 @@
     <template #header>
       <thead class="base-table__header">
         <tr
-          v-if="title"
+          v-if="hasTitleSlot"
           class="table-title-row"
         >
           <th
             id="table-title-cell"
             :colspan="headers.length"
           >
-            <slot name="header-title">
-              <h2 class="ml-3 py-6">
-                {{ title }}
-              </h2>
-            </slot>
+            <slot name="header-title" />
           </th>
         </tr>
         <!-- First row has titles. -->
@@ -172,12 +168,12 @@ export default defineComponent({
     setTableDataOptions: { default: () => _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
     totalItems: { type: Number, required: true },
     pageHide: { default: false },
-    updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: true },
+    updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, default: () => {} },
     filters: { default: { isActive: false, filterPayload: {} }, required: false },
     customPagination: { default: false },
     highlightIndex: { default: -1 },
     highlightClass: { type: String, default: '' },
-    title: { type: String, default: '' },
+    hasTitleSlot: { type: Boolean },
     useObserver: { type: Boolean, required: false },
     observerCallback: { type: Function as PropType<() => Promise<boolean>>, required: false, default: null }
   },
@@ -278,11 +274,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 .base-table {
-
-  h2 {
-    font-size: 1.125rem;
-    letter-spacing: 0.25px;
-  }
 
   &__header {
 
