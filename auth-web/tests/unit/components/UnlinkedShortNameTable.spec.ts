@@ -92,7 +92,7 @@ describe('UnlinkedShortNameTable.vue', () => {
   })
 
   it('Renders unlinked short name table with correct contents', async () => {
-    expect(wrapper.find('#table-title-cell').text()).toContain('Unlinked Bank Short Names (5)')
+    expect(wrapper.find('#table-title-cell').text()).toContain('Unlinked Payments  (5)')
 
     // verify table
     expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
