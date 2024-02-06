@@ -1,0 +1,68 @@
+<template>
+  <v-container
+      id="shortname-details"
+      class="view-container"
+  >
+    <div class="view-header flex-column">
+      <h1 class="view-header__title">
+        Payment Details
+      </h1>
+      <p class="mt-3 mb-0">
+        Review and verify payment details
+      </p>
+    </div>
+    <short-name-transactions :shortName=state.result />
+    <br /> <br />
+    <short-name-account-linkage :shortName=state.result />
+  </v-container>
+</template>
+<script lang="ts">
+import ShortNameAccountLinkage from '@/components/pay/eft/ShortNameAccountLink.vue'
+import PaymentService from '@/services/payment.services'
+import { PropType, defineComponent, onMounted, reactive } from '@vue/composition-api'
+import ShortNameTransactions from '@/components/pay/eft/ShortNameTransactions.vue'
+
+export default defineComponent({
+  name: 'ShortNameMappingView',
+  components: { ShortNameAccountLinkage, ShortNameTransactions },
+  props: {
+    shortNameId: {
+      type: String as PropType<string>,
+      default: null
+    }
+  },
+  setup (props) {
+    const state = reactive({
+      result: {}
+    })
+
+    onMounted(async () => {
+      await loadShortname(props.shortNameId)
+    })
+
+    async function loadShortname (shortnameId: string): Promise<void> {
+      try {
+        const response = await PaymentService.getEFTShortname(shortnameId)
+        if (response?.data) {
+          /* We use appendToResults for infinite scroll, so we keep the existing results. */
+          state.result = response.data
+        } else {
+          throw new Error('No response from getEFTShortname')
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to getEFTShortname.', error)
+      }
+    }
+
+    return {
+      state
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+@import '$assets/scss/theme.scss';
+
+</style>

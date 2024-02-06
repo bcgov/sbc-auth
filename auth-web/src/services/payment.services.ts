@@ -8,6 +8,7 @@ import {
   StatementNotificationSettings,
   StatementSettings
 } from '@/models/statement'
+import { EFTShortnameResponse, EFTTransactionFilterParams, EFTTransactionListResponse } from '@/models/eft-transaction'
 import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 
 import { AxiosPromise } from 'axios'
@@ -226,5 +227,22 @@ export default class PaymentService {
     }
 
     return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames?${params.toString()}`)
+  }
+  static getEFTTransactions (shortNameId: string, filterParams: EFTTransactionFilterParams): AxiosPromise<EFTTransactionListResponse> {
+    const params = new URLSearchParams()
+    if (filterParams.pageNumber) {
+      params.append('page', filterParams.pageNumber.toString())
+    }
+    if (filterParams.pageLimit) {
+      params.append('limit', filterParams.pageLimit.toString())
+    }
+
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/transactions`
+    return axios.get(url, { params })
+  }
+
+  static getEFTShortname (shortNameId: string): AxiosPromise<EFTShortnameResponse> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`
+    return axios.get(url)
   }
 }

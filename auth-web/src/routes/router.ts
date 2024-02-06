@@ -1,7 +1,7 @@
 import {
   MyBusinessRegistryBreadcrumb,
   RegistryDashboardBreadcrumb,
-  RegistryHomeBreadcrumb,
+  RegistryHomeBreadcrumb, ShortNameDetailsBreadcrumb, ShortNameMappingBreadcrumb,
   StaffBusinessRegistryBreadcrumb,
   StaffDashboardBreadcrumb
 } from '@/resources/BreadcrumbResources'
@@ -22,6 +22,7 @@ import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockS
 import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
+import ShortNameDetailsView from '@/views/pay/eft/ShortNameDetailsView.vue'
 import { Base64 } from 'js-base64'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
@@ -802,6 +803,22 @@ export function getRoutes (): RouteConfig[] {
       component: ShortNameMappingView,
       meta: { requiresAuth: true, allowedRoles: [Role.Staff] }, // TODO rewire this in #19673
       props: true
+    },
+    {
+      path: '/pay/shortname-details/:shortNameId',
+      name: 'shortnamedetails',
+      component: ShortNameDetailsView,
+      meta: {
+        requiresAuth: true,
+        allowedRoles: [Role.Staff],
+        breadcrumb: [
+          StaffDashboardBreadcrumb,
+          ShortNameMappingBreadcrumb,
+          ShortNameDetailsBreadcrumb
+        ],
+        showNavBar: true
+      },
+      props: (route) => ({ shortNameId: route.params.shortNameId })
     },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]
