@@ -82,7 +82,7 @@ describe('LinkedShortNameTable.vue', () => {
   })
 
   it('Renders linked short name table with correct contents', async () => {
-    expect(wrapper.find('#table-title-cell').text()).toContain('Linked Bank Short Names (4)')
+    expect(wrapper.find('#table-title-cell').text()).toContain('Linked Bank Short Names  (4)')
 
     // verify table
     expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)

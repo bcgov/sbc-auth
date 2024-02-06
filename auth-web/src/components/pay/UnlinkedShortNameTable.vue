@@ -66,12 +66,12 @@
       :clearFiltersTrigger="state.clearFiltersTrigger"
       itemKey="id"
       :loading="false"
-      loadingText="Loading Unlinked Bank Short Names..."
+      loadingText="Loading Unlinked Payments..."
       noDataText="No records to show."
       :setItems="state.results"
       :setHeaders="headers"
       :setTableDataOptions="state.options"
-      :title="title"
+      :hasTitleSlot="true"
       :totalItems="state.totalResults"
       :pageHide="true"
       :filters="state.filters"
@@ -80,6 +80,14 @@
       :observerCallback="infiniteScrollCallback"
       @update-table-options="options = $event"
     >
+      <template #header-title>
+        <h2 class="ml-4 py-6">
+          Unlinked Payments
+          <span class="font-weight-regular">
+            ({{ state.totalResults }})
+          </span>
+        </h2>
+      </template>
       <template #header-filter-slot-depositDate>
         <div @click="clickDatePicker()">
           <v-text-field
@@ -167,7 +175,7 @@
 </template>
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
-import { Ref, computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
+import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -241,10 +249,6 @@ export default defineComponent({
       }
     ]
 
-    const title = computed(() => {
-      return `Unlinked Bank Short Names (${state.totalResults})`
-    })
-
     function formatAmount (amount: number) {
       if (amount) {
         return CommonUtils.formatAmount(amount)
@@ -294,7 +298,6 @@ export default defineComponent({
       infiniteScrollCallback,
       headers,
       state,
-      title,
       updateFilter,
       formatAmount,
       formatDate,
@@ -313,6 +316,7 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
+
 #unlinked-bank-short-names {
   border: 1px solid #e9ecef
 }
