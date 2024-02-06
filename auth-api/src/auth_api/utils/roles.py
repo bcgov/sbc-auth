@@ -38,6 +38,7 @@ class Role(Enum):
     STAFF_CREATE_ACCOUNTS = 'create_accounts'
     STAFF_MANAGE_BUSINESS = 'manage_business'
     STAFF_SUSPEND_ACCOUNTS = 'suspend_accounts'
+    STAFF_EFT = 'eft_staff'
 
 
 # Membership types
