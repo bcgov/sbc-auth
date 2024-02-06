@@ -40,8 +40,8 @@ export interface UnlinkedShortNameFilterParams {
     depositDate?: string
     depositAmount?: number
     state: ShortNameStatus
-    transactionStartDate?: string
-    transactionEndDate?: string
+    depositStartDate?: string
+    depositEndDate?: string
   }
 }
 
