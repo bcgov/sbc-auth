@@ -31,7 +31,6 @@
         :placeholder="!header.customFilter.value ? header.customFilter.label || '' : ''"
         @reset="filter(header)"
         @input="filter(header)"
-        @keypress="sanitization($event, header)"
       />
     </slot>
   </span>
@@ -86,12 +85,6 @@ export default defineComponent({
       }
     }
 
-    function sanitization(event: any, header: BaseTableHeaderI) {
-      if (event && header.customFilter.sanitization) {
-        header.customFilter.sanitization(event)
-      }
-    }
-
     function applyFilters (props, state, header) {
       props.updateFilter(header.col, header.customFilter.value)
 
@@ -130,8 +123,7 @@ export default defineComponent({
     }
 
     return {
-      filter,
-      sanitization
+      filter
     }
   }
 })

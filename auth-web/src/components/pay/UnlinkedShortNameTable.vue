@@ -175,7 +175,7 @@
 </template>
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
-import { Ref, computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
+import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -216,17 +216,15 @@ export default defineComponent({
       dateRangeSelected: false,
       dateRangeText: ''
     })
-
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
-    const createHeader = (col, label, type, value, sanitization = null, hasFilter = true, minWidth = '125px') => ({
+    const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {
         filterApiFn: hasFilter ? (val: any) => loadTableData(col, val || '') : null,
         clearable: true,
         label,
         type,
-        value: '',
-        sanitization
+        value: ''
       },
       hasFilter,
       minWidth,
@@ -242,7 +240,7 @@ export default defineComponent({
         value: 'Initial Payment Received Date',
         minWidth: '260px'
       },
-      createHeader('depositAmount', 'Initial Payment Amount', 'text', 'Initial Payment Amount', CommonUtils.currencySanitization),
+      createHeader('depositAmount', 'Initial Payment Amount', 'text', 'Initial Payment Amount'),
       {
         col: 'actions',
         hasFilter: false,

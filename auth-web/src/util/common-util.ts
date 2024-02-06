@@ -108,13 +108,6 @@ export default class CommonUtils {
     return `$${amount.toFixed(2)}`
   }
 
-  static currencySanitization (event: any) {
-    const value = event.target.value
-    if (!/^(\d+)?(\.\d{0,2})?$/.test(value + event.key)) {
-      event.preventDefault()
-    }
-  }
-
   // Formatting date in the desired format for displaying in the template
   static formatDisplayDate (date: Date | string, format?: string) {
     // not working in CI (getting UTC datetime)

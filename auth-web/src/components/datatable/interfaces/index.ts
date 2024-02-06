@@ -5,7 +5,6 @@ export interface BaseTableFilterI {
   label?: string
   type: 'select' | 'text'
   value: string
-  sanitization?: (value: any) => boolean | string;
 }
 
 export interface BaseTableHeaderI {
