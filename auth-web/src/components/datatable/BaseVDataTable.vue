@@ -168,7 +168,7 @@ export default defineComponent({
     setTableDataOptions: { default: () => _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
     totalItems: { type: Number, required: true },
     pageHide: { default: false },
-    updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: true },
+    updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, default: () => {} },
     filters: { default: { isActive: false, filterPayload: {} }, required: false },
     customPagination: { default: false },
     highlightIndex: { default: -1 },
