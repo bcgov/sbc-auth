@@ -71,7 +71,7 @@
       :setItems="state.results"
       :setHeaders="headers"
       :setTableDataOptions="state.options"
-      :title="title"
+      :title="true"
       :totalItems="state.totalResults"
       :pageHide="true"
       :filters="state.filters"
@@ -82,7 +82,7 @@
     >
       <template #header-title>
         <h2 class="ml-4 py-6">
-          Unlinked Bank Short Names
+          Unlinked Payments
           <span class="font-weight-regular">
             ({{ state.totalResults }})
           </span>
@@ -175,7 +175,7 @@
 </template>
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
-import { Ref, computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
+import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -249,10 +249,6 @@ export default defineComponent({
       }
     ]
 
-    const title = computed(() => {
-      return `Unlinked Bank Short Names (${state.totalResults})`
-    })
-
     function formatAmount (amount: number) {
       if (amount) {
         return CommonUtils.formatAmount(amount)
@@ -302,7 +298,6 @@ export default defineComponent({
       infiniteScrollCallback,
       headers,
       state,
-      title,
       updateFilter,
       formatAmount,
       formatDate,

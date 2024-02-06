@@ -9,7 +9,7 @@
     :setItems="state.results"
     :setHeaders="headers"
     :setTableDataOptions="state.options"
-    :title="title"
+    :title="true"
     :totalItems="state.totalResults"
     :pageHide="true"
     :filters="state.filters"
@@ -88,7 +88,7 @@
   </BaseVDataTable>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
+import { defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { LinkedShortNameState } from '@/models/pay/short-name'
@@ -152,10 +152,6 @@ export default defineComponent({
       }
     ]
 
-    const title = computed<string>(() => {
-      return `Linked Bank Short Names (${state.totalResults})`
-    })
-
     onMounted(async () => {
       await loadTableData()
     })
@@ -185,7 +181,6 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
-
 
 #linked-bank-short-names {
   border: 1px solid #e9ecef
