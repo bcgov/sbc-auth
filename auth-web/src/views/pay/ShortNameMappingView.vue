@@ -28,7 +28,7 @@
     >
       <v-tab
         id="unlinked-shortname-tab"
-        :class="['tab-item-default', tab === 0 ? 'tab-item-active' : 'tab-item-inactive', 'font-weight-regular']"
+        :class="['tab-item-default', tab === 0 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
         <b>Unlinked Payments</b>
@@ -38,7 +38,7 @@
       </v-tab>
       <v-tab
         id="linked-shortname-tab"
-        :class="['tab-item-default', tab === 1 ? 'tab-item-active' : 'tab-item-inactive', 'font-weight-regular']"
+        :class="['tab-item-default', tab === 1 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
         <b>Linked Bank Short Names</b><span class="font-weight-regular">

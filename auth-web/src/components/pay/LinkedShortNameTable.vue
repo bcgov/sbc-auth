@@ -170,7 +170,6 @@ export default defineComponent({
       infiniteScrollCallback,
       headers,
       state,
-      title,
       updateFilter
     }
   }

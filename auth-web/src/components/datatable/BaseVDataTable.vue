@@ -177,7 +177,7 @@ export default defineComponent({
     customPagination: { default: false },
     highlightIndex: { default: -1 },
     highlightClass: { type: String, default: '' },
-    title: { type: String, default: '' },
+    title: { type: Boolean },
     useObserver: { type: Boolean, required: false },
     observerCallback: { type: Function as PropType<() => Promise<boolean>>, required: false, default: null }
   },
