@@ -86,7 +86,9 @@ export default defineComponent({
     }
 
     function applyFilters (props, state, header) {
-      props.updateFilter(header.col, header.customFilter.value)
+      if (props.updateFilter) {
+        props.updateFilter(header.col, header.customFilter.value)
+      }
 
       if (!props.filters.isActive) {
         props.setSortedItems(props.sortedItems, true)

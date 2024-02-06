@@ -1,7 +1,7 @@
 <template>
   <v-container
-      id="shortname-details"
-      class="view-container"
+    id="shortname-details"
+    class="view-container"
   >
     <div class="view-header flex-column">
       <h1 class="view-header__title">
@@ -11,15 +11,15 @@
         Review and verify payment details
       </p>
     </div>
-    <short-name-transactions :shortName=state.result />
-    <br /> <br />
-    <short-name-account-linkage :shortName=state.result />
+    <ShortNameTransactions :shortName="state.result" />
+    <br> <br>
+    <ShortNameAccountLinkage :shortName="state.result" />
   </v-container>
 </template>
 <script lang="ts">
-import ShortNameAccountLinkage from '@/components/pay/eft/ShortNameAccountLink.vue'
-import PaymentService from '@/services/payment.services'
 import { PropType, defineComponent, onMounted, reactive } from '@vue/composition-api'
+import PaymentService from '@/services/payment.services'
+import ShortNameAccountLinkage from '@/components/pay/eft/ShortNameAccountLink.vue'
 import ShortNameTransactions from '@/components/pay/eft/ShortNameTransactions.vue'
 
 export default defineComponent({

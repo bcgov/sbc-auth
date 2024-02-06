@@ -2,26 +2,33 @@
   <v-card>
     <v-card-title class="card-title">
       <v-icon
-          class="pr-5"
-          color="link"
-          left
+        class="pr-5"
+        color="link"
+        left
       >
         mdi-bank-check
       </v-icon>
       <b>Short Name and Account Linkage</b>
     </v-card-title>
 
-    <v-card-text class="pa-5" v-if="isLinked">
-        All payments from {{state.shortName.shortName}} will be applied to:
-        <br/>
-        <b>{{state.shortName.accountId }} {{state.shortName.accountName}}</b>
+    <v-card-text
+      v-if="isLinked"
+      class="pa-5"
+    >
+      All payments from {{ state.shortName.shortName }} will be applied to:
+      <br>
+      <b>{{ state.shortName.accountId }} {{ state.shortName.accountName }}</b>
     </v-card-text>
 
-    <v-card-text class="d-flex justify-space-between pa-5" v-else>
-        Payment from this short name is not linked with an account yet.
-        <v-btn color="primary">Link to Account</v-btn>
+    <v-card-text
+      v-else
+      class="d-flex justify-space-between pa-5"
+    >
+      Payment from this short name is not linked with an account yet.
+      <v-btn color="primary">
+        Link to Account
+      </v-btn>
     </v-card-text>
-
   </v-card>
 </template>
 <script lang="ts">

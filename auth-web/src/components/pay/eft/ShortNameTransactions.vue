@@ -2,47 +2,48 @@
   <v-card>
     <v-card-title class="card-title">
       <v-icon
-          class="pr-5"
-          color="link"
-          left
+        class="pr-5"
+        color="link"
+        left
       >
         mdi-format-list-bulleted
       </v-icon>
-      <b>Payments Received from {{ state.shortName?.shortName }} ({{state.totalResults}})</b>
+      <b>Payments Received from {{ state.shortName?.shortName }} ({{ state.totalResults }})</b>
     </v-card-title>
-    <base-v-data-table
-        id="eft-transactions-table"
-        class="transaction-list"
-        :clearFiltersTrigger="clearFiltersTrigger"
-        itemKey="id"
-        :loading="state.loading"
-        loadingText="Loading Transaction Records..."
-        noDataText="No Transaction Records"
-        :setItems="state.results"
-        :setHeaders="headers"
-        :setTableDataOptions="tableDataOptions"
-        :totalItems="state.totalResults"
-        :filters="state.filters"
-        :updateFilter="updateFilter"
-        @update-table-options="tableDataOptions = $event"
+    <BaseVDataTable
+      id="eft-transactions-table"
+      class="transaction-list"
+      itemKey="id"
+      :loading="state.loading"
+      loadingText="Loading Transaction Records..."
+      noDataText="No Transaction Records"
+      :setItems="state.results"
+      :setHeaders="headers"
+      :setTableDataOptions="tableDataOptions"
+      :totalItems="state.totalResults"
+      :filters="state.filters"
+      :updateFilter="updateFilter"
+      :pageHide="true"
+      @update-table-options="tableDataOptions = $event"
     >
+      <template #header-filter-slot />
       <template #item-slot-transactionDate="{ item }">
         <span>{{ formatDate(item.transactionDate, 'MMMM DD, YYYY') }}</span>
       </template>
       <template #item-slot-depositAmount="{ item }">
         <span>{{ formatCurrency(item.depositAmount) }}</span>
       </template>
-    </base-v-data-table>
+    </BaseVDataTable>
   </v-card>
 </template>
 <script lang="ts">
-import { EFTTransactionFilterParams } from '@/models/eft-transaction'
-import PaymentService from '@/services/payment.services'
-import CommonUtils from '@/util/common-util'
 import { Ref, defineComponent, reactive, ref, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
+import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../../datatable/resources'
 import { DataOptions } from 'vuetify'
+import { EFTTransactionFilterParams } from '@/models/eft-transaction'
+import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
 
 export default defineComponent({
@@ -111,7 +112,6 @@ export default defineComponent({
       state.loading = false
     }
 
-    function clearFilters (): void { }
     function updateFilter () : void { }
 
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
@@ -128,15 +128,10 @@ export default defineComponent({
       }
     })
 
-    // clear filters
-    const clearFiltersTrigger = ref(0)
-
     const formatDate = CommonUtils.formatDisplayDate
     const formatCurrency = CommonUtils.formatAmount
 
     return {
-      clearFilters,
-      clearFiltersTrigger,
       formatCurrency,
       formatDate,
       headers,
