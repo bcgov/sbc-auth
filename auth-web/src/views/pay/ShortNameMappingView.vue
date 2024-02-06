@@ -18,27 +18,31 @@
         class="account-label pr-5"
         cols="auto"
       >
-        Managing received electronic funds transfers
+        Manage received Electronic Funds Transfers
       </v-col>
     </v-row>
 
     <v-tabs
       v-model="tab"
-      style="height: 65px; margin-top: 20px;"
+      style="height: 65px; margin-top: 44px;"
     >
       <v-tab
         id="unlinked-shortname-tab"
-        :class="['tab-item-default', tab === 0 ? 'tab-item-active' : 'tab-item-inactive']"
+        :class="['tab-item-default', tab === 0 ? 'tab-item-active' : 'tab-item-inactive', 'font-weight-regular']"
         :ripple="false"
       >
-        <b>Unlinked Payments</b><span class="text-pre-wrap"> ({{ shortnameStateTotal.unlinked }})</span>
+        <b>Unlinked Payments</b>
+        <span class="font-weight-regular">
+          &nbsp;({{ shortnameStateTotal.unlinked }})
+        </span>
       </v-tab>
       <v-tab
         id="linked-shortname-tab"
-        :class="['tab-item-default', tab === 1 ? 'tab-item-active' : 'tab-item-inactive']"
+        :class="['tab-item-default', tab === 1 ? 'tab-item-active' : 'tab-item-inactive', 'font-weight-regular']"
         :ripple="false"
       >
-        <b>Linked Bank Short Names</b><span class="text-pre-wrap"> ({{ shortnameStateTotal.linked }})</span>
+        <b>Linked Bank Short Names</b><span class="font-weight-regular">
+          &nbsp;({{ shortnameStateTotal.linked }})</span>
       </v-tab>
     </v-tabs>
 
@@ -119,7 +123,7 @@ export default defineComponent({
 }
 
 .window-item-card {
-  padding: 30px 30px 30px 30px;
+  padding: 40px 30px 40px 30px;
 }
 
 .text-pre-wrap {

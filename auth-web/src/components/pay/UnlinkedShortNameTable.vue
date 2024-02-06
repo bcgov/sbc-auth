@@ -80,6 +80,14 @@
       :observerCallback="infiniteScrollCallback"
       @update-table-options="options = $event"
     >
+      <template #header-title>
+        <h2 class="ml-4 py-6">
+          Unlinked Bank Short Names
+          <span class="font-weight-regular">
+            ({{ state.totalResults }})
+          </span>
+        </h2>
+      </template>
       <template #header-filter-slot-depositDate>
         <div @click="clickDatePicker()">
           <v-text-field
@@ -313,6 +321,7 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
+
 #unlinked-bank-short-names {
   border: 1px solid #e9ecef
 }

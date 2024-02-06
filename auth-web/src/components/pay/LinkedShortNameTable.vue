@@ -18,6 +18,14 @@
     :observerCallback="infiniteScrollCallback"
     @update-table-options="tableDataOptions = $event"
   >
+    <template #header-title>
+      <h2 class="ml-4 py-6">
+        Linked Bank Short Names
+        <span class="font-weight-regular">
+          ({{ state.totalResults }})
+        </span>
+      </h2>
+    </template>
     <template #header-filter-slot-actions>
       <v-btn
         v-if="state.filters.isActive"
@@ -177,6 +185,7 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
+
 
 #linked-bank-short-names {
   border: 1px solid #e9ecef

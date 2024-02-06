@@ -279,11 +279,6 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 .base-table {
 
-  h2 {
-    font-size: 1.125rem;
-    letter-spacing: 0.25px;
-  }
-
   &__header {
 
     &__filter {
