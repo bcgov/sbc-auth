@@ -800,7 +800,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/pay/manage-shortnames',
       name: 'manage-shortnames',
       component: ShortNameMappingView,
-      meta: { requiresAuth: true, allowedRoles: [Role.StaffEFT] },
+      meta: { requiresAuth: true, allowedRoles: [Role.ManageEft] },
       props: true
     },
     { path: '*', name: 'notfound', component: PageNotFound }

@@ -268,8 +268,8 @@ class TestJwtClaims(dict, Enum):
         ],
         'loginSource': LoginSource.STAFF.value
     }
-    
-    staff_eft_role = {
+
+    manage_eft_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
@@ -284,7 +284,7 @@ class TestJwtClaims(dict, Enum):
             ]
         },
         'roles': [
-            'staff', 'edit', 'create_accounts', 'eft_staff'
+            'staff', 'edit', 'create_accounts', 'manage_eft'
         ],
         'loginSource': LoginSource.STAFF.value
     }

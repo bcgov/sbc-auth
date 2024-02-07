@@ -27,6 +27,7 @@ class Role(Enum):
     GOV_ACCOUNT_USER = 'gov_account_user'
     ANONYMOUS_USER = 'anonymous_user'
     ACCOUNT_IDENTITY = 'account_identity'
+    MANAGE_EFT = 'manage_eft'
 
     SYSTEM = 'system'
     TESTER = 'tester'
@@ -38,7 +39,6 @@ class Role(Enum):
     STAFF_CREATE_ACCOUNTS = 'create_accounts'
     STAFF_MANAGE_BUSINESS = 'manage_business'
     STAFF_SUSPEND_ACCOUNTS = 'suspend_accounts'
-    STAFF_EFT = 'eft_staff'
 
 
 # Membership types

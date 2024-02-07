@@ -99,7 +99,7 @@ def search_organizations():
 @cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
 @_jwt.has_one_of_roles(
-    [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value])
+    [Role.SYSTEM.value, Role.MANAGE_EFT.value])
 def search_simple_orgs():
     """Return simplified organization information."""
     current_app.logger.info('<search_simple_orgs')
