@@ -56,8 +56,7 @@ export default defineComponent({
     shortNameDetails: {
       type: Object,
       default: () => ({
-        shortName: null,
-        transactionDate: null
+        shortName: null
       })
     }
   },
