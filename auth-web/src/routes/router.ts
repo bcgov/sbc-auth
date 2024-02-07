@@ -810,7 +810,7 @@ export function getRoutes (): RouteConfig[] {
       component: ShortNameDetailsView,
       meta: {
         requiresAuth: true,
-        allowedRoles: [Role.Staff],
+        allowedRoles: [Role.ManageEft],
         breadcrumb: [
           StaffDashboardBreadcrumb,
           ShortNameMappingBreadcrumb,
