@@ -191,7 +191,7 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
 export default defineComponent({
   name: 'UnlinkedShortNameTable',
   components: { BaseVDataTable, DatePicker, ModalDialog, ShortNameLookup },
-  setup (props, { emit }) {
+  setup (props, { emit, root }) {
     const datePicker = ref(null)
     const accountLinkingDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const state = reactive<UnlinkedShortNameState>({
@@ -293,7 +293,7 @@ export default defineComponent({
     }
 
     function viewDetails (index) {
-      this.$router.push({
+      root.$router?.push({
         name: 'shortnamedetails',
         params: {
           'shortNameId': state.results[index].id

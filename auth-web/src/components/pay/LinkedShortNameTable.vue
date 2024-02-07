@@ -104,7 +104,7 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
 export default defineComponent({
   name: 'LinkedShortNameTable',
   components: { BaseVDataTable },
-  setup (props, { emit }) {
+  setup (props, { emit, root }) {
     const state = reactive<LinkedShortNameState>({
       results: [],
       totalResults: 1,
@@ -167,7 +167,7 @@ export default defineComponent({
     }
 
     function viewDetails (index) {
-      this.$router.push({
+      root.$router?.push({
         name: 'shortnamedetails',
         params: {
           'shortNameId': state.results[index].id
