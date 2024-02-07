@@ -167,8 +167,12 @@ export default defineComponent({
     }
 
     function viewDetails (index) {
-      const paymentDetailsUrl = ConfigHelper.getSelfURL() + '/pay/shortname-details/' + state.results[index].id
-      window.location.href = paymentDetailsUrl
+      this.$router.push({
+        name: 'shortnamedetails',
+        params: {
+          'shortNameId': state.results[index].id
+        }
+      })
     }
 
     return {
