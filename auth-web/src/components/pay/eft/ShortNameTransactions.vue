@@ -152,7 +152,6 @@ export default defineComponent({
 }
 
 ::v-deep{
-
   #table-title-cell {
     background-color: $app-lt-blue;
   }
