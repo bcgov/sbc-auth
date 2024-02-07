@@ -13,7 +13,7 @@
 
     <v-card-text
       v-if="isLinked"
-      class="pa-5"
+      class="pa-5 linked-text"
     >
       All payments from {{ shortNameDetails.shortName }} will be applied to:
       <br>
@@ -22,10 +22,13 @@
 
     <v-card-text
       v-else
-      class="d-flex justify-space-between pa-5"
+      class="d-flex justify-space-between pa-5 unlinked-text"
     >
       Payment from this short name is not linked with an account yet.
-      <v-btn color="primary">
+      <v-btn
+        id="link-shortname-btn"
+        color="primary"
+      >
         Link to Account
       </v-btn>
     </v-card-text>
