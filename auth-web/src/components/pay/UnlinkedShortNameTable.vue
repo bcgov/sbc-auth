@@ -160,7 +160,9 @@
                   class="actions-dropdown_item my-1"
                   data-test="remove-linkage-button"
                 >
-                  <v-list-item-subtitle>
+                  <v-list-item-subtitle
+                    @click="viewDetails(index)"
+                  >
                     <v-icon small>mdi-format-list-bulleted</v-icon>
                     <span class="pl-1">View Detail</span>
                   </v-list-item-subtitle>
@@ -188,7 +190,7 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
 export default defineComponent({
   name: 'UnlinkedShortNameTable',
   components: { BaseVDataTable, DatePicker, ModalDialog, ShortNameLookup },
-  setup (props, { emit }) {
+  setup (props, { emit, root }) {
     const datePicker = ref(null)
     const accountLinkingDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const state = reactive<UnlinkedShortNameState>({
@@ -289,6 +291,15 @@ export default defineComponent({
       await loadTableData()
     }
 
+    function viewDetails (index) {
+      root.$router?.push({
+        name: 'shortnamedetails',
+        params: {
+          'shortNameId': state.results[index].id
+        }
+      })
+    }
+
     onMounted(async () => {
       await loadTableData()
     })
@@ -306,7 +317,8 @@ export default defineComponent({
       accountLinkingDialog,
       openAccountLinkingDialog,
       closeAccountLinkingDialog,
-      datePicker
+      datePicker,
+      viewDetails
     }
   }
 })
