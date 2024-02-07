@@ -98,6 +98,7 @@ def search_organizations():
 @bp.route('/simple', methods=['GET', 'OPTIONS'])
 @cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
+@validate_roles(allowed_roles=[Role.MANAGE_EFT.value, Role.SYSTEM.value])
 @_jwt.has_one_of_roles(
     [Role.SYSTEM.value, Role.MANAGE_EFT.value])
 def search_simple_orgs():
