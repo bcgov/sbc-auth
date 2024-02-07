@@ -801,7 +801,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/pay/manage-shortnames',
       name: 'manage-shortnames',
       component: ShortNameMappingView,
-      meta: { requiresAuth: true, allowedRoles: [Role.Staff] }, // TODO rewire this in #19673
+      meta: { requiresAuth: true, allowedRoles: [Role.ManageEft] },
       props: true
     },
     {
@@ -810,7 +810,7 @@ export function getRoutes (): RouteConfig[] {
       component: ShortNameDetailsView,
       meta: {
         requiresAuth: true,
-        allowedRoles: [Role.Staff],
+        allowedRoles: [Role.ManageEft],
         breadcrumb: [
           StaffDashboardBreadcrumb,
           ShortNameMappingBreadcrumb,

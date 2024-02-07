@@ -44,7 +44,8 @@ export enum Role {
     GOVMAccountUser = 'gov_account_user',
     ManageGlCodes = 'manage_gl_codes',
     FasSearch = 'fas_search',
-    ViewAllTransactions = 'view_all_transactions'
+    ViewAllTransactions = 'view_all_transactions',
+    ManageEft = 'manage_eft'
 }
 
 export enum Pages {
