@@ -88,7 +88,7 @@
           </span>
         </h2>
       </template>
-      <template #header-filter-slot-depositDate>
+      <template #header-filter-slot-transactionDate>
         <div @click="clickDatePicker()">
           <v-text-field
             v-model="state.dateRangeText"
@@ -121,8 +121,8 @@
       <template #item-slot-depositAmount="{ item }">
         <span>{{ formatAmount(item.depositAmount) }}</span>
       </template>
-      <template #item-slot-depositDate="{ item }">
-        <span>{{ formatDate(item.depositDate) }}</span>
+      <template #item-slot-transactionDate="{ item }">
+        <span>{{ formatDate(item.transactionDate) }}</span>
       </template>
       <template #item-slot-actions="{ item, index }">
         <div
@@ -203,7 +203,7 @@ export default defineComponent({
         pageLimit: 20,
         filterPayload: {
           shortName: '',
-          depositDate: '',
+          transactionDate: '',
           depositAmount: 0,
           state: ShortNameStatus.UNLINKED
         }
@@ -237,7 +237,7 @@ export default defineComponent({
     const headers = [
       createHeader('shortName', 'Bank Short Name', 'text', 'Bank Short Name'),
       {
-        col: 'depositDate',
+        col: 'transactionDate',
         hasFilter: false,
         label: 'Initial Payment Received Date',
         value: 'Initial Payment Received Date',
@@ -268,7 +268,7 @@ export default defineComponent({
       state.dateRangeSelected = !!(endDate && startDate)
       if (!state.dateRangeSelected) { endDate = ''; startDate = '' }
       state.dateRangeText = state.dateRangeSelected ? `${formatDate(startDate)} - ${formatDate(endDate)}` : ''
-      loadTableData('depositDate', { endDate, startDate })
+      loadTableData('transactionDate', { endDate, startDate })
     }
 
     function openAccountLinkingDialog (item: any) {
