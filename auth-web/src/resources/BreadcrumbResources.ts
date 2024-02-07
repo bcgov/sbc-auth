@@ -26,3 +26,13 @@ export const StaffDashboardBreadcrumb: BreadcrumbIF = {
   text: 'Staff Dashboard',
   href: `${sessionStorage.getItem('AUTH_WEB_URL')}/staff/dashboard/active`
 }
+
+export const ShortNameMappingBreadcrumb: BreadcrumbIF = {
+  text: 'EFT Received Payments',
+  href: `${sessionStorage.getItem('AUTH_WEB_URL')}/pay/manage-shortnames`
+}
+
+export const ShortNameDetailsBreadcrumb: BreadcrumbIF = {
+  text: 'EFT Payment Details',
+  to: { name: 'shortnamedetails' }
+}

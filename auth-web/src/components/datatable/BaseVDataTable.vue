@@ -53,6 +53,7 @@
         </slot>
         <!-- Second row has filters. -->
         <slot
+          v-if="!hideFilters"
           name="header-filter-slot"
           :headers="headers"
         >
@@ -175,7 +176,8 @@ export default defineComponent({
     highlightClass: { type: String, default: '' },
     hasTitleSlot: { type: Boolean },
     useObserver: { type: Boolean, required: false },
-    observerCallback: { type: Function as PropType<() => Promise<boolean>>, required: false, default: null }
+    observerCallback: { type: Function as PropType<() => Promise<boolean>>, required: false, default: null },
+    hideFilters: { type: Boolean, default: false }
   },
   emits: ['update-table-options'],
   setup (props, { emit }) {
