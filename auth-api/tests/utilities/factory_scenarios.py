@@ -280,12 +280,9 @@ class TestJwtClaims(dict, Enum):
             'roles': [
                 'staff',
                 'view_accounts',
-                'create_accounts'
+                'manage_eft'
             ]
         },
-        'roles': [
-            'staff', 'edit', 'create_accounts', 'manage_eft'
-        ],
         'loginSource': LoginSource.STAFF.value
     }
 
