@@ -51,6 +51,7 @@
           min-width="5rem"
           min-height="2rem"
           class="open-action-btn"
+          @click="viewDetails(index)"
         >
           View
         </v-btn>
@@ -102,7 +103,7 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
 export default defineComponent({
   name: 'LinkedShortNameTable',
   components: { BaseVDataTable },
-  setup (props, { emit }) {
+  setup (props, { emit, root }) {
     const state = reactive<LinkedShortNameState>({
       results: [],
       totalResults: 1,
@@ -164,13 +165,23 @@ export default defineComponent({
       await loadTableData()
     }
 
+    function viewDetails (index) {
+      root.$router?.push({
+        name: 'shortnamedetails',
+        params: {
+          'shortNameId': state.results[index].id
+        }
+      })
+    }
+
     return {
       clearFilters,
       clearFiltersTrigger,
       infiniteScrollCallback,
       headers,
       state,
-      updateFilter
+      updateFilter,
+      viewDetails
     }
   }
 })

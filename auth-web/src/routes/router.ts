@@ -1,7 +1,7 @@
 import {
   MyBusinessRegistryBreadcrumb,
   RegistryDashboardBreadcrumb,
-  RegistryHomeBreadcrumb,
+  RegistryHomeBreadcrumb, ShortNameDetailsBreadcrumb, ShortNameMappingBreadcrumb,
   StaffBusinessRegistryBreadcrumb,
   StaffDashboardBreadcrumb
 } from '@/resources/BreadcrumbResources'
@@ -61,6 +61,7 @@ import { RouteConfig } from 'vue-router'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
 import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SetupGovmAccountView from '@/views/auth/staff/SetupGovmAccountView.vue'
+import ShortNameDetailsView from '@/views/pay/eft/ShortNameDetailsView.vue'
 import ShortNameMappingView from '@/views/pay/ShortNameMappingView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
@@ -800,8 +801,24 @@ export function getRoutes (): RouteConfig[] {
       path: '/pay/manage-shortnames',
       name: 'manage-shortnames',
       component: ShortNameMappingView,
-      meta: { requiresAuth: true, allowedRoles: [Role.Staff] }, // TODO rewire this in #19673
+      meta: { requiresAuth: true, allowedRoles: [Role.ManageEft] },
       props: true
+    },
+    {
+      path: '/pay/shortname-details/:shortNameId',
+      name: 'shortnamedetails',
+      component: ShortNameDetailsView,
+      meta: {
+        requiresAuth: true,
+        allowedRoles: [Role.ManageEft],
+        breadcrumb: [
+          StaffDashboardBreadcrumb,
+          ShortNameMappingBreadcrumb,
+          ShortNameDetailsBreadcrumb
+        ],
+        showNavBar: true
+      },
+      props: (route) => ({ shortNameId: route.params.shortNameId })
     },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]
