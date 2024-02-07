@@ -16,7 +16,7 @@
     :hasTitleSlot="true"
     :useObserver="true"
     :observerCallback="infiniteScrollCallback"
-    :height="'400px'"
+    :height="calculateTableHeight()"
     @update-table-options="state.options = $event"
   >
     <template #header-title>
@@ -121,13 +121,22 @@ export default defineComponent({
       return false
     }
 
+    function calculateTableHeight () {
+      if (state.results.length <= state.filters.pageLimit) return null
+      const height = state.results.length * 40
+      if (height > 400) return '400px'
+
+      return `${height}px`
+    }
+
     return {
       formatCurrency: CommonUtils.formatAmount,
       formatDate: CommonUtils.formatDisplayDate,
       headers,
       state,
       paymentsReceived,
-      infiniteScrollCallback
+      infiniteScrollCallback,
+      calculateTableHeight
     }
   }
 })
@@ -143,8 +152,17 @@ export default defineComponent({
 }
 
 ::v-deep{
+
+  #table-title-cell {
+    background-color: $app-lt-blue;
+  }
+
   .v-data-table__wrapper {
     overflow-y: auto;
+  }
+
+  .base-table__header__title {
+    padding-bottom: 16px
   }
 }
 
