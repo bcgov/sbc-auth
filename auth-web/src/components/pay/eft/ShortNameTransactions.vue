@@ -16,7 +16,7 @@
     :hasTitleSlot="true"
     :useObserver="true"
     :observerCallback="infiniteScrollCallback"
-    :height="'400'"
+    :height="'400px'"
     @update-table-options="state.options = $event"
   >
     <template #header-title>
@@ -144,7 +144,6 @@ export default defineComponent({
 
 ::v-deep{
   .v-data-table__wrapper {
-    height: 200px;
     overflow-y: auto;
   }
 }
