@@ -1,3 +1,5 @@
+import { DataOptions } from 'vuetify'
+
 export interface EFTTransaction {
   id: number
   shortNameId: number
@@ -23,21 +25,22 @@ export interface EFTTransactionState {
   filters: EFTTransactionFilterParams
   loading: boolean
   results: EFTTransaction[]
-  totalResults: number
+  totalResults: number,
+  options: DataOptions
 }
 
 export interface EFTShortnameResponse {
-  accountBranch: string
-  accountId: number
-  accountName: string
-  createdOn: string
-  depositAmount: number
-  depositDate: string
   id: number
-  linkedBy: string
-  linkedByName: string
-  linkedOn: string
   shortName: string
-  transactionDate: string
-  transactionId: string
+  accountBranch?: string
+  accountId?: number
+  accountName?: string
+  createdOn: string
+  depositAmount?: number
+  depositDate?: string
+  linkedBy?: string
+  linkedByName?: string
+  linkedOn?: string
+  transactionDate?: string
+  transactionId?: string
 }

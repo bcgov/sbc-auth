@@ -1,3 +1,4 @@
+import { EFTShortnameResponse, EFTTransactionFilterParams, EFTTransactionListResponse } from '@/models/eft-transaction'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
 import { PADInfo, PADInfoValidation } from '@/models/Organization'
@@ -8,7 +9,6 @@ import {
   StatementNotificationSettings,
   StatementSettings
 } from '@/models/statement'
-import { EFTShortnameResponse, EFTTransactionFilterParams, EFTTransactionListResponse } from '@/models/eft-transaction'
 import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 
 import { AxiosPromise } from 'axios'

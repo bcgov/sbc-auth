@@ -51,6 +51,7 @@
           min-width="5rem"
           min-height="2rem"
           class="open-action-btn"
+          @click="viewDetails(index)"
         >
           View
         </v-btn>
@@ -88,6 +89,7 @@
   </BaseVDataTable>
 </template>
 <script lang="ts">
+import ConfigHelper from '@/util/config-helper'
 import { defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
@@ -164,13 +166,19 @@ export default defineComponent({
       await loadTableData()
     }
 
+    function viewDetails (index) {
+      const paymentDetailsUrl = ConfigHelper.getSelfURL() + '/pay/shortname-details/' + state.results[index].id
+      window.location.href = paymentDetailsUrl
+    }
+
     return {
       clearFilters,
       clearFiltersTrigger,
       infiniteScrollCallback,
       headers,
       state,
-      updateFilter
+      updateFilter,
+      viewDetails
     }
   }
 })

@@ -1,48 +1,51 @@
 <template>
-  <v-card>
-    <v-card-title class="card-title">
-      <v-icon
-        class="pr-5"
-        color="link"
-        left
-      >
-        mdi-format-list-bulleted
-      </v-icon>
-      <b>Payments Received from {{ state.shortName?.shortName }} ({{ state.totalResults }})</b>
-    </v-card-title>
-    <BaseVDataTable
-      id="eft-transactions-table"
-      class="transaction-list"
-      itemKey="id"
-      :loading="state.loading"
-      loadingText="Loading Transaction Records..."
-      noDataText="No Transaction Records"
-      :setItems="state.results"
-      :setHeaders="headers"
-      :setTableDataOptions="tableDataOptions"
-      :totalItems="state.totalResults"
-      :filters="state.filters"
-      :updateFilter="updateFilter"
-      :pageHide="true"
-      @update-table-options="tableDataOptions = $event"
-    >
-      <template #header-filter-slot />
-      <template #item-slot-transactionDate="{ item }">
-        <span>{{ formatDate(item.transactionDate, 'MMMM DD, YYYY') }}</span>
-      </template>
-      <template #item-slot-depositAmount="{ item }">
-        <span>{{ formatCurrency(item.depositAmount) }}</span>
-      </template>
-    </BaseVDataTable>
-  </v-card>
+  <BaseVDataTable
+    id="eft-transactions-table"
+    class="transaction-list"
+    itemKey="id"
+    :loading="state.loading"
+    loadingText="Loading Transaction Records..."
+    noDataText="No Transaction Records"
+    :setItems="state.results"
+    :setHeaders="headers"
+    :setTableDataOptions="state.options"
+    :totalItems="state.totalResults"
+    :filters="state.filters"
+    :pageHide="true"
+    :hideFilters="true"
+    :hasTitleSlot="true"
+    :useObserver="true"
+    :observerCallback="infiniteScrollCallback"
+    :height="'400'"
+    @update-table-options="state.options = $event"
+  >
+    <template #header-title>
+      <h2 class="ml-4 py-6">
+        <v-icon
+          class="pr-4"
+          color="link"
+          left
+        >
+          mdi-format-list-bulleted
+        </v-icon>
+        {{ paymentsReceived }}
+      </h2>
+    </template>
+    <template #header-filter-slot />
+    <template #item-slot-transactionDate="{ item }">
+      <span>{{ formatDate(item.transactionDate, 'MMMM DD, YYYY') }}</span>
+    </template>
+    <template #item-slot-depositAmount="{ item }">
+      <span>{{ formatCurrency(item.depositAmount) }}</span>
+    </template>
+  </BaseVDataTable>
 </template>
 <script lang="ts">
-import { Ref, defineComponent, reactive, ref, watch } from '@vue/composition-api'
+import { computed, defineComponent, reactive, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../../datatable/resources'
-import { DataOptions } from 'vuetify'
-import { EFTTransactionFilterParams } from '@/models/eft-transaction'
+import { EFTTransactionState } from '@/models/eft-transaction'
 import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
 
@@ -50,7 +53,7 @@ export default defineComponent({
   name: 'ShortNameTransactions',
   components: { BaseVDataTable },
   props: {
-    shortName: {
+    shortNameDetails: {
       type: Object,
       default: () => ({
         shortName: null,
@@ -74,33 +77,32 @@ export default defineComponent({
       }
     ]
 
-    const state = reactive({
+    const state = reactive<EFTTransactionState>({
       results: [],
       totalResults: 1,
       filters: {
-        isActive: false,
         pageNumber: 1,
         pageLimit: 5
-      } as EFTTransactionFilterParams,
+      },
       loading: false,
-      shortName: {
-        id: null
-      }
+      options: _.cloneDeep(DEFAULT_DATA_OPTIONS)
     })
 
-    function setShortName (shortname) {
-      state.shortName = shortname
-      loadTransactions(state.shortName.id)
-    }
+    const paymentsReceived = computed<string>(() => {
+      return `Payments Received from ${props.shortNameDetails.shortName} (${state.totalResults})`
+    })
 
-    watch(() => props.shortName, () => setShortName(props.shortName), { deep: true })
-    async function loadTransactions (shortnameId: string): Promise<void> {
+    watch(() => props.shortNameDetails, () => {
+      return loadTransactions(props.shortNameDetails.id, false)
+    }, { deep: true })
+
+    async function loadTransactions (shortnameId: string, appendToResults: boolean = false): Promise<void> {
       try {
         state.loading = true
         const response = await PaymentService.getEFTTransactions(shortnameId, state.filters)
         if (response?.data) {
           /* We use appendToResults for infinite scroll, so we keep the existing results. */
-          state.results = response.data.items
+          state.results = appendToResults ? state.results.concat(response.data.items) : response.data.items
           state.totalResults = response.data.total
         } else {
           throw new Error('No response from getEFTTransactions')
@@ -112,32 +114,20 @@ export default defineComponent({
       state.loading = false
     }
 
-    function updateFilter () : void { }
-
-    const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
-
-    watch(() => state.filters.pageNumber, (val: number) => { tableDataOptions.value.page = val })
-    watch(() => tableDataOptions.value, (val: DataOptions) => {
-      const newPage = val?.page || DEFAULT_DATA_OPTIONS.page
-      const newLimit = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
-      // need this check or vi test continuously loops on initialization
-      if (state.filters.pageNumber !== newPage || state.filters.pageLimit !== newLimit) {
-        state.filters.pageNumber = val?.page || DEFAULT_DATA_OPTIONS.page
-        state.filters.pageLimit = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
-        loadTransactions(state.shortName?.id)
-      }
-    })
-
-    const formatDate = CommonUtils.formatDisplayDate
-    const formatCurrency = CommonUtils.formatAmount
+    async function infiniteScrollCallback () {
+      if (state.totalResults < (state.filters.pageLimit * state.filters.pageNumber)) return true
+      state.filters.pageNumber++
+      await loadTransactions(props.shortNameDetails.id, true)
+      return false
+    }
 
     return {
-      formatCurrency,
-      formatDate,
+      formatCurrency: CommonUtils.formatAmount,
+      formatDate: CommonUtils.formatDisplayDate,
       headers,
-      tableDataOptions,
       state,
-      updateFilter
+      paymentsReceived,
+      infiniteScrollCallback
     }
   }
 })
@@ -145,24 +135,18 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
+@import '@/assets/scss/ShortnameTables.scss';
 
 .card-title {
   background-color: $app-lt-blue;
   justify-content: left;
 }
 
-::v-deep {
-  .base-table__header__filter.pb-5 {
-    padding: 5px !important;
-    height: 0 !important;//No filters for this table
-  }
-  .base-table__item-row {
-    color: $gray7;
-    font-weight: bold;
-  }
-  .base-table__item-cell {
-    padding: 16px 0 16px 16px;
-    vertical-align: middle;
+::v-deep{
+  .v-data-table__wrapper {
+    height: 200px;
+    overflow-y: auto;
   }
 }
+
 </style>

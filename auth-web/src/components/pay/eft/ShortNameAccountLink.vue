@@ -15,7 +15,7 @@
       v-if="isLinked"
       class="pa-5"
     >
-      All payments from {{ shortName.shortName }} will be applied to:
+      All payments from {{ shortNameDetails.shortName }} will be applied to:
       <br>
       <b>{{ accountDisplayText }}</b>
     </v-card-text>
@@ -38,18 +38,18 @@ import { computed, defineComponent } from '@vue/composition-api'
 export default defineComponent({
   name: 'ShortNameAccountLinkage',
   props: {
-    shortName: {
+    shortNameDetails: {
       type: Object,
       default: () => ({})
     }
   },
   setup (props) {
     const isLinked = computed<boolean>(() => {
-      return props.shortName?.accountId
+      return props.shortNameDetails?.accountId
     })
 
     const accountDisplayText = computed<string>(() => {
-      return `${props.shortName.accountId} ${props.shortName.accountName}`
+      return `${props.shortNameDetails.accountId} ${props.shortNameDetails.accountName}`
     })
 
     return {

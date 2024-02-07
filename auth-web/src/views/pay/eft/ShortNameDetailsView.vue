@@ -11,9 +11,13 @@
         Review and verify payment details
       </p>
     </div>
-    <ShortNameTransactions :shortName="state.result" />
-    <br> <br>
-    <ShortNameAccountLinkage :shortName="state.result" />
+
+    <ShortNameTransactions
+      class="mb-4"
+      :shortNameDetails="state.shortNameDetails"
+    />
+
+    <ShortNameAccountLinkage :shortNameDetails="state.shortNameDetails" />
   </v-container>
 </template>
 <script lang="ts">
@@ -33,7 +37,7 @@ export default defineComponent({
   },
   setup (props) {
     const state = reactive({
-      result: {}
+      shortNameDetails: {}
     })
 
     onMounted(async () => {
@@ -44,8 +48,7 @@ export default defineComponent({
       try {
         const response = await PaymentService.getEFTShortname(shortnameId)
         if (response?.data) {
-          /* We use appendToResults for infinite scroll, so we keep the existing results. */
-          state.result = response.data
+          state.shortNameDetails = response.data
         } else {
           throw new Error('No response from getEFTShortname')
         }

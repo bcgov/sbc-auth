@@ -160,7 +160,9 @@
                   class="actions-dropdown_item my-1"
                   data-test="remove-linkage-button"
                 >
-                  <v-list-item-subtitle>
+                  <v-list-item-subtitle
+                    @click="viewDetails(index)"
+                  >
                     <v-icon small>mdi-format-list-bulleted</v-icon>
                     <span class="pl-1">View Detail</span>
                   </v-list-item-subtitle>
@@ -174,6 +176,7 @@
   </div>
 </template>
 <script lang="ts">
+import ConfigHelper from '@/util/config-helper'
 import { BaseVDataTable, DatePicker } from '..'
 import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
@@ -289,6 +292,11 @@ export default defineComponent({
       await loadTableData()
     }
 
+    function viewDetails (index) {
+      const paymentDetailsUrl = ConfigHelper.getSelfURL() + '/pay/shortname-details/' + state.results[index].id
+      window.location.href = paymentDetailsUrl
+    }
+
     onMounted(async () => {
       await loadTableData()
     })
@@ -306,7 +314,8 @@ export default defineComponent({
       accountLinkingDialog,
       openAccountLinkingDialog,
       closeAccountLinkingDialog,
-      datePicker
+      datePicker,
+      viewDetails
     }
   }
 })
