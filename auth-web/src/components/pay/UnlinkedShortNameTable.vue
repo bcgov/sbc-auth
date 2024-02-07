@@ -176,7 +176,6 @@
   </div>
 </template>
 <script lang="ts">
-import ConfigHelper from '@/util/config-helper'
 import { BaseVDataTable, DatePicker } from '..'
 import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'

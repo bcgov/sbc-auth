@@ -89,7 +89,6 @@
   </BaseVDataTable>
 </template>
 <script lang="ts">
-import ConfigHelper from '@/util/config-helper'
 import { defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
