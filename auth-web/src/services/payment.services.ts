@@ -1,3 +1,4 @@
+import { EFTShortnameResponse, EFTTransactionFilterParams, EFTTransactionListResponse } from '@/models/eft-transaction'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
 import { PADInfo, PADInfoValidation } from '@/models/Organization'
@@ -226,5 +227,22 @@ export default class PaymentService {
     }
 
     return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames?${params.toString()}`)
+  }
+  static getEFTTransactions (shortNameId: string, filterParams: EFTTransactionFilterParams): AxiosPromise<EFTTransactionListResponse> {
+    const params = new URLSearchParams()
+    if (filterParams.pageNumber) {
+      params.append('page', filterParams.pageNumber.toString())
+    }
+    if (filterParams.pageLimit) {
+      params.append('limit', filterParams.pageLimit.toString())
+    }
+
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/transactions`
+    return axios.get(url, { params })
+  }
+
+  static getEFTShortname (shortNameId: string): AxiosPromise<EFTShortnameResponse> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`
+    return axios.get(url)
   }
 }
