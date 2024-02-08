@@ -29,6 +29,10 @@ export default defineConfig({
   define: {
     'import.meta.env.ABOUT_TEXT': generateAboutText(aboutText1, aboutText2)
   },
+  esbuild: {
+    minifySyntax: false,
+    minifyIdentifiers: false
+  },
   envPrefix: 'VUE_APP_', // Need to remove this after fixing vaults. Use import.meta.env with VUE_APP.
   plugins: [
     vue({
