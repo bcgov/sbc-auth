@@ -80,6 +80,7 @@
   "bcscAccountCreationSuccessTitle": "Your BC Registries and Online Services account has successfully been created.",
   "bcscAccountCreationSuccessSubtext1": "You can now start accessing products and services available exclusively to BC Registries account holders.",
   "bcscAccountCreationSuccessSubtext2": "If you requested access to a product or service that requires staff review, you will receive notification once your application has been reviewed.",
+  "bcscAccountChangeSuccessTitle": "Your BC Registries and Online Services account type has been changed.",
   "bcscAccountChangeSuccessSubtext": "Your account has successfully been changed. Click 'View Account' to view your updated account information.",
   "resetConfirmTitle": "Reset your Profile",
   "resetConfirmText": "Reseting your profile will remove all your information.",
