@@ -6,9 +6,9 @@
         color="link"
         left
       >
-        mdi-bank-check
+        mdi-bank-transfer
       </v-icon>
-      <b>Short Name and Account Linkage</b>
+      Short Name and Account Linkage
     </v-card-title>
 
     <v-card-text
@@ -70,6 +70,12 @@ export default defineComponent({
   background-color: $app-lt-blue;
   justify-content: left;
   height: 75px;
+  font-weight: bold;
+  font-size: 1.125rem;
+
+  .v-icon {
+    font-size: 36px;
+  }
 }
 
 </style>

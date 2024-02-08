@@ -4,8 +4,8 @@
     class="transaction-list"
     itemKey="id"
     :loading="state.loading"
-    loadingText="Loading Transaction Records..."
-    noDataText="No Transaction Records"
+    loadingText="Loading Records..."
+    noDataText="No Records."
     :setItems="state.results"
     :setHeaders="headers"
     :setTableDataOptions="state.options"
@@ -155,6 +155,10 @@ export default defineComponent({
 
   .v-data-table__wrapper {
     overflow-y: auto;
+  }
+
+  .v-data-table__empty-wrapper {
+    background-color: transparent !important; // remove highlight on no records row
   }
 
   .base-table__header__title {
