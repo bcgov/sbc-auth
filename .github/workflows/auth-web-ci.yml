@@ -20,7 +20,7 @@ jobs:
     if: github.repository == 'bcgov/sbc-auth'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: "true"
 
   linting:
@@ -32,7 +32,7 @@ jobs:
         node-version: [20.5.1]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -53,7 +53,7 @@ jobs:
         node-version: [20.5.1]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: build to check strictness
         id: build
         run: |

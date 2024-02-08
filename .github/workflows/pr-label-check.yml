@@ -12,7 +12,7 @@ jobs:
   pr-label-check:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: yogevbd/enforce-label-action@master
         with:
           REQUIRED_LABELS_ANY: "bug,enhancement,feature,fix,devops,documentation,maintenance,skip-changelog"
