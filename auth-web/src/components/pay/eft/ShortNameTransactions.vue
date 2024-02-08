@@ -29,6 +29,9 @@
           mdi-format-list-bulleted
         </v-icon>
         {{ paymentsReceived }}
+        <span class="font-weight-regular">
+          ({{ state.totalResults }})
+        </span>
       </h2>
     </template>
     <template #header-filter-slot />
@@ -88,7 +91,7 @@ export default defineComponent({
     })
 
     const paymentsReceived = computed<string>(() => {
-      return `Payments Received from ${props.shortNameDetails.shortName} (${state.totalResults})`
+      return `Payments Received from ${props.shortNameDetails.shortName}`
     })
 
     watch(() => props.shortNameDetails, () => {
@@ -145,11 +148,6 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/ShortnameTables.scss';
 
-.card-title {
-  background-color: $app-lt-blue;
-  justify-content: left;
-}
-
 ::v-deep{
   #table-title-cell {
     background-color: $app-lt-blue;
@@ -160,7 +158,8 @@ export default defineComponent({
   }
 
   .base-table__header__title {
-    padding-bottom: 16px
+    padding-bottom: 16px;
+    top: 75px !important; // prevent fixed header sliding when there is a title
   }
 }
 
