@@ -188,7 +188,7 @@ class Affiliation:
 
         if entity_type not in ['SP', 'GP']:
             entity.set_pass_code_claimed(True)
-        if entity_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
+        if entity_type not in [CorpType.RTMP.value, CorpType.TMP.value, CorpType.ATMP.value]:
             name = entity.name if len(entity.name) > 0 else entity.business_identifier
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
                                                            name=name, id=entity.business_identifier))
@@ -287,7 +287,7 @@ class Affiliation:
             affiliation_model = AffiliationModel(
                 org_id=org_id, entity_id=entity.identifier, certified_by_name=certified_by_name)
 
-            if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
+            if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value, CorpType.ATMP.value]:
                 ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
                                                                name=entity.name, id=entity.business_identifier))
         affiliation_model.certified_by_name = certified_by_name
@@ -342,7 +342,7 @@ class Affiliation:
         affiliation.delete()
         entity.set_pass_code_claimed(False)
 
-        if entity.corp_type in [CorpType.RTMP.value, CorpType.TMP.value]:
+        if entity.corp_type in [CorpType.RTMP.value, CorpType.TMP.value, CorpType.ATMP.value]:
             return
 
         # When registering a business (also RTMP and TMP in between):
