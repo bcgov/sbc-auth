@@ -29,6 +29,10 @@ export default defineConfig({
   define: {
     'import.meta.env.ABOUT_TEXT': generateAboutText(aboutText1, aboutText2)
   },
+  esbuild: {
+    minifySyntax: false,
+    minifyIdentifiers: false
+  },
   envPrefix: 'VUE_APP_', // Need to remove this after fixing vaults. Use import.meta.env with VUE_APP.
   plugins: [
     vue({
@@ -66,7 +70,7 @@ export default defineConfig({
       // Fix for module decorator unit tests fail
       'vuex-module-decorators': path.resolve(__dirname, './node_modules/vuex-module-decorators/dist/esm/index.js'),
       // Fix for multiple vue detected on fas-ui issue, set alias to force fas-ui to use /vue
-      'vue': path.resolve(__dirname, './node_modules/vue/dist/vue.runtime.esm.js')
+      'vue': path.resolve(__dirname, './node_modules/vue/dist/vue.runtime.js')
     },
     extensions: ['.js', '.ts', '.vue', '.json', '.css']
   },
