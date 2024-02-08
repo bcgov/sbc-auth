@@ -69,6 +69,7 @@ export default defineComponent({
 .card-title {
   background-color: $app-lt-blue;
   justify-content: left;
+  height: 75px;
 }
 
 </style>
