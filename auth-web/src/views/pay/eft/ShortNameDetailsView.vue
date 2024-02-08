@@ -13,7 +13,7 @@
     </div>
 
     <ShortNameTransactions
-      class="mb-4"
+      class="mb-12"
       :shortNameDetails="state.shortNameDetails"
     />
 
