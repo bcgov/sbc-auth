@@ -19,7 +19,7 @@ jobs:
     if: github.repository == 'bcgov/sbc-auth'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: "true"
 
   linting:
@@ -31,7 +31,7 @@ jobs:
         python-version: [3.8]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -90,7 +90,7 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -115,7 +115,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: build to check strictness
         id: build
         run: |
