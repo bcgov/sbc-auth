@@ -167,6 +167,41 @@
       </template>
     </BaseVExpansionPanel>
 
+    <!-- EFT -->
+    <v-card
+      flat
+      class="mb-4 pa-8"
+    >
+      <v-row
+        align="center"
+        justify="space-between"
+      >
+        <v-col class="grow">
+          <header>
+            <h2 class="mb-0">
+              Electronic Funds Transfer Received
+            </h2>
+            <p class="mt-3 mb-0">
+              Manage received EFTs
+            </p>
+          </header>
+        </v-col>
+        <v-col cols="auto">
+          <v-btn
+            id="EFT-button"
+            class="mt-0 mr-4 font-weight-regular"
+            color="primary"
+            outlined
+            dark
+            large
+            @click="$router.push({ name: 'manage-shortnames' })"
+          >
+            <span>Manage EFT Payments</span>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-card>
+
     <!-- FAS UI  -->
     <BaseVExpansionPanel
       v-if="canSearchFAS && isFasDashboardEnabled"
@@ -175,9 +210,9 @@
       style="z-index: 0;"
       class="mb-4"
     >
-      <template #content>
+      <!-- <template #content>
         <fas-search-component :isLibraryMode="true" />
-      </template>
+      </template> -->
     </BaseVExpansionPanel>
 
     <!-- Email Safe List -->
@@ -261,6 +296,7 @@ export default defineComponent({
       canViewAccounts: computed((): boolean => currentUser.value?.roles?.includes(Role.StaffViewAccounts)),
       canViewAllTransactions: computed((): boolean => currentUser.value?.roles?.includes(Role.ViewAllTransactions)),
       canViewGLCodes: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageGlCodes)),
+      canViewEFTPayments: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageEft)),
       isFasDashboardEnabled: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
       showBusSearchlink: computed((): boolean => true),
       registrySearchUrl: computed((): string => ConfigHelper.getRegistrySearchUrl())
