@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card v-if="shortNameDetails.shortName">
     <v-card-title class="card-title">
       <v-icon
         class="pr-5"

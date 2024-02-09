@@ -81,7 +81,7 @@ export default defineComponent({
 
     const state = reactive<EFTTransactionState>({
       results: [],
-      totalResults: 1,
+      totalResults: 0,
       filters: {
         pageNumber: 1,
         pageLimit: 5
@@ -91,7 +91,7 @@ export default defineComponent({
     })
 
     const paymentsReceived = computed<string>(() => {
-      return `Payments Received from ${props.shortNameDetails.shortName}`
+      return props.shortNameDetails.shortName ? `Payments Received from ${props.shortNameDetails.shortName}` : 'Loading...'
     })
 
     watch(() => props.shortNameDetails, () => {
