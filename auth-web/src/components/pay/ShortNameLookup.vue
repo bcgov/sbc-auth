@@ -124,7 +124,6 @@ export default defineComponent({
         { 'filterPayload': { 'accountIdList': accountIds.join(',') } })
       const eftShortNames = eftShortNamesResponse.data.items
       const matchedAccounts = eftShortNames.filter(eft => organizations.some(org => org.id.toString() === eft.accountId))
-      console.log(matchedAccounts)
       return matchedAccounts
     }
 

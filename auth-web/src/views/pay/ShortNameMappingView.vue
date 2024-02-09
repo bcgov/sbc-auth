@@ -86,8 +86,7 @@ export default defineComponent({
       unlinked: 0
     })
 
-    function linkAccount (account: any) {
-      console.log('Linking account:', account)
+    function linkAccount () {
       tab.value = 1
     }
 
