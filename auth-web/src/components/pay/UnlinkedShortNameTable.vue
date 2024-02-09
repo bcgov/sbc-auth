@@ -10,7 +10,9 @@
     >
       <template #text>
         <p v-if="state.selectedAccount.id" class="py-4 px-6 important">
-          <span class="font-weight-bold">Important:</span> Once an account is linked, all payment received from the same short name will be applied to settle outstanding balances of the selected account.
+          <span class="font-weight-bold">Important:</span> Once an account is linked, all payment received 
+          from the same short name will be applied to settle outstanding balances of 
+          the selected account.
         </p>
         <h4>
           Search by Account ID or Name to Link:

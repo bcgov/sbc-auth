@@ -78,7 +78,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api'
 import { LookupType, NameRequestLookupResultIF } from '@/models/business-nr-lookup'
 import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BusinessLookupResultIF } from '@/models'
