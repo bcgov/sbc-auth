@@ -804,15 +804,11 @@ export function getRoutes (): RouteConfig[] {
       meta: {
         requiresAuth: true,
         allowedRoles: [Role.ManageEft],
-        breadcrumb: [
-          {
-            text: StaffDashboardBreadcrumb.text,
-            to: { name: 'active' }
-          },
-          {
-            text: ShortNameMappingBreadcrumb.text
-          }
-        ],
+        breadcrumb: // Don't include the staff dashboard breadcrumb, we want to not navigate via HREF it reloads the page.
+          [
+            StaffDashboardBreadcrumb,
+            ShortNameMappingBreadcrumb
+          ],
         showNavBar: true
       },
       props: true

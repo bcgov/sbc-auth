@@ -24,12 +24,12 @@ export const StaffBusinessRegistryBreadcrumb: BreadcrumbIF = {
 
 export const StaffDashboardBreadcrumb: BreadcrumbIF = {
   text: 'Staff Dashboard',
-  href: `${sessionStorage.getItem('AUTH_WEB_URL')}/staff/dashboard/active`
+  to: { name: 'active' }
 }
 
 export const ShortNameMappingBreadcrumb: BreadcrumbIF = {
   text: 'EFT Received Payments',
-  href: `${sessionStorage.getItem('AUTH_WEB_URL')}/pay/manage-shortnames`
+  to: { name: 'manage-shortnames' }
 }
 
 export const ShortNameDetailsBreadcrumb: BreadcrumbIF = {

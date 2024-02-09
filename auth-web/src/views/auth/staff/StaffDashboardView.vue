@@ -169,6 +169,7 @@
 
     <!-- EFT -->
     <v-card
+      v-if="canViewEFTPayments"
       flat
       class="mb-4 pa-8"
     >
