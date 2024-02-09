@@ -60,7 +60,7 @@
             cols="3"
             class="result-identifier d-inline-flex"
           >
-            {{ item.accountId }}2
+            {{ item.accountId }}
           </v-col>
           <v-col
             cols="7"
@@ -83,9 +83,9 @@
 </template>
 
 <script lang="ts">
-import { LookupType, NameRequestLookupResultIF } from '@/models/business-nr-lookup'
 import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
-import { BusinessLookupResultIF } from '@/models'
+import { EFTShortnameResponse } from '@/models/eft-transaction'
+import { LookupType } from '@/models/business-nr-lookup'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
@@ -112,7 +112,7 @@ export default defineComponent({
     const states = reactive({
       state: LookupStates.INITIAL,
       searchField: '',
-      searchResults: [] as NameRequestLookupResultIF[] | BusinessLookupResultIF[]
+      searchResults: [] as EFTShortnameResponse[]
     })
 
     const checkForTyping = () => {
@@ -165,7 +165,8 @@ export default defineComponent({
 
     watch(() => states.searchField, onSearchFieldChanged)
 
-    const onItemSelected = (account: BusinessLookupResultIF | NameRequestLookupResultIF) => {
+    const onItemSelected = (account: EFTShortnameResponse) => {
+      console.log(123, account)
       if (account) {
         emit('account', account)
         states.state = LookupStates.SUMMARY

@@ -247,6 +247,7 @@ export default defineComponent({
     ]
 
     function selectAccount (account: any) {
+      console.log(account)
       state.selectedAccount = account
     }
 
@@ -279,15 +280,16 @@ export default defineComponent({
     }
 
     async function linkAccount () {
-      if (state.selectedShortName?.id && state.selectedAccount?.id) {
-        try {
-          const response = await PaymentService.patchEFTShortname(state.selectedShortName.id, state.selectedAccount.id)
-          if (response?.data) {
-            emit('link-account', response.data)
-          }
-        } catch (error) {
-          console.error('Failed to patchEFTShortname.', error)
+      if (!state.selectedShortName?.id || !state.selectedAccount?.id) {
+        return
+      }
+      try {
+        const response = await PaymentService.patchEFTShortname(state.selectedShortName.id, state.selectedAccount.id)
+        if (response?.data) {
+          emit('link-account', response.data)
         }
+      } catch (error) {
+        console.error('Failed to patchEFTShortname.', error)
       }
     }
 
