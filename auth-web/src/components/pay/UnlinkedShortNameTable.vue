@@ -2,7 +2,7 @@
   <div>
     <ModalDialog
       ref="accountLinkingDialog"
-      max-width="640"
+      max-width="720"
       :show-icon="false"
       :showCloseIcon="true"
       dialog-class="account-linking-dialog"

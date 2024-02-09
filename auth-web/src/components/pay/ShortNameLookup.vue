@@ -45,12 +45,12 @@
         </p>
       </template>
       <template #prepend-item>
-        <p class="pl-5">
+        <p class="pl-5 d-flex align-center item-row">
           Accounts with EFT Payment Method Selected
         </p>
       </template>
       <template #no-data>
-        <p class="pl-5">
+        <p class="pl-5 d-flex align-center item-row">
           No accounts found
         </p>
       </template>
@@ -254,8 +254,17 @@ p {
   }
 }
 
+.item-row {
+  height: 50px;
+  margin: 0;
+}
+
 ::v-deep .v-input__icon .mdi-magnify {
   -webkit-transform: none !important;
   transform: none !important;
+}
+
+::v-deep .v-list {
+  padding: 0;
 }
 </style>
