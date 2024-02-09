@@ -39,7 +39,7 @@
         />
         <p
           v-if="state === LookupStates.SUMMARY"
-          class="undo"
+          class="d-flex justify-center align-center ma-0 pa-0 cursor-pointer undo"
         >
           Undo
         </p>
@@ -166,7 +166,6 @@ export default defineComponent({
     watch(() => states.searchField, onSearchFieldChanged)
 
     const onItemSelected = (account: EFTShortnameResponse) => {
-      console.log(123, account)
       if (account) {
         emit('account', account)
         states.state = LookupStates.SUMMARY
@@ -207,13 +206,7 @@ export default defineComponent({
 }
 
 .undo {
-  padding: 0;
-  margin: 0;
   height: 22px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
   color: var(--v-primary-base) !important;
 }
 

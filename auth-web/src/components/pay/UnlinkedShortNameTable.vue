@@ -172,6 +172,7 @@ import { BaseVDataTable, DatePicker } from '..'
 import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
+import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
 import ShortNameLookup from './ShortNameLookup.vue'
@@ -246,8 +247,7 @@ export default defineComponent({
       }
     ]
 
-    function selectAccount (account: any) {
-      console.log(account)
+    function selectAccount (account: EFTShortnameResponse) {
       state.selectedAccount = account
     }
 
