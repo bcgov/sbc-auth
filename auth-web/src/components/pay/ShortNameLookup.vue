@@ -37,7 +37,12 @@
           :size="24"
           :width="2"
         />
-        <p class="undo" v-if="state === LookupStates.SUMMARY">Undo</p>
+        <p
+          v-if="state === LookupStates.SUMMARY"
+          class="undo"
+        >
+          Undo
+        </p>
       </template>
       <template #prepend-item>
         <p class="pl-5">
@@ -116,7 +121,7 @@ export default defineComponent({
       }
     }
 
-    async function mapAccounts(query) {
+    async function mapAccounts (query) {
       const organizations = await OrgService.getOrganizationsSimple(query)
       const accountIds = organizations.map((org) => org.id)
       const eftShortNamesResponse = await PaymentService.getEFTShortNames(

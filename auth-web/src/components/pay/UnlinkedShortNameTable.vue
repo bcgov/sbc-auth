@@ -9,9 +9,12 @@
       :title="`Linking ${state.selectedShortName.shortName} to an Account`"
     >
       <template #text>
-        <p v-if="state.selectedAccount.id" class="py-4 px-6 important">
-          <span class="font-weight-bold">Important:</span> Once an account is linked, all payment received 
-          from the same short name will be applied to settle outstanding balances of 
+        <p
+          v-if="state.selectedAccount.id"
+          class="py-4 px-6 important"
+        >
+          <span class="font-weight-bold">Important:</span> Once an account is linked, all payment received
+          from the same short name will be applied to settle outstanding balances of
           the selected account.
         </p>
         <h4>
@@ -276,7 +279,7 @@ export default defineComponent({
     }
 
     async function linkAccount () {
-      if (state.selectedShortName.id, state.selectedAccount.id) {
+      if (state.selectedShortName?.id && state.selectedAccount?.id) {
         try {
           const response = await PaymentService.patchEFTShortname(state.selectedShortName.id, state.selectedAccount.id)
           if (response?.data) {
