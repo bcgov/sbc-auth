@@ -210,9 +210,9 @@
       style="z-index: 0;"
       class="mb-4"
     >
-      <!-- <template #content>
+      <template #content>
         <fas-search-component :isLibraryMode="true" />
-      </template> -->
+      </template>
     </BaseVExpansionPanel>
 
     <!-- Email Safe List -->
