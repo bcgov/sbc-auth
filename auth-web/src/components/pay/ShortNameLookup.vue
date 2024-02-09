@@ -267,4 +267,8 @@ p {
 ::v-deep .v-list {
   padding: 0;
 }
+
+::v-deep .v-text-field__details {
+  display: none;
+}
 </style>

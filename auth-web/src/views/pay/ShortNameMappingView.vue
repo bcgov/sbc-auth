@@ -152,4 +152,9 @@ export default defineComponent({
   }
 }
 
+.account-linking-dialog ::v-deep .v-card__actions {
+  display: flex;
+  background: red!important;
+}
+
 </style>

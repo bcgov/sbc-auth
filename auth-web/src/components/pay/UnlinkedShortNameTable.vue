@@ -26,22 +26,25 @@
         />
       </template>
       <template #actions>
-        <v-btn
-          large
-          color="outlined"
-          data-test="dialog-ok-button"
-          @click="closeAccountLinkingDialog()"
-        >
-          Close
-        </v-btn>
-        <v-btn
-          large
-          color="primary"
-          data-test="dialog-ok-button"
-          @click="linkAccount()"
-        >
-          Link to an Account and Settle Payment
-        </v-btn>
+        <div class="d-flex align-center justify-center w-100 h-100 ga-3">
+          <v-btn
+            large
+            outlined
+            color="outlined"
+            data-test="dialog-ok-button"
+            @click="closeAccountLinkingDialog()"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            large
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="linkAccount()"
+          >
+            Link to an Account and Settle Payment
+          </v-btn>
+        </div>
       </template>
     </ModalDialog>
     <DatePicker
@@ -354,6 +357,18 @@ export default defineComponent({
   border: 2px solid #fcba19;
   color: #495057;
   font-size: 12px;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.ga-3 {
+  gap: 12px;
 }
 
 </style>
