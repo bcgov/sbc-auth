@@ -1,140 +1,92 @@
 <template>
-  <!-- once in Summary state, need to re-mount to reuse this component -->
-  <div id="business-lookup">
-    <!--<v-autocomplete
+  <div id="short-name-lookup">
+    <v-autocomplete
       :search-input.sync="searchField"
-      :hide-no-data="state != States.NO_RESULTS"
+      :hide-no-data="state != LookupStates.NO_RESULTS"
       :items="searchResults"
-      :loading="state === States.SEARCHING"
+      :loading="state === LookupStates.SEARCHING"
       :name="Math.random()"
-      :clearable="state !== States.INITIAL && state !== States.SEARCHING"
-      :append-icon="state === States.INITIAL ? 'mdi-magnify':''"
+      :clearable="state !== LookupStates.INITIAL && state !== LookupStates.SEARCHING"
+      :clear-icon="state === LookupStates.SUMMARY ? 'mdi-undo': 'mdi-close'"
+      :append-icon="state === LookupStates.INITIAL ? 'mdi-magnify':''"
       autocomplete="chrome-off"
-      class="mt-5 mb-n2"
+      :class="`mt-5 mb-n2 ${state === LookupStates.SUMMARY ? 'summary' : ''}`"
       filled
       hint=""
-      :item-text="lookupType === LookupType.NR ? 'nrNum' : 'name'"
-      :item-value="lookupType === LookupType.NR ? 'nrNum' : 'identifier'"
-      label="Account ID or Account Name"
+      :item-text="'accountName'"
+      :item-value="'accountId'"
+      dialog-class="short-name-lookup-dialog"
+      :label="state !== LookupStates.SUMMARY ? 'Account ID or Account Name' : ''"
       no-filter
       persistent-hint
       return-object
+      :readonly="state === LookupStates.SUMMARY"
       @input="onItemSelected"
       @keydown.enter.native.prevent
     >
+      <template #selection="{ item }">
+        <div>
+          {{ item.accountId }} {{ item.accountName }}
+        </div>
+      </template>
       <template #append>
         <v-progress-circular
-          v-if="state === States.SEARCHING"
+          v-if="state === LookupStates.SEARCHING"
           color="primary"
           indeterminate
           :size="24"
           :width="2"
         />
+        <p class="undo" v-if="state === LookupStates.SUMMARY">Undo</p>
       </template>
-
-      <template #no-data>
-        <p class="pl-5 font-weight-bold">
-          {{ lookupType === LookupType.NR ? 'No active Name Request found' : 'No active B.C. business found' }}
-        </p>
+      <template #prepend-item>
         <p class="pl-5">
-          {{ lookupType === LookupType.NR ?
-            'Ensure you have entered a Name Request that has not expired or been cancelled.' :
-            'Ensure you have entered the correct business name or number.'
-          }}
+          Accounts with EFT Payment Method Selected
         </p>
       </template>
-
-      <template
-        v-if="lookupType === LookupType.BUSINESS"
-        #item="{ item }"
-      >
-        <v-row class="business-lookup-result pt-1">
+      <template #no-data>
+        <p class="pl-5">
+          No accounts found
+        </p>
+      </template>
+      <template #item="{ item }">
+        <v-row class="short-name-lookup-result pt-1">
           <v-col
             cols="3"
             class="result-identifier d-inline-flex"
           >
-            {{ item.identifier }}
+            {{ item.accountId }}2
           </v-col>
           <v-col
             cols="7"
             class="result-name flex-1-1"
           >
-            {{ item.name }}
+            {{ item.accountName }}
           </v-col>
           <v-col
             cols="2"
             class="result-action"
           >
             <span
-              v-if="item.disabled"
-              class="added"
-            >Added</span>
-            <span
-              v-else
               class="select"
             >Select</span>
           </v-col>
         </v-row>
       </template>
-      <template
-        v-else
-        #item="{ item }"
-      >
-        <v-row class="business-lookup-result pt-1">
-          <v-col
-            cols="3"
-            class="result-identifier d-inline-flex"
-          >
-            {{ item.nrNum }}
-          </v-col>
-          <v-col
-            cols="7"
-            class="result-name flex-1-1"
-          >
-            <div
-              v-for="(name, index) in item.names"
-              :key="index"
-            >
-              {{ name }}
-            </div>
-          </v-col>
-          <v-col
-            cols="2"
-            class="result-action"
-          >
-            <span
-              v-if="item.disabled"
-              class="added"
-            >Added</span>
-            <span
-              v-else
-              class="select"
-            >Select</span>
-          </v-col>
-        </v-row>
-      </template>
-    </v-autocomplete>-->
+    </v-autocomplete>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api'
-
-export default defineComponent({
-  name: 'ShortNameLookup'
-})
-/*
 import { LookupType, NameRequestLookupResultIF } from '@/models/business-nr-lookup'
 import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BusinessLookupResultIF } from '@/models'
-import BusinessLookupServices from '@/services/business-lookup.services'
-import { LDFlags } from '@/util/constants'
-import NameRequestLookupServices from '@/services/name-request-lookup.services'
+import OrgService from '@/services/org.services'
+import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
-import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
-import { useBusinessStore } from '@/stores/business'
 
-enum States {
+enum LookupStates {
   INITIAL = 'initial',
   TYPING = 'typing',
   SEARCHING = 'searching',
@@ -142,12 +94,7 @@ enum States {
   NO_RESULTS = 'no results',
   SUMMARY = 'summary'
 }
-*/
 
-/*
- * See PPR's BusinessSearchAutocomplete.vue for a Composition API example.
- */
-/*
 export default defineComponent({
   name: 'ShortNameLookup',
   props: {
@@ -156,94 +103,115 @@ export default defineComponent({
       default: LookupType.BUSINESS
     }
   },
-  emits: [LookupType.NR, LookupType.BUSINESS],
+  emits: ['account'],
   setup (props, { emit }) {
-    /*
-    // local variables
     const states = reactive({
-      state: States.INITIAL,
+      state: LookupStates.INITIAL,
       searchField: '',
       searchResults: [] as NameRequestLookupResultIF[] | BusinessLookupResultIF[]
     })
 
-    const businessStore = useBusinessStore()
-
     const checkForTyping = () => {
       if (states.searchField?.length <= 2) {
-        states.state = States.TYPING
+        states.state = LookupStates.TYPING
       }
+    }
+
+    async function mapAccounts(query) {
+      const organizations = await OrgService.getOrganizationsSimple(query)
+      const accountIds = organizations.map((org) => org.id)
+      const eftShortNamesResponse = await PaymentService.getEFTShortNames(
+        { 'filterPayload': { 'accountIdList': accountIds.join(',') } })
+      const eftShortNames = eftShortNamesResponse.data.items
+      const matchedAccounts = eftShortNames.filter(eft => organizations.some(org => org.id.toString() === eft.accountId))
+      console.log(matchedAccounts)
+      return matchedAccounts
     }
 
     const checkForSearching = async () => {
       if (!states.searchField || states.searchField?.length <= 2) {
         return
       }
-      states.state = States.SEARCHING
-      const searchStatus = null // search all (ACTIVE + HISTORICAL)
-      const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes)
-      // Use appropriate service based on lookupType
+      states.state = LookupStates.SEARCHING
 
-      const searchService = (props.lookupType === LookupType.NR)
-        ? NameRequestLookupServices.search
-        : (query) => BusinessLookupServices.search(query, legalType, searchStatus)
+      const searchOrganizations = (query) => mapAccounts(query)
 
       try {
-        states.searchResults = await searchService(states.searchField)
+        states.searchResults = await searchOrganizations(states.searchField)
       } catch (error) {
         console.error('Error occurred while searching:', error)
         states.searchResults = []
       }
-
-      // enable or disable items according to whether they have already been added
-      for (const result of states.searchResults) {
-        if (props.lookupType === LookupType.NR && 'nrNum' in result) {
-          result.disabled = businessStore.isAffiliatedNR(result.nrNum)
-        } else if ('identifier' in result) {
-          result.disabled = businessStore.isAffiliated(result.identifier)
-        }
-      }
-
-      // display appropriate section
-      states.state = (states.searchResults.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
+      states.state = (states.searchResults.length > 0) ? LookupStates.SHOW_RESULTS : LookupStates.NO_RESULTS
     }
 
     const checkForEmptySearch = () => {
       if (!states.searchField) {
-        // reset variables
+        emit('account', {})
         states.searchResults = []
-        states.state = States.INITIAL
+        states.state = LookupStates.INITIAL
       }
     }
     const onSearchFieldChanged = _.debounce(async () => {
-      checkForTyping()
-      await checkForSearching()
-      checkForEmptySearch()
+      if (states.state !== LookupStates.SUMMARY) {
+        checkForTyping()
+        await checkForSearching()
+        checkForEmptySearch()
+      }
     }, 600)
 
     watch(() => states.searchField, onSearchFieldChanged)
 
-    const onItemSelected = (input: BusinessLookupResultIF | NameRequestLookupResultIF) => {
-      if (input) {
-        emit(props.lookupType, input)
+    const onItemSelected = (account: BusinessLookupResultIF | NameRequestLookupResultIF) => {
+      if (account) {
+        emit('account', account)
+        states.state = LookupStates.SUMMARY
       } else {
-        // Clear button was clicked
+        emit('account', {})
         states.searchResults = []
-        states.state = States.INITIAL
+        states.state = LookupStates.INITIAL
       }
     }
     return {
-      // ...toRefs(states),
-      // onItemSelected,
-      States,
+      ...toRefs(states),
+      onItemSelected,
+      LookupStates,
       LookupType
     }
   }
 })
-*/
 </script>
 
 <style lang="scss" scoped>
 @import '@/assets/styles/theme.scss';
+
+::v-deep .summary {
+  .v-input__control {
+    .v-input__slot {
+      background: transparent !important;
+      &:before, &:after {
+        opacity: 0;
+      }
+    }
+    .v-input__icon i {
+      color: var(--v-primary-base) !important;
+    }
+    .v-select__selections {
+      color: black;
+    }
+  }
+}
+
+.undo {
+  padding: 0;
+  margin: 0;
+  height: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: var(--v-primary-base) !important;
+}
 
 .font-size-12 {
   font-size: 12px;
@@ -253,7 +221,7 @@ p {
   color: $gray7;
 }
 
-.business-lookup-result {
+.short-name-lookup-result {
   font-size: $px-14;
   color: $gray7;
 
@@ -270,8 +238,6 @@ p {
 .result-identifier,
 .result-name {
   font-size: $px-16;
-
-  // limit col width and show an ellipsis for long names:
   max-width: 485px;
   white-space: nowrap;
   overflow: hidden;
@@ -291,14 +257,8 @@ p {
   }
 }
 
-// prevent Magnify icon from being rotated when list is displayed
 ::v-deep .v-input__icon .mdi-magnify {
   -webkit-transform: none !important;
   transform: none !important;
-}
-
-// Background color of Busines Name or Incorporation/Registration Number field
-::v-deep .v-input__slot {
-  background: #fff !important;
 }
 </style>

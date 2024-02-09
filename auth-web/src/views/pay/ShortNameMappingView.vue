@@ -54,6 +54,7 @@
         >
           <UnlinkedShortNameTable
             @shortname-state-total="shortnameStateTotal.unlinked = $event"
+            @link-account="linkAccount"
           />
         </v-card>
       </v-window-item>
@@ -85,9 +86,15 @@ export default defineComponent({
       unlinked: 0
     })
 
+    function linkAccount (account: any) {
+      console.log('Linking account:', account)
+      tab.value = 1
+    }
+
     return {
       tab,
-      shortnameStateTotal
+      shortnameStateTotal,
+      linkAccount
     }
   }
 })

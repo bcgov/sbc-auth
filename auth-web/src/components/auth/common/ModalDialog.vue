@@ -194,4 +194,10 @@ export default defineComponent({
   [title] {
     text-align: center;
   }
+  .short-name-lookup-dialog {
+    background: red;
+    .v-card__actions {
+      padding-top: 12px;
+    }
+  }
 </style>

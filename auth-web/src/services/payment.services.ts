@@ -245,4 +245,12 @@ export default class PaymentService {
     const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`
     return axios.get(url)
   }
+
+  static patchEFTShortname (shortNameId: string, accountId: string): AxiosPromise<EFTShortnameResponse> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`
+    const body = {
+      accountId: accountId
+    }
+    return axios.patch(url, body)
+  }
 }
