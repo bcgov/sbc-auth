@@ -5,8 +5,9 @@
       max-width="720"
       :show-icon="false"
       :showCloseIcon="true"
-      dialog-class="account-linking-dialog"
+      dialog-class="lookup-dialog"
       :title="`Linking ${state.selectedShortName.shortName} to an Account`"
+      @close-dialog="resetAccountLinkingDialog"
     >
       <template #text>
         <p
@@ -22,7 +23,8 @@
         </h4>
         <ShortNameLookup
           :key="state.shortNameLookupKey"
-          @account="selectAccount"
+          @account="state.selectedAccount = $event"
+          @reset="resetAccountLinkingDialog"
         />
       </template>
       <template #actions>
@@ -32,7 +34,7 @@
             outlined
             color="outlined"
             data-test="dialog-ok-button"
-            @click="closeAccountLinkingDialog()"
+            @click="cancelAndResetAccountLinkingDialog()"
           >
             Cancel
           </v-btn>
@@ -250,10 +252,6 @@ export default defineComponent({
       }
     ]
 
-    function selectAccount (account: EFTShortnameResponse) {
-      state.selectedAccount = account
-    }
-
     function formatAmount (amount: number) {
       if (amount) {
         return CommonUtils.formatAmount(amount)
@@ -273,13 +271,21 @@ export default defineComponent({
       loadTableData('transactionDate', { endDate, startDate })
     }
 
-    function openAccountLinkingDialog (item: any) {
+    function openAccountLinkingDialog (item: EFTShortnameResponse) {
       state.selectedShortName = item
       accountLinkingDialog.value.open()
     }
 
-    function closeAccountLinkingDialog () {
+    function resetAccountLinkingDialog () {
+      // reset state
+      state.selectedAccount = {}
+      // force re-render and reset ShortNameLookup component
+      state.shortNameLookupKey++
+    }
+
+    function cancelAndResetAccountLinkingDialog () {
       accountLinkingDialog.value.close()
+      resetAccountLinkingDialog()
     }
 
     async function linkAccount () {
@@ -333,10 +339,10 @@ export default defineComponent({
       clickDatePicker,
       accountLinkingDialog,
       openAccountLinkingDialog,
-      closeAccountLinkingDialog,
+      resetAccountLinkingDialog,
+      cancelAndResetAccountLinkingDialog,
       datePicker,
       viewDetails,
-      selectAccount,
       linkAccount
     }
   }
@@ -347,6 +353,10 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
+
+h4 {
+  color: black;
+}
 
 #unlinked-bank-short-names {
   border: 1px solid #e9ecef
@@ -369,6 +379,13 @@ export default defineComponent({
 
 .ga-3 {
   gap: 12px;
+}
+
+::v-deep {
+  .v-btn.v-btn--outlined {
+      border-color: var(--v-primary-base);
+      color: var(--v-primary-base);
+  }
 }
 
 </style>

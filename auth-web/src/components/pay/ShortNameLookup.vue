@@ -26,7 +26,7 @@
     >
       <template #selection="{ item }">
         <div>
-          {{ item.accountId }} {{ item.accountName }}
+          <span class="pr-8">{{ item.accountId }}</span> {{ item.accountName }}
         </div>
       </template>
       <template #append>
@@ -39,6 +39,7 @@
         />
         <p
           v-if="state === LookupStates.SUMMARY"
+          @click="reset"
           class="d-flex justify-center align-center ma-0 pa-0 cursor-pointer undo"
         >
           Undo
@@ -107,7 +108,7 @@ export default defineComponent({
       default: LookupType.BUSINESS
     }
   },
-  emits: ['account'],
+  emits: ['account', 'reset'],
   setup (props, { emit }) {
     const states = reactive({
       state: LookupStates.INITIAL,
@@ -115,10 +116,44 @@ export default defineComponent({
       searchResults: [] as EFTShortnameResponse[]
     })
 
-    const checkForTyping = () => {
+    const onSearchFieldChanged = _.debounce(async function () {
+      if (states.state !== LookupStates.SUMMARY) {
+        checkForTyping()
+        await checkForSearching()
+        checkForEmptySearch()
+      }
+    }, 600)
+
+    function checkForTyping () {
       if (states.searchField?.length <= 2) {
         states.state = LookupStates.TYPING
       }
+    }
+
+    function checkForEmptySearch () {
+      if (!states.searchField) {
+        emit('account', {})
+        states.searchResults = []
+        states.state = LookupStates.INITIAL
+      }
+    }
+
+    function onItemSelected (account: EFTShortnameResponse) {
+      if (account) {
+        emit('account', account)
+        states.state = LookupStates.SUMMARY
+      } else {
+        emit('account', {})
+        states.searchResults = []
+        states.state = LookupStates.INITIAL
+      }
+    }
+
+    function reset () {
+      emit('reset')
+      states.searchField = ''
+      states.state = LookupStates.INITIAL
+      states.searchResults = []
     }
 
     async function mapAccounts (query) {
@@ -131,7 +166,7 @@ export default defineComponent({
       return matchedAccounts
     }
 
-    const checkForSearching = async () => {
+    async function checkForSearching () {
       if (!states.searchField || states.searchField?.length <= 2) {
         return
       }
@@ -148,38 +183,14 @@ export default defineComponent({
       states.state = (states.searchResults.length > 0) ? LookupStates.SHOW_RESULTS : LookupStates.NO_RESULTS
     }
 
-    const checkForEmptySearch = () => {
-      if (!states.searchField) {
-        emit('account', {})
-        states.searchResults = []
-        states.state = LookupStates.INITIAL
-      }
-    }
-    const onSearchFieldChanged = _.debounce(async () => {
-      if (states.state !== LookupStates.SUMMARY) {
-        checkForTyping()
-        await checkForSearching()
-        checkForEmptySearch()
-      }
-    }, 600)
-
     watch(() => states.searchField, onSearchFieldChanged)
 
-    const onItemSelected = (account: EFTShortnameResponse) => {
-      if (account) {
-        emit('account', account)
-        states.state = LookupStates.SUMMARY
-      } else {
-        emit('account', {})
-        states.searchResults = []
-        states.state = LookupStates.INITIAL
-      }
-    }
     return {
       ...toRefs(states),
       onItemSelected,
       LookupStates,
-      LookupType
+      LookupType,
+      reset
     }
   }
 })
