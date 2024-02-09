@@ -180,7 +180,7 @@
         <v-col class="grow">
           <header>
             <h2 class="mb-0">
-              Electronic Funds Transfer Received
+              Electronic Funds Transfers Received Payments
             </h2>
             <p class="mt-3 mb-0">
               Manage received EFTs
