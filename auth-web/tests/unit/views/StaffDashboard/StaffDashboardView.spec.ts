@@ -32,7 +32,7 @@ describe('StaffDashboardView tests', () => {
 
     const userStore = useUserStore()
     userStore.currentUser = {
-      roles: [Role.FasSearch, Role.Staff, Role.ViewAllTransactions, Role.StaffViewAccounts, Role.ManageGlCodes]
+      roles: [Role.FasSearch, Role.Staff, Role.ViewAllTransactions, Role.StaffViewAccounts, Role.ManageGlCodes, Role.ManageEft]
     } as any
 
     const codeStore = useCodesStore()
@@ -64,6 +64,7 @@ describe('StaffDashboardView tests', () => {
     expect(wrapper.findComponent(IncorporationSearchResultView).exists()).toBe(true)
     expect(wrapper.findComponent(StaffAccountManagement).exists()).toBe(true)
     expect(wrapper.findComponent(GLCodesListView).exists()).toBe(true)
+    expect(wrapper.find('#EFT-button').exists())
     const expansionPanels = wrapper.findAll(BaseVExpansionPanel)
     expect(expansionPanels.length).toBe(3)
     // hidden by closed BaseVExpansionPanel
