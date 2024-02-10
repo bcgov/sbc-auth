@@ -30,6 +30,9 @@ export interface LinkedShortNameState {
   filters: LinkedShortNameFilterParams
   actionDropdown: any[]
   options: DataOptions
+  highlightIndex: number
+  snackbar: boolean
+  snackbarText: string
 }
 
 export interface UnlinkedShortNameFilterParams {
@@ -68,4 +71,6 @@ export interface UnlinkedShortNameState {
   showDatePicker: boolean
   dateRangeSelected: boolean
   dateRangeText: string
+  accountLinkingErrorDialogTitle: string
+  accountLinkingErrorDialogText: string
 }

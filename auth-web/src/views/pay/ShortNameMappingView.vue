@@ -33,7 +33,7 @@
       >
         <b>Unlinked Payments</b>
         <span class="font-weight-regular">
-          &nbsp;({{ shortnameStateTotal.unlinked }})
+          &nbsp;({{ state.unlinked }})
         </span>
       </v-tab>
       <v-tab
@@ -42,7 +42,7 @@
         :ripple="false"
       >
         <b>Linked Bank Short Names</b><span class="font-weight-regular">
-          &nbsp;({{ shortnameStateTotal.linked }})</span>
+          &nbsp;({{ state.linked }})</span>
       </v-tab>
     </v-tabs>
 
@@ -53,7 +53,7 @@
           flat
         >
           <UnlinkedShortNameTable
-            @shortname-state-total="shortnameStateTotal.unlinked = $event"
+            @shortname-state-total="state.unlinked = $event"
             @link-account="linkAccount"
           />
         </v-card>
@@ -64,7 +64,8 @@
           flat
         >
           <LinkedShortNameTable
-            @shortname-state-total="shortnameStateTotal.linked = $event"
+            :linked-account="state.linkedAccount"
+            @shortname-state-total="state.linked = $event"
           />
         </v-card>
       </v-window-item>
@@ -81,18 +82,20 @@ export default defineComponent({
   components: { LinkedShortNameTable, UnlinkedShortNameTable },
   setup () {
     const tab = ref(null)
-    const shortnameStateTotal = reactive({
+    const state = reactive({
       linked: 0,
-      unlinked: 0
+      unlinked: 0,
+      linkedAccount: {}
     })
 
-    function linkAccount () {
+    function linkAccount (account: any) {
       tab.value = 1
+      state.linkedAccount = account
     }
 
     return {
       tab,
-      shortnameStateTotal,
+      state,
       linkAccount
     }
   }

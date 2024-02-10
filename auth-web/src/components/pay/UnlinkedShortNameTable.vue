@@ -49,6 +49,32 @@
         </div>
       </template>
     </ModalDialog>
+    <ModalDialog
+      ref="accountLinkingErrorDialog"
+      max-width="720"
+      dialog-class="notify-dialog"
+      :title="state.accountLinkingErrorDialogTitle"
+      :text="state.accountLinkingErrorDialogText"
+    >
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
+      </template>
+      <template #actions>
+        <v-btn
+          large
+          color="primary"
+          data-test="dialog-ok-button"
+          @click="closeAccountAlreadyLinkedDialog"
+        >
+          Close
+        </v-btn>
+      </template>
+    </ModalDialog>
     <DatePicker
       v-show="state.showDatePicker"
       ref="datePicker"
@@ -193,6 +219,7 @@ export default defineComponent({
   setup (props, { emit, root }) {
     const datePicker = ref(null)
     const accountLinkingDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const state = reactive<UnlinkedShortNameState>({
       results: [],
       totalResults: 1,
@@ -217,7 +244,9 @@ export default defineComponent({
       selectedAccount: {},
       showDatePicker: false,
       dateRangeSelected: false,
-      dateRangeText: ''
+      dateRangeText: '',
+      accountLinkingErrorDialogTitle: '',
+      accountLinkingErrorDialogText: ''
     })
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
@@ -288,6 +317,10 @@ export default defineComponent({
       resetAccountLinkingDialog()
     }
 
+    function closeAccountAlreadyLinkedDialog () {
+      accountLinkingErrorDialog.value.close()
+    }
+
     async function linkAccount () {
       if (!state.selectedShortName?.id || !state.selectedAccount?.id) {
         return
@@ -296,8 +329,20 @@ export default defineComponent({
         const response = await PaymentService.patchEFTShortname(state.selectedShortName.id, state.selectedAccount.id)
         if (response?.data) {
           emit('link-account', response.data)
+          cancelAndResetAccountLinkingDialog()
         }
       } catch (error) {
+        if (error.response.data.type === 'EFT_SHORT_NAME_ALREADY_MAPPED') {
+          state.accountLinkingErrorDialogTitle = 'Account Already Linked'
+          state.accountLinkingErrorDialogText = 'The selected bank short name is already linked to an account.'
+          cancelAndResetAccountLinkingDialog()
+          accountLinkingErrorDialog.value.open()
+        } else {
+          state.accountLinkingErrorDialogTitle = 'Something Went Wrong'
+          state.accountLinkingErrorDialogText = 'An error occurred while linking the bank short name to an account.'
+          cancelAndResetAccountLinkingDialog()
+          accountLinkingErrorDialog.value.open()
+        }
         console.error('Failed to patchEFTShortname.', error)
       }
     }
@@ -338,9 +383,11 @@ export default defineComponent({
       updateDateRange,
       clickDatePicker,
       accountLinkingDialog,
+      accountLinkingErrorDialog,
       openAccountLinkingDialog,
       resetAccountLinkingDialog,
       cancelAndResetAccountLinkingDialog,
+      closeAccountAlreadyLinkedDialog,
       datePicker,
       viewDetails,
       linkAccount

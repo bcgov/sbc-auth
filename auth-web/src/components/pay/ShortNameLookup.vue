@@ -39,8 +39,8 @@
         />
         <p
           v-if="state === LookupStates.SUMMARY"
-          @click="reset"
           class="d-flex justify-center align-center ma-0 pa-0 cursor-pointer undo"
+          @click="reset"
         >
           Undo
         </p>
