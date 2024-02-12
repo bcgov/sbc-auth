@@ -191,8 +191,9 @@ export default defineComponent({
       })
     }
 
-    function onLinkedAccount (account: EFTShortnameResponse) {
+    async function onLinkedAccount (account: EFTShortnameResponse) {
       if (account) {
+        await loadTableData()
         state.snackbarText = `Bank short name ${account.shortName} was successfully linked.`
         state.highlightIndex = state.results.findIndex((result) => result.id === account.id)
         state.snackbar = true

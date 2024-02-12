@@ -330,6 +330,7 @@ export default defineComponent({
         if (response?.data) {
           emit('link-account', response.data)
           cancelAndResetAccountLinkingDialog()
+          await loadTableData()
         }
       } catch (error) {
         if (error.response.data.type === 'EFT_SHORT_NAME_ALREADY_MAPPED') {
