@@ -74,8 +74,16 @@
             class="result-action"
           >
             <span
+              v-if="item.linkedBy"
+              class="linked"
+            >Linked</span>
+            <span
+              v-else
               class="select"
             >Select</span>
+            <!-- <span
+              class="select"
+            >Select</span> -->
           </v-col>
         </v-row>
       </template>
@@ -260,7 +268,7 @@ p {
     color: $app-blue;
   }
 
-  .added {
+  .linked {
     color: $app-green;
   }
 }
