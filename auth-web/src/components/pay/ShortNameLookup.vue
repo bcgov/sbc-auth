@@ -81,9 +81,6 @@
               v-else
               class="select"
             >Select</span>
-            <!-- <span
-              class="select"
-            >Select</span> -->
           </v-col>
         </v-row>
       </template>
