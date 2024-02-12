@@ -201,13 +201,13 @@
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
 import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
+import { ShortNameResponseStatus, ShortNameStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
 import ShortNameLookup from './ShortNameLookup.vue'
-import { ShortNameStatus } from '@/util/constants'
 import { UnlinkedShortNameState } from '@/models/pay/short-name'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
@@ -333,7 +333,7 @@ export default defineComponent({
           await loadTableData()
         }
       } catch (error) {
-        if (error.response.data.type === 'EFT_SHORT_NAME_ALREADY_MAPPED') {
+        if (error.response.data.type === ShortNameResponseStatus.EFT_SHORT_NAME_ALREADY_MAPPED) {
           state.accountLinkingErrorDialogTitle = 'Account Already Linked'
           state.accountLinkingErrorDialogText = 'The selected bank short name is already linked to an account.'
           cancelAndResetAccountLinkingDialog()
