@@ -1,6 +1,7 @@
 <template>
   <div id="short-name-lookup">
     <v-autocomplete
+      item-disabled="linkedBy"
       :search-input.sync="searchField"
       :hide-no-data="state != LookupStates.NO_RESULTS"
       :items="searchResults"
@@ -235,6 +236,7 @@ p {
 }
 
 .short-name-lookup-result {
+  pointer-events: none;
   font-size: $px-14;
   color: $gray7;
 

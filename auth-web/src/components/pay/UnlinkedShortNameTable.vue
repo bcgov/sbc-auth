@@ -322,11 +322,11 @@ export default defineComponent({
     }
 
     async function linkAccount () {
-      if (!state.selectedShortName?.id || !state.selectedAccount?.id) {
+      if (!state.selectedShortName?.id || !state.selectedAccount?.accountId) {
         return
       }
       try {
-        const response = await PaymentService.patchEFTShortname(state.selectedShortName.id, state.selectedAccount.id)
+        const response = await PaymentService.patchEFTShortname(state.selectedShortName.id, state.selectedAccount.accountId)
         if (response?.data) {
           emit('link-account', response.data)
           cancelAndResetAccountLinkingDialog()
