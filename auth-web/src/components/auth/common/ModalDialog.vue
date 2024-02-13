@@ -98,6 +98,7 @@ export default defineComponent({
     maxWidth: { type: String, default: '' },
     showCloseIcon: { type: Boolean, default: false }
   },
+  emits: ['open-help', 'close-dialog'],
   setup (_, { emit }) {
     const isOpen = ref(false)
 
@@ -105,23 +106,20 @@ export default defineComponent({
       emit('open-help')
       isOpen.value = false
     }
-    const closeDialog = () => {
-      emit('close-dialog')
-    }
 
     const open = () => {
       isOpen.value = true
     }
     const close = () => {
       isOpen.value = false
+      emit('close-dialog')
     }
 
     return {
       open,
       close,
       isOpen,
-      openHelp,
-      closeDialog
+      openHelp
     }
   }
 })
@@ -193,5 +191,10 @@ export default defineComponent({
   }
   [title] {
     text-align: center;
+  }
+  .lookup-dialog {
+    .v-card .v-card__text {
+      padding: 32px 40px 0 40px;
+    }
   }
 </style>

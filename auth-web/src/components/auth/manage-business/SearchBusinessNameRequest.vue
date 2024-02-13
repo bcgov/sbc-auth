@@ -77,6 +77,7 @@
       :show-actions="false"
       max-width="640"
       data-test-tag="add-name-request"
+      :showCloseIcon="true"
     >
       <template #text>
         <AddNameRequestForm
