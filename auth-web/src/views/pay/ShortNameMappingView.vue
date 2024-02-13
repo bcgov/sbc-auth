@@ -1,7 +1,7 @@
 <template>
   <v-container
-    id="dashboard"
-    class="container mt-4"
+    id="short-name-mapping-view"
+    class="container mt-7"
     fluid
   >
     <v-row no-gutters>

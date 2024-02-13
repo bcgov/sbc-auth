@@ -17,8 +17,11 @@
           mdi-check
         </v-icon>
         <h1>{{ $t('bcscAccountCreationSuccessTitle') }}</h1>
-        <p class="mt-8 mb-10">
-          {{ $t('bcscAccountCreationSuccessSubtext') }}
+        <p class="mt-8 mb-5">
+          {{ $t('bcscAccountCreationSuccessSubtext1') }}
+        </p>
+        <p class="mb-10">
+          {{ $t('bcscAccountCreationSuccessSubtext2') }}
         </p>
         <div class="btns">
           <v-btn
@@ -61,6 +64,7 @@
 
 import { Component, Mixins } from 'vue-property-decorator'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import ConfigHelper from '@/util/config-helper'
 import { Pages } from '@/util/constants'
 import { mapState } from 'pinia'
 import { useOrgStore } from '@/stores/org'
@@ -73,7 +77,7 @@ import { useOrgStore } from '@/stores/org'
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
   goTo (page) {
     switch (page) {
-      case 'home': this.$router.push('/')
+      case 'home': window.location.assign(`${ConfigHelper.getRegistryHomeURL()}dashboard/?accountid=${this.currentOrganization.id}`)
         break
       case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
         break

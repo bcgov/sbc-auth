@@ -1,14 +1,14 @@
 <template>
-  <v-card>
+  <v-card v-if="shortNameDetails.shortName">
     <v-card-title class="card-title">
       <v-icon
         class="pr-5"
         color="link"
         left
       >
-        mdi-bank-check
+        mdi-bank-transfer
       </v-icon>
-      <b>Short Name and Account Linkage</b>
+      Short Name and Account Linkage
     </v-card-title>
 
     <v-card-text
@@ -69,6 +69,13 @@ export default defineComponent({
 .card-title {
   background-color: $app-lt-blue;
   justify-content: left;
+  height: 75px;
+  font-weight: bold;
+  font-size: 1.125rem;
+
+  .v-icon {
+    font-size: 36px;
+  }
 }
 
 </style>

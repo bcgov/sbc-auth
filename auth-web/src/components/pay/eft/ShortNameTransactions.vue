@@ -4,8 +4,8 @@
     class="transaction-list"
     itemKey="id"
     :loading="state.loading"
-    loadingText="Loading Transaction Records..."
-    noDataText="No Transaction Records"
+    loadingText="Loading Records..."
+    noDataText="No Records."
     :setItems="state.results"
     :setHeaders="headers"
     :setTableDataOptions="state.options"
@@ -29,6 +29,9 @@
           mdi-format-list-bulleted
         </v-icon>
         {{ paymentsReceived }}
+        <span class="font-weight-regular">
+          ({{ state.totalResults }})
+        </span>
       </h2>
     </template>
     <template #header-filter-slot />
@@ -78,7 +81,7 @@ export default defineComponent({
 
     const state = reactive<EFTTransactionState>({
       results: [],
-      totalResults: 1,
+      totalResults: 0,
       filters: {
         pageNumber: 1,
         pageLimit: 5
@@ -88,7 +91,7 @@ export default defineComponent({
     })
 
     const paymentsReceived = computed<string>(() => {
-      return `Payments Received from ${props.shortNameDetails.shortName} (${state.totalResults})`
+      return props.shortNameDetails.shortName ? `Payments Received from ${props.shortNameDetails.shortName}` : 'Loading...'
     })
 
     watch(() => props.shortNameDetails, () => {
@@ -145,11 +148,6 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/ShortnameTables.scss';
 
-.card-title {
-  background-color: $app-lt-blue;
-  justify-content: left;
-}
-
 ::v-deep{
   #table-title-cell {
     background-color: $app-lt-blue;
@@ -159,8 +157,13 @@ export default defineComponent({
     overflow-y: auto;
   }
 
+  .v-data-table__empty-wrapper {
+    background-color: transparent !important; // remove highlight on no records row
+  }
+
   .base-table__header__title {
-    padding-bottom: 16px
+    padding-bottom: 16px;
+    top: 75px !important; // prevent fixed header sliding when there is a title
   }
 }
 

@@ -100,7 +100,7 @@ describe('ShortNameTransactions.vue', () => {
     await wrapper.setProps({ shortNameDetails: { id: 1, shortName: 'SHORTNAME' } })
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('#table-title-cell').text()).toContain('Payments Received from SHORTNAME (5)')
+    expect(wrapper.find('#table-title-cell').text()).toContain('Payments Received from SHORTNAME  (5)')
 
     // verify table
     expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)

@@ -186,7 +186,7 @@ export default defineComponent({
       root.$router?.push({
         name: 'shortnamedetails',
         params: {
-          'shortNameId': state.results[index].id
+          'shortNameId': state.results[index].id?.toString()
         }
       })
     }
