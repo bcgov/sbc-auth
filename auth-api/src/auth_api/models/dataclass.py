@@ -130,7 +130,7 @@ class SimpleOrgSearch:
     name: str
     branch_name: str
     search_text: str
-    status: str
+    statuses: List[str] = field()
     page: int
     limit: int
 

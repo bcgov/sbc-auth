@@ -111,14 +111,14 @@ def search_simple_orgs():
     name = request.args.get('name', None)
     branch_name = request.args.get('branchName', None)
     search_text = request.args.get('searchText', None)
-    status = request.args.get('status', OrgStatus.ACTIVE.value)
+    statuses = request.args.getlist('statuses', [OrgStatus.ACTIVE.value])
 
     response, status = SimpleOrgService.search(SimpleOrgSearch(
         id=org_id,
         name=name,
         branch_name=branch_name,
         search_text=search_text,
-        status=status,
+        statuses=statuses,
         page=page,
         limit=limit)), http_status.HTTP_200_OK
 
