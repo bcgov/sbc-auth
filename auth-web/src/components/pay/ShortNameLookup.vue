@@ -163,13 +163,33 @@ export default defineComponent({
     }
 
     async function mapAccounts (query) {
-      const organizations = await OrgService.getOrganizationsSimple(query)
-      const accountIds = organizations.map((org) => org.id)
-      const eftShortNamesResponse = await PaymentService.getEFTShortNames(
-        { 'filterPayload': { 'accountIdList': accountIds.join(',') } })
-      const eftShortNames = eftShortNamesResponse.data.items
-      const matchedAccounts = eftShortNames.filter(eft => organizations.some(org => org.id.toString() === eft.accountId))
-      return matchedAccounts
+      try {
+        const organizations = await OrgService.getOrganizationsSimple(query)
+        const accountIds = organizations.map((org) => org.id)
+        const accountIdString = accountIds.join(',')
+
+        const [eftShortNamesResponse, eftAccountsResponse] = await Promise.all([
+          PaymentService.getEFTShortNames({ 'filterPayload': { 'accountIdList': accountIdString } }),
+          PaymentService.getEFTAccounts({ 'filterPayload': { 'accountIdList': accountIdString } })
+        ])
+
+        const eftShortNames = eftShortNamesResponse.data.items
+        const eftAccounts = eftAccountsResponse.data.items
+
+        const eftAccountsMap = new Map(eftAccounts.map(eftAccount => [eftAccount.accountId, eftAccount]))
+
+        const result = eftShortNames.reduce((acc, eftShortName) => {
+          if (eftAccountsMap.has(eftShortName.accountId)) {
+            acc.push(eftShortName)
+            eftAccountsMap.delete(eftShortName.accountId)
+          }
+          return acc
+        }, [])
+        return [...result, ...eftAccountsMap.values()]
+      } catch (error) {
+        console.error('Error occurred while searching:', error)
+        return []
+      }
     }
 
     async function checkForSearching () {
