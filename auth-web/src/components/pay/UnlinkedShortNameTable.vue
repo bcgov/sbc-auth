@@ -2,53 +2,76 @@
   <div>
     <ModalDialog
       ref="accountLinkingDialog"
-      dialog-class="notify-dialog"
-      max-width="640"
+      max-width="720"
       :show-icon="false"
+      :showCloseIcon="true"
+      dialog-class="lookup-dialog"
+      :title="`Linking ${state.selectedShortName.shortName} to an Account`"
+      @close-dialog="resetAccountLinkingDialog"
     >
-      <template #title>
-        <h1 class="text-left">
-          Linking {{ state.selectedShortName.shortName }} to an Account
-        </h1>
-        <v-card-title>
-          Search by Account ID or Name to Link:
-          <v-btn
-            large
-            icon
-            aria-label="Close Dialog"
-            title="Close Dialog"
-            :disabled="false"
-            style="pointer-events: auto;"
-          >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-      </template>
       <template #text>
+        <p
+          v-if="state.selectedAccount.id"
+          class="py-4 px-6 important"
+        >
+          <span class="font-weight-bold">Important:</span> Once an account is linked, all payment received
+          from the same short name will be applied to settle outstanding balances of
+          the selected account.
+        </p>
         <h4>
           Search by Account ID or Name to Link:
         </h4>
         <ShortNameLookup
           :key="state.shortNameLookupKey"
-          @business="state.selectedShortName"
+          @account="state.selectedAccount = $event"
+          @reset="resetAccountLinkingDialog"
         />
+      </template>
+      <template #actions>
+        <div class="d-flex align-center justify-center w-100 h-100 ga-3">
+          <v-btn
+            large
+            outlined
+            color="outlined"
+            data-test="dialog-ok-button"
+            @click="cancelAndResetAccountLinkingDialog()"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            large
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="linkAccount()"
+          >
+            Link to an Account and Settle Payment
+          </v-btn>
+        </div>
+      </template>
+    </ModalDialog>
+    <ModalDialog
+      ref="accountLinkingErrorDialog"
+      max-width="720"
+      dialog-class="notify-dialog"
+      :title="state.accountLinkingErrorDialogTitle"
+      :text="state.accountLinkingErrorDialogText"
+    >
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
       <template #actions>
         <v-btn
           large
-          color="outlined"
-          data-test="dialog-ok-button"
-          @click="closeAccountLinkingDialog()"
-        >
-          Close
-        </v-btn>
-        <v-btn
-          large
           color="primary"
           data-test="dialog-ok-button"
-          @click="closeAccountLinkingDialog()"
+          @click="closeAccountAlreadyLinkedDialog"
         >
-          Link to an Account and Settle Payment
+          Close
         </v-btn>
       </template>
     </ModalDialog>
@@ -178,11 +201,13 @@
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
 import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
+import { ShortNameResponseStatus, ShortNameStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
+import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import PaymentService from '@/services/payment.services'
 import ShortNameLookup from './ShortNameLookup.vue'
-import { ShortNameStatus } from '@/util/constants'
 import { UnlinkedShortNameState } from '@/models/pay/short-name'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
@@ -190,9 +215,11 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
 export default defineComponent({
   name: 'UnlinkedShortNameTable',
   components: { BaseVDataTable, DatePicker, ModalDialog, ShortNameLookup },
+  emits: ['link-account'],
   setup (props, { emit, root }) {
     const datePicker = ref(null)
     const accountLinkingDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const state = reactive<UnlinkedShortNameState>({
       results: [],
       totalResults: 1,
@@ -214,9 +241,12 @@ export default defineComponent({
       dateRangeReset: 0,
       clearFiltersTrigger: 0,
       selectedShortName: {},
+      selectedAccount: {},
       showDatePicker: false,
       dateRangeSelected: false,
-      dateRangeText: ''
+      dateRangeText: '',
+      accountLinkingErrorDialogTitle: '',
+      accountLinkingErrorDialogText: ''
     })
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
@@ -270,13 +300,52 @@ export default defineComponent({
       loadTableData('transactionDate', { endDate, startDate })
     }
 
-    function openAccountLinkingDialog (item: any) {
+    function openAccountLinkingDialog (item: EFTShortnameResponse) {
       state.selectedShortName = item
       accountLinkingDialog.value.open()
     }
 
-    function closeAccountLinkingDialog () {
+    function resetAccountLinkingDialog () {
+      // reset state
+      state.selectedAccount = {}
+      // force re-render and reset ShortNameLookup component
+      state.shortNameLookupKey++
+    }
+
+    function cancelAndResetAccountLinkingDialog () {
       accountLinkingDialog.value.close()
+      resetAccountLinkingDialog()
+    }
+
+    function closeAccountAlreadyLinkedDialog () {
+      accountLinkingErrorDialog.value.close()
+    }
+
+    async function linkAccount () {
+      if (!state.selectedShortName?.id || !state.selectedAccount?.accountId) {
+        return
+      }
+      try {
+        const response = await PaymentService.patchEFTShortname(state.selectedShortName.id, state.selectedAccount.accountId)
+        if (response?.data) {
+          emit('link-account', response.data)
+          cancelAndResetAccountLinkingDialog()
+          await loadTableData()
+        }
+      } catch (error) {
+        if (error.response.data.type === ShortNameResponseStatus.EFT_SHORT_NAME_ALREADY_MAPPED) {
+          state.accountLinkingErrorDialogTitle = 'Account Already Linked'
+          state.accountLinkingErrorDialogText = 'The selected bank short name is already linked to an account.'
+          cancelAndResetAccountLinkingDialog()
+          accountLinkingErrorDialog.value.open()
+        } else {
+          state.accountLinkingErrorDialogTitle = 'Something Went Wrong'
+          state.accountLinkingErrorDialogText = 'An error occurred while linking the bank short name to an account.'
+          cancelAndResetAccountLinkingDialog()
+          accountLinkingErrorDialog.value.open()
+        }
+        console.error('Failed to patchEFTShortname.', error)
+      }
     }
 
     async function clickDatePicker () {
@@ -315,10 +384,14 @@ export default defineComponent({
       updateDateRange,
       clickDatePicker,
       accountLinkingDialog,
+      accountLinkingErrorDialog,
       openAccountLinkingDialog,
-      closeAccountLinkingDialog,
+      resetAccountLinkingDialog,
+      cancelAndResetAccountLinkingDialog,
+      closeAccountAlreadyLinkedDialog,
       datePicker,
-      viewDetails
+      viewDetails,
+      linkAccount
     }
   }
 })
@@ -329,8 +402,38 @@ export default defineComponent({
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
 
+h4 {
+  color: black;
+}
+
 #unlinked-bank-short-names {
   border: 1px solid #e9ecef
+}
+
+.important {
+  background-color: #fff7e3;
+  border: 2px solid #fcba19;
+  color: #495057;
+  font-size: 12px;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.ga-3 {
+  gap: 12px;
+}
+
+::v-deep {
+  .v-btn.v-btn--outlined {
+      border-color: var(--v-primary-base);
+      color: var(--v-primary-base);
+  }
 }
 
 </style>

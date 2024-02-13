@@ -24,6 +24,19 @@ import { OrgsDetails } from '@/models/affiliation-invitation'
 import { axios } from '@/util/http-util'
 
 export default class OrgService {
+  public static async getOrganizationsSimple (query: string): Promise<AxiosResponse<Organization[]>> {
+    try {
+      const url = `${ConfigHelper.getAuthAPIUrl()}/orgs/simple`
+      const searchParams = new URLSearchParams({ 'limit': '20' })
+      if (query) { searchParams.append('searchText', query) }
+      const response = await axios.get(url, { params: searchParams })
+      return response.data.items
+    } catch (error) {
+      console.error(`Failed to get organizations: ${error}`)
+      throw error
+    }
+  }
+
   public static async getOrganization (orgId: number): Promise<AxiosResponse<Organization>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`)
   }
@@ -165,6 +178,7 @@ export default class OrgService {
   public static async getOrgApiKeys (orgId: number): Promise<AxiosResponse<OrgProduct>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys`)
   }
+
   public static async revokeOrgApiKeys (ApiDetails): Promise<AxiosResponse<OrgProduct>> {
     const { orgId, apiKey } = ApiDetails
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/${apiKey}`)

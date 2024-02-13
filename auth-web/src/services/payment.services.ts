@@ -13,6 +13,7 @@ import { TransactionFilter, TransactionFilterParams, TransactionListResponse } f
 
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
+import { EFTAccountsFilterParams } from '@/models/pay/accounts'
 import { LinkedShortNameFilterParams } from '@/models/pay/short-name'
 import { Payment } from '@/models/Payment'
 import { PaymentTypes } from '@/util/constants'
@@ -206,6 +207,26 @@ export default class PaymentService {
     return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
   }
 
+  static getEFTAccounts (filterParams: EFTAccountsFilterParams): AxiosPromise<any> {
+    const params = new URLSearchParams()
+    if (filterParams.pageNumber) {
+      params.append('page', filterParams.pageNumber.toString())
+    }
+    if (filterParams.pageLimit) {
+      params.append('limit', filterParams.pageLimit.toString())
+    }
+
+    if (filterParams.filterPayload) {
+      for (const [key, value] of Object.entries(filterParams.filterPayload)) {
+        if (value) {
+          params.append(key, value)
+        }
+      }
+    }
+
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts?${params.toString()}`)
+  }
+
   static getEFTShortNames (filterParams: LinkedShortNameFilterParams, viewAll = false): AxiosPromise<any> {
     const params = new URLSearchParams()
     if (filterParams.pageNumber) {
@@ -244,5 +265,13 @@ export default class PaymentService {
   static getEFTShortname (shortNameId: string): AxiosPromise<EFTShortnameResponse> {
     const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`
     return axios.get(url)
+  }
+
+  static patchEFTShortname (shortNameId: string, accountId: string): AxiosPromise<EFTShortnameResponse> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`
+    const body = {
+      accountId: accountId
+    }
+    return axios.patch(url, body)
   }
 }

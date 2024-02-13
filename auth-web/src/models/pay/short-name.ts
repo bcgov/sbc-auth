@@ -11,6 +11,7 @@ export interface LinkedShortNameFilterParams {
     accountBranch?: string
     accountId?: string
     state: ShortNameStatus
+    accountIdList?: string
   }
 }
 
@@ -29,6 +30,9 @@ export interface LinkedShortNameState {
   filters: LinkedShortNameFilterParams
   actionDropdown: any[]
   options: DataOptions
+  highlightIndex: number
+  snackbar: boolean
+  snackbarText: string
 }
 
 export interface UnlinkedShortNameFilterParams {
@@ -63,7 +67,10 @@ export interface UnlinkedShortNameState {
   dateRangeReset: number
   clearFiltersTrigger: number
   selectedShortName: object
+  selectedAccount: object
   showDatePicker: boolean
   dateRangeSelected: boolean
   dateRangeText: string
+  accountLinkingErrorDialogTitle: string
+  accountLinkingErrorDialogText: string
 }
