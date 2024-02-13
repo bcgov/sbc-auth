@@ -65,7 +65,7 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.manage_eft_role)
 
     # Assert status filter by inactive orgs
-    rv = client.get(f'/api/v1/orgs/simple?status={OrgStatus.INACTIVE.value}',
+    rv = client.get(f'/api/v1/orgs/simple?statuses={OrgStatus.INACTIVE.value}',
                     headers=headers, content_type='application/json')
 
     result = rv.json
