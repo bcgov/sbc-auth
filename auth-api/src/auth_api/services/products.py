@@ -79,7 +79,6 @@ class Product:
 
     @staticmethod
     def _validate_product_resubmission(task: TaskModel, product_model: ProductCodeModel):
-        # Check that the product code can be resubmitted and requires review
         if not (product_model.can_resubmit and product_model.need_review):
             raise BusinessException(Error.INVALID_PRODUCT_RESUBMISSION, None)
         # Associated task not found or not in a rejected state. We should not reset the task state
@@ -98,7 +97,7 @@ class Product:
         org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        # Check authorization for the user
+
         if not skip_auth:
             check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
@@ -116,16 +115,12 @@ class Product:
             task: TaskModel = TaskModel.find_by_task_relationship_id(existing_sub.id,
                                                                      TaskRelationshipType.PRODUCT.value,
                                                                      TaskStatus.COMPLETED.value)
-            # Check if the review task is valid for resubmission
             Product._validate_product_resubmission(task, product_model)
-
-            # Reset the state of the review task
             Product._reset_subscription_and_review_task(review_task=task,
                                                         product_model=product_model,
                                                         subscription=existing_sub,
                                                         user_id=user.id)
 
-            # Resend confirmations
             Product._send_product_subscription_confirmation(ProductNotificationInfo(
                 product_model=product_model,
                 product_sub_model=existing_sub,
