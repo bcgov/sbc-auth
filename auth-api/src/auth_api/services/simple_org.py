@@ -39,6 +39,7 @@ class SimpleOrg:  # pylint: disable=too-few-public-methods
         """Return a simple org service instance."""
         self._model = model
 
+    # Currently this method is only being used by EFT linking.
     @classmethod
     def search(cls, search_criteria: SimpleOrgSearch):
         """Search org records and returned a simplified result set."""
@@ -47,7 +48,10 @@ class SimpleOrg:  # pylint: disable=too-few-public-methods
 
         query = query.filter_conditionally(search_criteria.id, OrgModel.id, is_like=True)
         query = query.filter_conditionally(search_criteria.name, OrgModel.name, is_like=True)
-        query = query.filter_conditionally(search_criteria.status, OrgModel.status_code)
+        if search_criteria.exclude_statuses:
+            query = query.filter(OrgModel.status_code.notin_(search_criteria.statuses))
+        else:
+            query = query.filter(OrgModel.status_code.in_(search_criteria.statuses))
 
         # OrgModel.branch_name default value is '', so we need to check for this
         if search_criteria.branch_name:

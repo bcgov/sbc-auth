@@ -25,6 +25,7 @@ class SimpleOrgInfoSchema:  # pylint: disable=too-few-public-methods
     id: int
     name: str
     branch_name: str
+    status: str
 
     @classmethod
     def from_row(cls, row: Org):
@@ -34,4 +35,5 @@ class SimpleOrgInfoSchema:  # pylint: disable=too-few-public-methods
         """
         return cls(id=row.id,
                    name=row.name,
-                   branch_name=row.branch_name)
+                   branch_name=row.branch_name,
+                   status=row.status_code)
