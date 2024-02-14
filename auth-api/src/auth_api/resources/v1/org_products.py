@@ -32,7 +32,7 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('', methods=['GET', 'OPTIONS'])
-@cross_origin(origins='*', methods=['GET', 'POST'])
+@cross_origin(origins='*', methods=['GET', 'PATCH', 'POST'])
 @TRACER.trace()
 @_jwt.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value])
 def get_org_product_subscriptions(org_id):
@@ -62,6 +62,25 @@ def post_org_product_subscription(org_id):
         subscriptions = ProductService.create_product_subscription(org_id, request_json)
         ProductService.update_org_product_keycloak_groups(org_id)
         response, status = {'subscriptions': subscriptions}, http_status.HTTP_201_CREATED
+    except BusinessException as exception:
+        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+    return response, status
+
+
+@bp.route('', methods=['PATCH'])
+@cross_origin(origins='*')
+@TRACER.trace()
+@_jwt.has_one_of_roles([Role.PUBLIC_USER.value])
+def patch_org_product_subscription(org_id):
+    """Patch existing product subscription to resubmit it for review."""
+    request_json = request.get_json()
+    valid_format, errors = schema_utils.validate(request_json, 'org_product_subscription')
+    if not valid_format:
+        return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+
+    try:
+        subscriptions = ProductService.resubmit_product_subscription(org_id, request_json)
+        response, status = {'subscriptions': subscriptions}, http_status.HTTP_200_OK
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
     return response, status

@@ -139,8 +139,8 @@ class Task:  # pylint: disable=too-many-instance-attributes
             # Update Product relationship
             product_subscription_id = task_model.relationship_id
             account_id = task_model.account_id
-
             self._update_product_subscription(ProductSubscriptionInfo(is_approved=is_approved,
+                                                                      is_resubmitted=task_model.is_resubmitted,
                                                                       is_hold=is_hold,
                                                                       product_subscription_id=product_subscription_id,
                                                                       org_id=account_id,

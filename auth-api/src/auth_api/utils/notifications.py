@@ -36,6 +36,7 @@ class ProductSubscriptionInfo:
     org_id: int
     task_remarks: Optional[str] = None
     is_hold: Optional[bool] = False
+    is_resubmitted: Optional[bool] = False
 
 
 @dataclass

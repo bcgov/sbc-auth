@@ -210,7 +210,7 @@ def test_preflight_org_products(app, client, jwt, session):
     """Assert preflight responses for org products are correct."""
     rv = client.options('/api/v1/orgs/1/products', headers={'Access-Control-Request-Method': 'GET'})
     assert rv.status_code == http_status.HTTP_200_OK
-    assert_access_control_headers(rv, '*', 'GET, POST')
+    assert_access_control_headers(rv, '*', 'GET, PATCH, POST')
 
 
 def test_preflight_org_permissions(app, client, jwt, session):
