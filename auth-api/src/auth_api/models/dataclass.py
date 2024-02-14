@@ -131,6 +131,7 @@ class SimpleOrgSearch:
     branch_name: str
     search_text: str
     statuses: List[str] = field()
+    exclude_statuses: bool
     page: int
     limit: int
 

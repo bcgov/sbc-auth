@@ -77,6 +77,19 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert result['limit'] == 10
     assert_simple_org(result['items'][0], org_inactive)
 
+    # Assert status filter by non-active orgs
+    rv = client.get(f'/api/v1/orgs/simple?statuses={OrgStatus.ACTIVE.value}&excludeStatuses=true',
+                    headers=headers, content_type='application/json')
+
+    result = rv.json
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert result['items']
+    assert len(result['items']) == 1
+    assert result['page'] == 1
+    assert result['total'] == 1
+    assert result['limit'] == 10
+    assert_simple_org(result['items'][0], org_inactive)
+
     # Assert default search - returns active orgs
     rv = client.get('/api/v1/orgs/simple', headers=headers, content_type='application/json')
 

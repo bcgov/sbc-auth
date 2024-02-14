@@ -111,7 +111,8 @@ def search_simple_orgs():
     name = request.args.get('name', None)
     branch_name = request.args.get('branchName', None)
     search_text = request.args.get('searchText', None)
-    statuses = request.args.getlist('statuses', [OrgStatus.ACTIVE.value])
+    statuses = request.args.getlist('statuses') or [OrgStatus.ACTIVE.value]
+    exclude_statuses = request.args.get('excludeStatuses', False)
 
     response, status = SimpleOrgService.search(SimpleOrgSearch(
         id=org_id,
@@ -119,8 +120,10 @@ def search_simple_orgs():
         branch_name=branch_name,
         search_text=search_text,
         statuses=statuses,
+        exclude_statuses=exclude_statuses,
         page=page,
-        limit=limit)), http_status.HTTP_200_OK
+        limit=limit
+    )), http_status.HTTP_200_OK
 
     current_app.logger.info('>search_simple_orgs')
     return jsonify(response), status
