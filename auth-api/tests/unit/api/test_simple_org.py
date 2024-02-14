@@ -37,8 +37,6 @@ def assert_simple_org(result_dict: dict, org: OrgModel):
 
 def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be searched using multiple syntax."""
-    # Create active org
-
     org_inactive = OrgModel(name='INACTIVE TST ORG',
                             branch_name='INACTIVE TST BRANCH NAME',
                             type_code=OrgType.PREMIUM.value,
@@ -64,7 +62,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.manage_eft_role)
 
-    # Assert status filter by inactive orgs
     rv = client.get(f'/api/v1/orgs/simple?statuses={OrgStatus.INACTIVE.value}',
                     headers=headers, content_type='application/json')
 
@@ -77,7 +74,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert result['limit'] == 10
     assert_simple_org(result['items'][0], org_inactive)
 
-    # Assert status filter by non-active orgs
     rv = client.get(f'/api/v1/orgs/simple?statuses={OrgStatus.ACTIVE.value}&excludeStatuses=true',
                     headers=headers, content_type='application/json')
 
@@ -105,7 +101,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][2], org_no_branch_1)
     assert_simple_org(result['items'][3], org_no_branch_2)
 
-    # Assert search id
     rv = client.get(f'/api/v1/orgs/simple?id={org_no_branch_1.id}', headers=headers, content_type='application/json')
 
     result = rv.json
@@ -117,7 +112,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert result['limit'] == 10
     assert_simple_org(result['items'][0], org_no_branch_1)
 
-    # Assert search id
     rv = client.get(f'/api/v1/orgs/simple?id={org_no_branch_1.id}', headers=headers, content_type='application/json')
 
     result = rv.json
@@ -129,7 +123,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert result['limit'] == 10
     assert_simple_org(result['items'][0], org_no_branch_1)
 
-    # Assert search name
     rv = client.get('/api/v1/orgs/simple?name=Name 2', headers=headers, content_type='application/json')
 
     result = rv.json
@@ -142,7 +135,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][0], org_branch_2)
     assert_simple_org(result['items'][1], org_no_branch_2)
 
-    # Assert search branch name
     rv = client.get('/api/v1/orgs/simple?branchName=branch', headers=headers, content_type='application/json')
 
     result = rv.json
@@ -155,7 +147,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][0], org_branch_1)
     assert_simple_org(result['items'][1], org_branch_2)
 
-    # Assert search branch name
     rv = client.get('/api/v1/orgs/simple?branchName=ch 1', headers=headers, content_type='application/json')
 
     result = rv.json
@@ -167,7 +158,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert result['limit'] == 10
     assert_simple_org(result['items'][0], org_branch_1)
 
-    # Assert search text with id
     rv = client.get(f'/api/v1/orgs/simple?searchText={org_no_branch_2.id}', headers=headers,
                     content_type='application/json')
 
@@ -180,7 +170,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert result['limit'] == 10
     assert_simple_org(result['items'][0], org_no_branch_2)
 
-    # Assert search text with name
     rv = client.get('/api/v1/orgs/simple?searchText=name 1', headers=headers, content_type='application/json')
 
     result = rv.json
@@ -193,7 +182,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result['items'][0], org_branch_1)
     assert_simple_org(result['items'][1], org_no_branch_1)
 
-    # Assert search text with branch name
     rv = client.get('/api/v1/orgs/simple?searchText=ch 1', headers=headers, content_type='application/json')
 
     result = rv.json
@@ -205,7 +193,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert result['limit'] == 10
     assert_simple_org(result['items'][0], org_branch_1)
 
-    # Assert page 1
     rv = client.get('/api/v1/orgs/simple?page=1&limit=1', headers=headers, content_type='application/json')
 
     result = rv.json
@@ -217,7 +204,6 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert result['limit'] == 1
     assert_simple_org(result['items'][0], org_branch_1)
 
-    # Assert page 2
     rv = client.get('/api/v1/orgs/simple?page=2&limit=1', headers=headers, content_type='application/json')
 
     result = rv.json
