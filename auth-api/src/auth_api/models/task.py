@@ -15,7 +15,7 @@
 import datetime as dt
 import pytz
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 
@@ -34,6 +34,8 @@ class Task(BaseModel):
     name = Column(String(250), nullable=False)  # Stores name of the relationship item. For eg, an org name
     date_submitted = Column(DateTime)  # Instance when task is created
     external_source_id = Column(String(75), nullable=True)  # Optional external system source identifier
+    is_resubmitted = Column(Boolean(), default=False,
+                            nullable=False)  # Stores whether this task is resubmitted for review
     relationship_type = Column(String(50), nullable=False)  # That is to be acted up on. For eg, an org
     relationship_id = Column(Integer, index=True, nullable=False)
     relationship_status = Column(String(100), nullable=True)  # Status of the related object. e.g, PENDING_STAFF_REVIEW

@@ -94,6 +94,10 @@ class Error(Enum):
     GOVM_ACCOUNT_DATA_MISSING = 'GOVM account creation needs payment info , gl code and mailing address', \
                                 http_status.HTTP_400_BAD_REQUEST
     PRODUCT_SUBSCRIPTION_EXISTS = 'Org has subscription to the product exists.', http_status.HTTP_409_CONFLICT
+    INVALID_PRODUCT_RESUB_STATE = 'Product is not in a valid state for re-submission.', \
+        http_status.HTTP_400_BAD_REQUEST
+    INVALID_PRODUCT_RESUBMISSION = 'Product is not valid for re-submission.', \
+        http_status.HTTP_400_BAD_REQUEST
 
     OUTSTANDING_CREDIT = 'Account have credits remaining on account.', http_status.HTTP_400_BAD_REQUEST
     TRANSACTIONS_IN_PROGRESS = 'Account have payment transactions in progress.', http_status.HTTP_400_BAD_REQUEST
