@@ -93,7 +93,6 @@
 import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import { LookupType } from '@/models/business-nr-lookup'
-import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
 
@@ -164,28 +163,25 @@ export default defineComponent({
 
     async function mapAccounts (query) {
       try {
-        const organizations = await OrgService.getOrganizationsSimple(query)
-        const accountIds = organizations.map((org) => org.id)
-        const accountIdString = accountIds.join(',')
+        const eftAccountsResponse = await PaymentService.searchEFTAccounts(query)
+        const eftAccounts = eftAccountsResponse.data.items
+        const accountIds = eftAccounts.map((org) => org.accountId)
 
-        const [eftShortNamesResponse, eftAccountsResponse] = await Promise.all([
-          PaymentService.getEFTShortNames({ 'filterPayload': { 'accountIdList': accountIdString } }),
-          PaymentService.getEFTAccounts({ 'filterPayload': { 'accountIdList': accountIdString } })
-        ])
+        const eftShortNamesResponse = await PaymentService.getEFTShortNames(
+          { 'filterPayload': { 'accountIdList': accountIds.join(',') } }
+        )
 
         const eftShortNames = eftShortNamesResponse.data.items
-        const eftAccounts = eftAccountsResponse.data.items
 
-        const eftAccountsMap = new Map(eftAccounts.map(eftAccount => [eftAccount.accountId, eftAccount]))
-
-        const result = eftShortNames.reduce((acc, eftShortName) => {
-          if (eftAccountsMap.has(eftShortName.accountId)) {
-            acc.push(eftShortName)
-            eftAccountsMap.delete(eftShortName.accountId)
+        const mappedAccounts = eftAccounts.map((eftAccount) => {
+          const eftShortName = eftShortNames.find((eftShortName) => eftShortName.accountId === eftAccount.accountId)
+          return {
+            ...eftAccount,
+            ...eftShortName
           }
-          return acc
-        }, [])
-        return [...result, ...eftAccountsMap.values()]
+        })
+
+        return mappedAccounts
       } catch (error) {
         console.error('Error occurred while searching:', error)
         return []
