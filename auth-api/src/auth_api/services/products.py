@@ -255,6 +255,7 @@ class Product:
         review_task.status = TaskStatus.OPEN.value
         review_task.related_to = user_id
         review_task.relationship_status = TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+        review_task.date_submitted = datetime.now()
         review_task.is_resubmitted = True
         review_task.remarks = None
         review_task.save()
