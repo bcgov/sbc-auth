@@ -123,7 +123,7 @@ class OrgSearch:  # pylint: disable=too-many-instance-attributes
 
 
 @dataclass
-class SimpleOrgSearch:
+class SimpleOrgSearch:   # pylint: disable=too-many-instance-attributes
     """Used for searching organizations."""
 
     id: str
