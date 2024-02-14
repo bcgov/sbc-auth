@@ -507,3 +507,127 @@ def test_no_confirmation_notification(mock_mailer, session, auth_mock, keycloak_
                                                    subscription_data=org_product_info,
                                                    skip_auth=True)
         mock_mailer.assert_not_called()
+
+
+@pytest.mark.parametrize('org_product_info, contact_type', [
+    (TestOrgProductsInfo.mhr_qs_lawyer_and_notaries, 'BCOL'),
+    (TestOrgProductsInfo.mhr_qs_home_manufacturers, 'BCREG'),
+    (TestOrgProductsInfo.mhr_qs_home_dealers, 'BCREG')
+])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
+@patch.object(auth_api.services.products, 'publish_to_mailer')
+def test_resubmission_notification(mock_mailer, session, auth_mock, keycloak_mock,
+                                   monkeypatch, org_product_info, contact_type):
+    """Assert product resubmission notifications are created."""
+    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_bceid_user['idp_userid']
+    user = factory_user_model_with_contact(user_with_token)
+
+    patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
+
+    org = OrgService.create_org(TestOrgInfo.org_premium, user_id=user.id)
+    assert org
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org_premium['name']
+
+    product_code = org_product_info['subscriptions'][0]['productCode']
+    product_code_model = ProductCodeModel.find_by_code(product_code)
+
+    if product_code_model.parent_code:
+        # Create parent product subscription
+        ProductService.create_product_subscription(org_id=dictionary['id'],
+                                                   subscription_data={'subscriptions': [
+                                                       {'productCode': product_code_model.parent_code}]},
+                                                   skip_auth=True)
+
+    # Subscribe to product
+    ProductService.create_product_subscription(org_id=dictionary['id'],
+                                               subscription_data=org_product_info,
+                                               skip_auth=True)
+
+    org_subscriptions = ProductSubscriptionModel.find_by_org_ids(org_ids=[dictionary['id']])
+    org_prod_sub = next(prod for prod in org_subscriptions
+                        if prod.product_code == product_code)
+
+    # Fetch products and confirm product subscription is present
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
+    patch_token_info(token_info, monkeypatch)
+    all_subs = ProductService.get_all_product_subscription(org_id=dictionary['id'])
+
+    prod_sub = next(sub for sub in all_subs if sub.get('code') == product_code)
+
+    assert prod_sub
+    assert prod_sub['code'] == product_code
+
+    # Staff review task should have been created
+    task = TaskModel.find_by_task_relationship_id(
+        task_relationship_type=TaskRelationshipType.PRODUCT.value, relationship_id=org_prod_sub.id)
+
+    assert task
+    assert task.account_id == dictionary['id']
+    assert task.relationship_type == TaskRelationshipType.PRODUCT.value
+    assert task.relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+    assert task.relationship_id == org_prod_sub.id
+    assert task.action == TaskAction.QUALIFIED_SUPPLIER_REVIEW.value
+
+    # Reject task and check for publish to mailer
+    task_info = {
+        'relationshipStatus': TaskRelationshipStatus.REJECTED.value,
+        'remarks': ['Test remark']
+    }
+    TaskService.update_task(TaskService(task), task_info=task_info)
+
+    # Resubmit product subscription
+    with patch.object(UserService, 'get_admin_emails_for_org', return_value='test@test.com'):
+        ProductService.resubmit_product_subscription(org_id=dictionary['id'],
+                                                     subscription_data=org_product_info,
+                                                     skip_auth=True)
+
+        expected_data = {
+            'subjectDescriptor': ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+            'productAccessDescriptor': ProductAccessDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+            'categoryDescriptor': ProductCategoryDescriptor.MHR.value,
+            'productName': product_code_model.description,
+            'emailAddresses': 'test@test.com',
+            'contactType': contact_type,
+            'hasAgreementAttachment': True,
+            'attachmentType': NotificationAttachmentType.MHR_QS.value
+        }
+
+        # Assert that confirmation email is re-sent on re-submission
+        mock_mailer.assert_called_with(NotificationTypes.DETAILED_CONFIRMATION_PRODUCT.value,
+                                       data=expected_data)
+
+    # Staff review task should be back in review
+    task = TaskModel.find_by_task_relationship_id(
+        task_relationship_type=TaskRelationshipType.PRODUCT.value, relationship_id=org_prod_sub.id)
+
+    assert task
+    assert task.account_id == dictionary['id']
+    assert task.relationship_type == TaskRelationshipType.PRODUCT.value
+    assert task.relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+    assert task.relationship_id == org_prod_sub.id
+    assert task.action == TaskAction.QUALIFIED_SUPPLIER_REVIEW.value
+
+    # Approve task and check for publish to mailer
+    task_info = {
+        'relationshipStatus': TaskRelationshipStatus.ACTIVE.value
+    }
+
+    product_code_model = ProductCodeModel.find_by_code(product_code)
+
+    # Should use re-approved template
+    with patch.object(UserService, 'get_admin_emails_for_org', return_value='test@test.com'):
+        TaskService.update_task(TaskService(task), task_info=task_info)
+
+        expected_data = {
+            'subjectDescriptor': ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+            'productAccessDescriptor': ProductAccessDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+            'categoryDescriptor': ProductCategoryDescriptor.MHR.value,
+            'isReapproved': True,
+            'productName': product_code_model.description,
+            'emailAddresses': 'test@test.com'
+        }
+        mock_mailer.assert_called_with(NotificationTypes.DETAILED_APPROVED_PRODUCT.value,
+                                       data=expected_data)

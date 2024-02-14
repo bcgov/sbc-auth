@@ -40,6 +40,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     #       Exception, id is always first, _fields first
     __mapper_args__ = {
         'include_properties': [
+            'can_resubmit',
             'code',
             'default',
             'description',
@@ -58,6 +59,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     type_code = Column(ForeignKey('product_type_codes.code'), default='INTERNAL', nullable=False)
     parent_code = Column(String(75), nullable=True)  # Used for sub products to define a parent product code
     premium_only = Column(Boolean(), default=False, nullable=True)  # Available only for premium accounts
+    can_resubmit = Column(Boolean(), default=False, nullable=False)  # Allows resubmission of subscription request
     need_review = Column(Boolean(), default=False, nullable=True)  # Need a review from staff for activating product
     need_system_admin = Column(Boolean(), default=False, nullable=True)  # Needs system admin for activating product
     hidden = Column(Boolean(), default=False, nullable=True)  # Flag to hide from the UI

@@ -25,6 +25,7 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
+from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.models.dataclass import Activity, KeycloakGroupSubscription, ProductReviewTask
@@ -75,6 +76,63 @@ class Product:
             return code_from_cache
         product_code_model: ProductCodeModel = ProductCodeModel.find_by_code(code)
         return getattr(product_code_model, 'type_code', '')
+
+    @staticmethod
+    def _validate_product_resubmission(task: TaskModel, product_model: ProductCodeModel):
+        # Check that the product code can be resubmitted and requires review
+        if not (product_model.can_resubmit and product_model.need_review):
+            raise BusinessException(Error.INVALID_PRODUCT_RESUBMISSION, None)
+        # Associated task not found or not in a rejected state. We should not reset the task state
+        if not task or task.relationship_status != TaskRelationshipStatus.REJECTED.value:
+            raise BusinessException(Error.INVALID_PRODUCT_RESUB_STATE, None)
+
+    @staticmethod
+    def resubmit_product_subscription(org_id, subscription_data: Dict[str, Any], skip_auth=False):
+        """Reset product subscription state.
+
+        A re-submission is only possible when:
+        1) product_code.can_resubmit flag is True
+        2) product_code.need_review flag is True
+        3) Task is currently in a REJECTED state.
+        """
+        org: OrgModel = OrgModel.find_by_org_id(org_id)
+        if not org:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        # Check authorization for the user
+        if not skip_auth:
+            check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
+
+        user = UserModel.find_by_jwt_token()
+        subscriptions_list = subscription_data.get('subscriptions')
+        for subscription in subscriptions_list:
+            product_code = subscription.get('productCode')
+            existing_sub = ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code)
+            product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_code)
+
+            # We only care about existing subs for resubmission
+            if not existing_sub:
+                continue
+
+            task: TaskModel = TaskModel.find_by_task_relationship_id(existing_sub.id,
+                                                                     TaskRelationshipType.PRODUCT.value,
+                                                                     TaskStatus.COMPLETED.value)
+            # Check if the review task is valid for resubmission
+            Product._validate_product_resubmission(task, product_model)
+
+            # Reset the state of the review task
+            Product._reset_subscription_and_review_task(review_task=task,
+                                                        product_model=product_model,
+                                                        subscription=existing_sub,
+                                                        user_id=user.id)
+
+            # Resend confirmations
+            Product._send_product_subscription_confirmation(ProductNotificationInfo(
+                product_model=product_model,
+                product_sub_model=existing_sub,
+                is_confirmation=True
+            ), org.id)
+
+        return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
 
     @staticmethod
     def create_product_subscription(org_id, subscription_data: Dict[str, Any],  # pylint: disable=too-many-locals
@@ -190,6 +248,26 @@ class Product:
         return subscription
 
     @staticmethod
+    def _reset_subscription_and_review_task(review_task: TaskModel,
+                                            product_model: ProductCodeModel,
+                                            subscription: ProductSubscriptionModel,
+                                            user_id: str):
+        review_task.status = TaskStatus.OPEN.value
+        review_task.related_to = user_id
+        review_task.relationship_status = TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+        review_task.is_resubmitted = True
+        review_task.remarks = None
+        review_task.save()
+
+        if product_model.parent_code:
+            Product._update_parent_subscription(subscription.org_id,
+                                                product_model,
+                                                ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value)
+
+        subscription.status_code = ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
+        subscription.save()
+
+    @staticmethod
     def _create_review_task(review_task: ProductReviewTask):
         task_type = review_task.product_description
         action_type = TaskAction.QUALIFIED_SUPPLIER_REVIEW.value \
@@ -292,7 +370,8 @@ class Product:
         # Approve/Reject Product subscription
         product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_id(product_subscription_id)
 
-        is_reapproved = Product.is_reapproved(product_subscription.status_code, is_approved)
+        is_reapproved = Product.is_reapproved(product_subscription.status_code,
+                                              is_approved, product_sub_info.is_resubmitted)
 
         if is_approved:
             product_subscription.status_code = ProductSubscriptionStatus.ACTIVE.value
@@ -380,9 +459,16 @@ class Product:
         current_app.logger.debug('>approve_reject_parent_subscription ')
 
     @staticmethod
-    def is_reapproved(product_sub_status: str, is_approved: str) -> bool:
-        """Determine if the product subscriptions is re-approved."""
-        return product_sub_status == ProductSubscriptionStatus.REJECTED.value and is_approved
+    def is_reapproved(product_sub_status: str, is_approved: bool, is_resubmitted: bool = False) -> bool:
+        """Determine if the product subscriptions is re-approved.
+
+        Re-approved if:
+        1) in REJECTED state and is_approved
+        2) in PENDING_STAFF_REVIEW, is_approved and is_resubmitted
+        """
+        return (product_sub_status == ProductSubscriptionStatus.REJECTED.value and is_approved) or \
+            (product_sub_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value and
+             is_approved and is_resubmitted)
 
     @staticmethod
     def send_product_subscription_notification(product_notification_info: ProductNotificationInfo):
