@@ -112,6 +112,11 @@ export const useAffiliations = () => {
     )
   }
 
+  /** Returns true if the affiliation is a numbered amalgamation application. */
+  const isNumberedAmalgamationApplication = (business: Business): boolean => {
+    return (business.corpType?.code || business.corpType) === CorpTypes.AMALGAMATION_APPLICATION
+  }
+
   /** Returns the identifier of the affiliation. */
   const number = (business: Business): string => {
     if (isNumberedIncorporationApplication(business)) {
@@ -138,6 +143,10 @@ export const useAffiliations = () => {
     }
     if (item.nameRequest) {
       return getApprovedName(item)
+    }
+    if (item.name == 'Numbered Amalgamated Company' && isNumberedAmalgamationApplication(item)) {
+      const legalType: unknown = item.corpSubType?.code
+      return GetCorpNumberedDescription(legalType as CorpTypeCd) || 'Numbered Amalgamated Company'
     }
     return item.name
   }
