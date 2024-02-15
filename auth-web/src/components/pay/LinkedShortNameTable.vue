@@ -126,7 +126,7 @@ export default defineComponent({
         isActive: false,
         pageNumber: 1,
         pageLimit: 20,
-        filterPayload: generateFilterPayload()
+        filterPayload: defaultFilterPayload()
       },
       loading: false,
       actionDropdown: [],
@@ -175,12 +175,12 @@ export default defineComponent({
 
     async function clearFilters (): Promise<void> {
       state.clearFiltersTrigger++
-      state.filters.filterPayload = generateFilterPayload()
+      state.filters.filterPayload = defaultFilterPayload()
       state.filters.isActive = false
       await loadTableData()
     }
 
-    function generateFilterPayload () {
+    function defaultFilterPayload () {
       return {
         accountName: '',
         shortName: '',
@@ -212,13 +212,11 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.LinkedShortNamesFilter)
-      if (orgSearchFilter) {
-        try {
-          state.filters.filterPayload = JSON.parse(orgSearchFilter)
-        } catch {
-          // Silent catch
-        }
+      try {
+        state.filters.filterPayload = JSON.parse(
+          ConfigHelper.getFromSession(SessionStorageKeys.LinkedShortNamesFilter)) || state.filters.filterPayload
+      } catch {
+        // Silent catch
       }
       await loadTableData()
     })

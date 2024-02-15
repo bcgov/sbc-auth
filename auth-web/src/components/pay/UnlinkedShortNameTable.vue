@@ -228,7 +228,7 @@ export default defineComponent({
         isActive: false,
         pageNumber: 1,
         pageLimit: 20,
-        filterPayload: generateFilterPayload()
+        filterPayload: defaultFilterPayload()
       },
       loading: false,
       actionDropdown: [],
@@ -284,7 +284,7 @@ export default defineComponent({
       }
     ]
 
-    function generateFilterPayload () {
+    function defaultFilterPayload () {
       return {
         shortName: '',
         transactionDate: '',
@@ -383,7 +383,7 @@ export default defineComponent({
     async function clearFilters () {
       state.clearFiltersTrigger++
       state.dateRangeReset++
-      state.filters.filterPayload = generateFilterPayload()
+      state.filters.filterPayload = defaultFilterPayload()
       state.filters.isActive = false
       await loadTableData()
     }
