@@ -242,8 +242,8 @@ export default class Product extends Mixins(AccountMixin) {
     // eg: pprCodeSubtitle, pprCodeDescription
     // Also, returns check box icon and color if the product has been reviewed.
     let { code } = this.productDetails
-    let subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
-    let details = `${code && code.toLowerCase()}CodeDescription` || ''
+    let subTitle = `${code && code.toLowerCase()}CodeSubtitle`
+    let details = `${code && code.toLowerCase()}CodeDescription`
     let decisionMadeIcon = null
     let decisionMadeColorCode = null
 
@@ -251,13 +251,13 @@ export default class Product extends Mixins(AccountMixin) {
       const status = this.productDetails.subscriptionStatus
       switch (status) {
         case ProductStatus.ACTIVE: {
-          subTitle = `${code && code.toLowerCase()}CodeActiveSubtitle` || ''
+          subTitle = `${code && code.toLowerCase()}CodeActiveSubtitle`
           decisionMadeIcon = 'mdi-check-circle'
           decisionMadeColorCode = 'success'
           break
         }
         case ProductStatus.REJECTED: {
-          subTitle = `${code && code.toLowerCase()}CodeRejectedSubtitle` || ''
+          subTitle = `${code && code.toLowerCase()}CodeRejectedSubtitle`
           decisionMadeIcon = 'mdi-close-circle'
           decisionMadeColorCode = 'error'
           break
@@ -272,13 +272,13 @@ export default class Product extends Mixins(AccountMixin) {
         }
       }
       if (this.isBasicAccountAndPremiumProduct) {
-        subTitle = `${code && code.toLowerCase()}CodeUnselectableSubtitle` || ''
+        subTitle = `${code && code.toLowerCase()}CodeUnselectableSubtitle`
         decisionMadeIcon = 'mdi-minus-box'
       }
       // Swap subtitle and details for sub-product specific content
       if (this.productDetails.code === ProductEnum.MHR && this.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
         subTitle = `mhrQsCodeActiveSubtitle`
-        details = `${this.activeSubProduct.code && this.activeSubProduct.code.toLowerCase()}CodeDescription` || ''
+        details = `${this.activeSubProduct.code && this.activeSubProduct.code.toLowerCase()}CodeDescription`
       }
     }
     return { subTitle, details, decisionMadeIcon, decisionMadeColorCode }
