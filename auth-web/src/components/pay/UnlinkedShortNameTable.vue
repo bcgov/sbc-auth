@@ -121,7 +121,7 @@
             dense
             filled
             hide-details
-            :placeholder="'Date'"
+            :placeholder="'Initial Payment Received Date'"
             :value="state.dateRangeSelected ? 'Custom' : ''"
             @click:clear="state.dateRangeReset++"
           />
@@ -200,9 +200,10 @@
 </template>
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
-import { Ref, defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
-import { ShortNameResponseStatus, ShortNameStatus } from '@/util/constants'
+import { Ref, defineComponent, onMounted, reactive, ref, watch } from '@vue/composition-api'
+import { SessionStorageKeys, ShortNameResponseStatus, ShortNameStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -227,12 +228,7 @@ export default defineComponent({
         isActive: false,
         pageNumber: 1,
         pageLimit: 20,
-        filterPayload: {
-          shortName: '',
-          transactionDate: '',
-          depositAmount: 0,
-          state: ShortNameStatus.UNLINKED
-        }
+        filterPayload: generateFilterPayload()
       },
       loading: false,
       actionDropdown: [],
@@ -249,30 +245,37 @@ export default defineComponent({
       accountLinkingErrorDialogText: ''
     })
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
-    const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
+    const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {
         filterApiFn: hasFilter ? (val: any) => loadTableData(col, val || '') : null,
         clearable: true,
         label,
         type,
-        value: ''
+        value: filterValue
       },
       hasFilter,
       minWidth,
       value
     })
 
+    const {
+      shortName = '',
+      depositAmount = ''
+    } = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.UnlinkedShortNamesFilter) || '{}')
+
     const headers = [
-      createHeader('shortName', 'Bank Short Name', 'text', 'Bank Short Name'),
-      {
-        col: 'transactionDate',
-        hasFilter: false,
-        label: 'Initial Payment Received Date',
-        value: 'Initial Payment Received Date',
-        minWidth: '260px'
-      },
-      createHeader('depositAmount', 'Initial Payment Amount', 'text', 'Initial Payment Amount'),
+      createHeader('shortName', 'Bank Short Name', 'text', 'Bank Short Name', shortName),
+      createHeader(
+        'transactionDate',
+        'Initial Payment Received Date',
+        'text',
+        'Initial Payment Received Date',
+        '',
+        false,
+        '260px'
+      ),
+      createHeader('depositAmount', 'Initial Payment Amount', 'text', 'Initial Payment Amount', depositAmount),
       {
         col: 'actions',
         hasFilter: false,
@@ -281,23 +284,23 @@ export default defineComponent({
       }
     ]
 
-    function formatAmount (amount: number) {
-      if (amount) {
-        return CommonUtils.formatAmount(amount)
+    function generateFilterPayload () {
+      return {
+        shortName: '',
+        transactionDate: '',
+        depositAmount: '',
+        state: ShortNameStatus.UNLINKED,
+        transactionStartDate: '',
+        transactionEndDate: ''
       }
-      return ''
+    }
+
+    function formatAmount (amount: number) {
+      return amount ? CommonUtils.formatAmount(amount) : ''
     }
 
     function formatDate (date: string) {
-      return CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY')
-    }
-
-    function updateDateRange ({ endDate, startDate }: { endDate?: string, startDate?: string }): void {
-      state.showDatePicker = false
-      state.dateRangeSelected = !!(endDate && startDate)
-      if (!state.dateRangeSelected) { endDate = ''; startDate = '' }
-      state.dateRangeText = state.dateRangeSelected ? `${formatDate(startDate)} - ${formatDate(endDate)}` : ''
-      loadTableData('transactionDate', { endDate, startDate })
+      return date ? CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY') : ''
     }
 
     function openAccountLinkingDialog (item: EFTShortnameResponse) {
@@ -306,9 +309,7 @@ export default defineComponent({
     }
 
     function resetAccountLinkingDialog () {
-      // reset state
       state.selectedAccount = {}
-      // force re-render and reset ShortNameLookup component
       state.shortNameLookupKey++
     }
 
@@ -319,6 +320,33 @@ export default defineComponent({
 
     function closeAccountAlreadyLinkedDialog () {
       accountLinkingErrorDialog.value.close()
+    }
+
+    function viewDetails (index) {
+      root.$router?.push({
+        name: 'shortnamedetails',
+        params: {
+          'shortNameId': state.results[index].id
+        }
+      })
+    }
+
+    function setDateRangeText (startDate: string, endDate: string) {
+      if (!startDate || !endDate) {
+        return
+      }
+      return `${formatDate(startDate)} - ${formatDate(endDate)}`
+    }
+
+    async function updateDateRange ({ endDate, startDate }: { endDate?: string, startDate?: string }): void {
+      state.showDatePicker = false
+      state.dateRangeSelected = !!(endDate && startDate)
+      if (!state.dateRangeSelected) { endDate = ''; startDate = '' }
+      state.dateRangeText = state.dateRangeSelected ? setDateRangeText(startDate, endDate) : ''
+      state.filters.filterPayload.transactionStartDate = startDate
+      state.filters.filterPayload.transactionEndDate = endDate
+      ConfigHelper.addToSession(SessionStorageKeys.UnlinkedShortNamesFilter, JSON.stringify(state.filters.filterPayload))
+      await loadTableData()
     }
 
     async function linkAccount () {
@@ -355,23 +383,30 @@ export default defineComponent({
     async function clearFilters () {
       state.clearFiltersTrigger++
       state.dateRangeReset++
-      state.filters.filterPayload = { state: ShortNameStatus.UNLINKED }
+      state.filters.filterPayload = generateFilterPayload()
       state.filters.isActive = false
       await loadTableData()
     }
 
-    function viewDetails (index) {
-      root.$router?.push({
-        name: 'shortnamedetails',
-        params: {
-          'shortNameId': state.results[index].id
-        }
-      })
-    }
-
     onMounted(async () => {
+      const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.UnlinkedShortNamesFilter)
+      if (orgSearchFilter) {
+        try {
+          const payload = JSON.parse(orgSearchFilter)
+          state.filters.filterPayload = payload
+          if (payload.transactionStartDate) {
+            state.dateRangeText = setDateRangeText(payload.transactionStartDate, payload.transactionEndDate)
+          }
+        } catch {
+          // Silent catch
+        }
+      }
       await loadTableData()
     })
+
+    watch(() => state.filters, (filters: any) => {
+      ConfigHelper.addToSession(SessionStorageKeys.UnlinkedShortNamesFilter, JSON.stringify(filters.filterPayload))
+    }, { deep: true })
 
     return {
       clearFilters,
