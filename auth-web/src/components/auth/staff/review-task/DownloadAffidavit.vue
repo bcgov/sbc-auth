@@ -25,16 +25,30 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({})
-export default class DownloadAffidavit extends Vue {
-  @Prop({ default: null }) tabNumber: number
-  @Prop({ default: 'Download Affidavit' }) title: string
-  @Prop({ default: 'Download the notarized affidavit associated with this account to verify the account creators ' +
-    'identity and associated information.' }) subTitle: string
-  @Prop({ default: '' }) affidavitName: string
-}
+export default defineComponent({
+  name: 'DownloadAffidavit',
+  props: {
+    tabNumber: {
+      type: Number,
+      default: null
+    },
+    title: {
+      type: String,
+      default: 'Download Affidavit'
+    },
+    subTitle: {
+      type: String,
+      default: 'Download the notarized affidavit associated with this account to verify the account creators ' +
+        'identity and associated information.'
+    },
+    affidavitName: {
+      type: String,
+      default: ''
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>

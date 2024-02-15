@@ -45,16 +45,29 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Contact } from '@/models/contact'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({})
-export default class NotaryInformation extends Vue {
-  @Prop({ default: null }) private tabNumber: number
-  @Prop({ default: 'Notary Information' }) private title: string
-  @Prop({ default: {} }) accountNotaryContact: Contact
-  @Prop({ default: '' }) accountNotaryName: string
-}
+export default defineComponent({
+  name: 'NotaryInformation',
+  props: {
+    tabNumber: {
+      type: Number,
+      default: null
+    },
+    title: {
+      type: String,
+      default: 'Notary Information'
+    },
+    accountNotaryContact: {
+      type: Object,
+      default: () => {}
+    },
+    accountNotaryName: {
+      type: String,
+      default: ''
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>

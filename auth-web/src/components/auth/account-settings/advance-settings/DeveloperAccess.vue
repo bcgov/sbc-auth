@@ -24,20 +24,24 @@
 
 <script lang="ts">
 
-import { Component, Mixins } from 'vue-property-decorator'
-
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import ConfigHelper from '@/util/config-helper'
 import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings/ExistingAPIKeys.vue'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
+export default defineComponent({
+  name: 'DeveloperAccess',
   components: {
     ExistingAPIKeys
+  },
+  mixins: [AccountChangeMixin],
+  setup () {
+    const APIDOCUMENTATION_URL = ConfigHelper.apiDocumentationUrl() || ''
+    return {
+      APIDOCUMENTATION_URL
+    }
   }
 })
-export default class DeveloperAccess extends Mixins(AccountChangeMixin) {
-  APIDOCUMENTATION_URL = ConfigHelper.apiDocumentationUrl() || ''
-}
 </script>
 
 <style lang="scss" scoped>

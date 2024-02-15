@@ -5,10 +5,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
+export default defineComponent({
+  name: 'NonBcscInfoView'
 })
-export default class NonBcscInfoView extends Vue {
-}
 </script>

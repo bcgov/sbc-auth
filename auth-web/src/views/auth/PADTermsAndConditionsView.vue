@@ -14,19 +14,15 @@
 </template>
 
 <script lang="ts">
-import { Component } from 'vue-property-decorator'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
-import Vue from 'vue'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
+export default defineComponent({
+  name: 'PADTermsAndConditionsView',
   components: {
     TermsOfUse
   }
 })
-
-export default class PADTermsAndConditionsView extends Vue {
-}
-
 </script>
 
 <style lang="scss" scoped>

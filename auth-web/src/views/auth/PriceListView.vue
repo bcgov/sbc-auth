@@ -135,60 +135,63 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
-  name: 'PriceListView'
-})
+export default defineComponent({
+  name: 'PriceListView',
+  setup () {
+    const priceList = [
+      {
+        businessType: 'cooperative',
+        name: 'Annual Report',
+        price: '30.00',
+        serviceFee: '',
+        futureEffectiveFee: ''
+      },
+      {
+        businessType: 'cooperative',
+        name: 'Correction',
+        price: '20.00',
+        serviceFee: '',
+        futureEffectiveFee: ''
+      },
+      {
+        businessType: 'cooperative',
+        name: 'Change of Address',
+        price: '20.00',
+        serviceFee: '',
+        futureEffectiveFee: ''
+      },
+      {
+        businessType: 'cooperative',
+        name: 'Change of Directors',
+        price: '20.00',
+        serviceFee: '',
+        futureEffectiveFee: ''
+      },
+      {
+        businessType: 'benefitCompany',
+        name: 'Incorporation',
+        price: '350.00',
+        serviceFee: '1.50',
+        futureEffectiveFee: '100.00'
+      }
+    ]
 
-export default class PriceListView extends Vue {
-  private readonly priceList = [
-    {
-      businessType: 'cooperative',
-      name: 'Annual Report',
-      price: '30.00',
-      serviceFee: '',
-      futureEffectiveFee: ''
-    },
-    {
-      businessType: 'cooperative',
-      name: 'Correction',
-      price: '20.00',
-      serviceFee: '',
-      futureEffectiveFee: ''
-    },
-    {
-      businessType: 'cooperative',
-      name: 'Change of Address',
-      price: '20.00',
-      serviceFee: '',
-      futureEffectiveFee: ''
-    },
-    {
-      businessType: 'cooperative',
-      name: 'Change of Directors',
-      price: '20.00',
-      serviceFee: '',
-      futureEffectiveFee: ''
-    },
-    {
-      businessType: 'benefitCompany',
-      name: 'Incorporation',
-      price: '350.00',
-      serviceFee: '1.50',
-      futureEffectiveFee: '100.00'
+    const coopPriceList = priceList.filter((item) => {
+      return (item.businessType === 'cooperative')
+    })
+
+    const benefitCompanyPriceList = priceList.filter((item) => {
+      return (item.businessType === 'benefitCompany')
+    })
+
+    return {
+      coopPriceList,
+      benefitCompanyPriceList
     }
-  ]
-
-  coopPriceList = this.priceList.filter((item) => {
-    return (item.businessType === 'cooperative')
-  })
-
-  benefitCompanyPriceList = this.priceList.filter((item) => {
-    return (item.businessType === 'benefitCompany')
-  })
-}
-
+  }
+})
 </script>
 
 <style lang="scss" scoped>

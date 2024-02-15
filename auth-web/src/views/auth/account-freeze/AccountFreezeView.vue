@@ -33,35 +33,33 @@
 </template>
 
 <script lang="ts">
-
-import { Component, Mixins } from 'vue-property-decorator'
+import { computed, defineComponent } from '@vue/composition-api'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { AccountStatus } from '@/util/constants'
 import AccountSuspendedView from './AccountSuspendedView.vue'
 import CommonUtils from '@/util/common-util'
-import { Organization } from '@/models/Organization'
-import { mapState } from 'pinia'
 import { useOrgStore } from '@/stores/org'
 
-@Component({
+export default defineComponent({
+  name: 'AccountCreationSuccessView',
   components: {
     AccountSuspendedView
   },
-  computed: {
-    ...mapState(useOrgStore, ['currentOrganization'])
+  mixins: [AccountMixin],
+  setup () {
+    const orgStore = useOrgStore()
+    const isAccountStatusNsfSuspended = computed<boolean>(() => {
+      return orgStore.currentOrganization?.accountStatus === AccountStatus.NSF_SUSPENDED
+    })
+    const suspendedDate = computed<string>(() => {
+      return (orgStore.currentOrganization.suspendedOn)
+        ? CommonUtils.formatDisplayDate(new Date(orgStore.currentOrganization.suspendedOn)) : ''
+    })
+
+    return {
+      isAccountStatusNsfSuspended,
+      suspendedDate
+    }
   }
 })
-export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
-  protected readonly currentOrganization!: Organization
-  private formatDate = CommonUtils.formatDisplayDate
-
-  get isAccountStatusNsfSuspended () : boolean {
-    return this.currentOrganization?.accountStatus === AccountStatus.NSF_SUSPENDED
-  }
-
-  get suspendedDate () {
-    return (this.currentOrganization?.suspendedOn)
-      ? this.formatDate(new Date(this.currentOrganization.suspendedOn)) : ''
-  }
-}
 </script>

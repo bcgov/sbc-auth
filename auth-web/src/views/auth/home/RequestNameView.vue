@@ -93,43 +93,51 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NameRequestButton from '@/components/auth/home/NameRequestButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
+export default defineComponent({
+  name: 'RequestNameView',
   components: {
     NameRequestButton,
     LearnMoreButton,
     NumberedCompanyTooltip
+  },
+  setup () {
+    const learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/' +
+      'managing-a-business/permits-licences/businesses-incorporated-companies/approval-business-name'
+    const bulletPoints: Array<any> = [
+      { text: 'You can choose to have a name or use the incorporation number as the name of the business.' },
+      { text: 'If you choose to have a name for your business, create a unique name that ensures the public is ' +
+        'not confused or mislead by similar corporate names.' }
+    ]
+    const subBulletPoints: Array<any> = [
+      { text: 'Submit your name choices for examination by the Business Registry.' },
+      { text: 'If your name is approved, you can use it to register or incorporate your business.' }
+    ]
+
+    // open Name Request in current tab to retain current account and user
+    function goToNameRequestExisting (): void {
+      window.location.href = appendAccountId(`${ConfigHelper.getNameRequestUrl()}existing`)
+    }
+
+    // open Name Request in current tab to retain current account and user
+    function goToNameRequest (): void {
+      window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl())
+    }
+    return {
+      learnMoreUrl,
+      bulletPoints,
+      subBulletPoints,
+      goToNameRequestExisting,
+      goToNameRequest
+    }
   }
 })
-export default class RequestNameView extends Vue {
-  readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/' +
-    'managing-a-business/permits-licences/businesses-incorporated-companies/approval-business-name'
-  bulletPoints: Array<any> = [
-    { text: 'You can choose to have a name or use the incorporation number as the name of the business.' },
-    { text: 'If you choose to have a name for your business, create a unique name that ensures the public is ' +
-      'not confused or mislead by similar corporate names.' }
-  ]
-  subBulletPoints: Array<any> = [
-    { text: 'Submit your name choices for examination by the Business Registry.' },
-    { text: 'If your name is approved, you can use it to register or incorporate your business.' }
-  ]
-
-  // open Name Request in current tab to retain current account and user
-  goToNameRequestExisting (): void {
-    window.location.href = appendAccountId(`${ConfigHelper.getNameRequestUrl()}existing`)
-  }
-
-  // open Name Request in current tab to retain current account and user
-  goToNameRequest (): void {
-    window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl())
-  }
-}
 </script>
 
 <style lang="scss" scoped>

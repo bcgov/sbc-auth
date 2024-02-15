@@ -34,32 +34,32 @@
 </template>
 
 <script lang="ts">
-import { Component } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
-import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
-import Vue from 'vue'
-import { mapState } from 'pinia'
+import { defineComponent } from '@vue/composition-api'
 import { useOrgStore } from '@/stores/org'
 
-@Component({
-  computed: {
-    ...mapState(useOrgStore, ['currentOrganization'])
-  }
-})
-export default class NonBcscAccountCreationSuccessView extends Vue {
-  readonly currentOrganization!: Organization
-  readonly descriptionParams: any = { 'days': ConfigHelper.getAccountApprovalSlaInDays() }
+export default defineComponent({
+  name: 'ExtraProdOrgSuccessView',
+  setup (props, { root }) {
+    const descriptionParams = { 'days': ConfigHelper.getAccountApprovalSlaInDays() }
+    const orgStore = useOrgStore()
 
-  goTo (page) {
-    switch (page) {
-      case 'home': this.$router.push('/')
-        break
-      case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
-        break
+    function goTo (page) {
+      switch (page) {
+        case 'home': root.$router.push('/')
+          break
+        case 'team-members': root.$router.push(`/${Pages.MAIN}/${orgStore.currentOrganization.id}/settings/team-members`)
+          break
+      }
+    }
+
+    return {
+      descriptionParams,
+      goTo
     }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>

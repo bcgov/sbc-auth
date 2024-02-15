@@ -54,38 +54,48 @@
 
 <script lang="ts">
 import { AccessType, Pages } from '@/util/constants'
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Invitation } from '@/models/Invitation'
-import { Organization } from '@/models/Organization'
-import { mapState } from 'pinia'
+import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { useOrgStore } from '@/stores/org'
 
-@Component({
-  computed: {
-    ...mapState(useOrgStore, ['currentOrganization', 'sentInvitations'])
+
+export default defineComponent({
+  name: 'SetupAccountSuccessView',
+  props: {
+    accountName: {
+      type: String,
+      default: ''
+    },
+    accountType: {
+      type: String,
+      default: ''
+    }
+  },
+  setup (props, { root }) {
+    const orgStore = useOrgStore()
+    const state = reactive({
+      accountEmail: '',
+      isGovmAccount: false
+    })
+
+    onMounted(() => {
+      state.accountEmail = (
+        orgStore.sentInvitations?.length &&
+      orgStore.sentInvitations[orgStore.sentInvitations.length - 1].recipientEmail
+      )
+        ? orgStore.sentInvitations[orgStore.sentInvitations.length - 1].recipientEmail : ''
+      state.isGovmAccount = props.accountType !== '' && props.accountType === AccessType.GOVM.toLowerCase()
+    })
+
+    function goToDashboard () {
+      root.$router.push({ path: Pages.STAFF_DASHBOARD })
+    }
+
+    return {
+      ...toRefs(state),
+      goToDashboard
+    }
   }
 })
-export default class SetupAccountSuccessView extends Vue {
-  private readonly currentOrganization!: Organization
-  private readonly sentInvitations!: Invitation[]
-  private accountEmail: string = ''
-  private isGovmAccount: boolean = false
-  @Prop({ default: '' }) accountName: string
-  @Prop({ default: '' }) accountType: string
-
-  private async mounted () {
-    this.accountEmail = (
-      this.sentInvitations?.length &&
-      this.sentInvitations[this.sentInvitations.length - 1].recipientEmail
-    )
-      ? this.sentInvitations[this.sentInvitations.length - 1].recipientEmail : ''
-    this.isGovmAccount = this.accountType !== '' && this.accountType === AccessType.GOVM.toLowerCase()
-  }
-
-  goToDashboard () {
-    this.$router.push({ path: Pages.STAFF_DASHBOARD })
-  }
-}
 </script>
 
 <style lang="scss" scoped>

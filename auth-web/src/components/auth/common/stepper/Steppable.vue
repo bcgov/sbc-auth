@@ -1,14 +1,22 @@
 <script lang="ts">
-import Component from 'vue-class-component'
-import { Prop } from 'vue-property-decorator'
-import Vue from 'vue'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
-  name: 'Steppable'
+export default defineComponent({
+  // eslint-disable-next-line vue/multi-word-component-names
+  name: 'Steppable',
+  props: {
+    stepForward: {
+      type: Function,
+      required: true
+    },
+    stepBack: {
+      type: Function,
+      required: true
+    },
+    jumpToStep: {
+      type: Function,
+      required: true
+    }
+  }
 })
-export default class Steppable extends Vue {
-  @Prop() stepForward!: (useAlternate?: boolean) => void
-  @Prop() stepBack!: (useAlternate?: boolean) => void
-  @Prop() jumpToStep!: (index: number, useAlternate?: boolean) => void
-}
 </script>

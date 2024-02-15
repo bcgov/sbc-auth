@@ -64,31 +64,37 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
+export default defineComponent({
+  name: 'DecideBusinessView',
   components: {
     LearnMoreButton
+  },
+  setup () {
+    const learnMoreUrl = 'https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-' +
+    'small-business/'
+    const selectorWizardUrl = ConfigHelper.getEntitySelectorUrl()
+    const bulletPoints: Array<any> = [
+      {
+        text: `Decide which business structure is most appropriate for you. A few options are: a sole proprietorship,
+      partnership, or corporation. Each structure has different legal and financial implications.`
+      },
+      {
+        linkText: 'Use the Business Structures Wizard to help you decide.',
+        url: selectorWizardUrl,
+        icon: `mdi-open-in-new`
+      }
+    ]
+    return {
+      learnMoreUrl,
+      selectorWizardUrl,
+      bulletPoints
+    }
   }
 })
-export default class DecideBusinessView extends Vue {
-  readonly learnMoreUrl = 'https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-' +
-    'small-business/'
-  readonly selectorWizardUrl = ConfigHelper.getEntitySelectorUrl()
-  readonly bulletPoints: Array<any> = [
-    {
-      text: `Decide which business structure is most appropriate for you. A few options are: a sole proprietorship,
-     partnership, or corporation. Each structure has different legal and financial implications.`
-    },
-    {
-      linkText: 'Use the Business Structures Wizard to help you decide.',
-      url: this.selectorWizardUrl,
-      icon: `mdi-open-in-new`
-    }
-  ]
-}
 </script>
 
 <style lang="scss" scoped>

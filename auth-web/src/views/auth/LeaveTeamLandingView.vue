@@ -1,20 +1,16 @@
 <template>
-  <interim-landing
+  <InterimLanding
     :summary="$t('leaveTeamTitle')"
     :description="$t('leaveTeamMsg')"
   />
 </template>
 
 <script lang="ts">
-import { Component } from 'vue-property-decorator'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
+import { defineComponent } from '@vue/composition-api'
 
-import Vue from 'vue'
-
-@Component({
+export default defineComponent({
+  name: 'LeaveTeamLandingView',
   components: { InterimLanding }
 })
-export default class LeaveTeamLandingView extends Vue {
-
-}
 </script>

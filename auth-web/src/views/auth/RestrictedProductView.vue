@@ -37,17 +37,26 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from 'vue-property-decorator'
-import Vue from 'vue'
+import { computed, defineComponent } from '@vue/composition-api'
 
-@Component({
-})
-export default class RestrictedProductView extends Vue {
-  @Prop({ default: '' }) private orgId: string
-  @Prop({ default: 'Wills Registry application' }) private productName: string
+export default defineComponent({
+  name: 'RestrictedProductView',
+  props: {
+    orgId: {
+      type: String,
+      default: ''
+    },
+    productName: {
+      type: String,
+      default: 'Wills Registry application'
+    }
+  },
+  setup (props) {
+    const productUrl = computed<string>(() => {
+      return `/account/${props.orgId}/settings/product-settings`
+    })
 
-  private get productUrl ():string {
-    return `/account/${this.orgId}/settings/product-settings`
+    return { productUrl }
   }
-}
+})
 </script>

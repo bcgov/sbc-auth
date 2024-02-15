@@ -61,31 +61,32 @@
 </template>
 
 <script lang="ts">
-
-import { Component, Mixins } from 'vue-property-decorator'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import ConfigHelper from '@/util/config-helper'
 import { Pages } from '@/util/constants'
-import { mapState } from 'pinia'
+import { defineComponent } from '@vue/composition-api'
 import { useOrgStore } from '@/stores/org'
 
-@Component({
-  computed: {
-    ...mapState(useOrgStore, ['currentOrganization'])
-  }
-})
-export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
-  goTo (page) {
-    switch (page) {
-      case 'home': window.location.assign(`${ConfigHelper.getRegistryHomeURL()}dashboard/?accountid=${this.currentOrganization.id}`)
-        break
-      case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
-        break
-      case 'setup-team': this.$router.push(`account-login-options-info`)
-        break
+export default defineComponent({
+  name: 'AccountCreationSuccessView',
+  mixins: [AccountMixin],
+  setup (props, { root }) {
+    const orgStore = useOrgStore()
+    function goTo (page) {
+      switch (page) {
+        case 'home': window.location.assign(`${ConfigHelper.getRegistryHomeURL()}dashboard/?accountid=${orgStore.currentOrganization.id}`)
+          break
+        case 'team-members': root.$router.push(`/${Pages.MAIN}/${orgStore.currentOrganization.id}/settings/team-members`)
+          break
+        case 'setup-team': root.$router.push(`account-login-options-info`)
+          break
+      }
+    }
+    return {
+      goTo
     }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>

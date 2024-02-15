@@ -21,10 +21,10 @@
 </template>
 
 <script lang="ts">
-import { Component } from 'vue-property-decorator'
-import Vue from 'vue'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({})
-export default class PasswordRequirementAlert extends Vue {}
+export default defineComponent({
+  name: 'PasswordRequirementAlert'
+})
 </script>
 <style lang="scss" scoped></style>

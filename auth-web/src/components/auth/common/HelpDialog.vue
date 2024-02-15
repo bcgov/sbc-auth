@@ -53,31 +53,48 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { computed, defineComponent, ref } from '@vue/composition-api'
 
-@Component({})
-export default class HelpDialog extends Vue {
-  isDialogOpen = false
+export default defineComponent({
+  name: 'HelpDialog',
+  props: {
+    helpDialogBlurb: {
+      type: String,
+      default: ''
+    },
+    inline: {
+      type: Boolean,
+      default: false
+    }
+  },
+  setup (props, { emit }) {
+    const isDialogOpen = ref(false)
 
-  @Prop({ default: '' }) readonly helpDialogBlurb: string
-  @Prop({ default: false }) readonly inline: boolean
+    function open () {
+      isDialogOpen.value = true
+    }
 
-  public open () {
-    this.isDialogOpen = true
-  }
+    function close () {
+      isDialogOpen.value = false
+    }
 
-  public close () {
-    this.isDialogOpen = false
-  }
+    const componentType = computed<string>(() => {
+      if (props.inline) {
+        return 'div'
+      } else {
+        return 'v-dialog'
+      }
+    })
 
-  get componentType (): string {
-    if (this.inline) {
-      return 'div'
-    } else {
-      return 'v-dialog'
+    return {
+      isDialogOpen,
+      open,
+      close,
+      componentType
     }
   }
-}
+
+})
 </script>
 
 <style lang="scss" scoped>

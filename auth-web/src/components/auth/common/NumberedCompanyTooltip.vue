@@ -40,18 +40,21 @@
 </template>
 
 <script lang="ts">
-import { Component } from 'vue-property-decorator'
+import { computed, defineComponent } from '@vue/composition-api'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import Vue from 'vue'
 
-@Component({})
-export default class NumberedCompanyTooltip extends Vue {
-  get enableBcCccUlc (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
+export default defineComponent({
+  name: 'NumberedCompanyTooltip',
+  setup () {
+    const enableBcCccUlc = computed<boolean>(() => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
+    })
+    return {
+      enableBcCccUlc
+    }
   }
-}
-
+})
 </script>
 <style lang="scss" scoped>
   @import '$assets/scss/theme.scss';

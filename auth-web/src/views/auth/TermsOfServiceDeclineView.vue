@@ -43,42 +43,44 @@
 
 <script lang="ts">
 import { LoginSource, Pages } from '@/util/constants'
-import { Component } from 'vue-property-decorator'
+import { defineComponent, onMounted, reactive } from '@vue/composition-api'
 import ConfigHelper from '@/util/config-helper'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-
-import Vue from 'vue'
-import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
 
-@Component({
-  computed: {
-    ...mapState(useUserStore, ['currentUser'])
-  }
-})
-export default class UnauthorizedView extends Vue {
-  currentUser!: KCUserProfile
-  errorMessage : string = ''
+export default defineComponent({
+  name: 'UnauthorizedView',
+  setup (props, { root }) {
+    const userStore = useUserStore()
 
-  mounted () {
-    this.errorMessage = this.$t('dirSearchUnauthorizedMsg').toString()
-  }
+    const state = reactive({
+      errorMessage: ''
+    })
 
-  navigate (page) {
-    switch (page) {
-      case 'termsofuse': this.$router.push(`/${Pages.USER_PROFILE_TERMS}`)
-        break
-      case 'logout':
-        if (this.currentUser?.loginSource === LoginSource.BCROS) {
-          let redirectUrl = `${ConfigHelper.getSelfURL()}/signin/bcros/`
-          this.$router.push(`/${Pages.SIGNOUT}/${encodeURIComponent(redirectUrl)}`)
-        } else {
-          this.$router.push(`/${Pages.SIGNOUT}`)
-        }
-        break
+    onMounted(() => {
+      state.errorMessage = root.$t('dirSearchUnauthorizedMsg').toString()
+    })
+
+    function navigate (page) {
+      switch (page) {
+        case 'termsofuse':
+          root.$router.push(`/${Pages.USER_PROFILE_TERMS}`)
+          break
+        case 'logout':
+          if (userStore.currentUser?.loginSource === LoginSource.BCROS) {
+            let redirectUrl = `${ConfigHelper.getSelfURL()}/signin/bcros/`
+            root.$router.push(`/${Pages.SIGNOUT}/${encodeURIComponent(redirectUrl)}`)
+          } else {
+            root.$router.push(`/${Pages.SIGNOUT}`)
+          }
+          break
+      }
+    }
+
+    return {
+      navigate
     }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>

@@ -42,19 +42,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
 import SetupAccountForm from '@/components/auth/staff/SetupAccountForm.vue'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
+export default defineComponent({
+  name: 'SetupAccountView',
   components: {
     SetupAccountForm
+  },
+  setup (props, { root }) {
+    const handleBackButton = () => {
+      root.$router.go(-1)
+    }
+    return {
+      handleBackButton
+    }
   }
 })
-export default class SetupAccountView extends Vue {
-  handleBackButton () {
-    this.$router.go(-1)
-  }
-}
 </script>
 
 <style lang="scss" scoped>

@@ -21,15 +21,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
+export default defineComponent({
+  name: 'DuplicateTeamWarningView',
   components: {
     CreateAccountInfoForm
   }
 })
-export default class DuplicateTeamWarningView extends Vue { }
 </script>
 
 <style lang="scss" scoped>

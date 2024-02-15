@@ -81,7 +81,7 @@
       </div>
     </template>
     <div v-else>
-      <interim-landing
+      <InterimLanding
         :summary="$t('errorOccurredTitle')"
         :description="$t('invitationProcessingErrorMsg')"
         icon="mdi-alert-circle-outline"
@@ -92,67 +92,83 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from 'vue-property-decorator'
+import { defineComponent, onMounted, ref } from '@vue/composition-api'
 import ConfigHelper from '@/util/config-helper'
-import CreateUserProfileForm from '@/components/auth/CreateUserProfileForm.vue'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { SessionStorageKeys } from '@/util/constants'
-import Vue from 'vue'
 
-@Component({
+export default defineComponent({
+  name: 'BceidInviteLanding',
   components: {
-    CreateUserProfileForm,
     InterimLanding
+  },
+  props: {
+    token: {
+      type: String,
+      default: null
+    },
+    orgName: {
+      type: String,
+      default: ''
+    }
+  },
+  setup (props, { root }): any {
+    const isLoading = ref(true)
+    const inviteError = ref(false)
+    const steps = ref([
+      {
+        number: 1,
+        stepTitle: 'Register or use an existing BCeID account',
+        stepDescription: '<p>A BCeID account provides secure access to online government services in British Columbia.\n' +
+                'You can register a new BCeID or use an existing BCeID account to log into BC Registries.</p>',
+        icon: 'mdi-account-plus-outline'
+      },
+      {
+        number: 2,
+        stepTitle: 'Use a 2-factor mobile or desktop authentication app',
+        stepDescription: `<p>Secure your account using a 2-factor authentication app with your BCeID when you log in. 
+        Download a 2-factor authentication app to your smartphone such as FreeOTP, Google Authenticator or 
+        Microsoft Authenticator or Desktop options such as: 
+        <a href="https://authy.com/" target="_sbc">Authy</a> or 
+        <a href="https://chrome.google.com/webstore/detail/gauth-authenticator/` +
+        `ilgcnhelpchnceeipipijaljkblbcobl?hl=en" target="_sbc_google">GAuth</a>.</p>`,
+        icon: 'mdi-two-factor-authentication'
+      }
+    ])
+
+    function registerForBceid () {
+      setStorage()
+      window.location.href = ConfigHelper.getBceIdOsdLink()
+    }
+
+    function loginWithBceid () {
+      setStorage()
+      root.$router.push('/signin/bceid/')
+    }
+
+    function setStorage () {
+      ConfigHelper.addToSession(SessionStorageKeys.InvitationToken, props.token)
+    }
+
+    const showErrorOccured = () => {
+      inviteError.value = true
+    }
+
+    onMounted(() => {
+      isLoading.value = false
+    })
+
+    return {
+      isLoading,
+      inviteError,
+      steps,
+      registerForBceid,
+      loginWithBceid,
+      setStorage,
+      showErrorOccured
+    }
   }
 })
-export default class BceidInviteLanding extends Vue {
-  private isLoading = true
-  private inviteError = false
-  private readonly steps = [
-    {
-      number: 1,
-      stepTitle: 'Register or use an existing BCeID account',
-      stepDescription: '<p>A BCeID account provides secure access to online government services in British Columbia.\n' +
-              'You can register a new BCeID or use an existing BCeID account to log into BC Registries.</p>',
-      icon: 'mdi-account-plus-outline'
-    },
-    {
-      number: 2,
-      stepTitle: 'Use a 2-factor mobile or desktop authentication app',
-      stepDescription: `<p>Secure your account using a 2-factor authentication app with your BCeID when you log in. 
-      Download a 2-factor authentication app to your smartphone such as FreeOTP, Google Authenticator or 
-      Microsoft Authenticator or Desktop options such as: 
-      <a href="https://authy.com/" target="_sbc">Authy</a> or 
-      <a href="https://chrome.google.com/webstore/detail/gauth-authenticator/` +
-      `ilgcnhelpchnceeipipijaljkblbcobl?hl=en" target="_sbc_google">GAuth</a>.</p>`,
-      icon: 'mdi-two-factor-authentication'
-    }
-  ]
-
-  @Prop() token: string
-  @Prop({ default: '' }) orgName: string
-
-  private registerForBceid () {
-    this.setStorage()
-    window.location.href = ConfigHelper.getBceIdOsdLink()
-  }
-  private loginWithBceid () {
-    this.setStorage()
-    this.$router.push('/signin/bceid/')
-  }
-
-  private setStorage () {
-    ConfigHelper.addToSession(SessionStorageKeys.InvitationToken, this.token)
-  }
-
-  private async mounted () {
-    this.isLoading = false
-  }
-
-  private showErrorOccured () {
-    this.inviteError = true
-  }
-}
 </script>
 
 <style lang="scss" scoped>

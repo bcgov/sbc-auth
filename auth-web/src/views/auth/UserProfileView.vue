@@ -71,46 +71,54 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { useOrgStore, useUserStore } from '@/stores'
 import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
-import { mapState } from 'pinia'
-import { useUserStore } from '@/stores/user'
 
-@Component({
+export default defineComponent({
+  name: 'UserProfileView',
   components: {
-    UserProfileForm,
-    SupportInfoCard
+    UserProfileForm
   },
-  computed: {
-    ...mapState(useUserStore, ['userContact'])
+  mixins: [NextPageMixin],
+  props: {
+    token: {
+      type: String,
+      required: true
+    }
+  },
+  setup (props, { root }) {
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
+    const state = reactive({
+      editing: false,
+      loading: true
+    })
+
+    function navigateBack () {
+      if (orgStore.currentOrganization) {
+        window.location.assign(ConfigHelper.getBcrosDashboardURL())
+      } else {
+        root.$router.push('/home')
+      }
+    }
+
+    onMounted(() => {
+      if (userStore.userContact) {
+        state.editing = true
+      }
+
+      state.loading = false
+    })
+
+    return {
+      ...toRefs(state),
+      navigateBack
+    }
   }
 })
-export default class UserProfileView extends Mixins(NextPageMixin) {
-  private readonly getUserProfile!: (identifier: string) => User
-  @Prop() token: string
-  private editing = false
-  private isLoading = true
-
-  private navigateBack (): void {
-    if (this.currentOrganization) {
-      window.location.assign(ConfigHelper.getBcrosDashboardURL())
-    } else {
-      this.$router.push('/home')
-    }
-  }
-
-  private async mounted () {
-    if (this.userContact) {
-      this.editing = true
-    }
-
-    this.isLoading = false
-  }
-}
 </script>
 
 <style lang="scss" scoped>

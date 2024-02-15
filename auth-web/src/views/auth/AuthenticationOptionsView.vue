@@ -5,16 +5,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
 import SbcAuthenticationOptions from 'sbc-common-components/src/components/SbcAuthenticationOptions.vue'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
+export default defineComponent({
+  name: 'AuthenticationOptionsView',
   components: {
     SbcAuthenticationOptions
   }
 })
-export default class AuthenticationOptionsView extends Vue {
-}
 </script>
 
 <style lang="scss" scoped>

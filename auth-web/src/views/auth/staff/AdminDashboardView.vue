@@ -21,24 +21,26 @@
 </template>
 
 <script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api'
 import AdministrativeBN from '@/components/auth/staff/admin/AdministrativeBN.vue'
-import { Component } from 'vue-property-decorator'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
-import { State } from 'pinia-class'
-import Vue from 'vue'
 import { useUserStore } from '@/stores/user'
 
-@Component({
+export default defineComponent({
+  name: 'AdminDashboardView',
   components: {
     AdministrativeBN
+  },
+  setup () {
+    const userStore = useUserStore()
+
+    const canEditBn = computed(() => {
+      return userStore.currentUser.roles.includes(Role.BnEdit) || userStore.currentUser.roles.includes(Role.AdminEdit)
+    })
+
+    return {
+      canEditBn
+    }
   }
 })
-export default class AdminDashboardView extends Vue {
-  @State(useUserStore) currentUser!: KCUserProfile
-
-  get canEditBn (): boolean {
-    return this.currentUser.roles.includes(Role.BnEdit) || this.currentUser.roles.includes(Role.AdminEdit)
-  }
-}
 </script>

@@ -37,33 +37,32 @@
 </template>
 
 <script lang="ts">
-
-import { Component, Mixins } from 'vue-property-decorator'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
-import { mapState } from 'pinia'
+import { defineComponent } from '@vue/composition-api'
 import { useOrgStore } from '@/stores/org'
 
-@Component({
-  computed: {
-    ...mapState(useOrgStore, ['currentOrganization'])
-  }
-})
-export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
-  protected readonly currentOrganization!: Organization
+export default defineComponent({
+  name: 'GovmAccountCreationSuccessView',
+  mixins: [AccountMixin],
+  setup (props, { root }) {
+    const orgStore = useOrgStore()
 
-  goTo (page) {
-    switch (page) {
-      case 'home': this.$router.push('/')
-        break
-      case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
-        break
-      case 'setup-team': this.$router.push(`account-login-options-info`)
-        break
+    function goTo (page) {
+      switch (page) {
+        case 'home': root.$router.push('/')
+          break
+        case 'team-members': root.$router.push(`/${Pages.MAIN}/${orgStore.currentOrganization.id}/settings/team-members`)
+          break
+        case 'setup-team': root.$router.push(`account-login-options-info`)
+          break
+      }
+    }
+    return {
+      goTo
     }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
