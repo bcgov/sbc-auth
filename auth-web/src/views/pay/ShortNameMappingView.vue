@@ -55,7 +55,7 @@
         >
           <UnlinkedShortNameTable
             @shortname-state-total="state.unlinked = $event"
-            @link-account="linkAccount"
+            @on-link-account="onLinkAccount"
           />
         </v-card>
       </v-window-item>
@@ -92,9 +92,10 @@ export default defineComponent({
       isMounted: false
     })
 
-    function linkAccount (account: any) {
+    function onLinkAccount (account: any) {
       tab.value = 1
       state.linkedAccount = account
+      ConfigHelper.addToSession(SessionStorageKeys.ShortNamesTabIndex, tab.value)
     }
 
     function onTabChange () {
@@ -109,7 +110,7 @@ export default defineComponent({
     })
 
     return {
-      linkAccount,
+      onLinkAccount,
       state,
       onTabChange,
       tab
