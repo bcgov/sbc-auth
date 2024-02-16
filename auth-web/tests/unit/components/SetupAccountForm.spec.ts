@@ -1,12 +1,7 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import SetupAccountForm from '@/components/auth/staff/SetupAccountForm.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useStaffStore } from '@/stores'
 
 describe('SetupAccountForm.vue', () => {
   let wrapper: Wrapper<SetupAccountForm>
@@ -15,73 +10,58 @@ describe('SetupAccountForm.vue', () => {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const staffModule = {
-      namespaced: true,
-      state: {
-        products: [
-          {
-            'code': 'PPR',
-            'default': false,
-            'desc': 'Personal Property Registry'
-          },
-          {
-            'code': 'DIR_SEARCH',
-            'default': false,
-            'desc': 'Director Search'
-          }
-        ],
-        accountTypes: [
-          {
-            'code': 'IMPLICIT',
-            'default': true,
-            'desc': 'Implicit organization for internal user only'
-          },
-          {
-            'code': 'EXPLICIT',
-            'default': false,
-            'desc': 'Explicity named organization that can have multiple members'
-          },
-          {
-            'code': 'PUBLIC',
-            'default': false,
-            'desc': 'PUBLIC'
-          }
-        ]
+    const staffStore = useStaffStore()
+    staffStore.products = [
+      {
+        'code': 'PPR',
+        'default': false,
+        'desc': 'Personal Property Registry'
       },
-      actions: {
-        getProducts: jest.fn(),
-        getAccountTypes: jest.fn()
+      {
+        'code': 'DIR_SEARCH',
+        'default': false,
+        'desc': 'Director Search'
       }
-    }
-
+    ]
+    staffStore.accountTypes = [
+      {
+        'code': 'IMPLICIT',
+        'default': true,
+        'desc': 'Implicit organization for internal user only'
+      },
+      {
+        'code': 'EXPLICIT',
+        'default': false,
+        'desc': 'Explicity named organization that can have multiple members'
+      },
+      {
+        'code': 'PUBLIC',
+        'default': false,
+        'desc': 'PUBLIC'
+      }
+    ]
     const vuetify = new Vuetify({})
 
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        staff: staffModule
-      }
-    })
-
     wrapper = mount(SetupAccountForm, {
-      store,
       localVue,
       vuetify
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('business contact form has submit and cancel buttons', () => {

@@ -19,6 +19,7 @@ Test suite to ensure that the Staff Task model routines are working as expected.
 from _datetime import datetime
 
 from auth_api.models import Task as TaskModel
+from auth_api.models.dataclass import TaskSearch
 from auth_api.utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix
 from tests.utilities.factory_utils import factory_task_models, factory_user_model
 
@@ -63,11 +64,16 @@ def test_fetch_tasks(session):  # pylint:disable=unused-argument
                      )
     session.add(task)
     session.commit()
-    found_tasks, count = TaskModel.fetch_tasks(
-        task_relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
-        task_type=task_type,
-        task_status=[TaskStatus.OPEN.value],
-        page=1, limit=10)
+
+    task_search = TaskSearch(
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        type=task_type,
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    found_tasks, count = TaskModel.fetch_tasks(task_search)
     assert found_tasks
     assert count == 1
 
@@ -95,10 +101,15 @@ def test_fetch_tasks_pagination(session):  # pylint:disable=unused-argument
     factory_task_models(6, user.id)
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
 
-    found_tasks, count = TaskModel.fetch_tasks(
-        task_relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
-        task_type=task_type,
-        task_status=[TaskStatus.OPEN.value], page=3, limit=2)
+    task_search = TaskSearch(
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        type=task_type,
+        status=[TaskStatus.OPEN.value],
+        page=3,
+        limit=2
+    )
+
+    found_tasks, count = TaskModel.fetch_tasks(task_search)
     assert found_tasks
     assert count == 6
 
@@ -137,10 +148,15 @@ def test_fetch_pending_tasks_descending(session):  # pylint:disable=unused-argum
     task.save()
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
 
-    found_tasks, count = TaskModel.fetch_tasks(
-        task_relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
-        task_type=task_type,
-        task_status=[TaskStatus.OPEN.value], page=1, limit=2)
+    task_search = TaskSearch(
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        type=task_type,
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=2
+    )
+
+    found_tasks, count = TaskModel.fetch_tasks(task_search)
     assert found_tasks
     assert found_tasks[0].name == 'TEST 2'
     assert found_tasks[1].name == 'TEST 1'

@@ -1,7 +1,10 @@
 <template>
   <div>
     <v-fade-transition>
-      <div class="loading-container" v-if="!termsContent">
+      <div
+        v-if="!termsContent"
+        class="loading-container"
+      >
         <v-progress-circular
           size="50"
           width="5"
@@ -10,28 +13,31 @@
         />
       </div>
     </v-fade-transition>
-    <div v-html="termsContent" class="terms-container"></div>
+    <div
+      class="terms-container"
+      v-html="termsContent"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
-import documentService from '@/services/document.services.ts'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   computed: {
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'termsOfUse',
       'userProfile',
       'userHasToAcceptTOS'
     ])
   },
   methods: {
-    ...mapActions('user', [
+    ...mapActions(useUserStore, [
       'getTermsOfUse'
     ])
   }
@@ -46,10 +52,12 @@ export default class TermsOfUse extends Vue {
 
   async mounted () {
     const termsOfService = await this.getTermsOfUse(this.tosType)
-    this.termsContent = termsOfService.content
-    const hasLatestTermsAccepted = this.hasAcceptedLatestTos(termsOfService.versionId)
-    if (!hasLatestTermsAccepted) {
-      this.$emit('tos-version-updated')
+    if (termsOfService) {
+      this.termsContent = termsOfService.content
+      const hasLatestTermsAccepted = this.hasAcceptedLatestTos(termsOfService?.versionId)
+      if (!hasLatestTermsAccepted) {
+        this.$emit('tos-version-updated')
+      }
     }
   }
 

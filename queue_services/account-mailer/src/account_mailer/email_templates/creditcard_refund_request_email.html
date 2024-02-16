@@ -1,72 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <base href="/">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="origin-when-cross-origin"/>
-    <meta name="author" content="BC Registries and Online Services">
-    <title>Refund Request for {{ refund_data.identifier }}</title>
-    [[style.html]]
-  </head>
+Please complete a refund for the following transaction:
 
-  <body>
-    <table class="body-table" role="presentation">
-      <tr>
-        <td>
-          <div style="margin-left: 10px;margin-top: 12px;">
-            [[logo.html]]
-          </div>
+Order Number:            {{ refund_data.orderNumber }}
+Transaction Date & Time: {{ refund_data.transactionDateTime }}
+Transaction Amount:      {{ refund_data.transactionAmount }}
+Transaction ID:          {{ refund_data.transactionId }}
 
-          <div class="container" style="font-family: Verdana, Arial, sans-serif; font-size: 14px">
-            <p>Please complete a refund for the following transaction:</p>
+These documents are also available on the [Business Dashboard]({{ entity_dashboard_url }}).
 
-            [[whitespace-16px.html]]
 
-            <div style="font-size: 15px">
-              <div>
-                <div style="width: 200px; display: inline-block">
-                  Order Number:
-                </div>
-                <div style="font-weight: 700; display: inline-block">
-                  {{ refund_data.orderNumber }}
-                </div>
-              </div>
-              <div>
-                <div style="width: 200px; display: inline-block">
-                  Transaction Date & Time:
-                </div>
-                <div style="font-weight: 700; display: inline-block">
-                  {{ refund_data.transactionDateTime }}
-                </div>
-              </div>
-              <div>
-                <div style="width: 200px; display: inline-block">
-                  Transaction Amount:
-                </div>
-                <div style="font-weight: 700; display: inline-block">
-                  {{ refund_data.transactionAmount }}
-                </div>
-              </div>
-              <div>
-                <div style="width: 200px; display: inline-block">
-                  Transaction ID:
-                </div>
-                <div style="font-weight: 700; display: inline-block">
-                  {{ refund_data.transactionId }}
-                </div>
-              </div>
-            </div>
-
-            [[whitespace-24px.html]]
-
-            [[business-dashboard-link.html]]
-
-            [[whitespace-16px.html]]
-            [[footer.html]]
-          </div>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>
+Toll Free: [1-877-370-1033](1-877-370-1033)
+Victoria Office: [250-370-1033](250-370-1033)
+Email: [BCRegistries@gov.bc.ca](BCRegistries@gov.bc.ca)

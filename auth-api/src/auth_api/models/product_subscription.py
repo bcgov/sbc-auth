@@ -37,14 +37,14 @@ class ProductSubscription(VersionedModel):  # pylint: disable=too-few-public-met
     product_subscriptions_status = relationship('ProductSubscriptionsStatus')
 
     @classmethod
-    def find_by_org_id(cls, org_id, valid_statuses=VALID_SUBSCRIPTION_STATUSES):
-        """Find an product subscription instance that matches the provided id."""
+    def find_by_org_ids(cls, org_ids, valid_statuses=VALID_SUBSCRIPTION_STATUSES):
+        """Find an product subscription instance that matches the provided org ids."""
         return cls.query.filter(
-            and_(ProductSubscription.org_id == org_id, ProductSubscription.status_code.in_(valid_statuses))).all()
+            and_(ProductSubscription.org_id.in_(org_ids), ProductSubscription.status_code.in_(valid_statuses))).all()
 
     @classmethod
     def find_by_org_id_product_code(cls, org_id, product_code, valid_statuses=VALID_SUBSCRIPTION_STATUSES):
         """Find an product subscription instance that matches the provided id."""
         return cls.query.filter(
             and_(ProductSubscription.org_id == org_id, ProductSubscription.product_code == product_code,
-                 ProductSubscription.status_code.in_(valid_statuses))).all()
+                 ProductSubscription.status_code.in_(valid_statuses))).first()

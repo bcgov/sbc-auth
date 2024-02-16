@@ -1,12 +1,8 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
 import AccountStatus from '@/components/auth/staff/review-task/AccountStatus.vue'
 import { TaskStatus } from '@/util/constants'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -34,21 +30,14 @@ describe('AccountStatus.vue', () => {
       'user': 32,
       'remarks': ['Affidavit is missing seal', 'Affidavit is blank / affidavit is not attached']
     }
-
   }
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({
-      strict: false
-    })
 
     wrapperFactory = (propsData) => {
       return shallowMount(AccountStatus, {
         localVue,
-        store,
         vuetify,
         propsData: {
           ...propsData
@@ -60,16 +49,17 @@ describe('AccountStatus.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly ', () => {
-    expect(wrapper.find(AccountStatus).exists()).toBe(true)
+    expect(wrapper.findComponent(AccountStatus).exists()).toBe(true)
   })
 
   it('renders proper header content', () => {

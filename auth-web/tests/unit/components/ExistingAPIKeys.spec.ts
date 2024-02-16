@@ -1,12 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-
 import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings/ExistingAPIKeys.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-import { nextTick } from 'vue/types/umd'
+import { useOrgStore } from '@/stores/org'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -36,42 +33,24 @@ describe('Account settings ExistingAPIKeys.vue', () => {
   }
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const orgModule = {
-      namespaced: true,
-      actions: {
-        getOrgApiKeys: jest.fn(() => {
-          return apikeyList
-        })
-      },
-      state: {
-        currentOrganization: {
-          id: 123,
-          name: 'test org'
-        }
-
-      }
+    const orgStore = useOrgStore()
+    orgStore.getOrgApiKeys = vi.fn(() => {
+      return apikeyList
+    }) as any
+    orgStore.currentOrganization = {
+      id: 123,
+      name: 'test org'
     }
-
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule
-
-      }
-    })
 
     wrapperFactory = (propsData) => {
       return mount(ExistingAPIKeys, {
-        store,
         localVue,
         vuetify,
         mocks: { $t },
         propsData: {
           ...propsData
         },
-        sync: false,
         stubs: {
           'v-btn': {
             template: `<button @click='$listeners.click'></button>`
@@ -85,12 +64,13 @@ describe('Account settings ExistingAPIKeys.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
@@ -109,7 +89,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
   it('Should open Confirmation modal on revoke button click', async () => {
     await wrapper.vm.loadApiKeys()
-    const stub = jest.fn(() => consumerKey)
+    const stub = vi.fn(() => consumerKey)
     wrapper.setMethods({ confirmationModal: stub })
 
     wrapper.find('[data-test="confirm-button-key1"]').trigger('click')

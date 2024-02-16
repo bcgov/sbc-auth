@@ -1,13 +1,8 @@
 
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
 import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffidavit.vue'
-
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -24,16 +19,10 @@ describe('DownloadAffidavit.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({
-      strict: false
-    })
 
     wrapperFactory = (propsData) => {
       return shallowMount(DownloadAffidavit, {
         localVue,
-        store,
         vuetify,
         propsData: {
           ...propsData
@@ -45,16 +34,17 @@ describe('DownloadAffidavit.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly ', () => {
-    expect(wrapper.find(DownloadAffidavit).exists()).toBe(true)
+    expect(wrapper.findComponent(DownloadAffidavit).exists()).toBe(true)
   })
 
   it('renders proper header content', () => {

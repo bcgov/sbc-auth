@@ -2,34 +2,45 @@
   <section id="testimonials-container">
     <v-container class="quote-container">
       <div>
-        <p class="quote-text">{{quotes[quoteIndex].text}}</p>
-        <p class="quote-author">&ndash; {{quotes[quoteIndex].author}}</p>
+        <p class="quote-text">
+          {{ quotes[quoteIndex].text }}
+        </p>
+        <p class="quote-author">
+          &ndash; {{ quotes[quoteIndex].author }}
+        </p>
       </div>
     </v-container>
   </section>
 </template>
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { defineComponent, onMounted, ref } from '@vue/composition-api'
 
-@Component({})
-export default class TestimonialQuotes extends Vue {
-  private quoteIndex = 0
-  private quotes: Array<any> =
-    [
+export default defineComponent({
+  name: 'TestimonialQuotes',
+  setup () {
+    const quoteIndex = ref(0)
+    const quotes = [
       {
-        text: 'We are really excited by the idea of incorporating as a Benefit Company, it really makes sense for us and the way we want to run our business.',
+        text: 'We are really excited by the idea of incorporating as a Benefit Company, ' +
+        'it really makes sense for us and the way we want to run our business.',
         author: 'Business Founder'
       }
     ]
 
-  mounted () {
-    setInterval(() => {
-      // Cycle quote index up or reset it once it reaches array size
-      if (this.quoteIndex === this.quotes.length - 1) this.quoteIndex = 0
-      else this.quoteIndex++
-    }, 5000)
+    onMounted(() => {
+      setInterval(() => {
+        // Cycle quote index up or reset it once it reaches array size
+        if (quoteIndex.value === quotes.length - 1) quoteIndex.value = 0
+        else quoteIndex.value++
+      }, 5000)
+    })
+
+    return {
+      quoteIndex,
+      quotes
+    }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>

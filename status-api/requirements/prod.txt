@@ -4,7 +4,7 @@ flask-restx
 flask-jwt-oidc
 python-dotenv
 psycopg2-binary
-jsonschema
+jsonschema==4.17.3
 requests
 sentry-sdk[flask]
 arrow

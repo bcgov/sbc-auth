@@ -2,37 +2,38 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
+const config = { 'REGISTRY_HOME_URL': 'hello' }
+
 describe('IncorpOrRegisterView.vue', () => {
   let wrapper: any
   let wrapperFactory: any
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
     const router = new VueRouter()
-
-    const store = new Vuex.Store({})
 
     wrapperFactory = (propsData) => {
       return mount(IncorpOrRegisterView, {
         localVue,
-        store,
         router,
         vuetify,
         propsData: {
           ...propsData
+        },
+        computed: {
+          enableBcCccUlc () {
+            return true
+          }
         }
       })
     }
@@ -41,67 +42,82 @@ describe('IncorpOrRegisterView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
-    expect(wrapper.find(IncorpOrRegisterView).exists()).toBe(true)
-    expect(wrapper.find(NumberedCompanyTooltip).exists()).toBe(true)
-    expect(wrapper.find(LearnMoreButton).exists()).toBe(true)
+    expect(wrapper.findComponent(IncorpOrRegisterView).exists()).toBe(true)
+    expect(wrapper.findComponent(NumberedCompanyTooltip).exists()).toBe(false)
+    expect(wrapper.findComponent(LearnMoreButton).exists()).toBe(true)
   })
 
   it('renders the correct buttons when authenticated', () => {
     const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
-    const namedCompBtn = authenticatedBtns[0]
-    const numberedCompBtn = authenticatedBtns[1]
+    const registryBtn = authenticatedBtns[0]
+    const learnMoreBtn = authenticatedBtns[1]
 
-    expect(namedCompBtn).toBeDefined()
-    expect(namedCompBtn.textContent).toContain('Incorporate a Named Benefit Company')
+    expect(registryBtn).toBeDefined()
+    expect(registryBtn.textContent).toContain('Go to My Business Registry')
 
-    expect(numberedCompBtn).toBeDefined()
-    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Benefit Company')
+    expect(learnMoreBtn).toBeDefined()
+    expect(learnMoreBtn.textContent).toContain('Learn More')
   })
 
-  it('renders the login button when NOT authenticated', () => {
+  it('renders the registry button when NOT authenticated', () => {
     // Render Un-Authenticated
     const wrapper = wrapperFactory({ userProfile: null })
 
-    const loginBtn = wrapper.vm.$el.querySelector('.v-btn')
+    const registryBtn = wrapper.vm.$el.querySelector('.v-btn')
 
-    expect(loginBtn).toBeDefined()
-    expect(loginBtn.textContent).toContain('Create a BC Registries Account')
+    expect(registryBtn).toBeDefined()
+    expect(registryBtn.textContent).toContain('Go to My Business Registry')
   })
 
-  it('renders the create account link when NOT authenticated', () => {
+  it('renders the registry buttn when authenticated', () => {
     // Render Un-Authenticated
-    const wrapper = wrapperFactory({ userProfile: null })
+    const wrapper = wrapperFactory({ userProfile: {} })
 
-    const createAccountLink = wrapper.vm.$el.querySelector('.cta-btn')
+    const registryBtn = wrapper.vm.$el.querySelector('.cta-btn')
 
-    expect(createAccountLink).toBeDefined()
-    expect(createAccountLink.textContent).toContain('Create a BC Registries Account')
+    expect(registryBtn).toBeDefined()
+    expect(registryBtn.textContent).toContain('Go to My Business Registry')
   })
 
   it('renders the correct text and number of bullet points', () => {
-    wrapper.vm.bulletPoints = [
-      { text: 'Bullet 1' },
-      { text: 'Bullet 2' },
-      { text: 'Bullet 3' }
-    ]
+    const bulletListItems = wrapper.vm.$el.querySelectorAll('.list-item .list-item')
 
-    const bulletListItems = wrapper.vm.$el.querySelectorAll('.list-item')
-
-    expect(bulletListItems[0].textContent).toContain('If you have an approved Name Request')
-    expect(bulletListItems[1].textContent).toContain('Bullet 1')
-    expect(bulletListItems[2].textContent).toContain('Bullet 2')
-    expect(bulletListItems[3].textContent).toContain('Bullet 3')
+    expect(bulletListItems[0].textContent).toContain('Register a firm such as a sole proprietorship, a Doing Business')
+    expect(bulletListItems[1].textContent).toContain('Incorporate a B.C. based company or a cooperative association.')
 
     // List item count will be +1 due to our fixed tooltip bullet point
-    expect(bulletListItems.length).toStrictEqual(4)
+    expect(bulletListItems.length).toStrictEqual(2)
+  })
+
+  it('renders the correct text and number of expansion panels', async () => {
+    const expansionItems = wrapper.vm.$el.querySelectorAll('.v-expansion-panel-header')
+
+    expect(expansionItems[0].textContent).toContain('Sole Proprietorship, DBA, and General Partnership')
+    expect(expansionItems[1].textContent).toContain('B.C. Based Company')
+    expect(expansionItems[2].textContent).toContain('Cooperative Association')
+
+    // List item count will be 3
+    expect(expansionItems.length).toStrictEqual(3)
+
+    // Trigger header button clicks
+    await wrapper.findAll('.v-expansion-panel-header').at(0).trigger('click')
+    await wrapper.findAll('.v-expansion-panel-header').at(1).trigger('click')
+    await wrapper.findAll('.v-expansion-panel-header').at(2).trigger('click')
+
+    expect(wrapper.find('#expPnlContent1').text()).toContain('The name(s) and address(es) of the proprietor')
+    expect(wrapper.find('#expPnlContent2').text()).toContain('Office addresses, director names and addresses, ' +
+      'share structure')
+    expect(wrapper.find('#expPnlContent3').text())
+      .toContain('Office addresses, director names and addresses, rules of the association')
   })
 })

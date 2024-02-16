@@ -1,13 +1,6 @@
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import Signin from '@/views/auth/SigninView.vue'
-import UserModule from '@/store/modules/user'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('Signin.vue', () => {
   let wrapper: Wrapper<Signin>
@@ -17,32 +10,26 @@ describe('Signin.vue', () => {
     'VUE_APP_FLAVOR': 'post-mvp'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(keyCloakConfig)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(keyCloakConfig)
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
+    const vuetify = new Vuetify({})
 
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        user: UserModule
-      }
-    })
-
-    let vuetify = new Vuetify({})
-
-    wrapper = mount(Signin, {
-      store,
+    wrapper = shallowMount(Signin, {
       vuetify,
       localVue
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 })

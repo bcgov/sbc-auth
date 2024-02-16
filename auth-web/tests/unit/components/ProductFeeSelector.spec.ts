@@ -10,13 +10,12 @@ Vue.use(Vuetify)
 document.body.setAttribute('data-app', 'true')
 
 describe('ProductFeeSelector.vue', () => {
-  let wrapper: any
   const vuetify = new Vuetify({})
 
   const orgProductFeeCodes =
     [ { 'amount': 1.5, 'code': 'TRF01' }, { 'amount': 1, 'code': 'TRF02' } ]
 
-  wrapper = shallowMount(ProductFeeSelector, {
+  const wrapper = shallowMount(ProductFeeSelector, {
     // store,
     vuetify,
     propsData: {
@@ -25,11 +24,12 @@ describe('ProductFeeSelector.vue', () => {
     }
   })
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 })

@@ -1,13 +1,11 @@
-import { createLocalVue, mount } from '@vue/test-utils'
+import '@/composition-api-setup'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountDeactivate from '@/views/auth/AccountDeactivate.vue'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import i18n from '@/plugins/i18n'
 
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 const router = new VueRouter()
 const vuetify = new Vuetify({})
 
@@ -16,46 +14,28 @@ document.body.setAttribute('data-app', 'true')
 
 describe('AccountDeactivate.vue', () => {
   let wrapper: any
-  let userModule: any
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const orgModule = {
-      namespaced: true,
-      state: {
-      }
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
-
-    wrapper = mount(AccountDeactivate, {
-      store,
+    wrapper = shallowMount(AccountDeactivate, {
       localVue,
+      i18n,
       router,
-      vuetify,
-      mocks: {
-        $t: (mock) => mock
-      }
+      vuetify
     })
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('AccountDeactivate is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
   it('AccountDeactivate contains the card', () => {
-    expect(wrapper.find(DeactivateCard).exists()).toBe(true)
+    expect(wrapper.findComponent(DeactivateCard).exists()).toBe(true)
   })
 })

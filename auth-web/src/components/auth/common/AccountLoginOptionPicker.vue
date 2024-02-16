@@ -1,74 +1,80 @@
 <template>
- <div>
-  <v-row>
-    <v-col
-      xs="12"
-      sm="6"
-      class="d-flex"
-      v-for="authOption in authOptions"
-      :key="authOption.type"
-    >
-      <v-card
-        flat
-        outlined
-        hover
-        class="account-card elevation-2 pa-8 d-flex flex-column text-center"
-        :class="{ 'active': authType === authOption.type }"
-        @click="selectAuthType(authOption.type)"
-        v-can:CHANGE_AUTH_OPTIONS.disable.card
+  <div>
+    <v-row>
+      <v-col
+        v-for="authOption in authOptions"
+        :key="authOption.type"
+        sm="6"
+        class="d-flex xs"
       >
-        <div class="account-type__icon mb-8">
-          <v-icon color="grey">{{authOption.icon}}</v-icon>
-        </div>
-        <div class="account-type__title font-weight-bold mb-6">
-          {{authOption.title}}
-        </div>
-        <div class="account-type__details mb-10">
-          {{authOption.description}}
-        </div>
-        <div class="account-type__buttons">
-          <v-btn
-            v-if="showLearnMore"
-            large
-            depressed
-            block
-            color="primary"
-            class="font-weight-bold mb-3"
-            outlined
-            @click="selectLearnMore(authOption.type)"
-          >
-            LEARN MORE
-          </v-btn>
-          <v-btn
-            large
-            depressed
-            block
-            color="primary"
-            class="font-weight-bold"
-            :outlined="authType != authOption.type"
-            @click="selectAuthType(authOption.type)"
-          >
-            {{ authType == authOption.type ? 'SELECTED' : 'SELECT' }}
-          </v-btn>
-        </div>
-       </v-card>
+        <v-card
+          v-can:CHANGE_AUTH_OPTIONS.disable.card
+          flat
+          outlined
+          hover
+          class="account-card elevation-2 pa-8 d-flex flex-column text-center"
+          :class="{ 'active': authType === authOption.type }"
+          @click="selectAuthType(authOption.type)"
+        >
+          <div class="account-type__icon mb-8">
+            <v-icon color="grey">
+              {{ authOption.icon }}
+            </v-icon>
+          </div>
+          <div class="account-type__title font-weight-bold mb-6">
+            {{ authOption.title }}
+          </div>
+          <div class="account-type__details mb-10">
+            {{ authOption.description }}
+          </div>
+          <div class="account-type__buttons">
+            <v-btn
+              large
+              depressed
+              block
+              color="primary"
+              class="font-weight-bold mb-3"
+              outlined
+              @click="selectLearnMore(authOption.type)"
+            >
+              LEARN MORE
+            </v-btn>
+            <v-btn
+              large
+              depressed
+              block
+              color="primary"
+              class="font-weight-bold"
+              :outlined="authType != authOption.type"
+              @click="selectAuthType(authOption.type)"
+            >
+              {{ authType == authOption.type ? 'SELECTED' : 'SELECT' }}
+            </v-btn>
+          </div>
+        </v-card>
       </v-col>
     </v-row>
-    <LearnMoreBCSC ref="bcscLearnMoreDialog" @bcsc-selected="selectAuthType('BCSC')" />
-    <LearnMoreBCEID ref="bceidLearnMoreDialog" @bceid-selected="selectAuthType('BCEID')" />
+    <LearnMoreBCSC
+      ref="bcscLearnMoreDialog"
+      @bcsc-selected="selectAuthType('BCSC')"
+    />
+    <LearnMoreBCEID
+      ref="bceidLearnMoreDialog"
+      @bceid-selected="selectAuthType('BCEID')"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Emit, Mixins } from 'vue-property-decorator'
-import { LDFlags, LoginSource } from '@/util/constants'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LearnMoreBCEID from '@/components/auth/common/LearnMoreBCEID.vue'
 import LearnMoreBCSC from '@/components/auth/common/LearnMoreBCSC.vue'
+import { LoginSource } from '@/util/constants'
 import { Organization } from '@/models/Organization'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -76,17 +82,17 @@ import { Organization } from '@/models/Organization'
     LearnMoreBCSC
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization',
       'memberLoginOption'
     ])
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'syncMemberLoginOption',
-      'updateLoginOption'
-    ]),
-    ...mapMutations('org', ['setMemberLoginOption'])
+      'updateLoginOption',
+      'setMemberLoginOption'
+    ])
   }
 })
 export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin, AccountMixin) {
@@ -143,10 +149,6 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
     }
   }
 
-  private get showLearnMore (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.AuthLearnMore) || false
-  }
-
   private get loginSourceEnum () {
     return LoginSource
   }
@@ -180,7 +182,10 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
     }
 
     &.active {
-      box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
+      box-shadow: 0 0 0 2px inset var(--v-primary-base),
+                  0 3px 1px -2px rgba(0,0,0,.2),
+                  0 2px 2px 0 rgba(0,0,0,.14),
+                  0 1px 5px 0 rgba(0,0,0,.12) !important;
     }
   }
 

@@ -15,13 +15,19 @@
 
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
+from typing import List
 from flask import current_app
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, desc, event, func, text
 from sqlalchemy.orm import contains_eager, relationship
+from sqlalchemy.dialects.postgresql import UUID
+
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation
 from auth_api.models.dataclass import OrgSearch
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
+from auth_api.utils.enums import OrgType as OrgTypeEnum
 from auth_api.utils.roles import EXCLUDED_FIELDS, VALID_STATUSES
 
 from .base_model import VersionedModel
@@ -39,6 +45,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     __tablename__ = 'orgs'
 
     id = Column(Integer, primary_key=True)
+    uuid = Column(UUID, nullable=False, server_default=text('uuid_generate_v4()'), unique=True)
     type_code = Column(ForeignKey('org_types.code'), nullable=False)
     status_code = Column(ForeignKey('org_statuses.code'), nullable=False)
     name = Column(String(250), index=True)
@@ -92,6 +99,11 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return None
 
     @classmethod
+    def find_by_org_uuid(cls, org_uuid):
+        """Find an Org instance that matches the provided uuid."""
+        return cls.query.filter_by(uuid=org_uuid).first()
+
+    @classmethod
     def find_by_org_id(cls, org_id):
         """Find an Org instance that matches the provided id."""
         return cls.query.filter_by(id=org_id).first()
@@ -100,7 +112,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     def find_by_bcol_id(cls, bcol_account_id):
         """Find an Org instance that matches the provided id and not in INACTIVE status."""
         return cls.query.filter(Org.bcol_account_id == bcol_account_id).filter(
-            Org.status_code != OrgStatusEnum.INACTIVE.value).first()
+            ~Org.status_code.in_([OrgStatusEnum.INACTIVE.value, OrgStatusEnum.REJECTED.value])).first()
 
     @classmethod
     def find_by_org_name(cls, org_name):
@@ -109,7 +121,14 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return query.all()
 
     @classmethod
-    def search_org(cls, search: OrgSearch):
+    def find_by_org_type(cls, org_type):
+        """Find Orgs that match the provided org type and not in INACTIVE status."""
+        query = db.session.query(Org).filter(Org.status_code != OrgStatusEnum.INACTIVE.value,
+                                             Org.org_type == OrgType.get_type_for_code(org_type))
+        return query.all()
+
+    @classmethod
+    def search_org(cls, search: OrgSearch, environment: str):
         """Find all orgs with the given type."""
         query = db.session.query(Org) \
             .outerjoin(ContactLink) \
@@ -131,18 +150,46 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         if search.name:
             query = query.filter(Org.name.ilike(f'%{search.name}%'))
 
-        query = cls._search_by_business_identifier(query, search.business_identifier)
+        query = cls._search_by_business_identifier(query, search.business_identifier, environment)
         query = cls._search_for_statuses(query, search.statuses)
 
-        pagination = query.order_by(Org.created.desc()) \
-                          .paginate(per_page=search.limit, page=search.page)
+        query = cls.get_order_by(search, query)
+        pagination = query.paginate(per_page=search.limit, page=search.page)
 
         return pagination.items, pagination.total
 
     @classmethod
-    def _search_by_business_identifier(cls, query, business_identifier):
+    def get_order_by(cls, search, query):
+        """Handle search query order by."""
+        # If searching by id, surface the perfect matches to the top
+        if search.id:
+            return query.order_by(desc(Org.id == search.id), Org.created.desc())
+
+        return query.order_by(Org.created.desc())
+
+    @classmethod
+    def search_orgs_by_business_identifier(cls,
+                                           business_identifier,
+                                           environment,
+                                           excluded_org_types: List[str] = None
+                                           ):
+        """Find all orgs affiliated with provided business identifier."""
+        query = db.session.query(Org)
+
+        query = cls._search_for_statuses(query, [])
+        query = cls._search_by_business_identifier(query, business_identifier, environment)
+        if excluded_org_types:
+            query = query.filter(Org.type_code.notin_(excluded_org_types))
+
+        query = query.order_by(Org.name.desc())
+
+        items = query.all()
+        return items, len(items)
+
+    @classmethod
+    def _search_by_business_identifier(cls, query, business_identifier, environment):
         if business_identifier:
-            affilliations = Affiliation.find_affiliations_by_business_identifier(business_identifier)
+            affilliations = Affiliation.find_affiliations_by_business_identifier(business_identifier, environment)
             affilliation_org_ids = [affilliation.org_id for affilliation in affilliations]
             query = query.filter(Org.id.in_(affilliation_org_ids))
         return query
@@ -201,7 +248,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         query = cls.query.filter(and_(
             func.upper(Org.name) == name.upper(),
             (func.upper(func.coalesce(Org.branch_name, '')) == ((branch_name or '').upper())))
-        ).filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
+        ).filter(~Org.status_code.in_([OrgStatusEnum.INACTIVE.value, OrgStatusEnum.REJECTED.value]))
 
         if org_id:
             query = query.filter(Org.id != org_id)
@@ -240,3 +287,25 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
             self.save()
         else:
             super().reset()
+
+
+@event.listens_for(Org, 'before_insert')
+def receive_before_insert(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
+    """Rejects invalid type_codes on insert."""
+    org = target
+    if org.type_code in (OrgTypeEnum.SBC_STAFF.value, OrgTypeEnum.STAFF.value):
+        raise BusinessException(
+            Error.INVALID_INPUT,
+            None
+        )
+
+
+@event.listens_for(Org, 'before_update', raw=True)
+def receive_before_update(mapper, connection, state):  # pylint: disable=unused-argument; SQLAlchemy callback signature
+    """Rejects invalid type_codes on update."""
+    if Org.type_code.key in state.unmodified:
+        return
+    raise BusinessException(
+        Error.INVALID_INPUT,
+        None
+    )

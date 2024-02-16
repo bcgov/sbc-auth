@@ -32,7 +32,20 @@ class Error(Enum):
     UNDEFINED_ERROR = 'Undefined error.', http_status.HTTP_400_BAD_REQUEST
     DATA_CONFLICT = 'New data conflict with existing data.', http_status.HTTP_409_CONFLICT
     ACTIONED_INVITATION = 'The invitation has already been accepted.', http_status.HTTP_400_BAD_REQUEST
+    ACTIONED_AFFILIATION_INVITATION = 'The affiliation invitation has already been accepted.', \
+                                      http_status.HTTP_400_BAD_REQUEST
+    INVALID_BUSINESS_EMAIL = 'Business contact email not valid.', http_status.HTTP_400_BAD_REQUEST
     EXPIRED_INVITATION = 'The invitation has expired.', http_status.HTTP_400_BAD_REQUEST
+    EXPIRED_AFFILIATION_INVITATION = 'The affiliation invitation has expired.', http_status.HTTP_400_BAD_REQUEST
+    INVALID_AFFILIATION_INVITATION_STATE = 'The affiliation invitation is in an invalid state for this action.', \
+                                           http_status.HTTP_400_BAD_REQUEST
+    INVALID_AFFILIATION_INVITATION_TOKEN = 'The affiliation invitation token is invalid.', \
+                                           http_status.HTTP_400_BAD_REQUEST
+    FAILED_AFFILIATION_INVITATION = 'Failed to dispatch the affiliation invitation', \
+                                    http_status.HTTP_500_INTERNAL_SERVER_ERROR
+    AFFILIATION_INVITATION_BUSINESS_NOT_FOUND = 'The business specified for the affiliation ' \
+                                                'invitation could not be found.', \
+                                                http_status.HTTP_400_BAD_REQUEST
     FAILED_INVITATION = 'Failed to dispatch the invitation', http_status.HTTP_500_INTERNAL_SERVER_ERROR
     FAILED_NOTIFICATION = 'Failed to dispatch the notification', http_status.HTTP_500_INTERNAL_SERVER_ERROR
     DELETE_FAILED_ONLY_OWNER = 'Cannot delete as user is the only Account Administrator of some teams', \
@@ -62,10 +75,15 @@ class Error(Enum):
     # NR_EXPIRED = 'The specified name request has expired', http_status.HTTP_400_BAD_REQUEST
     NR_CONSUMED = 'The specified name request has already been consumed.', http_status.HTTP_400_BAD_REQUEST
     NR_NOT_APPROVED = 'The specified name request has not been approved.', http_status.HTTP_400_BAD_REQUEST
+    NR_INVALID_STATUS = 'The specified name request cannot be used.', http_status.HTTP_400_BAD_REQUEST
     NR_NOT_FOUND = 'The specified name request number could not be found.', http_status.HTTP_400_BAD_REQUEST
+    NR_NOT_PAID = 'The payment for the specified name request number is not complete.', http_status.HTTP_400_BAD_REQUEST
     NR_INVALID_CONTACT = 'Invalid email or phone number.', http_status.HTTP_400_BAD_REQUEST
     NR_INVALID_CORP_TYPE = 'The business type associated with this name request is not yet supported.', \
                            http_status.HTTP_400_BAD_REQUEST
+    NR_INVALID_APPLICANTS = 'The specified name request must have at least one applicant. Please contact staff ' + \
+        'to fix this name request.', \
+        http_status.HTTP_400_BAD_REQUEST
 
     ENTITY_DELETE_FAILED = 'Cannot delete entity due to related records.', http_status.HTTP_400_BAD_REQUEST
 
@@ -76,6 +94,10 @@ class Error(Enum):
     GOVM_ACCOUNT_DATA_MISSING = 'GOVM account creation needs payment info , gl code and mailing address', \
                                 http_status.HTTP_400_BAD_REQUEST
     PRODUCT_SUBSCRIPTION_EXISTS = 'Org has subscription to the product exists.', http_status.HTTP_409_CONFLICT
+    INVALID_PRODUCT_RESUB_STATE = 'Product is not in a valid state for re-submission.', \
+        http_status.HTTP_400_BAD_REQUEST
+    INVALID_PRODUCT_RESUBMISSION = 'Product is not valid for re-submission.', \
+        http_status.HTTP_400_BAD_REQUEST
 
     OUTSTANDING_CREDIT = 'Account have credits remaining on account.', http_status.HTTP_400_BAD_REQUEST
     TRANSACTIONS_IN_PROGRESS = 'Account have payment transactions in progress.', http_status.HTTP_400_BAD_REQUEST
@@ -83,6 +105,8 @@ class Error(Enum):
     PAY_ACCOUNT_DEACTIVATE_ERROR = 'An error occurred while attempting to deactivate your account.Please try again', \
                                    http_status.HTTP_400_BAD_REQUEST
     PATCH_INVALID_ACTION = 'PATCH_INVALID_ACTION', http_status.HTTP_400_BAD_REQUEST
+    SERVICE_UNAVAILABLE = '3rd party application unavailable', http_status.HTTP_503_SERVICE_UNAVAILABLE
+    NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION = 'Not authorized to perform this action', http_status.HTTP_403_FORBIDDEN
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

@@ -1,10 +1,24 @@
 <template>
   <v-container class="view-container">
     <v-row justify="center">
-      <v-col cols="12" lg="6" class="text-center">
-        <v-icon size="48" color="error" class="mb-6">mdi-information-outline</v-icon>
-        <h1 class="mb-5">Not Authorized</h1>
-        <p class="mb-9">{{ errorMessage }}</p>
+      <v-col
+        cols="12"
+        lg="6"
+        class="text-center"
+      >
+        <v-icon
+          size="48"
+          color="error"
+          class="mb-6"
+        >
+          mdi-information-outline
+        </v-icon>
+        <h1 class="mb-5">
+          Not Authorized
+        </h1>
+        <p class="mb-9">
+          {{ errorMessage }}
+        </p>
         <div>
           <v-btn
             large
@@ -28,21 +42,22 @@
 </template>
 
 <script lang="ts">
-import { IdpHint, LoginSource, Pages, Role } from '@/util/constants'
+import { LoginSource, Pages } from '@/util/constants'
 import { Component } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import UserModule from '@/store/modules/user'
+
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   computed: {
-    ...mapState('user', ['currentUser'])
+    ...mapState(useUserStore, ['currentUser'])
   }
 })
 export default class UnauthorizedView extends Vue {
-  private currentUser!: KCUserProfile
+  currentUser!: KCUserProfile
   errorMessage : string = ''
 
   mounted () {

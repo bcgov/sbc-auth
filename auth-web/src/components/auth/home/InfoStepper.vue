@@ -2,28 +2,40 @@
   <div>
     <v-container id="step-buttons-container">
       <template v-for="(step, index) in steps">
-        <div class="step" :key="index"  @click="goTo(step)" v-on:keyup.tab="goTo(step)">
+        <div
+          :key="index"
+          class="step"
+          @click="goTo(step)"
+          @keyup.tab="goTo(step)"
+        >
           <v-btn
+            :id="step.id"
             fab
             outlined
-            :id=step.id
             :ripple="false"
             color="#1A5A96"
             class="step__icon"
             :class="{ 'filled': isCurrentStep(step) }"
-            >
-            <span class="step-number">{{step.step}}</span>
+          >
+            <span class="step-number">{{ step.step }}</span>
           </v-btn>
-          <div class="step__label" :class="{ 'selected': isCurrentStep(step) }">
-            {{step.text}}
+          <div
+            class="step__label"
+            :class="{ 'selected': isCurrentStep(step) }"
+          >
+            {{ step.text }}
           </div>
-          <span :class="{ 'arrow-down': isCurrentStep(step) }"></span>
+          <span :class="{ 'arrow-down': isCurrentStep(step) }" />
         </div>
       </template>
     </v-container>
     <!-- Next Step Button -->
     <div class="next-step-wrapper">
-      <span class="next-step-btn" :class="{ 'hide-next-btn': getCurrentStep() === steps.length }" @click="nextStep()">
+      <span
+        class="next-step-btn"
+        :class="{ 'hide-next-btn': hideBtn }"
+        @click="nextStep()"
+      >
         <u>Next Step</u><v-icon color="#1A5A96">mdi-menu-right</v-icon>
       </span>
     </div>
@@ -32,60 +44,75 @@
 
 <script lang="ts">
 // Libraries
-import { Component, Vue } from 'vue-property-decorator'
+import { computed, defineComponent } from '@vue/composition-api'
 
-@Component
-export default class InfoStepper extends Vue {
-  private steps: Array<any> = [
-    {
-      id: 'step-1-btn',
-      step: 1,
-      text: 'Decide on a Business Type',
-      to: '/home/decide-business'
-    },
-    {
-      id: 'step-2-btn',
-      step: 2,
-      text: 'Request a Name',
-      to: '/home/request-name'
-    },
-    {
-      id: 'step-3-btn',
-      step: 3,
-      text: 'Incorporate or Register',
-      to: '/home/incorporate-or-register'
-    },
-    {
-      id: 'step-4-btn',
-      step: 4,
-      text: 'Maintain Your Business',
-      to: '/home/maintain-business'
-    }
-  ]
-
-  private goTo (step: any): void {
-    if (!this.isCurrentStep(step)) this.$router.push(step.to)
-  }
-
-  private nextStep (): void {
-    const currentStepIndex = this.getCurrentStep()
-    const nextStep = this.steps[currentStepIndex]
-    this.$router.push(nextStep.to)
-  }
-
-  private isCurrentStep (step: any): boolean {
-    return this.$route.path === step.to
-  }
-
-  private getCurrentStep (): number {
-    const route = this.$route.path
-    for (const path of this.steps) {
-      if (path.to === route) {
-        return path.step || 0
+export default defineComponent({
+  name: 'InfoStepper',
+  setup (props, { root }) {
+    const steps = [
+      {
+        id: 'step-1-btn',
+        step: 1,
+        text: 'Decide on a Business Type',
+        to: '/decide-business'
+      },
+      {
+        id: 'step-2-btn',
+        step: 2,
+        text: 'Request a Name',
+        to: '/request-name'
+      },
+      {
+        id: 'step-3-btn',
+        step: 3,
+        text: 'Register or Incorporate',
+        to: '/incorporate-or-register'
+      },
+      {
+        id: 'step-4-btn',
+        step: 4,
+        text: 'Maintain Your Business',
+        to: '/maintain-business'
       }
+    ]
+
+    const getCurrentStep = (): number => {
+      const route = root.$route?.path
+      for (const path of steps) {
+        if (path.to === route) {
+          return path.step || 0
+        }
+      }
+      return 0
+    }
+
+    const hideBtn = computed(() => {
+      return getCurrentStep() === steps.length
+    })
+
+    const isCurrentStep = (step: { id: string, step: number, text: string, to: string}): boolean => {
+      return root.$route?.path === step.to
+    }
+
+    const goTo = (step: { id: string, step: number, text: string, to: string}): void => {
+      if (!isCurrentStep(step)) root.$router?.push(step.to)
+    }
+
+    const nextStep = (): void => {
+      const currentStepIndex = getCurrentStep()
+      const nextStep = steps[currentStepIndex]
+      root.$router?.push(nextStep.to)
+    }
+
+    return {
+      steps,
+      hideBtn,
+      isCurrentStep,
+      goTo,
+      nextStep
     }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>

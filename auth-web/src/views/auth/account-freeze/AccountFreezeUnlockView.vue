@@ -1,23 +1,36 @@
 <template>
-  <v-container class="view-container" v-if="isAccountStatusNsfSuspended">
+  <v-container
+    v-if="isAccountStatusNsfSuspended"
+    class="view-container"
+  >
     <div class="view-header">
       <div class="view-header__icon">
-        <v-icon large color="error" class="mt-1 mr-4">mdi-alert-circle-outline</v-icon>
+        <v-icon
+          large
+          color="error"
+          class="mt-1 mr-4"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </div>
       <div>
         <h1 class="view-header__title">
           This account has been temporarily suspended
         </h1>
-        <p class="mt-3 mb-0">To unlock your account, please complete the following steps.</p>
+        <p class="mt-3 mb-0">
+          To unlock your account, please complete the following steps.
+        </p>
       </div>
     </div>
     <v-card flat>
       <Stepper
+        ref="stepper"
         :stepper-configuration="stepperConfig"
         :isLoading="isLoading"
         :stepperColor="'error'"
         @final-step-action="unlockAccount"
-      ></Stepper>
+        @step-forward="handleStepForward"
+      />
     </v-card>
 
     <!-- Alert Dialog (Error) -->
@@ -28,10 +41,15 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           color="error"
@@ -43,8 +61,11 @@
       </template>
     </ModalDialog>
   </v-container>
-  <v-container class="view-container" v-else>
-    <AccountSuspendedView :isAdmin="true"></AccountSuspendedView>
+  <v-container
+    v-else
+    class="view-container"
+  >
+    <AccountSuspendedView :isAdmin="true" />
   </v-container>
 </template>
 
@@ -52,7 +73,7 @@
 import { AccountStatus, Pages } from '@/util/constants'
 import { Component, Vue } from 'vue-property-decorator'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
 import AccountSuspendedView from './AccountSuspendedView.vue'
 import ConfigHelper from 'sbc-common-components/src/util/config-helper'
@@ -62,6 +83,8 @@ import { Organization } from '@/models/Organization'
 import { Payment } from '@/models/Payment'
 import PaymentReview from '@/components/auth/account-freeze/PaymentReview.vue'
 import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankInformation.vue'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -73,16 +96,16 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
     AccountSuspendedView
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'createAccountPayment'
 
     ])
   },
   computed: {
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'userContact'
     ]),
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization'
     ])
 
@@ -97,7 +120,8 @@ export default class AccountFreezeUnlockView extends Vue {
   private isLoading: boolean = false
 
   $refs: {
-    errorDialog: ModalDialog
+    errorDialog: InstanceType<typeof ModalDialog>
+    stepper: InstanceType<typeof Stepper>
   }
 
   private stepperConfig: Array<StepConfiguration> =
@@ -135,6 +159,10 @@ export default class AccountFreezeUnlockView extends Vue {
   }
   private closeError () {
     this.$refs.errorDialog.close()
+  }
+
+  private handleStepForward () {
+    this.$refs.stepper.stepForward()
   }
 }
 </script>

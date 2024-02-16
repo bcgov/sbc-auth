@@ -1,19 +1,10 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
 import AccountMailingAddress from '@/components/auth/account-settings/account-info/AccountMailingAddress.vue'
-
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import can from '@/directives/can'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useCodesStore } from '@/stores'
 
 const vuetify = new Vuetify({})
-
-document.body.setAttribute('data-app', 'true')
 
 describe('AccountMailingAddress.vue', () => {
   let wrapper: any
@@ -21,36 +12,20 @@ describe('AccountMailingAddress.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.directive('can', can)
-    const codesModule = {
-      namespaced: true,
-      state: {
-        businessSizeCodes: [
-          { code: '0-1', default: true, desc: '1 Employee' },
-          { code: '2-5', default: false, desc: '2-5 Employees' }
-        ],
-        businessTypeCodes: [
-          { code: 'BIZ', default: false, desc: 'GENERAL BUSINESS' }
-        ]
-      },
-      actions: {
-        getBusinessSizeCodes: jest.fn(),
-        getBusinessTypeCodes: jest.fn()
-      }
-    }
 
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        codes: codesModule
-      }
-    })
+    const codesStore = useCodesStore()
+    codesStore.businessSizeCodes = [
+      { code: '0-1', default: true, desc: '1 Employee' },
+      { code: '2-5', default: false, desc: '2-5 Employees' }
+    ]
+    codesStore.businessTypeCodes = [
+      { code: 'BIZ', default: false, desc: 'GENERAL BUSINESS' }
+    ]
 
     wrapperFactory = propsData => {
       return shallowMount(AccountMailingAddress, {
         localVue,
-        store,
         vuetify,
         propsData: {
           ...propsData
@@ -70,12 +45,13 @@ describe('AccountMailingAddress.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly ', () => {

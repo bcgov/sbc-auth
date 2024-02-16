@@ -49,7 +49,7 @@ class Permissions:  # pylint: disable=too-few-public-methods
                 cache.set(key, val)
 
         except SQLAlchemyError as e:
-            current_app.logger.info('Error on building cache {}', e)
+            current_app.logger.info('Error on building cache %s', e)
 
     @staticmethod
     def get_permissions_for_membership(org_status, membership_type):

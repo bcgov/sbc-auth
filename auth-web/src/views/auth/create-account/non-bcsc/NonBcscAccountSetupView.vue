@@ -1,16 +1,20 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column">
-      <h1 class="view-header__title">{{$t('createBCRegistriesAccount')}}</h1>
-      <p class="mt-3 mb-0">Manage account settings, team members, and view account transactions</p>
+      <h1 class="view-header__title">
+        {{ $t('createBCRegistriesAccount') }}
+      </h1>
+      <p class="mt-3 mb-0">
+        Manage account settings, team members, and view account transactions
+      </p>
     </div>
     <v-card flat>
       <Stepper
-        :stepper-configuration="accountStepperConfig"
-        @final-step-action="verifyAndCreateAccount"
-        :isLoading="isLoading"
         ref="stepper"
-      ></Stepper>
+        :stepper-configuration="accountStepperConfig"
+        :isLoading="isLoading"
+        @final-step-action="verifyAndCreateAccount"
+      />
     </v-card>
     <!-- Alert Dialog (Error) -->
     <ModalDialog
@@ -20,10 +24,15 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           color="error"
@@ -38,11 +47,11 @@
 </template>
 
 <script lang="ts">
-import { AccessType, DisplayModeValues, LDFlags, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { AccessType, DisplayModeValues, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
@@ -51,7 +60,6 @@ import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
@@ -59,6 +67,8 @@ import SelectProductService from '@/components/auth/create-account/SelectProduct
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -73,22 +83,18 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
     PremiumChooser
   },
   computed: {
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'userContact',
       'userProfile'
     ]),
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrgPaymentType',
       'currentOrganization'
     ])
 
   },
   methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganizationType',
-      'setViewOnlyMode'
-    ]),
-    ...mapActions('user',
+    ...mapActions(useUserStore,
       [
         'createUserContact',
         'updateUserContact',
@@ -96,19 +102,21 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
         'createAffidavit',
         'updateUserFirstAndLastName'
       ]),
-    ...mapActions('org',
+    ...mapActions(useOrgStore,
       [
         'createOrg',
         'validatePADInfo',
         'syncMembership',
         'syncOrganization',
         'syncAddress',
-        'getOrgPayments'
+        'getOrgPayments',
+        'setCurrentOrganizationType',
+        'setViewOnlyMode'
       ])
   }
 })
 export default class NonBcscAccountSetupView extends Vue {
-  @Prop({ default: undefined }) private readonly orgId: number; // org id used for bceid re-uplaod
+  @Prop({ default: undefined }) private readonly orgId: number // org id used for bceid re-uplaod
   private readonly currentUser!: KCUserProfile
   private readonly currentOrgPaymentType!: string
   protected readonly userContact!: Contact
@@ -128,14 +136,14 @@ export default class NonBcscAccountSetupView extends Vue {
   private readonly currentOrganization!: Organization
   private readonly userProfile!: User
 
-  private errorTitle = 'Account creation failed'
-  private errorText = ''
+  errorTitle = 'Account creation failed'
+  errorText = ''
   private isLoading: boolean = false
   private readOnly = false
   private isAffidavitAlreadyApproved = false
 
   $refs: {
-    errorDialog: ModalDialog,
+    errorDialog: InstanceType<typeof ModalDialog>,
     stepper: HTMLFormElement,
   }
 
@@ -186,17 +194,15 @@ export default class NonBcscAccountSetupView extends Vue {
     ]
 
   private async beforeMount () {
-    if (this.enablePaymentMethodSelectorStep) {
-      const paymentMethodStep = {
-        title: 'Payment Method',
-        stepName: 'Payment Method',
-        component: PaymentMethodSelector,
-        componentProps: {}
-      }
-      this.accountStepperConfig.push(paymentMethodStep)
-      // use the new premium chooser account when flag is enabled
-      this.accountStepperConfig[3].alternate.component = PremiumChooser
+    const paymentMethodStep = {
+      title: 'Payment Method',
+      stepName: 'Payment Method',
+      component: PaymentMethodSelector,
+      componentProps: {}
     }
+    this.accountStepperConfig.push(paymentMethodStep)
+    // use the new premium chooser account when flag is enabled
+    this.accountStepperConfig[3].alternate.component = PremiumChooser
     // Loading user details if not exist and check user already verified with affidavit
     if (!this.userProfile) {
       await this.getUserProfile('@me')
@@ -226,17 +232,11 @@ export default class NonBcscAccountSetupView extends Vue {
       this.accountStepperConfig[4].componentProps = { ...this.accountStepperConfig[4].componentProps, clearForm: true }
       this.accountStepperConfig[0].componentProps = { ...this.accountStepperConfig[0].componentProps, readOnly: true, orgId }
 
-      if (this.enablePaymentMethodSelectorStep) {
-        this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[3].componentProps, readOnly: true }
-        this.accountStepperConfig[5].componentProps = { ...this.accountStepperConfig[5].componentProps, readOnly: true }
-      }
+      this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[3].componentProps, readOnly: true }
+      this.accountStepperConfig[5].componentProps = { ...this.accountStepperConfig[5].componentProps, readOnly: true }
     } else {
       this.setViewOnlyMode('')
     }
-  }
-
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
 
   private async verifyAndCreateAccount () {
@@ -303,6 +303,7 @@ export default class NonBcscAccountSetupView extends Vue {
         await this.getUserProfile('@me')
       }
 
+      // Remove with Vue 3
       this.$store.commit('updateHeader')
       const nextRoute = !this.isAffidavitAlreadyApproved ? '/setup-non-bcsc-account-success' : '/setup-account-success'
       this.$router.push(nextRoute)

@@ -1,15 +1,16 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
+import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountPaymentMethods from '@/components/auth/account-settings/payment/AccountPaymentMethods.vue'
-import Vue from 'vue'
+import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
+// Prevent error redundant navigation.
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push (location) {
+  return originalPush.call(this, location).catch(() => {})
+}
 
 describe('AccountPaymentMethods.vue', () => {
   let wrapper: any
@@ -17,17 +18,25 @@ describe('AccountPaymentMethods.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
+    localVue.use(VueRouter)
 
-    const store = new Vuex.Store({
-      strict: false
-
-    })
-
+    const router = new VueRouter()
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      name: 'new org',
+      orgType: 'STAFF'
+    }
+    const businessStore = useBusinessStore()
+    businessStore.businesses = []
+    const userStore = useUserStore()
+    userStore.currentUser = {
+      firstName: 'test',
+      lastName: 'test'
+    } as any
     wrapperFactory = (propsData) => {
       return shallowMount(AccountPaymentMethods, {
         localVue,
-        store,
+        router,
         vuetify,
         propsData: {
           ...propsData
@@ -39,16 +48,20 @@ describe('AccountPaymentMethods.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  afterAll(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly and address is being shown', () => {
-    expect(wrapper.find(AccountPaymentMethods).exists()).toBe(true)
+    expect(wrapper.findComponent(AccountPaymentMethods).exists()).toBe(true)
   })
 
   it('renders proper header content', () => {

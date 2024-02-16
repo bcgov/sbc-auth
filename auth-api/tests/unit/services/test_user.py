@@ -19,6 +19,7 @@ Test-Suite to ensure that the User Service is working as expected.
 import json
 from unittest.mock import patch
 
+import mock
 import pytest
 from werkzeug.exceptions import HTTPException
 
@@ -40,6 +41,7 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_membership_model, factory_org_model, factory_product_model,
     factory_user_model, get_tos_latest_version, patch_token_info)
+from tests.conftest import mock_token
 
 
 def test_as_dict(session):  # pylint: disable=unused-argument
@@ -144,7 +146,7 @@ def test_reset_password_by_member(session, auth_mock, keycloak_mock, monkeypatch
     with pytest.raises(HTTPException) as excinfo:
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
         UserService.reset_password_for_anon_user(user_info, user_name)
-        assert excinfo.exception.code == 403
+    assert excinfo.value.code == 403
 
 
 def test_delete_otp_for_user(session, auth_mock, keycloak_mock, monkeypatch):
@@ -417,6 +419,7 @@ def test_add_contact_to_user(session, monkeypatch):  # pylint: disable=unused-ar
     """Assert that a contact can be added to a user."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     factory_user_model(user_info=user_with_token)
 
     patch_token_info(TestJwtClaims.user_test, monkeypatch)
@@ -439,6 +442,7 @@ def test_add_contact_to_user_already_exists(session, monkeypatch):  # pylint: di
     """Assert that a contact cannot be added to a user that already has a contact."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     factory_user_model(user_info=user_with_token)
 
     patch_token_info(TestJwtClaims.user_test, monkeypatch)
@@ -453,6 +457,7 @@ def test_update_contact_for_user(session, monkeypatch):  # pylint: disable=unuse
     """Assert that a contact can be updated for a user."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     factory_user_model(user_info=user_with_token)
 
     patch_token_info(TestJwtClaims.user_test, monkeypatch)
@@ -520,10 +525,12 @@ def test_update_contact_for_user_no_contact(session, monkeypatch):  # pylint: di
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_contact_for_user(session, monkeypatch):  # pylint: disable=unused-argument
     """Assert that a contact can be deleted for a user."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     factory_user_model(user_info=user_with_token)
 
     patch_token_info(TestJwtClaims.user_test, monkeypatch)
@@ -572,6 +579,7 @@ def test_user_find_by_token(session, monkeypatch):  # pylint: disable=unused-arg
     """Assert that a user can be found by token."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     factory_user_model(user_info=user_with_token)
 
     found_user = UserService.find_by_jwt_token()
@@ -627,10 +635,12 @@ def test_user_find_by_username_missing_username(session):  # pylint: disable=unu
     assert user is None
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_contact_user_link(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a contact can not be deleted if contact link exists."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
     user_model = factory_user_model(user_info=user_with_token)
     user = UserService(user_model)
 
@@ -660,10 +670,12 @@ def test_delete_contact_user_link(session, auth_mock, keycloak_mock, monkeypatch
     assert exist_contact_link
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_user(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     user_model = factory_user_model(user_info=user_with_token)
     contact = factory_contact_model()
     contact_link = ContactLinkModel()
@@ -684,8 +696,10 @@ def test_delete_user(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:
         assert org.status_code == 'INACTIVE'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
+@pytest.mark.parametrize('environment', ['test', None])
 def test_delete_user_where_org_has_affiliations(session, auth_mock, keycloak_mock,
-                                                monkeypatch):  # pylint:disable=unused-argument
+                                                monkeypatch, environment):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -701,7 +715,7 @@ def test_delete_user_where_org_has_affiliations(session, auth_mock, keycloak_moc
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
 
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment=environment)
     affiliation.save()
     with pytest.raises(BusinessException) as exception:
         UserService.delete_user()
@@ -716,8 +730,10 @@ def test_delete_user_where_org_has_affiliations(session, auth_mock, keycloak_moc
         assert org.status_code == 'ACTIVE'
 
 
+@pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mock,
-                                                 monkeypatch):  # pylint:disable=unused-argument
+                                                 monkeypatch, environment):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     # Create a user and org
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
@@ -727,13 +743,14 @@ def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mo
     contact_link.user = user_model
     contact_link.commit()
 
-    patch_token_info(TestJwtClaims.get_test_user(user_model.keycloak_guid), monkeypatch)
+    patch_token_info(TestJwtClaims.get_test_user(user_model.keycloak_guid,
+                     idp_userid=user_model.idp_userid), monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
     org_dictionary = org.as_dict()
     org_id = org_dictionary['id']
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment=environment)
     affiliation.save()
 
     # Create another user and add membership to the above org
@@ -748,7 +765,8 @@ def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mo
                                  membership_type_status=Status.ACTIVE.value)
     membership.save()
 
-    patch_token_info(TestJwtClaims.get_test_user(user_model2.keycloak_guid), monkeypatch)
+    patch_token_info(TestJwtClaims.get_test_user(user_model2.keycloak_guid,
+                     idp_userid=user_model2.idp_userid), monkeypatch)
     UserService.delete_user()
 
     updated_user = UserModel.find_by_jwt_token()
@@ -759,8 +777,10 @@ def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mo
         assert org.status_code == 'INACTIVE'
 
 
+@pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_user_where_org_has_another_owner(session, auth_mock, keycloak_mock,
-                                                 monkeypatch):  # pylint:disable=unused-argument
+                                                 monkeypatch, environment):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     # Create a user and org
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
@@ -770,13 +790,14 @@ def test_delete_user_where_org_has_another_owner(session, auth_mock, keycloak_mo
     contact_link.user = user_model
     contact_link.commit()
 
-    patch_token_info(TestJwtClaims.get_test_user(user_model.keycloak_guid), monkeypatch)
+    patch_token_info(TestJwtClaims.get_test_user(user_model.keycloak_guid,
+                     idp_userid=user_model.idp_userid), monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
     org_dictionary = org.as_dict()
     org_id = org_dictionary['id']
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment=environment)
     affiliation.save()
 
     # Create another user and add membership to the above org
@@ -793,7 +814,8 @@ def test_delete_user_where_org_has_another_owner(session, auth_mock, keycloak_mo
     membership.commit()
 
     # with pytest.raises(BusinessException) as exception:
-    patch_token_info(TestJwtClaims.get_test_user(user_model2.keycloak_guid), monkeypatch)
+    patch_token_info(TestJwtClaims.get_test_user(user_model2.keycloak_guid,
+                     idp_userid=user_model2.idp_userid), monkeypatch)
     UserService.delete_user()
 
     updated_user = UserModel.find_by_jwt_token()

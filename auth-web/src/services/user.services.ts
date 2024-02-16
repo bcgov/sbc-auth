@@ -89,7 +89,8 @@ export default class UserService {
     return axios.post(`${ConfigHelper.getAuthResetAPIUrl()}`)
   }
 
-  static async createNotaryDetails (documentId: String, notaryInfo: NotaryInformation, notaryContact: NotaryContact, userId: string): Promise<AxiosResponse<User>> {
+  static async createNotaryDetails (documentId: string, notaryInfo: NotaryInformation,
+    notaryContact: NotaryContact, userId: string): Promise<AxiosResponse<User>> {
     const inputrequest = {
       documentId: documentId,
       issuer: notaryInfo.notaryName,
@@ -106,7 +107,9 @@ export default class UserService {
 
   static async getAffidavitInfo (userGuid: string, status: string): Promise<AxiosResponse<AffidavitInformation>> {
     const params = new URLSearchParams()
-    params.append('status', status)
+    if (status) {
+      params.append('status', status)
+    }
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(userGuid)}/affidavits`, { params })
   }
 

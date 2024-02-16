@@ -1,19 +1,10 @@
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import { SearchFilterCodes } from '@/util/constants'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('SearchFilterInput.vue', () => {
   let wrapper: any
-  const config = {
-    'AUTH_API_URL': 'https://localhost:8080/api/v1/11'
-  }
 
   const filterParams = [
     {
@@ -31,7 +22,7 @@ describe('SearchFilterInput.vue', () => {
       filterInput: ''
     }
   ]
-  let filteredRecordsCount = 0
+  const filteredRecordsCount = 0
 
   const app = document.createElement('div')
   app.setAttribute('data-app', 'true')
@@ -39,7 +30,6 @@ describe('SearchFilterInput.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(Vuetify)
 
     const vuetify = new Vuetify({})
@@ -51,16 +41,19 @@ describe('SearchFilterInput.vue', () => {
         filterParams: filterParams,
         filteredRecordsCount: filteredRecordsCount
       },
-      sync: false,
       attachToDocument: true
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('has search fields and apply button', () => {

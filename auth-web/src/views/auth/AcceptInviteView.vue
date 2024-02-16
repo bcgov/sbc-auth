@@ -1,35 +1,35 @@
 <template>
   <div v-if="inviteError">
-    <interim-landing :summary="$t('errorOccurredTitle')" :description="$t('invitationProcessingErrorMsg')" iconColor="error" icon="mdi-alert-circle-outline">
-    </interim-landing>
+    <interim-landing
+      :summary="$t('errorOccurredTitle')"
+      :description="$t('invitationProcessingErrorMsg')"
+      iconColor="error"
+      icon="mdi-alert-circle-outline"
+    />
   </div>
 </template>
 
 <script lang="ts">
 
-import { AccessType, IdpHint, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { AccessType, LoginSource, Pages } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import ConfigHelper from '@/util/config-helper'
-import { Contact } from '@/models/contact'
+import { Member, MembershipStatus, Organization } from '@/models/Organization'
+import { mapActions, mapState } from 'pinia'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { Invitation } from '@/models/Invitation'
-import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import { User } from '@/models/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   computed: {
-    ...mapState('user', ['userProfile', 'userContact', 'redirectAfterLoginUrl']),
-    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings'])
+    ...mapState(useUserStore, ['userProfile', 'userContact', 'redirectAfterLoginUrl']),
+    ...mapState(useOrgStore, ['currentOrganization', 'currentMembership', 'currentAccountSettings'])
   },
   methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganization', 'setCurrentMembership'
-    ]),
-    ...mapActions('org', ['acceptInvitation']),
-    ...mapActions('user', ['getUserProfile'])
+    ...mapActions(useOrgStore, ['acceptInvitation', 'setCurrentOrganization', 'setCurrentMembership']),
+    ...mapActions(useUserStore, ['getUserProfile'])
   },
   components: { InterimLanding }
 })
@@ -64,13 +64,10 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
       const affidavitNeededURL = affidavitNeeded ? `?affidavit=true` : ''
       if (!this.userProfile.userTerms.isTermsOfUseAccepted) {
         await this.$router.push(`/${Pages.USER_PROFILE_TERMS}/${this.token}${affidavitNeededURL}`)
-        return
       } else if (this.token && affidavitNeeded) {
         await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}/${this.token}`)
-        return
       } else if (!this.userContact && this.isProfileNeeded()) {
         await this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
-        return
       } else {
         const invitation = await this.acceptInvitation(this.token)
         const invitingOrg = invitation?.membership[0]?.org
@@ -96,9 +93,9 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
         } else {
           await this.syncMembership(invitation?.membership[0]?.org?.id)
         }
+        // Remove Vuex with Vue 3
         this.$store.commit('updateHeader')
         this.$router.push(this.getNextPageUrl())
-        return
       }
     } catch (exception) {
       this.inviteError = true

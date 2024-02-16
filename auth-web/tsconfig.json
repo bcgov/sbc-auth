@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "skipLibCheck": true,
     "target": "esnext",
     "module": "esnext",
     "strict": false,
@@ -7,13 +8,14 @@
     "importHelpers": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
     "experimentalDecorators": true,
     "types": [
-      "webpack-env",
-      "jest",
+      "vite/client",
+      "vitest/globals",
       "vuetify"
     ],
     "paths": {
@@ -27,6 +29,9 @@
       "dom.iterable",
       "scripthost"
     ]
+  },
+  "vueCompilerOptions": {
+    "target": 2
   },
   "include": [
     "src/**/*.ts",

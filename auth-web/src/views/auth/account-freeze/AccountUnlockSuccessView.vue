@@ -1,23 +1,42 @@
 <template>
   <v-container class="view-container">
     <v-row justify="center">
-      <v-col cols="12" sm="6" class="text-center">
+      <v-col
+        cols="12"
+        sm="6"
+        class="text-center"
+      >
         <template v-if="isFailed">
-          <v-icon size="32" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
+          <v-icon
+            size="32"
+            color="error"
+            class="mb-6"
+          >
+            mdi-alert-circle-outline
+          </v-icon>
           <h1>Some error occured</h1>
-          <p class="mt-8 mb-10">Unable to get the status of the organization, Please try again</p>
+          <p class="mt-8 mb-10">
+            Unable to get the status of the organization, Please try again
+          </p>
           <div class="btns">
             <v-btn
               large
               color="primary"
               class="action-btn font-weight-bold"
-              @click="goTo('account-unlock')">
+              @click="goTo('account-unlock')"
+            >
               Try Again
             </v-btn>
           </div>
         </template>
         <template v-else>
-          <v-icon size="48" color="primary" class="mb-6">mdi-check</v-icon>
+          <v-icon
+            size="48"
+            color="primary"
+            class="mb-6"
+          >
+            mdi-check
+          </v-icon>
           <h1>Your account was successfully unlocked</h1>
           <div class="mt-8 mb-10">
             <div>Your account has successfully been unlocked,</div>
@@ -37,8 +56,16 @@
       </v-col>
     </v-row>
     <v-fade-transition>
-      <div class="loading-container" v-if="isLoading">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
       </div>
     </v-fade-transition>
   </v-container>
@@ -48,29 +75,28 @@
 
 import { AccountStatus, Pages } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { Organization } from '@/models/Organization'
-import Vue from 'vue'
-import { flush } from '@sentry/browser'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState(useOrgStore, ['currentOrganization'])
   },
   methods: {
-    ...mapActions('org', ['syncOrganization'])
+    ...mapActions(useOrgStore, ['syncOrganization'])
   }
 })
 export default class AccountUnlockSuccessView extends Mixins(AccountMixin) {
   protected readonly currentOrganization!: Organization
   protected readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  private isLoading: boolean = false
-  private isFailed: boolean = false
-  private errorMsg: string = ''
-  private readonly TIMEOUT_DURATION = 10000
+  isLoading: boolean = false
+  isFailed: boolean = false
+  errorMsg: string = ''
+  readonly TIMEOUT_DURATION = 10000
 
-  private goTo (page) {
+  goTo (page) {
     switch (page) {
       case 'account-info': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
         break

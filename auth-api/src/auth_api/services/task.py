@@ -24,16 +24,19 @@ from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException, Error
-from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
+from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import TaskSchema
+from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskAction
+from auth_api.utils.enums import Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
+from auth_api.utils.notifications import ProductSubscriptionInfo
 from auth_api.utils.util import camelback2snake  # noqa: I005
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -104,11 +107,9 @@ class Task:  # pylint: disable=too-many-instance-attributes
         task_model.relationship_status = task_relationship_status
         task_model.flush()
 
-        # Update its relationship
-
         self._update_relationship(origin_url=origin_url)
-        current_app.logger.debug('>update_task ')
         db.session.commit()
+        current_app.logger.debug('>update_task ')
         return Task(task_model)
 
     def _update_relationship(self, origin_url: str = None):
@@ -138,8 +139,12 @@ class Task:  # pylint: disable=too-many-instance-attributes
             # Update Product relationship
             product_subscription_id = task_model.relationship_id
             account_id = task_model.account_id
-            self._update_product_subscription(is_approved=is_approved, product_subscription_id=product_subscription_id,
-                                              org_id=account_id)
+            self._update_product_subscription(ProductSubscriptionInfo(is_approved=is_approved,
+                                                                      is_resubmitted=task_model.is_resubmitted,
+                                                                      is_hold=is_hold,
+                                                                      product_subscription_id=product_subscription_id,
+                                                                      org_id=account_id,
+                                                                      task_remarks=Task.get_task_remark(task_model)))
 
         elif task_model.relationship_type == TaskRelationshipType.USER.value:
             user_id = task_model.relationship_id
@@ -160,6 +165,13 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>update_task_relationship ')
 
     @staticmethod
+    def get_task_remark(task_model: TaskModel):
+        """Check and return the task remarks."""
+        if task_model.remarks and len(task_model.remarks) > 0:
+            return task_model.remarks[0]
+        return None
+
+    @staticmethod
     def _notify_admin_about_hold(task_model, org: OrgModel = None, is_new_bceid_admin_request: bool = False,
                                  membership_id: int = None, user: UserModel = None):
         if is_new_bceid_admin_request:
@@ -167,7 +179,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
                 f"{current_app.config.get('BCEID_ADMIN_SETUP_ROUTE')}/"
                 f'{task_model.account_id}/'
                 f'{membership_id}')
-            admin_email = user.contacts[0].contact.email
+            admin_emails = user.contacts[0].contact.email if user.contacts else ''
             account_id = task_model.account_id
             mailer_type = 'resubmitBceidAdmin'
 
@@ -175,18 +187,23 @@ class Task:  # pylint: disable=too-many-instance-attributes
             create_account_signin_route = urllib.parse. \
                 quote_plus(f"{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/"
                            f'{org.id}')
-            admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
+            admin_emails = UserService.get_admin_emails_for_org(org.id)
             account_id = org.id
             mailer_type = 'resubmitBceidOrg'
+
+        if admin_emails == '':
+            current_app.logger.error('No admin email record for org id %s', org.id)
+            current_app.logger.error('<send_approval_notification_to_member failed')
+            return
 
         data = {
             'remarks': task_model.remarks,
             'applicationDate': f"{task_model.created.strftime('%m/%d/%Y')}",
             'accountId': account_id,
-            'emailAddresses': admin_email,
+            'emailAddresses': admin_emails,
             'contextUrl': f"{current_app.config.get('WEB_APP_URL')}"
-                          f"/{current_app.config.get('BCEID_SIGNIN_ROUTE')}/"
-                          f'{create_account_signin_route}'
+            f"/{current_app.config.get('BCEID_SIGNIN_ROUTE')}/"
+            f'{create_account_signin_route}'
         }
         try:
             publish_to_mailer(mailer_type, org_id=account_id, data=data)
@@ -226,45 +243,27 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>update_bceid_admin_to_org ')
 
     @staticmethod
-    def _update_product_subscription(is_approved: bool, product_subscription_id: int, org_id: int):
+    def _update_product_subscription(product_sub_info: ProductSubscriptionInfo):
         """Review Product Subscription."""
         current_app.logger.debug('<_update_product_subscription ')
         from auth_api.services import Product as ProductService  # pylint:disable=cyclic-import, import-outside-toplevel
 
         # Approve/Reject Product subscription
-        ProductService.update_product_subscription(product_subscription_id=product_subscription_id,
-                                                   is_approved=is_approved, org_id=org_id, is_new_transaction=False)
+        ProductService.update_product_subscription(product_sub_info=product_sub_info, is_new_transaction=False)
         current_app.logger.debug('>_update_product_subscription ')
 
     @staticmethod
-    def fetch_tasks(**kwargs):
+    def fetch_tasks(task_search: TaskSearch):
         """Search all tasks."""
-        task_type = kwargs.get('task_type')
-        task_status = kwargs.get('task_status') or [TaskStatus.OPEN.value]
-        task_relationship_status = kwargs.get('task_relationship_status')
-
-        tasks = {'tasks': []}
-        page: int = int(kwargs.get('page'))
-        limit: int = int(kwargs.get('limit'))
-        search_args = (task_type,
-                       task_status,
-                       task_relationship_status,
-                       page,
-                       limit)
-
         current_app.logger.debug('<fetch_tasks ')
-        task_models, count = TaskModel.fetch_tasks(*search_args)  # pylint: disable=unused-variable
+        task_models, count = TaskModel.fetch_tasks(task_search)  # pylint: disable=unused-variable
 
-        if not task_models:
-            return tasks
-
-        for task in task_models:
-            task_dict = Task(task).as_dict(exclude=['user'])
-            tasks['tasks'].append(task_dict)
-
-        tasks['total'] = count
-        tasks['page'] = page
-        tasks['limit'] = limit
+        tasks = {
+            'tasks': [Task(task).as_dict(exclude=['user']) for task in task_models],
+            'total': count,
+            'page': task_search.page,
+            'limit': task_search.limit
+        }
 
         current_app.logger.debug('>fetch_tasks ')
         return tasks

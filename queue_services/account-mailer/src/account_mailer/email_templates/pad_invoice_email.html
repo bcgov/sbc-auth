@@ -1,38 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <base href="/">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="origin-when-cross-origin"/>
-    <meta name="author" content="BC Registries and Online Services">
-    <title>Account PAD Invoice Email Notification</title>
-    [[style.html]]
-  </head>
-  <body>
-    <div style="font-family: Verdana, Arial, sans-serif; font-size: 14px; padding: 16px;">
-      <div style="margin-left: -6px;">
-        [[logo.html]]
-      </div>
-      <h1 style="margin: 0; line-height: 34px; letter-spacing: -1px; font-size: 16px; font-weight: 700;">
-        Your {{ account_name }} completed ${{ invoice_total }} in transactions during business hours on {{ invoice_process_date }}.
-      </h1>
-      <p style="margin-top: 20px; margin-bottom: 0; line-height: 24px; font-size: 16px;">
-          This amount will be debited from your financial institution in 2 business days. Please ensure you have sufficient funds in your financial institution account to cover this debit.
-      </p>
-      <p style="margin-top: 20px; margin-bottom: 0; line-height: 24px; font-size: 16px; font-weight: 700;">
-        Your account will be suspended and charged a ${{ nsf_fee }} dishonoured bank instrument fee for every failed payment.
-      </p>
-      <p style="margin-top: 20px; margin-bottom: 0; line-height: 24px; font-size: 16px;">
-          Log in to BC Registries and Online Services.
-      </p>
-      <div style="margin-top: 45px;">
-          <!--[if mso]> <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ url }}" style="height:55px; v-text-anchor:middle; width:250px;" arcsize="10%" stroke="f" fillcolor="#003366" alias="CTA1">Join Team<w:anchorlock/> <center> <![endif]-->
-          <a style="display: block; width: 250px; padding: 15px 0; color: #ffffff; border: none; border-radius: 6px; background-color: #003366; text-align: center; text-decoration: none; font-size: 16px; font-weight: bold;"
-             href="{{ url }}">Log in
-          </a>
-          <!--[if mso]> </center> </v:roundrect> <![endif]-->
-      </div>
-    </div>
-  </body>
-</html>
+# Your {{ account_name }} account completed ${{ invoice_total }} in transactions during business hours on {{ invoice_process_date }}.
+
+This amount will be debited from your financial institution in 2 business days. Please ensure you have sufficient funds in your financial institution account to cover this debit.
+
+Your account will be suspended and charged a ${{ nsf_fee }} dishonoured bank instrument fee for every failed payment.
+
+Log in to BC Registries and Online Services.
+
+[Log in]({{ url }})

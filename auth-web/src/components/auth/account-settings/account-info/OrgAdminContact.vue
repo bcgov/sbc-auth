@@ -1,16 +1,20 @@
 <template>
   <div class="value__title">
-    <div v-for="(member, index) in getActiveAdmins" v-bind:key="index">
+    <div
+      v-for="(member, index) in getActiveAdmins"
+      :key="index"
+    >
       <div v-if="!anonAccount">
         <div>
           {{ member.user.firstname }} {{ member.user.lastname }}
         </div>
-        <div v-if="member.user.contacts">
+        <div v-if="member.user.contacts && member.user.contacts[0]">
           <div v-if="member.user.contacts[0].email">
             {{ member.user.contacts[0].email }}
           </div>
           <div v-if="member.user.contacts[0].phone">
-            {{ member.user.contacts[0].phone }} <span v-if="member.user.contacts[0].phoneExtension">ext. {{ member.user.contacts[0].phoneExtension }}</span>
+            {{ member.user.contacts[0].phone }}
+            <span v-if="member.user.contacts[0].phoneExtension">ext. {{ member.user.contacts[0].phoneExtension }}</span>
           </div>
         </div>
       </div>
@@ -22,26 +26,25 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import {
   Member,
-  MembershipStatus,
   MembershipType,
-  Organization,
-  RoleInfo
+  Organization
 } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { AccessType } from '@/util/constants'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'activeOrgMembers',
       'currentOrganization'
     ])
   },
   methods: {
-    ...mapActions('org', ['syncActiveOrgMembers'])
+    ...mapActions(useOrgStore, ['syncActiveOrgMembers'])
   }
 
 })

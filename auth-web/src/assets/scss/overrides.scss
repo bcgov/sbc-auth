@@ -1,6 +1,6 @@
 // Vuetify Overrides
 @import 'theme.scss';
-@import '~vuetify/src/styles/settings/_variables';
+@import '~/vuetify/src/styles/settings/_variables';
 
 // Buttons
 .v-btn {
@@ -70,6 +70,18 @@
 
 .theme--light.v-card > .v-card__text {
   color: $gray9;
+}
+
+// v-list-items
+.v-list--dense .v-list-item:hover,
+.v-list-item--link.theme--light.v-list-item:hover,
+.v-list-item__content:hover,
+.v-list-item__action:hover {
+  background-color: $gray1;
+  color: $app-blue !important;
+}
+.v-list-item--active {
+  background-color: $app-background-blue;
 }
 
 // Form Inputs

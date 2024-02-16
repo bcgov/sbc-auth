@@ -1,88 +1,110 @@
 <template>
   <div>
-    <template >
-      <p class="mb-9" v-if="canSelect">
-        General Ledger codes for the account that is issued by the Finance department of the Ministry
-      </p>
-
-    </template>
+    <p
+      v-if="canSelect"
+      class="mb-9"
+    >
+      General Ledger codes for the account that is issued by the Finance department of the Ministry
+    </p>
     <v-form ref="GlInfoForm">
       <section>
         <header class="mb-4 d-flex align-content-center">
-          <div data-test="pad-info-form-title" class="mr-1 font-weight-bold">General Ledger Information</div>
+          <div
+            data-test="pad-info-form-title"
+            class="mr-1 font-weight-bold"
+          >
+            General Ledger Information
+          </div>
         </header>
         <v-row>
-          <v-col cols="4" class="py-0">
+          <v-col
+            cols="4"
+            class="py-0"
+          >
             <v-text-field
+              v-model="client"
+              v-mask="'XXX'"
               label="Client Code"
               filled
               hint="3 characters"
               persistent-hint
               :rules="clientRules"
-              v-model="client"
-              @change="emitGLInfo"
-              v-mask="'XXX'"
               data-test="input-client-code"
               :disabled="!canSelect"
-            ></v-text-field>
+              @change="emitGLInfo"
+            />
           </v-col>
-          <v-col cols="4" class="py-0">
+          <v-col
+            cols="4"
+            class="py-0"
+          >
             <v-text-field
+              v-model="responsibilityCentre"
+              v-mask="'XXXXX'"
               label="Responsibility Center"
               filled
               hint="5 characters"
               persistent-hint
               :rules="responsibilityCentreRules"
-              v-model="responsibilityCentre"
-              @change="emitGLInfo"
-              v-mask="'XXXXX'"
               data-test="input-responsibilityCentre"
               :disabled="!canSelect"
-            ></v-text-field>
+              @change="emitGLInfo"
+            />
           </v-col>
-            <v-col cols="4" class="py-0">
+          <v-col
+            cols="4"
+            class="py-0"
+          >
             <v-text-field
+              v-model="serviceLine"
+              v-mask="'XXXXX'"
               label="Account Number"
               filled
               hint="5 characters"
               persistent-hint
               :rules="serviceLineRules"
-              v-model="serviceLine"
-              @change="emitGLInfo"
               data-test="input-serviceLine"
-              v-mask="'XXXXX'"
               :disabled="!canSelect"
-            ></v-text-field>
+              @change="emitGLInfo"
+            />
           </v-col>
-          <v-col cols="4" class="py-0">
+          <v-col
+            cols="4"
+            class="py-0"
+          >
             <v-text-field
+              v-model="stob"
+              v-mask="'XXXX'"
               label="Standard Object"
               filled
               hint="4 characters"
               persistent-hint
               :rules="stobRules"
-              v-model="stob"
               data-test="input-stob"
-              v-mask="'XXXX'"
-              @change="emitGLInfo"
               :disabled="!canSelect"
+              @change="emitGLInfo"
+            >
               >
-            ></v-text-field>
+            </v-text-field>
           </v-col>
-            <v-col cols="8" class="py-0">
+          <v-col
+            cols="8"
+            class="py-0"
+          >
             <v-text-field
+              v-model="projectCode"
+              v-mask="'XXXXXXX'"
               label="Project"
               filled
               hint="7 characters"
               persistent-hint
               :rules="projectCodeRules"
-              v-model="projectCode"
-              @change="emitGLInfo"
               data-test="input-projectCode"
-              v-mask="'XXXXXXX'"
               :disabled="!canSelect"
+              @change="emitGLInfo"
+            >
               >
-            ></v-text-field>
+            </v-text-field>
           </v-col>
         </v-row>
       </section>
@@ -91,11 +113,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Action, State } from 'pinia-class'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { GLInfo } from '@/models/Organization'
 import { mask } from 'vue-the-mask'
-import { namespace } from 'vuex-class'
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   directives: {
@@ -103,9 +125,9 @@ const OrgModule = namespace('org')
   }
 })
 export default class GLPaymentForm extends Vue {
-  @OrgModule.State('currentOrgGLInfo') private currentOrgGLInfo!: GLInfo[]
-  @OrgModule.State('currentOrganization') private currentOrganization!: any
-  @OrgModule.Mutation('setCurrentOrganizationGLInfo') private setCurrentOrganizationGLInfo!: (glInfo: GLInfo) => void
+  @State(useOrgStore) private currentOrgGLInfo!: GLInfo[]
+  @State(useOrgStore) private currentOrganization!: any
+  @Action(useOrgStore) private setCurrentOrganizationGLInfo!: (glInfo: GLInfo) => void
 
   @Prop({ default: () => ({} as GLInfo) }) glInformation: any
   @Prop({ default: true }) private canSelect: boolean

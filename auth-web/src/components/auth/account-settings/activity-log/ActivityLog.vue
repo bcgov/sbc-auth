@@ -1,12 +1,22 @@
 <template>
   <v-container>
     <v-fade-transition>
-      <div v-if="isLoading" class="loading-container">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
       </div>
     </v-fade-transition>
     <header class="view-header mb-6">
-      <h2 class="view-header__title">Activity Log</h2>
+      <h2 class="view-header__title">
+        Activity Log
+      </h2>
     </header>
     <div>
       <v-data-table
@@ -22,41 +32,36 @@
           itemsPerPageOptions: getPaginationOptions
         }"
       >
-        <template v-slot:loading>
+        <template #loading>
           Loading...
         </template>
-        <template v-slot:[`item.created`]="{ item }">
+        <template #[`item.created`]="{ item }">
           <div class="font-weight-bold">
-            {{formatDate(item.created,'MMMM DD, YYYY')}}
+            {{ formatDate(item.created,'MMMM DD, YYYY') }}
           </div>
         </template>
       </v-data-table>
     </div>
-
   </v-container>
 </template>
 
 <script lang="ts">
-import { Account, Pages } from '@/util/constants'
+import { Action, State } from 'pinia-class'
 import { ActivityLog, ActivityLogFilterParams } from '@/models/activityLog'
-
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import { Member, MembershipType, Organization } from '@/models/Organization'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { Member, Organization } from '@/models/Organization'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
-
-import { namespace } from 'vuex-class'
-
-const ActivityLogModule = namespace('activity')
-const OrgModule = namespace('org')
+import { useActivityStore } from '@/stores/activityLog'
+import { useOrgStore } from '@/stores/org'
 
 @Component({})
 export default class ActivityLogs extends Mixins(AccountChangeMixin) {
-  @Prop({ default: '' }) private orgId: number;
-  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
-  @OrgModule.State('currentMembership') public currentMembership!: Member
-  @ActivityLogModule.State('currentOrgActivity') public currentOrgActivity!: ActivityLog
-  @ActivityLogModule.Action('getActivityLog') public getActivityLog!:(filterParams:ActivityLogFilterParams) =>Promise<ActivityLog>
+  @Prop({ default: '' }) private orgId: number
+  @State(useOrgStore) public currentOrganization!: Organization
+  @State(useOrgStore) public currentMembership!: Member
+  @State(useActivityStore) public currentOrgActivity!: ActivityLog
+  @Action(useActivityStore) public getActivityLog!:(filterParams:ActivityLogFilterParams) =>Promise<ActivityLog>
 
   private readonly ITEMS_PER_PAGE = 5
   private readonly PAGINATION_COUNTER_STEP = 4

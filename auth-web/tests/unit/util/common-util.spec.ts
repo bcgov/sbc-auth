@@ -40,7 +40,7 @@ describe('Common Util Test', () => {
   beforeEach(async () => {
     // mock the window.location.pathname function
     delete window.location
-    window.location = { pathname: jest.fn() } as any
+    window.location = { pathname: vi.fn() } as any
   })
 
   it('is isUrl [positive]', () => {
@@ -51,6 +51,7 @@ describe('Common Util Test', () => {
   it('is isUrl [negative]', () => {
     expect(CommonUtil.isUrl('abcd')).toBe(false)
     expect(CommonUtil.isUrl('localhost:8080')).toBe(false)
+    expect(CommonUtil.isUrl('/confirmtoken/xxxxx.Y-qrVg.jqfdfdfdfd')).toBe(false)
   })
 
   it('formatIncorporationNumber returns null', () => {
@@ -58,9 +59,9 @@ describe('Common Util Test', () => {
     expect(CommonUtil.formatIncorporationNumber('')).toBeNull()
   })
 
-  it('formatIncorporationNumber returns correct NR Number', () => {
+  it('formatIncorporationNumber returns correct incorporation number', () => {
     expect(CommonUtil.formatIncorporationNumber('CP33')).toBe('CP0000033')
-    expect(CommonUtil.formatIncorporationNumber('NR77', true)).toBe('NR 0000077')
+    expect(CommonUtil.formatIncorporationNumber('CP1234567')).toBe('CP1234567')
   })
 
   it('validateIncorporationNumber returns True with valid incorp number', () => {
@@ -82,14 +83,6 @@ describe('Common Util Test', () => {
     expect(CommonUtil.isCooperativeNumber('XX000033')).toBe(false)
   })
 
-  it('is validating NameRequestNumber [positive]', () => {
-    expect(CommonUtil.validateNameRequestNumber('NR 0000077')).toBe(true)
-  })
-
-  it('is validating NameRequestNumber [negative]', () => {
-    expect(CommonUtil.validateNameRequestNumber('CP0000033')).toBe(false)
-  })
-
   it('is validating email format [positive]', () => {
     expect(CommonUtil.validateEmailFormat('peterparker07@spider-man.com')).toBe(true)
     expect(CommonUtil.validateEmailFormat('peterparker07+1@spider-man.com')).toBe(true)
@@ -100,11 +93,11 @@ describe('Common Util Test', () => {
   })
 
   it('validatePhoneNumber returns True with valid phone number', () => {
-    expect(CommonUtil.validateEmailFormat('123-456-7890')).toBe(false)
+    expect(CommonUtil.validatePhoneNumber('123-123-1234')).toBe(true)
   })
 
   it('validatePhoneNumber returns False with invalid phone number', () => {
-    expect(CommonUtil.validateEmailFormat('1234567890123')).toBe(false)
+    expect(CommonUtil.validatePhoneNumber('123-123-12345')).toBe(false)
   })
 
   it('validateCooperativePasscode returns True with valid passcode', () => {
@@ -190,6 +183,16 @@ describe('Common Util Test', () => {
 
   it('is doing custom sort dec correctly', () => {
     expect(CommonUtil.customSort(items, ['name'], [true])).toMatchObject(sortedDec)
+  })
+
+  it('formats number to two places correctly', () => {
+    expect(CommonUtil.formatNumberToTwoPlaces(2)).toBe('02')
+    expect(CommonUtil.formatNumberToTwoPlaces(10)).toBe('10')
+  })
+
+  it('trims trailing slash URL correctly', () => {
+    expect(CommonUtil.trimTrailingSlashURL(null)).toBe('')
+    expect(CommonUtil.trimTrailingSlashURL('abc/')).toBe('abc')
   })
 
   afterEach(() => {

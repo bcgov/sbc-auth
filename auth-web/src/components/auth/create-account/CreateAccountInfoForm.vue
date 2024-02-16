@@ -1,23 +1,32 @@
 <template>
-  <v-form ref="createAccountInfoForm" lazy-validation>
-    <account-create-premium v-if="isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-create-premium>
-    <account-create-basic v-if="!isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-create-basic>
+  <v-form
+    ref="createAccountInfoForm"
+    lazy-validation
+  >
+    <account-create-premium
+      v-if="isPremium()"
+      :stepForward="stepForward"
+      :stepBack="stepBack"
+    />
+    <account-create-basic
+      v-if="!isPremium()"
+      :stepForward="stepForward"
+      :stepBack="stepBack"
+    />
   </v-form>
 </template>
 
 <script lang="ts">
-
-import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { Account } from '@/util/constants'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -25,43 +34,42 @@ import { getModule } from 'vuex-module-decorators'
     AccountCreateBasic
   },
   computed: {
-    ...mapState('org', ['currentOrganization']),
-    ...mapState('user', ['userProfile', 'currentUser'])
+    ...mapState(useOrgStore, ['currentOrganization']),
+    ...mapState(useUserStore, ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
+    ...mapActions(useOrgStore, ['createOrg', 'syncMembership', 'syncOrganization'])
   }
 })
 export default class CreateAccountInfoForm extends Mixins(Steppable) {
-    private orgStore = getModule(OrgModule, this.$store)
-    private username = ''
-    private password = ''
-    private errorMessage: string = ''
-    private saving = false
-    private readonly createOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
-    private readonly syncMembership!: (orgId: number) => Promise<Member>
-    private readonly syncOrganization!: (orgId: number) => Promise<Organization>
-    private readonly currentOrganization!: Organization
-    private readonly currentUser!: KCUserProfile
+  private username = ''
+  private password = ''
+  private errorMessage: string = ''
+  private saving = false
+  private readonly createOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
+  private readonly syncMembership!: (orgId: number) => Promise<Member>
+  private readonly syncOrganization!: (orgId: number) => Promise<Organization>
+  private readonly currentOrganization!: Organization
+  private readonly currentUser!: KCUserProfile
 
-    $refs: {
+  $refs: {
       createAccountInfoForm: HTMLFormElement
     }
 
-    private readonly teamNameRules = [
-      v => !!v || 'An account name is required']
+  private readonly teamNameRules = [
+    v => !!v || 'An account name is required']
 
-    private isFormValid (): boolean {
-      return !!this.username && !!this.password
-    }
+  private isFormValid (): boolean {
+    return !!this.username && !!this.password
+  }
 
-    private isPremium () {
-      return this.currentOrganization.orgType === Account.PREMIUM
-    }
+  isPremium () {
+    return this.currentOrganization.orgType === Account.PREMIUM
+  }
 
-    private redirectToNext (organization?: Organization) {
-      this.$router.push({ path: `/account/${organization.id}/` })
-    }
+  private redirectToNext (organization?: Organization) {
+    this.$router.push({ path: `/account/${organization.id}/` })
+  }
 }
 </script>
 

@@ -1,6 +1,5 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import SignoutView from '@/views/auth/SignoutView.vue'
-import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -15,17 +14,16 @@ describe('SignoutView.vue', () => {
     'REGISTRY_HOME_URL': 'https://localhost:8080/'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
+    // Requires Vuex, because it clears the store state.
+    // Remove in Vue 3
     const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        user: UserModule
-      }
+      strict: false
     })
 
     wrapper = mount(SignoutView, {
@@ -33,11 +31,15 @@ describe('SignoutView.vue', () => {
       localVue
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 })

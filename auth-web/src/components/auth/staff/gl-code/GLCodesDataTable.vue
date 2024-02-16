@@ -8,13 +8,13 @@
       :no-data-text="$t('noGLCodeList')"
       :loading="isDataLoading"
     >
-      <template v-slot:loading>
+      <template #loading>
         Loading...
       </template>
-      <template v-slot:[`item.updatedOn`]="{ item }">
-        {{formatDate(item.updatedOn)}}
+      <template #[`item.updatedOn`]="{ item }">
+        {{ formatDate(item.updatedOn) }}
       </template>
-      <template v-slot:[`item.action`]="{ item }">
+      <template #[`item.action`]="{ item }">
         <div class="btn-inline">
           <v-btn
             outlined
@@ -31,36 +31,33 @@
     <GLCodeDetailsModal
       ref="glcodeDetailsModal"
       @refresh-glcode-table="refreshTable"
-    >
-    </GLCodeDetailsModal>
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import { GLCode } from '@/models/Staff'
 import GLCodeDetailsModal from '@/components/auth/staff/gl-code/GLCodeDetailsModal.vue'
-import StaffModule from '@/store/modules/staff'
-import { getModule } from 'vuex-module-decorators'
+import { mapActions } from 'pinia'
+import { useStaffStore } from '@/stores/staff'
 
 @Component({
   components: {
     GLCodeDetailsModal
   },
   methods: {
-    ...mapActions('staff', [
+    ...mapActions(useStaffStore, [
       'getGLCodeList'
     ])
   }
 })
 export default class GLCodesDataTable extends Vue {
-  private staffStore = getModule(StaffModule, this.$store)
   @Prop({ default: '' }) private folioFilter: string
   private readonly getGLCodeList!: () => GLCode[]
 
-  private glCodeList: GLCode[] = [];
+  private glCodeList: GLCode[] = []
   private formatDate = CommonUtils.formatDisplayDate
   private isDataLoading = false
 

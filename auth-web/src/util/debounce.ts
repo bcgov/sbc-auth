@@ -1,4 +1,4 @@
-export function debounce<F extends (...params: any[]) => void>(fn: F, delay = 300) {
+export function debounce<F extends (...params: any[]) => void | Promise<void>>(fn: F, delay = 300) {
   let timeoutID: number = null
   return function (this: any, ...args: any[]) {
     clearTimeout(timeoutID)

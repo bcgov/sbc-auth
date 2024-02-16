@@ -5,34 +5,34 @@
         <create-user-profile-landing
           :token="token"
           :orgName="orgName"
-        ></create-user-profile-landing>
+        />
       </div>
       <div v-if="loginSource == loginSourceenum.BCEID">
         <interim-landing
+          v-if="affidavitNeeded"
           :summary="$t('acceptInviteLandingTitle')"
           :description="$t('acceptInviteLandingMessageBCEID')"
           icon="mdi-login-variant"
           showHomePageBtn="false"
-          v-if="affidavitNeeded"
         >
-          <template v-slot:actions>
+          <template #actions>
             <v-btn
 
               large
               link
               color="primary"
               @click="bceidAcceptinviteWithAffidavit()"
-              >Accept</v-btn
             >
-
+              Accept
+            </v-btn>
           </template>
         </interim-landing>
 
         <bceid-invite-landing
+          v-else
           :token="token"
           :orgName="orgName"
-          v-else
-        ></bceid-invite-landing>
+        />
       </div>
       <div v-if="loginSource == loginSourceenum.BCSC">
         <interim-landing
@@ -41,23 +41,25 @@
           icon="mdi-login-variant"
           showHomePageBtn="false"
         >
-          <template v-slot:actions>
+          <template #actions>
             <v-btn
               v-if="!isUserSignedIn()"
               large
               link
               color="primary"
               @click="redirectToSignin()"
-              >{{ $t('loginBtnLabel') }}</v-btn
             >
+              {{ $t('loginBtnLabel') }}
+            </v-btn>
             <v-btn
               v-if="isUserSignedIn()"
               large
               link
               color="primary"
               @click="redirectToConfirm()"
-              >{{ $t('acceptButtonLabel') }}</v-btn
             >
+              {{ $t('acceptButtonLabel') }}
+            </v-btn>
           </template>
         </interim-landing>
       </div>
@@ -68,8 +70,7 @@
         :description="$t('expiredInvitationMessage')"
         icon="mdi-alert-circle-outline"
         iconColor="error"
-      >
-      </interim-landing>
+      />
     </div>
     <div v-if="tokenError || otherError">
       <interim-landing
@@ -77,8 +78,7 @@
         :description="$t('invitationProcessingErrorMsg')"
         icon="mdi-alert-circle-outline"
         iconColor="error"
-      >
-      </interim-landing>
+      />
     </div>
   </div>
 </template>
@@ -87,21 +87,20 @@
 
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { LoginSource, SessionStorageKeys } from '@/util/constants'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import BceidInviteLanding from '@/components/auth/BceidInviteLanding.vue'
 import ConfigHelper from '@/util/config-helper'
 import CreateUserProfileLanding from '@/components/auth/CreateUserProfileLanding.vue'
 import { EmptyResponse } from '@/models/global'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
-import OrgModule from '@/store/modules/org'
-import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {
-    ...mapState('org', ['invalidInvitationToken', 'tokenError'])
+    ...mapState(useOrgStore, ['invalidInvitationToken', 'tokenError'])
   },
   methods: {
-    ...mapActions('org', ['validateInvitationToken'])
+    ...mapActions(useOrgStore, ['validateInvitationToken'])
   },
   components: {
     BceidInviteLanding,
@@ -110,7 +109,6 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class AcceptInviteLandingView extends Vue {
-  private orgStore = getModule(OrgModule, this.$store)
   private readonly validateInvitationToken!: (token: string) => EmptyResponse
   private readonly invalidInvitationToken!: boolean
   private readonly tokenError!: boolean

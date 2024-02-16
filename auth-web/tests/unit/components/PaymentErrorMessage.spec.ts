@@ -1,25 +1,13 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import PaymentErrorMessage from '@/components/pay/common/PaymentErrorMessage.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('PaymentErrorMessage.vue', () => {
   let wrapper: any
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     const vuetify = new Vuetify({})
 
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {}
-    })
     const PaymentErrorMessageData = {
       errorType: 'PAYMENT_GENERIC_ERROR',
       backUrl: '',
@@ -31,18 +19,21 @@ describe('PaymentErrorMessage.vue', () => {
       propsData: {
         PaymentErrorMessageData
       },
-      store,
       localVue,
       vuetify,
       mocks: { $t }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('Should Payment card div', () => {

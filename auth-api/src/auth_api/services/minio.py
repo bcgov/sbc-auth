@@ -27,7 +27,7 @@ class MinioService:
     @staticmethod
     def create_signed_put_url(file_name: str, prefix_key: str = AFFIDAVIT_FOLDER_NAME) -> dict:
         """Return a pre-signed URL for new doc upload."""
-        current_app.logger.debug(f'Creating pre-signed URL for {file_name}')
+        current_app.logger.debug('Creating pre-signed URL.')
         minio_client: Minio = MinioService._get_client()
         file_extension: str = file_name.split('.')[-1]
         key = f'{prefix_key}/{str(uuid.uuid4())}.{file_extension}'
@@ -43,7 +43,7 @@ class MinioService:
     def create_signed_get_url(key: str) -> str:
         """Return a pre-signed URL for uploaded document."""
         minio_client: Minio = MinioService._get_client()
-        current_app.logger.debug(f'Creating pre-signed GET URL for {key}')
+        current_app.logger.debug('Creating pre-signed GET URL.')
 
         return minio_client.presigned_get_object(current_app.config['MINIO_BUCKET_ACCOUNTS'], key, timedelta(hours=1))
 

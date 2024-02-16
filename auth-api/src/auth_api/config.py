@@ -59,6 +59,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
     SECRET_KEY = 'a secret'
+    AUTH_LD_SDK_KEY = os.getenv('AUTH_LD_SDK_KEY', None)
 
     TESTING = False
     DEBUG = False
@@ -96,9 +97,23 @@ class _Config:  # pylint: disable=too-few-public-methods
     KEYCLOAK_ADMIN_USERNAME = os.getenv('SBC_AUTH_ADMIN_CLIENT_ID')
     KEYCLOAK_ADMIN_SECRET = os.getenv('SBC_AUTH_ADMIN_CLIENT_SECRET')
 
+    # keycloak service account token lifepan
+    try:
+        CACHE_DEFAULT_TIMEOUT = int(os.getenv('ACCESS_TOKEN_LIFESPAN'))
+    except:  # pylint:disable=bare-except # noqa: B901, E722
+        CACHE_DEFAULT_TIMEOUT = 300
+
+    CACHE_MEMCACHED_SERVERS = os.getenv('CACHE_MEMCACHED_SERVERS')
+
+    CACHE_REDIS_HOST = os.getenv('CACHE_REDIS_HOST')
+    CACHE_REDIS_PORT = os.getenv('CACHE_REDIS_PORT')
+
     # Service account details
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('SBC_AUTH_ADMIN_CLIENT_ID')
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('SBC_AUTH_ADMIN_CLIENT_SECRET')
+
+    ENTITY_SVC_CLIENT_ID = os.getenv('ENTITY_SERVICE_ACCOUNT_CLIENT_ID')
+    ENTITY_SVC_CLIENT_SECRET = os.getenv('ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET')
 
     # Upstream Keycloak settings
     KEYCLOAK_BCROS_BASE_URL = os.getenv('KEYCLOAK_BCROS_BASE_URL')
@@ -107,13 +122,24 @@ class _Config:  # pylint: disable=too-few-public-methods
     KEYCLOAK_BCROS_ADMIN_SECRET = os.getenv('KEYCLOAK_BCROS_ADMIN_SECRET')
 
     # API Endpoints
-    PAY_API_URL = os.getenv('PAY_API_URL')
-    LEGAL_API_URL = os.getenv('LEGAL_API_URL')
-    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
     BCOL_API_URL = os.getenv('BCOL_API_URL')
+    LEGAL_API_URL = os.getenv('LEGAL_API_URL', '')
+    NAMEX_API_URL = os.getenv('NAMEX_API_URL', '')
+    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
     PAY_API_SANDBOX_URL = os.getenv('PAY_API_SANDBOX_URL')
+    PAY_API_URL = os.getenv('PAY_API_URL')
+
     LEGAL_API_VERSION = os.getenv('LEGAL_API_VERSION')
-    LEGAL_API_VERSION_2 = os.getenv('LEGAL_API_VERSION_2')
+    LEGAL_API_VERSION_2 = os.getenv('LEGAL_API_VERSION_2', '')
+
+    LEAR_AFFILIATION_DETAILS_URL = f'{LEGAL_API_URL + LEGAL_API_VERSION_2}/businesses/search'
+
+    # Temporary until legal names is implemented.
+    LEGAL_API_ALTERNATE_URL = os.getenv('LEGAL_API_ALTERNATE_URL', '')
+    # Temporary until legal names is implemented.
+    LEAR_ALTERNATE_AFFILIATION_DETAILS_URL = f'{LEGAL_API_ALTERNATE_URL + LEGAL_API_VERSION_2}/businesses/search'
+
+    NAMEX_AFFILIATION_DETAILS_URL = f'{NAMEX_API_URL}/requests/search'
 
     # NATS Config
     NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(',')
@@ -139,6 +165,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     EMAIL_SECURITY_PASSWORD_SALT = os.getenv('EMAIL_SECURITY_PASSWORD_SALT')
     EMAIL_TOKEN_SECRET_KEY = os.getenv('EMAIL_TOKEN_SECRET_KEY')
     TOKEN_EXPIRY_PERIOD = os.getenv('TOKEN_EXPIRY_PERIOD')
+    AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS = os.getenv('AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS', '15')
     STAFF_ADMIN_EMAIL = os.getenv('STAFF_ADMIN_EMAIL')
 
     # Sentry Config
@@ -180,6 +207,7 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     # NR Supported Request types.
     NR_SUPPORTED_REQUEST_TYPES: List[str] = os.getenv('NR_SUPPORTED_REQUEST_TYPES', 'BC').replace(' ', '').split(',')
+    AUTH_WEB_SANDBOX_HOST = os.getenv('AUTH_WEB_SANDBOX_HOST', 'localhost')
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
@@ -277,6 +305,9 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
 
     # Legal-API URL
+    ENTITY_SVC_CLIENT_ID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
+    ENTITY_SVC_CLIENT_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
+
     LEGAL_API_URL = 'https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7'
     LEGAL_API_VERSION_2 = '/api/v1'
 

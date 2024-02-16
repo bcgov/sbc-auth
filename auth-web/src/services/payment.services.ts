@@ -1,3 +1,4 @@
+import { EFTShortnameResponse, EFTTransactionFilterParams, EFTTransactionListResponse } from '@/models/eft-transaction'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
 import { PADInfo, PADInfoValidation } from '@/models/Organization'
@@ -12,6 +13,7 @@ import { TransactionFilter, TransactionFilterParams, TransactionListResponse } f
 
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
+import { LinkedShortNameFilterParams } from '@/models/pay/short-name'
 import { Payment } from '@/models/Payment'
 import { PaymentTypes } from '@/util/constants'
 import { axios } from '@/util/http-util'
@@ -25,16 +27,20 @@ export default class PaymentService {
     })
   }
 
-  static getInvoice (invoiceId: string): AxiosPromise<Invoice> {
-    return axios.get(`${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}`)
+  static getInvoice (invoiceId: string, accountId: number): AxiosPromise<Invoice> {
+    const headers = accountId ? { 'Account-Id': accountId } : {}
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}`, { headers: headers })
   }
 
-  static updateInvoicePaymentMethodAsCreditCard (paymentId: string): AxiosPromise<any> {
+  static updateInvoicePaymentMethodAsCreditCard (paymentId: string, accountId: number): AxiosPromise<any> {
+    const headers = accountId ? { 'Account-Id': accountId } : {}
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}`
     return axios.patch(url, {
       paymentInfo: {
         methodOfPayment: PaymentTypes.CREDIT_CARD
       }
+    }, {
+      headers: headers
     }
     )
   }
@@ -73,19 +79,21 @@ export default class PaymentService {
     })
   }
 
-  static getTransactions (accountId: string, filterParams: TransactionFilterParams): AxiosPromise<TransactionListResponse> {
-    let params = new URLSearchParams()
+  static getTransactions (accountId: number, filterParams: TransactionFilterParams, viewAll = false): AxiosPromise<TransactionListResponse> {
+    const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
     }
     if (filterParams.pageLimit) {
       params.append('limit', filterParams.pageLimit.toString())
     }
+    if (viewAll) params.append('viewAll', `${viewAll}`)
+
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
     return axios.post(url, filterParams.filterPayload, { params })
   }
 
-  static getTransactionReports (accountId: string, filterParams: TransactionFilter): AxiosPromise<any> {
+  static getTransactionReports (accountId: number, filterParams: TransactionFilter): AxiosPromise<any> {
     const headers = {
       'Accept': 'text/csv'
     }
@@ -93,8 +101,8 @@ export default class PaymentService {
     return axios.post(url, filterParams, { headers, responseType: 'blob' as 'json' })
   }
 
-  static getStatementsList (accountId: string, filterParams: StatementFilterParams): AxiosPromise<StatementListResponse> {
-    let params = new URLSearchParams()
+  static getStatementsList (accountId: string | number, filterParams: StatementFilterParams): AxiosPromise<StatementListResponse> {
+    const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
     }
@@ -105,11 +113,16 @@ export default class PaymentService {
     return axios.get(url, { params })
   }
 
-  static getStatementSettings (accountId: string): AxiosPromise<StatementSettings> {
+  static getStatementSettings (accountId: string | number): AxiosPromise<StatementSettings> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/settings`)
   }
 
-  static getStatement (accountId: string, statementId: string, type: string): AxiosPromise<any> {
+  static getStatementsSummary (accountId: string | number): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/summary`
+    return axios.get(url)
+  }
+
+  static getStatement (accountId: string | number, statementId: string, type: string): AxiosPromise<any> {
     const headers = {
       'Accept': type
     }
@@ -117,15 +130,15 @@ export default class PaymentService {
     return axios.get(url, { headers, responseType: 'blob' as 'json' })
   }
 
-  static updateStatementSettings (accountId: string, updateBody): AxiosPromise<StatementListItem> {
+  static updateStatementSettings (accountId: string | number, updateBody): AxiosPromise<StatementListItem> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/settings`, updateBody)
   }
 
-  static getStatementRecipients (accountId: string): AxiosPromise<StatementNotificationSettings> {
+  static getStatementRecipients (accountId: string | number): AxiosPromise<StatementNotificationSettings> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/notifications`)
   }
 
-  static updateStatementNotifications (accountId: string, updateBody): AxiosPromise<StatementNotificationSettings> {
+  static updateStatementNotifications (accountId: string | number, updateBody): AxiosPromise<StatementNotificationSettings> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/notifications`, updateBody)
   }
 
@@ -149,11 +162,11 @@ export default class PaymentService {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/bank-accounts/verifications`, padInfo)
   }
 
-  static getFailedInvoices (accountId: string): AxiosPromise<InvoiceListResponse> {
+  static getFailedInvoices (accountId: string | number): AxiosPromise<InvoiceListResponse> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?status=FAILED`)
   }
 
-  static createAccountPayment (accountId: string) :AxiosPromise<Payment> {
+  static createAccountPayment (accountId: string | number) :AxiosPromise<Payment> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?retryFailedPayment=true`, {})
   }
 
@@ -165,16 +178,87 @@ export default class PaymentService {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/codes/fee_codes`)
   }
 
-  static createAccountFees (accountId: string, accountFeePayload: any): AxiosPromise<any> {
+  static createAccountFees (accountId: string | number, accountFeePayload: any): AxiosPromise<any> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/fees`, accountFeePayload)
   }
 
-  static getAccountFees (accountId: string): AxiosPromise<any> {
+  static getAccountFees (accountId: string | number): AxiosPromise<any> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}`)
   }
 
-  static updateAccountFees (accountId: string, accountFeePayload: any): AxiosPromise<any> {
+  static updateAccountFees (accountId: string | number, accountFeePayload: any): AxiosPromise<any> {
     const { product } = accountFeePayload
     return axios.put(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/fees/${product}`, accountFeePayload)
+  }
+
+  static removeAccountFees (accountId: string | number): AxiosPromise<any> {
+    return axios.delete(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/fees`)
+  }
+
+  static getNSFInvoices (accountId: string | number): AxiosPromise<any> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/nsf`)
+  }
+
+  static downloadNSFInvoicesPDF (accountId: string | number): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/nsf/statement`
+    const headers = { 'Accept': 'application/pdf' }
+    const body = {}
+    return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
+  }
+
+  static searchEFTAccounts (searchText: string): AxiosPromise<any> {
+    const params = new URLSearchParams({
+      'searchText': searchText
+    })
+
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/search/eft?${params.toString()}`)
+  }
+
+  static getEFTShortNames (filterParams: LinkedShortNameFilterParams, viewAll = false): AxiosPromise<any> {
+    const params = new URLSearchParams()
+    if (filterParams.pageNumber) {
+      params.append('page', filterParams.pageNumber.toString())
+    }
+    if (filterParams.pageLimit) {
+      params.append('limit', filterParams.pageLimit.toString())
+    }
+    if (viewAll) {
+      params.append('viewAll', `${viewAll}`)
+    }
+
+    if (filterParams.filterPayload) {
+      for (const [key, value] of Object.entries(filterParams.filterPayload)) {
+        if (value) {
+          params.append(key, value)
+        }
+      }
+    }
+
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames?${params.toString()}`)
+  }
+  static getEFTTransactions (shortNameId: string, filterParams: EFTTransactionFilterParams): AxiosPromise<EFTTransactionListResponse> {
+    const params = new URLSearchParams()
+    if (filterParams.pageNumber) {
+      params.append('page', filterParams.pageNumber.toString())
+    }
+    if (filterParams.pageLimit) {
+      params.append('limit', filterParams.pageLimit.toString())
+    }
+
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/transactions`
+    return axios.get(url, { params })
+  }
+
+  static getEFTShortname (shortNameId: string): AxiosPromise<EFTShortnameResponse> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`
+    return axios.get(url)
+  }
+
+  static patchEFTShortname (shortNameId: string, accountId: string): AxiosPromise<EFTShortnameResponse> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`
+    const body = {
+      accountId: accountId
+    }
+    return axios.patch(url, body)
   }
 }

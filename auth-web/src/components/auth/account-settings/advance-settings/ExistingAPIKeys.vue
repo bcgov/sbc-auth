@@ -1,7 +1,9 @@
 <template>
   <div>
     <header class="view-header align-center mt-n1 mb-7">
-      <h2 class="view-header__title">Existing API Keys</h2>
+      <h2 class="view-header__title">
+        Existing API Keys
+      </h2>
     </header>
 
     <div>
@@ -15,28 +17,28 @@
         disable-pagination
         hide-default-footer
       >
-        <template v-slot:loading>
+        <template #loading>
           Loading...
         </template>
-        <template v-slot:[`item.apiKeyName`]="{ item }">
+        <template #[`item.apiKeyName`]="{ item }">
           <div class=" font-weight-bold">
             {{ item.apiKeyName }}
           </div>
         </template>
-          <template v-slot:[`item.environment`]="{ item }">
+        <template #[`item.environment`]="{ item }">
           <div class="text-capitalize">
             {{ item.environment }}
           </div>
         </template>
-        <template v-slot:[`item.action`]="{ item }">
+        <template #[`item.action`]="{ item }">
           <!-- Revoke -->
           <v-btn
             outlined
             aria-label="Revoke"
             title="Revoke"
             color="primary"
-            @click="confirmationModal(item)"
             :data-test="getIndexedTag('confirm-button', item.apiKeyName)"
+            @click="confirmationModal(item)"
           >
             Revoke
           </v-btn>
@@ -52,23 +54,32 @@
       max-width="650"
       data-test="confirmation-modal"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
           mdi-alert-circle-outline
         </v-icon>
       </template>
-      <template v-slot:text>
-        <p class="mb-0 px-6" v-html="confirmActionTextLine1"></p>
-        <p class="mx-4 px-10 mb-0" v-html="confirmActionTextLine2"></p>
+      <template #text>
+        <p
+          class="mb-0 px-6"
+          v-html="confirmActionTextLine1"
+        />
+        <p
+          class="mx-4 px-10 mb-0"
+          v-html="confirmActionTextLine2"
+        />
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <div class="modal-class-override">
           <v-btn
             large
             color="primary"
             class="font-weight-bold px-8"
-            @click="revokeApi()"
             :loading="isLoading"
+            @click="revokeApi()"
           >
             Revoke
           </v-btn>
@@ -77,8 +88,8 @@
             large
             depressed
             color="primary"
-            @click="close($refs.confirmActionDialog)"
             class="ml-3 px-7"
+            @click="close($refs.confirmActionDialog)"
           >
             Cancel
           </v-btn>
@@ -95,12 +106,15 @@
       max-width="600"
       data-test="alert-modal"
     >
-      <template v-slot:icon>
-        <v-icon large :color="notificationColor">
+      <template #icon>
+        <v-icon
+          large
+          :color="notificationColor"
+        >
           {{ alertIcon }}
         </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           depressed
@@ -115,14 +129,12 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Mixins } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
-
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -130,14 +142,9 @@ const OrgModule = namespace('org')
   }
 })
 export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
-  @OrgModule.State('currentOrganization')
-  public currentOrganization!: Organization
-  @OrgModule.Action('getOrgApiKeys') public getOrgApiKeys!: (
-    orgId: any
-  ) => Promise<any>
-  @OrgModule.Action('revokeOrgApiKeys') public revokeOrgApiKeys!: (
-    orgId: any
-  ) => Promise<any>
+  @State(useOrgStore) readonly currentOrganization!: Organization
+  @Action(useOrgStore) readonly getOrgApiKeys!: (orgId: any) => Promise<any>
+  @Action(useOrgStore) readonly revokeOrgApiKeys!: (orgId: any) => Promise<any>
 
   public isLoading = true
   public confirmActionTitle = 'Revoke API Key?'
@@ -151,8 +158,8 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   public selectedApi: any = {}
 
   $refs: {
-    successDialog: ModalDialog
-    confirmActionDialog: ModalDialog
+    successDialog: InstanceType<typeof ModalDialog>
+    confirmActionDialog: InstanceType<typeof ModalDialog>
   }
 
   public apliKeyList = []

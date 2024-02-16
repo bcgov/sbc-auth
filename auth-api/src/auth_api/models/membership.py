@@ -23,7 +23,7 @@ from typing import List
 from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.enums import Status
+from auth_api.utils.enums import OrgType, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_ORG_STATUSES, VALID_STATUSES
 from .base_model import VersionedModel
 from .db import db
@@ -107,6 +107,35 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
         return list(map(lambda x: x.org, records))
 
     @classmethod
+    def find_active_staff_org_memberships_for_user(cls, user_id) -> List[Membership]:
+        """Find staff orgs memberships for a user."""
+        return cls.query \
+            .join(OrgModel) \
+            .filter(cls.user_id == user_id) \
+            .filter(cls.status == Status.ACTIVE.value) \
+            .filter(OrgModel.status_code.in_(VALID_ORG_STATUSES)) \
+            .filter(OrgModel.type_code == OrgType.STAFF.value) \
+            .all()
+
+    @classmethod
+    def add_membership_for_staff(cls, user_id):
+        """Add staff membership."""
+        if (staff_orgs := OrgModel.find_by_org_type(OrgType.STAFF.value)):
+            membership = cls.find_membership_by_user_and_org(user_id, staff_orgs[0].id)
+            if not membership:
+                membership = Membership(org_id=staff_orgs[0].id, user_id=user_id, membership_type_code=USER)
+            membership.status = Status.ACTIVE.value
+            membership.save()
+
+    @classmethod
+    def remove_membership_for_staff(cls, user_id):
+        """Remove staff membership."""
+        staff_memberships = cls.find_active_staff_org_memberships_for_user(user_id)
+        for staff_membership in staff_memberships:
+            staff_membership.status = Status.INACTIVE.value
+            staff_membership.save()
+
+    @classmethod
     def find_membership_by_user_and_org(cls, user_id, org_id) -> Membership:
         """Get the membership for the specified user and org."""
         records = cls.query \
@@ -120,11 +149,21 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
 
     @classmethod
     def find_membership_by_userid(cls, user_id) -> Membership:
-        """Get the membership for the specified user and org."""
+        """Get the membership for the specified user."""
         records = cls.query \
             .filter(cls.user_id == user_id) \
             .order_by(desc(Membership.created)) \
             .first()
+
+        return records
+
+    @classmethod
+    def find_memberships_by_user_ids(cls, user_id) -> List[Membership]:
+        """Get the memberships for the specified user ids."""
+        records = cls.query \
+            .filter(cls.user_id == user_id) \
+            .order_by(desc(Membership.created)) \
+            .all()
 
         return records
 
@@ -160,6 +199,13 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
         count_q = query.statement.with_only_columns([func.count()]).order_by(None)
         count = query.session.execute(count_q).scalar()
         return count
+
+    @classmethod
+    def check_if_sbc_staff(cls, user_id: int) -> bool:
+        """Return True if the use has membership to sbc staff organization."""
+        return db.session.query(Membership).filter(
+            and_(Membership.user_id == user_id, Membership.status == Status.ACTIVE.value,
+                 Membership.org.has(OrgModel.type_code == OrgType.SBC_STAFF.value))).count() > 0
 
     def reset(self):
         """Reset member."""

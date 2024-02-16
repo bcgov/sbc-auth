@@ -1,12 +1,8 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
 import { GLInfo } from '@/models/Organization'
 import PaymentInformation from '@/components/auth/staff/review-task/PaymentInformation.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -32,16 +28,10 @@ describe('PaymentInformation.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({
-      strict: false
-    })
 
     wrapperFactory = (propsData) => {
       return shallowMount(PaymentInformation, {
         localVue,
-        store,
         vuetify,
         propsData: {
           ...propsData
@@ -53,16 +43,17 @@ describe('PaymentInformation.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the AgreementInformation components properly ', () => {
-    expect(wrapper.find(PaymentInformation).exists()).toBe(true)
+    expect(wrapper.findComponent(PaymentInformation).exists()).toBe(true)
   })
 
   it('renders proper GLInfo content', () => {

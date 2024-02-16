@@ -1,10 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import PasswordRequirementAlert from '@/components/auth/common/PasswordRequirementAlert.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -16,14 +13,10 @@ describe('PasswordRequirementAlert.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const store = new Vuex.Store({})
-
-    wrapperFactory = (propsData) => {
+    wrapperFactory = () => {
       return mount(PasswordRequirementAlert, {
         localVue,
-        store,
         vuetify
       })
     }
@@ -32,16 +25,17 @@ describe('PasswordRequirementAlert.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
-    expect(wrapper.find(PasswordRequirementAlert).exists()).toBe(true)
+    expect(wrapper.findComponent(PasswordRequirementAlert).exists()).toBe(true)
   })
 
   it('renders the v-alert properly', () => {

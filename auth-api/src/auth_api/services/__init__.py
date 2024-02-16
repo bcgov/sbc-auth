@@ -16,6 +16,7 @@ from .activity_log import ActivityLog
 from .activity_log_publisher import ActivityLogPublisher
 from .affidavit import Affidavit
 from .affiliation import Affiliation
+from .affiliation_invitation import AffiliationInvitation
 from .api_gateway import ApiGateway
 from .codes import Codes
 from .contact import Contact
@@ -28,6 +29,8 @@ from .org import Org
 from .permissions import Permissions
 from .products import Product
 from .reset import ResetTestData
+from .simple_org import SimpleOrg
 from .task import Task
 from .user import User
 from .user_settings import UserSettings
+from .flags import Flags

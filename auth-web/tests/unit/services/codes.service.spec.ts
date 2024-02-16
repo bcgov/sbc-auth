@@ -1,29 +1,42 @@
 import { Code } from '@/models/Code'
 import CodesService from '../../../src/services/codes.service'
-import axios from 'axios'
 
-var mockob = {
+const mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 }
 
+const testCodeSuspensionReasons: Code[] = [{
+  code: 'testSuspensionCode',
+  desc: 'testSuspensionDesc',
+  default: true
+}]
+
+const mocks = vi.hoisted(() => ({
+  get: vi.fn().mockReturnValue({ data: testCodeSuspensionReasons })
+}))
+
 describe('Codes service', () => {
-  beforeAll(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
-    // @ts-ignore
-    jest.clearAllMocks()
+  beforeEach(() => {
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
+    vi.doMock('axios', () => {
+      return {
+        get: mocks.get,
+        interceptors: {
+          request: {
+            use: vi.fn(),
+            eject: vi.fn()
+          },
+          response: {
+            use: vi.fn(),
+            eject: vi.fn()
+          }
+        }
+      }
+    })
   })
 
   it('call getCodes() for suspended_reason_codes ', () => {
-    jest.mock('axios')
-    const testCodeSuspensionReasons: Code[] = [{
-      code: 'testSuspensionCode',
-      desc: 'testSuspensionDesc',
-      default: true
-    }]
-    const resp = { data: testCodeSuspensionReasons }
-    axios.get = jest.fn().mockReturnValue(resp)
-
     CodesService.getCodes('suspension-reason-codes').then((response) => {
       expect(response).toEqual(testCodeSuspensionReasons)
     })

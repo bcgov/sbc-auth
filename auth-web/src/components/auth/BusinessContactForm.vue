@@ -1,112 +1,132 @@
 <template>
-  <v-form ref="form" lazy-validation>
+  <v-form
+    ref="form"
+    lazy-validation
+  >
     <v-expand-transition>
-      <div class="business-contact-form__alert-container" v-show="formError">
-        <v-alert type="error" class="mb-0"
+      <div
+        v-show="formError"
+        class="business-contact-form__alert-container"
+      >
+        <v-alert
+          type="error"
+          class="mb-0"
           :value="true"
-        >{{formError}}
+        >
+          {{ formError }}
         </v-alert>
       </div>
     </v-expand-transition>
 
     <!-- Business Contact Information Fields -->
     <fieldset>
-      <legend class="mb-4">Business Contact Information</legend>
+      <legend class="mb-4">
+        Business Contact Information
+      </legend>
       <v-text-field
+        v-model="emailAddress"
         filled
         label="Email Address"
         req
         persistent-hint
         :rules="emailRules"
-        v-model="emailAddress"
+      />
+      <v-text-field
+        v-model="confirmedEmailAddress"
+        filled
+        label="Confirm Email Address"
+        req
+        persistent-hint
+        :error-messages="emailMustMatch()"
+      />
+      <v-row>
+        <v-col cols="6">
+          <v-text-field
+            v-model="phoneNumber"
+            v-mask="['(###) ###-####']"
+            filled
+            label="Phone Number"
+            persistent-hint
+            hint="Example: (555) 555-5555"
+            type="tel"
+          />
+        </v-col>
+        <v-col cols="4">
+          <v-text-field
+            v-model="extension"
+            v-mask="'#####'"
+            filled
+            label="Extension"
+            persistent-hint
+            :rules="extensionRules"
+          />
+        </v-col>
+      </v-row>
+    </fieldset>
+
+    <v-divider class="mt-6 mb-9" />
+
+    <!-- Folio / Reference Number Fields -->
+    <fieldset>
+      <legend class="mb-4">
+        Folio / Reference Number (optional)
+      </legend>
+      <p class="mb-8">
+        If you file forms for a number of companies, you may want to enter a folio or reference number to help you keep track of your transactions.
+      </p>
+      <v-text-field
+        v-model="folioNumber"
+        filled
+        label="Folio or Reference Number"
+        persistent-hint
+        :maxlength="50"
+      />
+    </fieldset>
+
+    <v-divider class="my-2 mb-10" />
+
+    <div class="form__btns">
+      <v-btn
+        large
+        color="primary"
+        :disabled="!isFormValid()"
+        @click="save"
       >
-      </v-text-field>
-        <v-text-field
-          filled
-          label="Confirm Email Address"
-          req
-          persistent-hint
-          :error-messages="emailMustMatch()"
-          v-model="confirmedEmailAddress"
-        >
-        </v-text-field>
-        <v-row>
-          <v-col cols="6">
-            <v-text-field
-              filled
-              label="Phone Number"
-              persistent-hint
-              hint="Example: (555) 555-5555"
-              type="tel"
-              v-mask="['(###) ###-####']"
-              v-model="phoneNumber"
-            >
-            </v-text-field>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              filled label="Extension"
-              persistent-hint
-              :rules="extensionRules"
-              v-mask="'#####'"
-              v-model="extension"
-            >
-            </v-text-field>
-          </v-col>
-        </v-row>
-      </fieldset>
-
-      <v-divider class="mt-6 mb-9"></v-divider>
-
-      <!-- Folio / Reference Number Fields -->
-      <fieldset>
-        <legend class="mb-4">Folio / Reference Number (optional)</legend>
-        <p class="mb-8">If you file forms for a number of companies, you may want to enter a folio or reference number to help you keep track of your transactions.</p>
-        <v-text-field
-          filled
-          label="Folio or Reference Number"
-          persistent-hint
-          :maxlength="50"
-          v-model="folioNumber"
-        >
-        </v-text-field>
-      </fieldset>
-
-      <v-divider class="my-2 mb-10"></v-divider>
-
-      <div class="form__btns">
-        <v-btn large color="primary" @click="save" :disabled='!isFormValid()'>
-          Update
-        </v-btn>
-        <v-btn large depressed color="default" @click="cancel">
-          Cancel
-        </v-btn>
-      </div>
+        Update
+      </v-btn>
+      <v-btn
+        large
+        depressed
+        color="default"
+        @click="cancel"
+      >
+        Cancel
+      </v-btn>
+    </div>
   </v-form>
 </template>
 
 <script lang="ts">
 import { Business, FolioNumberload } from '@/models/business'
 import { Component, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
-import BusinessModule from '@/store/modules/business'
+import { mapActions, mapState } from 'pinia'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { Organization } from '@/models/Organization'
-import { SessionStorageKeys } from '@/util/constants'
-import { getModule } from 'vuex-module-decorators'
 import { mask } from 'vue-the-mask'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   directives: {
     mask
   },
   computed: {
-    ...mapState('business', ['currentBusiness']),
-    ...mapState('org', ['currentOrganization'])
+    ...mapState(useBusinessStore, ['currentBusiness']),
+    ...mapState(useOrgStore, ['currentOrganization'])
   },
   methods: {
-    ...mapActions('business', ['saveContact', 'updateFolioNumber'])
+    ...mapActions(useBusinessStore, ['saveContact', 'updateFolioNumber'])
   }
 })
 export default class BusinessContactForm extends Vue {
@@ -173,7 +193,10 @@ export default class BusinessContactForm extends Vue {
         phoneExtension: this.extension
       }
       await this.saveContact(contact)
-      await this.updateFolioNumber({ businessIdentifier: this.currentBusiness.businessIdentifier.trim().toUpperCase(), folioNumber: this.folioNumber })
+      await this.updateFolioNumber({
+        businessIdentifier: this.currentBusiness.businessIdentifier.trim().toUpperCase(),
+        folioNumber: this.folioNumber
+      })
       this.redirectToNext()
     }
   }

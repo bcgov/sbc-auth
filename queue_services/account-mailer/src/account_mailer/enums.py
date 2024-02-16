@@ -36,6 +36,7 @@ class MessageType(Enum):
     EJV_FAILED = 'bc.registry.payment.ejvFailed'
     RESET_PASSCODE = 'bc.registry.auth.resetPasscode'
     ADMIN_NOTIFICATION = 'bc.registry.auth.adminNotification'
+    AFFILIATION_INVITATION = 'bc.registry.auth.affiliationInvitation'
     BUSINESS_INVITATION = 'bc.registry.auth.businessInvitation'
     BUSINESS_INVITATION_FOR_BCEID = 'bc.registry.auth.businessInvitationForBceid'
     DIRSEARCH_BUSINESS_INVITATION = 'bc.registry.auth.dirsearchBusinessInvitation'
@@ -52,15 +53,24 @@ class MessageType(Enum):
     GOVM_REJECTED_NOTIFICATION = 'bc.registry.auth.govmRejectedNotification'
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'bc.registry.auth.prodPackageApprovedNotification'
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'bc.registry.auth.prodPackageRejectedNotification'
+    PRODUCT_APPROVED_NOTIFICATION_DETAILED = 'bc.registry.auth.productApprovedNotificationDetailed'
+    PRODUCT_REJECTED_NOTIFICATION_DETAILED = 'bc.registry.auth.productRejectedNotificationDetailed'
+    PRODUCT_CONFIRMATION_NOTIFICATION = 'bc.registry.auth.productConfirmationNotification'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'bc.registry.auth.resubmitBceidOrg'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'bc.registry.auth.resubmitBceidAdmin'
+    AFFILIATION_INVITATION_REQUEST = 'bc.registry.auth.affiliationInvitationRequest'
+    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = 'bc.registry.auth.affiliationInvitationRequestAuthorization'
+    STATEMENT_NOTIFICATION = 'bc.registry.payment.statementNotification'
+    PAYMENT_REMINDER_NOTIFICATION = 'bc.registry.payment.statementReminderNotification'
+    PAYMENT_DUE_NOTIFICATION = 'bc.registry.payment.statementDueNotification'
+    EFT_AVAILABLE_NOTIFICATION = 'bc.registry.payment.eftAvailableNotification'
 
 
 class SubjectType(Enum):
     """Event Types."""
 
     NSF_LOCK_ACCOUNT_SUBJECT = '[BC Registries and Online Services] Your account has been suspended'
-    NSF_UNLOCK_ACCOUNT_SUBJECT = '[BC Registries and Online Services] Your account has been reactivated'
+    NSF_UNLOCK_ACCOUNT_SUBJECT = 'Your Account Was Successfully Restored'
     ACCOUNT_CONF_OVER_SUBJECT = '[BC Registries and Online Services] Your account is now active'
     PAD_INVOICE_CREATED = '[BC Registries and Online Services] Your accounts PAD transaction details'
     ADMIN_REMOVED_SUBJECT = '[BC Registries and Online Services] You have been removed as an administrator'
@@ -72,6 +82,7 @@ class SubjectType(Enum):
     RESET_PASSCODE = 'BC Registries Account Passcode Reset'
     ADMIN_NOTIFICATION = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
                          'has responded for the invitation to join the account {account_name}'
+    AFFILIATION_INVITATION = '[BC Registries and Online Services] Authorise Access to Manage Your Business'
     BUSINESS_INVITATION = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
                           'has invited you to join an account'
     BUSINESS_INVITATION_FOR_BCEID = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
@@ -96,10 +107,23 @@ class SubjectType(Enum):
                                          '{product_name} Has Been Approved'
     PROD_PACKAGE_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                          'Your Product Request {product_name} Has Been Rejected'
+    PRODUCT_APPROVED_NOTIFICATION_DETAILED = '[BC Registries and Online Services] Your {subject_descriptor} ' \
+                                             'Access Has Been Approved'
+    PRODUCT_REJECTED_NOTIFICATION_DETAILED = '[BC Registries and Online Services] Your {subject_descriptor} ' \
+                                             'Access Has Been Rejected'
+    PRODUCT_CONFIRMATION_NOTIFICATION = '[BC Registries and Online Services] {subject_descriptor} ' \
+                                        'Application Confirmation'
     RESUBMIT_BCEID_ORG_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                       'Update your information.'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                         'Update your information.'
+    AFFILIATION_INVITATION_REQUEST = '[BC Registries and Online Services] Request to manage {business_name}'
+    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = '[BC Registries and Online Services] ' \
+                                                   'Request to manage {business_name}'
+    STATEMENT_NOTIFICATION = 'Your BC Registries statement is available'
+    PAYMENT_REMINDER_NOTIFICATION = 'Your BC Registries payment reminder'
+    PAYMENT_DUE_NOTIFICATION = 'Your BC Registries payment is due'
+    EFT_AVAILABLE_NOTIFICATION = 'New Payment Method Available'
 
 
 class TitleType(Enum):
@@ -122,15 +146,21 @@ class TitleType(Enum):
     GOVM_REJECTED_NOTIFICATION = 'Your BC Registries Account Has Been Rejected'
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'Your Product Request Has Been Approved'
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'Your Product Request Has Been Rejected'
+    PRODUCT_APPROVED_NOTIFICATION_DETAILED = 'Your Product Request Has Been Approved'
+    PRODUCT_REJECTED_NOTIFICATION_DETAILED = 'Your Product Request Has Been Rejected'
+    PRODUCT_CONFIRMATION_NOTIFICATION = 'Your Product Request Application Has Been Received'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'Your Account Creation Request is On hold '
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'Your Team Member Request is On hold '
+    AFFILIATION_INVITATION = 'Invitation to manage a business with your account.'
+    AFFILIATION_INVITATION_REQUEST = 'You have been authorized to manage the business.'
+    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = 'You have been authorized to manage the business.'
 
 
 class TemplateType(Enum):
     """Template Types."""
 
     NSF_LOCK_ACCOUNT_TEMPLATE_NAME = 'account_suspended_email'
-    NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME = 'account_restored_email'
+    NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME = 'account_unlocked_email'
     ACCOUNT_CONF_OVER_TEMPLATE_NAME = 'account_conf_over_email'
     PAD_INVOICE_CREATED_TEMPLATE_NAME = 'pad_invoice_email'
     ADMIN_REMOVED_TEMPLATE_NAME = 'admin_removed_email'
@@ -143,6 +173,7 @@ class TemplateType(Enum):
     EJV_FAILED_TEMPLATE_NAME = 'ejv_failed_email'
     RESET_PASSCODE_TEMPLATE_NAME = 'reset_passcode'
     ADMIN_NOTIFICATION_TEMPLATE_NAME = 'admin_notification_email'
+    AFFILIATION_INVITATION_TEMPLATE_NAME = 'affiliation_invitation_email'
     BUSINESS_INVITATION_TEMPLATE_NAME = 'business_invitation_email'
     BUSINESS_INVITATION_FOR_BCEID_TEMPLATE_NAME = 'business_invitation_email_for_bceid'
     DIRSEARCH_BUSINESS_INVITATION_TEMPLATE_NAME = 'dirsearch_business_invitation_email'
@@ -159,11 +190,26 @@ class TemplateType(Enum):
     GOVM_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'govm_rejected_notification'
     PROD_PACKAGE_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_approved_notification'
     PROD_PACKAGE_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_rejected_notification'
+    PRODUCT_APPROVED_NOTIFICATION_DETAILED_TEMPLATE_NAME = 'product_approved_notification_detailed'
+    PRODUCT_REJECTED_NOTIFICATION_DETAILED_TEMPLATE_NAME = 'product_rejected_notification_detailed'
+    PRODUCT_CONFIRMATION_NOTIFICATION_TEMPLATE_NAME = 'product_confirmation_notification'
     RESUBMIT_BCEID_ORG_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_org'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_admin'
+    AFFILIATION_INVITATION_REQUEST_TEMPLATE_NAME = 'affiliation_invitation_request'
+    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION_TEMPLATE_NAME = 'affiliation_invitation_request_authorization'
+    STATEMENT_NOTIFICATION_TEMPLATE_NAME = 'statement_notification'
+    PAYMENT_REMINDER_NOTIFICATION_TEMPLATE_NAME = 'payment_reminder_notification'
+    PAYMENT_DUE_NOTIFICATION_TEMPLATE_NAME = 'payment_due_notification'
+    EFT_AVAILABLE_NOTIFICATION_TEMPLATE_NAME = 'eft_available_notification'
 
 
 class Constants(Enum):
     """Constants."""
 
     RESET_PASSCODE_HEADER = 'BC Registries have generated a new passcode for your business.'
+
+
+class AttachmentTypes(Enum):
+    """Notification Attachment Types."""
+
+    QUALIFIED_SUPPLIER = 'QUALIFIED_SUPPLIER'

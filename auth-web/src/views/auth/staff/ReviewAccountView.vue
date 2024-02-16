@@ -2,8 +2,16 @@
   <v-container class="view-container pt-0">
     <!-- Loading status -->
     <v-fade-transition>
-      <div class="loading-container" v-if="isLoading">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
       </div>
     </v-fade-transition>
 
@@ -11,44 +19,82 @@
       <!-- Breadcrumbs / Back Navigation -->
       <nav class="crumbs py-6">
         <div>
-            <router-link :to="task.relationshipStatus === TaskRelationshipStatusEnum.REJECTED ? pagesEnum.STAFF_DASHBOARD_REJECTED: pagesEnum.STAFF_DASHBOARD_REVIEW">
-              <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
-              <span>Back to Staff Dashboard</span>
-            </router-link>
+          <router-link :to="determinePage">
+            <v-icon
+              small
+              color="primary"
+              class="mr-1"
+            >
+              mdi-arrow-left
+            </v-icon>
+            <span>Back to Staff Dashboard</span>
+          </router-link>
         </div>
       </nav>
       <div class="view-header flex-column">
-        <h1 class="view-header__title">{{title}}</h1>
-        <p class="mt-2 mb-0">Review and verify details for this account.</p>
+        <h1 class="view-header__title">
+          {{ title }}
+        </h1>
+        <p class="mt-2 mb-0">
+          Review and verify details for this account.
+        </p>
       </div>
-      <v-card class="mt-8" flat>
+      <v-card
+        class="mt-8"
+        flat
+      >
         <v-row class="mr-0 ml-0">
-
           <!-- Components list will come here -->
           <v-col class="main-col col-12 col-md-8 pa-6 pa-md-8">
             <template v-for="(component, idx) in componentList">
               <component
-                :key="component.id"
                 :is="component.component"
+                :key="component.id"
                 v-bind="component.props"
-                v-on="component.events"
                 :ref="component.ref"
+                v-on="component.events"
               />
 
-              <v-divider class="mt-11 mb-8" :key="`divider-${component.id}`"  v-if="idx !== componentList.length-1"></v-divider>
+              <v-divider
+                v-if="idx !== componentList.length-1"
+                :key="`divider-${component.id}`"
+                class="mt-11 mb-8"
+              />
             </template>
 
             <template v-if="canSelect">
-              <v-divider class="mt-11 mb-8" ></v-divider>
-              <div class="form-btns d-flex justify-end" >
-
+              <v-divider class="mt-11 mb-8" />
+              <div class="form-btns d-flex justify-end">
                 <div v-display-mode="!canEdit ? viewOnly : false ">
-                  <v-btn large color="success" class="font-weight-bold mr-2 select-button" @click="openModal()" >
-                    <span>Approve</span>
+                  <v-btn
+                    large
+                    color="primary"
+                    class="font-weight-bold mr-2 select-button"
+                    @click="openModal()"
+                  >
+                    <span v-if="isTaskRejected">Re-Approve</span>
+                    <span v-else>Approve</span>
                   </v-btn>
-                  <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)"  >
+                  <v-btn
+                    v-if="!isTaskRejected"
+                    large
+                    outlined
+                    color="primary"
+                    class="font-weight-bold white--text select-button"
+                    @click="openModal(true)"
+                  >
                     <span v-if="isAffidavitReview && !isTaskOnHold">Reject/On Hold</span>
                     <span v-else>Reject</span>
+                  </v-btn>
+                  <v-btn
+                    v-else-if="!isMhrSubProductReview"
+                    large
+                    outlined
+                    color="primary"
+                    class="font-weight-bold white--text select-button"
+                    @click="openModal(false, false, false, true)"
+                  >
+                    <span>Move to pending</span>
                   </v-btn>
                 </div>
               </div>
@@ -57,12 +103,16 @@
 
           <!-- Account Status Column -->
           <v-col class="col-12 col-md-4 pl-0 pt-8 pr-8 d-flex">
-            <v-divider vertical class="mb-0 mr-8"></v-divider>
-            <div class="flex-grow-1">
-            <AccountStatusTab
-              :taskDetails="task"
-              :isPendingReviewPage="isPendingReviewPage"
+            <v-divider
+              vertical
+              class="mb-0 mr-8"
             />
+            <div class="flex-grow-1">
+              <AccountStatusTab
+                :title="statusTitle"
+                :taskDetails="task"
+                :isPendingReviewPage="isPendingReviewPage"
+              />
             </div>
           </v-col>
         </v-row>
@@ -71,419 +121,578 @@
           ref="accessRequest"
           :isConfirmationModal="isConfirmationModal"
           :isRejectModal="isRejectModal"
+          :isTaskRejected="isTaskRejected"
           :isOnHoldModal="isOnHoldModal"
+          :isMoveToPendingModal="isMoveToPendingModal"
           :isSaving="isSaving"
           :orgName="accountUnderReview.name"
-          @approve-reject-action="saveSelection"
-          @after-confirm-action="goBack()"
           :accountType="taskRelationshipType"
           :taskName="task.type"
           :onholdReasonCodes="onholdReasonCodes"
-          />
-
+          :isMhrSubProductReview="isMhrSubProductReview"
+          @approve-reject-action="saveSelection"
+          @after-confirm-action="goBack()"
+        />
       </v-card>
     </div>
   </v-container>
 </template>
 
 <script lang="ts">
-import { AccountFee, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
-import { DisplayModeValues, OnholdOrRejectCode, Pages, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
-// import { mapActions, mapGetters, mapState } from 'vuex'
+import { AccessType, AffidavitStatus, DisplayModeValues, OnholdOrRejectCode, Pages,
+  TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
+import { Ref, computed, defineComponent, getCurrentInstance, onMounted, ref } from '@vue/composition-api'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
-import AccountInformation from '@/components/auth/staff/review-task/AccountInformation.vue'
+import { AccountInformation } from '@/components/auth/staff/review-task'
 import AccountStatusTab from '@/components/auth/staff/review-task/AccountStatus.vue'
-import { Address } from '@/models/address'
-import { AffidavitInformation } from '@/models/affidavit'
 import AgreementInformation from '@/components/auth/staff/review-task/AgreementInformation.vue'
-import { Code } from '@/models/Code'
-import Component from 'vue-class-component'
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffidavit.vue'
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
 import PaymentInformation from '@/components/auth/staff/review-task/PaymentInformation.vue'
 import ProductFee from '@/components/auth/staff/review-task/ProductFee.vue'
-import { Prop } from 'vue-property-decorator'
-import StaffModuleStore from '@/store/modules/staff'
+import QsApplication from '@/components/auth/staff/review-task/QsApplication.vue'
 import { Task } from '@/models/Task'
-import { User } from '@/models/user'
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
+import { useStaffStore } from '@/stores/staff'
+import { useTaskStore } from '@/stores/task'
 
-import Vue from 'vue'
-import { getModule } from 'vuex-module-decorators'
-import { namespace } from 'vuex-class'
-
-const StaffModule = namespace('staff')
-const TaskModule = namespace('task')
-const orgModule = namespace('org')
-const CodesModule = namespace('codes')
-
-@Component({
+export default defineComponent({
+  name: 'ReviewAccountView',
   components: {
-    DownloadAffidavit,
-    AccountInformation,
-    AccountAdministrator,
-    NotaryInformation,
-    AccountStatusTab,
-    AccessRequestModal
-  }
-})
-export default class ReviewAccountView extends Vue {
-  @Prop() orgId: number // chnage varible name to taskId
-
-  @TaskModule.Action('getTaskById') public getTaskById!:(orgId: number) =>Promise<Task>
-
-  @StaffModule.State('accountUnderReview') public accountUnderReview!: Organization
-  @StaffModule.State('accountUnderReviewAdmin') public accountUnderReviewAdmin!: User
-  @StaffModule.State('accountUnderReviewAddress') public accountUnderReviewAddress!: Address
-  @StaffModule.State('accountUnderReviewAdminContact') public accountUnderReviewAdminContact!: Contact
-  @StaffModule.State('accountUnderReviewAffidavitInfo') public accountUnderReviewAffidavitInfo!: AffidavitInformation
-
-  @StaffModule.Getter('accountNotaryName') public accountNotaryName!: string
-
-  @StaffModule.Action('syncTaskUnderReview') public syncTaskUnderReview!: (task:Task) => Promise<void>
-  @StaffModule.Action('approveAccountUnderReview') public approveAccountUnderReview!: (task:Task) => Promise<void>
-  @StaffModule.Action('rejectorOnHoldAccountUnderReview') public rejectorOnHoldAccountUnderReview!: (task:any) => Promise<void>
-
-  @orgModule.Action('fetchCurrentOrganizationGLInfo') public fetchCurrentOrganizationGLInfo!:(accountId: number) =>Promise<any>
-  @orgModule.State('currentOrgGLInfo') public currentOrgGLInfo!: GLInfo
-  @orgModule.Action('fetchOrgProductFeeCodes') public fetchOrgProductFeeCodes!:() =>Promise<OrgProductFeeCode>
-  @orgModule.Action('getOrgProducts') public getOrgProducts!:(accountId: number) =>Promise<OrgProduct[]>
-  @orgModule.Action('createAccountFees') public createAccountFees!:(accoundId:number) =>Promise<any>
-  @orgModule.Action('syncCurrentAccountFees') public syncCurrentAccountFees!:(accoundId:number) =>Promise<AccountFee[]>
-  @orgModule.Mutation('resetCurrentAccountFees') public resetCurrentAccountFees!:() =>void
-
-  @CodesModule.Action('getOnholdReasonCodes') public getOnholdReasonCodes!: () => Promise<Code[]>
-  @CodesModule.State('onholdReasonCodes') private readonly onholdReasonCodes!: Code[]
-
-  private staffStore = getModule(StaffModuleStore, this.$store)
-  public isLoading = true
-  public isSaving = false
-
-  private readonly pagesEnum = Pages
-  private readonly TaskRelationshipStatusEnum = TaskRelationshipStatus
-
-  private isConfirmationModal:boolean = false
-  private isRejectModal:boolean = false
-  private isOnHoldModal:boolean = false
-  public task :Task
-  public taskRelationshipType:string = ''
-  private productFeeFormValid: boolean = false
-  private viewOnly = DisplayModeValues.VIEW_ONLY
-
-  $refs: {
-    accessRequest: AccessRequestModal,
-    productFeeRef: HTMLFormElement
-  }
-
-  private get canEdit (): boolean {
-    return this.task.status === TaskStatus.OPEN || this.isTaskOnHold
-  }
-
-  private get isTaskOnHold (): boolean {
-    return this.task.status === TaskStatus.HOLD
-  }
-
-  private get canSelect (): boolean {
-    return this.task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW
-  }
-
-  private get isPendingReviewPage () {
-    return this.task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW
-  }
-
-  // Tasks with Affidavit action can be put on hold
-  private get isAffidavitReview (): boolean {
-    return this.task.action === TaskAction.AFFIDAVIT_REVIEW
-  }
-
-  private get isGovNAccountReview (): boolean {
-    return this.task.type === TaskType.GOVN_REVIEW
-  }
-
-  get title () {
-    let title = 'Review Account'
-    if (this.taskRelationshipType === TaskRelationshipType.PRODUCT) {
-      title = `Access Request (${this.task.type})`
-    } else if (this.taskRelationshipType === TaskRelationshipType.USER) {
-      // For now, Task with relationship type as user is for BCeID Admin request
-      title = 'Review BCeID Admin'
+    AccessRequestModal,
+    AccountStatusTab
+  },
+  props: {
+    orgId: {
+      type: String,
+      default: null
     }
-    return title
-  }
+  },
+  setup (props) {
+    const instance = getCurrentInstance()
+    const isLoading: Ref<boolean> = ref(true)
+    const isSaving: Ref<boolean> = ref(false)
+    const pagesEnum = Pages
+    const TaskRelationshipStatusEnum = TaskRelationshipStatus
+    const isConfirmationModal: Ref<boolean> = ref(false)
+    const isRejectModal: Ref<boolean> = ref(false)
+    const isOnHoldModal: Ref<boolean> = ref(false)
+    const isMoveToPendingModal: Ref<boolean> = ref(false)
+    const task: Ref<Task> = ref(null)
+    const taskRelationshipType: Ref<string> = ref('')
+    const productFeeFormValid: Ref<boolean> = ref(false)
+    const viewOnly = DisplayModeValues.VIEW_ONLY
+    const accountInfoAccessType = ref<string>(null)
+    const accountInfoValid: Ref<boolean> = ref(true)
+    const showAccountInfoValidations: Ref<boolean> = ref(false)
 
-  /*
-    5 types of Tasks:
-    1. New BCeId Account creation -> TaskType.NEW_ACCOUNT_STAFF_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
-    2. Product request access -> TaskType.PRODUCT and taskRelationshipType === TaskRelationshipType.PRODUCT and PRODUCT_REVIEW action
-    3. GovM review -> TaskType.GOVM and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
-    4. BCeId admin review -> TaskType.BCeID Admin and TaskRelationshipType.USER and ACCOUNT_REVIEW action
-    5. GovN review -> 1. Bcsc flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
-                      2. Bceid flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
-  */
-  get componentList () {
-    const taskType = this.task.type
-    switch (taskType) {
-      case TaskType.GOVM_REVIEW:
-        return [{ ...this.componentAccountInformation(1) },
-          { ...this.componentAccountAdministrator(2) },
-          { ...this.componentPaymentInformation(3) },
-          { ...this.componentProductFee(4) }
-        ]
-      case TaskType.NEW_ACCOUNT_STAFF_REVIEW:
-        return [{ ...this.compDownloadAffidavit(1) },
-          { ...this.componentAccountInformation(2) },
-          { ...this.componentAccountAdministrator(3) },
-          { ...this.componentNotaryInformation(4) }
-        ]
-      case TaskType.BCEID_ADMIN_REVIEW:
-        return [{ ...this.compDownloadAffidavit(1) },
-          { ...this.componentAccountInformation(2) },
-          { ...this.componentAccountAdministrator(3) },
-          { ...this.componentNotaryInformation(4) }
-        ]
-      case TaskType.GOVN_REVIEW:
-        if (this.task.action === TaskAction.ACCOUNT_REVIEW) {
-          return [{ ...this.componentAccountInformation(1) },
-            { ...this.componentAccountAdministrator(2) },
-            { ...this.componentProductFee(3) }
-          ]
-        } else {
-          return [{ ...this.compDownloadAffidavit(1) },
-            { ...this.componentAccountInformation(2) },
-            { ...this.componentAccountAdministrator(3) },
-            { ...this.componentNotaryInformation(4) },
-            { ...this.componentProductFee(5) }
-          ]
+    const accessRequest: Ref<typeof AccessRequestModal> = ref(null)
+    const productFeeRef: Ref<HTMLFormElement> = ref(null)
+    const codesStore = useCodesStore()
+    const orgStore = useOrgStore()
+    const staffStore = useStaffStore()
+    const taskStore = useTaskStore()
+
+    const accountUnderReview = computed(() => {
+      return staffStore.accountUnderReview
+    })
+
+    const accountUnderReviewAdmin = computed(() => {
+      return staffStore.accountUnderReviewAdmin
+    })
+
+    const accountUnderReviewAddress = computed(() => {
+      return staffStore.accountUnderReviewAddress
+    })
+
+    const accountUnderReviewAdminContact = computed(() => {
+      return staffStore.accountUnderReviewAdminContact
+    })
+
+    const accountUnderReviewAffidavitInfo = computed(() => {
+      return staffStore.accountUnderReviewAffidavitInfo
+    })
+
+    const accountNotaryName = computed(() => {
+      return staffStore.accountNotaryName
+    })
+
+    const currentOrgGLInfo = computed(() => {
+      return orgStore.currentOrgGLInfo
+    })
+
+    const onholdReasonCodes = computed(() => {
+      return codesStore.onholdReasonCodes
+    })
+
+    const isTaskOnHold = computed(() => {
+      return task.value.status === TaskStatus.HOLD
+    })
+
+    const isTaskRejected = computed(() => {
+      return task.value.relationshipStatus === TaskRelationshipStatus.REJECTED
+    })
+
+    const canSelect = computed(() => {
+      return (task.value.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW ||
+        (task.value.relationshipType === TaskRelationshipType.PRODUCT &&
+        task.value.relationshipStatus === TaskRelationshipStatus.REJECTED))
+    })
+
+    const isPendingReviewPage = computed(() => {
+      return task.value.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW
+    })
+
+    const isAffidavitReview = computed(() => {
+      return task.value.action === TaskAction.AFFIDAVIT_REVIEW
+    })
+
+    const isGovNAccountReview = computed(() => {
+      return task.value.type === TaskType.GOVN_REVIEW
+    })
+
+    const isMhrSubProductReview = computed(() => {
+      return [TaskType.MHR_LAWYER_NOTARY, TaskType.MHR_MANUFACTURERS, TaskType.MHR_DEALERS]
+        .includes(task.value?.type as TaskType)
+    })
+
+    const title = computed(() => {
+      let title = 'Review Account'
+      if (taskRelationshipType.value === TaskRelationshipType.PRODUCT) {
+        title = `Access Request (${task.value.type})`
+      } else if (taskRelationshipType.value === TaskRelationshipType.USER) {
+        // For now, Task with relationship type as user is for BCeID Admin request
+        title = 'Review BCeID Admin'
+      }
+      return title
+    })
+
+    const statusTitle = computed(() => {
+      return isMhrSubProductReview.value ? 'Access Request Status' : 'Account Status'
+    })
+
+    const accountNotaryContact = (): Contact => {
+      return accountUnderReviewAffidavitInfo.value?.contacts?.length > 0 &&
+        accountUnderReviewAffidavitInfo.value?.contacts[0]
+    }
+
+    const productFeeChange = (isFormValid): void => {
+      productFeeFormValid.value = isFormValid
+    }
+
+    const canEdit = () => {
+      return task.value.status === TaskStatus.OPEN || isTaskOnHold.value ||
+        (task.value.status === TaskStatus.COMPLETED &&
+          task.value.relationshipStatus === TaskRelationshipStatus.REJECTED)
+    }
+
+    const formattedComponent = (tabNumber, id, component, props, event = null, ref = null) => {
+      return {
+        id: id,
+        component: component,
+        props: {
+          tabNumber: tabNumber,
+          ...props
+        },
+        events: { ...event },
+        ref: ref
+      }
+    }
+
+    const downloadAffidavit = async (): Promise<void> => {
+      // Invoke document service to get affidavit for current organization
+      await DocumentService.getSignedAffidavit(
+        accountUnderReviewAffidavitInfo.value?.documentUrl,
+        `${accountUnderReview.value?.name}-affidavit`
+      )
+    }
+
+    const compDownloadAffidavit = (tabNumber = 1) => {
+      let subTitle = 'Download the notarized affidavit associated with this account to verify the account creators ' +
+        'identity and associated information.'
+      if (accountUnderReviewAffidavitInfo.value?.status === AffidavitStatus.APPROVED) {
+        subTitle = 'Download the notarized affidavit associated with this account that has been reviewed and approved.'
+      }
+      return formattedComponent(
+        tabNumber,
+        `download-affidavit-${tabNumber}`,
+        DownloadAffidavit,
+        {
+          title: 'Download Affidavit',
+          subTitle: subTitle,
+          affidavitName: accountUnderReview.value?.name
+        },
+        { 'emit-download-affidavit': downloadAffidavit }
+      )
+    }
+
+    const componentAccountInformation = (tabNumber = 1) => {
+      return formattedComponent(
+        tabNumber,
+        `account-info-${tabNumber}`,
+        AccountInformation,
+        {
+          title: 'Account Information',
+          accountUnderReview: accountUnderReview.value,
+          accountUnderReviewAddress: accountUnderReviewAddress.value,
+          isGovnReview: isGovNAccountReview.value,
+          showValidations: showAccountInfoValidations.value
+        },
+        {
+          'emit-access-type': (event) => { accountInfoAccessType.value = event },
+          'emit-valid': (event) => { accountInfoValid.value = event }
         }
-      default:
-        // Since task of Product type has variable Task Type (eg, Wills Registry, PPR ) we specify in default.
-        // Also, we double check by task relationship type
-        if (this.taskRelationshipType === TaskRelationshipType.PRODUCT) {
+      )
+    }
+
+    const componentAccountAdministrator = (tabNumber:number = 1) => {
+      return formattedComponent(
+        tabNumber,
+        `account-administration-${tabNumber}`,
+        AccountAdministrator,
+        {
+          title: 'Account Administrator',
+          accountUnderReviewAdmin: accountUnderReviewAdmin.value,
+          accountUnderReviewAdminContact: accountUnderReviewAdminContact.value
+        }
+      )
+    }
+
+    const componentNotaryInformation = (tabNumber:number = 1) => {
+      return formattedComponent(tabNumber,
+        `notary-info-${tabNumber}`,
+        NotaryInformation,
+        {
+          title: 'Notary Information',
+          accountNotaryContact: accountNotaryContact(),
+          accountNotaryName: accountUnderReviewAffidavitInfo.value?.issuer || '-'
+        }
+      )
+    }
+
+    const componentAgreementInformation = (tabNumber:number = 1) => {
+      return formattedComponent(tabNumber,
+        `agreement-info-${tabNumber}`,
+        AgreementInformation,
+        {
+          title: 'Agreement',
+          isTOSAlreadyAccepted: true,
+          orgName: accountUnderReview.value?.name,
+          userName: `${accountUnderReviewAdmin.value.firstname} ${accountUnderReviewAdmin.value.lastname}`
+        }
+      )
+    }
+
+    const componentPaymentInformation = (tabNumber:number = 1) => {
+      return formattedComponent(tabNumber,
+        `payment-info-${tabNumber}`,
+        PaymentInformation,
+        {
+          title: 'Payment Information',
+          currentOrganizationGLInfo: currentOrgGLInfo.value
+        }
+      )
+    }
+
+    const componentProductFee = (tabNumber:number = 1) => {
+      return formattedComponent(tabNumber,
+        `product-fee-${tabNumber}`,
+        ProductFee,
+        {
+          title: 'Product Fee',
+          canSelect: canSelect.value
+        },
+        { 'emit-product-fee-change': productFeeChange },
+        'productFeeRef'
+      )
+    }
+
+    const componentQualifiedSupplierApplication = (tabNumber:number = 1) => {
+      return formattedComponent(
+        tabNumber,
+        `qualified-supplier-application-${tabNumber}`,
+        QsApplication,
+        {
+          title: 'Qualified Supplier Application',
+          taskDetails: task.value,
+          accountUnderReview: accountUnderReview.value,
+          accountUnderReviewAdmin: accountUnderReviewAdmin.value,
+          accountUnderReviewAdminContact: accountUnderReviewAdminContact.value
+
+        }
+      )
+    }
+
+    /*
+      5 types of Tasks:
+      1. New BCeId Account -> TaskType.NEW_ACCOUNT_STAFF_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
+      2. Product request -> TaskType.PRODUCT and TaskRelationshipType.PRODUCT and PRODUCT_REVIEW action
+      3. GovM review -> TaskType.GOVM and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
+      4. BCeId admin review -> TaskType.BCeID Admin and TaskRelationshipType.USER and ACCOUNT_REVIEW action
+      5. GovN review -> 1. Bcsc flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
+                        2. Bceid flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
+    */
+
+    const componentList = computed(() => {
+      const taskType = task.value?.type
+      switch (taskType) {
+        case TaskType.GOVM_REVIEW:
           return [
-            { ...this.componentAccountInformation(1) },
-            { ...this.componentAccountAdministrator(2) },
-            { ...this.componentAgreementInformation(3) }
+            { ...componentAccountInformation(1) },
+            { ...componentAccountAdministrator(2) },
+            { ...componentPaymentInformation(3) },
+            { ...componentProductFee(4) }
           ]
+        case TaskType.NEW_ACCOUNT_STAFF_REVIEW:
+          return [
+            { ...compDownloadAffidavit(1) },
+            { ...componentAccountInformation(2) },
+            { ...componentAccountAdministrator(3) },
+            { ...componentNotaryInformation(4) }
+          ]
+        case TaskType.BCEID_ADMIN_REVIEW:
+          return [
+            { ...compDownloadAffidavit(1) },
+            { ...componentAccountInformation(2) },
+            { ...componentAccountAdministrator(3) },
+            { ...componentNotaryInformation(4) }
+          ]
+        case TaskType.GOVN_REVIEW: {
+          let list = []
+          if (task.value?.action === TaskAction.ACCOUNT_REVIEW) {
+            list = [
+              { ...componentAccountInformation(1) },
+              { ...componentAccountAdministrator(2) },
+              { ...componentProductFee(3) }
+            ]
+          } else {
+            list = [
+              { ...compDownloadAffidavit(1) },
+              { ...componentAccountInformation(2) },
+              { ...componentAccountAdministrator(3) },
+              { ...componentNotaryInformation(4) },
+              { ...componentProductFee(5) }
+            ]
+          }
+          // if account access type was changed to regular remove the product fee comp
+          if (accountInfoAccessType.value === AccessType.REGULAR) list.pop()
+          return list
         }
-        break
-    }
-  }
+        case TaskType.MHR_LAWYER_NOTARY:
+        case TaskType.MHR_MANUFACTURERS:
+        case TaskType.MHR_DEALERS:
+          return [
+            { ...componentAccountInformation(1) },
+            { ...componentAccountAdministrator(2) },
+            { ...componentQualifiedSupplierApplication(3) }
+          ]
+        default:
+          // Since task of Product type has variable Task Type (eg, Wills Registry, PPR ) we specify in default.
+          // Also, we double check by task relationship type
+          if (taskRelationshipType.value === TaskRelationshipType.PRODUCT) {
+            return [
+              { ...componentAccountInformation(1) },
+              { ...componentAccountAdministrator(2) },
+              { ...componentAgreementInformation(3) }
+            ]
+          } else {
+            return []
+          }
+      }
+    })
 
-  private async mounted () {
-    // need to change call task api before
+    onMounted(async () => {
+      try {
+        task.value = await taskStore.getTaskById(props.orgId)
+        taskRelationshipType.value = task.value.relationshipType
+        await staffStore.syncTaskUnderReview(task.value)
 
-    try {
-      this.task = await this.getTaskById(this.orgId)
-      this.taskRelationshipType = this.task.relationshipType
-      await this.syncTaskUnderReview(this.task)
-
-      // If the task type is GOVM or GOVN, then need to populate product fee codes
-      if (this.task.type === TaskType.GOVM_REVIEW || this.task.type === TaskType.GOVN_REVIEW) {
-        const accountId = this.task.relationshipId
-        await this.fetchCurrentOrganizationGLInfo(accountId)
-        await this.fetchOrgProductFeeCodes()
-        await this.getOrgProducts(accountId)
-        // For rejected accounts view
-        if (!this.canSelect) {
-          await this.syncCurrentAccountFees(accountId)
-        } else {
-          this.resetCurrentAccountFees()
+        // If the task type is GOVM or GOVN, then need to populate product fee codes
+        if (task.value.type === TaskType.GOVM_REVIEW || task.value.type === TaskType.GOVN_REVIEW) {
+          const accountId = task.value.relationshipId
+          await orgStore.fetchCurrentOrganizationGLInfo(accountId)
+          await orgStore.fetchOrgProductFeeCodes()
+          await orgStore.getOrgProducts(accountId)
+          // For rejected accounts view
+          if (!canSelect.value) {
+            await orgStore.syncCurrentAccountFees(accountId)
+          } else {
+            orgStore.setCurrentAccountFees([])
+          }
         }
+
+        // Tasks with Affidavit action can be put on hold. Therefore, populate on hold reasons
+        if (isAffidavitReview.value && (!onholdReasonCodes.value || onholdReasonCodes.value?.length === 0)) {
+          await codesStore.getOnholdReasonCodes()
+        }
+      } catch (ex) {
+        // eslint-disable-next-line no-console
+        console.error(ex)
+      } finally {
+        isLoading.value = false
       }
-      // Tasks with Affidavit action can be put on hold. Therefore, populate on hold reasons
-      if (this.isAffidavitReview && (!this.onholdReasonCodes || this.onholdReasonCodes.length === 0)) {
-        await this.getOnholdReasonCodes()
+    })
+
+    const toggleAccessRequestModal = (hasConfirmationModal: boolean) => {
+      if (hasConfirmationModal) {
+        accessRequest.value.close()
+        accessRequest.value.openConfirm()
+      } else {
+        accessRequest.value.open()
+        accessRequest.value.closeConfirm()
       }
-    } catch (ex) {
-      // eslint-disable-next-line no-console
-      console.error(ex)
-    } finally {
-      this.isLoading = false
     }
-  }
 
-  private async downloadAffidavit (): Promise<void> {
-    // Invoke document service to get affidavit for current organization
-    await DocumentService.getSignedAffidavit(this.accountUnderReviewAffidavitInfo?.documentUrl, `${this.accountUnderReview.name}-affidavit`)
-  }
-
-  private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false, rejectConfirmationModal:boolean = false) {
-    if (this.task.type === TaskType.GOVM_REVIEW && !this.productFeeFormValid) {
-      // validate form before showing pop-up
-      (this.$refs.productFeeRef[0] as any).validateNow()
-      if (!this.productFeeFormValid) {
+    const openModal = (
+      isRejectModalArg: boolean = false,
+      isConfirmationModalArg: boolean = false,
+      rejectConfirmationModalArg: boolean = false,
+      isMoveToPendingModalArg: boolean = false
+    ): boolean => {
+      if (!accountInfoValid.value) {
+        showAccountInfoValidations.value = true
+        window.scrollTo({ top: 200, behavior: 'smooth' })
         return false
       }
+
+      if (task.value.type === TaskType.GOVM_REVIEW && !productFeeFormValid.value) {
+        // validate form before showing pop-up
+        (productFeeRef.value[0] as any).validateNow()
+        if (!productFeeFormValid.value) {
+          return false
+        }
+      }
+
+      isConfirmationModal.value = isConfirmationModalArg
+
+      const isRejectModalWhileOnHold = isRejectModalArg && isTaskOnHold.value
+
+      if (rejectConfirmationModalArg || isRejectModalWhileOnHold) {
+        isRejectModal.value = true
+        isOnHoldModal.value = false
+      } else if (!isMoveToPendingModalArg) {
+        isRejectModal.value = isAffidavitReview.value ? false : isRejectModalArg
+        isOnHoldModal.value = isAffidavitReview.value ? isRejectModalArg : false
+      } else {
+        isMoveToPendingModal.value = true
+      }
+
+      toggleAccessRequestModal(isConfirmationModal.value)
+
+      return true
     }
-    this.isConfirmationModal = isConfirmationModal
 
-    if (rejectConfirmationModal || (isRejectModal && this.isTaskOnHold)) {
-      this.isRejectModal = true
-      this.isOnHoldModal = false
-    } else {
-      this.isRejectModal = this.isAffidavitReview ? false : isRejectModal
-      this.isOnHoldModal = this.isAffidavitReview ? isRejectModal : false
-    }
+    const saveSelection = async (reason) => {
+      const { isValidForm, accountToBeOnHoldOrRejected, onHoldOrRejectReasons } = reason
 
-    if (isConfirmationModal) {
-      this.$refs.accessRequest.close()
-      this.$refs.accessRequest.openConfirm()
-    } else {
-      this.$refs.accessRequest.open()
-      this.$refs.accessRequest.closeConfirm()
-    }
-  }
+      if (!isValidForm) return
 
-  private async saveSelection (reason): Promise<void> {
-    const { isValidForm, accountToBeOnholdOrRejected, onholdReasons } = reason
+      isSaving.value = true
+      const isApprove = !isRejectModal.value && !isOnHoldModal.value && !isMoveToPendingModal.value
+      const isRejecting = isRejectModal.value || accountToBeOnHoldOrRejected === OnholdOrRejectCode.REJECTED
+      const isMoveToPending = isMoveToPendingModal.value || accountToBeOnHoldOrRejected === OnholdOrRejectCode.ONHOLD
 
-    if (isValidForm) {
-      this.isSaving = true
-      // if account approve
-      const isApprove = !this.isRejectModal && !this.isOnHoldModal
-      // on rejecting there will be two scenarios
-      // 1. by clicking reject for normal flow.
-      // 2. by selecting remark as Reject account ,(check by using code)
-      // both cases we need to call reject API than hold
-      const isRejecting = this.isRejectModal || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
       try {
+        if (accountInfoAccessType.value && accountInfoAccessType.value !== accountUnderReview.value.accessType) {
+          const success = await orgStore.updateOrganizationAccessType(
+            accountInfoAccessType.value, accountUnderReview.value.id, false
+          )
+          if (!success) throw new Error('Error updating account access type prevented review completion.')
+        }
         if (isApprove) {
-          await this.approveAccountUnderReview(this.task)
+          await staffStore.approveAccountUnderReview(task.value)
         } else {
-        // both reject and hold will happen here passing second argument to determine which call need to make
-          await this.rejectorOnHoldAccountUnderReview({ task: this.task, isRejecting, remarks: onholdReasons })
+          await staffStore.rejectorOnHoldAccountUnderReview({
+            task: task.value,
+            isRejecting,
+            remarks: onHoldOrRejectReasons
+          })
         }
-        const taskType: any = this.task.type
+        const taskType: any = task.value.type
 
-        if ([TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType)) {
-          await this.createAccountFees(this.task.relationshipId)
+        if (
+          [TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType) &&
+          (!accountInfoAccessType.value || [AccessType.GOVN, AccessType.GOVM].includes(accountInfoAccessType.value))
+        ) {
+          await orgStore.createAccountFees(task.value.relationshipId)
         }
-        this.openModal(!isApprove, true, isRejecting)
-      // this.$router.push(Pages.STAFF_DASHBOARD)
+        openModal(!isApprove, true, isRejecting, isMoveToPending)
       } catch (error) {
-      // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.log(error)
       } finally {
-        this.isSaving = false
+        isSaving.value = false
       }
     }
-  }
 
-  public get accountNotaryContact (): Contact {
-    return this.accountUnderReviewAffidavitInfo?.contacts?.length > 0 && this.accountUnderReviewAffidavitInfo?.contacts[0]
-  }
+    const goBack = () => {
+      instance.proxy.$router.push(pagesEnum.STAFF_DASHBOARD)
+    }
 
-  private goBack (): void {
-    this.$router.push(Pages.STAFF_DASHBOARD)
-  }
+    const determinePage = computed(() => {
+      return task.value.relationshipStatus === TaskRelationshipStatusEnum.REJECTED
+        ? pagesEnum.STAFF_DASHBOARD_REJECTED : pagesEnum.STAFF_DASHBOARD_REVIEW
+    })
 
-  private productFeeChange (isFormValid): void {
-    this.productFeeFormValid = isFormValid
-  }
-
-  formattedComponent (tabNumber, id, component, props, event = null, ref = null) {
     return {
-      id: id,
-      component: component,
-      props: {
-        tabNumber: tabNumber,
-        ...props
-      },
-      events: { ...event },
-      ref: ref
+      isLoading,
+      isSaving,
+      pagesEnum,
+      TaskRelationshipStatusEnum,
+      isConfirmationModal,
+      isRejectModal,
+      isOnHoldModal,
+      isMoveToPendingModal,
+      task,
+      taskRelationshipType,
+      productFeeFormValid,
+      viewOnly,
+      accountInfoAccessType,
+      accountInfoValid,
+      showAccountInfoValidations,
+      accessRequest,
+      productFeeRef,
+      accountUnderReview,
+      accountUnderReviewAdmin,
+      accountUnderReviewAddress,
+      accountUnderReviewAdminContact,
+      accountUnderReviewAffidavitInfo,
+      accountNotaryName,
+      currentOrgGLInfo,
+      isTaskOnHold,
+      isTaskRejected,
+      canSelect,
+      isPendingReviewPage,
+      isAffidavitReview,
+      isGovNAccountReview,
+      title,
+      statusTitle,
+      accountNotaryContact,
+      productFeeChange,
+      canEdit,
+      formattedComponent,
+      downloadAffidavit,
+      compDownloadAffidavit,
+      componentAccountInformation,
+      componentAccountAdministrator,
+      componentNotaryInformation,
+      componentAgreementInformation,
+      componentPaymentInformation,
+      componentProductFee,
+      componentList,
+      openModal,
+      saveSelection,
+      goBack,
+      determinePage,
+      onholdReasonCodes,
+      isMhrSubProductReview
     }
   }
-
-  // list of components
-  compDownloadAffidavit (tabNumber:number = 1) {
-    return this.formattedComponent(
-      tabNumber,
-      `download-affidavit-${tabNumber}`,
-      DownloadAffidavit,
-      {
-        title: 'Download Affidavit',
-        subTitle: 'Download the notarized affidavit associated with this account to verify the account creators identity and associated information.',
-        affidavitName: this.accountUnderReview.name
-      },
-      { 'emit-download-affidavit': this.downloadAffidavit }
-    )
-  }
-
-  componentAccountInformation (tabNumber:number = 1) {
-    return this.formattedComponent(
-      tabNumber,
-      `account-info-${tabNumber}`,
-      AccountInformation,
-      {
-        title: 'Account Information',
-        accountUnderReview: this.accountUnderReview,
-        accountUnderReviewAddress: this.accountUnderReviewAddress
-      },
-      null
-    )
-  }
-  componentAccountAdministrator (tabNumber:number = 1) {
-    return this.formattedComponent(
-      tabNumber,
-      `account-administration-${tabNumber}`,
-      AccountAdministrator,
-      {
-        title: 'Account Administrator',
-        accountUnderReviewAdmin: this.accountUnderReviewAdmin,
-        accountUnderReviewAdminContact: this.accountUnderReviewAdminContact
-      }
-
-    )
-  }
-
-  componentNotaryInformation (tabNumber:number = 1) {
-    return this.formattedComponent(tabNumber,
-      `notary-info-${tabNumber}`,
-      NotaryInformation,
-      {
-        title: 'Notary Information',
-        accountNotaryContact: this.accountNotaryContact,
-        accountNotaryName: this.accountUnderReviewAffidavitInfo?.issuer || '-'
-      }
-    )
-  }
-  componentAgreementInformation (tabNumber:number = 1) {
-    return this.formattedComponent(tabNumber,
-      `agreement-info-${tabNumber}`,
-      AgreementInformation,
-      {
-        title: 'Agreement',
-        isTOSAlreadyAccepted: true,
-        orgName: this.accountUnderReview.name,
-        userName: `${this.accountUnderReviewAdmin.firstname} ${this.accountUnderReviewAdmin.lastname}`
-      }
-    )
-  }
-  componentPaymentInformation (tabNumber:number = 1) {
-    return this.formattedComponent(tabNumber,
-      `payment-info-${tabNumber}`,
-      PaymentInformation,
-      {
-        title: 'Payment Information',
-        currentOrganizationGLInfo: this.currentOrgGLInfo
-      }
-    )
-  }
-  componentProductFee (tabNumber:number = 1) {
-    return this.formattedComponent(tabNumber,
-      `product-fee-${tabNumber}`,
-      ProductFee,
-      {
-        title: 'Product Fee',
-        canSelect: this.canSelect
-      },
-      { 'emit-product-fee-change': this.productFeeChange },
-      'productFeeRef'
-    )
-  }
-}
+})
 </script>
 
 <style lang="scss" scoped>

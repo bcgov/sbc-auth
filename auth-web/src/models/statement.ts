@@ -3,12 +3,20 @@ export interface StatementListItem {
   frequency: string
   fromDate?: string
   id?: number
+  isOverdue?: boolean
+  isNew?: boolean
   toDate?: string
+  paymentMethods?: string[]
 }
 
 export interface StatementSettings {
   currentFrequency?: StatementListItem
   frequencies: Frequencies[]
+}
+
+export interface StatementsSummary {
+  oldestOverdueDate?: string
+  totalDue: number
 }
 
 export interface Frequencies {

@@ -3,7 +3,7 @@
     v-model="showDateFilter"
     :close-on-content-click="false"
   >
-    <template v-slot:activator="{ on }">
+    <template #activator="{ on }">
       <v-btn
         block
         depressed
@@ -13,35 +13,43 @@
         v-on="on"
         @click="openDateFilter"
       >
-        <v-icon class="mr-2">mdi-calendar-range</v-icon>
+        <v-icon class="mr-2">
+          mdi-calendar-range
+        </v-icon>
         <span class="flex-grow-1 text-left">Date Range</span>
-        <v-icon class="ml-1">mdi-menu-down</v-icon>
+        <v-icon class="ml-1">
+          mdi-menu-down
+        </v-icon>
       </v-btn>
     </template>
     <v-card class="date-range-container d-flex">
       <div class="date-range-options d-flex flex-column justify-space-between flex-grow-0 pb-6 pt-3">
-        <v-list dense class="py-0"
+        <v-list
+          dense
+          class="py-0"
         >
           <v-list-item-group
             v-model="dateFilterSelectedIndex"
             color="primary"
             @change="dateFilterChange"
           >
-            <v-list-item class="py-2 px-6"
+            <v-list-item
               v-for="(filterRange, i) in dateFilterRanges"
               :key="i"
+              class="py-2 px-6"
             >
               <v-list-item-content>
                 <v-list-item-title
                   class="font-weight-bold px-1"
                   v-text="filterRange.label"
-                ></v-list-item-title>
+                />
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
         </v-list>
         <div class="date-filter-btns px-6 mt-4 d-flex flex-end">
-          <v-btn large
+          <v-btn
+            large
             color="primary"
             class="font-weight-bold flex-grow-1 apply-btn"
             :disabled="!isApplyFilterBtnValid"
@@ -49,7 +57,8 @@
           >
             Apply
           </v-btn>
-          <v-btn large
+          <v-btn
+            large
             outlined
             color="primary"
             class="flex-grow-1 ml-2 cancel-btn"
@@ -60,19 +69,22 @@
         </div>
       </div>
       <div class="date-range-calendars pb-6">
-        <div class="date-range-label py-6 mx-6 mb-3" v-html="showDateRangeSelected"></div>
+        <div
+          class="date-range-label py-6 mx-6 mb-3"
+          v-html="showDateRangeSelected"
+        />
         <v-date-picker
+          v-model="dateRangeSelected"
           color="primary"
           width="400"
           class="text-center"
-          v-model="dateRangeSelected"
           no-title
           range
           :first-day-of-week="1"
           :show-current="false"
           :picker-date="pickerDate"
           @click:date="dateClick"
-        ></v-date-picker>
+        />
       </div>
     </v-card>
   </v-menu>
@@ -148,29 +160,33 @@ export default class DateRangeFilter extends Vue {
     if (val > -1) {
       this.dateFilterSelected = this.dateFilterRanges[val]
       switch (this.dateFilterSelected?.code) {
-        case DATEFILTER_CODES.TODAY:
+        case DATEFILTER_CODES.TODAY: {
           const today = this.formatDatePickerDate(moment())
           this.dateRangeSelected = [today, today]
           this.pickerDate = today.slice(0, -3)
           break
-        case DATEFILTER_CODES.YESTERDAY:
+        }
+        case DATEFILTER_CODES.YESTERDAY: {
           const yesterday = this.formatDatePickerDate(moment().subtract(1, 'days'))
           this.dateRangeSelected = [yesterday, yesterday]
           this.pickerDate = yesterday.slice(0, -3)
           break
-        case DATEFILTER_CODES.LASTWEEK:
+        }
+        case DATEFILTER_CODES.LASTWEEK: {
           // Week should start from  Monday and Ends on Sunday
           const weekStart = this.formatDatePickerDate(moment().subtract(1, 'weeks').startOf('isoWeek'))
           const weekEnd = this.formatDatePickerDate(moment().subtract(1, 'weeks').endOf('isoWeek'))
           this.dateRangeSelected = [weekStart, weekEnd]
           this.pickerDate = weekStart.slice(0, -3)
           break
-        case DATEFILTER_CODES.LASTMONTH:
+        }
+        case DATEFILTER_CODES.LASTMONTH: {
           const monthStart = this.formatDatePickerDate(moment().subtract(1, 'months').startOf('month'))
           const monthEnd = this.formatDatePickerDate(moment().subtract(1, 'months').endOf('month'))
           this.dateRangeSelected = [monthStart, monthEnd]
           this.pickerDate = monthStart.slice(0, -3)
           break
+        }
         case DATEFILTER_CODES.CUSTOMRANGE:
           this.pickerDate = ''
       }
@@ -197,7 +213,7 @@ export default class DateRangeFilter extends Vue {
     return (this.dateFilterSelected?.code) ? dateText : '<strong>No dates selected</strong>'
   }
 
-  private dateClick (date) {
+  private dateClick () {
     this.pickerDate = ''
     // ideally it should find using DATEFILTER_CODES.CUSTOMRANGE, but since its static and date click is often, better give the index as it is
     this.dateFilterSelectedIndex = 4 // 4 = Custom Range

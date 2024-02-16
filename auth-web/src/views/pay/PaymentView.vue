@@ -1,49 +1,77 @@
 <template>
   <div data-test="div-payment-view">
-    <v-container v-if="showLoading" data-test="div-payment-view-loading">
-      <v-layout row flex-column justify-center align-center class="py-12 loading-progressbar">
+    <v-container
+      v-if="showLoading"
+      data-test="div-payment-view-loading"
+    >
+      <v-row
+        justify="center"
+        align="center"
+        class="py-12 loading-progressbar flex-column"
+      >
         <v-progress-circular
           color="primary"
           :size="80"
           :width="5"
           indeterminate
           class="mt-12"
-        ></v-progress-circular>
-        <div class="loading-msg">{{ showdownloadLoading ? $t('paymentDownloadMsg')  : $t('paymentPrepareMsg') }}</div>
-      </v-layout>
+        />
+        <div class="loading-msg">
+          {{ showdownloadLoading ? $t('paymentDownloadMsg') : $t('paymentPrepareMsg') }}
+        </div>
+      </v-row>
     </v-container>
     <div v-else>
-      <v-container v-if="errorMessage" data-test="div-payment-view-error">
-        <v-layout row justify-center align-center>
+      <v-container
+        v-if="errorMessage"
+        data-test="div-payment-view-error"
+      >
+        <v-row
+          justify="center"
+          align="center"
+        >
           <SbcSystemError
-            v-on:continue-event="goToUrl(returnUrl)"
             v-if="showErrorModal"
             title="Payment Failed"
             primaryButtonTitle="Continue to Filing"
-            :description="errorMessage">
-          </SbcSystemError>
-          <div class="mt-12" v-else>
+            :description="errorMessage"
+            @continue-event="goToUrl(returnUrl)"
+          />
+          <div
+            v-else
+            class="mt-12"
+          >
             <div class="text-center mb-4">
-              <v-icon color="error" size="30">mdi-alert-outline</v-icon>
+              <v-icon
+                color="error"
+                size="30"
+              >
+                mdi-alert-outline
+              </v-icon>
             </div>
-            <h4>{{errorMessage}}</h4>
+            <h4>{{ errorMessage }}</h4>
           </div>
-        </v-layout>
+        </v-row>
       </v-container>
       <v-container
+        v-if="showOnlineBanking"
         data-test="div-payment-view-container"
         class="view-container"
-        v-if="showOnlineBanking">
+      >
         <div class="payment-view-content">
-          <h1 class="mb-1">Make a payment</h1>
-          <p class="mb-8">Please find your balance and payment details below.</p>
+          <h1 class="mb-1">
+            Make a payment
+          </h1>
+          <p class="mb-8">
+            Please find your balance and payment details below.
+          </p>
           <PaymentCard
             :paymentCardData="paymentCardData"
+            :showPayWithOnlyCC="showPayWithOnlyCC"
             @complete-online-banking="completeOBPayment"
             @pay-with-credit-card="payNow"
             @download-invoice="downloadInvoice"
-            :showPayWithOnlyCC="showPayWithOnlyCC"
-          ></PaymentCard>
+          />
         </div>
       </v-container>
     </div>
@@ -58,12 +86,11 @@ import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Invoice } from '@/models/invoice'
-import OrgModule from '@/store/modules/org'
 import { OrgPaymentDetails } from '@/models/Organization'
 import PaymentCard from '@/components/pay/PaymentCard.vue'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
-import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -71,7 +98,7 @@ import { mapActions } from 'vuex'
     PaymentCard
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'createTransaction',
       'getOrgPayments',
       'getInvoice',
@@ -81,14 +108,13 @@ import { mapActions } from 'vuex'
   }
 })
 export default class PaymentView extends Vue {
-  private orgStore = getModule(OrgModule, this.$store)
   @Prop({ default: '' }) paymentId: string
   @Prop({ default: '' }) redirectUrl: string
   private readonly createTransaction!: (transactionData) => any
-  private readonly updateInvoicePaymentMethodAsCreditCard!: (paymentId: string) => any
+  private readonly updateInvoicePaymentMethodAsCreditCard!: (invoicePayload) => any
   private readonly downloadOBInvoice!: (paymentId: string) => any
   private readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
-  private readonly getInvoice!: (paymentId: string) => Invoice
+  private readonly getInvoice!: (invoicePayload) => Invoice
   private showLoading: boolean = true
   private showdownloadLoading: boolean = false
   private showOnlineBanking: boolean = false
@@ -111,7 +137,7 @@ export default class PaymentView extends Vue {
       if (this.isUserSignedIn && !!accountSettings) {
         // get the invoice and check for OB
         try {
-          const invoice: Invoice = await this.getInvoice(this.paymentId)
+          const invoice: Invoice = await this.getInvoice({ invoiceId: this.paymentId, accountId: accountSettings?.id })
           if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
             // get account data to show in the UI
             const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
@@ -126,7 +152,8 @@ export default class PaymentView extends Vue {
 
             this.showLoading = false
             this.showOnlineBanking = true
-            this.showPayWithOnlyCC = !invoice?.isOnlineBankingAllowed // if isOnlineBankingAllowed is true, allowed show CC as only payment type
+            // if isOnlineBankingAllowed is true, allowed show CC as only payment type
+            this.showPayWithOnlyCC = !invoice?.isOnlineBankingAllowed
           }
         } catch (error) {
           // eslint-disable-next-line no-console
@@ -142,6 +169,14 @@ export default class PaymentView extends Vue {
     }
   }
 
+  // We need this, otherwise we can get redirect Urls with just a single slash.
+  get redirectUrlFixed () {
+    if (!this.redirectUrl.includes('://')) {
+      return this.redirectUrl.replace(':/', '://')
+    }
+    return this.redirectUrl
+  }
+
   private isUserSignedIn (): boolean {
     return !!ConfigHelper.getFromSession('KEYCLOAK_TOKEN')
   }
@@ -151,7 +186,7 @@ export default class PaymentView extends Vue {
   }
 
   private goToUrl (url:string) {
-    window.location.href = url || this.redirectUrl
+    window.location.href = url || this.redirectUrlFixed
   }
 
   private completeOBPayment () {
@@ -162,7 +197,8 @@ export default class PaymentView extends Vue {
     // patch the transaction
     // redirect for payment
     try {
-      await this.updateInvoicePaymentMethodAsCreditCard(this.paymentId)
+      const accountSettings = this.getAccountFromSession()
+      await this.updateInvoicePaymentMethodAsCreditCard({ paymentId: this.paymentId, accountId: accountSettings?.id })
       await this.doCreateTransaction()
     } catch (error) {
       this.doHandleError(error)
@@ -195,7 +231,7 @@ export default class PaymentView extends Vue {
   private async doCreateTransaction () {
     const transactionDetails = await this.createTransaction({
       paymentId: this.paymentId,
-      redirectUrl: this.redirectUrl
+      redirectUrl: this.redirectUrlFixed
     })
     this.showLoading = false
     this.returnUrl = transactionDetails?.paySystemUrl
@@ -205,8 +241,9 @@ export default class PaymentView extends Vue {
   private doHandleError (error) {
     this.showLoading = false
     this.errorMessage = this.$t('payFailedMessage').toString()
-    if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') { // Transaction is already completed.Show as a modal.
-      this.goToUrl(this.redirectUrl)
+    if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') {
+      // Transaction is already completed. Show as a modal.
+      this.goToUrl(this.redirectUrlFixed)
     } else {
       this.showErrorModal = true
     }

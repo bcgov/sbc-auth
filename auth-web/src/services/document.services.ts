@@ -3,7 +3,7 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DocumentUpload } from '@/models/user'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
-import { axios } from '@/util/http-util.ts'
+import { axios } from '@/util/http-util'
 import mime from 'mime-types'
 
 export default class DocumentService {
@@ -14,6 +14,16 @@ export default class DocumentService {
   static async getAffidavitPdf (): Promise<AxiosResponse> {
     const instance = Axios.create()
     return instance.get(`${ConfigHelper.getFileServerUrl()}/affidavit_v1.pdf`, {
+      responseType: 'arraybuffer',
+      headers: {
+        'Accept': 'application/pdf'
+      }
+    })
+  }
+
+  static async getEftInstructions (): Promise<AxiosResponse> {
+    const instance = Axios.create()
+    return instance.get(`${ConfigHelper.getFileServerUrl()}/bcrs_eft_instructions.pdf`, {
       responseType: 'arraybuffer',
       headers: {
         'Accept': 'application/pdf'
@@ -35,8 +45,8 @@ export default class DocumentService {
     )
   }
 
-  static async uplpoadToUrl (url: string, file:File, key:String, userId: string): Promise<AxiosResponse> {
-    var options = {
+  static async uploadToUrl (url: string, file:File, key:string, userId: string): Promise<AxiosResponse> {
+    const options = {
       headers: {
         'Content-Type': file.type,
         'x-amz-meta-userid': `${userId}`,
@@ -44,7 +54,7 @@ export default class DocumentService {
         'Content-Disposition': `attachment; filename=${file.name}`
       }
     }
-    let response = await axios.put(
+    const response = await axios.put(
       url, file, options
     )
     return response

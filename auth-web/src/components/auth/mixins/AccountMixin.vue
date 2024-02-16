@@ -6,14 +6,16 @@ import Component from 'vue-class-component'
 import ConfigHelper from '@/util/config-helper'
 import { Organization } from '@/models/Organization'
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 @Component({
   name: 'AccountMixin',
   computed: {
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'currentUser'
     ]),
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization',
       'currentMembership'
     ])
@@ -23,26 +25,34 @@ import { mapState } from 'vuex'
 export default class AccountMixin extends Vue {
   protected readonly currentOrganization!: Organization
 
-  protected getAccountFromSession (): AccountSettings {
+  getAccountFromSession (): AccountSettings {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
   }
-  protected get isPremiumAccount (): boolean {
+  get isPremiumAccount (): boolean {
     return this.currentOrganization?.orgType === Account.PREMIUM
   }
-  protected get isRegularAccount (): boolean {
+  get isRegularAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.REGULAR
   }
 
-  protected get anonAccount (): boolean {
+  get anonAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.ANONYMOUS
   }
 
-  protected get isGovmAccount (): boolean {
+  get isGovmAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.GOVM
   }
 
-  protected get isGovnAccount (): boolean {
+  get isGovnAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.GOVN
+  }
+
+  get isStaffAccount (): boolean {
+    return this.currentOrganization?.orgType === Account.STAFF
+  }
+
+  get isSbcStaffAccount (): boolean {
+    return this.currentOrganization?.orgType === Account.SBC_STAFF
   }
 }
 </script>

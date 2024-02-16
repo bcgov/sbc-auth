@@ -31,6 +31,8 @@ import os
 import nats
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import db
+from auth_api.services import Flags
+from auth_api.utils.cache import cache
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask  # pylint: disable=wrong-import-order
@@ -43,6 +45,8 @@ APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)
 FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
+cache.init_app(FLASK_APP)
+flag_service = Flags(FLASK_APP)
 
 
 async def process_event(event_message, flask_app):
@@ -64,8 +68,12 @@ async def process_event(event_message, flask_app):
                                                             created=data.get('createdAt'),
                                                             org_id=data.get('orgId')
                                                             )
-        activity_model.save()
-        logger.debug('activity log saved')
+        try:
+            activity_model.save()
+            logger.debug('activity log saved')
+        except Exception as e:  # NOQA # pylint: disable=broad-except
+            logger.error('DB Error: %s', e)
+            db.session.rollback()
 
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):

@@ -3,15 +3,10 @@ import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import HomeView from '@/views/auth/home/HomeView.vue'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-const router = new VueRouter()
-const vuetify = new Vuetify({})
+import flushPromises from 'flush-promises'
+import { useUserStore } from '@/stores/user'
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
@@ -23,47 +18,16 @@ const mockSession = {
 
 describe('HomeView.vue', () => {
   let wrapper: any
-  let userModule: any
 
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
-    localVue.use(Vuex)
+    localVue.use(VueRouter)
 
-    userModule = {
-      namespaced: true,
-      state: {
-        userProfile: {
-        }
-      },
-      actions: {
-        getUserProfile: jest.fn()
-      }
-    }
-
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-        }
-      },
-      actions: {
-        syncOrganizations: jest.fn(),
-        syncCurrentOrganization: jest.fn()
-      }
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        user: userModule,
-        org: orgModule
-      }
-    })
+    const router = new VueRouter()
+    const vuetify = new Vuetify({})
 
     wrapper = mount(HomeView, {
-      store,
       localVue,
       router,
       vuetify,
@@ -74,57 +38,52 @@ describe('HomeView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the sub-components properly', () => {
-    expect(wrapper.find(InfoStepper).exists()).toBe(true)
-    expect(wrapper.find(TestimonialQuotes).exists()).toBe(true)
-    expect(wrapper.find(BcscPanel).exists()).toBe(true)
+    expect(wrapper.findComponent(InfoStepper).exists()).toBe(true)
+    expect(wrapper.findComponent(TestimonialQuotes).exists()).toBe(true)
+    expect(wrapper.findComponent(BcscPanel).exists()).toBe(true)
   })
 
-  it('renders the correct buttons when authenticated', () => {
-    const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn-auth')
-    const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')
-    const namedCompBtn = bannerBtns[0]
-    const numberedCompBtn = bannerBtns[1]
-    const manageBusinessBtn = bannerBtns[2]
+  it('renders the correct buttons when authenticated', async () => {
+    const userStore = useUserStore()
+    userStore.userProfile = { 'firstname': 'test' } as any
+    await flushPromises()
+    const nameRequestBtn = wrapper.find('.btn-name-request')
+    const manageBusinessBtn = wrapper.findAll('.cta-btn-auth').at(0)
 
-    expect(nameRequestBtn).toBeDefined()
-    expect(nameRequestBtn.textContent).toContain('Request a Name')
+    expect(nameRequestBtn.exists()).toBe(true)
+    expect(nameRequestBtn.text()).toContain('Request a Name')
 
-    expect(namedCompBtn).toBeDefined()
-    expect(namedCompBtn.textContent).toContain('Incorporate a Named Benefit Company')
-
-    expect(numberedCompBtn).toBeDefined()
-    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Benefit Company')
-
-    expect(manageBusinessBtn).toBeDefined()
-    expect(manageBusinessBtn.textContent).toContain('Manage an Existing Business')
+    expect(manageBusinessBtn.exists()).toBe(true)
+    expect(manageBusinessBtn.text()).toContain('Manage my Business')
   })
 
   it('renders the correct buttons when not authenticated', async () => {
     // Render Un-authenticated
-    userModule.state.userProfile = null
+    const userStore = useUserStore()
+    userStore.userProfile = null
+    await flushPromises()
+    const loginBtn = wrapper.findAll('.cta-btn').at(0)
+    const nameRequestBtn = wrapper.find('.btn-name-request')
 
-    const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn')
-    const loginBtn = bannerBtns[0]
-    const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')
+    const createAccountLink = wrapper.find('.cta-btn')
 
-    const createAccountLink = wrapper.vm.$el.querySelector('.cta-btn')
+    expect(loginBtn.exists()).toBe(true)
+    expect(loginBtn.text()).toContain('Create a BC Registries Account')
 
-    expect(loginBtn).toBeDefined()
-    expect(loginBtn.textContent).toContain('Create a BC Registries Account')
+    expect(nameRequestBtn.exists()).toBe(true)
+    expect(nameRequestBtn.text()).toContain('Request a Name')
 
-    expect(nameRequestBtn).toBeDefined()
-    expect(nameRequestBtn.textContent).toContain('Request a Name')
-
-    expect(createAccountLink).toBeDefined()
-    expect(createAccountLink.textContent).toContain('Create a BC Registries Account')
+    expect(createAccountLink.exists()).toBe(true)
+    expect(createAccountLink.text()).toContain('Create a BC Registries Account')
   })
 })

@@ -18,27 +18,12 @@ A simple decorator to add the options method to a Request Class.
 """
 
 import base64
+import os
 import re
 import urllib
 
+from flask import current_app, request
 from humps.main import camelize, decamelize
-
-
-def cors_preflight(methods):
-    """Render an option method on the class."""
-
-    def wrapper(func):
-        def options(self, *args, **kwargs):  # pylint: disable=unused-argument
-            return {'Allow': 'GET'}, 200, \
-                   {'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': methods,
-                    'Access-Control-Allow-Headers': 'Authorization, Content-Type, registries-trace-id, '
-                                                    'invitation_token'}
-
-        setattr(func, 'options', options)
-        return func
-
-    return wrapper
 
 
 def camelback2snake(camel_dict: dict):
@@ -73,3 +58,24 @@ def escape_wam_friendly_url(param):
     base64_org_name = base64.b64encode(bytes(param, encoding='utf-8')).decode('utf-8')
     encode_org_name = urllib.parse.quote(base64_org_name, safe='')
     return encode_org_name
+
+
+def mask_email(email: str) -> str:
+    """Return masked email."""
+    if email:
+        parts = email.split('@')
+        if len(parts) == 2:
+            username, domain = parts
+            masked_username = username[:2] + '*' * (len(username) - 2)
+            masked_domain = domain[:2] + '*' * (len(domain) - 2)
+            email = masked_username + '@' + masked_domain
+    return email
+
+
+def get_request_environment():
+    """Return the environment corresponding to the user request."""
+    env = None
+    sandbox_host = current_app.config['AUTH_WEB_SANDBOX_HOST']
+    if os.getenv('FLASK_ENV') == 'production' and sandbox_host in request.host_url:
+        env = 'sandbox'
+    return env

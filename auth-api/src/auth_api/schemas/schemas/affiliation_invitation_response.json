@@ -1,0 +1,129 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/affiliation_invitation_response",
+    "type": "object",
+    "title": "Affiliation Invitation Response",
+    "description": "The Affiliation Invitation schema for response.",
+    "default": {},
+    "examples": [
+        {
+            "acceptedDate": "2020-11-08T12:03:50.863200+00:00",
+            "expiresOn": "2020-11-13T19:25:02.704139+00:00",
+            "id": 1580,
+            "fromOrg": {
+                "id": 1,
+                "name": "My Test Org",
+                "orgType": "BASIC"
+            },
+            "toOrg": {
+                "id": 1,
+                "name": "My Test Org 2",
+                "orgType": "BASIC"
+            },
+            "businessIdentifier": "CP1234567",
+            "recipientEmail": "test@gmai.com",
+            "sentDate": "2020-11-06T19:25:02.704139+00:00",
+            "status": "ACCEPTED",
+            "token": "eyJpZCI6NiwidHlwZSI6IlNUQU5EQVJEIn0.X7V-Jg.Pd0g1DvcmChr34dQk5DbDmQOXOQ",
+            "type": "EMAIL"
+        }
+    ],
+    "required": [
+        "id",
+        "fromOrg",
+        "businessIdentifier",
+        "sentDate",
+        "status"
+    ],
+    "properties": {
+        "acceptedDate": {
+            "$id": "#/properties/acceptedDate",
+            "type": "string",
+            "title": "Accepted Date",
+            "default": "",
+            "examples": [
+                "2020-11-08T12:03:50.863200+00:00"
+            ]
+        },
+        "expiresOn": {
+            "$id": "#/properties/expiresOn",
+            "type": "string",
+            "title": "Expires On",
+            "default": "",
+            "examples": [
+                "2020-11-13T19:25:02.704139+00:00"
+            ]
+        },
+        "id": {
+            "$id": "#/properties/id",
+            "type": "integer",
+            "title": "ID",
+            "default": 0,
+            "examples": [
+                1580
+            ]
+        },
+        "fromOrg": {
+            "$id": "#/properties/fromOrg",
+            "type": "object",
+            "title": "From Org",
+            "required":[
+                "id",
+                "name",
+                "orgType"
+            ]
+
+        },
+        "toOrg": {
+            "$id": "#/properties/toOrg",
+            "type": "object",
+            "title": "To Org "
+        },
+        "businessIdentifier": {
+            "$id": "#/properties/businessIdentifier",
+            "type": "string",
+            "title": "Business Identifier",
+            "default": "",
+            "examples": [
+                "CP0002103"
+            ]
+        },
+        "recipientEmail": {
+            "$id": "#/properties/recipientEmail",
+            "type": "string",
+            "title": "Recipient Email",
+            "default": "",
+            "examples": [
+                "test@gmail.com"
+            ]
+        },
+        "sentDate": {
+            "$id": "#/properties/sentDate",
+            "type": "string",
+            "title": "Sent Date",
+            "default": "",
+            "examples": [
+                "2020-11-06T19:25:02.704139+00:00"
+            ]
+        },
+        "status": {
+            "$id": "#/properties/status",
+            "type": "string",
+            "title": "Status",
+            "default": "",
+            "examples": [
+                "ACCEPTED"
+            ]
+        },
+        "token": {
+            "$id": "#/properties/token",
+            "type": "string",
+            "title": "Token",
+            "default": "",
+            "examples": [
+                "eyJpZCI6NiwidHlwZSI6IlNUQU5EQVJEIn0.X7V-Jg.Pd0g1DvcmChr34dQk5DbDmQOXOQ"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

@@ -9,7 +9,7 @@ spacy
 papermill
 schedule
 attrs==19.2.0
-future==0.18.2
+future==0.18.3
 Jinja2==2.11.3
 markupsafe==2.0.1
 python-dateutil==2.8.1
@@ -26,16 +26,16 @@ Flask==1.1.2
 pytest
 Click==7.1.2
 python-dotenv==0.13.0
-requests==2.23.0
+requests==2.31.0
 marshmallow==2.20.5
 Werkzeug==0.16.1
-certifi==2020.4.5.1
-urllib3==1.21.1
 idna==2.9
 pylint
 pylint-flask
 pep8
 autopep8
+certifi==2020.4.5.1
+urllib3==1.21.1
 
 
 

@@ -1,16 +1,8 @@
 import { Account, PaymentTypes } from '@/util/constants'
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import OrgModule from '@/store/modules/org'
+import { createLocalVue, mount } from '@vue/test-utils'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-import displayMode from '@/directives/displayMode'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-Vue.directive('displayMode', displayMode)
+import { useOrgStore } from '@/stores/org'
 
 describe('PaymentMethodSelector.vue', () => {
   let wrapper: any
@@ -19,45 +11,29 @@ describe('PaymentMethodSelector.vue', () => {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const vuetify = new Vuetify({})
-
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {},
-        currentOrgType: Account.BASIC
-      },
-      actions: OrgModule.actions,
-      mutations: OrgModule.mutations,
-      getters: OrgModule.getters
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
-
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = { orgType: Account.BASIC } as any
     wrapper = mount(PaymentMethodSelector, {
-      store,
       localVue,
       vuetify
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('initial selection should be empty', () => {

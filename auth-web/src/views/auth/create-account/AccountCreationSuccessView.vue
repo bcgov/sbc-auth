@@ -1,35 +1,54 @@
 <template>
-  <v-container class="view-container" data-test="div-account-setup-success-container">
+  <v-container
+    class="view-container"
+    data-test="div-account-setup-success-container"
+  >
     <v-row justify="center">
-      <v-col cols="12" sm="6" class="text-center">
-        <v-icon size="48" color="primary" class="mb-6">mdi-check</v-icon>
-        <h1>{{$t('bcscAccountCreationSuccessTitle')}}</h1>
-        <p class="mt-8 mb-10">{{$t('bcscAccountCreationSuccessSubtext')}}</p>
+      <v-col
+        cols="12"
+        sm="6"
+        class="text-center"
+      >
+        <v-icon
+          size="48"
+          color="primary"
+          class="mb-6"
+        >
+          mdi-check
+        </v-icon>
+        <h1>{{ $t('bcscAccountCreationSuccessTitle') }}</h1>
+        <p class="mt-8 mb-5">
+          {{ $t('bcscAccountCreationSuccessSubtext1') }}
+        </p>
+        <p class="mb-10">
+          {{ $t('bcscAccountCreationSuccessSubtext2') }}
+        </p>
         <div class="btns">
           <v-btn
             large
             color="primary"
             class="action-btn font-weight-bold"
             data-test="btn-goto-home"
-            @click="goTo('home')">
+            @click="goTo('home')"
+          >
             Home
           </v-btn>
           <span class="mx-3">or</span>
           <v-btn
+            v-if="isRegularAccount"
             large
             color="primary"
             class="action-btn font-weight-bold"
-            v-if="isRegularAccount"
             data-test="btn-setup-team"
             @click="goTo('setup-team')"
           >
             Set up team
           </v-btn>
           <v-btn
+            v-if="!isRegularAccount"
             large
             color="primary"
             class="action-btn font-weight-bold"
-            v-if="!isRegularAccount"
             data-test="btn-add-team-members"
             @click="goTo('team-members')"
           >
@@ -45,22 +64,20 @@
 
 import { Component, Mixins } from 'vue-property-decorator'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { Organization } from '@/models/Organization'
+import ConfigHelper from '@/util/config-helper'
 import { Pages } from '@/util/constants'
-import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState(useOrgStore, ['currentOrganization'])
   }
 })
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
-  protected readonly currentOrganization!: Organization
-
-  private goTo (page) {
+  goTo (page) {
     switch (page) {
-      case 'home': this.$router.push('/')
+      case 'home': window.location.assign(`${ConfigHelper.getRegistryHomeURL()}dashboard/?accountid=${this.currentOrganization.id}`)
         break
       case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
         break

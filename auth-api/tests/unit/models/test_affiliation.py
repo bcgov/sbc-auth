@@ -15,6 +15,8 @@
 
 Test suite to ensure that the Affiliation model routines are working as expected.
 """
+import pytest
+
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
@@ -51,9 +53,9 @@ def factory_org_model(name):
     return org
 
 
-def factory_affiliation_model(entity_id, org_id):
+def factory_affiliation_model(entity_id, org_id, environment=None):
     """Produce a templated affiliation model."""
-    affiliation = AffiliationModel(entity_id=entity_id, org_id=org_id)
+    affiliation = AffiliationModel(entity_id=entity_id, org_id=org_id, environment=environment)
     affiliation.save()
     return affiliation
 
@@ -67,6 +69,7 @@ def test_affiliation(session):  # pylint:disable=unused-argument
     assert entity.id is not None
     assert org.id is not None
     assert affiliation.id is not None
+    assert affiliation.environment is None
 
 
 def test_find_affiliation_by_ids(session):  # pylint:disable=unused-argument
@@ -79,21 +82,37 @@ def test_find_affiliation_by_ids(session):  # pylint:disable=unused-argument
     assert result_affiliation is not None
 
 
-def test_find_affiliations_by_org_id(session):  # pylint:disable=unused-argument
+@pytest.mark.parametrize('environment', ['test', None])
+def test_find_affiliations_by_org_id(session, environment):  # pylint:disable=unused-argument
     """Assert that a affiliation can be retrieved via affiliation id."""
     entity = factory_entity_model()
     org = factory_org_model(name='My Test Org')
-    affiliation = factory_affiliation_model(entity.id, org.id)
+    affiliation = factory_affiliation_model(entity.id, org.id, environment)
 
-    result_affiliation = affiliation.find_affiliations_by_org_id(org_id=org.id)
+    result_affiliation = affiliation.find_affiliations_by_org_id(org_id=org.id, environment=environment)
     assert result_affiliation is not None
 
 
-def test_find_affiliation_by_org_and_entity_ids(session):  # pylint:disable=unused-argument
+@pytest.mark.parametrize('environment', ['test', None])
+def test_find_affiliation_by_org_and_entity_ids(session, environment):  # pylint:disable=unused-argument
     """Assert that affiliations can be retrieved via the org id."""
     entity = factory_entity_model()
     org = factory_org_model(name='My Test Org')
-    affiliation = factory_affiliation_model(entity.id, org.id)
+    affiliation = factory_affiliation_model(entity.id, org.id, environment)
 
-    result_affiliations = affiliation.find_affiliation_by_org_and_entity_ids(org_id=org.id, entity_id=entity.id)
+    result_affiliations = affiliation.find_affiliation_by_org_and_entity_ids(org_id=org.id, entity_id=entity.id,
+                                                                             environment=environment)
+    assert result_affiliations is not None
+
+
+@pytest.mark.parametrize('environment', ['test', None])
+def test_find_affiliation_by_org_id_and_business_identifier(session, environment):  # pylint:disable=unused-argument
+    """Assert that affiliations can be retrieved via the org id and business identifier."""
+    entity = factory_entity_model()
+    org = factory_org_model(name='My Test Org')
+    affiliation = factory_affiliation_model(entity.id, org.id, environment)
+
+    result_affiliations = affiliation.find_affiliation_by_org_id_and_business_identifier(org.id,
+                                                                                         entity.business_identifier,
+                                                                                         environment)
     assert result_affiliations is not None

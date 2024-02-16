@@ -1,14 +1,6 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('UserProfileForm.vue', () => {
   let wrapper: Wrapper<UserProfileForm>
@@ -18,35 +10,13 @@ describe('UserProfileForm.vue', () => {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
 
-  let userModule: any
-
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     vuetify = new Vuetify()
     const $t = () => 'test'
 
-    userModule = {
-      namespaced: true,
-      state: {
-        userProfile: {
-        }
-      },
-      actions: {
-        getUserProfile: jest.fn()
-      }
-    }
-
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        user: userModule
-      }
-    })
-
     wrapper = mount(UserProfileForm, {
-      store,
       localVue,
       vuetify,
       mocks: { $t },
@@ -56,12 +26,16 @@ describe('UserProfileForm.vue', () => {
       }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('user profile form has save and cancel buttons', () => {

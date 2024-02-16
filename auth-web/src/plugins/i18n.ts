@@ -1,25 +1,22 @@
 import VueI18n, { LocaleMessages } from 'vue-i18n'
-import Vue from 'vue'
+import { createI18n } from 'vue-i18n-composable'
+import enLocals from '@/locales/en.json'
 
-Vue.use(VueI18n)
+export default function initialize (vue) {
+  vue.use(VueI18n)
 
-function loadLocaleMessages (): LocaleMessages {
-  const locales = require.context('../locales', true, /[A-Za-z0-9-_,\s]+\.json$/i)
-  const messages: LocaleMessages = {}
-  locales.keys().forEach((key) => {
-    const matched = key.match(/([A-Za-z0-9-_]+)\./i)
-    if (matched && matched.length > 1) {
-      const locale = matched[1]
-      messages[locale] = locales(key)
-    }
+  function loadLocaleMessages (): LocaleMessages {
+    const messages: LocaleMessages = { en: {} }
+    Object.keys(enLocals).forEach((key) => {
+      messages['en'][key] = enLocals[key]
+    })
+    return messages
+  }
+
+  const i18n = createI18n({
+    locale: import.meta.env.VUE_APP_I18N_LOCALE || 'en',
+    fallbackLocale: import.meta.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
+    messages: loadLocaleMessages()
   })
-  return messages
+  return i18n
 }
-
-const i18n = new VueI18n({
-  locale: process.env.VUE_APP_I18N_LOCALE || 'en',
-  fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
-  messages: loadLocaleMessages()
-})
-
-export default i18n

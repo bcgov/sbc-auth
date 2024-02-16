@@ -1,8 +1,7 @@
 import { DirectiveBinding } from 'vue/types/options'
 import { DirectiveOptions } from 'vue'
 import { DisplayModeValues } from '@/util/constants'
-import { VNode } from 'vue/types'
-import store from '@/store'
+import { useOrgStore } from '@/stores/org'
 
 interface CustomHTMLElement extends HTMLElement {
   disabled: boolean
@@ -10,11 +9,11 @@ interface CustomHTMLElement extends HTMLElement {
 }
 
 const displayMode: DirectiveOptions = {
-  inserted (el, binding, node) {
-    checkViewOnlyMode(binding, el, node)
+  inserted (el, binding) {
+    checkViewOnlyMode(binding, el)
   },
-  componentUpdated (el, binding, node) {
-    checkViewOnlyMode(binding, el, node)
+  componentUpdated (el, binding) {
+    checkViewOnlyMode(binding, el)
   }
 }
 
@@ -22,15 +21,14 @@ const displayMode: DirectiveOptions = {
  *
  * @param binding
  * @param el
- * @param node
  * How to use
  * v-display-mode only with out any value, this will check the value from org store and disable/enable div
  * v-display-mode="'VIEW_ONLY'", when pass value to thsi directive it will check the value and disable/enable div
  */
-function checkViewOnlyMode (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
+function checkViewOnlyMode (binding: DirectiveBinding, el: HTMLElement) {
   const directiveValue = binding.value
 
-  const vModeStoreValue:string = (store.state as any)?.org?.vDisplayModeValue
+  const vModeStoreValue:string = useOrgStore().vDisplayModeValue
   const customeEl = el as CustomHTMLElement
   let viewOnly = false
   if (directiveValue) {

@@ -56,7 +56,7 @@ ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
-class User:  # pylint: disable=too-many-instance-attributes
+class User:  # pylint: disable=too-many-instance-attributes disable=too-many-public-methods
     """Manages all aspects of the User Entity.
 
     This manages storing the User in the cache,
@@ -82,6 +82,11 @@ class User:  # pylint: disable=too-many-instance-attributes
     def verified(self) -> str:
         """Return the verified flag for the user."""
         return self._model.verified
+
+    @property
+    def type(self) -> str:
+        """Return the type for the user."""
+        return self._model.type
 
     @ServiceTracing.disable_tracing
     def as_dict(self):
@@ -134,11 +139,11 @@ class User:  # pylint: disable=too-many-instance-attributes
                 else:
                     kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
             except BusinessException as err:
-                current_app.logger.error('create_user in keycloak failed :duplicate user {}', err)
+                current_app.logger.error('create_user in keycloak failed :duplicate user %s', err)
                 users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))
                 continue
             except HTTPError as err:
-                current_app.logger.error('create_user in keycloak failed {}', err)
+                current_app.logger.error('create_user in keycloak failed %s', err)
                 users.append(User._get_error_dict(username, Error.FAILED_ADDING_USER_ERROR))
                 continue
             try:
@@ -158,7 +163,7 @@ class User:  # pylint: disable=too-many-instance-attributes
                 user_dict.update({'http_status': http_status.HTTP_201_CREATED, 'error': ''})
                 users.append(user_dict)
             except Exception as e:  # NOQA # pylint: disable=broad-except
-                current_app.logger.error('Error on  create_user_and_add_membership: {}', e)
+                current_app.logger.error('Error on  create_user_and_add_membership: %s', e)
                 db.session.rollback()
                 if re_enable_user:
                     User._update_user_in_kc(create_user_request)
@@ -221,7 +226,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             KeycloakService.reset_otp(str(user.keycloak_guid))
             User.send_otp_authenticator_reset_notification(user.email, origin_url, org_id)
         except HTTPError as err:
-            current_app.logger.error('update_user in keycloak failed {}', err)
+            current_app.logger.error('update_user in keycloak failed %s', err)
             raise BusinessException(Error.UNDEFINED_ERROR, err) from err
 
     @staticmethod
@@ -264,7 +269,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         try:
             kc_user = KeycloakService.update_user(update_user_request)
         except HTTPError as err:
-            current_app.logger.error('update_user in keycloak failed {}', err)
+            current_app.logger.error('update_user in keycloak failed %s', err)
             raise BusinessException(Error.UNDEFINED_ERROR, err) from err
         return kc_user
 
@@ -342,10 +347,10 @@ class User:  # pylint: disable=too-many-instance-attributes
         request_json = {} if not request_json else request_json
 
         is_anonymous_user = user_from_context.token_info.get('accessType', None) == AccessType.ANONYMOUS.value
-        if not is_anonymous_user:
-            existing_user = UserModel.find_by_jwt_token()
-        else:
+        if is_anonymous_user:
             existing_user = UserModel.find_by_username(user_from_context.user_name)
+        else:
+            existing_user = UserModel.find_by_jwt_idp_userid()
 
         first_name, last_name = User._get_names(existing_user, request_json)
 
@@ -547,11 +552,17 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def get_admins_for_membership(membership_id, status=Status.ACTIVE.value):
-        """Get admins for an org."""
+        """Get admins for a membership's org."""
         membership = MembershipModel.find_membership_by_id(membership_id)
         org_id = membership.org_id
 
         return UserModel.find_users_by_org_id_by_status_by_roles(org_id, CLIENT_ADMIN_ROLES, status)
+
+    @staticmethod
+    def get_admin_emails_for_org(org_id: int, status=Status.ACTIVE.value):
+        """Get admin emails for an org."""
+        admin_list = UserModel.find_users_by_org_id_by_status_by_roles(org_id, CLIENT_ADMIN_ROLES, status)
+        return ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
 
     @staticmethod
     def delete_user():
@@ -628,3 +639,24 @@ class User:  # pylint: disable=too-many-instance-attributes
         else:
             user_membership.status = Status.INACTIVE.value
             user_membership.flush()
+
+    @staticmethod
+    @user_context
+    def is_context_user_staff(**kwargs):
+        """Check if user in user context has is a staff."""
+        user_from_context: UserContext = kwargs['user_context']
+        return user_from_context.is_staff()
+
+    @staticmethod
+    def is_user_admin_or_coordinator(user, org_id: int) -> bool:
+        """Check if user(userservice wrapper) provided is admin or coordinator for the given org id."""
+        current_user_membership: MembershipModel = \
+            MembershipModel.find_membership_by_user_and_org(user_id=user.identifier, org_id=org_id)
+
+        if current_user_membership is None:
+            return False
+
+        if current_user_membership.status != Status.ACTIVE.value:
+            return False
+
+        return current_user_membership.membership_type_code in CLIENT_ADMIN_ROLES

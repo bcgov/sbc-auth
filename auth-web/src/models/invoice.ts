@@ -1,3 +1,5 @@
+import { LineItem } from '.'
+
 export interface InvoiceList {
   consInvNumber?: string
   invoiceNumber: string
@@ -25,22 +27,8 @@ export interface Invoice {
   statusCode: string
   total: number
   isOnlineBankingAllowed?: boolean
-}
-
-export interface LineItem {
-  description: string
-  filingFees: number
-  futureEffectiveFees: number
-  gst: number
-  id: number
-  priorityFees: number
-  pst: number
-  quantity: number
-  serviceFees: number
-  statusCode: string
-  total: number
-  waivedBy: string
-  waivedFees: number
+  paymentDate?: string
+  refundDate?: string
 }
 
 export interface InvoiceListResponse {
@@ -55,4 +43,13 @@ export interface FailedInvoice {
   nsfFee?:number
   totalTransactionAmount?: number
   totalAmountToPay?: number
+  invoices?: InvoiceList[]
+}
+
+export interface NonSufficientFundsInvoiceListResponse {
+  invoices: InvoiceList[]
+  total: number
+  totalAmount: number
+  totalAmountRemaining: number
+  nsfAmount: number
 }

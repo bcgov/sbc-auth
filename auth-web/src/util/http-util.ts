@@ -6,12 +6,17 @@ import { SessionStorageKeys } from '@/util/constants'
 const axios = Axios.create()
 
 axios.interceptors.request.use(
-  config => {
+  request => {
+    // Bypass adding auth header for minio
+    if (request.url?.includes('minio')) {
+      return request
+    }
+
     const token = ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      request.headers.Authorization = `Bearer ${token}`
     }
-    return config
+    return request
   },
   error => Promise.reject(error)
 )

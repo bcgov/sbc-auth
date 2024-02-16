@@ -1,47 +1,27 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
 import ProductFee from '@/components/auth/staff/review-task/ProductFee.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import can from '@/directives/can'
-
-Vue.use(Vuetify)
-
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
+import { useOrgStore } from '@/stores/org'
 
 describe('PaymentInformation.vue', () => {
   let store: any
-  let orgModule: any
   const localVue = createLocalVue()
-  localVue.use(Vuex)
   localVue.directive('can', can)
   let wrapper: any
   const vuetify = new Vuetify({})
 
   beforeEach(() => {
-    orgModule = {
-      namespaced: true,
-      state: {
-        orgProductFeeCodes: [{ amount: 1.5, code: 'TRF01' }, { amount: 1, code: 'TRF02' }],
-        productList: [{ code: 'BCA', name: 'BC Assessment' }, { code: 'VS', name: 'Wills Registry' }],
-        currentAccountFees: []
-      }
-    }
-
-    store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
+    const orgStore = useOrgStore()
+    orgStore.orgProductFeeCodes = [{ amount: 1.5, code: 'TRF01' }, { amount: 1, code: 'TRF02' }]
+    orgStore.productList = [{ code: 'BCA', name: 'BC Assessment' }, { code: 'VS', name: 'Wills Registry' }] as any
+    orgStore.currentAccountFees = []
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
@@ -49,6 +29,6 @@ describe('PaymentInformation.vue', () => {
       store,
       vuetify
     })
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 })

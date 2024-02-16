@@ -1,6 +1,7 @@
 <script lang="ts">
 import Component from 'vue-class-component'
 import Vue from 'vue'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   name: 'AccountChangeMixin'
@@ -9,10 +10,12 @@ export default class AccountChangeMixin extends Vue {
   protected unregisterHandler: () => void
 
   protected setAccountChangedHandler (handler: () => any) {
-    this.unregisterHandler = this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'org/setCurrentOrganization') {
-        handler()
-      }
+    this.unregisterHandler = useOrgStore().$onAction(({ name, after }) => {
+      after(() => {
+        if (['syncOrganization', 'setCurrentOrganization'].includes(name)) {
+          handler()
+        }
+      })
     })
   }
 

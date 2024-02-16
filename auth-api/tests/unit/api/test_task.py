@@ -16,11 +16,14 @@
 Test-Suite to ensure that the /tasks endpoint is working as expected.
 """
 import json
+import mock
 
+import datetime as dt
 import pytest
 
 from auth_api import status as http_status
 from auth_api.models import ProductCode as ProductCodeModel
+from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
@@ -31,7 +34,13 @@ from auth_api.utils.enums import (
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestJwtClaims, TestOrgInfo, TestOrgProductsInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
-    factory_auth_header, factory_task_service, factory_user_model, factory_user_model_with_contact, patch_token_info)
+    factory_auth_header, factory_task_model, factory_task_service, factory_user_model, factory_user_model_with_contact,
+    patch_token_info)
+from tests.conftest import mock_token
+
+
+current_dt = dt.datetime.now()
+current_date_str = current_dt.strftime('%Y-%m-%d')
 
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
@@ -53,19 +62,76 @@ def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-
     assert rv.status_code == http_status.HTTP_200_OK
 
 
-def test_fetch_tasks_with_status(client, jwt, session):  # pylint:disable=unused-argument
+@pytest.mark.parametrize('test_name, endpoint', [
+    ('status', 'status=OPEN'),
+    ('relationshipStatus', 'relationshipStatus=PENDING_STAFF_REVIEW'),
+    ('dateSubmitted', f'startDate=2022-10-1&endDate={current_date_str}'),
+    ('type', 'type=New Account'),
+    ('name', 'name=foo'),
+    ('modifiedBy', 'modifiedBy=User'),
+])
+def test_fetch_tasks_with_params(test_name, client, jwt, endpoint, session):  # pylint:disable=unused-argument
+    """Assert that the tasks can be fetched."""
+    user = factory_user_model()
+    date_submitted = dt.datetime(2022, 10, 20, 12, 0, 0)
+    factory_task_model(user_id=user.id, modified_by_id=user.id, date_submitted=date_submitted)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get(f'/api/v1/tasks?{endpoint}',
+                    headers=headers, content_type='application/json')
+    item_list = rv.json
+    assert item_list['tasks']
+    assert len(item_list['tasks']) > 0
+    assert item_list['tasks'][0][test_name]
+    assert schema_utils.validate(item_list, 'paged_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+
+
+@pytest.mark.parametrize('test_name, endpoint', [
+    ('with-2-params', 'status=OPEN&relationshipStatus=PENDING_STAFF_REVIEW'),
+    ('with-many-params', 'status=OPEN&relationshipStatus=PENDING_STAFF_REVIEW&page=1&limit=10')
+])
+def test_fetch_tasks_with_many_params(test_name, client, jwt, endpoint, session):
     """Assert that the tasks can be fetched."""
     user = factory_user_model()
     factory_task_service(user.id)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.get('/api/v1/tasks?status=OPEN',
+    rv = client.get(f'/api/v1/tasks?{endpoint}',
                     headers=headers, content_type='application/json')
     item_list = rv.json
+    assert item_list['tasks']
+    assert len(item_list['tasks']) > 0
+    assert item_list['tasks'][0]['relationshipStatus']
     assert schema_utils.validate(item_list, 'paged_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK
 
 
+def test_fetch_tasks_end_of_day(client, jwt, session):
+    """Assert that task is only fetched on end of end_date."""
+    user = factory_user_model(TestUserInfo.user1)
+    user_2 = factory_user_model(TestUserInfo.user2)
+
+    date_submitted_1 = dt.datetime(2022, 7, 10, 15, 59, 59)
+    # this is the utc value so needs to be 8 + hours ahead of midnight or will be returned
+    date_submitted_2 = dt.datetime(2022, 7, 11, 9, 0, 0)
+
+    factory_task_model(user_id=user.id, modified_by_id=user.id, date_submitted=date_submitted_1)
+    factory_task_model(user_id=user_2.id, modified_by_id=user_2.id, date_submitted=date_submitted_2)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/tasks?startDate=2022-7-10&endDate=2022-7-10',
+                    headers=headers, content_type='application/json')
+    item_list = rv.json
+
+    assert item_list['tasks']
+    assert len(item_list['tasks']) > 0 and len(item_list['tasks']) <= 1
+    assert item_list['tasks'][0]['dateSubmitted'] == '2022-07-10T15:59:59+00:00'
+    assert schema_utils.validate(item_list, 'paged_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+
+
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the task can be updated."""
     # 1. Create User
@@ -76,6 +142,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
     user_with_token = TestUserInfo.user_staff_admin
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
     user = factory_user_model_with_contact(user_with_token)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
@@ -86,7 +153,12 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict['id']
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+    tasks = TaskService.fetch_tasks(task_search)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -117,6 +189,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     assert rv.json.get('orgStatus') == OrgStatus.ACTIVE.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the task can be updated."""
     # 1. Create User
@@ -127,6 +200,7 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
     user = factory_user_model_with_contact(user_with_token)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
@@ -137,7 +211,13 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict['id']
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -169,6 +249,7 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     assert rv.json.get('orgStatus') == OrgStatus.PENDING_STAFF_REVIEW.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the task can be updated."""
     # 1. Create User
@@ -179,10 +260,12 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     user_with_token = TestUserInfo.user_staff_admin
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
     user = factory_user_model_with_contact(user_with_token)
 
     patch_token_info({
         'sub': str(user_with_token['keycloak_guid']),
+        'idp_userid': str(user_with_token['idp_userid']),
         'username': 'public_user',
         'realm_access': {
             'roles': [
@@ -205,9 +288,13 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                    page=1,
-                                    limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
     assert len(tasks['tasks']) == 1
 
     product_which_needs_approval = TestOrgProductsInfo.org_products_vs
@@ -217,9 +304,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                    page=1,
-                                    limit=10)
+    tasks = TaskService.fetch_tasks(task_search)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[1]
     assert fetched_task['relationship_type'] == TaskRelationshipType.PRODUCT.value
@@ -265,6 +350,7 @@ def test_fetch_task(client, jwt, session):  # pylint:disable=unused-argument
     (TestJwtClaims.public_bceid_user, AccessType.GOVN.value, TaskAction.AFFIDAVIT_REVIEW.value),
     (TestJwtClaims.public_user_role, AccessType.GOVN.value, TaskAction.ACCOUNT_REVIEW.value),
 ])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_tasks_on_account_creation(client, jwt, session, keycloak_mock,  # pylint:disable=unused-argument
                                    monkeypatch, user_token, access_type, expected_task_action):
     """Assert that tasks are created."""

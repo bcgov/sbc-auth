@@ -18,6 +18,7 @@ Test suite to ensure that the Invitation service routines are working as expecte
 from datetime import datetime, timedelta
 from unittest.mock import ANY, patch
 
+import mock
 import pytest
 from freezegun import freeze_time
 from auth_api.models.dataclass import Activity
@@ -35,13 +36,15 @@ from auth_api.services import User
 from auth_api.utils.enums import ActivityAction
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import factory_invitation, factory_user_model, patch_token_info
+from tests.conftest import mock_token
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_as_dict(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the Invitation is exported correctly as a dictionary."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model()
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -50,11 +53,12 @@ def test_as_dict(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disa
         assert invitation_dictionary['recipient_email'] == invitation_info['recipientEmail']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Invitation can be created."""
     with patch.object(InvitationService, 'send_invitation', return_value=None) as mock_notify:
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -71,11 +75,12 @@ def test_create_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
         mock_notify.assert_called()
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_find_invitation_by_id(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided id."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -91,11 +96,12 @@ def test_find_invitation_by_id_exception(session, auth_mock):  # pylint:disable=
     assert invitation is None
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Delete the specified invitation."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -113,11 +119,12 @@ def test_delete_invitation_exception(session, auth_mock):  # pylint:disable=unus
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Update the specified invitation with new data."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -126,12 +133,13 @@ def test_update_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
         assert updated_invitation['status'] == 'PENDING'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_update_invitation_verify_different_tokens(session, auth_mock, keycloak_mock,  # pylint:disable=unused-argument
                                                    monkeypatch):
     """Update the specified invitation with new data."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -151,11 +159,12 @@ def test_generate_confirmation_token(session):  # pylint:disable=unused-argument
     assert confirmation_token is not None
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_validate_token_valid(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Validate the invitation token."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -165,11 +174,12 @@ def test_validate_token_valid(session, auth_mock, keycloak_mock, monkeypatch):  
         assert invitation_id == new_invitation['id']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_validate_token_accepted(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Validate invalid invitation token."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         user_invitee = factory_user_model(TestUserInfo.user1)
@@ -192,6 +202,7 @@ def test_validate_token_exception(session):  # pylint:disable=unused-argument
     assert exception.value.code == Error.EXPIRED_INVITATION.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_accept_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Accept the invitation and add membership from the invitation to the org."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
@@ -199,8 +210,9 @@ def test_accept_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
             with patch.object(InvitationService, 'notify_admin', return_value=None):
                 user_with_token = TestUserInfo.user_test
                 user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+                user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
                 user = factory_user_model(user_with_token)
-                patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+                patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
 
                 org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
                 org_dictionary = org.as_dict()
@@ -218,6 +230,7 @@ def test_accept_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
                 assert len(members) == 1
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_accept_invitation_for_govm(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Accept the invitation and add membership from the invitation to the org."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
@@ -248,13 +261,14 @@ def test_accept_invitation_for_govm(session, auth_mock, keycloak_mock, monkeypat
                 assert len(members) == 1, 'user gets active membership'
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Accept the invitation and add membership from the invitation to the org."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         with patch.object(auth, 'check_auth', return_value=True):
             with patch.object(InvitationService, 'notify_admin', return_value=None):
                 user = factory_user_model(TestUserInfo.user_test)
-                patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+                patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
                 org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
                 org_dictionary = org.as_dict()
                 invitation_info = factory_invitation(org_dictionary['id'])
@@ -285,6 +299,7 @@ def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, monkeyp
                 assert exception.value.code == Error.EXPIRED_INVITATION.name
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_get_invitations_by_org_id(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided org id."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
@@ -292,7 +307,7 @@ def test_get_invitations_by_org_id(session, auth_mock, keycloak_mock, monkeypatc
         user_with_token = TestUserInfo.user_test
         user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
         user = factory_user_model(user_with_token)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         org_id = org_dictionary['id']

@@ -71,6 +71,11 @@ class Entity:
         return self._model.corp_type_code
 
     @property
+    def pass_code_claimed(self):
+        """Return the pass_code_claimed for this entity."""
+        return self._model.pass_code_claimed
+
+    @property
     def status(self):
         """Return the status for this entity."""
         return self._model.status
@@ -148,14 +153,11 @@ class Entity:
         if not entity_info or not business_identifier:
             return None
         user_from_context: UserContext = kwargs['user_context']
-        # todo No memberhsip created at this point. check_auth wont work.ideally we shud put the logic in here
-        # check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
+        if not user_from_context.is_system():
+            check_auth(one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
         entity = EntityModel.find_by_business_identifier(business_identifier)
         if entity is None or entity.corp_type_code is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        # if entity.corp_type_code != token_info.get('corp_type', None):
-        #    raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-
         if user_from_context.is_system():
             if entity_info.get('passCode') is not None:
                 entity_info['passCode'] = passcode_hash(entity_info['passCode'])
@@ -177,7 +179,7 @@ class Entity:
         """Reset the entity passcode and send email."""
         user_from_context: UserContext = kwargs['user_context']
         check_auth(one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
-        current_app.logger.debug(f'reset passcode identifier:{business_identifier}')
+        current_app.logger.debug('reset passcode')
         entity: EntityModel = EntityModel.find_by_business_identifier(business_identifier)
         # generate passcode and set
         new_pass_code = ''.join(secrets.choice(string.digits) for i in range(9))
@@ -186,13 +188,13 @@ class Entity:
         entity.pass_code_claimed = False
         entity.save()
         if email_addresses:
-            mailer_payload = dict(
-                emailAddresses=email_addresses,
-                passCode=new_pass_code,
-                businessIdentifier=business_identifier,
-                businessName=entity.name,
-                isStaffInitiated=user_from_context.is_staff()
-            )
+            mailer_payload = {
+                'emailAddresses': email_addresses,
+                'passCode': new_pass_code,
+                'businessIdentifier': business_identifier,
+                'businessName': entity.name,
+                'isStaffInitiated': user_from_context.is_staff()
+            }
             publish_to_mailer(
                 notification_type='resetPasscode', business_identifier=business_identifier, data=mailer_payload
             )
@@ -247,7 +249,7 @@ class Entity:
 
         return self
 
-    def get_contact(self):
+    def get_contact(self) -> ContactModel:
         """Get the contact for this business."""
         contact_link = ContactLinkModel.find_by_entity_id(self._model.id)
         if contact_link is None:

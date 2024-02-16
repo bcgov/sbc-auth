@@ -24,7 +24,13 @@ from stan.aio.client import Client as Stan
 
 from auth_api import create_app, setup_jwt_manager
 from auth_api.auth import jwt as _jwt
+from auth_api.exceptions import BusinessException, Error
 from auth_api.models import db as _db
+
+
+def mock_token(config_id='', config_secret=''):
+    """Mock token generator."""
+    return 'TOKEN....'
 
 
 @pytest.fixture(scope='session')
@@ -224,12 +230,14 @@ def auth_mock(monkeypatch):
     monkeypatch.setattr('auth_api.services.entity.check_auth', lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.org.check_auth', lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.invitation.check_auth', lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.check_auth', lambda *args, **kwargs: None)
 
 
 @pytest.fixture()
 def notify_mock(monkeypatch):
     """Mock send_email."""
     monkeypatch.setattr('auth_api.services.invitation.send_email', lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.send_email', lambda *args, **kwargs: None)
 
 
 @pytest.fixture()
@@ -247,13 +255,63 @@ def keycloak_mock(monkeypatch):
                         lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group',
                         lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.add_or_remove_product_keycloak_groups',
+                        lambda *args, **kwargs: None)
+
+
+@pytest.fixture()
+def business_exception_mock(monkeypatch):
+    """Mock get business call exceotion."""
+
+    def get_business(business_identifier, token):
+        raise BusinessException(Error.AFFILIATION_INVITATION_BUSINESS_NOT_FOUND, None)
+
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details',
+                        get_business)
+
+
+@pytest.fixture()
+def business_mock(monkeypatch):
+    """Mock get business call."""
+
+    def get_business(business_identifier, token):
+        return {
+            'business': {
+                'identifier': 'CP0002103',
+                'legalName': 'BarFoo, Inc.',
+                'legalType': 'CP'
+            }
+        }
+
+    def get_businesses(business_identifiers, token):
+        return [
+            {
+                'identifier': 'CP0002103',
+                'legalName': 'BarFoo, Inc.',
+                'legalType': 'CP',
+                'state': 'ACTIVE',
+            },
+            {
+
+                'identifier': 'CP0002104',
+                'legalName': 'BarFooMeToo, Inc.',
+                'legalType': 'CP',
+                'state': 'ACTIVE',
+            }
+        ]
+
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details',
+                        get_business)
+
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.AffiliationInvitation._get_multiple_business_details',
+                        get_businesses)
 
 
 @pytest.fixture()
 def nr_mock(monkeypatch):
     """Mock nr get call."""
 
-    def get_nr(business_identifier, bearer_token):
+    def get_nr(business_identifier):
         return {
             'applicants': {
                 'emailAddress': 'test@test.com',
@@ -276,7 +334,7 @@ def nr_mock(monkeypatch):
 def minio_mock(monkeypatch):
     """Mock minio calls."""
 
-    def get_nr(business_identifier, bearer_token):
+    def get_nr(business_identifier):
         return {
             'applicants': {
                 'emailAddress': 'test@test.com',
@@ -328,6 +386,29 @@ def bceid_user_mock(monkeypatch):
                 'roles': [
                     'edit',
                     'create_accounts'
+                ]
+            }
+        }
+
+    def mock_auth():  # pylint: disable=unused-argument; mocks of library methods
+        return 'test'
+
+    monkeypatch.setattr('auth_api.utils.user_context._get_token', mock_auth)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
+
+
+@pytest.fixture()
+def system_user_mock(monkeypatch):
+    """Mock user_context."""
+
+    def token_info():  # pylint: disable=unused-argument; mocks of library methods
+        return {
+            'username': 'staff user',
+            'realm_access': {
+                'roles': [
+                    'staff',
+                    'edit',
+                    'system'
                 ]
             }
         }

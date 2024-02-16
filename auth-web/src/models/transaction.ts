@@ -1,44 +1,51 @@
+import { InvoiceStatus, PaymentTypes, Product } from '@/util/constants'
+import { LineItem } from '.'
+
 export interface Transaction {
+  businessIdentifier: string
   createdName: string
   createdOn: string
-  id: number,
-  paymentMethod: string
-  statusCode: string
-  updatedName: string
-  updatedOn: string
-  businessIdentifier: string
+  details?: { label: string, value: string }[]
   folioNumber: string
+  id: number
+  invoiceNumber: string
   lineItems: LineItem[]
   paid: number
+  paymentAccount: {
+    accountId: string
+    accountName: string
+    billable: boolean
+  }
+  paymentMethod: PaymentTypes
+  product: Product
   refund: number
+  statusCode: InvoiceStatus
   total: number
-  transactionFees: number
-}
-
-export interface LineItem {
-  description: string
-  filingFees: number
-  filingTypeCode: string
-  futureEffectiveFees: number
-  gst: number
-  priorityFees: number
-  pst: number
-  quantity: number
-  total: number
-  waivedBy: string
-  waivedFees: number
+  updatedOn: string
 }
 
 export interface TransactionFilter {
-  dateFilter: {
+  accountName?: string,
+  businessIdentifier?: string,
+  createdBy?: string,
+  createdName?: string,
+  dateFilter?: {
     startDate: string
     endDate: string
   },
+  details?: string,
   folioNumber?: string,
-  createdBy?: string,
+  id?: string,
+  invoiceNumber?: string,
+  lineItems?: string,
+  lineItemsAndDetails?: string,
+  paymentMethod?: PaymentTypes,
+  product?: string,
+  statusCode?: InvoiceStatus
 }
 
 export interface TransactionFilterParams {
+  isActive: boolean
   filterPayload: TransactionFilter
   pageNumber?: number
   pageLimit?: number
@@ -51,19 +58,9 @@ export interface TransactionListResponse {
   total: number
 }
 
-export interface TransactionTableList {
-  transactionsList: TransactionTableRow[]
-  limit: number
-  page: number
-  total: number
-}
-
-export interface TransactionTableRow {
-  id: number
-  transactionNames: string[]
-  folioNumber: string
-  initiatedBy: string
-  transactionDate: string
-  totalAmount: number
-  status: string
+export interface TransactionState {
+  filters: TransactionFilterParams
+  loading: boolean
+  results: Transaction[]
+  totalResults: number
 }

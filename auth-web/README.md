@@ -9,20 +9,20 @@
 BC Registries authentication and authorization interface.
 
 ## Prerequisites
-- Node.js (> v13.6.x)
-- [Vue Cli](https://cli.vuejs.org/)
+- Node.js (> v16.15.x)
+- [VITE v4.4.9](https://vitejs.dev/)
 
 ## Development setup
 
 - Fork and checkout this repository in to your local.
 - Open terminal or cmd.
 - Go to the **auth-web** folder (`cd /auth-web`)
-- install the dependencies by running the command: **`npm install`**
+- install the dependencies by running the command: **`npm i`**
 
 ## Running the environment in development mode
 Run the following command on the root(auth-web) folder:
 ```
-npm run serve
+npm run dev
 ```
 
 ### Run your tests
@@ -65,6 +65,3 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ## Openshift Environment
 View the document [here](/docs/build-deploy.md#webui-runtime)
-
-
-

@@ -17,17 +17,21 @@
 Test-Suite to ensure that the User Service is working as expected.
 """
 
+import mock
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services import UserSettings as UserSettingsService
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import factory_user_model, patch_token_info
+from tests.conftest import mock_token
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_user_settings(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a contact can not be deleted if contact link exists."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
     user_model = factory_user_model(user_info=user_with_token)
     user = UserService(user_model)
 

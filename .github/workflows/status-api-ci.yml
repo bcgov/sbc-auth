@@ -19,7 +19,7 @@ jobs:
     if: github.repository == 'bcgov/sbc-auth'
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: "true"
 
   linting:
@@ -31,7 +31,7 @@ jobs:
         python-version: [3.8]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -69,7 +69,7 @@ jobs:
         run: |
           make test
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           file: ./status-api/coverage.xml
           flags: statusapi
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: build to check strictness
         id: build
         run: |

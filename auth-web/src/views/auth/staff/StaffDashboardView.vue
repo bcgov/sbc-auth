@@ -1,244 +1,384 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column">
-      <h1 class="view-header__title">Staff Dashboard</h1>
+      <h1 class="view-header__title">
+        Staff Dashboard
+      </h1>
       <p class="mt-3 mb-0">
         Search for businesses and manage BC Registries accounts
       </p>
     </div>
 
-    <v-row class="ma-0 mb-4" no-gutters>
-      <v-col class="pr-2" cols="6">
-        <v-card class="pa-8" flat style="height: 100%;">
-          <div class="view-header flex-column mb-10">
-            <h2 class="view-header__title">Search Entities</h2>
-            <p class="mt-3 mb-0">
-              Enter the Entity's Incorporation Number below to access their dashboard.
+    <v-row
+      class="ma-0 mb-4"
+      no-gutters
+    >
+      <v-col
+        class="pr-2"
+        cols="6"
+      >
+        <v-card
+          class="srch-card"
+          flat
+          style="height: 100%;"
+        >
+          <div>
+            <h2>Business Registry</h2>
+            <v-row
+              class="mt-4"
+              no-gutters
+            >
+              <v-col
+                class="mr-5"
+                cols="auto"
+              >
+                <v-btn
+                  class="srch-card__link px-0"
+                  color="primary"
+                  :ripple="false"
+                  small
+                  text
+                  @click="goToManageBusiness()"
+                >
+                  My Staff Business Registry
+                  <v-icon
+                    class="ml-1"
+                    size="20"
+                  >
+                    mdi-chevron-right-circle-outline
+                  </v-icon>
+                </v-btn>
+              </v-col>
+              <v-col>
+                <v-btn
+                  class="srch-card__link px-0"
+                  color="primary"
+                  :href="registrySearchUrl"
+                  :ripple="false"
+                  small
+                  target="blank"
+                  text
+                >
+                  Business Search
+                  <v-icon
+                    class="ml-1"
+                    size="20"
+                  >
+                    mdi-chevron-right-circle-outline
+                  </v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+            <p class="mb-5 mt-4">
+              Find an existing business to manage:
             </p>
           </div>
 
           <v-expand-transition>
             <div v-show="errorMessage">
-              <v-alert type="error" icon="mdi-alert-circle" class="mb-0"
-                >{{ errorMessage }} <strong>{{ searchedBusinessNumber }}</strong>
+              <v-alert
+                type="error"
+                icon="mdi-alert-circle"
+                class="mb-0"
+              >
+                {{ errorMessage }} <strong>{{ searchedBusinessNumber }}</strong>
               </v-alert>
             </div>
           </v-expand-transition>
 
-          <v-form ref="searchBusinessForm" v-on:submit.prevent="search">
-            <v-text-field
-              filled dense req persistent-hint
-              label="Incorporation Number or Registration Number"
-              hint="Example: BC1234567, CP1234567 or FM1234567"
-              @blur="formatBusinessIdentifier()"
-              :rules="businessIdentifierRules"
-              v-model="businessIdentifier"
-              id="txtBusinessNumber"
-            />
-            <v-btn
-              color="primary"
-              class="search-btn mt-0"
-              type="submit"
-              depressed
-              :disabled="!isFormValid()"
-              :loading="searchActive"
-            >
-              <span>Search</span>
-            </v-btn>
+          <v-form
+            ref="searchBusinessForm"
+            @submit.prevent="search"
+          >
+            <v-row no-gutters>
+              <v-col>
+                <v-text-field
+                  id="txtBusinessNumber"
+                  v-model="businessIdentifier"
+                  filled
+                  dense
+                  req
+                  persistent-hint
+                  label="Incorporation Number or Registration Number"
+                  hint="Example: BC1234567, CP1234567 or FM1234567"
+                  :rules="businessIdentifierRules"
+                  @blur="formatBusinessIdentifier()"
+                />
+              </v-col>
+              <v-col cols="auto">
+                <v-btn
+                  color="primary"
+                  class="search-btn mt-0"
+                  type="submit"
+                  depressed
+                  :disabled="!isFormValid()"
+                  :loading="searchActive"
+                >
+                  <span>Search</span>
+                </v-btn>
+              </v-col>
+            </v-row>
           </v-form>
-
-          <template>
-            <IncorporationSearchResultView
-              :isVisible="canViewIncorporationSearchResult"
-              :affiliatedOrg="affiliatedOrg"
-            ></IncorporationSearchResultView>
-          </template>
+          <IncorporationSearchResultView
+            :isVisible="canViewIncorporationSearchResult"
+            :affiliatedOrg="affiliatedOrg"
+          />
         </v-card>
       </v-col>
-      <v-col class="pl-2" cols="6">
+      <v-col
+        class="pl-2"
+        cols="6"
+      >
         <PPRLauncher />
       </v-col>
     </v-row>
 
     <!-- Director search -->
-    <v-card flat class="mb-4 pa-8" v-if="canViewAccounts">
-      <StaffAccountManagement></StaffAccountManagement>
+    <v-card
+      v-if="canViewAccounts"
+      flat
+      class="mb-4 pa-8"
+    >
+      <StaffAccountManagement />
     </v-card>
 
     <!-- GL Codes -->
-    <v-card flat class="mb-4 pa-8" v-if="canViewGLCodes">
+    <v-card
+      v-if="canViewGLCodes"
+      flat
+      class="mb-4 pa-8"
+    >
       <GLCodesListView />
     </v-card>
 
-    <!-- FAS UI  -->
-    <v-expansion-panels class="mb-4" accordion v-if="canSearchFAS && isFasDashboardEnabled">
-      <v-expansion-panel class="pa-8">
-        <v-expansion-panel-header class="px-0">
+    <!-- Transactions -->
+    <BaseVExpansionPanel
+      v-if="canViewAllTransactions"
+      class="mb-4"
+      title="Transaction Records"
+    >
+      <template #content>
+        <Transactions
+          class="mt-5 pa-0 pr-2"
+          :extended="true"
+          :showCredit="false"
+          :showExport="false"
+        />
+      </template>
+    </BaseVExpansionPanel>
+
+    <!-- EFT -->
+    <v-card
+      v-if="canViewEFTPayments"
+      flat
+      class="mb-4 pa-8"
+    >
+      <v-row
+        align="center"
+        justify="space-between"
+      >
+        <v-col class="grow">
           <header>
-            <h2 class="view-header__title">Fee Accounting System</h2>
+            <h2 class="mb-0">
+              Electronic Funds Transfers Received Payments
+            </h2>
             <p class="mt-3 mb-0">
-              Search and manage routing slips
+              Manage received EFTs
             </p>
           </header>
-          <template v-slot:actions>
-            <v-icon large>
-              mdi-chevron-down
-            </v-icon>
-          </template>
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-            <fas-search-component :isLibraryMode="true"/>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
+        </v-col>
+        <v-col cols="auto">
+          <v-btn
+            id="EFT-button"
+            class="mt-0 mr-4 font-weight-regular"
+            color="primary"
+            outlined
+            dark
+            large
+            @click="$router.push({ name: 'manage-shortnames' })"
+          >
+            <span>Manage EFT Payments</span>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-card>
+
+    <!-- FAS UI  -->
+    <BaseVExpansionPanel
+      v-if="canSearchFAS && isFasDashboardEnabled"
+      info="Search and manage routing slips"
+      title="Fee Accounting System"
+      style="z-index: 0;"
+      class="mb-4"
+    >
+      <template #content>
+        <fas-search-component :isLibraryMode="true" />
+      </template>
+    </BaseVExpansionPanel>
+
+    <!-- Email Safe List -->
+    <BaseVExpansionPanel
+      v-if="isDevOrTest"
+      info="Please contact #registries-ops to add or remove email addresses from the safe list."
+      title="Safe Email List (DEV/TEST)"
+    >
+      <template #content>
+        <SafeEmailView />
+      </template>
+    </BaseVExpansionPanel>
   </v-container>
 </template>
 
 <script lang="ts">
-/* eslint-disable */
-import { Component } from 'vue-property-decorator'
-import { Business } from '@/models/business'
+import { ComputedRef, Ref, computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
+import { Role, SessionStorageKeys } from '@/util/constants'
+import { BaseVExpansionPanel } from '@/components'
 import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
-import { LDFlags, Role } from '@/util/constants'
-import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
-import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import Vue from 'vue'
-import { namespace } from 'vuex-class'
+import SafeEmailView from '@/views/auth/staff/SafeEmailView.vue'
+import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
+import { Transactions } from '@/components/auth/account-settings/transaction'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
-const OrgModule = namespace('org')
-const BusinessModule = namespace('business')
-const userModule = namespace('user')
+// FUTURE: remove after vue 3 upgrade
+interface StaffDashboardViewI {
+  businessIdentifier: string
+  searchedBusinessNumber: string
+  searchActive: boolean
+  errorMessage: string
+  canViewIncorporationSearchResult: boolean
+  affiliatedOrg: Organization
+  canSearchFAS: ComputedRef<boolean>
+  canViewAccounts: ComputedRef<boolean>
+  canViewGLCodes: ComputedRef<boolean>
+  isFasDashboardEnabled: ComputedRef<boolean>
+  showBusSearchlink: ComputedRef<boolean>
+  registrySearchUrl: ComputedRef<string>
+}
 
-@Component({
+export default defineComponent({
+  name: 'StaffDashboardView',
   components: {
+    BaseVExpansionPanel,
+    SafeEmailView,
     GLCodesListView,
-    SupportInfoCard,
-    StaffAccountManagement,
     IncorporationSearchResultView,
-    PPRLauncher
-  }
-})
-export default class StaffDashboardView extends Vue {
-  $refs: {
-    searchBusinessForm: HTMLFormElement
-  }
+    PPRLauncher,
+    StaffAccountManagement,
+    Transactions
+  },
+  setup (props, { root }) {
+    const searchBusinessForm: Ref<HTMLFormElement> = ref(null)
+    const businessStore = useBusinessStore()
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
+    const currentOrganization = computed(() => orgStore.currentOrganization)
+    const currentUser = computed(() => userStore.currentUser)
 
-  @OrgModule.Action('getOrganizationForAffiliate')
-  private getOrganizationForAffiliate!: () => Promise<Organization>
+    const businessIdentifierRules = [
+      v => !!v || 'Incorporation Number or Registration Number is required',
+      v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number or Registration Number is not valid'
+    ]
 
-  @userModule.State('currentUser')
-  private currentUser!: KCUserProfile
+    const localVars = (reactive({
+      businessIdentifier: '',
+      searchedBusinessNumber: '',
+      searchActive: false,
+      errorMessage: '',
+      canViewIncorporationSearchResult: false,
+      affiliatedOrg: {},
+      canSearchFAS: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
+      canViewAccounts: computed((): boolean => currentUser.value?.roles?.includes(Role.StaffViewAccounts)),
+      canViewAllTransactions: computed((): boolean => currentUser.value?.roles?.includes(Role.ViewAllTransactions)),
+      canViewGLCodes: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageGlCodes)),
+      canViewEFTPayments: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageEft)),
+      isFasDashboardEnabled: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
+      showBusSearchlink: computed((): boolean => true),
+      registrySearchUrl: computed((): string => ConfigHelper.getRegistrySearchUrl())
+    }) as unknown) as StaffDashboardViewI
 
-  @BusinessModule.Action('searchBusiness')
-  private searchBusiness!: (businessIdentifier: string) => Promise<any>
+    const isFormValid = () => localVars.businessIdentifier && searchBusinessForm.value?.validate()
 
-  @BusinessModule.Action('resetCurrentBusiness')
-  private resetCurrentBusiness!: () => Promise<any>
+    const goToManageBusiness = () => root.$router.push(`/account/${currentOrganization.value?.id}/business`)
 
-  @BusinessModule.State('currentBusiness')
-  private currentBusiness!: Business
-
-  @BusinessModule.Action('loadBusiness')
-  private loadBusiness!: () => Promise<Business>
-
-  // local variables
-  protected businessIdentifier = ''
-  protected searchedBusinessNumber = ''
-  protected searchActive = false
-  protected errorMessage = ''
-  protected canViewIncorporationSearchResult = false
-  protected affiliatedOrg = {}
-
-  readonly businessIdentifierRules = [
-    v => !!v || 'Incorporation Number or Registration Number is required',
-    v => CommonUtils.validateIncorporationNumber(v) ||
-      'Incorporation Number or Registration Number is not valid'
-  ]
-
-  get canViewAccounts (): boolean {
-    return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
-  }
-
-  get canViewGLCodes (): boolean {
-    return this.currentUser?.roles?.includes(Role.ManageGlCodes)
-  }
-
-  get canSearchFAS (): boolean {
-    return this.currentUser?.roles?.includes(Role.FasSearch)
-  }
-
-  get isFasDashboardEnabled (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableFasDashboard) || false
-  }
-
-  protected isFormValid(): boolean {
-    return !!this.businessIdentifier && this.$refs.searchBusinessForm?.validate()
-  }
-
-  protected async search() {
-    if (this.isFormValid()) {
-      this.searchActive = true
-
+    const updateCurrentBusiness = async () => {
       try {
         // Search for business, action will set session storage
-        await this.searchBusiness(this.businessIdentifier)
-        this.errorMessage = ''
-        await this.updateCurrentBusiness()
+        await businessStore.loadBusiness()
+        localVars.affiliatedOrg = await orgStore.getOrganizationForAffiliate()
+        localVars.canViewIncorporationSearchResult = true
       } catch (exception) {
-        this.searchedBusinessNumber = this.businessIdentifier
-        this.resetCurrentBusiness()
-        this.errorMessage = this.$t('noIncorporationNumberFound').toString()
-        this.canViewIncorporationSearchResult = false
-      } finally {
-        this.searchActive = false
+        // eslint-disable-next-line no-console
+        console.log('Error during search incorporations event!')
+        localVars.canViewIncorporationSearchResult = false
+        businessStore.resetCurrentBusiness()
       }
     }
-  }
 
-  private async updateCurrentBusiness() {
-    try {
-      // Search for business, action will set session storage
-      await this.loadBusiness()
-      this.affiliatedOrg = await this.getOrganizationForAffiliate()
-      this.canViewIncorporationSearchResult = true
-    } catch (exception) {
-      // eslint-disable-next-line no-console
-      console.log('Error during search incorporations event!')
-      this.canViewIncorporationSearchResult = false
-      this.resetCurrentBusiness()
+    const search = async () => {
+      if (isFormValid()) {
+        localVars.searchActive = true
+
+        try {
+          ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, localVars.businessIdentifier)
+          localVars.errorMessage = ''
+          await updateCurrentBusiness()
+        } catch (exception) {
+          localVars.searchedBusinessNumber = localVars.businessIdentifier
+          businessStore.resetCurrentBusiness()
+          // FUTURE: get this from t(noIncorporationNumberFound)
+          // having trouble with composition version of $t in the build.
+          localVars.errorMessage = 'No match found for Incorporation Number'
+          localVars.canViewIncorporationSearchResult = false
+        } finally {
+          localVars.searchActive = false
+        }
+      }
+    }
+
+    const isDevOrTest = computed(() =>
+      window.location.href.includes('localhost') ||
+      window.location.href.includes('dev.account') ||
+      window.location.href.includes('test.account')
+    )
+
+    const formatBusinessIdentifier = () => {
+      localVars.businessIdentifier =
+        CommonUtils.formatIncorporationNumber(localVars.businessIdentifier)
+    }
+
+    return {
+      searchBusinessForm,
+      businessIdentifierRules,
+      isFormValid,
+      goToManageBusiness,
+      search,
+      formatBusinessIdentifier,
+      isDevOrTest,
+      ...toRefs(localVars)
     }
   }
-
-  protected formatBusinessIdentifier () {
-    this.businessIdentifier =
-      CommonUtils.formatIncorporationNumber(this.businessIdentifier)
-  }
-}
+})
 </script>
 
 <style lang="scss" >
 // importing FAS styles need no scope
-@import '~fas-ui/src/assets/scss/search.scss';
+@import '~/fas-ui/src/assets/scss/search.scss';
 </style>
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
-
-.v-input {
-  display: inline-block;
-  width: 20rem;
+h2 {
+  line-height: 1.5rem;
 }
 
 ::v-deep {
-  .v-input__append-outer {
-    margin-top: 0 !important;
-  }
 
   .search-btn {
     margin-left: 0.25rem;
@@ -249,8 +389,46 @@ export default class StaffDashboardView extends Vue {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
   }
+  .srch-card {
+    padding: 30px;
+
+    p {
+      color: $gray7;
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    &__link {
+
+      .v-btn__content {
+        font-size: 1rem;
+
+        i {
+          margin-top: 1px;
+          opacity: 0.9;
+        }
+      }
+    }
+
+    &__link::before { background-color: white; }
+
+    &__reg-srch-link {
+      position: absolute;
+      right: 32px;
+      top: 20px;
+    }
+  }
+
   .v-expansion-panel-content__wrap {
-  padding: 0px !important;
+    padding: 0px !important;
+  }
+
+  .v-input__append-outer {
+    margin-top: 0 !important;
+  }
+
+  .v-text-field__details {
+    margin: 0 !important;
   }
 }
 </style>
