@@ -10,10 +10,10 @@ class Config(object):
     APP_FILE = os.getenv('APP_FILE', '')
     SENDER_EMAIL = os.getenv('SENDER_EMAIL', '')
     ERROR_EMAIL_RECIPIENTS = os.getenv('ERROR_EMAIL_RECIPIENTS', '')
-    REPORT_RECIPIENTS = os.getenv('REPORT_RECIPIENTS', '')
+    WEEKLY_REPORT_RECIPIENTS = os.getenv('WEEKLY_REPORT_RECIPIENTS', '')
     EMAIL_SMTP = os.getenv('EMAIL_SMTP', '')
     ENVIRONMENT = os.getenv('ENVIRONMENT', '')
-    MONTH_REPORT_DATES = os.getenv('MONTH_REPORT_DATES', '')
+    WEEKLY_REPORT_DATES = os.getenv('WEEKLY_REPORT_DATES', '')
 
     # POSTGRESQL
     PG_USER = os.getenv('PG_USER', '')

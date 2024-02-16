@@ -92,16 +92,6 @@ objects:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
                         key: EMAIL_SMTP
-                  - name: RETRY_TIMES
-                    valueFrom:
-                      secretKeyRef:
-                        name: ${NAME}-${TAG}-secret
-                        key: RETRY_TIMES
-                  - name: RETRY_INTERVAL
-                    valueFrom:
-                      secretKeyRef:
-                        name: ${NAME}-${TAG}-secret
-                        key: RETRY_INTERVAL
                   - name: ENVIRONMENT
                     valueFrom:
                       secretKeyRef:
@@ -111,9 +101,7 @@ objects:
                     valueFrom:
                       secretKeyRef:
                         name: ${NAME}-${TAG}-secret
-                        key: WEEKLY_REPORT_DATES
-                  - name: DATA_DIR
-                    value: '/opt/app-root/data/'     
+                        key: WEEKLY_REPORT_DATES   
             restartPolicy: "Never"
             terminationGracePeriodSeconds: 30
             activeDeadlineSeconds: 1600
