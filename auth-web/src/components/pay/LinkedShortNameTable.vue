@@ -10,7 +10,7 @@
     </v-snackbar>
     <BaseVDataTable
       id="linked-bank-short-names"
-      :clearFiltersTrigger="clearFiltersTrigger"
+      :clearFiltersTrigger="state.clearFiltersTrigger"
       itemKey="id"
       :loading="false"
       loadingText="Loading Linked Bank Short Names..."
@@ -99,12 +99,13 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, reactive, ref, watch } from '@vue/composition-api'
+import { SessionStorageKeys, ShortNameStatus } from '@/util/constants'
+import { defineComponent, onMounted, reactive, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
+import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import { LinkedShortNameState } from '@/models/pay/short-name'
-import { ShortNameStatus } from '@/util/constants'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
 
@@ -125,42 +126,44 @@ export default defineComponent({
         isActive: false,
         pageNumber: 1,
         pageLimit: 20,
-        filterPayload: {
-          accountName: '',
-          shortName: '',
-          accountBranch: '',
-          accountId: '',
-          state: ShortNameStatus.LINKED
-        }
+        filterPayload: defaultFilterPayload()
       },
       loading: false,
       actionDropdown: [],
       options: _.cloneDeep(DEFAULT_DATA_OPTIONS),
       highlightIndex: -1,
       snackbar: false,
-      snackbarText: ''
+      snackbarText: '',
+      clearFiltersTrigger: 0
     })
 
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
-    const createHeader = (col, label, type, value, hasFilter = true, minWidth = '125px') => ({
+    const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {
         filterApiFn: hasFilter ? (val: any) => loadTableData(col, val || '') : null,
         clearable: true,
         label,
         type,
-        value: ''
+        value: filterValue
       },
       hasFilter,
       minWidth,
       value
     })
 
+    const {
+      shortName = '',
+      accountName = '',
+      accountBranch = '',
+      accountId = ''
+    } = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.LinkedShortNamesFilter) || '{}')
+
     const headers = [
-      createHeader('shortName', 'Bank Short Name', 'text', 'Bank Short Name', true, '125px'),
-      createHeader('accountName', 'Account Name', 'text', 'Account Name', true, '125px'),
-      createHeader('accountBranch', 'Branch Name', 'text', 'Branch Name', true, '125px'),
-      createHeader('accountId', 'Account Number', 'text', 'Account Number', true, '125px'),
+      createHeader('shortName', 'Bank Short Name', 'text', 'Bank Short Name', shortName),
+      createHeader('accountName', 'Account Name', 'text', 'Account Name', accountName),
+      createHeader('accountBranch', 'Branch Name', 'text', 'Branch Name', accountBranch),
+      createHeader('accountId', 'Account Number', 'text', 'Account Number', accountId),
       {
         col: 'actions',
         hasFilter: false,
@@ -170,16 +173,21 @@ export default defineComponent({
       }
     ]
 
-    onMounted(async () => {
-      await loadTableData()
-    })
-
-    const clearFiltersTrigger = ref(0)
     async function clearFilters (): Promise<void> {
-      clearFiltersTrigger.value++
-      state.filters.filterPayload = { state: ShortNameStatus.LINKED }
+      state.clearFiltersTrigger++
+      state.filters.filterPayload = defaultFilterPayload()
       state.filters.isActive = false
       await loadTableData()
+    }
+
+    function defaultFilterPayload () {
+      return {
+        accountName: '',
+        shortName: '',
+        accountBranch: '',
+        accountId: '',
+        state: ShortNameStatus.LINKED
+      }
     }
 
     function viewDetails (index) {
@@ -203,13 +211,26 @@ export default defineComponent({
       }
     }
 
+    onMounted(async () => {
+      try {
+        state.filters.filterPayload = JSON.parse(
+          ConfigHelper.getFromSession(SessionStorageKeys.LinkedShortNamesFilter)) || state.filters.filterPayload
+      } catch {
+        // Silent catch
+      }
+      await loadTableData()
+    })
+
     watch(() => props.linkedAccount, (account: EFTShortnameResponse) => {
       onLinkedAccount(account)
     })
 
+    watch(() => state.filters, (filters: any) => {
+      ConfigHelper.addToSession(SessionStorageKeys.LinkedShortNamesFilter, JSON.stringify(filters.filterPayload))
+    }, { deep: true })
+
     return {
       clearFilters,
-      clearFiltersTrigger,
       infiniteScrollCallback,
       headers,
       state,

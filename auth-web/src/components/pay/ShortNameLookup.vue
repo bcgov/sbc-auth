@@ -165,6 +165,11 @@ export default defineComponent({
       try {
         const eftAccountsResponse = await PaymentService.searchEFTAccounts(query)
         const eftAccounts = eftAccountsResponse.data.items
+
+        if (!eftAccounts.length) {
+          return []
+        }
+
         const accountIds = eftAccounts.map((org) => org.accountId)
 
         const eftShortNamesResponse = await PaymentService.getEFTShortNames(
