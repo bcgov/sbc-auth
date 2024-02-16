@@ -16,7 +16,7 @@ to setup your local development environment.
 ## Running Notebook Report
 
 1. Run `. venv/bin/activate` to change to `venv` environment.
-2. Run notebook with `(python notebookreport.py)`
+2. Run notebook with `python notebookreport.py`
 
 ## Running Unit Tests
 
