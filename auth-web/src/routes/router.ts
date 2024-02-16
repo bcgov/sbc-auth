@@ -54,6 +54,7 @@ import PaymentView from '@/views/pay/PaymentView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import PriceListView from '@/views/auth/PriceListView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
+import RefundViewVue from '@/views/auth/RefundView.vue'
 import RequestNameView from '@/views/auth/home/RequestNameView.vue'
 import RestrictedProductView from '@/views/auth/RestrictedProductView.vue'
 import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
@@ -829,7 +830,17 @@ export function getRoutes (): RouteConfig[] {
       },
       props: (route) => ({ shortNameId: route.params.shortNameId })
     },
-    { path: '*', name: 'notfound', component: PageNotFound }
+    { path: '*', name: 'notfound', component: PageNotFound },
+    {
+      path: '/refund',
+      name: 'refund',
+      component: RefundViewVue,
+      props: true,
+      meta: {
+        equiresAuth: true,
+        allowedRoles: [Role.AdminEdit]
+      }
+    }
   ]
 
   return routes
