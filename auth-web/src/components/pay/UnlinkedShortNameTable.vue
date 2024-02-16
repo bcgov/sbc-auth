@@ -216,7 +216,7 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
 export default defineComponent({
   name: 'UnlinkedShortNameTable',
   components: { BaseVDataTable, DatePicker, ModalDialog, ShortNameLookup },
-  emits: ['link-account'],
+  emits: ['on-link-account'],
   setup (props, { emit, root }) {
     const datePicker = ref(null)
     const accountLinkingDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
@@ -356,7 +356,7 @@ export default defineComponent({
       try {
         const response = await PaymentService.patchEFTShortname(state.selectedShortName.id, state.selectedAccount.accountId)
         if (response?.data) {
-          emit('link-account', response.data)
+          emit('on-link-account', response.data)
           cancelAndResetAccountLinkingDialog()
           await loadTableData()
         }

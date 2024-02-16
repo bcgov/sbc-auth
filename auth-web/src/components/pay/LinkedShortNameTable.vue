@@ -25,6 +25,8 @@
       :updateFilter="updateFilter"
       :useObserver="true"
       :observerCallback="infiniteScrollCallback"
+      :highlight-index="state.highlightIndex"
+      highlight-class="base-table__item-row-green"
       @update-table-options="tableDataOptions = $event"
     >
       <template #header-title>
@@ -247,6 +249,7 @@ export default defineComponent({
 @import '@/assets/scss/ShortnameTables.scss';
 
 #linked-bank-short-names {
-  border: 1px solid #e9ecef
+  border: 1px solid #e9ecef;
+  font-weight: bold;
 }
 </style>
