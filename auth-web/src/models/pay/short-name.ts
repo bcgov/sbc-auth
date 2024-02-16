@@ -33,6 +33,7 @@ export interface LinkedShortNameState {
   highlightIndex: number
   snackbar: boolean
   snackbarText: string
+  clearFiltersTrigger: number
 }
 
 export interface UnlinkedShortNameFilterParams {
@@ -42,7 +43,7 @@ export interface UnlinkedShortNameFilterParams {
   filterPayload: {
     shortName?: string
     transactionDate?: string
-    depositAmount?: number
+    depositAmount?: string
     state: ShortNameStatus
     transactionStartDate?: string
     transactionEndDate?: string

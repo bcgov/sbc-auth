@@ -10,12 +10,7 @@ export function useShortNameTable (tableState: LinkedShortNameState | UnlinkedSh
     state.loading = true
     if (filterField) {
       state.filters.pageNumber = 1
-      if (filterField === 'transactionDate') {
-        state.filters.filterPayload.transactionStartDate = value.startDate
-        state.filters.filterPayload.transactionEndDate = value.endDate
-      } else {
-        state.filters.filterPayload[filterField] = value
-      }
+      state.filters.filterPayload[filterField] = value
     }
     let filtersActive = false
     for (const key in state.filters.filterPayload) {
