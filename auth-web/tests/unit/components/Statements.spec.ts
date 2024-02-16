@@ -1,15 +1,10 @@
+import { Member, Organization } from '@/models/Organization'
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import Statements from '@/components/auth/account-settings/statement/Statements.vue'
-
-import Vue from 'vue'
-import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
-import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import { useOrgStore } from '@/stores/org'
 
-Vue.use(Vuetify)
-Vue.use(VueI18n)
-Vue.use(VueRouter)
+const router = new VueRouter()
 
 describe('Statements.vue', () => {
   let store
@@ -19,74 +14,57 @@ describe('Statements.vue', () => {
     AUTH_API_URL: 'https://localhost:8080/api/v1/sbc',
     PAY_API_URL: 'https://pay.gov.bc.ca/api/v1'
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const orgModule = {
-      namespaced: true,
-      actions: {
-        getStatementsList: jest.fn(),
-        getStatement: jest.fn()
-      },
-      state: {
-        currentOrganization: {
-          'accessType': 'REGULAR',
-          'created': '2021-05-02T20:54:15.936923+00:00',
-          'createdBy': 'user1',
-          'hasApiAccess': false,
-          'id': 124,
-          'loginOptions': [],
-          'modified': '2021-05-02T20:54:15.936935+00:00',
-          'name': 'Org 2',
-          'orgType': 'PREMIUM',
-          'orgStatus': 'ACTIVE',
-          'products': [
-            3830,
-            3831,
-            3832,
-            3833,
-            3834
-          ],
-          'statusCode': 'ACTIVE',
-          'bcolAccountDetails': { }
-        },
-        currentMembership: {
-          'id': 123,
-          'membershipStatus': 'ACTIVE',
-          'membershipTypeCode': 'ADMIN',
-          'user': {
-            'contacts': [
-              {
-                'created': '2021-04-30T20:54:17.109390+00:00',
-                'createdBy': 'user1',
-                'email': 'test1@test.com',
-                'modified': '2021-04-30T20:54:17.109398+00:00',
-                'phone': '',
-                'phoneExtension': ''
-              }
-            ],
-            'firstname': 'user',
-            'id': 4,
-            'lastname': 'one',
-            'loginSource': 'BCSC',
-            'modified': '2021-05-11T19:38:35.067210+00:00',
-            'username': 'user1'
+    const orgStore = useOrgStore()
+    orgStore.getStatementsList = vi.fn()
+    orgStore.getStatement = vi.fn()
+    orgStore.currentOrganization = {
+      'accessType': 'REGULAR',
+      'created': '2021-05-02T20:54:15.936923+00:00',
+      'createdBy': 'user1',
+      'hasApiAccess': false,
+      'id': 124,
+      'loginOptions': [],
+      'modified': '2021-05-02T20:54:15.936935+00:00',
+      'name': 'Org 2',
+      'orgType': 'PREMIUM',
+      'orgStatus': 'ACTIVE',
+      'products': [
+        3830,
+        3831,
+        3832,
+        3833,
+        3834
+      ],
+      'statusCode': 'ACTIVE',
+      'bcolAccountDetails': { accountNumber: '55' }
+    } as Organization
+    orgStore.currentMembership = {
+      'id': 123,
+      'membershipStatus': 'ACTIVE',
+      'membershipTypeCode': 'ADMIN',
+      'user': {
+        'contacts': [
+          {
+            'email': 'test1@test.com',
+            'phone': '',
+            'phoneExtension': ''
           }
-        }
+        ],
+        'firstname': 'user',
+        'id': 4,
+        'lastname': 'one',
+        'loginSource': 'BCSC',
+        'username': 'user1'
       }
-    }
-    store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
+    } as Member
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('is a Vue instance', () => {
@@ -94,9 +72,11 @@ describe('Statements.vue', () => {
     const wrapper = shallowMount(Statements, {
       store,
       localVue,
+      router,
       mocks: { $t }
     })
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
+    wrapper.destroy()
   })
 
   it('renders proper header content', () => {
@@ -104,8 +84,92 @@ describe('Statements.vue', () => {
     const wrapper = shallowMount(Statements, {
       store,
       localVue,
+      router,
       mocks: { $t }
     })
     expect(wrapper.find('h2').text()).toBe('Statements')
+    wrapper.destroy()
+  })
+
+  it('Should compute the correct value for formatAmount(amount)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    expect(wrapper.vm.formatAmount(0)).toBe('$0.00')
+    expect(wrapper.vm.formatAmount(1)).toBe('$1.00')
+    expect(wrapper.vm.formatAmount(1000)).toBe('$1000.00')
+    expect(wrapper.vm.formatAmount(1000.1)).toBe('$1000.10')
+    wrapper.destroy()
+  })
+
+  it('Should compute the correct value for getIndexedTag(tag, index)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    expect(wrapper.vm.formatDate('1999-01-12')).toBe('January 11, 1999')
+    expect(wrapper.vm.formatDate('2023-09-24')).toBe('September 23, 2023')
+    wrapper.destroy()
+  })
+
+  it('Should compute the correct value for getIndexedTag(tag, index)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    expect(wrapper.vm.getIndexedTag('abc', '123')).toBe('abc-123')
+    wrapper.destroy()
+  })
+
+  it('Should compute the correct value for getMomentDateObj(dateString)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    expect(wrapper.vm.formatDateRange('1999-01-01', '2022-01-02')).toBe('January 01, 1999 - January 02, 2022')
+    wrapper.destroy()
+  })
+
+  it('Should compute the correct value for isStatementOverdue(item)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    let item = { isOverdue: true }
+    expect(wrapper.vm.isStatementOverdue(item)).toBe(true)
+    item = { isOverdue: false }
+    expect(wrapper.vm.isStatementOverdue(item)).toBe(false)
+    wrapper.destroy()
+  })
+
+  it('Should compute the correct value for isStatementNew(item)', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    let item = { isNew: true }
+    expect(wrapper.vm.isStatementNew(item)).toBe(true)
+    item = { isNew: false }
+    expect(wrapper.vm.isStatementNew(item)).toBe(false)
+    wrapper.destroy()
   })
 })

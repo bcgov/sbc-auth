@@ -1,23 +1,13 @@
-import { Wrapper, createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
+import { useOrgStore, useUserStore } from '@/stores'
 import MemberDataTable from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
-import OrgModule from '@/store/modules/org'
 import OrgService from '../../../src/services/org.services'
-import UserModule from '@/store/modules/user'
-import Vue from 'vue'
-import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-import can from '@/directives/can'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-Vue.use(VueI18n)
-Vue.directive('can', can)
 
 const vuetify = new Vuetify({})
 
-jest.mock('../../../src/services/bcol.services')
+vi.mock('../../../src/services/bcol.services')
 
 const membersList = [{
   'id': 2909,
@@ -128,13 +118,13 @@ const roleInfoList = [
     'displayName': 'Account Administrator',
     'displayOrder': 3,
     'icon': 'mdi-shield-account-outline',
-    'label': 'Submit searches and filings, add / remove businesses, add / remove team members, access financial statements, update payment methods',
+    'label': 'Submit searches and filings, add / remove businesses, add / remove team members,' +
+      ' access financial statements, update payment methods',
     'name': 'ADMIN'
   }
 ]
 
 describe('MemberDataTable.vue', () => {
-  let store
   let wrapper: any
 
   const config = {
@@ -142,82 +132,52 @@ describe('MemberDataTable.vue', () => {
     PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(Vuetify)
     localVue.use(VueRouter)
 
     const router = new VueRouter()
 
-    OrgService.getOrgMembers = jest.fn().mockResolvedValue({
+    OrgService.getOrgMembers = vi.fn().mockResolvedValue({
       data: {
         members: membersList
       }
     })
 
-    const orgModule = {
-      namespaced: true,
-      state: {
-        pendingOrgInvitations: [],
-        currentOrganization: {},
-        activeOrgMembers: membersList,
-        currentMembership: [{
-          membershipTypeCode: 'ADMIN',
-          membershipStatus: 'ACTIVE',
-          user: { username: 'test' }
-        }]
-      },
-      actions: {
-        createInvitation: jest.fn(),
-        resendInvitation: jest.fn()
-      },
-      mutations: {
-        resetInvitations: jest.fn(),
-        setCurrentMembership: jest.fn()
-      },
-      getters: OrgModule.getters
-    }
-    const userModule = {
-      namespaced: true,
-      state: {
-        currentUser: { 'userName': 'test' },
-        roleInfos: roleInfoList
-      },
-      actions: {
-        getRoleInfo: jest.fn()
-      },
-      getters: UserModule.getters
-    }
-
-    store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule,
-        user: userModule
-      }
-    })
+    const orgStore = useOrgStore()
+    orgStore.pendingOrgInvitations = []
+    orgStore.currentOrganization = {} as any
+    orgStore.activeOrgMembers = membersList as any
+    orgStore.currentMembership = [{
+      membershipTypeCode: 'ADMIN',
+      membershipStatus: 'ACTIVE',
+      user: { username: 'test' }
+    }] as any
+    const userStore = useUserStore()
+    userStore.currentUser = { 'userName': 'test' } as any
+    userStore.roleInfos = roleInfoList
 
     const $t = () => {}
 
     wrapper = mount(MemberDataTable, {
       localVue,
-      store,
       router,
       vuetify,
-      mocks: { $t },
-      sync: false
+      mocks: { $t }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+  afterAll(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('mounting works', () => {
@@ -245,8 +205,8 @@ describe('MemberDataTable.vue', () => {
       membershipTypeCode: 'USER',
       membershipStatus: 'ACTIVE',
       user: { username: 'test' }
-    }]
-    await store.commit('org/setCurrentMembership', currentMember)
+    }] as any
+    useOrgStore().setCurrentMembership(currentMember)
     const items = wrapper.vm.$el.querySelectorAll('.member-data-table tbody tr')
     expect(items[0].querySelector('[title="Remove Team Member"]').style.display).toBe('')
   })

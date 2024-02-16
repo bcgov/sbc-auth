@@ -1,57 +1,75 @@
 <template>
-  <v-card class="bcol-payment-card" data-test='div-bcol-payment-card'>
+  <v-card
+    class="bcol-payment-card"
+    data-test="div-bcol-payment-card"
+  >
     <!-- wording for credit card payment -->
-    <PayWithCreditCard v-if="payWithCreditCard"
-    :totalBalanceDue="totalBalanceDue"
-    :showPayWithOnlyCC="showPayWithOnlyCC"
-    :partialCredit="partialCredit"
+    <PayWithCreditCard
+      v-if="payWithCreditCard"
+      :totalBalanceDue="totalBalanceDue"
+      :showPayWithOnlyCC="showPayWithOnlyCC"
+      :partialCredit="partialCredit"
     />
     <!-- wording for online bank payment -->
     <PayWithOnlineBanking
-    :onlineBankingData="onlineBankingData"
-    v-else />
+      v-else
+      :onlineBankingData="onlineBankingData"
+    />
 
     <v-card-text class="pt-0 pb-8 px-8">
       <template v-if="!overCredit">
-        <p v-if="showPayWithOnlyCC">Click <strong>"pay now"</strong> to complete transaction balance with credit card</p>
-        <p v-else>Would you like to complete transaction immediately?</p>
+        <p v-if="showPayWithOnlyCC">
+          Click <strong>"pay now"</strong> to complete transaction balance with credit card
+        </p>
+        <p v-else>
+          Would you like to complete transaction immediately?
+        </p>
         <v-checkbox
-          class="pay-with-credit-card mb-4"
           v-model="payWithCreditCard"
+          class="pay-with-credit-card mb-4"
           color="primary"
           hide-details
           :disabled="showPayWithOnlyCC"
         >
-          <template v-slot:label>
+          <template #label>
             <div class="ml-1">
-              <div class="font-weight-bold">Credit Card</div>
-              <div class="subtitle-2 mt-1">Pay your balance and access files <strong>immediately</strong></div>
-              <div class="subtitle-2" v-if="partialCredit">Account credit will <strong>not apply</strong> with credit card payment option.</div>
+              <div class="font-weight-bold">
+                Credit Card
+              </div>
+              <div class="subtitle-2 mt-1">
+                Pay your balance and access files <strong>immediately</strong>
+              </div>
+              <div
+                v-if="partialCredit"
+                class="subtitle-2"
+              >
+                Account credit will <strong>not apply</strong> with credit card payment option.
+              </div>
             </div>
           </template>
         </v-checkbox>
       </template>
-      <v-divider class="mt-8"></v-divider>
+      <v-divider class="mt-8" />
       <v-row>
         <v-col
           cols="12"
           class="pt-8 pb-0 d-inline-flex"
         >
           <v-btn
+            v-if="!payWithCreditCard && !overCredit"
             large
             text
             color="primary"
             class="px-0"
+            data-test="btn-download-invoice"
             @click="emitBtnClick('download-invoice')"
-            v-if="!payWithCreditCard && !overCredit"
-            data-test='btn-download-invoice'
           >
             <v-icon class="mr-1">
               mdi-file-download-outline
             </v-icon>
             Download Invoice
           </v-btn>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <template v-if="payWithCreditCard">
             <v-btn
               large
@@ -66,8 +84,8 @@
               large
               width="100"
               class="ml-3"
+              data-test="btn-cancel-online-banking"
               @click="cancel"
-              data-test='btn-cancel-online-banking'
             >
               Cancel
             </v-btn>
@@ -78,8 +96,8 @@
               color="primary"
               width="100"
               class="font-weight-bold"
+              data-test="btn-complete-online-banking"
               @click="emitBtnClick('complete-online-banking')"
-              data-test='btn-complete-online-banking'
             >
               Ok
             </v-btn>
@@ -92,7 +110,7 @@
 
 <script lang="ts">
 
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import PayWithCreditCard from '@/components/pay/PayWithCreditCard.vue'
 import PayWithOnlineBanking from '@/components/pay/PayWithOnlineBanking.vue'
 import PaymentServices from '@/services/payment.services'
@@ -129,7 +147,7 @@ export default class PaymentCard extends Vue {
     this.cfsAccountId = this.paymentCardData?.cfsAccountId || ''
     this.payWithCreditCard = this.showPayWithOnlyCC
     this.credit = this.paymentCardData.credit
-    this.doHaveCredit = this.paymentCardData.credit !== null && this.paymentCardData.credit !== 0
+    this.doHaveCredit = this.paymentCardData?.credit > 0
     if (this.doHaveCredit) {
       this.overCredit = this.credit >= this.totalBalanceDue
       this.partialCredit = this.credit < this.totalBalanceDue
@@ -180,7 +198,7 @@ export default class PaymentCard extends Vue {
     .payee-name {
       padding-right: 16px;
       margin-right: 16px;
-      border-right: 1px solid #fff;
+      border-right: 1px solid white;
     }
   }
   ol {

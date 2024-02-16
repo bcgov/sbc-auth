@@ -37,7 +37,7 @@ from auth_api.utils.user_context import UserContext, user_context
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .keycloak import KeycloakService
-from .org import Org as OrgService
+from .products import Product as ProductService
 from .user import User as UserService
 from ..utils.account_mailer import publish_to_mailer
 
@@ -66,6 +66,10 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         membership_schema = MembershipSchema()
         obj = membership_schema.dump(self._model, many=False)
         return obj
+
+    def get_owner_count(self, org):
+        """Return the number of owners in the org."""
+        return len([x for x in org.members if x.membership_type_code == ADMIN])
 
     @staticmethod
     def get_membership_type_by_code(type_code):
@@ -152,6 +156,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         current_app.logger.debug(f'<send {notification_type} notification')
         org_name = self._model.org.name
         org_id = self._model.org.id
+        if not self._model.user.contacts:
+            current_app.logger.error('No user contact record for user id %s', self._model.user_id)
+            current_app.logger.error('<send_notification_to_member failed')
         recipient = self._model.user.contacts[0].contact.email
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         app_url = f'{origin_url}/{context_path}'
@@ -214,13 +221,13 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 and updated_membership_status.id == Status.INACTIVE.value \
                 and self._model.membership_type.code == ADMIN:
             admin_getting_removed = True
-            if OrgService(self._model.org).get_owner_count() == 1:
+            if self.get_owner_count(self._model.org) == 1:
                 raise BusinessException(Error.CHANGE_ROLE_FAILED_ONLY_OWNER, None)
 
         # Ensure that if downgrading from owner that there is at least one other owner in org
         if self._model.membership_type.code == ADMIN and \
                 updated_fields.get('membership_type', None) != ADMIN and \
-                OrgService(self._model.org).get_owner_count() == 1:
+                self.get_owner_count(self._model.org) == 1:
             raise BusinessException(Error.CHANGE_ROLE_FAILED_ONLY_OWNER, None)
 
         for key, value in updated_fields.items():
@@ -245,14 +252,15 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         if user_from_context.is_staff() and not is_bcros_user and len(updated_fields) != 0:
             publish_to_mailer(notification_type='teamModified', org_id=self._model.org.id)
 
-        # send mail to the person itself who is getting removed by staff ;if he is admin
+        # send mail to the person itself who is getting removed by staff ;if he is admin and has an email on record
         if user_from_context.is_staff() and not is_bcros_user and admin_getting_removed:
-            recipient_email = ContactLinkModel.find_by_user_id(self._model.user.id).contact.email
-            data = {
-                'accountId': self._model.org.id,
-                'recipientEmail': recipient_email
-            }
-            publish_to_mailer(notification_type='adminRemoved', org_id=self._model.org.id, data=data)
+            contact_link = ContactLinkModel.find_by_user_id(self._model.user.id)
+            if contact_link and contact_link.contact.email:
+                data = {
+                    'accountId': self._model.org.id,
+                    'recipientEmail': contact_link.contact.email
+                }
+                publish_to_mailer(notification_type='adminRemoved', org_id=self._model.org.id, data=data)
 
         current_app.logger.debug('>update_membership')
         return self
@@ -262,13 +270,14 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         """Mark this membership as inactive."""
         current_app.logger.debug('<deactivate_membership')
         user_from_context: UserContext = kwargs['user_context']
+
         # if this is a member removing another member, check that they admin or owner
         if self._model.user.username != user_from_context.user_name:
             check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN))
 
         # check to ensure that owner isn't removed by anyone but an owner
-        if self._model.membership_type == ADMIN:
-            check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN))
+        if self._model.membership_type_code == ADMIN:
+            check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN))  # pylint: disable=superfluous-parens
 
         self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code('INACTIVE')
         current_app.logger.info(f'<deactivate_membership for {self._model.user.username}')
@@ -285,13 +294,14 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
     @staticmethod
     def _add_or_remove_group(model: MembershipModel):
-        """Add or remove the user from/to account holders group."""
+        """Add or remove the user from/to account holders / product keycloak group."""
         if model.membership_status.id == Status.ACTIVE.value:
             KeycloakService.join_account_holders_group(model.user.keycloak_guid)
         elif model.membership_status.id == Status.INACTIVE.value and len(
                 MembershipModel.find_orgs_for_user(model.user.id)) == 0:
             # Check if the user has any other active org membership, if none remove from the group
             KeycloakService.remove_from_account_holders_group(model.user.keycloak_guid)
+        ProductService.update_users_products_keycloak_groups([model.user.id])
 
     @staticmethod
     def get_membership_for_org_and_user(org_id, user_id):
@@ -302,3 +312,15 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
     def get_membership_for_org_and_user_all_status(org_id, user_id):
         """Get the membership for the specified user and org with all memebership statuses."""
         return MembershipModel.find_membership_by_user_and_org_all_status(user_id, org_id)
+
+    @staticmethod
+    def add_staff_membership(user_id):
+        """Add a staff membership for the specified user."""
+        if MembershipModel.find_active_staff_org_memberships_for_user(user_id):
+            return
+        MembershipModel.add_membership_for_staff(user_id)
+
+    @staticmethod
+    def remove_staff_membership(user_id):
+        """Remove staff membership for the specified user."""
+        MembershipModel.remove_membership_for_staff(user_id)

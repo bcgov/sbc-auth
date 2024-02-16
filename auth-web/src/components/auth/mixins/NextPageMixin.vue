@@ -2,34 +2,30 @@
 <script lang="ts">
 import { AccountStatus, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { useOrgStore, useUserStore } from '@/stores'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import Component from 'vue-class-component'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import OrgModule from '@/store/modules/org'
 import { User } from '@/models/user'
-import UserModule from '@/store/modules/user'
 import Vue from 'vue'
-import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapState('user', ['currentUser', 'userProfile', 'userContact', 'redirectAfterLoginUrl']),
-    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings', 'permissions']),
-    ...mapGetters('org', ['needMissingBusinessDetailsRedirect'])
+    ...mapState(useUserStore, ['currentUser', 'userProfile', 'userContact', 'redirectAfterLoginUrl']),
+    ...mapState(useOrgStore, ['currentOrganization', 'currentMembership', 'currentAccountSettings', 'permissions',
+      'needMissingBusinessDetailsRedirect'])
   },
   methods: {
-    ...mapActions('user', ['loadUserInfo', 'syncUserProfile', 'getUserProfile']),
-    ...mapActions('org', ['syncOrganization', 'syncMembership', 'resetCurrentOrganization']),
-    ...mapMutations('org', ['setCurrentAccountSettings'])
+    ...mapActions(useUserStore, ['loadUserInfo', 'syncUserProfile', 'getUserProfile']),
+    ...mapActions(useOrgStore, ['syncOrganization', 'syncMembership', 'resetCurrentOrganization',
+      'setCurrentAccountSettings'])
   }
 })
 export default class NextPageMixin extends Vue {
-  private userStore = getModule(UserModule, this.$store)
-  private orgStore = getModule(OrgModule, this.$store)
   protected readonly currentUser!: KCUserProfile
   protected readonly userProfile!: User
   protected readonly userContact!: Contact
@@ -74,12 +70,12 @@ export default class NextPageMixin extends Vue {
         } else {
           return dashboardUrl
         }
-      case LoginSource.BCROS:
+      case LoginSource.BCROS: {
         let bcrosNextStep = '/'
         if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           bcrosNextStep = `/${Pages.USER_PROFILE_TERMS}`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
-          if ((this.currentMembership.membershipTypeCode === MembershipType.Admin) || (this.currentMembership.membershipTypeCode === MembershipType.Coordinator)) {
+          if ([MembershipType.Coordinator, MembershipType.Admin].includes(this.currentMembership.membershipTypeCode)) {
             bcrosNextStep = `/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`
           } else {
             bcrosNextStep = ConfigHelper.getDirectorSearchURL()
@@ -87,8 +83,9 @@ export default class NextPageMixin extends Vue {
         }
 
         return bcrosNextStep
+      }
       // case LoginSource.IDIR:
-      case LoginSource.BCSC:
+      case LoginSource.BCSC: {
         let nextStep = '/'
         // Redirect to TOS if no terms accepted
         // for invited users , handle user profile
@@ -108,7 +105,8 @@ export default class NextPageMixin extends Vue {
         }
 
         return nextStep
-      case LoginSource.BCEID:
+      }
+      case LoginSource.BCEID: {
         // if they are in invitation flow [check session storage], take them to
         // Redirect to TOS if no terms accepted
         // for invited users , handle user profile
@@ -146,6 +144,7 @@ export default class NextPageMixin extends Vue {
         }
 
         return `${bceidNextStep}`
+      }
       default:
         return dashboardUrl
     }
@@ -166,6 +165,10 @@ export default class NextPageMixin extends Vue {
 
   protected redirectTo (target: string): void {
     if (CommonUtils.isUrl(target)) {
+      // Solves where we get passed http:/www.google.ca for example.
+      if (!target.includes('://')) {
+        target = target.replace(':/', '://')
+      }
       window.location.assign(target)
     } else {
       if (this.$route.path !== target) {
@@ -202,7 +205,8 @@ export default class NextPageMixin extends Vue {
         this.$router.push(`/${Pages.ACCOUNT_FREEZE}`)
       }
     } else {
-      /** If user is in the account freeze page while switching the account, then need to redirect them to account info page if that account is active.
+      /** If user is in the account freeze page while switching the account,
+       * then need to redirect them to account info page if that account is active.
        * otherwise user will stuck on the account freeze page **/
       if (this.$route.name?.search('account-freeze') > -1) {
         this.anyPendingRedirect = true

@@ -1,13 +1,10 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import { useBusinessStore } from '@/stores/business'
 
-Vue.use(VueRouter)
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 const router = new VueRouter()
 
@@ -21,47 +18,27 @@ document.body.setAttribute('data-app', 'true')
 
 describe('IncorporationSearchResultView.vue', () => {
   let wrapper: any
-  let store: any
   const localVue = createLocalVue()
-  localVue.use(Vuex)
-  const affiliatedOrgModule = {
-    namespaced: true,
-    state: {},
-    actions: {
-      addOrgSettings: jest.fn()
-    }
-  }
-  const businessModule = {
-    namespaced: true,
-    state: {
-      currentBusiness: {
-        name: 'affiliated_test_business',
-        businessIdentifier: '123123',
-        businessNumber: '1231231'
-      }
-    }
-  }
+
+  const businessStore = useBusinessStore()
+  businessStore.currentBusiness = {
+    name: 'affiliated_test_business',
+    businessIdentifier: '123123',
+    businessNumber: '1231231'
+  } as any
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
-    store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: affiliatedOrgModule,
-        business: businessModule
-      }
-    })
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
   })
 
   it('Search Result with affiliated CP is valid', () => {
     wrapper = mount(IncorporationSearchResultView, {
-      store,
       vuetify,
       localVue,
       router,
@@ -80,7 +57,7 @@ describe('IncorporationSearchResultView.vue', () => {
 
     const searchResult = wrapper.vm.searchResult
 
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
     expect(searchResult[0].businessIdentifier).toBe('123123')
     expect(searchResult[0].businessNumber).toBe('1231231')
     expect(searchResult[0].statusCode).toBe('Active')
@@ -90,37 +67,14 @@ describe('IncorporationSearchResultView.vue', () => {
   })
 
   it('Search Result with unaffiliated CP is valid', () => {
-    const unAffiliatedOrgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-        }
-      },
-      actions: {
-        addOrgSettings: jest.fn()
-      }
-    }
-    const unAffiliatedbusinessModule = {
-      namespaced: true,
-      state: {
-        currentBusiness: {
-          name: 'unaffiliated_test_business',
-          businessIdentifier: '123123',
-          businessNumber: '1231231'
-        }
-      }
-    }
-    store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: unAffiliatedOrgModule,
-        business: unAffiliatedbusinessModule
-      }
-    })
+    const businessStore = useBusinessStore()
+    businessStore.currentBusiness = {
+      name: 'unaffiliated_test_business',
+      businessIdentifier: '123123',
+      businessNumber: '1231231'
+    } as any
 
     wrapper = mount(IncorporationSearchResultView, {
-      store,
       localVue,
       router,
       vuetify,

@@ -1,0 +1,27 @@
+.v-dialog {
+  > .v-card {
+    > div {
+        padding: 16px 40px 0 40px;
+      &:first-of-type {
+        padding: 40px 40px 0 40px;
+      }
+      &:last-of-type {
+        padding: 40px 40px 40px 40px;
+        button {
+          padding: 0 20px;
+        }
+      }
+    }
+  }
+  .contact-us {
+    ol {
+      padding: 0;
+      text-decoration: none;
+      margin-bottom: 16px;
+      list-style-type: none;
+      li + li {
+        margin-top: 8px;
+      }
+    }
+  }
+}

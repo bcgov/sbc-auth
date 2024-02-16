@@ -1,29 +1,35 @@
 <template>
   <div>
     <header class="view-header align-center mb-5">
-      <h2 class="view-header__title">Team Members</h2>
+      <h2 class="view-header__title">
+        Team Members
+      </h2>
       <div class="view-header__actions">
         <v-btn
+          v-can:INVITE_MEMBERS.hide
           large
           color="primary"
-          v-can:INVITE_MEMBERS.hide
-          @click="showAddUsersModal()"
           data-test="add-people-button"
+          @click="showAddUsersModal()"
         >
-          <v-icon small>mdi-plus</v-icon>
+          <v-icon small>
+            mdi-plus
+          </v-icon>
           <span>Add Team Member</span>
         </v-btn>
       </div>
     </header>
 
-    <SearchFilterInput class="mb-6"
+    <SearchFilterInput
+      class="mb-6"
       :filterParams="searchFilter"
       :filteredRecordsCount="teamMembersCount"
       @filter-texts="setAppliedFilterValue"
-    ></SearchFilterInput>
+    />
 
     <!-- Team member listing -->
     <MemberDataTable
+      :userNamefilterText="appliedFilterValue"
       @confirm-remove-member="
         showConfirmRemoveModal($event, $refs.confirmActionDialog)
       "
@@ -39,7 +45,6 @@
         showConfirmDissolveModal($refs.confirmActionDialog)
       "
       @single-owner-error="showSingleOwnerErrorModal($refs.errorDialog)"
-      :userNamefilterText="appliedFilterValue"
       @filtered-members-count="filteredTeamMembersCount"
     />
 
@@ -57,10 +62,10 @@
       :is-scrollable="true"
       max-width="800"
     >
-      <template v-slot:title>
+      <template #title>
         <span>Add Team Members</span>
       </template>
-      <template v-slot:text>
+      <template #text>
         <AddUsersForm
           @add-users-complete="showSuccessModal()"
           @cancel="close($refs.addAnonUsersDialog)"
@@ -70,27 +75,28 @@
 
     <!-- Add Users Dialog -->
     <ModalDialog
-            ref="passwordResetDialog"
-            :show-icon="false"
-            :show-actions="false"
-            :fullscreen-on-mobile="
+      ref="passwordResetDialog"
+      :show-icon="false"
+      :show-actions="false"
+      :fullscreen-on-mobile="
         $vuetify.breakpoint.xsOnly ||
           $vuetify.breakpoint.smOnly ||
           $vuetify.breakpoint.mdOnly
       "
-            :is-persistent="true"
-            :is-scrollable="true"
-            max-width="800"
+      :is-persistent="true"
+      :is-scrollable="true"
+      max-width="800"
     >
-      <template v-slot:title>
+      <template #title>
         <span>Reset Password</span>
       </template>
-      <template v-slot:text>
-        <PasswordReset v-bind:user="user"
-                       ref="passwordResetComp"
-                @reset-complete="showUpdateModal()"
-                @reset-error="showPasswordResetErrorModal()"
-                       @cancel="close($refs.passwordResetDialog)"
+      <template #text>
+        <PasswordReset
+          ref="passwordResetComp"
+          :user="user"
+          @reset-complete="showUpdateModal()"
+          @reset-error="showPasswordResetErrorModal()"
+          @cancel="close($refs.passwordResetDialog)"
         />
       </template>
     </ModalDialog>
@@ -103,24 +109,36 @@
 
     <!-- Password Reset Success Modal -->
     <ModalDialog
-            ref="passwordResetSuccessDialog"
-            :title="successTitle"
-            dialog-class="notify-dialog"
-            max-width="640"
-            :show-icon="true"
+      ref="passwordResetSuccessDialog"
+      :title="successTitle"
+      dialog-class="notify-dialog"
+      max-width="640"
+      :show-icon="true"
     >
-      <template v-slot:actions>
-        <v-btn large color="primary" @click="close($refs.passwordResetSuccessDialog)"
-        >OK</v-btn
+      <template #actions>
+        <v-btn
+          large
+          color="primary"
+          @click="close($refs.passwordResetSuccessDialog)"
         >
+          OK
+        </v-btn>
       </template>
 
-      <template v-slot:icon>
-        <v-icon large color="success">mdi-check</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="success"
+        >
+          mdi-check
+        </v-icon>
       </template>
 
-      <template v-slot:text>
-        <AddUsersSuccess ref="addUserSuccessRef" v-bind:action="action"/>
+      <template #text>
+        <AddUsersSuccess
+          ref="addUserSuccessRef"
+          :action="action"
+        />
       </template>
     </ModalDialog>
 
@@ -131,17 +149,29 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:actions>
-        <v-btn large color="primary" @click="close($refs.addUsersSuccessDialog)"
-          >OK</v-btn
+      <template #actions>
+        <v-btn
+          large
+          color="primary"
+          @click="close($refs.addUsersSuccessDialog)"
         >
+          OK
+        </v-btn>
       </template>
 
-      <template v-slot:icon v-if="!createdUsers.length && failedUsers.length">
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template
+        v-if="!createdUsers.length && failedUsers.length"
+        #icon
+      >
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
 
-      <template v-slot:text>
+      <template #text>
         <AddUsersSuccess ref="addUserSuccessRef" />
       </template>
     </ModalDialog>
@@ -154,19 +184,31 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
-        <v-btn large color="primary" @click="confirmHandler()">{{
-          primaryActionText
-        }}</v-btn>
+      <template #actions>
+        <v-btn
+          large
+          color="primary"
+          @click="confirmHandler()"
+        >
+          {{
+            primaryActionText
+          }}
+        </v-btn>
         <v-btn
           large
           color="default"
           @click="close($refs.confirmActionDialog)"
-          >{{ secondaryActionText }}</v-btn
         >
+          {{ secondaryActionText }}
+        </v-btn>
       </template>
     </ModalDialog>
 
@@ -178,7 +220,7 @@
       dialog-class="notify-dialog"
       max-width="480"
     >
-      <template v-slot:icon>
+      <template #icon>
         <v-icon
           large
           :color="primaryActionType"
@@ -186,7 +228,7 @@
           mdi-information-outline
         </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           :color="primaryActionType"
@@ -211,7 +253,7 @@
       :text="successText"
       dialog-class="notify-dialog"
       max-width="640"
-    ></ModalDialog>
+    />
 
     <!-- Alert Dialog (Error) -->
     <ModalDialog
@@ -221,11 +263,22 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
-        <v-btn large color="error" @click="close($refs.errorDialog)">OK</v-btn>
+      <template #actions>
+        <v-btn
+          large
+          color="error"
+          @click="close($refs.errorDialog)"
+        >
+          OK
+        </v-btn>
       </template>
     </ModalDialog>
   </div>
@@ -238,7 +291,7 @@ import {
   Member
 } from '@/models/Organization'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AddUsersForm from '@/components/auth/account-settings/team-management/AddUsersForm.vue'
 import AddUsersSuccess from '@/components/auth/account-settings/team-management/AddUsersSuccess.vue'
 import MemberDataTable from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
@@ -249,6 +302,7 @@ import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { SearchFilterParam } from '@/models/searchfilter'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
 import { User } from '@/models/user'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -260,17 +314,17 @@ import { User } from '@/models/user'
     SearchFilterInput
   },
   computed: {
-    ...mapState('org', ['createdUsers', 'failedUsers'])
+    ...mapState(useOrgStore, ['createdUsers', 'failedUsers'])
   },
   methods: {
-    ...mapActions('org', ['syncActiveOrgMembers'])
+    ...mapActions(useOrgStore, ['syncActiveOrgMembers'])
   }
 })
 export default class AnonymousUserManagement extends Mixins(
   TeamManagementMixin
 ) {
   @Prop({ default: '' }) private orgId: string
-  // @Prop() private confirmActionDialogWithQuestion: ModalDialog;
+  // @Prop() private confirmActionDialogWithQuestion: InstanceType<typeof ModalDialog>;
 
   private isLoading = true
 
@@ -292,14 +346,14 @@ export default class AnonymousUserManagement extends Mixins(
   ]
 
   $refs: {
-    successDialog: ModalDialog
-    errorDialog: ModalDialog
-    confirmActionDialog: ModalDialog
-    confirmActionDialogWithQuestion: ModalDialog
-    addAnonUsersDialog: ModalDialog
-    addUsersSuccessDialog: ModalDialog
-    passwordResetDialog: ModalDialog
-    passwordResetSuccessDialog: ModalDialog
+    successDialog: InstanceType<typeof ModalDialog>
+    errorDialog: InstanceType<typeof ModalDialog>
+    confirmActionDialog: InstanceType<typeof ModalDialog>
+    confirmActionDialogWithQuestion: InstanceType<typeof ModalDialog>
+    addAnonUsersDialog: InstanceType<typeof ModalDialog>
+    addUsersSuccessDialog: InstanceType<typeof ModalDialog>
+    passwordResetDialog: InstanceType<typeof ModalDialog>
+    passwordResetSuccessDialog: InstanceType<typeof ModalDialog>
   }
 
   private async mounted () {

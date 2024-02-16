@@ -1,65 +1,66 @@
 <template>
-      <v-data-table
-      class="incorporation-search-results"
-      :headers="headersSearchResult"
-      :items="searchResult"
-      hide-default-footer
-      v-if="isVisible"
-    >
-      <template v-slot:loading>
-        Loading...
-      </template>
-      <template v-slot:[`item.orgType`]="{ item }">
-          {{formatType(item)}}
-      </template>
-      <template v-slot:[`item.account`]="{ item }">
-        <span
+  <v-data-table
+    v-if="isVisible"
+    class="incorporation-search-results"
+    :headers="headersSearchResult"
+    :items="searchResult"
+    hide-default-footer
+  >
+    <template #loading>
+      Loading...
+    </template>
+    <template #[`item.orgType`]="{ item }">
+      {{ formatType(item) }}
+    </template>
+    <template #[`item.account`]="{ item }">
+      <span
         :class="{ 'account-color-empty': !isThereAnAffiliatedAccount }"
-        >
-          {{ item.account }}
-        </span>
-      </template>
-      <template v-slot:[`item.action`]>
-        <v-menu
+      >
+        {{ item.account }}
+      </span>
+    </template>
+    <template #[`item.action`]>
+      <v-menu
         bottom
-        left>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
+        left
+      >
+        <template #activator="{ on, attrs }">
+          <v-btn
             icon
             v-bind="attrs"
             v-on="on"
-            >
-              <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
-          </template>
-          <v-list
-          dense
           >
-              <v-list-item
-              v-for="(action, i) in actions"
-              :key="i"
-              @click="action.event"
-              >
-                <v-list-item-icon>
-                  <v-icon v-text="action.icon"></v-icon>
-                </v-list-item-icon>
-                <v-list-item-content>
-                  <v-list-item-title v-text="action.title"></v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-          </v-list>
-        </v-menu>
-        <GeneratePasscodeView
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </template>
+        <v-list
+          dense
+        >
+          <v-list-item
+            v-for="(action, i) in actions"
+            :key="i"
+            @click="action.event"
+          >
+            <v-list-item-icon>
+              <v-icon v-text="action.icon" />
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title v-text="action.title" />
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <GeneratePasscodeView
         ref="generatePasscodeDialog"
         :businessIdentitifier="currentBusiness.businessIdentifier"
-        >
-        </GeneratePasscodeView>
-      </template>
-    </v-data-table>
+      />
+    </template>
+  </v-data-table>
 </template>
 
 <script lang="ts">
 import { AccessType, Account } from '@/util/constants'
+import { Action, State } from 'pinia-class'
 import { Business, BusinessSearchResultDto } from '@/models/business'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
@@ -67,10 +68,8 @@ import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import GeneratePasscodeView from '@/views/auth/staff/GeneratePasscodeView.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const BusinessModule = namespace('business')
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -78,12 +77,12 @@ const BusinessModule = namespace('business')
   }
 })
 export default class IncorporationSearchResultView extends Vue {
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
-  @OrgModule.Action('syncOrganization') private syncOrganization!: (affiliatedOrganizationId: number) => Promise<Organization>
-  @OrgModule.Action('syncMembership') private syncMembership!: (affiliatedOrganizationId: number) => Promise<Member>
-  @OrgModule.Mutation('setCurrentAccountSettings') private setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
-  @BusinessModule.State('currentBusiness') private currentBusiness!: Business
+  @State(useOrgStore) readonly currentOrganization!: Organization
+  @Action(useOrgStore) readonly addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
+  @Action(useOrgStore) readonly syncOrganization!: (affiliatedOrganizationId: number) => Promise<Organization>
+  @Action(useOrgStore) readonly syncMembership!: (affiliatedOrganizationId: number) => Promise<Member>
+  @Action(useOrgStore) readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
+  @State(useBusinessStore) currentBusiness!: Business
 
   @Prop({ default: false }) isVisible: boolean
   @Prop() affiliatedOrg: Organization
@@ -92,7 +91,7 @@ export default class IncorporationSearchResultView extends Vue {
     generatePasscodeDialog: GeneratePasscodeView
   }
 
-  private get actions (): object[] {
+  get actions (): object[] {
     if (this.isThereAnAffiliatedAccount) {
       return [
         { title: 'Entity Dashboard',
@@ -118,7 +117,7 @@ export default class IncorporationSearchResultView extends Vue {
     }
   }
 
-  private get searchResult (): BusinessSearchResultDto[] {
+  get searchResult (): BusinessSearchResultDto[] {
     return [{
       name: this.currentBusiness?.name,
       orgType: this.affiliatedOrg?.orgType,
@@ -129,7 +128,7 @@ export default class IncorporationSearchResultView extends Vue {
       statusCode: this.affiliatedOrg?.statusCode
     }]
   }
-  private readonly headersSearchResult = [
+  readonly headersSearchResult = [
     {
       text: 'Name',
       align: 'left',
@@ -166,7 +165,7 @@ export default class IncorporationSearchResultView extends Vue {
     }
   ]
 
-  private formatType (org:BusinessSearchResultDto): string {
+  formatType (org:BusinessSearchResultDto): string {
     let orgTypeDisplay = org?.orgType ? org?.orgType === Account.BASIC ? 'Basic' : 'Premium' : 'N/A'
     if (org?.accessType === AccessType.ANONYMOUS) {
       return 'Director Search'
@@ -177,11 +176,11 @@ export default class IncorporationSearchResultView extends Vue {
     return orgTypeDisplay
   }
 
-  private async entityDashboardEvent () {
+  async entityDashboardEvent () {
     window.location.href = `${ConfigHelper.getBusinessURL()}${this.currentBusiness.businessIdentifier}`
   }
 
-  private async manageAccountEvent () {
+  async manageAccountEvent () {
     try {
       await this.syncOrganization(this.affiliatedOrg.id)
       await this.syncMembership(this.currentOrganization.id)
@@ -193,11 +192,11 @@ export default class IncorporationSearchResultView extends Vue {
     }
   }
 
-  private generatePasscodeEvent () {
+  generatePasscodeEvent () {
     this.$refs.generatePasscodeDialog.open()
   }
 
-  private get isThereAnAffiliatedAccount (): boolean {
+  get isThereAnAffiliatedAccount (): boolean {
     return !!this.affiliatedOrg?.name
   }
 }

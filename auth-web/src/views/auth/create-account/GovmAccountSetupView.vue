@@ -1,16 +1,23 @@
 
 <template>
-  <v-container class="view-container" data-test="div-account-setup-container">
+  <v-container
+    class="view-container"
+    data-test="div-account-setup-container"
+  >
     <div class="view-header flex-column">
-      <h1 class="view-header__title">Create a Ministry Account</h1>
-      <p class="mt-3 mb-0">Create an account to access products and services offered by BC Registries and Online Services</p>
+      <h1 class="view-header__title">
+        Create a Ministry Account
+      </h1>
+      <p class="mt-3 mb-0">
+        Create an account to access products and services offered by BC Registries and Online Services
+      </p>
     </div>
     <v-card flat>
       <Stepper
         :stepper-configuration="stepperConfig"
         :isLoading="isLoading"
         @final-step-action="createAccount"
-      ></Stepper>
+      />
     </v-card>
     <!-- Alert Dialog (Error) -->
     <ModalDialog
@@ -21,10 +28,15 @@
       max-width="640"
       data-test="modal-account-setup-error"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           color="error"
@@ -39,7 +51,7 @@
 </template>
 
 <script lang="ts">
-
+import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
@@ -50,8 +62,7 @@ import GovmPaymentMethodSelector from '@/components/auth/create-account/GovmPaym
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Pages } from '@/util/constants'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
-import { namespace } from 'vuex-class'
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -62,22 +73,21 @@ const OrgModule = namespace('org')
     ModalDialog,
     GovmContactInfoForm
   }
-
 })
 export default class GovmAccountSetupView extends Vue {
   // private readonly createOrg!: () => Promise<Organization>
-  @OrgModule.Action('createGovmOrg') private createGovmOrg!: () => void
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @OrgModule.State('currentOrgAddress') private currentOrgAddress!: Address
-  @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
-  @OrgModule.Action('syncMembership') private syncMembership!: (orgId: number) => Promise<Member>
+  @Action(useOrgStore) private createGovmOrg!: () => void
+  @State(useOrgStore) private currentOrganization!: Organization
+  @State(useOrgStore) private currentOrgAddress!: Address
+  @Action(useOrgStore) private syncOrganization!: (orgId: number) => Promise<Organization>
+  @Action(useOrgStore) private syncMembership!: (orgId: number) => Promise<Member>
 
   public errorTitle = 'Account creation failed'
   public errorText = ''
   public isLoading: boolean = false
 
   $refs: {
-    errorDialog: ModalDialog
+    errorDialog: InstanceType<typeof ModalDialog>
   }
 
   public stepperConfig: Array<StepConfiguration> =
@@ -123,6 +133,7 @@ export default class GovmAccountSetupView extends Vue {
       const organization: any = await this.createGovmOrg() // create govm account
       await this.syncOrganization(organization.id)
       await this.syncMembership(organization.id)
+      // Remove with Vue 3
       this.$store.commit('updateHeader')
       this.$router.push(Pages.SETUP_GOVM_ACCOUNT_SUCCESS)
       this.isLoading = false

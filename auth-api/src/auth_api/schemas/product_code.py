@@ -26,8 +26,9 @@ class ProductCodeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, 
         """Maps all of the ProductSubscription fields to a default schema."""
 
         model = ProductCodeModel
-        exclude = ['default', 'linked_product_code']
+        exclude = ['default', 'linked_product_code', 'can_resubmit']
 
     type_code = fields.String(data_key='type')
+    parent_code = fields.String(data_key='parentCode')
     premium_only = fields.Boolean(data_key='premiumOnly')
     need_review = fields.Boolean(data_key='needReview')

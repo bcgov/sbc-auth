@@ -15,16 +15,20 @@
 
 Test suite to ensure that the Task service routines are working as expected.
 """
-
+import mock
+import pytest
 from datetime import datetime
 from unittest.mock import patch
 
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import User as UserModel
 from auth_api.models import Task as TaskModel
+from auth_api.models.dataclass import TaskSearch
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
+from auth_api.services import User as UserService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import (
     LoginSource, OrgStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
@@ -33,6 +37,7 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import (
     factory_org_model, factory_product_model, factory_task_service, factory_user_model, factory_user_model_with_contact,
     patch_token_info)
+from tests.conftest import mock_token
 
 
 def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
@@ -42,9 +47,13 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     dictionary = task.as_dict()
     name = dictionary['name']
 
-    fetched_task = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                           page=1,
-                                           limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    fetched_task = TaskService.fetch_tasks(task_search)
 
     assert fetched_task['tasks']
     for item in fetched_task['tasks']:
@@ -99,10 +108,16 @@ def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-a
     assert dictionary['relationship_type'] == TaskRelationshipType.PRODUCT.value
 
 
-def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+@pytest.mark.parametrize('test_name, rmv_contact', [
+    ('has_contact', False),
+    ('no_contact', True),
+])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
+def test_update_task(session, keycloak_mock, monkeypatch, test_name, rmv_contact):  # pylint:disable=unused-argument
     """Assert that a task can be updated."""
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_bceid_user['idp_userid']
     user = factory_user_model_with_contact(user_with_token)
 
     patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
@@ -112,12 +127,23 @@ def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
 
+    if rmv_contact:
+        # remove contact link
+        contact_link = ContactLinkModel.find_by_user_id(user.id)
+        contact_link.user_id = None
+        session.add(contact_link)
+        session.commit()
+        assert UserService.get_admin_emails_for_org(org_dict['id']) == ''
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
     patch_token_info(token_info, monkeypatch)
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                    page=1,
-                                    limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -134,10 +160,12 @@ def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     assert user.verified
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a task can be updated."""
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_bceid_user['idp_userid']
     user = factory_user_model_with_contact(user_with_token)
 
     patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
@@ -150,9 +178,13 @@ def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unuse
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
     patch_token_info(token_info, monkeypatch)
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                    page=1,
-                                    limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -171,15 +203,16 @@ def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unuse
     assert dictionary['remarks'] == ['Test Remark']
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_create_task_govm(session,
                           keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a task can be created when updating a GOVM account."""
     user = factory_user_model()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
-                                             roles=['create_accounts'])
+                                             roles=['create_accounts'], idp_userid=user.idp_userid)
     user2 = factory_user_model(TestUserInfo.user2)
     public_token_info = TestJwtClaims.get_test_user(sub=user2.keycloak_guid, source=LoginSource.STAFF.value,
-                                                    roles=['gov_account_user'])
+                                                    roles=['gov_account_user'], idp_userid=user2.idp_userid)
 
     patch_token_info(token_info, monkeypatch)
     org: OrgService = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id)
@@ -201,6 +234,7 @@ def test_create_task_govm(session,
         expected_data = {
             'accountId': dictionary.get('id'),
             'accountName': dictionary.get('name') + '-' + dictionary.get('branch_name'),
+            'branchName': dictionary.get('branch_name'),
             'paymentInfo': {
                 'methodOfPayment': 'EJV',
                 'revenueAccount': payment_details.get('paymentInfo').get('revenueAccount')
@@ -212,9 +246,14 @@ def test_create_task_govm(session,
 
         # Assert the task that is created
         patch_token_info(token_info, monkeypatch)
-        fetched_task = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                               page=1,
-                                               limit=10)
+
+        task_search = TaskSearch(
+            status=[TaskStatus.OPEN.value],
+            page=1,
+            limit=10
+        )
+
+        fetched_task = TaskService.fetch_tasks(task_search)
 
         for item in fetched_task['tasks']:
             assert item['name'] == dictionary['name']

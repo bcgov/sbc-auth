@@ -1,43 +1,53 @@
 <template>
-  <v-form ref="notaryContactForm" lazy-validation>
+  <v-form
+    ref="notaryContactForm"
+    lazy-validation
+  >
     <fieldset v-if="notaryContact">
-      <legend class="mb-4">Notary Contact</legend>
+      <legend class="mb-4">
+        Notary Contact
+      </legend>
       <v-row>
-        <v-col cols="12" class="py-0">
+        <v-col
+          cols="12"
+          class="py-0"
+        >
           <v-text-field
+            v-model.trim="notaryContact.email"
             filled
             label="Email Address"
             :rules="rules.email"
             :disabled="disabled"
-            hint="Optional"
             persistent-hint
-            v-model.trim="notaryContact.email"
-          >
-          </v-text-field>
+          />
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="4" class="py-0">
+        <v-col
+          cols="4"
+          class="py-0"
+        >
           <v-text-field
+            v-model.trim="notaryContact.phone"
             filled
             label="Phone"
             :disabled="disabled"
             hint="Optional"
             persistent-hint
-            v-model.trim="notaryContact.phone"
-          >
-          </v-text-field>
+          />
         </v-col>
-        <v-col cols="3" class="py-0">
+        <v-col
+          cols="3"
+          class="py-0"
+        >
           <v-text-field
+            v-model.trim="notaryContact.extension"
             filled
             label="Extension"
             :disabled="disabled"
             hint="Optional"
             persistent-hint
-            v-model.trim="notaryContact.extension"
-          >
-          </v-text-field>
+          />
         </v-col>
       </v-row>
     </fieldset>
@@ -53,14 +63,17 @@ import { NotaryContact } from '@/models/notary'
 export default class NotaryContactForm extends Vue {
   @Prop() inputNotaryContact: NotaryContact
   @Prop({ default: false }) disabled: boolean
-  private notaryContact: NotaryContact = {}
+  notaryContact: NotaryContact = {}
 
   $refs: {
     notaryContactForm: HTMLFormElement,
   }
 
-  private readonly rules = {
+  readonly rules = {
     email: [val => {
+      if (!val) {
+        return 'Email is required'
+      }
       if (val) {
         return !!CommonUtils.validateEmailFormat(val) || 'Email is invalid'
       }
@@ -80,7 +93,7 @@ export default class NotaryContactForm extends Vue {
   }
 
   @Watch('notaryContact', { deep: true })
-  async updateContact (val, oldVal) {
+  async updateContact () {
     this.emitNotaryContact()
   }
 

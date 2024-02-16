@@ -1,64 +1,29 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-
-import { Account } from '@/util/constants'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
-import CodesModule from '@/store/modules/codes'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import can from '@/directives/can'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import flushPromises from 'flush-promises'
 
 document.body.setAttribute('data-app', 'true')
 
 describe('AccountBusinessType.vue', () => {
-  let orgModule: any
-  let codesModule: any
   let wrapper: any
-  let store: any
   const localVue = createLocalVue()
   localVue.directive('can', can)
-  localVue.use(Vuex)
   const vuetify = new Vuetify({})
 
   beforeEach(() => {
-    codesModule = {
-      namespaced: true,
-      state: {
-      },
-      actions: CodesModule.actions,
-      mutations: CodesModule.mutations,
-      getters: CodesModule.getters
-    }
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
 
-    orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: '',
-          orgType: Account.BASIC
-        }
-      }
-    }
-    store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule,
-        codes: codesModule
-      }
-    })
-    jest.resetModules()
-    jest.clearAllMocks()
+  afterEach(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
     const $t = () => ''
     wrapper = mount(AccountBusinessType, {
-      store,
       localVue,
       vuetify,
       propsData: {
@@ -67,13 +32,12 @@ describe('AccountBusinessType.vue', () => {
       mocks: { $t
       }
     })
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('individual account type rendering', async () => {
     const $t = () => ''
     wrapper = mount(AccountBusinessType, {
-      store,
       localVue,
       vuetify,
       propsData: {
@@ -91,7 +55,6 @@ describe('AccountBusinessType.vue', () => {
   it('business account type rendering', async () => {
     const $t = () => ''
     wrapper = mount(AccountBusinessType, {
-      store,
       localVue,
       vuetify,
       propsData: {
@@ -100,8 +63,9 @@ describe('AccountBusinessType.vue', () => {
       mocks: { $t
       }
     })
-    await wrapper.setData({ isLoading: false })
+    await wrapper.setData({ isLoading: false, isBusinessAccount: true })
     wrapper.find("[data-test='radio-business-account-type']").trigger('click')
+    await flushPromises()
     expect(wrapper.find("[data-test='input-branch-name']").isVisible()).toBeTruthy()
     expect(wrapper.find("[data-test='business-account-type-details']").exists()).toBeTruthy()
   })

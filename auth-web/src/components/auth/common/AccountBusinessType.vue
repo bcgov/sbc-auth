@@ -1,142 +1,189 @@
 <template>
-    <v-container class="view-container" v-display-mode>
-      <v-fade-transition>
-      <div v-if="isLoading" class="loading-inner-container">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+  <v-container
+    v-display-mode
+    class="view-container"
+  >
+    <v-fade-transition>
+      <div
+        v-if="isLoading"
+        class="loading-inner-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
       </div>
-      </v-fade-transition>
+    </v-fade-transition>
 
-      <div class="account-business-type-container" v-if="!isLoading">
-        <p class="mb-9" v-if="!govmAccount">
-                {{ $t('accountBusinessTypeText') }}
-        </p>
-        <v-form ref="accountInformationForm" data-test="account-information-form">
-          <v-radio-group
-            v-if="!govmAccount"
-            row
-            v-model="isBusinessAccount"
-            ref="isBusinessAccount"
-            mandatory
+    <div
+      v-if="!isLoading"
+      class="account-business-type-container"
+    >
+      <p
+        v-if="!govmAccount"
+        class="mb-9"
+      >
+        {{ $t('accountBusinessTypeText') }}
+      </p>
+      <v-form
+        ref="accountInformationForm"
+        data-test="account-information-form"
+      >
+        <v-radio-group
+          v-if="!govmAccount"
+          ref="isBusinessAccount"
+          v-model="isBusinessAccount"
+          row
+          mandatory
+        >
+          <v-row justify="space-between">
+            <v-col
+              md="9"
+              class="business-radio xs"
             >
-                <v-row justify="space-between">
-                    <v-col  xs="12" md="9" class="business-radio">
-                        <v-radio
-                        label="Individual Person Name"
-                        :key="false"
-                        :value="false"
-                        data-test="radio-individual-account-type"
-                        class="px-4 py-5"
-                        @change="onOrgBusinessTypeChange(!isEditAccount)"
-                        ></v-radio>
-                        <v-radio
-                        label="Business Name"
-                        :key="true"
-                        :value="true"
-                        data-test="radio-business-account-type"
-                        class="px-4 py-5"
-                        @change="onOrgBusinessTypeChange(!isEditAccount)"
-                        ></v-radio>
-                    </v-col>
-                </v-row>
-            </v-radio-group>
-            <fieldset class="auto-complete-relative account-name" data-test="account-name">
-                <legend class="mb-3"  v-if="govmAccount">Enter Ministry Information for this account</legend>
-                <legend class="mb-3"  v-else-if="!isBusinessAccount">Account Name</legend>
-                <v-slide-y-transition>
-                    <div v-show="errorMessage">
-                    <v-alert type="error" icon="mdi-alert-circle-outline">{{ errorMessage }}</v-alert>
-                    </div>
-                </v-slide-y-transition>
-                <v-text-field
+              <v-radio
+                :key="false"
+                label="Individual Person Name"
+                :value="false"
+                data-test="radio-individual-account-type"
+                class="px-4 py-5"
+                @change="onOrgBusinessTypeChange(!isEditAccount)"
+              />
+              <v-radio
+                :key="true"
+                label="Business Name"
+                :value="true"
+                data-test="radio-business-account-type"
+                class="px-4 py-5"
+                @change="onOrgBusinessTypeChange(!isEditAccount)"
+              />
+            </v-col>
+          </v-row>
+        </v-radio-group>
+        <fieldset
+          class="auto-complete-relative account-name"
+          data-test="account-name"
+        >
+          <legend
+            v-if="govmAccount"
+            class="mb-3"
+          >
+            Enter Ministry Information for this account
+          </legend>
+          <legend
+            v-else-if="!isBusinessAccount"
+            class="mb-3"
+          >
+            Account Name
+          </legend>
+          <v-slide-y-transition>
+            <div v-show="errorMessage">
+              <v-alert
+                type="error"
+                icon="mdi-alert-circle-outline"
+              >
+                {{ errorMessage }}
+              </v-alert>
+            </div>
+          </v-slide-y-transition>
+          <v-text-field
+            ref="name"
+            v-model.trim="name"
+            filled
+            :label="getOrgNameLabel"
+            :rules="orgNameRules"
+            :disabled="saving || orgNameReadOnly"
+            data-test="input-org-name"
+            :readonly="govmAccount"
+            autocomplete="off"
+            :error-messages="bcolDuplicateNameErrorMessage"
+            @keyup="onOrgNameChange"
+          />
+          <org-name-auto-complete
+            v-if="isBusinessAccount"
+            :searchValue="autoCompleteSearchValue"
+            :setAutoCompleteIsActive="autoCompleteIsActive"
+            @auto-complete-value="setAutoCompleteSearchValue"
+          />
+        </fieldset>
+        <v-expand-transition class="branch-detail">
+          <v-text-field
+            v-show="govmAccount || isBusinessAccount"
+            v-model.trim="branchName"
+            filled
+            label="Branch/Division (If applicable)"
+            :disabled="saving"
+            data-test="input-branch-name"
+            :readonly="govmAccount"
+            @keyup="onOrgBusinessTypeChange()"
+          />
+        </v-expand-transition>
+        <v-expand-transition class="business-account-type-details">
+          <v-row
+            v-if="isBusinessAccount"
+            justify="space-between"
+            data-test="business-account-type-details"
+          >
+            <v-col
+              cols="6"
+              class="py-0"
+            >
+              <v-select
+                ref="businessType"
+                v-model="businessType"
                 filled
-                :label="getOrgNameLabel"
-                v-model.trim="name"
-                :rules="orgNameRules"
-                :disabled="saving || orgNameReadOnly"
-                data-test="input-org-name"
-                :readonly="govmAccount"
-                autocomplete="off"
-                :error-messages="bcolDuplicateNameErrorMessage"
-                v-on:keyup="onOrgNameChange"
-                ref="name"
-                />
-                <org-name-auto-complete
-                v-if="enableOrgNameAutoComplete && isBusinessAccount"
-                :searchValue="autoCompleteSearchValue"
-                :setAutoCompleteIsActive="autoCompleteIsActive"
-                @auto-complete-value="setAutoCompleteSearchValue">
-                </org-name-auto-complete>
-            </fieldset>
-              <v-expand-transition class="branch-detail">
-                <v-text-field
+                label="Business Type"
+                item-text="desc"
+                item-value="code"
+                :items="businessTypeCodes"
+                data-test="select-business-type"
+                :rules="orgBusinessTypeRules"
+                :menu-props="{
+                  bottom: true,
+                  offsetY: true
+                }"
+                @change="onOrgBusinessTypeChange()"
+              />
+            </v-col>
+            <v-col
+              cols="6"
+              class="py-0"
+            >
+              <v-select
+                ref="businessSize"
+                v-model="businessSize"
                 filled
-                label="Branch/Division (If applicable)"
-                v-model.trim="branchName"
-                :disabled="saving"
-                data-test="input-branch-name"
-                :readonly="govmAccount"
-                v-on:keyup="onOrgBusinessTypeChange()"
-                v-show="govmAccount || isBusinessAccount"
-                />
-              </v-expand-transition>
-            <template >
-              <v-expand-transition class="business-account-type-details">
-                <v-row justify="space-between" data-test="business-account-type-details" v-if="isBusinessAccount">
-                    <v-col cols="6" class="py-0">
-                        <v-select
-                        filled
-                        label="Business Type"
-                        item-text="desc"
-                        item-value="code"
-                        :items="businessTypeCodes"
-                        v-model="businessType"
-                        data-test="select-business-type"
-                        :rules="orgBusinessTypeRules"
-                        @change="onOrgBusinessTypeChange()"
-                        :menu-props="{
-                          bottom: true,
-                          offsetY: true
-                        }"
-                        ref="businessType"
-                        />
-                    </v-col>
-                    <v-col cols="6" class="py-0">
-                        <v-select
-                        filled
-                        label="Business Size"
-                        item-text="desc"
-                        item-value="code"
-                        :items="businessSizeCodes"
-                        v-model="businessSize"
-                        data-test="select-business-size"
-                        :rules="orgBusinessSizeRules"
-                        @change="onOrgBusinessTypeChange()"
-                        :menu-props="{
-                          bottom: true,
-                          offsetY: true
-                        }"
-                        ref="businessSize"
-                        />
-                    </v-col>
-                </v-row>
-              </v-expand-transition>
-            </template>
-        </v-form>
-      </div>
-    </v-container>
+                label="Business Size"
+                item-text="desc"
+                item-value="code"
+                :items="businessSizeCodes"
+                data-test="select-business-size"
+                :rules="orgBusinessSizeRules"
+                :menu-props="{
+                  bottom: true,
+                  offsetY: true
+                }"
+                @change="onOrgBusinessTypeChange()"
+              />
+            </v-col>
+          </v-row>
+        </v-expand-transition>
+      </v-form>
+    </div>
+  </v-container>
 </template>
 
 <script lang="ts">
-import { Account, LDFlags } from '@/util/constants'
+import { Action, State } from 'pinia-class'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { OrgBusinessType, Organization } from '@/models/Organization'
+import { Account } from '@/util/constants'
 import { Code } from '@/models/Code'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const CodesModule = namespace('codes')
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -152,12 +199,12 @@ export default class AccountBusinessType extends Vue {
   @Prop({ default: false }) orgNameReadOnly: boolean
   @Prop({ default: false }) isEditAccount: boolean // hide some details for update account
 
-  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
+  @State(useOrgStore) public currentOrganization!: Organization
 
-  @CodesModule.Action('getBusinessSizeCodes') private readonly getBusinessSizeCodes!: () => Promise<Code[]>
-  @CodesModule.Action('getBusinessTypeCodes') private readonly getBusinessTypeCodes!: () => Promise<Code[]>
-  @CodesModule.State('businessSizeCodes') private readonly businessSizeCodes!: Code[]
-  @CodesModule.State('businessTypeCodes') private readonly businessTypeCodes!: Code[]
+  @Action(useCodesStore) private readonly getBusinessSizeCodes!: () => Promise<Code[]>
+  @Action(useCodesStore) private readonly getBusinessTypeCodes!: () => Promise<Code[]>
+  @State(useCodesStore) private readonly businessSizeCodes!: Code[]
+  @State(useCodesStore) private readonly businessTypeCodes!: Code[]
 
   private autoCompleteIsActive: boolean = false
   private autoCompleteSearchValue: string = ''
@@ -232,19 +279,13 @@ export default class AccountBusinessType extends Vue {
     }
   }
 
-  private get enableOrgNameAutoComplete (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableOrgNameAutoComplete) || false
-  }
-
   private get getOrgNameLabel (): string {
     return this.govmAccount ? 'Ministry Name' : this.isBusinessAccount ? 'Legal Business Name' : 'Account Name'
   }
 
   private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
-    if (this.enableOrgNameAutoComplete) {
-      this.autoCompleteIsActive = false
-      this.name = autoCompleteSearchValue
-    }
+    this.autoCompleteIsActive = false
+    this.name = autoCompleteSearchValue
     // emit the update value to the parent
     this.emitUpdatedOrgBusinessType()
   }
@@ -253,7 +294,7 @@ export default class AccountBusinessType extends Vue {
   // similar to PPR - watch logic
   async onOrgNameChange () {
     // suggest auto complete values
-    if (this.enableOrgNameAutoComplete && this.isBusinessAccount) {
+    if (this.isBusinessAccount) {
       if (this.name) {
         this.autoCompleteSearchValue = this.name
       }

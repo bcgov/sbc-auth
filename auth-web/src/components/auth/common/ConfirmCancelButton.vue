@@ -15,18 +15,35 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:text>
-        <p class="pb-1">{{subText}}</p>
+      <template #text>
+        <p class="pb-1">
+          {{ subText }}
+        </p>
       </template>
-      <template v-slot:actions>
-        <v-btn large color="error" @click="confirmDialogResponse(true)" data-test="accept-button">
-          {{confirmBtnText}}
+      <template #actions>
+        <v-btn
+          large
+          color="error"
+          data-test="accept-button"
+          @click="confirmDialogResponse(true)"
+        >
+          {{ confirmBtnText }}
         </v-btn>
-        <v-btn large color="default" @click="confirmDialogResponse(false)" data-test="reject-button">
-          {{rejectBtnText}}
+        <v-btn
+          large
+          color="default"
+          data-test="reject-button"
+          @click="confirmDialogResponse(false)"
+        >
+          {{ rejectBtnText }}
         </v-btn>
       </template>
     </ModalDialog>
@@ -35,12 +52,10 @@
 
 <script lang="ts">
 import { Component, Emit, Prop } from 'vue-property-decorator'
+import { Action } from 'pinia-class'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
-import { mapActions } from 'vuex'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -60,11 +75,11 @@ export default class ConfirmCancelButton extends Vue {
   // for not to clear current org values [for account change , while clicking on cancel , current org has to stay]
   @Prop({ default: true }) clearCurrentOrg: boolean
 
-  @OrgModule.Action('setCurrentOrganizationFromUserAccountSettings') private setCurrentOrganizationFromUserAccountSettings!: () => Promise<void>
-  @OrgModule.Action('resetAccountSetupProgress') private resetAccountSetupProgress!: () => Promise<void>
+  @Action(useOrgStore) private setCurrentOrganizationFromUserAccountSettings!: () => Promise<void>
+  @Action(useOrgStore) private resetAccountSetupProgress!: () => Promise<void>
 
   $refs: {
-      confirmCancelDialog: ModalDialog
+      confirmCancelDialog: InstanceType<typeof ModalDialog>
   }
 
   private async confirmDialogResponse (response) {
@@ -79,7 +94,7 @@ export default class ConfirmCancelButton extends Vue {
       if (this.clearCurrentOrg) {
         await this.resetAccountSetupProgress()
         await this.setCurrentOrganizationFromUserAccountSettings()
-        // Update header
+        // Remove in Vue 3
         await this.$store.commit('updateHeader')
       }
       if (this.isEmit) {

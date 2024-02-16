@@ -21,6 +21,7 @@ import uuid
 from unittest.mock import patch
 
 import pytest
+from datetime import datetime
 from faker import Faker
 
 from auth_api import status as http_status
@@ -30,7 +31,8 @@ from auth_api.models import Affidavit as AffidavitModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Membership as MembershipModel
-from auth_api.models.org import Org
+from auth_api.models import Org as OrgModel
+from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
@@ -38,17 +40,17 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services import User as UserService
 from auth_api.utils.enums import (
-    AccessType, AffidavitStatus, OrgStatus, OrgType, PatchActions, PaymentMethod, ProductCode,
-    ProductSubscriptionStatus, Status,
+    AccessType, AffidavitStatus, CorpType, NRActionCodes, NRStatus, OrgStatus, OrgType, PatchActions, PaymentMethod,
+    ProductCode, ProductSubscriptionStatus, Status,
     SuspensionReasonCode, TaskStatus, TaskRelationshipStatus)
 from auth_api.utils.roles import ADMIN  # noqa: I005
 from tests.utilities.factory_scenarios import (
     DeleteAffiliationPayload, TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims,
     TestOrgInfo, TestPaymentMethodInfo)
 from tests.utilities.factory_utils import (
-    factory_affiliation_model, factory_auth_header, factory_entity_model, factory_invitation,
-    factory_invitation_anonymous, factory_membership_model, factory_user_model, patch_pay_account_delete,
-    patch_pay_account_delete_error)
+    convert_org_to_staff_org, factory_affiliation_model, factory_auth_header, factory_entity_model, factory_invitation,
+    factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_user_model,
+    patch_pay_account_delete, patch_pay_account_delete_error)
 
 FAKE = Faker()
 
@@ -164,6 +166,15 @@ def test_duplicate_name(client, jwt, session, keycloak_mock):  # pylint:disable=
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+
+    # does not conflict with rejected accounts
+    rejected_org = factory_org_model(org_info=TestOrgInfo.org2)
+    rejected_org.status_code = OrgStatus.REJECTED.value
+    rejected_org.save()
+
+    rv = client.get(f'/api/v1/orgs?validateName=true&name={rejected_org.name}&branchName=',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
 
 
 def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -733,6 +744,38 @@ def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disa
     assert schema_utils.validate(rv.json, 'org_response')[0]
 
 
+def test_update_org_type_to_staff_fails(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that org type doesn't get updated."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked()),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    data = TestOrgInfo.update_bcol_linked()
+    data['typeCode'] = OrgType.SBC_STAFF.value
+
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(data),
+                    headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    rv = client.get('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+
+    data['typeCode'] = OrgType.STAFF.value
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(data),
+                    headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    rv = client.get('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+
+
 def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -1215,7 +1258,7 @@ def test_add_affiliation_no_org_returns_404(client, jwt, session):  # pylint:dis
     """Assert that adding a contact to a non-existant org returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/orgs/{}/affiliations'.format(99), headers=headers,
-                     data=json.dumps(TestAffliationInfo.affliation1), content_type='application/json')
+                     data=json.dumps(TestAffliationInfo.affiliation1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
@@ -1234,11 +1277,99 @@ def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):
     with patch.object(AffiliationService, 'create_affiliation',
                       side_effect=BusinessException(Error.DATA_ALREADY_EXISTS, None)):
         rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
-                         data=json.dumps(TestAffliationInfo.affliation1),
+                         data=json.dumps(TestAffliationInfo.affiliation1),
                          headers=headers,
                          content_type='application/json')
         assert rv.status_code == 400
         assert schema_utils.validate(rv.json, 'exception')[0]
+
+
+def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock, nr_mock):
+    """Assert that an affiliation can be added by staff."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    convert_org_to_staff_org(org_id, OrgType.SBC_STAFF.value)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_business)
+    rv = client.post('/api/v1/orgs/{}/affiliations?newBusiness=true'.format(org_id), headers=headers,
+                     data=json.dumps(TestAffliationInfo.new_business_affiliation), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'affiliation_response')[0]
+    certified_by_name = TestAffliationInfo.new_business_affiliation['certifiedByName']
+
+    dictionary = json.loads(rv.data)
+    assert dictionary['organization']['id'] == org_id
+    assert dictionary['certifiedByName'] == certified_by_name
+
+    rv = client.get('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    assert schema_utils.validate(rv.json, 'affiliations_response')[0]
+    affiliations = json.loads(rv.data)
+
+    assert affiliations['entities'][0]['affiliations'][0]['certifiedByName'] == certified_by_name
+
+
+def test_get_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a list of affiliation for an org can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.name_request),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.nr_affiliation),
+                     headers=headers,
+                     content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    business_identifier = TestAffliationInfo.nr_affiliation['businessIdentifier']
+
+    rv = client.get(f'/api/v1/orgs/{org_id}/affiliations/{business_identifier}', headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    dictionary = json.loads(rv.data)
+    assert dictionary['business']['businessIdentifier'] == business_identifier
+
+
+def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a list of affiliation for an org can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.name_request),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.nr_affiliation),
+                     headers=headers,
+                     content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    business_identifier = TestAffliationInfo.nr_affiliation['businessIdentifier']
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
+    rv = client.get(f'/api/v1/orgs/{org_id}/affiliations/{business_identifier}', headers=headers)
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
 def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -1384,22 +1515,58 @@ def test_add_bcol_linked_org_different_name(client, jwt, session, keycloak_mock)
     assert rv.status_code == http_status.HTTP_201_CREATED
 
 
-def test_new_business_affiliation(client, jwt, session, keycloak_mock, nr_mock):  # pylint:disable=unused-argument
+@pytest.mark.parametrize('test_name, nr_status, payment_status, error', [
+    ('NR_Approved', NRStatus.APPROVED.value, 'COMPLETED', None),
+    ('NR_Draft', NRStatus.DRAFT.value, 'COMPLETED', None),
+    ('NR_Draft', NRStatus.DRAFT.value, 'REJECTED', Error.NR_NOT_PAID),
+    ('NR_Consumed', NRStatus.CONSUMED.value, 'COMPLETED', Error.NR_INVALID_STATUS)
+])
+def test_new_business_affiliation(client, jwt, session, keycloak_mock, mocker, test_name, nr_status, payment_status,
+                                  error):
     """Assert that an NR can be affiliated to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
+    nr_response = {
+        'applicants': {
+            'emailAddress': '',
+            'phoneNumber': TestAffliationInfo.nr_affiliation['phone'],
+        },
+        'names': [{
+            'name': 'TEST INC.',
+            'state': nr_status
+        }],
+        'state': nr_status,
+        'requestTypeCd': 'BC'
+    }
+
+    payment_response = {
+        'invoices': [{
+            'statusCode': payment_status
+        }]
+    }
+
+    mocker.patch('auth_api.services.affiliation.Affiliation._get_nr_details', return_value=nr_response)
+
+    mocker.patch('auth_api.services.affiliation.Affiliation.get_nr_payment_details',
+                 return_value=payment_response)
+
     rv = client.post('/api/v1/orgs/{}/affiliations?newBusiness=true'.format(org_id), headers=headers,
                      data=json.dumps(TestAffliationInfo.nr_affiliation), content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
-    assert schema_utils.validate(rv.json, 'affiliation_response')[0]
-    dictionary = json.loads(rv.data)
-    assert dictionary['organization']['id'] == org_id
-    assert dictionary['business']['businessIdentifier'] == TestAffliationInfo.nr_affiliation['businessIdentifier']
+
+    if error is None:
+        assert rv.status_code == http_status.HTTP_201_CREATED
+        assert schema_utils.validate(rv.json, 'affiliation_response')[0]
+        dictionary = json.loads(rv.data)
+        assert dictionary['organization']['id'] == org_id
+        assert dictionary['business']['businessIdentifier'] == TestAffliationInfo.nr_affiliation['businessIdentifier']
+    else:
+        assert rv.status_code == error.status_code
+        assert rv.json['message'] == error.message
 
 
 def test_get_org_admin_affidavits(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -1457,9 +1624,14 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
                                content_type='application/json')
     assert org_response.status_code == http_status.HTTP_201_CREATED
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
-    fetched_tasks = tasks['tasks']
-    fetched_task = fetched_tasks[0]
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
+    fetched_task = tasks['tasks'][0]
 
     update_task_payload = {
         'status': TaskStatus.COMPLETED.value,
@@ -1527,9 +1699,14 @@ def test_approve_org_with_pending_affidavits_duplicate_affidavit(client, jwt, se
                                content_type='application/json')
     assert org_response.status_code == http_status.HTTP_201_CREATED
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
-    fetched_tasks = tasks['tasks']
-    fetched_task = fetched_tasks[0]
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
+    fetched_task = tasks['tasks'][0]
 
     update_task_payload = {
         'status': TaskStatus.COMPLETED.value,
@@ -1901,7 +2078,7 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     dictionary = json.loads(rv.data)
     org_id_1 = dictionary['id']
     decision_made_by = 'barney'
-    org: Org = Org.find_by_org_id(org_id_1)
+    org: OrgModel = OrgModel.find_by_org_id(org_id_1)
     org.decision_made_by = decision_made_by
     org.status_code = OrgStatus.ACTIVE.value
     org.save()
@@ -1915,7 +2092,7 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
 
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
-    org: Org = Org.find_by_org_id(org_id)
+    org: OrgModel = OrgModel.find_by_org_id(org_id)
     org.status_code = OrgStatus.ACTIVE.value
     org.save()
 
@@ -1949,3 +2126,220 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     assert schema_utils.validate(rv.json, 'paged_response')[0]
     orgs = json.loads(rv.data)
     assert orgs.get('orgs')[0].get('decisionMadeBy') == decision_made_by
+
+
+@pytest.mark.parametrize('test_name, businesses, drafts, drafts_with_nrs, nrs, dates', [
+    ('businesses_only', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)], [], [], [], []),
+    ('drafts_only', [], [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)], [], [], []),
+    ('nrs_only', [], [], [], [('NR 1234567', 'NEW'), ('NR 1234566', 'NEW')], []),
+    ('drafts_with_nrs', [], [],
+     [('T12dfhsff1', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff2', CorpType.GP.value, 'NR 1234566')],
+     [('NR 1234567', 'AML'), ('NR 1234566', 'AML')], []),
+    ('affiliations_order', [], [],
+     [], [('abcde1', CorpType.BC.value, 'NR 123456'),
+          ('abcde2', CorpType.BC.value, 'NR 123457'),
+          ('abcde3', CorpType.BC.value, 'NR 123458'),
+          ('abcde4', CorpType.BC.value, 'NR 123459')],
+     [datetime(2021, 1, 1), datetime(2022, 2, 1), datetime(2022, 3, 1), datetime(2023, 2, 1)]),
+    ('all', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)],
+     [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)],
+     [('T12dfhsff3', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff4', CorpType.GP.value, 'NR 1234566')],
+     [('NR 1234567', 'AML'), ('NR 1234566', 'AML'), ('NR 1234565', 'AML')],
+     [datetime(2021, 1, 1), datetime(2022, 2, 1)])
+])
+def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
+                              test_name, businesses, drafts, drafts_with_nrs, nrs, dates):
+    """Assert details of affiliations for an org are returned."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    # setup org
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    # setup mocks
+    businesses_details = [{
+        'adminFreeze': False,
+        'goodStanding': True,
+        'identifier': data[0],
+        'legalName': 'KIALS BUSINESS NAME CORP.',
+        'legalType': data[1],
+        'state': 'ACTIVE',
+        'taxId': '123'
+    } for data in businesses]
+
+    drafts_details = [{
+        'identifier': data[0],
+        'legalType': data[1],
+    } for data in drafts]
+
+    drafts_with_nr_details = [{
+        'identifier': data[0],
+        'legalType': data[1],
+        'nrNumber': data[2]
+    } for data in drafts_with_nrs]
+
+    nrs_details = [{
+        'actions': [],
+        'applicants': {
+            'emailAddress': '1@1.com',
+            'phoneNumber': '1234567890',
+        },
+        'names': [{
+            'name': f'TEST INC. {nr}',
+            'state': 'APPROVED'
+        }],
+        'stateCd': 'APPROVED',
+        'requestTypeCd': 'BC',
+        'request_action_cd': nr[1],
+        'nrNum': nr
+    } for nr in nrs]
+
+    # Add dates to nrs_details
+    for i, date in enumerate(dates):
+        if i < len(nrs_details):
+            nrs_details[i]['created'] = date.isoformat()
+
+    entities_response = {
+        'businessEntities': businesses_details,
+        'draftEntities': drafts_details + drafts_with_nr_details
+    }
+
+    nrs_response = nrs_details
+
+    # mock function that calls namex / lear
+    mocker.patch('auth_api.services.rest_service.RestService.call_posts_in_parallel',
+                 return_value=[entities_response, nrs_response])
+    mocker.patch('auth_api.services.rest_service.RestService.get_service_account_token',
+                 return_value='token')
+
+    rv = client.get('/api/v1/orgs/{}/affiliations?new=true'.format(org_id),
+                    headers=headers,
+                    content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('entities', None) and isinstance(rv.json['entities'], list)
+    assert len(rv.json['entities']) == len(businesses) + len(drafts) + len(nrs)
+
+    drafts_nr_numbers = [data[2] for data in drafts_with_nrs]
+    for entity in rv.json['entities']:
+        if entity['legalType'] == CorpType.NR.value:
+            assert entity['nameRequest']['nrNum'] not in drafts_nr_numbers
+
+        if draft_type := entity.get('draftType', None):
+            expected = CorpType.RTMP.value if entity['legalType'] in [
+                CorpType.SP.value, CorpType.GP.value] else CorpType.TMP.value
+            if entity.get('nameRequest', {}).get('requestActionCd') == NRActionCodes.AMALGAMATE.value:
+                expected = CorpType.ATMP.value
+
+            assert draft_type == expected
+
+    # Assert that the entities are sorted in descending order of creation dates
+    if test_name == 'affiliations_order' and len(dates) > 0:
+        created_order = [affiliation['nameRequest'].get('created') for affiliation in rv.json['entities']]
+        dates.sort()
+        date_iso = [date.isoformat() for date in dates]
+        assert date_iso == created_order
+
+
+def _create_orgs_entities_and_affiliations(client, jwt, count):
+    created_orgs = []
+    for i in range(0, count):
+        headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+        client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
+                    headers=headers, content_type='application/json')
+
+        headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+        client.post('/api/v1/users', headers=headers, content_type='application/json')
+        new_org = TestOrgInfo.org_details.copy()
+        new_org['name'] = new_org['name'] + ' ' + str(i)
+        new_org['branchName'] = 'branch-for-' + new_org['name']
+        rv = client.post('/api/v1/orgs', data=json.dumps(new_org),
+                         headers=headers, content_type='application/json')
+        dictionary = json.loads(rv.data)
+        org_id = dictionary['id']
+        new_org['id'] = org_id
+        created_orgs.append(new_org)
+
+        client.post('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers,
+                    data=json.dumps(TestAffliationInfo.affiliation3), content_type='application/json')
+
+    return created_orgs
+
+
+@pytest.mark.parametrize('expected_http_status, entries_count',
+                         [
+                             (http_status.HTTP_200_OK, 1),
+                             (http_status.HTTP_200_OK, 3),
+                             (http_status.HTTP_200_OK, 0),
+                         ],
+                         ids=[
+                             'Assert that fetching orgs filtered by business identifier works, single entry.',
+                             'Assert that fetching orgs filtered by business identifier works, multiple entries.',
+                             'Assert that fetching orgs filtered by business identifier works, no entry',
+                         ]
+                         )
+def test_get_orgs_by_affiliation(client, jwt, session, keycloak_mock,
+                                 expected_http_status, entries_count):
+    """Assert that api call returns affiliated orgs."""
+    created_orgs = _create_orgs_entities_and_affiliations(client, jwt, entries_count)
+
+    # Create a system token
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.get('/api/v1/orgs/affiliation/{}'.format(TestAffliationInfo.affiliation3.get('businessIdentifier')),
+                    headers=headers, content_type='application/json')
+
+    response = json.loads(rv.data)
+
+    assert rv.status_code == expected_http_status
+    assert schema_utils.validate(rv.json, 'orgs_response')[1]
+    assert len(response.get('orgsDetails')) == entries_count
+    orgs_details = response.get('orgsDetails')
+
+    for co in created_orgs:
+        names = [od['name'] for od in orgs_details]
+        branches = [od['branchName'] for od in orgs_details]
+        assert co['name'] in names
+        assert co['branchName'] in branches
+
+    for od in orgs_details:
+        assert 'name' in od
+        assert 'branchName' in od
+        assert 'uuid' in od
+        assert 'id' not in od
+
+
+def test_get_orgs_by_affiliation_filtering_out_staff_orgs(app, client, jwt, session, keycloak_mock):
+    """Assert that fetching orgs by affiliation do not return staff orgs."""
+    orig_val_max_number_of_orgs = app.config.get('MAX_NUMBER_OF_ORGS')
+    app.config.update(MAX_NUMBER_OF_ORGS=10)
+    create_org_count = 6
+
+    created_orgs = _create_orgs_entities_and_affiliations(client, jwt, create_org_count)
+    app.config.update(MAX_NUMBER_OF_ORGS=orig_val_max_number_of_orgs)
+
+    org3 = created_orgs[2]
+    org5 = created_orgs[4]
+
+    convert_org_to_staff_org(org3['id'], OrgType.SBC_STAFF.value)
+    convert_org_to_staff_org(org5['id'], OrgType.STAFF.value)
+
+    staff_org_names = [org3['name'], org5['name']]
+    expected_org_count = create_org_count - len(staff_org_names)
+
+    # Create a system token
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.get('/api/v1/orgs/affiliation/{}'.format(TestAffliationInfo.affiliation3.get('businessIdentifier')),
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'orgs_response')[1]
+
+    response = json.loads(rv.data)
+
+    assert len(response.get('orgsDetails')) == expected_org_count  # without org 3 and 5
+    orgs_details = response.get('orgsDetails')
+
+    for od in orgs_details:
+        assert od['name'] not in staff_org_names

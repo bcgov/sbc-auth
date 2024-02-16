@@ -1,10 +1,13 @@
 <template>
-  <div  data-test="div-stepper-container" >
-    <p class="mb-7" >There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
-     <v-row v-display-mode>
+  <div data-test="div-stepper-container">
+    <p class="mb-7">
+      There is no cost to create a BC Registries account. You only pay for the services and products you purchase.
+    </p>
+    <v-row v-display-mode>
       <v-col
         class="d-flex align-stretch"
-        sm="12" md="6"
+        sm="12"
+        md="6"
       >
         <v-card
           class="account-card pa-8 elevation-2"
@@ -12,9 +15,9 @@
           flat
           outlined
           hover
-          @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
           data-test="div-stepper-basic"
-          :disabled="isCurrentProductsPremiumOnly"
+          :disabled="isCurrentSelectedProductsPremiumOnly"
+          @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
         >
           <div class="account-type">
             <div class="account-type__title">
@@ -34,26 +37,36 @@
           </div>
 
           <!-- State Button (Create Account) -->
-          <div class="mt-10" >
-            <v-btn large block depressed color="primary" class="font-weight-bold"
+          <div class="mt-10">
+            <v-btn
+              large
+              block
+              depressed
+              color="primary"
+              class="font-weight-bold"
               data-test="btn-stepper-basic-select"
               :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
-              @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
-              {{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT'}}
+              @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
+            >
+              {{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT' }}
             </v-btn>
           </div>
-
         </v-card>
       </v-col>
       <v-col
         class="d-flex align-stretch"
-        sm="12" md="6"
+        sm="12"
+        md="6"
       >
         <v-badge color>
-          <span slot="badge" data-test="badge-account-premium" v-if="isCurrentProductsPremiumOnly">
+          <span
+            v-if="isCurrentSelectedProductsPremiumOnly"
+            slot="badge"
+            data-test="badge-account-premium"
+          >
             <v-chip
-            class="premium-badge-chip"
-            label
+              class="premium-badge-chip"
+              label
             >
               <span>A Premium Account type is required based on the services you have selected.</span>
             </v-chip>
@@ -64,8 +77,8 @@
             flat
             outlined
             hover
-            @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
             data-test="div-stepper-premium"
+            @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
           >
             <div class="account-type">
               <div class="account-type__title">
@@ -80,27 +93,41 @@
               <ul class="account-type__details">
                 <li>Unlimited transactions</li>
                 <li>Unlimited team members</li>
-                <li>Pay by pre-authorized debit or <a href="https://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">BC Online deposit account</a></li>
+                <li>
+                  Pay by pre-authorized debit or
+                  <span v-if="enableCreditCardPremium">
+                    credit card or
+                  </span> <a
+                    href="https://www.bconline.gov.bc.ca/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >BC Online deposit account</a>
+                </li>
                 <li>Financial Statements</li>
               </ul>
             </div>
 
             <!-- State Button (Create Account) -->
-            <div class="mt-10" >
-              <v-btn large block depressed color="primary" class="font-weight-bold"
-              data-test="btn-stepper-premium-select"
-              :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
-              @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
-                  {{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT' }}
+            <div class="mt-10">
+              <v-btn
+                large
+                block
+                depressed
+                color="primary"
+                class="font-weight-bold"
+                data-test="btn-stepper-premium-select"
+                :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
+                @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
+              >
+                {{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT' }}
               </v-btn>
             </div>
-
           </v-card>
         </v-badge>
       </v-col>
     </v-row>
 
-    <v-divider class="mt-4 mb-10"></v-divider>
+    <v-divider class="mt-4 mb-10" />
 
     <v-row>
       <v-col
@@ -108,45 +135,55 @@
         class="form__btns py-0"
       >
         <v-btn
-        large
-        depressed
-        color="default"
-        @click="goBack"
-        data-test="btn-back">
-          <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
+          large
+          depressed
+          color="default"
+          data-test="btn-back"
+          @click="goBack"
+        >
+          <v-icon
+            left
+            class="mr-2 ml-n2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
-        <v-btn large
-        color="primary"
-        class="mr-3"
-        @click="goNext"
-        :disabled='!canContinue'
-        data-test="btn-stepper-next">
+        <v-spacer />
+        <v-btn
+          large
+          color="primary"
+          class="mr-3"
+          :disabled="!canContinue"
+          data-test="btn-stepper-next"
+          @click="goNext"
+        >
           <span>Next</span>
-          <v-icon class="ml-2">mdi-arrow-right</v-icon>
+          <v-icon class="ml-2">
+            mdi-arrow-right
+          </v-icon>
         </v-btn>
         <ConfirmCancelButton
           :showConfirmPopup="false"
           :target-route="cancelUrl"
-        ></ConfirmCancelButton>
+        />
       </v-col>
     </v-row>
   </div>
 </template>
 
 <script lang="ts">
-
-import { AccessType, Account, LoginSource, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, LDFlags, LoginSource, SessionStorageKeys } from '@/util/constants'
+import { Action, State } from 'pinia-class'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { namespace } from 'vuex-class'
-const OrgModule = namespace('org')
-const UserModule = namespace('user')
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
   @Component({
     components: {
@@ -158,45 +195,32 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   private selectedAccountType = ''
   @Prop() cancelUrl: string
 
-  @OrgModule.State('isCurrentSelectedProductsPremiumOnly') private isCurrentProductsPremiumOnly!: boolean
+  @State(useOrgStore) private isCurrentSelectedProductsPremiumOnly!: boolean
+  @State(useOrgStore) private currentOrganization!: Organization
+  @State(useOrgStore) private currentOrganizationType!: string
+  @State(useOrgStore) private resetAccountTypeOnSetupAccount!: string
 
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
+  @State(useUserStore) currentUser!: KCUserProfile
 
-  @OrgModule.State('currentOrganizationType') private currentOrganizationType!: string
-  @OrgModule.State('resetAccountTypeOnSetupAccount') private resetAccountTypeOnSetupAccount!: string
-
-  @UserModule.State('currentUser') private currentUser!: KCUserProfile
-
-  @OrgModule.Mutation('setSelectedAccountType') private setSelectedAccountType!: (selectedAccountType: Account) => void
-  @OrgModule.Mutation('setCurrentOrganization') private setCurrentOrganization!: (organization: Organization) => void
-  @OrgModule.Mutation('setCurrentOrganizationType') private setCurrentOrganizationType!: (orgType: string) => void
-  @OrgModule.Mutation('resetCurrentOrganisation') private resetCurrentOrganisation!: () => void
-  @OrgModule.Mutation('setAccessType') private setAccessType!: (accessType: string) => void
-  @OrgModule.Mutation('setResetAccountTypeOnSetupAccount') private setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
+  @Action(useOrgStore) setSelectedAccountType!: (selectedAccountType: Account) => void
+  @Action(useOrgStore) setCurrentOrganization!: (organization: Organization) => void
+  @Action(useOrgStore) setCurrentOrganizationType!: (orgType: string) => void
+  @Action(useOrgStore) resetCurrentOrganisation!: () => void
+  @Action(useOrgStore) setAccessType!: (accessType: string) => void
+  @Action(useOrgStore) setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
 
   private async mounted () {
     // first time to the page , start afresh..this is Create New account flow
-    if (!this.currentOrganization) {
-      this.setCurrentOrganization({ name: '' })
-    } else {
-      // need to set org type if its re-upload bceid flow
-      this.selectAccountType(this.currentOrganization.orgType)
-    }
-    // when some one goes back into product page and come, this will be true and selectedAccountType as undefined.
-    if (!this.currentOrganization && this.resetAccountTypeOnSetupAccount) {
-      this.selectAccountType(undefined)
-      this.setResetAccountTypeOnSetupAccount(false) // reset back flag for coming back
-    }
+    this.setCurrentOrganization({ name: '' })
 
     // first time stepper hits step 2 after selecting a premium product/service in step 1
-    if (!this.currentOrganizationType && this.isCurrentProductsPremiumOnly) {
+    if (!this.currentOrganizationType && this.isCurrentSelectedProductsPremiumOnly) {
       this.selectAccountType(this.ACCOUNT_TYPE.PREMIUM)
     } else {
       // come back to step 2 or after selecting basic products/services in step 1
       this.selectedAccountType = (this.currentOrganizationType === this.ACCOUNT_TYPE.UNLINKED_PREMIUM)
         ? this.ACCOUNT_TYPE.PREMIUM : this.currentOrganizationType
     }
-
     this.setAccessType(this.getOrgAccessType())
     const accessType = this.getOrgAccessType()
     this.setCurrentOrganization({ ...this.currentOrganization, ...{ accessType: accessType } })
@@ -239,6 +263,10 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   private cancel () {
     this.$router.push({ path: '/home' })
   }
+
+  get enableCreditCardPremium () {
+    return LaunchDarklyService.getFlag(LDFlags.EnableCreditCardPremium, false)
+  }
 }
 </script>
 
@@ -261,7 +289,10 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   }
 
   &.active {
-    box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
+    box-shadow: 0 0 0 2px inset var(--v-primary-base),
+                0 3px 1px -2px rgba(0,0,0,.2),
+                0 2px 2px 0 rgba(0,0,0,.14),
+                0 1px 5px 0 rgba(0,0,0,.12) !important;
   }
 }
 

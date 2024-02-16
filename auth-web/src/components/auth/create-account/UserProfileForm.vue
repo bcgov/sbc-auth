@@ -1,182 +1,235 @@
 <template>
-  <v-form ref="form" lazy-validation data-test="form-profile">
-    <p class="mb-9" v-if="isStepperView">Enter your contact information. Once your account is created, you may add additional users and assign roles.</p>
-    <p class="mb-7" v-if="isAffidavitUpload">
+  <v-form
+    ref="form"
+    lazy-validation
+    data-test="form-profile"
+  >
+    <p
+      v-if="isStepperView"
+      class="mb-9"
+    >
+      Enter your contact information. Once your account is created, you may add additional users and assign roles.
+    </p>
+    <p
+      v-if="isAffidavitUpload"
+      class="mb-7"
+    >
       This will be reviewed by Registries staff and the account will be approved
       when authenticated.
     </p>
     <v-expand-transition>
-      <div class="form_alert-container" v-show="formError">
-        <v-alert type="error" class="mb-3"
-                 :value="true"
+      <div
+        v-show="formError"
+        class="form_alert-container"
+      >
+        <v-alert
+          type="error"
+          class="mb-3"
+          :value="true"
         >
-          {{formError}}
+          {{ formError }}
         </v-alert>
       </div>
     </v-expand-transition>
     <!-- First / Last Name -->
     <v-row v-if="isInEditNameMode">
-      <v-col cols="6" class="py-0">
+      <v-col
+        cols="6"
+        class="py-0"
+      >
         <v-text-field
+          v-model="firstName"
           filled
           label="First Name"
           req
           persistent-hint
           hint="Your first name as it appears on your affidavit"
           :rules="firstNameRules"
-          v-model="firstName"
           data-test="firstName"
-        >
-        </v-text-field>
+        />
       </v-col>
-      <v-col cols="6" class="py-0">
+      <v-col
+        cols="6"
+        class="py-0"
+      >
         <v-text-field
+          v-model="lastName"
           filled
           label="Last Name"
           req
           persistent-hint
           hint="Your last name as it appears on your affidavit"
           :rules="lastNameRules"
-          v-model="lastName"
           data-test="lastName"
-        >
-        </v-text-field>
+        />
       </v-col>
     </v-row>
     <v-row v-else>
-      <v-col cols="12" class="py-0 mb-4">
+      <v-col
+        cols="12"
+        class="py-0 mb-4"
+      >
         <h4
-          v-bind:class="{'legal-name': !isStepperView}"
+          :class="{'legal-name': !isStepperView}"
           class="mb-1"
-        >{{firstName}} {{lastName}}</h4>
-        <div class="mb-2" v-if="!isBCEIDUser">This is your legal name as it appears on your BC Services Card.</div>
+        >
+          {{ firstName }} {{ lastName }}
+        </h4>
+        <div
+          v-if="!isBCEIDUser"
+          class="mb-2"
+        >
+          This is your legal name as it appears on your BC Services Card.
+        </div>
       </v-col>
     </v-row>
     <!-- Email Address -->
     <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
+      <v-col
+        cols="12"
+        class="pt-0 pb-0"
+      >
         <v-text-field
+          v-model="emailAddress"
           filled
           label="Email Address"
           req
           persistent-hint
           :rules="emailRules"
-          v-model="emailAddress"
           data-test="email"
-        >
-        </v-text-field>
+        />
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
+      <v-col
+        cols="12"
+        class="pt-0 pb-0"
+      >
         <v-text-field
+          v-model="confirmedEmailAddress"
           filled
           label="Confirm Email Address"
           req
           persistent-hint
           :error-messages="emailMustMatch()"
-          v-model="confirmedEmailAddress"
           data-test="confirm-email"
-        >
-        </v-text-field>
+        />
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" md="6" class="pt-0 pb-0">
+      <v-col
+        cols="12"
+        md="6"
+        class="pt-0 pb-0"
+      >
         <v-text-field
+          v-model="phoneNumber"
+          v-mask="['(###) ###-####']"
           filled
           label="Phone Number"
           persistent-hint
           type="tel"
-          v-mask="['(###) ###-####']"
-          v-model="phoneNumber"
           hint="Example: (555) 555-5555"
           :rules="phoneRules"
           data-test="phone"
-        >
-        </v-text-field>
+        />
       </v-col>
-      <v-col cols="12" md="3" class="pt-0 pb-0">
+      <v-col
+        cols="12"
+        md="3"
+        class="pt-0 pb-0"
+      >
         <v-text-field
-          filled label="Extension"
+          v-model="extension"
+          v-mask="'#####'"
+          filled
+          label="Extension"
           persistent-hint
           :rules="extensionRules"
-          v-mask="'#####'"
-          v-model="extension"
           data-test="phone-extension"
-        >
-        </v-text-field>
+        />
       </v-col>
     </v-row>
 
-    <v-divider class="mt-7 mb-10"></v-divider>
+    <v-divider class="mt-7 mb-10" />
 
     <v-row>
-      <v-col cols="12" class="form__btns py-0 d-inline-flex">
+      <v-col
+        cols="12"
+        class="form__btns py-0 d-inline-flex"
+      >
         <!-- The deactivate profile button should be hidden for account stepper view and for admin affidavit BCeId flow -->
         <v-btn
+          v-show="editing && !isStepperView && !isAffidavitUpload"
           large
           depressed
           color="default"
           class="deactivate-btn"
-          v-show="editing && !isStepperView && !isAffidavitUpload"
-          @click="$refs.deactivateUserConfirmationDialog.open()"
           data-test="btn-profile-deactivate"
-        >Deactivate my profile</v-btn>
+          @click="$refs.deactivateUserConfirmationDialog.open()"
+        >
+          Deactivate my profile
+        </v-btn>
         <!-- The reset button should be hidden in Production environment and who doesn't have tester role and for admin affidavit BCeId flow  -->
         <v-btn
+          v-show="editing && !isStepperView && isTester && !isAffidavitUpload"
           large
           depressed
           color="default"
           class="reset-btn"
-          v-show="editing && !isStepperView && isTester && !isAffidavitUpload"
-          @click="$refs.resetDialog.open()"
           data-test="btn-profile-reset"
-        >Reset</v-btn>
+          @click="$refs.resetDialog.open()"
+        >
+          Reset
+        </v-btn>
         <v-btn
+          v-if="isStepperView || isAffidavitUpload"
           large
           depressed
-          v-if="isStepperView || isAffidavitUpload"
           color="default"
-          @click="goBack"
           data-test="btn-back"
+          @click="goBack"
         >
-          <v-icon left class="mr-2">mdi-arrow-left</v-icon>
+          <v-icon
+            left
+            class="mr-2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
+          v-if="!isStepperView || isAffidavitUpload"
           large
           color="primary"
           class="save-continue-button mr-2"
-          :disabled='!isFormValid()'
-          v-if="!isStepperView || isAffidavitUpload"
-          @click="save"
+          :disabled="!isFormValid()"
           data-test="save-button"
+          @click="save"
         >
-          {{ isAffidavitUpload ? 'Submit' :  'Save' }}
+          {{ isAffidavitUpload ? 'Submit' : 'Save' }}
         </v-btn>
         <v-btn
+          v-if="isStepperView"
           large
           color="primary"
           class="save-continue-button mr-3"
-          :disabled='!isFormValid()'
-          @click="next"
-          v-if="isStepperView"
+          :disabled="!isFormValid()"
           data-test="next-button"
+          @click="next"
         >
-          <span v-if="enablePaymentMethodSelectorStep">
+          <span>
             Next
             <v-icon class="ml-2">mdi-arrow-right</v-icon>
           </span>
-          <span v-if="!enablePaymentMethodSelectorStep">Create Account</span>
         </v-btn>
         <ConfirmCancelButton
+          v-if="!isAffidavitUpload"
           :showConfirmPopup="isStepperView"
           :isEmit="true"
           @click-confirm="cancel"
-          v-if="!isAffidavitUpload"
-        ></ConfirmCancelButton>
+        />
       </v-col>
     </v-row>
 
@@ -187,15 +240,38 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:text>
-        <p class="pb-1">{{ $t('deactivateConfirmText')}} <strong>{{ $t('deactivateConfirmTextEmphasis') }}</strong></p>
+      <template #text>
+        <p class="pb-1">
+          {{ $t('deactivateConfirmText') }} <strong>{{ $t('deactivateConfirmTextEmphasis') }}</strong>
+        </p>
       </template>
-      <template v-slot:actions>
-        <v-btn large color="error" @click="deactivate()" :loading="isDeactivating" data-test="deactivate-confirm-button">Deactivate</v-btn>
-        <v-btn large color="default" :disabled="isDeactivating" @click="cancelConfirmDeactivate()" data-test="deactivate-cancel-button">Cancel</v-btn>
+      <template #actions>
+        <v-btn
+          large
+          color="error"
+          :loading="isDeactivating"
+          data-test="deactivate-confirm-button"
+          @click="deactivate()"
+        >
+          Deactivate
+        </v-btn>
+        <v-btn
+          large
+          color="default"
+          :disabled="isDeactivating"
+          data-test="deactivate-cancel-button"
+          @click="cancelConfirmDeactivate()"
+        >
+          Cancel
+        </v-btn>
       </template>
     </ModalDialog>
 
@@ -207,8 +283,13 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
     </ModalDialog>
 
@@ -220,15 +301,38 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:text>
-        <p class="pb-1">{{ $t('resetConfirmText')}} <strong>{{ $t('resetConfirmTextEmphasis') }}</strong></p>
+      <template #text>
+        <p class="pb-1">
+          {{ $t('resetConfirmText') }} <strong>{{ $t('resetConfirmTextEmphasis') }}</strong>
+        </p>
       </template>
-      <template v-slot:actions>
-        <v-btn large color="error" @click="reset()" :loading="isReseting" data-test="reset-confirm-button">Reset</v-btn>
-        <v-btn large color="default" :disabled="isReseting" @click="cancelConfirmReset()" data-test="reset-cancel-button">Cancel</v-btn>
+      <template #actions>
+        <v-btn
+          large
+          color="error"
+          :loading="isReseting"
+          data-test="reset-confirm-button"
+          @click="reset()"
+        >
+          Reset
+        </v-btn>
+        <v-btn
+          large
+          color="default"
+          :disabled="isReseting"
+          data-test="reset-cancel-button"
+          @click="cancelConfirmReset()"
+        >
+          Cancel
+        </v-btn>
       </template>
     </ModalDialog>
 
@@ -240,25 +344,26 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
     </ModalDialog>
   </v-form>
 </template>
 
 <script lang="ts">
-
-import { AccessType, Account, LDFlags, LoginSource, Pages, Role } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
+import { AccessType, Account, LoginSource, Pages, Role } from '@/util/constants'
+import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 import { User, UserProfileData } from '@/models/user'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Contact } from '@/models/contact'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
@@ -266,6 +371,8 @@ import UserService from '@/services/user.services'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import configHelper from '@/util/config-helper'
 import { mask } from 'vue-the-mask'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -276,34 +383,33 @@ import { mask } from 'vue-the-mask'
     mask
   },
   computed: {
-    ...mapState('org', ['currentOrganization']),
-    ...mapState('user', [
+    ...mapState(useOrgStore, ['currentOrganization']),
+    ...mapState(useUserStore, [
       'userProfileData'
     ])
   },
   methods: {
-    ...mapMutations('user', ['setUserProfileData', 'setUserProfile']),
-    ...mapActions('user',
+    ...mapActions(useUserStore,
       [
         'createUserContact',
         'updateUserContact',
         'getUserProfile',
         'createAffidavit',
-        'updateUserFirstAndLastName'
+        'updateUserFirstAndLastName',
+        'setUserProfileData',
+        'setUserProfile'
       ]),
-    ...mapActions('org', ['syncMembership', 'syncOrganization'])
+    ...mapActions(useOrgStore, ['syncMembership', 'syncOrganization'])
   }
 })
 export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     @Prop({ default: false }) isAffidavitUpload: boolean
+    @Prop() token: string
     private readonly createUserContact!: (contact?: Contact) => Contact
     private readonly updateUserContact!: (contact?: Contact) => Contact
     private readonly getUserProfile!: (identifer: string) => User
     private readonly updateUserFirstAndLastName!: (user?: User) => Contact
     private readonly setUserProfileData!: (userProfile: UserProfileData | undefined) => void
-    private readonly setUserProfile!: (userProfile: User | undefined) => void
-
-    private readonly createAffidavit!: () => User
     private firstName = ''
     private lastName = ''
     private emailAddress = ''
@@ -314,15 +420,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private editing = false
     private deactivateProfileDialog = false
     private isDeactivating = false
-    @Prop() token: string
-    readonly currentOrganization!: Organization
     readonly userProfileData!: UserProfileData
-    readonly syncMembership!: (orgId: number) => Promise<Member>
-    readonly syncOrganization!: (orgId: number) => Promise<Organization>
     private readonly ACCOUNT_TYPE = Account
     private isTester: boolean = false
     private isReseting = false
-    readonly currentUser!: KCUserProfile
 
     // this prop is used for conditionally using this form in both account stepper and edit profile pages
     @Prop({ default: false }) isStepperView: boolean
@@ -331,10 +432,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     @Prop({ default: false }) clearForm: boolean
 
     $refs: {
-      deactivateUserConfirmationDialog: ModalDialog,
-      deactivateUserFailureDialog: ModalDialog,
-      resetDialog: ModalDialog,
-      resetFailureDialog: ModalDialog,
+      deactivateUserConfirmationDialog: InstanceType<typeof ModalDialog>,
+      deactivateUserFailureDialog: InstanceType<typeof ModalDialog>,
+      resetDialog: InstanceType<typeof ModalDialog>,
+      resetFailureDialog: InstanceType<typeof ModalDialog>,
       form: HTMLFormElement
     }
 
@@ -347,7 +448,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     ]
 
     private phoneRules = [
-      v => !v || (v.length === 0 || v.length === 14) || 'Phone number is invalid'
+      v => !!v || 'Phone number is required',
+      v => !v || (v.length === 14) || 'Phone number is invalid'
     ]
 
     private extensionRules = [
@@ -371,10 +473,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       return this.currentUser?.loginSource === LoginSource.BCEID
     }
 
-    private get enablePaymentMethodSelectorStep (): boolean {
-      return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
-    }
-
     private emailMustMatch (): string {
       return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
     }
@@ -392,9 +490,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       let user: any = {}
       // clear user profile data
       if (!this.clearForm) {
-        // await this.setUserProfileData(undefined)
-        // await this.setUserProfile(undefined)
-
         if (this.userProfileData) {
           user = this.userProfileData
         } else {
@@ -463,12 +558,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       }
       this.setUserProfileData(userProfile)
 
-      // if payment method selector ld flag is enabled, the navigate to next step, otherwise emit & create account
-      if (this.enablePaymentMethodSelectorStep) {
-        this.stepForward()
-      } else {
-        this.createAccount()
-      }
+      this.stepForward()
     }
 
     @Emit('final-step-action')

@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This model manages a Task item in the Auth Service."""
-from typing import List
+import datetime as dt
+import pytz
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 
+from auth_api.models.dataclass import TaskSearch
 from ..utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from .base_model import BaseModel
 from .db import db
@@ -31,6 +33,9 @@ class Task(BaseModel):
     id = Column(Integer, index=True, primary_key=True)
     name = Column(String(250), nullable=False)  # Stores name of the relationship item. For eg, an org name
     date_submitted = Column(DateTime)  # Instance when task is created
+    external_source_id = Column(String(75), nullable=True)  # Optional external system source identifier
+    is_resubmitted = Column(Boolean(), default=False,
+                            nullable=False)  # Stores whether this task is resubmitted for review
     relationship_type = Column(String(50), nullable=False)  # That is to be acted up on. For eg, an org
     relationship_id = Column(Integer, index=True, nullable=False)
     relationship_status = Column(String(100), nullable=True)  # Status of the related object. e.g, PENDING_STAFF_REVIEW
@@ -49,25 +54,39 @@ class Task(BaseModel):
     user = relationship('User', foreign_keys=[related_to], lazy='select')
 
     @classmethod
-    def fetch_tasks(cls, task_type: str, task_status: List[str],  # pylint:disable=too-many-arguments
-                    task_relationship_status: str,
-                    page: int, limit: int):
+    def fetch_tasks(cls, task_search: TaskSearch):
         """Fetch all tasks."""
         query = db.session.query(Task)
 
-        if task_type:
-            query = query.filter(Task.type == task_type)
-        if task_status:
-            query = query.filter(Task.status.in_(task_status))
-        if task_relationship_status:
-            if task_relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value:
-                query = query.filter(Task.relationship_status == task_relationship_status).order_by(
-                    Task.date_submitted.asc())
-            else:
-                query = query.filter(Task.relationship_status == task_relationship_status)
+        if task_search.name:
+            query = query.filter(Task.name.ilike(f'%{task_search.name}%'))
+        if task_search.type:
+            query = query.filter(Task.type == task_search.type)
+        if task_search.status:
+            query = query.filter(Task.status.in_(task_search.status))
+        if task_search.start_date:
+            # convert PST start_date to UTC then filter
+            start_date_utc = cls._str_to_utc_dt(task_search.start_date, False)
+            query = query.filter(Task.date_submitted >= start_date_utc)
+        if task_search.end_date:
+            # convert PST end_date to UTC then set time to end of day then filter
+            end_date_utc = cls._str_to_utc_dt(task_search.end_date, True)
+            query = query.filter(Task.date_submitted <= end_date_utc)
+        if task_search.relationship_status:
+            query = query.filter(Task.relationship_status == task_search.relationship_status)
+        if task_search.modified_by:
+            query = query.join(Task.modified_by) \
+                            .filter(text("lower(users.first_name || ' ' || users.last_name) like lower(:search_text)"))\
+                            .params(search_text=f'%{task_search.modified_by}%')
+        if task_search.relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value:
+            query = query.order_by(Task.date_submitted.asc())
+        if task_search.submitted_sort_order == 'asc':
+            query = query.order_by(Task.date_submitted.asc())
+        if task_search.submitted_sort_order == 'desc':
+            query = query.order_by(Task.date_submitted.desc())
 
         # Add pagination
-        pagination = query.paginate(per_page=limit, page=page)
+        pagination = query.paginate(per_page=task_search.limit, page=task_search.page)
         return pagination.items, pagination.total
 
     @classmethod
@@ -95,3 +114,15 @@ class Task(BaseModel):
         return db.session.query(Task).filter_by(account_id=org_id,
                                                 relationship_type=TaskRelationshipType.USER.value, status=status)\
             .first()
+
+    @classmethod
+    def _str_to_utc_dt(cls, date: str, add_time: bool):
+        """Convert ISO formatted dates into dateTime objects in UTC."""
+        time_zone = pytz.timezone('Canada/Pacific')
+        naive_dt = dt.datetime.strptime(date, '%Y-%m-%d')
+        local_dt = time_zone.localize(naive_dt, is_dst=None)
+        if add_time:
+            local_dt = dt.datetime(local_dt.year, local_dt.month, local_dt.day, 23, 59, 59)
+        utc_dt = local_dt.astimezone(pytz.utc)
+
+        return utc_dt

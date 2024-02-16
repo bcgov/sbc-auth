@@ -10,7 +10,7 @@ pytest-env
 pytest-dotenv
 pytest-mock
 requests
-flake8
+flake8==5.0.4
 flake8-blind-except
 flake8-debugger
 flake8-docstrings
@@ -22,3 +22,5 @@ pydocstyle
 FreezeGun
 lovely-pytest-docker
 Faker
+pytest-asyncio==0.21.0
+mock

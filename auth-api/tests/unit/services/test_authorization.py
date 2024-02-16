@@ -17,14 +17,15 @@ Test suite to ensure that the Authorization service routines are working as expe
 """
 
 import uuid
+from contextlib import nullcontext as does_not_raise
 
 import pytest
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import Forbidden, HTTPException
 
 from auth_api.services.authorization import Authorization, check_auth
 from auth_api.utils.enums import ProductCode
 from auth_api.utils.roles import ADMIN, STAFF, USER
-from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo
+from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestUserInfo
 from tests.utilities.factory_utils import (
     TestOrgInfo, TestOrgTypeInfo, factory_affiliation_model, factory_entity_model, factory_membership_model,
     factory_org_model, factory_product_model, factory_user_model, patch_token_info)
@@ -71,6 +72,18 @@ def test_get_user_authorizations_for_entity(session, monkeypatch):  # pylint:dis
 
     assert authorization is not None
     assert authorization.get('orgMembership', None) is None
+
+    # test with api_gw source user
+    patch_token_info({
+        'Account-Id': org.id,
+        'loginSource': 'API_GW',
+        'sub': str(user.keycloak_guid),
+        'realm_access': {
+            'roles': ['basic']
+        }}, monkeypatch)
+    authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+    assert authorization is not None
+    assert authorization.get('orgMembership', None) == membership.membership_type_code
 
 
 def test_get_user_authorizations_for_org(session, monkeypatch):  # pylint:disable=unused-argument
@@ -221,6 +234,221 @@ def test_check_auth(session, monkeypatch):  # pylint:disable=unused-argument
                              monkeypatch)
             check_auth(equals_role=USER, org_id=org.id)
             assert excinfo.exception.code == 403
+
+
+@pytest.mark.parametrize(
+    'test_desc,test_expect,additional_kwargs,add_org_id',
+    [
+        ('Test 403 when no role checks provided in kwargs.', pytest.raises(Forbidden), {}, False),
+        ('Test 403 when STAFF in disabled_roles.', pytest.raises(Forbidden), {'disabled_roles': {'STAFF'}}, False),
+        ('Test OK when STAFF not in disabled_roles.', does_not_raise(), {'disabled_roles': {None}}, False),
+        ('Test OK when STAFF in one_of_roles.', does_not_raise(), {'one_of_roles': {'STAFF'}}, False),
+        ('Test OK when STAFF IS equals_role.', does_not_raise(), {'equals_role': 'STAFF'}, False),
+        (
+            'Test UnboundLocalError when system_required set to true -- auth variable not set.',
+            pytest.raises(UnboundLocalError),
+            {'equals_role': 'STAFF', 'system_required': True},
+            False
+        ),
+        (
+            'Test 403 when system_required set to true and correct OrgId provided, but not correct membership type.',
+            pytest.raises(Forbidden),
+            {'equals_role': 'STAFF', 'system_required': True},
+            True
+        ),
+        (
+            'Test OK when system_required set to true, it is STAFF and correct OrgId and membership provided.',
+            does_not_raise(),
+            {'equals_role': 'ADMIN', 'system_required': True},
+            True
+        ),
+    ])
+def test_check_auth_staff_path(session, monkeypatch, test_desc, test_expect, additional_kwargs, add_org_id):
+    """Assert and document scenarios for check_auth when STAFF path is concerned."""
+    jwt_claims = TestJwtClaims.staff_role
+
+    if add_org_id:
+        user = factory_user_model(TestUserInfo.user_test)
+        jwt_claims['sub'] = str(user.keycloak_guid)
+        jwt_claims['idp_userid'] = user.idp_userid
+        org = factory_org_model()
+        factory_membership_model(user.id, org.id)
+        additional_kwargs['org_id'] = org.id
+
+    patch_token_info(jwt_claims, monkeypatch)
+    with test_expect:
+        check_auth(**additional_kwargs)
+
+
+@pytest.mark.parametrize(
+    'test_desc,test_expect,additional_kwargs,is_org_member,is_entity_affiliated,product_code_in_jwt',
+    [
+        (
+            'Test UnboundLocalError when no role checks provided in kwargs, and no org_id or business_identifier.',
+            pytest.raises(UnboundLocalError), {}, False, False, ProductCode.BUSINESS.value
+        ),
+        (
+            'Test OK when no role checks provided in kwargs, but has ALL product in jwt. (bypass all checks).',
+            does_not_raise(), {}, False, False, 'ALL'
+        ),
+        (
+            'Test OK when business identifier for affiliated entity and member of org.',
+            does_not_raise(), {}, True, True, ProductCode.BUSINESS.value
+        ),
+        (
+            'Test OK when business identifier for affiliated entity provided.',
+            does_not_raise(), {}, False, True, ProductCode.BUSINESS.value
+        ),
+        (
+            'Test OK when member of the org.',
+            does_not_raise(), {}, True, False, ProductCode.BUSINESS.value
+        ),
+        (
+            'Test OK when business identifier provided, not affiliated...',
+            does_not_raise(), {'business_identifier': 'SOME_NOT_AFFILIATED'}, False, False, ProductCode.BUSINESS.value
+        ),
+        (
+            'Test OK when org_id provided, not member...',
+            does_not_raise(), {'org_id': 123}, False, False, ProductCode.BUSINESS.value
+        ),
+        (
+            'Test OK when org_id provided, not member, and not affiliated business_identifier...',
+            does_not_raise(), {'org_id': 123, 'business_identifier': 'SOME_NOT_AFFILIATED'},
+            False, False, ProductCode.BUSINESS.value
+        ),
+    ]
+)
+def test_check_auth_system_path(session, monkeypatch, test_desc, test_expect, additional_kwargs,
+                                is_org_member, is_entity_affiliated, product_code_in_jwt):
+    """Assert and document scenarios for check_auth when calls are made by SYSTEM ROLE."""
+    jwt_claims = TestJwtClaims.system_role
+    user = factory_user_model()
+    jwt_claims['sub'] = str(user.keycloak_guid)
+    org1 = factory_org_model(org_info=TestOrgInfo.org1)
+    org3 = factory_org_model(org_info=TestOrgInfo.org4)
+    entity1 = factory_entity_model(entity_info=TestEntityInfo.entity1)
+    entity2 = factory_entity_model(entity_info=TestEntityInfo.entity2)
+    factory_affiliation_model(entity2.id, org3.id)
+
+    if is_org_member and is_entity_affiliated:
+        factory_membership_model(user.id, org1.id)
+        factory_product_model(org1.id, product_code=ProductCode.BUSINESS.value)
+        factory_affiliation_model(entity1.id, org1.id)
+        additional_kwargs['org_id'] = org1.id
+        additional_kwargs['business_identifier'] = entity1.business_identifier
+
+    elif is_org_member:
+        factory_membership_model(user.id, org1.id)
+        factory_product_model(org1.id, product_code=ProductCode.BUSINESS.value)
+        additional_kwargs['org_id'] = org1.id
+
+    elif is_entity_affiliated:
+        factory_membership_model(user.id, org1.id)
+        factory_product_model(org1.id, product_code=ProductCode.BUSINESS.value)
+        factory_affiliation_model(entity1.id, org1.id)
+        additional_kwargs['business_identifier'] = entity1.business_identifier
+
+    jwt_claims['product_code'] = product_code_in_jwt
+
+    patch_token_info(jwt_claims, monkeypatch)
+    with test_expect:
+        check_auth(**additional_kwargs)
+
+
+@pytest.mark.parametrize(
+    'test_desc,test_expect,additional_kwargs,is_org_member,is_entity_affiliated',
+    [
+        (
+            'Test UnboundLocalError when no role checks provided in kwargs.',
+            pytest.raises(UnboundLocalError), {}, False, False
+        ),
+        (
+            'Test 403 when org member, but no role checks provided in kwargs.',
+            pytest.raises(Forbidden), {}, True, False
+        ),
+        (
+            'Test 403 when entity affiliated, but no role checks provided in kwargs.',
+            pytest.raises(Forbidden), {}, False, True
+        ),
+        (
+            'Test OK when org member ADMIN and checked for ADMIN role.',
+            does_not_raise(), {'equals_role': 'ADMIN'}, True, False
+        ),
+        (
+            'Test OK when affiliated entity and checked for ADMIN role.',
+            does_not_raise(), {'equals_role': 'ADMIN'}, False, True
+        ),
+        (
+            'Test OK when org member ADMIN and checked for ADMIN role.',
+            does_not_raise(), {'one_of_roles': {'ADMIN'}}, True, False
+        ),
+        (
+            'Test OK when affiliated entity and checked for ADMIN role.',
+            does_not_raise(), {'one_of_roles': {'ADMIN'}}, False, True
+        ),
+        (
+            'Test OK when org member ADMIN and checked for ADMIN role.',
+            does_not_raise(), {'one_of_roles': {'ADMIN'}}, True, False
+        ),
+        (
+            'Test OK when affiliated entity and checked for ADMIN role.',
+            does_not_raise(), {'one_of_roles': {'ADMIN'}}, False, True
+        ),
+        (
+            'Test OK when org member ADMIN and checked for ADMIN role.',
+            does_not_raise(), {'disabled_roles': {'STAFF'}}, True, False
+        ),
+        (
+            'Test OK when affiliated entity and checked for ADMIN role.',
+            does_not_raise(), {'disabled_roles': {'STAFF'}}, False, True
+        ),
+        (
+            'Test 403 when org member ADMIN and checked for STAFF role.',
+            pytest.raises(Forbidden), {'one_of_roles': {'STAFF'}}, True, True
+        ),
+        (
+            'Test 403 when affiliated entity and disabled ADMIN role.',
+            pytest.raises(Forbidden), {'disabled_roles': {'ADMIN'}}, True, True
+        ),
+        (
+            'Test 403 when affiliated entity and disabled STAFF role.',
+            pytest.raises(Forbidden), {'equals_role': {'STAFF'}}, True, True
+        ),
+    ]
+)
+def test_check_auth_public_user_path(session, monkeypatch, test_desc, test_expect, additional_kwargs,
+                                     is_org_member, is_entity_affiliated):
+    """Assert and document scenarios for check_auth when calls are made by PUBLIC USER ROLE."""
+    jwt_claims = TestJwtClaims.public_user_role
+    user = factory_user_model(user_info=TestUserInfo.user_tester)
+    jwt_claims['sub'] = str(user.keycloak_guid)
+    org1 = factory_org_model(org_info=TestOrgInfo.org1)
+    org3 = factory_org_model(org_info=TestOrgInfo.org4)
+    entity1 = factory_entity_model(entity_info=TestEntityInfo.entity1)
+    entity2 = factory_entity_model(entity_info=TestEntityInfo.entity2)
+    factory_affiliation_model(entity2.id, org3.id)
+
+    if is_org_member and is_entity_affiliated:
+        factory_membership_model(user.id, org1.id)
+        factory_product_model(org1.id, product_code=ProductCode.BUSINESS.value)
+        factory_affiliation_model(entity1.id, org1.id)
+        additional_kwargs['org_id'] = org1.id
+        additional_kwargs['business_identifier'] = entity1.business_identifier
+
+    elif is_org_member:
+        factory_membership_model(user.id, org1.id)
+        factory_product_model(org1.id, product_code=ProductCode.BUSINESS.value)
+        additional_kwargs['org_id'] = org1.id
+
+    elif is_entity_affiliated:
+        factory_membership_model(user.id, org1.id)
+        factory_product_model(org1.id, product_code=ProductCode.BUSINESS.value)
+        factory_affiliation_model(entity1.id, org1.id)
+        additional_kwargs['business_identifier'] = entity1.business_identifier
+
+    patch_token_info(jwt_claims, monkeypatch)
+    with test_expect:
+        check_auth(**additional_kwargs)
 
 
 def test_check_auth_for_service_account_valid_with_org_id(session, monkeypatch):  # pylint:disable=unused-argument

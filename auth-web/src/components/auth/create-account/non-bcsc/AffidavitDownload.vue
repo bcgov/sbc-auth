@@ -5,24 +5,30 @@
         Getting your identity affidavit notarized
       </h1>
       <p class="mt-5 mb-3">
-        Download the identity affidavit template below and visit a Notary Public or laywer to have it notarized.
+        Download the identity affidavit template below and visit a Notary Public or lawyer to have it notarized.
       </p>
     </div>
-    <v-card flat class="pa-sm-6 pa-lg-8">
+    <v-card
+      flat
+      class="pa-sm-6 pa-lg-8"
+    >
       <p class="mb-8">
         <strong>You will need to bring:</strong>
       </p>
       <div class="mb-9">
         <ol>
           <li>One piece of government-issued photo identification</li>
-          <li>Bring a printed copy of the BC Registries and Online Services affidavit template.
+          <li>
+            Bring a printed copy of the BC Registries and Online Services affidavit template.
             You must use this template and fill out all fields.
-            Failure to do so may result in a rejection of your account request.</li>
-          <li>Payment (most notaries and laywers charge a fee for this service. Fees will vary.)</li>
+            Failure to do so may result in a rejection of your account request.
+          </li>
+          <li>Payment (most notaries and lawyers charge a fee for this service. Fees will vary.)</li>
         </ol>
       </div>
       <p class="mb-10">
-        Once you have your affidavit notarized, return to this website and continue to the next step. <span class="lb">You will upload your affidavit later in the account creation process.</span>
+        Once you have your affidavit notarized, return to this website and continue to the next step.
+        <span class="lb">You will upload your affidavit later in the account creation process.</span>
       </p>
       <div class="d-inline-flex flex-column pb-2">
         <v-btn
@@ -44,23 +50,26 @@
           <div>
             <strong>Download Identity Affidavit</strong>
             <div class="file-size mb-1">
-              PDF <span v-once v-if="affidavitSize">({{affidavitSize}})</span>
+              PDF <span
+                v-if="affidavitSize"
+                v-once
+              >({{ affidavitSize }})</span>
             </div>
           </div>
         </v-btn>
         <v-alert
+          v-if="isDownloadFailed"
           dense
           text
           type="error"
           height="42"
           class="mt-3"
-          v-if="isDownloadFailed"
         >
-          {{downloadFailedMsg}}
+          {{ downloadFailedMsg }}
         </v-alert>
       </div>
     </v-card>
-    <v-divider class="my-9"></v-divider>
+    <v-divider class="my-9" />
     <div class="d-flex">
       <v-btn
         large
@@ -74,7 +83,7 @@
         </v-icon>
         Back
       </v-btn>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <template v-if="isAuthenticated">
         <v-btn
           large
@@ -120,6 +129,7 @@ import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import DocumentService from '@/services/document.services'
+// Will be removing these two lines with Vue 3 upgrade.
 import { getModule } from 'vuex-module-decorators'
 import { mapGetters } from 'vuex'
 

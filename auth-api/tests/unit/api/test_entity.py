@@ -19,6 +19,7 @@ Test-Suite to ensure that the /entities endpoint is working as expected.
 
 import copy
 import json
+import pytest
 from unittest.mock import patch
 
 from auth_api import status as http_status
@@ -28,8 +29,8 @@ from auth_api.schemas import utils as schema_utils
 from auth_api.services import Entity as EntityService
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims
 from tests.utilities.factory_utils import (
-    factory_affiliation_model, factory_auth_header, factory_entity_model, factory_membership_model, factory_org_model,
-    factory_user_model)
+    factory_affiliation_model, factory_affiliation_model_by_identifier, factory_auth_header, factory_entity_model,
+    factory_membership_model, factory_org_model, factory_user_model)
 
 
 def test_add_entity(client, jwt, session):  # pylint:disable=unused-argument
@@ -39,6 +40,35 @@ def test_add_entity(client, jwt, session):  # pylint:disable=unused-argument
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv.json, 'business')[0]
+
+
+@pytest.mark.parametrize(
+    'test_name, legal_type', [
+        ('BC Limited Company', 'BC'),
+        ('BC Community Contribution Company', 'CC'),
+        ('BC Unlimited Liability Company', 'ULC')
+    ])
+def test_temp_business_with_subtype(client, jwt, session, test_name, legal_type):  # pylint:disable=unused-argument
+    """Assert that a temp business with subtype can be POSTed and retrieved."""
+    temp_business_json = {
+        'businessIdentifier': 'QWERTYUIO',
+        'name': 'NR 1234567',
+        'corpTypeCode': 'TMP',
+        'corpSubTypeCode': legal_type
+    }
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.post('/api/v1/entities', data=json.dumps(temp_business_json),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'business')[0]
+
+    entity_rv = client.get('/api/v1/entities/{}'.format(temp_business_json['businessIdentifier']),
+                           headers=headers, content_type='application/json')
+
+    assert entity_rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(entity_rv.json, 'business')[0]
+    dictionary = json.loads(entity_rv.data)
+    assert dictionary['corpSubType']['code'] == legal_type
 
 
 def test_add_entity_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
@@ -232,13 +262,14 @@ def test_update_entity_success(client, jwt, session):  # pylint:disable=unused-a
 
     # test business id alone can be updated
     rv = client.patch('/api/v1/entities/{}'.format(TestEntityInfo.entity2['businessIdentifier']),
-                      data=json.dumps({'businessIdentifier': 'CPNEW123'}),
+                      data=json.dumps({'businessIdentifier': 'CPNEW123', 'folioNumber': '123'}),
                       headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'business')[0]
 
     dictionary = json.loads(rv.data)
     assert dictionary['businessIdentifier'] == 'CPNEW123'
+    assert dictionary['folioNumber'] == '123'
 
 
 def test_update_entity_with_folio_number(client, jwt, session):  # pylint:disable=unused-argument
@@ -255,6 +286,21 @@ def test_update_entity_with_folio_number(client, jwt, session):  # pylint:disabl
     rv = client.patch('/api/v1/entities/{}'.format(TestEntityInfo.entity1['businessIdentifier']),
                       data=json.dumps(TestEntityInfo.entity_folio_number),
                       headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_403_FORBIDDEN
+
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    factory_affiliation_model_by_identifier(TestEntityInfo.entity1['businessIdentifier'], org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims['sub'] = str(user.keycloak_guid)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.patch('/api/v1/entities/{}'.format(TestEntityInfo.entity1['businessIdentifier']),
+                      data=json.dumps(TestEntityInfo.entity_folio_number),
+                      headers=headers, content_type='application/json')
+
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'business')[0]
     dictionary = json.loads(rv.data)
@@ -420,3 +466,42 @@ def test_reset_passcode_success(client, jwt, session, stan_server):  # pylint:di
 
     assert dictionary['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
     assert dictionary['passCodeClaimed'] is False
+
+
+def test_get_entity_contacts(client, jwt, session):
+    """Assert that an entity contacts can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv_create = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+                            headers=headers, content_type='application/json')
+    assert rv_create.status_code == http_status.HTTP_201_CREATED
+    client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
+                headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.get(f'/api/v1/entities/{TestEntityInfo.entity1["businessIdentifier"]}/contacts',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    data = json.loads(rv.data)
+    assert data['email'] != TestContactInfo.contact1['email']
+    assert data['email'] == 'fo*@ba*****'
+    assert 'phone' not in data
+    assert 'phone_extension' not in data
+
+
+def test_get_entity_authentication(client, jwt, session):
+    """Assert that an entity authentication can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv_create = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+                            headers=headers, content_type='application/json')
+    assert rv_create.status_code == http_status.HTTP_201_CREATED
+    client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
+                headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.get(f'/api/v1/entities/{TestEntityInfo.entity1["businessIdentifier"]}/authentication',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    data = json.loads(rv.data)
+    assert data['contactEmail'] != TestContactInfo.contact1['email']
+    assert data['contactEmail'] == 'fo*@ba*****'
+    assert 'hasValidPassCode' in data

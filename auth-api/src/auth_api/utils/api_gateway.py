@@ -308,6 +308,17 @@ def generate_client_representation(account_id: int, client_id_pattern: str, env:
                     'claim.name': 'Account-Id',
                     'jsonType.label': 'String'
                 }
+            },
+            {
+                'name': 'aud-business-search-services-mapper',
+                'protocol': 'openid-connect',
+                'protocolMapper': 'oidc-audience-mapper',
+                'consentRequired': False,
+                'config': {
+                    'included.client.audience': 'business-search-service',
+                    'id.token.claim': 'false',
+                    'access.token.claim': 'true'
+                }
             }
         ],
         'defaultClientScopes': [

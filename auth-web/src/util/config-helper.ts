@@ -1,18 +1,13 @@
-import { Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { Account, LDFlags, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 
-import Axios from 'axios'
 import CommonUtils from './common-util'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { NameRequest } from '@/models/business'
-
-/**
- * the configs are used since process.env doesnt play well when we hae only one build config and multiple deployments..so going for this
- */
-const url = `${process.env.VUE_APP_PATH}config/configuration.json`
 
 export default class ConfigHelper {
   static async fetchConfig () {
-    const response = await Axios.get(url)
-    sessionStorage.setItem(SessionStorageKeys.ApiConfigKey, JSON.stringify(response.data))
+    // fas-ui needs the following keys
+    sessionStorage.setItem(SessionStorageKeys.PayApiUrl, ConfigHelper.getPayAPIURL())
     // sbc common components need the following keys
     sessionStorage.setItem(SessionStorageKeys.AuthApiUrl, ConfigHelper.getAuthAPIUrl())
     sessionStorage.setItem(SessionStorageKeys.StatusApiUrl, ConfigHelper.getStatusAPIUrl())
@@ -40,15 +35,15 @@ export default class ConfigHelper {
 
   static getBusinessURL () {
     // this needs trailing slash
-    return `${window.location.origin}/business/`
+    return `${import.meta.env.VUE_APP_DASHBOARD_URL}`
   }
 
   static getRegistryHomeURL () {
-    return `${ConfigHelper.getValue('REGISTRY_HOME_URL')}`
+    return `${import.meta.env.VUE_APP_REGISTRY_HOME_URL}`
   }
 
   static getBcrosDashboardURL () {
-    return `${ConfigHelper.getValue('REGISTRY_HOME_URL')}dashboard`
+    return `${import.meta.env.VUE_APP_REGISTRY_HOME_URL}dashboard`
   }
 
   static getBcrosURL () {
@@ -57,101 +52,164 @@ export default class ConfigHelper {
 
   static getSelfURL () {
     // this is without a trailing slash
-    return `${window.location.origin}${process.env.VUE_APP_PATH}`.replace(/\/$/, '') // remove the slash at the end
+    return `${window.location.origin}${import.meta.env.VUE_APP_PATH}`.replace(/\/$/, '') // remove the slash at the end
   }
 
   static getDirectorSearchURL () {
-    return ConfigHelper.getValue('DIRECTOR_SEARCH_URL')
+    return `${import.meta.env.VUE_APP_DIRECTOR_SEARCH_URL}`
   }
 
   static getNewBusinessURL () {
     // returns new business URL
-    return ConfigHelper.getValue('BUSINESS_CREATE_URL')
+    return `${import.meta.env.VUE_APP_BUSINESS_CREATE_URL}`
   }
 
   static getFileServerUrl () {
-    return ConfigHelper.getValue('FILE_SERVER_URL')
+    return `${import.meta.env.VUE_APP_FILE_SERVER_URL}`
   }
 
   static getNroUrl () {
-    return ConfigHelper.getValue('NRO_URL')
+    return `${import.meta.env.VUE_APP_NRO_URL}`
   }
 
   static getNameRequestUrl () {
-    return ConfigHelper.getValue('NAME_REQUEST_URL')
+    return `${import.meta.env.VUE_APP_NAME_REQUEST_URL}`
   }
 
   static getBceIdOsdLink () {
-    return ConfigHelper.getValue('BCEID_URL')
+    return `${import.meta.env.VUE_APP_BCEID_OSD_LINK}`
   }
 
   static getAffidavitSize () {
-    return ConfigHelper.getValue('AFFIDAVIT_FILE_SIZE')
+    return `${import.meta.env.VUE_APP_AFFIDAVIT_FILE_SIZE}`
   }
 
   static getPayAPIURL () {
-    return ConfigHelper.getValue('PAY_API_URL') + ConfigHelper.getValue('PAY_API_VERSION')
+    return `${import.meta.env.VUE_APP_PAY_API_URL}` + `${import.meta.env.VUE_APP_PAY_API_VERSION}`
   }
 
   static getPaymentPayeeName () {
-    return ConfigHelper.getValue('PAYMENT_PAYEE_NAME') || 'BC Registries and Online Services'
+    return `${import.meta.env.VUE_APP_PAYMENT_PAYEE_NAME}` || 'BC Registries and Online Services'
   }
 
   static getAuthAPIUrl () {
-    return ConfigHelper.getValue('AUTH_API_URL') + ConfigHelper.getValue('AUTH_API_VERSION')
+    return `${import.meta.env.VUE_APP_AUTH_API_URL}` + `${import.meta.env.VUE_APP_AUTH_API_VERSION}`
   }
 
   static getAuthResetAPIUrl () {
-    return ConfigHelper.getValue('AUTH_API_URL') + '/test/reset'
+    return `${import.meta.env.VUE_APP_AUTH_API_URL}` + '/test/reset'
   }
 
   static getLegalAPIUrl () {
-    return ConfigHelper.getValue('LEGAL_API_URL') + ConfigHelper.getValue('LEGAL_API_VERSION')
+    return `${import.meta.env.VUE_APP_LEGAL_API_URL}` + `${import.meta.env.VUE_APP_LEGAL_API_VERSION}`
   }
 
   static getLegalAPIV2Url () {
-    return ConfigHelper.getValue('LEGAL_API_URL') + ConfigHelper.getValue('LEGAL_API_VERSION_2')
+    return `${import.meta.env.VUE_APP_LEGAL_API_URL}` + `${import.meta.env.VUE_APP_LEGAL_API_VERSION_2}`
   }
 
   static getVonAPIUrl () {
-    return ConfigHelper.getValue('VON_API_URL') + ConfigHelper.getValue('VON_API_VERSION')
+    return `${import.meta.env.VUE_APP_VON_API_URL}` + `${import.meta.env.VUE_APP_VON_API_VERSION}`
   }
 
   static getStatusAPIUrl () {
-    return ConfigHelper.getValue('STATUS_API_URL') + ConfigHelper.getValue('STATUS_API_VERSION')
+    return `${import.meta.env.VUE_APP_STATUS_API_URL}` + `${import.meta.env.VUE_APP_STATUS_API_VERSION}`
   }
 
   static getEntitySelectorUrl () {
-    return ConfigHelper.getValue('ENTITY_SELECTOR_URL')
+    return `${import.meta.env.VUE_APP_ENTITY_SELECTOR_URL}`
   }
 
   static getOneStopUrl () {
-    return ConfigHelper.getValue('ONE_STOP_URL')
+    return `${import.meta.env.VUE_APP_ONE_STOP_URL}`
   }
 
   static getCorporateOnlineUrl () {
-    return ConfigHelper.getValue('CORPORATE_ONLINE_URL')
+    return `${import.meta.env.VUE_APP_CORPORATE_ONLINE_URL}`
+  }
+
+  static getSocietiesUrl () {
+    return `${import.meta.env.VUE_APP_SOCIETIES_URL}`
+  }
+
+  static getCorpFormsUrl () {
+    return `${import.meta.env.VUE_APP_CORP_FORMS_URL}`
+  }
+
+  static getLLPFormsUrl () {
+    return `${import.meta.env.VUE_APP_LLP_FORMS_URL}`
+  }
+
+  static getLPFormsUrl () {
+    return `${import.meta.env.VUE_APP_LP_FORMS_URL}`
+  }
+
+  static getXLPFormsUrl () {
+    return `${import.meta.env.VUE_APP_XLP_FORMS_URL}`
   }
 
   static getFasWebUrl () {
-    return ConfigHelper.getValue('FAS_WEB_URL')
+    return `${import.meta.env.VUE_APP_FAS_WEB_URL}`
   }
 
   static getPPRWebUrl () {
-    return ConfigHelper.getValue('PPR_WEB_URL')
+    return `${import.meta.env.VUE_APP_PPR_WEB_URL}`
+  }
+
+  static getMhrAPIUrl () {
+    return `${import.meta.env.VUE_APP_MHR_API_URL}` + `${import.meta.env.VUE_APP_MHR_API_VERSION}`
+  }
+
+  static getMhrAPIKey () {
+    return `${import.meta.env.VUE_APP_MHR_API_KEY}`
   }
 
   static getSiteminderLogoutUrl () {
-    return ConfigHelper.getValue('SITEMINDER_LOGOUT_URL')
+    return `${import.meta.env.VUE_APP_SITEMINDER_LOGOUT_URL}`
   }
 
   static apiDocumentationUrl () {
-    return ConfigHelper.getValue('API_DOCUMENTATION_URL')
+    return `${import.meta.env.VUE_APP_API_DOCUMENTATION_URL}`
   }
 
-  static getValue (key: String) {
-    // @ts-ignore
-    return JSON.parse(sessionStorage.getItem(SessionStorageKeys.ApiConfigKey))[key]
+  static getRegistrySearchUrl () {
+    return `${import.meta.env.VUE_APP_REGISTRY_SEARCH_URL}`
+  }
+
+  static getHotjarId () {
+    return `${import.meta.env.VUE_APP_HOTJAR_ID}`
+  }
+
+  static getLdClientId () {
+    return `${import.meta.env.VUE_APP_AUTH_LD_CLIENT_ID}`
+  }
+
+  static getSentryDsn () {
+    return `${import.meta.env.VUE_APP_SENTRY_DSN}`
+  }
+
+  static getAddressCompleteKey () {
+    return `${import.meta.env.VUE_APP_ADDRESS_COMPLETE_KEY}`
+  }
+
+  static getAccountApprovalSlaInDays () {
+    return `${import.meta.env.VUE_APP_APPROVE_ACCOUNT_SLA_DAYS}` || '5'
+  }
+
+  static getKeycloakAuthUrl () {
+    return `${import.meta.env.VUE_APP_KEYCLOAK_AUTH_URL}`
+  }
+
+  static getKeycloakRealm () {
+    return `${import.meta.env.VUE_APP_KEYCLOAK_REALM}`
+  }
+
+  static getKeycloakClientId () {
+    return `${import.meta.env.VUE_APP_KEYCLOAK_CLIENTID}`
+  }
+
+  static getNotifiyAPIUrl () {
+    return `${import.meta.env.VUE_APP_NOTIFY_API_URL}` + `${import.meta.env.VUE_APP_NOTIFY_API_VERSION}`
   }
 
   static addToSession (key:string, value:any) {
@@ -171,10 +229,19 @@ export default class ConfigHelper {
   }
 
   static accountSettingsRoute () {
-    return `/account/${JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0}/settings`
+    const currentAccountJson = ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}'
+    return `/account/${JSON.parse(currentAccountJson).id || 0}/settings`
   }
 
   static paymentsAllowedPerAccountType () {
+    if (LaunchDarklyService.getFlag(LDFlags.EnableCreditCardPremium, false)) {
+      return {
+        [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
+        [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.BCOL ],
+        [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ]
+      }
+    }
+
     return {
       [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
       [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ],
@@ -187,9 +254,6 @@ export default class ConfigHelper {
     sessionStorage.setItem('BCREG-nrNum', nameRequest.nrNumber)
     sessionStorage.setItem('BCREG-emailAddress', nameRequest.applicantEmail)
     sessionStorage.setItem('BCREG-phoneNumber', nameRequest.applicantPhone)
-  }
-  static getAccountApprovalSlaInDays () {
-    return ConfigHelper.getValue('APPROVE_ACCOUNT_SLA_DAYS') || '5'
   }
 
   // Allowed redirect back to same page URUI list

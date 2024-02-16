@@ -2,12 +2,8 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 
 import AgreementInformation from '@/components/auth/staff/review-task/AgreementInformation.vue'
-
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -27,16 +23,10 @@ describe('AgreementInformation.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({
-      strict: false
-    })
 
     wrapperFactory = (propsData) => {
       return shallowMount(AgreementInformation, {
         localVue,
-        store,
         vuetify,
         propsData: {
           ...propsData
@@ -48,16 +38,17 @@ describe('AgreementInformation.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the AgreementInformation components properly ', () => {
-    expect(wrapper.find(AgreementInformation).exists()).toBe(true)
+    expect(wrapper.findComponent(AgreementInformation).exists()).toBe(true)
   })
 
   it('renders proper header content', () => {

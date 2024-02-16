@@ -55,9 +55,12 @@ class Authorization(db.Model):
             auth = cls.query.filter_by(keycloak_guid=keycloak_guid,
                                        business_identifier=business_identifier,
                                        org_id=org_id).one_or_none()
+        elif business_identifier and org_id:
+            auth = cls.query.filter_by(business_identifier=business_identifier,
+                                       org_id=org_id).first()
         elif keycloak_guid and business_identifier:
             auth = cls.query.filter_by(keycloak_guid=keycloak_guid,
-                                       business_identifier=business_identifier).one_or_none()
+                                       business_identifier=business_identifier).first()
         elif is_staff and business_identifier:
             auth = cls.query.filter_by(business_identifier=business_identifier).first()
         return auth

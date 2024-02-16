@@ -1,16 +1,39 @@
 <template>
   <v-container class="view-container mt-10">
     <v-row justify="center">
-      <v-col cols="12" sm="8" md="8" class="text-center pb-0">
-        <v-icon large color="info" class="font-weight-bold">mdi-alert-circle-outline</v-icon>
-        <h1 class="mt-2">Please Update Your Account Information</h1>
-        <p class="text-center mt-8"
-           v-html="$t('updateAccountInformation' , {'name': currentOrganization.name })" />
+      <v-col
+        cols="12"
+        sm="8"
+        md="8"
+        class="text-center pb-0"
+      >
+        <v-icon
+          large
+          color="info"
+          class="font-weight-bold"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
+        <h1 class="mt-2">
+          Please Update Your Account Information
+        </h1>
+        <p
+          v-sanitize="$t('updateAccountInformation' , {'name': currentOrganization.name })"
+          class="text-center mt-8"
+        />
       </v-col>
     </v-row>
     <v-row justify="center">
-      <v-col cols="12" sm="9" md="8" class="text-center">
-        <v-card flat class="my-4 justify-space-between pa-8">
+      <v-col
+        cols="12"
+        sm="9"
+        md="8"
+        class="text-center"
+      >
+        <v-card
+          flat
+          class="my-4 justify-space-between pa-8"
+        >
           <v-card-title>
             <h2>Account Information</h2>
           </v-card-title>
@@ -19,68 +42,84 @@
               Do you want your account: <span class="font-weight-bold">{{ currentOrganization.name }}</span> associated
               with your personal name or business name?
             </p>
-            <v-form ref="accountInformationForm" data-test="account-information-form">
-
-              <v-alert type="error" class="mb-6" v-show="errorMessage">
+            <v-form
+              ref="accountInformationForm"
+              data-test="account-information-form"
+            >
+              <v-alert
+                v-show="errorMessage"
+                type="error"
+                class="mb-6"
+              >
                 {{ errorMessage }}
               </v-alert>
 
               <v-radio-group
-                row
                 v-model="isBusinessAccount"
+                row
               >
                 <v-row justify="space-between">
-                  <v-col xs="12" md="12" class="business-radio">
+                  <v-col
+                    md="12"
+                    class="business-radio xs"
+                  >
                     <v-radio
-                      label="Individual Person Name"
                       :key="false"
+                      label="Individual Person Name"
                       :value="false"
                       data-test="radio-individual-account-type"
                       class="px-4 py-5"
-                    ></v-radio>
+                    />
                     <v-radio
-                      label="Business Name"
                       :key="true"
+                      label="Business Name"
                       :value="true"
                       data-test="radio-business-account-type"
                       class="px-4 py-5"
-                    ></v-radio>
+                    />
                   </v-col>
                 </v-row>
               </v-radio-group>
 
               <div v-if="isBusinessAccount">
                 <v-text-field
+                  v-model="currentOrganization.name"
                   filled
                   label="Account Name"
                   disabled
-                  v-model="currentOrganization.name"
-                >
-                </v-text-field>
+                />
                 <v-expand-transition class="branch-detail">
                   <v-text-field
+                    v-model.trim="branchName"
                     filled
                     label="Branch/Division (Optional)"
-                    v-model.trim="branchName"
                     data-test="input-branch-name"
                   />
                 </v-expand-transition>
                 <AccountBusinessTypePicker
                   @valid="checkOrgBusinessTypeValid"
-                  @update:org-business-type="updateOrgBusinessType">
-
-                </AccountBusinessTypePicker>
+                  @update:org-business-type="updateOrgBusinessType"
+                />
               </div>
-
             </v-form>
           </v-card-text>
-
         </v-card>
       </v-col>
     </v-row>
     <v-row justify="center">
-      <v-col cols="12" sm="8" md="6" class="text-center">
-        <v-btn large color="primary" :disabled="!canSubmit" data-test="goto-create-account-button" @click="submit()">
+      <v-col
+        cols="12"
+        sm="8"
+        md="6"
+        class="text-center"
+      >
+        <v-btn
+          large
+          color="primary"
+          :disabled="!canSubmit"
+          data-test="goto-create-account-button"
+          @click="submit()"
+        >
           Submit
         </v-btn>
       </v-col>
@@ -89,25 +128,24 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, OrgBusinessType, Organization } from '@/models/Organization'
 import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
 import { Pages } from '@/util/constants'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: { AccountBusinessTypePicker }
 })
 export default class UpdateAccountView extends Vue {
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @OrgModule.Action('updateOrg') private updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
-  private errorMessage: string = ''
-  private isBusinessAccount = null
-  private canSubmit = false
-  private branchName = ''
-  private orgBusinessType: OrgBusinessType = null
+  @State(useOrgStore) currentOrganization!: Organization
+  @Action(useOrgStore) private updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
+  errorMessage: string = ''
+  isBusinessAccount = null
+  canSubmit = false
+  branchName = ''
+  orgBusinessType: OrgBusinessType = null
 
   private async mounted () {
     this.branchName = this.currentOrganization?.branchName
@@ -118,11 +156,11 @@ export default class UpdateAccountView extends Vue {
     this.canSubmit = this.isBusinessAccount === false
   }
 
-  private checkOrgBusinessTypeValid (isValid) {
+  checkOrgBusinessTypeValid (isValid) {
     this.canSubmit = isValid ? true : this.canSubmit
   }
 
-  private async submit () {
+  async submit () {
     let createRequestBody: CreateRequestBody = {
       isBusinessAccount: this.isBusinessAccount
     }
@@ -150,7 +188,7 @@ export default class UpdateAccountView extends Vue {
     }
   }
 
-  private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
+  updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
     this.orgBusinessType = orgBusinessType
   }
 }

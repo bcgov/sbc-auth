@@ -1,5 +1,6 @@
 import { Address, BaseAddressModel } from '@/models/address'
-import { Permission } from '@/util/constants'
+import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
+import { NrRequestTypeStrings, Permission } from '@/util/constants'
 import moment from 'moment'
 
 /**
@@ -7,21 +8,20 @@ import moment from 'moment'
  */
 export default class CommonUtils {
   // checking url matches the regex
-  static isUrl (value:string):boolean {
-    const URL_MATCHER = new RegExp('^(?:\\w+:)?\\/\\/([^\\s\\.]+\\.\\S{2}|localhost[\\:?\\d]*)\\S*$')
-    return URL_MATCHER.test(value)
+  static isUrl (value:string): boolean {
+    return value?.startsWith('http')
   }
 
   // formatting incorporation number according to the length of numbers
-  static formatIncorporationNumber (incorpNum:string, isNR: boolean = false, numLength?:number):string {
+  static formatIncorporationNumber (incorpNum: string, numLength = 7):string {
     if (!incorpNum) return null
-    numLength = numLength || 7 // optional: go with '7' if nothing specified
     const numberFirstIndex = incorpNum.search(/[0-9]/i)
     if (numberFirstIndex > -1) {
       // cut,trim and replace special characters from the first part
       let businessIdentifierStr = incorpNum.substring(0, numberFirstIndex).trim()
       businessIdentifierStr = businessIdentifierStr.replace(/[^a-zA-Z]/g, '')
-      // cut, get rid of alpha and special chars, and pad '0's according to the numLength if length is less than numLength, trim to numLength if otherwise
+      // cut, get rid of alpha and special chars, and pad '0's according to the numLength
+      // if length is less than numLength, trim to numLength if otherwise
       let businessIdentifierNumbers = incorpNum.substring(numberFirstIndex)
       businessIdentifierNumbers = parseInt(businessIdentifierNumbers.replace(/[^0-9]/g, '')).toString()
       if (businessIdentifierNumbers.length && businessIdentifierNumbers.length < numLength) {
@@ -30,7 +30,7 @@ export default class CommonUtils {
         businessIdentifierNumbers = businessIdentifierNumbers.substring(0, numLength)
       }
       // join both first part and second part
-      incorpNum = (isNR) ? `${businessIdentifierStr} ${businessIdentifierNumbers}` : `${businessIdentifierStr}${businessIdentifierNumbers}`
+      incorpNum = `${businessIdentifierStr}${businessIdentifierNumbers}`
     }
     return incorpNum.toUpperCase()
   }
@@ -46,11 +46,6 @@ export default class CommonUtils {
 
   static isFirmNumber (value: string):boolean {
     return value?.toUpperCase().startsWith('FM') || false
-  }
-
-  static validateNameRequestNumber (value: string):boolean {
-    const VALID_FORMAT = new RegExp(/^(NR )?\d+$/)
-    return VALID_FORMAT.test(value?.toUpperCase())
   }
 
   static validateEmailFormat (value: string):boolean {
@@ -94,9 +89,30 @@ export default class CommonUtils {
     return VALID_PASSWORD_FORMAT.test(value)
   }
 
+  // Formatting phone number in the desired format for displaying in the template eg: (123) 456-7890
+  static toDisplayPhone (phoneNumber: string): string {
+    // Filter only numbers from the input
+    const cleaned = ('' + phoneNumber).replace(/\D/g, '')
+
+    // Check if the input is of correct length
+    const regex = /^(\d{3})(\d{3})(\d{4})$/
+    const match = regex.exec(cleaned)
+
+    if (match) {
+      return '(' + match[1] + ') ' + match[2] + '-' + match[3]
+    } else return phoneNumber
+  }
+
+  // Format amount for displaying dollar currency
+  static formatAmount (amount: number): string {
+    return `$${amount.toFixed(2)}`
+  }
+
   // Formatting date in the desired format for displaying in the template
-  static formatDisplayDate (date: Date, format?: string) {
-    return (date) ? moment(date.toLocaleString('en-US', { timeZone: 'America/Vancouver' })).format(format || 'YYYY-MM-DD') : ''
+  static formatDisplayDate (date: Date | string, format?: string) {
+    // not working in CI (getting UTC datetime)
+    return (date) ? moment(date.toLocaleString('en-US', { timeZone: 'America/Vancouver' }))
+      .format(format || 'YYYY-MM-DD') : ''
   }
 
   // Formatting date in the desired format for vue date pickers
@@ -117,8 +133,9 @@ export default class CommonUtils {
       // the URL has been freed."
       window.navigator.msSaveBlob(blob, fileName)
     } else {
-      const blobURL = (window.URL && window.URL.createObjectURL) ? window.URL.createObjectURL(blob) : window.webkitURL.createObjectURL(blob)
-      let tempLink = document.createElement('a')
+      const blobURL = window.URL?.createObjectURL
+        ? window.URL.createObjectURL(blob) : window.webkitURL.createObjectURL(blob)
+      const tempLink = document.createElement('a')
       tempLink.style.display = 'none'
       tempLink.href = blobURL
       tempLink.setAttribute('download', fileName)
@@ -151,24 +168,25 @@ export default class CommonUtils {
 
   static getAdminPermissions (): string[] {
     return [
-      Permission.REMOVE_BUSINESS,
-      Permission.VIEW_ADDRESS,
-      Permission.INVITE_MEMBERS,
+      Permission.CHANGE_ADDRESS,
+      Permission.CHANGE_ORG_NAME,
       Permission.CHANGE_ROLE,
-      Permission.VIEW_AUTH_OPTIONS,
-      Permission.RESET_PASSWORD,
-      Permission.TRANSACTION_HISTORY,
-      Permission.MANAGE_STATEMENTS,
-      Permission.VIEW_PAYMENT_METHODS,
-      Permission.VIEW_ADMIN_CONTACT,
-      Permission.RESET_OTP,
-      Permission.MAKE_PAYMENT,
-      Permission.GENERATE_INVOICE,
-      Permission.VIEW_ACTIVITYLOG,
-      Permission.VIEW_ADDRESS,
-      Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
       Permission.EDIT_REQUEST_PRODUCT_PACKAGE,
       Permission.DEACTIVATE_ACCOUNT,
+      Permission.GENERATE_INVOICE,
+      Permission.INVITE_MEMBERS,
+      Permission.MAKE_PAYMENT,
+      Permission.MANAGE_STATEMENTS,
+      Permission.REMOVE_BUSINESS,
+      Permission.RESET_OTP,
+      Permission.RESET_PASSWORD,
+      Permission.TRANSACTION_HISTORY,
+      Permission.VIEW_ACTIVITYLOG,
+      Permission.VIEW_ADDRESS,
+      Permission.VIEW_ADMIN_CONTACT,
+      Permission.VIEW_AUTH_OPTIONS,
+      Permission.VIEW_PAYMENT_METHODS,
+      Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
       Permission.VIEW_USER_LOGINSOURCE
     ]
   }
@@ -272,5 +290,26 @@ export default class CommonUtils {
   // trim last slas from URL
   static trimTrailingSlashURL (url) {
     return (url) ? url.trim().replace(/\/+$/, '') : ''
+  }
+
+  /** use NR request action code to get NR type from enum */
+  static mapRequestActionCdToNrType (requestActionCd: NrRequestActionCodes): string {
+    // Can add other NrRequestActionCodes here to use the action code instead of the NrRequestTypeCd.
+    // Must ensure that the action code does not have several potential types
+    // Example: the NEW action code can be for Incorporation or Registration, so we cannot use it for the NR type
+    if (requestActionCd === NrRequestActionCodes.AMALGAMATE) { return 'Amalgamation' }
+    return ''
+  }
+
+  /** use NR request type code to get NR type from enum */
+  static mapRequestTypeCdToNrType (requestTypeCd: NrRequestTypeCodes): string {
+    return NrRequestTypeStrings[requestTypeCd] as string
+  }
+
+  static getElementWithSmallestId<Type extends {id:number}> (arrayToSearch: Type[]): Type | undefined {
+    return arrayToSearch?.reduce(
+      (currentMin, curr) => (currentMin.id <= curr.id) ? currentMin : curr,
+      arrayToSearch.length > 0 ? arrayToSearch[0] : undefined
+    )
   }
 }

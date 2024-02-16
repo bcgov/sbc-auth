@@ -2,7 +2,9 @@
   <v-card class="support-info-card">
     <v-card-title>Need Assistance?</v-card-title>
     <v-card-text>
-      <p class="mb-0">For support or questions about this application, please contact us at:</p>
+      <p class="mb-0">
+        For support or questions about this application, please contact us at:
+      </p>
       <ul class="contact-info">
         <li class="contact-info__row">
           <span class="contact-info__type">Phone:</span>
@@ -10,7 +12,7 @@
         </li>
         <li class="contact-info__row">
           <span class="contact-info__type">Email:</span>
-          <span class="contact-info__value"><a v-bind:href="'mailto:' + $t('techSupportEmail')">{{ $t('techSupportEmail') }}</a></span>
+          <span class="contact-info__value"><a :href="'mailto:' + $t('techSupportEmail')">{{ $t('techSupportEmail') }}</a></span>
         </li>
       </ul>
     </v-card-text>

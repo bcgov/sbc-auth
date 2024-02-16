@@ -1,7 +1,8 @@
 import {
   MyBusinessRegistryBreadcrumb,
   RegistryDashboardBreadcrumb,
-  RegistryHomeBreadcrumb,
+  RegistryHomeBreadcrumb, ShortNameDetailsBreadcrumb, ShortNameMappingBreadcrumb,
+  StaffBusinessRegistryBreadcrumb,
   StaffDashboardBreadcrumb
 } from '@/resources/BreadcrumbResources'
 import { Pages, Role, SessionStorageKeys } from '@/util/constants'
@@ -21,6 +22,7 @@ import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockS
 import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
+import { Base64 } from 'js-base64'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
 import CcPaymentView from '@/views/pay/CcPaymentView.vue'
@@ -59,6 +61,8 @@ import { RouteConfig } from 'vue-router'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
 import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SetupGovmAccountView from '@/views/auth/staff/SetupGovmAccountView.vue'
+import ShortNameDetailsView from '@/views/pay/eft/ShortNameDetailsView.vue'
+import ShortNameMappingView from '@/views/pay/ShortNameMappingView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
@@ -72,6 +76,7 @@ import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import UpdateAccountView from '@/views/auth/create-account/UpdateAccountView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
+import { ViewAllTransactions } from '@/views'
 
 function mapReturnPayVars (route: any) {
   let payResponseUrl = window.location.search
@@ -120,25 +125,26 @@ function isStaff (): boolean {
 }
 
 export function getRoutes (): RouteConfig[] {
-  const accountSettings = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettings.vue')
-  const accountInfo = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/account-info/AccountInfo.vue')
-  const teamManagement = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/team-management/TeamManagement.vue')
-  const accountLoginOption = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/login-options/AccountSettingsLoginOption.vue')
-  const accountPaymentOption = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/payment/AccountPaymentMethods.vue')
-  const transaction = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/transaction/Transactions.vue')
-  const statements = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/statement/Statements.vue')
-  const productPackage = () => import(/* webpackChunkName: "product-settings" */ '../components/auth/account-settings/product/ProductPackage.vue')
-  const activityLog = () => import(/* webpackChunkName: "activity-log" */ '../components/auth/account-settings/activity-log/ActivityLog.vue')
-  const developerAccess = () => import(/* webpackChunkName: "developer-access" */ '../components/auth/account-settings/advance-settings/DeveloperAccess.vue')
+  const accountSettings = () => import('../views/auth/AccountSettings.vue')
+  const accountInfo = () => import('../components/auth/account-settings/account-info/AccountInfo.vue')
+  const teamManagement = () => import('../components/auth/account-settings/team-management/TeamManagement.vue')
+  const accountLoginOption = () =>
+    import('../components/auth/account-settings/login-options/AccountSettingsLoginOption.vue')
+  const accountPaymentOption = () => import('../components/auth/account-settings/payment/AccountPaymentMethods.vue')
+  const transaction = () => import('../components/auth/account-settings/transaction/Transactions.vue')
+  const statements = () => import('../components/auth/account-settings/statement/Statements.vue')
+  const productPackage = () => import('../components/auth/account-settings/product/ProductPackage.vue')
+  const activityLog = () => import('../components/auth/account-settings/activity-log/ActivityLog.vue')
+  const developerAccess = () => import('../components/auth/account-settings/advance-settings/DeveloperAccess.vue')
 
   const routes = [
-    { path: '/', name: 'root', redirect: 'home' },
+    { path: '/', name: 'root', redirect: 'decide-business' },
     {
-      path: '/home',
+      path: '/',
       component: HomeView,
       children: [
         {
-          path: '',
+          path: '/home',
           name: 'home',
           redirect: 'decide-business'
         },
@@ -228,12 +234,45 @@ export function getRoutes (): RouteConfig[] {
             disabledRoles: [Role.AnonymousUser],
             requiresAuth: true,
             requiresActiveAccount: true,
-            breadcrumb: [
-              ...isStaff() ? [StaffDashboardBreadcrumb] : [RegistryDashboardBreadcrumb],
-              MyBusinessRegistryBreadcrumb
-            ]
+            get breadcrumb () {
+              return isStaff()
+                ? [StaffDashboardBreadcrumb, StaffBusinessRegistryBreadcrumb]
+                : [RegistryDashboardBreadcrumb, MyBusinessRegistryBreadcrumb]
+            }
           }
-        }]
+        }
+      ]
+    },
+    {
+      path: '/:base64OrgName/affiliationInvitation/acceptToken/:base64Token',
+      name: 'account-magic-link',
+      component: EntityManagement,
+      props: route => {
+        try {
+          // The :base64Token consists of a token that is divided into three parts, separated by periods.
+          // we extract the first part of the token for decoding.
+          const base64Token = route.params.base64Token
+          const base64TokenObject = base64Token.split('.')[0]
+          const decodedToken = Base64.decode(base64TokenObject)
+          const orgId = JSON.parse(decodedToken).fromOrgId.toString()
+
+          return {
+            orgId: orgId,
+            base64Token: base64Token,
+            base64OrgName: route.params.base64OrgName
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error decoding token:', error)
+        }
+      },
+      meta: {
+        checkMagicLink: true,
+        showNavBar: true,
+        disabledRoles: [Role.AnonymousUser],
+        requiresAuth: true,
+        requiresActiveAccount: true
+      }
     },
     {
       path: '/account/:orgId/settings',
@@ -271,9 +310,7 @@ export function getRoutes (): RouteConfig[] {
           path: 'transactions',
           name: 'transactions',
           component: transaction,
-          meta: {
-            isPremiumOnly: true
-          }
+          props: { exportBtn: true, extended: false, title: 'Transactions' }
         },
         {
           path: 'statements',
@@ -329,7 +366,7 @@ export function getRoutes (): RouteConfig[] {
     },
     {
       path: '/setup-govm-account',
-      name: 'setupaccount',
+      name: 'setup-govm-account',
       component: GovmAccountSetupView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
@@ -486,22 +523,15 @@ export function getRoutes (): RouteConfig[] {
       props: true,
       meta: { requiresAuth: false } },
     {
-      path: '/signin/:idpHint/:redirectUrl',
+      path: '/signin/:idpHint/:redirectUrl(.*)',
       name: 'signin-redirect',
-      component: SigninView,
-      props: true,
-      meta: { requiresAuth: false }
-    },
-    {
-      path: '/signin/:idpHint/:redirectUrl/:redirectUrlLoginFail',
-      name: 'signin-redirect-full',
       component: SigninView,
       props: true,
       meta: { requiresAuth: false }
     },
     { path: '/signout', name: 'signout', component: SignoutView, props: true, meta: { requiresAuth: true } },
     {
-      path: '/signout/:redirectUrl',
+      path: '/signout/:redirectUrl(.*)',
       name: 'signout-redirect',
       component: SignoutView,
       props: true,
@@ -514,14 +544,14 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true }
     },
     {
-      path: '/makepayment/:paymentId/:redirectUrl',
+      path: '/makepayment/:paymentId/:redirectUrl(.*)',
       name: 'makepayment',
       component: PaymentView,
       props: true,
       meta: { requiresAuth: false }
     },
     {
-      path: '/make-cc-payment/:paymentId/transactions/:redirectUrl',
+      path: '/make-cc-payment/:paymentId/transactions/:redirectUrl(.*)',
       name: 'make-cc-payment',
       component: CcPaymentView,
       props: true,
@@ -557,7 +587,7 @@ export function getRoutes (): RouteConfig[] {
       path: Pages.ADMIN_DASHBOARD,
       component: AdminDashboardView,
       props: true,
-      meta: { requiresAuth: true, allowedRoles: [Role.AdminEdit] }
+      meta: { requiresAuth: true, allowedRoles: [Role.AdminEdit, Role.BnEdit] }
     },
     {
       path: Pages.STAFF_DASHBOARD,
@@ -575,6 +605,8 @@ export function getRoutes (): RouteConfig[] {
           name: 'active',
           component: StaffActiveAccountsTable,
           meta: {
+            requiresAuth: true,
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -589,6 +621,8 @@ export function getRoutes (): RouteConfig[] {
           name: 'invitations',
           component: StaffPendingAccountInvitationsTable,
           meta: {
+            requiresAuth: true,
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -603,6 +637,8 @@ export function getRoutes (): RouteConfig[] {
           name: 'review',
           component: StaffPendingAccountsTable,
           meta: {
+            requiresAuth: true,
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -617,6 +653,8 @@ export function getRoutes (): RouteConfig[] {
           name: 'rejected',
           component: StaffRejectedAccountsTable,
           meta: {
+            requiresAuth: true,
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -631,6 +669,8 @@ export function getRoutes (): RouteConfig[] {
           name: 'suspended',
           component: StaffSuspendedAccountsTable,
           meta: {
+            requiresAuth: true,
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -749,6 +789,45 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true },
       name: 'duplicateaccountwarning',
       props: (route) => ({ redirectToUrl: route.query.redirectToUrl })
+    },
+    {
+      path: '/transactions',
+      name: 'transactions',
+      component: ViewAllTransactions,
+      props: true,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/pay/manage-shortnames',
+      name: 'manage-shortnames',
+      component: ShortNameMappingView,
+      meta: {
+        requiresAuth: true,
+        allowedRoles: [Role.ManageEft],
+        breadcrumb:
+          [
+            StaffDashboardBreadcrumb,
+            ShortNameMappingBreadcrumb
+          ],
+        showNavBar: true
+      },
+      props: true
+    },
+    {
+      path: '/pay/shortname-details/:shortNameId',
+      name: 'shortnamedetails',
+      component: ShortNameDetailsView,
+      meta: {
+        requiresAuth: true,
+        allowedRoles: [Role.ManageEft],
+        breadcrumb: [
+          StaffDashboardBreadcrumb,
+          ShortNameMappingBreadcrumb,
+          ShortNameDetailsBreadcrumb
+        ],
+        showNavBar: true
+      },
+      props: (route) => ({ shortNameId: route.params.shortNameId })
     },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]

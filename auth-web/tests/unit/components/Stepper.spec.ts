@@ -1,38 +1,30 @@
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import Stepper from '@/components/auth/common/stepper/Stepper.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('Stepper.vue', () => {
   let wrapper: any
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const vuetify = new Vuetify({})
 
-    const store = new Vuex.Store({
-      strict: false
-    })
-
     wrapper = mount(Stepper, {
-      store,
       localVue,
       vuetify
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('is default configurations are correct', () => {
@@ -62,9 +54,9 @@ describe('Stepper.vue', () => {
   it('is gets step props', () => {
     const firstStep = wrapper.vm.defaultSteps[0]
     const stepProp = {
-      stepForward: jest.fn(),
-      stepBack: jest.fn(),
-      jumpToStep: jest.fn()
+      stepForward: vi.fn(),
+      stepBack: vi.fn(),
+      jumpToStep: vi.fn()
     }
     const props = Object.keys(wrapper.vm.getPropsForStep(firstStep))
     expect(props.length).toBe(Object.keys(stepProp).length)

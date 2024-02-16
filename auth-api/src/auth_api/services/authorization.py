@@ -21,6 +21,7 @@ from flask import abort, current_app
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.services.permissions import Permissions as PermissionsService
+from auth_api.utils.enums import LoginSource
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
@@ -109,18 +110,29 @@ class Authorization:
                     permissions = PermissionsService.get_permissions_for_membership(auth.status_code, 'SYSTEM')
                     auth_response['roles'] = permissions
         else:
-            keycloak_guid = user_from_context.sub
-            if business_identifier and keycloak_guid:
-                auth = AuthorizationView.find_user_authorization_by_business_number(
-                    business_identifier=business_identifier,
-                    keycloak_guid=keycloak_guid,
-                    org_id=user_from_context.account_id
-                )
+            if business_identifier:
 
-            if auth:
-                permissions = PermissionsService.get_permissions_for_membership(auth.status_code, auth.org_membership)
-                auth_response = Authorization(auth).as_dict(expanded)
-                auth_response['roles'] = permissions
+                # if this is an API GW account, check if the account has access to the resource
+                if user_from_context.login_source == LoginSource.API_GW.value:
+                    auth = AuthorizationView.find_user_authorization_by_business_number(
+                        business_identifier=business_identifier,
+                        org_id=user_from_context.account_id_claim
+                    )
+
+                # Check if the user has access to the resource
+                elif keycloak_guid := user_from_context.sub:
+                    auth = AuthorizationView.find_user_authorization_by_business_number(
+                        business_identifier=business_identifier,
+                        keycloak_guid=keycloak_guid,
+                        org_id=user_from_context.account_id
+                    )
+
+                if auth:
+                    permissions = PermissionsService.get_permissions_for_membership(
+                        auth.status_code, auth.org_membership
+                    )
+                    auth_response = Authorization(auth).as_dict(expanded)
+                    auth_response['roles'] = permissions
 
         return auth_response
 
@@ -201,7 +213,7 @@ class Authorization:
 def check_auth(**kwargs):
     """Check if user is authorized to perform action on the service."""
     user_from_context: UserContext = kwargs['user_context']
-    if user_from_context.is_staff():
+    if user_from_context.is_staff() and not kwargs.get('system_required', None):
         _check_for_roles(STAFF, kwargs)
     elif user_from_context.is_system():
         business_identifier = kwargs.get('business_identifier', None)
@@ -247,7 +259,7 @@ def _check_for_roles(role: str, kwargs):
         if kwargs.get('disabled_roles', None):
             is_authorized = role not in kwargs.get('disabled_roles')
         if kwargs.get('equals_role', None):
-            is_authorized = (role == kwargs.get('equals_role'))
+            is_authorized = role == kwargs.get('equals_role')
 
     if not is_authorized:
         abort(403)

@@ -44,10 +44,13 @@ class CorpType(Enum):
     CP = 'CP'  # cooperative
     TMP = 'TMP'
     RTMP = 'RTMP'
+    ATMP = 'ATMP'  # Amalgamation
     BC = 'BC'  # bcomp
     CR = 'CR'  # corporation
     UL = 'UL'  # Unlimited Liability
     CC = 'CC'  # Community Contribution
+    GP = 'GP'  # General Partnership
+    SP = 'SP'  # Sole Proprietorship
 
 
 class ProductTypeCode(Enum):
@@ -75,6 +78,7 @@ class PaymentMethod(Enum):
     ONLINE_BANKING = 'ONLINE_BANKING'
     PAD = 'PAD'
     EJV = 'EJV'
+    EFT = 'EFT'
 
 
 class PaymentAccountStatus(Enum):
@@ -90,6 +94,8 @@ class OrgType(Enum):
 
     PREMIUM = 'PREMIUM'
     BASIC = 'BASIC'
+    STAFF = 'STAFF'
+    SBC_STAFF = 'SBC_STAFF'
 
 
 class DocumentType(Enum):
@@ -108,6 +114,8 @@ class NRStatus(Enum):
     APPROVED = 'APPROVED'
     CONDITIONAL = 'CONDITIONAL'
     DRAFT = 'DRAFT'
+    CONSUMED = 'CONSUMED'
+    INPROGRESS = 'INPROGRESS'
 
 
 class NRNameStatus(Enum):
@@ -195,6 +203,19 @@ class InvitationType(Enum):
     STANDARD = 'STANDARD'  # Used to indicate the standard email invite with admin approval
 
 
+class AffiliationInvitationType(Enum):
+    """Affiliation Invitation type."""
+
+    EMAIL = 'EMAIL'
+    REQUEST = 'REQUEST'  # Used to indicate an affiliation invitation initiated through Access Request modal
+
+    @classmethod
+    def from_value(cls, value):
+        """Return instance from value of the enum."""
+        return \
+            AffiliationInvitationType(value) if value in cls._value2member_map_ else None  # pylint: disable=no-member
+
+
 class IdpHint(Enum):
     """IdpHint for user login."""
 
@@ -207,6 +228,8 @@ class InvitationStatus(Enum):
 
     ACCEPTED = 'ACCEPTED'
     PENDING = 'PENDING'
+    EXPIRED = 'EXPIRED'
+    FAILED = 'FAILED'
 
 
 class LoginSource(Enum):
@@ -218,6 +241,7 @@ class LoginSource(Enum):
     STAFF = 'IDIR'
     BCROS = 'BCROS'
     API_GW = 'API_GW'
+    IDIR = 'IDIR'
 
 
 class ProductCode(Enum):
@@ -231,6 +255,10 @@ class ProductCode(Enum):
     DIR_SEARCH = 'DIR_SEARCH'
     NAMES_REQUEST = 'NRO'
     MHR = 'MHR'
+    MHR_QSLN = 'MHR_QSLN'  # Qualified Supplier - Lawyers and Notaries
+    MHR_QSHM = 'MHR_QSHM'  # Qualified Supplier - Home Manufacturers
+    MHR_QSHD = 'MHR_QSHD'  # Qualified Supplier - Home Dealers
+    NDS = 'NDS'
 
 
 class TaskRelationshipType(Enum):
@@ -279,6 +307,7 @@ class TaskAction(Enum):
     AFFIDAVIT_REVIEW = 'AFFIDAVIT_REVIEW'
     ACCOUNT_REVIEW = 'ACCOUNT_REVIEW'
     PRODUCT_REVIEW = 'PRODUCT_REVIEW'
+    QUALIFIED_SUPPLIER_REVIEW = 'QUALIFIED_SUPPLIER_REVIEW'
 
 
 class ActivityAction(Enum):
@@ -308,3 +337,36 @@ class PatchActions(Enum):
     def from_value(cls, value):
         """Return instance from value of the enum."""
         return PatchActions(value) if value in cls._value2member_map_ else None  # pylint: disable=no-member
+
+
+class KeycloakGroupActions(Enum):
+    """Keycloak group actions."""
+
+    ADD_TO_GROUP = 'ADD_TO_GROUP'
+    REMOVE_FROM_GROUP = 'REMOVE_FROM_GROUP'
+
+
+class NotificationTypes(Enum):
+    """Account mailer notification types."""
+
+    DEFAULT_APPROVED_PRODUCT = 'prodPackageApprovedNotification'
+    DEFAULT_REJECTED_PRODUCT = 'prodPackageRejectedNotification'
+    DETAILED_CONFIRMATION_PRODUCT = 'productConfirmationNotification'
+    DETAILED_APPROVED_PRODUCT = 'productApprovedNotificationDetailed'
+    DETAILED_REJECTED_PRODUCT = 'productRejectedNotificationDetailed'
+
+
+class NRActionCodes(Enum):
+    """Name Request Action Codes."""
+
+    AMALGAMATE = 'AML'
+    ASSUMED = 'ASSUMED'  # FUTURE: should be AS (as in LEAR)?
+    CHANGE_NAME = 'CHG'
+    CONVERSION = 'CNV'  # aka Alteration
+    DBA = 'DBA'  # doing business as
+    MOVE = 'MVE'  # continuation in
+    NEW_BUSINESS = 'NEW'  # incorporate or register
+    RESTORE = 'REH'  # restore or reinstate
+    RENEW = 'REN'  # restore with new name request
+    RESTORATION = 'REST'  # FUTURE: unused? delete?
+    RESUBMIT = 'RESUBMIT'  # FUTURE: unused? delete?

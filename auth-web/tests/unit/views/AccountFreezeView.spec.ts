@@ -5,7 +5,7 @@ import { AccountStatus } from '@/util/constants'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import { useOrgStore } from '@/stores/org'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -22,43 +22,16 @@ const mockSession = {
 
 describe('AccountFreezeView.vue', () => {
   let wrapper: any
-  let userModule: any
 
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    userModule = {
-      namespaced: true,
-      state: {
-        userProfile: {}
-      },
-      actions: {
-        getUserProfile: jest.fn()
-      }
-    }
-
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          statusCode: AccountStatus.NSF_SUSPENDED
-        }
-      }
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        user: userModule,
-        org: orgModule
-      }
-    })
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      statusCode: AccountStatus.NSF_SUSPENDED
+    } as any
 
     wrapper = mount(AccountFreezeView, {
-      store,
       localVue,
       router,
       vuetify,
@@ -72,12 +45,13 @@ describe('AccountFreezeView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('should render page title', () => {

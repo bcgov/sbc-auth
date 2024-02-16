@@ -1,60 +1,215 @@
 <template>
-  <v-data-table
-    class="user-list"
-    :headers="headerAccounts"
-    :items="staffTasks"
-    :server-items-length="totalStaffTasks"
-    :no-data-text="$t('noActiveAccountsLabel')"
-    :options.sync="tableDataOptions"
-    :custom-sort="columnSort"
-    :footer-props="{
-      itemsPerPageOptions: getPaginationOptions
-    }"
-    :loading="isTableLoading"
-    @update:items-per-page="saveItemsPerPage"
-  >
-    <template v-slot:loading>
-      Loading...
-    </template>
-     <template v-slot:[`item.dateSubmitted`]="{ item }">
-      {{formatDate(item.dateSubmitted, 'MMM DD, YYYY')}}
-    </template>
-    <template v-slot:[`item.type`]="{ item }">
-      {{item.relationshipType === TaskRelationshipTypeEnum.PRODUCT ?  `Access Request (${item.type})` : item.type}}
-    </template>
-    <template v-slot:[`item.status`]="{ item }">
-      <span class="status" :class="{'onhold': item.status == 'HOLD'}">{{item.status == 'HOLD' ? `On hold` : item.status.toLowerCase() }}</span>
-    </template>
-    <template v-slot:[`item.action`]="{ item }">
-      <div class="btn-inline">
-        <v-btn
-          outlined
-          color="primary"
-          :data-test="getIndexedTag('reset-password-button', item.id)"
-          @click="review(item)"
+  <v-container class="pa-0">
+    <DatePicker
+      v-show="showDatePicker"
+      ref="datePicker"
+      :setEndDate="searchParams.endDate"
+      :setStartDate="searchParams.startDate"
+      @submit="updateDateRange($event)"
+    />
+    <v-form class="fas-search account-pending-search">
+      <v-row
+        dense
+        class="row-margin"
+      >
+        <v-col
+          sm="12"
+          cols="6"
         >
-          Review
-        </v-btn>
-      </div>
-    </template>
-  </v-data-table>
+          <transition name="slide-fade">
+            <v-data-table
+              :options.sync="tableDataOptions"
+              class="user-list"
+              :headers="headerAccounts"
+              :items="staffTasks"
+              :server-items-length="totalStaffTasks"
+              :no-data-text="$t('noActiveAccountsLabel')"
+              :custom-sort="columnSort"
+              :footer-props="{
+                itemsPerPageOptions: getPaginationOptions
+              }"
+              :loading="isTableLoading"
+              hide-default-header
+              fixed-header
+              @update:items-per-page="saveItemsPerPage"
+            >
+              <template #loading>
+                Loading...
+              </template>
+
+              <template #header="{}">
+                <thead class="v-data-table-header">
+                  <tr class="header-row-1">
+                    <th
+                      v-for="(header, i) in headerAccounts"
+                      :key="getIndexedTag('find-header-row', i)"
+                      :scope="i"
+                      class="font-weight-bold"
+                    >
+                      {{ header.text }}
+                    </th>
+                  </tr>
+
+                  <tr
+                    id="header-filter-row"
+                    class="header-row-2 header-row-2-no-padding"
+                  >
+                    <th
+                      v-for="(header, i) in headerAccounts"
+                      :key="getIndexedTag('find-header-row2', i)"
+                      :scope="i"
+                    >
+                      <v-text-field
+                        v-if="!['status', 'action', 'dateSubmitted', 'type'].includes(header.value)"
+                        :id="header.value"
+                        v-model.trim="searchParams[header.value]"
+                        input
+                        type="search"
+                        autocomplete="off"
+                        class="text-input-style"
+                        filled
+                        :placeholder="header.text"
+                        dense
+                        hide-details="auto"
+                      />
+
+                      <div
+                        v-else-if="['status'].includes(header.value)"
+                        class="mt-0"
+                      >
+                        <v-select
+                          v-model="searchParams[header.value]"
+                          :items="statuses"
+                          filled
+                          item-text="text"
+                          item-value="code"
+                          data-test="select-status"
+                          v-bind="$attrs"
+                          hide-details="auto"
+                          :menu-props="{ bottom: true, offsetY: true }"
+                          v-on="$listeners"
+                        />
+                      </div>
+
+                      <div
+                        v-else-if="['type'].includes(header.value)"
+                        class="mt-0"
+                      >
+                        <v-select
+                          v-model="searchParams[header.value]"
+                          :items="accountTypes"
+                          filled
+                          v-bind="$attrs"
+                          hide-details="auto"
+                          item-text="desc"
+                          item-value="val"
+                          :menu-props="{ bottom: true, offsetY: true }"
+                          class="account-type-list"
+                          v-on="$listeners"
+                        />
+                      </div>
+
+                      <div
+                        v-else-if="['dateSubmitted'].includes(header.value)"
+                        class="mt-0 pt-5"
+                        @click="showDatePicker = true"
+                      >
+                        <v-text-field
+                          v-model="dateTxt"
+                          class="text-input-style"
+                          append-icon="mdi-calendar"
+                          dense
+                          filled
+                          hide-details="true"
+                          :placeholder="header.text"
+                        />
+                      </div>
+
+                      <v-btn
+                        v-else-if="searchParamsExist && header.value === 'action'"
+                        outlined
+                        color="primary"
+                        class="action-btn clear-filter-button"
+                        @click="clearSearchParams()"
+                      >
+                        <span class="clear-filter cursor-pointer">
+                          Clear Filters
+                          <v-icon
+                            small
+                            color="primary"
+                          >mdi-close</v-icon>
+                        </span>
+                      </v-btn>
+                    </th>
+                  </tr>
+                </thead>
+              </template>
+
+              <template #[`item.dateSubmitted`]="{ item }">
+                {{ formatDate(item.dateSubmitted, 'MMM DD, YYYY') }}
+              </template>
+              <template #[`item.type`]="{ item }">
+                {{ item.relationshipType === TaskRelationshipTypeEnum.PRODUCT ? `Access Request (${item.type})` :
+                  item.type
+                }}
+              </template>
+              <template #[`item.status`]="{ item }">
+                <span
+                  class="status"
+                  :class="{ 'onhold': item.status == 'HOLD' }"
+                >{{ item.status == 'HOLD' ? `On hold` :
+                  item.status.toLowerCase()
+                }}</span>
+              </template>
+              <template #[`item.action`]="{ item }">
+                <div class="btn-inline">
+                  <v-btn
+                    outlined
+                    color="primary"
+                    :data-test="getIndexedTag('reset-password-button', item.id)"
+                    @click="review(item)"
+                  >
+                    Review
+                  </v-btn>
+                </div>
+              </template>
+            </v-data-table>
+          </transition>
+        </v-col>
+      </v-row>
+    </v-form>
+  </v-container>
 </template>
 
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator'
+import { SessionStorageKeys, TaskRelationshipStatus, TaskRelationshipType, TaskStatus } from '@/util/constants'
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
-import { TaskRelationshipStatus, TaskRelationshipType, TaskStatus } from '@/util/constants'
+import { mapActions, mapState } from 'pinia'
+import { Action } from 'pinia-class'
 import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
+import { DatePicker } from '@/components'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { namespace } from 'vuex-class'
-
-const TaskModule = namespace('task')
+import { ProductCode } from '@/models/Staff'
+import moment from 'moment'
+import { useStaffStore } from '@/stores/staff'
+import { useTaskStore } from '@/stores/task'
 
 @Component({
+  components: {
+    DatePicker
+  },
+  computed: {
+    ...mapState(useStaffStore, ['products'])
+  },
+  methods: {
+    ...mapActions(useStaffStore, ['getProducts'])
+  }
 })
 export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
-  @TaskModule.Action('fetchTasks') private fetchTasks!: (filterParams: TaskFilterParams) => TaskList
+  @Action(useTaskStore) private fetchTasks!: (filterParams: TaskFilterParams) => TaskList
   private staffTasks: Task[] = []
   private taskFilter: TaskFilterParams
   private totalStaffTasks = 0
@@ -63,14 +218,21 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   private tableDataOptions: Partial<DataOptions> = {}
   private isTableLoading: boolean = false
   public TaskRelationshipTypeEnum = TaskRelationshipType
+  protected searchParamsExist = false
+  private datePicker = null
+  private dateTxt = ''
+  private showDatePicker = false
+
+  private readonly getProducts!: () => Promise<ProductCode[]>
+  private readonly products!: ProductCode[]
 
   private readonly headerAccounts = [
     {
-      text: 'Date Submittted',
+      text: 'Date Submitted',
       align: 'left',
       sortable: false,
       value: 'dateSubmitted',
-      width: '150'
+      width: '90'
     },
     {
       text: 'Name',
@@ -94,22 +256,73 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
       text: 'Actions',
       align: 'left',
       value: 'action',
-      sortable: false,
-      width: '105'
+      sortable: false
     }
   ]
 
+  protected readonly statuses = [
+    { text: 'All', code: '' }, { text: 'Open', code: TaskStatus.OPEN }, { text: 'Hold', code: TaskStatus.HOLD }]
+
+  private accountTypes = [
+    { desc: 'All', val: '' },
+    { desc: 'New Account', val: 'New Account' },
+    { desc: 'BCeID Admin', val: 'BCeID Admin' },
+    { desc: 'GovM', val: 'GovM' },
+    { desc: 'GovN', val: 'GovN' }
+  ]
+
+  private searchParams: TaskFilterParams = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PendingAccountsSearchFilter)) ||
+  {
+    name: '',
+    startDate: '',
+    endDate: '',
+    type: '',
+    status: ''
+  }
+
+  protected clearSearchParams () {
+    this.searchParams = {
+      name: '',
+      startDate: '',
+      endDate: '',
+      type: '',
+      status: ''
+    }
+    this.dateTxt = ''
+  }
+
   private formatDate = CommonUtils.formatDisplayDate
 
+  @Watch('searchParams', { deep: true, immediate: true })
+  async searchChanged (value: TaskFilterParams) {
+    this.searchParamsExist = this.doSearchParametersExist(value)
+    const itemsPerPage = this.getNumberOfItemsFromSessionStorage() || this.DEFAULT_ITEMS_PER_PAGE
+    if (this.cachedPageInfo()) {
+      this.tableDataOptions = { ...this.getAndPruneCachedPageInfo(), itemsPerPage }
+    } else {
+      this.tableDataOptions = { ...this.tableDataOptions, page: 1, itemsPerPage }
+    }
+    this.setPendingSearchFilterToStorage(JSON.stringify(value))
+  }
+
   @Watch('tableDataOptions', { deep: true })
-  async getStaffTasks (val, oldVal) {
+  async getStaffTasks (val) {
     await this.searchStaffTasks(val?.page, val?.itemsPerPage)
   }
 
-  mounted () {
-    this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
-    if (this.hasCachedPageInfo) {
-      this.tableDataOptions = this.getAndPruneCachedPageInfo()
+  async mounted () {
+    await this.getProducts()
+    if (this.products) {
+      this.products.forEach((element) => {
+        this.accountTypes.push({ desc: `Access Request (${element.desc})`, val: element.desc })
+      })
+    }
+    try {
+      if (this.searchParams.startDate && this.searchParams.endDate) {
+        this.dateTxt = `${moment(this.searchParams.startDate).format('MMM DD, YYYY')} - ${moment(this.searchParams.endDate).format('MMM DD, YYYY')}`
+      }
+    } catch {
+      // Do nothing
     }
   }
 
@@ -121,11 +334,16 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
     // set this variable so that the chip is shown
     try {
       this.taskFilter = {
+        ...this.searchParams,
         relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW,
         pageNumber: page,
         pageLimit: pageLimit,
         statuses: [TaskStatus.OPEN, TaskStatus.HOLD]
       }
+      if (this.searchParams.status) {
+        this.taskFilter.statuses = [this.searchParams.status]
+      }
+
       const staffTasksResp = await this.fetchTasks(this.taskFilter)
       this.staffTasks = staffTasksResp.tasks
       this.totalStaffTasks = staffTasksResp?.total || 0
@@ -140,28 +358,140 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
     this.cachePageInfo(this.tableDataOptions)
     this.$router.push(`/review-account/${item.id}`)
   }
+
+  protected doSearchParametersExist (taskFilterParams: TaskFilterParams) {
+    return taskFilterParams.name.length > 0 ||
+      taskFilterParams.type.length > 0 ||
+      taskFilterParams.status.length > 0 ||
+      taskFilterParams.startDate.length > 0 ||
+      taskFilterParams.endDate.length > 0
+  }
+
+  private setPendingSearchFilterToStorage (val: string): void {
+    ConfigHelper.addToSession(SessionStorageKeys.PendingAccountsSearchFilter, val)
+  }
+
+  private updateDateRange (event) {
+    if (!(event.endDate && event.startDate)) {
+      this.dateTxt = ''
+    } else {
+      this.dateTxt = `${moment(event.startDate).format('MMM DD, YYYY')} - ${moment(event.endDate).format('MMM DD, YYYY')}`
+    }
+
+    this.searchParams.startDate = event.startDate
+    this.searchParams.endDate = event.endDate
+    this.showDatePicker = false
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-::v-deep {
-  table {
-    table-layout: fixed;
+@import '@/assets/scss/theme.scss';
+@import '~/fas-ui/src/assets/scss/search.scss';
 
-    td {
-      padding-top: 0.5rem;
-      padding-bottom: 0.5rem;
+ #header-filter-row {
+    th {
+      padding: 0px 3px 0px 3px !important;
     }
+  }
+::v-deep .theme--light.v-data-table .v-data-table__empty-wrapper {
+  color: $gray7;
+
+  &:hover {
+    background-color: transparent;
   }
 }
 
 .action-btn {
   width: 5rem;
 }
-.onhold{
+
+.onhold {
   color: var(--v-error-darken1) !important;
 }
-.status{
+
+.status {
   text-transform: capitalize;
+}
+
+.account-pending-search {
+  table>thead>tr>th {
+    width: 210px !important;
+    min-width: 210px !important;
+  }
+
+  // Inline for Clear Filters
+  .clear-filter-button {
+    padding: 7px !important;
+    width: 110px
+  }
+
+  .clear-filter {
+    line-height: 1.5;
+  }
+
+  ::v-deep input,
+  ::v-deep .v-select__selection {
+    color: #212529 !important;
+  }
+
+  ::v-deep ::placeholder {
+    color: #495057 !important;
+  }
+
+  .v-data-table th {
+    font-size: 0.75rem;
+  }
+
+  ::v-deep .v-data-footer {
+    min-width: 100%;
+  }
+
+  ::v-deep .v-data-table__wrapper::-webkit-scrollbar {
+    width: .625rem;
+    height: 0.50rem;
+    overflow-x: hidden;
+  }
+
+  ::v-deep .v-data-table__wrapper::-webkit-scrollbar-track {
+    overflow: auto;
+  }
+
+  ::v-deep .v-data-table__wrapper::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background-color: lightgray;
+  }
+
+  table>thead>tr>th:last-child {
+    width: 130px !important;
+    min-width: 130px !important;
+  }
+
+  // The TD cells don't seem to be scoped properly.
+  // Thus the usage of v-deep.
+  ::v-deep tr:hover td:last-child {
+    background-color: inherit !important;
+  }
+
+  table>thead>tr>th:last-child,
+  ::v-deep table>tbody>tr>td:last-child:not([colspan]) {
+    position: sticky !important;
+    position: -webkit-sticky !important;
+    right: 0;
+    z-index: 1;
+    background: white;
+    text-align: right !important;
+  }
+
+  ::v-deep table>tbody>tr>td {
+    border: 0px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  ::v-deep table>tbody>tr>td:last-child:not([colspan]) {
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
 }
 </style>

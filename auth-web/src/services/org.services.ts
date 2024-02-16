@@ -1,8 +1,14 @@
-import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
+import {
+  Affiliation,
+  AffiliationResponse,
+  CreateRequestBody as CreateAffiliationRequestBody,
+  CreateNRAffiliationRequestBody
+} from '@/models/affiliation'
 import {
   CreateRequestBody as CreateOrganizationRequestBody,
   Member,
   Members,
+  OrgPaymentDetails,
   OrgProduct,
   OrgProductsRequestBody,
   Organization,
@@ -11,17 +17,39 @@ import {
 } from '@/models/Organization'
 
 import { Address } from '@/models/address'
-import { AffidavitInformation } from '@/models/affidavit'
 import { AxiosResponse } from 'axios'
-import { Businesses } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
-import { PatchActions } from '@/util/constants'
+import { OrgsDetails } from '@/models/affiliation-invitation'
 import { axios } from '@/util/http-util'
 
 export default class OrgService {
+  public static async getOrganizationsSimple (query: string): Promise<AxiosResponse<Organization[]>> {
+    try {
+      const url = `${ConfigHelper.getAuthAPIUrl()}/orgs/simple`
+      const searchParams = new URLSearchParams({ 'limit': '20' })
+      if (query) { searchParams.append('searchText', query) }
+      const response = await axios.get(url, { params: searchParams })
+      return response.data.items
+    } catch (error) {
+      console.error(`Failed to get organizations: ${error}`)
+      throw error
+    }
+  }
+
   public static async getOrganization (orgId: number): Promise<AxiosResponse<Organization>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`)
+  }
+
+  public static async getOrganizationsNameAndUuidByAffiliation (businessIdentifier: string): Promise<OrgsDetails[]> {
+    try {
+      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/affiliation/${businessIdentifier}`)
+      return response.data?.orgsDetails
+    } catch (err) {
+      // eslint-disable-line no-console
+      console.log(err)
+      return null
+    }
   }
 
   public static async getContactForOrg (orgId: number): Promise<Address> {
@@ -61,33 +89,45 @@ export default class OrgService {
       { role: updatePayload.role, status: updatePayload.status, notifyUser: updatePayload.notifyUser })
   }
 
-  public static async createOrg (createRequestBody: CreateOrganizationRequestBody): Promise<AxiosResponse<Organization>> {
+  public static async createOrg (createRequestBody: CreateOrganizationRequestBody):
+    Promise<AxiosResponse<Organization>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs`, createRequestBody)
   }
 
-  public static async updateOrg (orgId: number, createRequestBody: CreateOrganizationRequestBody): Promise<AxiosResponse<Organization>> {
+  public static async updateOrg (orgId: number, createRequestBody: CreateOrganizationRequestBody):
+    Promise<AxiosResponse<Organization>> {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`, createRequestBody)
   }
 
-  static async getAffiliatiatedEntities (orgIdentifier: number): Promise<AxiosResponse<Businesses>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`)
+  static async getAffiliatedEntities (orgIdentifier: number): Promise<AffiliationResponse[]> {
+    try {
+      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, { params: { new: true } })
+      if (response?.data?.entities && response?.status === 200) {
+        return response.data.entities
+      } else {
+        throw Error(`Invalid response = ${response}`)
+      }
+    } catch (error) {
+      throw new Error('Error fetching data from API: ' + error.message)
+    }
   }
 
-  static async createAffiliation (orgIdentifier: number, affiliation: CreateAffiliationRequestBody): Promise<AxiosResponse<Affiliation>> {
+  static async createAffiliation (orgIdentifier: number, affiliation: CreateAffiliationRequestBody):
+    Promise<AxiosResponse<Affiliation>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, affiliation)
   }
 
-  static async createNRAffiliation (orgIdentifier: number, affiliation: CreateNRAffiliationRequestBody): Promise<AxiosResponse<Affiliation>> {
-    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations?newBusiness=true`, affiliation)
+  static async createNRAffiliation (orgIdentifier: number, affiliation: CreateNRAffiliationRequestBody):
+    Promise<AxiosResponse<Affiliation>> {
+    const url = `${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations?newBusiness=true`
+    return axios.post(url, affiliation)
   }
 
-  static async removeAffiliation (orgIdentifier: number, incorporationNumber: string, passcodeResetEmail?: string, resetPasscode?: boolean): Promise<AxiosResponse<void>> {
+  static async removeAffiliation (
+    orgIdentifier: number, incorporationNumber: string, passcodeResetEmail?: string, resetPasscode?: boolean
+  ): Promise<AxiosResponse<void>> {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`,
       { data: { passcodeResetEmail: passcodeResetEmail, resetPasscode: resetPasscode, logDeleteDraft: true } })
-  }
-  // TODO can be remove this since we moved from org to user affidavit
-  static async getAffidavitInfo (orgIdentifier: number): Promise<AxiosResponse<AffidavitInformation>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/admins/affidavits`)
   }
 
   static async approvePendingOrg (orgIdentifier: number): Promise<AxiosResponse> {
@@ -114,7 +154,7 @@ export default class OrgService {
     return response.data?.loginOption
   }
 
-  static async getOrgPayments (orgId: number): Promise<AxiosResponse> {
+  static async getOrgPayments (orgId: number): Promise<AxiosResponse<OrgPaymentDetails>> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${orgId}`)
   }
 
@@ -126,7 +166,8 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/products`)
   }
 
-  public static async addProducts (orgIdentifier: number, productsRequestBody: OrgProductsRequestBody): Promise<AxiosResponse<OrgProduct>> {
+  public static async addProducts (orgIdentifier: number, productsRequestBody: OrgProductsRequestBody):
+    Promise<AxiosResponse<OrgProduct>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/products`, productsRequestBody)
   }
 
@@ -137,6 +178,7 @@ export default class OrgService {
   public static async getOrgApiKeys (orgId: number): Promise<AxiosResponse<OrgProduct>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys`)
   }
+
   public static async revokeOrgApiKeys (ApiDetails): Promise<AxiosResponse<OrgProduct>> {
     const { orgId, apiKey } = ApiDetails
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/${apiKey}`)

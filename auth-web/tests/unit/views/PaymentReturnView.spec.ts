@@ -9,20 +9,20 @@ import Vuetify from 'vuetify'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-jest.mock('../../../src/services/payment.services')
+vi.mock('../../../src/services/payment.services')
 
 describe('PaymentReturnView.vue', () => {
-  var ob = {
+  const ob = {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
     'AUTH_API_URL': 'https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1',
     'LEGAL_API_URL': 'https://legal-api-dev.pathfinder.gov.bc.ca/api/v1',
     'VUE_APP_FLAVOR': 'post-mvp'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(ob)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(ob)
 
   it('renders page and service gets invoked', () => {
-    PaymentServices.updateTransaction = jest.fn().mockResolvedValue({})
+    PaymentServices.updateTransaction = vi.fn().mockResolvedValue({})
     const $t = () => 'Preparing your payments'
     shallowMount(PaymentReturnView, {
       propsData: {
@@ -36,10 +36,10 @@ describe('PaymentReturnView.vue', () => {
     expect(PaymentServices.updateTransaction).toBeCalledWith('somepaymentId', 'sometransactionId', 'someResponseUrl')
   })
   it('service is not invoked when no params are present', () => {
-    PaymentServices.updateTransaction = jest.fn().mockResolvedValue({})
+    PaymentServices.updateTransaction = vi.fn().mockResolvedValue({})
 
-    const $t = (payNoParams: string) => 'Incorrect configuration'
-    const wrapper = shallowMount(PaymentReturnView, {
+    const $t = () => 'Incorrect configuration'
+    shallowMount(PaymentReturnView, {
       propsData: { },
       mocks: { $t }
     })
@@ -49,7 +49,7 @@ describe('PaymentReturnView.vue', () => {
 
   it('renders page with error message when service fails', () => {
     const $t = () => 'Preparing your payments'
-    PaymentServices.updateTransaction = jest.fn().mockRejectedValue({})
+    PaymentServices.updateTransaction = vi.fn().mockRejectedValue({})
 
     const wrapper = mount(PaymentReturnView, {
       propsData: {

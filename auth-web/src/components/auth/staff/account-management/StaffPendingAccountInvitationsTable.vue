@@ -14,19 +14,19 @@
       :options.sync="tableDataOptions"
       @update:items-per-page="saveItemsPerPage"
     >
-      <template v-slot:loading>
+      <template #loading>
         Loading...
       </template>
-      <template v-slot:[`item.expires`]="{ item }">
-        {{formatDate(item.invitations[0].expiresOn, 'MMM DD, YYYY')}}
+      <template #[`item.expires`]="{ item }">
+        {{ formatDate(item.invitations[0].expiresOn, 'MMM DD, YYYY') }}
       </template>
-      <template v-slot:[`item.contactEmail`]="{ item }">
+      <template #[`item.contactEmail`]="{ item }">
         <!-- {{item.invitations[0].recipientEmail}} -->
-        <a v-bind:href="'mailto:' + item.invitations[0].recipientEmail">
-          {{item.invitations[0].recipientEmail}}
+        <a :href="'mailto:' + item.invitations[0].recipientEmail">
+          {{ item.invitations[0].recipientEmail }}
         </a>
       </template>
-      <template v-slot:[`item.action`]="{ item }">
+      <template #[`item.action`]="{ item }">
         <div class="table-actions">
           <v-btn
             outlined
@@ -36,8 +36,7 @@
             @click="resend(item.invitations[0])"
           >
             Resend
-          </v-btn
-          >
+          </v-btn>
           <v-btn
             outlined
             color="primary"
@@ -54,27 +53,46 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:title>
+      <template #title>
         <span>Remove Invitation</span>
       </template>
-      <template v-slot:text>
-        <span>This invitation for this account will be removed permanently. Are you sure you want to remove this invitation?</span>
+      <template #text>
+        <span>
+          This invitation for this account will be removed permanently.
+          Are you sure you want to remove this invitation?
+        </span>
       </template>
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
-        <v-btn large color="error" @click="deleteInvitation()">Yes</v-btn>
-        <v-btn large color="default" @click="close()">No</v-btn>
+      <template #actions>
+        <v-btn
+          large
+          color="error"
+          @click="deleteInvitation()"
+        >
+          Yes
+        </v-btn>
+        <v-btn
+          large
+          color="default"
+          @click="close()"
+        >
+          No
+        </v-btn>
       </template>
     </ModalDialog>
   </div>
 </template>
 
 <script lang="ts">
-import { AccessType, Account } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { Component, Mixins } from 'vue-property-decorator'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import { DataOptions } from 'vuetify'
 import { Event } from '@/models/event'
@@ -83,18 +101,19 @@ import { Invitation } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
+import { useStaffStore } from '@/stores/staff'
 
 @Component({
   components: {
     ModalDialog
   },
   computed: {
-    ...mapState('staff', [
+    ...mapState(useStaffStore, [
       'pendingInvitationOrgs'
     ])
   },
   methods: {
-    ...mapActions('staff', [
+    ...mapActions(useStaffStore, [
       'resendPendingOrgInvitation',
       'syncPendingInvitationOrgs',
       'deleteOrg'
@@ -103,7 +122,7 @@ import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 })
 export default class StaffPendingAccountInvitationsTable extends Mixins(PaginationMixin) {
   $refs: {
-    confirmActionDialog: ModalDialog
+    confirmActionDialog: InstanceType<typeof ModalDialog>
   }
 
   private readonly pendingInvitationOrgs!: Organization[]

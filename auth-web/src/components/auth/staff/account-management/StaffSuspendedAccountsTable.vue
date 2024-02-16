@@ -11,26 +11,26 @@
         itemsPerPageOptions: getPaginationOptions
       }"
       :loading="isTableLoading"
-      @update:items-per-page="saveItemsPerPage"
       :server-items-length="totalAccountsCount"
+      @update:items-per-page="saveItemsPerPage"
     >
-      <template v-slot:loading>
+      <template #loading>
         Loading...
       </template>
-      <template v-slot:[`item.statusCode`]="{ item }">
-          {{ getStatusText(item) }}
+      <template #[`item.statusCode`]="{ item }">
+        {{ getStatusText(item) }}
       </template>
-      <template v-slot:[`item.suspendedOn`]="{ item }">
-          {{formatDate(item.suspendedOn)}}
+      <template #[`item.suspendedOn`]="{ item }">
+        {{ formatDate(item.suspendedOn) }}
       </template>
-      <template v-slot:[`item.decisionMadeBy`]="{ item }">
-          {{item.decisionMadeBy ? item.decisionMadeBy : 'N/A'}}
+      <template #[`item.decisionMadeBy`]="{ item }">
+        {{ item.decisionMadeBy ? item.decisionMadeBy : 'N/A' }}
       </template>
-      <template v-slot:[`item.orgType`]="{ item }">
-          {{formatType(item)}}
+      <template #[`item.orgType`]="{ item }">
+        {{ formatType(item) }}
       </template>
-      <template v-slot:[`item.action`]="{ item }">
-         <v-btn
+      <template #[`item.action`]="{ item }">
+        <v-btn
           outlined
           color="primary"
           class="action-btn"
@@ -45,32 +45,31 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, AccountStatus } from '@/util/constants'
+import { Action, State } from 'pinia-class'
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
 import { Code } from '@/models/Code'
 import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
-import { namespace } from 'vuex-class'
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
+import { useStaffStore } from '@/stores/staff'
 
-const OrgModule = namespace('org')
-const StaffModule = namespace('staff')
-const CodesModule = namespace('codes')
 @Component({})
 export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
-  @OrgModule.Action('syncOrganization') private syncOrganization!: (currentAccount: number) => Promise<Organization>
-  @OrgModule.Action('addOrgSettings') private addOrgSettings!: (org: Organization) => Promise<UserSettings>
-  @OrgModule.Action('syncMembership') private syncMembership!: (orgId: number) => Promise<Member>
-  @StaffModule.Action('syncSuspendedStaffOrgs') private syncSuspendedStaffOrgs!: () => Organization[]
-  @StaffModule.State('suspendedStaffOrgs') private suspendedStaffOrgs!: Organization[]
-  @StaffModule.Action('searchOrgs') private searchOrgs!: (filterParams: OrgFilterParams) => OrgList
-  @StaffModule.State('suspendedReviewCount') private suspendedReviewCount!: number
-  @CodesModule.State('suspensionReasonCodes') private suspensionReasonCodes!: Code[]
+  @Action(useOrgStore) syncOrganization!: (currentAccount: number) => Promise<Organization>
+  @Action(useOrgStore) addOrgSettings!: (org: Organization) => Promise<UserSettings>
+  @Action(useOrgStore) syncMembership!: (orgId: number) => Promise<Member>
+  @Action(useStaffStore) syncSuspendedStaffOrgs!: () => Organization[]
+  @State(useStaffStore) suspendedStaffOrgs!: Organization[]
+  @Action(useStaffStore) searchOrgs!: (filterParams: OrgFilterParams) => OrgList
+  @State(useStaffStore) suspendedReviewCount!: number
+  @State(useCodesStore) suspensionReasonCodes!: Code[]
 
-  private readonly headerAccounts = [
+  readonly headerAccounts = [
     {
       text: 'Name',
       align: 'left',
@@ -110,20 +109,20 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     }
   ]
 
-  private formatDate = CommonUtils.formatDisplayDate
+  formatDate = CommonUtils.formatDisplayDate
 
-  private totalAccountsCount = 0
-  private tableDataOptions: Partial<DataOptions> = {}
-  private orgFilter: OrgFilterParams
-  private isTableLoading: boolean = false
-  private suspendedOrgs: Organization[] = []
+  totalAccountsCount = 0
+  tableDataOptions: Partial<DataOptions> = {}
+  orgFilter: OrgFilterParams
+  isTableLoading: boolean = false
+  suspendedOrgs: Organization[] = []
 
-  private getIndexedTag (tag, index): string {
+  getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
 
   @Watch('tableDataOptions', { deep: true })
-  async getAccounts (val, oldVal) {
+  async getAccounts (val) {
     await this.getOrgs(val?.page, val?.itemsPerPage)
   }
 
@@ -138,7 +137,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
     // set this variable so that the chip is shown
-    const appliedFilterValue = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
     try {
       this.orgFilter = {
         statuses: [AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED],
@@ -156,7 +154,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     }
   }
 
-  private async view (org: Organization) {
+  async view (org: Organization) {
     this.cachePageInfo(this.tableDataOptions)
     let orgId:number = org.id
     await this.syncOrganization(orgId)
@@ -165,7 +163,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     this.$router.push(`/account/${orgId}/settings`)
   }
 
-  private formatType (org:Organization):string {
+  formatType (org:Organization):string {
     let orgTypeDisplay = org.orgType === Account.BASIC ? 'Basic' : 'Premium'
     if (org.accessType === AccessType.ANONYMOUS) {
       return 'Director Search'
@@ -176,7 +174,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     return orgTypeDisplay
   }
 
-  private getStatusText (org: Organization) {
+  getStatusText (org: Organization) {
     if (org.statusCode === AccountStatus.NSF_SUSPENDED) {
       return 'NSF'
     } else if (org.statusCode === AccountStatus.SUSPENDED) {
@@ -187,7 +185,8 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   }
 
   private getSuspensionReasonCode (org: Organization) : string {
-    return this.suspensionReasonCodes?.find(suspensionReasonCode => suspensionReasonCode?.code === org?.suspensionReasonCode)?.desc
+    return this.suspensionReasonCodes?.find(suspensionReasonCode =>
+      suspensionReasonCode?.code === org?.suspensionReasonCode)?.desc
   }
 }
 </script>

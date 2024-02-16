@@ -35,6 +35,7 @@ class Tracer():  # pylint: disable=too-few-public-methods
     def __init__(self):
         """Virtually private constructor."""
         if Tracer.__instance is not None:
+            # pylint: disable=broad-exception-raised
             raise Exception('Attempt made to create multiple tracing instances')
 
         api_tracer = ApiTracer()

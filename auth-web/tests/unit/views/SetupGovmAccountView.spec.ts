@@ -1,12 +1,8 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import SetupGovmAccountView from '@/views/auth/staff/SetupGovmAccountView.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(VueRouter)
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 const router = new VueRouter()
 
@@ -22,18 +18,14 @@ describe('SetupGovmAccountView.vue', () => {
   let wrapper: any
   let store: any
   const localVue = createLocalVue()
-  localVue.use(Vuex)
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
-    store = new Vuex.Store({
-      state: {},
-      strict: false
-    })
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
   })
 
   it('Should have a h1', () => {
@@ -48,7 +40,7 @@ describe('SetupGovmAccountView.vue', () => {
       }
     })
 
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
     expect(wrapper.find('h1').text()).toBe('Send Invite to Ministry Account')
   })
 })

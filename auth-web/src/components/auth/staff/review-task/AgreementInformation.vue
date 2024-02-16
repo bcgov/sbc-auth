@@ -1,21 +1,23 @@
 <template>
   <section>
-    <h2 class="mb-5">{{`${tabNumber !==null ?  `${tabNumber}.` : ''} ${title}`}}</h2>
+    <h2 class="mb-5">
+      {{ `${tabNumber !==null ? `${tabNumber}.` : ''} ${title}` }}
+    </h2>
     <v-row>
       <v-col class="cols-12 py-2">
-      <ProductTos
-        :userName="userName"
-        :orgName="orgName"
-        :isTOSAlreadyAccepted="isTOSAlreadyAccepted"
-        :isApprovalFlow="isApprovalFlow"
-      />
+        <ProductTos
+          :userName="userName"
+          :orgName="orgName"
+          :isTOSAlreadyAccepted="isTOSAlreadyAccepted"
+          :isApprovalFlow="isApprovalFlow"
+        />
       </v-col>
-      </v-row>
+    </v-row>
   </section>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
 
 @Component({

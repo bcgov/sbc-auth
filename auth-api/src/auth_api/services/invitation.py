@@ -48,6 +48,7 @@ from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
+from .products import Product as ProductService
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -383,8 +384,10 @@ class Invitation:
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
 
-        if (login_source := user_from_context.login_source) is not None:  # bcros comes with out token
-            if invitation.login_source != login_source:
+        login_source = user_from_context.login_source
+
+        if invitation.login_source == LoginSource.STAFF.value:  # Ensure STAFF login source for STAFF invitations
+            if login_source is None or invitation.login_source != login_source:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
         if add_membership:
@@ -420,6 +423,7 @@ class Invitation:
                 except BusinessException as exception:
                     current_app.logger.error('<send_notification_to_admin failed', exception.message)
 
+        invitation.login_source = login_source  # Update login source to the source when accepted
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
         invitation.save()
@@ -428,10 +432,11 @@ class Invitation:
         if user:
             group_name: str = KeycloakService.join_users_group()
             KeycloakService.join_account_holders_group(user.keycloak_guid)
+            ProductService.update_users_products_keycloak_groups([user.identifier])
 
             if group_name == GROUP_GOV_ACCOUNT_USERS:
                 # Add contact to the user.
-                user.add_contact(dict(email=user_from_context.token_info.get('email', None)),
+                user.add_contact({'email': user_from_context.token_info.get('email', None)},
                                  throw_error_for_duplicates=False)
 
         current_app.logger.debug('<accept_invitation')
@@ -453,7 +458,8 @@ class Invitation:
             name = {'first_name': user.first_name, 'last_name': user.last_name}
             ActivityLogPublisher.publish_activity(Activity(membership.org_id,
                                                            ActivityAction.APPROVE_TEAM_MEMBER.value,
-                                                           name=json.dumps(name)
+                                                           name=json.dumps(name),
+                                                           value=membership.membership_type_code
                                                            ))
 
     @staticmethod

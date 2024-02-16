@@ -22,7 +22,7 @@ from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
-from auth_api.models.dataclass import Activity
+from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
@@ -35,6 +35,7 @@ from auth_api.models import Task as TaskModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
+from auth_api.services.user import User as UserService
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
 from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
@@ -145,6 +146,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         org.commit()
 
+        ProductService.update_org_product_keycloak_groups(org.id)
+
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
         return Org(org)
@@ -196,7 +199,8 @@ class Org:  # pylint: disable=too-many-public-methods
         pay_request = {
             'accountId': org_model.id,
             # pay needs the most unique idenitfier.So combine name and branch name
-            'accountName': org_name_for_pay
+            'accountName': org_name_for_pay,
+            'branchName': org_model.branch_name
         }
 
         if payment_method:
@@ -383,6 +387,7 @@ class Org:  # pylint: disable=too-many-public-methods
         Org._publish_activity_on_mailing_address_change(org_model.id, current_org_name, mailing_address)
         Org._publish_activity_on_name_change(org_model.id, org_name)
 
+        ProductService.update_org_product_keycloak_groups(org_model.id)
         current_app.logger.debug('>update_org ')
         return self
 
@@ -466,11 +471,10 @@ class Org:  # pylint: disable=too-many-public-methods
         # Find all active affiliations and remove them.
         entities = AffiliationService.find_affiliations_by_org_id(org_id)
         for entity in entities:
-            AffiliationService.delete_affiliation(
-                org_id=org_id,
-                business_identifier=entity['business_identifier'],
-                reset_passcode=True
-            )
+            delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id,
+                                                                  business_identifier=entity['business_identifier'],
+                                                                  reset_passcode=True)
+            AffiliationService.delete_affiliation(delete_affiliation_request)
 
         # Deactivate all members.
         members = MembershipModel.find_members_by_org_id(org_id)
@@ -493,6 +497,8 @@ class Org:  # pylint: disable=too-many-public-methods
         # Set the account as INACTIVE
         org.status_code = OrgStatus.INACTIVE.value
         org.save()
+
+        ProductService.update_org_product_keycloak_groups(org.id)
 
         current_app.logger.debug('org Inactivated>')
 
@@ -687,17 +693,13 @@ class Org:  # pylint: disable=too-many-public-methods
                 return contact
         return None
 
-    def get_owner_count(self):
-        """Get the number of owners for the specified org."""
-        return len([x for x in self._model.members if x.membership_type_code == ADMIN])
-
     @staticmethod
     def get_orgs(user_id, valid_statuses=VALID_STATUSES):
         """Return the orgs associated with this user."""
         return MembershipModel.find_orgs_for_user(user_id, valid_statuses)
 
     @staticmethod
-    def search_orgs(search: OrgSearch):  # pylint: disable=too-many-locals
+    def search_orgs(search: OrgSearch, environment):  # pylint: disable=too-many-locals
         """Search for orgs based on input parameters."""
         orgs_result = {
             'orgs': [],
@@ -714,7 +716,7 @@ class Org:  # pylint: disable=too-many-public-methods
             org_models, orgs_result['total'] = OrgModel.search_pending_activation_orgs(name=search.name)
             include_invitations = True
         else:
-            org_models, orgs_result['total'] = OrgModel.search_org(search)
+            org_models, orgs_result['total'] = OrgModel.search_org(search, environment)
 
         for org in org_models:
             orgs_result['orgs'].append({
@@ -727,6 +729,22 @@ class Org:  # pylint: disable=too-many-public-methods
                 if include_invitations and org.invitations else [],
             })
         return orgs_result
+
+    @staticmethod
+    def search_orgs_by_affiliation(
+        business_identifier, environment, excluded_org_types
+    ):
+        """Search for orgs based on input parameters."""
+        orgs, total = OrgModel.search_orgs_by_business_identifier(
+            business_identifier,
+            environment,
+            excluded_org_types
+        )
+
+        return {
+            'orgs': orgs,
+            'total': total
+        }
 
     @staticmethod
     @user_context
@@ -809,14 +827,17 @@ class Org:  # pylint: disable=too-many-public-methods
         # TODO Publish to activity stream
 
         org.save()
-
-        # Find admin email address
-        admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
-        if org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
-            Org.send_approved_rejected_notification(admin_email, org.name, org.id, org.status_code, origin_url)
-        elif org.access_type in (AccessType.GOVM.value, AccessType.GOVN.value):
-            Org.send_approved_rejected_govm_govn_notification(admin_email, org.name, org.id, org.status_code,
-                                                              origin_url)
+        # Find admin email addresses
+        admin_emails = UserService.get_admin_emails_for_org(org_id)
+        if admin_emails != '':
+            if org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
+                Org.send_approved_rejected_notification(admin_emails, org.name, org.id, org.status_code, origin_url)
+            elif org.access_type in (AccessType.GOVM.value, AccessType.GOVN.value):
+                Org.send_approved_rejected_govm_govn_notification(admin_emails, org.name, org.id, org.status_code,
+                                                                  origin_url)
+        else:
+            # continue but log error
+            current_app.logger.error('No admin email record for org id %s', org_id)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)
@@ -851,7 +872,7 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
-    def send_approved_rejected_notification(receipt_admin_email, org_name, org_id, org_status: OrgStatus, origin_url):
+    def send_approved_rejected_notification(receipt_admin_emails, org_name, org_id, org_status: OrgStatus, origin_url):
         """Send Approved/Rejected notification to the user."""
         current_app.logger.debug('<send_approved_rejected_notification')
 
@@ -864,7 +885,7 @@ class Org:  # pylint: disable=too-many-public-methods
         app_url = f"{origin_url}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}"
         data = {
             'accountId': org_id,
-            'emailAddresses': receipt_admin_email,
+            'emailAddresses': receipt_admin_emails,
             'contextUrl': app_url,
             'orgName': org_name
         }

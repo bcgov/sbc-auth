@@ -1,64 +1,93 @@
 <template>
-  <v-form ref="form"  data-test="form-govm-contact">
-    <p class="mb-9">Enter the IDIR email address of the ministry's employee.
-        An email will be sent this user to verify and activate this account. This user will be the admin of this account.</p>
-    <v-row >
-      <v-col cols="12" class="py-0 mb-4">
+  <v-form
+    ref="form"
+    data-test="form-govm-contact"
+  >
+    <p class="mb-9">
+      Enter the IDIR email address of the ministry's employee.
+      An email will be sent this user to verify and activate this account. This user will be the admin of this account.
+    </p>
+    <v-row>
+      <v-col
+        cols="12"
+        class="py-0 mb-4"
+      >
         <h4
           class="mb-1"
-        >Account Admin Contact</h4>
+        >
+          Account Admin Contact
+        </h4>
       </v-col>
     </v-row>
     <!-- Email Address -->
     <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
+      <v-col
+        cols="12"
+        class="pt-0 pb-0"
+      >
         <v-text-field
+          v-model="emailAddress"
           filled
           label="Email Address"
           req
           persistent-hint
-          v-model="emailAddress"
           data-test="email"
           readonly
-        >
-        </v-text-field>
+        />
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
+      <v-col
+        cols="12"
+        class="pt-0 pb-0"
+      >
         <v-text-field
+          v-model="confirmedEmailAddress"
           filled
           label="Confirm Email Address"
           req
           persistent-hint
-          v-model="confirmedEmailAddress"
           data-test="confirm-email"
           readonly
-        >
-        </v-text-field>
+        />
       </v-col>
     </v-row>
-    <v-divider class="mt-7 mb-10"></v-divider>
-
+    <span
+      v-if="emailAddress === ''"
+      class="red--text mb-10"
+    >
+      Please contact BCROS support, no email in Keycloak for this account.
+    </span>
+    <v-divider class="mt-7 mb-10" />
     <v-row>
-      <v-col cols="12" class="form__btns py-0 d-inline-flex">
+      <v-col
+        cols="12"
+        class="form__btns py-0 d-inline-flex"
+      >
         <v-btn
           large
           depressed
           color="default"
-          @click="goBack"
           data-test="btn-back"
+          @click="goBack"
         >
-          <v-icon left class="mr-2">mdi-arrow-left</v-icon>
+          <v-icon
+            left
+            class="mr-2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
+
         <v-btn
           large
           color="primary"
           class="save-continue-button mr-3"
-          @click="createAccount"
           data-test="next-button"
+          :disabled="emailAddress === ''"
+          @click="createAccount"
         >
           <span>
             Create Account
@@ -68,58 +97,65 @@
           :showConfirmPopup="true"
           :isEmit="true"
           @click-confirm="cancel"
-        ></ConfirmCancelButton>
+        />
       </v-col>
     </v-row>
-
   </v-form>
 </template>
 
 <script lang="ts">
-
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { User } from '@/models/user'
+import { useUserStore } from '@/stores/user'
 
-import { namespace } from 'vuex-class'
-const userModule = namespace('user')
-
-@Component({
+export default defineComponent({
+  name: 'GovmContactInfoForm',
   components: {
     ConfirmCancelButton
+  },
+  mixins: [NextPageMixin, Steppable],
+  emits: ['final-step-action'],
+  setup (props, { root, emit }) {
+    const userStore = useUserStore()
+    const state = reactive({
+      emailAddress: '',
+      confirmedEmailAddress: '',
+      userProfile: null
+    })
+
+    const formRef = ref(null)
+
+    onMounted(async () => {
+      state.userProfile = await userStore.getUserProfile('@me')
+      state.emailAddress = state.userProfile?.email || ''
+      state.confirmedEmailAddress = state.userProfile?.email || ''
+    })
+
+    const createAccount = () => {
+      // email is readonly to show. no need to save
+      emit('final-step-action')
+    }
+
+    const cancel = () => {
+      root.$router.push('/')
+    }
+
+    const goBack = () => {
+      // Vue 3 - get rid of MIXINS and use the composition-api instead.
+      (props as any).stepBack()
+    }
+
+    return {
+      ...toRefs(state),
+      formRef,
+      createAccount,
+      cancel,
+      goBack
+    }
   }
 })
-export default class GovmContactInfoForm extends Mixins(NextPageMixin, Steppable) {
-  @userModule.Action('getUserProfile') public getUserProfile!: (identifer: string) => User
-
-  public emailAddress = ''
-  public confirmedEmailAddress = ''
-  // @Prop({ default: false }) isStepperView: boolean
-
-  $refs: {
-    form: HTMLFormElement
-  }
-
-  public async mounted () {
-    await this.getUserProfile('@me')
-    this.emailAddress = this.userProfile?.email || ''
-    this.emailAddress = this.confirmedEmailAddress = this.userProfile?.email || ''
-  }
-  // email is readonly to show. no need to save
-  @Emit('final-step-action')
-  public createAccount () {
-  }
-
-  public cancel () {
-    this.$router.push('/')
-  }
-
-  public goBack () {
-    this.stepBack()
-  }
-}
 </script>
 
 <style lang="scss" scoped>

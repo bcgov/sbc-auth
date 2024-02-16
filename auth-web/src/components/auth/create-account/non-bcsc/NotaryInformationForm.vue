@@ -1,17 +1,21 @@
 <template>
   <v-form ref="notaryInformationForm">
     <fieldset v-if="notaryInfo">
-      <legend class="mb-4">Notary Information</legend>
+      <legend class="mb-4">
+        Notary Information
+      </legend>
       <v-row>
-        <v-col cols="12" class="py-0">
+        <v-col
+          cols="12"
+          class="py-0"
+        >
           <v-text-field
+            v-model.trim="notaryInfo.notaryName"
             filled
             label="Name of Notary"
             :rules="rules.notaryName"
             :disabled="disabled"
-            v-model.trim="notaryInfo.notaryName"
-          >
-          </v-text-field>
+          />
         </v-col>
       </v-row>
       <base-address-form
@@ -45,7 +49,7 @@ export default class NotaryInformationForm extends Vue {
   private isNotaryAddressValid: boolean = false
 
   private notaryAddress: Address = {} as Address
-  private notaryAddressSchema: {} = addressSchema
+  private notaryAddressSchema = addressSchema
 
   $refs: {
     notaryInformationForm: HTMLFormElement,
@@ -77,7 +81,7 @@ export default class NotaryInformationForm extends Vue {
   }
 
   @Watch('notaryInfo', { deep: true })
-  async updateNotary (val, oldVal) {
+  async updateNotary () {
     this.emitNotaryInformation()
   }
 

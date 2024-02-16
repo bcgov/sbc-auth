@@ -1,9 +1,10 @@
-name: Auth Web CI
+name: ACCOUNT UI CI
 
 on:
   pull_request:
     branches:
       - main
+      - feature-business-registry-dashboard-updates
     paths:
       - "auth-web/**"
 
@@ -19,7 +20,7 @@ jobs:
     if: github.repository == 'bcgov/sbc-auth'
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: "true"
 
   linting:
@@ -28,10 +29,10 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.14.2]
+        node-version: [20.5.1]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -49,10 +50,10 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.14.2]
+        node-version: [20.5.1]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -60,12 +61,12 @@ jobs:
       - name: Install dependencies
         run: |
           make setup
-      - name: Test with Jest
+      - name: Test with Vitest
         id: test
         run: |
           make test
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           flags: authweb
           name: codecov-auth-web
@@ -76,7 +77,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: build to check strictness
         id: build
         run: |

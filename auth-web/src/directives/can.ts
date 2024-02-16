@@ -3,7 +3,7 @@ import { DirectiveBinding } from 'vue/types/options'
 import { DirectiveOptions } from 'vue'
 import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import { VNode } from 'vue/types'
-import store from '@/store'
+import { useOrgStore } from '@/stores/org'
 
 interface CustomHTMLElement extends HTMLElement {
   disabled: boolean
@@ -26,11 +26,11 @@ function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
   if (!accountId) {
     return
   }
-  let behaviour = binding.modifiers.disable ? 'disable' : 'hide'
+  const behaviour = binding.modifiers.disable ? 'disable' : 'hide'
   // to handle special elements like v-card etc
-  let isCard = !!binding.modifiers.card
+  const isCard = !!binding.modifiers.card
   const requestedAction = binding.arg
-  const permissions:string[] = (store.state as any)?.org?.permissions
+  const permissions:string[] = useOrgStore().permissions
   const customeEl = el as CustomHTMLElement
   const okayToAccess = permissions.indexOf(requestedAction) >= 0
   // if not okay , hide or disable
@@ -43,8 +43,6 @@ function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
       // TODO tab still works.. can tab to the text field and make it work
       customeEl.classList.add('v-card--disabled')
       customeEl.style.pointerEvents = 'none'
-    } else if (behaviour === 'readonly') {
-      customeEl.readOnly = true
     }
   }
 }
@@ -71,6 +69,7 @@ function commentNode (el: HTMLElement, vnode: VNode) {
   vnode.data.directives = undefined
 
   if (vnode.componentInstance) {
+    /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
     // @ts-ignore
     vnode.componentInstance.$el = comment
   }

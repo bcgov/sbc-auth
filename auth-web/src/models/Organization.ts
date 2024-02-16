@@ -1,5 +1,5 @@
+import { AccountStatus, ProductStatus } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-
 import { Address } from '@/models/address'
 import { Business } from '@/models/business'
 import { Invitation } from '@/models/Invitation'
@@ -32,11 +32,17 @@ export interface Organizations
   orgs : Organization[]
 }
 
+export interface OrgNameAndId {
+  name: string
+  id: number
+}
+
 export interface Organization {
   id?: number;
   name: string;
   affiliatedEntities?: Business[];
   orgType?: string;
+  orgStatus?: AccountStatus
   members?: Member[];
   invitations?: Invitation[];
   accessType?: string;
@@ -56,7 +62,8 @@ export interface Organization {
   branchName?: string,
   isBusinessAccount?: boolean,
   businessType?: string,
-  businessSize?: string
+  businessSize?: string,
+  mailingAddress?: Address
 }
 
 export interface PADInfo {
@@ -212,6 +219,7 @@ export interface OrgPaymentDetails {
   padTosAcceptedBy:string
   padTosAcceptedDate:string
   futurePaymentMethod: string
+  eftEnable?: boolean
 }
 
 export interface CFSAccountDetails {
@@ -237,10 +245,11 @@ export interface OrgProduct {
   description: string;
   url?: string;
   type?: string;
-  subscriptionStatus?: string;
+  subscriptionStatus?: ProductStatus;
   hidden?:boolean
   premiumOnly?:boolean
   needReview?:boolean
+  parentCode?: string;
 }
 
 export interface OrgProductsRequestBody {
@@ -303,5 +312,7 @@ export enum OrgAccountTypes {
   PREMIUM_OUT_OF_PROVINCE = 'Premium (out-of-province)',
   GOVM = 'GovM',
   GOVN = 'GovN',
-  DIRECTOR_SEARCH = 'Director Search'
+  DIRECTOR_SEARCH = 'Director Search',
+  STAFF = 'BC Registries Staff',
+  SBC_STAFF = 'Service BC Staff'
 }

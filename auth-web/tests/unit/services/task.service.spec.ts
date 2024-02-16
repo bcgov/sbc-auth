@@ -1,7 +1,7 @@
 import { Task } from '@/models/Task'
 import TaskService from '../../../src/services/task.services'
 
-var mockob = {
+const mockob = {
   'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.silver.devops.gov.bc.ca/api/v1'
 }
@@ -20,30 +20,29 @@ const mockTask: Task[] = [{
   'type': 'Wills Registry'
 }]
 
-jest.mock('axios', () => {
-  return {
-    create: () => {
-      return {
-        get: () => {
-          return mockTask
-        },
-        put: () => {
-          return mockTask
-        },
-        interceptors: {
-          request: { eject: jest.fn(), use: jest.fn() },
-          response: { eject: jest.fn(), use: jest.fn() }
-        }
-      }
-    }
-  }
-})
+const mocks = vi.hoisted(() => ({
+  get: vi.fn().mockReturnValue(mockTask),
+  put: vi.fn().mockReturnValue(mockTask)
+}))
 
 describe('Task service', () => {
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
-    // @ts-ignore
-    jest.clearAllMocks()
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
+    vi.doMock('axios', () => {
+      return {
+        create: () => {
+          return {
+            get: mocks.get,
+            put: mocks.put,
+            interceptors: {
+              request: { eject: vi.fn(), use: vi.fn() },
+              response: { eject: vi.fn(), use: vi.fn() }
+            }
+          }
+        }
+      }
+    })
+    vi.clearAllMocks()
   })
 
   it('call getTaskById() for task Details ', () => {

@@ -1,140 +1,196 @@
 <template>
   <div>
-    <template>
-
-      <v-card
-        outlined
-        hover
-        class="product-card py-8 px-5 mb-4 elevation-1"
-        :class="[ {'processing-card' : isSelected}]"
-        :data-test="`div-product-${productDetails.code}`"
-      >
-        <div>
-          <header class="d-flex align-center">
-            <div class="pr-8" v-if="hasDecisionNotBeenMade && !isBasicAccountAndPremiumProduct" data-test="div-decision-not-made-product">
-              <v-checkbox
-                class="product-check-box ma-0 pa-0"
-                hide-details
-                v-model="productSelected"
-                :data-test="`check-product-${productDetails.code}`"
-                @change="selecThisProduct"
-                :key="Math.random()"
-              >
-                <template v-slot:label>
-                  <div class="ml-2">
-                    <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">
-                      {{productDetails.description}}
-                  <v-tooltip
-                    v-if="productPremTooltipText(productDetails.code)"
-                    class="pa-2"
-                    content-class="tooltip"
-                    color="grey darken-4"
-                    max-width="350px"
-                    top
-                  >
-                    <template v-slot:activator="{ on }">
-                      <span v-if="productDetails.premiumOnly" class="product-title-info" v-on="on">
-                        (<span class="underline-dotted">requires Premium Account</span>)
-                      </span>
-                    </template>
-                    <div class="py-3">
-                      <span>{{ productPremTooltipText(productDetails.code) }}</span>
-                    </div>
-                  </v-tooltip>
-                  <span v-else-if="productDetails.premiumOnly" class="product-title-info"> (requires Premium Account)</span>
-                  <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
-                    </h3>
-                    <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
-                  </div>
-              </template>
-              </v-checkbox>
-            </div>
-            <div class="d-flex align-center pr-8" data-test="div-decision-made-product" v-else>
-              <v-icon :color="productLabel.decisionMadeColorCode" class="mr-2">
-                {{ productLabel.decisionMadeIcon }}
-              </v-icon>
-              <div class="ml-2 label-color">
-                <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">
-                  {{productDetails.description}}
-                  <v-tooltip
-                    v-if="productPremTooltipText(productDetails.code)"
-                    class="pa-2"
-                    content-class="tooltip"
-                    color="grey darken-4"
-                    max-width="350px"
-                    top
-                  >
-                    <template v-slot:activator="{ on }">
-                      <span v-if="productDetails.premiumOnly" class="product-title-info" v-on="on">
-                        (<span class="underline-dotted">requires Premium Account</span>)
-                      </span>
-                    </template>
-                    <div class="py-3">
-                      <span>{{ productPremTooltipText(productDetails.code) }}</span>
-                    </div>
-                  </v-tooltip>
-                  <span v-else-if="productDetails.premiumOnly" class="product-title-info"> (requires Premium Account)</span>
-                  <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
-                </h3>
-                <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"  />
-              </div>
-            </div>
-            <v-btn
-              large
-              depressed
-              color="primary"
-              width="120"
-              class="font-weight-bold ml-auto"
-              :aria-label="`Select  ${productDetails.description}`"
-              :data-test="`btn-productDetails-${productDetails.code}`"
-              text
-              @click="expand()"
+    <v-card
+      v-if="!productDetails.hidden"
+      outlined
+      hover
+      class="product-card py-8 px-5 mb-4 elevation-1"
+      :class="[ {'processing-card' : isSelected}]"
+      :data-test="`div-product-${productDetails.code}`"
+    >
+      <div>
+        <header class="d-flex align-center">
+          <div
+            v-if="hasDecisionNotBeenMade && !isBasicAccountAndPremiumProduct"
+            class="pr-8"
+            data-test="div-decision-not-made-product"
+          >
+            <v-checkbox
+              :key="Math.random()"
+              v-model="productSelected"
+              class="product-check-box ma-0 pa-0"
+              hide-details
+              :data-test="`check-product-${productDetails.code}`"
+              @change="selecThisProduct"
             >
-
-              <span v-if="isexpandedView" :data-test="`span-readless-${productDetails.code}`">Read Less<v-icon meduim color="primary">mdi-chevron-up</v-icon></span>
-              <span :data-test="`span-readmore-${productDetails.code}`" v-else>Read More<v-icon meduim color="primary">mdi-chevron-down</v-icon></span>
-            </v-btn>
-          </header>
-
-          <div class="product-card-contents ml-9">
-            <v-expand-transition>
-              <div v-if="isexpandedView" :data-test="`div-expanded-product-${productDetails.code}`">
-                <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"  class="mb-0"/>
-                <component
-                  v-if="isTOSNeeded"
-                  :key="productFooter.id"
-                  :is="productFooter.component"
-                  v-bind="productFooter.props"
-                  v-on="productFooter.events"
-                  :ref="productFooter.ref"
-                  v-display-mode="hasDecisionNotBeenMade ? false : viewOnly"
-                />
-                <div v-if="showProductFee">
-                  <v-divider class="my-6"></v-divider>
-                  <ProductFee :orgProduct="orgProduct"
-                  :orgProductFeeCodes="orgProductFeeCodes"
-                  @save:saveProductFee="saveProductFee"
-                  :isProductActionLoading="isProductActionLoading"
-                  :isProductActionCompleted="isProductActionCompleted"
+              <template #label>
+                <div class="ml-2">
+                  <h3
+                    class="title font-weight-bold product-title mt-n1"
+                    :data-test="productDetails.code"
+                  >
+                    {{ productDetails.description }}
+                    <v-tooltip
+                      v-if="productPremTooltipText(productDetails.code)"
+                      class="pa-2"
+                      content-class="tooltip"
+                      color="grey darken-4"
+                      max-width="350px"
+                      top
+                    >
+                      <template #activator="{ on }">
+                        <span
+                          v-if="productDetails.premiumOnly"
+                          class="product-title-info"
+                          v-on="on"
+                        >
+                          (<span class="underline-dotted">requires Premium Account</span>)
+                        </span>
+                      </template>
+                      <div class="py-3">
+                        <span>{{ productPremTooltipText(productDetails.code) }}</span>
+                      </div>
+                    </v-tooltip>
+                    <span
+                      v-else-if="productDetails.premiumOnly"
+                      class="product-title-info"
+                    > (requires Premium Account)</span>
+                    <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
+                  </h3>
+                  <p
+                    v-if="$te(productLabel.subTitle)"
+                    v-html="$t(productLabel.subTitle)"
                   />
                 </div>
+              </template>
+            </v-checkbox>
+          </div>
+          <div
+            v-else
+            class="d-flex align-center pr-8"
+            data-test="div-decision-made-product"
+          >
+            <v-icon
+              :color="productLabel.decisionMadeColorCode"
+              class="mr-2"
+            >
+              {{ productLabel.decisionMadeIcon }}
+            </v-icon>
+            <div class="ml-2 label-color">
+              <h3
+                class="title font-weight-bold product-title mt-n1"
+                :data-test="productDetails.code"
+              >
+                {{ productDetails.description }}
+                <v-tooltip
+                  v-if="productPremTooltipText(productDetails.code)"
+                  class="pa-2"
+                  content-class="tooltip"
+                  color="grey darken-4"
+                  max-width="350px"
+                  top
+                >
+                  <template #activator="{ on }">
+                    <span
+                      v-if="productDetails.premiumOnly"
+                      class="product-title-info"
+                      v-on="on"
+                    >
+                      (<span class="underline-dotted">requires Premium Account</span>)
+                    </span>
+                  </template>
+                  <div class="py-3">
+                    <span>{{ productPremTooltipText(productDetails.code) }}</span>
+                  </div>
+                </v-tooltip>
+                <span
+                  v-else-if="productDetails.premiumOnly"
+                  class="product-title-info"
+                > (requires Premium Account)</span>
+                <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
+              </h3>
+              <p
+                v-if="$te(productLabel.subTitle)"
+                v-html="$t(productLabel.subTitle)"
+              />
+            </div>
+          </div>
+          <v-btn
+            large
+            depressed
+            color="primary"
+            width="120"
+            class="font-weight-bold ml-auto"
+            :aria-label="`Select  ${productDetails.description}`"
+            :data-test="`btn-productDetails-${productDetails.code}`"
+            text
+            @click="expand()"
+          >
+            <span
+              v-if="isexpandedView"
+              :data-test="`span-readless-${productDetails.code}`"
+            >Read Less<v-icon
+              meduim
+              color="primary"
+            >mdi-chevron-up</v-icon></span>
+            <span
+              v-else
+              :data-test="`span-readmore-${productDetails.code}`"
+            >Read More<v-icon
+              meduim
+              color="primary"
+            >mdi-chevron-down</v-icon></span>
+          </v-btn>
+        </header>
+
+        <div class="product-card-contents ml-9">
+          <!-- Product Content Slot -->
+          <slot name="productContentSlot" />
+
+          <v-expand-transition>
+            <div
+              v-if="isexpandedView"
+              :data-test="`div-expanded-product-${productDetails.code}`"
+            >
+              <p
+                v-if="$te(productLabel.details)"
+                class="mb-0"
+                v-html="$t(productLabel.details)"
+              />
+              <component
+                :is="productFooter.component"
+                v-if="isTOSNeeded"
+                :key="productFooter.id"
+                v-bind="productFooter.props"
+                :ref="productFooter.ref"
+                v-display-mode="hasDecisionNotBeenMade ? false : viewOnly"
+                v-on="productFooter.events"
+              />
+              <div v-if="showProductFee">
+                <v-divider class="my-6" />
+                <!-- This links to ProductFeeViewEdit. -->
+                <ProductFee
+                  :orgProduct="orgProduct"
+                  :orgProductFeeCodes="orgProductFeeCodes"
+                  :isProductActionLoading="isProductActionLoading"
+                  :isProductActionCompleted="isProductActionCompleted"
+                  @save:saveProductFee="saveProductFee"
+                />
               </div>
-
-            </v-expand-transition>
-          </div>
-          <div>
-
-          </div>
+            </div>
+          </v-expand-transition>
         </div>
-      </v-card>
-    </template>
+        <div />
+      </div>
+    </v-card>
   </div>
 </template>
 
 <script lang="ts">
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { DisplayModeValues, productStatus } from '@/util/constants'
+import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { DisplayModeValues, Product as ProductEnum, ProductStatus } from '@/util/constants'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
@@ -147,8 +203,9 @@ const TOS_NEEDED_PRODUCT = ['VS']
     ProductFee
   }
 })
-export default class Product extends Vue {
+export default class Product extends Mixins(AccountMixin) {
   @Prop({ default: undefined }) productDetails: OrgProduct
+  @Prop({ default: undefined }) activeSubProduct: OrgProduct
   @Prop({ default: undefined }) orgProduct: AccountFee // product available for orgs
   @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode // product
   @Prop({ default: false }) isProductActionLoading: boolean // loading
@@ -164,7 +221,7 @@ export default class Product extends Vue {
 
   private termsAccepted: boolean = false
   public productSelected:boolean = false
-  private viewOnly = DisplayModeValues.VIEW_ONLY
+  viewOnly = DisplayModeValues.VIEW_ONLY
 
   $refs: {
     tosForm: HTMLFormElement
@@ -184,28 +241,28 @@ export default class Product extends Vue {
     // lang file have subtitle and description with product code prefix.
     // eg: pprCodeSubtitle, pprCodeDescription
     // Also, returns check box icon and color if the product has been reviewed.
-    const { code } = this.productDetails
-    let subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
-    let details = `${code && code.toLowerCase()}CodeDescription` || ''
+    let { code } = this.productDetails
+    let subTitle = `${code && code.toLowerCase()}CodeSubtitle`
+    let details = `${code && code.toLowerCase()}CodeDescription`
     let decisionMadeIcon = null
     let decisionMadeColorCode = null
 
     if (this.isAccountSettingsView) {
       const status = this.productDetails.subscriptionStatus
       switch (status) {
-        case productStatus.ACTIVE: {
-          subTitle = `${code && code.toLowerCase()}CodeActiveSubtitle` || ''
+        case ProductStatus.ACTIVE: {
+          subTitle = `${code && code.toLowerCase()}CodeActiveSubtitle`
           decisionMadeIcon = 'mdi-check-circle'
           decisionMadeColorCode = 'success'
           break
         }
-        case productStatus.REJECTED: {
-          subTitle = `${code && code.toLowerCase()}CodeRejectedSubtitle` || ''
+        case ProductStatus.REJECTED: {
+          subTitle = `${code && code.toLowerCase()}CodeRejectedSubtitle`
           decisionMadeIcon = 'mdi-close-circle'
           decisionMadeColorCode = 'error'
           break
         }
-        case productStatus.PENDING_STAFF_REVIEW: {
+        case ProductStatus.PENDING_STAFF_REVIEW: {
           subTitle = 'productPendingSubtitle'
           decisionMadeIcon = 'mdi-clock-outline'
           break
@@ -215,8 +272,13 @@ export default class Product extends Vue {
         }
       }
       if (this.isBasicAccountAndPremiumProduct) {
-        subTitle = `${code && code.toLowerCase()}CodeUnselectableSubtitle` || ''
+        subTitle = `${code && code.toLowerCase()}CodeUnselectableSubtitle`
         decisionMadeIcon = 'mdi-minus-box'
+      }
+      // Swap subtitle and details for sub-product specific content
+      if (this.productDetails.code === ProductEnum.MHR && this.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
+        subTitle = `mhrQsCodeActiveSubtitle`
+        details = `${this.activeSubProduct.code && this.activeSubProduct.code.toLowerCase()}CodeDescription`
       }
     }
     return { subTitle, details, decisionMadeIcon, decisionMadeColorCode }
@@ -237,7 +299,7 @@ export default class Product extends Vue {
       return true
     }
     // returns true if product subscription status is unsubscribed and in account settings view
-    if (([productStatus.NOT_SUBSCRIBED] as Array<string>).includes(this.productDetails.subscriptionStatus)) {
+    if (([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(this.productDetails.subscriptionStatus)) {
       return true
     }
     this.termsAccepted = true
@@ -269,9 +331,10 @@ export default class Product extends Vue {
     let forceRemove = false
     // expand if tos needed
     // as per new requirment, show expanded when user tries to click checkbox and not accepted TOS.
-    // need to collaps on uncheck. Since both are using same function emitFromTos will be true when click happend from TOS check box. then no need to collaps
+    // need to collapse on uncheck. Since both are using same function emitFromTos will be true when
+    // click happend from TOS check box. then no need to collapse
     if (this.isTOSNeeded && !this.termsAccepted) {
-      if (!emitFromTos) { // expand and collaps on click if click is not coming from TOS
+      if (!emitFromTos) { // expand and collapse on click if click is not coming from TOS
         this.expand()
       }
       this.productSelected = false
@@ -298,7 +361,7 @@ export default class Product extends Vue {
   }
 
   @Emit('save:saveProductFee')
-  private saveProductFee (data) {
+  saveProductFee (data) {
     return data
   }
 
@@ -322,7 +385,10 @@ export default class Product extends Vue {
   }
 
   &.selected {
-    box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
+    box-shadow: 0 0 0 2px inset var(--v-primary-base),
+                0 3px 1px -2px rgba(0,0,0,.2),
+                0 2px 2px 0 rgba(0,0,0,.14),
+                0 1px 5px 0 rgba(0,0,0,.12) !important;
   }
   &.processing-card{
     border-color: var(--v-primary-base) !important;
@@ -348,6 +414,7 @@ export default class Product extends Vue {
   font-size: 0.875rem;
   letter-spacing: -0.25px;
   position: absolute;
+  white-space: nowrap;
 }
 
 .underline-dotted {

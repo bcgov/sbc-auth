@@ -1,15 +1,23 @@
 <template>
-  <v-form class="mt-8" ref="createAccountInfoForm"  data-test="form-stepper-basic-wrapper">
+  <v-form
+    ref="createAccountInfoForm"
+    class="mt-8"
+    data-test="form-stepper-basic-wrapper"
+  >
     <account-business-type
-    :govmAccount="govmAccount"
-    :errorMessage="errorMessage"
-    :saving="saving"
-    @update:org-business-type="updateOrgBusinessType"
-    @valid="checkOrgBusinessTypeValid">
-    </account-business-type>
+      :govmAccount="govmAccount"
+      :errorMessage="errorMessage"
+      :saving="saving"
+      @update:org-business-type="updateOrgBusinessType"
+      @valid="checkOrgBusinessTypeValid"
+    />
 
-    <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep " v-display-mode>
-      <legend class="mb-3">Mailing Address</legend>
+    <fieldset
+      v-display-mode
+    >
+      <legend class="mb-3">
+        Mailing Address
+      </legend>
       <base-address-form
         ref="mailingAddress"
         :editing="true"
@@ -20,30 +28,39 @@
       />
     </fieldset>
 
-    <v-divider class="mt-4 mb-10"></v-divider>
+    <v-divider class="mt-4 mb-10" />
 
     <v-row>
-      <v-col cols="12" class="form__btns py-0 d-inline-flex">
+      <v-col
+        cols="12"
+        class="form__btns py-0 d-inline-flex"
+      >
         <v-btn
           large
           depressed
           color="default"
+          data-test="btn-back"
           @click="goBack"
-          data-test="btn-back">
-          <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
+        >
+          <v-icon
+            left
+            class="mr-2 ml-n2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           large
           color="primary"
           class="mr-3 save-btn"
           :loading="saving"
           :disabled="!isFormValid() || saving"
-          @click="save"
           data-test="save-button"
+          @click="save"
         >
-          <span >Next
+          <span>Next
             <v-icon class="ml-2">mdi-arrow-right</v-icon>
           </span>
         </v-btn>
@@ -51,26 +68,25 @@
           :disabled="saving"
           :target-route="cancelUrl"
           :showConfirmPopup="false"
-        ></ConfirmCancelButton>
+        />
       </v-col>
     </v-row>
   </v-form>
 </template>
 
 <script lang="ts">
-import { Account, LDFlags, LoginSource, SessionStorageKeys } from '@/util/constants'
-import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { Account, LoginSource } from '@/util/constants'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
-import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -79,22 +95,19 @@ import { getModule } from 'vuex-module-decorators'
     ConfirmCancelButton
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization',
       'currentOrgAddress',
       'currentOrganizationType'
     ]),
-    ...mapState('user', ['userProfile', 'currentUser'])
+    ...mapState(useUserStore, ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganization', 'setOrgName', 'setCurrentOrganizationAddress'
-    ]),
-    ...mapActions('org', ['syncMembership', 'syncOrganization', 'isOrgNameAvailable'])
+    ...mapActions(useOrgStore, ['syncMembership', 'syncOrganization', 'isOrgNameAvailable', 'setCurrentOrganization',
+      'setCurrentOrganizationAddress'])
   }
 })
 export default class AccountCreateBasic extends Mixins(Steppable) {
-  private orgStore = getModule(OrgModule, this.$store)
   private errorMessage: string = ''
   private saving = false
   private isBasicAccount: boolean = true
@@ -107,13 +120,13 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   @Prop() cancelUrl: string
   @Prop({ default: false }) govmAccount: boolean
   @Prop({ default: false }) readOnly: boolean
-  private isBaseAddressValid = !this.isExtraProvUser && !this.enablePaymentMethodSelectorStep
+  private isBaseAddressValid = false
   private readonly currentOrgAddress!: Address
   private readonly currentOrganizationType!: string
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private orgBusinessTypeLocal: OrgBusinessType = {}
 
-  private baseAddressSchema: {} = addressSchema
+  private baseAddressSchema = addressSchema
   private isOrgBusinessTypeValid = false
   // Org Id variable to store the current organization ID of the invitation IDIR account
   private orgId: number = null
@@ -130,13 +143,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     if (this.govmAccount) {
       this.orgId = this.currentOrganization.id
     }
-    if (this.enablePaymentMethodSelectorStep) {
-      this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
-    }
-  }
-
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+    this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
   }
 
   private get address () {
@@ -159,6 +166,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private get isExtraProvUser () {
+    // Remove Vuex with Vue 3
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 
@@ -172,7 +180,10 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
       const checkNameAVailability = (this.orgBusinessTypeLocal.name !== this.currentOrganization?.name)
       // no need to check name if govmAccount
       if (checkNameAVailability && !this.govmAccount) {
-        const available = await this.isOrgNameAvailable({ 'name': this.orgBusinessTypeLocal.name, 'branchName': this.orgBusinessTypeLocal.branchName })
+        const available = await this.isOrgNameAvailable({
+          'name': this.orgBusinessTypeLocal.name,
+          'branchName': this.orgBusinessTypeLocal.branchName
+        })
         if (!available) {
           this.errorMessage =
                 'An account with this name already exists. Try a different account name.'

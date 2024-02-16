@@ -177,13 +177,15 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
     def approve_or_reject_bceid_admin(admin_user_id: int, is_approved: bool, user: UserModel):
         """Mark the BCeId Admin Affidavit as approved or rejected."""
         current_app.logger.debug('<approve_or_reject_bceid_admin ')
-        affidavit: AffidavitModel = AffidavitModel.find_pending_by_user_id(admin_user_id)
+        affidavit: AffidavitModel = AffidavitModel.find_approved_by_user_id(admin_user_id)
         if affidavit is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
+            affidavit = AffidavitModel.find_pending_by_user_id(admin_user_id)
+            if affidavit is None:
+                raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        affidavit.decision_made_by = user.username
-        affidavit.decision_made_on = datetime.now()
-        affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
+            affidavit.decision_made_by = user.username
+            affidavit.decision_made_on = datetime.now()
+            affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
 
         current_app.logger.debug('>approve_or_reject_bceid_admin ')
         return Affidavit(affidavit)

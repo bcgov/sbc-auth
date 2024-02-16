@@ -1,12 +1,16 @@
 <template>
   <v-container>
     <div class="view-header flex-column">
-      <h1 class="view-header__title mb-4">Create a New Account</h1>
+      <h1 class="view-header__title mb-4">
+        Create a New Account
+      </h1>
       <p>Tell us about this new account, and enter an account name.</p>
     </div>
     <v-card class="profile-card">
       <v-container>
-        <v-card-title class="mb-3">Account Information</v-card-title>
+        <v-card-title class="mb-3">
+          Account Information
+        </v-card-title>
         <v-card-text>
           <CreateAccountInfoForm />
         </v-card-text>
@@ -17,10 +21,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
-import { Organization } from '@/models/Organization'
-import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {

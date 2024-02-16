@@ -15,6 +15,7 @@
 
 Test suite to ensure that the affidavit service routines are working as expected.
 """
+import mock
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.models import Task as TaskModel
 from auth_api.services import Org as OrgService
@@ -23,12 +24,13 @@ from auth_api.utils.enums import (AffidavitStatus, LoginSource, OrgStatus, TaskS
                                   TaskRelationshipStatus)
 from tests.utilities.factory_scenarios import TestAffidavit, TestJwtClaims, TestOrgInfo, TestUserInfo  # noqa: I005
 from tests.utilities.factory_utils import factory_user_model, factory_user_model_with_contact, patch_token_info
+from tests.conftest import mock_token
 
 
 def test_create_affidavit(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be created."""
     user = factory_user_model()
-    token_info = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    token_info = TestJwtClaims.get_test_real_user(user.keycloak_guid, idp_userid=user.idp_userid)
     patch_token_info(token_info, monkeypatch)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     affidavit = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
@@ -40,7 +42,7 @@ def test_create_affidavit(session, keycloak_mock, monkeypatch):  # pylint:disabl
 def test_create_affidavit_duplicate(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that duplicate Affidavit cannot be created."""
     user = factory_user_model()
-    token_info = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    token_info = TestJwtClaims.get_test_real_user(user.keycloak_guid, idp_userid=user.idp_userid)
     patch_token_info(token_info, monkeypatch)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
@@ -56,10 +58,12 @@ def test_create_affidavit_duplicate(session, keycloak_mock, monkeypatch):  # pyl
     assert affidavit3.as_dict().get('status', None) == AffidavitStatus.PENDING.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be approved."""
     user = factory_user_model_with_contact(user_info=TestUserInfo.user_bceid_tester)
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid)
     patch_token_info(token_info, monkeypatch)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
@@ -81,10 +85,12 @@ def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     assert affidavit['status'] == AffidavitStatus.APPROVED.value
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_task_creation(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that affidavit reupload creates new task."""
     user = factory_user_model_with_contact()
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid)
     patch_token_info(token_info, monkeypatch)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
@@ -100,10 +106,12 @@ def test_task_creation(session, keycloak_mock, monkeypatch):  # pylint:disable=u
     assert TaskModel.find_by_task_for_account(org_id, TaskStatus.OPEN.value) is not None
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_reject_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be rejected."""
     user = factory_user_model_with_contact(user_info=TestUserInfo.user_bceid_tester)
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid)
     patch_token_info(token_info, monkeypatch)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()

@@ -1,8 +1,0 @@
-{
-  "realm": "fcf0kpqr",
-  "auth-server-url": "https://dev.oidc.gov.bc.ca/auth/",
-  "ssl-required": "external",
-  "resource": "account-web",
-  "public-client": true,
-  "confidential-port": 0
-}

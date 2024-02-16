@@ -1,17 +1,12 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import Vue from 'vue'
-import VueI18n from 'vue-i18n'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-Vue.use(VueI18n)
+import { useUserStore } from '@/stores/user'
 
 describe('PPRLauncher.vue', () => {
   let wrapper: Wrapper<any>
+  let userStore: any
   const assetLauncherText = 'Register or search for manufactured homes and register or search for legal claims on ' +
       'personal property.'
   const assetLauncherTitle = 'Staff Asset Registries'
@@ -20,32 +15,20 @@ describe('PPRLauncher.vue', () => {
   const mhrLauncherText = 'Register or search for legal claims on manufactured homes.'
   const mhrLauncherTitle = 'Staff Manufactured Home Registry'
 
-  const pprUrl = 'ppr-web'
+  const pprUrl = 'https://dev.assets.bcregistry.gov.bc.ca/'
   const config = {
     'PPR_WEB_URL': pprUrl
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
-
-  let userModule = {
-    namespaced: true,
-    state: {
-      currentUser: {
-        fullName: 'user2',
-        roles: ['ppr']
-      }
-    }
-  }
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     const vuetify = new Vuetify({})
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: { user: userModule }
-    })
+    userStore = useUserStore()
+    userStore.currentUser = {
+      fullName: 'user2',
+      roles: ['ppr']
+    } as any
 
     const $t = (val: string) => {
       switch (val) {
@@ -59,7 +42,6 @@ describe('PPRLauncher.vue', () => {
       }
     }
     wrapper = mount(PPRLauncher, {
-      store,
       localVue,
       vuetify,
       mocks: { $t }
@@ -67,12 +49,12 @@ describe('PPRLauncher.vue', () => {
   })
   afterEach(() => {
     wrapper.destroy()
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('is a Vue instance', async () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders img, title, text and button as PPR staff', async () => {
@@ -81,26 +63,24 @@ describe('PPRLauncher.vue', () => {
     expect(wrapper.find('.product-info').exists()).toBe(true)
     expect(wrapper.find('.product-info h2').text()).toBe('Staff Personal Property Registry')
     expect(wrapper.find('.product-info p').text()).toContain('claims on personal property.')
-    expect(wrapper.find('.action-btn').exists()).toBe(true)
-    expect(wrapper.find('.action-btn').text()).toContain('Open')
-    expect(wrapper.vm.pprUrl).toEqual(pprUrl)
+    expect(wrapper.find('.product-info__btn').exists()).toBe(true)
+    expect(wrapper.find('.product-info__btn').text()).toContain('Open')
   })
 
   it('renders img, title, text and button as MHR staff', async () => {
-    userModule.state.currentUser.roles = ['mhr']
+    userStore.currentUser.roles = ['mhr']
     await Vue.nextTick()
     expect(wrapper.find('.product-container').exists()).toBe(true)
     expect(wrapper.find('.product-img').exists()).toBe(true)
     expect(wrapper.find('.product-info').exists()).toBe(true)
     expect(wrapper.find('.product-info h2').text()).toBe('Staff Manufactured Home Registry')
     expect(wrapper.find('.product-info p').text()).toContain('claims on manufactured homes.')
-    expect(wrapper.find('.action-btn').exists()).toBe(true)
-    expect(wrapper.find('.action-btn').text()).toContain('Open')
-    expect(wrapper.vm.pprUrl).toEqual(pprUrl)
+    expect(wrapper.find('.product-info__btn').exists()).toBe(true)
+    expect(wrapper.find('.product-info__btn').text()).toContain('Open')
   })
 
   it('renders img, title, text and button as Asset staff', async () => {
-    userModule.state.currentUser.roles = ['mhr', 'ppr']
+    userStore.currentUser.roles = ['mhr', 'ppr']
     await Vue.nextTick()
     expect(wrapper.find('.product-container').exists()).toBe(true)
     expect(wrapper.find('.product-img').exists()).toBe(true)
@@ -108,8 +88,7 @@ describe('PPRLauncher.vue', () => {
     expect(wrapper.find('.product-info h2').text()).toBe('Staff Asset Registries')
     expect(wrapper.find('.product-info p').text()).toContain('manufactured homes and register or ' +
         'search for legal claims on personal property.')
-    expect(wrapper.find('.action-btn').exists()).toBe(true)
-    expect(wrapper.find('.action-btn').text()).toContain('Open')
-    expect(wrapper.vm.pprUrl).toEqual(pprUrl)
+    expect(wrapper.find('.product-info__btn').exists()).toBe(true)
+    expect(wrapper.find('.product-info__btn').text()).toContain('Open')
   })
 })

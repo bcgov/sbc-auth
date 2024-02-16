@@ -4,7 +4,6 @@ import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -12,22 +11,21 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
+const config = { 'REGISTRY_HOME_URL': 'hello' }
+
 describe('MaintainBusinessView.vue', () => {
   let wrapper: any
   let wrapperFactory: any
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
     const router = new VueRouter()
-
-    const store = new Vuex.Store({})
 
     wrapperFactory = (propsData) => {
       return mount(MaintainBusinessView, {
         localVue,
-        store,
         router,
         vuetify,
         propsData: {
@@ -35,6 +33,11 @@ describe('MaintainBusinessView.vue', () => {
         },
         mocks: {
           $t: (mock) => mock
+        },
+        computed: {
+          enableBcCccUlc () {
+            return true
+          }
         }
       })
     }
@@ -43,17 +46,18 @@ describe('MaintainBusinessView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
-    expect(wrapper.find(MaintainBusinessView).exists()).toBe(true)
-    expect(wrapper.find(LearnMoreButton).exists()).toBe(true)
+    expect(wrapper.findComponent(MaintainBusinessView).exists()).toBe(true)
+    expect(wrapper.findComponent(LearnMoreButton).exists()).toBe(true)
   })
 
   it('renders the correct buttons when authenticated', () => {
@@ -62,48 +66,44 @@ describe('MaintainBusinessView.vue', () => {
     const learnMoreBtn = authenticatedBtns[1]
 
     expect(manageBusinessBtn).toBeDefined()
-    expect(manageBusinessBtn.textContent).toContain('Manage an Existing Business')
+    expect(manageBusinessBtn.textContent).toContain('Manage my Business')
 
     expect(learnMoreBtn).toBeDefined()
     expect(learnMoreBtn.textContent).toContain('Learn More')
   })
 
-  it('renders the login button when NOT authenticated', () => {
+  it('renders the manage business button when NOT authenticated', () => {
     // Render Un-Authenticated
     const wrapper = wrapperFactory({ userProfile: null })
 
     const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
-    const loginBtn = authenticatedBtns[0]
+    const manageBusinessBtn = authenticatedBtns[0]
     const learnMoreBtn = authenticatedBtns[1]
 
-    expect(loginBtn).toBeDefined()
-    expect(loginBtn.textContent).toContain('Create a BC Registries account')
+    expect(manageBusinessBtn).toBeDefined()
+    expect(manageBusinessBtn.textContent).toContain('Manage my Business')
 
     expect(learnMoreBtn).toBeDefined()
     expect(learnMoreBtn.textContent).toContain('Learn More')
   })
 
   it('renders the correct text and number of bullet points', () => {
-    wrapper.vm.bulletPoints = [
-      { text: 'Bullet 1' },
-      { text: 'Bullet 2',
-        subText: [
-          { text: 'Sub Bullet 3' },
-          { text: 'Sub Bullet 4' }
-        ]
-      }
-    ]
-
     const bulletListItems = wrapper.vm.$el.querySelectorAll('.list-item')
     const bulletListSubItems = wrapper.vm.$el.querySelectorAll('.list-item-sub')
 
-    expect(bulletListItems[0].textContent).toContain('Bullet 1')
-    expect(bulletListItems[1].textContent).toContain('Bullet 2')
+    expect(bulletListItems[0].textContent).toContain('Once your business is incorporated or registered you are ' +
+      'required to keep information about your business up to date with the Registry.')
+    expect(bulletListItems[1].textContent).toContain('You can manage your business information using your BC ' +
+      'Registries account:')
 
-    expect(bulletListSubItems[0].textContent).toContain('Sub Bullet 3')
-    expect(bulletListSubItems[1].textContent).toContain('Sub Bullet 4')
+    expect(bulletListSubItems[0].textContent).toContain('See which Annual Reports are due for your corporation and ' +
+      'file each year.')
+    expect(bulletListSubItems[1].textContent).toContain('View and change your current directors or owners and ' +
+      'addresses.')
+    expect(bulletListSubItems[2].textContent).toContain('See the history of your business\' filings and download ' +
+      'copies of all documents including your Statement of Registration, Certificate of Incorporation and more.')
 
-    expect(bulletListItems.length).toStrictEqual(4)
-    expect(bulletListSubItems.length).toStrictEqual(2)
+    expect(bulletListItems.length).toStrictEqual(5)
+    expect(bulletListSubItems.length).toStrictEqual(3)
   })
 })

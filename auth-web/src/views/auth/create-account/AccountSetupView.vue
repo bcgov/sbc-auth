@@ -1,63 +1,83 @@
 <template>
-  <v-container class="view-container" data-test="div-account-setup-container">
+  <v-container
+    class="view-container"
+    data-test="div-account-setup-container"
+  >
     <!-- Loading status -->
     <v-fade-transition>
-      <div class="loading-container" v-if="isCurrentUserSettingLoading">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isCurrentUserSettingLoading"/>
+      <div
+        v-if="isCurrentUserSettingLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isCurrentUserSettingLoading"
+        />
       </div>
     </v-fade-transition>
     <template v-if="!isCurrentUserSettingLoading">
-    <div class="view-header flex-column">
-      <h1 class="view-header__title">{{$t('createBCRegistriesAccount')}}</h1>
-      <p class="mt-3 mb-0">Create an account to access BC Registries products and services.</p>
-    </div>
-    <v-card flat>
-      <Stepper
-        :stepper-configuration="stepperConfig"
-        :isLoading="isLoading"
-        @final-step-action="verifyAndCreateAccount"
-      ></Stepper>
-    </v-card>
-    <!-- Alert Dialog (Error) -->
-    <ModalDialog
-      ref="errorDialog"
-      :title="errorTitle"
-      :text="errorText"
-      dialog-class="notify-dialog"
-      max-width="640"
-      data-test="modal-account-setup-error"
-    >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-      </template>
-      <template v-slot:actions>
-        <v-btn
-          large
-          color="error"
-          class="font-weight-bold"
-          @click="closeError"
-        >
-          OK
-        </v-btn>
-      </template>
-    </ModalDialog>
-  </template>
+      <div class="view-header flex-column">
+        <h1 class="view-header__title">
+          {{ $t('createBCRegistriesAccount') }}
+        </h1>
+        <p class="mt-3 mb-0">
+          Create an account to access BC Registries products and services.
+        </p>
+      </div>
+      <v-card flat>
+        <Stepper
+          :stepper-configuration="stepperConfig"
+          :isLoading="isLoading"
+          @final-step-action="verifyAndCreateAccount"
+        />
+      </v-card>
+      <!-- Alert Dialog (Error) -->
+      <ModalDialog
+        ref="errorDialog"
+        :title="errorTitle"
+        :text="errorText"
+        dialog-class="notify-dialog"
+        max-width="640"
+        data-test="modal-account-setup-error"
+      >
+        <template #icon>
+          <v-icon
+            large
+            color="error"
+          >
+            mdi-alert-circle-outline
+          </v-icon>
+        </template>
+        <template #actions>
+          <v-btn
+            large
+            color="error"
+            class="font-weight-bold"
+            @click="closeError"
+          >
+            OK
+          </v-btn>
+        </template>
+      </ModalDialog>
+    </template>
   </v-container>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { LDFlags, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
+import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
+import { Action } from 'pinia-class'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
@@ -65,8 +85,9 @@ import SelectProductService from '@/components/auth/create-account/SelectProduct
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import { namespace } from 'vuex-class'
-
-const UserModule = namespace('user')
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
+// This will be taken out with Vue3.
 const AuthModule = namespace('auth')
 
 @Component({
@@ -83,15 +104,15 @@ const AuthModule = namespace('auth')
     PremiumChooser
   },
   computed: {
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'userContact'
     ]),
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrgPaymentType'
     ])
   },
   methods: {
-    ...mapActions('user',
+    ...mapActions(useUserStore,
       [
         'createUserContact',
         'updateUserContact',
@@ -99,7 +120,7 @@ const AuthModule = namespace('auth')
         'createAffidavit',
         'updateUserFirstAndLastName'
       ]),
-    ...mapActions('org',
+    ...mapActions(useOrgStore,
       [
         'createOrg',
         'validatePADInfo',
@@ -122,14 +143,14 @@ export default class AccountSetupView extends Vue {
   private errorText = ''
   private isLoading: boolean = false
   private isCurrentUserSettingLoading: boolean = false
-  @Prop({ default: '' }) redirectToUrl !: string;
-  @Prop({ default: false }) skipConfirmation !: boolean;
+  @Prop({ default: '' }) redirectToUrl !: string
+  @Prop({ default: false }) skipConfirmation !: boolean
 
-  @AuthModule.Getter('isAuthenticated') private isAuthenticated!: boolean
-  @UserModule.Action('getUserAccountSettings') private getUserAccountSettings!: () => Promise<any>
+  @AuthModule.Getter('isAuthenticated') readonly isAuthenticated!: boolean
+  @Action(useUserStore) readonly getUserAccountSettings!: () => Promise<any>
 
   $refs: {
-    errorDialog: ModalDialog
+    errorDialog: InstanceType<typeof ModalDialog>
   }
 
   private stepperConfig: Array<StepConfiguration> =
@@ -172,21 +193,15 @@ export default class AccountSetupView extends Vue {
     ]
 
   private beforeMount () {
-    if (this.enablePaymentMethodSelectorStep) {
-      const paymentMethodStep = {
-        title: 'Payment Method',
-        stepName: 'Payment Method',
-        component: PaymentMethodSelector,
-        componentProps: {}
-      }
-      this.stepperConfig.push(paymentMethodStep)
-      // use the new premium chooser account when flag is enabled
-      this.stepperConfig[2].alternate.component = PremiumChooser
+    const paymentMethodStep = {
+      title: 'Payment Method',
+      stepName: 'Payment Method',
+      component: PaymentMethodSelector,
+      componentProps: {}
     }
-  }
-
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+    this.stepperConfig.push(paymentMethodStep)
+    // use the new premium chooser account when flag is enabled
+    this.stepperConfig[2].alternate.component = PremiumChooser
   }
 
   private async verifyAndCreateAccount () {
@@ -237,6 +252,7 @@ export default class AccountSetupView extends Vue {
       await this.syncMembership(organization.id)
       // remove GOVN accoutn type from session
       ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
+      // Remove with Vue 3
       this.$store.commit('updateHeader')
       this.$router.push('/setup-account-success')
     } catch (err) {
@@ -276,7 +292,7 @@ export default class AccountSetupView extends Vue {
     }
   }
 
-  private closeError () {
+  closeError () {
     this.$refs.errorDialog.close()
   }
 }

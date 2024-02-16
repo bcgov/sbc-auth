@@ -18,8 +18,12 @@ Test-Suite to ensure that the /users endpoint is working as expected.
 """
 import copy
 import json
+import pytest
 import time
 import uuid
+import mock
+
+from sqlalchemy import event
 
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
@@ -27,6 +31,8 @@ from auth_api.models import Affidavit as AffidavitModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
+from auth_api.models import Org as OrgModel
+from auth_api.models.org import receive_before_insert, receive_before_update
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
@@ -41,6 +47,8 @@ from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
     factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_product_model,
     factory_user_model, patch_token_info)
+from tests.utilities.sqlalchemy import clear_event_listeners
+from tests.conftest import mock_token
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -53,6 +61,37 @@ def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     assert schema_utils.validate(rv.json, 'user_response')[0]
 
 
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
+def test_add_user_staff_org(client, jwt, session, keycloak_mock, monkeypatch):
+    """Assert that adding and removing membership to a staff org occurs."""
+    # Create a user and org
+    user_model = factory_user_model(user_info=TestUserInfo.user_test)
+
+    # Clearing the event listeners here, because we can't change the type_code.
+    clear_event_listeners(OrgModel)
+    patch_token_info(TestJwtClaims.user_test, monkeypatch)
+    OrgService.create_org(TestOrgInfo.staff_org, user_id=user_model.id).as_dict()
+    event.listen(OrgModel, 'before_update', receive_before_update, raw=True)
+    event.listen(OrgModel, 'before_insert', receive_before_insert)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.user_test)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('id') is not None
+
+    staff_memberships = MembershipModel.find_active_staff_org_memberships_for_user(rv.json.get('id'))
+    assert len(staff_memberships) == 1
+    assert staff_memberships[0].status == Status.ACTIVE.value
+
+    patch_token_info(TestJwtClaims.get_test_real_user(sub=user_model.keycloak_guid), monkeypatch)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_real_user(sub=user_model.keycloak_guid))
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    staff_memberships = MembershipModel.find_active_staff_org_memberships_for_user(rv.json.get('id'))
+    assert len(staff_memberships) == 0  # 0, because our row was set to INACTIVE.
+
+
 def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock, monkeypatch):
     """Assert different conditions of user deletion."""
     admin_user = TestUserInfo.user_bcros_active
@@ -60,7 +99,7 @@ def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock, monkeypat
     user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
     factory_membership_model(user.id, org.id)
     factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
-    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid, idp_userid=user.idp_userid)
 
     patch_token_info(owner_claims, monkeypatch)
     member = TestAnonymousMembership.generate_random_user(USER)
@@ -130,7 +169,7 @@ def test_add_back_a_delete_bcros(client, jwt, session, keycloak_mock, monkeypatc
     user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
     factory_membership_model(user.id, org.id)
     factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
-    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid, idp_userid=user.idp_userid)
     member = TestAnonymousMembership.generate_random_user(USER)
     membership = [member,
                   TestAnonymousMembership.generate_random_user(COORDINATOR)]
@@ -649,8 +688,10 @@ def test_delete_unknown_user_returns_404(client, jwt, session):  # pylint:disabl
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
+@pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mock,
-                                               monkeypatch):  # pylint:disable=unused-argument
+                                               monkeypatch, environment):  # pylint:disable=unused-argument
     """Test if the user is the only owner of a team assert status is 400."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -661,6 +702,7 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
 
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims['sub'] = str(user_model.keycloak_guid)
+    claims['idp_userid'] = str(user_model.idp_userid)
 
     patch_token_info(claims, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
@@ -669,7 +711,7 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
 
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment=environment)
     affiliation.save()
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -678,8 +720,10 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+@pytest.mark.parametrize('environment', ['test', None])
+@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
 def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock,
-                                           monkeypatch):  # pylint:disable=unused-argument
+                                           monkeypatch, environment):  # pylint:disable=unused-argument
     """Test if the user is the member of a team assert status is 204."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -697,6 +741,7 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock,
 
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims['sub'] = str(user_model2.keycloak_guid)
+    claims['idp_userid'] = str(user_model2.idp_userid)
 
     patch_token_info(claims, monkeypatch)
 
@@ -705,7 +750,7 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock,
     org_id = org_dictionary['id']
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment=environment)
     affiliation.save()
 
     membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='USER',

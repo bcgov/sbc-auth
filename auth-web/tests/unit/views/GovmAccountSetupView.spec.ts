@@ -1,11 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-
 import GovmAccountSetupView from '@/views/auth/create-account/GovmAccountSetupView.vue'
-// import { AccountStatus } from '@/util/constants'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import Vuelidate from 'vuelidate'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
@@ -19,11 +17,11 @@ document.body.setAttribute('data-app', 'true')
 
 describe('GovmAccountSetupView.vue', () => {
   let wrapper: any
-  let userModule: any
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    localVue.use(Vuelidate)
 
     const orgModule = {
       namespaced: true,
@@ -31,6 +29,8 @@ describe('GovmAccountSetupView.vue', () => {
       }
     }
 
+    // Remove with Vue 3 upgrade
+    // We need a store for this one it calls auth/currentLoginSource - which is in sbc-common-components for now.
     const store = new Vuex.Store({
       state: {},
       strict: false,
@@ -51,12 +51,12 @@ describe('GovmAccountSetupView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('GovmAccountSetupView is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('should render with h1', () => {
@@ -64,7 +64,7 @@ describe('GovmAccountSetupView.vue', () => {
   })
 
   it('should render page title icon color correctly', () => {
-    expect(wrapper.find(ModalDialog).exists()).toBe(true)
+    expect(wrapper.findComponent(ModalDialog).exists()).toBe(true)
   })
 
   it('should call createAccount on emit', async () => {

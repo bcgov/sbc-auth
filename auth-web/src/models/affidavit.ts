@@ -5,4 +5,5 @@ export interface AffidavitInformation {
   documentId: string
   documentUrl: string
   issuer: string
+  status: string
 }

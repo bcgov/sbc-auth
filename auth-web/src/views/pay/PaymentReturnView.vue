@@ -1,15 +1,35 @@
 <template>
-    <div id="app">
-        <v-container>
-            <v-layout row justify-center align-center>
-                <v-layout row justify-center align-center column class="loading-progressbar"  v-if="isLoading" >
-                <v-progress-circular color="primary" :size="100" :width="8" indeterminate ></v-progress-circular>
-                <div class="mt-6 font-italic font-weight-bold">Processing your payment ...</div>
-                </v-layout>
-                <PaymentErrorMessage  :errorType="errorType" :tryAgainURL="tryAgainURL" :backUrl="backUrl" v-else/>
-            </v-layout>
-        </v-container>
-    </div>
+  <div id="app">
+    <v-container>
+      <v-row
+        justify="center"
+        align="center"
+      >
+        <v-row
+          v-if="isLoading"
+          justify="center"
+          align="center"
+          class="loading-progressbar"
+        >
+          <v-progress-circular
+            color="primary"
+            :size="100"
+            :width="8"
+            indeterminate
+          />
+          <div class="mt-6 font-italic font-weight-bold">
+            Processing your payment ...
+          </div>
+        </v-row>
+        <PaymentErrorMessage
+          v-else
+          :errorType="errorType"
+          :tryAgainURL="tryAgainURL"
+          :backUrl="backUrl"
+        />
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script  lang="ts">
@@ -61,7 +81,7 @@ export default class PaymentReturnView extends Vue {
                 this.tryAgainURL = `/makepayment/${this.paymentId}/${encodeURIComponent(this.returnUrl)}`
               }
             })
-            .catch(response => {
+            .catch(() => {
               const status = btoa('FAILED') // convert to base 64
               const appendType = this.appendURLtype(this.returnUrl)
               this.isLoading = false

@@ -1,28 +1,47 @@
 <template>
-  <v-card v-if="showAutoComplete" class="mt-0 auto-complete-card" elevation="5" data-test="auto-complete-card">
-    <v-row no-gutters justify="start" class="mx-0 pl-2 pr-5">
-      <v-col no-gutters cols="12">
+  <v-card
+    v-if="showAutoComplete"
+    class="mt-0 auto-complete-card"
+    elevation="5"
+    data-test="auto-complete-card"
+  >
+    <v-row
+      no-gutters
+      justify="start"
+      class="mx-0 pl-2 pr-5"
+    >
+      <v-col
+        class="no-gutters"
+        cols="12"
+      >
         <div class="content px-2 pt-1">
-        <v-list class="pt-0 content-list">
-          <v-list-item-group v-model="autoCompleteSelectedIndex">
-            <v-list-item v-for="(result, i) in autoCompleteResults"
-            :key="i"
-            class="pt-0 pb-0 pl-1 auto-complete-item">
-              <v-list-item-content class="pt-2 pb-2">
-                <v-list-item-title :data-test="getIndexedTag('auto-complete-item', i)" v-text="result.value"></v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list-item-group>
-        </v-list>
-         <v-btn append
-        icon
-        x-small
-        right
-        class="auto-complete-close-btn"
-        data-test="auto-complete-close-btn"
-        @click="autoCompleteIsActive=false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
+          <v-list class="pt-0 content-list">
+            <v-list-item-group v-model="autoCompleteSelectedIndex">
+              <v-list-item
+                v-for="(result, i) in autoCompleteResults"
+                :key="i"
+                class="pt-0 pb-0 pl-1 auto-complete-item"
+              >
+                <v-list-item-content class="pt-2 pb-2">
+                  <v-list-item-title
+                    :data-test="getIndexedTag('auto-complete-item', i)"
+                    v-text="result.value"
+                  />
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
+          <v-btn
+            append
+            icon
+            x-small
+            right
+            class="auto-complete-close-btn"
+            data-test="auto-complete-close-btn"
+            @click="autoCompleteIsActive=false"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
         </div>
       </v-col>
     </v-row>
@@ -32,22 +51,21 @@
 <script lang="ts">
 import { AutoCompleteResponse, AutoCompleteResult } from '@/models/AutoComplete'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Action } from 'pinia-class'
 import { ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT } from '@/util/constants'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/stores/org'
 
 @Component({})
 export default class OrgNameAutoComplete extends Vue {
-    @OrgModule.Action('getOrgNameAutoComplete') public getOrgNameAutoComplete!:(searchValue: string) =>Promise<AutoCompleteResponse>
+    @Action(useOrgStore) public getOrgNameAutoComplete!:(searchValue: string) => Promise<AutoCompleteResponse>
     @Prop({ default: false }) private setAutoCompleteIsActive: boolean
     @Prop({ default: '' }) private searchValue: string
 
-    private autoCompleteResults: AutoCompleteResult[] = []
-    private autoCompleteSelectedIndex : number = -1
-    private autoCompleteIsActive: boolean = false
+    autoCompleteResults: AutoCompleteResult[] = []
+    autoCompleteSelectedIndex : number = -1
+    autoCompleteIsActive: boolean = false
 
-    private get showAutoComplete () {
+    get showAutoComplete () {
       return this.autoCompleteResults.length > 0 && this.autoCompleteIsActive
     }
 
@@ -95,7 +113,7 @@ export default class OrgNameAutoComplete extends Vue {
       }
     }
 
-    private getIndexedTag (tag, index): string {
+    getIndexedTag (tag, index): string {
       return `${tag}-${index}`
     }
 }

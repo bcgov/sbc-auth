@@ -28,12 +28,44 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """Product code table to store all the products supported by auth system."""
 
     __tablename__ = 'product_codes'
+    # this mapper is used so that new and old versions of the service can be run simultaneously,
+    # making rolling upgrades easier
+    # This is used by SQLAlchemy to explicitly define which fields we're interested
+    # so it doesn't freak out and say it can't map the structure if other fields are present.
+    # This could occur from a failed deploy or during an upgrade.
+    # The other option is to tell SQLAlchemy to ignore differences, but that is ambiguous
+    # and can interfere with Alembic upgrades.
+    #
+    # NOTE: please keep mapper names in alpha-order, easier to track that way
+    #       Exception, id is always first, _fields first
+    __mapper_args__ = {
+        'include_properties': [
+            'can_resubmit',
+            'code',
+            'default',
+            'description',
+            'hidden',
+            'keycloak_group',
+            'linked_product_code',
+            'need_review',
+            'need_system_admin',
+            'parent_code',
+            'premium_only',
+            'type_code',
+            'url'
+        ]
+    }
+
     type_code = Column(ForeignKey('product_type_codes.code'), default='INTERNAL', nullable=False)
+    parent_code = Column(String(75), nullable=True)  # Used for sub products to define a parent product code
     premium_only = Column(Boolean(), default=False, nullable=True)  # Available only for premium accounts
+    can_resubmit = Column(Boolean(), default=False, nullable=False)  # Allows resubmission of subscription request
     need_review = Column(Boolean(), default=False, nullable=True)  # Need a review from staff for activating product
+    need_system_admin = Column(Boolean(), default=False, nullable=True)  # Needs system admin for activating product
     hidden = Column(Boolean(), default=False, nullable=True)  # Flag to hide from the UI
     linked_product_code = Column(String(100),
                                  nullable=True)  # Product linked to to another product, like business and NR
+    keycloak_group = Column(String(100), nullable=True)
     url = Column(String(100), nullable=True)
 
     @classmethod

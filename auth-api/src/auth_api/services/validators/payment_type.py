@@ -29,12 +29,15 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     default_cc_method = PaymentMethod.DIRECT_PAY.value if current_app.config.get(
         'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
     validator_response = ValidatorResponse()
+    non_ejv_payment_methods = (
+            PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value,
+            PaymentMethod.PAD.value, PaymentMethod.BCOL.value, PaymentMethod.EFT.value)
     org_payment_method_mapping = {
         OrgType.BASIC: (
             PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value, PaymentMethod.ONLINE_BANKING.value),
-        OrgType.PREMIUM: (
-            PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value,
-            PaymentMethod.PAD.value, PaymentMethod.BCOL.value)
+        OrgType.PREMIUM: non_ejv_payment_methods,
+        OrgType.SBC_STAFF: non_ejv_payment_methods,
+        OrgType.STAFF: non_ejv_payment_methods,
     }
     if access_type == AccessType.GOVM.value:
         payment_type = PaymentMethod.EJV.value
@@ -48,7 +51,8 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
             if is_fatal:
                 raise BusinessException(Error.INVALID_INPUT, None)
     else:
+        premium_org_types = (OrgType.PREMIUM, OrgType.SBC_STAFF, OrgType.STAFF)
         payment_type = PaymentMethod.BCOL.value if \
-            org_type == OrgType.PREMIUM else default_cc_method
+            org_type in premium_org_types else default_cc_method
     validator_response.add_info({'payment_type': payment_type})
     return validator_response

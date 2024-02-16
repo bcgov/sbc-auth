@@ -16,6 +16,7 @@
 Test Utility for creating model factory.
 """
 import datetime
+from sqlalchemy import event
 
 from requests.exceptions import HTTPError
 
@@ -30,6 +31,7 @@ from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import Task as TaskModel
 from auth_api.models.membership import Membership as MembershipModel
+from auth_api.models.org import receive_before_insert, receive_before_update
 from auth_api.models.product_subscription import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.user import User as UserModel
 from auth_api.services import Affiliation as AffiliationService
@@ -37,11 +39,12 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.utils.enums import (
-    AccessType, InvitationType, ProductSubscriptionStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus,
-    TaskTypePrefix)
+    AccessType, InvitationType, OrgType, ProductSubscriptionStatus, TaskRelationshipStatus, TaskRelationshipType,
+    TaskStatus, TaskTypePrefix)
 from auth_api.utils.roles import Role
 from tests.utilities.factory_scenarios import (
     JWT_HEADER, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgTypeInfo, TestUserInfo)
+from tests.utilities.sqlalchemy import clear_event_listeners
 
 
 def factory_auth_header(jwt, claims):
@@ -81,6 +84,7 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
                      type=user_type,
                      email='test@test.com',
                      login_source=user_info.get('login_source', None),
+                     idp_userid=user_info.get('idp_userid', None)
                      )
 
     user.save()
@@ -96,7 +100,8 @@ def factory_user_model_with_contact(user_info: dict = TestUserInfo.user1, keyclo
                      keycloak_guid=user_info.get('keycloak_guid', keycloak_guid),
                      type=user_type,
                      email='test@test.com',
-                     login_source=user_info.get('loginSource')
+                     login_source=user_info.get('loginSource'),
+                     idp_userid=user_info.get('idp_userid', None)
                      )
 
     user.save()
@@ -172,12 +177,39 @@ def factory_affiliation_model(entity_id, org_id) -> AffiliationModel:
     return affiliation
 
 
+def factory_affiliation_model_by_identifier(business_identifier, org_id) -> AffiliationModel:
+    """Produce a templated affiliation model."""
+    entity = EntityModel.find_by_business_identifier(business_identifier)
+    affiliation = AffiliationModel(entity_id=entity.id, org_id=org_id)
+    affiliation.save()
+    return affiliation
+
+
 def factory_affiliation_service(entity_id, org_id):
     """Produce a templated affiliation service."""
     affiliation = AffiliationModel(entity=entity_id, org=org_id)
     affiliation.save()
     affiliation_service = AffiliationService(affiliation)
     return affiliation_service
+
+
+def factory_affiliation_invitation(from_org_id,
+                                   business_identifier,
+                                   to_org_id=None,
+                                   to_org_uuid=None,
+                                   invitation_type='EMAIL'):
+    """Produce an affiliation invitation for the given from/to org, business and email."""
+    affiliation_invitation_dict = {
+        'fromOrgId': from_org_id,
+        'toOrgId': to_org_id,
+        'businessIdentifier': business_identifier,
+        'type': invitation_type
+    }
+
+    if to_org_uuid:
+        affiliation_invitation_dict['toOrgUuid'] = to_org_uuid
+
+    return affiliation_invitation_dict
 
 
 def factory_contact_model(contact_info: dict = TestContactInfo.contact1):
@@ -234,10 +266,10 @@ def factory_document_model(version_id, doc_type, content, content_type='text/htm
 
 
 def factory_product_model(org_id: str,
-                          product_code: str = 'PPR'):
+                          product_code: str = 'PPR', status_code=ProductSubscriptionStatus.ACTIVE.value):
     """Produce a templated product model."""
     subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code,
-                                            status_code=ProductSubscriptionStatus.ACTIVE.value)
+                                            status_code=status_code)
     subscription.save()
 
     return subscription
@@ -245,23 +277,24 @@ def factory_product_model(org_id: str,
 
 def factory_task_service(user_id: int = 1, org_id: int = 1):
     """Produce a templated task service."""
-    task_model = factory_task_model(user_id, org_id)
+    task_model = factory_task_model(user_id, org_id, modified_by_id=user_id)
     service = TaskService(task_model)
     return service
 
 
-def factory_task_model(user_id: int = 1, org_id: int = 1):
+def factory_task_model(user_id: int = 1, org_id: int = 1,
+                       modified_by_id: int = None, date_submitted: datetime = datetime.datetime.now()):
     """Produce a Task model."""
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
-    task = TaskModel(id=1,
-                     name='foo',
-                     date_submitted=datetime.datetime.now(),
+    task = TaskModel(name='foo',
+                     date_submitted=date_submitted,
                      relationship_type=TaskRelationshipType.ORG.value,
                      relationship_id=org_id,
                      type=task_type,
                      status=TaskStatus.OPEN.value,
                      related_to=user_id,
-                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+                     modified_by_id=modified_by_id
                      )
     task.save()
     return task
@@ -311,6 +344,11 @@ def patch_token_info(claims, monkeypatch):
 def get_tos_latest_version():
     """Return latest tos version."""
     return '5'
+
+
+def get_tos_pad_latest_version():
+    """Return latest tos pad version."""
+    return 'p1'
 
 
 def patch_pay_account_post(monkeypatch):
@@ -407,3 +445,14 @@ def patch_get_firms_parties(monkeypatch):
             pass
 
     monkeypatch.setattr('auth_api.services.rest_service.RestService.get', lambda *args, **kwargs: MockPartiesResponse())
+
+
+def convert_org_to_staff_org(org_id: int, type_code: OrgType):
+    """Convert an org to a staff org."""
+    # Clearing the event listeners here, because we can't change the type_code.
+    clear_event_listeners(OrgModel)
+    org_db = OrgModel.find_by_id(org_id)
+    org_db.type_code = type_code
+    org_db.save()
+    event.listen(OrgModel, 'before_update', receive_before_update, raw=True)
+    event.listen(OrgModel, 'before_insert', receive_before_insert)

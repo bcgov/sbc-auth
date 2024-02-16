@@ -1,47 +1,40 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
 import { AccessType, LoginSource, SessionStorageKeys } from '@/util/constants'
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
-import MemberDataTable, { ChangeRolePayload } from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
-import { mapActions, mapState } from 'vuex'
-import { Business } from '@/models/business'
+import { Component, Vue } from 'vue-property-decorator'
+import { Member, MembershipStatus, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { mapActions, mapState } from 'pinia'
+import { ChangeRolePayload } from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
-import { Invitation } from '@/models/Invitation'
-import InvitationsDataTable from '@/components/auth/account-settings/team-management/InvitationsDataTable.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import OrgModule from '@/store/modules/org'
-import PendingMemberDataTable from '@/components/auth/account-settings/team-management/PendingMemberDataTable.vue'
-import UserModule from '@/store/modules/user'
-import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
     ModalDialog
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentMembership',
       'currentOrganization'
     ]),
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'currentUser'
     ])
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'updateMember',
       'leaveTeam',
-      'dissolveTeam',
       'deleteUser'
     ])
   }
 })
 export default class TeamManagementMixin extends Vue {
-  private userStore = getModule(UserModule, this.$store)
   protected successTitle: string = ''
   protected successText: string = ''
   protected errorTitle: string = ''
@@ -54,7 +47,7 @@ export default class TeamManagementMixin extends Vue {
   protected primaryActionType: string = ''
   protected secondaryActionText = 'Cancel'
 
-  protected confirmHandler: (modal:ModalDialog) => void = undefined
+  protected confirmHandler: (modal: InstanceType<typeof ModalDialog>) => void = undefined
 
   protected readonly currentMembership!: Member
   protected readonly currentOrganization!: Organization
@@ -65,19 +58,21 @@ export default class TeamManagementMixin extends Vue {
   protected readonly currentUser!: KCUserProfile
 
   private notifyUser = true
-  private modal: ModalDialog
+  private modal: InstanceType<typeof ModalDialog>
 
-  protected showConfirmRemoveModal (member: Member, confirmActionDialog: ModalDialog) {
+  protected showConfirmRemoveModal (member: Member, confirmActionDialog: InstanceType<typeof ModalDialog>) {
     this.modal = confirmActionDialog
     if (member.membershipStatus === MembershipStatus.Pending) {
       this.confirmActionTitle = this.$t('confirmDenyMemberTitle').toString()
-      this.confirmActionText = `Deny account access to <strong>${member?.user?.firstname} ${member?.user?.lastname}</strong?`
+      this.confirmActionText =
+        `Deny account access to <strong>${member?.user?.firstname} ${member?.user?.lastname}</strong>?`
       this.confirmHandler = this.deny
       this.primaryActionText = 'Deny'
       this.primaryActionType = 'error'
     } else {
       this.confirmActionTitle = this.$t('confirmRemoveMemberTitle').toString()
-      this.confirmActionText = `Remove team member <strong>${member?.user?.firstname} ${member?.user?.lastname}</strong> from this account?`
+      this.confirmActionText =
+        `Remove team member <strong>${member?.user?.firstname} ${member?.user?.lastname}</strong> from this account?`
       this.confirmHandler = this.removeMember
       this.primaryActionText = 'Remove'
       this.primaryActionType = 'error'
@@ -86,7 +81,7 @@ export default class TeamManagementMixin extends Vue {
     confirmActionDialog.open()
   }
 
-  protected showConfirmChangeRoleModal (payload: ChangeRolePayload, confirmActionDialogWithQuestion: ModalDialog) {
+  protected showConfirmChangeRoleModal (payload: ChangeRolePayload, confirmActionDialogWithQuestion: InstanceType<typeof ModalDialog>) {
     if (payload.member.membershipTypeCode.toString() === payload.targetRole.toString()) {
       return
     }
@@ -101,7 +96,7 @@ export default class TeamManagementMixin extends Vue {
     confirmActionDialogWithQuestion.open()
   }
 
-  protected showConfirmLeaveTeamModal (confirmActionDialog: ModalDialog) {
+  protected showConfirmLeaveTeamModal (confirmActionDialog: InstanceType<typeof ModalDialog>) {
     this.modal = confirmActionDialog
     this.confirmActionTitle = this.$t('confirmLeaveTeamTitle').toString()
     this.confirmActionText = this.$t('confirmLeaveTeamText').toString()
@@ -110,7 +105,7 @@ export default class TeamManagementMixin extends Vue {
     confirmActionDialog.open()
   }
 
-  protected showConfirmDissolveModal (confirmActionDialog: ModalDialog) {
+  protected showConfirmDissolveModal (confirmActionDialog: InstanceType<typeof ModalDialog>) {
     this.modal = confirmActionDialog
     this.confirmActionTitle = this.$t('confirmDissolveTeamTitle').toString()
     this.confirmActionText = this.$t('confirmDissolveTeamText').toString()
@@ -119,7 +114,7 @@ export default class TeamManagementMixin extends Vue {
     confirmActionDialog.open()
   }
 
-  protected showSingleOwnerErrorModal (errorDialog: ModalDialog) {
+  protected showSingleOwnerErrorModal (errorDialog: InstanceType<typeof ModalDialog>) {
     this.modal = errorDialog
     this.errorTitle = this.$t('singleOwnerErrorTitle').toString()
     this.errorText = this.$t('singleOwnerErrorText').toString()
@@ -134,7 +129,7 @@ export default class TeamManagementMixin extends Vue {
     return this.isAccountGovM ? this.$t('inviteUsersFormTextGovM').toString() : this.$t('inviteUsersFormText').toString()
   }
 
-  protected close (modal: ModalDialog) {
+  protected close (modal: InstanceType<typeof ModalDialog>) {
     modal.close()
   }
 
@@ -167,6 +162,7 @@ export default class TeamManagementMixin extends Vue {
       memberId: this.memberToBeRemoved.id,
       status: MembershipStatus.Rejected
     })
+    // Remove Vuex with Vue 3
     this.$store.commit('updateHeader')
     this.modal.close()
   }
@@ -178,14 +174,15 @@ export default class TeamManagementMixin extends Vue {
       await this.leaveTeam(this.currentMembership.id)
     }
     this.modal.close()
+    // Remove Vuex with Vue 3
     this.$store.commit('updateHeader')
     this.$router.push('/leaveteam')
   }
 
   protected async dissolve () {
-    await this.dissolveTeam()
     await this.leaveTeam(this.currentMembership.id)
     this.modal.close()
+    // Remove Vuex with Vue 3
     this.$store.commit('updateHeader')
     const event:Event = { message: 'Dissolved the account', type: 'error', timeout: 1000 }
     EventBus.$emit('show-toast', event)
