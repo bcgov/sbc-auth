@@ -429,7 +429,8 @@ export enum LDFlags {
     SupportRestorationEntities = 'supported-restoration-entities',
     AllowableBusinessSearchTypes = 'allowable-business-search-types',
     AllowableBusinessPasscodeTypes = 'allowable-business-passcode-types',
-    EnableAffiliationDelegation = 'enable-affiliation-delegation'
+    EnableAffiliationDelegation = 'enable-affiliation-delegation',
+    EnableCreditCardPremium = 'enable-credit-card-premium'
 }
 
 export enum DateFilterCodes {

@@ -1,6 +1,7 @@
-import { Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { Account, LDFlags, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 
 import CommonUtils from './common-util'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { NameRequest } from '@/models/business'
 
 export default class ConfigHelper {
@@ -233,6 +234,14 @@ export default class ConfigHelper {
   }
 
   static paymentsAllowedPerAccountType () {
+    if (LaunchDarklyService.getFlag(LDFlags.EnableCreditCardPremium, false)) {
+      return {
+        [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
+        [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.BCOL ],
+        [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ]
+      }
+    }
+
     return {
       [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
       [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ],
