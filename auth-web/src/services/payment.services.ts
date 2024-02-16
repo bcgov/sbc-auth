@@ -48,8 +48,7 @@ export default class PaymentService {
 
   static refundInvoice (invoiceId: string, refundPayload: Refund): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}/refunds`
-    return axios.patch(url, refundPayload
-    )
+    return axios.post(url, refundPayload)
   }
 
   static downloadOBInvoice (paymentId: string): AxiosPromise<any> {

@@ -838,7 +838,7 @@ export function getRoutes (): RouteConfig[] {
       props: true,
       meta: {
         equiresAuth: true,
-        allowedRoles: [Role.AdminEdit]
+        allowedRoles: [Role.CreateCredits, Role.FasRefund]
       }
     }
   ]

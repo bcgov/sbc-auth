@@ -29,8 +29,9 @@
           <tr>
             <th>Line Item #</th>
             <th>Description</th>
-            <th>Base Fee</th>
-            <th>Service Fees</th>
+            <th>Base Fee($)</th>
+            <th>Service Fees($)</th>
+            <th>priority Fees($)</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -41,8 +42,28 @@
           >
             <td>{{ index + 1 }}</td>
             <td>{{ item.description }}</td>
-            <td>{{ item.total - item.serviceFees }}</td>
-            <td>{{ item.serviceFees }}</td>
+            <td><v-text-field
+              v-model="item.total"
+              type="number"
+              :disabled="!item.isEditable"
+              dense
+              hide-details="auto"
+            /></td>
+            <td><v-text-field
+              v-model="item.serviceFees"
+              type="number"
+              :disabled="!item.isEditable"
+              dense
+              hide-details="auto"
+            /></td>
+            <td><v-text-field
+              v-model="item.priorityFees"
+              type="number"
+              :disabled="!item.isEditable"
+              dense
+              hide-details="auto"
+            /></td>
+
             <td v-if="!isFullRefund">
               <v-btn
                 small
@@ -55,9 +76,20 @@
           </tr>
         </tbody>
       </v-simple-table>
-      Refund total:
-      <div>Base Fee: ${{ totalRefund.baseFee.toFixed(2) }}</div>
-      <div>Service Fee: ${{ totalRefund.serviceFee.toFixed(2) }}</div>
+      <br>
+      Refund Summary:
+      <div v-if="totalRefund.baseFee">
+        Base Fee: ${{ totalRefund.baseFee.toFixed(2) }}
+      </div>
+      <div v-if="totalRefund.serviceFee">
+        Service Fee: ${{ totalRefund.serviceFee.toFixed(2) }}
+      </div>
+      <div v-if="totalRefund.priorityFee">
+        priorityFee Fee: ${{ totalRefund.priorityFee.toFixed(2) }}
+      </div>
+      <div v-if="isFullRefund">
+        Paid: {{ invoicePaid }}
+      </div>
       <v-text-field
         v-model="refundComment"
         label="Refund Comment"
@@ -76,105 +108,122 @@
 </template>
 
 <script lang="ts">
-import { Refund, refundRevenueType } from '@/models/refund'
-import { computed, defineComponent, reactive, ref } from '@vue/composition-api'
+import { computed, defineComponent, reactive, toRefs } from '@vue/composition-api'
+import { Invoice } from '@/models/invoice'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'PaymentRefund',
   setup () {
-    const invoiceId = ref('')
-    const paymentLineItems = ref([])
-    const isFullRefund = ref(false)
-    const isPartialRefund = ref(true)
-    const refundedItems = ref([])
-    const orgStore = useOrgStore()
-    const refundComment = ref('')
-    const totalRefund = reactive({
-      baseFee: 0,
-      serviceFee: 0
+    const state = reactive({
+      invoiceId: '',
+      invoicePaid: 0,
+      paymentLineItems: [],
+      isFullRefund: false,
+      isPartialRefund: true,
+      refundedItems: [],
+      orgStore: useOrgStore(),
+      refundComment: '',
+      totalRefund: {
+        baseFee: 0,
+        serviceFee: 0,
+        priorityFee: 0
+      }
     })
 
-    const fetchInvoice = async () => {
-      const invoice: any = await orgStore.getInvoice({ invoiceId: invoiceId.value })
-      if (invoice.lineItems) {
-        paymentLineItems.value = invoice.lineItems.map(item => ({
-          ...item
-        }))
-      }
+    function fetchInvoice () {
+      state.orgStore.getInvoice({ invoiceId: state.invoiceId }).then((invoice: Invoice) => {
+        state.invoicePaid = invoice.paid
+        state.paymentLineItems = invoice.lineItems ? invoice.lineItems.map(item => ({
+          ...item,
+          isEditable: true
+        })) : []
+      }).catch((error: Error) => console.error('Failed to fetch invoice:', error))
     }
 
-    const processRefund = async () => {
+    async function processRefund () {
       try {
-        let refundRevenue: refundRevenueType[] = []
-
-        refundedItems.value.forEach(index => {
-          const item = paymentLineItems.value[index]
-          const baseFee = item.total - item.serviceFees
-
-          if (baseFee > 0) {
-            refundRevenue.push({
-              paymentLineItemId: item.id,
-              refundAmount: baseFee,
-              refundType: 'OTHER_FEES' // For baseFee
-            })
-          }
-
-          if (item.serviceFees > 0) {
-            refundRevenue.push({
-              paymentLineItemId: item.id,
-              refundAmount: item.serviceFees,
-              refundType: 'SERVICE_FEE'
-            })
-          }
-        })
-
-        const refundPayload: Refund = {
-          reason: refundComment.value,
-          refundRevenue: refundRevenue
+        let refundPayload = {
+          reason: state.refundComment,
+          refundRevenue: []
         }
 
-        const response = await orgStore.refundInvoice(invoiceId.value, refundPayload)
-        console.log('Refund successful:', refundPayload, response)
+        if (!state.isFullRefund) {
+          state.refundedItems.forEach(index => {
+            const item = state.paymentLineItems[index]
+            if (item.total > 0) {
+              refundPayload.refundRevenue.push({
+                paymentLineItemId: item.id,
+                refundAmount: item.total,
+                refundType: 'OTHER_FEES'
+              })
+            }
+            if (item.serviceFees > 0) {
+              refundPayload.refundRevenue.push({
+                paymentLineItemId: item.id,
+                refundAmount: item.serviceFees,
+                refundType: 'SERVICE_FEE'
+              })
+            }
+            if (item.priorityFees > 0) {
+              refundPayload.refundRevenue.push({
+                paymentLineItemId: item.id,
+                refundAmount: item.priorityFees,
+                refundType: 'PRIORITY_FEE'
+              })
+            }
+          })
+        } else {
+          delete refundPayload.refundRevenue
+        }
+
+        const response = await state.orgStore.refundInvoice(state.invoiceId, refundPayload)
+        console.log('Refund successful:', response)
       } catch (error) {
         console.error('Refund process failed:', error)
       }
     }
 
-    const addToRefund = (item, index) => {
-      const isRefunded = refundedItems.value.includes(index)
+    // Adding/Removing items to/from refund
+    function addToRefund (item, index) {
+      const isRefunded = state.refundedItems.includes(index)
       if (!isRefunded) {
-        // Add to refund
-        totalRefund.baseFee += item.total - item.serviceFees
-        totalRefund.serviceFee += item.serviceFees
-        refundedItems.value.push(index) // Mark item as refunded
+        // Mark as refunded and make non-editable
+        item.isEditable = false
+        state.refundedItems.push(index)
       } else {
-        // Remove from refund
-        totalRefund.baseFee -= item.total - item.serviceFees
-        totalRefund.serviceFee -= item.serviceFees
-        const itemIndex = refundedItems.value.indexOf(index)
-        refundedItems.value.splice(itemIndex, 1) // Unmark item as refunded
+        // If removing from refund, make editable again
+        item.isEditable = true
+        const itemIndex = state.refundedItems.indexOf(index)
+        state.refundedItems.splice(itemIndex, 1)
       }
+
+      // Recalculate totals based on current refundedItems
+      state.totalRefund.baseFee = 0
+      state.totalRefund.serviceFee = 0
+      state.totalRefund.priorityFee = 0
+      state.refundedItems.forEach(refundedIndex => {
+        const refundedItem = state.paymentLineItems[refundedIndex]
+        state.totalRefund.baseFee += refundedItem.total
+        state.totalRefund.serviceFee += refundedItem.serviceFees
+        state.totalRefund.priorityFee += refundedItem.priorityFees
+      })
     }
 
+    // Compute if the finalize button should be disabled
     const isFinalizeDisabled = computed(() => {
-      return refundComment.value.trim().length === 0 ||
-        (totalRefund.baseFee === 0 && totalRefund.serviceFee === 0)
+      return state.refundComment.trim().length === 0 ||
+        (!state.isFullRefund && state.totalRefund.baseFee === 0 && state.totalRefund.serviceFee === 0)
     })
 
     return {
-      invoiceId,
-      paymentLineItems,
+      ...toRefs(state),
       fetchInvoice,
       processRefund,
-      totalRefund,
       addToRefund,
-      isFullRefund,
-      refundedItems,
-      isPartialRefund,
-      refundComment,
       isFinalizeDisabled
     }
   }
 })
+
 </script>

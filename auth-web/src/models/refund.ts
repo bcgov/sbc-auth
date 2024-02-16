@@ -1,6 +1,6 @@
 export interface Refund {
   reason: string,
-  refundRevenue: refundRevenueType[]
+  refundRevenue?: refundRevenueType[]
 }
 
 export interface refundRevenueType {
