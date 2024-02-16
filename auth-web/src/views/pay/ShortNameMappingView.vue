@@ -25,6 +25,7 @@
     <v-tabs
       v-model="tab"
       style="height: 65px; margin-top: 44px;"
+      @change="onTabChange"
     >
       <v-tab
         id="unlinked-shortname-tab"
@@ -73,8 +74,10 @@
   </v-container>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, ref } from '@vue/composition-api'
+import { defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
+import ConfigHelper from '@/util/config-helper'
 import LinkedShortNameTable from '@/components/pay/LinkedShortNameTable.vue'
+import { SessionStorageKeys } from '@/util/constants'
 import UnlinkedShortNameTable from '@/components/pay/UnlinkedShortNameTable.vue'
 
 export default defineComponent({
@@ -85,7 +88,8 @@ export default defineComponent({
     const state = reactive({
       linked: 0,
       unlinked: 0,
-      linkedAccount: {}
+      linkedAccount: {},
+      isMounted: false
     })
 
     function linkAccount (account: any) {
@@ -93,10 +97,22 @@ export default defineComponent({
       state.linkedAccount = account
     }
 
+    function onTabChange () {
+      if (!state.isMounted) return
+      ConfigHelper.addToSession(SessionStorageKeys.ShortNamesTabIndex, tab.value)
+    }
+
+    onMounted(() => {
+      const shortNamesTabIndex = ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesTabIndex)
+      tab.value = shortNamesTabIndex ? parseInt(shortNamesTabIndex) : 0
+      state.isMounted = true
+    })
+
     return {
-      tab,
+      linkAccount,
       state,
-      linkAccount
+      onTabChange,
+      tab
     }
   }
 })
