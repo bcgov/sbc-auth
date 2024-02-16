@@ -382,7 +382,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   readonly createNumberedBusiness!: ({ filingType, business }) => Promise<void>
   readonly currentOrgAddress!: Address
   readonly syncAddress!: () => Address
-  highlightIndex = 1
+  highlightIndex = -1
 
   $refs: {
     successDialog: InstanceType<typeof ModalDialog>
