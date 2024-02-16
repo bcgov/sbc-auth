@@ -94,7 +94,10 @@
                 <li>Unlimited transactions</li>
                 <li>Unlimited team members</li>
                 <li>
-                  Pay by pre-authorized debit or <a
+                  Pay by pre-authorized debit or
+                  <span v-if="enableCreditCardPremium">
+                    credit card or
+                  </span> <a
                     href="https://www.bconline.gov.bc.ca/"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -170,12 +173,13 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, LoginSource, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, LDFlags, LoginSource, SessionStorageKeys } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { useOrgStore } from '@/stores/org'
@@ -258,6 +262,10 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
   private cancel () {
     this.$router.push({ path: '/home' })
+  }
+
+  get enableCreditCardPremium () {
+    return LaunchDarklyService.getFlag(LDFlags.EnableCreditCardPremium, false)
   }
 }
 </script>
