@@ -42,22 +42,25 @@
           >
             <td>{{ index + 1 }}</td>
             <td>{{ item.description }}</td>
-            <td><v-text-field
-              v-model="item.total"
+            <td>
+            <v-text-field
+              v-model.number="item.total"
               type="number"
               :disabled="!item.isEditable"
               dense
               hide-details="auto"
             /></td>
-            <td><v-text-field
-              v-model="item.serviceFees"
+            <td>
+            <v-text-field
+              v-model.number="item.serviceFees"
               type="number"
               :disabled="!item.isEditable"
               dense
               hide-details="auto"
             /></td>
-            <td><v-text-field
-              v-model="item.priorityFees"
+            <td>
+            <v-text-field
+              v-model.number="item.priorityFees"
               type="number"
               :disabled="!item.isEditable"
               dense
@@ -139,6 +142,7 @@ export default defineComponent({
           isEditable: true
         })) : []
       }).catch((error: Error) => console.error('Failed to fetch invoice:', error))
+      clear()
     }
 
     async function processRefund () {
@@ -154,7 +158,7 @@ export default defineComponent({
             if (item.total > 0) {
               refundPayload.refundRevenue.push({
                 paymentLineItemId: item.id,
-                refundAmount: item.total,
+                refundAmount: parseFloat(item.total),
                 refundType: 'OTHER_FEES'
               })
             }
@@ -198,16 +202,27 @@ export default defineComponent({
         state.refundedItems.splice(itemIndex, 1)
       }
 
-      // Recalculate totals based on current refundedItems
+        // Recalculate totals based on current refundedItems
+        state.totalRefund.baseFee = 0
+        state.totalRefund.serviceFee = 0
+        state.totalRefund.priorityFee = 0
+
+        state.refundedItems.forEach(refundedIndex => {
+          const refundedItem = state.paymentLineItems[refundedIndex]
+          state.totalRefund.baseFee += Number(refundedItem.total)
+          state.totalRefund.serviceFee += refundedItem.serviceFees
+          state.totalRefund.priorityFee += refundedItem.priorityFees
+        })
+    }
+
+    function clear () {
       state.totalRefund.baseFee = 0
       state.totalRefund.serviceFee = 0
       state.totalRefund.priorityFee = 0
-      state.refundedItems.forEach(refundedIndex => {
-        const refundedItem = state.paymentLineItems[refundedIndex]
-        state.totalRefund.baseFee += refundedItem.total
-        state.totalRefund.serviceFee += refundedItem.serviceFees
-        state.totalRefund.priorityFee += refundedItem.priorityFees
-      })
+      state.paymentLineItems = []
+      state.isFullRefund = false
+      state.isPartialRefund = true
+      state.refundedItems = []
     }
 
     // Compute if the finalize button should be disabled
