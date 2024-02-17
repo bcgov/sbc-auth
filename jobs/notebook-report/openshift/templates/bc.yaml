@@ -36,7 +36,7 @@ objects:
         ref: ${GIT_REF}
         uri: ${GIT_REPO_URL}
       dockerfile: |
-        FROM docker-remote.artifacts.developer.gov.bc.ca/python:3.8.6-buster
+        FROM python:3.8.6-buster
         USER root
 
         # Create working directory
