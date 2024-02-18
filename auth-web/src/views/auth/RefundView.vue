@@ -31,13 +31,28 @@
       <v-simple-table>
         <thead>
           <tr>
-            <th>Line Item #</th>
-            <th>Description</th>
-            <th>Filing Fee</th>
-            <th>Priority Fees</th>
-            <th>Future Effective Fees</th>
-            <th>Service Fees</th>
-            <th v-if="refundType === RefundType.PARTIAL">
+            <th id="line-item-number-header">
+              Line Item #
+            </th>
+            <th id="description-header">
+              Description
+            </th>
+            <th id="filing-fee-header">
+              Filing Fee
+            </th>
+            <th id="priority-fee-header">
+              Priority Fees
+            </th>
+            <th id="future-effective-fee-header">
+              Future Effective Fees
+            </th>
+            <th id="service-fee-header">
+              Service Fees
+            </th>
+            <th
+              v-if="refundType === RefundType.PARTIAL"
+              id="action-header"
+            >
               Actions
             </th>
           </tr>
