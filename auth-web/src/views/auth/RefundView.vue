@@ -3,7 +3,7 @@
     <v-container>
       <v-text-field
         v-model="invoiceId"
-        label="Invoice ID"
+        label="Invoice Number EG. (REG00012343 or 12343)"
       />
       <v-btn
         :disabled="!invoiceId.trim()"
@@ -29,9 +29,9 @@
           <tr>
             <th>Line Item #</th>
             <th>Description</th>
-            <th>Base Fee($)</th>
-            <th>Service Fees($)</th>
-            <th>priority Fees($)</th>
+            <th>Base Fee</th>
+            <th>Service Fees</th>
+            <th>Priority Fees</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -43,35 +43,38 @@
             <td>{{ index + 1 }}</td>
             <td>{{ item.description }}</td>
             <td>
-            <v-text-field
-              v-model.number="item.total"
-              type="number"
-              :disabled="!item.isEditable"
-              dense
-              hide-details="auto"
-            /></td>
+              <v-text-field
+                v-model.number="item.total"
+                type="number"
+                :disabled="!item.isEditable"
+                dense
+                hide-details="auto"
+              />
+            </td>
             <td>
-            <v-text-field
-              v-model.number="item.serviceFees"
-              type="number"
-              :disabled="!item.isEditable"
-              dense
-              hide-details="auto"
-            /></td>
+              <v-text-field
+                v-model.number="item.serviceFees"
+                type="number"
+                :disabled="!item.isEditable"
+                dense
+                hide-details="auto"
+              />
+            </td>
             <td>
-            <v-text-field
-              v-model.number="item.priorityFees"
-              type="number"
-              :disabled="!item.isEditable"
-              dense
-              hide-details="auto"
-            /></td>
+              <v-text-field
+                v-model.number="item.priorityFees"
+                type="number"
+                :disabled="!item.isEditable"
+                dense
+                hide-details="auto"
+              />
+            </td>
 
             <td v-if="!isFullRefund">
               <v-btn
                 small
                 :disabled="isFullRefund"
-                @click="addToRefund(item, index)"
+                @click="changeRefundPayload(item, index)"
               >
                 {{ refundedItems.includes(index) ? 'Remove from Refund' : 'Add to Refund' }}
               </v-btn>
@@ -135,7 +138,9 @@ export default defineComponent({
     })
 
     function fetchInvoice () {
-      state.orgStore.getInvoice({ invoiceId: state.invoiceId }).then((invoice: Invoice) => {
+      // Should resolve REG0031233 -> 31233 etc.
+      const invoiceId = state.invoiceId.match(/\d+/)
+      state.orgStore.getInvoice({ invoiceId: invoiceId }).then((invoice: Invoice) => {
         state.invoicePaid = invoice.paid
         state.paymentLineItems = invoice.lineItems ? invoice.lineItems.map(item => ({
           ...item,
@@ -188,8 +193,7 @@ export default defineComponent({
       }
     }
 
-    // Adding/Removing items to/from refund
-    function addToRefund (item, index) {
+    function changeRefundPayload (item, index) {
       const isRefunded = state.refundedItems.includes(index)
       if (!isRefunded) {
         // Mark as refunded and make non-editable
@@ -202,17 +206,17 @@ export default defineComponent({
         state.refundedItems.splice(itemIndex, 1)
       }
 
-        // Recalculate totals based on current refundedItems
-        state.totalRefund.baseFee = 0
-        state.totalRefund.serviceFee = 0
-        state.totalRefund.priorityFee = 0
+      // Recalculate totals based on current refundedItems
+      state.totalRefund.baseFee = 0
+      state.totalRefund.serviceFee = 0
+      state.totalRefund.priorityFee = 0
 
-        state.refundedItems.forEach(refundedIndex => {
-          const refundedItem = state.paymentLineItems[refundedIndex]
-          state.totalRefund.baseFee += Number(refundedItem.total)
-          state.totalRefund.serviceFee += refundedItem.serviceFees
-          state.totalRefund.priorityFee += refundedItem.priorityFees
-        })
+      state.refundedItems.forEach(refundedIndex => {
+        const refundedItem = state.paymentLineItems[refundedIndex]
+        state.totalRefund.baseFee += Number(refundedItem.total)
+        state.totalRefund.serviceFee += refundedItem.serviceFees
+        state.totalRefund.priorityFee += refundedItem.priorityFees
+      })
     }
 
     function clear () {
@@ -225,7 +229,6 @@ export default defineComponent({
       state.refundedItems = []
     }
 
-    // Compute if the finalize button should be disabled
     const isFinalizeDisabled = computed(() => {
       return state.refundComment.trim().length === 0 ||
         (!state.isFullRefund && state.totalRefund.baseFee === 0 && state.totalRefund.serviceFee === 0)
@@ -235,7 +238,7 @@ export default defineComponent({
       ...toRefs(state),
       fetchInvoice,
       processRefund,
-      addToRefund,
+      changeRefundPayload,
       isFinalizeDisabled
     }
   }
