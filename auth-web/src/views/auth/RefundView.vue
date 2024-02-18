@@ -176,7 +176,7 @@ export default defineComponent({
         serviceFee: 0,
         priorityFee: 0
       },
-      refundType: RefundType.PARTIAL,
+      refundType: RefundType.FULL,
       refundResponse: ''
     })
 
