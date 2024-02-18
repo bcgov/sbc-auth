@@ -836,7 +836,7 @@ export function getRoutes (): RouteConfig[] {
       component: RefundViewVue,
       props: true,
       meta: {
-        equiresAuth: true,
+        requiresAuth: true,
         allowedRoles: [Role.CreateCredits, Role.FasRefund]
       }
     },
