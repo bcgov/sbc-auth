@@ -53,7 +53,7 @@ import KeyCloakService from 'sbc-common-components/src/services/keycloak.service
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import PermissionService from '@/services/permission.services'
-import { Refund } from './../models/refund'
+import { RefundRequest } from './../models/refund'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
@@ -812,7 +812,7 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data || {}
   }
 
-  async function refundInvoice (invoiceId, refundPayload: Refund) {
+  async function refundInvoice (invoiceId, refundPayload: RefundRequest) {
     const response = await PaymentService.refundInvoice(invoiceId, refundPayload)
     return response?.data || {}
   }

@@ -1,10 +1,10 @@
-export interface Refund {
-  reason: string,
-  refundRevenue?: refundRevenueType[]
+export interface RefundRequest {
+  reason: string
+  refundRevenue?: RefundRevenueType[]
 }
 
-export interface refundRevenueType {
-  paymentLineItemId: string,
-  refundAmount: number,
+export interface RefundRevenueType {
+  paymentLineItemId: string
+  refundAmount: number
   refundType: string
 }

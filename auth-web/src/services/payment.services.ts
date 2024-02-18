@@ -16,7 +16,7 @@ import ConfigHelper from '@/util/config-helper'
 import { LinkedShortNameFilterParams } from '@/models/pay/short-name'
 import { Payment } from '@/models/Payment'
 import { PaymentTypes } from '@/util/constants'
-import { Refund } from '@/models/refund'
+import { RefundRequest } from '@/models/refund'
 import { axios } from '@/util/http-util'
 
 export default class PaymentService {
@@ -46,7 +46,7 @@ export default class PaymentService {
     )
   }
 
-  static refundInvoice (invoiceId: string, refundPayload: Refund): AxiosPromise<any> {
+  static refundInvoice (invoiceId: string, refundPayload: RefundRequest): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}/refunds`
     return axios.post(url, refundPayload)
   }

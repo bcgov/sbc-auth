@@ -830,7 +830,6 @@ export function getRoutes (): RouteConfig[] {
       },
       props: (route) => ({ shortNameId: route.params.shortNameId })
     },
-    { path: '*', name: 'notfound', component: PageNotFound },
     {
       path: '/refund',
       name: 'refund',
@@ -840,7 +839,8 @@ export function getRoutes (): RouteConfig[] {
         equiresAuth: true,
         allowedRoles: [Role.CreateCredits, Role.FasRefund]
       }
-    }
+    },
+    { path: '*', name: 'notfound', component: PageNotFound }
   ]
 
   return routes
