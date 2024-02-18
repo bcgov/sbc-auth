@@ -1,8 +1,9 @@
 <template>
+  <!-- TODO: Note this code is very rough and will need to be rewritten. -->
   <v-app>
     <v-container>
       <h2 class="mb-4">
-        MVP Refunds
+        MVP Refunds - OPS only for now.
       </h2>
       <v-text-field
         v-model="invoiceId"
@@ -20,11 +21,11 @@
       >
         <v-radio
           label="Full refund"
-          value="full"
+          :value="RefundType.FULL"
         />
         <v-radio
           label="Partial Refund"
-          value="partial"
+          :value="RefundType.PARTIAL"
         />
       </v-radio-group>
       <v-simple-table>
@@ -36,7 +37,7 @@
             <th>Priority Fees</th>
             <th>Future Effective Fees</th>
             <th>Service Fees</th>
-            <th v-if="refundType === 'partial'">
+            <th v-if="refundType === RefundType.PARTIAL">
               Actions
             </th>
           </tr>
@@ -52,7 +53,7 @@
               <v-text-field
                 v-model.number="item.total"
                 type="number"
-                :disabled="refundType === 'full'"
+                :disabled="refundType === RefundType.FULL"
                 dense
                 hide-details="auto"
               />
@@ -62,7 +63,7 @@
               <v-text-field
                 v-model.number="item.priorityFees"
                 type="number"
-                :disabled="refundType === 'full'"
+                :disabled="refundType === RefundType.FULL"
                 dense
                 hide-details="auto"
               />
@@ -71,7 +72,7 @@
               <v-text-field
                 v-model.number="item.futureEffectiveFees"
                 type="number"
-                :disabled="refundType === 'full'"
+                :disabled="refundType === RefundType.FULL"
                 dense
                 hide-details="auto"
               />
@@ -80,12 +81,12 @@
               <v-text-field
                 v-model.number="item.serviceFees"
                 type="number"
-                :disabled="refundType === 'full'"
+                :disabled="refundType === RefundType.FULL"
                 dense
                 hide-details="auto"
               />
             </td>
-            <td v-if="refundType === 'partial'">
+            <td v-if="refundType === RefundType.PARTIAL">
               <v-btn
                 small
                 @click="changeRefundPayload(item, index)"
@@ -100,7 +101,7 @@
       <h2 class="mb-4">
         Refund Summary:
       </h2>
-
+      <!-- TODO: this wont work for multiple payment line items, but we can worry about that after the demo. -->
       <div v-if="totalRefund.baseFee">
         Base Fee from: ${{ paymentLineItems[0].filingFees.toFixed(2) }} -> ${{ totalRefund.baseFee.toFixed(2) }}
       </div>
@@ -108,7 +109,7 @@
         Service Fee from: ${{ totalRefund.serviceFee.toFixed(2) }} -> ${{ totalRefund.serviceFee.toFixed(2) }}
       </div>
       <div
-        v-if="refundType === 'full' && paymentLineItems.length > 0"
+        v-if="refundType === RefundType.FULL && paymentLineItems.length > 0"
       >
         <h3>
           By pressing the refund action, the full paid amount will be refunded: ${{ invoicePaid.toFixed(2) }}
@@ -128,7 +129,7 @@
         REFUND
       </v-btn>
       <v-alert
-        v-if="refundRequestResponse"
+        v-if="refundResponse"
         class="mt-4"
         border="left"
         dense
@@ -136,18 +137,29 @@
         prominent
         shaped
         text
-        :type="refundRequestResponse.includes('success') ? 'success' : 'error'"
+        :type="refundResponse.includes('success') ? 'success' : 'error'"
       >
-        {{ refundRequestResponse }}
+        {{ refundResponse }}
       </v-alert>
     </v-container>
   </v-app>
 </template>
 
 <script lang="ts">
+
 import { computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { Invoice } from '@/models/invoice'
 import { useOrgStore } from '@/stores/org'
+
+enum RefundType {
+  FULL = 'full',
+  PARTIAL = 'partial'
+}
+
+enum RefundLineTypes {
+  OTHER_FEES = 'OTHER_FEES',
+  SERVICE_FEE = 'SERVICE_FEE',
+}
 
 export default defineComponent({
   name: 'PaymentRefund',
@@ -164,8 +176,8 @@ export default defineComponent({
         serviceFee: 0,
         priorityFee: 0
       },
-      refundType: 'partial',
-      refundRequestResponse: ''
+      refundType: RefundType.PARTIAL,
+      refundResponse: ''
     })
 
     function fetchInvoice () {
@@ -188,21 +200,21 @@ export default defineComponent({
           refundRevenue: []
         }
 
-        if (state.refundType === 'partial') {
+        if (state.refundType === RefundType.PARTIAL) {
           state.refundedItems.forEach(index => {
             const item = state.paymentLineItems[index]
             if (item.total > 0) {
               refundPayload.refundRevenue.push({
                 paymentLineItemId: item.id,
                 refundAmount: parseFloat(item.total),
-                refundType: 'OTHER_FEES'
+                refundType: RefundLineTypes.OTHER_FEES
               })
             }
             if (item.serviceFees > 0) {
               refundPayload.refundRevenue.push({
                 paymentLineItemId: item.id,
                 refundAmount: item.serviceFees,
-                refundType: 'SERVICE_FEE'
+                refundType: RefundLineTypes.SERVICE_FEE
               })
             }
           })
@@ -211,10 +223,10 @@ export default defineComponent({
         }
 
         const response = await state.orgStore.refundInvoice(state.invoiceId, refundPayload)
-        state.refundRequestResponse = 'Refund successful.'
+        state.refundResponse = 'Refund successful.'
         console.log('Refund successful:', response)
       } catch (error) {
-        state.refundRequestResponse = 'Refund failed.'
+        state.refundResponse = 'Refund failed.'
         console.error('Refund process failed:', error)
       }
     }
@@ -255,11 +267,11 @@ export default defineComponent({
 
     const isFinalizeDisabled = computed(() => {
       return state.refundComment.trim().length === 0 ||
-        (state.refundType === 'partial' && state.totalRefund.baseFee === 0 && state.totalRefund.serviceFee === 0)
+        (state.refundType === RefundType.PARTIAL && state.totalRefund.baseFee === 0 && state.totalRefund.serviceFee === 0)
     })
 
     watch(() => state.invoiceId, () => {
-      state.refundRequestResponse = ''
+      state.refundResponse = ''
     })
 
     return {
@@ -267,7 +279,8 @@ export default defineComponent({
       fetchInvoice,
       processRefund,
       changeRefundPayload,
-      isFinalizeDisabled
+      isFinalizeDisabled,
+      RefundType
     }
   }
 })
