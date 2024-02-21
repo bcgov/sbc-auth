@@ -438,7 +438,6 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
-// @import '@/assets/scss/overrides';
 
 .actions-dropdown_item {
   cursor: pointer;
