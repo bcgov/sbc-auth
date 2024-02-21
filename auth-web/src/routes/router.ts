@@ -54,7 +54,7 @@ import PaymentView from '@/views/pay/PaymentView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import PriceListView from '@/views/auth/PriceListView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
-import RefundViewVue from '@/views/auth/RefundView.vue'
+
 import RequestNameView from '@/views/auth/home/RequestNameView.vue'
 import RestrictedProductView from '@/views/auth/RestrictedProductView.vue'
 import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
@@ -78,6 +78,7 @@ import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import UpdateAccountView from '@/views/auth/create-account/UpdateAccountView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
 import { ViewAllTransactions } from '@/views'
+import RefundViewVue from '@/views/pay/RefundView.vue'
 
 function mapReturnPayVars (route: any) {
   let payResponseUrl = window.location.search
@@ -831,7 +832,7 @@ export function getRoutes (): RouteConfig[] {
       props: (route) => ({ shortNameId: route.params.shortNameId })
     },
     {
-      path: '/refund',
+      path: '/pay/refund',
       name: 'refund',
       component: RefundViewVue,
       props: true,
