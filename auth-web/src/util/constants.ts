@@ -48,7 +48,9 @@ export enum Role {
     ManageGlCodes = 'manage_gl_codes',
     FasSearch = 'fas_search',
     ViewAllTransactions = 'view_all_transactions',
-    ManageEft = 'manage_eft'
+    ManageEft = 'manage_eft',
+    CreateCredits = 'create_credits',
+    FasRefund = 'fas_refund'
 }
 
 export enum Pages {
