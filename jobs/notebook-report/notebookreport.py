@@ -6,16 +6,14 @@ import logging
 import os
 import smtplib
 import sys
-import time
 import traceback
-from datetime import datetime, timedelta, date
+from datetime import date, datetime, timedelta
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import papermill as pm
-from dateutil.relativedelta import relativedelta
 from flask import Flask, current_app
 
 from config import Config
@@ -50,15 +48,15 @@ def findfiles(directory, pattern):
 def send_email(note_book, emailtype, errormessage):
     """Send email for results."""
     message = MIMEMultipart()
-    date = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')    
+    date_str = datetime.strftime(datetime.now() - timedelta(1), '%Y-%m-%d')
     ext = ''
-    if not os.getenv('ENVIRONMENT', '') == 'prod':
-        ext = ' on ' + os.getenv('ENVIRONMENT', '')
+    if not Config.ENVIRONMENT == 'prod':
+        ext = ' on ' + Config.ENVIRONMENT
 
     if emailtype == 'ERROR':
         subject = "Jupyter Notebook Error Notification from sbc-auth for processing '" \
-            + note_book + "' on " + date + ext
-        recipients = os.getenv('ERROR_EMAIL_RECIPIENTS', '')
+            + note_book + "' on " + date_str + ext
+        recipients = Config.ERROR_EMAIL_RECIPIENTS
         message.attach(MIMEText('ERROR!!! \n' + errormessage, 'plain'))
     else:
         file_processing = note_book.split('.ipynb')[0]
@@ -66,13 +64,13 @@ def send_email(note_book, emailtype, errormessage):
         if file_processing == 'auth':
             subject = 'SBC-AUTH Weekly Stats till ' + datetime.strftime(datetime.now()-timedelta(1), '%Y-%m-%d') + ext
             filename = 'auth_weekly_stats_till_' + datetime.strftime(datetime.now()-timedelta(1), '%Y-%m-%d') + '.csv'
-            recipients = os.getenv('WEEKLY_REPORT_RECIPIENTS', '')
-        
+            recipients = Config.WEEKLY_REPORT_RECIPIENTS
+
         # Add body to email
         message.attach(MIMEText('Please see attached.', 'plain'))
 
         # Open file in binary mode
-        with open(os.getenv('DATA_DIR', '')+filename, 'rb') as attachment:
+        with open(os.path.join(os.getcwd(), r'data/')+filename, 'rb') as attachment:
             # Add file as application/octet-stream
             # Email client can usually download this automatically as attachment
             part = MIMEBase('application', 'octet-stream')
@@ -91,73 +89,45 @@ def send_email(note_book, emailtype, errormessage):
         message.attach(part)
 
     message['Subject'] = subject
-    server = smtplib.SMTP(os.getenv('EMAIL_SMTP', ''))
+    server = smtplib.SMTP(Config.EMAIL_SMTP)
     email_list = recipients.strip('][').split(', ')
     logging.info('Email recipients list is: %s', email_list)
-    server.sendmail(os.getenv('SENDER_EMAIL', ''), email_list, message.as_string())
+    server.sendmail(Config.SENDER_EMAIL, email_list, message.as_string())
     logging.info("Email with subject \'%s\' has been sent successfully!", subject)
     server.quit()
-    os.remove(os.getenv('DATA_DIR', '')+filename)
 
-def processnotebooks(notebookdirectory):    
+
+def processnotebooks(notebookdirectory, data_dir):
     """Process Notebook."""
-    status = False
-    
     try:
-        retry_times = int(os.getenv('RETRY_TIMES', '1'))
-        retry_interval = int(os.getenv('RETRY_INTERVAL', '60'))
-        if notebookdirectory == 'weekly':
-            week_report_dates = ast.literal_eval(os.getenv('WEEKLY_REPORT_DATES', ''))
-    except Exception:
+        week_report_dates = ast.literal_eval(Config.WEEKLY_REPORT_DATES)
+    except Exception:  # noqa: B902
         logging.exception('Error processing notebook for %s', notebookdirectory)
         send_email(notebookdirectory, 'ERROR', traceback.format_exc())
-        return status
-    
-   
+
     # For weekly tasks, we only run on the specified days
-    if notebookdirectory == 'weekly' and date.today().weekday() in week_report_dates:        
+    if date.today().weekday() in week_report_dates:
         logging.info('Processing: %s', notebookdirectory)
-        
-        num_files = len(os.listdir(notebookdirectory))
-        file_processed = 0
-        
-        for file in findfiles(notebookdirectory, '*.ipynb'):
-            file_processed += 1
-            note_book = os.path.basename(file)
-            for attempt in range(retry_times):
-                try:                    
-                    pm.execute_notebook(file, os.getenv('DATA_DIR', '')+'temp.ipynb', parameters=None)
-                    send_email(note_book, '', '')
-                    os.remove(os.getenv('DATA_DIR', '')+'temp.ipynb')                    
-                    status = True                    
-                    break
-                except Exception:
-                    if attempt + 1 == retry_times:
-                        # If any errors occur with the notebook processing they will be logged to the log file
-                        logging.exception(
-                            'Error processing notebook %s at %s/%s try.', notebookdirectory, attempt + 1,
-                            retry_times)
-                        send_email(notebookdirectory, 'ERROR', traceback.format_exc())
-                    else:
-                        # If any errors occur with the notebook processing they will be logged to the log file
-                        logging.exception('Error processing notebook %s at %s/%s try. '
-                                          'Sleeping for %s secs before next try', notebookdirectory, attempt + 1,
-                                          retry_times, retry_interval)
-                        time.sleep(retry_interval)
-                        continue
-            if not status and num_files == file_processed:
-                break
-    return status
+        file = 'auth.ipynb'
+
+        try:
+            pm.execute_notebook(os.path.join(notebookdirectory, file), data_dir+'temp.ipynb', parameters=None)
+            send_email(file, '', '')
+            os.remove(data_dir+'temp.ipynb')
+        except Exception:  # noqa: B902
+            logging.exception('Error processing notebook %s.', notebookdirectory)
+            send_email(notebookdirectory, 'ERROR', traceback.format_exc())
+
 
 if __name__ == '__main__':
     start_time = datetime.utcnow()
-  
-    # Check if the subfolders for notebooks exist, and create them if they don't
-    for subdir in ['weekly']:
-        if not os.path.isdir(subdir):
-            os.mkdir(subdir)
 
-        processnotebooks(subdir)
+    data_directory = os.path.join(os.getcwd(), r'data/')
+    if not os.path.exists(data_directory):
+        os.makedirs(data_directory)
+
+    # processing the files in the fold 'weekly'.
+    processnotebooks('weekly', data_directory)
 
     end_time = datetime.utcnow()
     logging.info('job - jupyter notebook report completed in: %s', end_time - start_time)

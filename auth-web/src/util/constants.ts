@@ -11,6 +11,9 @@ export enum SessionStorageKeys {
     PaginationOptions = 'PAGINATION_OPTIONS',
     PaginationNumberOfItems = 'PAGINATION_NUMBER_OF_ITEMS',
     OrgSearchFilter = 'ORG_SEARCH_FILTER',
+    UnlinkedShortNamesFilter = 'UNLINKED_SHORT_NAMES_FILTER',
+    LinkedShortNamesFilter = 'LINKED_SHORT_NAMES_FILTER',
+    ShortNamesTabIndex = 'SHORT_NAMES_TAB_INDEX',
     PendingAccountsSearchFilter = 'PENDING_ACCOUNTS_SEARCH_FILTER',
     RejectedAccountsSearchFilter = 'REJECTED_ACCOUNTS_SEARCH_FILTER',
     AuthApiUrl = 'AUTH_API_URL',
@@ -431,7 +434,8 @@ export enum LDFlags {
     SupportRestorationEntities = 'supported-restoration-entities',
     AllowableBusinessSearchTypes = 'allowable-business-search-types',
     AllowableBusinessPasscodeTypes = 'allowable-business-passcode-types',
-    EnableAffiliationDelegation = 'enable-affiliation-delegation'
+    EnableAffiliationDelegation = 'enable-affiliation-delegation',
+    EnableCreditCardPremium = 'enable-credit-card-premium'
 }
 
 export enum DateFilterCodes {
