@@ -11,7 +11,7 @@
       :clear-icon="state === LookupStates.SUMMARY ? 'mdi-undo': 'mdi-close'"
       :append-icon="state === LookupStates.INITIAL ? 'mdi-magnify':''"
       autocomplete="chrome-off"
-      :class="`mt-5 mb-n2 ${state === LookupStates.SUMMARY ? 'summary' : ''}`"
+      :class="`mt-5 mb-n2 ${state}`"
       filled
       hint=""
       :item-text="'accountName'"
@@ -226,9 +226,14 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '@/assets/styles/theme.scss';
 
+::v-deep .v-input__slot {
+  background: red;
+}
+
 ::v-deep .summary {
   .v-input__control {
     .v-input__slot {
+      padding: 0 !important;
       background: transparent !important;
       &:before, &:after {
         opacity: 0;

@@ -11,7 +11,7 @@
     >
       <template #text>
         <p
-          v-if="state.selectedAccount.id"
+          v-if="state.selectedAccount.accountId"
           class="py-4 px-6 important"
         >
           <span class="font-weight-bold">Important:</span> Once an account is linked, all payment received
@@ -166,6 +166,8 @@
             <v-menu
               v-model="state.actionDropdown[index]"
               :attach="`#action-menu-${index}`"
+              offset-y
+              nudge-left="74"
             >
               <template #activator="{ on }">
                 <v-btn
@@ -180,8 +182,8 @@
               </template>
               <v-list>
                 <v-list-item
-                  class="actions-dropdown_item my-1"
-                  data-test="remove-linkage-button"
+                  class="actions-dropdown_item"
+                  data-test="link-account-button"
                 >
                   <v-list-item-subtitle
                     @click="viewDetails(index)"
@@ -436,6 +438,16 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
+// @import '@/assets/scss/overrides';
+
+.actions-dropdown_item {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  &:hover {
+    background-color: $gray1;
+    color: $app-blue !important;
+  }
+}
 
 h4 {
   color: black;
