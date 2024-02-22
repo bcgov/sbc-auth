@@ -143,7 +143,7 @@
   "business_searchCodeSubtitle": "Select this if you need to request information about businesses or organizations registered in B.C.",
   "mhrStaffCodeSubtitle": "Select this if you need to search for manufactured homes in BC or complete a combined Manufactured Home and Personal Property Registry search.",
   "mhrCodeSubtitle": "Select this if you want to search for manufactured homes, and search for personal property legal claims on manufactured homes.",
-  "mhrCodeNote": "<span class=\"font-weight-bold\">Note:</span> You can request Qualified Supplier access from your Manufactured Home Registry <br>(or Asset Registries) page once you have added this product to your account.",
+  "mhrCodeNote": "<b>Note:</b> You can request Qualified Supplier access from your Manufactured Home Registry <br>(or Asset Registries) page once you have added this product to your account.",
   "vsCodeSubtitle": "<p>Select this if you need to register the location of a will by filing a wills notice or search for a wills notice as part of an estate probate.</p>",
   "bcaCodeSubtitle": "Select this for access to BC Assessment's real property information database.",
   "esraCodeSubtitle": "Select this if you need to identify properties with environmental records submitted under Part 4 of B.C.'s Environmental Management Act.",
