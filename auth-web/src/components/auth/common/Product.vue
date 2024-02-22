@@ -157,6 +157,11 @@
                 class="mb-0"
                 v-html="$t(productLabel.details)"
               />
+              <p
+                v-if="$te(productLabel.note)"
+                class="mb-0"
+                v-html="$t(productLabel.note)"
+              />
               <component
                 :is="productFooter.component"
                 v-if="isTOSNeeded"
@@ -244,6 +249,7 @@ export default class Product extends Mixins(AccountMixin) {
     let { code } = this.productDetails
     let subTitle = `${code && code.toLowerCase()}CodeSubtitle`
     let details = `${code && code.toLowerCase()}CodeDescription`
+    let note = `${code && code.toLowerCase()}CodeNote`
     let decisionMadeIcon = null
     let decisionMadeColorCode = null
 
@@ -279,9 +285,10 @@ export default class Product extends Mixins(AccountMixin) {
       if (this.productDetails.code === ProductEnum.MHR && this.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
         subTitle = `mhrQsCodeActiveSubtitle`
         details = `${this.activeSubProduct.code && this.activeSubProduct.code.toLowerCase()}CodeDescription`
+        note = ''
       }
     }
-    return { subTitle, details, decisionMadeIcon, decisionMadeColorCode }
+    return { subTitle, details, decisionMadeIcon, decisionMadeColorCode, note }
   }
 
   get isTOSNeeded () {
