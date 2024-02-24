@@ -1,80 +1,11 @@
 <template>
   <div>
-    <ModalDialog
-      ref="accountLinkingDialog"
-      max-width="720"
-      :show-icon="false"
-      :showCloseIcon="true"
-      dialog-class="lookup-dialog"
-      :title="`Linking ${state.selectedShortName.shortName} to an Account`"
-      @close-dialog="resetAccountLinkingDialog"
-    >
-      <template #text>
-        <p
-          v-if="state.selectedAccount.accountId"
-          class="py-4 px-6 important"
-        >
-          <span class="font-weight-bold">Important:</span> Once an account is linked, all payment received
-          from the same short name will be applied to settle outstanding balances of
-          the selected account.
-        </p>
-        <h4>
-          Search by Account ID or Name to Link:
-        </h4>
-        <ShortNameLookup
-          :key="state.shortNameLookupKey"
-          @account="state.selectedAccount = $event"
-          @reset="resetAccountLinkingDialog"
-        />
-      </template>
-      <template #actions>
-        <div class="d-flex align-center justify-center w-100 h-100 ga-3">
-          <v-btn
-            large
-            outlined
-            color="outlined"
-            data-test="dialog-ok-button"
-            @click="cancelAndResetAccountLinkingDialog()"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            large
-            color="primary"
-            data-test="dialog-ok-button"
-            @click="linkAccount()"
-          >
-            Link to an Account and Settle Payment
-          </v-btn>
-        </div>
-      </template>
-    </ModalDialog>
-    <ModalDialog
-      ref="accountLinkingErrorDialog"
-      max-width="720"
-      dialog-class="notify-dialog"
-      :title="state.accountLinkingErrorDialogTitle"
-      :text="state.accountLinkingErrorDialogText"
-    >
-      <template #icon>
-        <v-icon
-          large
-          color="error"
-        >
-          mdi-alert-circle-outline
-        </v-icon>
-      </template>
-      <template #actions>
-        <v-btn
-          large
-          color="primary"
-          data-test="dialog-ok-button"
-          @click="closeAccountAlreadyLinkedDialog"
-        >
-          Close
-        </v-btn>
-      </template>
-    </ModalDialog>
+    <ShortNameLinkingDialog
+      :isShortNameLinkingDialogOpen="state.isShortNameLinkingDialogOpen"
+      :selectedShortName="state.selectedShortName"
+      @close-short-name-linking-dialog="closeShortNameLinkingDialog"
+      @on-link-account="onLinkAccount"
+    />
     <DatePicker
       v-show="state.showDatePicker"
       ref="datePicker"
@@ -203,21 +134,20 @@
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
 import { Ref, defineComponent, onMounted, reactive, ref, watch } from '@vue/composition-api'
-import { SessionStorageKeys, ShortNameResponseStatus, ShortNameStatus } from '@/util/constants'
+import { SessionStorageKeys, ShortNameStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import PaymentService from '@/services/payment.services'
-import ShortNameLookup from './ShortNameLookup.vue'
+import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
 import { UnlinkedShortNameState } from '@/models/pay/short-name'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
 
 export default defineComponent({
   name: 'UnlinkedShortNameTable',
-  components: { BaseVDataTable, DatePicker, ModalDialog, ShortNameLookup },
+  components: { BaseVDataTable, DatePicker, ShortNameLinkingDialog },
   emits: ['on-link-account'],
   setup (props, { emit, root }) {
     const datePicker = ref(null)
@@ -239,12 +169,12 @@ export default defineComponent({
       dateRangeReset: 0,
       clearFiltersTrigger: 0,
       selectedShortName: {},
-      selectedAccount: {},
       showDatePicker: false,
       dateRangeSelected: false,
       dateRangeText: '',
       accountLinkingErrorDialogTitle: '',
-      accountLinkingErrorDialogText: ''
+      accountLinkingErrorDialogText: '',
+      isShortNameLinkingDialogOpen: false
     })
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px') => ({
@@ -307,11 +237,15 @@ export default defineComponent({
 
     function openAccountLinkingDialog (item: EFTShortnameResponse) {
       state.selectedShortName = item
-      accountLinkingDialog.value.open()
+      state.isShortNameLinkingDialogOpen = true
+    }
+
+    function closeShortNameLinkingDialog () {
+      state.selectedShortName = {}
+      state.isShortNameLinkingDialogOpen = false
     }
 
     function resetAccountLinkingDialog () {
-      state.selectedAccount = {}
       state.shortNameLookupKey++
     }
 
@@ -340,6 +274,11 @@ export default defineComponent({
       return `${formatDate(startDate)} - ${formatDate(endDate)}`
     }
 
+    async function onLinkAccount (account: any) {
+      emit('on-link-account', account)
+      await loadTableData()
+    }
+
     async function updateDateRange ({ endDate, startDate }: { endDate?: string, startDate?: string }): void {
       state.showDatePicker = false
       state.dateRangeSelected = !!(endDate && startDate)
@@ -349,33 +288,6 @@ export default defineComponent({
       state.filters.filterPayload.transactionEndDate = endDate
       ConfigHelper.addToSession(SessionStorageKeys.UnlinkedShortNamesFilter, JSON.stringify(state.filters.filterPayload))
       await loadTableData()
-    }
-
-    async function linkAccount () {
-      if (!state.selectedShortName?.id || !state.selectedAccount?.accountId) {
-        return
-      }
-      try {
-        const response = await PaymentService.patchEFTShortname(state.selectedShortName.id, state.selectedAccount.accountId)
-        if (response?.data) {
-          emit('on-link-account', response.data)
-          cancelAndResetAccountLinkingDialog()
-          await loadTableData()
-        }
-      } catch (error) {
-        if (error.response.data.type === ShortNameResponseStatus.EFT_SHORT_NAME_ALREADY_MAPPED) {
-          state.accountLinkingErrorDialogTitle = 'Account Already Linked'
-          state.accountLinkingErrorDialogText = 'The selected bank short name is already linked to an account.'
-          cancelAndResetAccountLinkingDialog()
-          accountLinkingErrorDialog.value.open()
-        } else {
-          state.accountLinkingErrorDialogTitle = 'Something Went Wrong'
-          state.accountLinkingErrorDialogText = 'An error occurred while linking the bank short name to an account.'
-          cancelAndResetAccountLinkingDialog()
-          accountLinkingErrorDialog.value.open()
-        }
-        console.error('Failed to patchEFTShortname.', error)
-      }
     }
 
     async function clickDatePicker () {
@@ -419,16 +331,17 @@ export default defineComponent({
       formatAmount,
       formatDate,
       updateDateRange,
+      onLinkAccount,
       clickDatePicker,
       accountLinkingDialog,
       accountLinkingErrorDialog,
       openAccountLinkingDialog,
+      closeShortNameLinkingDialog,
       resetAccountLinkingDialog,
       cancelAndResetAccountLinkingDialog,
       closeAccountAlreadyLinkedDialog,
       datePicker,
-      viewDetails,
-      linkAccount
+      viewDetails
     }
   }
 })
@@ -439,47 +352,8 @@ export default defineComponent({
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
 
-.actions-dropdown_item {
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  &:hover {
-    background-color: $gray1;
-    color: $app-blue !important;
-  }
-}
-
-h4 {
-  color: black;
-}
-
 #unlinked-bank-short-names {
   border: 1px solid #e9ecef
-}
-
-.important {
-  background-color: #fff7e3;
-  border: 2px solid #fcba19;
-  color: #495057;
-  font-size: 12px;
-}
-
-.w-100 {
-  width: 100%;
-}
-
-.h-100 {
-  height: 100%;
-}
-
-.ga-3 {
-  gap: 12px;
-}
-
-::v-deep {
-  .v-btn.v-btn--outlined {
-      border-color: var(--v-primary-base);
-      color: var(--v-primary-base);
-  }
 }
 
 </style>
