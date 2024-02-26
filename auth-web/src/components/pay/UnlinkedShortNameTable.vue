@@ -120,7 +120,7 @@
                     @click="viewDetails(index)"
                   >
                     <v-icon small>mdi-format-list-bulleted</v-icon>
-                    <span class="pl-1">View Detail</span>
+                    <span class="pl-1 cursor-pointer">View Detail</span>
                   </v-list-item-subtitle>
                 </v-list-item>
               </v-list>
@@ -264,7 +264,7 @@ export default defineComponent({
       root.$router?.push({
         name: 'shortnamedetails',
         params: {
-          'shortNameId': state.results[index].id
+          'shortNameId': state.results[index].id.toString()
         }
       })
     }
@@ -353,6 +353,14 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
+
+.actions-dropdown_item {
+  padding: 0.5rem 1rem;
+  &:hover {
+    background-color: $gray1;
+    color: $app-blue !important;
+  }
+}
 
 #unlinked-bank-short-names {
   border: 1px solid #e9ecef
