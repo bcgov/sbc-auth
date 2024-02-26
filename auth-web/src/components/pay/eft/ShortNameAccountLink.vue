@@ -1,7 +1,7 @@
 <template>
   <v-card v-if="shortNameDetails.shortName">
     <ShortNameLinkingDialog
-      :isShortNameLinkingDialogOpen="state.isShortNameLinkingDialogOpen"
+      :isShortNameLinkingDialogOpen="isShortNameLinkingDialogOpen"
       :selectedShortName="shortNameDetails"
       @close-short-name-linking-dialog="closeShortNameLinkingDialog"
       @on-link-account="onLinkAccount"
@@ -43,7 +43,7 @@
 </template>
 <script lang="ts">
 
-import { computed, defineComponent, reactive } from '@vue/composition-api'
+import { computed, defineComponent, reactive, toRefs } from '@vue/composition-api'
 import ConfigHelper from '@/util/config-helper'
 import { SessionStorageKeys } from '@/util/constants'
 import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
@@ -85,7 +85,7 @@ export default defineComponent({
     }
 
     return {
-      state,
+      ...toRefs(state),
       isLinked,
       accountDisplayText,
       openAccountLinkingDialog,
