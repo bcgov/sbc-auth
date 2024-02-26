@@ -168,13 +168,11 @@ export default defineComponent({
     onMounted(async () => {
     })
 
-    watch(() => [props.selectedShortName, props.isShortNameLinkingDialogOpen],
-      () => {
-        if (props.isShortNameLinkingDialogOpen && props.selectedShortName) {
-          openAccountLinkingDialog(props.selectedShortName)
-        }
+    watch(() => [props.selectedShortName, props.isShortNameLinkingDialogOpen], ([selectedShortNameNewValue]) => {
+      if (props.isShortNameLinkingDialogOpen && selectedShortNameNewValue) {
+        openAccountLinkingDialog(selectedShortNameNewValue)
       }
-    )
+    })
 
     return {
       ...toRefs(state),
