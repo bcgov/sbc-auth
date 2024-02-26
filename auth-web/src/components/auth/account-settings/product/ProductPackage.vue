@@ -212,10 +212,18 @@ export default defineComponent({
         // check for role and account can have service fee (GOVM and GOVN account)
         return currentUser?.roles?.includes(Role.StaffManageAccounts) && localState.isVariableFeeAccount
       }),
-      /** Return any sub-product that has a status indicating activity **/
+      /**
+       * Return any sub-product that has a status indicating activity
+       * Prioritize Active/Pending for edge-cases when multiple sub product statuses exist
+       **/
       subProduct: computed((): OrgProduct => {
         return productList.value?.find(product =>
-          !!product.parentCode && product.subscriptionStatus !== ProductStatus.NOT_SUBSCRIBED
+          !!product.parentCode && (
+            product.subscriptionStatus === ProductStatus.ACTIVE ||
+            product.subscriptionStatus === ProductStatus.PENDING_STAFF_REVIEW
+          )
+        ) || productList.value.find(product =>
+          !!product.parentCode && product.subscriptionStatus === ProductStatus.REJECTED
         )
       })
     })
