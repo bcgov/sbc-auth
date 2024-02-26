@@ -169,9 +169,9 @@ export default defineComponent({
     })
 
     watch(() => [props.selectedShortName, props.isShortNameLinkingDialogOpen],
-      async ([selectedShortNameNewValue]) => {
-        if (props.isShortNameLinkingDialogOpen && selectedShortNameNewValue) {
-          openAccountLinkingDialog(selectedShortNameNewValue)
+      () => {
+        if (props.isShortNameLinkingDialogOpen && props.selectedShortName) {
+          openAccountLinkingDialog(props.selectedShortName)
         }
       }
     )
