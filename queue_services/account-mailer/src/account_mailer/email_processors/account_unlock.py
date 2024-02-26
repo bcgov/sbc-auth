@@ -14,7 +14,6 @@
 """A Template for the Account Unlocked Email."""
 
 import base64
-import datetime
 
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import AuthHeaderType, ContentType
