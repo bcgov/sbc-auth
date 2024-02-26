@@ -14,6 +14,7 @@ export enum SessionStorageKeys {
     UnlinkedShortNamesFilter = 'UNLINKED_SHORT_NAMES_FILTER',
     LinkedShortNamesFilter = 'LINKED_SHORT_NAMES_FILTER',
     ShortNamesTabIndex = 'SHORT_NAMES_TAB_INDEX',
+    LinkedAccount = 'LINKED_ACCOUNT',
     PendingAccountsSearchFilter = 'PENDING_ACCOUNTS_SEARCH_FILTER',
     RejectedAccountsSearchFilter = 'REJECTED_ACCOUNTS_SEARCH_FILTER',
     AuthApiUrl = 'AUTH_API_URL',

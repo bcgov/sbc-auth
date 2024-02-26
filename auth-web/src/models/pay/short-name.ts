@@ -68,10 +68,12 @@ export interface UnlinkedShortNameState {
   dateRangeReset: number
   clearFiltersTrigger: number
   selectedShortName: object
-  selectedAccount: object
   showDatePicker: boolean
   dateRangeSelected: boolean
   dateRangeText: string
   accountLinkingErrorDialogTitle: string
   accountLinkingErrorDialogText: string
+  isShortNameLinkingDialogOpen: boolean,
+  startDate: string
+  endDate: string
 }

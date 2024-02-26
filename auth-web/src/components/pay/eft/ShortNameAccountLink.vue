@@ -1,5 +1,11 @@
 <template>
   <v-card v-if="shortNameDetails.shortName">
+    <ShortNameLinkingDialog
+      :isShortNameLinkingDialogOpen="state.isShortNameLinkingDialogOpen"
+      :selectedShortName="shortNameDetails"
+      @close-short-name-linking-dialog="closeShortNameLinkingDialog"
+      @on-link-account="onLinkAccount"
+    />
     <v-card-title class="card-title">
       <v-icon
         class="pr-5"
@@ -28,6 +34,7 @@
       <v-btn
         id="link-shortname-btn"
         color="primary"
+        @click="openAccountLinkingDialog()"
       >
         Link to Account
       </v-btn>
@@ -36,17 +43,25 @@
 </template>
 <script lang="ts">
 
-import { computed, defineComponent } from '@vue/composition-api'
+import { computed, defineComponent, reactive } from '@vue/composition-api'
+import ConfigHelper from '@/util/config-helper'
+import { SessionStorageKeys } from '@/util/constants'
+import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
 
 export default defineComponent({
   name: 'ShortNameAccountLinkage',
+  components: { ShortNameLinkingDialog },
   props: {
     shortNameDetails: {
       type: Object,
       default: () => ({})
     }
   },
-  setup (props) {
+  setup (props, { root }) {
+    const state = reactive({
+      isShortNameLinkingDialogOpen: false
+    })
+
     const isLinked = computed<boolean>(() => {
       return props.shortNameDetails?.accountId
     })
@@ -55,9 +70,27 @@ export default defineComponent({
       return `${props.shortNameDetails.accountId} ${props.shortNameDetails.accountName}`
     })
 
+    function openAccountLinkingDialog () {
+      state.isShortNameLinkingDialogOpen = true
+    }
+
+    function closeShortNameLinkingDialog () {
+      state.isShortNameLinkingDialogOpen = false
+    }
+
+    function onLinkAccount (account: any) {
+      ConfigHelper.addToSession(SessionStorageKeys.LinkedAccount, JSON.stringify(account))
+      ConfigHelper.addToSession(SessionStorageKeys.ShortNamesTabIndex, 1)
+      root.$router.push('/pay/manage-shortnames')
+    }
+
     return {
+      state,
       isLinked,
-      accountDisplayText
+      accountDisplayText,
+      openAccountLinkingDialog,
+      closeShortNameLinkingDialog,
+      onLinkAccount
     }
   }
 })
