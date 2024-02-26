@@ -104,6 +104,11 @@ export default defineComponent({
     }
 
     onMounted(() => {
+      const linkedAccount = ConfigHelper.getFromSession(SessionStorageKeys.LinkedAccount)
+      if (linkedAccount) {
+        state.linkedAccount = JSON.parse(linkedAccount)
+        ConfigHelper.removeFromSession(SessionStorageKeys.LinkedAccount)
+      }
       const shortNamesTabIndex = ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesTabIndex)
       tab.value = shortNamesTabIndex ? parseInt(shortNamesTabIndex) : 0
       state.isMounted = true
