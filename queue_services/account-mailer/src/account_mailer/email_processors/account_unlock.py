@@ -58,7 +58,6 @@ def _get_account_unlock_email(email_msg):
 
 
 def _get_account_unlock_pdf(data, token):
-    current_time = datetime.datetime.now()
     pdf_payload = {
         'reportName': 'NSF_Fee_Receipt',
         'templateVars': data['template_vars'],

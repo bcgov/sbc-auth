@@ -114,7 +114,7 @@ async def process_event(event_message: dict, flask_app):
                 'admin_coordinator_emails': admin_coordinator_emails,
             }
 
-            email_dict = account_unlock.process(email_msg=email_dict, token=token)
+            email_dict = account_unlock.process(data=email_dict, token=token)
 
         elif message_type == MessageType.ACCOUNT_CONFIRMATION_PERIOD_OVER.value:
             template_name = TemplateType.ACCOUNT_CONF_OVER_TEMPLATE_NAME.value
