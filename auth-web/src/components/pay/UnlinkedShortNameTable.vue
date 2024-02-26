@@ -1,34 +1,34 @@
 <template>
   <div>
     <ShortNameLinkingDialog
-      :isShortNameLinkingDialogOpen="state.isShortNameLinkingDialogOpen"
-      :selectedShortName="state.selectedShortName"
+      :isShortNameLinkingDialogOpen="isShortNameLinkingDialogOpen"
+      :selectedShortName="selectedShortName"
       @close-short-name-linking-dialog="closeShortNameLinkingDialog"
       @on-link-account="onLinkAccount"
     />
     <DatePicker
-      v-show="state.showDatePicker"
+      v-show="showDatePicker"
       ref="datePicker"
-      :reset="state.dateRangeReset"
+      :reset="dateRangeReset"
       class="date-picker"
-      :setEndDate="state.endDate"
-      :setStartDate="state.startDate"
+      :setEndDate="endDate"
+      :setStartDate="startDate"
       @submit="updateDateRange($event)"
     />
     <BaseVDataTable
       id="unlinked-bank-short-names"
-      :clearFiltersTrigger="state.clearFiltersTrigger"
+      :clearFiltersTrigger="clearFiltersTrigger"
       itemKey="id"
       :loading="false"
       loadingText="Loading Unlinked Payments..."
       noDataText="No records to show."
-      :setItems="state.results"
+      :setItems="results"
       :setHeaders="headers"
-      :setTableDataOptions="state.options"
+      :setTableDataOptions="options"
       :hasTitleSlot="true"
-      :totalItems="state.totalResults"
+      :totalItems="totalResults"
       :pageHide="true"
-      :filters="state.filters"
+      :filters="filters"
       :updateFilter="updateFilter"
       :useObserver="true"
       :observerCallback="infiniteScrollCallback"
@@ -38,14 +38,14 @@
         <h2 class="ml-4 py-6">
           Unlinked Payments
           <span class="font-weight-regular">
-            ({{ state.totalResults }})
+            ({{ totalResults }})
           </span>
         </h2>
       </template>
       <template #header-filter-slot-transactionDate>
         <div @click="clickDatePicker()">
           <v-text-field
-            v-model="state.dateRangeText"
+            v-model="dateRangeText"
             class="base-table__header__filter__textbox date-filter"
             :append-icon="'mdi-calendar'"
             clearable
@@ -53,14 +53,14 @@
             filled
             hide-details
             :placeholder="'Initial Payment Received Date'"
-            :value="state.dateRangeSelected ? 'Custom' : ''"
-            @click:clear="state.dateRangeReset++"
+            :value="dateRangeSelected ? 'Custom' : ''"
+            @click:clear="dateRangeReset++"
           />
         </div>
       </template>
       <template #header-filter-slot-actions>
         <v-btn
-          v-if="state.filters.isActive"
+          v-if="filters.isActive"
           class="clear-btn mx-auto mt-auto"
           color="primary"
           outlined
@@ -95,7 +95,7 @@
           </v-btn>
           <span class="more-actions">
             <v-menu
-              v-model="state.actionDropdown[index]"
+              v-model="actionDropdown[index]"
               :attach="`#action-menu-${index}`"
               offset-y
               nudge-left="74"
@@ -108,7 +108,7 @@
                   class="more-actions-btn"
                   v-on="on"
                 >
-                  <v-icon>{{ state.actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                  <v-icon>{{ actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
                 </v-btn>
               </template>
               <v-list>
@@ -133,7 +133,7 @@
 </template>
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
-import { Ref, defineComponent, onMounted, reactive, ref, watch } from '@vue/composition-api'
+import { Ref, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { SessionStorageKeys, ShortNameStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -174,7 +174,9 @@ export default defineComponent({
       dateRangeText: '',
       accountLinkingErrorDialogTitle: '',
       accountLinkingErrorDialogText: '',
-      isShortNameLinkingDialogOpen: false
+      isShortNameLinkingDialogOpen: false,
+      startDate: '',
+      endDate: ''
     })
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px') => ({
@@ -323,10 +325,10 @@ export default defineComponent({
     }, { deep: true })
 
     return {
+      ...toRefs(state),
       clearFilters,
       infiniteScrollCallback,
       headers,
-      state,
       updateFilter,
       formatAmount,
       formatDate,

@@ -1,6 +1,6 @@
 <template>
   <div
-    id="manage-business-dialog"
+    id="short-name-linking-dialog"
   >
     <ModalDialog
       ref="accountLinkingDialog"
@@ -8,12 +8,12 @@
       :show-icon="false"
       :showCloseIcon="true"
       dialog-class="lookup-dialog"
-      :title="`Linking ${state.selectedShortName.shortName} to an Account`"
+      :title="`Linking ${currentShortName.shortName} to an Account`"
       @close-dialog="resetAccountLinkingDialog"
     >
       <template #text>
         <p
-          v-if="state.selectedAccount.accountId"
+          v-if="selectedAccount.accountId"
           class="py-4 px-6 important"
         >
           <span class="font-weight-bold">Important:</span> Once an account is linked, all payment received
@@ -24,8 +24,8 @@
           Search by Account ID or Name to Link:
         </h4>
         <ShortNameLookup
-          :key="state.shortNameLookupKey"
-          @account="state.selectedAccount = $event"
+          :key="shortNameLookupKey"
+          @account="selectedAccount = $event"
           @reset="resetAccountLinkingDialog"
         />
       </template>
@@ -55,8 +55,8 @@
       ref="accountLinkingErrorDialog"
       max-width="720"
       dialog-class="notify-dialog"
-      :title="state.accountLinkingErrorDialogTitle"
-      :text="state.accountLinkingErrorDialogText"
+      :title="accountLinkingErrorDialogTitle"
+      :text="accountLinkingErrorDialogText"
     >
       <template #icon>
         <v-icon
@@ -80,7 +80,7 @@
   </div>
 </template>
 <script lang="ts">
-import { Ref, defineComponent, onMounted, reactive, ref, watch } from '@vue/composition-api'
+import { Ref, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
@@ -89,7 +89,7 @@ import { ShortNameResponseStatus } from '@/util/constants'
 
 interface ShortNameLinkingDialog {
   shortNameLookupKey: number
-  selectedShortName: object
+  currentShortName: object
   selectedAccount: object
   accountLinkingErrorDialogTitle: string
   accountLinkingErrorDialogText: string
@@ -113,14 +113,14 @@ export default defineComponent({
     const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const state = reactive<ShortNameLinkingDialog>({
       shortNameLookupKey: 0,
-      selectedShortName: {},
+      currentShortName: {},
       selectedAccount: {},
       accountLinkingErrorDialogTitle: '',
       accountLinkingErrorDialogText: ''
     })
 
     function openAccountLinkingDialog (item: EFTShortnameResponse) {
-      state.selectedShortName = item
+      state.currentShortName = item
       accountLinkingDialog.value.open()
     }
 
@@ -140,11 +140,11 @@ export default defineComponent({
     }
 
     async function linkAccount () {
-      if (!state.selectedShortName?.id || !state.selectedAccount?.accountId) {
+      if (!state.currentShortName?.id || !state.selectedAccount?.accountId) {
         return
       }
       try {
-        const response = await PaymentService.patchEFTShortname(state.selectedShortName.id, state.selectedAccount.accountId)
+        const response = await PaymentService.patchEFTShortname(state.currentShortName.id, state.selectedAccount.accountId)
         if (response?.data) {
           emit('on-link-account', response.data)
           cancelAndResetAccountLinkingDialog()
@@ -168,15 +168,14 @@ export default defineComponent({
     onMounted(async () => {
     })
 
-    watch(() => [props.selectedShortName, props.isShortNameLinkingDialogOpen],
-      async ([selectedShortNameNewValue]) => {
-        if (props.isShortNameLinkingDialogOpen && selectedShortNameNewValue) {
-          openAccountLinkingDialog(selectedShortNameNewValue)
-        }
-      })
+    watch(() => props.selectedShortName, (selectedShortNameNewValue) => {
+      if (props.isShortNameLinkingDialogOpen && selectedShortNameNewValue) {
+        openAccountLinkingDialog(props.selectedShortName)
+      }
+    })
 
     return {
-      state,
+      ...toRefs(state),
       accountLinkingDialog,
       accountLinkingErrorDialog,
       openAccountLinkingDialog,

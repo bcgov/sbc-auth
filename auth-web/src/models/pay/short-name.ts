@@ -73,5 +73,7 @@ export interface UnlinkedShortNameState {
   dateRangeText: string
   accountLinkingErrorDialogTitle: string
   accountLinkingErrorDialogText: string
-  isShortNameLinkingDialogOpen: boolean
+  isShortNameLinkingDialogOpen: boolean,
+  startDate: string
+  endDate: string
 }
