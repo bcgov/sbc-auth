@@ -175,7 +175,78 @@ async def test_unlock_account_mailer_queue(app, session, stan_server, event_loop
             # add an event to queue
             mail_details = {
                 'accountId': id,
-                'accountName': org.name
+                'accountName': org.name,
+                'invoiceNumber': 'REG0123456',
+                'receiptNumber': '99123',
+                'paymentMethod': 'CC',
+                'invoice': {
+                    '_links': {
+                        'self': 'http://auth-web.dev.com/api/v1/payment-requests/2',
+                        'collection': 'http://auth-web.dev.com/api/v1/payment-requests?invoice_id=2'
+                    },
+                    'bcolAccount': 'TEST',
+                    'corpTypeCode': 'CP',
+                    'createdName':
+                    'test name',
+                    'id': 2,
+                    'createdBy': 'test',
+                    'paymentAccount': {
+                        'accountId': '1234',
+                        'billable': True
+                    },
+                    'paymentDate': '2024-02-27T09:52:03+00:00',
+                    'total': 130.0,
+                    'paymentMethod': 'CC',
+                    'overdueDate': '2024-03-01T09:52:02+00:00',
+                    'paid': 30.0,
+                    'details': [{'label': 'label', 'value': 'value'}],
+                    'serviceFees': 0.0,
+                    'updatedOn': '2024-02-27T09:52:03+00:00',
+                    'lineItems': [{
+                        'waivedFees': None,
+                        'waivedBy': None,
+                        'gst': None,
+                        'pst': None,
+                        'filingFees': 10.0,
+                        'id': 2,
+                        'serviceFees': 0.0,
+                        'priorityFees': None,
+                        'futureEffectiveFees': None,
+                        'quantity': None,
+                        'statusCode': 'ACTIVE',
+                        'total': 10.0,
+                        'description': None
+                    }, {
+                        'waivedFees': None,
+                        'waivedBy': None,
+                        'gst': None,
+                        'pst': None,
+                        'filingFees': 10.0,
+                        'id': 1,
+                        'serviceFees': 0.0,
+                        'priorityFees': None,
+                        'futureEffectiveFees': None,
+                        'quantity': None,
+                        'statusCode': 'ACTIVE',
+                        'total': 10.0,
+                        'description': None
+                    }],
+                    'createdOn': '2024-02-27T09:51:55+00:00',
+                    'references': [{
+                        'invoiceNumber': 'REG00001',
+                        'id': 2,
+                        'statusCode': 'COMPLETED'
+                    }],
+                    'receipts': [{
+                        'receiptAmount': 100.0,
+                        'id': 2,
+                        'receiptDate': '2024-02-27T09:52:03.018524',
+                        'receiptNumber': '1234567890'
+                    }],
+                    'statusCode': 'COMPLETED',
+                    'folioNumber': '1234567890',
+                    'businessIdentifier': 'CP0001234'
+                }
             }
             await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
                                             msg_type=MessageType.NSF_UNLOCK_ACCOUNT.value, mail_details=mail_details)
