@@ -162,9 +162,7 @@ async def test_unlock_account_mailer_queue(app, session, stan_server, event_loop
     response = types.SimpleNamespace()
     response.status_code = 200
     response.content = bytes('foo', 'utf-8')
-    # patch RestService.post
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
         with patch.object(RestService, 'post', return_value=response):
             await subscribe_to_queue(events_stan,
                                      events_subject,
