@@ -154,13 +154,13 @@
             >
               <p
                 v-if="$te(productLabel.details)"
-                class="mb-0"
                 v-sanitize="$t(productLabel.details)"
+                class="mb-0"
               />
               <p
                 v-if="$te(productLabel.note)"
-                class="mb-0"
                 v-sanitize="$t(productLabel.note)"
+                class="mb-0"
               />
               <component
                 :is="productFooter.component"
