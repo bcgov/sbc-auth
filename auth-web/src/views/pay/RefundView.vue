@@ -172,8 +172,10 @@ enum RefundType {
 }
 
 enum RefundLineTypes {
-  OTHER_FEES = 'OTHER_FEES',
-  SERVICE_FEE = 'SERVICE_FEE',
+  BASE_FEES = 'BASE_FEES',
+  FUTURE_EFFECTIVE_FEES = 'FUTURE_EFFECTIVE_FEES',
+  PRIORITY_FEES = 'PRIORITY_FEES',
+  SERVICE_FEES = 'SERVICE_FEES'
 }
 
 export default defineComponent({
@@ -218,23 +220,23 @@ export default defineComponent({
         if (state.refundType === RefundType.PARTIAL) {
           state.refundedItems.forEach(index => {
             const item = state.paymentLineItems[index]
-            if (item.total > 0) {
-              refundPayload.refundRevenue.push({
-                paymentLineItemId: item.id,
-                refundAmount: parseFloat(item.total),
-                refundType: RefundLineTypes.OTHER_FEES
-              })
-            }
-            if (item.serviceFees > 0) {
-              refundPayload.refundRevenue.push({
-                paymentLineItemId: item.id,
-                refundAmount: item.serviceFees,
-                refundType: RefundLineTypes.SERVICE_FEE
-              })
-            }
+            const feeTypes = [
+              { key: 'total', type: RefundLineTypes.BASE_FEES },
+              { key: 'priorityFees', type: RefundLineTypes.PRIORITY_FEES },
+              { key: 'futureEffectiveFees', type: RefundLineTypes.FUTURE_EFFECTIVE_FEES },
+              { key: 'serviceFees', type: RefundLineTypes.SERVICE_FEES }
+            ]
+
+            feeTypes.forEach(fee => {
+              if (item[fee.key] > 0) {
+                refundPayload.refundRevenue.push({
+                  paymentLineItemId: item.id,
+                  refundAmount: parseFloat(item[fee.key]),
+                  refundType: fee.type
+                })
+              }
+            })
           })
-        } else {
-          delete refundPayload.refundRevenue
         }
 
         const response = await state.orgStore.refundInvoice(state.invoiceId, refundPayload)
