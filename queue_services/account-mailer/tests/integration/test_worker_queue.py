@@ -162,9 +162,7 @@ async def test_unlock_account_mailer_queue(app, session, stan_server, event_loop
     response = types.SimpleNamespace()
     response.status_code = 200
     response.content = bytes('foo', 'utf-8')
-    # patch RestService.post
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
         with patch.object(RestService, 'post', return_value=response):
             await subscribe_to_queue(events_stan,
                                      events_subject,
@@ -172,10 +170,80 @@ async def test_unlock_account_mailer_queue(app, session, stan_server, event_loop
                                      events_durable_name,
                                      cb_subscription_handler)
 
-            # add an event to queue
+            # Note: This payload should work with report-api.
             mail_details = {
                 'accountId': id,
-                'accountName': org.name
+                'accountName': org.name,
+                'invoiceNumber': 'REG0123456',
+                'receiptNumber': '99123',
+                'paymentMethodDescription': 'Credit Card',
+                'invoice': {
+                    '_links': {
+                        'self': 'http://auth-web.dev.com/api/v1/payment-requests/2',
+                        'collection': 'http://auth-web.dev.com/api/v1/payment-requests?invoice_id=2'
+                    },
+                    'bcolAccount': 'TEST',
+                    'corpTypeCode': 'CP',
+                    'createdName':
+                    'test name',
+                    'id': 2,
+                    'createdBy': 'test',
+                    'paymentAccount': {
+                        'accountId': '1234',
+                        'billable': True
+                    },
+                    'paymentDate': '2024-02-27T09:52:03+00:00',
+                    'total': 130.0,
+                    'paymentMethod': 'CC',
+                    'overdueDate': '2024-03-01T09:52:02+00:00',
+                    'paid': 30.0,
+                    'details': [{'label': 'label', 'value': 'value'}],
+                    'serviceFees': 0.0,
+                    'updatedOn': '2024-02-27T09:52:03+00:00',
+                    'lineItems': [{
+                        'waivedFees': None,
+                        'waivedBy': None,
+                        'gst': 0.0,
+                        'pst': 0.0,
+                        'filingFees': 10.0,
+                        'id': 2,
+                        'serviceFees': 0.0,
+                        'priorityFees': 0.0,
+                        'futureEffectiveFees': 0.0,
+                        'quantity': 1,
+                        'statusCode': 'ACTIVE',
+                        'total': 10.0,
+                        'description': 'NSF Fee'
+                    }, {
+                        'waivedFees': None,
+                        'waivedBy': None,
+                        'gst': 0.0,
+                        'pst': 0.0,
+                        'filingFees': 10.0,
+                        'id': 1,
+                        'serviceFees': 0.0,
+                        'priorityFees': 0.0,
+                        'futureEffectiveFees': 0.0,
+                        'quantity': 1,
+                        'statusCode': 'ACTIVE',
+                        'total': 10.0,
+                        'description': 'Name Request'
+                    }],
+                    'createdOn': '2024-02-27T09:51:55+00:00',
+                    'references': [{
+                        'invoiceNumber': 'REG00001',
+                        'id': 2,
+                        'statusCode': 'COMPLETED'
+                    }],
+                    'receipts': [{
+                        'receiptAmount': 100.0,
+                        'id': 2,
+                        'receiptDate': '2024-02-27T09:52:03.018524',
+                        'receiptNumber': '1234567890'
+                    }],
+                    'statusCode': 'COMPLETED',
+                    'folioNumber': '1234567890'
+                }
             }
             await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
                                             msg_type=MessageType.NSF_UNLOCK_ACCOUNT.value, mail_details=mail_details)
