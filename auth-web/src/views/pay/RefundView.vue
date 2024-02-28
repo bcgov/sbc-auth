@@ -197,9 +197,13 @@ export default defineComponent({
       refundResponse: ''
     })
 
-    function fetchInvoice () {
+    function matchInvoiceId (invoiceId: string) {
       // Should resolve REG0031233 -> 31233 etc.
-      const invoiceId = state.invoiceId.match(/\d+/)
+      return invoiceId.match(/\d+/)
+    }
+
+    function fetchInvoice () {
+      const invoiceId = matchInvoiceId(state.invoiceId)
       state.orgStore.getInvoice({ invoiceId: invoiceId }).then((invoice: Invoice) => {
         state.invoicePaid = invoice.paid
         state.paymentLineItems = invoice.lineItems ? invoice.lineItems.map(item => ({
@@ -239,7 +243,8 @@ export default defineComponent({
           })
         }
 
-        const response = await state.orgStore.refundInvoice(state.invoiceId, refundPayload)
+        const invoiceId = matchInvoiceId(state.invoiceId)
+        const response = await state.orgStore.refundInvoice(invoiceId, refundPayload)
         state.refundResponse = 'Refund successful.'
         console.log('Refund successful:', response)
       } catch (error) {
