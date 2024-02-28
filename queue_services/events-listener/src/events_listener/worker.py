@@ -73,10 +73,13 @@ async def process_event(event_message, flask_app):
         if message_type == LOCK_ACCOUNT_MESSAGE_TYPE:
             org.status_code = OrgStatus.NSF_SUSPENDED.value
             org.suspended_on = datetime.now()
-            await publish_mailer_events(LOCK_ACCOUNT_MESSAGE_TYPE, org_id)
+            data = {
+                'accountId': org_id,
+            }
+            await publish_mailer_events(LOCK_ACCOUNT_MESSAGE_TYPE, org_id, data)
         elif message_type == UNLOCK_ACCOUNT_MESSAGE_TYPE:
             org.status_code = OrgStatus.ACTIVE.value
-            await publish_mailer_events(UNLOCK_ACCOUNT_MESSAGE_TYPE, org_id)
+            await publish_mailer_events(UNLOCK_ACCOUNT_MESSAGE_TYPE, org_id, data)
         else:
             logger.error('Unknown Message Type : %s', message_type)
             return
@@ -97,13 +100,9 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
         logger.error('Queue Error: %s', json.dumps(event_message), exc_info=True)
 
 
-async def publish_mailer_events(message_type: str, org_id: str):
+async def publish_mailer_events(message_type: str, org_id, data):
     """Publish payment message to the mailer queue."""
     # Publish message to the Queue, saying account has been created. Using the event spec.
-
-    queue_data = {
-        'accountId': org_id,
-    }
     payload = {
         'specversion': '1.x-wip',
         'type': message_type,
@@ -111,7 +110,7 @@ async def publish_mailer_events(message_type: str, org_id: str):
         'id': org_id,
         'time': f'{datetime.now()}',
         'datacontenttype': 'application/json',
-        'data': queue_data
+        'data': data
     }
     try:
         await publish(payload=payload,
