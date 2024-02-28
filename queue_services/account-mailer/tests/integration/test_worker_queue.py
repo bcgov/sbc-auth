@@ -170,13 +170,13 @@ async def test_unlock_account_mailer_queue(app, session, stan_server, event_loop
                                      events_durable_name,
                                      cb_subscription_handler)
 
-            # add an event to queue
+            # Note: This payload should work with report-api.
             mail_details = {
                 'accountId': id,
                 'accountName': org.name,
                 'invoiceNumber': 'REG0123456',
                 'receiptNumber': '99123',
-                'paymentMethod': 'CC',
+                'paymentMethodDescription': 'Credit Card',
                 'invoice': {
                     '_links': {
                         'self': 'http://auth-web.dev.com/api/v1/payment-requests/2',
@@ -203,31 +203,31 @@ async def test_unlock_account_mailer_queue(app, session, stan_server, event_loop
                     'lineItems': [{
                         'waivedFees': None,
                         'waivedBy': None,
-                        'gst': None,
-                        'pst': None,
+                        'gst': 0.0,
+                        'pst': 0.0,
                         'filingFees': 10.0,
                         'id': 2,
                         'serviceFees': 0.0,
-                        'priorityFees': None,
-                        'futureEffectiveFees': None,
-                        'quantity': None,
+                        'priorityFees': 0.0,
+                        'futureEffectiveFees': 0.0,
+                        'quantity': 1,
                         'statusCode': 'ACTIVE',
                         'total': 10.0,
-                        'description': None
+                        'description': 'NSF Fee'
                     }, {
                         'waivedFees': None,
                         'waivedBy': None,
-                        'gst': None,
-                        'pst': None,
+                        'gst': 0.0,
+                        'pst': 0.0,
                         'filingFees': 10.0,
                         'id': 1,
                         'serviceFees': 0.0,
-                        'priorityFees': None,
-                        'futureEffectiveFees': None,
-                        'quantity': None,
+                        'priorityFees': 0.0,
+                        'futureEffectiveFees': 0.0,
+                        'quantity': 1,
                         'statusCode': 'ACTIVE',
                         'total': 10.0,
-                        'description': None
+                        'description': 'Name Request'
                     }],
                     'createdOn': '2024-02-27T09:51:55+00:00',
                     'references': [{
@@ -242,8 +242,7 @@ async def test_unlock_account_mailer_queue(app, session, stan_server, event_loop
                         'receiptNumber': '1234567890'
                     }],
                     'statusCode': 'COMPLETED',
-                    'folioNumber': '1234567890',
-                    'businessIdentifier': 'CP0001234'
+                    'folioNumber': '1234567890'
                 }
             }
             await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
