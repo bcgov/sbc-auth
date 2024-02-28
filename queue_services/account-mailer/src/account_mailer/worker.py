@@ -112,6 +112,7 @@ async def process_event(event_message: dict, flask_app):
                 'subject': subject,
                 'org_id': org_id,
                 'admin_coordinator_emails': admin_coordinator_emails,
+                'account_name': email_msg.get('accountName')
             }
 
             email_dict = account_unlock.process(data=email_dict, token=token)
