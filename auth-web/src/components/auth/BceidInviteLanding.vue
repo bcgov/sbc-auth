@@ -121,8 +121,7 @@ export default class BceidInviteLanding extends Vue {
       stepTitle: 'Use a 2-factor mobile or desktop authentication app',
       stepDescription: `<p>Secure your account using a 2-factor authentication app with your BCeID when you log in. 
       Download a 2-factor authentication app to your smartphone such as FreeOTP, Google Authenticator or 
-      Microsoft Authenticator or Desktop options such as: 
-      <a href="https://authy.com/" target="_sbc">Authy</a> or 
+      Microsoft Authenticator or Desktop option such as: 
       <a href="https://chrome.google.com/webstore/detail/gauth-authenticator/` +
       `ilgcnhelpchnceeipipijaljkblbcobl?hl=en" target="_sbc_google">GAuth</a>.</p>`,
       icon: 'mdi-two-factor-authentication'

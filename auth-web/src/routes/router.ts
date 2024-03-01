@@ -1,4 +1,5 @@
 import {
+  CreatAccountBreadcrumb,
   MyBusinessRegistryBreadcrumb,
   RegistryDashboardBreadcrumb,
   RegistryHomeBreadcrumb, ShortNameDetailsBreadcrumb, ShortNameMappingBreadcrumb,
@@ -456,7 +457,15 @@ export function getRoutes (): RouteConfig[] {
       path: '/choose-authentication-method',
       name: 'chooseauthmethodview',
       component: ChooseAuthMethodView,
-      meta: { requiresAuth: false, requiresProfile: false },
+      meta: {
+        requiresAuth: false,
+        requiresProfile: false,
+        breadcrumb: [
+          RegistryHomeBreadcrumb,
+          CreatAccountBreadcrumb
+        ],
+        showNavBar: true
+      },
       props: true
     },
     {
