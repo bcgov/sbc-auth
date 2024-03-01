@@ -57,7 +57,7 @@
         class="small-icon"
       > mdi-open-in-new</v-icon></a><br>
       If you have <a
-        :href="acceptedIDURL"
+        :href="bcscInfoURL"
         target="_blank"
         class="learn-more-link"
         rel="noopener noreferrer"
@@ -359,7 +359,7 @@ export default class ChooseAuthMethodView extends Vue {
     return 'https://id.gov.bc.ca/'
   }
 
-  get acceptedIDURL (): string {
+  get bcscInfoURL (): string {
     return 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/id'
   }
 
