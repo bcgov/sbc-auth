@@ -66,7 +66,7 @@
         class="small-icon"
       > mdi-open-in-new</v-icon></a> this login method is an easy and secure way to access your account.
     </div>
-    <div class="mb-6">
+    <div class="mb-9">
       <span
         text
         class="help-btn"
@@ -160,7 +160,7 @@
         >
           <span
             v-if="showBCeIDOption"
-          > Read Less
+          > View Less
             <v-icon
               meduim
               color="primary"
@@ -168,7 +168,7 @@
           </span>
           <span
             v-else
-          >Read More<v-icon
+          >View More<v-icon
             meduim
             color="primary"
           >mdi-chevron-down</v-icon></span>
@@ -192,10 +192,10 @@
                   <h3 class="title font-weight-bold payment-title mt-n1">
                     BCeID Login + Two-Factor Authentication
                   </h3>
-                  <div class="align-center">
+                  <div>
                     <v-icon
                       small
-                      class="account-type__details"
+                      class="account-type__details mt-n1"
                     >
                       mdi-clock-outline
                     </v-icon>
@@ -211,15 +211,15 @@
                   :depressed="true"
                   @click="goNext(LoginSource.BCEID)"
                 >
-                  <span>Login</span>
-                  <v-icon class="pl-1">
-                    mdi-chevron-right
+                  <span>Next</span>
+          <v-icon class="pl-1">
+                  mdi-chevron-right
                   </v-icon>
                 </v-btn>
               </header>
             </v-card>
           </div>
-          <div class="mb-4">
+          <div class="mb-9">
             <a
               :href="bceIdURL"
               target="_blank"
