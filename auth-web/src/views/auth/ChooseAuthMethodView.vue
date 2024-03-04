@@ -9,38 +9,85 @@
         Account
       </h1>
       <div class="mt-4 view-header__subtitle">
-        Choose how you want to log into your BC Registries account.
+        You can log into your BC Registries account by using:
       </div>
     </div>
-    <span
-      text
-      class="help-btn"
-      @click="showHelp = !showHelp"
-    >
-      <v-icon
-        class="mr-1"
+    <div class="mb-9">
+      <v-card class="service-container">
+        <header class="d-flex align-center">
+          <div class="login-icon-container mt-n2">
+            <v-icon
+              x-large
+              class="account-card-icon"
+            >
+              mdi-account-card-details
+            </v-icon>
+          </div>
+          <div class="pr-8">
+            <h3 class="title font-weight-bold payment-title mt-n1">
+              BC Service Card
+            </h3>
+            <div>Easy and secure way to access your account</div>
+          </div>
+          <v-btn
+            id="bcsc-login"
+            large
+            width="120"
+            class="action-btn px-5 ml-auto"
+            color="primary"
+            :depressed="true"
+            @click="goNext(LoginSource.BCSC)"
+          >
+            <span>Login</span>
+            <v-icon class="pl-1">
+              mdi-chevron-right
+            </v-icon>
+          </v-btn>
+        </header>
+      </v-card>
+    </div>
+    <div class="mb-6">
+      No BC Services Card account? <a
+        :href="bcTokenURL"
+        target="_blank"
+        class="learn-more-link"
+        rel="noopener noreferrer"
+      >Learn how to set up a BC Services Card account<v-icon
         color="primary"
-      >mdi-help-circle-outline</v-icon>
-      <span v-if="!showHelp">Help me Choose</span>
-      <span v-else>Hide Help</span>
-    </span>
+        class="small-icon"
+      > mdi-open-in-new</v-icon></a><br>
+      If you have <a
+        :href="bcscInfoURL"
+        target="_blank"
+        class="learn-more-link"
+        rel="noopener noreferrer"
+      >ID issued in Canada<v-icon
+        color="primary"
+        class="small-icon"
+      > mdi-open-in-new</v-icon></a> this login method is an easy and secure way to access your account.
+    </div>
+    <div class="mb-9">
+      <span
+        text
+        class="help-btn"
+        @click="showHelpBCSC = !showHelpBCSC"
+      >
+        <v-icon
+          class="mr-1"
+          color="primary"
+        >mdi-help-circle-outline</v-icon>
+        <span v-if="!showHelpBCSC">More Help</span>
+        <span v-else>Hide Help</span>
+      </span>
+    </div>
     <v-slide-y-transition>
       <div
-        v-if="showHelp"
+        v-if="showHelpBCSC"
         class="help-info mb-10 mt-5 pb-16 pt-6"
       >
         <div class="help-info__content mx-auto">
           <div class="help-info__header">
-            Help with Choosing Login Option
-          </div>
-          <p class="mt-5">
-            There are two ways to log into a BC Registries account. Both methods require identity verification to ensure that a
-            person is who they say they are online. This is necessary to enhance transparency, protect British Columbians, and
-            ensure lawful transactions.
-          </p>
-
-          <div class="bold-text">
-            1) The BC Services Card Login
+            BC Services Card Login
           </div>
           <div class="mt-4">
             The BC Services Card login is a means of logging into BC government online services with a verified identity. You can
@@ -90,31 +137,89 @@
               >mdi-open-in-new</v-icon>
             </a>
           </div>
+        </div>
+        <div class="help-info__close-btn-section">
+          <span
+            class="help-info__close-btn my-5"
+            @click="showHelpBCSC = false"
+          >Hide help</span>
+        </div>
+      </div>
+    </v-slide-y-transition>
+    <v-divider class="mb-6 mt-1" />
+    <div>
+      <header class="d-flex align-center">
+        <span>Other login options if you do not have ID issued in Canada</span>
+        <v-btn
+          depressed
+          color="primary"
+          width="120"
+          class="font-weight-bold ml-auto"
+          text
+          @click="showBCeIDOption = !showBCeIDOption"
+        >
+          <span
+            v-if="showBCeIDOption"
+          > View Less
+            <v-icon
+              meduim
+              color="primary"
+            >mdi-chevron-up</v-icon>
+          </span>
+          <span
+            v-else
+          >View More<v-icon
+            meduim
+            color="primary"
+          >mdi-chevron-down</v-icon></span>
+        </v-btn>
+      </header>
 
-          <div class="bold-text mt-4">
-            2) BCeID Login
+      <v-expand-transition v-if="showBCeIDOption">
+        <div class="mt-9">
+          <div class="mb-9">
+            <v-card class="service-container">
+              <header class="d-flex align-center">
+                <div class="login-icon-container mt-n2">
+                  <v-icon
+                    x-large
+                    class="account-card-icon"
+                  >
+                    mdi-certificate
+                  </v-icon>
+                </div>
+                <div class="pr-8">
+                  <h3 class="title font-weight-bold payment-title mt-n1">
+                    BCeID Login + Two-Factor Authentication
+                  </h3>
+                  <div>
+                    <v-icon
+                      small
+                      class="account-type__details mt-n1"
+                    >
+                      mdi-clock-outline
+                    </v-icon>
+                    Require identity verification, the approximate processing time is 8-10 days
+                  </div>
+                </div>
+                <v-btn
+                  id="bceid-login"
+                  large
+                  width="120"
+                  class="action-btn px-5 ml-auto"
+                  color="primary"
+                  :depressed="true"
+                  @click="goNext(LoginSource.BCEID)"
+                >
+                  <span>Next</span>
+          <v-icon class="pl-1">
+                  mdi-chevron-right
+                  </v-icon>
+                </v-btn>
+              </header>
+            </v-card>
           </div>
-          <div class="mt-4">
-            A BCeID is an account that provides a username and password to allow secure electronic access to online
-            government services.
-          </div>
-          <ul class="mt-4">
-            <li>
-              You can sign up for a BCeID when creating your BC Registries account or use an existing BCeID if you
-              already have one.
-            </li>
-            <li>
-              Your identity will need to be verified by obtaining a notarized affidavit from a notary or lawyer before
-              you can access BC Registry services. Note: Most notaries and lawyers charge a fee for this service; fees will
-              vary.
-            </li>
-            <li>The affidavit will need to be reviewed by BC Registries staff before it can be used.</li>
-            <li>
-              Logging in with a BCeID will require the use of a 3rd party application for 2-factor authentication (2FA) on a
-              mobile device or on a desktop computer.
-            </li>
-          </ul>
-          <div class="mt-4">
+          <div class="mb-9">
             <a
               :href="bceIdURL"
               target="_blank"
@@ -128,278 +233,76 @@
               >mdi-open-in-new</v-icon>
             </a>
           </div>
-        </div>
-
-        <div class="bold-text mt-4">
-          Canadian Government Agency (other than B.C. provincial)
-        </div>
-        <div class="mt-4 mb-6">
-          If you are a member of a Canadian government agency (other than B.C. provincial), select the method you will
-          use to login, and then check the box "I am a Canadian government agency". Once this has been reviewed by
-          staff, your account will be authorized for government access.
-        </div>
-
-        <div class="help-info__close-btn-section">
-          <span
-            class="help-info__close-btn my-5"
-            @click="showHelp = false"
-          >Hide help</span>
-        </div>
-      </div>
-    </v-slide-y-transition>
-    <div>
-      <v-row>
-        <v-col
-          class="d-flex align-stretch"
-          sm="12"
-          md="6"
-        >
-          <v-card
-            flat
-            outlined
-            hover
-            class="account-card text-center pa-10 elevation-2 d-flex"
-            :class="{ 'active': authType == 'BCSC' }"
-            @click="selectBCSCAuth()"
-          >
-            <div class="account-type d-flex flex-column">
-              <div class="account-type__icon mb-4">
-                <v-icon
-                  color="primary"
-                  class="account-card-icon"
-                >
-                  mdi-account-card-details-outline
-                </v-icon>
-              </div>
-              <div class="account-type__title mb-6">
-                BC Services Card Login
-              </div>
-              <div class="account-type__details mb-6">
-                If you have <a
-                  :href="idURL"
-                  target="_blank"
-                  class="id-info-link"
-                  rel="noopener noreferrer"
-                >
-                  ID issued in Canada
-                </a> the BC Services Card app is an easy and secure way to access your BC Registries account
-                <div class="mt-6">
-                  If you have a BC Services Card and don't have a mobile device, you can set up a username and password
-                  with a <a
-                    :href="bcTokenURL"
+          <div class="mb-6">
+            <span
+              text
+              class="help-btn"
+              @click="showHelpBCeID = !showHelpBCeID"
+            >
+              <v-icon
+                class="mr-1"
+                color="primary"
+              >mdi-help-circle-outline</v-icon>
+              <span v-if="!showHelpBCeID">More Help</span>
+              <span v-else>Hide Help</span>
+            </span>
+          </div>
+          <v-slide-y-transition>
+            <div
+              v-if="showHelpBCeID"
+              class="help-info mb-10 mt-5 pb-16 pt-6"
+            >
+              <div class="help-info__content mx-auto">
+                <div class="help-info__header">
+                  BCeID Login + Two-Factor Authentication
+                </div>
+                <div class="mt-4">
+                  A BCeID is an account that provides a username and password to allow secure electronic access to online
+                  government services.
+                </div>
+                <ul class="mt-4">
+                  <li>
+                    You can sign up for a BCeID when creating your BC Registries account or use an existing BCeID if you
+                    already have one.
+                  </li>
+                  <li>
+                    Your identity will need to be verified by obtaining a notarized affidavit from a notary or lawyer before
+                    you can access BC Registry services. Note: Most notaries and lawyers charge a fee for this service; fees will
+                    vary.
+                  </li>
+                  <li>The affidavit will need to be reviewed by BC Registries staff before it can be used.</li>
+                  <li>
+                    Logging in with a BCeID will require the use of a 3rd party application for 2-factor authentication (2FA) on a
+                    mobile device or on a desktop computer.
+                  </li>
+                </ul>
+                <div class="mt-4">
+                  <a
+                    :href="bceIdURL"
                     target="_blank"
-                    class="id-info-link"
+                    class="learn-more-link"
                     rel="noopener noreferrer"
-                  >BC Token</a>.
+                  >
+                    Learn more about BCeID
+                    <v-icon
+                      color="primary"
+                      class="small-icon"
+                    >mdi-open-in-new</v-icon>
+                  </a>
                 </div>
               </div>
-              <div class="mb-4">
-                <a
-                  :href="serviceCardLearnMoreURL"
-                  target="_blank"
-                  class="learn-more-link"
-                  rel="noopener noreferrer"
-                >
-                  Learn more about BC Services Card Login
-                  <v-icon
-                    color="primary"
-                    class="small-icon"
-                  >mdi-open-in-new</v-icon>
-                </a>
-              </div>
-              <div
-                class="mb-6"
-              >
-                <v-checkbox
-                  v-model="isGovNBCSC"
-                  color="primary"
-                  class="py-0 mt-2 align-checkbox-label--top"
-                  hide-details
-                  @click="openGovnWarningModal('BCSC')"
-                >
-                  <template #label>
-                    I am a Canadian government agency (other than B.C. provincial)
-                  </template>
-                </v-checkbox>
-                <div
-                  v-if="isGovNBCSC"
-                  class="gov-sccount-description mt-2"
-                >
-                  {{ govnAccountDescription }}
-                </div>
-              </div>
-              <!-- State Button (Create Account) -->
-              <div class="mb-4">
-                <v-btn
-                  large
-                  depressed
-                  block
-                  color="primary"
-                  class="font-weight-bold"
-                  :outlined="authType != 'BCSC'"
-                >
-                  {{ authType == 'BCSC' ? 'Selected' : 'Select' }}
-                </v-btn>
+              <div class="help-info__close-btn-section">
+                <span
+                  class="help-info__close-btn my-5"
+                  @click="showHelpBCeID = false"
+                >Hide help</span>
               </div>
             </div>
-          </v-card>
-        </v-col>
-        <v-col
-          class="d-flex align-stretch"
-          sm="12"
-          md="6"
-        >
-          <v-card
-            flat
-            outlined
-            hover
-            class="account-card text-center pa-10 elevation-2 d-flex"
-            :class="{ 'active': authType == 'BCEID' }"
-            @click="selectBCEIDAuth()"
-          >
-            <div class="account-type d-flex flex-column">
-              <div class="account-type__icon mb-4">
-                <v-icon
-                  color="primary"
-                  class="account-card-icon"
-                >
-                  mdi-certificate-outline
-                </v-icon>
-              </div>
-              <div class="account-type__title mb-6">
-                BCeID + 2FA Login
-              </div>
-              <div class="account-type__details mb-6">
-                If you do <span class="bold-text">not</span> have <a
-                  :href="idURL"
-                  target="_blank"
-                  class="id-info-link"
-                  rel="noopener noreferrer"
-                >
-                  ID issued in Canada
-                </a>, or if you prefer this option,
-                you can use a BCeID to log into your BC Registries account.
-                <div class="mt-6">
-                  <span class="bold-text">Note:</span> Using a BCeID requires you to verify your identity with a
-                  notarized affidavit, and to log in with
-                  2-factor authentication (2FA).
-                </div>
-              </div>
-              <div class="mb-4">
-                <a
-                  :href="bceIdURL"
-                  target="_blank"
-                  class="learn-more-link"
-                  rel="noopener noreferrer"
-                >
-                  Learn more about BCeID
-                  <v-icon
-                    color="primary"
-                    class="small-icon"
-                  >mdi-open-in-new</v-icon>
-                </a>
-              </div>
-              <div
-                v-if="!disableGovnAccountCreation"
-                class="mb-6"
-              >
-                <v-checkbox
-                  v-model="isGovNBCeID"
-                  color="primary"
-                  class="py-0 mt-2 align-checkbox-label--top"
-                  hide-details
-                  @click="openGovnWarningModal('BCEID')"
-                >
-                  <template #label>
-                    I am a Canadian government agency (other than B.C. provincial)
-                  </template>
-                </v-checkbox>
-                <div
-                  v-if="isGovNBCeID"
-                  class="gov-sccount-description mt-2"
-                >
-                  {{ govnAccountDescription }}
-                </div>
-              </div>
-              <!-- State Button (Create Account) -->
-              <div class="mb-4">
-                <v-btn
-                  large
-                  depressed
-                  block
-                  color="primary"
-                  class="font-weight-bold"
-                  :outlined="authType != 'BCEID'"
-                >
-                  {{ authType == 'BCEID' ? 'Selected' : 'Select' }}
-                </v-btn>
-              </div>
-            </div>
-          </v-card>
-        </v-col>
-      </v-row>
+          </v-slide-y-transition>
+        </div>
+      </v-expand-transition>
+      <div />
     </div>
-    <v-divider class="mb-6 mt-1" />
-    <div class="form__btns d-flex mt-8">
-      <v-btn
-        color="primary"
-        outlined
-        @click="goPrevious()"
-      >
-        Cancel
-      </v-btn>
-      <v-spacer />
-      <v-btn
-        large
-        color="primary"
-        class="next-btn font-weight-bold"
-        :disabled="authType == ''"
-        @click="goNext()"
-      >
-        Next
-        <v-icon class="ml-2">
-          mdi-arrow-right
-        </v-icon>
-      </v-btn>
-    </div>
-    <!-- Open GovN Account Modal -->
-    <ModalDialog
-      ref="govnConfirmModal"
-      :title="govnConfirmModalTitle"
-      :text="govnConfirmModalText"
-      dialog-class="notify-dialog"
-      max-width="680"
-      :isPersistent="true"
-      data-test="modal-govn-confirm"
-    >
-      <template #icon>
-        <v-icon
-          large
-          color="primary"
-        >
-          mdi-help-circle-outline
-        </v-icon>
-      </template>
-      <template #actions>
-        <v-btn
-          large
-          color="primary"
-          data-test="btn-govn-confirm"
-          class="mr-5 px-4"
-          @click="confirmGovnCreateAccount()"
-        >
-          Confirm
-        </v-btn>
-        <v-btn
-          large
-          data-test="btn-close-dialog"
-          class="px-4"
-          @click="closeConfirmModal()"
-        >
-          Cancel
-        </v-btn>
-      </template>
-    </ModalDialog>
   </v-container>
 </template>
 
@@ -419,20 +322,18 @@ import { mapGetters } from 'vuex'
     ...mapGetters('auth', [
       'isAuthenticated',
       'currentLoginSource'
-    ])
+    ]),
+    LoginSource: () => LoginSource
   }
 })
 export default class ChooseAuthMethodView extends Vue {
   private readonly isAuthenticated!: boolean
   private readonly currentLoginSource!: string
   authType = ''
-  isGovNBCSC = false
-  isGovNBCeID = false
   currCheckBox = ''
-  showHelp = false
-  govnConfirmModalTitle = 'Create Government Agency Account?'
-  govnConfirmModalText = this.$t('govnConfirmText')
-  govnAccountDescription = this.$t('govnAccountDescription')
+  showHelpBCSC = false
+  showHelpBCeID = false
+  showBCeIDOption = false
 
   $refs: {
     govnConfirmModal: InstanceType<typeof ModalDialog>
@@ -458,32 +359,12 @@ export default class ChooseAuthMethodView extends Vue {
     return 'https://id.gov.bc.ca/'
   }
 
-  selectBCSCAuth () {
-    this.authType = LoginSource.BCSC
-    if (this.isGovNBCeID) {
-      this.isGovNBCeID = false
-    }
+  get bcscInfoURL (): string {
+    return 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/id'
   }
 
-  selectBCEIDAuth () {
-    this.authType = LoginSource.BCEID
-    if (this.isGovNBCSC) {
-      this.isGovNBCSC = false
-    }
-  }
-
-  linkToNext () {
-    ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, (this.isGovNBCSC || this.isGovNBCeID))
-    ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'false')
-  }
-
-  goPrevious () {
-    this.$router.go(-1)
-  }
-
-  goNext () {
-    ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, (this.isGovNBCSC || this.isGovNBCeID))
-    switch (this.authType) {
+  goNext (authType: LoginSource) {
+    switch (authType) {
       case LoginSource.BCEID:
         ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'true')
         this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}/${Pages.SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS}`)
@@ -504,31 +385,27 @@ export default class ChooseAuthMethodView extends Vue {
         break
     }
   }
-
-  openGovnWarningModal (selection: string): void {
-    this.currCheckBox = selection
-    this.$refs.govnConfirmModal.open()
-  }
-
-  confirmGovnCreateAccount (): void {
-    this.$refs.govnConfirmModal.close()
-    this.isGovNBCSC = this.currCheckBox === LoginSource.BCSC
-    this.isGovNBCeID = this.currCheckBox === LoginSource.BCEID
-    this.currCheckBox = ''
-  }
-
-  closeConfirmModal (): void {
-    this.$refs.govnConfirmModal.close()
-    // Set isGovn flag back to false
-    this.isGovNBCSC = false
-    this.isGovNBCeID = false
-    this.currCheckBox = ''
-  }
 }
 </script>
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
+
+.service-container {
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  max-width: none;
+  padding: 24px;
+
+  &:hover {
+    border-left: 3px solid $app-blue !important;
+    box-shadow: 1px 1px 6px 0px $gray6;
+  }
+}
+.login-icon-container {
+  flex: 0 0 auto;
+  width: 4.5rem;
+}
 
 .view-container {
   max-width: 60rem;
@@ -538,78 +415,25 @@ export default class ChooseAuthMethodView extends Vue {
   padding: 1rem !important;
 }
 
-.account-card {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  background-color: #ffffff !important;
-  transition: all ease-out 0.2s;
-
-  &:hover {
-    border-color: var(--v-primary-base) !important;
-  }
-
-  &.active {
-    box-shadow: 0 0 0 2px inset var(--v-primary-base),
-                0 3px 1px -2px rgba(0, 0, 0, .2),
-                0 2px 2px 0 rgba(0, 0, 0, .14),
-                0 1px 5px 0 rgba(0, 0, 0, .12) !important;
-  }
-}
-
 .theme--light.v-card.v-card--outlined.active {
   border-color: var(--v-primary-base);
 }
 
 .account-card-icon {
-  color: var(--v-grey-lighten1) !important;
-  font-size: 3rem !important;
-}
-
-.account-card.active .v-icon {
-  color: var(--v-primary-base) !important;
-}
-
-.account-type {
-  flex: 1 1 auto;
-}
-
-.account-type__icon {
-  flex: 0 0 auto;
-}
-
-.account-type__title {
-  flex: 0 0 auto;
-  line-height: 1.75rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: $gray9
+  color: $app-dk-blue !important;
 }
 
 .account-type__details {
   flex: 1 1 auto;
   font-size: $px-16;
-  color: $gray7
-}
-
-.notary-link {
-  position: absolute;
-  left: 0;
-  bottom: 1.5rem;
-  width: 100%;
-}
-
-.lb {
-  display: block;
-}
-
-.gov-sccount-description {
-  color: $TextColorGray !important;
+  color: $gray7 !important;
+  top:0;
 }
 
 .learn-more-link {
   color: $app-blue;
   text-decoration: none;
+  text-decoration: underline;
 }
 
 .small-icon {
@@ -662,9 +486,5 @@ export default class ChooseAuthMethodView extends Vue {
   cursor: pointer;
   text-align: right;
   color: $app-blue;
-}
-
-.id-info-link {
-  color: $BCgoveBueText1;
 }
 </style>
