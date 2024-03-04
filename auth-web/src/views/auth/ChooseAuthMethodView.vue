@@ -25,7 +25,7 @@
           </div>
           <div class="pr-8">
             <h3 class="title font-weight-bold payment-title mt-n1">
-              BC Service Card
+              BC Services Card
             </h3>
             <div>Easy and secure way to create your account</div>
           </div>
