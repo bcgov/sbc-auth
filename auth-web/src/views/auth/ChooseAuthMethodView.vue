@@ -199,7 +199,7 @@
                     >
                       mdi-clock-outline
                     </v-icon>
-                    Require identity verification, the approximate processing time is 8-10 days
+                    Requires identity verification, the approximate processing time is 8-10 days
                   </div>
                 </div>
                 <v-btn
