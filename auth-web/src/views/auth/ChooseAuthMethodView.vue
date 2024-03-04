@@ -9,7 +9,7 @@
         Account
       </h1>
       <div class="mt-4 view-header__subtitle">
-        You can log into your BC Registries account by using:
+        You can create your BC Registries account by using:
       </div>
     </div>
     <div class="mb-9">
@@ -27,7 +27,7 @@
             <h3 class="title font-weight-bold payment-title mt-n1">
               BC Service Card
             </h3>
-            <div>Easy and secure way to access your account</div>
+            <div>Easy and secure way to create your account</div>
           </div>
           <v-btn
             id="bcsc-login"
@@ -38,7 +38,7 @@
             :depressed="true"
             @click="goNext(LoginSource.BCSC)"
           >
-            <span>Login</span>
+            <span>Create</span>
             <v-icon class="pl-1">
               mdi-chevron-right
             </v-icon>
@@ -64,7 +64,7 @@
       >ID issued in Canada<v-icon
         color="primary"
         class="small-icon"
-      > mdi-open-in-new</v-icon></a> this login method is an easy and secure way to access your account.
+      > mdi-open-in-new</v-icon></a> this method is an easy and secure way to create your account.
     </div>
     <div class="mb-9">
       <span
@@ -149,7 +149,7 @@
     <v-divider class="mb-6 mt-1" />
     <div>
       <header class="d-flex align-center">
-        <span>Other login options if you do not have ID issued in Canada</span>
+        <span>Other account creation options if you do not have ID issued in Canada</span>
         <v-btn
           depressed
           color="primary"
