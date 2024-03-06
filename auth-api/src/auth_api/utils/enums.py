@@ -332,6 +332,7 @@ class PatchActions(Enum):
 
     UPDATE_STATUS = 'updateStatus'
     UPDATE_ACCESS_TYPE = 'updateAccessType'
+    UPDATE_API_ACCESS = 'updateApiAccess'
 
     @classmethod
     def from_value(cls, value):
