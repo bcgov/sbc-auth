@@ -2343,3 +2343,33 @@ def test_get_orgs_by_affiliation_filtering_out_staff_orgs(app, client, jwt, sess
 
     for od in orgs_details:
         assert od['name'] not in staff_org_names
+
+
+def test_update_org_api_access(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be searched."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
+    rv = client.get('/api/v1/orgs/{}'.format(org_id),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'org_response')[0]
+    dictionary = json.loads(rv.data)
+    assert dictionary['id'] == org_id
+    assert dictionary['hasApiAccess'] is False
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
+    client.patch('/api/v1/orgs/{}'.format(org_id),
+                 data=json.dumps({'hasApiAccess': True,
+                                  'action': PatchActions.UPDATE_API_ACCESS.value}),
+                 headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/orgs/{}'.format(org_id),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['hasApiAccess'] is True
