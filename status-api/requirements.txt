@@ -13,7 +13,7 @@ click==7.1.2
 ecdsa==0.17.0
 flask-jwt-oidc==0.3.0
 flask-restx==0.5.1
-gunicorn==20.1.0
+gunicorn==22.0.0
 idna==3.7
 importlib-resources==5.4.0
 itsdangerous==1.1.0
