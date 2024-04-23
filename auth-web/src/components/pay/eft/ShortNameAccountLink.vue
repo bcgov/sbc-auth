@@ -28,7 +28,7 @@
         dark
         large
         @click="openAccountLinkingDialog()"
-        class="mt-0 mr-4 font-weight-regular ."
+        class="mt-0 mr-4 font-weight-regular"
       >
         + Link a New Account
       </v-btn>
