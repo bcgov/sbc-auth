@@ -74,6 +74,6 @@ describe('ShortNameAccountLink.vue', () => {
       .toContain(`All payments from ${shortNameDetails.shortName} will be applied to:`)
     expect(wrapper.find('.linked-text').text())
       .toContain(`${shortNameDetails.accountId} ${shortNameDetails.accountName}`)
-    expect(wrapper.find('#link-shortname-btn').exists()).toBe(false)
+    expect(wrapper.find('#link-shortname-btn').exists()).toBe(true)
   })
 })

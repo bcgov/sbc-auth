@@ -21,9 +21,20 @@
       v-if="isLinked"
       class="pa-5 linked-text"
     >
-      All payments from {{ shortNameDetails.shortName }} will be applied to:
-      <br>
-      <b>{{ accountDisplayText }}</b>
+      <v-btn
+        id="link-shortname-btn"
+        color="primary"
+        outlined
+        dark
+        large
+        @click="openAccountLinkingDialog()"
+        class="mt-0 mr-4 font-weight-regular"
+      >
+        + Link a New Account
+      </v-btn>
+      <div>
+        All payments from {{ shortNameDetails.shortName }} will be applied to: <b>{{ accountDisplayText }}</b>
+      </div>
     </v-card-text>
 
     <v-card-text
