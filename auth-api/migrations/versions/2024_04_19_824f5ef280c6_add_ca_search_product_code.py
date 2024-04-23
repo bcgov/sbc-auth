@@ -20,7 +20,7 @@ def upgrade():
     op.execute("INSERT INTO public.product_codes "
              "(code, description,\"default\", type_code, hidden, need_review, need_system_admin, premium_only, url) "
              "VALUES "
-             "('CA_SEARCH', 'Competent Authority Search', false, 'INTERNAL', true, true, true, false,'')")
+             "('CA_SEARCH', 'Competent Authority Search', false, 'INTERNAL', true, false, true, false,'')")
     op.execute("commit")
 
 def downgrade():
