@@ -34,7 +34,6 @@ from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
-from auth_api.services.flags import flags
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus
@@ -399,9 +398,6 @@ class Affiliation:
         # only have LEAR and NAMEX affiliations
         if affiliation.entity.corp_type_code == CorpType.NR.value:
             return current_app.config.get('NAMEX_AFFILIATION_DETAILS_URL')
-        # Temporary until legal names is implemented.
-        if flags.is_on('enable-alternate-names-mbr', default=False):
-            return current_app.config.get('LEAR_ALTERNATE_AFFILIATION_DETAILS_URL')
         return current_app.config.get('LEAR_AFFILIATION_DETAILS_URL')
 
     @staticmethod
