@@ -93,7 +93,7 @@ class Affiliation:
         nr_number_name_dict = {d['business_identifier']: d['name']
                                for d in data if d['corp_type']['code'] == CorpType.NR.value}
         # Create a list of all temporary business names
-        temp_types = (CorpType.TMP.value, CorpType.RTMP.value)
+        temp_types = [CorpType.TMP.value, CorpType.ATMP.value, CorpType.CTMP.value, CorpType.RTMP.value]
         tmp_business_list = [d['name'] for d in data if d['corp_type']['code'] in temp_types]
 
         # NR Numbers
@@ -187,7 +187,10 @@ class Affiliation:
 
         if entity_type not in ['SP', 'GP']:
             entity.set_pass_code_claimed(True)
-        if entity_type not in [CorpType.RTMP.value, CorpType.TMP.value, CorpType.ATMP.value]:
+        if entity_type not in [CorpType.RTMP.value,
+                               CorpType.TMP.value,
+                               CorpType.ATMP.value,
+                               CorpType.CTMP.value]:
             name = entity.name if len(entity.name) > 0 else entity.business_identifier
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
                                                            name=name, id=entity.business_identifier))
@@ -286,7 +289,10 @@ class Affiliation:
             affiliation_model = AffiliationModel(
                 org_id=org_id, entity_id=entity.identifier, certified_by_name=certified_by_name)
 
-            if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value, CorpType.ATMP.value]:
+            if entity.corp_type not in [CorpType.RTMP.value,
+                                        CorpType.TMP.value,
+                                        CorpType.ATMP.value,
+                                        CorpType.CTMP.value]:
                 ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
                                                                name=entity.name, id=entity.business_identifier))
         affiliation_model.certified_by_name = certified_by_name
@@ -341,7 +347,10 @@ class Affiliation:
         affiliation.delete()
         entity.set_pass_code_claimed(False)
 
-        if entity.corp_type in [CorpType.RTMP.value, CorpType.TMP.value, CorpType.ATMP.value]:
+        if entity.corp_type in [CorpType.RTMP.value,
+                                CorpType.TMP.value,
+                                CorpType.ATMP.value,
+                                CorpType.CTMP.value]:
             return
 
         # When registering a business (also RTMP and TMP in between):
