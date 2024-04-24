@@ -1,8 +1,8 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import { useUserStore } from '@/stores'
-import { Role } from '@/util/constants'
 import InvoluntaryDissolution from '@/views/auth/staff/InvoluntaryDissolution.vue'
+import { Role } from '@/util/constants'
 import Vuetify from 'vuetify'
+import { useUserStore } from '@/stores'
 
 const vuetify = new Vuetify({})
 
