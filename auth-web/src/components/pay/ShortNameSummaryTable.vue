@@ -16,11 +16,11 @@
       @submit="updateDateRange($event)"
     />
     <BaseVDataTable
-      id="unlinked-bank-short-names"
+      id="short-name-summaries"
       :clearFiltersTrigger="clearFiltersTrigger"
       itemKey="id"
       :loading="false"
-      loadingText="Loading Unlinked Payments..."
+      loadingText="Loading Short names..."
       noDataText="No records to show."
       :setItems="results"
       :setHeaders="headers"
@@ -31,18 +31,18 @@
       :filters="filters"
       :updateFilter="updateFilter"
       :useObserver="true"
-      :observerCallback="infiniteScrollCallback"
+      :observerCallback="() => infiniteScrollCallback(true)"
       @update-table-options="options = $event"
     >
       <template #header-title>
         <h2 class="ml-4 py-6">
-          Unlinked Payments
+          All Short Names
           <span class="font-weight-regular">
             ({{ totalResults }})
           </span>
         </h2>
       </template>
-      <template #header-filter-slot-transactionDate>
+      <template #header-filter-slot-lastPaymentReceivedDate>
         <div @click="clickDatePicker()">
           <v-text-field
             v-model="dateRangeText"
@@ -52,7 +52,7 @@
             dense
             filled
             hide-details
-            :placeholder="'Initial Payment Received Date'"
+            :placeholder="'Last Payment Received Date'"
             :value="dateRangeSelected ? 'Custom' : ''"
             @click:clear="dateRangeReset++"
           />
@@ -72,11 +72,14 @@
           </v-icon>
         </v-btn>
       </template>
-      <template #item-slot-depositAmount="{ item }">
-        <span>{{ formatAmount(item.depositAmount) }}</span>
+      <template #item-slot-lastPaymentReceivedDate="{ item }">
+        <span>{{ formatDate(item.lastPaymentReceivedDate) }}</span>
       </template>
-      <template #item-slot-transactionDate="{ item }">
-        <span>{{ formatDate(item.transactionDate) }}</span>
+      <template #item-slot-creditsRemaining="{ item }">
+        <span>{{ formatAmount(item.creditsRemaining) }}</span>
+      </template>
+      <template #item-slot-linkedAccountsCount="{ item }">
+        <span>{{ item.linkedAccountsCount }}</span>
       </template>
       <template #item-slot-actions="{ item, index }">
         <div
@@ -89,9 +92,9 @@
             min-width="5rem"
             min-height="2rem"
             class="open-action-btn"
-            @click="openAccountLinkingDialog(item)"
+            @click="viewDetails(index)"
           >
-            Link to Account
+            View Details
           </v-btn>
           <span class="more-actions">
             <v-menu
@@ -112,15 +115,15 @@
                 </v-btn>
               </template>
               <v-list>
-                <v-list-item
-                  class="actions-dropdown_item"
-                  data-test="link-account-button"
-                >
+                 <v-list-item
+                     class="actions-dropdown_item"
+                     data-test="link-account-button"
+                 >
                   <v-list-item-subtitle
-                    @click="viewDetails(index)"
+                      @click="openAccountLinkingDialog(item)"
                   >
-                    <v-icon small>mdi-format-list-bulleted</v-icon>
-                    <span class="pl-1 cursor-pointer">View Detail</span>
+                    <v-icon small>mdi-plus</v-icon>
+                    <span class="pl-1 cursor-pointer">Link to Account</span>
                   </v-list-item-subtitle>
                 </v-list-item>
               </v-list>
@@ -134,26 +137,26 @@
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
 import { Ref, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
-import { SessionStorageKeys, ShortNameStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { SessionStorageKeys } from '@/util/constants'
 import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
-import { UnlinkedShortNameState } from '@/models/pay/short-name'
+import { ShortNameSummaryState } from '@/models/pay/short-name'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
 
 export default defineComponent({
-  name: 'UnlinkedShortNameTable',
+  name: 'ShortNameSummaryTable',
   components: { BaseVDataTable, DatePicker, ShortNameLinkingDialog },
   emits: ['on-link-account'],
   setup (props, { emit, root }) {
     const datePicker = ref(null)
     const accountLinkingDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
-    const state = reactive<UnlinkedShortNameState>({
+    const state = reactive<ShortNameSummaryState>({
       results: [],
       totalResults: 1,
       filters: {
@@ -178,11 +181,11 @@ export default defineComponent({
       startDate: '',
       endDate: ''
     })
-    const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
+    const { infiniteScrollCallback, loadTableSummaryData, updateFilter } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {
-        filterApiFn: hasFilter ? (val: any) => loadTableData(col, val || '') : null,
+        filterApiFn: hasFilter ? (val: any) => loadTableSummaryData(col, val || '') : null,
         clearable: true,
         label,
         type,
@@ -195,21 +198,38 @@ export default defineComponent({
 
     const {
       shortName = '',
-      depositAmount = ''
-    } = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.UnlinkedShortNamesFilter) || '{}')
+      lastPaymentReceivedDate = '',
+      creditsRemaining = '',
+      linkedAccountsCount = ''
+    } = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesSummaryFilter) || '{}')
 
     const headers = [
-      createHeader('shortName', 'Bank Short Name', 'text', 'Bank Short Name', shortName),
+      createHeader('shortName', 'Short Name', 'text', 'Short Name', shortName),
       createHeader(
-        'transactionDate',
-        'Initial Payment Received Date',
+        'lastPaymentReceivedDate',
+        'Last Payment Received Date',
         'text',
-        'Initial Payment Received Date',
-        '',
+        'Last Payment Received Date',
+        lastPaymentReceivedDate,
         false,
-        '260px'
+        '200px'
       ),
-      createHeader('depositAmount', 'Initial Payment Amount', 'text', 'Initial Payment Amount', depositAmount),
+      createHeader(
+        'creditsRemaining',
+        'Unsettled Amount',
+        'text',
+        'Unsettled Amount',
+        creditsRemaining,
+        true,
+        '200px'
+      ),
+      createHeader(
+        'linkedAccountsCount',
+        'Number of Linked Accounts',
+        'text',
+        'Number of Linked Accounts',
+        linkedAccountsCount
+      ),
       {
         col: 'actions',
         hasFilter: false,
@@ -221,16 +241,15 @@ export default defineComponent({
     function defaultFilterPayload () {
       return {
         shortName: '',
-        transactionDate: '',
-        depositAmount: '',
-        state: ShortNameStatus.UNLINKED,
-        transactionStartDate: '',
-        transactionEndDate: ''
+        creditsRemaining: '',
+        linkedAccountsCount: '',
+        paymentReceivedStartDate: '',
+        paymentReceivedEndDate: ''
       }
     }
 
     function formatAmount (amount: number) {
-      return amount ? CommonUtils.formatAmount(amount) : ''
+      return amount !== undefined ? CommonUtils.formatAmount(amount) : ''
     }
 
     function formatDate (date: string) {
@@ -278,7 +297,7 @@ export default defineComponent({
 
     async function onLinkAccount (account: any) {
       emit('on-link-account', account)
-      await loadTableData()
+      await loadTableSummaryData()
     }
 
     async function updateDateRange ({ endDate, startDate }: { endDate?: string, startDate?: string }): void {
@@ -286,10 +305,10 @@ export default defineComponent({
       state.dateRangeSelected = !!(endDate && startDate)
       if (!state.dateRangeSelected) { endDate = ''; startDate = '' }
       state.dateRangeText = state.dateRangeSelected ? setDateRangeText(startDate, endDate) : ''
-      state.filters.filterPayload.transactionStartDate = startDate
-      state.filters.filterPayload.transactionEndDate = endDate
-      ConfigHelper.addToSession(SessionStorageKeys.UnlinkedShortNamesFilter, JSON.stringify(state.filters.filterPayload))
-      await loadTableData()
+      state.filters.filterPayload.paymentReceivedStartDate = startDate
+      state.filters.filterPayload.paymentReceivedEndDate = endDate
+      ConfigHelper.addToSession(SessionStorageKeys.ShortNamesSummaryFilter, JSON.stringify(state.filters.filterPayload))
+      await loadTableSummaryData()
     }
 
     async function clickDatePicker () {
@@ -301,27 +320,27 @@ export default defineComponent({
       state.dateRangeReset++
       state.filters.filterPayload = defaultFilterPayload()
       state.filters.isActive = false
-      await loadTableData()
+      await loadTableSummaryData()
     }
 
     onMounted(async () => {
-      const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.UnlinkedShortNamesFilter)
+      const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesSummaryFilter)
       if (orgSearchFilter) {
         try {
           const payload = JSON.parse(orgSearchFilter)
           state.filters.filterPayload = payload
-          if (payload.transactionStartDate) {
-            state.dateRangeText = setDateRangeText(payload.transactionStartDate, payload.transactionEndDate)
+          if (payload.paymentReceivedStartDate) {
+            state.dateRangeText = setDateRangeText(payload.paymentReceivedStartDate, payload.paymentReceivedEndDate)
           }
         } catch {
           // Silent catch
         }
       }
-      await loadTableData()
+      await loadTableSummaryData()
     })
 
     watch(() => state.filters, (filters: any) => {
-      ConfigHelper.addToSession(SessionStorageKeys.UnlinkedShortNamesFilter, JSON.stringify(filters.filterPayload))
+      ConfigHelper.addToSession(SessionStorageKeys.ShortNamesSummaryFilter, JSON.stringify(filters.filterPayload))
     }, { deep: true })
 
     return {
@@ -362,7 +381,7 @@ export default defineComponent({
   }
 }
 
-#unlinked-bank-short-names {
+#short-name-summaries {
   border: 1px solid #e9ecef
 }
 

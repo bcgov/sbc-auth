@@ -1,8 +1,8 @@
-import { LinkedShortNameState, UnlinkedShortNameState } from '@/models/pay/short-name'
+import { LinkedShortNameState, ShortNameSummaryState } from '@/models/pay/short-name'
 import PaymentService from '@/services/payment.services'
 
 /* Not using a global state here, state can be passed as a reactive object through to the factory. */
-export function useShortNameTable (tableState: LinkedShortNameState | UnlinkedShortNameState, emit) {
+export function useShortNameTable (tableState: LinkedShortNameState | ShortNameSummaryState, emit) {
   const state = tableState
 
   /* Always includes state, which differes from the Affiliation table. */
@@ -26,13 +26,22 @@ export function useShortNameTable (tableState: LinkedShortNameState | UnlinkedSh
     state.filters.isActive = filtersActive
   }
 
+  /*
+   * Helper to load table summary data that makes use of similar logic to loadTableData, but with the isSummary flag
+   */
+  async function loadTableSummaryData (filterField?: string, value?: any, appendToResults = false): Promise<void> {
+    return loadTableData(filterField, value, appendToResults, true)
+  }
+
   /* This is also called inside of the HeaderFilter component inside of the BaseVDataTable component
   * Parts of this is duplicated inside of the other datatable components.
   */
-  async function loadTableData (filterField?: string, value?: any, appendToResults = false): Promise<void> {
+  async function loadTableData (filterField?: string, value?: any, appendToResults = false, isSummary = false): Promise<void> {
     handleFilters(filterField, value)
     try {
-      const response = await PaymentService.getEFTShortNames(state.filters)
+      const response = !isSummary ? await PaymentService.getEFTShortNames(state.filters)
+        : await PaymentService.getEFTShortNameSummaries(state.filters)
+
       if (response?.data) {
         /* We use appendToResults for infinite scroll, so we keep the existing results. */
         state.results = appendToResults ? state.results.concat(response.data.items) : response.data.items
@@ -67,10 +76,10 @@ export function useShortNameTable (tableState: LinkedShortNameState | UnlinkedSh
   }
 
   /* Instead of slicing up the results, we handle the results inside of this function. */
-  async function infiniteScrollCallback () {
+  async function infiniteScrollCallback (isSummary = false) {
     if (state.totalResults < (state.filters.pageLimit * state.filters.pageNumber)) return true
     state.filters.pageNumber++
-    await loadTableData(null, null, true)
+    await loadTableData(null, null, true, isSummary)
     return false
   }
 
@@ -78,6 +87,7 @@ export function useShortNameTable (tableState: LinkedShortNameState | UnlinkedSh
     infiniteScrollCallback,
     handleFilters,
     loadTableData,
+    loadTableSummaryData,
     updateFilter
   }
 }
