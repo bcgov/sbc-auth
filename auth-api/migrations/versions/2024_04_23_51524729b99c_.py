@@ -32,7 +32,7 @@ def upgrade():
             {'code': 'CUL', 'description': 'BC Unlimited Liability Company Continuation In', 'default': False}
         ]
     )
-    op.execute("update from corp_types set description='BC Community Contribution Company Continuation In' where code='CCC'")
+    op.execute("update corp_types set description='BC Community Contribution Company Continuation In' where code='CCC'")
 
 
 def downgrade():

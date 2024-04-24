@@ -42,7 +42,7 @@ class CorpType(Enum):
 
     NR = 'NR'
     CP = 'CP'  # Coperative
-    TMP = 'TMP' # Incorporation Application
+    TMP = 'TMP'  # Incorporation Application
     CTMP = 'CTMP'  # Continuation In
     RTMP = 'RTMP'  # Registration
     ATMP = 'ATMP'  # Amalgamation
