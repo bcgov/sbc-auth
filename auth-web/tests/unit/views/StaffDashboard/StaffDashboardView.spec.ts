@@ -65,6 +65,7 @@ describe('StaffDashboardView tests', () => {
     expect(wrapper.findComponent(StaffAccountManagement).exists()).toBe(true)
     expect(wrapper.findComponent(GLCodesListView).exists()).toBe(true)
     expect(wrapper.find('#EFT-button').exists())
+    expect(wrapper.find('#involuntary-dissolution-button').exists())
     const expansionPanels = wrapper.findAll(BaseVExpansionPanel)
     expect(expansionPanels.length).toBe(3)
     // hidden by closed BaseVExpansionPanel

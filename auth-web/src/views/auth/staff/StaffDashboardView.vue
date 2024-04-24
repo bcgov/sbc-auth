@@ -226,17 +226,54 @@
         <SafeEmailView />
       </template>
     </BaseVExpansionPanel>
+
+    <!-- Involuntary Dissolution -->
+    <v-card
+      v-if="showInvoluntaryDissolutionTile"
+      flat
+      class="mt-4 pa-8"
+    >
+      <v-row
+        align="center"
+        justify="space-between"
+      >
+        <v-col>
+          <header>
+            <h2 class="mb-0">
+              Involuntary Dissolution
+            </h2>
+            <p class="mt-3 mb-0">
+              Set up and manage automation for Involuntary Dissolution of businesses
+            </p>
+          </header>
+        </v-col>
+        <v-col cols="auto">
+          <v-btn
+            id="involuntary-dissolution-button"
+            class="mr-4"
+            color="primary"
+            outlined
+            dark
+            large
+            @click="goToInvoluntaryDissolution()"
+          >
+            <span>Manage Involuntary Dissolution</span>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-card>
   </v-container>
 </template>
 
 <script lang="ts">
 import { ComputedRef, Ref, computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
-import { Role, SessionStorageKeys } from '@/util/constants'
+import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
 import { BaseVExpansionPanel } from '@/components'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { Organization } from '@/models/Organization'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import SafeEmailView from '@/views/auth/staff/SafeEmailView.vue'
@@ -287,23 +324,26 @@ export default defineComponent({
     ]
 
     const localVars = (reactive({
-      businessIdentifier: '',
-      searchedBusinessNumber: '',
-      searchActive: false,
-      errorMessage: '',
-      canViewIncorporationSearchResult: false,
       affiliatedOrg: {},
+      businessIdentifier: '',
       canSearchFAS: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
       canViewAccounts: computed((): boolean => currentUser.value?.roles?.includes(Role.StaffViewAccounts)),
       canViewAllTransactions: computed((): boolean => currentUser.value?.roles?.includes(Role.ViewAllTransactions)),
-      canViewGLCodes: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageGlCodes)),
       canViewEFTPayments: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageEft)),
+      canViewGLCodes: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageGlCodes)),
+      canViewIncorporationSearchResult: false,
+      errorMessage: '',
       isFasDashboardEnabled: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
+      registrySearchUrl: computed((): string => ConfigHelper.getRegistrySearchUrl()),
+      searchActive: false,
+      searchedBusinessNumber: '',
       showBusSearchlink: computed((): boolean => true),
-      registrySearchUrl: computed((): string => ConfigHelper.getRegistrySearchUrl())
+      showInvoluntaryDissolutionTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableInvoluntaryDissolution) || false)
     }) as unknown) as StaffDashboardViewI
 
     const isFormValid = () => localVars.businessIdentifier && searchBusinessForm.value?.validate()
+
+    const goToInvoluntaryDissolution = () => root.$router.push(`/staff/involuntary-dissolution`)
 
     const goToManageBusiness = () => root.$router.push(`/account/${currentOrganization.value?.id}/business`)
 
@@ -354,13 +394,14 @@ export default defineComponent({
     }
 
     return {
-      searchBusinessForm,
       businessIdentifierRules,
-      isFormValid,
-      goToManageBusiness,
-      search,
       formatBusinessIdentifier,
+      goToInvoluntaryDissolution,
+      goToManageBusiness,
       isDevOrTest,
+      isFormValid,
+      search,
+      searchBusinessForm,
       ...toRefs(localVars)
     }
   }
