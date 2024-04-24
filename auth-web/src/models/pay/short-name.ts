@@ -36,32 +36,31 @@ export interface LinkedShortNameState {
   clearFiltersTrigger: number
 }
 
-export interface UnlinkedShortNameFilterParams {
+export interface ShortNameSummaryFilterParams {
   isActive: boolean
   pageNumber: number
   pageLimit: number
   filterPayload: {
     shortName?: string
-    transactionDate?: string
-    depositAmount?: string
-    state: ShortNameStatus
-    transactionStartDate?: string
-    transactionEndDate?: string
+    creditsRemaining?: string
+    linkedAccountsCount?: string
+    paymentReceivedStartDate?: string
+    paymentReceivedEndDate?: string
   }
 }
 
-export interface UnlinkedShortNameResults {
+export interface ShortNameSummaryResults {
   shortName?: string
   transactionDate?: string
   depositAmount?: number
   id: number
 }
 
-export interface UnlinkedShortNameState {
-  results: UnlinkedShortNameResults[]
+export interface ShortNameSummaryState {
+  results: ShortNameSummaryResults[]
   totalResults: number
   loading: boolean
-  filters: UnlinkedShortNameFilterParams
+  filters: ShortNameSummaryFilterParams
   actionDropdown: any[]
   options: DataOptions
   shortNameLookupKey: number
