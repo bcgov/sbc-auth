@@ -133,12 +133,6 @@ class _Config:  # pylint: disable=too-few-public-methods
     LEGAL_API_VERSION_2 = os.getenv('LEGAL_API_VERSION_2', '')
 
     LEAR_AFFILIATION_DETAILS_URL = f'{LEGAL_API_URL + LEGAL_API_VERSION_2}/businesses/search'
-
-    # Temporary until legal names is implemented.
-    LEGAL_API_ALTERNATE_URL = os.getenv('LEGAL_API_ALTERNATE_URL', '')
-    # Temporary until legal names is implemented.
-    LEAR_ALTERNATE_AFFILIATION_DETAILS_URL = f'{LEGAL_API_ALTERNATE_URL + LEGAL_API_VERSION_2}/businesses/search'
-
     NAMEX_AFFILIATION_DETAILS_URL = f'{NAMEX_API_URL}/requests/search'
 
     # NATS Config
