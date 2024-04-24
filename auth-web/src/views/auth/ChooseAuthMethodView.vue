@@ -212,8 +212,8 @@
                   @click="goNext(LoginSource.BCEID)"
                 >
                   <span>Next</span>
-          <v-icon class="pl-1">
-                  mdi-chevron-right
+                  <v-icon class="pl-1">
+                    mdi-chevron-right
                   </v-icon>
                 </v-btn>
               </header>
