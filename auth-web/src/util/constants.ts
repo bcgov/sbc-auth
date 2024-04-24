@@ -11,7 +11,7 @@ export enum SessionStorageKeys {
     PaginationOptions = 'PAGINATION_OPTIONS',
     PaginationNumberOfItems = 'PAGINATION_NUMBER_OF_ITEMS',
     OrgSearchFilter = 'ORG_SEARCH_FILTER',
-    UnlinkedShortNamesFilter = 'UNLINKED_SHORT_NAMES_FILTER',
+    ShortNamesSummaryFilter = 'SHORT_NAMES_SUMMARY_FILTER',
     LinkedShortNamesFilter = 'LINKED_SHORT_NAMES_FILTER',
     ShortNamesTabIndex = 'SHORT_NAMES_TAB_INDEX',
     LinkedAccount = 'LINKED_ACCOUNT',

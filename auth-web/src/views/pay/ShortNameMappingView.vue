@@ -28,13 +28,13 @@
       @change="onTabChange"
     >
       <v-tab
-        id="unlinked-shortname-tab"
+        id="shortname-summary-tab"
         :class="['tab-item-default', tab === 0 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
-        <b>Unlinked Payments</b>
+        <b>All Short Names</b>
         <span class="font-weight-regular">
-          &nbsp;({{ state.unlinked }})
+          &nbsp;({{ state.summaries }})
         </span>
       </v-tab>
       <v-tab
@@ -53,8 +53,8 @@
           class="window-item-card"
           flat
         >
-          <UnlinkedShortNameTable
-            @shortname-state-total="state.unlinked = $event"
+          <ShortNameSummaryTable
+            @shortname-state-total="state.summaries = $event"
             @on-link-account="onLinkAccount"
           />
         </v-card>
@@ -78,16 +78,16 @@ import { defineComponent, onMounted, reactive, ref } from '@vue/composition-api'
 import ConfigHelper from '@/util/config-helper'
 import LinkedShortNameTable from '@/components/pay/LinkedShortNameTable.vue'
 import { SessionStorageKeys } from '@/util/constants'
-import UnlinkedShortNameTable from '@/components/pay/UnlinkedShortNameTable.vue'
+import ShortNameSummaryTable from '@/components/pay/ShortNameSummaryTable.vue'
 
 export default defineComponent({
   name: 'ShortNameMappingView',
-  components: { LinkedShortNameTable, UnlinkedShortNameTable },
+  components: { LinkedShortNameTable, ShortNameSummaryTable },
   setup () {
     const tab = ref(null)
     const state = reactive({
       linked: 0,
-      unlinked: 0,
+      summaries: 0,
       linkedAccount: {},
       isMounted: false
     })
