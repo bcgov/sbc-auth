@@ -1,5 +1,6 @@
 import {
   CreatAccountBreadcrumb,
+  InvoluntaryDissolutionBreadcrumb,
   MyBusinessRegistryBreadcrumb,
   RegistryDashboardBreadcrumb,
   RegistryHomeBreadcrumb, ShortNameDetailsBreadcrumb, ShortNameMappingBreadcrumb,
@@ -40,6 +41,7 @@ import GovmAccountCreationSuccessView from '@/views/auth/create-account/GovmAcco
 import GovmAccountSetupView from '@/views/auth/create-account/GovmAccountSetupView.vue'
 import HomeView from '@/views/auth/home/HomeView.vue'
 import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
+import InvoluntaryDissolution from '@/views/auth/staff/InvoluntaryDissolution.vue'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
@@ -847,6 +849,21 @@ export function getRoutes (): RouteConfig[] {
       meta: {
         requiresAuth: true,
         allowedRoles: [Role.CreateCredits, Role.FasRefund]
+      }
+    },
+    {
+      path: '/staff/involuntary-dissolution',
+      name: 'involuntary-dissolution',
+      component: InvoluntaryDissolution,
+      props: true,
+      meta: {
+        allowedRoles: [Role.Staff],
+        breadcrumb: [
+          StaffDashboardBreadcrumb,
+          InvoluntaryDissolutionBreadcrumb
+        ],
+        requiresAuth: true,
+        showNavBar: true
       }
     },
     { path: '*', name: 'notfound', component: PageNotFound }

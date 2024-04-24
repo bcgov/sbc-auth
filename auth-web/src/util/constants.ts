@@ -422,6 +422,7 @@ export enum LDFlags {
     EnableBusinessNrSearch = 'enable-business-nr-search',
     EnableDetailsFilter = 'enable-transactions-detail-filter',
     EnableEFTPaymentMethod = 'enable-eft-payment-method',
+    EnableInvoluntaryDissolution = 'enable-involuntary-dissolution',
     IaSupportedEntities = 'ia-supported-entities',
     ProductBCAStatus = 'product-BCA-status',
     ProductBusSearchPremTooltip = 'product-BUSINESS_SEARCH-prem-tooltip',

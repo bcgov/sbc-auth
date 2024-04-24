@@ -43,3 +43,9 @@ export const CreatAccountBreadcrumb: BreadcrumbIF = {
   text: 'Create Account',
   to: { name: 'chooseauthmethodview' }
 }
+
+export const InvoluntaryDissolutionBreadcrumb: BreadcrumbIF = {
+  text: 'Staff Involuntary Dissolution Batch',
+  to: { name: 'involuntary-dissolution' },
+  href: `${sessionStorage.getItem('AUTH_WEB_URL')}/staff/involuntary-dissolution`
+}
