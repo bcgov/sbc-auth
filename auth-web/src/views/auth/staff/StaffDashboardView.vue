@@ -230,7 +230,6 @@
     <!-- Involuntary Dissolution -->
     <v-card
       v-if="showInvoluntaryDissolutionTile"
-      flat
       class="mt-4 pa-8"
     >
       <v-row
