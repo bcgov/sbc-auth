@@ -12,12 +12,12 @@ import {
 } from '@/util/constants'
 import {
   AffiliationResponse,
-  AlternateNames,
   CreateRequestBody as CreateAffiliationRequestBody,
   CreateNRAffiliationRequestBody,
   NameRequestResponse
 } from '@/models/affiliation'
 import { AmalgamationTypes, FilingTypes } from '@bcrs-shared-components/enums'
+import { AlternateNameIF } from '@bcrs-shared-components/interfaces'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, LoginPayload,
   PasscodeResetLoad } from '@/models/business'
@@ -53,14 +53,14 @@ export const useBusinessStore = defineStore('business', () => {
     legalName: string,
     legalType: CorpTypes,
     identifier: string,
-    alternateNames: AlternateNames[]
+    alternateNames: AlternateNameIF[]
   ): string {
     if (!LaunchDarklyService.getFlag(LDFlags.AlternateNamesMbr, false)) {
       return legalName
     }
     if ([CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP].includes(legalType)) {
       // Intentionally show blank, if the alternate name is not found. This is to avoid showing the legal name.
-      return alternateNames?.find(alt => alt.identifier === identifier)?.operatingName
+      return alternateNames?.find(alt => alt.identifier === identifier)?.name
     } else {
       return legalName
     }

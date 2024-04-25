@@ -1,5 +1,6 @@
-import { AffiliationInviteInfo, AlternateNames } from '@/models/affiliation'
+import { AffiliationInviteInfo } from '@/models/affiliation'
 import { AmalgamationTypes, FilingTypes, NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
+import { AlternateNameIF } from '@bcrs-shared-components/interfaces'
 import { CorpTypes, LearFilingTypes, NrTargetTypes } from '@/util/constants'
 import { Contact } from './contact'
 
@@ -146,6 +147,6 @@ export interface LearBusiness {
     identifier: string
     legalName: string
     legalType: string
-    alternateNames: AlternateNames[]
+    alternateNames: AlternateNameIF[]
     taxId?: string
 }

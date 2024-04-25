@@ -1,6 +1,7 @@
 import { Action, Applicant, Business, CorpType, Names } from '@/models/business'
 import { AffiliationInvitationStatus, AffiliationInvitationType, CorpTypes, NrTargetTypes } from '@/util/constants'
 import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
+import { AlternateNameIF } from '@bcrs-shared-components/interfaces'
 import { OrgNameAndId, Organization } from '@/models/Organization'
 import { Contact } from './contact'
 
@@ -55,14 +56,6 @@ export interface AffiliationFilter {
   actions?: string
 }
 
-export interface AlternateNames {
-  entityType?: string
-  identifier?: string
-  nameRegisteredDate?: string
-  nameStartDate?: string
-  operatingName?: string
-}
-
 export interface AffiliationResponse {
   identifier?: string
   draftType?: CorpTypes
@@ -70,7 +63,7 @@ export interface AffiliationResponse {
   businessNumber?: string
   name?: string
   legalName?: string
-  alternateNames?: AlternateNames[]
+  alternateNames?: AlternateNameIF[]
   contacts?: Contact[]
   corpType?: CorpType
   corpSubType?: CorpType
@@ -104,7 +97,6 @@ export interface NameRequestResponse {
   natureOfBusiness?: string
   expirationDate?: Date
   nrNum?: string
-  requestActionCd?: string
   stateCd?: string
   natureBusinessInfo?: string
   applicants?: Array<Applicant>
