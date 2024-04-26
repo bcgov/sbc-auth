@@ -156,6 +156,7 @@ export enum AffiliationTypes {
     NAME_REQUEST = 'Name Request',
     AMALGAMATION_APPLICATION = 'Amalgamation Application',
     INCORPORATION_APPLICATION = 'Incorporation Application',
+    CONTINUATION_IN = 'Continuation In',
     CORPORATION = 'Corporation',
     REGISTRATION = 'Registration'
 }
@@ -180,10 +181,13 @@ export enum CorpTypes {
     PARTNERSHIP = 'GP',
     SOLE_PROP = 'SP',
 
-    // colin
+    BC_CONTINUE_IN = 'C',
+    BEN_CONTINUE_IN = 'CBEN',
     CCC_CONTINUE_IN = 'CCC',
-    BC_CORPORATION = 'CR', // SPECIAL NAMEREQUEST-ONLY ENTITY TYPE
     ULC_CONTINUE_IN = 'CUL',
+
+    // colin
+    BC_CORPORATION = 'CR', // SPECIAL NAMEREQUEST-ONLY ENTITY TYPE
     EXTRA_PRO_REG = 'EPR',
     LL_PARTNERSHIP = 'LL',
     LIMITED_CO = 'LLC',
@@ -205,6 +209,7 @@ export enum CorpTypes {
     // overloaded values
     AMALGAMATION_APPLICATION = 'ATMP',
     INCORPORATION_APPLICATION = 'TMP',
+    CONTINUATION_IN = 'CTMP',
     NAME_REQUEST = 'NR',
     REGISTRATION = 'RTMP'
 }
