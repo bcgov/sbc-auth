@@ -102,8 +102,8 @@ describe('Entity Management Component', () => {
     const removeBusinessPayload: RemoveBusinessPayload = getPayLoad('CTMP')
     wrapper.vm.showConfirmationOptionsModal(removeBusinessPayload)
     expect(mockedNrMethod).toHaveBeenCalled()
-    expect(wrapper.vm.primaryBtnText).toBe('Delete Continuation In')
-    expect(wrapper.vm.secondaryBtnText).toBe('Keep Continuation In')
+    expect(wrapper.vm.primaryBtnText).toBe('Delete Continuation In Application')
+    expect(wrapper.vm.secondaryBtnText).toBe('Keep Continuation In Application')
   })
   it('calls the Passcode reset open modal with correct buttons', async () => {
     const removeBusinessPayload: RemoveBusinessPayload = getPayLoad('CP')
@@ -325,7 +325,7 @@ describe('Entity Management Component', () => {
 
   it('Should set the correct values when populateContinuationInModalValues() is called', () => {
     wrapper.vm.populateContinuationInModalValues()
-    expect(wrapper.vm.primaryBtnText).toBe('Delete Continuation In')
-    expect(wrapper.vm.secondaryBtnText).toBe('Keep Continuation In')
+    expect(wrapper.vm.primaryBtnText).toBe('Delete Continuation In Application')
+    expect(wrapper.vm.secondaryBtnText).toBe('Keep Continuation In Application')
   })
 })
