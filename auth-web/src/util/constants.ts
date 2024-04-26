@@ -156,7 +156,7 @@ export enum AffiliationTypes {
     NAME_REQUEST = 'Name Request',
     AMALGAMATION_APPLICATION = 'Amalgamation Application',
     INCORPORATION_APPLICATION = 'Incorporation Application',
-    CONTINUATION_IN = 'Continuation In',
+    CONTINUATION_IN = 'Continuation In Application',
     CORPORATION = 'Corporation',
     REGISTRATION = 'Registration'
 }
@@ -181,7 +181,7 @@ export enum CorpTypes {
     PARTNERSHIP = 'GP',
     SOLE_PROP = 'SP',
 
-    BC_CONTINUE_IN = 'C',
+    CONTINUE_IN = 'C',
     BEN_CONTINUE_IN = 'CBEN',
     CCC_CONTINUE_IN = 'CCC',
     ULC_CONTINUE_IN = 'CUL',
