@@ -39,6 +39,7 @@ export const useAffiliations = () => {
     return (
       (business.corpType?.code || business.corpType) === CorpTypes.AMALGAMATION_APPLICATION ||
       (business.corpType?.code || business.corpType) === CorpTypes.INCORPORATION_APPLICATION ||
+      (business.corpType?.code || business.corpType) === CorpTypes.CONTINUATION_IN ||
       (business.corpType?.code || business.corpType) === CorpTypes.REGISTRATION
     )
   }
@@ -55,6 +56,8 @@ export const useAffiliations = () => {
     switch ((business.corpType?.code || business.corpType) as CorpTypes) {
       case CorpTypes.AMALGAMATION_APPLICATION:
         return AffiliationTypes.AMALGAMATION_APPLICATION
+      case CorpTypes.CONTINUATION_IN:
+        return AffiliationTypes.CONTINUATION_IN
       case CorpTypes.INCORPORATION_APPLICATION:
         return AffiliationTypes.INCORPORATION_APPLICATION
       case CorpTypes.REGISTRATION:
@@ -87,9 +90,11 @@ export const useAffiliations = () => {
       if (!state) return 'Unknown'
       if (state === NrState.INPROGRESS) return NrDisplayStates.DRAFT
       if (state === NrState.APPROVED && (!business.nameRequest.expirationDate)) return NrDisplayStates.PROCESSING
-      else if (business.corpType.code === CorpTypes.INCORPORATION_APPLICATION ||
-              business.corpType.code === CorpTypes.REGISTRATION ||
-              state === NrState.DRAFT) {
+      else if (state === NrState.DRAFT ||
+        [CorpTypes.AMALGAMATION_APPLICATION,
+          CorpTypes.INCORPORATION_APPLICATION,
+          CorpTypes.CONTINUATION_IN,
+          CorpTypes.REGISTRATION].includes(business.corpType.code)) {
         return NrDisplayStates[NrState.HOLD]
       } else return NrDisplayStates[state] || 'Unknown'
     }

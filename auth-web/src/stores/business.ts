@@ -484,7 +484,10 @@ export const useBusinessStore = defineStore('business', () => {
 
   async function removeBusiness (payload: RemoveBusinessPayload) {
     // If the business is a new registration then remove the business filing from legal-db
-    if (payload.business.corpType.code === CorpTypes.INCORPORATION_APPLICATION) {
+    if ([CorpTypes.AMALGAMATION_APPLICATION,
+      CorpTypes.INCORPORATION_APPLICATION,
+      CorpTypes.CONTINUATION_IN,
+      CorpTypes.REGISTRATION].includes(payload.business.corpType.code)) {
       const filingResponse = await BusinessService.getFilings(payload.business.businessIdentifier)
       if (filingResponse?.data && filingResponse.status === 200) {
         const filingId = filingResponse?.data?.filing?.header?.filingId
