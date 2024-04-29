@@ -380,5 +380,15 @@ export default defineComponent({
   ::v-deep .v-list-item .v-list-item--link .theme--light:hover {
     background-color: $gray1;
   }
+
+  .fixed-action-column {
+    z-index: 3;
+    position: sticky;
+    right:0;
+    left:0;
+    border-left: 1px solid #dee2e6;
+    box-shadow: -2px 0 4px -1px #adb5bd;
+    background: white;
+  }
 }
 </style>
