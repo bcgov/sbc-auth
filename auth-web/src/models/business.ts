@@ -1,7 +1,7 @@
-import { AffiliationInviteInfo } from '@/models/affiliation'
 import { AmalgamationTypes, FilingTypes, NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
-import { AlternateNameIF } from '@bcrs-shared-components/interfaces'
 import { CorpTypes, LearFilingTypes, NrTargetTypes } from '@/util/constants'
+import { AffiliationInviteInfo } from '@/models/affiliation'
+import { AlternateNameIF } from '@bcrs-shared-components/interfaces'
 import { Contact } from './contact'
 
 export interface LoginPayload {

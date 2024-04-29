@@ -17,13 +17,13 @@ import {
   NameRequestResponse
 } from '@/models/affiliation'
 import { AmalgamationTypes, EntityStates, FilingTypes } from '@bcrs-shared-components/enums'
-import { AlternateNameIF } from '@bcrs-shared-components/interfaces'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, LoginPayload,
   PasscodeResetLoad } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { computed, reactive, toRefs } from '@vue/composition-api'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
+import { AlternateNameIF } from '@bcrs-shared-components/interfaces'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'

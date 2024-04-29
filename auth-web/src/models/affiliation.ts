@@ -1,8 +1,8 @@
 import { Action, Applicant, Business, CorpType, Names } from '@/models/business'
 import { AffiliationInvitationStatus, AffiliationInvitationType, CorpTypes, NrTargetTypes } from '@/util/constants'
 import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
-import { AlternateNameIF } from '@bcrs-shared-components/interfaces'
 import { OrgNameAndId, Organization } from '@/models/Organization'
+import { AlternateNameIF } from '@bcrs-shared-components/interfaces'
 import { Contact } from './contact'
 
 export interface CreateRequestBody {
