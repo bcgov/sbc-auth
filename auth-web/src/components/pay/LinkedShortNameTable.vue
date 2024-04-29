@@ -31,7 +31,7 @@
     >
       <template #header-title>
         <h2 class="ml-4 py-6">
-          Linked Bank Short Names
+          EFT Enabled Accounts
           <span class="font-weight-regular">
             ({{ state.totalResults }})
           </span>
@@ -51,6 +51,9 @@
           </v-icon>
         </v-btn>
       </template>
+      <template #item-slot-amountOwing="{ item }">
+        <span>{{ formatAmount(item.amountOwing) }}</span>
+      </template>
       <template #item-slot-actions="{ index }">
         <div
           :id="`action-menu-${index}`"
@@ -64,37 +67,8 @@
             class="open-action-btn"
             @click="viewDetails(index)"
           >
-            View
+            View Detail
           </v-btn>
-          <span class="more-actions">
-            <v-menu
-              v-model="state.actionDropdown[index]"
-              :attach="`#action-menu-${index}`"
-            >
-              <template #activator="{ on }">
-                <v-btn
-                  small
-                  color="primary"
-                  min-height="2rem"
-                  class="more-actions-btn"
-                  v-on="on"
-                >
-                  <v-icon>{{ state.actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item
-                  class="actions-dropdown_item my-1"
-                  data-test="remove-linkage-button"
-                >
-                  <v-list-item-subtitle>
-                    <v-icon small>mdi-delete</v-icon>
-                    <span class="pl-1">Remove Linkage</span>
-                  </v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </span>
         </div>
       </template>
     </BaseVDataTable>
@@ -104,6 +78,7 @@
 import { SessionStorageKeys, ShortNameStatus } from '@/util/constants'
 import { defineComponent, onMounted, reactive, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
@@ -158,20 +133,73 @@ export default defineComponent({
       shortName = '',
       accountName = '',
       accountBranch = '',
-      accountId = ''
+      accountId = '',
+      amountOwing = '',
+      statementId = ''
     } = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.LinkedShortNamesFilter) || '{}')
 
     const headers = [
-      createHeader('shortName', 'Bank Short Name', 'text', 'Bank Short Name', shortName),
-      createHeader('accountName', 'Account Name', 'text', 'Account Name', accountName),
-      createHeader('accountBranch', 'Branch Name', 'text', 'Branch Name', accountBranch),
-      createHeader('accountId', 'Account Number', 'text', 'Account Number', accountId),
+      createHeader(
+        'shortName',
+        'Bank Short Name',
+        'text',
+        'Short Name',
+        shortName,
+        true,
+        '180px'
+      ),
+      createHeader(
+        'accountName',
+        'Account Name',
+        'text',
+        'Account Name',
+        accountName,
+        true,
+        '280px'
+      ),
+      createHeader('accountBranch',
+        'Branch Name',
+        'text',
+        'Branch Name',
+        accountBranch,
+        true,
+        '175px'
+      ),
+      createHeader(
+        'accountId',
+        'Account Number',
+        'text',
+        'Account Number',
+        accountId,
+        true,
+        '180px'
+      ),
+      createHeader(
+        'amountOwing',
+        'Total Amount Owing',
+        'text',
+        'Total Amount Owing',
+        amountOwing,
+        true,
+        '200px'
+      ),
+      createHeader(
+        'statementId',
+        'Latest Statement Number',
+        'text',
+        'Latest Statement Number',
+        statementId,
+        true,
+        '235px'
+      ),
       {
         col: 'actions',
         hasFilter: false,
         minWidth: '164px',
         value: 'Actions',
-        width: '164px'
+        width: '130px',
+        class: 'fixed-action-column',
+        itemClass: 'fixed-action-column'
       }
     ]
 
@@ -190,6 +218,10 @@ export default defineComponent({
         accountId: '',
         state: ShortNameStatus.LINKED
       }
+    }
+
+    function formatAmount (amount: number) {
+      return amount !== undefined ? CommonUtils.formatAmount(amount) : ''
     }
 
     function viewDetails (index) {
@@ -237,7 +269,8 @@ export default defineComponent({
       headers,
       state,
       updateFilter,
-      viewDetails
+      viewDetails,
+      formatAmount
     }
   }
 })
