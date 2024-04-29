@@ -115,12 +115,12 @@
                 </v-btn>
               </template>
               <v-list>
-                 <v-list-item
-                     class="actions-dropdown_item"
-                     data-test="link-account-button"
-                 >
+                <v-list-item
+                  class="actions-dropdown_item"
+                  data-test="link-account-button"
+                >
                   <v-list-item-subtitle
-                      @click="openAccountLinkingDialog(item)"
+                    @click="openAccountLinkingDialog(item)"
                   >
                     <v-icon small>mdi-plus</v-icon>
                     <span class="pl-1 cursor-pointer">Link to Account</span>
@@ -204,7 +204,7 @@ export default defineComponent({
     } = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesSummaryFilter) || '{}')
 
     const headers = [
-      createHeader('shortName', 'Short Name', 'text', 'Short Name', shortName),
+      createHeader('shortName', 'Bank Short Name', 'text', 'Short Name', shortName),
       createHeader(
         'lastPaymentReceivedDate',
         'Last Payment Received Date',
