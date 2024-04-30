@@ -18,9 +18,7 @@ from random import random
 
 import pytest
 from flask_migrate import Migrate, upgrade
-from nats.aio.client import Client as Nats
 from sqlalchemy import event, text
-from stan.aio.client import Client as Stan
 
 from auth_api import create_app, setup_jwt_manager
 from auth_api.auth import jwt as _jwt
@@ -151,49 +149,6 @@ def stan_server(docker_services):
     if os.getenv('USE_DOCKER_MOCK'):
         docker_services.start('nats')
         time.sleep(2)
-
-
-@pytest.fixture(scope='function')
-@pytest.mark.asyncio
-async def stan(event_loop, client_id):
-    """Create a stan connection for each function, to be used in the tests."""
-    nc = Nats()
-    sc = Stan()
-    cluster_name = 'test-cluster'
-
-    await nc.connect(io_loop=event_loop, name='entity.filing.tester')
-
-    await sc.connect(cluster_name, client_id, nats=nc)
-
-    yield sc
-
-    await sc.close()
-    await nc.close()
-
-
-@pytest.fixture(scope='function')
-@pytest.mark.asyncio
-async def entity_stan(app, event_loop, client_id):
-    """Create a stan connection for each function.
-
-    Uses environment variables for the cluster name.
-    """
-    nc = Nats()
-    sc = Stan()
-
-    await nc.connect(io_loop=event_loop)
-
-    cluster_name = app.config['NATS_CLUSTER_ID']
-
-    if not cluster_name:
-        raise ValueError('Missing env variable: NATS_CLUSTER_ID')
-
-    await sc.connect(cluster_name, client_id, nats=nc)
-
-    yield sc
-
-    await sc.close()
-    await nc.close()
 
 
 @pytest.fixture(scope='session', autouse=True)
