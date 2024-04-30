@@ -38,7 +38,7 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
 from auth_api.utils import roles
-from auth_api.utils.enums import InvitationStatus
+from auth_api.utils.enums import InvitationStatus, QueueMessageTypes
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_affiliation_invitation, factory_entity_model, factory_membership_model, factory_user_model,
@@ -507,8 +507,7 @@ def test_send_affiliation_invitation_magic_link(publish_to_mailer_mock,
         'contextUrl': 'None/RnJvbSB0aGUgbW9vbiBpbmMu/affiliationInvitation/acceptToken/ABCD'
     }
 
-    publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitation',
-                                              org_id=affiliation_invitation.from_org.id,
+    publish_to_mailer_mock.assert_called_with(notification_type=QueueMessageTypes.AFFILIATION_INVITATION.value,
                                               data=expected_data)
 
 
@@ -538,9 +537,8 @@ def test_send_affiliation_invitation_request_sent(publish_to_mailer_mock,
         'toOrgBranchName': affiliation_invitation.to_org.branch_name,
         'additionalMessage': additional_message
     }
-
-    publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitationRequest',
-                                              org_id=affiliation_invitation.from_org.id,
+    notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value
+    publish_to_mailer_mock.assert_called_with(notification_type=notification_type,
                                               data=expected_data)
 
 
@@ -581,8 +579,8 @@ def test_send_affiliation_invitation_request_authorized(publish_to_mailer_mock,
         'isAuthorized': True
     }
 
-    publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitationRequestAuthorization',
-                                              org_id=affiliation_invitation.from_org.id,
+    notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value
+    publish_to_mailer_mock.assert_called_with(notification_type=notification_type,
                                               data=expected_data)
 
 
@@ -625,8 +623,8 @@ def test_send_affiliation_invitation_request_refused(publish_to_mailer_mock,
         'isAuthorized': False
     }
 
-    publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitationRequestAuthorization',
-                                              org_id=affiliation_invitation.from_org.id,
+    notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value
+    publish_to_mailer_mock.assert_called_with(notification_type=notification_type,
                                               data=expected_data)
 
 

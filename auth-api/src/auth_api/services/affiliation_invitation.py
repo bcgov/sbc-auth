@@ -479,7 +479,7 @@ class AffiliationInvitation:
             'emailAddresses': email_addresses,
             'orgName': from_org_name
         }
-        notification_type = 'affiliationInvitation'
+        notification_type = QueueMessageTypes.AFFILIATION_INVITATION.value
 
         if affiliation_invitation_type == AffiliationInvitationType.EMAIL.value:
             # if MAGIC LINK type, add data for magic link

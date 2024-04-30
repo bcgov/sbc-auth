@@ -373,3 +373,13 @@ def system_user_mock(monkeypatch):
 
     monkeypatch.setattr('auth_api.utils.user_context._get_token', mock_auth)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
+
+
+@pytest.fixture(autouse=True)
+def mock_pub_sub_call(monkeypatch):
+    """Mock pub sub call."""
+
+    def publish(topic, message):
+        return True
+
+    monkeypatch.setattr('auth_api.services.gcp_queue.queue.publish', publish)
