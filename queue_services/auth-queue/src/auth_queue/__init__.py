@@ -11,36 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""The Events Listener service.
-
-This module is the service worker for applying filings to the Business Database structure.
-"""
-from __future__ import annotations
-
+"""Resource package for the auth-queue service."""
 import os
 
-import sentry_sdk
 from flask import Flask
-from pay_api.models import db
-from pay_api.services.flags import flags
-from pay_api.utils.run_version import get_run_version
-from sentry_sdk.integrations.flask import FlaskIntegration
-
-from pay_queue.config import CONFIGURATION
-from pay_queue.version import __version__
-
-from .resources import register_endpoints
-from .services import queue
-
-
-import os
-from flask import Flask, register_endpoints
-from account_mailer.resources.worker import bp as worker_endpoint
 from auth_api import config
-from auth_api.models import db, cache
+from auth_api.models import cache, db
 from auth_api.resources.ops import bp as ops_bp
-from auth_api.services import flags
+from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
+
+from auth_queue.resources.worker import bp as worker_endpoint
 
 
 def register_endpoints(app: Flask):
@@ -59,7 +40,6 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(config.get_named_config(run_mode))
-
     db.init_app(app)
     cache.init_app(app)
     flags.init_app(app)

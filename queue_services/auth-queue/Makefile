@@ -6,13 +6,13 @@
 MKFILE_PATH:=$(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_ABS_DIR:=$(patsubst %/,%,$(dir $(MKFILE_PATH)))
 
-PROJECT_NAME:=account_mailer
-DOCKER_NAME:=account-mailer
+PROJECT_NAME:=auth_queue
+DOCKER_NAME:=auth-queue
 
 #################################################################################
 # COMMANDS -- Setup                                                             #
 #################################################################################
-setup: clean install install-dev ## Setup the project
+setup: install install-dev ## Setup the project
 
 clean: clean-build clean-pyc clean-test ## Clean the project
 	rm -rf venv/

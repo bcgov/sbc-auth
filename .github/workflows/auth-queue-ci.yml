@@ -1,17 +1,17 @@
-name: Account Mailer Queue CI
+name: Auth Queue CI
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - "queue_services/account-mailer/**"
+      - "queue_services/auth-queue/**"
       - "auth-api/src/auth_api/models/**"
 
 defaults:
   run:
     shell: bash
-    working-directory: ./queue_services/account-mailer
+    working-directory: ./queue_services/auth-queue
 
 jobs:
   setup-job:
@@ -53,17 +53,10 @@ jobs:
     needs: setup-job
     env:
       DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
-      USE_TEST_KEYCLOAK_DOCKER: "YES"
-      USE_DOCKER_MOCK: "YES"
-      JWT_OIDC_ISSUER: "http://localhost:8081/auth/realms/demo"
-      SBC_AUTH_ADMIN_CLIENT_ID: "sbc-auth-admin"
-      SBC_AUTH_ADMIN_CLIENT_SECRET: "2222222222"
-      MINIO_ENDPOINT: "localhost:9000"
-      MINIO_ACCESS_KEY: "minio"
-      MINIO_ACCESS_SECRET: "minio123"
-      MINIO_BUCKET_NAME: "payment-sftp"
-      MINIO_SECURE: False
-      BCOL_ADMIN_EMAIL: "test@test.com"
+      TEST_NATS_DOCKER: "YES"
+      STAN_CLUSTER_NAME: "test-cluster"
+      PAY_API_URL: "https://localhost:5000"
+      PAY_API_VERSION: "/api/v1"
 
     runs-on: ubuntu-20.04
 
@@ -95,10 +88,10 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          file: ./queue_services/account-mailer/coverage.xml
-          flags: accountmailerqueue
-          name: codecov-account-mailer
-          fail_ci_if_error: true
+          file: ./queue_services/auth-queue/coverage.xml
+          flags: businesseventlistenerqueue
+          name: codecov-auth-queue
+          fail_ci_if_error: false
 
   build-check:
     needs: setup-job

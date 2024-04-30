@@ -40,7 +40,7 @@ from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils import util
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, DocumentType, IdpHint, LoginSource, OrgStatus, Status, UserStatus)
+    AccessType, ActivityAction, DocumentType, IdpHint, LoginSource, OrgStatus, QueueMessageTypes, Status, UserStatus)
 from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
@@ -242,7 +242,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             'contextUrl': login_url
         }
         try:
-            publish_to_mailer('otpAuthenticatorResetNotification', org_id=org_id, data=data)
+            publish_to_mailer(QueueMessageTypes.OTP_RESET.value, org_id=org_id, data=data)
             current_app.logger.debug('<send_otp_authenticator_reset_notification')
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.RESET_2FA.value,
                                                            name=recipient_email))

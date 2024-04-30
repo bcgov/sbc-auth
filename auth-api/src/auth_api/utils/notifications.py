@@ -1,4 +1,4 @@
-# Copyright © 2023 Province of British Columbia
+# Copyright © 2024 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ from typing import Optional
 
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
-from auth_api.utils.enums import NotificationTypes, ProductCode, ProductSubscriptionStatus
+from auth_api.utils.enums import ProductCode, ProductSubscriptionStatus, QueueMessageTypes
 
 DETAILED_MHR_NOTIFICATIONS = (ProductCode.MHR_QSLN.value,
                               ProductCode.MHR_QSHD.value,
@@ -88,20 +88,20 @@ def get_product_notification_type(product_notification_info: ProductNotification
     # Use detailed version of product subscription notification templates
     if product_model.code in DETAILED_MHR_NOTIFICATIONS:
         if is_reapproved or subscription_status_code == ProductSubscriptionStatus.ACTIVE.value:
-            return NotificationTypes.DETAILED_APPROVED_PRODUCT.value
+            return QueueMessageTypes.DETAILED_APPROVED_PRODUCT.value
 
         if subscription_status_code == ProductSubscriptionStatus.REJECTED.value:
-            return NotificationTypes.DETAILED_REJECTED_PRODUCT.value
+            return QueueMessageTypes.DETAILED_REJECTED_PRODUCT.value
 
         if is_confirmation:
-            return NotificationTypes.DETAILED_CONFIRMATION_PRODUCT.value
+            return QueueMessageTypes.DETAILED_CONFIRMATION_PRODUCT.value
 
     # Use default product subscription notification templates
     if subscription_status_code == ProductSubscriptionStatus.ACTIVE.value:
-        return NotificationTypes.DEFAULT_APPROVED_PRODUCT.value
+        return QueueMessageTypes.DEFAULT_APPROVED_PRODUCT.value
 
     if subscription_status_code == ProductSubscriptionStatus.REJECTED.value:
-        return NotificationTypes.DEFAULT_REJECTED_PRODUCT.value
+        return QueueMessageTypes.DEFAULT_REJECTED_PRODUCT.value
 
     return None
 

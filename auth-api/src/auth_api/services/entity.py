@@ -27,6 +27,7 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
 from auth_api.utils.account_mailer import publish_to_mailer
+from auth_api.utils.enums import QueueMessageTypes
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.roles import ALL_ALLOWED_ROLES
 from auth_api.utils.user_context import UserContext, user_context
@@ -196,7 +197,9 @@ class Entity:
                 'isStaffInitiated': user_from_context.is_staff()
             }
             publish_to_mailer(
-                notification_type='resetPasscode', business_identifier=business_identifier, data=mailer_payload
+                notification_type=QueueMessageTypes.RESET_PASSCODE.value,
+                business_identifier=business_identifier,
+                data=mailer_payload
             )
 
         entity = Entity(entity)

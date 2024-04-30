@@ -33,7 +33,8 @@ from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import TaskSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
+from auth_api.utils.enums import (
+    QueueMessageTypes, Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
 from auth_api.utils.notifications import ProductSubscriptionInfo
 from auth_api.utils.util import camelback2snake  # noqa: I005
 
@@ -189,7 +190,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
                            f'{org.id}')
             admin_emails = UserService.get_admin_emails_for_org(org.id)
             account_id = org.id
-            mailer_type = 'resubmitBceidOrg'
+            mailer_type = QueueMessageTypes.RESUBMIT_BCEID_ORG.value
 
         if admin_emails == '':
             current_app.logger.error('No admin email record for org id %s', org.id)

@@ -43,8 +43,8 @@ from auth_api.services.validators.duplicate_org_name import validate as duplicat
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
     AccessType, ActivityAction, AffidavitStatus, LoginSource, OrgStatus, OrgType, PatchActions, PaymentAccountStatus,
-    PaymentMethod, Status, SuspensionReasonCode, TaskRelationshipStatus, TaskRelationshipType, TaskStatus,
-    TaskTypePrefix, TaskAction)
+    PaymentMethod, QueueMessageTypes, Status, SuspensionReasonCode, TaskRelationshipStatus, TaskRelationshipType,
+    TaskStatus, TaskTypePrefix, TaskAction)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I005
 from auth_api.utils.util import camelback2snake
 
@@ -865,7 +865,7 @@ class Org:  # pylint: disable=too-many-public-methods
             'userLastName': last_name
         }
         try:
-            publish_to_mailer('staffReviewAccount', org_id=relationship_id, data=data)
+            publish_to_mailer(QueueMessageTypes.STAFF_REVIEW_ACCOUNT.value, org_id=relationship_id, data=data)
             current_app.logger.debug('<send_staff_review_account_reminder')
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_staff_review_account_reminder failed')
@@ -877,9 +877,9 @@ class Org:  # pylint: disable=too-many-public-methods
         current_app.logger.debug('<send_approved_rejected_notification')
 
         if org_status == OrgStatus.ACTIVE.value:
-            notification_type = 'nonbcscOrgApprovedNotification'
+            notification_type = QueueMessageTypes.NON_BCSC_ORG_APPROVED.value
         elif org_status == OrgStatus.REJECTED.value:
-            notification_type = 'nonbcscOrgRejectedNotification'
+            notification_type = QueueMessageTypes.NON_BCSC_ORG_REJECTED.value
         else:
             return  # Don't send mail for any other status change
         app_url = f"{origin_url}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}"
@@ -903,9 +903,9 @@ class Org:  # pylint: disable=too-many-public-methods
         current_app.logger.debug('<send_approved_rejected_govm_govn_notification')
 
         if org_status == OrgStatus.ACTIVE.value:
-            notification_type = 'govmApprovedNotification'
+            notification_type = QueueMessageTypes.GOVM_APPROVED_NOTIFICATION.value
         elif org_status == OrgStatus.REJECTED.value:
-            notification_type = 'govmRejectedNotification'
+            notification_type = QueueMessageTypes.GOVM_REJECTED_NOTIFICATION.value
         else:
             return  # Don't send mail for any other status change
         app_url = f"{origin_url}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}"

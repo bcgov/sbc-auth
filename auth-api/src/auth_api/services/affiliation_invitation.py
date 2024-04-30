@@ -39,11 +39,12 @@ from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
-from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
+from auth_api.utils.enums import (
+    AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, QueueMessageTypes, Status)
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
-from ..schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
 
+from ..schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.util import escape_wam_friendly_url
 from .authorization import check_auth
@@ -501,10 +502,10 @@ class AffiliationInvitation:
             data['toOrgBranchName'] = affiliation_invitation.to_org.branch_name
 
             if is_authorized is not None:
-                notification_type = 'affiliationInvitationRequestAuthorization'
+                notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTH.value
                 data['isAuthorized'] = is_authorized
             else:
-                notification_type = 'affiliationInvitationRequest'
+                notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value
                 data['additionalMessage'] = affiliation_invitation.additional_message
 
         try:

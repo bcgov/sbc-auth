@@ -31,15 +31,17 @@ from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
-from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, Status
+from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, QueueMessageTypes, Status
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
+
+from ..utils.account_mailer import publish_to_mailer
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .products import Product as ProductService
 from .user import User as UserService
-from ..utils.account_mailer import publish_to_mailer
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -250,7 +252,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         is_bcros_user = self._model.user.login_source == LoginSource.BCROS.value
         # send mail if staff modifies , not applicable for bcros , only if anything is getting updated
         if user_from_context.is_staff() and not is_bcros_user and len(updated_fields) != 0:
-            publish_to_mailer(notification_type='teamModified', org_id=self._model.org.id)
+            publish_to_mailer(notification_type=QueueMessageTypes.TEAM_MODIFIED.value, org_id=self._model.org.id)
 
         # send mail to the person itself who is getting removed by staff ;if he is admin and has an email on record
         if user_from_context.is_staff() and not is_bcros_user and admin_getting_removed:
@@ -260,7 +262,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                     'accountId': self._model.org.id,
                     'recipientEmail': contact_link.contact.email
                 }
-                publish_to_mailer(notification_type='adminRemoved', org_id=self._model.org.id, data=data)
+                publish_to_mailer(notification_type=QueueMessageTypes.ADMIN_REMOVED.value,
+                                  org_id=self._model.org.id,
+                                  data=data)
 
         current_app.logger.debug('>update_membership')
         return self

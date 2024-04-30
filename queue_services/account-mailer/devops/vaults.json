@@ -21,13 +21,6 @@
         ]
     },
     {
-        "vault": "nats",
-        "application": [
-            "base",
-            "account-mailer"
-        ]
-    },
-    {
         "vault": "relationship",
         "application": [
             "postgres-auth",

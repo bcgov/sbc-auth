@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2024 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Invitation data."""
-from datetime import datetime
 import json
+from datetime import datetime
 from typing import Dict
 from urllib.parse import urlencode
 
@@ -23,13 +23,14 @@ from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.config import get_named_config
-from auth_api.models.dataclass import Activity
+
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
+from auth_api.models.dataclass import Activity
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.task import Task
@@ -38,7 +39,7 @@ from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
 from auth_api.utils.enums import AccessType, ActivityAction, InvitationStatus, InvitationType, LoginSource
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.enums import (
-    Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
+    QueueMessageTypes, Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -122,7 +123,7 @@ class Invitation:
         if user_from_context.is_staff() and invitation_type == InvitationType.STANDARD.value:
             try:
                 current_app.logger.debug('<send_team_member_invitation_notification')
-                publish_to_mailer(notification_type='teamMemberInvited', org_id=org_id)
+                publish_to_mailer(notification_type=QueueMessageTypes.TEAM_MEMBER_INVITED.value, org_id=org_id)
                 current_app.logger.debug('send_team_member_invitation_notification>')
             except Exception as e:  # noqa=B901
                 current_app.logger.error('<send_team_member_invitation_notification failed')
@@ -234,7 +235,7 @@ class Invitation:
         }
         try:
             current_app.logger.debug('<send_admin_notification')
-            publish_to_mailer(notification_type='adminNotification', org_id=org_id, data=data)
+            publish_to_mailer(QueueMessageTypes.ADMIN_NOTIFICATION.value, org_id=org_id, data=data)
             current_app.logger.debug('send_admin_notification>')
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_admin_notification failed')
@@ -285,23 +286,23 @@ class Invitation:
 
         govm_setup_configs = {
             'token_confirm_path': token_confirm_path,
-            'notification_type': 'govmBusinessInvitation',
+            'notification_type': QueueMessageTypes.GOVM_BUSINESS_INVITATION.value,
         }
         govm_member_configs = {
             'token_confirm_path': token_confirm_path,
-            'notification_type': 'govmMemberInvitation',
+            'notification_type': QueueMessageTypes.GOVM_MEMBER_INVITATION.value,
         }
         director_search_configs = {
             'token_confirm_path': token_confirm_path,
-            'notification_type': 'dirsearchBusinessInvitation',
+            'notification_type': QueueMessageTypes.DIRECTOR_SEARCH_INVITATION.value,
         }
         bceid_configs = {
             'token_confirm_path': token_confirm_path,
-            'notification_type': 'businessInvitationForBceid',
+            'notification_type': QueueMessageTypes.BCEID_BUSINESS_INVITATION.value,
         }
         default_configs = {
             'token_confirm_path': token_confirm_path,
-            'notification_type': 'businessInvitation',
+            'notification_type': QueueMessageTypes.BUSINESS_INVITATION.value,
         }
         mail_configs = {
             'BCROS': director_search_configs,
