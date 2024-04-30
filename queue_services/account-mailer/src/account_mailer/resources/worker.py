@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The unique worker functionality for this service is contained here."""
-
-from http import HTTPStatus
-from datetime import datetime
 import json
+from datetime import datetime
+from http import HTTPStatus
 
 from auth_api.services.gcp_queue import queue
 from auth_api.services.gcp_queue.gcp_auth import ensure_authorized_queue_user
@@ -26,11 +25,11 @@ from flask import Blueprint, current_app, request
 
 from account_mailer.auth_utils import get_login_url, get_member_emails
 from account_mailer.email_processors import (
-    account_unlock, common_mailer, ejv_failures, pad_confirmation, product_confirmation,
-    refund_requested)
+    account_unlock, common_mailer, ejv_failures, pad_confirmation, product_confirmation, refund_requested)
 from account_mailer.enums import Constants, SubjectType, TemplateType, TitleType
 from account_mailer.services import minio_service, notification_service
 from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
+
 
 bp = Blueprint('worker', __name__)
 
@@ -65,7 +64,7 @@ def worker():
 
         # Note if you're extending above, make sure to include the new type in handle_other_messages below.
         handle_other_messages(message_type, email_msg)
-    except Exception as e: # pylint: disable=broad-except
+    except Exception as e: # NOQA # pylint: disable=broad-except
         current_app.logger.error('Queue Error: %s', json.dumps(event_message), exc_info=True)
         current_app.logger.error(e)
     return {}, HTTPStatus.OK
@@ -100,7 +99,7 @@ def handle_eft_available_notification(message_type, email_msg):
     context_url = f'{get_login_url()}/account/{org_id}/settings/payment-option'
     logo_url = email_msg.get('logo_url')
     email_dict = common_mailer.process(org_id, admin_emails, template_name, subject,
-                                        logo_url=logo_url, context_url=context_url)
+                                       logo_url=logo_url, context_url=context_url)
     process_email(email_dict)
 
 
@@ -114,7 +113,7 @@ def handle_nsf_lock_unlock_account(message_type, email_msg):
         subject = SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
         logo_url = email_msg.get('logo_url')
         email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
-                                            subject, logo_url=logo_url)
+                                           subject, logo_url=logo_url)
         process_email(email_dict)
     elif message_type == QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value:
         current_app.logger.debug('unlock account message received')
@@ -150,8 +149,9 @@ def handle_account_confirmation_period_over(message_type, email_msg):
     subject = SubjectType.ACCOUNT_CONF_OVER_SUBJECT.value
     logo_url = email_msg.get('logo_url')
     email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject,
-                                        nsf_fee=nsf_fee, logo_url=logo_url)
+                                       nsf_fee=nsf_fee, logo_url=logo_url)
     process_email(email_dict)
+
 
 def handle_team_actions(message_type, email_msg):
     """Handle the team actions messages."""
@@ -163,7 +163,7 @@ def handle_team_actions(message_type, email_msg):
         subject = SubjectType.TEAM_MODIFIED_SUBJECT.value
         logo_url = email_msg.get('logo_url')
         email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
-                                            subject, logo_url=logo_url)
+                                           subject, logo_url=logo_url)
         process_email(email_dict)
     elif message_type == QueueMessageTypes.ADMIN_REMOVED.value:
         current_app.logger.debug('ADMIN_REMOVED message received')
@@ -173,8 +173,9 @@ def handle_team_actions(message_type, email_msg):
         subject = SubjectType.ADMIN_REMOVED_SUBJECT.value
         logo_url = email_msg.get('logo_url')
         email_dict = common_mailer.process(org_id, recipient_email, template_name,
-                                            subject, logo_url=logo_url)
+                                           subject, logo_url=logo_url)
         process_email(email_dict)
+
 
 def handle_pad_invoice_created(message_type, email_msg):
     """Handle the pad invoice created message."""
@@ -192,15 +193,16 @@ def handle_pad_invoice_created(message_type, email_msg):
     }
     logo_url = email_msg.get('logo_url')
     email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
-                                        subject, logo_url=logo_url,
-                                        **args)
+                                       subject, logo_url=logo_url,
+                                       **args)
     process_email(email_dict)
 
 
 def handle_online_banking(message_type, email_msg):
     """Handle the online banking payment message."""
     if message_type not in (QueueMessageTypes.ONLINE_BANKING_OVER_PAYMENT.value,
-                                QueueMessageTypes.ONLINE_BANKING_UNDER_PAYMENT.value, QueueMessageTypes.ONLINE_BANKING_PAYMENT.value):
+                            QueueMessageTypes.ONLINE_BANKING_UNDER_PAYMENT.value,
+                            QueueMessageTypes.ONLINE_BANKING_PAYMENT.value):
         return
 
     if message_type == QueueMessageTypes.ONLINE_BANKING_OVER_PAYMENT.value:
@@ -220,8 +222,8 @@ def handle_online_banking(message_type, email_msg):
     }
     logo_url = email_msg.get('logo_url')
     email_dict = common_mailer.process(org_id, admin_emails, template_name,
-                                        subject, logo_url=logo_url,
-                                        **args)
+                                       subject, logo_url=logo_url,
+                                       **args)
     process_email(email_dict)
 
 
@@ -238,9 +240,10 @@ def handle_pad_setup_failed(message_type, email_msg):
     }
     logo_url = email_msg.get('logo_url')
     email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
-                                        subject, logo_url=logo_url,
-                                        **args)
+                                       subject, logo_url=logo_url,
+                                       **args)
     process_email(email_dict)
+
 
 def handle_payment_pending(message_type, email_msg):
     """Handle the payment pending message."""
@@ -257,9 +260,10 @@ def handle_payment_pending(message_type, email_msg):
     }
     logo_url = email_msg.get('logo_url')
     email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
-                                        subject, logo_url=logo_url,
-                                        **args)
+                                       subject, logo_url=logo_url,
+                                       **args)
     process_email(email_dict)
+
 
 def handle_ejv_failed(message_type, email_msg):
     """Handle the ejv failed message."""
@@ -267,6 +271,7 @@ def handle_ejv_failed(message_type, email_msg):
         return
     email_dict = ejv_failures.process(email_msg)
     process_email(email_dict)
+
 
 def handle_reset_passcode(message_type, email_msg):
     """Handle the reset passcode message."""
@@ -290,7 +295,7 @@ def handle_reset_passcode(message_type, email_msg):
 def handle_affiliation_invitation(message_type, email_msg):
     """Handle the affiliation invitation messages."""
     if message_type not in {QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value,
-                        QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value}:
+                            QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value}:
         return
     business_name = email_msg.get('businessName')
     logo_url = email_msg.get('logo_url')
@@ -321,8 +326,8 @@ def handle_affiliation_invitation(message_type, email_msg):
 def handle_product_actions(message_type, email_msg):
     """Handle the product actions messages."""
     if message_type not in {QueueMessageTypes.PRODUCT_APPROVED_NOTIFICATION_DETAILED.value,
-                        QueueMessageTypes.PRODUCT_REJECTED_NOTIFICATION_DETAILED.value,
-                        QueueMessageTypes.PRODUCT_CONFIRMATION_NOTIFICATION.value}:
+                            QueueMessageTypes.PRODUCT_REJECTED_NOTIFICATION_DETAILED.value,
+                            QueueMessageTypes.PRODUCT_CONFIRMATION_NOTIFICATION.value}:
         return
     logo_url = email_msg.get('logo_url')
     subject_descriptor = email_msg.get('subjectDescriptor')
@@ -349,6 +354,7 @@ def handle_product_actions(message_type, email_msg):
     email_dict = product_confirmation.process_attachment(email_dict, attachment_type)
     process_email(email_dict)
 
+
 def handle_statement_notification(message_type, email_msg):
     """Handle the statement notification message."""
     if message_type not in {QueueMessageTypes.STATEMENT_NOTIFICATION.value}:
@@ -369,6 +375,7 @@ def handle_statement_notification(message_type, email_msg):
             'statement_frequency': email_msg.get('statementFrequency').lower()
         })
     process_email(email_dict)
+
 
 def handle_payment_reminder_or_due(message_type, email_msg):
     """Handle the payment reminder or due message."""

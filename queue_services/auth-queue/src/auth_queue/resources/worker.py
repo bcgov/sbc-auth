@@ -28,7 +28,7 @@ from auth_api.utils import OrgStatus, QueueMessageTypes
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.enums import AccessType, ActivityAction, CorpType
 from dateutil import parser
-from flask import Blueprint, current_app, request  # pylint: disable=wrong-import-order
+from flask import Blueprint, current_app, request
 from simple_cloud_events import CloudEvent
 
 
@@ -53,9 +53,8 @@ def worker():
             process_pay_lock_unlock_event(ce.data)
     except Exception as e:  # NOQA # pylint: disable=broad-except
         current_app.logger.error('Error processing event: %s', e)
-    finally:
-        # Return a 200, so the event is removed from the Queue
-        return {}, HTTPStatus.OK
+    # Return a 200, so the event is removed from the Queue
+    return {}, HTTPStatus.OK
 
 
 def process_activity_log(data):

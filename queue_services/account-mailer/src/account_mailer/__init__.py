@@ -20,14 +20,13 @@ from __future__ import annotations
 import os
 
 import sentry_sdk
-from flask import Flask
-from sentry_sdk.integrations.flask import FlaskIntegration
-
 from auth_api import config
-from auth_api.models import db, cache
+from auth_api.models import cache, db
 from auth_api.resources.ops import bp as ops_bp
 from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
+from flask import Flask
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 from account_mailer.resources.worker import bp as worker_endpoint
 

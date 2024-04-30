@@ -14,6 +14,7 @@
 """Enum definitions."""
 from enum import Enum
 
+
 class SubjectType(Enum):
     """Event Types."""
 
