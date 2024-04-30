@@ -367,6 +367,7 @@ class NRActionCodes(Enum):
     RESTORATION = 'REST'  # FUTURE: unused? delete?
     RESUBMIT = 'RESUBMIT'  # FUTURE: unused? delete?
 
+
 class QueueMessageTypes(Enum):
     """Queue MessageTypes."""
 

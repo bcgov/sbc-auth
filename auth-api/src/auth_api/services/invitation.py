@@ -297,11 +297,11 @@ class Invitation:
         }
         director_search_configs = {
             'token_confirm_path': token_confirm_path,
-            'notification_type': QueueMessageTypes.DIRECTOR_SEARCH_INVITATION.value,
+            'notification_type': QueueMessageTypes.DIRSEARCH_BUSINESS_INVITATION.value,
         }
         bceid_configs = {
             'token_confirm_path': token_confirm_path,
-            'notification_type': QueueMessageTypes.BCEID_BUSINESS_INVITATION.value,
+            'notification_type': QueueMessageTypes.BUSINESS_INVITATION_FOR_BCEID.value,
         }
         default_configs = {
             'token_confirm_path': token_confirm_path,

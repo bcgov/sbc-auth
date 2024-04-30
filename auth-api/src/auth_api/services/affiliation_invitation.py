@@ -502,7 +502,7 @@ class AffiliationInvitation:
             data['toOrgBranchName'] = affiliation_invitation.to_org.branch_name
 
             if is_authorized is not None:
-                notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTH.value
+                notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value
                 data['isAuthorized'] = is_authorized
             else:
                 notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value

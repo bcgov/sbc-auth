@@ -139,7 +139,6 @@ class _Config:  # pylint: disable=too-few-public-methods
     GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
     ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
     ACTIVITY_LISTENER_TOPIC = os.getenv('ACTIVITY_LISTENER_TOPIC', 'activity-listener-dev')
-    
 
     # Minio configuration values
     MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')

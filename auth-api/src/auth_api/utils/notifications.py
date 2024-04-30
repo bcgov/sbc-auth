@@ -88,20 +88,20 @@ def get_product_notification_type(product_notification_info: ProductNotification
     # Use detailed version of product subscription notification templates
     if product_model.code in DETAILED_MHR_NOTIFICATIONS:
         if is_reapproved or subscription_status_code == ProductSubscriptionStatus.ACTIVE.value:
-            return QueueMessageTypes.DETAILED_APPROVED_PRODUCT.value
+            return QueueMessageTypes.PRODUCT_APPROVED_NOTIFICATION_DETAILED.value
 
         if subscription_status_code == ProductSubscriptionStatus.REJECTED.value:
-            return QueueMessageTypes.DETAILED_REJECTED_PRODUCT.value
+            return QueueMessageTypes.PRODUCT_REJECTED_NOTIFICATION_DETAILED.value
 
         if is_confirmation:
-            return QueueMessageTypes.DETAILED_CONFIRMATION_PRODUCT.value
+            return QueueMessageTypes.PRODUCT_CONFIRMATION_NOTIFICATION.value
 
     # Use default product subscription notification templates
     if subscription_status_code == ProductSubscriptionStatus.ACTIVE.value:
-        return QueueMessageTypes.DEFAULT_APPROVED_PRODUCT.value
+        return QueueMessageTypes.PROD_PACKAGE_APPROVED_NOTIFICATION.value
 
     if subscription_status_code == ProductSubscriptionStatus.REJECTED.value:
-        return QueueMessageTypes.DEFAULT_REJECTED_PRODUCT.value
+        return QueueMessageTypes.PROD_PACKAGE_REJECTED_NOTIFICATION.value
 
     return None
 

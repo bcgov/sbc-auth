@@ -19,6 +19,7 @@ from simple_cloudevent import SimpleCloudEvent
 
 from auth_api.services.gcp_queue import GcpQueue, queue
 
+
 def publish_to_mailer(notification_type, data=None, source='sbc-auth-auth-api'):
     """Publish to Account Mailer."""
     cloud_event = SimpleCloudEvent(
