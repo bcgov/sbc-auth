@@ -1,13 +1,5 @@
 <template>
   <div>
-    <v-snackbar
-      id="linked-account-snackbar"
-      v-model="state.snackbar"
-      :timeout="4000"
-      transition="fade"
-    >
-      {{ state.snackbarText }}
-    </v-snackbar>
     <BaseVDataTable
       id="linked-bank-short-names"
       :clearFiltersTrigger="state.clearFiltersTrigger"
@@ -81,7 +73,6 @@ import { BaseVDataTable } from '..'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
-import { EFTShortnameResponse } from '@/models/eft-transaction'
 import { LinkedShortNameState } from '@/models/pay/short-name'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
@@ -108,9 +99,6 @@ export default defineComponent({
       loading: false,
       actionDropdown: [],
       options: _.cloneDeep(DEFAULT_DATA_OPTIONS),
-      highlightIndex: -1,
-      snackbar: false,
-      snackbarText: '',
       clearFiltersTrigger: 0
     })
 
@@ -233,18 +221,6 @@ export default defineComponent({
       })
     }
 
-    async function onLinkedAccount (account: EFTShortnameResponse) {
-      if (account) {
-        await loadTableData()
-        state.snackbarText = `Bank short name ${account.shortName} was successfully linked.`
-        state.highlightIndex = state.results.findIndex((result) => result.id === account.id)
-        state.snackbar = true
-        setTimeout(() => {
-          state.highlightIndex = -1
-        }, 4000)
-      }
-    }
-
     onMounted(async () => {
       try {
         state.filters.filterPayload = JSON.parse(
@@ -253,10 +229,6 @@ export default defineComponent({
         // Silent catch
       }
       await loadTableData()
-    })
-
-    watch(() => props.linkedAccount, (account: EFTShortnameResponse) => {
-      onLinkedAccount(account)
     })
 
     watch(() => state.filters, (filters: any) => {

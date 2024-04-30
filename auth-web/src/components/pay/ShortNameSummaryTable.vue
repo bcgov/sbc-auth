@@ -1,5 +1,13 @@
 <template>
   <div>
+    <v-snackbar
+      id="linked-account-snackbar"
+      v-model="state.snackbar"
+      :timeout="4000"
+      transition="fade"
+    >
+      {{ state.snackbarText }}
+    </v-snackbar>
     <ShortNameLinkingDialog
       :isShortNameLinkingDialogOpen="isShortNameLinkingDialogOpen"
       :selectedShortName="selectedShortName"
@@ -151,6 +159,9 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
 export default defineComponent({
   name: 'ShortNameSummaryTable',
   components: { BaseVDataTable, DatePicker, ShortNameLinkingDialog },
+  props: {
+    linkedAccount: { default: {} }
+  },
   emits: ['on-link-account'],
   setup (props, { emit, root }) {
     const datePicker = ref(null)
@@ -179,9 +190,14 @@ export default defineComponent({
       accountLinkingErrorDialogText: '',
       isShortNameLinkingDialogOpen: false,
       startDate: '',
-      endDate: ''
+      endDate: '',
+      highlightIndex: -1,
+      snackbar: false,
+      snackbarText: ''
     })
-    const { infiniteScrollCallback, loadTableSummaryData, updateFilter } = useShortNameTable(state, emit)
+    const {
+      infiniteScrollCallback, loadTableData, loadTableSummaryData, updateFilter
+    } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {
@@ -322,6 +338,22 @@ export default defineComponent({
       state.filters.isActive = false
       await loadTableSummaryData()
     }
+
+    async function onLinkedAccount (account: EFTShortnameResponse) {
+      if (account) {
+        await loadTableData()
+        state.snackbarText = `Bank short name ${account.shortName} was successfully linked.`
+        state.highlightIndex = state.results.findIndex((result) => result.id === account.id)
+        state.snackbar = true
+        setTimeout(() => {
+          state.highlightIndex = -1
+        }, 4000)
+      }
+    }
+
+    watch(() => props.linkedAccount, (account: EFTShortnameResponse) => {
+      onLinkedAccount(account)
+    })
 
     onMounted(async () => {
       const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesSummaryFilter)
