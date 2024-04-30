@@ -42,7 +42,7 @@
         :class="['tab-item-default', tab === 1 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
-        <b>Linked Bank Short Names</b><span class="font-weight-regular">
+        <b>EFT Enabled Accounts</b><span class="font-weight-regular">
           &nbsp;({{ state.linked }})</span>
       </v-tab>
     </v-tabs>

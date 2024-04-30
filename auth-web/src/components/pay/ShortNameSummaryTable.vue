@@ -204,7 +204,7 @@ export default defineComponent({
     } = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesSummaryFilter) || '{}')
 
     const headers = [
-      createHeader('shortName', 'Short Name', 'text', 'Short Name', shortName),
+      createHeader('shortName', 'Bank Short Name', 'text', 'Short Name', shortName),
       createHeader(
         'lastPaymentReceivedDate',
         'Last Payment Received Date',
