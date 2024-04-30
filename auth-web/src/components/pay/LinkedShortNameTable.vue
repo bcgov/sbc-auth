@@ -83,9 +83,6 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
 export default defineComponent({
   name: 'LinkedShortNameTable',
   components: { BaseVDataTable },
-  props: {
-    linkedAccount: { default: {} }
-  },
   setup (props, { emit, root }) {
     const state = reactive<LinkedShortNameState>({
       results: [],

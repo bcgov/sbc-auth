@@ -2,11 +2,11 @@
   <div>
     <v-snackbar
       id="linked-account-snackbar"
-      v-model="state.snackbar"
+      v-model="snackbar"
       :timeout="4000"
       transition="fade"
     >
-      {{ state.snackbarText }}
+      {{ snackbarText }}
     </v-snackbar>
     <ShortNameLinkingDialog
       :isShortNameLinkingDialogOpen="isShortNameLinkingDialogOpen"
