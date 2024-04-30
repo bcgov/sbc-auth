@@ -194,7 +194,7 @@ export default defineComponent({
   }
   .lookup-dialog {
     .v-card .v-card__text {
-      padding: 32px 40px 0 40px;
+      padding: 16px 40px 0 40px;
     }
   }
 </style>

@@ -115,15 +115,15 @@
                 </v-btn>
               </template>
               <v-list>
-                 <v-list-item
-                     class="actions-dropdown_item"
-                     data-test="link-account-button"
-                 >
+                <v-list-item
+                  class="actions-dropdown_item"
+                  data-test="link-account-button"
+                >
                   <v-list-item-subtitle
-                      @click="openAccountLinkingDialog(item)"
+                    @click="openAccountLinkingDialog(item)"
                   >
                     <v-icon small>mdi-plus</v-icon>
-                    <span class="pl-1 cursor-pointer">Link to Account</span>
+                    <span class="pl-1 cursor-pointer">{{ item.linkedAccountsCount > 0 ? 'Add Linkage' : 'Link to Account' }}</span>
                   </v-list-item-subtitle>
                 </v-list-item>
               </v-list>

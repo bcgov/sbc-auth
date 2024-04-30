@@ -8,7 +8,7 @@
       :loading="state === LookupStates.SEARCHING"
       :name="Math.random()"
       :clearable="state !== LookupStates.INITIAL && state !== LookupStates.SEARCHING"
-      :clear-icon="state === LookupStates.SUMMARY ? 'mdi-undo': 'mdi-close'"
+      :clear-icon="'mdi-close'"
       :append-icon="state === LookupStates.INITIAL ? 'mdi-magnify':''"
       autocomplete="chrome-off"
       :class="`mt-5 mb-n2 ${state}`"
@@ -38,18 +38,25 @@
           :size="24"
           :width="2"
         />
-        <p
-          v-if="state === LookupStates.SUMMARY"
-          class="d-flex justify-center align-center ma-0 pa-0 cursor-pointer undo"
-          @click="reset"
-        >
-          Undo
-        </p>
       </template>
       <template #prepend-item>
-        <p class="pl-5 d-flex align-center item-row">
-          Accounts with EFT Payment Method Selected
-        </p>
+        <div
+          class="d-flex"
+          style="justify-content: space-between;"
+        >
+          <p
+            class="pl-5 align-center item-row d-flex"
+            style="flex-grow: 1;"
+          >
+            Accounts with EFT Payment Method Selected
+          </p>
+          <p
+            class="pl- align-center item-row d-flex"
+            style="flex-grow: 1; flex-basis: 19%;"
+          >
+            Amount Owing
+          </p>
+        </div>
       </template>
       <template #no-data>
         <p class="pl-5 d-flex align-center item-row">
@@ -65,10 +72,17 @@
             {{ item.accountId }}
           </v-col>
           <v-col
-            cols="7"
+            cols="5"
             class="result-name flex-1-1"
           >
             {{ item.accountName }}
+          </v-col>
+          <v-col
+            cols="2"
+            class="amount-owing"
+          >
+            {{ formatCurrency(item.totalDue) }}
+            <!-- {{ item.amountOwing }} -->
           </v-col>
           <v-col
             cols="2"
@@ -91,10 +105,12 @@
 
 <script lang="ts">
 import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import CommonUtils from '@/util/common-util'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import { LookupType } from '@/models/business-nr-lookup'
 import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
+import { useOrgStore } from '@/stores/org'
 
 enum LookupStates {
   INITIAL = 'initial',
@@ -115,6 +131,7 @@ export default defineComponent({
   },
   emits: ['account', 'reset'],
   setup (props, { emit }) {
+    const orgStore = useOrgStore()
     const states = reactive({
       state: LookupStates.INITIAL,
       searchField: '',
@@ -161,6 +178,16 @@ export default defineComponent({
       states.searchResults = []
     }
 
+    const getStatementsSummary = async (accountId): Promise<any> => {
+      try {
+        const data = await orgStore.getStatementsSummary(accountId)
+        return data.totalDue
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error)
+      }
+    }
+
     async function mapAccounts (query) {
       try {
         const eftAccountsResponse = await PaymentService.searchEFTAccounts(query)
@@ -178,11 +205,17 @@ export default defineComponent({
 
         const eftShortNames = eftShortNamesResponse.data.items
 
-        const mappedAccounts = eftAccounts.map((eftAccount) => {
+        const statementsSummaries = await Promise.all(
+          accountIds.map(accountId => getStatementsSummary(accountId))
+        )
+
+        const mappedAccounts = eftAccounts.map((eftAccount, index) => {
           const eftShortName = eftShortNames.find((eftShortName) => eftShortName.accountId === eftAccount.accountId)
+          const totalDue = statementsSummaries[index]
           return {
             ...eftAccount,
-            ...eftShortName
+            ...eftShortName,
+            totalDue
           }
         })
 
@@ -214,6 +247,7 @@ export default defineComponent({
 
     return {
       ...toRefs(states),
+      formatCurrency: CommonUtils.formatAmount,
       onItemSelected,
       LookupStates,
       LookupType,
@@ -233,10 +267,10 @@ export default defineComponent({
 ::v-deep .summary {
   .v-input__control {
     .v-input__slot {
-      padding: 0 !important;
-      background: transparent !important;
+      margin-bottom: 24px;
+      color: red;
       &:before, &:after {
-        opacity: 0;
+        color: #6f7780;
       }
     }
     .v-input__icon i {
@@ -246,11 +280,6 @@ export default defineComponent({
       color: black;
     }
   }
-}
-
-.undo {
-  height: 22px;
-  color: var(--v-primary-base) !important;
 }
 
 .font-size-12 {
