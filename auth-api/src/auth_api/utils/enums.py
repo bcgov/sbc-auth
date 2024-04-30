@@ -370,14 +370,15 @@ class NRActionCodes(Enum):
 class QueueMessageTypes(Enum):
     """Queue MessageTypes."""
 
+    # Note some of these need to match inside of SubjectType in account_mailer.enums.
+
     ACCOUNT_CONFIRMATION_PERIOD_OVER = 'bc.registry.payment.confirmationPeriodOver'
-    ACCOUNT_MAILER = 'bc.registry.auth.mailer'
     ACTIVITY_LOG = 'bc.registry.auth.activity'
     ADMIN_NOTIFICATION = 'bc.registry.auth.adminNotification'
     ADMIN_REMOVED = 'bc.registry.auth.adminRemoved'
     AFFILIATION_INVITATION = 'bc.registry.auth.affiliationInvitation'
     AFFILIATION_INVITATION_REQUEST = 'bc.registry.auth.affiliationInvitationRequest'
-    AFFILIATION_INVITATION_REQUEST_AUTH = 'bc.registry.auth.affiliationInvitationRequestAuthorization'
+    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = 'bc.registry.auth.affiliationInvitationRequestAuthorization'
     BUSINESS_INVITATION = 'bc.registry.auth.businessInvitation'
     BUSINESS_INVITATION_FOR_BCEID = 'bc.registry.auth.businessInvitationForBceid'
     DIRSEARCH_BUSINESS_INVITATION = 'bc.registry.auth.dirsearchBusinessInvitation'
