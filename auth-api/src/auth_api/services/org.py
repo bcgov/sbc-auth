@@ -865,7 +865,7 @@ class Org:  # pylint: disable=too-many-public-methods
             'userLastName': last_name
         }
         try:
-            publish_to_mailer(QueueMessageTypes.STAFF_REVIEW_ACCOUNT.value, org_id=relationship_id, data=data)
+            publish_to_mailer(QueueMessageTypes.STAFF_REVIEW_ACCOUNT.value, data=data)
             current_app.logger.debug('<send_staff_review_account_reminder')
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_staff_review_account_reminder failed')
@@ -890,7 +890,7 @@ class Org:  # pylint: disable=too-many-public-methods
             'orgName': org_name
         }
         try:
-            publish_to_mailer(notification_type, org_id=org_id, data=data)
+            publish_to_mailer(notification_type, data=data)
             current_app.logger.debug('<send_approved_rejected_notification')
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_approved_rejected_notification failed')
@@ -916,7 +916,7 @@ class Org:  # pylint: disable=too-many-public-methods
             'orgName': org_name
         }
         try:
-            publish_to_mailer(notification_type, org_id=org_id, data=data)
+            publish_to_mailer(notification_type, data=data)
             current_app.logger.debug('send_approved_rejected_govm_govn_notification>')
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_approved_rejected_govm_govn_notification failed')

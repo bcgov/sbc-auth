@@ -14,12 +14,12 @@
 """Resource package for the auth-queue service."""
 import os
 
-from flask import Flask
 from auth_api import config
 from auth_api.models import cache, db
 from auth_api.resources.ops import bp as ops_bp
 from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
+from flask import Flask
 
 from auth_queue.resources.worker import bp as worker_endpoint
 

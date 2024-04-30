@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2024 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -12,35 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """helper to publish to mailer."""
-from datetime import datetime
+import uuid
+from datetime import datetime, timezone
+from flask import current_app
+from simple_cloudevent import SimpleCloudEvent
 
-from auth_api.config import get_named_config
-from auth_api.services.queue_publisher import publish_response
+from auth_api.services.gcp_queue import GcpQueue, queue
 
-
-CONFIG = get_named_config()
-
-
-def publish_to_mailer(notification_type, org_id: str = None, data=None, business_identifier: str = None):
-    """Publish from auth to mailer."""
-    if data is None:
-        data = {
-            'accountId': org_id,
-        }
-    source: str = None
-    if org_id:
-        source = f'https://api.auth.bcregistry.gov.bc.ca/v1/accounts/{org_id}'
-    elif business_identifier:
-        source = f'https://api.auth.bcregistry.gov.bc.ca/v1/entities/{business_identifier}'
-
-    payload = {
-        'specversion': '1.x-wip',
-        'type': f'bc.registry.auth.{notification_type}',
-        'source': source,
-        'id': org_id,
-        'time': f'{datetime.now()}',
-        'datacontenttype': 'application/json',
-        'data': data
-    }
-    publish_response(payload=payload, client_name=CONFIG.NATS_MAILER_CLIENT_NAME,
-                     subject=CONFIG.NATS_MAILER_SUBJECT)
+def publish_to_mailer(notification_type, data=None, source='sbc-auth-auth-api'):
+    """Publish to Account Mailer."""
+    cloud_event = SimpleCloudEvent(
+        id=str(uuid.uuid4()),
+        source=source,
+        subject=None,
+        time=datetime.now(tz=timezone.utc).isoformat(),
+        type=notification_type,
+        data=data
+    )
+    queue.publish(current_app.config.get('ACCOUNT_MAILER_TOPIC'), GcpQueue.to_queue_message(cloud_event))

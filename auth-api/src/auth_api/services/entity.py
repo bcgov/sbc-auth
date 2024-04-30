@@ -198,7 +198,6 @@ class Entity:
             }
             publish_to_mailer(
                 notification_type=QueueMessageTypes.RESET_PASSCODE.value,
-                business_identifier=business_identifier,
                 data=mailer_payload
             )
 

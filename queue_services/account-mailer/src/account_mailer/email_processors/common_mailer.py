@@ -13,7 +13,6 @@
 # limitations under the License.
 """A Template for the account suspended email."""
 from auth_api.models import Org as OrgModel
-from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
 
@@ -23,7 +22,7 @@ from account_mailer.email_processors import generate_template
 
 def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> dict:
     """Build the email for Account notification."""
-    logger.debug('account  notification: %s', org_id)
+    current_app.logger.debug('account  notification: %s', org_id)
 
     account_name: str = None
     if org_id:
@@ -42,7 +41,7 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
         'payment_statement_url': get_payment_statements_url(org_id),
         **kwargs
     }
-    logger.debug('notification args: %s', jinja_kwargs)
+    current_app.logger.debug('notification args: %s', jinja_kwargs)
 
     html_out = jnja_template.render(jinja_kwargs)
 

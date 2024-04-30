@@ -21,26 +21,15 @@ import os
 
 import sentry_sdk
 from flask import Flask
-from pay_api.models import db
-from pay_api.services.flags import flags
-from pay_api.utils.run_version import get_run_version
 from sentry_sdk.integrations.flask import FlaskIntegration
 
-from pay_queue.config import CONFIGURATION
-from pay_queue.version import __version__
-
-from .resources import register_endpoints
-from .services import queue
-
-
-import os
-from flask import Flask, register_endpoints
-from account_mailer.resources.worker import bp as worker_endpoint
 from auth_api import config
 from auth_api.models import db, cache
 from auth_api.resources.ops import bp as ops_bp
-from auth_api.services import flags
+from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
+
+from account_mailer.resources.worker import bp as worker_endpoint
 
 
 def register_endpoints(app: Flask):
@@ -59,6 +48,13 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(config.get_named_config(run_mode))
+
+    # Configure Sentry
+    if sentry_dsn := app.config.get('SENTRY_DSN'):
+        sentry_sdk.init(
+            dsn=sentry_dsn,
+            integrations=[FlaskIntegration()]
+        )
 
     db.init_app(app)
     cache.init_app(app)

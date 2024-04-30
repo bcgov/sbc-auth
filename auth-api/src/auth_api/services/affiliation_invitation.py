@@ -509,7 +509,7 @@ class AffiliationInvitation:
                 data['additionalMessage'] = affiliation_invitation.additional_message
 
         try:
-            publish_to_mailer(notification_type=notification_type, org_id=from_org_id, data=data)
+            publish_to_mailer(notification_type=notification_type, data=data)
         except BusinessException as exception:
             affiliation_invitation.invitation_status_code = InvitationStatus.FAILED.value
             affiliation_invitation.save()

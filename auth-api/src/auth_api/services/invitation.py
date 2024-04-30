@@ -123,7 +123,10 @@ class Invitation:
         if user_from_context.is_staff() and invitation_type == InvitationType.STANDARD.value:
             try:
                 current_app.logger.debug('<send_team_member_invitation_notification')
-                publish_to_mailer(notification_type=QueueMessageTypes.TEAM_MEMBER_INVITED.value, org_id=org_id)
+                data = {
+                    'accountId': org_id
+                }
+                publish_to_mailer(notification_type=QueueMessageTypes.TEAM_MEMBER_INVITED.value, data=data)
                 current_app.logger.debug('send_team_member_invitation_notification>')
             except Exception as e:  # noqa=B901
                 current_app.logger.error('<send_team_member_invitation_notification failed')
@@ -235,7 +238,7 @@ class Invitation:
         }
         try:
             current_app.logger.debug('<send_admin_notification')
-            publish_to_mailer(QueueMessageTypes.ADMIN_NOTIFICATION.value, org_id=org_id, data=data)
+            publish_to_mailer(QueueMessageTypes.ADMIN_NOTIFICATION.value, data=data)
             current_app.logger.debug('send_admin_notification>')
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_admin_notification failed')
@@ -263,7 +266,7 @@ class Invitation:
         }
 
         try:
-            publish_to_mailer(notification_type=mail_configs.get('notification_type'), org_id=org_id, data=data)
+            publish_to_mailer(notification_type=mail_configs.get('notification_type'), data=data)
         except BusinessException as exception:
             invitation.invitation_status_code = 'FAILED'
             invitation.save()

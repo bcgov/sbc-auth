@@ -409,7 +409,6 @@ class QueueMessageTypes(Enum):
     PRODUCT_APPROVED_NOTIFICATION_DETAILED = 'bc.registry.auth.productApprovedNotificationDetailed'
     PRODUCT_CONFIRMATION_NOTIFICATION = 'bc.registry.auth.productConfirmationNotification'
     PRODUCT_REJECTED_NOTIFICATION_DETAILED = 'bc.registry.auth.productRejectedNotificationDetailed'
-    REFUND_DIRECT_PAY_REQUEST = 'bc.registry.payment.direct_pay.refundRequest'
     REFUND_DRAWDOWN_REQUEST = 'bc.registry.payment.drawdown.refundRequest'
     RESET_PASSCODE = 'bc.registry.auth.resetPasscode'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'bc.registry.auth.resubmitBceidAdmin'
