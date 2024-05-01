@@ -68,8 +68,7 @@ def worker():
         # Note if you're extending above, make sure to include the new type in handle_other_messages below.
         handle_other_messages(message_type, email_msg)
     except Exception as e: # NOQA # pylint: disable=broad-except
-        current_app.logger.error('Queue Error: %s', json.dumps(event_message), exc_info=True)
-        current_app.logger.error(e)
+        current_app.logger.error('Error processing event: %s', e)
     return {}, HTTPStatus.OK
 
 
