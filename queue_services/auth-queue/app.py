@@ -18,9 +18,10 @@
 
 
 import os
-from names_event_listener import create_app
+from auth_queue import create_app
+
 
 app = create_app()
 if __name__ == '__main__':
-    server_port = os.environ.get('PORT', '5007')
+    server_port = os.environ.get('PORT', '5005')
     app.run(debug=False, port=server_port, host='0.0.0.0')

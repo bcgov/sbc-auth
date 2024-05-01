@@ -4,7 +4,7 @@
 
 # Application Name
 
-BC Registries Business events listener
+BC Registries Auth Queue
 
 ## Technology Stack Used
 * Python, Flask
@@ -17,9 +17,6 @@ BC Registries Business events listener
 As of 2018-02-22 in **ALPHA**
 
 ## Documentation
-
-The names-events-listener is used to create entities within sbc-auth and affiliate them to orgs (accounts).
-It's a bridge between namerequest -> sbc-auth via queue, based on events.
 
 ## Security
 
@@ -61,7 +58,7 @@ By participating in this project you agree to abide by its terms.
 
 ## License
 
-    Copyright 2018 Province of British Columbia
+    Copyright 2024 Province of British Columbia
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

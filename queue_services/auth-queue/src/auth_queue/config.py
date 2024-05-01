@@ -115,6 +115,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
         'DATABASE_TEST_URL',
         default=f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
     )
+    PAY_API_URL = os.getenv('PAY_API_URL') + os.getenv('PAY_API_VERSION')
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

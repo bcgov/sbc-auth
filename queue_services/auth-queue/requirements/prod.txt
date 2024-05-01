@@ -14,3 +14,4 @@ protobuf~=3.19.5
 launchdarkly-server-sdk==8.2.1
 google-auth==2.18.1
 google-cloud-pubsub==2.17.0
+cachecontrol

@@ -12,24 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The unique worker functionality for this service is contained here."""
+import dataclasses
 import json
 from datetime import datetime
 from http import HTTPStatus
-from typing import Dict
 
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import db
-from auth_api.services.gcp_queue import ensure_authorized_queue_user, queue
+from auth_api.services.gcp_queue import queue
+from auth_api.services.gcp_queue.gcp_auth import ensure_authorized_queue_user
 from auth_api.services.rest_service import RestService
-from auth_api.utils import OrgStatus, QueueMessageTypes
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import AccessType, ActivityAction, CorpType
+from auth_api.utils.enums import AccessType, ActivityAction, CorpType, OrgStatus, QueueMessageTypes
 from dateutil import parser
 from flask import Blueprint, current_app, request
-from simple_cloud_events import CloudEvent
+from simple_cloudevent import SimpleCloudEvent
 
 
 bp = Blueprint('worker', __name__)
@@ -43,14 +43,14 @@ def worker():
         # Return a 200, so event is removed from the Queue
         return {}, HTTPStatus.OK
 
-    current_app.logger.info('Event Message Received: %s', json.dumps(ce))
+    current_app.logger.info('Event Message Received: %s', json.dumps(dataclasses.asdict(ce)))
     try:
         if ce.type == QueueMessageTypes.NAMES_EVENT.value:
-            process_name_events(ce.data)
+            process_name_events(ce)
         elif ce.type == QueueMessageTypes.ACTIVITY_LOG.value:
             process_activity_log(ce.data)
-        elif ce.type in [QueueMessageTypes.UNLOCK_ACCOUNT.value, QueueMessageTypes.LOCK_ACCOUNT.value]:
-            process_pay_lock_unlock_event(ce.data)
+        elif ce.type in [QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value, QueueMessageTypes.NSF_LOCK_ACCOUNT.value]:
+            process_pay_lock_unlock_event(ce)
     except Exception as e:  # NOQA # pylint: disable=broad-except
         current_app.logger.error('Error processing event: %s', e)
     # Return a 200, so the event is removed from the Queue
@@ -78,7 +78,7 @@ def process_activity_log(data):
     current_app.logger.debug('<<<<<<<process_activity_log<<<<<')
 
 
-def process_pay_lock_unlock_event(event_message: CloudEvent, flask_app):
+def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
     """Process a pay event to either unlock or lock an account. Source message comes from Pay-api."""
     current_app.logger.debug('>>>>>>>process_pay_lock_unlock_event>>>>>')
     message_type = event_message.type
@@ -105,7 +105,7 @@ def process_pay_lock_unlock_event(event_message: CloudEvent, flask_app):
     current_app.logger.debug('<<<<<<<process_pay_lock_unlock_event<<<<<')
 
 
-def process_name_events(event_message: Dict[str, any]):
+def process_name_events(event_message: SimpleCloudEvent):
     """Process name events.
 
     1. Check if the NR already exists in entities table, if yes apply changes. If not create entity record.
@@ -128,7 +128,7 @@ def process_name_events(event_message: Dict[str, any]):
             }
     """
     current_app.logger.debug('>>>>>>>process_name_events>>>>>')
-    request_data = event_message.get('data').get('request') or event_message.get('data').get('name')
+    request_data = event_message.data.get('request') or event_message.data.get('name')
     nr_number = request_data['nrNum']
     nr_status = request_data['newState']
     nr_entity = EntityModel.find_by_business_identifier(nr_number)
@@ -142,7 +142,7 @@ def process_name_events(event_message: Dict[str, any]):
     nr_entity.status = nr_status
     nr_entity.name = request_data.get('name', '')  # its not part of event now, this is to handle if they include it.
     nr_entity.last_modified_by = None  # TODO not present in event message.
-    nr_entity.last_modified = parser.parse(event_message.get('time'))
+    nr_entity.last_modified = parser.parse(event_message.time)
     # Future - None needs to be replaced with whatever we decide to fill the data with.
     if nr_status == 'DRAFT' and not AffiliationModel.find_affiliations_by_business_identifier(nr_number, None):
         current_app.logger.info('Status is DRAFT, getting invoices for account')
@@ -151,7 +151,7 @@ def process_name_events(event_message: Dict[str, any]):
         with current_app.test_request_context('service_token'):
             token = RestService.get_service_account_token()
         invoices = RestService.get(
-            f'{current_app.config.PAY_API_URL}/payment-requests?businessIdentifier={nr_number}',
+            f'{current_app.config.get("PAY_API_URL")}/payment-requests?businessIdentifier={nr_number}',
             token=token
         ).json()
 

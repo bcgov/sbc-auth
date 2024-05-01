@@ -11,39 +11,73 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Utilities used by the integration tests."""
+"""Utilities used by the unit tests."""
+import base64
 import json
-from datetime import datetime
+import uuid
+from datetime import datetime, timezone
 from random import randint
 
-import stan
+from auth_api.utils.enums import QueueMessageTypes
+from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
 
-async def helper_add_event_to_queue(stan_client: stan.aio.client.Client,
-                                    subject: str,
-                                    nr_number: str,
-                                    new_state: str,
-                                    old_state: str):
-    """Add event to the Queue."""
-    payload = {
-        'specversion': '1.0.1',
-        'type': 'bc.registry.names.events',
-        'source': '/requests/6724165',
-        'id': 1234,
-        'time': str(datetime.now()),
-        'datacontenttype': 'application/json',
-        'identifier': '781020202',
-        'data': {
-            'request': {
-                'nrNum': nr_number,
-                'newState': new_state,
-                'previousState': old_state
-            }
-        }
+def build_request_for_queue_push(message_type, payload):
+    """Build request for queue message."""
+    queue_message_bytes = to_queue_message(SimpleCloudEvent(
+        id=str(uuid.uuid4()),
+        source='pay-queue',
+        subject=None,
+        time=datetime.now(tz=timezone.utc).isoformat(),
+        type=message_type,
+        data=payload
+    ))
+
+    return {
+        'message': {
+            'data': base64.b64encode(queue_message_bytes).decode('utf-8')
+        },
+        'subscription': 'foobar'
     }
 
-    await stan_client.publish(subject=subject,
-                              payload=json.dumps(payload).encode('utf-8'))
+
+def post_to_queue(client, request_payload):
+    """Post request to worker using an http request on our wrapped flask instance."""
+    response = client.post('/', data=json.dumps(request_payload),
+                           headers={'Content-Type': 'application/json'})
+    assert response.status_code == 200
+
+
+def helper_add_activity_log_event_to_queue(client, details):
+    """Add event to the Queue."""
+    payload = build_request_for_queue_push(QueueMessageTypes.ACTIVITY_LOG.value, details)
+    post_to_queue(client, payload)
+
+
+def helper_add_lock_unlock_event_to_queue(client, message_type: str, org_id):
+    """Add event to the Queue."""
+    queue_payload = {
+        'accountId': org_id,
+        'accountName': 'DEV - PAD01'
+    }
+    payload = build_request_for_queue_push(message_type, queue_payload)
+    post_to_queue(client, payload)
+
+
+def helper_add_nr_event_to_queue(client,
+                                 nr_number: str,
+                                 new_state: str,
+                                 old_state: str):
+    """Add event to the Queue."""
+    queue_payload = {
+        'request': {
+            'nrNum': nr_number,
+            'newState': new_state,
+            'previousState': old_state
+        }
+    }
+    payload = build_request_for_queue_push(QueueMessageTypes.NAMES_EVENT.value, queue_payload)
+    post_to_queue(client, payload)
 
 
 def get_random_number():

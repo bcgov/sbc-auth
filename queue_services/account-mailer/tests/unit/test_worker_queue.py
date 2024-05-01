@@ -18,9 +18,9 @@ from unittest.mock import patch
 
 import pytest
 from auth_api.services.rest_service import RestService
-from entity_queue_common.service_utils import subscribe_to_queue
+from auth_api.utils.enums import QueueMessageTypes
 
-from account_mailer.enums import MessageType, SubjectType
+from account_mailer.enums import SubjectType
 from account_mailer.services import notification_service
 from account_mailer.services.minio_service import MinioService
 from account_mailer.utils import get_local_formatted_date
@@ -29,34 +29,17 @@ from . import factory_membership_model, factory_org_model, factory_user_model_wi
 from .utils import helper_add_event_to_queue, helper_add_ref_req_to_queue
 
 
-@pytest.mark.asyncio
-async def test_account_mailer_queue(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_account_mailer_queue(app, session, stan_server, event_loop, client_id, events_stan, future):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
     # vars
     org_id = '1'
-
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
-
-    # Create a Credit Card Payment
-
-    # register the handler to test it
-    await subscribe_to_queue(events_stan,
-                             events_subject,
-                             events_queue,
-                             events_durable_name,
-                             cb_subscription_handler)
 
     # add an event to queue
     mail_details = {
         'type': 'payment_completed'
     }
     await helper_add_event_to_queue(events_stan, events_subject, org_id=org_id, mail_details=mail_details)
-
+    
     assert True
 
 

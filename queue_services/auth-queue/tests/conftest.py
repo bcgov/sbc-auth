@@ -12,17 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
-import asyncio
-import random
 from contextlib import contextmanager
 
 import pytest
 from auth_api import db as _db
-from flask import Flask
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 
-from auth_queue.config import get_named_config
+from auth_queue import create_app
 
 
 @contextmanager
@@ -40,11 +37,7 @@ def not_raises(exception):
 @pytest.fixture(scope='session')
 def app():
     """Return a session-wide application configured in TEST mode."""
-    # _app = create_app('testing')
-    _app = Flask(__name__)
-    _app.config.from_object(get_named_config('testing'))
-    _db.init_app(_app)
-
+    _app = create_app('testing')
     return _app
 
 
@@ -104,15 +97,6 @@ def client_ctx(app):  # pylint: disable=redefined-outer-name
 
 
 @pytest.fixture(scope='function')
-def client_id():
-    """Return a unique client_id that can be used in tests."""
-    _id = random.SystemRandom().getrandbits(0x58)
-    #     _id = (base64.urlsafe_b64encode(uuid.uuid4().bytes)).replace('=', '')
-
-    return f'client-{_id}'
-
-
-@pytest.fixture(scope='function')
 def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a function-scoped session."""
     with app.app_context():
@@ -148,25 +132,16 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         conn.close()
 
 
-@pytest.fixture(scope='function')
-def future(event_loop):
-    """Return a future that is used for managing function tests."""
-    _future = asyncio.Future(loop=event_loop)
-    return _future
+@pytest.fixture(autouse=True)
+def mock_queue_auth(mocker):
+    """Mock queue authorization."""
+    mocker.patch('auth_api.services.gcp_queue.gcp_auth.verify_jwt', return_value='')
 
+@pytest.fixture(autouse=True)
+def mock_pub_sub_call(monkeypatch):
+    """Mock pub sub call."""
 
-@pytest.fixture
-def create_mock_coro(mocker, monkeypatch):
-    """Return a mocked coroutine, and optionally patch-it in."""
+    def publish(topic, message):
+        return True
 
-    def _create_mock_patch_coro(to_patch=None):
-        mock = mocker.Mock()
-
-        async def _coro(*args, **kwargs):
-            return mock(*args, **kwargs)
-
-        if to_patch:  # <-- may not need/want to patch anything
-            monkeypatch.setattr(to_patch, _coro)
-        return mock, _coro
-
-    return _create_mock_patch_coro
+    monkeypatch.setattr('auth_api.services.gcp_queue.queue.publish', publish)

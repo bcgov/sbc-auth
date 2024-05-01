@@ -24,9 +24,7 @@ from auth_api import db as _db
 from auth_api.services.rest_service import RestService
 from flask import Flask
 from flask_migrate import Migrate, upgrade
-from nats.aio.client import Client as Nats
 from sqlalchemy import event, text
-from stan.aio.client import Client as Stan
 
 from account_mailer.config import get_named_config
 
@@ -219,61 +217,6 @@ def keycloak_mock(monkeypatch):
                         lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group',
                         lambda *args, **kwargs: None)
-
-
-@pytest.fixture(scope='session')
-def stan_server(docker_services):
-    """Create the nats / stan services that the integration tests will use."""
-    if os.getenv('TEST_NATS_DOCKER'):
-        docker_services.start('nats')
-        time.sleep(2)
-    # TODO get the wait part working, as opposed to sleeping for 2s
-    # public_port = docker_services.wait_for_service("nats", 4222)
-    # dsn = "{docker_services.docker_ip}:{public_port}".format(**locals())
-    # return dsn
-
-
-@pytest.fixture(scope='function')
-@pytest.mark.asyncio
-async def stan(event_loop, client_id):
-    """Create a stan connection for each function, to be used in the tests."""
-    nc = Nats()
-    sc = Stan()
-    cluster_name = 'test-cluster'
-
-    await nc.connect(io_loop=event_loop, name='entity.filing.tester')
-
-    await sc.connect(cluster_name, client_id, nats=nc)
-
-    yield sc
-
-    await sc.close()
-    await nc.close()
-
-
-@pytest.fixture(scope='function')
-@pytest.mark.asyncio
-async def events_stan(app, event_loop, client_id):
-    """Create a stan connection for each function.
-
-    Uses environment variables for the cluster name.
-    """
-    nc = Nats()
-    sc = Stan()
-
-    await nc.connect(io_loop=event_loop)
-
-    cluster_name = os.getenv('STAN_CLUSTER_NAME')
-
-    if not cluster_name:
-        raise ValueError('Missing env variable: STAN_CLUSTER_NAME-')
-
-    await sc.connect(cluster_name, client_id, nats=nc)
-
-    yield sc
-
-    await sc.close()
-    await nc.close()
 
 
 @pytest.fixture(scope='function')

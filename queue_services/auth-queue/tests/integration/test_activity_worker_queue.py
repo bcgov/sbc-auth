@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2024 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,28 +13,11 @@
 # limitations under the License.
 """Test Suite to ensure the worker routines are working as expected."""
 
-import pytest
-from entity_queue_common.service_utils import subscribe_to_queue
-
-from .utils import helper_add_event_to_queue
+from .utils import helper_add_activity_log_event_to_queue
 
 
-@pytest.mark.asyncio
-async def test_events_listener_queue(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_activity_listener_queue(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from activity_log_listener.worker import cb_subscription_handler
-
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
-
-    # register the handler to test it
-    await subscribe_to_queue(events_stan,
-                             events_subject,
-                             events_queue,
-                             events_durable_name,
-                             cb_subscription_handler)
     event_details = {
         'action': 'test_action',
         'itemType': 'test_type',
@@ -44,7 +27,6 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
         'remoteAddr': ''
     }
 
-    # add an event to queue
-    await helper_add_event_to_queue(events_stan, events_subject, event_details=event_details)
+    helper_add_activity_log_event_to_queue(client, details=event_details)
 
     assert True
