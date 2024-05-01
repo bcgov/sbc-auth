@@ -91,7 +91,7 @@ export default defineComponent({
 
     function onLinkAccount (account: any) {
       ConfigHelper.addToSession(SessionStorageKeys.LinkedAccount, JSON.stringify(account))
-      ConfigHelper.addToSession(SessionStorageKeys.ShortNamesTabIndex, 1)
+      ConfigHelper.addToSession(SessionStorageKeys.ShortNamesTabIndex, 0)
       root.$router.push('/pay/manage-shortnames')
     }
 

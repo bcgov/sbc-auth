@@ -54,6 +54,7 @@
           flat
         >
           <ShortNameSummaryTable
+            :linked-account="state.linkedAccount"
             @shortname-state-total="state.summaries = $event"
             @on-link-account="onLinkAccount"
           />
@@ -65,7 +66,6 @@
           flat
         >
           <LinkedShortNameTable
-            :linked-account="state.linkedAccount"
             @shortname-state-total="state.linked = $event"
           />
         </v-card>
