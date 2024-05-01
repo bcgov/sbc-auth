@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2024 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
-import asyncio
 import logging
 import os
 import random
@@ -22,11 +21,10 @@ from contextlib import contextmanager
 import pytest
 from auth_api import db as _db
 from auth_api.services.rest_service import RestService
-from flask import Flask
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 
-from account_mailer.config import get_named_config
+from account_mailer import create_app
 
 
 def setup_logging(conf):
@@ -53,12 +51,9 @@ def not_raises(exception):
 @pytest.fixture(scope='session')
 def app():
     """Return a session-wide application configured in TEST mode."""
-    # _app = create_app('testing')
-    _app = Flask(__name__)
-    _app.config.from_object(get_named_config('testing'))
-    _db.init_app(_app)
-    # Bypass caching.
+    _app = create_app('testing')
 
+    # Bypass caching.
     def get_service_token():
         pass
     RestService.get_service_account_token = get_service_token
@@ -219,25 +214,17 @@ def keycloak_mock(monkeypatch):
                         lambda *args, **kwargs: None)
 
 
-@pytest.fixture(scope='function')
-def future(event_loop):
-    """Return a future that is used for managing function tests."""
-    _future = asyncio.Future(loop=event_loop)
-    return _future
+@pytest.fixture(autouse=True)
+def mock_queue_auth(mocker):
+    """Mock queue authorization."""
+    mocker.patch('auth_api.services.gcp_queue.gcp_auth.verify_jwt', return_value='')
 
 
-@pytest.fixture
-def create_mock_coro(mocker, monkeypatch):
-    """Return a mocked coroutine, and optionally patch-it in."""
+@pytest.fixture(autouse=True)
+def mock_pub_sub_call(monkeypatch):
+    """Mock pub sub call."""
 
-    def _create_mock_patch_coro(to_patch=None):
-        mock = mocker.Mock()
+    def publish(topic, message):
+        return True
 
-        async def _coro(*args, **kwargs):
-            return mock(*args, **kwargs)
-
-        if to_patch:  # <-- may not need/want to patch anything
-            monkeypatch.setattr(to_patch, _coro)
-        return mock, _coro
-
-    return _create_mock_patch_coro
+    monkeypatch.setattr('auth_api.services.gcp_queue.queue.publish', publish)

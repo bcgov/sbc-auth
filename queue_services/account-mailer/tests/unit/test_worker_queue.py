@@ -16,7 +16,6 @@ import types
 from datetime import datetime
 from unittest.mock import patch
 
-import pytest
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import QueueMessageTypes
 
@@ -26,100 +25,39 @@ from account_mailer.services.minio_service import MinioService
 from account_mailer.utils import get_local_formatted_date
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
-from .utils import helper_add_event_to_queue, helper_add_ref_req_to_queue
+from .utils import helper_add_event_to_queue
 
 
-def test_account_mailer_queue(app, session, stan_server, event_loop, client_id, events_stan, future):
-    """Assert that events can be retrieved and decoded from the Queue."""
-    # vars
-    org_id = '1'
-
-    # add an event to queue
-    mail_details = {
-        'type': 'payment_completed'
-    }
-    await helper_add_event_to_queue(events_stan, events_subject, org_id=org_id, mail_details=mail_details)
-    
-    assert True
-
-
-@pytest.mark.asyncio
-async def test_refund_request(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_refund_request(app, session, client):
     """Assert that the refund request event works."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # vars
-    invoice_id = '1'
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
-
-    # register the handler to test it
-    await subscribe_to_queue(events_stan,
-                             events_subject,
-                             events_queue,
-                             events_durable_name,
-                             cb_subscription_handler)
-
-    # add an event to queue
-    mail_details = {
-        'identifier': 'NR 123456789',
-        'orderNumber': '1',
-        'transactionDateTime': '2020-12-12 14:10:20',
-        'transactionAmount': 50.00,
-        'transactionId': 'REG1234'
-    }
-    await helper_add_ref_req_to_queue(events_stan, events_subject, invoice_id=invoice_id, mail_details=mail_details)
-
-    assert True  # If no errors, we assumed test passed.
-
-    # Test drawdown refund
     mail_details = {
         'identifier': 'NR 123456789',
         'orderNumber': '1',
         'transactionDateTime': '2020-12-12 14:10:20',
         'transactionAmount': 50.00,
         'transactionId': 'REG1234',
-        'refunDate': '2000-01-01',
+        'refundDate': '20000101',
         'bcolAccount': '12345',
         'bcolUser': '009900'
     }
-    await helper_add_ref_req_to_queue(events_stan, events_subject, invoice_id=invoice_id, mail_details=mail_details,
-                                      pay_method='drawdown')
+    with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
+        helper_add_event_to_queue(client, QueueMessageTypes.REFUND_DRAWDOWN_REQUEST.value, mail_details=mail_details)
+        mock_send.assert_called
 
 
-@pytest.mark.asyncio
-async def test_lock_account_mailer_queue(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_lock_account_mailer_queue(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # vars
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
-
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
+    mail_details = {
+        'accountId': id,
+        'accountName': org.name
+    }
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
-        # add an event to queue
-        mail_details = {
-            'accountId': id,
-            'accountName': org.name
-        }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.NSF_LOCK_ACCOUNT.value, mail_details=mail_details)
-
+        helper_add_event_to_queue(client, message_type=QueueMessageTypes.NSF_LOCK_ACCOUNT.value,
+                                  mail_details=mail_details)
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
@@ -127,32 +65,18 @@ async def test_lock_account_mailer_queue(app, session, stan_server, event_loop, 
         assert True
 
 
-@pytest.mark.asyncio
-async def test_unlock_account_mailer_queue(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_unlock_account_mailer_queue(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # vars
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     response = types.SimpleNamespace()
     response.status_code = 200
     response.content = bytes('foo', 'utf-8')
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
         with patch.object(RestService, 'post', return_value=response):
-            await subscribe_to_queue(events_stan,
-                                     events_subject,
-                                     events_queue,
-                                     events_durable_name,
-                                     cb_subscription_handler)
-
             # Note: This payload should work with report-api.
             mail_details = {
                 'accountId': id,
@@ -228,9 +152,8 @@ async def test_unlock_account_mailer_queue(app, session, stan_server, event_loop
                     'folioNumber': '1234567890'
                 }
             }
-            await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                            msg_type=MessageType.NSF_UNLOCK_ACCOUNT.value, mail_details=mail_details)
-
+            helper_add_event_to_queue(client, message_type=QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value,
+                                      mail_details=mail_details)
             mock_send.assert_called
             assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
             assert mock_send.call_args.args[0].get('content').get('subject') == \
@@ -240,37 +163,22 @@ async def test_unlock_account_mailer_queue(app, session, stan_server, event_loop
             assert True
 
 
-@pytest.mark.asyncio
-async def test_account_conf_mailer_queue(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_account_conf_mailer_queue(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # vars
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
         # add an event to queue
         mail_details = {
             'accountId': id,
             'nsfFee': '30'
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.ACCOUNT_CONFIRMATION_PERIOD_OVER.value,
-                                        mail_details=mail_details)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.ACCOUNT_CONFIRMATION_PERIOD_OVER.value,
+                                  mail_details=mail_details)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
@@ -279,29 +187,14 @@ async def test_account_conf_mailer_queue(app, session, stan_server, event_loop, 
         assert mock_send.call_args.args[0].get('content').get('body') is not None
 
 
-@pytest.mark.asyncio
-async def test_account_pad_invoice_mailer_queue(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_account_pad_invoice_mailer_queue(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # vars
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
         # add an event to queue, these are provided by cfs_create_invoice_task.
         mail_details = {
             'accountId': id,
@@ -309,8 +202,9 @@ async def test_account_pad_invoice_mailer_queue(app, session, stan_server, event
             'invoice_total': '100',
             'invoice_process_date': f'{datetime.now()}'
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.PAD_INVOICE_CREATED.value, mail_details=mail_details)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.PAD_INVOICE_CREATED.value,
+                                  mail_details=mail_details)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
@@ -321,37 +215,20 @@ async def test_account_pad_invoice_mailer_queue(app, session, stan_server, event
             in mock_send.call_args.args[0].get('content').get('body')
 
 
-@pytest.mark.asyncio
-async def test_account_admin_removed(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_account_admin_removed(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # vars
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
-        # add an event to queue
         email = 'foo@testbar.com'
         mail_details = {
             'accountId': id,
             'recipientEmail': email
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.ADMIN_REMOVED.value, mail_details=mail_details)
+        helper_add_event_to_queue(client, message_type=QueueMessageTypes.ADMIN_REMOVED.value, mail_details=mail_details)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == email
@@ -360,35 +237,20 @@ async def test_account_admin_removed(app, session, stan_server, event_loop, clie
         assert mock_send.call_args.args[0].get('content').get('body') is not None
 
 
-@pytest.mark.asyncio
-async def test_account_team_modified(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_account_team_modified(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # vars
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
-        # add an event to queue
         mail_details = {
             'accountId': id,
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.TEAM_MEMBER_INVITED.value, mail_details=mail_details)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.TEAM_MEMBER_INVITED.value,
+                                  mail_details=mail_details)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
@@ -397,38 +259,22 @@ async def test_account_team_modified(app, session, stan_server, event_loop, clie
         assert mock_send.call_args.args[0].get('content').get('body') is not None
 
 
-@pytest.mark.asyncio
-async def test_online_banking_emails(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_online_banking_emails(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # vars
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
-        # add an event to queue
         mail_details = {
             'amount': '100.00',
             'creditAmount': '10.00',
             'accountId': id
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.ONLINE_BANKING_UNDER_PAYMENT.value,
-                                        mail_details=mail_details)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.ONLINE_BANKING_UNDER_PAYMENT.value,
+                                  mail_details=mail_details)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
@@ -437,9 +283,9 @@ async def test_online_banking_emails(app, session, stan_server, event_loop, clie
         assert mock_send.call_args.args[0].get('attachments') is None
         assert mock_send.call_args.args[0].get('content').get('body') is not None
 
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.ONLINE_BANKING_OVER_PAYMENT.value,
-                                        mail_details=mail_details)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.ONLINE_BANKING_OVER_PAYMENT.value,
+                                  mail_details=mail_details)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
@@ -448,9 +294,9 @@ async def test_online_banking_emails(app, session, stan_server, event_loop, clie
         assert mock_send.call_args.args[0].get('attachments') is None
         assert mock_send.call_args.args[0].get('content').get('body') is not None
 
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.ONLINE_BANKING_PAYMENT.value,
-                                        mail_details=mail_details)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.ONLINE_BANKING_PAYMENT.value,
+                                  mail_details=mail_details)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
@@ -460,36 +306,20 @@ async def test_online_banking_emails(app, session, stan_server, event_loop, clie
         assert mock_send.call_args.args[0].get('content').get('body') is not None
 
 
-@pytest.mark.asyncio
-async def test_pad_failed_emails(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_pad_failed_emails(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # vars
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
-        # add an event to queue
         mail_details = {
             'accountId': id
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.PAD_SETUP_FAILED.value,
-                                        mail_details=mail_details)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.PAD_SETUP_FAILED.value,
+                                  mail_details=mail_details)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
@@ -498,43 +328,27 @@ async def test_pad_failed_emails(app, session, stan_server, event_loop, client_i
         assert mock_send.call_args.args[0].get('attachments') is None
         assert mock_send.call_args.args[0].get('content').get('body') is not None
 
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.PAD_SETUP_FAILED.value,
-                                        mail_details=mail_details)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.PAD_SETUP_FAILED.value,
+                                  mail_details=mail_details)
 
 
-@pytest.mark.asyncio
-async def test_payment_pending_emails(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_payment_pending_emails(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # vars
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
-        # add an event to queue
         mail_details = {
             'accountId': id,
             'cfsAccountId': '12345678',
             'transactionAmount': 20.00
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.PAYMENT_PENDING.value,
-                                        mail_details=mail_details)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.PAYMENT_PENDING.value,
+                                  mail_details=mail_details)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
@@ -543,28 +357,14 @@ async def test_payment_pending_emails(app, session, stan_server, event_loop, cli
         assert mock_send.call_args.args[0].get('attachments') is None
         assert mock_send.call_args.args[0].get('content').get('body') is not None
 
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.PAYMENT_PENDING.value,
-                                        mail_details=mail_details)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.PAYMENT_PENDING.value,
+                                  mail_details=mail_details)
 
 
-@pytest.mark.asyncio
-async def test_ejv_failure_emails(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_ejv_failure_emails(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
         minio_file_name = 'FEEDBACK.1234567890'
         minio_bucket = 'cgi-ejv'
 
@@ -581,33 +381,18 @@ async def test_ejv_failure_emails(app, session, stan_server, event_loop, client_
             'fileName': minio_file_name,
             'minioLocation': minio_bucket
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.EJV_FAILED.value,
-                                        mail_details=mail_details)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.EJV_FAILED.value,
+                                  mail_details=mail_details)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.EJV_FAILED.value
 
 
-@pytest.mark.asyncio
-async def test_passcode_reset_email(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_passcode_reset_email(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
-        # add an event to queue - staff initiated reset
         msg_payload = {
             'emailAddresses': 'test@test.com',
             'passCode': '1234',
@@ -615,9 +400,9 @@ async def test_passcode_reset_email(app, session, stan_server, event_loop, clien
             'businessName': 'TEST',
             'isStaffInitiated': True
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.RESET_PASSCODE.value,
-                                        mail_details=msg_payload)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.RESET_PASSCODE.value,
+                                  mail_details=msg_payload)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
@@ -631,39 +416,23 @@ async def test_passcode_reset_email(app, session, stan_server, event_loop, clien
             'businessName': 'TEST',
             'isStaffInitiated': False
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.RESET_PASSCODE.value,
-                                        mail_details=msg_payload)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.RESET_PASSCODE.value,
+                                  mail_details=msg_payload)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.RESET_PASSCODE.value
 
 
-@pytest.mark.asyncio
-async def test_statement_notification_email(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_statement_notification_email(app, session, client):
     """Assert that statement notification events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # set up org
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
-        # add an event to queue
         msg_payload = {
             'accountId': id,
             'fromDate': '2023-09-15 00:00:00',
@@ -672,40 +441,23 @@ async def test_statement_notification_email(app, session, stan_server, event_loo
             'statementFrequency': 'MONTHLY',
             'totalAmountOwing': 351.5
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.STATEMENT_NOTIFICATION.value,
-                                        mail_details=msg_payload)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.STATEMENT_NOTIFICATION.value,
+                                  mail_details=msg_payload)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.STATEMENT_NOTIFICATION.value
 
 
-@pytest.mark.asyncio
-async def test_payment_reminder_notification_email(app, session, stan_server, event_loop, client_id, events_stan,
-                                                   future):
+def test_payment_reminder_notification_email(app, session, client):
     """Assert that payment reminder notification events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # set up org
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
-        # add an event to queue
         msg_payload = {
             'accountId': id,
             'dueDate': '2023-09-15 00:00:00',
@@ -713,9 +465,9 @@ async def test_payment_reminder_notification_email(app, session, stan_server, ev
             'statementFrequency': 'MONTHLY',
             'totalAmountOwing': 351.5
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.PAYMENT_REMINDER_NOTIFICATION.value,
-                                        mail_details=msg_payload)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.PAYMENT_REMINDER_NOTIFICATION.value,
+                                  mail_details=msg_payload)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
@@ -723,30 +475,13 @@ async def test_payment_reminder_notification_email(app, session, stan_server, ev
             get('content').get('subject') == SubjectType.PAYMENT_REMINDER_NOTIFICATION.value
 
 
-@pytest.mark.asyncio
-async def test_payment_due_notification_email(app, session, stan_server, event_loop, client_id, events_stan, future):
+def test_payment_due_notification_email(app, session, client):
     """Assert that payment due notification events can be retrieved and decoded from the Queue."""
-    # Call back for the subscription
-    from account_mailer.worker import cb_subscription_handler
-
-    # set up org
     user = factory_user_model_with_contact()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
-
-    events_subject = 'test_subject'
-    events_queue = 'test_queue'
-    events_durable_name = 'test_durable'
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # register the handler to test it
-        await subscribe_to_queue(events_stan,
-                                 events_subject,
-                                 events_queue,
-                                 events_durable_name,
-                                 cb_subscription_handler)
-
-        # add an event to queue
         msg_payload = {
             'accountId': id,
             'dueDate': '2023-09-15 00:00:00',
@@ -754,9 +489,9 @@ async def test_payment_due_notification_email(app, session, stan_server, event_l
             'statementFrequency': 'MONTHLY',
             'totalAmountOwing': 351.5
         }
-        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
-                                        msg_type=MessageType.PAYMENT_DUE_NOTIFICATION.value,
-                                        mail_details=msg_payload)
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.PAYMENT_DUE_NOTIFICATION.value,
+                                  mail_details=msg_payload)
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'

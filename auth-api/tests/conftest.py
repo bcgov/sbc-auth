@@ -25,12 +25,6 @@ from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models import db as _db
 
-
-def mock_token(config_id='', config_secret=''):
-    """Mock token generator."""
-    return 'TOKEN....'
-
-
 @pytest.fixture(scope='session')
 def app():
     """Return a session-wide application configured in TEST mode."""
@@ -132,23 +126,6 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         # This instruction rollsback any commit that were executed in the tests.
         txn.rollback()
         conn.close()
-
-
-@pytest.fixture(scope='function')
-def client_id():
-    """Return a unique client_id that can be used in tests."""
-    _id = random.SystemRandom().getrandbits(0x58)
-    #     _id = (base64.urlsafe_b64encode(uuid.uuid4().bytes)).replace('=', '')
-
-    return f'client-{_id}'
-
-
-@pytest.fixture(scope='session')
-def stan_server(docker_services):
-    """Create the nats / stan services that the integration tests will use."""
-    if os.getenv('USE_DOCKER_MOCK'):
-        docker_services.start('nats')
-        time.sleep(2)
 
 
 @pytest.fixture(scope='session', autouse=True)
