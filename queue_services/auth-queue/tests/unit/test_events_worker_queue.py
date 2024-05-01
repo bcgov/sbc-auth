@@ -15,7 +15,7 @@
 from auth_api.models import Org as OrgModel
 from auth_api.utils.enums import OrgStatus, QueueMessageTypes
 
-from tests.integration import factory_org_model
+from tests.unit import factory_org_model
 
 from .utils import helper_add_lock_unlock_event_to_queue
 

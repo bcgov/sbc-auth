@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
-import os
 import time
-from random import random
 
 import pytest
 from flask_migrate import Migrate, upgrade
@@ -24,6 +22,12 @@ from auth_api import create_app, setup_jwt_manager
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models import db as _db
+
+
+def mock_token(config_id='', config_secret=''):
+    """Mock token generator."""
+    return 'TOKEN....'
+
 
 @pytest.fixture(scope='session')
 def app():

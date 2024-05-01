@@ -137,6 +137,7 @@ def mock_queue_auth(mocker):
     """Mock queue authorization."""
     mocker.patch('auth_api.services.gcp_queue.gcp_auth.verify_jwt', return_value='')
 
+
 @pytest.fixture(autouse=True)
 def mock_pub_sub_call(monkeypatch):
     """Mock pub sub call."""
