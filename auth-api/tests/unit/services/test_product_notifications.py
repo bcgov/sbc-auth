@@ -343,7 +343,7 @@ def test_detailed_rejected_notification(mock_mailer, session, auth_mock, keycloa
             'contactType': contact_type,
             'remarks': task_dict['remarks'][0]
         }
-        mock_mailer.assert_called_with(QueueMessageTypes.PROD_PACKAGE_REJECTED_NOTIFICATION.value,
+        mock_mailer.assert_called_with(QueueMessageTypes.PRODUCT_APPROVED_NOTIFICATION_DETAILED.value,
                                        data=expected_data)
 
 
