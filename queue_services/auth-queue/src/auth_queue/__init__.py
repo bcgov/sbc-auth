@@ -15,7 +15,7 @@
 import os
 
 from auth_api import config
-from auth_api.models import cache, db
+from auth_api.models import db
 from auth_api.resources.ops import bp as ops_bp
 from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
@@ -41,7 +41,6 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config.get_named_config(run_mode))
     db.init_app(app)
-    cache.init_app(app)
     flags.init_app(app)
     queue.init_app(app)
 
