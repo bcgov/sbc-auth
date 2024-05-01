@@ -39,18 +39,19 @@ bp = Blueprint('worker', __name__)
 @ensure_authorized_queue_user
 def worker():
     """Worker to handle incoming queue pushes."""
-    if not (ce := queue.get_simple_cloud_event(request)):
+    if not (event_message := queue.get_simple_cloud_event(request)):
         # Return a 200, so event is removed from the Queue
         return {}, HTTPStatus.OK
 
-    current_app.logger.info('Event Message Received: %s', json.dumps(dataclasses.asdict(ce)))
     try:
-        if ce.type == QueueMessageTypes.NAMES_EVENT.value:
-            process_name_events(ce)
-        elif ce.type == QueueMessageTypes.ACTIVITY_LOG.value:
-            process_activity_log(ce.data)
-        elif ce.type in [QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value, QueueMessageTypes.NSF_LOCK_ACCOUNT.value]:
-            process_pay_lock_unlock_event(ce)
+        current_app.logger.info('Event Message Received: %s', json.dumps(dataclasses.asdict(event_message)))
+        if event_message.type == QueueMessageTypes.NAMES_EVENT.value:
+            process_name_events(event_message)
+        elif event_message.type == QueueMessageTypes.ACTIVITY_LOG.value:
+            process_activity_log(event_message.data)
+        elif event_message.type in [QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value,
+                                    QueueMessageTypes.NSF_LOCK_ACCOUNT.value]:
+            process_pay_lock_unlock_event(event_message)
     except Exception as e:  # NOQA # pylint: disable=broad-except
         current_app.logger.error('Error processing event: %s', e)
     # Return a 200, so the event is removed from the Queue

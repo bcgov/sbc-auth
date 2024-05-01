@@ -178,6 +178,19 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     MINIO_BUCKET_NAME = 'cgi-ejv'
     MINIO_SECURE = False
 
+    REFUND_REQUEST = {
+        'creditcard': {
+            'recipients': 'hello@haha.com'
+        },
+        'bcol': {
+            'recipients': 'hello@haha.com'
+        }
+    }
+    PDF_TEMPLATE_PATH = os.getenv('PDF_TEMPLATE_PATH', 'src/account_mailer/pdf_templates')
+    TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
+    BCOL_ADMIN_EMAIL = os.getenv('BCOL_ADMIN_EMAIL', 'test@test.com')
+    LEGISLATIVE_TIMEZONE = os.getenv('LEGISLATIVE_TIMEZONE', 'America/Vancouver')
+
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
     """Production environment configuration."""

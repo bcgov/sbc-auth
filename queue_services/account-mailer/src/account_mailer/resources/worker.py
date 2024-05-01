@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The unique worker functionality for this service is contained here."""
+import dataclasses
 import json
 from datetime import datetime
 from http import HTTPStatus
@@ -43,8 +44,8 @@ def worker():
         return {}, HTTPStatus.OK
 
     try:
+        current_app.logger.info('Event Message Received: %s', json.dumps(dataclasses.asdict(event_message)))
         message_type, email_msg = event_message.type, event_message.data
-        current_app.logger.debug('message_type received %s', message_type)
         email_msg['logo_url'] = minio_service.MinioService.get_minio_public_url('bc_logo_for_email.png')
 
         handle_drawdown_request(message_type, email_msg)
