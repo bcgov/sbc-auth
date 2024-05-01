@@ -6,6 +6,7 @@ import TransactionsDataTable from '@/components/auth/account-settings/transactio
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import { axios } from '@/util/http-util'
+import flushPromises from 'flush-promises'
 import sinon from 'sinon'
 import { transactionResponse } from '../test-utils'
 import { useOrgStore } from '@/stores/org'
@@ -36,13 +37,14 @@ describe('Transactions tests', () => {
     // stub get transactions get call
     sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'post')
-    get.returns(new Promise(resolve => resolve({ data: transactionResponse })))
+    get.returns(Promise.resolve({ data: transactionResponse }))
 
     wrapper = mount(Transactions, {
       localVue,
       vuetify
     })
-  })
+    await flushPromises()
+  }, 50000)
 
   afterEach(() => {
     wrapper.destroy()

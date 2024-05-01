@@ -12,14 +12,7 @@
       @close-dialog="resetAccountLinkingDialog"
     >
       <template #text>
-        <p
-          v-if="selectedAccount.accountId"
-          class="py-4 px-6 important"
-        >
-          <span class="font-weight-bold">Important:</span> Once an account is linked, all payment received
-          from the same short name will be applied to settle outstanding balances of
-          the selected account.
-        </p>
+        <p>After the account has been linked, payment will be applied at 6:00 p.m. Pacific Time.</p>
         <h4>
           Search by Account ID or Name to Link:
         </h4>
@@ -28,6 +21,29 @@
           @account="selectedAccount = $event"
           @reset="resetAccountLinkingDialog"
         />
+        <div
+          v-if="selectedAccount.accountId"
+        >
+          <h4 class="mb-4">
+            Payment Information
+          </h4>
+          <p class="mb-2 d-flex justify-space-between">
+            Unsettled amount from the short name: <span class="font-weight-bold">{{ formatCurrency(currentShortName.creditsRemaining) }}</span>
+          </p>
+          <p class="d-flex justify-space-between">
+            Amount owing on the selected account (Statement #{{ statementId }}):
+            <span class="font-weight-bold">{{ formatCurrency(selectedAccount.totalDue) }}</span>
+          </p>
+        </div>
+        <p
+          v-if="selectedAccount.accountId && isUnsettledAmountAndOwingAmountMatch()"
+          class="py-4 px-6 important"
+        >
+          <span class="font-weight-bold">Important:</span>
+          The unsettled amount from the short name does not match with the amount owing on the account.
+          This could result in over or under payment settlement.
+          Please make sure you have selected the correct account to link.
+        </p>
       </template>
       <template #actions>
         <div class="d-flex align-center justify-center w-100 h-100 ga-3">
@@ -46,7 +62,7 @@
             data-test="dialog-ok-button"
             @click="linkAccount()"
           >
-            Link to an Account and Settle Payment
+            Link Account
           </v-btn>
         </div>
       </template>
@@ -81,11 +97,13 @@
 </template>
 <script lang="ts">
 import { Ref, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import CommonUtils from '@/util/common-util'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
 import ShortNameLookup from '@/components/pay/ShortNameLookup.vue'
 import { ShortNameResponseStatus } from '@/util/constants'
+import { useOrgStore } from '@/stores/org'
 
 interface ShortNameLinkingDialog {
   shortNameLookupKey: number
@@ -93,6 +111,9 @@ interface ShortNameLinkingDialog {
   selectedAccount: object
   accountLinkingErrorDialogTitle: string
   accountLinkingErrorDialogText: string
+  totalDue: number
+  areAmountsMismatch: boolean
+  statementId: number
 }
 
 export default defineComponent({
@@ -109,6 +130,7 @@ export default defineComponent({
   },
   emits: ['on-link-account', 'close-short-name-linking-dialog'],
   setup (props, { emit }) {
+    const orgStore = useOrgStore()
     const accountLinkingDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const state = reactive<ShortNameLinkingDialog>({
@@ -116,8 +138,15 @@ export default defineComponent({
       currentShortName: {},
       selectedAccount: {},
       accountLinkingErrorDialogTitle: '',
-      accountLinkingErrorDialogText: ''
+      accountLinkingErrorDialogText: '',
+      totalDue: 0,
+      areAmountsMismatch: false,
+      statementId: 0
     })
+
+    function isUnsettledAmountAndOwingAmountMatch () {
+      return state.currentShortName?.creditsRemaining !== state.selectedAccount?.totalDue
+    }
 
     function openAccountLinkingDialog (item: EFTShortnameResponse) {
       state.currentShortName = item
@@ -126,6 +155,8 @@ export default defineComponent({
 
     function resetAccountLinkingDialog () {
       state.selectedAccount = {}
+      state.totalDue = 0
+      state.statementId = 0
       state.shortNameLookupKey++
       emit('close-short-name-linking-dialog')
     }
@@ -144,7 +175,7 @@ export default defineComponent({
         return
       }
       try {
-        const response = await PaymentService.patchEFTShortname(state.currentShortName.id, state.selectedAccount.accountId)
+        const response = await PaymentService.postShortNameLink(state.currentShortName.id, state.selectedAccount.accountId)
         if (response?.data) {
           emit('on-link-account', response.data)
           cancelAndResetAccountLinkingDialog()
@@ -161,11 +192,22 @@ export default defineComponent({
           cancelAndResetAccountLinkingDialog()
           accountLinkingErrorDialog.value.open()
         }
-        console.error('Failed to patchEFTShortname.', error)
+        console.error('Failed to postShortNameLink.', error)
       }
     }
 
+    const getStatementsList = async (organizationId: string): Promise<any> => {
+      const data = await orgStore.getStatementsList({}, organizationId)
+      state.statementId = data.items[0].id
+    }
+
     onMounted(async () => {
+    })
+
+    watch(() => [state.selectedAccount], ([selectedAccount]) => {
+      if (selectedAccount?.accountId) {
+        getStatementsList(selectedAccount.accountId)
+      }
     })
 
     watch(() => [props.selectedShortName, props.isShortNameLinkingDialogOpen], ([selectedShortNameNewValue]) => {
@@ -176,13 +218,15 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
+      formatCurrency: CommonUtils.formatAmount,
       accountLinkingDialog,
       accountLinkingErrorDialog,
       openAccountLinkingDialog,
       resetAccountLinkingDialog,
       cancelAndResetAccountLinkingDialog,
       closeAccountAlreadyLinkedDialog,
-      linkAccount
+      linkAccount,
+      isUnsettledAmountAndOwingAmountMatch
     }
   }
 })
