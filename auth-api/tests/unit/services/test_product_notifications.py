@@ -30,7 +30,7 @@ from auth_api.services import Product as ProductService
 from auth_api.services import Task as TaskService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import (
-    LoginSource, NotificationTypes, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
+    LoginSource, QueueMessageTypes, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
 from auth_api.utils.notifications import (
     NotificationAttachmentType, ProductAccessDescriptor, ProductCategoryDescriptor, ProductSubjectDescriptor)
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOrgProductsInfo, TestUserInfo
@@ -103,7 +103,7 @@ def test_default_approved_notification(mock_mailer, session, auth_mock, keycloak
             'productName': product_code_model.description,
             'emailAddresses': 'test@test.com'
         }
-        mock_mailer.assert_called_with(NotificationTypes.DEFAULT_APPROVED_PRODUCT.value,
+        mock_mailer.assert_called_with(QueueMessageTypes.PROD_PACKAGE_APPROVED_NOTIFICATION.value,
                                        data=expected_data)
 
 
@@ -172,7 +172,7 @@ def test_default_rejected_notification(mock_mailer, session, auth_mock, keycloak
             'productName': product_code_model.description,
             'emailAddresses': 'test@test.com'
         }
-        mock_mailer.assert_called_with(NotificationTypes.DEFAULT_REJECTED_PRODUCT.value,
+        mock_mailer.assert_called_with(QueueMessageTypes.PROD_PACKAGE_REJECTED_NOTIFICATION.value,
                                        data=expected_data)
 
 
@@ -255,7 +255,7 @@ def test_detailed_approved_notification(mock_mailer, session, auth_mock, keycloa
             'productName': product_code_model.description,
             'emailAddresses': 'test@test.com'
         }
-        mock_mailer.assert_called_with(NotificationTypes.DETAILED_APPROVED_PRODUCT.value,
+        mock_mailer.assert_called_with(QueueMessageTypes.PROD_PACKAGE_APPROVED_NOTIFICATION.value,
                                        data=expected_data)
 
 
@@ -343,7 +343,7 @@ def test_detailed_rejected_notification(mock_mailer, session, auth_mock, keycloa
             'contactType': contact_type,
             'remarks': task_dict['remarks'][0]
         }
-        mock_mailer.assert_called_with(NotificationTypes.DETAILED_REJECTED_PRODUCT.value,
+        mock_mailer.assert_called_with(QueueMessageTypes.PROD_PACKAGE_REJECTED_NOTIFICATION.value,
                                        data=expected_data)
 
 
@@ -468,7 +468,7 @@ def test_confirmation_notification(mock_mailer, session, auth_mock, keycloak_moc
             'attachmentType': NotificationAttachmentType.MHR_QS.value
         }
 
-        mock_mailer.assert_called_with(NotificationTypes.DETAILED_CONFIRMATION_PRODUCT.value,
+        mock_mailer.assert_called_with(QueueMessageTypes.PRODUCT_CONFIRMATION_NOTIFICATION.value,
                                        data=expected_data)
 
 
@@ -596,7 +596,7 @@ def test_resubmission_notification(mock_mailer, session, auth_mock, keycloak_moc
         }
 
         # Assert that confirmation email is re-sent on re-submission
-        mock_mailer.assert_called_with(NotificationTypes.DETAILED_CONFIRMATION_PRODUCT.value,
+        mock_mailer.assert_called_with(QueueMessageTypes.PRODUCT_CONFIRMATION_NOTIFICATION.value,
                                        data=expected_data)
 
     # Staff review task should be back in review
@@ -629,5 +629,5 @@ def test_resubmission_notification(mock_mailer, session, auth_mock, keycloak_moc
             'productName': product_code_model.description,
             'emailAddresses': 'test@test.com'
         }
-        mock_mailer.assert_called_with(NotificationTypes.DETAILED_APPROVED_PRODUCT.value,
+        mock_mailer.assert_called_with(QueueMessageTypes.PROD_PACKAGE_APPROVED_NOTIFICATION.value,
                                        data=expected_data)
