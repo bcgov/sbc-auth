@@ -255,7 +255,7 @@ def test_detailed_approved_notification(mock_mailer, session, auth_mock, keycloa
             'productName': product_code_model.description,
             'emailAddresses': 'test@test.com'
         }
-        mock_mailer.assert_called_with(QueueMessageTypes.PROD_PACKAGE_APPROVED_NOTIFICATION.value,
+        mock_mailer.assert_called_with(QueueMessageTypes.PRODUCT_APPROVED_NOTIFICATION_DETAILED.value,
                                        data=expected_data)
 
 
@@ -629,5 +629,5 @@ def test_resubmission_notification(mock_mailer, session, auth_mock, keycloak_moc
             'productName': product_code_model.description,
             'emailAddresses': 'test@test.com'
         }
-        mock_mailer.assert_called_with(QueueMessageTypes.PROD_PACKAGE_APPROVED_NOTIFICATION.value,
+        mock_mailer.assert_called_with(QueueMessageTypes.PRODUCT_APPROVED_NOTIFICATION_DETAILED.value,
                                        data=expected_data)
