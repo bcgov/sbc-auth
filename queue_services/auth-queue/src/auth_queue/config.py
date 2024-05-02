@@ -75,10 +75,10 @@ class _Config:  # pylint: disable=too-few-public-methods
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
     # PUB/SUB
-    AUTH_SUB_AUDIENCE = os.getenv('AUTH_SUB_AUDIENCE')
-
-    ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
     # SUBSCRIBES TO THESE TOPICS: auth-event-dev and namex-nr-state-dev
+    AUTH_SUB_AUDIENCE = os.getenv('AUTH_SUB_AUDIENCE')
+    VERIFY_PUBSUB_EMAIL = os.getenv('VERIFY_PUBSUB_EMAIL')
+    ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
 
     PAY_API_URL = os.getenv('PAY_API_URL') + os.getenv('PAY_API_VERSION')
 

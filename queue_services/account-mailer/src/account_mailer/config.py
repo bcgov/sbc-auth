@@ -98,6 +98,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     # PUB/SUB
     # SUBSCRIBES TO THIS TOPIC: account-mailer-dev
     AUTH_SUB_AUDIENCE = os.getenv('AUTH_SUB_AUDIENCE')
+    VERIFY_PUBSUB_EMAIL = os.getenv('VERIFY_PUBSUB_EMAIL')
 
     # Minio configuration values
     MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
