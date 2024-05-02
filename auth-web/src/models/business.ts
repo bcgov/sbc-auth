@@ -147,6 +147,6 @@ export interface LearBusiness {
     identifier: string
     legalName: string
     legalType: string
-    alternateNames: AlternateNameIF[]
+    alternateNames?: AlternateNameIF[]
     taxId?: string
 }

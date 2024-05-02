@@ -16,7 +16,7 @@ import {
   CreateNRAffiliationRequestBody,
   NameRequestResponse
 } from '@/models/affiliation'
-import { AmalgamationTypes, EntityStates, FilingTypes } from '@bcrs-shared-components/enums'
+import { AmalgamationTypes, FilingTypes } from '@bcrs-shared-components/enums'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, LoginPayload,
   PasscodeResetLoad } from '@/models/business'
@@ -208,20 +208,6 @@ export const useBusinessStore = defineStore('business', () => {
     // get affiliated entities for this organization
     const entityResponse: AffiliationResponse[] = await OrgService.getAffiliatedEntities(currentOrganization.value.id)
     let affiliatedEntities: Business[] = []
-
-    // do a lear search on firms to fetch the latest names (alternate names array)
-    // set that array to firm entries in the entityResponse array
-    for (const response of entityResponse) {
-      if ([CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP].includes(response.legalType) &&
-        (response.state === EntityStates.ACTIVE || response.state === EntityStates.HISTORICAL)) {
-        await BusinessService.searchBusiness(response.identifier).then(result => {
-          response.legalName = result.data.business.legalName
-          response.alternateNames = result.data.business.alternateNames
-        }).catch(error => {
-          console.log(error)
-        })
-      }
-    }
 
     // push entities from the entityResponse array after properly building them to the store
     entityResponse.forEach((resp) => {
