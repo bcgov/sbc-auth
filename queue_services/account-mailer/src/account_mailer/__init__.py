@@ -48,12 +48,12 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config.get_named_config(run_mode))
 
-    # Configure Sentry
-    if sentry_dsn := app.config.get('SENTRY_DSN'):
-        sentry_sdk.init(
-            dsn=sentry_dsn,
-            integrations=[FlaskIntegration()]
-        )
+    if str(app.config.get('SENTRY_ENABLE')).lower() == 'true':
+        if app.config.get('SENTRY_DSN', None):
+            sentry_sdk.init(  # pylint: disable=abstract-class-instantiated
+                dsn=app.config.get('SENTRY_DSN'),
+                integrations=[FlaskIntegration()]
+            )
 
     db.init_app(app)
     flags.init_app(app)

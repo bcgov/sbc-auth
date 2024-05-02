@@ -14,12 +14,14 @@
 """Resource package for the auth-queue service."""
 import os
 
+import sentry_sdk
 from auth_api import config
 from auth_api.models import db
 from auth_api.resources.ops import bp as ops_bp
 from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
 from flask import Flask
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 from auth_queue.resources.worker import bp as worker_endpoint
 
@@ -40,6 +42,14 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(config.get_named_config(run_mode))
+
+    if str(app.config.get('SENTRY_ENABLE')).lower() == 'true':
+        if app.config.get('SENTRY_DSN', None):
+            sentry_sdk.init(  # pylint: disable=abstract-class-instantiated
+                dsn=app.config.get('SENTRY_DSN'),
+                integrations=[FlaskIntegration()]
+            )
+
     db.init_app(app)
     flags.init_app(app)
     queue.init_app(app)
