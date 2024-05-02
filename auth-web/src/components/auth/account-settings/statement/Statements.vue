@@ -99,6 +99,14 @@
             <span>{{ paymentMethodsDisplay(item.paymentMethods) }}</span>
           </div>
         </template>
+        <template
+          v-if="enableEFTPaymentMethod && hasEFTPaymentMethod"
+          #[`item.statementNumber`]="{ item }"
+        >
+          <div>
+            <span>{{ item.id }}</span>
+          </div>
+        </template>
         <template #[`item.action`]="{ item }">
           <div>
             <v-btn
@@ -411,6 +419,7 @@ export default defineComponent({
 
       if (this.hasEFTPaymentMethod && this.enableEFTPaymentMethod()) {
         headers.splice(2, 0, { text: 'Payment Methods', align: 'left', sortable: false, value: 'paymentMethods' })
+        headers.splice(2, 0, { text: 'Statement Number', align: 'left', sortable: false, value: 'statementNumber' })
       }
 
       return headers
