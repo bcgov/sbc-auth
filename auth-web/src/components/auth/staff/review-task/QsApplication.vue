@@ -126,9 +126,9 @@
       </v-col>
       <v-col
         class="py-2"
-        data-test="qs-phone"
+        data-test="sp-phone"
       >
-        {{ accountUnderReviewAdminContact.phone }}
+        {{ taskUserContact.phone }}
       </v-col>
     </v-row>
     <v-row>
@@ -137,9 +137,9 @@
       </v-col>
       <v-col
         class="py-2"
-        data-test="qs-email"
+        data-test="sp-email"
       >
-        {{ accountUnderReviewAdminContact.email }}
+        {{ taskUserContact.email }}
       </v-col>
     </v-row>
     <v-row>
@@ -274,6 +274,7 @@ export default defineComponent({
       qsRequirements: computed((): QualifiedSupplierRequirementsConfig[] => {
         return userAccessRequirements[props.taskDetails?.type]
       }),
+      taskUserContact: computed((): Contact => props.taskDetails?.user?.contacts[0]),
       isLawyerNotaryApplication: computed((): boolean => props.taskDetails?.type === TaskType.MHR_LAWYER_NOTARY),
       isManufacturerApplication: computed((): boolean => props.taskDetails?.type === TaskType.MHR_MANUFACTURERS)
     })
