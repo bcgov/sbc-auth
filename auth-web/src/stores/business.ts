@@ -12,7 +12,6 @@ import {
 } from '@/util/constants'
 import {
   AffiliationResponse,
-  AlternateNames,
   CreateRequestBody as CreateAffiliationRequestBody,
   CreateNRAffiliationRequestBody,
   NameRequestResponse
@@ -24,6 +23,7 @@ import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, Log
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { computed, reactive, toRefs } from '@vue/composition-api'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
+import { AlternateNameIF } from '@bcrs-shared-components/interfaces'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -53,14 +53,14 @@ export const useBusinessStore = defineStore('business', () => {
     legalName: string,
     legalType: CorpTypes,
     identifier: string,
-    alternateNames: AlternateNames[]
+    alternateNames: AlternateNameIF[]
   ): string {
     if (!LaunchDarklyService.getFlag(LDFlags.AlternateNamesMbr, false)) {
       return legalName
     }
     if ([CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP].includes(legalType)) {
       // Intentionally show blank, if the alternate name is not found. This is to avoid showing the legal name.
-      return alternateNames?.find(alt => alt.identifier === identifier)?.operatingName
+      return alternateNames?.find(alt => alt.identifier === identifier)?.name
     } else {
       return legalName
     }
@@ -209,6 +209,7 @@ export const useBusinessStore = defineStore('business', () => {
     const entityResponse: AffiliationResponse[] = await OrgService.getAffiliatedEntities(currentOrganization.value.id)
     let affiliatedEntities: Business[] = []
 
+    // push entities from the entityResponse array after properly building them to the store
     entityResponse.forEach((resp) => {
       const entity: Business = buildBusinessObject(resp)
       if (resp.nameRequest) {
@@ -407,7 +408,7 @@ export const useBusinessStore = defineStore('business', () => {
     return BusinessService.createBNRequest(request)
   }
 
-  async function searchNRIndex (identifier: string): number {
+  async function searchNRIndex (identifier: string): Promise<number> {
     return this.businesses.findIndex(business => business.nrNumber === identifier)
   }
 
