@@ -99,6 +99,13 @@
             <span>{{ paymentMethodsDisplay(item.paymentMethods) }}</span>
           </div>
         </template>
+        <template
+          #[`item.statementNumber`]="{ item }"
+        >
+          <div>
+            <span>{{ item.id }}</span>
+          </div>
+        </template>
         <template #[`item.action`]="{ item }">
           <div>
             <v-btn
@@ -400,6 +407,12 @@ export default defineComponent({
           align: 'left',
           sortable: false,
           value: 'frequency'
+        },
+        {
+          text: 'Statement Number',
+          align: 'left',
+          sortable: false,
+          value: 'statementNumber'
         },
         {
           text: 'Downloads',
