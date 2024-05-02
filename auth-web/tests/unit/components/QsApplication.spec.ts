@@ -12,6 +12,8 @@ const mockProps = {
     type: null,
     created: new Date(),
     user: {
+      firstname: 'John',
+      lastname: 'Doe',
       contacts: [
         {
           email: 'submitter@example.com',
@@ -25,14 +27,6 @@ const mockProps = {
     mailingAddress: {
       // Add required properties for mailingAddress
     }
-  },
-  accountUnderReviewAdmin: {
-    firstname: 'John',
-    lastname: 'Doe'
-  },
-  accountUnderReviewAdminContact: {
-    email: 'john.doe@example.com',
-    phone: '123-456-7890'
   }
 }
 const mockQsApplicantData = {
@@ -101,7 +95,7 @@ for (const taskType of taskTypes) {
     })
 
     it('displays the correct applicant full name', () => {
-      const applicantName = wrapper.find('[data-test="qs-username"]').text()
+      const applicantName = wrapper.find('[data-test="sp-username"]').text()
       expect(applicantName).toContain('John Doe')
     })
 

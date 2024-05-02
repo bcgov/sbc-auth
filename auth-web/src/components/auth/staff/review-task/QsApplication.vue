@@ -107,9 +107,9 @@
       </v-col>
       <v-col
         class="py-2"
-        data-test="qs-username"
+        data-test="sp-username"
       >
-        {{ accountUnderReviewAdmin.firstname }} {{ accountUnderReviewAdmin.lastname }}
+        {{ taskDetails.user.firstname }} {{ taskDetails.user.lastname }}
       </v-col>
     </v-row>
     <v-row>
@@ -246,7 +246,6 @@ import { Organization } from '@/models/Organization'
 import { Task } from '@/models/Task'
 import TaskService from '@/services/task.services'
 import { TaskType } from '@/util/constants'
-import { User } from '@/models/user'
 import moment from 'moment/moment'
 
 export default defineComponent({
@@ -258,9 +257,7 @@ export default defineComponent({
     tabNumber: { type: Number, default: null },
     title: { type: String, default: 'Qualified Supplier Application' },
     taskDetails: { type: Object as () => Task, default: () => null },
-    accountUnderReview: { type: Object as () => Organization, default: () => null },
-    accountUnderReviewAdmin: { type: Object as () => User, default: () => null },
-    accountUnderReviewAdminContact: { type: Object as () => Contact, default: () => null }
+    accountUnderReview: { type: Object as () => Organization, default: () => null }
   },
   setup (props) {
     const localState = reactive({
