@@ -78,9 +78,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     AUTH_SUB_AUDIENCE = os.getenv('AUTH_SUB_AUDIENCE')
 
     ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
-    ACTIVITY_LISTENER_TOPIC = os.getenv('ACTIVITY_LISTENER_TOPIC', 'activity-listener-dev')
-    EVENT_LISTENER_TOPIC = os.getenv('EVENT_LISTENER_TOPIC', 'auth-event-dev')
-    NAMES_NR_STATE_TOPIC = os.getenv('NAMES_NR_STATE_TOPIC', 'namex-nr-state-dev')
+    # SUBSCRIBES TO THESE TOPICS: auth-event-dev and namex-nr-state-dev
 
     PAY_API_URL = os.getenv('PAY_API_URL') + os.getenv('PAY_API_VERSION')
 

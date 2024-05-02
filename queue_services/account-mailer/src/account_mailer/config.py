@@ -96,7 +96,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     REPORT_API_BASE_URL = f'{os.getenv("REPORT_API_URL")}/reports'
 
     # PUB/SUB
-    ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
+    # SUBSCRIBES TO THIS TOPIC: account-mailer-dev
     AUTH_SUB_AUDIENCE = os.getenv('AUTH_SUB_AUDIENCE')
 
     # Minio configuration values
