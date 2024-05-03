@@ -23,6 +23,7 @@ from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api import status as http_status
 from auth_api.models.dataclass import Activity
@@ -40,7 +41,7 @@ from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils import util
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, DocumentType, IdpHint, LoginSource, OrgStatus, QueueMessageTypes, Status, UserStatus)
+    AccessType, ActivityAction, DocumentType, IdpHint, LoginSource, OrgStatus, Status, UserStatus)
 from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake

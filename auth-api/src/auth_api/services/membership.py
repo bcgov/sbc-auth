@@ -20,6 +20,7 @@ import json
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api.config import get_named_config
 from auth_api.models.dataclass import Activity
@@ -31,7 +32,7 @@ from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
-from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, QueueMessageTypes, Status
+from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, Status
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 

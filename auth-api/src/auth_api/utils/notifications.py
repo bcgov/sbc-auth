@@ -17,9 +17,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
+from sbc_common_components.utils.enums import QueueMessageTypes
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
-from auth_api.utils.enums import ProductCode, ProductSubscriptionStatus, QueueMessageTypes
+from auth_api.utils.enums import ProductCode, ProductSubscriptionStatus
 
 DETAILED_MHR_NOTIFICATIONS = (ProductCode.MHR_QSLN.value,
                               ProductCode.MHR_QSHD.value,

@@ -19,12 +19,12 @@ from flask import current_app, g
 from sentry_sdk import capture_message
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy_continuum.plugins.flask import fetch_remote_addr
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api.config import get_named_config
 from auth_api.models.dataclass import Activity
 from auth_api.models import User as UserModel
 from auth_api.services.gcp_queue import GcpQueue, queue
-from auth_api.utils.enums import QueueMessageTypes
 
 
 CONFIG = get_named_config()

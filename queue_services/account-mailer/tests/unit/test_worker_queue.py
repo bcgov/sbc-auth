@@ -17,7 +17,7 @@ from datetime import datetime
 from unittest.mock import patch
 
 from auth_api.services.rest_service import RestService
-from auth_api.utils.enums import QueueMessageTypes
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from account_mailer.enums import SubjectType
 from account_mailer.services import notification_service

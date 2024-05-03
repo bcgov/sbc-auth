@@ -13,7 +13,8 @@
 # limitations under the License.
 """Test Suite to ensure the worker routines are working as expected."""
 from auth_api.models import Org as OrgModel
-from auth_api.utils.enums import OrgStatus, QueueMessageTypes
+from auth_api.utils.enums import OrgStatus
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from tests.unit import factory_org_model
 

@@ -18,7 +18,7 @@ import uuid
 from datetime import datetime, timezone
 from random import randint
 
-from auth_api.utils.enums import QueueMessageTypes
+from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
 

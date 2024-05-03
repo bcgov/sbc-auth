@@ -26,9 +26,10 @@ from auth_api.services.gcp_queue import queue
 from auth_api.services.gcp_queue.gcp_auth import ensure_authorized_queue_user
 from auth_api.services.rest_service import RestService
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import AccessType, ActivityAction, CorpType, OrgStatus, QueueMessageTypes
+from auth_api.utils.enums import AccessType, ActivityAction, CorpType, OrgStatus
 from dateutil import parser
 from flask import Blueprint, current_app, request
+from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
 
 

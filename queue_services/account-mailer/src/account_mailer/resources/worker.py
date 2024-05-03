@@ -20,9 +20,9 @@ from http import HTTPStatus
 from auth_api.services.gcp_queue import queue
 from auth_api.services.gcp_queue.gcp_auth import ensure_authorized_queue_user
 from auth_api.services.rest_service import RestService
-from auth_api.utils.enums import QueueMessageTypes
 from auth_api.utils.roles import ADMIN, COORDINATOR
 from flask import Blueprint, current_app, request
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from account_mailer.auth_utils import get_login_url, get_member_emails
 from account_mailer.email_processors import (

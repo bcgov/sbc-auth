@@ -22,6 +22,7 @@ from typing import Dict, List
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models import Membership as MembershipModel
@@ -33,8 +34,7 @@ from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import TaskSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import (
-    QueueMessageTypes, Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
+from auth_api.utils.enums import Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from auth_api.utils.notifications import ProductSubscriptionInfo
 from auth_api.utils.util import camelback2snake  # noqa: I005
 

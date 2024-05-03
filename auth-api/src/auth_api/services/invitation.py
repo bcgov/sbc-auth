@@ -21,6 +21,7 @@ from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api.config import get_named_config
 
@@ -39,7 +40,7 @@ from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
 from auth_api.utils.enums import AccessType, ActivityAction, InvitationStatus, InvitationType, LoginSource
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.enums import (
-    QueueMessageTypes, Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
+    Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
 from auth_api.utils.user_context import UserContext, user_context
 

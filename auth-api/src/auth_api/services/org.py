@@ -20,6 +20,7 @@ from flask import current_app, g
 from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api import status as http_status
 from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
@@ -43,7 +44,7 @@ from auth_api.services.validators.duplicate_org_name import validate as duplicat
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
     AccessType, ActivityAction, AffidavitStatus, LoginSource, OrgStatus, OrgType, PatchActions, PaymentAccountStatus,
-    PaymentMethod, QueueMessageTypes, Status, SuspensionReasonCode, TaskRelationshipStatus, TaskRelationshipType,
+    PaymentMethod, Status, SuspensionReasonCode, TaskRelationshipStatus, TaskRelationshipType,
     TaskStatus, TaskTypePrefix, TaskAction)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I005
 from auth_api.utils.util import camelback2snake

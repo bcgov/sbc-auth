@@ -22,6 +22,7 @@ from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sbc_common_components.utils.enums import QueueMessageTypes
 from sqlalchemy.exc import DataError
 
 from auth_api.config import get_named_config
@@ -39,8 +40,7 @@ from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
-from auth_api.utils.enums import (
-    AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, QueueMessageTypes, Status)
+from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
