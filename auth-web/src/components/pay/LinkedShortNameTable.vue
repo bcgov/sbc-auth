@@ -250,6 +250,13 @@ export default defineComponent({
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
 
+.v-btn {
+  border-radius: 4px !important;
+  height: 40px !important;
+  padding: 0 24px 0 24px !important;
+  top: -5px;
+}
+
 #linked-bank-short-names {
   border: 1px solid #e9ecef;
   font-weight: bold;
