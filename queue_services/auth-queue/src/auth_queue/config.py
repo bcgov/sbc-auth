@@ -77,7 +77,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     # PUB/SUB
     # SUBSCRIBES TO THESE TOPICS: auth-event-dev and namex-nr-state-dev
     AUTH_SUB_AUDIENCE = os.getenv('AUTH_SUB_AUDIENCE')
-    VERIFY_PUBSUB_EMAIL = os.getenv('VERIFY_PUBSUB_EMAIL')
+    VERIFY_PUBSUB_EMAILS = os.getenv('VERIFY_PUBSUB_EMAILS', 'email1,email2').split(',')
 
     PAY_API_URL = os.getenv('PAY_API_URL') + os.getenv('PAY_API_VERSION')
 
