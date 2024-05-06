@@ -9,5 +9,5 @@ requests
 sentry-sdk[flask]
 arrow
 Werkzeug<2
-Jinja2==3.0.3
+Jinja2==3.1.4
 itsdangerous==2.0.1
