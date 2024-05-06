@@ -34,8 +34,6 @@ def ensure_authorized_queue_user(f):
     """Ensures the user is authorized to use the queue."""
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
-        if current_app.config.get('DEBUG_REQUEST') is True:
-            current_app.logger.info(f'Headers: {request.headers}')
         # Use CacheControl to avoid re-fetching certificates for every request.
         if verify_jwt(CacheControl(Session())):
             abort(HTTPStatus.UNAUTHORIZED)
