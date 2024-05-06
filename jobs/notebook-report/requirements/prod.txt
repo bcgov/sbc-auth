@@ -28,7 +28,7 @@ Click==7.1.2
 python-dotenv==0.13.0
 requests==2.31.0
 marshmallow==2.20.5
-Werkzeug==0.16.1
+Werkzeug==3.0.3
 idna==3.7
 pylint
 pylint-flask
