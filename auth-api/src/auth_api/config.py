@@ -135,7 +135,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     LEAR_AFFILIATION_DETAILS_URL = f'{LEGAL_API_URL + LEGAL_API_VERSION_2}/businesses/search'
     NAMEX_AFFILIATION_DETAILS_URL = f'{NAMEX_API_URL}/requests/search'
 
-    # PUB/SUB
+    # PUB/SUB - PUB: account-mailer-dev, auth-event-dev
     GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
     ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
     AUTH_EVENT_TOPIC = os.getenv('AUTH_EVENT_TOPIC', 'auth-event-dev')

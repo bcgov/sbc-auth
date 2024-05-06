@@ -74,13 +74,13 @@ class _Config:  # pylint: disable=too-few-public-methods
     DB_PORT = os.getenv('DATABASE_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
-    # PUB/SUB
-    # SUBSCRIBES TO THESE TOPICS: auth-event-dev and namex-nr-state-dev
-    GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
-    AUTH_SUB_AUDIENCE = os.getenv('AUTH_SUB_AUDIENCE')
-    VERIFY_PUBSUB_EMAILS = os.getenv('VERIFY_PUBSUB_EMAILS', 'email1,email2').split(',')
+    # PUB/SUB - PUB: account-mailer-dev, SUB: auth-event-dev and namex-nr-state-dev
     ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
-
+    AUTH_SUB_AUDIENCE = os.getenv('AUTH_SUB_AUDIENCE')
+    GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
+    # If blank in PUB/SUB, this should match the https endpoint the subscription is pushing to.
+    VERIFY_PUBSUB_EMAILS = os.getenv('VERIFY_PUBSUB_EMAILS', 'email1,email2').split(',')
+    
     PAY_API_URL = os.getenv('PAY_API_URL') + os.getenv('PAY_API_VERSION')
 
     # Service account details
