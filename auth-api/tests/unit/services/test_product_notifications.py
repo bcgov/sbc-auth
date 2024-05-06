@@ -20,6 +20,7 @@ from unittest.mock import patch
 
 import mock
 import pytest
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 import auth_api.utils.account_mailer
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
@@ -29,8 +30,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Product as ProductService
 from auth_api.services import Task as TaskService
 from auth_api.services.user import User as UserService
-from auth_api.utils.enums import (
-    LoginSource, QueueMessageTypes, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
+from auth_api.utils.enums import LoginSource, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from auth_api.utils.notifications import (
     NotificationAttachmentType, ProductAccessDescriptor, ProductCategoryDescriptor, ProductSubjectDescriptor)
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOrgProductsInfo, TestUserInfo
