@@ -76,8 +76,10 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     # PUB/SUB
     # SUBSCRIBES TO THESE TOPICS: auth-event-dev and namex-nr-state-dev
+    GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
     AUTH_SUB_AUDIENCE = os.getenv('AUTH_SUB_AUDIENCE')
     VERIFY_PUBSUB_EMAILS = os.getenv('VERIFY_PUBSUB_EMAILS', 'email1,email2').split(',')
+    ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
 
     PAY_API_URL = os.getenv('PAY_API_URL') + os.getenv('PAY_API_VERSION')
 
