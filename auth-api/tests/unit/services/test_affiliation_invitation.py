@@ -21,6 +21,7 @@ from unittest.mock import patch
 import mock
 import pytest
 from freezegun import freeze_time
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 import auth_api.services.authorization as auth
 import auth_api.utils.account_mailer
@@ -38,7 +39,7 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
 from auth_api.utils import roles
-from auth_api.utils.enums import InvitationStatus, QueueMessageTypes
+from auth_api.utils.enums import InvitationStatus
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_affiliation_invitation, factory_entity_model, factory_membership_model, factory_user_model,

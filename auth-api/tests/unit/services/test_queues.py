@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from auth_api import create_app
 from auth_api.services.activity_log_publisher import Activity, ActivityLogPublisher
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import QueueMessageTypes
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 
 @pytest.mark.skip(reason='ADHOC only test.')
