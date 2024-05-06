@@ -18,7 +18,7 @@ sentry-sdk[flask]
 bcrypt
 cattrs
 jaeger-client
-Werkzeug<2
+Werkzeug<4
 minio
 pyhumps
 sqlalchemy-utils
