@@ -42,7 +42,7 @@
           >
             <CardHeader
               badgeText="Paused"
-              icon="mdi-delete-clock"
+              icon="mdi-calendar-clock"
               label="Automated Dissolution Schedule"
               :showBadge="isOnHold"
             />
