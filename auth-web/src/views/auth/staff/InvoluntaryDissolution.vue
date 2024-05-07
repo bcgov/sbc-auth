@@ -57,40 +57,37 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import { CardHeader } from '@/components'
 import DissolutionSchedule from '@/components/auth/staff/DissolutionSchedule.vue'
-import { mapActions } from 'pinia'
 import { useStaffStore } from '@/stores/staff'
 
-@Component({
+export default defineComponent({
+  name: 'InvoluntaryDissolution',
   components: {
     CardHeader,
     DissolutionSchedule
   },
-  methods: {
-    ...mapActions(useStaffStore,
-      ['isDissolutionBatchOnHold'])
+  setup () {
+    const isOnHold = ref<boolean>(false)
+    const staffStore = useStaffStore()
+
+    onMounted(() => {
+      isOnHold.value = staffStore.isDissolutionBatchOnHold()
+    })
+
+    /**
+     * The number of B.C. businesses that are ready for D1 Dissolution.
+     * TODO: Change this once the BE is done.
+     */
+    const businessesReadyforDissolutionNumber = computed(() => 0)
+
+    return {
+      businessesReadyforDissolutionNumber,
+      isOnHold
+    }
   }
 })
-export default class InvoluntaryDissolution extends Vue {
-  readonly isDissolutionBatchOnHold!: () => boolean
-
-  // Local vars
-  isOnHold = false
-
-  mounted (): void {
-    this.isOnHold = this.isDissolutionBatchOnHold()
-  }
-
-  /**
-   * The number of B.C. businesses that are ready for D1 Dissolution.
-   * TODO: Change this once the BE is done.
-   */
-  get businessesReadyforDissolutionNumber (): number {
-    return 0
-  }
-}
 </script>
 
 <style lang="scss" scoped>
