@@ -1,133 +1,131 @@
 <template>
-  <div id="summary-define-company">
-    <section>
-      <article class="section-container px-6 py-8">
-        <!-- Dissolution Batch Size -->
-        <template v-if="isEdit">
-          <v-row no-gutters>
-            <v-col
-              cols="12"
-              sm="3"
-            >
-              <label id="company-label">Dissolution Batch Size</label>
-            </v-col>
-            <v-col
-              cols="12"
-              sm="9"
-            >
-              <v-text-field
-                ref="numberOfBusinessesRef"
-                v-model="numberOfBusinesses"
-                filled
-                type="number"
-                label="Dissolution Batch Size"
-                hint="The number of businesses to be moved into D1 dissolution per batch. Maximum of 2000."
-                :rules="dissolutionBatchSizeRules"
-                req
-                persistent-hint
-              />
-            </v-col>
-          </v-row>
-
-          <v-divider class="mb-8 mt-6" />
-        </template>
-
-        <!-- Schedule Summary -->
+  <section id="dissolution-schedule">
+    <article class="section-container px-6 py-8">
+      <!-- Dissolution Batch Size -->
+      <template v-if="isEdit">
         <v-row no-gutters>
           <v-col
             cols="12"
             sm="3"
           >
-            <label id="company-label">Schedule Summary</label>
+            <label id="company-label">Dissolution Batch Size</label>
           </v-col>
           <v-col
             cols="12"
-            sm="6"
+            sm="9"
           >
-            <span>
-              Moving <strong>{{ scheduleSummaryNumber }}</strong> businesses into D1 dissolution every
-              <strong>Tuesday</strong> at <strong>11:59 p.m</strong> Pacific Time.
-            </span>
+            <v-text-field
+              ref="numberOfBusinessesRef"
+              v-model="numberOfBusinesses"
+              filled
+              type="number"
+              label="Dissolution Batch Size"
+              hint="The number of businesses to be moved into D1 dissolution per batch. Maximum of 2000."
+              :rules="dissolutionBatchSizeRules"
+              req
+              persistent-hint
+            />
           </v-col>
-
-          <template v-if="!isEdit">
-            <v-col
-              cols="6"
-              sm="3"
-              class="text-right"
-            >
-              <v-btn
-                color="primary"
-                class="action-btn px-6"
-                @click="actionBtnClicked()"
-              >
-                {{ actionBtnText }}
-              </v-btn>
-              <span>
-                <v-menu
-                  v-model="menu"
-                  offset-y
-                  nudge-left="90"
-                >
-                  <template #activator="{ on }">
-                    <v-btn
-                      color="primary"
-                      class="more-actions-btn menu-btn px-3"
-                      v-on="on"
-                    >
-                      <v-icon v-if="menu">
-                        mdi-menu-up
-                      </v-icon>
-                      <v-icon v-else>
-                        mdi-menu-down
-                      </v-icon>
-                    </v-btn>
-                  </template>
-
-                  <v-list dense>
-                    <v-list-item @click="triggerEditOnOff()">
-                      <v-list-item-subtitle>
-                        <v-icon>mdi-pencil</v-icon>
-                        <span class="pl-2 edit-txt">Edit</span>
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </span>
-            </v-col>
-          </template>
         </v-row>
 
-        <!-- Cancel/Save buttons -->
-        <template v-if="isEdit">
-          <v-divider class="mb-8 mt-8" />
-          <v-row no-gutters>
-            <v-col
-              cols="12"
-              class="text-right"
+        <v-divider class="mb-8 mt-6" />
+      </template>
+
+      <!-- Schedule Summary -->
+      <v-row no-gutters>
+        <v-col
+          cols="12"
+          sm="3"
+        >
+          <label id="company-label">Schedule Summary</label>
+        </v-col>
+        <v-col
+          cols="12"
+          sm="6"
+        >
+          <span>
+            Moving <strong>{{ scheduleSummaryNumber }}</strong> businesses into D1 dissolution every
+            <strong>Tuesday</strong> at <strong>11:59 p.m</strong> Pacific Time.
+          </span>
+        </v-col>
+
+        <template v-if="!isEdit">
+          <v-col
+            cols="6"
+            sm="3"
+            class="text-right"
+          >
+            <v-btn
+              color="primary"
+              class="action-btn px-6"
+              @click="actionBtnClicked()"
             >
-              <v-btn
-                color="primary"
-                large
-                outlined
-                class="mr-3"
-                @click="triggerEditOnOff()"
+              {{ actionBtnText }}
+            </v-btn>
+            <span>
+              <v-menu
+                v-model="menu"
+                offset-y
+                nudge-left="90"
               >
-                Cancel
-              </v-btn>
-              <v-btn
-                color="primary"
-                large
-                @click="saveBtnClicked()"
-              >
-                Save
-              </v-btn>
-            </v-col>
-          </v-row>
+                <template #activator="{ on }">
+                  <v-btn
+                    color="primary"
+                    class="more-actions-btn menu-btn px-3"
+                    v-on="on"
+                  >
+                    <v-icon v-if="menu">
+                      mdi-menu-up
+                    </v-icon>
+                    <v-icon v-else>
+                      mdi-menu-down
+                    </v-icon>
+                  </v-btn>
+                </template>
+
+                <v-list dense>
+                  <v-list-item @click="triggerEditOnOff()">
+                    <v-list-item-subtitle>
+                      <v-icon>mdi-pencil</v-icon>
+                      <span class="pl-2 edit-txt">Edit</span>
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </span>
+          </v-col>
         </template>
-      </article>
-    </section>
-  </div>
+      </v-row>
+
+      <!-- Cancel/Save buttons -->
+      <template v-if="isEdit">
+        <v-divider class="mb-8 mt-8" />
+        <v-row no-gutters>
+          <v-col
+            cols="12"
+            class="text-right"
+          >
+            <v-btn
+              color="primary"
+              large
+              outlined
+              class="mr-3"
+              @click="triggerEditOnOff()"
+            >
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              large
+              @click="saveBtnClicked()"
+            >
+              Save
+            </v-btn>
+          </v-col>
+        </v-row>
+      </template>
+    </article>
+  </section>
 </template>
 
 <script lang="ts">
@@ -191,7 +189,7 @@ export default class DissolutionSchedule extends Vue {
     }
   }
 
-  /** Edit or Cancel button is clicked. */
+  /** Edit, Cancel, or Save (successful) button is clicked. */
   triggerEditOnOff (): void {
     this.isEdit = !this.isEdit
     // closing the menu
@@ -239,7 +237,7 @@ export default class DissolutionSchedule extends Vue {
   }
 }
 
-// Vuetify Override of list item
+// Vuetify Override of list item to change it's text and icon color to app blue
 .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
   color: $app-blue;
   .v-icon.v-icon {
@@ -279,12 +277,12 @@ export default class DissolutionSchedule extends Vue {
 
 // Making the pencil icon smaller
 .mdi-pencil:before, .mdi-pencil-set {
-  font-size: 16px;
+  font-size: $px-16;
 }
 
 // Increasing the Edit text size by a bit
 .edit-txt {
-  font-size: 14px;
+  font-size: $px-14;
 }
 
 // Hiding the spin button of the v-text-field

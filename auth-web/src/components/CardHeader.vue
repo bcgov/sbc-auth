@@ -53,12 +53,12 @@ export default class CardHeader extends Vue {
 
 // Vuetify override for the color of the v-chip
 .v-application .primary {
-  background-color: $BCgovPausedWarning !important;
+  background-color: $BCgovOrangeWarning !important;
 }
 
 // Vuetify override for the sizes of the v-chip
 .v-chip.v-size--small {
-  font-size: 12px;
+  font-size: $px-12;
   height: 19px;
 }
 </style>

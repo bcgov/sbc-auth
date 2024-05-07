@@ -96,11 +96,11 @@ export default class InvoluntaryDissolution extends Vue {
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 h2 {
-  font-size: 18px;
+  font-size: $px-18;
 }
 
 p {
-  font-size: 16px;
+  font-size: $px-16;
 }
 
 // Tighten up some of the spacing between rows
