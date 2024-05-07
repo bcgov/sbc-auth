@@ -27,6 +27,7 @@ $BCgovBlue2: #8099b3;
 $BCgovBlue3: #4d7094;
 $BCgovBlue4: #26527d;
 $BCgovBlue5: #003366; // PRIMARY BLUE
+$BCgovBlue5O: #01336626; // LOW OPACITY PRIMARY BLUE
 $BCgovBlue6: #1e1e1f;
 $BCgovBlue7: #002753;
 $BCgovBlue8: #002049;
@@ -72,6 +73,8 @@ $BCgovInputBG: #ffffff;
 
 // Font Colors
 $BCgovFontColorInverted: #ffffff;
+
+$BCgovPausedWarning: #EF6A01;
 
 // App Colors
 $app-blue: #1669bb; // same as the Vuetify theme primary
