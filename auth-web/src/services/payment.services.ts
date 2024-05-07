@@ -254,7 +254,6 @@ export default class PaymentService {
     if (viewAll) {
       params.append('viewAll', `${viewAll}`)
     }
-
     if (filterParams.filterPayload) {
       for (const [key, value] of Object.entries(filterParams.filterPayload)) {
         if (value) {
@@ -284,11 +283,11 @@ export default class PaymentService {
     return axios.get(url)
   }
 
-  static patchEFTShortname (shortNameId: string, accountId: string): AxiosPromise<EFTShortnameResponse> {
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`
+  static postShortNameLink (shortNameId: string, accountId: string): AxiosPromise<EFTShortnameResponse> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/links`
     const body = {
       accountId: accountId
     }
-    return axios.patch(url, body)
+    return axios.post(url, body)
   }
 }

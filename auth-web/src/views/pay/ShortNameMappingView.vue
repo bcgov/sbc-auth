@@ -42,7 +42,7 @@
         :class="['tab-item-default', tab === 1 ? 'tab-item-active' : 'tab-item-inactive']"
         :ripple="false"
       >
-        <b>Linked Bank Short Names</b><span class="font-weight-regular">
+        <b>EFT Enabled Accounts</b><span class="font-weight-regular">
           &nbsp;({{ state.linked }})</span>
       </v-tab>
     </v-tabs>
@@ -54,6 +54,7 @@
           flat
         >
           <ShortNameSummaryTable
+            :linked-account="state.linkedAccount"
             @shortname-state-total="state.summaries = $event"
             @on-link-account="onLinkAccount"
           />
@@ -65,7 +66,6 @@
           flat
         >
           <LinkedShortNameTable
-            :linked-account="state.linkedAccount"
             @shortname-state-total="state.linked = $event"
           />
         </v-card>
@@ -93,7 +93,7 @@ export default defineComponent({
     })
 
     function onLinkAccount (account: any) {
-      tab.value = 1
+      tab.value = 0
       state.linkedAccount = account
       ConfigHelper.addToSession(SessionStorageKeys.ShortNamesTabIndex, tab.value)
     }

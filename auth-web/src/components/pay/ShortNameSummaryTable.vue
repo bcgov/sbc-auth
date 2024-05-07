@@ -1,5 +1,13 @@
 <template>
   <div>
+    <v-snackbar
+      id="linked-account-snackbar"
+      v-model="snackbar"
+      :timeout="4000"
+      transition="fade"
+    >
+      {{ snackbarText }}
+    </v-snackbar>
     <ShortNameLinkingDialog
       :isShortNameLinkingDialogOpen="isShortNameLinkingDialogOpen"
       :selectedShortName="selectedShortName"
@@ -32,6 +40,8 @@
       :updateFilter="updateFilter"
       :useObserver="true"
       :observerCallback="() => infiniteScrollCallback(true)"
+      :highlight-index="highlightIndex"
+      highlight-class="base-table__item-row-green"
       @update-table-options="options = $event"
     >
       <template #header-title>
@@ -115,15 +125,15 @@
                 </v-btn>
               </template>
               <v-list>
-                 <v-list-item
-                     class="actions-dropdown_item"
-                     data-test="link-account-button"
-                 >
+                <v-list-item
+                  class="actions-dropdown_item"
+                  data-test="link-account-button"
+                >
                   <v-list-item-subtitle
-                      @click="openAccountLinkingDialog(item)"
+                    @click="openAccountLinkingDialog(item)"
                   >
                     <v-icon small>mdi-plus</v-icon>
-                    <span class="pl-1 cursor-pointer">Link to Account</span>
+                    <span class="pl-1 cursor-pointer">{{ item.linkedAccountsCount > 0 ? 'Add Linkage' : 'Link to Account' }}</span>
                   </v-list-item-subtitle>
                 </v-list-item>
               </v-list>
@@ -151,6 +161,9 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
 export default defineComponent({
   name: 'ShortNameSummaryTable',
   components: { BaseVDataTable, DatePicker, ShortNameLinkingDialog },
+  props: {
+    linkedAccount: { default: {} }
+  },
   emits: ['on-link-account'],
   setup (props, { emit, root }) {
     const datePicker = ref(null)
@@ -179,9 +192,14 @@ export default defineComponent({
       accountLinkingErrorDialogText: '',
       isShortNameLinkingDialogOpen: false,
       startDate: '',
-      endDate: ''
+      endDate: '',
+      highlightIndex: -1,
+      snackbar: false,
+      snackbarText: ''
     })
-    const { infiniteScrollCallback, loadTableSummaryData, updateFilter } = useShortNameTable(state, emit)
+    const {
+      infiniteScrollCallback, loadTableSummaryData, updateFilter
+    } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px') => ({
       col,
       customFilter: {
@@ -204,7 +222,7 @@ export default defineComponent({
     } = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesSummaryFilter) || '{}')
 
     const headers = [
-      createHeader('shortName', 'Short Name', 'text', 'Short Name', shortName),
+      createHeader('shortName', 'Bank Short Name', 'text', 'Short Name', shortName),
       createHeader(
         'lastPaymentReceivedDate',
         'Last Payment Received Date',
@@ -322,6 +340,27 @@ export default defineComponent({
       state.filters.isActive = false
       await loadTableSummaryData()
     }
+
+    async function onLinkedAccount (account: EFTShortnameResponse) {
+      if (!account) return
+
+      const { results } = state
+      const shortName = results.find(result => result.id === account.shortNameId)
+
+      if (!shortName) return
+
+      state.snackbarText = `Bank short name ${shortName.shortName} was successfully linked.`
+      state.highlightIndex = results.indexOf(shortName)
+      state.snackbar = true
+
+      setTimeout(() => {
+        state.highlightIndex = -1
+      }, 4000)
+    }
+
+    watch(() => props.linkedAccount, (account: EFTShortnameResponse) => {
+      onLinkedAccount(account)
+    })
 
     onMounted(async () => {
       const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesSummaryFilter)

@@ -685,8 +685,8 @@ export const useOrgStore = defineStore('org', () => {
     state.failedUsers = []
   }
 
-  async function getStatementsList (filterParams: StatementFilterParams) {
-    const response = await PaymentService.getStatementsList(state.currentOrganization.id, filterParams)
+  async function getStatementsList (filterParams: StatementFilterParams, organizationId = state.currentOrganization.id) {
+    const response = await PaymentService.getStatementsList(organizationId, filterParams)
     return response?.data
   }
 
@@ -702,9 +702,9 @@ export const useOrgStore = defineStore('org', () => {
     return result
   }
 
-  async function getStatementsSummary () {
+  async function getStatementsSummary (organizationId = state.currentOrganization.id) {
     try {
-      const response = await PaymentService.getStatementsSummary(state.currentOrganization.id)
+      const response = await PaymentService.getStatementsSummary(organizationId)
       const result = response?.data || {} as StatementsSummary
       state.statementsSummary = result
       return result
