@@ -100,7 +100,7 @@ jobs:
           file: ./queue_services/account-mailer/coverage.xml
           flags: accountmailerqueue
           name: codecov-account-mailer
-          fail_ci_if_error: true
+          fail_ci_if_error: false
 
   build-check:
     needs: setup-job
