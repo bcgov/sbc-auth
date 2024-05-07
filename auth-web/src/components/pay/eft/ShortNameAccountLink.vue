@@ -2,7 +2,7 @@
   <v-card v-if="shortNameDetails.shortName">
     <ShortNameLinkingDialog
       :isShortNameLinkingDialogOpen="isShortNameLinkingDialogOpen"
-      :selectedShortName="shortNameDetails"
+      :selectedShortName="eftShortNameSummary"
       @close-short-name-linking-dialog="closeShortNameLinkingDialog"
       @on-link-account="onLinkAccount"
     />
@@ -32,7 +32,8 @@
       >
         + Link a New Account
       </v-btn>
-      <div>
+      <!-- move highlight index to data table when multi-linking is implemented -->
+      <div :class="{'base-table__item-row-green': highlightIndex === 1}">
         All payments from {{ shortNameDetails.shortName }} will be applied to: <b>{{ accountDisplayText }}</b>
       </div>
     </v-card-text>
@@ -54,9 +55,8 @@
 </template>
 <script lang="ts">
 
-import { computed, defineComponent, reactive, toRefs } from '@vue/composition-api'
-import ConfigHelper from '@/util/config-helper'
-import { SessionStorageKeys } from '@/util/constants'
+import { computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import PaymentService from '@/services/payment.services'
 import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
 
 export default defineComponent({
@@ -66,11 +66,17 @@ export default defineComponent({
     shortNameDetails: {
       type: Object,
       default: () => ({})
+    },
+    highlightIndex: {
+      type: Number,
+      default: -1
     }
   },
-  setup (props, { root }) {
+  emits: ['on-link-account'],
+  setup (props, { emit }) {
     const state = reactive({
-      isShortNameLinkingDialogOpen: false
+      isShortNameLinkingDialogOpen: false,
+      eftShortNameSummary: {}
     })
 
     const isLinked = computed<boolean>(() => {
@@ -90,10 +96,24 @@ export default defineComponent({
     }
 
     function onLinkAccount (account: any) {
-      ConfigHelper.addToSession(SessionStorageKeys.LinkedAccount, JSON.stringify(account))
-      ConfigHelper.addToSession(SessionStorageKeys.ShortNamesTabIndex, 0)
-      root.$router.push('/pay/manage-shortnames')
+      emit('on-link-account', account)
     }
+
+    async function getEFTShortNameSummaries () {
+      const filters = {
+        filterPayload: {
+          shortName: props.shortNameDetails.shortName
+        }
+      }
+      const EFTShortNameSummaries = await PaymentService.getEFTShortNameSummaries(filters)
+      if (EFTShortNameSummaries.data && EFTShortNameSummaries.data.items.length > 0) {
+        state.eftShortNameSummary = EFTShortNameSummaries.data.items[0]
+      }
+    }
+
+    watch(() => props.shortNameDetails.shortName, () => {
+      getEFTShortNameSummaries()
+    })
 
     return {
       ...toRefs(state),
@@ -101,7 +121,8 @@ export default defineComponent({
       accountDisplayText,
       openAccountLinkingDialog,
       closeShortNameLinkingDialog,
-      onLinkAccount
+      onLinkAccount,
+      getEFTShortNameSummaries
     }
   }
 })
@@ -120,6 +141,9 @@ export default defineComponent({
   .v-icon {
     font-size: 36px;
   }
+}
+.base-table__item-row-green {
+  background-color: $table-green !important;
 }
 
 </style>

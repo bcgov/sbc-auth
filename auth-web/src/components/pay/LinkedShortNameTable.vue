@@ -17,8 +17,6 @@
       :updateFilter="updateFilter"
       :useObserver="true"
       :observerCallback="infiniteScrollCallback"
-      :highlight-index="state.highlightIndex"
-      highlight-class="base-table__item-row-green"
       @update-table-options="tableDataOptions = $event"
     >
       <template #header-title>

@@ -3,6 +3,14 @@
     id="shortname-details"
     class="view-container"
   >
+    <v-snackbar
+      id="linked-account-snackbar"
+      v-model="snackbar"
+      :timeout="4000"
+      transition="fade"
+    >
+      {{ snackbarText }}
+    </v-snackbar>
     <div class="view-header flex-column">
       <h1 class="view-header__title">
         Payment Details
@@ -12,16 +20,20 @@
       </p>
     </div>
 
-    <ShortNameTransactions
+    <ShortNameAccountLinkage
       class="mb-12"
-      :shortNameDetails="state.shortNameDetails"
+      :shortNameDetails="shortNameDetails"
+      :highlightIndex="highlightIndex"
+      @on-link-account="onLinkAccount"
     />
 
-    <ShortNameAccountLinkage :shortNameDetails="state.shortNameDetails" />
+    <ShortNameTransactions
+      :shortNameDetails="shortNameDetails"
+    />
   </v-container>
 </template>
 <script lang="ts">
-import { PropType, defineComponent, onMounted, reactive } from '@vue/composition-api'
+import { PropType, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import PaymentService from '@/services/payment.services'
 import ShortNameAccountLinkage from '@/components/pay/eft/ShortNameAccountLink.vue'
 import ShortNameTransactions from '@/components/pay/eft/ShortNameTransactions.vue'
@@ -37,12 +49,26 @@ export default defineComponent({
   },
   setup (props) {
     const state = reactive({
-      shortNameDetails: {}
+      shortNameDetails: {},
+      highlightIndex: -1,
+      snackbar: false,
+      snackbarText: ''
     })
 
     onMounted(async () => {
       await loadShortname(props.shortNameId)
     })
+
+    async function onLinkAccount () {
+      await loadShortname(props.shortNameId)
+      state.snackbarText = `Bank short name ${state.shortNameDetails.shortName} was successfully linked.`
+      state.highlightIndex = 1 // highlight indexOf when multi-linking is implemented
+      state.snackbar = true
+
+      setTimeout(() => {
+        state.highlightIndex = -1
+      }, 4000)
+    }
 
     async function loadShortname (shortnameId: string): Promise<void> {
       try {
@@ -59,7 +85,8 @@ export default defineComponent({
     }
 
     return {
-      state
+      ...toRefs(state),
+      onLinkAccount
     }
   }
 })
