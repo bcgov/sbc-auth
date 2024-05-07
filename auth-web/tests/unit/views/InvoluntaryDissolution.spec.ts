@@ -29,6 +29,6 @@ describe('StaffDashboardView tests', () => {
 
   it('renders view with child components', async () => {
     expect(wrapper.findComponent(InvoluntaryDissolution).exists()).toBe(true)
-    expect(wrapper.find('.view-header__title').text()).toBe('Staff Involuntary Dissolution Batch')
+    expect(wrapper.find('h1').text()).toBe('Staff Involuntary Dissolution Batch')
   })
 })
