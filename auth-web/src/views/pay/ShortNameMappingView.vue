@@ -93,7 +93,7 @@ export default defineComponent({
     })
 
     function onLinkAccount (account: any) {
-      tab.value = 1
+      tab.value = 0
       state.linkedAccount = account
       ConfigHelper.addToSession(SessionStorageKeys.ShortNamesTabIndex, tab.value)
     }

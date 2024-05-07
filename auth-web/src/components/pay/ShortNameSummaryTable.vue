@@ -40,6 +40,8 @@
       :updateFilter="updateFilter"
       :useObserver="true"
       :observerCallback="() => infiniteScrollCallback(true)"
+      :highlight-index="highlightIndex"
+      highlight-class="base-table__item-row-green"
       @update-table-options="options = $event"
     >
       <template #header-title>
@@ -196,7 +198,7 @@ export default defineComponent({
       snackbarText: ''
     })
     const {
-      infiniteScrollCallback, loadTableData, loadTableSummaryData, updateFilter
+      infiniteScrollCallback, loadTableSummaryData, updateFilter
     } = useShortNameTable(state, emit)
     const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px') => ({
       col,
@@ -340,15 +342,20 @@ export default defineComponent({
     }
 
     async function onLinkedAccount (account: EFTShortnameResponse) {
-      if (account) {
-        await loadTableData()
-        state.snackbarText = `Bank short name ${account.shortName} was successfully linked.`
-        state.highlightIndex = state.results.findIndex((result) => result.id === account.id)
-        state.snackbar = true
-        setTimeout(() => {
-          state.highlightIndex = -1
-        }, 4000)
-      }
+      if (!account) return
+
+      const { results } = state
+      const shortName = results.find(result => result.id === account.shortNameId)
+
+      if (!shortName) return
+
+      state.snackbarText = `Bank short name ${shortName.shortName} was successfully linked.`
+      state.highlightIndex = results.indexOf(shortName)
+      state.snackbar = true
+
+      setTimeout(() => {
+        state.highlightIndex = -1
+      }, 4000)
     }
 
     watch(() => props.linkedAccount, (account: EFTShortnameResponse) => {
