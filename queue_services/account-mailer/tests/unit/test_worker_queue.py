@@ -177,7 +177,7 @@ def test_account_conf_mailer_queue(app, session, client):
             'nsfFee': '30'
         }
         helper_add_event_to_queue(client,
-                                  message_type=QueueMessageTypes.ACCOUNT_CONFIRMATION_PERIOD_OVER.value,
+                                  message_type=QueueMessageTypes.CONFIRMATION_PERIOD_OVER.value,
                                   mail_details=mail_details)
 
         mock_send.assert_called
