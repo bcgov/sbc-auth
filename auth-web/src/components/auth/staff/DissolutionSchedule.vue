@@ -200,8 +200,8 @@ export default class DissolutionSchedule extends Vue {
   get dissolutionBatchSizeRules (): Array<(v) => boolean | string> {
     return [
       v => !!v || 'The number of businesses to be moved into D1 dissolution per batch. Maximum of 2000.',
-      v => (v % 1 === 0) || 'The number of businesses to be moved into D1 dissolution per batch. Maximum of 2000.',
-      v => v >= 0 || 'The number of businesses to be moved into D1 dissolution per batch. Maximum of 2000.',
+      v => (v % 1 === 0) || 'Enter a whole number between 0 and 2000.',
+      v => v >= 0 || 'Enter a whole number between 0 and 2000.',
       v => v <= 2000 || 'Exceeds the maximum of 2000 businesses per batch.'
     ]
   }
