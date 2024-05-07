@@ -142,7 +142,7 @@ def handle_nsf_lock_unlock_account(message_type, email_msg):
 
 def handle_account_confirmation_period_over(message_type, email_msg):
     """Handle the account confirmation period over message."""
-    if message_type != QueueMessageTypes.ACCOUNT_CONFIRMATION_PERIOD_OVER.value:
+    if message_type != QueueMessageTypes.CONFIRMATION_PERIOD_OVER.value:
         return
     template_name = TemplateType.ACCOUNT_CONF_OVER_TEMPLATE_NAME.value
     org_id = email_msg.get('accountId')
@@ -411,7 +411,7 @@ def handle_other_messages(message_type, email_msg):
         QueueMessageTypes.TEAM_MODIFIED.value,
         QueueMessageTypes.TEAM_MEMBER_INVITED.value,
         QueueMessageTypes.ADMIN_REMOVED.value,
-        QueueMessageTypes.ACCOUNT_CONFIRMATION_PERIOD_OVER.value,
+        QueueMessageTypes.CONFIRMATION_PERIOD_OVER.value,
         QueueMessageTypes.PAD_INVOICE_CREATED.value,
         QueueMessageTypes.ONLINE_BANKING_OVER_PAYMENT.value,
         QueueMessageTypes.ONLINE_BANKING_UNDER_PAYMENT.value,
