@@ -26,15 +26,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({})
-export default class CardHeader extends Vue {
-  @Prop({ default: 'Paused' }) readonly badgeText!: boolean
-  @Prop({ default: null }) readonly icon!: string
-  @Prop({ default: null }) readonly label!: string
-  @Prop({ default: false }) readonly showBadge!: boolean
-}
+export default defineComponent({
+  name: 'CardHeader',
+  props: {
+    badgeText: { type: String, default: 'Paused' },
+    icon: { type: String, default: null },
+    label: { type: String, default: null },
+    showBadge: { type: Boolean, default: false }
+  }
+})
 </script>
 
 <style lang="scss" scoped>
