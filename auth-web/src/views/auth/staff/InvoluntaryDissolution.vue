@@ -26,6 +26,7 @@
               The system will prioritize the oldest eligible businesses to move into D1 dissolution,
               automatically saving a list of businesses in each batch to the LAN.
               The schedule will run until there are no more businesses ready for D1 dissolution.
+              To pause the schedule, enter a batch size of 0.
             </p>
           </header>
         </v-col>

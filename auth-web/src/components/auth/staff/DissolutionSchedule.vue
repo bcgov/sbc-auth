@@ -41,7 +41,7 @@
         </v-col>
         <v-col
           cols="12"
-          sm="6"
+          sm="7"
         >
           <span>
             Moving <strong>{{ scheduleSummaryNumber }}</strong> businesses into D1 dissolution every
@@ -51,48 +51,17 @@
 
         <template v-if="!isEdit">
           <v-col
-            cols="6"
-            sm="3"
+            cols="2"
+            sm="2"
             class="text-right"
           >
             <v-btn
-              color="primary"
-              class="action-btn px-6"
-              @click="actionBtnClicked()"
+              class="edit-button"
+              @click="triggerEditOnOff()"
             >
-              {{ actionBtnText }}
+              <v-icon>mdi-pencil</v-icon>
+              <span class="edit-txt">Edit</span>
             </v-btn>
-            <span>
-              <v-menu
-                v-model="menu"
-                offset-y
-                nudge-left="90"
-              >
-                <template #activator="{ on }">
-                  <v-btn
-                    color="primary"
-                    class="more-actions-btn menu-btn px-3"
-                    v-on="on"
-                  >
-                    <v-icon v-if="menu">
-                      mdi-menu-up
-                    </v-icon>
-                    <v-icon v-else>
-                      mdi-menu-down
-                    </v-icon>
-                  </v-btn>
-                </template>
-
-                <v-list dense>
-                  <v-list-item @click="triggerEditOnOff()">
-                    <v-list-item-subtitle>
-                      <v-icon>mdi-pencil</v-icon>
-                      <span class="pl-2 edit-txt">Edit</span>
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </span>
           </v-col>
         </template>
       </v-row>
@@ -232,52 +201,27 @@ export default defineComponent({
   }
 }
 
-// Vuetify Override of list item to change it's text and icon color to app blue
-.theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
+// Remove background + shadow of the edit button. Change the colors to app blue.
+::v-deep .edit-button {
+  background-color: transparent !important;
   color: $app-blue;
+  box-shadow: none;
+
+  // Icon color is app blue.
   .v-icon.v-icon {
     color: $app-blue;
   }
-}
 
-// Adding shadows to buttons
-.action-btn, .more-actions-btn {
-    box-shadow: 0 1px 1px 0px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
-    -webkit-box-shadow: 0 1px 1px 0px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
+  // Increasing the Edit text size by a bit + text color is app blue.
+  .edit-txt {
+    color: $app-blue;
+    font-size: $px-16;
   }
-
-// The action buttons styling (Pause, Resume)
-.action-btn {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  min-width: 5.5rem !important;
-  margin-right: 1px;
-}
-
-// The more actions button styling (chevron)
-.more-actions-btn {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-// make menu button slightly smaller
-.menu-btn {
-  min-width: unset !important;
-}
-
-// Increasing dropdown menu (list) size to same size as button
-.v-list {
-  min-width: 8.5rem !important;
 }
 
 // Making the pencil icon smaller
 .mdi-pencil:before, .mdi-pencil-set {
-  font-size: $px-16;
-}
-
-// Increasing the Edit text size by a bit
-.edit-txt {
-  font-size: $px-14;
+  font-size: $px-20;
 }
 
 // Hiding the spin button of the v-text-field
