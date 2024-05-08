@@ -20,7 +20,7 @@
               filled
               type="number"
               label="Dissolution Batch Size"
-              hint="The number of businesses to be moved into D1 dissolution per batch. Maximum of 2000."
+              hint="The number of businesses to be moved into D1 dissolution per batch. Maximum of 600."
               :rules="dissolutionBatchSizeRules"
               req
               persistent-hint
@@ -45,7 +45,7 @@
         >
           <span>
             Moving <strong>{{ scheduleSummaryNumber }}</strong> businesses into D1 dissolution every
-            <strong>Tuesday</strong> at <strong>11:59 p.m</strong> Pacific Time.
+            <strong>Tuesday, Wednesday, and Thursday</strong> at <strong>12:15 a.m.</strong> Pacific Time.
           </span>
         </v-col>
 
@@ -188,10 +188,10 @@ export default defineComponent({
     /** The array of validations rule(s) for the Dissolution Batch Size text field. */
     const dissolutionBatchSizeRules = computed(() => {
       return [
-        v => !!v || 'The number of businesses to be moved into D1 dissolution per batch. Maximum of 2000.',
-        v => (v % 1 === 0) || 'Enter a whole number between 0 and 2000.',
-        v => v >= 0 || 'Enter a whole number between 0 and 2000.',
-        v => v <= 2000 || 'Exceeds the maximum of 2000 businesses per batch.'
+        v => !!v || 'The number of businesses to be moved into D1 dissolution per batch. Maximum of 600.',
+        v => (v % 1 === 0) || 'Enter a whole number between 0 and 600.',
+        v => v >= 0 || 'Enter a whole number between 0 and 600.',
+        v => v <= 600 || 'Exceeds the maximum of 600 businesses per batch.'
       ]
     })
 
