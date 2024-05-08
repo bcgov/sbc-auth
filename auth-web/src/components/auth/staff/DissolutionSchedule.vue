@@ -129,101 +129,96 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Vue } from 'vue-property-decorator'
-import { mapActions } from 'pinia'
+import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { useStaffStore } from '@/stores/staff'
 
-@Component({
-  methods: {
-    ...mapActions(useStaffStore,
-      ['getDissolutionBatchSize',
-        'isDissolutionBatchOnHold',
-        'updateDissolutionBatchSize',
-        'updateDissolutionBatchOnHold'])
-  }
-})
-export default class DissolutionSchedule extends Vue {
-  $refs: {
-    numberOfBusinessesRef: any
-  }
+export default defineComponent({
+  name: 'DissolutionSchedule',
+  emits: ['update:onHold'],
+  setup (_, { emit }) {
+    const state = reactive({
+      menu: false,
+      numberOfBusinesses: 0,
+      numberOfBusinessesRef: null,
+      isEdit: false,
+      isOnHold: false
+    })
+    const staffStore = useStaffStore()
 
-  // Local properties
-  menu = false
-  numberOfBusinesses = 0
-  isEdit = false
-  isOnHold = false
+    /**
+     * Set local properties to values from the store.
+     * TODO: Update once BE work is done.
+     */
+    onMounted(() => {
+      state.numberOfBusinesses = staffStore.getDissolutionBatchSize()
+      state.isOnHold = staffStore.isDissolutionBatchOnHold()
+    })
 
-  readonly getDissolutionBatchSize!: () => number
-  readonly isDissolutionBatchOnHold!: () => boolean
-  readonly updateDissolutionBatchSize!: (x: number) => void
-  readonly updateDissolutionBatchOnHold!: (x: boolean) => void
+    /**
+     * Update whether the dissolution batch is paused or running.
+     * Emit the status to the parent to know whether the "Paused" badge is going to be shown.
+     * TODO: Modify/Update this once the BE is done.
+     */
+    const actionBtnClicked = (): void => {
+      state.isOnHold = !staffStore.isDissolutionBatchOnHold()
+      // Emit whether on hold or not to the parent.
+      emit('update:onHold', state.isOnHold)
+      staffStore.updateDissolutionBatchOnHold(!staffStore.isDissolutionBatchOnHold())
+    }
 
-  /**
-   * Set local properties to values from the store.
-   * TODO: Update once BE work is done.
-   */
-  mounted (): void {
-    this.numberOfBusinesses = this.getDissolutionBatchSize()
-    this.isOnHold = this.isDissolutionBatchOnHold()
-  }
+    /** Edit, Cancel, or Save (successful) button is clicked. */
+    const triggerEditOnOff = (): void => {
+      state.isEdit = !state.isEdit
+      // closing the menu
+      state.menu = false
+    }
 
-  /**
-   * Update whether the dissolution batch is paused or running.
-   * Emit the status to the parent to know whether the "Paused" badge is going to be shown.
-   * TODO: Modify/Update this once the BE is done. */
-  actionBtnClicked (): void {
-    this.isOnHold = !this.isDissolutionBatchOnHold()
-    this.onHoldUpdate(this.isOnHold)
-    this.updateDissolutionBatchOnHold(!this.isDissolutionBatchOnHold())
-  }
+    /**
+     * Save button is clicked. Update the dissolution batch size.
+     * Only save if the inputted number is valid.
+     * TODO: Implement logic (job) once the BE is done.
+     */
+    const saveBtnClicked = (): void => {
+      if (state.numberOfBusinessesRef.validate()) {
+        staffStore.updateDissolutionBatchSize(state.numberOfBusinesses)
+        triggerEditOnOff()
+      }
+    }
 
-  /**
-   * Save button is clicked. Update the dissolution batch size.
-   * Only save if the inputted number is valid.
-   * TODO: Implement logic (job) once the BE is done.
-   */
-  saveBtnClicked (): void {
-    if (this.$refs.numberOfBusinessesRef.validate()) {
-      this.updateDissolutionBatchSize(this.numberOfBusinesses)
-      this.triggerEditOnOff()
+    /** The array of validations rule(s) for the Dissolution Batch Size text field. */
+    const dissolutionBatchSizeRules = computed(() => {
+      return [
+        v => !!v || 'The number of businesses to be moved into D1 dissolution per batch. Maximum of 2000.',
+        v => (v % 1 === 0) || 'Enter a whole number between 0 and 2000.',
+        v => v >= 0 || 'Enter a whole number between 0 and 2000.',
+        v => v <= 2000 || 'Exceeds the maximum of 2000 businesses per batch.'
+      ]
+    })
+
+    /** The action button text depending on whether the dissolution job is paused or running. */
+    const actionBtnText = computed(() => {
+      return state.isOnHold ? 'Resume' : 'Pause'
+    })
+
+    /**
+     * If non-edit, show the number of businesses into D1 from the store.
+     * Otherwise, it'll be reactive to whatever is being typed in the text field.
+     */
+    const scheduleSummaryNumber = computed(() => {
+      return state.isEdit ? state.numberOfBusinesses : staffStore.getDissolutionBatchSize()
+    })
+
+    return {
+      ...toRefs(state),
+      actionBtnClicked,
+      actionBtnText,
+      dissolutionBatchSizeRules,
+      triggerEditOnOff,
+      saveBtnClicked,
+      scheduleSummaryNumber
     }
   }
-
-  /** Edit, Cancel, or Save (successful) button is clicked. */
-  triggerEditOnOff (): void {
-    this.isEdit = !this.isEdit
-    // closing the menu
-    this.menu = false
-  }
-
-  /** The array of validations rule(s) for the Dissolution Batch Size text field. */
-  get dissolutionBatchSizeRules (): Array<(v) => boolean | string> {
-    return [
-      v => !!v || 'The number of businesses to be moved into D1 dissolution per batch. Maximum of 2000.',
-      v => (v % 1 === 0) || 'Enter a whole number between 0 and 2000.',
-      v => v >= 0 || 'Enter a whole number between 0 and 2000.',
-      v => v <= 2000 || 'Exceeds the maximum of 2000 businesses per batch.'
-    ]
-  }
-
-  /** The action button text depending on whether the dissolution job is paused or running. */
-  get actionBtnText (): string {
-    return this.isOnHold ? 'Resume' : 'Pause'
-  }
-
-  /**
-   * If non-edit, show the number of businesses into D1 from the store.
-   * Otherwise, it'll be reactive to whatever is being typed in the text field.
-   */
-  get scheduleSummaryNumber (): number {
-    return this.isEdit ? this.numberOfBusinesses : this.getDissolutionBatchSize()
-  }
-
-  /** Emit whether on hold or not to the parent. */
-  @Emit('update:onHold')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onHoldUpdate (onHold: boolean): void {}
-}
+})
 </script>
 
 <style lang="scss" scoped>
