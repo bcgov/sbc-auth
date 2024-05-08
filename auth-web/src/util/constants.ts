@@ -118,6 +118,14 @@ export enum AccountStatus {
     PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT'
 }
 
+export enum SuspensionReasonCode {
+    OWNER_CHANGE = 'OWNER_CHANGE',
+    DISPUTE = 'DISPUTE',
+    COURT_ORDER = 'COURT_ORDER',
+    FRAUDULENT = 'FRAUDULENT',
+    OVERDUE_EFT = 'OVERDUE_EFT'
+}
+
 export enum IdpHint {
     BCROS = 'bcros',
     IDIR = 'idir',

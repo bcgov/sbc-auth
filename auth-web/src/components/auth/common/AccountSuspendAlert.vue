@@ -14,13 +14,14 @@
           mdi-alert-circle-outline
         </v-icon>
         <div
-          v-if="isSuspendedForNSF"
+          v-if="isSuspendedForNSF || isSuspendedForEFTOverdue"
           class="account-alert__info ml-7"
         >
           <div class="font-weight-bold">
             Account Suspended
           </div>
-          <div>Account has been suspended for outstanding balance (NSF).</div>
+          <div v-if="isSuspendedForNSF">Account has been suspended for outstanding balance (NSF).</div>
+          <div v-if="isSuspendedForEFTOverdue">Account has been suspended for overdue EFT payments.</div>
           <div class="mt-6 title font-weight-bold">
             BALANCE DUE:  ${{ totalAmountToPay.toFixed(2) }}
           </div>
@@ -50,7 +51,7 @@
 <script lang="ts">
 import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
-import { AccountStatus } from '@/util/constants'
+import { AccountStatus, SuspensionReasonCode } from '@/util/constants'
 import { Code } from '@/models/Code'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
@@ -75,7 +76,14 @@ export default class AccountSuspendAlert extends Vue {
   }
 
   get isSuspendedForNSF (): boolean {
-    return this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED
+    console.log(this.currentOrganization)
+    return (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED
+      && this.currentOrganization?.suspensionReasonCode !== SuspensionReasonCode.OVERDUE_EFT)
+  }
+
+  get isSuspendedForEFTOverdue (): boolean {
+    return (this.currentOrganization?.statusCode === AccountStatus.SUSPENDED
+      && this.currentOrganization?.suspensionReasonCode === SuspensionReasonCode.OVERDUE_EFT)
   }
 
   get suspendedBy (): string {

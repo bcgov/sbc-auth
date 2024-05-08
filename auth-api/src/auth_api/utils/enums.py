@@ -193,6 +193,7 @@ class SuspensionReasonCode(Enum):
     DISPUTE = 'Account Ownership Dispute'
     COURT_ORDER = 'Court Order'
     FRAUDULENT = 'Fraudulent Activity'
+    OVERDUE_EFT = 'Overdue EFT Payments'
 
 
 class InvitationType(Enum):

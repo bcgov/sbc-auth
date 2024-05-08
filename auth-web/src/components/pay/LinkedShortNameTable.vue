@@ -51,6 +51,18 @@
           </v-icon>
         </v-btn>
       </template>
+      <template #item-slot-accountName="{ item }">
+        <span>{{item.accountName}}</span>
+        <v-chip
+          small
+          label
+          color="error"
+          class="item-chip"
+          v-if="item.cfsAccountStatus && item.cfsAccountStatus !== 'ACTIVE'"
+        >
+          SUSPENDED
+        </v-chip>
+      </template>
       <template #item-slot-actions="{ index }">
         <div
           :id="`action-menu-${index}`"
@@ -251,5 +263,8 @@ export default defineComponent({
 #linked-bank-short-names {
   border: 1px solid #e9ecef;
   font-weight: bold;
+}
+.item-chip {
+  margin-left: 1em;
 }
 </style>
