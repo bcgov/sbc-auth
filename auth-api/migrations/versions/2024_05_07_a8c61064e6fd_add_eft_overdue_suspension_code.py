@@ -21,9 +21,7 @@ def upgrade():
             "(code, description,\"default\") "
             "VALUES "
             "('OVERDUE_EFT', 'Overdue EFT Payments', false)")
-    op.execute("commit")
 
 
 def downgrade():
     op.execute("DELETE FROM suspension_reason_codes WHERE code in ('OVERDUE_EFT')")
-    op.execute("commit")

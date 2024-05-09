@@ -44,7 +44,7 @@
       <template #item-slot-accountName="{ item }">
         <span>{{ item.accountName }}</span>
         <v-chip
-          v-if="item.cfsAccountStatus === 'FREEZE'"
+          v-if="item.cfsAccountStatus === CfsAccountStatus.FREEZE"
           small
           label
           color="error"
@@ -77,7 +77,7 @@
   </div>
 </template>
 <script lang="ts">
-import { SessionStorageKeys, ShortNameStatus } from '@/util/constants'
+import { CfsAccountStatus, SessionStorageKeys, ShortNameStatus } from '@/util/constants'
 import { defineComponent, onMounted, reactive, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import CommonUtils from '@/util/common-util'
@@ -249,7 +249,8 @@ export default defineComponent({
       state,
       updateFilter,
       viewDetails,
-      formatAmount
+      formatAmount,
+      CfsAccountStatus
     }
   }
 })
