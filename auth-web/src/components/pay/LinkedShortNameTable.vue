@@ -1,13 +1,5 @@
 <template>
   <div>
-    <v-snackbar
-      id="linked-account-snackbar"
-      v-model="state.snackbar"
-      :timeout="4000"
-      transition="fade"
-    >
-      {{ state.snackbarText }}
-    </v-snackbar>
     <BaseVDataTable
       id="linked-bank-short-names"
       :clearFiltersTrigger="state.clearFiltersTrigger"
@@ -25,13 +17,11 @@
       :updateFilter="updateFilter"
       :useObserver="true"
       :observerCallback="infiniteScrollCallback"
-      :highlight-index="state.highlightIndex"
-      highlight-class="base-table__item-row-green"
       @update-table-options="tableDataOptions = $event"
     >
       <template #header-title>
         <h2 class="ml-4 py-6">
-          Linked Bank Short Names
+          EFT Enabled Accounts
           <span class="font-weight-regular">
             ({{ state.totalResults }})
           </span>
@@ -51,17 +41,8 @@
           </v-icon>
         </v-btn>
       </template>
-      <template #item-slot-accountName="{ item }">
-        <span>{{item.accountName}}</span>
-        <v-chip
-          small
-          label
-          color="error"
-          class="item-chip"
-          v-if="item.cfsAccountStatus && item.cfsAccountStatus !== 'ACTIVE'"
-        >
-          SUSPENDED
-        </v-chip>
+      <template #item-slot-amountOwing="{ item }">
+        <span>{{ formatAmount(item.amountOwing) }}</span>
       </template>
       <template #item-slot-actions="{ index }">
         <div
@@ -76,37 +57,8 @@
             class="open-action-btn"
             @click="viewDetails(index)"
           >
-            View
+            View Detail
           </v-btn>
-          <span class="more-actions">
-            <v-menu
-              v-model="state.actionDropdown[index]"
-              :attach="`#action-menu-${index}`"
-            >
-              <template #activator="{ on }">
-                <v-btn
-                  small
-                  color="primary"
-                  min-height="2rem"
-                  class="more-actions-btn"
-                  v-on="on"
-                >
-                  <v-icon>{{ state.actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item
-                  class="actions-dropdown_item my-1"
-                  data-test="remove-linkage-button"
-                >
-                  <v-list-item-subtitle>
-                    <v-icon small>mdi-delete</v-icon>
-                    <span class="pl-1">Remove Linkage</span>
-                  </v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </span>
         </div>
       </template>
     </BaseVDataTable>
@@ -116,9 +68,9 @@
 import { SessionStorageKeys, ShortNameStatus } from '@/util/constants'
 import { defineComponent, onMounted, reactive, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
-import { EFTShortnameResponse } from '@/models/eft-transaction'
 import { LinkedShortNameState } from '@/models/pay/short-name'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
@@ -129,9 +81,6 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
 export default defineComponent({
   name: 'LinkedShortNameTable',
   components: { BaseVDataTable },
-  props: {
-    linkedAccount: { default: {} }
-  },
   setup (props, { emit, root }) {
     const state = reactive<LinkedShortNameState>({
       results: [],
@@ -145,9 +94,6 @@ export default defineComponent({
       loading: false,
       actionDropdown: [],
       options: _.cloneDeep(DEFAULT_DATA_OPTIONS),
-      highlightIndex: -1,
-      snackbar: false,
-      snackbarText: '',
       clearFiltersTrigger: 0
     })
 
@@ -170,20 +116,73 @@ export default defineComponent({
       shortName = '',
       accountName = '',
       accountBranch = '',
-      accountId = ''
+      accountId = '',
+      amountOwing = '',
+      statementId = ''
     } = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.LinkedShortNamesFilter) || '{}')
 
     const headers = [
-      createHeader('shortName', 'Bank Short Name', 'text', 'Bank Short Name', shortName),
-      createHeader('accountName', 'Account Name', 'text', 'Account Name', accountName),
-      createHeader('accountBranch', 'Branch Name', 'text', 'Branch Name', accountBranch),
-      createHeader('accountId', 'Account Number', 'text', 'Account Number', accountId),
+      createHeader(
+        'shortName',
+        'Bank Short Name',
+        'text',
+        'Short Name',
+        shortName,
+        true,
+        '180px'
+      ),
+      createHeader(
+        'accountName',
+        'Account Name',
+        'text',
+        'Account Name',
+        accountName,
+        true,
+        '280px'
+      ),
+      createHeader('accountBranch',
+        'Branch Name',
+        'text',
+        'Branch Name',
+        accountBranch,
+        true,
+        '175px'
+      ),
+      createHeader(
+        'accountId',
+        'Account Number',
+        'text',
+        'Account Number',
+        accountId,
+        true,
+        '180px'
+      ),
+      createHeader(
+        'amountOwing',
+        'Total Amount Owing',
+        'text',
+        'Total Amount Owing',
+        amountOwing,
+        true,
+        '200px'
+      ),
+      createHeader(
+        'statementId',
+        'Latest Statement Number',
+        'text',
+        'Latest Statement Number',
+        statementId,
+        true,
+        '235px'
+      ),
       {
         col: 'actions',
         hasFilter: false,
         minWidth: '164px',
         value: 'Actions',
-        width: '164px'
+        width: '130px',
+        class: 'fixed-action-column',
+        itemClass: 'fixed-action-column'
       }
     ]
 
@@ -204,6 +203,10 @@ export default defineComponent({
       }
     }
 
+    function formatAmount (amount: number) {
+      return amount !== undefined ? CommonUtils.formatAmount(amount) : ''
+    }
+
     function viewDetails (index) {
       root.$router?.push({
         name: 'shortnamedetails',
@@ -211,18 +214,6 @@ export default defineComponent({
           'shortNameId': state.results[index].id?.toString()
         }
       })
-    }
-
-    async function onLinkedAccount (account: EFTShortnameResponse) {
-      if (account) {
-        await loadTableData()
-        state.snackbarText = `Bank short name ${account.shortName} was successfully linked.`
-        state.highlightIndex = state.results.findIndex((result) => result.id === account.id)
-        state.snackbar = true
-        setTimeout(() => {
-          state.highlightIndex = -1
-        }, 4000)
-      }
     }
 
     onMounted(async () => {
@@ -235,10 +226,6 @@ export default defineComponent({
       await loadTableData()
     })
 
-    watch(() => props.linkedAccount, (account: EFTShortnameResponse) => {
-      onLinkedAccount(account)
-    })
-
     watch(() => state.filters, (filters: any) => {
       ConfigHelper.addToSession(SessionStorageKeys.LinkedShortNamesFilter, JSON.stringify(filters.filterPayload))
     }, { deep: true })
@@ -249,7 +236,8 @@ export default defineComponent({
       headers,
       state,
       updateFilter,
-      viewDetails
+      viewDetails,
+      formatAmount
     }
   }
 })
@@ -259,6 +247,13 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
+
+.v-btn {
+  border-radius: 4px !important;
+  height: 40px !important;
+  padding: 0 24px 0 24px !important;
+  top: -5px;
+}
 
 #linked-bank-short-names {
   border: 1px solid #e9ecef;

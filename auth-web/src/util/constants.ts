@@ -11,7 +11,7 @@ export enum SessionStorageKeys {
     PaginationOptions = 'PAGINATION_OPTIONS',
     PaginationNumberOfItems = 'PAGINATION_NUMBER_OF_ITEMS',
     OrgSearchFilter = 'ORG_SEARCH_FILTER',
-    UnlinkedShortNamesFilter = 'UNLINKED_SHORT_NAMES_FILTER',
+    ShortNamesSummaryFilter = 'SHORT_NAMES_SUMMARY_FILTER',
     LinkedShortNamesFilter = 'LINKED_SHORT_NAMES_FILTER',
     ShortNamesTabIndex = 'SHORT_NAMES_TAB_INDEX',
     LinkedAccount = 'LINKED_ACCOUNT',
@@ -164,6 +164,7 @@ export enum AffiliationTypes {
     NAME_REQUEST = 'Name Request',
     AMALGAMATION_APPLICATION = 'Amalgamation Application',
     INCORPORATION_APPLICATION = 'Incorporation Application',
+    CONTINUATION_IN = 'Continuation In Application',
     CORPORATION = 'Corporation',
     REGISTRATION = 'Registration'
 }
@@ -188,10 +189,13 @@ export enum CorpTypes {
     PARTNERSHIP = 'GP',
     SOLE_PROP = 'SP',
 
-    // colin
+    CONTINUE_IN = 'C',
+    BEN_CONTINUE_IN = 'CBEN',
     CCC_CONTINUE_IN = 'CCC',
-    BC_CORPORATION = 'CR', // SPECIAL NAMEREQUEST-ONLY ENTITY TYPE
     ULC_CONTINUE_IN = 'CUL',
+
+    // colin
+    BC_CORPORATION = 'CR', // SPECIAL NAMEREQUEST-ONLY ENTITY TYPE
     EXTRA_PRO_REG = 'EPR',
     LL_PARTNERSHIP = 'LL',
     LIMITED_CO = 'LLC',
@@ -213,6 +217,7 @@ export enum CorpTypes {
     // overloaded values
     AMALGAMATION_APPLICATION = 'ATMP',
     INCORPORATION_APPLICATION = 'TMP',
+    CONTINUATION_IN = 'CTMP',
     NAME_REQUEST = 'NR',
     REGISTRATION = 'RTMP'
 }
@@ -430,6 +435,7 @@ export enum LDFlags {
     EnableBusinessNrSearch = 'enable-business-nr-search',
     EnableDetailsFilter = 'enable-transactions-detail-filter',
     EnableEFTPaymentMethod = 'enable-eft-payment-method',
+    EnableInvoluntaryDissolution = 'enable-involuntary-dissolution',
     IaSupportedEntities = 'ia-supported-entities',
     ProductBCAStatus = 'product-BCA-status',
     ProductBusSearchPremTooltip = 'product-BUSINESS_SEARCH-prem-tooltip',

@@ -733,6 +733,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     } else if (removeBusinessPayload.business.corpType.code === CorpTypes.AMALGAMATION_APPLICATION) {
       this.populateAmalagmationModalValues()
       this.$refs.removalConfirmDialog.open()
+    } else if (removeBusinessPayload.business.corpType.code === CorpTypes.CONTINUATION_IN) {
+      this.populateContinuationInModalValues()
+      this.$refs.removalConfirmDialog.open()
     } else if (removeBusinessPayload.business.corpType.code === CorpTypes.REGISTRATION) {
       this.populateRegistrationModalValues()
       this.$refs.removalConfirmDialog.open()
@@ -786,6 +789,15 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.secondaryBtnHandler = this.cancelRemoval
   }
 
+  populateContinuationInModalValues () {
+    this.dialogTitle = this.$t('removeContinuationInConfirmTitle').toString()
+    this.dialogText = this.$t('removeContinuationInConfirmText').toString()
+    this.primaryBtnText = 'Delete Continuation In Application'
+    this.secondaryBtnText = 'Keep Continuation In Application'
+    this.primaryBtnHandler = this.confirmRemovalContinuationIn
+    this.secondaryBtnHandler = this.cancelRemoval
+  }
+
   populateRegistrationModalValues () {
     this.dialogTitle = this.$t('removeRegistrationConfirmTitle').toString()
     this.dialogText = this.$t('removeRegistrationConfirmText').toString()
@@ -821,6 +833,11 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   confirmRemovalAmalgamation () {
     this.$refs.removalConfirmDialog.close()
     this.remove('', false, 'removeAmalgamationSuccessTitle', 'removeAmalgamationSuccessText')
+  }
+
+  confirmRemovalContinuationIn () {
+    this.$refs.removalConfirmDialog.close()
+    this.remove('', false, 'removeContinuationInSuccessTitle', 'removeContinuationInSuccessText')
   }
 
   confirmRemovalNr () {

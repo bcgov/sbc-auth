@@ -219,7 +219,7 @@ def delete_organization(org_id):
 @bp.route('/<int:org_id>', methods=['PATCH'])
 @cross_origin(origins='*')
 @TRACER.trace()
-@_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value])
+@_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.SYSTEM.value])
 def patch_organization(org_id):
     """Patch an account."""
     request_json = request.get_json()

@@ -10,21 +10,23 @@ const mockProps = {
   title: 'Test Application',
   taskDetails: {
     type: null,
-    created: new Date()
+    created: new Date(),
+    user: {
+      firstname: 'John',
+      lastname: 'Doe',
+      contacts: [
+        {
+          email: 'submitter@example.com',
+          phone: '(321) 654-9876'
+        }
+      ]
+    }
   },
   accountUnderReview: {
     name: 'Test Organization',
     mailingAddress: {
       // Add required properties for mailingAddress
     }
-  },
-  accountUnderReviewAdmin: {
-    firstname: 'John',
-    lastname: 'Doe'
-  },
-  accountUnderReviewAdminContact: {
-    email: 'john.doe@example.com',
-    phone: '123-456-7890'
   }
 }
 const mockQsApplicantData = {
@@ -46,7 +48,7 @@ for (const taskType of taskTypes) {
       wrapper = shallowMount(QsApplication, {
         localVue,
         vuetify,
-        propsData: { ...mockProps, taskDetails: { type: taskType } }
+        propsData: { ...mockProps, taskDetails: { ...mockProps.taskDetails, type: taskType } }
       })
 
       // Set the mock qsApplicantData
@@ -87,19 +89,24 @@ for (const taskType of taskTypes) {
         expect(dbaName).toContain('DBA Test Business')
       })
 
-    it('displays the correct admin full name', () => {
-      const adminName = wrapper.find('[data-test="qs-username"]').text()
-      expect(adminName).toContain('John Doe')
+    it('displays the correct QS phone number', () => {
+      const qsPhone = wrapper.find('[data-test="qs-phone"]').text()
+      expect(qsPhone).toContain('(987) 654-3210')
     })
 
-    it('displays the correct admin contact email', () => {
-      const adminEmail = wrapper.find('[data-test="qs-email"]').text()
-      expect(adminEmail).toContain('john.doe@example.com')
+    it('displays the correct applicant full name', () => {
+      const applicantName = wrapper.find('[data-test="sp-username"]').text()
+      expect(applicantName).toContain('John Doe')
+    })
+
+    it('displays the correct applicant contact email', () => {
+      const applicantEmail = wrapper.find('[data-test="sp-email"]').text()
+      expect(applicantEmail).toContain('submitter@example.com')
     })
 
     it('displays the correct applicant contact phone number', () => {
-      const adminPhone = wrapper.find('[data-test="qs-phone"]').text()
-      expect(adminPhone).toContain('(987) 654-3210')
+      const applicantPhone = wrapper.find('[data-test="sp-phone"]').text()
+      expect(applicantPhone).toContain('(321) 654-9876')
     })
 
     it.runIf([TaskType.MHR_MANUFACTURERS].includes(taskType))(

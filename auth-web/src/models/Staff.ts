@@ -58,3 +58,8 @@ export interface FilingType {
 export interface FilingTypeResponse {
     items: FilingType[]
 }
+
+export interface InvoluntaryDissolutionIF {
+  batchSize: number
+  onHold: boolean
+}

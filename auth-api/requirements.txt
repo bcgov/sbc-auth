@@ -13,7 +13,7 @@ SQLAlchemy-Continuum==1.3.14
 SQLAlchemy-Utils==0.40.0
 SQLAlchemy==1.3.24
 Werkzeug==1.0.1
-aiohttp==3.9.2
+aiohttp==3.9.4
 aiosignal==1.3.1
 alembic==1.10.2
 aniso8601==9.0.1
@@ -33,8 +33,8 @@ expiringdict==1.2.2
 flask-jwt-oidc==0.3.0
 flask-marshmallow==0.11.0
 frozenlist==1.3.3
-gunicorn==20.1.0
-idna==3.4
+gunicorn==22.0.0
+idna==3.7
 importlib-metadata==6.1.0
 importlib-resources==5.12.0
 itsdangerous==1.1.0

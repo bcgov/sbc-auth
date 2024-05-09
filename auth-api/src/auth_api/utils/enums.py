@@ -41,14 +41,19 @@ class CorpType(Enum):
     """Corp Types."""
 
     NR = 'NR'
-    CP = 'CP'  # cooperative
-    TMP = 'TMP'
-    RTMP = 'RTMP'
+    CP = 'CP'  # Coperative
+    TMP = 'TMP'  # Incorporation Application
+    CTMP = 'CTMP'  # Continuation In
+    RTMP = 'RTMP'  # Registration
     ATMP = 'ATMP'  # Amalgamation
-    BC = 'BC'  # bcomp
-    CR = 'CR'  # corporation
-    UL = 'UL'  # Unlimited Liability
+    BC = 'BC'  # Limited Company
+    BEN = 'BEN'  # Benefit Company
+    ULC = 'ULC'  # Unlimited Liability
     CC = 'CC'  # Community Contribution
+    C = 'C'  # Continuation In BC
+    CBEN = 'CBEN'  # Continuation In BEN
+    CCC = 'CCC'  # Continuation In CC
+    CUL = 'CUL'  # Continuation In ULC
     GP = 'GP'  # General Partnership
     SP = 'SP'  # Sole Proprietorship
 
@@ -333,6 +338,7 @@ class PatchActions(Enum):
 
     UPDATE_STATUS = 'updateStatus'
     UPDATE_ACCESS_TYPE = 'updateAccessType'
+    UPDATE_API_ACCESS = 'updateApiAccess'
 
     @classmethod
     def from_value(cls, value):

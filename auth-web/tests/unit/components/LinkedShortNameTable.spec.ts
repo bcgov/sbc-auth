@@ -16,7 +16,7 @@ sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
 const vuetify = new Vuetify({})
 // Selectors
 const { header, headerTitles, itemRow, itemCell } = baseVdataTable
-const headers = ['Bank Short Name', 'Account Name', 'Branch Name', 'Account Number', 'Actions']
+const headers = ['Short Name', 'Account Name', 'Branch Name', 'Account Number', 'Total Amount Owing', 'Latest Statement Number', 'Actions']
 
 describe('LinkedShortNameTable.vue', () => {
   setupIntersectionObserverMock()
@@ -28,37 +28,45 @@ describe('LinkedShortNameTable.vue', () => {
   beforeEach(async () => {
     localVue = createLocalVue()
     linkedShortNameResponse = {
-      items: [
+      'items': [
         {
-          shortName: 'RCPV',
-          accountName: 'RCPV',
-          accountBranch: 'Saanich',
-          accountId: '3199',
-          id: 1
+          'accountBranch': 'Test Branch',
+          'accountId': '3202',
+          'accountName': 'Odysseus Chiu',
+          'amountOwing': 300.5,
+          'createdOn': '2023-11-24T21:49:25.833501',
+          'id': 2,
+          'shortName': 'ODYCHIU',
+          'statementId': 5407509,
+          'statusCode': 'LINKED'
         },
         {
-          shortName: 'SHORT NAME',
-          accountName: 'SUPER ACCOUNT',
-          accountBranch: 'OUT THERE',
-          accountId: '3135',
-          id: 2
+          'accountBranch': '',
+          'accountId': '3142',
+          'accountName': 'Capsule Corp',
+          'amountOwing': 4218.0,
+          'createdOn': '2024-02-02T15:57:37.067542',
+          'id': 155,
+          'shortName': 'SNAME142',
+          'statementId': 5399172,
+          'statusCode': 'LINKED'
         },
         {
-          shortName: 'little name',
-          accountName: 'BIG ACCOUNT',
-          accountBranch: 'VICTORIA',
-          accountId: '6000',
-          id: 3
-        },
-        {
-          shortName: 'WOW',
-          accountName: 'BOO',
-          accountBranch: '',
-          accountId: '911',
-          id: 4
+          'accountBranch': '',
+          'accountId': '3114',
+          'accountName': 'EY QA account',
+          'amountOwing': 0.0,
+          'createdOn': '2024-01-30T21:43:50.597984',
+          'id': 11,
+          'shortName': 'TST6',
+          'statementId': 5407288,
+          'statusCode': 'LINKED'
         }
       ],
-      total: 4
+      'limit': 20,
+      'page': 1,
+      'stateTotal': 3,
+      'total': 3
     }
 
     sandbox = sinon.createSandbox()
@@ -82,7 +90,7 @@ describe('LinkedShortNameTable.vue', () => {
   })
 
   it('Renders linked short name table with correct contents', async () => {
-    expect(wrapper.find('#table-title-cell').text()).toContain('Linked Bank Short Names  (4)')
+    expect(wrapper.find('#table-title-cell').text()).toContain('EFT Enabled Accounts  (3)')
 
     // verify table
     expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
@@ -104,6 +112,8 @@ describe('LinkedShortNameTable.vue', () => {
       expect(columns.at(1).text()).toBe(linkedShortNameResponse.items[i].accountName)
       expect(columns.at(2).text()).toBe(linkedShortNameResponse.items[i].accountBranch)
       expect(columns.at(3).text()).toBe(linkedShortNameResponse.items[i].accountId)
+      expect(columns.at(4).text()).toBe(`$${linkedShortNameResponse.items[i].amountOwing.toFixed(2)}`)
+      expect(columns.at(5).text()).toBe(linkedShortNameResponse.items[i].statementId.toString())
     }
   })
 })

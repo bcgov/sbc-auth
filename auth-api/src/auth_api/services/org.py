@@ -200,7 +200,7 @@ class Org:  # pylint: disable=too-many-public-methods
             'accountId': org_model.id,
             # pay needs the most unique idenitfier.So combine name and branch name
             'accountName': org_name_for_pay,
-            'branchName': org_model.branch_name
+            'branchName': org_model.branch_name or ''
         }
 
         if payment_method:
@@ -931,6 +931,15 @@ class Org:  # pylint: disable=too-many-public-methods
         current_app.logger.debug('change_org_access_type>')
         return Org(org_model)
 
+    def change_org_api_access(self, has_api_access):
+        """Update the org API access."""
+        current_app.logger.debug('<change_org_api_access')
+        org_model = self._model
+        org_model.has_api_access = has_api_access
+        org_model.save()
+        current_app.logger.debug('change_org_api_access>')
+        return Org(org_model)
+
     def patch_org(self, action: str = None, request_json: Dict[str, any] = None):
         """Update Org."""
         if (patch_action := PatchActions.from_value(action)) is None:
@@ -951,4 +960,7 @@ class Org:  # pylint: disable=too-many-public-methods
                                                           AccessType.EXTRA_PROVINCIAL.value, AccessType.GOVN.value]:
                 raise BusinessException(Error.INVALID_INPUT, None)
             return self.change_org_access_type(access_type).as_dict()
+        if patch_action == PatchActions.UPDATE_API_ACCESS:
+            has_api_access = request_json.get('hasApiAccess', False)
+            return self.change_org_api_access(has_api_access).as_dict()
         return None

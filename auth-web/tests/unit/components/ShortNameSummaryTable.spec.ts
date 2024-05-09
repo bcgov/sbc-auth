@@ -1,7 +1,7 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
-import UnlinkedShortNameTableVue from '@/components/pay/UnlinkedShortNameTable.vue'
+import ShortNameSummaryTableVue from '@/components/pay/ShortNameSummaryTable.vue'
 import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
 import { axios } from '@/util/http-util'
@@ -22,51 +22,57 @@ const itemRow = baseVdataTable.itemRow
 const itemCell = baseVdataTable.itemCell
 
 const headers = [
-  'Bank Short Name',
-  'Initial Payment Received Date',
-  'Initial Payment Amount',
+  'Short Name',
+  'Last Payment Received Date',
+  'Unsettled Amount',
+  'Number of Linked Accounts',
   'Actions'
 ]
 
-describe('UnlinkedShortNameTable.vue', () => {
+describe('ShortNameSummaryTable.vue', () => {
   setupIntersectionObserverMock()
   let wrapper: Wrapper<any>
   let localVue: VueConstructor<any>
-  let unlinkedShortNameResponse: any
+  let shortNameSummaryResponse: any
 
   beforeEach(async () => {
     localVue = createLocalVue()
-    unlinkedShortNameResponse = {
+    shortNameSummaryResponse = {
       items: [
         {
-          shortName: 'TST1',
-          transactionDate: '2024-01-28T10:00:00',
-          depositAmount: 5,
-          id: 1
+          creditsRemaining: 0.0,
+          id: 142,
+          lastPaymentReceivedDate: '2024-01-28T10:00:00',
+          linkedAccountsCount: 0,
+          shortName: 'SNAME129'
         },
         {
-          shortName: 'TST2',
-          transactionDate: '2024-01-29T10:00:00',
-          depositAmount: 50,
-          id: 2
+          creditsRemaining: 151.5,
+          id: 123,
+          lastPaymentReceivedDate: '2024-01-28T10:00:00',
+          linkedAccountsCount: 0,
+          shortName: 'SNAME110'
         },
         {
-          shortName: 'TST3',
-          transactionDate: '2024-01-30T10:00:00',
-          depositAmount: 133.33,
-          id: 3
+          creditsRemaining: 204.0,
+          id: 158,
+          lastPaymentReceivedDate: '2024-01-27T10:00:00',
+          linkedAccountsCount: 1,
+          shortName: 'SNAME145'
         },
         {
-          shortName: 'TST4',
-          transactionDate: '2024-01-31T10:00:00',
-          depositAmount: 121.21,
-          id: 4
+          creditsRemaining: 50.25,
+          id: 156,
+          lastPaymentReceivedDate: '2024-01-27T10:00:00',
+          linkedAccountsCount: 1,
+          shortName: 'SNAME143'
         },
         {
-          shortName: 'TST5',
-          transactionDate: '2024-02-01T10:00:00',
-          depositAmount: 333.33,
-          id: 5
+          creditsRemaining: 0.0,
+          id: 134,
+          lastPaymentReceivedDate: '2023-11-24T10:00:00',
+          linkedAccountsCount: 2,
+          shortName: 'SNAME121'
         }
       ],
       total: 5
@@ -74,9 +80,9 @@ describe('UnlinkedShortNameTable.vue', () => {
 
     const sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'get')
-    get.returns(new Promise(resolve => resolve({ data: unlinkedShortNameResponse })))
+    get.returns(new Promise(resolve => resolve({ data: shortNameSummaryResponse })))
 
-    wrapper = mount(UnlinkedShortNameTableVue, {
+    wrapper = mount(ShortNameSummaryTableVue, {
       localVue,
       vuetify
     })
@@ -91,13 +97,13 @@ describe('UnlinkedShortNameTable.vue', () => {
     vi.clearAllMocks()
   })
 
-  it('Renders unlinked short name table with correct contents', async () => {
-    expect(wrapper.find('#table-title-cell').text()).toContain('Unlinked Payments  (5)')
+  it('Renders short name summary table with correct contents', async () => {
+    expect(wrapper.find('#table-title-cell').text()).toContain('All Short Names  (5)')
 
     // verify table
     expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
     expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
-    expect(wrapper.find('#unlinked-bank-short-names').exists()).toBe(true)
+    expect(wrapper.find('#short-name-summaries').exists()).toBe(true)
     expect(wrapper.find('.v-data-table__wrapper').exists()).toBe(true)
     const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
     expect(titles.length).toBe(headers.length)
@@ -107,14 +113,15 @@ describe('UnlinkedShortNameTable.vue', () => {
 
     // verify data
     const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
-    expect(itemRows.length).toBe(unlinkedShortNameResponse.items.length)
-    for (let i = 0; i < unlinkedShortNameResponse.items.length; i++) {
+    expect(itemRows.length).toBe(shortNameSummaryResponse.items.length)
+    for (let i = 0; i < shortNameSummaryResponse.items.length; i++) {
       const columns = itemRows.at(i).findAll(itemCell)
-      expect(columns.at(0).text()).toBe(unlinkedShortNameResponse.items[i].shortName)
+      expect(columns.at(0).text()).toBe(shortNameSummaryResponse.items[i].shortName)
       expect(columns.at(1).text()).toBe(
-        CommonUtils.formatDisplayDate(unlinkedShortNameResponse.items[i].transactionDate, 'MMMM DD, YYYY'))
+        CommonUtils.formatDisplayDate(shortNameSummaryResponse.items[i].lastPaymentReceivedDate, 'MMMM DD, YYYY'))
       expect(columns.at(2).text()).toBe(
-        CommonUtils.formatAmount(unlinkedShortNameResponse.items[i].depositAmount))
+        CommonUtils.formatAmount(shortNameSummaryResponse.items[i].creditsRemaining))
+      expect(columns.at(3).text()).toBe(shortNameSummaryResponse.items[i].linkedAccountsCount.toString())
     }
   })
 })
