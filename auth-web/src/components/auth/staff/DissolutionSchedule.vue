@@ -79,7 +79,7 @@
               large
               outlined
               class="mr-3"
-              @click="triggerEditOnOff()"
+              @click="cancelBtnClicked()"
             >
               Cancel
             </v-btn>
@@ -143,6 +143,15 @@ export default defineComponent({
     }
 
     /**
+     * Cancel button clicked.
+     * Revert numberOfBusinesses to store value. Hide the edit components.
+     */
+    const cancelBtnClicked = (): void => {
+      state.numberOfBusinesses = staffStore.getDissolutionBatchSize()
+      triggerEditOnOff()
+    }
+
+    /**
      * Save button is clicked. Update the dissolution batch size.
      * Only save if the inputted number is valid.
      * TODO: Implement logic (job) once the BE is done.
@@ -181,6 +190,7 @@ export default defineComponent({
       ...toRefs(state),
       actionBtnClicked,
       actionBtnText,
+      cancelBtnClicked,
       dissolutionBatchSizeRules,
       triggerEditOnOff,
       saveBtnClicked,
