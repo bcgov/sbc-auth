@@ -41,6 +41,18 @@
           </v-icon>
         </v-btn>
       </template>
+      <template #item-slot-accountName="{ item }">
+        <span>{{item.accountName}}</span>
+        <v-chip
+          small
+          label
+          color="error"
+          class="item-chip"
+          v-if="item.cfsAccountStatus && item.cfsAccountStatus !== 'ACTIVE'"
+        >
+          SUSPENDED
+        </v-chip>
+      </template>
       <template #item-slot-amountOwing="{ item }">
         <span>{{ formatAmount(item.amountOwing) }}</span>
       </template>

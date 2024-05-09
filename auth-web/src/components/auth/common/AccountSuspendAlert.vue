@@ -27,7 +27,7 @@
           </div>
         </div>
         <div
-          v-if="isSuspendedForNSF"
+          v-if="isSuspendedForNSF || isSuspendedForEFTOverdue"
           class="account-alert__date"
         >
           {{ suspendedDate }}
@@ -49,15 +49,15 @@
 </template>
 
 <script lang="ts">
-import { Action, State } from 'pinia-class'
-import { Component, Vue } from 'vue-property-decorator'
 import { AccountStatus, SuspensionReasonCode } from '@/util/constants'
+import { Action, State } from 'pinia-class'
 import { Code } from '@/models/Code'
-import CommonUtils from '@/util/common-util'
+import { Component, Vue } from 'vue-property-decorator'
 import { FailedInvoice } from '@/models/invoice'
 import { Organization } from '@/models/Organization'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
+import CommonUtils from '@/util/common-util'
 
 @Component
 export default class AccountSuspendAlert extends Vue {
