@@ -45,11 +45,8 @@
               badgeText="Paused"
               icon="mdi-calendar-clock"
               label="Automated Dissolution Schedule"
-              :showBadge="isOnHold"
             />
-            <DissolutionSchedule
-              @update:onHold="isOnHold=$event"
-            />
+            <DissolutionSchedule />
           </v-card>
         </v-col>
       </v-row>
@@ -70,12 +67,9 @@ export default defineComponent({
     DissolutionSchedule
   },
   setup () {
-    const isOnHold = ref<boolean>(false)
     const staffStore = useStaffStore()
 
-    onMounted(() => {
-      isOnHold.value = staffStore.isDissolutionBatchOnHold()
-    })
+    onMounted(() => {})
 
     /**
      * The number of B.C. businesses that are ready for D1 Dissolution.
@@ -84,8 +78,7 @@ export default defineComponent({
     const businessesReadyforDissolutionNumber = computed(() => 0)
 
     return {
-      businessesReadyforDissolutionNumber,
-      isOnHold
+      businessesReadyforDissolutionNumber
     }
   }
 })
