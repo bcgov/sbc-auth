@@ -126,6 +126,11 @@ export enum SuspensionReasonCode {
     OVERDUE_EFT = 'OVERDUE_EFT'
 }
 
+export enum SuspensionReason {
+    NSF = 'NSF',
+    OVERDUE_EFT = 'Overdue EFT Payments'
+}
+
 export enum IdpHint {
     BCROS = 'bcros',
     IDIR = 'idir',

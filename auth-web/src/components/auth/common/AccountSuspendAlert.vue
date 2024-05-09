@@ -14,7 +14,7 @@
           mdi-alert-circle-outline
         </v-icon>
         <div
-          v-if="isSuspendedForNSF || isSuspendedForEFTOverdue"
+          v-if="isSuspendedForNSF"
           class="account-alert__info ml-7"
         >
           <div class="font-weight-bold">
@@ -28,7 +28,7 @@
           </div>
         </div>
         <div
-          v-if="isSuspendedForNSF || isSuspendedForEFTOverdue"
+          v-if="isSuspendedForNSF"
           class="account-alert__date"
         >
           {{ suspendedDate }}
@@ -77,13 +77,7 @@ export default class AccountSuspendAlert extends Vue {
   }
 
   get isSuspendedForNSF (): boolean {
-    return (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED &&
-      this.currentOrganization?.suspensionReasonCode !== SuspensionReasonCode.OVERDUE_EFT)
-  }
-
-  get isSuspendedForEFTOverdue (): boolean {
-    return (this.currentOrganization?.statusCode === AccountStatus.SUSPENDED &&
-      this.currentOrganization?.suspensionReasonCode === SuspensionReasonCode.OVERDUE_EFT)
+    return this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED
   }
 
   get suspendedBy (): string {
@@ -91,13 +85,10 @@ export default class AccountSuspendAlert extends Vue {
   }
 
   get accountSuspendReason (): string {
-    if (this.isSuspendedForNSF) {
-      return 'outstanding balance (NSF)'
-    }
-    if (this.isSuspendedForEFTOverdue) {
+    if (this.currentOrganization?.suspensionReasonCode === SuspensionReasonCode.OVERDUE_EFT) {
       return 'overdue EFT payments'
     }
-    return ''
+    return 'outstanding balance (NSF)'
   }
 
   suspendedReason (): string {

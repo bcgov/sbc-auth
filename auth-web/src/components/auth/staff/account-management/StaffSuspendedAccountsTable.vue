@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus } from '@/util/constants'
+import { AccessType, Account, AccountStatus, SuspensionReason, SuspensionReasonCode } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
@@ -176,12 +176,11 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   getStatusText (org: Organization) {
     if (org.statusCode === AccountStatus.NSF_SUSPENDED) {
-      return 'NSF'
-    } else if (org.statusCode === AccountStatus.SUSPENDED) {
-      return this.getSuspensionReasonCode(org)
-    } else {
-      return org.statusCode
+      return org.suspensionReasonCode === SuspensionReasonCode.OVERDUE_EFT ? SuspensionReason.OVERDUE_EFT : SuspensionReason.NSF
     }
+    return org.statusCode === AccountStatus.SUSPENDED
+      ? this.getSuspensionReasonCode(org)
+      : org.statusCode
   }
 
   private getSuspensionReasonCode (org: Organization) : string {

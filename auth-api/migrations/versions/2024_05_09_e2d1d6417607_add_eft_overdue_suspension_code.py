@@ -1,8 +1,8 @@
-"""Add Overdue EFT Payments suspension code
+"""empty message
 
-Revision ID: a8c61064e6fd
-Revises: e65cc8ab51cc
-Create Date: 2024-05-07 15:53:21.674906
+Revision ID: e2d1d6417607
+Revises: 17369fa9416d
+Create Date: 2024-05-09 15:39:36.678009
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a8c61064e6fd'
-down_revision = 'e65cc8ab51cc'
+revision = 'e2d1d6417607'
+down_revision = '17369fa9416d'
 branch_labels = None
 depends_on = None
 
