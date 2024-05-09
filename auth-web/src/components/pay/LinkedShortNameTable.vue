@@ -42,13 +42,13 @@
         </v-btn>
       </template>
       <template #item-slot-accountName="{ item }">
-        <span>{{item.accountName}}</span>
+        <span>{{ item.accountName }}</span>
         <v-chip
+          v-if="item.cfsAccountStatus && item.cfsAccountStatus !== 'ACTIVE'"
           small
           label
           color="error"
           class="item-chip"
-          v-if="item.cfsAccountStatus && item.cfsAccountStatus !== 'ACTIVE'"
         >
           SUSPENDED
         </v-chip>

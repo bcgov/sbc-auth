@@ -20,8 +20,12 @@
           <div class="font-weight-bold">
             Account Suspended
           </div>
-          <div v-if="isSuspendedForNSF">Account has been suspended for outstanding balance (NSF).</div>
-          <div v-if="isSuspendedForEFTOverdue">Account has been suspended for overdue EFT payments.</div>
+          <div v-if="isSuspendedForNSF">
+            Account has been suspended for outstanding balance (NSF).
+          </div>
+          <div v-if="isSuspendedForEFTOverdue">
+            Account has been suspended for overdue EFT payments.
+          </div>
           <div class="mt-6 title font-weight-bold">
             BALANCE DUE:  ${{ totalAmountToPay.toFixed(2) }}
           </div>
@@ -51,13 +55,13 @@
 <script lang="ts">
 import { AccountStatus, SuspensionReasonCode } from '@/util/constants'
 import { Action, State } from 'pinia-class'
-import { Code } from '@/models/Code'
 import { Component, Vue } from 'vue-property-decorator'
+import { Code } from '@/models/Code'
+import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
 import { Organization } from '@/models/Organization'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
-import CommonUtils from '@/util/common-util'
 
 @Component
 export default class AccountSuspendAlert extends Vue {
@@ -77,13 +81,13 @@ export default class AccountSuspendAlert extends Vue {
 
   get isSuspendedForNSF (): boolean {
     console.log(this.currentOrganization)
-    return (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED
-      && this.currentOrganization?.suspensionReasonCode !== SuspensionReasonCode.OVERDUE_EFT)
+    return (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED &&
+      this.currentOrganization?.suspensionReasonCode !== SuspensionReasonCode.OVERDUE_EFT)
   }
 
   get isSuspendedForEFTOverdue (): boolean {
-    return (this.currentOrganization?.statusCode === AccountStatus.SUSPENDED
-      && this.currentOrganization?.suspensionReasonCode === SuspensionReasonCode.OVERDUE_EFT)
+    return (this.currentOrganization?.statusCode === AccountStatus.SUSPENDED &&
+      this.currentOrganization?.suspensionReasonCode === SuspensionReasonCode.OVERDUE_EFT)
   }
 
   get suspendedBy (): string {
