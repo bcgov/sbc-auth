@@ -44,7 +44,7 @@
       <template #item-slot-accountName="{ item }">
         <span>{{ item.accountName }}</span>
         <v-chip
-          v-if="item.cfsAccountStatus && item.cfsAccountStatus !== 'ACTIVE'"
+          v-if="item.cfsAccountStatus === 'FREEZE'"
           small
           label
           color="error"

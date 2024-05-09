@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade():
-    op.execute("INSERT INTO public.suspension_reason_codes "
+    op.execute("INSERT INTO suspension_reason_codes "
             "(code, description,\"default\") "
             "VALUES "
             "('OVERDUE_EFT', 'Overdue EFT Payments', false)")
