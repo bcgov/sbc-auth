@@ -34,11 +34,12 @@ export interface LinkedShortNameState {
 }
 
 export interface ShortNameSummaryFilterParams {
-  isActive: boolean
-  pageNumber: number
-  pageLimit: number
+  isActive?: boolean
+  pageNumber?: number
+  pageLimit?: number
   filterPayload: {
     shortName?: string
+    shortNameId?: string
     creditsRemaining?: string
     linkedAccountsCount?: string
     paymentReceivedStartDate?: string
