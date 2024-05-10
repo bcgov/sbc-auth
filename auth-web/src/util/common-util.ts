@@ -12,7 +12,6 @@ export default class CommonUtils {
     return value?.startsWith('http')
   }
 
-  // Format payment account display name
   static formatAccountDisplayName (item: any) {
     return `${item?.accountId} ${item?.accountName}`
   }

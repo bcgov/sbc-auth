@@ -56,6 +56,7 @@ import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../../datatable/resources'
 import { EFTTransactionState } from '@/models/eft-transaction'
 import PaymentService from '@/services/payment.services'
+import { ShortNameTransactionRowType } from '@/util/constants'
 import _ from 'lodash'
 
 export default defineComponent({
@@ -146,7 +147,7 @@ export default defineComponent({
     }
 
     function isStatementPaid (item: any) {
-      return item?.transactionDescription === 'Statement Paid'
+      return item?.transactionDescription === ShortNameTransactionRowType.STATEMENT_PAID
     }
 
     return {

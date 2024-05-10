@@ -630,3 +630,7 @@ export enum ShortNameStatus {
 export enum ShortNameResponseStatus {
     EFT_SHORT_NAME_ALREADY_MAPPED = 'EFT_SHORT_NAME_ALREADY_MAPPED'
 }
+
+export enum ShortNameTransactionRowType {
+    STATEMENT_PAID = 'Statement Paid'
+}

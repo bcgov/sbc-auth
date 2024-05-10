@@ -36,10 +36,7 @@ describe('ShortNameAccountLink.vue', () => {
           'id': 103,
           'shortNameId': 2,
           'statementId': 5407406,
-          'statusCode': 'LINKED',
-          'updatedBy': 'CODDYSEU',
-          'updatedByName': 'ODYSSEUS CHIU',
-          'updatedOn': '2023-11-24T21:49:25.833501'
+          'statusCode': 'LINKED'
         },
         {
           'accountBranch': 'Test Branch',
@@ -49,10 +46,7 @@ describe('ShortNameAccountLink.vue', () => {
           'id': 45,
           'shortNameId': 2,
           'statementId': 5407509,
-          'statusCode': 'LINKED',
-          'updatedBy': 'CODDYSEU',
-          'updatedByName': 'ODYSSEUS CHIU',
-          'updatedOn': '2023-11-24T21:49:25.833501'
+          'statusCode': 'LINKED'
         }
       ],
       'limit': 5,

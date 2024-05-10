@@ -16,7 +16,7 @@
         {{ unsettledAmountHeader }}
       </h1>
       <p class="mt-3 mb-0">
-        Review and verify payment details
+        Review and verify short name details
       </p>
     </div>
 
