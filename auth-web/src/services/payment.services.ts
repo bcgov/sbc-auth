@@ -265,6 +265,10 @@ export default class PaymentService {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames/summaries?${params.toString()}`)
   }
 
+  static getEFTShortNameLinks (shortNameId: number): AxiosPromise<any> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/links`)
+  }
+
   static getEFTTransactions (shortNameId: string, filterParams: EFTTransactionFilterParams): AxiosPromise<EFTTransactionListResponse> {
     const params = new URLSearchParams()
     if (filterParams.pageNumber) {
@@ -278,8 +282,8 @@ export default class PaymentService {
     return axios.get(url, { params })
   }
 
-  static getEFTShortname (shortNameId: string): AxiosPromise<EFTShortnameResponse> {
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`
+  static getEFTShortnameSummary (shortNameId: string): AxiosPromise<EFTShortnameResponse> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/summaries?shortNameId=${shortNameId}`
     return axios.get(url)
   }
 

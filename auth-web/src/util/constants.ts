@@ -644,6 +644,10 @@ export enum ShortNameResponseStatus {
     EFT_SHORT_NAME_ALREADY_MAPPED = 'EFT_SHORT_NAME_ALREADY_MAPPED'
 }
 
+export enum ShortNameTransactionRowType {
+    STATEMENT_PAID = 'Statement Paid'
+}
+
 export enum CfsAccountStatus {
     PENDING = 'PENDING',
     PENDING_PAD_ACTIVATION = 'PENDING_PAD_ACTIVATION',
