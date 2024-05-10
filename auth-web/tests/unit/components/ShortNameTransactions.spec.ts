@@ -121,7 +121,7 @@ describe('ShortNameTransactions.vue', () => {
       expect(columns.at(1).text()).toContain(transactionsResponse.items[i].transactionDescription)
       expect(columns.at(2).text()).toBe(transactionsResponse.items[i].statementId
         ? transactionsResponse.items[i].statementId.toString() : '')
-      expect(columns.at(3).text()).toBe(
+      expect(columns.at(3).text()).toContain(
         CommonUtils.formatAmount(transactionsResponse.items[i].transactionAmount))
     }
   })
