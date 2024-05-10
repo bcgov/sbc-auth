@@ -118,6 +118,19 @@ export enum AccountStatus {
     PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT'
 }
 
+export enum SuspensionReasonCode {
+    OWNER_CHANGE = 'OWNER_CHANGE',
+    DISPUTE = 'DISPUTE',
+    COURT_ORDER = 'COURT_ORDER',
+    FRAUDULENT = 'FRAUDULENT',
+    OVERDUE_EFT = 'OVERDUE_EFT'
+}
+
+export enum SuspensionReason {
+    NSF = 'NSF',
+    OVERDUE_EFT = 'Overdue EFT Payments'
+}
+
 export enum IdpHint {
     BCROS = 'bcros',
     IDIR = 'idir',
@@ -633,4 +646,12 @@ export enum ShortNameResponseStatus {
 
 export enum ShortNameTransactionRowType {
     STATEMENT_PAID = 'Statement Paid'
+}
+
+export enum CfsAccountStatus {
+    PENDING = 'PENDING',
+    PENDING_PAD_ACTIVATION = 'PENDING_PAD_ACTIVATION',
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+    FREEZE = 'FREEZE'
 }

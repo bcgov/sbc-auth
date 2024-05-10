@@ -20,7 +20,9 @@
           <div class="font-weight-bold">
             Account Suspended
           </div>
-          <div>Account has been suspended for outstanding balance (NSF).</div>
+          <div>
+            Account has been suspended for {{ accountSuspendReason }}.
+          </div>
           <div class="mt-6 title font-weight-bold">
             BALANCE DUE:  ${{ totalAmountToPay.toFixed(2) }}
           </div>
@@ -48,9 +50,9 @@
 </template>
 
 <script lang="ts">
+import { AccountStatus, SuspensionReasonCode } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
-import { AccountStatus } from '@/util/constants'
 import { Code } from '@/models/Code'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
@@ -80,6 +82,13 @@ export default class AccountSuspendAlert extends Vue {
 
   get suspendedBy (): string {
     return this.currentOrganization?.decisionMadeBy
+  }
+
+  get accountSuspendReason (): string {
+    if (this.currentOrganization?.suspensionReasonCode === SuspensionReasonCode.OVERDUE_EFT) {
+      return 'overdue EFT payments'
+    }
+    return 'outstanding balance (NSF)'
   }
 
   suspendedReason (): string {
