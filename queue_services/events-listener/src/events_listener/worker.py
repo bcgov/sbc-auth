@@ -73,7 +73,7 @@ async def process_event(event_message, flask_app):
         if message_type == LOCK_ACCOUNT_MESSAGE_TYPE:
             org.status_code = OrgStatus.NSF_SUSPENDED.value
             org.suspended_on = datetime.now()
-            org.suspension_reason_code = data.get('suspensionReason', None)
+            org.suspension_reason_code = data.get('suspensionReasonCode', None)
             data = {
                 'accountId': org_id,
             }
