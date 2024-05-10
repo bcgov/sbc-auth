@@ -110,7 +110,9 @@
       v-else
       class="d-flex justify-space-between pa-5 unlinked-text"
     >
-      This short name is not linked with an account.
+      <span class="pt-1">
+        This short name is not linked with an account.
+      </span>
       <v-btn
         id="link-shortname-btn"
         color="primary"
