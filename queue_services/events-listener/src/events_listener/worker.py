@@ -73,12 +73,14 @@ async def process_event(event_message, flask_app):
         if message_type == LOCK_ACCOUNT_MESSAGE_TYPE:
             org.status_code = OrgStatus.NSF_SUSPENDED.value
             org.suspended_on = datetime.now()
+            org.suspension_reason_code = data.get('suspensionReason', None)
             data = {
                 'accountId': org_id,
             }
             await publish_mailer_events(LOCK_ACCOUNT_MESSAGE_TYPE, org_id, data)
         elif message_type == UNLOCK_ACCOUNT_MESSAGE_TYPE:
             org.status_code = OrgStatus.ACTIVE.value
+            org.suspension_reason_code = None
             await publish_mailer_events(UNLOCK_ACCOUNT_MESSAGE_TYPE, org_id, data)
         else:
             logger.error('Unknown Message Type : %s', message_type)
