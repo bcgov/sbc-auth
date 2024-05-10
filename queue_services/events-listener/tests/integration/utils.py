@@ -15,8 +15,8 @@
 import json
 
 import stan
-
 from auth_api.utils.enums import SuspensionReasonCode
+
 
 async def helper_add_event_to_queue(stan_client: stan.aio.client.Client,
                                     subject: str,
