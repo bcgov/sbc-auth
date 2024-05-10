@@ -287,7 +287,8 @@ import {
   AccountStatus,
   Pages,
   Permission,
-  Role
+  Role,
+  SuspensionReason
 } from '@/util/constants'
 import { Action, Getter, State } from 'pinia-class'
 import { Component, Mixins } from 'vue-property-decorator'
@@ -642,9 +643,9 @@ export default class AccountInfo extends Mixins(
   private getStatusText (status) {
     switch (status) {
       case AccountStatus.NSF_SUSPENDED:
-        return 'NSF SUSPENDED'
+        return SuspensionReason.NSF_SUSPENDED
       case AccountStatus.SUSPENDED:
-        return 'SUSPENDED'
+        return SuspensionReason.SUSPENDED
       default:
         return status
     }
