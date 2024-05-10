@@ -27,26 +27,24 @@ def upgrade():
                   sa.Column('external_source_id', sa.String(length=75), nullable=True))
 
     # Add MHR sub product codes
-    op.execute("INSERT INTO public.product_codes "
+    op.execute("INSERT INTO product_codes "
                "(code, description,\"default\", type_code, hidden, need_review, premium_only, url, keycloak_group, "
                "parent_code) "
                "VALUES "
                "('MHR_QSLN', 'Qualified Supplier - Lawyers and Notaries', false, 'INTERNAL', false, true, true, "
                "'https://www.bcregistry.ca/ppr', 'mhr_qualified_user', 'MHR')")
-    op.execute("INSERT INTO public.product_codes "
+    op.execute("INSERT INTO product_codes "
                "(code, description,\"default\", type_code, hidden, need_review, premium_only, url, keycloak_group, "
                "parent_code) "
                "VALUES "
                "('MHR_QSHM', 'Qualified Supplier - Home Manufacturers', false, 'INTERNAL', false, true, true, "
                "'https://www.bcregistry.ca/ppr', 'mhr_manufacturer', 'MHR')")
-    op.execute("INSERT INTO public.product_codes "
+    op.execute("INSERT INTO product_codes "
                "(code, description,\"default\", type_code, hidden, need_review, premium_only, url, keycloak_group, "
                "parent_code) "
                "VALUES "
                "('MHR_QSHD', 'Qualified Supplier - Home Dealers', false, 'INTERNAL', false, true, true, "
                "'https://www.bcregistry.ca/ppr', 'mhr_general_user', 'MHR')")
-
-    op.execute("commit")
 
 
 def downgrade():
