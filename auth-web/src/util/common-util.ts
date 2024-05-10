@@ -12,6 +12,11 @@ export default class CommonUtils {
     return value?.startsWith('http')
   }
 
+  // Format payment account display name
+  static formatAccountDisplayName (item: any) {
+    return `${item?.accountId} ${item?.accountName}`
+  }
+
   // formatting incorporation number according to the length of numbers
   static formatIncorporationNumber (incorpNum: string, numLength = 7):string {
     if (!incorpNum) return null

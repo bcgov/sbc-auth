@@ -412,16 +412,7 @@ export default defineComponent({
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
 
-.actions-dropdown_item {
-  padding: 0.5rem 1rem;
-  &:hover {
-    background-color: $gray1;
-    color: $app-blue !important;
-  }
-}
-
 #short-name-summaries {
   border: 1px solid #e9ecef
 }
-
 </style>

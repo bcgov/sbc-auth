@@ -183,7 +183,7 @@ export default defineComponent({
       } catch (error) {
         if (error.response.data.type === ShortNameResponseStatus.EFT_SHORT_NAME_ALREADY_MAPPED) {
           state.accountLinkingErrorDialogTitle = 'Account Already Linked'
-          state.accountLinkingErrorDialogText = 'The selected bank short name is already linked to an account.'
+          state.accountLinkingErrorDialogText = 'The selected account is already linked to a bank short name.'
           cancelAndResetAccountLinkingDialog()
           accountLinkingErrorDialog.value.open()
         } else {
