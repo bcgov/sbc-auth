@@ -50,7 +50,7 @@
           color="error"
           class="item-chip"
         >
-          {{ AccountStatus.SUSPENDED }}
+          {{ AccountStatus.NSF_SUSPENDED }}
         </v-chip>
       </template>
       <template #item-slot-amountOwing="{ item }">

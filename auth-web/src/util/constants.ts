@@ -128,7 +128,9 @@ export enum SuspensionReasonCode {
 
 export enum SuspensionReason {
     NSF = 'NSF',
-    OVERDUE_EFT = 'Overdue EFT Payments'
+    OVERDUE_EFT = 'Overdue EFT Payments',
+    NSF_SUSPENDED = 'NSF SUSPENDED',
+    SUSPENDED = 'SUSPENDED'
 }
 
 export enum IdpHint {
