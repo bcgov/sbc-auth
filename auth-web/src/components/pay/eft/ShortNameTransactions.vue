@@ -45,7 +45,7 @@
       </span>
     </template>
     <template #item-slot-transactionAmount="{ item }">
-      <span>{{ formatCurrency(item.transactionAmount) }}</span>
+      <span>{{ formatTransactionAmount(item) }}</span>
     </template>
   </BaseVDataTable>
 </template>
@@ -87,13 +87,13 @@ export default defineComponent({
       {
         col: 'statementId',
         hasFilter: false,
-        minWidth: '200px',
+        minWidth: '175px',
         value: 'Related Statement Number'
       },
       {
         col: 'transactionAmount',
         hasFilter: false,
-        minWidth: '125px',
+        minWidth: '355px',
         value: 'Amount'
       }
     ]
@@ -150,8 +150,17 @@ export default defineComponent({
       return item?.transactionDescription === ShortNameTransactionRowType.STATEMENT_PAID
     }
 
+    function formatTransactionAmount (item: any) {
+      if (item.transactionAmount === undefined) return ''
+      let amount = CommonUtils.formatAmount(item.transactionAmount)
+      if (isStatementPaid(item)) {
+        amount = `-${amount}`
+      }
+      return amount
+    }
+
     return {
-      formatCurrency: CommonUtils.formatAmount,
+      formatTransactionAmount,
       formatDate: CommonUtils.formatDisplayDate,
       formatAccountDisplayName: CommonUtils.formatAccountDisplayName,
       headers,
