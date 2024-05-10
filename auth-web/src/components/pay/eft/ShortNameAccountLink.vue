@@ -14,7 +14,7 @@
       >
         mdi-bank-transfer
       </v-icon>
-      Accounts Linked to {{shortNameDetails.shortName}}
+      Accounts Linked to {{ shortNameDetails.shortName }}
     </v-card-title>
 
     <v-card-text
@@ -33,23 +33,23 @@
         + Link a New Account
       </v-btn>
       <BaseVDataTable
-          id="eft-account-linking-table"
-          class="eft-account-links-list pt-2"
-          itemKey="id"
-          :loading="state.loading"
-          loadingText="Loading Records..."
-          noDataText="No Records."
-          :setItems="state.results"
-          :setHeaders="headers"
-          :setTableDataOptions="state.options"
-          :totalItems="state.totalResults"
-          :filters="state.filters"
-          :pageHide="true"
-          :hideFilters="true"
-          :hasTitleSlot="false"
-          :highlight-index="highlightIndex"
-          highlight-class="base-table__item-row-green"
-          @update-table-options="state.options = $event"
+        id="eft-account-linking-table"
+        class="eft-account-links-list pt-2"
+        itemKey="id"
+        :loading="state.loading"
+        loadingText="Loading Records..."
+        noDataText="No Records."
+        :setItems="state.results"
+        :setHeaders="headers"
+        :setTableDataOptions="state.options"
+        :totalItems="state.totalResults"
+        :filters="state.filters"
+        :pageHide="true"
+        :hideFilters="true"
+        :hasTitleSlot="false"
+        :highlight-index="highlightIndex"
+        highlight-class="base-table__item-row-green"
+        @update-table-options="state.options = $event"
       >
         <template #item-slot-linkedAccount="{ item }">
           <span>{{ formatAccountDisplayName(item) }}</span>
@@ -57,50 +57,50 @@
         <template #item-slot-amountOwing="{ item }">
           <span>{{ formatCurrency(item.amountOwing) }}</span>
         </template>
-        <template #item-slot-actions="{ item, index }">
+        <template #item-slot-actions="{ index }">
           <div
-              :id="`action-menu-${index}`"
-              class="new-actions mx-auto"
+            :id="`action-menu-${index}`"
+            class="new-actions mx-auto"
           >
             <v-btn
-                small
-                color="primary"
-                min-width="5rem"
-                min-height="2rem"
-                class="open-action-btn"
+              small
+              color="primary"
+              min-width="5rem"
+              min-height="2rem"
+              class="open-action-btn"
             >
               Cancel Payment
             </v-btn>
             <span class="more-actions">
-            <v-menu
+              <v-menu
                 v-model="actionDropdown[index]"
                 :attach="`#action-menu-${index}`"
                 offset-y
                 nudge-left="74"
-            >
-              <template #activator="{ on }">
-                <v-btn
+              >
+                <template #activator="{ on }">
+                  <v-btn
                     small
                     color="primary"
                     min-height="2rem"
                     class="more-actions-btn"
                     v-on="on"
-                >
-                  <v-icon>{{ actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item
+                  >
+                    <v-icon>{{ actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item
                     class="actions-dropdown_item"
                     data-test="link-account-button"
-                >
-                  <v-list-item-subtitle>
-                    <span class="pl-1 cursor-pointer">Cancel payment and remove linkage</span>
-                  </v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </span>
+                  >
+                    <v-list-item-subtitle>
+                      <span class="pl-1 cursor-pointer">Cancel payment and remove linkage</span>
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </span>
           </div>
         </template>
       </BaseVDataTable>
@@ -123,10 +123,10 @@
 </template>
 <script lang="ts">
 
-import { BaseVDataTable } from '@/components'
-import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
-import CommonUtils from '@/util/common-util'
 import { computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import { BaseVDataTable } from '@/components'
+import CommonUtils from '@/util/common-util'
+import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import PaymentService from '@/services/payment.services'
 import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
 import _ from 'lodash'

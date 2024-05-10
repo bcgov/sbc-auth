@@ -1,6 +1,6 @@
 {
   "name": "auth-web",
-  "version": "2.6.8",
+  "version": "2.6.7",
   "appName": "Auth Web",
   "sbcName": "SBC Common Components",
   "private": true,

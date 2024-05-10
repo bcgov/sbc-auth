@@ -17,7 +17,7 @@ sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
 const vuetify = new Vuetify({})
 // Selectors
 const { header, headerTitles, itemRow, itemCell } = baseVdataTable
-const headers = ['Payment Received Date', 'Amount']
+const headers = ['Date', 'Description', 'Related Statement Number', 'Amount']
 
 describe('ShortNameTransactions.vue', () => {
   setupIntersectionObserverMock()
@@ -31,45 +31,42 @@ describe('ShortNameTransactions.vue', () => {
     transactionsResponse = {
       items: [
         {
-          depositAmount: 0.04,
-          depositDate: '2024-01-17T14:05:23',
-          id: 10,
-          shortNameId: 2,
-          transactionDate: '2024-01-17T14:05:33'
+          'accountBranch': 'Test Branch',
+          'accountId': '3202',
+          'accountName': 'ABC 123',
+          'shortNameId': 2,
+          'statementId': 5374449,
+          'transactionAmount': 451.5,
+          'transactionDate': '2023-11-27T16:24:37.522500',
+          'transactionDescription': 'Statement Paid',
+          'transactionId': null
         },
         {
-          depositAmount: 0.03,
-          depositDate: '2024-01-16T14:05:23',
-          id: 9,
-          shortNameId: 2,
-          transactionDate: '2024-01-16T14:05:33'
+          'accountBranch': null,
+          'accountId': null,
+          'accountName': null,
+          'shortNameId': 2,
+          'statementId': null,
+          'transactionAmount': 151.5,
+          'transactionDate': '2023-11-24T13:47:47',
+          'transactionDescription': 'Funds Received',
+          'transactionId': 6
         },
         {
-          depositAmount: 0.02,
-          depositDate: '2024-01-15T14:05:23',
-          id: 8,
-          shortNameId: 2,
-          transactionDate: '2024-01-15T14:05:33'
-        },
-        {
-          depositAmount: 0.01,
-          depositDate: '2024-01-14T14:05:23',
-          id: 7,
-          shortNameId: 2,
-          transactionDate: '2024-01-14T14:05:33'
-        },
-        {
-          depositAmount: 151.5,
-          depositDate: '2024-01-13T14:05:23',
-          id: 6,
-          shortNameId: 2,
-          transactionDate: '2024-01-13T14:05:33'
+          'accountBranch': null,
+          'accountId': null,
+          'accountName': null,
+          'shortNameId': 2,
+          'statementId': null,
+          'transactionAmount': 300.0,
+          'transactionDate': '2023-11-22T13:47:47',
+          'transactionDescription': 'Funds Received',
+          'transactionId': 2
         }
       ],
-      limit: 5,
-      page: 1,
-      remainingCredit: 0,
-      total: 5
+      'limit': 5,
+      'page': 1,
+      'total': 3
     }
 
     sandbox = sinon.createSandbox()
@@ -100,7 +97,7 @@ describe('ShortNameTransactions.vue', () => {
     await wrapper.setProps({ shortNameDetails: { id: 1, shortName: 'SHORTNAME' } })
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('#table-title-cell').text()).toContain('Payments Received from SHORTNAME  (5)')
+    expect(wrapper.find('#table-title-cell').text()).toContain('Payment History')
 
     // verify table
     expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
@@ -121,8 +118,11 @@ describe('ShortNameTransactions.vue', () => {
       const columns = itemRows.at(i).findAll(itemCell)
       expect(columns.at(0).text()).toBe(
         CommonUtils.formatDisplayDate(transactionsResponse.items[i].transactionDate, 'MMMM DD, YYYY'))
-      expect(columns.at(1).text()).toBe(
-        CommonUtils.formatAmount(transactionsResponse.items[i].depositAmount))
+      expect(columns.at(1).text()).toContain(transactionsResponse.items[i].transactionDescription)
+      expect(columns.at(2).text()).toBe(transactionsResponse.items[i].statementId
+        ? transactionsResponse.items[i].statementId.toString() : '')
+      expect(columns.at(3).text()).toBe(
+        CommonUtils.formatAmount(transactionsResponse.items[i].transactionAmount))
     }
   })
 })

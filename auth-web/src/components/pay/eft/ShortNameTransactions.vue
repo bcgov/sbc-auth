@@ -36,8 +36,11 @@
       <span>{{ formatDate(item.transactionDate, 'MMMM DD, YYYY') }}</span>
     </template>
     <template #item-slot-transactionDescription="{ item }">
-      <span>{{item.transactionDescription}}</span>
-      <span v-if="isStatementPaid(item)" class="transaction-details">
+      <span>{{ item.transactionDescription }}</span>
+      <span
+        v-if="isStatementPaid(item)"
+        class="transaction-details"
+      >
         {{ formatAccountDisplayName(item) }}
       </span>
     </template>
@@ -154,7 +157,7 @@ export default defineComponent({
       state,
       infiniteScrollCallback,
       calculateTableHeight,
-      isStatementPaid,
+      isStatementPaid
     }
   }
 })
