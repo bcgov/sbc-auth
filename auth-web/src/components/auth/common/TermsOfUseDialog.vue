@@ -27,7 +27,7 @@
             tabindex="0"
             @keyup.enter="openDialog()"
             @click.stop="openDialog()"
-          >terms and conditions</strong>
+          >{{ tosText }}</strong>
           {{ tosCheckBoxLabelAppend }}
         </span>
       </template>
@@ -111,6 +111,7 @@ export default class TermsOfUseDialog extends Vue {
   @Prop({ default: 'termsofuse' }) tosType: string
   @Prop({ default: 'Terms of Use Agreement' }) tosHeading: string
   @Prop({ default: '' }) tosCheckBoxLabelAppend: string
+  @Prop({ default: '' }) tosText: string
   @Prop({ default: false }) isUserTOS: boolean
   @Prop({ default: false }) isAlreadyAccepted: boolean
   protected readonly userHasToAcceptTOS!: boolean
