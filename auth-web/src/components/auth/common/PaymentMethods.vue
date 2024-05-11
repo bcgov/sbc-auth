@@ -149,8 +149,8 @@ import DocumentService from '@/services/document.services'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
-import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { PaymentTypes } from '@/util/constants'
+import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { useOrgStore } from '@/stores/org'
 
 const PAYMENT_METHODS = {
