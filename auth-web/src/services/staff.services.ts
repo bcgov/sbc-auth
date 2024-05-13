@@ -1,4 +1,4 @@
-import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
+import { AccountType, Configurations, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
 import { OrgFilterParams, OrgList, Organizations } from '@/models/Organization'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
@@ -47,5 +47,9 @@ export default class StaffService {
 
   static async getSafeEmails (): Promise<AxiosResponse<SafeEmail[]>> {
     return axios.get(`${ConfigHelper.getNotifiyAPIUrl()}/safe_list`)
+  }
+
+  static async getInvoluntaryDissolutionConfigurations (): Promise<AxiosResponse<Configurations>> {
+    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/admin/configurations`)
   }
 }

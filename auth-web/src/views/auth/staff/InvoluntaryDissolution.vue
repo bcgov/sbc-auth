@@ -45,11 +45,8 @@
               badgeText="Paused"
               icon="mdi-calendar-clock"
               label="Automated Dissolution Schedule"
-              :showBadge="isOnHold"
             />
-            <DissolutionSchedule
-              @update:onHold="isOnHold=$event"
-            />
+            <DissolutionSchedule />
           </v-card>
         </v-col>
       </v-row>
@@ -58,10 +55,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { computed, defineComponent, onMounted } from '@vue/composition-api'
 import { CardHeader } from '@/components'
 import DissolutionSchedule from '@/components/auth/staff/DissolutionSchedule.vue'
-import { useStaffStore } from '@/stores/staff'
 
 export default defineComponent({
   name: 'InvoluntaryDissolution',
@@ -70,12 +66,7 @@ export default defineComponent({
     DissolutionSchedule
   },
   setup () {
-    const isOnHold = ref<boolean>(false)
-    const staffStore = useStaffStore()
-
-    onMounted(() => {
-      isOnHold.value = staffStore.isDissolutionBatchOnHold()
-    })
+    onMounted(() => {})
 
     /**
      * The number of B.C. businesses that are ready for D1 Dissolution.
@@ -84,8 +75,7 @@ export default defineComponent({
     const businessesReadyforDissolutionNumber = computed(() => 0)
 
     return {
-      businessesReadyforDissolutionNumber,
-      isOnHold
+      businessesReadyforDissolutionNumber
     }
   }
 })
