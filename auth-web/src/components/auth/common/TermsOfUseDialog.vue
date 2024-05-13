@@ -27,7 +27,7 @@
             tabindex="0"
             @keyup.enter="openDialog()"
             @click.stop="openDialog()"
-          >terms and conditions</strong>
+          >{{ tosText }}</strong>
           {{ tosCheckBoxLabelAppend }}
         </span>
       </template>
@@ -91,90 +91,93 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+<script lang="ts" setup>
+import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
-import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
 
-@Component({
-  components: {
-    TermsOfUse
+export default defineComponent({
+  name: 'TermsOfUseDialog',
+  components: { TermsOfUse },
+  props: {
+    tosType: { type: String, default: 'termsofuse' },
+    tosHeading: { type: String, default: 'Terms of Use Agreement' },
+    tosCheckBoxLabelAppend: { type: String, default: '' },
+    tosText: { type: String, default: '' },
+    isUserTOS: { type: Boolean, default: false },
+    isAlreadyAccepted: { type: Boolean, default: false }
   },
-  computed: {
-    ...mapState(useUserStore, [
-      'userHasToAcceptTOS'
-    ])
+  setup(props, { emit }) {
+    const userStore = useUserStore()
+    const userHasToAcceptTOS = computed(() => userStore.userHasToAcceptTOS)
+    const termsDialog = ref(false)
+    const termsAccepted = ref(false)
+    const canCheckTerms = ref(false)
+    const atBottom = ref(false)
+
+    const tooltipTxt = computed(() => 'Please read and agree to the Terms Of Use')
+
+    onMounted(() => {
+      termsDialog.value = false
+      if (props.isUserTOS && userHasToAcceptTOS.value) {
+        agreeToTerms()
+      }
+      if (props.isAlreadyAccepted) {
+        termsAccepted.value = canCheckTerms.value = true
+      }
+    })
+
+    function updateTermsAccepted(val) {
+      if (props.isUserTOS && val) {
+        agreeToTerms()
+      }
+    }
+
+    function updateIsAlreadyAccepted(val, oldVal) {
+      if (oldVal !== val) {
+        termsAccepted.value = canCheckTerms.value = val
+      }
+    }
+
+    function openDialog() {
+      termsDialog.value = true
+    }
+
+    function closeDialog() {
+      termsDialog.value = false
+    }
+
+    function onScroll(e) {
+      atBottom.value = (e.target.scrollHeight - e.target.scrollTop) <= (e.target.offsetHeight + 25)
+    }
+
+    function agreeToTerms() {
+      termsDialog.value = false
+      termsAccepted.value = true
+      canCheckTerms.value = true
+      emitTermsAcceptanceStatus()
+    }
+
+    function emitTermsAcceptanceStatus() {
+      emit('terms-acceptance-status', termsAccepted.value)
+    }
+
+    return {
+      termsDialog,
+      termsAccepted,
+      canCheckTerms,
+      atBottom,
+      tooltipTxt,
+      openDialog,
+      closeDialog,
+      onScroll,
+      agreeToTerms,
+      updateTermsAccepted,
+      updateIsAlreadyAccepted,
+      emitTermsAcceptanceStatus
+    }
   }
 })
-export default class TermsOfUseDialog extends Vue {
-  @Prop({ default: 'termsofuse' }) tosType: string
-  @Prop({ default: 'Terms of Use Agreement' }) tosHeading: string
-  @Prop({ default: '' }) tosCheckBoxLabelAppend: string
-  @Prop({ default: false }) isUserTOS: boolean
-  @Prop({ default: false }) isAlreadyAccepted: boolean
-  protected readonly userHasToAcceptTOS!: boolean
-  private termsDialog: boolean = true
-  private termsAccepted: boolean = false
-  private canCheckTerms: boolean = false
-  private atBottom: boolean = false
-
-  get tooltipTxt () {
-    return 'Please read and agree to the Terms Of Use'
-  }
-
-  private mounted () {
-    this.termsDialog = false
-    if (this.isUserTOS && this.userHasToAcceptTOS) {
-      this.agreeToTerms()
-    }
-    if (this.isAlreadyAccepted) {
-      this.termsAccepted = this.canCheckTerms = true
-    }
-  }
-
-  @Watch('userHasToAcceptTOS', { deep: true })
-  updateTermsAccepted (val) {
-    if (this.isUserTOS && val) {
-      this.agreeToTerms()
-    }
-  }
-
-  /**
-   * watching isAlreadyAccepted to make changes for edit
-  */
-  @Watch('isAlreadyAccepted', { deep: true })
-  updateIsAlreadyAccepted (val, oldVal) {
-    // mark checked as props
-    if (oldVal !== val) {
-      this.termsAccepted = this.canCheckTerms = val
-    }
-  }
-
-  private openDialog () {
-    this.termsDialog = true
-  }
-
-  private closeDialog () {
-    this.termsDialog = false
-  }
-
-  private onScroll (e) {
-    this.atBottom = (e.target.scrollHeight - e.target.scrollTop) <= (e.target.offsetHeight + 25)
-  }
-
-  private agreeToTerms () {
-    this.termsDialog = false
-    this.termsAccepted = true
-    this.canCheckTerms = true
-    this.emitTermsAcceptanceStatus()
-  }
-
-  @Emit('terms-acceptance-status')
-  private emitTermsAcceptanceStatus () {
-    return this.termsAccepted
-  }
-}
 </script>
 
 <style lang="scss" scoped>

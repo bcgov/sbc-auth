@@ -50,7 +50,7 @@
           color="error"
           class="item-chip"
         >
-          {{ AccountStatus.NSF_SUSPENDED }}
+          {{ SuspensionReason.NSF_SUSPENDED }}
         </v-chip>
       </template>
       <template #item-slot-amountOwing="{ item }">
@@ -77,7 +77,7 @@
   </div>
 </template>
 <script lang="ts">
-import { AccountStatus, CfsAccountStatus, SessionStorageKeys, ShortNameStatus } from '@/util/constants'
+import { AccountStatus, CfsAccountStatus, SessionStorageKeys, ShortNameStatus, SuspensionReason } from '@/util/constants'
 import { defineComponent, onMounted, reactive, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import CommonUtils from '@/util/common-util'
@@ -251,7 +251,8 @@ export default defineComponent({
       viewDetails,
       formatAmount,
       CfsAccountStatus,
-      AccountStatus
+      AccountStatus,
+      SuspensionReason
     }
   }
 })

@@ -88,9 +88,19 @@
                   class="pt-7"
                 >
                   <v-divider class="mb-7" />
-                  <div>
+                  <div class="mb-7">
                     To send us a payment through electronic funds transfer (EFT), please read the
                     <a @click="getEftInstructions">Electronic Funds Transfer Payment Instructions</a>.
+                  </div>
+                  <div class="terms-container">
+                    <TermsOfUseDialog
+                      :isAlreadyAccepted="isEFTTOSAccepted"
+                      :tosText="'Terms and Conditions of the Electronic Funds Transfer'"
+                      :tosType="'termsofuse_pad'"
+                      :tosHeading="'Electronic Funds Transfer Terms and Conditions Agreement, BC Registry and Online Services'"
+                      :tosCheckBoxLabelAppend="'for BC Registry Services'"
+                      @terms-acceptance-status="updateEFTTermsAccepted($event)"
+                    />
                   </div>
                 </div>
 
@@ -140,6 +150,7 @@ import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import { PaymentTypes } from '@/util/constants'
+import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { useOrgStore } from '@/stores/org'
 
 const PAYMENT_METHODS = {
@@ -213,7 +224,8 @@ export default defineComponent({
   components: {
     PADInfoForm,
     LinkedBCOLBanner,
-    GLPaymentForm
+    GLPaymentForm,
+    TermsOfUseDialog
   },
   props: {
     currentOrgType: { default: '' },
@@ -226,7 +238,7 @@ export default defineComponent({
     isInitialTOSAccepted: { default: false },
     isInitialAcknowledged: { default: false }
   },
-  emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'payment-method-selected'],
+  emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-eft-valid', 'payment-method-selected'],
   setup (props, { emit }) {
     const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails } = useOrgStore()
 
@@ -235,6 +247,7 @@ export default defineComponent({
     const padInfo = ref({})
     const isTouched = ref(false)
     const ejvPaymentInformationTitle = 'General Ledger Information'
+    const isEFTTOSAccepted = ref(false)
 
     // this object can define the payment methods allowed for each account tyoes
     const paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
@@ -309,6 +322,12 @@ export default defineComponent({
       emit('is-pad-valid', isValid && isTouched.value)
     }
 
+    const updateEFTTermsAccepted = (isAccepted: boolean) => {
+      isEFTTOSAccepted.value = isAccepted
+      isTouched.value = true
+      emit('is-eft-valid', isAccepted && isTouched.value)
+    }
+
     onMounted(async () => {
       paymentMethodSelected({ type: props.currentSelectedPaymentMethod }, false)
       if (isPaymentEJV.value) {
@@ -331,7 +350,9 @@ export default defineComponent({
       setBcolInfo,
       isPADValid,
       isPadInfoTouched,
-      isPaymentSelected
+      isPaymentSelected,
+      updateEFTTermsAccepted,
+      isEFTTOSAccepted
     }
   }
 })
