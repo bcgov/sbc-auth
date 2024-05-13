@@ -16,7 +16,7 @@
           >
             <v-text-field
               ref="numberOfBusinessesRef"
-              v-model="numberOfBusinesses"
+              v-model="numberOfBusinessesEdit"
               filled
               type="number"
               label="Dissolution Batch Size"
@@ -79,7 +79,7 @@
               large
               outlined
               class="mr-3"
-              @click="cancelBtnClicked()"
+              @click="triggerEditOnOff()"
             >
               Cancel
             </v-btn>
@@ -103,52 +103,34 @@ import { useStaffStore } from '@/stores/staff'
 
 export default defineComponent({
   name: 'DissolutionSchedule',
-  emits: ['update:onHold'],
-  setup (_, { emit }) {
+  setup () {
     const state = reactive({
       menu: false,
-      numberOfBusinesses: 0,
+      numberOfBusinessesEdit: 0,
+      numberOfBusinessesNonEdit: 0,
       numberOfBusinessesRef: null,
-      isEdit: false,
-      isOnHold: false
+      isEdit: false
     })
     const staffStore = useStaffStore()
 
-    /**
-     * Set local properties to values from the store.
-     * TODO: Update once BE work is done.
-     */
-    onMounted(() => {
-      state.numberOfBusinesses = staffStore.getDissolutionBatchSize()
-      state.isOnHold = staffStore.isDissolutionBatchOnHold()
-    })
+    /** Set local properties to values from the store. */
+    onMounted(async () => {
+      // Make the call to get the involuntary dissolution configurations array and set it in store.
+      await staffStore.getDissolutionConfigurations()
 
-    /**
-     * Update whether the dissolution batch is paused or running.
-     * Emit the status to the parent to know whether the "Paused" badge is going to be shown.
-     * TODO: Modify/Update this once the BE is done.
-     */
-    const actionBtnClicked = (): void => {
-      state.isOnHold = !staffStore.isDissolutionBatchOnHold()
-      // Emit whether on hold or not to the parent.
-      emit('update:onHold', state.isOnHold)
-      staffStore.updateDissolutionBatchOnHold(!staffStore.isDissolutionBatchOnHold())
-    }
+      // Get the batch size current value (number of businesses to be dissolved per job run)
+      const numDissolutions = staffStore.involuntaryDissolutionConfigurations.configurations.find(
+        config => config.name === 'NUM_DISSOLUTIONS_ALLOWED').value
+      state.numberOfBusinessesNonEdit = parseInt(numDissolutions)
+    })
 
     /** Edit, Cancel, or Save (successful) button is clicked. */
     const triggerEditOnOff = (): void => {
+      // set text field value
+      state.numberOfBusinessesEdit = state.numberOfBusinessesNonEdit
       state.isEdit = !state.isEdit
       // closing the menu
       state.menu = false
-    }
-
-    /**
-     * Cancel button clicked.
-     * Revert numberOfBusinesses to store value. Hide the edit components.
-     */
-    const cancelBtnClicked = (): void => {
-      state.numberOfBusinesses = staffStore.getDissolutionBatchSize()
-      triggerEditOnOff()
     }
 
     /**
@@ -158,7 +140,8 @@ export default defineComponent({
      */
     const saveBtnClicked = (): void => {
       if (state.numberOfBusinessesRef.validate()) {
-        staffStore.updateDissolutionBatchSize(state.numberOfBusinesses)
+        // staffStore.updateDissolutionBatchSize(state.numberOfBusinesses)
+        state.numberOfBusinessesNonEdit = state.numberOfBusinessesEdit
         triggerEditOnOff()
       }
     }
@@ -173,24 +156,16 @@ export default defineComponent({
       ]
     })
 
-    /** The action button text depending on whether the dissolution job is paused or running. */
-    const actionBtnText = computed(() => {
-      return state.isOnHold ? 'Resume' : 'Pause'
-    })
-
     /**
      * If non-edit, show the number of businesses into D1 from the store.
      * Otherwise, it'll be reactive to whatever is being typed in the text field.
      */
     const scheduleSummaryNumber = computed(() => {
-      return state.isEdit ? state.numberOfBusinesses : staffStore.getDissolutionBatchSize()
+      return state.isEdit ? state.numberOfBusinessesEdit : state.numberOfBusinessesNonEdit
     })
 
     return {
       ...toRefs(state),
-      actionBtnClicked,
-      actionBtnText,
-      cancelBtnClicked,
       dissolutionBatchSizeRules,
       triggerEditOnOff,
       saveBtnClicked,

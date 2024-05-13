@@ -1,5 +1,5 @@
 import { AccountStatus, AffidavitStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
-import { AccountType, GLCode, InvoluntaryDissolutionIF, ProductCode } from '@/models/Staff'
+import { AccountType, Configurations, GLCode, ProductCode } from '@/models/Staff'
 import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
 import { SyncAccountPayload, Task } from '@/models/Task'
 import { computed, reactive, toRefs } from '@vue/composition-api'
@@ -25,7 +25,7 @@ export const useStaffStore = defineStore('staff', () => {
     accountUnderReviewAdminContact: {} as Contact,
     accountUnderReviewAffidavitInfo: {} as AffidavitInformation,
     activeStaffOrgs: [] as Organization[],
-    involuntaryDissolutionBatch: {} as InvoluntaryDissolutionIF,
+    involuntaryDissolutionConfigurations: {} as Configurations,
     pendingInvitationOrgs: [] as Organization[],
     pendingStaffOrgs: [] as Organization[],
     products: [] as ProductCode[],
@@ -42,7 +42,7 @@ export const useStaffStore = defineStore('staff', () => {
     state.accountUnderReviewAdminContact = {} as Contact
     state.accountUnderReviewAffidavitInfo = {} as AffidavitInformation
     state.activeStaffOrgs = [] as Organization[]
-    state.involuntaryDissolutionBatch = {} as InvoluntaryDissolutionIF
+    state.involuntaryDissolutionConfigurations = {} as Configurations
     state.pendingInvitationOrgs = [] as Organization[]
     state.pendingStaffOrgs = [] as Organization[]
     state.products = [] as ProductCode[]
@@ -80,14 +80,13 @@ export const useStaffStore = defineStore('staff', () => {
     }
   }
 
-  /** TODO: Implement the call from BE to grab this number. */
-  function getDissolutionBatchSize (): number {
-    return state.involuntaryDissolutionBatch.batchSize || 0
-  }
-
-  /** TODO: Implement the call from BE to grab the status. */
-  function isDissolutionBatchOnHold (): boolean {
-    return state.involuntaryDissolutionBatch.onHold || false
+  /** Get the involuntary dissolution configurations array from Legal API. */
+  async function getDissolutionConfigurations (): Promise<Configurations> {
+    const response = await StaffService.getInvoluntaryDissolutionConfigurations()
+    if (response?.data && response.status === 200) {
+      state.involuntaryDissolutionConfigurations = response.data
+      return response.data
+    }
   }
 
   async function getAccountTypes (): Promise<AccountType[]> {
@@ -293,14 +292,9 @@ export const useStaffStore = defineStore('staff', () => {
   }
 
   /** TODO: Make the backend call to the number of businesses to be dissolved. */
-  function updateDissolutionBatchSize (dissolutionBatchSize: number) {
-    state.involuntaryDissolutionBatch.batchSize = dissolutionBatchSize
-  }
-
-  /** TODO: Make the backend call to the number of businesses to be dissolved. */
-  function updateDissolutionBatchOnHold (onHold: boolean) {
-    state.involuntaryDissolutionBatch.onHold = onHold
-  }
+  // function updateDissolutionBatchSize (dissolutionBatchSize: number) {
+  //   state.involuntaryDissolutionBatch.batchSize = dissolutionBatchSize
+  // }
 
   return {
     accountNotaryContact,
@@ -308,8 +302,7 @@ export const useStaffStore = defineStore('staff', () => {
     approveAccountUnderReview,
     deleteOrg,
     getAccountTypes,
-    getDissolutionBatchSize,
-    isDissolutionBatchOnHold,
+    getDissolutionConfigurations,
     getGLCode,
     getGLCodeList,
     getGLCodeFiling,
@@ -330,8 +323,6 @@ export const useStaffStore = defineStore('staff', () => {
     syncSuspendedStaffOrgs,
     syncPendingStaffOrgs,
     updateGLCodeFiling,
-    updateDissolutionBatchSize,
-    updateDissolutionBatchOnHold,
     $reset
   }
 })
