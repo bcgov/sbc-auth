@@ -97,9 +97,11 @@ def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
     if message_type == QueueMessageTypes.NSF_LOCK_ACCOUNT.value:
         org.status_code = OrgStatus.NSF_SUSPENDED.value
         org.suspended_on = datetime.now()
+        org.suspension_reason_code = data.get('suspensionReasonCode', None)
         publish_to_mailer(QueueMessageTypes.NSF_LOCK_ACCOUNT.value, data)
     elif message_type == QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value:
         org.status_code = OrgStatus.ACTIVE.value
+        org.suspension_reason_code = None
         publish_to_mailer(QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value, data)
 
     org.flush()

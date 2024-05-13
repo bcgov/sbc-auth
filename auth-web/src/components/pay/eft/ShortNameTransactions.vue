@@ -28,28 +28,35 @@
         >
           mdi-format-list-bulleted
         </v-icon>
-        {{ paymentsReceived }}
-        <span class="font-weight-regular">
-          ({{ state.totalResults }})
-        </span>
+        Payment History
       </h2>
     </template>
     <template #header-filter-slot />
     <template #item-slot-transactionDate="{ item }">
       <span>{{ formatDate(item.transactionDate, 'MMMM DD, YYYY') }}</span>
     </template>
-    <template #item-slot-depositAmount="{ item }">
-      <span>{{ formatCurrency(item.depositAmount) }}</span>
+    <template #item-slot-transactionDescription="{ item }">
+      <span>{{ item.transactionDescription }}</span>
+      <span
+        v-if="isStatementPaid(item)"
+        class="transaction-details"
+      >
+        {{ formatAccountDisplayName(item) }}
+      </span>
+    </template>
+    <template #item-slot-transactionAmount="{ item }">
+      <span>{{ formatTransactionAmount(item) }}</span>
     </template>
   </BaseVDataTable>
 </template>
 <script lang="ts">
-import { computed, defineComponent, reactive, watch } from '@vue/composition-api'
+import { defineComponent, reactive, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../../datatable/resources'
 import { EFTTransactionState } from '@/models/eft-transaction'
 import PaymentService from '@/services/payment.services'
+import { ShortNameTransactionRowType } from '@/util/constants'
 import _ from 'lodash'
 
 export default defineComponent({
@@ -69,12 +76,24 @@ export default defineComponent({
         col: 'transactionDate',
         hasFilter: false,
         minWidth: '125px',
-        value: 'Payment Received Date'
+        value: 'Date'
       },
       {
-        col: 'depositAmount',
+        col: 'transactionDescription',
         hasFilter: false,
-        minWidth: '125px',
+        minWidth: '200px',
+        value: 'Description'
+      },
+      {
+        col: 'statementId',
+        hasFilter: false,
+        minWidth: '175px',
+        value: 'Related Statement Number'
+      },
+      {
+        col: 'transactionAmount',
+        hasFilter: false,
+        minWidth: '355px',
         value: 'Amount'
       }
     ]
@@ -88,10 +107,6 @@ export default defineComponent({
       },
       loading: false,
       options: _.cloneDeep(DEFAULT_DATA_OPTIONS)
-    })
-
-    const paymentsReceived = computed<string>(() => {
-      return props.shortNameDetails.shortName ? `Payments Received from ${props.shortNameDetails.shortName}` : 'Loading...'
     })
 
     watch(() => props.shortNameDetails, () => {
@@ -131,14 +146,28 @@ export default defineComponent({
       return `${height}px`
     }
 
+    function isStatementPaid (item: any) {
+      return item?.transactionDescription === ShortNameTransactionRowType.STATEMENT_PAID
+    }
+
+    function formatTransactionAmount (item: any) {
+      if (item.transactionAmount === undefined) return ''
+      let amount = CommonUtils.formatAmount(item.transactionAmount)
+      if (isStatementPaid(item)) {
+        amount = `-${amount}`
+      }
+      return amount
+    }
+
     return {
-      formatCurrency: CommonUtils.formatAmount,
+      formatTransactionAmount,
       formatDate: CommonUtils.formatDisplayDate,
+      formatAccountDisplayName: CommonUtils.formatAccountDisplayName,
       headers,
       state,
-      paymentsReceived,
       infiniteScrollCallback,
-      calculateTableHeight
+      calculateTableHeight,
+      isStatementPaid
     }
   }
 })
@@ -165,6 +194,12 @@ export default defineComponent({
     padding-bottom: 16px;
     top: 75px !important; // prevent fixed header sliding when there is a title
   }
+}
+
+.transaction-details {
+  display: block;
+  width: 100%;
+  font-weight: normal;
 }
 
 </style>

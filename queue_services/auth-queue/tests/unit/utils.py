@@ -58,7 +58,8 @@ def helper_add_lock_unlock_event_to_queue(client, message_type: str, org_id):
     """Add event to the Queue."""
     queue_payload = {
         'accountId': org_id,
-        'accountName': 'DEV - PAD01'
+        'accountName': 'DEV - PAD01',
+        'suspensionReasonCode': 'EFT'
     }
     payload = build_request_for_queue_push(message_type, queue_payload)
     post_to_queue(client, payload)
