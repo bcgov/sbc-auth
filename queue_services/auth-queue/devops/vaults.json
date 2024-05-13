@@ -29,5 +29,14 @@
         "application": [
             "auth"
         ]
+    },
+    {
+        "vault": "gcp-queue",
+        "application": [
+            "a083gt-dev",
+            "authpay",
+            "topics",
+            "gtksf3-dev"
+        ]
     }
 ]

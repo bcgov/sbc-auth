@@ -49,5 +49,12 @@
         "application": [
             "auth"
         ]
+    },
+    {
+        "vault": "gcp-queue",
+        "application": [
+            "topics",
+            "gtksf3-dev"
+        ]
     }
 ]

@@ -97,8 +97,8 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     # PUB/SUB - SUB: account-mailer-dev
     # If blank in PUB/SUB, this should match the https endpoint the subscription is pushing to.
-    AUTH_SUB_AUDIENCE = os.getenv('AUTH_SUB_AUDIENCE')
-    VERIFY_PUBSUB_EMAILS = os.getenv('VERIFY_PUBSUB_EMAILS', 'email1,email2').split(',')
+    AUTH_AUDIENCE_SUB = os.getenv('ACCOUNT_MAILER_AUDIENCE_SUB')
+    VERIFY_PUBSUB_EMAILS = os.getenv('AUTHPAY_SERVICE_ACCOUNT', 'email1,email2').split(',')
 
     # Minio configuration values
     MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')

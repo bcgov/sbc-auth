@@ -138,7 +138,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     # PUB/SUB - PUB: account-mailer-dev, auth-event-dev
     ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
     AUTH_EVENT_TOPIC = os.getenv('AUTH_EVENT_TOPIC', 'auth-event-dev')
-    GCP_AUTH_KEY = os.getenv('GCP_AUTH_KEY', None)
+    GCP_AUTH_KEY = os.getenv('AUTHPAY_GCP_AUTH_KEY', None)
 
     # Minio configuration values
     MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')

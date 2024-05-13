@@ -19,7 +19,7 @@ def verify_jwt(session):
         claims = id_token.verify_oauth2_token(
             jwt_token,
             Request(session=session),
-            audience=current_app.config.get('AUTH_SUB_AUDIENCE')
+            audience=current_app.config.get('AUTH_AUDIENCE_SUB')
         )
         required_emails = current_app.config.get('VERIFY_PUBSUB_EMAILS')
         if claims.get('email_verified') and claims.get('email') in required_emails:
