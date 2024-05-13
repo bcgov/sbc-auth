@@ -184,9 +184,9 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
     if (this.isBtnSaved) {
       disableSaveBtn = false
     } else if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) ||
+               (this.selectedPaymentMethod === PaymentTypes.EFT && !this.eftValid) ||
                (!this.paymentMethodChanged) ||
                (this.selectedPaymentMethod === PaymentTypes.EJV) ||
-               (this.selectedPaymentMethod === PaymentTypes.EFT && !this.eftValid) ||
                this.disableSaveButtonForBCOL()) {
       disableSaveBtn = true
     }
