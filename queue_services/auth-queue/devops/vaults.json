@@ -33,10 +33,10 @@
     {
         "vault": "gcp-queue",
         "application": [
-            "a083gt-dev",
+            "a083gt",
             "authpay",
             "topics",
-            "gtksf3-dev"
+            "gtksf3"
         ]
     }
 ]

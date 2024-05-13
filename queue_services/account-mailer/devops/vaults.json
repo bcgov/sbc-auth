@@ -45,7 +45,7 @@
         "application": [
             "authpay",
             "topics",
-            "gtksf3-dev"
+            "gtksf3"
         ]
     }
 ]

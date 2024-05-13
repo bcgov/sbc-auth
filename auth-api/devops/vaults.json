@@ -54,7 +54,7 @@
         "vault": "gcp-queue",
         "application": [
             "topics",
-            "gtksf3-dev"
+            "gtksf3"
         ]
     }
 ]
