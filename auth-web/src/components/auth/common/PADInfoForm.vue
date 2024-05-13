@@ -136,6 +136,7 @@
             <div class="terms-container">
               <TermsOfUseDialog
                 :isAlreadyAccepted="isTOSAccepted"
+                :tosText="'terms and conditions'"
                 :tosType="'termsofuse_pad'"
                 :tosHeading="'Business Pre-Authorized Debit Terms and Conditions Agreement BC Registries and Online Services'"
                 :tosCheckBoxLabelAppend="'of the Business Pre-Authorized Debit Terms and Conditions for BC Registry Services'"

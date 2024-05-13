@@ -26,6 +26,7 @@
       @get-PAD-info="getPADInfo"
       @emit-bcol-info="setBcolInfo"
       @is-pad-valid="isPADValid"
+      @is-eft-valid="isEFTValid"
     />
     <v-slide-y-transition>
       <div
@@ -162,6 +163,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private errorText = ''
   private isLoading: boolean = false
   private padValid: boolean = false
+  private eftValid: boolean = false
   private paymentMethodChanged:boolean = false
   private isFuturePaymentMethodAvailable: boolean = false // set true if in between 3 days cooling period
   private isTOSandAcknowledgeCompleted:boolean = false // sert true if TOS already accepted
@@ -182,6 +184,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
     if (this.isBtnSaved) {
       disableSaveBtn = false
     } else if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) ||
+               (this.selectedPaymentMethod === PaymentTypes.EFT && !this.eftValid) ||
                (!this.paymentMethodChanged) ||
                (this.selectedPaymentMethod === PaymentTypes.EJV) ||
                this.disableSaveButtonForBCOL()) {
@@ -202,6 +205,10 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
 
   private isPADValid (isValid) {
     this.padValid = isValid
+  }
+
+  private isEFTValid (isValid) {
+    this.eftValid = isValid
   }
 
   private async mounted () {
