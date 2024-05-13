@@ -84,8 +84,8 @@ def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
     """Process a pay event to either unlock or lock an account. Source message comes from Pay-api."""
     current_app.logger.debug('>>>>>>>process_pay_lock_unlock_event>>>>>')
     message_type = event_message.type
-    data = event_message.data
-    org_id = data.get('accountId')
+    queue_data = event_message.data
+    org_id = queue_data.get('accountId')
     org: OrgModel = OrgModel.find_by_org_id(org_id)
     if org is None:
         current_app.logger.error('Unknown org for orgid %s', org_id)
@@ -97,7 +97,7 @@ def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
     if message_type == QueueMessageTypes.NSF_LOCK_ACCOUNT.value:
         org.status_code = OrgStatus.NSF_SUSPENDED.value
         org.suspended_on = datetime.now()
-        org.suspension_reason_code = data.get('suspensionReasonCode', None)
+        org.suspension_reason_code = queue_data.get('suspensionReasonCode', None)
         publish_to_mailer(QueueMessageTypes.NSF_LOCK_ACCOUNT.value, data)
     elif message_type == QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value:
         org.status_code = OrgStatus.ACTIVE.value

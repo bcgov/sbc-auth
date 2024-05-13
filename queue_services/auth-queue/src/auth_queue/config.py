@@ -79,7 +79,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     # If blank in PUB/SUB, this should match the https endpoint the subscription is pushing to.
     AUTH_AUDIENCE_SUB = os.getenv('AUTH_QUEUE_AUDIENCE_SUB')
     GCP_AUTH_KEY = os.getenv('AUTHPAY_GCP_AUTH_KEY', None)
-    VERIFY_PUBSUB_EMAILS = f'{os.getenv('AUTHPAY_SERVICE_ACCOUNT')},{os.getenv('BUSINESS_SERVICE_ACCOUNT')}'.split(',')
+    VERIFY_PUBSUB_EMAILS = f'{os.getenv("AUTHPAY_SERVICE_ACCOUNT")},{os.getenv("BUSINESS_SERVICE_ACCOUNT")}'.split(',')
 
     PAY_API_URL = os.getenv('PAY_API_URL') + os.getenv('PAY_API_VERSION')
 
