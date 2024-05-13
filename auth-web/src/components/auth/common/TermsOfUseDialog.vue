@@ -94,7 +94,6 @@
 <script lang="ts" setup>
 import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
-import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
