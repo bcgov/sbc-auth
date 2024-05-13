@@ -55,10 +55,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { computed, defineComponent, onMounted } from '@vue/composition-api'
 import { CardHeader } from '@/components'
 import DissolutionSchedule from '@/components/auth/staff/DissolutionSchedule.vue'
-import { useStaffStore } from '@/stores/staff'
 
 export default defineComponent({
   name: 'InvoluntaryDissolution',
@@ -67,8 +66,6 @@ export default defineComponent({
     DissolutionSchedule
   },
   setup () {
-    const staffStore = useStaffStore()
-
     onMounted(() => {})
 
     /**
