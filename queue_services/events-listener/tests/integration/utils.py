@@ -15,6 +15,7 @@
 import json
 
 import stan
+from auth_api.utils.enums import SuspensionReasonCode
 
 
 async def helper_add_event_to_queue(stan_client: stan.aio.client.Client,
@@ -31,7 +32,8 @@ async def helper_add_event_to_queue(stan_client: stan.aio.client.Client,
         'datacontenttype': 'application/json',
         'data': {
             'accountId': org_id,
-            'accountName': 'DEV - PAD01'
+            'accountName': 'DEV - PAD01',
+            'suspensionReasonCode': SuspensionReasonCode.OVERDUE_EFT.name
         }
     }
 

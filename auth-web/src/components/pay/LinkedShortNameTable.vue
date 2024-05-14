@@ -41,6 +41,18 @@
           </v-icon>
         </v-btn>
       </template>
+      <template #item-slot-accountName="{ item }">
+        <span>{{ item.accountName }}</span>
+        <v-chip
+          v-if="item.cfsAccountStatus === CfsAccountStatus.FREEZE"
+          small
+          label
+          color="error"
+          class="item-chip"
+        >
+          {{ SuspensionReason.NSF_SUSPENDED }}
+        </v-chip>
+      </template>
       <template #item-slot-amountOwing="{ item }">
         <span>{{ formatAmount(item.amountOwing) }}</span>
       </template>
@@ -65,7 +77,7 @@
   </div>
 </template>
 <script lang="ts">
-import { SessionStorageKeys, ShortNameStatus } from '@/util/constants'
+import { AccountStatus, CfsAccountStatus, SessionStorageKeys, ShortNameStatus, SuspensionReason } from '@/util/constants'
 import { defineComponent, onMounted, reactive, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import CommonUtils from '@/util/common-util'
@@ -237,7 +249,10 @@ export default defineComponent({
       state,
       updateFilter,
       viewDetails,
-      formatAmount
+      formatAmount,
+      CfsAccountStatus,
+      AccountStatus,
+      SuspensionReason
     }
   }
 })
@@ -258,5 +273,8 @@ export default defineComponent({
 #linked-bank-short-names {
   border: 1px solid #e9ecef;
   font-weight: bold;
+}
+.item-chip {
+  margin-left: 1em;
 }
 </style>

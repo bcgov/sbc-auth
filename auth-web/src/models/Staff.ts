@@ -59,7 +59,13 @@ export interface FilingTypeResponse {
     items: FilingType[]
 }
 
-export interface InvoluntaryDissolutionIF {
-  batchSize: number
-  onHold: boolean
+export interface InvoluntaryDissolutionConfigurationIF {
+  fullDescription: string
+  name: string
+  shortDescription: string
+  value: string
+}
+
+export interface Configurations {
+  configurations: InvoluntaryDissolutionConfigurationIF[]
 }

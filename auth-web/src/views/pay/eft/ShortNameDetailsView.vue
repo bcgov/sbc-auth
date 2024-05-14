@@ -13,10 +13,10 @@
     </v-snackbar>
     <div class="view-header flex-column">
       <h1 class="view-header__title">
-        Payment Details
+        {{ unsettledAmountHeader }}
       </h1>
       <p class="mt-3 mb-0">
-        Review and verify payment details
+        Review and verify short name details
       </p>
     </div>
 
@@ -33,7 +33,8 @@
   </v-container>
 </template>
 <script lang="ts">
-import { PropType, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { PropType, computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import CommonUtils from '@/util/common-util'
 import PaymentService from '@/services/payment.services'
 import ShortNameAccountLinkage from '@/components/pay/eft/ShortNameAccountLink.vue'
 import ShortNameTransactions from '@/components/pay/eft/ShortNameTransactions.vue'
@@ -59,6 +60,13 @@ export default defineComponent({
       await loadShortname(props.shortNameId)
     })
 
+    const unsettledAmountHeader = computed<string>(() => {
+      const details = state.shortNameDetails
+      const unsettledAmount = details.creditsRemaining !== undefined
+        ? CommonUtils.formatAmount(details.creditsRemaining) : ''
+      return `Unsettled Amount for ${details.shortName}: ${unsettledAmount}`
+    })
+
     async function onLinkAccount () {
       await loadShortname(props.shortNameId)
       state.snackbarText = `Bank short name ${state.shortNameDetails.shortName} was successfully linked.`
@@ -72,9 +80,9 @@ export default defineComponent({
 
     async function loadShortname (shortnameId: string): Promise<void> {
       try {
-        const response = await PaymentService.getEFTShortname(shortnameId)
+        const response = await PaymentService.getEFTShortnameSummary(shortnameId)
         if (response?.data) {
-          state.shortNameDetails = response.data
+          state.shortNameDetails = response.data['items'][0]
         } else {
           throw new Error('No response from getEFTShortname')
         }
@@ -86,7 +94,9 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
-      onLinkAccount
+      onLinkAccount,
+      formatCurrency: CommonUtils.formatAmount,
+      unsettledAmountHeader
     }
   }
 })
