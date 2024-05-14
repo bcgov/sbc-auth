@@ -67,6 +67,7 @@ class GcpQueue:
     def init_app(self, app: Flask):
         """Initialize the application."""
         self.gcp_auth_key = app.config.get('GCP_AUTH_KEY')
+        print(app.config.get('GCP_AUTH_KEY')[0:10])
         if self.gcp_auth_key:
             try:
                 audience = app.config.get(

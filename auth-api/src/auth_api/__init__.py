@@ -58,6 +58,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     ma.init_app(app)
     mail.init_app(app)
     queue.init_app(app)
+    print('INIT QUEUE')
+    print(app.config.get('GCP_AUTH_KEY')[1:10])
     endpoints.init_app(app)
 
     if os.getenv('FLASK_ENV', 'production') != 'testing':
