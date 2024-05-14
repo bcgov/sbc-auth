@@ -19,6 +19,7 @@ from auth_api.models import db
 from auth_api.resources.ops import bp as ops_bp
 from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
+from auth_api.utils.cache import cache
 from flask import Flask
 from sentry_sdk.integrations.flask import FlaskIntegration
 
@@ -52,6 +53,7 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
 
     db.init_app(app)
     flags.init_app(app)
+    cache.init_app(app)
     queue.init_app(app)
 
     register_endpoints(app)
