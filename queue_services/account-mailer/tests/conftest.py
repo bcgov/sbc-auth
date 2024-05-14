@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2024 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
-import asyncio
 import logging
 import os
 import random
@@ -22,13 +21,10 @@ from contextlib import contextmanager
 import pytest
 from auth_api import db as _db
 from auth_api.services.rest_service import RestService
-from flask import Flask
 from flask_migrate import Migrate, upgrade
-from nats.aio.client import Client as Nats
 from sqlalchemy import event, text
-from stan.aio.client import Client as Stan
 
-from account_mailer.config import get_named_config
+from account_mailer import create_app
 
 
 def setup_logging(conf):
@@ -55,12 +51,9 @@ def not_raises(exception):
 @pytest.fixture(scope='session')
 def app():
     """Return a session-wide application configured in TEST mode."""
-    # _app = create_app('testing')
-    _app = Flask(__name__)
-    _app.config.from_object(get_named_config('testing'))
-    _db.init_app(_app)
-    # Bypass caching.
+    _app = create_app('testing')
 
+    # Bypass caching.
     def get_service_token():
         pass
     RestService.get_service_account_token = get_service_token
@@ -221,80 +214,17 @@ def keycloak_mock(monkeypatch):
                         lambda *args, **kwargs: None)
 
 
-@pytest.fixture(scope='session')
-def stan_server(docker_services):
-    """Create the nats / stan services that the integration tests will use."""
-    if os.getenv('TEST_NATS_DOCKER'):
-        docker_services.start('nats')
-        time.sleep(2)
-    # TODO get the wait part working, as opposed to sleeping for 2s
-    # public_port = docker_services.wait_for_service("nats", 4222)
-    # dsn = "{docker_services.docker_ip}:{public_port}".format(**locals())
-    # return dsn
+@pytest.fixture(autouse=True)
+def mock_queue_auth(mocker):
+    """Mock queue authorization."""
+    mocker.patch('auth_api.services.gcp_queue.gcp_auth.verify_jwt', return_value='')
 
 
-@pytest.fixture(scope='function')
-@pytest.mark.asyncio
-async def stan(event_loop, client_id):
-    """Create a stan connection for each function, to be used in the tests."""
-    nc = Nats()
-    sc = Stan()
-    cluster_name = 'test-cluster'
+@pytest.fixture(autouse=True)
+def mock_pub_sub_call(monkeypatch):
+    """Mock pub sub call."""
 
-    await nc.connect(io_loop=event_loop, name='entity.filing.tester')
+    def publish(topic, message):
+        return True
 
-    await sc.connect(cluster_name, client_id, nats=nc)
-
-    yield sc
-
-    await sc.close()
-    await nc.close()
-
-
-@pytest.fixture(scope='function')
-@pytest.mark.asyncio
-async def events_stan(app, event_loop, client_id):
-    """Create a stan connection for each function.
-
-    Uses environment variables for the cluster name.
-    """
-    nc = Nats()
-    sc = Stan()
-
-    await nc.connect(io_loop=event_loop)
-
-    cluster_name = os.getenv('STAN_CLUSTER_NAME')
-
-    if not cluster_name:
-        raise ValueError('Missing env variable: STAN_CLUSTER_NAME-')
-
-    await sc.connect(cluster_name, client_id, nats=nc)
-
-    yield sc
-
-    await sc.close()
-    await nc.close()
-
-
-@pytest.fixture(scope='function')
-def future(event_loop):
-    """Return a future that is used for managing function tests."""
-    _future = asyncio.Future(loop=event_loop)
-    return _future
-
-
-@pytest.fixture
-def create_mock_coro(mocker, monkeypatch):
-    """Return a mocked coroutine, and optionally patch-it in."""
-
-    def _create_mock_patch_coro(to_patch=None):
-        mock = mocker.Mock()
-
-        async def _coro(*args, **kwargs):
-            return mock(*args, **kwargs)
-
-        if to_patch:  # <-- may not need/want to patch anything
-            monkeypatch.setattr(to_patch, _coro)
-        return mock, _coro
-
-    return _create_mock_patch_coro
+    monkeypatch.setattr('auth_api.services.gcp_queue.queue.publish', publish)

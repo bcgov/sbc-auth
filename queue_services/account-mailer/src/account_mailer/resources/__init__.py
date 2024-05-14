@@ -1,0 +1,1 @@
+"""Module to initialize resources."""

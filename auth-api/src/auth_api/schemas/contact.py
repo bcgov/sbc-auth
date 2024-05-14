@@ -34,7 +34,7 @@ class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-
     phone = fields.String(data_key='phone')
 
 
-class ContactSchemaPublic(BaseSchema):
+class ContactSchemaPublic(BaseSchema):  # pylint: disable=too-many-ancestors
     """This is the public schema for the Contact model it only includes a masked email."""
 
     class Meta(BaseSchema.Meta):  # pylint: disable=too-few-public-methods

@@ -15,3 +15,50 @@
 
 This module is the service worker for applying filings to the Business Database structure.
 """
+from __future__ import annotations
+
+import os
+
+import sentry_sdk
+from auth_api.models import db
+from auth_api.resources.ops import bp as ops_bp
+from auth_api.services.flags import flags
+from auth_api.services.gcp_queue import queue
+from flask import Flask
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+from account_mailer import config
+from account_mailer.resources.worker import bp as worker_endpoint
+
+
+def register_endpoints(app: Flask):
+    """Register endpoints with the flask application."""
+    # Allow base route to match with, and without a trailing slash
+    app.url_map.strict_slashes = False
+
+    app.register_blueprint(
+        url_prefix='/',
+        blueprint=worker_endpoint,
+    )
+    app.register_blueprint(ops_bp)
+
+
+def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
+    """Return a configured Flask App using the Factory method."""
+    app = Flask(__name__)
+    app.config.from_object(config.get_named_config(run_mode))
+
+    if str(app.config.get('SENTRY_ENABLE')).lower() == 'true':
+        if app.config.get('SENTRY_DSN', None):
+            sentry_sdk.init(  # pylint: disable=abstract-class-instantiated
+                dsn=app.config.get('SENTRY_DSN'),
+                integrations=[FlaskIntegration()]
+            )
+
+    db.init_app(app)
+    flags.init_app(app)
+    queue.init_app(app)
+
+    register_endpoints(app)
+
+    return app

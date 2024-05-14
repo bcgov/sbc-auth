@@ -21,13 +21,6 @@
         ]
     },
     {
-        "vault": "nats",
-        "application": [
-            "base",
-            "account-mailer"
-        ]
-    },
-    {
         "vault": "relationship",
         "application": [
             "postgres-auth",
@@ -45,6 +38,14 @@
         "vault": "launchdarkly",
         "application": [
             "auth"
+        ]
+    },
+    {
+        "vault": "gcp-queue",
+        "application": [
+            "authpay",
+            "topics",
+            "gtksf3"
         ]
     }
 ]

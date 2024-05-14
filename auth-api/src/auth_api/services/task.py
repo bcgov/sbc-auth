@@ -22,6 +22,7 @@ from typing import Dict, List
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models import Membership as MembershipModel
@@ -181,7 +182,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
                 f'{membership_id}')
             admin_emails = user.contacts[0].contact.email if user.contacts else ''
             account_id = task_model.account_id
-            mailer_type = 'resubmitBceidAdmin'
+            mailer_type = QueueMessageTypes.RESUBMIT_BCEID_ADMIN_NOTIFICATION.value
 
         else:
             create_account_signin_route = urllib.parse. \
@@ -189,7 +190,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
                            f'{org.id}')
             admin_emails = UserService.get_admin_emails_for_org(org.id)
             account_id = org.id
-            mailer_type = 'resubmitBceidOrg'
+            mailer_type = QueueMessageTypes.RESUBMIT_BCEID_ORG_NOTIFICATION.value
 
         if admin_emails == '':
             current_app.logger.error('No admin email record for org id %s', org.id)
@@ -206,7 +207,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
             f'{create_account_signin_route}'
         }
         try:
-            publish_to_mailer(mailer_type, org_id=account_id, data=data)
+            publish_to_mailer(mailer_type, data=data)
             current_app.logger.debug('<send_approval_notification_to_member')
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_notification_to_member failed')

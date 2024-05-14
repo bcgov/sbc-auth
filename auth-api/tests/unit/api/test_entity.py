@@ -445,7 +445,7 @@ def test_add_entity_idempotent(client, jwt, session):  # pylint:disable=unused-a
     assert schema_utils.validate(rv.json, 'business')[0]
 
 
-def test_reset_passcode_success(client, jwt, session, stan_server):  # pylint:disable=unused-argument
+def test_reset_passcode_success(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an entity passcode can be reset."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),

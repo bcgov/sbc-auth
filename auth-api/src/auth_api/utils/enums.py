@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2024 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -351,16 +351,6 @@ class KeycloakGroupActions(Enum):
 
     ADD_TO_GROUP = 'ADD_TO_GROUP'
     REMOVE_FROM_GROUP = 'REMOVE_FROM_GROUP'
-
-
-class NotificationTypes(Enum):
-    """Account mailer notification types."""
-
-    DEFAULT_APPROVED_PRODUCT = 'prodPackageApprovedNotification'
-    DEFAULT_REJECTED_PRODUCT = 'prodPackageRejectedNotification'
-    DETAILED_CONFIRMATION_PRODUCT = 'productConfirmationNotification'
-    DETAILED_APPROVED_PRODUCT = 'productApprovedNotificationDetailed'
-    DETAILED_REJECTED_PRODUCT = 'productRejectedNotificationDetailed'
 
 
 class NRActionCodes(Enum):

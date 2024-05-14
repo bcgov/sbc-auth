@@ -20,7 +20,6 @@ from auth_api.models import User as UserModel
 from auth_api.services.org import Org as OrgService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import AuthHeaderType, ContentType
-from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
 
@@ -30,7 +29,7 @@ from account_mailer.services import minio_service
 
 def process(email_msg: dict, token: str) -> dict:
     """Build the email for PAD Confirmation notification."""
-    logger.debug('email_msg notification: %s', email_msg)
+    current_app.logger.debug('email_msg notification: %s', email_msg)
     # fill in template
 
     username = email_msg.get('padTosAcceptedBy')
@@ -119,7 +118,7 @@ def _get_pad_confirmation_report_pdf(email_msg, token):
                                        additional_headers={'Accept': 'application/pdf'})
     pdf_attachment = None
     if report_response.status_code != 200:
-        logger.error('Failed to get pdf')
+        current_app.logger.error('Failed to get pdf')
     else:
         pdf_attachment = base64.b64encode(report_response.content)
 

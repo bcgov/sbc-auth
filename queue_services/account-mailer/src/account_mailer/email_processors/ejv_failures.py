@@ -15,7 +15,6 @@
 
 import base64
 
-from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
 
@@ -26,7 +25,7 @@ from account_mailer.services import minio_service
 
 def process(email_msg: dict) -> dict:
     """Build the email for JV failures."""
-    logger.debug('ejv_failures: %s', email_msg)
+    current_app.logger.debug('ejv_failures: %s', email_msg)
     # fill in template
     failed_jv_file_name = email_msg.get('fileName')
     file_location = email_msg.get('minioLocation')

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2024 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -14,21 +14,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""s2i based launch script to run the service."""
-import asyncio
+"""Provides the WSGI entry point for running the application."""
+import os
 
-
-from account_mailer.worker import APP_CONFIG, cb_subscription_handler, qsm
+from account_mailer import create_app
+app = create_app()
 
 if __name__ == '__main__':
-
-    # my_config = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
-
-    event_loop = asyncio.get_event_loop()
-    event_loop.run_until_complete(qsm.run(loop=event_loop,
-                                          config=APP_CONFIG,
-                                          callback=cb_subscription_handler))
-    try:
-        event_loop.run_forever()
-    finally:
-        event_loop.close()
+    server_port = os.environ.get('PORT', '5002')
+    app.run(debug=False, port=server_port, host='0.0.0.0')
