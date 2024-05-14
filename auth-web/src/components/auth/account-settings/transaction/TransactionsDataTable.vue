@@ -115,7 +115,7 @@
             >
               mdi-alert
             </v-icon>
-            <b>{{ invoiceStatusDisplay[item.statusCode] }}</b>
+            <b>{{ getInvoiceStatus(item) }}</b>
             <br>
             <span
               v-if="item.updatedOn"
@@ -143,12 +143,12 @@
 
 <script lang="ts">
 import { BaseVDataTable, DatePicker, IconTooltip } from '@/components'
+import { InvoiceStatus, PaymentTypes } from '@/util/constants'
 import { Ref, computed, defineComponent, nextTick, ref, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import { DataOptions } from 'vuetify'
-import { InvoiceStatus } from '@/util/constants'
 import { Transaction } from '@/models'
 import _ from 'lodash'
 import { invoiceStatusDisplay } from '@/resources/display-mappers'
@@ -170,6 +170,15 @@ export default defineComponent({
     setViewAll(props.extended)
 
     const getHeaders = computed(() => props.headers)
+
+    const getInvoiceStatus = (item: Transaction) => {
+      // Special case for Online Banking - it shouldn't show NSF, should show Pending.
+      if (item.paymentMethod === PaymentTypes.ONLINE_BANKING &&
+        item.statusCode === InvoiceStatus.SETTLEMENT_SCHEDULED) {
+        return invoiceStatusDisplay[InvoiceStatus.PENDING]
+      }
+      return invoiceStatusDisplay[item.statusCode]
+    }
 
     // date picker stuff
     const dateRangeReset = ref(0)
@@ -264,7 +273,8 @@ export default defineComponent({
       displayDate,
       scrollToDatePicker,
       updateDateRange,
-      loadTransactionList
+      loadTransactionList,
+      getInvoiceStatus
     }
   }
 })
