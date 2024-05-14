@@ -67,7 +67,6 @@ class GcpQueue:
     def init_app(self, app: Flask):
         """Initialize the application."""
         self.gcp_auth_key = app.config.get('GCP_AUTH_KEY')
-        print(app.config.get('GCP_AUTH_KEY')[0:10])
         if self.gcp_auth_key:
             try:
                 audience = app.config.get(
@@ -83,21 +82,14 @@ class GcpQueue:
                 credentials = jwt.Credentials.from_service_account_info(self.service_account_info, audience=audience)
                 self.credentials_pub = credentials.with_claims(audience=publisher_audience)
             except Exception as error:  # noqa: B902
-                print('error creating connection?')
-                print(error)
                 raise Exception('Unable to create a connection', error) from error  # pylint: disable=W0719
 
     @property
     def publisher(self):
         """Returns the publisher."""
-        if self.credentials_pub:
-            print('Choosing credentials')
+        if not self._publisher and self.credentials_pub:
             self._publisher = pubsub_v1.PublisherClient(credentials=self.credentials_pub)
-        else:
-            print('no cred!')
-            print(self._publisher)
-            print(self.credentials_pub)
-            print(self.gcp_auth_key[0:20])
+        if not self._publisher:
             self._publisher = pubsub_v1.PublisherClient()
         return self._publisher
 
