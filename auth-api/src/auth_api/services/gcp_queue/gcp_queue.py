@@ -83,14 +83,20 @@ class GcpQueue:
                 credentials = jwt.Credentials.from_service_account_info(self.service_account_info, audience=audience)
                 self.credentials_pub = credentials.with_claims(audience=publisher_audience)
             except Exception as error:  # noqa: B902
+                print('error creating connection?')
+                print(error)
                 raise Exception('Unable to create a connection', error) from error  # pylint: disable=W0719
 
     @property
     def publisher(self):
         """Returns the publisher."""
         if not self._publisher and self.credentials_pub:
+            print('Choosing credentials')
             self._publisher = pubsub_v1.PublisherClient(credentials=self.credentials_pub)
         else:
+            print('no cred!')
+            print(self._printer)
+            print(self.credentials_pub)
             self._publisher = pubsub_v1.PublisherClient()
         return self._publisher
 
