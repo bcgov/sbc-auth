@@ -90,12 +90,12 @@ class GcpQueue:
     @property
     def publisher(self):
         """Returns the publisher."""
-        if not self._publisher and self.credentials_pub:
+        if self.credentials_pub:
             print('Choosing credentials')
             self._publisher = pubsub_v1.PublisherClient(credentials=self.credentials_pub)
         else:
             print('no cred!')
-            print(self._printer)
+            print(self._publisher)
             print(self.credentials_pub)
             print(self.gcp_auth_key[0:20])
             self._publisher = pubsub_v1.PublisherClient()
