@@ -97,7 +97,7 @@ class GcpQueue:
             print('no cred!')
             print(self._printer)
             print(self.credentials_pub)
-            print(self.gcp_auth_key)
+            print(self.gcp_auth_key[0:20])
             self._publisher = pubsub_v1.PublisherClient()
         return self._publisher
 
