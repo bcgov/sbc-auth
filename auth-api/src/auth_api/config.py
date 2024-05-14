@@ -135,14 +135,10 @@ class _Config:  # pylint: disable=too-few-public-methods
     LEAR_AFFILIATION_DETAILS_URL = f'{LEGAL_API_URL + LEGAL_API_VERSION_2}/businesses/search'
     NAMEX_AFFILIATION_DETAILS_URL = f'{NAMEX_API_URL}/requests/search'
 
-    # NATS Config
-    NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(',')
-    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
-    NATS_MAILER_CLIENT_NAME = os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
-    NATS_MAILER_SUBJECT = os.getenv('NATS_MAILER_SUBJECT', 'account.mailer')
-
-    NATS_ACTIVITY_SUBJECT = os.getenv('NATS_ACTIVITY_SUBJECT', 'account.activity.events')
-    NATS_ACTIVITY_CLIENT_NAME = os.getenv('NATS_ACTIVITY_CLIENT_NAME', 'account.events.worker')
+    # PUB/SUB - PUB: account-mailer-dev, auth-event-dev
+    ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
+    AUTH_EVENT_TOPIC = os.getenv('AUTH_EVENT_TOPIC', 'auth-event-dev')
+    GCP_AUTH_KEY = os.getenv('AUTHPAY_GCP_AUTH_KEY', None)
 
     # Minio configuration values
     MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
@@ -325,7 +321,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     MINIO_SECURE = False
 
     STAFF_ADMIN_EMAIL = 'test@test.com'
-    NATS_MAILER_CLIENT_NAME = 'account.mailer.worker'
+    ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
 
     API_GW_CONSUMERS_API_URL = 'https://bcregistry-bcregistry-mock.apigee.net/mockTarget'
     API_GW_CONSUMERS_SANDBOX_API_URL = 'https://bcregistry-bcregistry-mock.apigee.net/mockTarget'

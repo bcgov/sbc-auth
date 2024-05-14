@@ -23,13 +23,6 @@
             "accounts"
         ]
     },
-    {
-        "vault": "nats",
-        "application": [
-            "base",
-            "account-mailer"
-        ]
-    },
 	{
         "vault": "relationship",
         "application": [
@@ -55,6 +48,13 @@
         "vault": "launchdarkly",
         "application": [
             "auth"
+        ]
+    },
+    {
+        "vault": "gcp-queue",
+        "application": [
+            "topics",
+            "gtksf3"
         ]
     }
 ]

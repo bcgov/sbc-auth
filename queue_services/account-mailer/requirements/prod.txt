@@ -2,8 +2,6 @@ Flask
 jsonschema==4.17.3
 python-dotenv
 sentry-sdk[flask]
-asyncio-nats-client
-asyncio-nats-streaming
 pycountry
 Werkzeug<2
 jaeger-client
@@ -13,3 +11,5 @@ Jinja2==3.0.3
 markupsafe==2.0.1
 protobuf~=3.19.5
 launchdarkly-server-sdk==8.2.1
+cachecontrol
+urllib3==1.26.18

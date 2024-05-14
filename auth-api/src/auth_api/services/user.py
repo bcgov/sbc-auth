@@ -23,6 +23,7 @@ from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api import status as http_status
 from auth_api.models.dataclass import Activity
@@ -242,7 +243,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             'contextUrl': login_url
         }
         try:
-            publish_to_mailer('otpAuthenticatorResetNotification', org_id=org_id, data=data)
+            publish_to_mailer(QueueMessageTypes.OTP_AUTHENTICATOR_RESET_NOTIFICATION.value, data=data)
             current_app.logger.debug('<send_otp_authenticator_reset_notification')
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.RESET_2FA.value,
                                                            name=recipient_email))

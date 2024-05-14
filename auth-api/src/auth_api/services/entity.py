@@ -19,6 +19,7 @@ from typing import Tuple
 
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -196,7 +197,8 @@ class Entity:
                 'isStaffInitiated': user_from_context.is_staff()
             }
             publish_to_mailer(
-                notification_type='resetPasscode', business_identifier=business_identifier, data=mailer_payload
+                notification_type=QueueMessageTypes.RESET_PASSCODE.value,
+                data=mailer_payload
             )
 
         entity = Entity(entity)

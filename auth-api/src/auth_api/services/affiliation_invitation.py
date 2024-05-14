@@ -22,6 +22,7 @@ from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sbc_common_components.utils.enums import QueueMessageTypes
 from sqlalchemy.exc import DataError
 
 from auth_api.config import get_named_config
@@ -42,8 +43,8 @@ from auth_api.services.user import User as UserService
 from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
-from ..schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
 
+from ..schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.util import escape_wam_friendly_url
 from .authorization import check_auth
@@ -478,7 +479,7 @@ class AffiliationInvitation:
             'emailAddresses': email_addresses,
             'orgName': from_org_name
         }
-        notification_type = 'affiliationInvitation'
+        notification_type = QueueMessageTypes.AFFILIATION_INVITATION.value
 
         if affiliation_invitation_type == AffiliationInvitationType.EMAIL.value:
             # if MAGIC LINK type, add data for magic link
@@ -501,14 +502,14 @@ class AffiliationInvitation:
             data['toOrgBranchName'] = affiliation_invitation.to_org.branch_name
 
             if is_authorized is not None:
-                notification_type = 'affiliationInvitationRequestAuthorization'
+                notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value
                 data['isAuthorized'] = is_authorized
             else:
-                notification_type = 'affiliationInvitationRequest'
+                notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value
                 data['additionalMessage'] = affiliation_invitation.additional_message
 
         try:
-            publish_to_mailer(notification_type=notification_type, org_id=from_org_id, data=data)
+            publish_to_mailer(notification_type=notification_type, data=data)
         except BusinessException as exception:
             affiliation_invitation.invitation_status_code = InvitationStatus.FAILED.value
             affiliation_invitation.save()
