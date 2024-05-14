@@ -2,7 +2,7 @@ CacheControl==0.14.0
 Flask==1.1.2
 Jinja2==3.0.3
 MarkupSafe==2.0.1
-Werkzeug==1.0.1
+Werkzeug==3.0.3
 attrs==23.2.0
 blinker==1.8.1
 cachetools==5.3.3

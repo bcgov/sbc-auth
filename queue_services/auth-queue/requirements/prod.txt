@@ -4,7 +4,7 @@ python-dotenv
 sentry-sdk[flask]
 pycountry
 jaeger-client
-Werkzeug<2
+Werkzeug<4
 attrs
 python-dateutil
 itsdangerous==2.0.1
