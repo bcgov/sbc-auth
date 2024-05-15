@@ -50,6 +50,7 @@ from .product_code import ProductCode
 from .product_subscription import ProductSubscription
 from .product_subscriptions_status import ProductSubscriptionsStatus
 from .product_type_code import ProductTypeCode
+from .pubsub_message_processing import PubSubMessageProcessing
 from .suspension_reason_code import SuspensionReasonCode
 from .task import Task
 from .user import User
