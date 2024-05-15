@@ -34,5 +34,5 @@ tornado==6.4
 urllib3==1.26.18
 zipp==3.18.1
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
--e git+https://github.com/seeker25/sbc-auth.git@queue_upgrades#egg=auth-api&subdirectory=auth-api
+-e git+https://github.com/bcgov/sbc-auth.git@queue_fixess#egg=auth-api&subdirectory=auth-api
 git+https://github.com/daxiom/simple-cloudevent.py.git
