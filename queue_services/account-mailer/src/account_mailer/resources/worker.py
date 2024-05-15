@@ -89,6 +89,7 @@ def is_message_processed(event_message):
     db.session.commit()
     return False
 
+
 def handle_drawdown_request(message_type, email_msg):
     """Handle the drawdown request message."""
     if message_type != QueueMessageTypes.REFUND_DRAWDOWN_REQUEST.value:
