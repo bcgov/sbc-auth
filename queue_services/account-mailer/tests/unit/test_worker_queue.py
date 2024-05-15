@@ -71,7 +71,7 @@ def test_duplicate_messages(app, session, client):
         mock_send.assert_not_called
 
 
-def test_duplicate_messages(app, session, client):
+def test_lock_account_mailer_queue(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
     user = factory_user_model_with_contact()
     org = factory_org_model()
