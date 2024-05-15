@@ -15,10 +15,12 @@ import AccountCreationSuccessView from '@/views/auth/create-account/AccountCreat
 import AccountDeactivate from '@/views/auth/AccountDeactivate.vue'
 import AccountFreezeUnlockView from '@/views/auth/account-freeze/AccountFreezeUnlockView.vue'
 import AccountFreezeView from '@/views/auth/account-freeze/AccountFreezeView.vue'
+import AccountHoldView from '@/views/auth/account-freeze/AccountHoldView.vue'
 import AccountInstructions from '@/components/auth/create-account/non-bcsc/AccountInstructions.vue'
 import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.vue'
 import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
 import AccountSetupLanding from '@/views/auth/create-account/AccountSetupLanding.vue'
+import AccountSuspendedUnlockView from '@/views/auth/account-freeze/AccountSuspendedUnlockView.vue'
 import AccountSwitching from '@/views/auth/AccountSwitching.vue'
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
@@ -418,6 +420,20 @@ export function getRoutes (): RouteConfig[] {
       path: '/account-freeze-nsf',
       name: 'account-freeze-nsf',
       component: AccountFreezeUnlockView,
+      props: true,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/account-unlock',
+      name: 'account-unlock',
+      component: AccountSuspendedUnlockView,
+      props: true,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/account-hold',
+      name: 'account-hold',
+      component: AccountHoldView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },

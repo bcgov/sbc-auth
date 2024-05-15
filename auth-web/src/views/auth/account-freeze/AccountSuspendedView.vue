@@ -12,10 +12,10 @@
           color="error"
           class="mb-6"
         >
-          mdi-lock-outline
+          mdi-alert-circle-outline
         </v-icon>
         <h1 data-test="header-account-suspend">
-          Account Suspended
+          Your Account is Suspended
         </h1>
         <div
           v-if="isAdmin"
@@ -33,8 +33,14 @@
           v-else
           data-test="div-is-user"
         >
-          <p class="mt-8 mb-10">
-            Your account is suspended. Please contact the account administrator
+          <p class="mt-4">
+            Your account is suspended from: <span class="font-weight-bold">May 10, 2024.</span>
+          </p>
+          <p class="mt-4">
+            Please contact the account administrator to reactive your account.
+          </p>
+          <p class="mt-4 mb-10">
+            Account Administrator Email: <a href="mailto:rodrigo.barraza@gov.bc.ca">rodrigo.barraza@gov.bc.ca</a>
           </p>
         </div>
       </v-col>

@@ -25,6 +25,9 @@
           class="step-divider mt-n1 mb-n1"
         />
       </template>
+      <p class="assistance-text">
+        If you need further assistance, reach us at <span class="font-weight-bold">1-877-526-1526</span>
+      </p>
     </v-container>
     <v-divider
       vertical
@@ -393,5 +396,17 @@ export default class Stepper extends Vue {
 
   .error + hr {
     display: none;
+  }
+  .assistance-text {
+    border-top: 1px solid #e0e0e0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 256px;
+    margin: 32px;
+    padding-top: 20px;
+    padding-bottom: 32px;
+    text-align: center;
+    color: #495057;
   }
 </style>
