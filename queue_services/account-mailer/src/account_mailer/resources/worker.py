@@ -443,6 +443,7 @@ def handle_other_messages(message_type, email_msg):
                     )
         template_name = TemplateType[f'{QueueMessageTypes(message_type).name}_TEMPLATE_NAME'].value
     else:
+        current_app.logger.error('Unknown message type: %s', message_type)
         return
 
     kwargs = {
