@@ -42,7 +42,7 @@ describe('AccountSuspendedView.vue', () => {
   })
 
   it('Validate is-user message', () => {
-    expect(wrapper.find('h1').text()).toBe('Account Suspended')
+    expect(wrapper.find('h1').text()).toBe('Your Account is Suspended')
     expect(wrapper.find('[data-test="div-is-user"]').text()).toBe('Your account is suspended. ' +
     'Please contact the account administrator')
     expect(wrapper.find('[data-test="div-is-admin"]').exists()).toBeFalsy()
@@ -51,7 +51,7 @@ describe('AccountSuspendedView.vue', () => {
   it('Validate is-admin message', async () => {
     wrapper.setProps({ isAdmin: true })
     await flushPromises()
-    expect(wrapper.find('h1').text()).toBe('Account Suspended')
+    expect(wrapper.find('h1').text()).toBe('Your Account is Suspended')
     const divAdminText = wrapper.find('[data-test="div-is-admin"]').text()
     expect(divAdminText).toContain('Your account is suspended. For more information, please contact the BC Online ' +
     'Partnership Office at: Email: bconline@gov.bc.caTelephone: 1-800-663-6102')
