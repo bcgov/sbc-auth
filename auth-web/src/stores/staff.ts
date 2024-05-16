@@ -295,6 +295,7 @@ export const useStaffStore = defineStore('staff', () => {
   async function updateDissolutionConfigurations (configurations: Configurations) {
     const response = await StaffService.updateInvoluntaryDissolutionConfigurations(configurations)
     if (response?.data && response.status === 200) {
+      state.involuntaryDissolutionConfigurations = response.data
       return response.data
     }
   }
