@@ -878,9 +878,9 @@ class Org:  # pylint: disable=too-many-public-methods
         current_app.logger.debug('<send_approved_rejected_notification')
 
         if org_status == OrgStatus.ACTIVE.value:
-            notification_type = QueueMessageTypes.NON_BCSC_ORG_APPROVED.value
+            notification_type = QueueMessageTypes.NON_BCSC_ORG_APPROVED_NOTIFICATION.value
         elif org_status == OrgStatus.REJECTED.value:
-            notification_type = QueueMessageTypes.NON_BCSC_ORG_REJECTED.value
+            notification_type = QueueMessageTypes.NON_BCSC_ORG_REJECTED_NOTIFICATION.value
         else:
             return  # Don't send mail for any other status change
         app_url = f"{origin_url}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}"
