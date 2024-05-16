@@ -1,7 +1,7 @@
 """This model manages pubsub message processing.
 
 NOTE: Only use this when it's not possible to use other indicators to track message processing.
-      Currently used by the account-mailer. This prevents duplicates.
+      Currently used by the account-mailer / auth-queue. This prevents duplicates.
 """
 import datetime as dt
 import pytz
