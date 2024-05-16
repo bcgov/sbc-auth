@@ -113,6 +113,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { InvoluntaryDissolutionConfigNames } from '@/util/constants'
 import { useStaffStore } from '@/stores/staff'
 
 export default defineComponent({
@@ -155,10 +156,10 @@ export default defineComponent({
      */
     const saveBtnClicked = async (): Promise<void> => {
       if (state.numberOfBusinessesRef.validate()) {
-        state.isSaving = true  // show the spinner
+        state.isSaving = true // show the spinner
         // Update store configurations array with the new number of inputted batch size
         staffStore.involuntaryDissolutionConfigurations.configurations.find((config, index) => {
-          if (config.name === 'NUM_DISSOLUTIONS_ALLOWED') {
+          if (config.name === InvoluntaryDissolutionConfigNames.NUM_DISSOLUTIONS_ALLOWED) {
             staffStore.involuntaryDissolutionConfigurations.configurations[index].value = String(state.numberOfBusinessesEdit)
           }
         })
@@ -169,7 +170,7 @@ export default defineComponent({
         } catch (err) {
           console.error(err)
         }
-        state.isSaving = false  // hide the spinner
+        state.isSaving = false // hide the spinner
         triggerEditOnOff()
       }
     }
