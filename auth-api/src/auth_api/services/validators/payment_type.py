@@ -39,6 +39,7 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
         OrgType.SBC_STAFF: non_ejv_payment_methods,
         OrgType.STAFF: non_ejv_payment_methods,
     }
+    payment_type = None
     if access_type == AccessType.GOVM.value:
         payment_type = PaymentMethod.EJV.value
     elif selected_payment_method:

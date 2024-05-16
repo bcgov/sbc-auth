@@ -226,6 +226,7 @@ def check_auth(**kwargs):
         if product_code_in_jwt == 'ALL':  # Product code for super admin service account (sbc-auth-admin)
             return
 
+        auth = None
         if business_identifier:
             auth = Authorization.get_user_authorizations_for_entity(business_identifier)
         elif org_identifier:
