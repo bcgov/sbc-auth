@@ -52,4 +52,8 @@ export default class StaffService {
   static async getInvoluntaryDissolutionConfigurations (): Promise<AxiosResponse<Configurations>> {
     return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/admin/configurations`)
   }
+
+  static async updateInvoluntaryDissolutionConfigurations (configurations: Configurations): Promise<AxiosResponse<Configurations>> {
+    return axios.put(`${ConfigHelper.getLegalAPIV2Url()}/admin/configurations`, configurations)
+  }
 }
