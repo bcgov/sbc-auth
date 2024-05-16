@@ -657,3 +657,9 @@ export enum CfsAccountStatus {
     INACTIVE = 'INACTIVE',
     FREEZE = 'FREEZE'
 }
+
+export enum AccountType {
+    BUSINESS = 'business',
+    GOVN = 'govn',
+    INDIVIDUAL = 'individual'
+}

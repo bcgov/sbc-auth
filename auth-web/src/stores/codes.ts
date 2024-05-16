@@ -10,15 +10,19 @@ export const useCodesStore = defineStore('codes', () => {
   const suspensionReasonCodeTable = 'suspension_reason_codes'
 
   const state = reactive({
+    allBusinessTypeCodes: [] as Code[],
     businessSizeCodes: [] as Code[],
     businessTypeCodes: [] as Code[],
+    governmentTypeCodes: [] as Code[],
     onholdReasonCodes: [] as Code[],
     suspensionReasonCodes: [] as Code[]
   })
 
   function $reset () {
+    state.allBusinessTypeCodes = []
     state.businessSizeCodes = []
     state.businessTypeCodes = []
+    state.governmentTypeCodes = []
     state.onholdReasonCodes = []
     state.suspensionReasonCodes = []
   }
@@ -33,15 +37,25 @@ export const useCodesStore = defineStore('codes', () => {
     return []
   }
 
-  async function getBusinessTypeCodes (): Promise<Code[]> {
-    const response = await CodesService.getCodes(this.businessTypeCodeTable)
+  async function fetchAllBusinessTypeCodes (): Promise<void> {
+    const response = await CodesService.getCodes(businessTypeCodeTable)
     if (response?.data && response.status === 200) {
-      const result = response.data.sort((a, b) => a.desc.localeCompare(b.desc))
-      state.businessTypeCodes = result
-      return result
+      state.allBusinessTypeCodes = response.data
+    } else {
+      state.allBusinessTypeCodes = []
     }
-    state.businessTypeCodes = []
-    return []
+  }
+
+  function getBusinessTypeCodes (): Code[] {
+    const filteredCodes = state.allBusinessTypeCodes.filter(code => code.isBusiness)
+    state.businessTypeCodes = filteredCodes.sort((a, b) => a.desc.localeCompare(b.desc))
+    return state.businessTypeCodes
+  }
+
+  function getGovernmentTypeCodes (): Code[] {
+    const filteredCodes = state.allBusinessTypeCodes.filter(code => code.isGovernmentAgency)
+    state.governmentTypeCodes = filteredCodes.sort((a, b) => a.desc.localeCompare(b.desc))
+    return state.governmentTypeCodes
   }
 
   async function getCodes (): Promise<Code[]> {
@@ -64,9 +78,12 @@ export const useCodesStore = defineStore('codes', () => {
     ...toRefs(state),
     businessSizeCodeTable,
     businessTypeCodeTable,
+    fetchAllBusinessTypeCodes,
     getBusinessSizeCodes,
     getBusinessTypeCodes,
+    getBusinessTypeCodesDelete,
     getCodes,
+    getGovernmentTypeCodes,
     getOnholdReasonCodes,
     onholdReasonCodeTable,
     suspensionReasonCodeTable,
