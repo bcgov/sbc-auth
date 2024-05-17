@@ -1,3 +1,5 @@
+import { InvoluntaryDissolutionConfigNames } from '@/util/constants'
+
 export interface ProductCode {
     code: string
     default: boolean
@@ -61,7 +63,7 @@ export interface FilingTypeResponse {
 
 export interface InvoluntaryDissolutionConfigurationIF {
   fullDescription: string
-  name: string
+  name: InvoluntaryDissolutionConfigNames
   shortDescription: string
   value: string
 }

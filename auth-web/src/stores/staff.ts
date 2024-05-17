@@ -291,10 +291,14 @@ export const useStaffStore = defineStore('staff', () => {
     return response?.data || {}
   }
 
-  /** TODO: Make the backend call to the number of businesses to be dissolved. */
-  // function updateDissolutionBatchSize (dissolutionBatchSize: number) {
-  //   state.involuntaryDissolutionBatch.batchSize = dissolutionBatchSize
-  // }
+  /** Update the involuntary dissolution configurations array. */
+  async function updateDissolutionConfigurations (configurations: Configurations) {
+    const response = await StaffService.updateInvoluntaryDissolutionConfigurations(configurations)
+    if (response?.data && response.status === 200) {
+      state.involuntaryDissolutionConfigurations = response.data
+      return response.data
+    }
+  }
 
   return {
     accountNotaryContact,
@@ -322,6 +326,7 @@ export const useStaffStore = defineStore('staff', () => {
     syncRejectedStaffOrgs,
     syncSuspendedStaffOrgs,
     syncPendingStaffOrgs,
+    updateDissolutionConfigurations,
     updateGLCodeFiling,
     $reset
   }

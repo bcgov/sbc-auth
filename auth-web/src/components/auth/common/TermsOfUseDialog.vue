@@ -107,7 +107,7 @@ export default defineComponent({
     isUserTOS: { type: Boolean, default: false },
     isAlreadyAccepted: { type: Boolean, default: false }
   },
-  setup(props, { emit }) {
+  setup (props, { emit }) {
     const userStore = useUserStore()
     const userHasToAcceptTOS = computed(() => userStore.userHasToAcceptTOS)
     const termsDialog = ref(false)
@@ -127,38 +127,38 @@ export default defineComponent({
       }
     })
 
-    function updateTermsAccepted(val) {
+    function updateTermsAccepted (val) {
       if (props.isUserTOS && val) {
         agreeToTerms()
       }
     }
 
-    function updateIsAlreadyAccepted(val, oldVal) {
+    function updateIsAlreadyAccepted (val, oldVal) {
       if (oldVal !== val) {
         termsAccepted.value = canCheckTerms.value = val
       }
     }
 
-    function openDialog() {
+    function openDialog () {
       termsDialog.value = true
     }
 
-    function closeDialog() {
+    function closeDialog () {
       termsDialog.value = false
     }
 
-    function onScroll(e) {
+    function onScroll (e) {
       atBottom.value = (e.target.scrollHeight - e.target.scrollTop) <= (e.target.offsetHeight + 25)
     }
 
-    function agreeToTerms() {
+    function agreeToTerms () {
       termsDialog.value = false
       termsAccepted.value = true
       canCheckTerms.value = true
       emitTermsAcceptanceStatus()
     }
 
-    function emitTermsAcceptanceStatus() {
+    function emitTermsAcceptanceStatus () {
       emit('terms-acceptance-status', termsAccepted.value)
     }
 

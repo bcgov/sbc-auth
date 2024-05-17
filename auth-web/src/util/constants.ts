@@ -658,6 +658,13 @@ export enum CfsAccountStatus {
     FREEZE = 'FREEZE'
 }
 
+export enum InvoluntaryDissolutionConfigNames {
+  DISSOLUTIONS_ON_HOLD = 'DISSOLUTIONS_ON_HOLD',
+  MAX_DISSOLUTIONS_ALLOWED = 'MAX_DISSOLUTIONS_ALLOWED',
+  NUM_DISSOLUTIONS_ALLOWED = 'NUM_DISSOLUTIONS_ALLOWED',
+  NEW_DISSOLUTIONS_SCHEDULE = 'NEW_DISSOLUTIONS_SCHEDULE'
+}
+
 export enum AccountType {
     BUSINESS = 'business',
     GOVN = 'govn',
