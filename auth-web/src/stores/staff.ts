@@ -1,5 +1,5 @@
 import { AccountStatus, AffidavitStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
-import { AccountType, Configurations, GLCode, ProductCode } from '@/models/Staff'
+import { AccountType, Configurations, DissolutionStatistics, GLCode, ProductCode } from '@/models/Staff'
 import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
 import { SyncAccountPayload, Task } from '@/models/Task'
 import { computed, reactive, toRefs } from '@vue/composition-api'
@@ -25,6 +25,7 @@ export const useStaffStore = defineStore('staff', () => {
     accountUnderReviewAdminContact: {} as Contact,
     accountUnderReviewAffidavitInfo: {} as AffidavitInformation,
     activeStaffOrgs: [] as Organization[],
+    dissolutionStatistics: {} as DissolutionStatistics,
     involuntaryDissolutionConfigurations: {} as Configurations,
     pendingInvitationOrgs: [] as Organization[],
     pendingStaffOrgs: [] as Organization[],
@@ -42,6 +43,7 @@ export const useStaffStore = defineStore('staff', () => {
     state.accountUnderReviewAdminContact = {} as Contact
     state.accountUnderReviewAffidavitInfo = {} as AffidavitInformation
     state.activeStaffOrgs = [] as Organization[]
+    state.dissolutionStatistics = {} as DissolutionStatistics
     state.involuntaryDissolutionConfigurations = {} as Configurations
     state.pendingInvitationOrgs = [] as Organization[]
     state.pendingStaffOrgs = [] as Organization[]
@@ -85,6 +87,15 @@ export const useStaffStore = defineStore('staff', () => {
     const response = await StaffService.getInvoluntaryDissolutionConfigurations()
     if (response?.data && response.status === 200) {
       state.involuntaryDissolutionConfigurations = response.data
+      return response.data
+    }
+  }
+
+  /** Get the businesses dissolution statistics (businesses ready for D1 dissolution). */
+  async function getDissolutionStatistics (): Promise<DissolutionStatistics> {
+    const response = await StaffService.getDissolutionStatistics()
+    if (response?.data && response.status === 200) {
+      state.dissolutionStatistics = response.data
       return response.data
     }
   }
@@ -307,6 +318,7 @@ export const useStaffStore = defineStore('staff', () => {
     deleteOrg,
     getAccountTypes,
     getDissolutionConfigurations,
+    getDissolutionStatistics,
     getGLCode,
     getGLCodeList,
     getGLCodeFiling,

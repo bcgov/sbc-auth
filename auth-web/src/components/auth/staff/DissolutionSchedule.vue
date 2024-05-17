@@ -135,7 +135,7 @@ export default defineComponent({
       await staffStore.getDissolutionConfigurations()
 
       // Get the batch size current value (number of businesses to be dissolved per job run)
-      const numDissolutions = staffStore.involuntaryDissolutionConfigurations.configurations.find(
+      const numDissolutions = staffStore.involuntaryDissolutionConfigurations?.configurations?.find(
         config => config.name === 'NUM_DISSOLUTIONS_ALLOWED').value
       state.numberOfBusinessesNonEdit = parseInt(numDissolutions)
     })
