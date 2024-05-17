@@ -74,9 +74,10 @@ import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Organization } from '@/models/Organization'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
-import { PaymentTypes } from '@/util/constants'
+import { AccessType, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { useOrgStore } from '@/stores/org'
+import ConfigHelper from '@/util/config-helper'
 
 @Component({
   components: {
@@ -94,6 +95,8 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   @State(useOrgStore) readonly currentOrganizationType!: string
   @State(useOrgStore) readonly currentOrgPaymentType!: string
 
+  @Action(useOrgStore) setAccessType!: (accessType: string) => void
+  @Action(useOrgStore) setCurrentOrganization!: (organization: Organization) => void
   @Action(useOrgStore) setCurrentOrganizationPaymentType!: (paymentType: string) => void
   @Action(useOrgStore) setCurrentOrganizationBcolProfile!: (bcolProfile: BcolProfile) => void
 
@@ -137,6 +140,12 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
 
   async save () {
     this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
+    // Update Access Type, in case user select GOVN
+    const isGovNAccount = !!JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.GOVN_USER || 'false'))
+    if (isGovNAccount) {
+      this.setAccessType(AccessType.GOVN)
+      this.setCurrentOrganization({ ...this.currentOrganization, ...{ accessType: AccessType.GOVN } })
+    }
     if (this.selectedPaymentMethod !== PaymentTypes.BCOL) {
       // It's possible this is already set from being linked, so we need to empty it out.
       this.setCurrentOrganizationBcolProfile(null)

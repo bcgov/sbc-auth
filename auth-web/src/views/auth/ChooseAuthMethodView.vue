@@ -149,7 +149,7 @@
     <v-divider class="mb-6 mt-1" />
     <div class="mb-6 mt-1">
       <header class="d-flex align-center">
-        <span>Other account creation options if you do not have ID issued in Canada</span>
+        <span>Don't have ID issued in Canada? View other account creation options</span>
         <v-btn
           depressed
           color="primary"
@@ -304,7 +304,7 @@
     </div>
     <div>
       <header class="d-flex align-center">
-        <span>How to create an account if you are from a Canadian government agency</span>
+        <span>Creating an account for Canadian government agency?</span>
         <v-btn
           depressed
           color="primary"
@@ -344,7 +344,7 @@
                 <div class="mt-4">
                   If you are a B.C. Provincial Government Ministry/Employee, please follow
                   <a
-                    :href="bcTokenURL"
+                    :href="govnURL"
                     target="_blank"
                     class="learn-more-link"
                     rel="noopener noreferrer"
@@ -418,6 +418,10 @@ export default class ChooseAuthMethodView extends Vue {
 
   get bcTokenURL (): string {
     return 'https://id.gov.bc.ca/account/setup-instruction'
+  }
+
+  get govnURL (): string {
+    return 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-guides/ministry_account_creation_process_april_2022.pdf'
   }
 
   get serviceCardLearnMoreURL (): string {

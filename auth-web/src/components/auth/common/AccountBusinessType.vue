@@ -178,13 +178,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted, nextTick } from '@vue/composition-api'
+import { defineComponent, ref, computed, onMounted, nextTick, watch } from '@vue/composition-api'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import { OrgBusinessType, Organization } from '@/models/Organization'
-import { Account, AccountType } from '@/util/constants'
+import { AccessType, Account, AccountType, SessionStorageKeys } from '@/util/constants'
 import { Code } from '@/models/Code'
+import ConfigHelper from '@/util/config-helper'
 
 export default defineComponent({
   name: 'AccountBusinessType',
@@ -229,6 +230,7 @@ export default defineComponent({
     const businessSizeCodes = computed(() => codesStore.businessSizeCodes)
     const businessTypeCodes = computed(() => codesStore.businessTypeCodes)
 
+    const accountInformationForm = ref(null)
     const orgType = ref(AccountType.INDIVIDUAL)
     const autoCompleteIsActive = ref(false)
     const autoCompleteSearchValue = ref('')
@@ -241,10 +243,9 @@ export default defineComponent({
     const branchName = ref('')
     const isIndividualAccount = ref(false)
     const isGovnAccount = ref(false)
-
-    const orgNameRules = [v => !!v || 'An account name is required']
-    const orgBusinessTypeRules = [v => !!v || 'A business type is required']
-    const orgBusinessSizeRules = [v => !!v || 'A business size is required']
+    const orgNameRules = ref([])
+    const orgBusinessTypeRules = ref([])
+    const orgBusinessSizeRules = ref([])
 
     const getOrgNameLabel = computed(() => {
       if (props.govmAccount) {
@@ -271,6 +272,18 @@ export default defineComponent({
       branchName.value = ''
       businessType.value = ''
       businessSize.value = ''
+      if (accountInformationForm.value) {
+        accountInformationForm.value.resetValidation()
+      }
+      if (isGovnAccount.value) {
+        orgNameRules.value = [v => !!v || 'A government agency name is required']
+        orgBusinessTypeRules.value = [v => !!v || 'A government agency type is required']
+        orgBusinessSizeRules.value = [v => !!v || 'A government agency size is required']
+      } else {
+        orgNameRules.value = [v => !!v || 'An account name is required']
+        orgBusinessTypeRules.value = [v => !!v || 'A business type is required']
+        orgBusinessSizeRules.value = [v => !!v || 'A business size is required']
+      }
     }
 
     async function handleAccountTypeChange(newValue) {
@@ -290,6 +303,14 @@ export default defineComponent({
         ...((isBusinessAccount.value || isGovnAccount.value) && { businessType: businessType.value, businessSize: businessSize.value, branchName: branchName.value })
       }
       emit('update:org-business-type', orgBusinessType)
+    }
+
+    function updateAccessType() {
+      if (isGovnAccount.value) {
+        ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, 'true')
+        return
+      }
+      ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
     }
 
     function emitValid() {
@@ -353,6 +374,7 @@ export default defineComponent({
       }
       await nextTick()
       emitUpdatedOrgBusinessType()
+      updateAccessType()
       emitValid()
     }
 
@@ -382,7 +404,8 @@ export default defineComponent({
       AccountType,
       getOrgTypeDropdownLabel,
       getOrgSizeDropdownLabel,
-      isEditing: props.isEditAccount
+      isEditing: props.isEditAccount,
+      accountInformationForm
     }
   }
 })

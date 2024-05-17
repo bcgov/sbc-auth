@@ -81,7 +81,6 @@ export const useCodesStore = defineStore('codes', () => {
     fetchAllBusinessTypeCodes,
     getBusinessSizeCodes,
     getBusinessTypeCodes,
-    getBusinessTypeCodesDelete,
     getCodes,
     getGovernmentTypeCodes,
     getOnholdReasonCodes,
