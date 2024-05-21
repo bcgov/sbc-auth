@@ -105,9 +105,20 @@ def downgrade():
                  sa.column('default', sa.Boolean())
                  ),
         [
-            {"code": "INTRN", "description": "INTERNAL BCOL ACCOUNT", "default": False},
-            {"code": "LDBC", "description": "LAND DATA BC", "default": False},
             {"code": "PILOT", "description": "HRV", "default": False},
-            {"code": "GOVOP", "description": "OTHER PROVINCIAL GOVT. MINISTRY", "default": False}
+            {"code": "INTRN", "description": "INTERNAL BCOL ACCOUNT", "default": False},
+            {"code": "GOVOP", "description": "OTHER PROVINCIAL GOVT. MINISTRY", "default": False},
+            {"code": "GOVR", "description": "REGISTRIES WHO PARTICIPATE IN BCOL", "default": False}
         ]
     )
+    
+    # Remove the new rows added in the upgrade
+    codes_added = [
+        "BIZ", "BIZAC", "BIZEL", "BIZGA", "BIZGE", "BSPLY", "CAR", "CAREQ", "CON", "EDUC", "EXPLR", "FINBA", "FINCO",
+        "FINCU", "FINIC", "FINLE", "FINTR", "FIRNA", "FOR", "GOVA", "GOVAA", "GOVCC", "GOVD", "GOVF", "GOVGA", "GOVL",
+        "GOVLT", "GOVM", "GOVOP", "GOVP", "GOVR", "GOVSR", "HLTH", "INSUR", "LAW", "LAWNP", "LDB", "LDBC", "MAR",
+        "OTHCC", "OTHCR", "OTHER", "OTHNE", "OTHUN", "REAL", "REALA", "REALB", "RESRC", "SES", "SURV", "TSC"
+    ]
+
+    for code in codes_added:
+        op.execute(f"DELETE FROM business_type_codes WHERE code = '{code}'")

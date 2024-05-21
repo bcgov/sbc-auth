@@ -35,7 +35,7 @@
                   {{ orgName }}
                 </div>
                 <div
-                  v-if="nameChangeAllowed && viewOnlyMode && !isGovnOrg"
+                  v-if="canOrgChange"
                   v-can:CHANGE_ORG_NAME.hide
                 >
                   <span
@@ -57,12 +57,12 @@
               </div>
 
               <div v-if="isAccountTypeBusiness">
-                <span class="font-weight-bold">{{ isGovnOrg ? 'Government Agency Type:' : 'Business Type:' }}</span>
+                <span class="font-weight-bold">{{ accountTypeLabel }}</span>
                 {{ getBusinessTypeLabel }}
               </div>
 
               <div v-if="isAccountTypeBusiness">
-                <span class="font-weight-bold">{{ isGovnOrg ? 'Government Agency Type:' : 'Business Type:' }}</span>
+                <span class="font-weight-bold">{{ accountSizeLabel }}</span>
                 {{ getBusinessSizeLabel }}
               </div>
             </div>
@@ -122,6 +122,9 @@ export interface AccountDetailsI {
   isLoading: boolean
   orgBusinessType: OrgBusinessType
   isGovnOrg: boolean
+  accountTypeLabel: string
+  accountSizeLabel: string
+  canOrgChange: boolean
 }
 
 export default defineComponent({
@@ -149,7 +152,10 @@ export default defineComponent({
       isOrgBusinessTypeValid: false,
       isLoading: false,
       orgBusinessType: { businessType: '', businessSize: '' },
-      isGovnOrg: orgStore.isGovnOrg
+      isGovnOrg: orgStore.isGovnOrg,
+      accountTypeLabel: '',
+      accountSizeLabel: '',
+      canOrgChange: false
     }) as unknown) as AccountDetailsI
     watch(() => props.isBusinessAccount, (val: boolean) => { localVars.isAccountTypeBusiness = val })
 
@@ -166,6 +172,9 @@ export default defineComponent({
       localVars.orgBusinessType.businessType = props.accountDetails?.businessType
       localVars.orgBusinessType.businessSize = props.accountDetails?.businessSize
       localVars.isAccountTypeBusiness = props.isBusinessAccount
+      localVars.accountTypeLabel = localVars.isGovnOrg ? 'Government Agency Type:' : 'Business Type:'
+      localVars.accountSizeLabel = localVars.isGovnOrg ? 'Government Agency Size:' : 'Business Size:'
+      localVars.canOrgChange = props.nameChangeAllowed && props.viewOnlyMode && !localVars.isGovnOrg
     }
     watch(() => props.accountDetails, () => updateAccountDetails(), { deep: true })
 
@@ -194,6 +203,7 @@ export default defineComponent({
     onMounted(async () => {
       localVars.isLoading = true
       // to show business type value need to get all code
+      await codeStore.fetchAllBusinessTypeCodes()
       await codeStore.getBusinessTypeCodes()
       await codeStore.getBusinessSizeCodes()
       updateAccountDetails()

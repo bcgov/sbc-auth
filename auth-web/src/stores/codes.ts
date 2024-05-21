@@ -38,7 +38,7 @@ export const useCodesStore = defineStore('codes', () => {
   }
 
   async function fetchAllBusinessTypeCodes (): Promise<void> {
-    const response = await CodesService.getCodes(businessTypeCodeTable)
+    const response = await CodesService.getCodes(this.businessTypeCodeTable)
     if (response?.data && response.status === 200) {
       state.allBusinessTypeCodes = response.data
     } else {
