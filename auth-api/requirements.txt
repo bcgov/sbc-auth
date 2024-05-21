@@ -73,7 +73,7 @@ python-jose==3.3.0
 python-memcached==1.62
 pytz==2024.1
 redis==5.0.4
-requests==2.31.0
+requests==2.32.0
 rsa==4.9
 semver==3.0.2
 sentry-sdk==2.0.1
