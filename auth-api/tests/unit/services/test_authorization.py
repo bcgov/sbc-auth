@@ -359,8 +359,8 @@ def test_check_auth_system_path(session, monkeypatch, test_desc, test_expect, ad
     'test_desc,test_expect,additional_kwargs,is_org_member,is_entity_affiliated',
     [
         (
-            'Test HTTPException (403) when no role checks provided in kwargs.',
-            pytest.raises(HTTPException), {}, False, False
+            'Test UnboundLocalError (403) when no role checks provided in kwargs.',
+            pytest.raises(UnboundLocalError), {}, False, False
         ),
         (
             'Test 403 when org member, but no role checks provided in kwargs.',
