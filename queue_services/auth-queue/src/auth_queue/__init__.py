@@ -20,11 +20,15 @@ from auth_api.resources.ops import bp as ops_bp
 from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
 from auth_api.utils.cache import cache
+from auth_api.utils.util_logging import setup_logging
 from flask import Flask
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from auth_queue import config
 from auth_queue.resources.worker import bp as worker_endpoint
+
+
+setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
 
 
 def register_endpoints(app: Flask):

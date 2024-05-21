@@ -14,9 +14,11 @@
 """The unique worker functionality for this service is contained here."""
 import dataclasses
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from http import HTTPStatus
 
+from auth_api.models import db
+from auth_api.models.pubsub_message_processing import PubSubMessageProcessing
 from auth_api.services.gcp_queue import queue
 from auth_api.services.gcp_queue.gcp_auth import ensure_authorized_queue_user
 from auth_api.services.rest_service import RestService
@@ -44,7 +46,10 @@ def worker():
         return {}, HTTPStatus.OK
 
     try:
-        current_app.logger.info('Event Message Received: %s', json.dumps(dataclasses.asdict(event_message)))
+        current_app.logger.info('Event message received: %s', json.dumps(dataclasses.asdict(event_message)))
+        if is_message_processed(event_message):
+            current_app.logger.info('Event message already processed, skipping.')
+            return {}, HTTPStatus.OK
         message_type, email_msg = event_message.type, event_message.data
         email_msg['logo_url'] = minio_service.MinioService.get_minio_public_url('bc_logo_for_email.png')
 
@@ -70,6 +75,19 @@ def worker():
     except Exception: # NOQA # pylint: disable=broad-except
         current_app.logger.error('Error processing event:', exc_info=True)
     return {}, HTTPStatus.OK
+
+
+def is_message_processed(event_message):
+    """Check if the queue message is processed."""
+    if PubSubMessageProcessing.find_by_cloud_event_id_and_type(event_message.id, event_message.type):
+        return True
+    pubsub_message_processing = PubSubMessageProcessing()
+    pubsub_message_processing.cloud_event_id = event_message.id
+    pubsub_message_processing.message_type = event_message.type
+    pubsub_message_processing.processed = datetime.now(timezone.utc)
+    db.session.add(pubsub_message_processing)
+    db.session.commit()
+    return False
 
 
 def handle_drawdown_request(message_type, email_msg):
@@ -443,6 +461,7 @@ def handle_other_messages(message_type, email_msg):
                     )
         template_name = TemplateType[f'{QueueMessageTypes(message_type).name}_TEMPLATE_NAME'].value
     else:
+        current_app.logger.error('Unknown message type: %s', message_type)
         return
 
     kwargs = {

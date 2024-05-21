@@ -69,6 +69,8 @@ def _get_admin_emails(username):
             admin_emails = admin_user.contacts[0].contact.email
         else:
             admin_emails = admin_user.email
+    else:
+        raise ValueError('Admin user not found, cannot determine email address.')
 
     return admin_emails, admin_name
 

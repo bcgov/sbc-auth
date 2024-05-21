@@ -51,7 +51,7 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
     user = relationship('User', foreign_keys=[user_id], lazy='select')
     org = relationship('Org', foreign_keys=[org_id], lazy='select')
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         """Initialize a new membership."""
         self.org_id = kwargs.get('org_id')
         self.user_id = kwargs.get('user_id')
