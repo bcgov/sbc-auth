@@ -93,15 +93,15 @@ mac-cov: local-test ## Run the coverage report and display in a browser window (
 #################################################################################
 cd: ## CD flow
 ifeq ($(TAG_NAME), test)
-cd:
+cd: update-env
 	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):dev $(DOCKER_NAME):$(TAG_NAME)
 else ifeq ($(TAG_NAME), prod)
-cd:
+cd: update-env
 	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):$(TAG_NAME) $(DOCKER_NAME):$(TAG_NAME)-$(shell date +%F)
 	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):test $(DOCKER_NAME):$(TAG_NAME)
 else
 TAG_NAME=dev
-cd: build tag
+cd: build update-env tag
 endif
 
 build: ## Build the docker container
