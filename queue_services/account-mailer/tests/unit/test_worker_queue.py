@@ -45,6 +45,32 @@ def test_refund_request(app, session, client):
         mock_send.assert_called
 
 
+def test_duplicate_messages(app, session, client):
+    """Assert that duplicate messages are handled by the queue.."""
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    id = org.id
+    mail_details = {
+        'accountId': id,
+        'accountName': org.name
+    }
+
+    with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
+        helper_add_event_to_queue(client, message_type=QueueMessageTypes.NSF_LOCK_ACCOUNT.value,
+                                  mail_details=mail_details, message_id='f76e5ca9-93f3-44ee-a0f8-f47ee83b1971')
+        mock_send.assert_called
+        assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
+        assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
+        assert mock_send.call_args.args[0].get('attachments') is None
+        assert True
+
+    with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
+        helper_add_event_to_queue(client, message_type=QueueMessageTypes.NSF_LOCK_ACCOUNT.value,
+                                  mail_details=mail_details, message_id='f76e5ca9-93f3-44ee-a0f8-f47ee83b1971')
+        mock_send.assert_not_called
+
+
 def test_lock_account_mailer_queue(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
     user = factory_user_model_with_contact()
