@@ -68,16 +68,16 @@
 </template>
 
 <script lang="ts">
+import { AccessType, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Organization } from '@/models/Organization'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
-import { AccessType, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { useOrgStore } from '@/stores/org'
-import ConfigHelper from '@/util/config-helper'
 
 @Component({
   components: {

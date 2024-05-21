@@ -421,7 +421,9 @@ export default class ChooseAuthMethodView extends Vue {
   }
 
   get govnURL (): string {
-    return 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-guides/ministry_account_creation_process_april_2022.pdf'
+    return 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/' +
+          'business-management/permits-licences-and-registration/registries-guides/' +
+          'ministry_account_creation_process_april_2022.pdf'
   }
 
   get serviceCardLearnMoreURL (): string {

@@ -38,7 +38,10 @@
           @change="handleAccountTypeChange"
         >
           <v-row justify="space-between">
-            <v-col md="7" class="business-radio xs">
+            <v-col
+              md="7"
+              class="business-radio xs"
+            >
               <v-radio
                 label="Individual Person"
                 :value="AccountType.INDIVIDUAL"
@@ -52,7 +55,7 @@
                 class="px-4 py-5"
               />
               <v-radio
-                v-if="!isEditing"
+                v-if="!isEditing && !isCurrentGovnOrg"
                 label="Government Agency"
                 :value="AccountType.GOVN"
                 data-test="radio-government-account-type"
@@ -105,7 +108,7 @@
             :error-messages="bcolDuplicateNameErrorMessage"
             @keyup="onOrgNameChange"
           />
-          <org-name-auto-complete
+          <OrgNameAutoComplete
             v-if="isBusinessAccount"
             :searchValue="autoCompleteSearchValue"
             :setAutoCompleteIsActive="autoCompleteIsActive"
@@ -178,14 +181,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted, nextTick, watch } from '@vue/composition-api'
+import { AccessType, Account, AccountType, SessionStorageKeys } from '@/util/constants'
+import { computed, defineComponent, nextTick, onMounted, ref } from '@vue/composition-api'
+import ConfigHelper from '@/util/config-helper'
+import { OrgBusinessType } from '@/models/Organization'
+import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
-import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
-import { OrgBusinessType, Organization } from '@/models/Organization'
-import { AccessType, Account, AccountType, SessionStorageKeys } from '@/util/constants'
-import { Code } from '@/models/Code'
-import ConfigHelper from '@/util/config-helper'
 
 export default defineComponent({
   name: 'AccountBusinessType',
@@ -229,6 +231,7 @@ export default defineComponent({
     const currentOrganization = computed(() => orgStore.currentOrganization)
     const businessSizeCodes = computed(() => codesStore.businessSizeCodes)
     const businessTypeCodes = computed(() => codesStore.businessTypeCodes)
+    const isCurrentGovnOrg = currentOrganization.value?.accessType === AccessType.GOVN
 
     const accountInformationForm = ref(null)
     const orgType = ref(AccountType.INDIVIDUAL)
@@ -259,15 +262,15 @@ export default defineComponent({
       }
     })
 
-    const getOrgTypeDropdownLabel = computed(() => 
+    const getOrgTypeDropdownLabel = computed(() =>
       orgType.value === AccountType.GOVN ? 'Government Agency Type' : 'Business Type'
     )
 
-    const getOrgSizeDropdownLabel = computed(() => 
+    const getOrgSizeDropdownLabel = computed(() =>
       orgType.value === AccountType.GOVN ? 'Government Agency Size' : 'Business Size'
     )
 
-    function cleanOrgInfo() {
+    function cleanOrgInfo () {
       name.value = ''
       branchName.value = ''
       businessType.value = ''
@@ -286,7 +289,7 @@ export default defineComponent({
       }
     }
 
-    async function handleAccountTypeChange(newValue) {
+    async function handleAccountTypeChange (newValue) {
       orgType.value = newValue
       isBusinessAccount.value = (orgType.value === AccountType.BUSINESS)
       isGovnAccount.value = (orgType.value === AccountType.GOVN)
@@ -295,17 +298,18 @@ export default defineComponent({
       await onOrgBusinessTypeChange(!props.isEditAccount)
     }
 
-    function emitUpdatedOrgBusinessType() {
+    function emitUpdatedOrgBusinessType () {
       const orgBusinessType: OrgBusinessType = {
         name: name.value,
         isBusinessAccount: isBusinessAccount.value || isGovnAccount.value,
         ...((props.govmAccount || isBusinessAccount.value) && { branchName: branchName.value }),
-        ...((isBusinessAccount.value || isGovnAccount.value) && { businessType: businessType.value, businessSize: businessSize.value, branchName: branchName.value })
+        ...((isBusinessAccount.value || isGovnAccount.value) &&
+          { businessType: businessType.value, businessSize: businessSize.value, branchName: branchName.value })
       }
       emit('update:org-business-type', orgBusinessType)
     }
 
-    function updateAccessType() {
+    function updateAccessType () {
       if (isGovnAccount.value) {
         ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, 'true')
         return
@@ -313,7 +317,7 @@ export default defineComponent({
       ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
     }
 
-    function emitValid() {
+    function emitValid () {
       let isFormValid = true
       if (isBusinessAccount.value || isGovnAccount.value) {
         isFormValid = businessType.value !== '' && businessSize.value !== ''
@@ -337,7 +341,9 @@ export default defineComponent({
           branchName.value = currentOrganization.value.branchName
         } else {
           isBusinessAccount.value = currentOrganization.value.orgType !== Account.BASIC
-          orgType.value = AccountType.BUSINESS
+          if (isBusinessAccount.value) {
+            orgType.value = AccountType.BUSINESS
+          }
         }
         await onOrgBusinessTypeChange()
       } catch (ex) {
@@ -347,13 +353,13 @@ export default defineComponent({
       }
     })
 
-    function setAutoCompleteSearchValue(value: string) {
+    function setAutoCompleteSearchValue (value: string) {
       autoCompleteIsActive.value = false
       name.value = value
       emitUpdatedOrgBusinessType()
     }
 
-    async function onOrgNameChange() {
+    async function onOrgNameChange () {
       if (isBusinessAccount.value) {
         if (name.value) {
           autoCompleteSearchValue.value = name.value
@@ -368,7 +374,7 @@ export default defineComponent({
       await onOrgBusinessTypeChange()
     }
 
-    async function onOrgBusinessTypeChange(clearOrgName = false) {
+    async function onOrgBusinessTypeChange (clearOrgName = false) {
       if (clearOrgName) {
         name.value = ''
       }
@@ -405,7 +411,8 @@ export default defineComponent({
       getOrgTypeDropdownLabel,
       getOrgSizeDropdownLabel,
       isEditing: props.isEditAccount,
-      accountInformationForm
+      accountInformationForm,
+      isCurrentGovnOrg
     }
   }
 })

@@ -35,7 +35,7 @@
                   {{ orgName }}
                 </div>
                 <div
-                  v-if="nameChangeAllowed && viewOnlyMode"
+                  v-if="nameChangeAllowed && viewOnlyMode && !isGovnOrg"
                   v-can:CHANGE_ORG_NAME.hide
                 >
                   <span
@@ -57,12 +57,12 @@
               </div>
 
               <div v-if="isAccountTypeBusiness">
-                <span class="font-weight-bold">Business Type:</span>
+                <span class="font-weight-bold">{{ isGovnOrg ? 'Government Agency Type:' : 'Business Type:' }}</span>
                 {{ getBusinessTypeLabel }}
               </div>
 
               <div v-if="isAccountTypeBusiness">
-                <span class="font-weight-bold">Business Size:</span>
+                <span class="font-weight-bold">{{ isGovnOrg ? 'Government Agency Type:' : 'Business Type:' }}</span>
                 {{ getBusinessSizeLabel }}
               </div>
             </div>
@@ -112,6 +112,7 @@ import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vu
 import { Code } from '@/models/Code'
 import { OrgBusinessType } from '@/models/Organization'
 import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
 
 export interface AccountDetailsI {
   orgName: string
@@ -120,6 +121,7 @@ export interface AccountDetailsI {
   isOrgBusinessTypeValid: boolean
   isLoading: boolean
   orgBusinessType: OrgBusinessType
+  isGovnOrg: boolean
 }
 
 export default defineComponent({
@@ -138,6 +140,7 @@ export default defineComponent({
     const codeStore = useCodesStore()
     const businessSizeCodes = computed(() => codeStore.businessSizeCodes)
     const businessTypeCodes = computed(() => codeStore.businessTypeCodes)
+    const orgStore = useOrgStore()
 
     const localVars = (reactive({
       orgName: '',
@@ -145,7 +148,8 @@ export default defineComponent({
       isAccountTypeBusiness: false,
       isOrgBusinessTypeValid: false,
       isLoading: false,
-      orgBusinessType: { businessType: '', businessSize: '' }
+      orgBusinessType: { businessType: '', businessSize: '' },
+      isGovnOrg: orgStore.isGovnOrg
     }) as unknown) as AccountDetailsI
     watch(() => props.isBusinessAccount, (val: boolean) => { localVars.isAccountTypeBusiness = val })
 
