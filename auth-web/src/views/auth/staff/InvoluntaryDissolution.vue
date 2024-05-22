@@ -68,7 +68,7 @@ export default defineComponent({
   },
   setup () {
     const state = reactive({
-      businessesReadyforDissolutionNumber: 0
+      businessesReadyforDissolutionNumber: -1
     })
     const staffStore = useStaffStore()
 
@@ -76,7 +76,7 @@ export default defineComponent({
       // Make the call to get the involuntary dissolutions statistics data and set it in store
       await staffStore.getDissolutionStatistics()
 
-      state.businessesReadyforDissolutionNumber = staffStore.dissolutionStatistics?.data?.eligibleCount || -1
+      state.businessesReadyforDissolutionNumber = staffStore.dissolutionStatistics?.data?.eligibleCount
     })
 
     return {
