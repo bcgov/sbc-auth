@@ -89,7 +89,6 @@ export default defineComponent({
 
     onMounted(async () => {
       // Make the call to get the involuntary dissolutions statistics data and set it in store
-      await staffStore.getDissolutionStatistics()
       try {
         await staffStore.getDissolutionStatistics()
         state.businessesReadyforDissolutionNumber = staffStore.dissolutionStatistics?.data?.eligibleCount
