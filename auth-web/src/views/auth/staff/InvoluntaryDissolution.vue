@@ -91,7 +91,7 @@ export default defineComponent({
       // Make the call to get the involuntary dissolutions statistics data and set it in store
       try {
         await staffStore.getDissolutionStatistics()
-        state.businessesReadyforDissolutionNumber = staffStore.dissolutionStatistics?.data?.eligibleCount
+        state.businessesReadyforDissolutionNumber = staffStore.dissolutionStatistics.data.eligibleCount
       } catch (err) {
         console.error(err)
       }
