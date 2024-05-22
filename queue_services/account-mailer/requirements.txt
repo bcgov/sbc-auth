@@ -24,7 +24,7 @@ pycountry==23.12.11
 pyrsistent==0.20.0
 python-dotenv==1.0.1
 pytz==2024.1
-requests==2.31.0
+requests==2.32.2
 semver==3.0.2
 sentry-sdk==2.0.1
 six==1.16.0
