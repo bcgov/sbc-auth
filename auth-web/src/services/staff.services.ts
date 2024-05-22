@@ -54,7 +54,7 @@ export default class StaffService {
   }
 
   static async getDissolutionStatistics (): Promise<AxiosResponse<DissolutionStatistics>> {
-    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/internal/statistics?view=dissolution`)
+    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/admin/dissolutions/statistics`)
   }
 
   static async updateInvoluntaryDissolutionConfigurations (configurations: Configurations): Promise<AxiosResponse<Configurations>> {
