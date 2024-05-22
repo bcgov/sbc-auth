@@ -75,7 +75,7 @@
             Enter Ministry Information for this account
           </legend>
           <legend
-            v-else-if="isGovnAccount && onOrgBusinessTypeChange"
+            v-else-if="isGovnAccount"
             class="mb-3"
           >
             Government Agency Information
@@ -86,6 +86,7 @@
           >
             Account Name
           </legend>
+          <legend v-else />
           <v-slide-y-transition>
             <div v-show="errorMessage">
               <v-alert
@@ -181,8 +182,8 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountType, SessionStorageKeys } from '@/util/constants'
-import { computed, defineComponent, nextTick, onMounted, ref } from '@vue/composition-api'
+import { AccessType, Account, AccountType, OrgNameLabel, SessionStorageKeys } from '@/util/constants'
+import { computed, defineComponent, nextTick, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import ConfigHelper from '@/util/config-helper'
 import { OrgBusinessType } from '@/models/Organization'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
@@ -233,84 +234,89 @@ export default defineComponent({
     const businessTypeCodes = computed(() => codesStore.businessTypeCodes)
     const isCurrentGovnOrg = currentOrganization.value?.accessType === AccessType.GOVN
 
-    const accountInformationForm = ref(null)
-    const orgType = ref(AccountType.INDIVIDUAL)
-    const autoCompleteIsActive = ref(false)
-    const autoCompleteSearchValue = ref('')
-    const isLoading = ref(false)
-    const isBusinessAccount = ref(false)
-    const name = ref('')
-    const businessType = ref('')
-    const businessSize = ref('')
-    const governmentSize = ref('')
-    const branchName = ref('')
-    const isIndividualAccount = ref(false)
-    const isGovnAccount = ref(false)
-    const orgNameRules = ref([])
-    const orgBusinessTypeRules = ref([])
-    const orgBusinessSizeRules = ref([])
+    const state = reactive({
+      accountInformationForm: null,
+      orgType: AccountType.INDIVIDUAL,
+      autoCompleteIsActive: false,
+      autoCompleteSearchValue: '',
+      isLoading: false,
+      isBusinessAccount: false,
+      name: '',
+      businessType: '',
+      businessSize: '',
+      governmentSize: '',
+      branchName: '',
+      isIndividualAccount: false,
+      isGovnAccount: false,
+      orgNameRules: [],
+      orgBusinessTypeRules: [],
+      orgBusinessSizeRules: []
+    })
 
     const getOrgNameLabel = computed(() => {
       if (props.govmAccount) {
-        return 'Ministry Name'
-      } else if (isGovnAccount.value) {
-        return 'Government Agency Name'
-      } else if (isBusinessAccount.value) {
-        return 'Legal Business Name'
+        return OrgNameLabel.GOVM
+      } else if (state.isGovnAccount) {
+        return OrgNameLabel.GOVN
+      } else if (state.isBusinessAccount) {
+        return OrgNameLabel.BUSINESS
       } else {
-        return 'Account Name'
+        return OrgNameLabel.REGULAR
       }
     })
 
     const getOrgTypeDropdownLabel = computed(() =>
-      orgType.value === AccountType.GOVN ? 'Government Agency Type' : 'Business Type'
+      state.orgType === AccountType.GOVN ? 'Government Agency Type' : 'Business Type'
     )
 
     const getOrgSizeDropdownLabel = computed(() =>
-      orgType.value === AccountType.GOVN ? 'Government Agency Size' : 'Business Size'
+      state.orgType === AccountType.GOVN ? 'Government Agency Size' : 'Business Size'
     )
 
+    watch(() => state.orgType, () => {
+      state.isBusinessAccount = state.orgType === AccountType.BUSINESS
+      state.isGovnAccount = state.orgType === AccountType.GOVN
+      state.isIndividualAccount = state.orgType === AccountType.INDIVIDUAL
+    })
+
     function cleanOrgInfo () {
-      name.value = ''
-      branchName.value = ''
-      businessType.value = ''
-      businessSize.value = ''
-      if (accountInformationForm.value) {
-        accountInformationForm.value.resetValidation()
+      state.name = ''
+      state.branchName = ''
+      state.businessType = ''
+      state.businessSize = ''
+      if (state.accountInformationForm) {
+        state.accountInformationForm.resetValidation()
       }
-      if (isGovnAccount.value) {
-        orgNameRules.value = [v => !!v || 'A government agency name is required']
-        orgBusinessTypeRules.value = [v => !!v || 'A government agency type is required']
-        orgBusinessSizeRules.value = [v => !!v || 'A government agency size is required']
+      if (state.isGovnAccount) {
+        state.orgNameRules = [v => !!v || 'A government agency name is required']
+        state.orgBusinessTypeRules = [v => !!v || 'A government agency type is required']
+        state.orgBusinessSizeRules = [v => !!v || 'A government agency size is required']
       } else {
-        orgNameRules.value = [v => !!v || 'An account name is required']
-        orgBusinessTypeRules.value = [v => !!v || 'A business type is required']
-        orgBusinessSizeRules.value = [v => !!v || 'A business size is required']
+        state.orgNameRules = [v => !!v || 'An account name is required']
+        state.orgBusinessTypeRules = [v => !!v || 'A business type is required']
+        state.orgBusinessSizeRules = [v => !!v || 'A business size is required']
       }
     }
 
     async function handleAccountTypeChange (newValue) {
-      orgType.value = newValue
-      isBusinessAccount.value = (orgType.value === AccountType.BUSINESS)
-      isGovnAccount.value = (orgType.value === AccountType.GOVN)
-      isIndividualAccount.value = (orgType.value === AccountType.INDIVIDUAL)
+      state.orgType = newValue
       cleanOrgInfo()
       await onOrgBusinessTypeChange(!props.isEditAccount)
     }
 
     function emitUpdatedOrgBusinessType () {
       const orgBusinessType: OrgBusinessType = {
-        name: name.value,
-        isBusinessAccount: isBusinessAccount.value || isGovnAccount.value,
-        ...((props.govmAccount || isBusinessAccount.value) && { branchName: branchName.value }),
-        ...((isBusinessAccount.value || isGovnAccount.value) &&
-          { businessType: businessType.value, businessSize: businessSize.value, branchName: branchName.value })
+        name: state.name,
+        isBusinessAccount: state.isBusinessAccount || state.isGovnAccount,
+        ...((props.govmAccount || state.isBusinessAccount) && { branchName: state.branchName }),
+        ...((state.isBusinessAccount || state.isGovnAccount) &&
+          { businessType: state.businessType, businessSize: state.businessSize, branchName: state.branchName })
       }
       emit('update:org-business-type', orgBusinessType)
     }
 
     function updateAccessType () {
-      if (isGovnAccount.value) {
+      if (state.isGovnAccount) {
         ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, 'true')
         return
       }
@@ -319,52 +325,52 @@ export default defineComponent({
 
     function emitValid () {
       let isFormValid = true
-      if (isBusinessAccount.value || isGovnAccount.value) {
-        isFormValid = businessType.value !== '' && businessSize.value !== ''
+      if (state.isBusinessAccount || state.isGovnAccount) {
+        isFormValid = state.businessType !== '' && state.businessSize !== ''
       }
-      isFormValid = isFormValid && name.value !== ''
+      isFormValid = isFormValid && state.name !== ''
       emit('valid', isFormValid)
     }
 
     onMounted(async () => {
       try {
-        isLoading.value = true
+        state.isLoading = true
         await codesStore.fetchAllBusinessTypeCodes()
         await codesStore.getGovernmentTypeCodes()
         await codesStore.getBusinessSizeCodes()
         await codesStore.getBusinessTypeCodes()
         if (currentOrganization.value.name) {
-          name.value = currentOrganization.value.name
-          isBusinessAccount.value = currentOrganization.value.isBusinessAccount
-          businessType.value = currentOrganization.value.businessType
-          businessSize.value = currentOrganization.value.businessSize
-          branchName.value = currentOrganization.value.branchName
+          state.name = currentOrganization.value.name
+          state.isBusinessAccount = currentOrganization.value.isBusinessAccount
+          state.businessType = currentOrganization.value.businessType
+          state.businessSize = currentOrganization.value.businessSize
+          state.branchName = currentOrganization.value.branchName
         } else {
-          isBusinessAccount.value = currentOrganization.value.orgType !== Account.BASIC
-          if (isBusinessAccount.value) {
-            orgType.value = AccountType.BUSINESS
+          state.isBusinessAccount = currentOrganization.value.orgType !== Account.BASIC
+          if (state.isBusinessAccount) {
+            state.orgType = AccountType.BUSINESS
           }
         }
         await onOrgBusinessTypeChange()
       } catch (ex) {
         console.error(`Error while loading account business type - ${ex}`)
       } finally {
-        isLoading.value = false
+        state.isLoading = false
       }
     })
 
     function setAutoCompleteSearchValue (value: string) {
-      autoCompleteIsActive.value = false
-      name.value = value
+      state.autoCompleteIsActive = false
+      state.name = value
       emitUpdatedOrgBusinessType()
     }
 
     async function onOrgNameChange () {
-      if (isBusinessAccount.value) {
-        if (name.value) {
-          autoCompleteSearchValue.value = name.value
+      if (state.isBusinessAccount) {
+        if (state.name) {
+          state.autoCompleteSearchValue = state.name
         }
-        autoCompleteIsActive.value = name.value !== ''
+        state.autoCompleteIsActive = state.name !== ''
       }
 
       if (props.premiumLinkedAccount && props.bcolDuplicateNameErrorMessage) {
@@ -376,7 +382,7 @@ export default defineComponent({
 
     async function onOrgBusinessTypeChange (clearOrgName = false) {
       if (clearOrgName) {
-        name.value = ''
+        state.name = ''
       }
       await nextTick()
       emitUpdatedOrgBusinessType()
@@ -385,33 +391,19 @@ export default defineComponent({
     }
 
     return {
-      orgType,
-      isLoading,
-      isBusinessAccount,
+      ...toRefs(state),
       name,
-      businessType,
-      businessSize,
-      branchName,
-      autoCompleteIsActive,
-      autoCompleteSearchValue,
       getOrgNameLabel,
-      orgNameRules,
-      orgBusinessTypeRules,
-      orgBusinessSizeRules,
       setAutoCompleteSearchValue,
       onOrgNameChange,
       onOrgBusinessTypeChange,
       businessSizeCodes,
       businessTypeCodes,
-      isGovnAccount,
-      isIndividualAccount,
-      governmentSize,
       handleAccountTypeChange,
       AccountType,
       getOrgTypeDropdownLabel,
       getOrgSizeDropdownLabel,
       isEditing: props.isEditAccount,
-      accountInformationForm,
       isCurrentGovnOrg
     }
   }

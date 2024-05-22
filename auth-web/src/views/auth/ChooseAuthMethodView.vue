@@ -304,7 +304,7 @@
     </div>
     <div>
       <header class="d-flex align-center">
-        <span>Creating an account for Canadian government agency?</span>
+        <span>Creating an account for a Canadian government agency?</span>
         <v-btn
           depressed
           color="primary"
@@ -334,7 +334,6 @@
         <div class="mt-2">
           <v-slide-y-transition>
             <div
-              v-if="showGovnOption"
               class="mb-10 pb-16 pt-6"
             >
               <div class="help-info__content mx-auto">
@@ -359,7 +358,7 @@
                   If you are a member of a Canadian government agency (other than B.C. provincial),
                   select the BC Services Card to create an account, and then identify yourself as "Government Agency" on
                   the Account Information page during registration. Once your registration has been reviewed by staff,
-                  your account will be authorized for government access
+                  your account will be authorized for government access.
                 </div>
               </div>
             </div>

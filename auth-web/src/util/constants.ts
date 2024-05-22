@@ -670,3 +670,10 @@ export enum AccountType {
     GOVN = 'govn',
     INDIVIDUAL = 'individual'
 }
+
+export enum OrgNameLabel {
+    GOVM = 'Ministry Name',
+    GOVN = 'Government Agency Name',
+    BUSINESS = 'Legal Business Name',
+    REGULAR = 'Account Name'
+}

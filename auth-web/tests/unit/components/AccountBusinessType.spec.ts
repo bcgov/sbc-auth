@@ -115,4 +115,20 @@ describe('AccountBusinessType.vue', () => {
     await wrapper.setData({ isLoading: false })
     expect(wrapper.find('.v-alert').text()).toBe('An error occurred')
   })
+
+  it('renders correctly when govmAccount is true', async () => {
+    const $t = () => ''
+    wrapper = mount(AccountBusinessType, {
+      localVue,
+      vuetify,
+      propsData: {
+        govmAccount: true
+      },
+      mocks: { $t }
+    })
+    expect(wrapper.find("[data-test='account-name']").exists()).toBeTruthy()
+    expect(wrapper.find("[data-test='input-branch-name']").isVisible()).toBeTruthy()
+    expect(wrapper.find("[data-test='business-account-type-details']").exists()).toBeFalsy()
+    expect(wrapper.find('legend.mb-3').text()).toBe('Enter Ministry Information for this account')
+  })
 })

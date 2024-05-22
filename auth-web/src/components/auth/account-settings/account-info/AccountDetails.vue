@@ -35,7 +35,7 @@
                   {{ orgName }}
                 </div>
                 <div
-                  v-if="canOrgChange"
+                  v-if="nameChangeAllowed && viewOnlyMode"
                   v-can:CHANGE_ORG_NAME.hide
                 >
                   <span
@@ -121,10 +121,6 @@ export interface AccountDetailsI {
   isOrgBusinessTypeValid: boolean
   isLoading: boolean
   orgBusinessType: OrgBusinessType
-  isGovnOrg: boolean
-  accountTypeLabel: string
-  accountSizeLabel: string
-  canOrgChange: boolean
 }
 
 export default defineComponent({
@@ -141,9 +137,9 @@ export default defineComponent({
     // refs
     const editAccountForm = ref(null as HTMLFormElement)
     const codeStore = useCodesStore()
+    const orgStore = useOrgStore()
     const businessSizeCodes = computed(() => codeStore.businessSizeCodes)
     const businessTypeCodes = computed(() => codeStore.businessTypeCodes)
-    const orgStore = useOrgStore()
 
     const localVars = (reactive({
       orgName: '',
@@ -151,13 +147,14 @@ export default defineComponent({
       isAccountTypeBusiness: false,
       isOrgBusinessTypeValid: false,
       isLoading: false,
-      orgBusinessType: { businessType: '', businessSize: '' },
-      isGovnOrg: orgStore.isGovnOrg,
-      accountTypeLabel: '',
-      accountSizeLabel: '',
-      canOrgChange: false
+      orgBusinessType: { businessType: '', businessSize: '' }
     }) as unknown) as AccountDetailsI
     watch(() => props.isBusinessAccount, (val: boolean) => { localVars.isAccountTypeBusiness = val })
+
+    const isGovnOrg = computed(() => orgStore.isGovnOrg)
+    const accountTypeLabel = computed(() => isGovnOrg.value ? 'Government Agency Type:' : 'Business Type:')
+    const accountSizeLabel = computed(() => isGovnOrg.value ? 'Government Agency Size:' : 'Business Size:')
+    const canOrgChange = computed(() => props.nameChangeAllowed && props.viewOnlyMode && !isGovnOrg.value)
 
     const updateIsOrgBusinessTypeValid = (isValid: boolean) => {
       localVars.isOrgBusinessTypeValid = !!isValid
@@ -172,9 +169,6 @@ export default defineComponent({
       localVars.orgBusinessType.businessType = props.accountDetails?.businessType
       localVars.orgBusinessType.businessSize = props.accountDetails?.businessSize
       localVars.isAccountTypeBusiness = props.isBusinessAccount
-      localVars.accountTypeLabel = localVars.isGovnOrg ? 'Government Agency Type:' : 'Business Type:'
-      localVars.accountSizeLabel = localVars.isGovnOrg ? 'Government Agency Size:' : 'Business Size:'
-      localVars.canOrgChange = props.nameChangeAllowed && props.viewOnlyMode && !localVars.isGovnOrg
     }
     watch(() => props.accountDetails, () => updateAccountDetails(), { deep: true })
 
@@ -218,6 +212,9 @@ export default defineComponent({
       updateOrgBusinessType,
       emitViewOnly,
       emitUpdateAndSaveAccount,
+      accountTypeLabel,
+      accountSizeLabel,
+      canOrgChange,
       ...toRefs(localVars)
     }
   }
