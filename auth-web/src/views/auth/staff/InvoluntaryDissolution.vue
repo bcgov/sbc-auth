@@ -3,6 +3,20 @@
     id="involuntary-dissolution"
     class="view-container"
   >
+    <!-- Spinner while waiting to grab the number of the businesses ready for D1 Dissolution -->
+    <v-fade-transition>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
+      </div>
+    </v-fade-transition>
     <div class="view-header flex-column">
       <h1>
         Staff Involuntary Dissolution Batch
@@ -68,15 +82,21 @@ export default defineComponent({
   },
   setup () {
     const state = reactive({
-      businessesReadyforDissolutionNumber: -1
+      businessesReadyforDissolutionNumber: -1,
+      isLoading: true
     })
     const staffStore = useStaffStore()
 
     onMounted(async () => {
       // Make the call to get the involuntary dissolutions statistics data and set it in store
       await staffStore.getDissolutionStatistics()
-
-      state.businessesReadyforDissolutionNumber = staffStore.dissolutionStatistics?.data?.eligibleCount
+      try {
+        await staffStore.getDissolutionStatistics()
+        state.businessesReadyforDissolutionNumber = staffStore.dissolutionStatistics?.data?.eligibleCount
+      } catch (err) {
+        console.error(err)
+      }
+      state.isLoading = false
     })
 
     return {
