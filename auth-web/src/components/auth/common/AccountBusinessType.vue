@@ -187,6 +187,7 @@ import { computed, defineComponent, nextTick, onMounted, reactive, toRefs, watch
 import ConfigHelper from '@/util/config-helper'
 import { OrgBusinessType } from '@/models/Organization'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
+import { storeToRefs } from 'pinia'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
 
@@ -229,9 +230,12 @@ export default defineComponent({
     const codesStore = useCodesStore()
     const orgStore = useOrgStore()
 
+    const {
+      businessSizeCodes,
+      businessTypeCodes
+    } = storeToRefs(codesStore)
+
     const currentOrganization = computed(() => orgStore.currentOrganization)
-    const businessSizeCodes = computed(() => codesStore.businessSizeCodes)
-    const businessTypeCodes = computed(() => codesStore.businessTypeCodes)
     const isCurrentGovnOrg = currentOrganization.value?.accessType === AccessType.GOVN
 
     const state = reactive({
@@ -246,7 +250,7 @@ export default defineComponent({
       businessSize: '',
       governmentSize: '',
       branchName: '',
-      isIndividualAccount: false,
+      isIndividualAccount: true,
       isGovnAccount: false,
       orgNameRules: [],
       orgBusinessTypeRules: [],
@@ -339,7 +343,7 @@ export default defineComponent({
         await codesStore.getGovernmentTypeCodes()
         await codesStore.getBusinessSizeCodes()
         await codesStore.getBusinessTypeCodes()
-        if (currentOrganization.value.name) {
+        if (currentOrganization.value?.name) {
           state.name = currentOrganization.value.name
           state.isBusinessAccount = currentOrganization.value.isBusinessAccount
           state.businessType = currentOrganization.value.businessType
@@ -392,7 +396,6 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
-      name,
       getOrgNameLabel,
       setAutoCompleteSearchValue,
       onOrgNameChange,
