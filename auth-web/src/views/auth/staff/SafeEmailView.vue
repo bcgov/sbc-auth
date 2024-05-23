@@ -23,7 +23,14 @@
       >
         <td>{{ item.id }}</td>
         <td>{{ item.email }}</td>
-        <td><v-btn small @click="deleteEmail(item.email)">Delete</v-btn></td>
+        <td>
+          <v-btn
+            small
+            @click="deleteEmail(item.email)"
+          >
+            Delete
+          </v-btn>
+        </td>
       </tr>
     </tbody>
   </v-simple-table>
@@ -50,7 +57,7 @@ export default defineComponent({
         await StaffService.deleteSafeEmail(email)
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(`Unable to delete the email, ${error})
+        console.error(`Unable to delete the email, ${error}`)
       }
     }
 
@@ -60,7 +67,7 @@ export default defineComponent({
 
     return {
       deleteEmail,
-      safeEmails,
+      safeEmails
     }
   }
 })
