@@ -75,3 +75,7 @@ export interface Configurations {
 export interface DissolutionStatistics {
   data: { eligibleCount: number }
 }
+
+export interface SafeListEmailsRequestBody {
+    email: string[]
+}

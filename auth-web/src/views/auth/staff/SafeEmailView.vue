@@ -23,6 +23,7 @@
       >
         <td>{{ item.id }}</td>
         <td>{{ item.email }}</td>
+        <td><v-btn small @click="deleteEmail(item.email)">Delete</v-btn></td>
       </tr>
     </tbody>
   </v-simple-table>
@@ -43,12 +44,23 @@ export default defineComponent({
     }
     const safeEmails = ref<SafeEmail[]>()
 
+    async function deleteEmail (email: string) {
+      // Call the service method to delete the email from the server
+      try {
+        await StaffService.deleteSafeEmail(email)
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Unable to delete the email, ${error})
+      }
+    }
+
     onMounted(async () => {
       safeEmails.value = await getSafeEmails()
     })
 
     return {
-      safeEmails
+      deleteEmail,
+      safeEmails,
     }
   }
 })
