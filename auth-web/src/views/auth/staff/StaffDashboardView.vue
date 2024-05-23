@@ -432,7 +432,7 @@ export default defineComponent({
         await StaffService.addSafeEmail(safeListEmailsRequestBody)
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(`Unable to add email, ${error})
+        console.error(`Unable to add the email, ${error}`)
       }
     }
 
