@@ -1,8 +1,8 @@
 """add_business_and_government_flags_and_remove_rows
 
-Revision ID: 60711696cdd2
-Revises: e2d1d6417607
-Create Date: 2024-05-15 15:04:38.643180
+Revision ID: 1e4b6359f470
+Revises: b3a741249edc
+Create Date: 2024-05-23 10:18:59.135894
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '60711696cdd2'
-down_revision = 'e2d1d6417607'
+revision = '1e4b6359f470'
+down_revision = 'b3a741249edc'
 branch_labels = None
 depends_on = None
 
