@@ -223,6 +223,34 @@
       title="Safe Email List (DEV/TEST)"
     >
       <template #content>
+        <v-container>
+          <p>Add to Safe Email List</p>
+          <v-form
+            ref="form"
+            class="mt-3"
+          >
+            <v-row>
+              <v-col cols="8">
+                <v-text-field
+                  v-model="emailToAdd"
+                  filled
+                  label="Email"
+                  class="ml-2"
+                />
+              </v-col>
+              <v-col cols="4">
+                <v-btn
+                  large
+                  depressed
+                  color="primary"
+                  @click="addEmail"
+                >
+                  <span>Add</span>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-container>
         <SafeEmailView />
       </template>
     </BaseVExpansionPanel>
@@ -276,7 +304,9 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import { Organization } from '@/models/Organization'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import SafeEmailView from '@/views/auth/staff/SafeEmailView.vue'
+import { SafeListEmailsRequestBody } from '@/models/Staff'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
+import StaffService from '@/services/staff.services'
 import { Transactions } from '@/components/auth/account-settings/transaction'
 import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
@@ -311,6 +341,7 @@ export default defineComponent({
   },
   setup (props, { root }) {
     const searchBusinessForm: Ref<HTMLFormElement> = ref(null)
+    const emailToAdd = ref(null)
     const businessStore = useBusinessStore()
     const orgStore = useOrgStore()
     const userStore = useUserStore()
@@ -392,6 +423,19 @@ export default defineComponent({
         CommonUtils.formatIncorporationNumber(localVars.businessIdentifier)
     }
 
+    async function addEmail () {
+      // Call the service method to add the email to the safe list
+      try {
+        const safeListEmailsRequestBody: SafeListEmailsRequestBody = {
+          email: [emailToAdd.value]
+        }
+        await StaffService.addSafeEmail(safeListEmailsRequestBody)
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Unable to add the email, ${error}`)
+      }
+    }
+
     return {
       businessIdentifierRules,
       formatBusinessIdentifier,
@@ -401,6 +445,8 @@ export default defineComponent({
       isFormValid,
       search,
       searchBusinessForm,
+      emailToAdd,
+      addEmail,
       ...toRefs(localVars)
     }
   }
