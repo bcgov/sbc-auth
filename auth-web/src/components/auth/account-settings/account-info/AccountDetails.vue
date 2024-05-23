@@ -57,12 +57,12 @@
               </div>
 
               <div v-if="isAccountTypeBusiness">
-                <span class="font-weight-bold">Business Type:</span>
+                <span class="font-weight-bold">{{ accountTypeLabel }}</span>
                 {{ getBusinessTypeLabel }}
               </div>
 
               <div v-if="isAccountTypeBusiness">
-                <span class="font-weight-bold">Business Size:</span>
+                <span class="font-weight-bold">{{ accountSizeLabel }}</span>
                 {{ getBusinessSizeLabel }}
               </div>
             </div>
@@ -112,6 +112,7 @@ import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vu
 import { Code } from '@/models/Code'
 import { OrgBusinessType } from '@/models/Organization'
 import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
 
 export interface AccountDetailsI {
   orgName: string
@@ -136,6 +137,7 @@ export default defineComponent({
     // refs
     const editAccountForm = ref(null as HTMLFormElement)
     const codeStore = useCodesStore()
+    const orgStore = useOrgStore()
     const businessSizeCodes = computed(() => codeStore.businessSizeCodes)
     const businessTypeCodes = computed(() => codeStore.businessTypeCodes)
 
@@ -148,6 +150,11 @@ export default defineComponent({
       orgBusinessType: { businessType: '', businessSize: '' }
     }) as unknown) as AccountDetailsI
     watch(() => props.isBusinessAccount, (val: boolean) => { localVars.isAccountTypeBusiness = val })
+
+    const isGovnOrg = computed(() => orgStore.isGovnOrg)
+    const accountTypeLabel = computed(() => isGovnOrg.value ? 'Government Agency Type:' : 'Business Type:')
+    const accountSizeLabel = computed(() => isGovnOrg.value ? 'Government Agency Size:' : 'Business Size:')
+    const canOrgChange = computed(() => props.nameChangeAllowed && props.viewOnlyMode && !isGovnOrg.value)
 
     const updateIsOrgBusinessTypeValid = (isValid: boolean) => {
       localVars.isOrgBusinessTypeValid = !!isValid
@@ -190,6 +197,7 @@ export default defineComponent({
     onMounted(async () => {
       localVars.isLoading = true
       // to show business type value need to get all code
+      await codeStore.fetchAllBusinessTypeCodes()
       await codeStore.getBusinessTypeCodes()
       await codeStore.getBusinessSizeCodes()
       updateAccountDetails()
@@ -204,6 +212,9 @@ export default defineComponent({
       updateOrgBusinessType,
       emitViewOnly,
       emitUpdateAndSaveAccount,
+      accountTypeLabel,
+      accountSizeLabel,
+      canOrgChange,
       ...toRefs(localVars)
     }
   }

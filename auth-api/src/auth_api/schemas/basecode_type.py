@@ -24,7 +24,7 @@ class BaseCodeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps fields to a default schema."""
 
-        fields = ('code', 'description', 'default')
+        fields = ('code', 'description', 'default', 'is_government_agency', 'is_business')
 
     # front end expects desc still
     description = fields.String(data_key='desc')

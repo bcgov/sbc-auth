@@ -147,9 +147,9 @@
       </div>
     </v-slide-y-transition>
     <v-divider class="mb-6 mt-1" />
-    <div>
+    <div class="mb-6 mt-1">
       <header class="d-flex align-center">
-        <span>Other account creation options if you do not have ID issued in Canada</span>
+        <span>Don't have ID issued in Canada? View other account creation options</span>
         <v-btn
           depressed
           color="primary"
@@ -301,7 +301,70 @@
           </v-slide-y-transition>
         </div>
       </v-expand-transition>
-      <div />
+    </div>
+    <div>
+      <header class="d-flex align-center">
+        <span>Creating an account for a Canadian government agency?</span>
+        <v-btn
+          depressed
+          color="primary"
+          width="120"
+          class="font-weight-bold ml-auto"
+          text
+          @click="showGovnOption = !showGovnOption"
+        >
+          <span
+            v-if="showGovnOption"
+          > View Less
+            <v-icon
+              meduim
+              color="primary"
+            >mdi-chevron-up</v-icon>
+          </span>
+          <span
+            v-else
+          >View More<v-icon
+            meduim
+            color="primary"
+          >mdi-chevron-down</v-icon></span>
+        </v-btn>
+      </header>
+
+      <v-expand-transition v-if="showGovnOption">
+        <div class="mt-2">
+          <v-slide-y-transition>
+            <div
+              class="mb-10 pb-16 pt-6"
+            >
+              <div class="help-info__content mx-auto">
+                <div class="help-info__sub-header">
+                  B.C. Provincial Government Ministry/Employee
+                </div>
+                <div class="mt-4">
+                  If you are a B.C. Provincial Government Ministry/Employee, please follow
+                  <a
+                    :href="govnURL"
+                    target="_blank"
+                    class="learn-more-link"
+                    rel="noopener noreferrer"
+                  >the Ministry Government Account Creation Process (PDF)
+                  </a>
+                  to set up your account. You can login with your IDIR after approval.
+                </div>
+                <div class="mt-4 help-info__sub-header">
+                  Canadian Government Agency (other than B.C. provincial)
+                </div>
+                <div class="mt-4">
+                  If you are a member of a Canadian government agency (other than B.C. provincial),
+                  select the BC Services Card to create an account, and then identify yourself as "Government Agency" on
+                  the Account Information page during registration. Once your registration has been reviewed by staff,
+                  your account will be authorized for government access.
+                </div>
+              </div>
+            </div>
+          </v-slide-y-transition>
+        </div>
+      </v-expand-transition>
     </div>
   </v-container>
 </template>
@@ -334,6 +397,7 @@ export default class ChooseAuthMethodView extends Vue {
   showHelpBCSC = false
   showHelpBCeID = false
   showBCeIDOption = false
+  showGovnOption = false
 
   $refs: {
     govnConfirmModal: InstanceType<typeof ModalDialog>
@@ -353,6 +417,12 @@ export default class ChooseAuthMethodView extends Vue {
 
   get bcTokenURL (): string {
     return 'https://id.gov.bc.ca/account/setup-instruction'
+  }
+
+  get govnURL (): string {
+    return 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/' +
+          'business-management/permits-licences-and-registration/registries-guides/' +
+          'ministry_account_creation_process_april_2022.pdf'
   }
 
   get serviceCardLearnMoreURL (): string {
@@ -478,6 +548,11 @@ export default class ChooseAuthMethodView extends Vue {
     font-size: .875rem;
     text-decoration: underline;
     white-space: nowrap;
+  }
+
+  &__sub-header {
+    font-weight: bold;
+    color: $gray9;
   }
 }
 
