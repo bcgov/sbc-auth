@@ -4,7 +4,7 @@ Jinja2==3.0.3
 MarkupSafe==2.0.1
 Werkzeug==1.0.1
 attrs==23.2.0
-blinker==1.8.1
+blinker==1.8.2
 certifi==2024.2.2
 charset-normalizer==3.3.2
 click==8.1.7
@@ -26,13 +26,13 @@ python-dotenv==1.0.1
 pytz==2024.1
 requests==2.32.2
 semver==3.0.2
-sentry-sdk==2.0.1
+sentry-sdk==2.3.1
 six==1.16.0
 threadloop==1.0.2
 thrift==0.20.0
 tornado==6.4
 urllib3==1.26.18
-zipp==3.18.1
+zipp==3.18.2
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
 -e git+https://github.com/bcgov/sbc-auth.git#egg=auth-api&subdirectory=auth-api
 git+https://github.com/daxiom/simple-cloudevent.py.git
