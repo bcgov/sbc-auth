@@ -667,3 +667,16 @@ export enum InvoluntaryDissolutionConfigNames {
   MAX_DISSOLUTIONS_ALLOWED = 'MAX_DISSOLUTIONS_ALLOWED',
   NUM_DISSOLUTIONS_ALLOWED = 'NUM_DISSOLUTIONS_ALLOWED'
 }
+
+export enum AccountType {
+    BUSINESS = 'business',
+    GOVN = 'govn',
+    INDIVIDUAL = 'individual'
+}
+
+export enum OrgNameLabel {
+    GOVM = 'Ministry Name',
+    GOVN = 'Government Agency Name',
+    BUSINESS = 'Legal Business Name',
+    REGULAR = 'Account Name'
+}

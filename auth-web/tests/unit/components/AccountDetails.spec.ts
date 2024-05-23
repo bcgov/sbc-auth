@@ -1,8 +1,9 @@
+import { AccessType, AccountStatus } from '@/util/constants'
 import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { useCodesStore, useOrgStore } from '@/stores'
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
-import { useCodesStore } from '@/stores'
 
 const vuetify = new Vuetify({})
 
@@ -12,9 +13,17 @@ describe('AccountDetails.vue', () => {
   let wrapper: any
   let wrapperFactory: any
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const localVue = createLocalVue()
     localVue.directive('can', can)
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      name: 'testOrg',
+      statusCode: AccountStatus.ACTIVE,
+      orgStatus: AccountStatus.ACTIVE,
+      accessType: AccessType.REGULAR,
+      id: 1234
+    } as any
 
     const codesStore = useCodesStore()
     codesStore.businessSizeCodes = [
@@ -24,6 +33,14 @@ describe('AccountDetails.vue', () => {
     codesStore.businessTypeCodes = [
       { code: 'BIZ', default: false, desc: 'GENERAL BUSINESS' }
     ]
+
+    codesStore.fetchAllBusinessTypeCodes = vi.fn().mockResolvedValue(null)
+    codesStore.getBusinessSizeCodes = vi.fn().mockResolvedValue(null)
+    codesStore.getBusinessTypeCodes = vi.fn().mockResolvedValue(null)
+    await codesStore.fetchAllBusinessTypeCodes()
+    await codesStore.getBusinessSizeCodes()
+    await codesStore.getBusinessTypeCodes()
+
     // Remove in Vue 3
     codesStore.getBusinessSizeCodes = vi.fn()
     codesStore.getBusinessTypeCodes = vi.fn()
@@ -67,7 +84,19 @@ describe('AccountDetails.vue', () => {
 
   it('Show edit icon when passing props', async () => {
     expect(wrapper.find('[data-test="btn-edit"]').exists()).toBe(false)
-    await wrapper.setProps({ viewOnlyMode: true })
+    await wrapper.setProps({ viewOnlyMode: true, nameChangeAllowed: true })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.accountTypeLabel).toBe('Business Type:')
+    expect(wrapper.vm.accountSizeLabel).toBe('Business Size:')
     expect(wrapper.find('[data-test="btn-edit"]').exists()).toBe(true)
+  })
+
+  it('Hide edit icon when govn and update type label', async () => {
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization.accessType = AccessType.GOVN
+    await wrapper.setProps({ viewOnlyMode: true, nameChangeAllowed: true })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.accountTypeLabel).toBe('Government Agency Type:')
+    expect(wrapper.vm.accountSizeLabel).toBe('Government Agency Size:')
   })
 })

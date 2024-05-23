@@ -3,4 +3,6 @@ export interface Code {
     code: string;
     default?: boolean;
     desc: string;
+    isBusiness?: boolean;
+    isGovernmentAgency?: boolean;
 }

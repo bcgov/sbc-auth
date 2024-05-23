@@ -160,7 +160,7 @@
   "vsCodeDescription": "<p class='mb-2'><p class='mb-1'>The search and registration products are intended for the exclusive use of solicitors and notaries only. To add this product, accept the Terms of Service. Review the terms and check the box below if you confirm. BC Registry staff will review your information and grant access to Wills Registry in <strong>3-4 days</strong> if approved.</p><a href='https://www2.gov.bc.ca/gov/content/life-events/death/wills-registry' target='sbc-auth-wills'>Learn More <span class='mdi mdi-open-in-new'></span></a></p>",
   "bcaCodeDescription": "Three reports are available for purchase:<ul><li>Owner Location Report</li><li>Assessment Roll Report</li><li>Assessment Inventory Report</li></ul>",
   "esraCodeDescription": "Search by the following:<ul><li>Parcel ID (PID)</li><li>Crown Lands PIN</li><li>Crown Lands File Number</li><li>Site ID</li><li>Address</li><li>Area</li></ul>",
-  "accountBusinessTypeText": "Do you want your BC Registries and Online Service account in your personal name or business name?",
+  "accountBusinessTypeText": "Select a user type for your BC Registries and Online Service Account:",
   "businessCodeActiveSubtitle": "This account has access to Business Registry & Name Request.",
   "business_searchCodeActiveSubtitle": "This account has access to Business Search.",
   "mhrStaffCodeActiveSubtitle": "This account has search access to Manufactured Home Registry",
