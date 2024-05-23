@@ -71,3 +71,11 @@ export interface InvoluntaryDissolutionConfigurationIF {
 export interface Configurations {
   configurations: InvoluntaryDissolutionConfigurationIF[]
 }
+
+export interface DissolutionStatistics {
+  data: { eligibleCount: number }
+}
+
+export interface SafeListEmailsRequestBody {
+    email: string[]
+}

@@ -284,8 +284,8 @@ def test_check_auth_staff_path(session, monkeypatch, test_desc, test_expect, add
     'test_desc,test_expect,additional_kwargs,is_org_member,is_entity_affiliated,product_code_in_jwt',
     [
         (
-            'Test UnboundLocalError when no role checks provided in kwargs, and no org_id or business_identifier.',
-            pytest.raises(UnboundLocalError), {}, False, False, ProductCode.BUSINESS.value
+            'Test 403 when no role checks provided in kwargs, and no org_id or business_identifier.',
+            pytest.raises(Forbidden), {}, False, False, ProductCode.BUSINESS.value
         ),
         (
             'Test OK when no role checks provided in kwargs, but has ALL product in jwt. (bypass all checks).',
@@ -359,7 +359,7 @@ def test_check_auth_system_path(session, monkeypatch, test_desc, test_expect, ad
     'test_desc,test_expect,additional_kwargs,is_org_member,is_entity_affiliated',
     [
         (
-            'Test UnboundLocalError when no role checks provided in kwargs.',
+            'Test UnboundLocalError (403) when no role checks provided in kwargs.',
             pytest.raises(UnboundLocalError), {}, False, False
         ),
         (

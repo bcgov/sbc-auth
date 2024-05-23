@@ -36,7 +36,7 @@ pyrsistent==0.20.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2024.1
-requests==2.31.0
+requests==2.32.0
 rsa==4.9
 semver==3.0.2
 sentry-sdk==2.0.1
@@ -47,5 +47,5 @@ tornado==6.4
 urllib3==1.26.18
 zipp==3.18.1
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
--e git+https://github.com/seeker25/sbc-auth.git@queue_upgrades#egg=auth-api&subdirectory=auth-api
+-e git+https://github.com/bcgov/sbc-auth.git#egg=auth-api&subdirectory=auth-api
 git+https://github.com/daxiom/simple-cloudevent.py.git

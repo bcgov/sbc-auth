@@ -89,7 +89,7 @@ class GcpQueue:
         """Returns the publisher."""
         if not self._publisher and self.credentials_pub:
             self._publisher = pubsub_v1.PublisherClient(credentials=self.credentials_pub)
-        else:
+        if not self._publisher:
             self._publisher = pubsub_v1.PublisherClient()
         return self._publisher
 

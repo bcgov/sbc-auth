@@ -18,7 +18,7 @@ from flask_sqlalchemy import BaseQuery
 from sqlalchemy import String, func
 
 
-class CustomQuery(BaseQuery):
+class CustomQuery(BaseQuery):  # pylint: disable=too-few-public-methods
     """Custom Query class to extend the base query class for helper functionality."""
 
     def filter_conditionally(self, search_criteria, model_attribute, is_like: bool = False):

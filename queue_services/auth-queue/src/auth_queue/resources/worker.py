@@ -14,7 +14,7 @@
 """The unique worker functionality for this service is contained here."""
 import dataclasses
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from http import HTTPStatus
 
 from auth_api.models import ActivityLog as ActivityLogModel
@@ -22,6 +22,7 @@ from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import db
+from auth_api.models.pubsub_message_processing import PubSubMessageProcessing
 from auth_api.services.gcp_queue import queue
 from auth_api.services.gcp_queue.gcp_auth import ensure_authorized_queue_user
 from auth_api.services.rest_service import RestService
@@ -45,7 +46,10 @@ def worker():
         return {}, HTTPStatus.OK
 
     try:
-        current_app.logger.info('Event Message Received: %s', json.dumps(dataclasses.asdict(event_message)))
+        current_app.logger.info('Event message received: %s', json.dumps(dataclasses.asdict(event_message)))
+        if is_message_processed(event_message):
+            current_app.logger.info('Event message already processed, skipping.')
+            return {}, HTTPStatus.OK
         if event_message.type == QueueMessageTypes.NAMES_EVENT.value:
             process_name_events(event_message)
         elif event_message.type == QueueMessageTypes.ACTIVITY_LOG.value:
@@ -57,6 +61,19 @@ def worker():
         current_app.logger.error('Error processing event: %s', e)
     # Return a 200, so the event is removed from the Queue
     return {}, HTTPStatus.OK
+
+
+def is_message_processed(event_message):
+    """Check if the queue message is processed."""
+    if PubSubMessageProcessing.find_by_cloud_event_id_and_type(event_message.id, event_message.type):
+        return True
+    pubsub_message_processing = PubSubMessageProcessing()
+    pubsub_message_processing.cloud_event_id = event_message.id
+    pubsub_message_processing.message_type = event_message.type
+    pubsub_message_processing.processed = datetime.now(timezone.utc)
+    db.session.add(pubsub_message_processing)
+    db.session.commit()
+    return False
 
 
 def process_activity_log(data):
