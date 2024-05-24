@@ -49,6 +49,7 @@
         :hasTitleSlot="false"
         :highlight-index="highlightIndex"
         highlight-class="base-table__item-row-green"
+        :setExpanded="state.expanded"
         @update-table-options="state.options = $event"
       >
         <template #item-slot-linkedAccount="{ item }">
@@ -57,50 +58,79 @@
         <template #item-slot-amountOwing="{ item }">
           <span>{{ formatCurrency(item.amountOwing) }}</span>
         </template>
-        <template #item-slot-actions="{ index }">
+        <template #expanded-item="{ item }">
+          <tr class="expanded-item-row">
+            <td
+              :colspan="headers.length"
+              class="pb-5 pl-0"
+            >
+              <span class="expanded-item scheduled-item">
+                <v-icon>mdi-clock-outline</v-icon>
+                {{ formatCurrency(item.amountOwing) }} will be applied to this account today at 6:00 p.m. Pacific Time.
+              </span>
+            </td>
+          </tr>
+        </template>
+        <template #item-slot-actions="{ item, index }">
           <div
             :id="`action-menu-${index}`"
             class="new-actions mx-auto"
           >
-            <v-btn
-              small
-              color="primary"
-              min-width="5rem"
-              min-height="2rem"
-              class="open-action-btn"
-            >
-              Cancel Payment
-            </v-btn>
-            <span class="more-actions">
-              <v-menu
-                v-model="actionDropdown[index]"
-                :attach="`#action-menu-${index}`"
-                offset-y
-                nudge-left="74"
+            <!-- Cancel Payment / Unlink buttons-->
+            <template v-if="item?.hasPendingPayment">
+              <v-btn
+                small
+                color="primary"
+                min-width="5rem"
+                min-height="2rem"
+                class="open-action-btn"
               >
-                <template #activator="{ on }">
-                  <v-btn
-                    small
-                    color="primary"
-                    min-height="2rem"
-                    class="more-actions-btn"
-                    v-on="on"
-                  >
-                    <v-icon>{{ actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                  <v-list-item
-                    class="actions-dropdown_item"
-                    data-test="link-account-button"
-                  >
-                    <v-list-item-subtitle>
-                      <span class="pl-1 cursor-pointer">Cancel payment and remove linkage</span>
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </span>
+                Cancel Payment
+              </v-btn>
+              <span class="more-actions">
+                <v-menu
+                  v-model="actionDropdown[index]"
+                  :attach="`#action-menu-${index}`"
+                  offset-y
+                  nudge-left="74"
+                >
+                  <template #activator="{ on }">
+                    <v-btn
+                      small
+                      color="primary"
+                      min-height="2rem"
+                      class="more-actions-btn"
+                      v-on="on"
+                    >
+                      <v-icon>{{ actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item
+                      class="actions-dropdown_item"
+                      data-test="link-account-button"
+                    >
+                      <v-list-item-subtitle>
+                        <span class="pl-1 cursor-pointer">Cancel payment and remove linkage</span>
+                      </v-list-item-subtitle>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </span>
+            </template>
+            <!-- Unlink Account Button -->
+            <template v-else>
+              <v-btn
+                small
+                color="primary"
+                min-width="5rem"
+                min-height="2rem"
+                class="open-action-btn unlink-action-btn"
+                @click="unlinkAccount(item)"
+              >
+                Unlink Account
+              </v-btn>
+            </template>
           </div>
         </template>
       </BaseVDataTable>
@@ -131,6 +161,7 @@ import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import PaymentService from '@/services/payment.services'
 import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
+import { Vue } from 'vue-property-decorator'
 import _ from 'lodash'
 
 export default defineComponent({
@@ -192,7 +223,8 @@ export default defineComponent({
         pageLimit: 5
       },
       loading: false,
-      options: _.cloneDeep(DEFAULT_DATA_OPTIONS)
+      options: _.cloneDeep(DEFAULT_DATA_OPTIONS),
+      expanded: []
     })
 
     const isLinked = computed<boolean>(() => {
@@ -202,6 +234,17 @@ export default defineComponent({
     const accountDisplayText = computed<string>(() => {
       return `${props.shortNameDetails.accountId} ${props.shortNameDetails.accountName}`
     })
+
+    async function evaluateLinks () {
+      let pending = []
+      state.results.map(result => {
+        if (result.statusCode === 'PENDING' && result.amountOwing > 0) {
+          pending.push(result)
+        }
+      })
+      await Vue.nextTick()
+      state.expanded = [...pending]
+    }
 
     function openAccountLinkingDialog () {
       state.isShortNameLinkingDialogOpen = true
@@ -214,6 +257,14 @@ export default defineComponent({
     function onLinkAccount (account: any) {
       loadShortNameLinks()
       emit('on-link-account', account)
+    }
+
+    async function unlinkAccount (item) {
+      const response = await PaymentService.deleteShortNameLink(props.shortNameDetails.id, item.id)
+      if (!response) {
+        throw new Error('No response from delete short name link')
+      }
+      await loadShortNameLinks()
     }
 
     async function getEFTShortNameSummaries () {
@@ -236,6 +287,7 @@ export default defineComponent({
           /* We use appendToResults for infinite scroll, so we keep the existing results. */
           state.results = response.data.items
           state.totalResults = response.data.items.length
+          await evaluateLinks()
         } else {
           throw new Error('No response from loadShortNameLinks')
         }
@@ -260,6 +312,7 @@ export default defineComponent({
       openAccountLinkingDialog,
       closeShortNameLinkingDialog,
       onLinkAccount,
+      unlinkAccount,
       getEFTShortNameSummaries,
       formatCurrency: CommonUtils.formatAmount,
       formatAccountDisplayName: CommonUtils.formatAccountDisplayName
@@ -292,6 +345,41 @@ export default defineComponent({
 ::v-deep {
   .base-table__item-cell {
     padding: 16px 0 16px 0
+  }
+
+  // Remove border for rows that are expanded with additional information
+  tr:has(+ tr.expanded-item-row) td {
+    border-bottom: none !important;
+  }
+}
+
+.unlink-action-btn {
+  border-radius: 4px !important;
+}
+
+.expanded-item-row {
+  td {
+    .expanded-item {
+      display: grid;
+      max-width: 80%;
+      padding: 5px 0px 0px 0px;
+      font-size: 16px;
+      grid-template-columns: 35px 1fr;
+      align-items: start;
+
+      .v-icon {
+        justify-content: left;
+        grid-column: 1;
+        padding-right: 4px !important;
+        margin-right: 0px !important;
+      }
+    }
+
+    .alert-item {
+      .v-icon{
+        color: #F8661A;
+      }
+    }
   }
 }
 

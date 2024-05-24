@@ -294,4 +294,9 @@ export default class PaymentService {
     }
     return axios.post(url, body)
   }
+
+  static deleteShortNameLink (shortNameId: string, shortNameLinkId: string): AxiosPromise<EFTShortnameResponse> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/links/${shortNameLinkId}`
+    return axios.delete(url)
+  }
 }
