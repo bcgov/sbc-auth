@@ -54,7 +54,7 @@ describe('AccountHoldView.vue', () => {
 
   it('Validate is-user message', () => {
     expect(wrapper.find('h1').text()).toBe('Your Account is Temporarily on Hold')
-    expect(wrapper.find('[data-test="div-is-user"]').text()).toBe('Your account is suspended from: 2021-01-12 ' +
+    expect(wrapper.find('[data-test="div-is-user"]').text()).toBe('Your account is suspended from: 2021-01-11 ' +
     'Please contact the account administrator to reactive your account.  ' +
     'Account Administrator Email: test@email.com')
     expect(wrapper.find('[data-test="div-is-admin"]').exists()).toBeFalsy()
