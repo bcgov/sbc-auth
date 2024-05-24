@@ -79,7 +79,6 @@
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { FailedEFTInvoice } from '@/models/invoice'
-import moment from 'moment'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -92,6 +91,7 @@ export default defineComponent({
     const calculateFailedInvoices: any = orgStore.calculateFailedEFTInvoices
     const downloadNSFInvoicesPDF: any = orgStore.downloadNSFInvoicesPDF
     const formatDate = CommonUtils.formatDisplayDate
+    const formatDateRange = CommonUtils.formatDateRange
     const suspendedDate = (currentOrganization.value?.suspendedOn) ? formatDate(new Date(currentOrganization.value.suspendedOn)) : ''
 
     const state = reactive({
@@ -101,26 +101,6 @@ export default defineComponent({
 
     const goNext = () => {
       emit('step-forward')
-    }
-
-    const getMomentDateObj = (dateStr) => {
-      return moment(dateStr, 'YYYY-MM-DD')
-    }
-
-    const formatDateRange = (date1, date2) => {
-      let dateObj1 = getMomentDateObj(date1)
-      let dateObj2 = getMomentDateObj(date2)
-      let year = (dateObj1.year() === dateObj2.year()) ? dateObj1.year() : ''
-      let month = (dateObj1.month() === dateObj2.month()) ? dateObj1.format('MMMM') : ''
-      if (date1 === date2) {
-        return dateObj1.format('MMMM DD, YYYY')
-      } else if (year && !month) {
-        return `${dateObj1.format('MMMM DD')} - ${dateObj2.format('MMMM DD')}, ${year}`
-      } else if (year && month) {
-        return `${month} ${dateObj1.date()} - ${dateObj2.date()}, ${year}`
-      } else {
-        return `${dateObj1.format('MMMM DD, YYYY')} - ${dateObj2.format('MMMM DD, YYYY')}`
-      }
     }
 
     onMounted(async () => {

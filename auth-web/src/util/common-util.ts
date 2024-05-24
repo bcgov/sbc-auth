@@ -7,6 +7,22 @@ import moment from 'moment'
  * A class to put all the common utility methods.
  */
 export default class CommonUtils {
+  static formatDateRange (date1: any, date2: any): string {
+    const dateObj1 = moment(date1, 'YYYY-MM-DD')
+    const dateObj2 = moment(date2, 'YYYY-MM-DD')
+    const year = (dateObj1.year() === dateObj2.year()) ? dateObj1.year() : ''
+    const month = (dateObj1.month() === dateObj2.month()) ? dateObj1.format('MMMM') : ''
+    if (date1 === date2) {
+      return dateObj1.format('MMMM DD, YYYY')
+    } else if (year && !month) {
+      return `${dateObj1.format('MMMM DD')} - ${dateObj2.format('MMMM DD')}, ${year}`
+    } else if (year && month) {
+      return `${month} ${dateObj1.date()} - ${dateObj2.date()}, ${year}`
+    } else {
+      return `${dateObj1.format('MMMM DD, YYYY')} - ${dateObj2.format('MMMM DD, YYYY')}`
+    }
+  }
+
   // checking url matches the regex
   static isUrl (value:string): boolean {
     return value?.startsWith('http')

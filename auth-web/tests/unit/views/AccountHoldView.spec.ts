@@ -1,5 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-import AccountSuspendedView from '@/views/auth/account-freeze/AccountSuspendedView.vue'
+import AccountHoldView from '@/views/auth/account-freeze/AccountHoldView.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
@@ -13,7 +13,7 @@ const mockSession = {
 const router = new VueRouter()
 const vuetify = new Vuetify({})
 
-describe('AccountSuspendedView.vue', () => {
+describe('AccountHoldView.vue', () => {
   let wrapper: any
 
   afterEach(() => {
@@ -30,7 +30,7 @@ describe('AccountSuspendedView.vue', () => {
     }
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
-    wrapper = shallowMount(AccountSuspendedView, {
+    wrapper = shallowMount(AccountHoldView, {
       localVue,
       router,
       vuetify,
@@ -53,7 +53,7 @@ describe('AccountSuspendedView.vue', () => {
   })
 
   it('Validate is-user message', () => {
-    expect(wrapper.find('h1').text()).toBe('Your Account is Suspended')
+    expect(wrapper.find('h1').text()).toBe('Your Account is Temporarily on Hold')
     expect(wrapper.find('[data-test="div-is-user"]').text()).toBe('Your account is suspended from: 2021-01-12 ' +
     'Please contact the account administrator to reactive your account.  ' +
     'Account Administrator Email: test@email.com')
@@ -63,10 +63,11 @@ describe('AccountSuspendedView.vue', () => {
   it('Validate is-admin message', async () => {
     wrapper.setProps({ isAdmin: true })
     await flushPromises()
-    expect(wrapper.find('h1').text()).toBe('Your Account is Suspended')
+    expect(wrapper.find('h1').text()).toBe('Your Account is Temporarily on Hold')
     const divAdminText = wrapper.find('[data-test="div-is-admin"]').text()
-    expect(divAdminText).toContain('Your account is suspended. For more information, please contact the BC Online ' +
-    'Partnership Office at: Email: bconline@gov.bc.caTelephone: 1-800-663-6102')
+    expect(divAdminText).toContain('Your account is on hold until payment is received. ' +
+    'Once your payment is processed, your account will be activated. ' +
+    'We will send a notification email when your account is activated.')
     expect(wrapper.find('[data-test="div-is-user"]').exists()).toBeFalsy()
   })
 })

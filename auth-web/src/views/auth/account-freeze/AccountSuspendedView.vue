@@ -34,13 +34,13 @@
           data-test="div-is-user"
         >
           <p class="mt-4">
-            Your account is suspended from: <span class="font-weight-bold">May 10, 2024.</span>
+            Your account is suspended from: <span class="font-weight-bold">{{ suspendedDate }}</span>
           </p>
           <p class="mt-4">
             Please contact the account administrator to reactive your account.
           </p>
           <p class="mt-4 mb-10">
-            Account Administrator Email: <a href="mailto:rodrigo.barraza@gov.bc.ca">rodrigo.barraza@gov.bc.ca</a>
+            Account Administrator Email: <a :href="'mailto:' + accountAdministratorEmail">{{ accountAdministratorEmail }}</a>
           </p>
         </div>
       </v-col>
@@ -49,12 +49,33 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { computed, defineComponent, reactive, toRefs } from '@vue/composition-api'
+import CommonUtils from '@/util/common-util'
+import { useOrgStore } from '@/stores/org'
 
-@Component
-export default class AccountSuspendedView extends Vue {
-  @Prop({ default: false }) isAdmin: boolean
-}
+export default defineComponent({
+  name: 'AccountSuspendedView',
+  props: {
+    isAdmin: {
+      type: Boolean,
+      default: false
+    }
+  },
+  setup () {
+    const orgStore = useOrgStore()
+    const currentOrganization = computed(() => orgStore.currentOrganization)
+    const formatDate = CommonUtils.formatDisplayDate
+
+    const state = reactive({
+      invoices: [],
+      suspendedDate: (currentOrganization.value?.suspendedOn) ? formatDate(new Date(currentOrganization.value.suspendedOn)) : '',
+      accountAdministratorEmail: ''
+    })
+    return {
+      ...toRefs(state)
+    }
+  }
+})
 </script>
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';

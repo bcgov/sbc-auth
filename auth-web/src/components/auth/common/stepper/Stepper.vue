@@ -66,6 +66,7 @@
             keep-alive
             @final-step-action="emitFinalStepAction"
             @step-forward="emitStepForward"
+            @step-back="emitStepBack"
           />
         </template>
       </div>
@@ -177,6 +178,10 @@ export default class Stepper extends Vue {
 
   @Emit('step-forward')
   emitStepForward () : void {
+  }
+
+  @Emit('step-back')
+  emitStepBack () : void {
   }
 }
 </script>

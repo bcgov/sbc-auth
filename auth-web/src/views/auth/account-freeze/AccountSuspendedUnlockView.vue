@@ -29,10 +29,10 @@
         redirectWhenDone="/account-hold"
         @final-step-action="unlockAccount"
         @step-forward="handleStepForward"
+        @step-back="handleStepBack"
       />
     </v-card>
 
-    <!-- Alert Dialog (Error) -->
     <ModalDialog
       ref="errorDialog"
       :title="errorTitle"
@@ -135,6 +135,10 @@ export default defineComponent({
       stepper.value.stepForward()
     }
 
+    const handleStepBack = () => {
+      stepper.value.stepBack()
+    }
+
     return {
       currentUser,
       currentOrganization,
@@ -148,7 +152,8 @@ export default defineComponent({
       unlockAccount,
       isAccountEFTSuspended,
       closeError,
-      handleStepForward
+      handleStepForward,
+      handleStepBack
     }
   }
 })

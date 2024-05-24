@@ -15,11 +15,10 @@
           mdi-clock-outline
         </v-icon>
         <h1 data-test="header-account-suspend">
-          Your account is temporarily on hold
+          Your Account is Temporarily on Hold
         </h1>
-        <!-- should be isAdmin -->
         <div
-          v-if="!isAdmin"
+          v-if="isAdmin"
           data-test="div-is-admin"
         >
           <p class="mt-8 mb-10">
@@ -35,7 +34,7 @@
             :key="invoice.id"
             class="mb-2 link"
           >
-            April 1 - 30, 2024
+            {{ formatDateRange(invoice.fromDate, invoice.toDate) }}
           </p>
         </div>
         <div
@@ -47,6 +46,9 @@
           </p>
           <p class="mt-4">
             Please contact the account administrator to reactive your account.
+          </p>
+          <p class="mt-4 mb-10">
+            Account Administrator Email: <a :href="'mailto:' + accountAdministratorEmail">{{ accountAdministratorEmail }}</a>
           </p>
         </div>
       </v-col>
@@ -73,9 +75,12 @@ export default defineComponent({
     const currentOrganization = computed(() => orgStore.currentOrganization)
     const calculateFailedInvoices: any = orgStore.calculateFailedEFTInvoices
     const formatDate = CommonUtils.formatDisplayDate
-    const suspendedDate = (currentOrganization.value?.suspendedOn) ? formatDate(new Date(currentOrganization.value.suspendedOn)) : ''
+    const formatDateRange = CommonUtils.formatDateRange
+
     const state = reactive({
-      invoices: []
+      invoices: [],
+      suspendedDate: (currentOrganization.value?.suspendedOn) ? formatDate(new Date(currentOrganization.value.suspendedOn)) : '',
+      accountAdministratorEmail: ''
     })
 
     onMounted(async () => {
@@ -85,7 +90,7 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
-      suspendedDate
+      formatDateRange
     }
   }
 })
