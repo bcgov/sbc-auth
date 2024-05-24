@@ -3,6 +3,20 @@
     id="involuntary-dissolution"
     class="view-container"
   >
+    <!-- Spinner while waiting to grab the number of the businesses ready for D1 Dissolution -->
+    <v-fade-transition>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
+      </div>
+    </v-fade-transition>
     <div class="view-header flex-column">
       <h1>
         Staff Involuntary Dissolution Batch
@@ -55,9 +69,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted } from '@vue/composition-api'
+import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { CardHeader } from '@/components'
 import DissolutionSchedule from '@/components/auth/staff/DissolutionSchedule.vue'
+import { useStaffStore } from '@/stores/staff'
 
 export default defineComponent({
   name: 'InvoluntaryDissolution',
@@ -66,16 +81,23 @@ export default defineComponent({
     DissolutionSchedule
   },
   setup () {
-    onMounted(() => {})
+    const state = reactive({
+      businessesReadyforDissolutionNumber: -1,
+      isLoading: true
+    })
+    const staffStore = useStaffStore()
 
-    /**
-     * The number of B.C. businesses that are ready for D1 Dissolution.
-     * TODO: Change this once the BE is done.
-     */
-    const businessesReadyforDissolutionNumber = computed(() => 0)
+    onMounted(async () => {
+      // Make the call to get the involuntary dissolutions statistics data and set it in store
+      await staffStore.getDissolutionStatistics()
+      state.businessesReadyforDissolutionNumber = staffStore.dissolutionStatistics?.data?.eligibleCount
+
+      // Hide spinner
+      state.isLoading = false
+    })
 
     return {
-      businessesReadyforDissolutionNumber
+      ...toRefs(state)
     }
   }
 })

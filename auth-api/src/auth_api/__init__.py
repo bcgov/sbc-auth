@@ -33,6 +33,7 @@ from auth_api.extensions import mail
 from auth_api.models import db, ma
 from auth_api.resources import endpoints
 from auth_api.services.flags import flags
+from auth_api.services.gcp_queue import queue
 from auth_api.utils.cache import cache
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
@@ -45,7 +46,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     app = Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
 
-    # Configure Sentry
     if str(app.config.get('SENTRY_ENABLE')).lower() == 'true':
         if app.config.get('SENTRY_DSN', None):
             sentry_sdk.init(  # pylint: disable=abstract-class-instantiated
@@ -57,6 +57,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     db.init_app(app)
     ma.init_app(app)
     mail.init_app(app)
+    queue.init_app(app)
     endpoints.init_app(app)
 
     if os.getenv('FLASK_ENV', 'production') != 'testing':

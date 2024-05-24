@@ -1,4 +1,12 @@
-import { AccountType, Configurations, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
+import {
+  AccountType,
+  Configurations,
+  DissolutionStatistics,
+  ProductCode,
+  Products,
+  ProductsRequestBody,
+  SafeListEmailsRequestBody
+} from '@/models/Staff'
 import { OrgFilterParams, OrgList, Organizations } from '@/models/Organization'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
@@ -51,5 +59,21 @@ export default class StaffService {
 
   static async getInvoluntaryDissolutionConfigurations (): Promise<AxiosResponse<Configurations>> {
     return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/admin/configurations`)
+  }
+
+  static async getDissolutionStatistics (): Promise<AxiosResponse<DissolutionStatistics>> {
+    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/admin/dissolutions/statistics`)
+  }
+
+  static async updateInvoluntaryDissolutionConfigurations (configurations: Configurations): Promise<AxiosResponse<Configurations>> {
+    return axios.put(`${ConfigHelper.getLegalAPIV2Url()}/admin/configurations`, configurations)
+  }
+
+  static async deleteSafeEmail (email: string): Promise<AxiosResponse<SafeEmail[]>> {
+    return axios.delete(`${ConfigHelper.getNotifiyAPIUrl()}/safe_list/${email}`)
+  }
+
+  static async addSafeEmail (safeListEmailsRequestBody: SafeListEmailsRequestBody): Promise<AxiosResponse<SafeEmail[]>> {
+    return axios.post(`${ConfigHelper.getNotifiyAPIUrl()}/safe_list`, safeListEmailsRequestBody)
   }
 }

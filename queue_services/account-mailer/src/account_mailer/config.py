@@ -20,7 +20,6 @@ Flask config, rather than reading environment variables directly
 or by accessing this configuration directly.
 """
 import os
-import random
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -96,23 +95,10 @@ class _Config():  # pylint: disable=too-few-public-methods
     NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
     REPORT_API_BASE_URL = f'{os.getenv("REPORT_API_URL")}/reports'
 
-    # nats
-    NATS_CONNECTION_OPTIONS = {
-        'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
-        'name': os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
-    }
-    STAN_CONNECTION_OPTIONS = {
-        'cluster_id': os.getenv('NATS_CLUSTER_ID', 'test-cluster'),
-        'client_id': str(random.SystemRandom().getrandbits(0x58)),
-        'ping_interval': 1,
-        'ping_max_out': 5,
-    }
-
-    SUBSCRIPTION_OPTIONS = {
-        'subject': os.getenv('NATS_MAILER_SUBJECT', 'account.mailer'),
-        'queue': os.getenv('NATS_MAILER_QUEUE', 'account.mailer.worker'),
-        'durable_name': os.getenv('NATS_MAILER_QUEUE', 'account-mailer-worker') + '_durable',
-    }
+    # PUB/SUB - SUB: account-mailer-dev
+    # If blank in PUB/SUB, this should match the https endpoint the subscription is pushing to.
+    AUTH_AUDIENCE_SUB = os.getenv('ACCOUNT_MAILER_AUDIENCE_SUB')
+    VERIFY_PUBSUB_EMAILS = os.getenv('AUTHPAY_SERVICE_ACCOUNT', 'email1,email2').split(',')
 
     # Minio configuration values
     MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
@@ -179,7 +165,6 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
         default=f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}',
     )
 
-    STAN_CLUSTER_NAME = 'test-cluster'
     AUTH_WEB_TOKEN_CONFIRM_PATH = ''
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_TEST_ISSUER')
     # Service account details

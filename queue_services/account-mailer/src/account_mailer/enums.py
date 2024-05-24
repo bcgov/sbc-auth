@@ -15,57 +15,6 @@
 from enum import Enum
 
 
-class MessageType(Enum):
-    """Event Types."""
-
-    REFUND_DIRECT_PAY_REQUEST = 'bc.registry.payment.direct_pay.refundRequest'
-    REFUND_DRAWDOWN_REQUEST = 'bc.registry.payment.drawdown.refundRequest'
-    PAD_ACCOUNT_CREATE = 'bc.registry.payment.padAccountCreate'
-    NSF_LOCK_ACCOUNT = 'bc.registry.payment.lockAccount'
-    NSF_UNLOCK_ACCOUNT = 'bc.registry.payment.unlockAccount'
-    ACCOUNT_CONFIRMATION_PERIOD_OVER = 'bc.registry.payment.confirmationPeriodOver'
-    PAD_INVOICE_CREATED = 'bc.registry.payment.pad.invoiceCreated'
-    ADMIN_REMOVED = 'bc.registry.auth.adminRemoved'
-    TEAM_MEMBER_INVITED = 'bc.registry.auth.teamMemberInvited'
-    TEAM_MODIFIED = 'bc.registry.auth.teamModified'
-    ONLINE_BANKING_OVER_PAYMENT = 'bc.registry.payment.OverPaid'
-    ONLINE_BANKING_UNDER_PAYMENT = 'bc.registry.payment.UnderPaid'
-    ONLINE_BANKING_PAYMENT = 'bc.registry.payment.Payment'
-    PAD_SETUP_FAILED = 'bc.registry.payment.PadSetupFailed'
-    PAYMENT_PENDING = 'bc.registry.payment.ob.outstandingInvoice'
-    EJV_FAILED = 'bc.registry.payment.ejvFailed'
-    RESET_PASSCODE = 'bc.registry.auth.resetPasscode'
-    ADMIN_NOTIFICATION = 'bc.registry.auth.adminNotification'
-    AFFILIATION_INVITATION = 'bc.registry.auth.affiliationInvitation'
-    BUSINESS_INVITATION = 'bc.registry.auth.businessInvitation'
-    BUSINESS_INVITATION_FOR_BCEID = 'bc.registry.auth.businessInvitationForBceid'
-    DIRSEARCH_BUSINESS_INVITATION = 'bc.registry.auth.dirsearchBusinessInvitation'
-    GOVM_BUSINESS_INVITATION = 'bc.registry.auth.govmBusinessInvitation'
-    GOVM_MEMBER_INVITATION = 'bc.registry.auth.govmMemberInvitation'
-    MEMBERSHIP_APPROVED_NOTIFICATION = 'bc.registry.auth.membershipApprovedNotification'
-    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = 'bc.registry.auth.membershipApprovedNotificationForBceid'
-    NONBCSC_ORG_APPROVED_NOTIFICATION = 'bc.registry.auth.nonbcscOrgApprovedNotification'
-    NONBCSC_ORG_REJECTED_NOTIFICATION = 'bc.registry.auth.nonbcscOrgRejectedNotification'
-    OTP_AUTHENTICATOR_RESET_NOTIFICATION = 'bc.registry.auth.otpAuthenticatorResetNotification'
-    ROLE_CHANGED_NOTIFICATION = 'bc.registry.auth.roleChangedNotification'
-    STAFF_REVIEW_ACCOUNT = 'bc.registry.auth.staffReviewAccount'
-    GOVM_APPROVED_NOTIFICATION = 'bc.registry.auth.govmApprovedNotification'
-    GOVM_REJECTED_NOTIFICATION = 'bc.registry.auth.govmRejectedNotification'
-    PROD_PACKAGE_APPROVED_NOTIFICATION = 'bc.registry.auth.prodPackageApprovedNotification'
-    PROD_PACKAGE_REJECTED_NOTIFICATION = 'bc.registry.auth.prodPackageRejectedNotification'
-    PRODUCT_APPROVED_NOTIFICATION_DETAILED = 'bc.registry.auth.productApprovedNotificationDetailed'
-    PRODUCT_REJECTED_NOTIFICATION_DETAILED = 'bc.registry.auth.productRejectedNotificationDetailed'
-    PRODUCT_CONFIRMATION_NOTIFICATION = 'bc.registry.auth.productConfirmationNotification'
-    RESUBMIT_BCEID_ORG_NOTIFICATION = 'bc.registry.auth.resubmitBceidOrg'
-    RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'bc.registry.auth.resubmitBceidAdmin'
-    AFFILIATION_INVITATION_REQUEST = 'bc.registry.auth.affiliationInvitationRequest'
-    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = 'bc.registry.auth.affiliationInvitationRequestAuthorization'
-    STATEMENT_NOTIFICATION = 'bc.registry.payment.statementNotification'
-    PAYMENT_REMINDER_NOTIFICATION = 'bc.registry.payment.statementReminderNotification'
-    PAYMENT_DUE_NOTIFICATION = 'bc.registry.payment.statementDueNotification'
-    EFT_AVAILABLE_NOTIFICATION = 'bc.registry.payment.eftAvailableNotification'
-
-
 class SubjectType(Enum):
     """Event Types."""
 
@@ -94,9 +43,9 @@ class SubjectType(Enum):
     MEMBERSHIP_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Welcome to the account {account_name}'
     MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = '[BC Registries and Online Services] Welcome to the account ' \
                                                  '{account_name}'
-    NONBCSC_ORG_APPROVED_NOTIFICATION = '[BC Registries and Online Services] APPROVED Business Registry Account'
-    NONBCSC_ORG_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
-                                        'Business Registry Account cannot be approved'
+    NON_BCSC_ORG_APPROVED_NOTIFICATION = '[BC Registries and Online Services] APPROVED Business Registry Account'
+    NON_BCSC_ORG_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
+                                         'Business Registry Account cannot be approved'
     OTP_AUTHENTICATOR_RESET_NOTIFICATION = '[BC Registries and Online Services] Authenticator Has Been Reset'
     ROLE_CHANGED_NOTIFICATION = '[BC Registries and Online Services] Your Role Has Been Changed'
     STAFF_REVIEW_ACCOUNT = '[BC Registries and Online Services] An out of province account needs to be approved.'
@@ -137,8 +86,8 @@ class TitleType(Enum):
     GOVM_MEMBER_INVITATION = 'Invitation to Join an Account at Business Registry'
     MEMBERSHIP_APPROVED_NOTIFICATION = 'Your Membership Has Been Approved'
     MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = 'Your Membership Has Been Approved'
-    NONBCSC_ORG_APPROVED_NOTIFICATION = 'Your Membership Has Been Approved'
-    NONBCSC_ORG_REJECTED_NOTIFICATION = 'Your Membership Has Been Rejected'
+    NON_BCSC_ORG_APPROVED_NOTIFICATION = 'Your Membership Has Been Approved'
+    NON_BCSC_ORG_REJECTED_NOTIFICATION = 'Your Membership Has Been Rejected'
     OTP_AUTHENTICATOR_RESET_NOTIFICATION = 'Your Authenticator Has Been Reset'
     ROLE_CHANGED_NOTIFICATION = 'Your Role Has Been Changed'
     STAFF_REVIEW_ACCOUNT = 'Notification from Business Registry'
@@ -181,8 +130,8 @@ class TemplateType(Enum):
     GOVM_MEMBER_INVITATION_TEMPLATE_NAME = 'govm_member_invitation_email'
     MEMBERSHIP_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'membership_approved_notification_email'
     MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID_TEMPLATE_NAME = 'membership_approved_notification_email_for_bceid'
-    NONBCSC_ORG_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'nonbcsc_org_approved_notification_email'
-    NONBCSC_ORG_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'nonbcsc_org_rejected_notification_email'
+    NON_BCSC_ORG_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'nonbcsc_org_approved_notification_email'
+    NON_BCSC_ORG_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'nonbcsc_org_rejected_notification_email'
     OTP_AUTHENTICATOR_RESET_NOTIFICATION_TEMPLATE_NAME = 'otp_authenticator_reset_notification_email'
     ROLE_CHANGED_NOTIFICATION_TEMPLATE_NAME = 'role_changed_notification_email'
     STAFF_REVIEW_ACCOUNT_TEMPLATE_NAME = 'staff_review_account_email'

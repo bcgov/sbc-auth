@@ -658,3 +658,26 @@ export enum CfsAccountStatus {
     INACTIVE = 'INACTIVE',
     FREEZE = 'FREEZE'
 }
+
+export enum InvoluntaryDissolutionConfigNames {
+  DISSOLUTIONS_ON_HOLD = 'DISSOLUTIONS_ON_HOLD',
+  DISSOLUTIONS_STAGE_1_SCHEDULE='DISSOLUTIONS_STAGE_1_SCHEDULE',
+  DISSOLUTIONS_STAGE_2_SCHEDULE='DISSOLUTIONS_STAGE_2_SCHEDULE',
+  DISSOLUTIONS_STAGE_3_SCHEDULE='DISSOLUTIONS_STAGE_3_SCHEDULE',
+  DISSOLUTIONS_SUMMARY_EMAIL = 'DISSOLUTIONS_SUMMARY_EMAIL',
+  MAX_DISSOLUTIONS_ALLOWED = 'MAX_DISSOLUTIONS_ALLOWED',
+  NUM_DISSOLUTIONS_ALLOWED = 'NUM_DISSOLUTIONS_ALLOWED'
+}
+
+export enum AccountType {
+    BUSINESS = 'business',
+    GOVN = 'govn',
+    INDIVIDUAL = 'individual'
+}
+
+export enum OrgNameLabel {
+    GOVM = 'Ministry Name',
+    GOVN = 'Government Agency Name',
+    BUSINESS = 'Legal Business Name',
+    REGULAR = 'Account Name'
+}

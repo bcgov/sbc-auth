@@ -16,7 +16,6 @@
         />
       </div>
     </v-fade-transition>
-
     <div
       v-if="!isLoading"
       class="account-business-type-container"
@@ -33,31 +32,34 @@
       >
         <v-radio-group
           v-if="!govmAccount"
-          ref="isBusinessAccount"
-          v-model="isBusinessAccount"
+          v-model="orgType"
           row
           mandatory
+          @change="handleAccountTypeChange"
         >
           <v-row justify="space-between">
             <v-col
-              md="9"
+              md="7"
               class="business-radio xs"
             >
               <v-radio
-                :key="false"
-                label="Individual Person Name"
-                :value="false"
+                label="Individual Person"
+                :value="AccountType.INDIVIDUAL"
                 data-test="radio-individual-account-type"
                 class="px-4 py-5"
-                @change="onOrgBusinessTypeChange(!isEditAccount)"
               />
               <v-radio
-                :key="true"
                 label="Business Name"
-                :value="true"
+                :value="AccountType.BUSINESS"
                 data-test="radio-business-account-type"
                 class="px-4 py-5"
-                @change="onOrgBusinessTypeChange(!isEditAccount)"
+              />
+              <v-radio
+                v-if="!isEditing && !isCurrentGovnOrg"
+                label="Government Agency"
+                :value="AccountType.GOVN"
+                data-test="radio-government-account-type"
+                class="px-4 py-5"
               />
             </v-col>
           </v-row>
@@ -73,11 +75,18 @@
             Enter Ministry Information for this account
           </legend>
           <legend
-            v-else-if="!isBusinessAccount"
+            v-else-if="isGovnAccount"
+            class="mb-3"
+          >
+            Government Agency Information
+          </legend>
+          <legend
+            v-else-if="isIndividualAccount"
             class="mb-3"
           >
             Account Name
           </legend>
+          <legend v-else />
           <v-slide-y-transition>
             <div v-show="errorMessage">
               <v-alert
@@ -89,19 +98,18 @@
             </div>
           </v-slide-y-transition>
           <v-text-field
-            ref="name"
             v-model.trim="name"
             filled
             :label="getOrgNameLabel"
             :rules="orgNameRules"
             :disabled="saving || orgNameReadOnly"
             data-test="input-org-name"
-            :readonly="govmAccount"
             autocomplete="off"
+            :readonly="govmAccount"
             :error-messages="bcolDuplicateNameErrorMessage"
             @keyup="onOrgNameChange"
           />
-          <org-name-auto-complete
+          <OrgNameAutoComplete
             v-if="isBusinessAccount"
             :searchValue="autoCompleteSearchValue"
             :setAutoCompleteIsActive="autoCompleteIsActive"
@@ -110,7 +118,7 @@
         </fieldset>
         <v-expand-transition class="branch-detail">
           <v-text-field
-            v-show="govmAccount || isBusinessAccount"
+            v-show="govmAccount || isGovnAccount || isBusinessAccount"
             v-model.trim="branchName"
             filled
             label="Branch/Division (If applicable)"
@@ -122,7 +130,7 @@
         </v-expand-transition>
         <v-expand-transition class="business-account-type-details">
           <v-row
-            v-if="isBusinessAccount"
+            v-if="isGovnAccount || isBusinessAccount "
             justify="space-between"
             data-test="business-account-type-details"
           >
@@ -131,10 +139,9 @@
               class="py-0"
             >
               <v-select
-                ref="businessType"
                 v-model="businessType"
                 filled
-                label="Business Type"
+                :label="getOrgTypeDropdownLabel"
                 item-text="desc"
                 item-value="code"
                 :items="businessTypeCodes"
@@ -152,10 +159,9 @@
               class="py-0"
             >
               <v-select
-                ref="businessSize"
                 v-model="businessSize"
                 filled
-                label="Business Size"
+                :label="getOrgSizeDropdownLabel"
                 item-text="desc"
                 item-value="code"
                 :items="businessSizeCodes"
@@ -176,151 +182,235 @@
 </template>
 
 <script lang="ts">
-import { Action, State } from 'pinia-class'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { OrgBusinessType, Organization } from '@/models/Organization'
-import { Account } from '@/util/constants'
-import { Code } from '@/models/Code'
+import { AccessType, Account, AccountType, OrgNameLabel, SessionStorageKeys } from '@/util/constants'
+import { computed, defineComponent, nextTick, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
+import ConfigHelper from '@/util/config-helper'
+import { OrgBusinessType } from '@/models/Organization'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
+import { storeToRefs } from 'pinia'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
 
-@Component({
+export default defineComponent({
+  name: 'AccountBusinessType',
   components: {
     OrgNameAutoComplete
+  },
+  props: {
+    govmAccount: {
+      type: Boolean,
+      default: false
+    },
+    errorMessage: {
+      type: String,
+      default: null
+    },
+    saving: {
+      type: Boolean,
+      default: false
+    },
+    bcolDuplicateNameErrorMessage: {
+      type: String,
+      default: null
+    },
+    premiumLinkedAccount: {
+      type: Boolean,
+      default: false
+    },
+    orgNameReadOnly: {
+      type: Boolean,
+      default: false
+    },
+    isEditAccount: {
+      type: Boolean,
+      default: false
+    }
+  },
+  setup (props, { emit }) {
+    const codesStore = useCodesStore()
+    const orgStore = useOrgStore()
+
+    const {
+      businessSizeCodes,
+      businessTypeCodes
+    } = storeToRefs(codesStore)
+
+    const currentOrganization = computed(() => orgStore.currentOrganization)
+    const isCurrentGovnOrg = currentOrganization.value?.accessType === AccessType.GOVN
+
+    const state = reactive({
+      accountInformationForm: null,
+      orgType: AccountType.INDIVIDUAL,
+      autoCompleteIsActive: false,
+      autoCompleteSearchValue: '',
+      isLoading: false,
+      isBusinessAccount: false,
+      name: '',
+      businessType: '',
+      businessSize: '',
+      governmentSize: '',
+      branchName: '',
+      isIndividualAccount: true,
+      isGovnAccount: false,
+      orgNameRules: [],
+      orgBusinessTypeRules: [],
+      orgBusinessSizeRules: []
+    })
+
+    const getOrgNameLabel = computed(() => {
+      if (props.govmAccount) {
+        return OrgNameLabel.GOVM
+      } else if (state.isGovnAccount) {
+        return OrgNameLabel.GOVN
+      } else if (state.isBusinessAccount) {
+        return OrgNameLabel.BUSINESS
+      } else {
+        return OrgNameLabel.REGULAR
+      }
+    })
+
+    const getOrgTypeDropdownLabel = computed(() =>
+      state.orgType === AccountType.GOVN ? 'Government Agency Type' : 'Business Type'
+    )
+
+    const getOrgSizeDropdownLabel = computed(() =>
+      state.orgType === AccountType.GOVN ? 'Government Agency Size' : 'Business Size'
+    )
+
+    watch(() => state.orgType, () => {
+      state.isBusinessAccount = state.orgType === AccountType.BUSINESS
+      state.isGovnAccount = state.orgType === AccountType.GOVN
+      state.isIndividualAccount = state.orgType === AccountType.INDIVIDUAL
+    })
+
+    function cleanOrgInfo () {
+      state.name = ''
+      state.branchName = ''
+      state.businessType = ''
+      state.businessSize = ''
+      if (state.accountInformationForm) {
+        state.accountInformationForm.resetValidation()
+      }
+      if (state.isGovnAccount) {
+        state.orgNameRules = [v => !!v || 'A government agency name is required']
+        state.orgBusinessTypeRules = [v => !!v || 'A government agency type is required']
+        state.orgBusinessSizeRules = [v => !!v || 'A government agency size is required']
+      } else {
+        state.orgNameRules = [v => !!v || 'An account name is required']
+        state.orgBusinessTypeRules = [v => !!v || 'A business type is required']
+        state.orgBusinessSizeRules = [v => !!v || 'A business size is required']
+      }
+    }
+
+    async function handleAccountTypeChange (newValue) {
+      state.orgType = newValue
+      cleanOrgInfo()
+      await onOrgBusinessTypeChange(!props.isEditAccount)
+    }
+
+    function emitUpdatedOrgBusinessType () {
+      const orgBusinessType: OrgBusinessType = {
+        name: state.name,
+        isBusinessAccount: state.isBusinessAccount || state.isGovnAccount,
+        ...((props.govmAccount || state.isBusinessAccount) && { branchName: state.branchName }),
+        ...((state.isBusinessAccount || state.isGovnAccount) &&
+          { businessType: state.businessType, businessSize: state.businessSize, branchName: state.branchName })
+      }
+      emit('update:org-business-type', orgBusinessType)
+    }
+
+    function updateAccessType () {
+      if (state.isGovnAccount) {
+        ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, 'true')
+        return
+      }
+      ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
+    }
+
+    function emitValid () {
+      let isFormValid = true
+      if (state.isBusinessAccount || state.isGovnAccount) {
+        isFormValid = state.businessType !== '' && state.businessSize !== ''
+      }
+      isFormValid = isFormValid && state.name !== ''
+      emit('valid', isFormValid)
+    }
+
+    onMounted(async () => {
+      try {
+        state.isLoading = true
+        await codesStore.fetchAllBusinessTypeCodes()
+        await codesStore.getGovernmentTypeCodes()
+        await codesStore.getBusinessSizeCodes()
+        await codesStore.getBusinessTypeCodes()
+        if (currentOrganization.value?.name) {
+          state.name = currentOrganization.value.name
+          state.isBusinessAccount = currentOrganization.value.isBusinessAccount
+          state.businessType = currentOrganization.value.businessType
+          state.businessSize = currentOrganization.value.businessSize
+          state.branchName = currentOrganization.value.branchName
+        } else {
+          state.isBusinessAccount = currentOrganization.value.orgType !== Account.BASIC
+          if (state.isBusinessAccount) {
+            state.orgType = AccountType.BUSINESS
+          }
+        }
+        await onOrgBusinessTypeChange()
+      } catch (ex) {
+        console.error(`Error while loading account business type - ${ex}`)
+      } finally {
+        state.isLoading = false
+      }
+    })
+
+    function setAutoCompleteSearchValue (value: string) {
+      state.autoCompleteIsActive = false
+      state.name = value
+      emitUpdatedOrgBusinessType()
+    }
+
+    async function onOrgNameChange () {
+      if (state.isBusinessAccount) {
+        if (state.name) {
+          state.autoCompleteSearchValue = state.name
+        }
+        state.autoCompleteIsActive = state.name !== ''
+      }
+
+      if (props.premiumLinkedAccount && props.bcolDuplicateNameErrorMessage) {
+        emit('update:org-name-clear-errors')
+      }
+
+      await onOrgBusinessTypeChange()
+    }
+
+    async function onOrgBusinessTypeChange (clearOrgName = false) {
+      if (clearOrgName) {
+        state.name = ''
+      }
+      await nextTick()
+      emitUpdatedOrgBusinessType()
+      updateAccessType()
+      emitValid()
+    }
+
+    return {
+      ...toRefs(state),
+      getOrgNameLabel,
+      setAutoCompleteSearchValue,
+      onOrgNameChange,
+      onOrgBusinessTypeChange,
+      businessSizeCodes,
+      businessTypeCodes,
+      handleAccountTypeChange,
+      AccountType,
+      getOrgTypeDropdownLabel,
+      getOrgSizeDropdownLabel,
+      isEditing: props.isEditAccount,
+      isCurrentGovnOrg
+    }
   }
 })
-export default class AccountBusinessType extends Vue {
-  @Prop({ default: false }) govmAccount: boolean
-  @Prop({ default: null }) errorMessage: string
-  @Prop({ default: false }) saving: boolean
-  @Prop({ default: null }) bcolDuplicateNameErrorMessage: string
-  @Prop({ default: false }) premiumLinkedAccount: boolean
-  @Prop({ default: false }) orgNameReadOnly: boolean
-  @Prop({ default: false }) isEditAccount: boolean // hide some details for update account
-
-  @State(useOrgStore) public currentOrganization!: Organization
-
-  @Action(useCodesStore) private readonly getBusinessSizeCodes!: () => Promise<Code[]>
-  @Action(useCodesStore) private readonly getBusinessTypeCodes!: () => Promise<Code[]>
-  @State(useCodesStore) private readonly businessSizeCodes!: Code[]
-  @State(useCodesStore) private readonly businessTypeCodes!: Code[]
-
-  private autoCompleteIsActive: boolean = false
-  private autoCompleteSearchValue: string = ''
-  private isLoading = false
-
-  $refs: {
-    accountInformationForm: HTMLFormElement,
-    name: HTMLFormElement,
-    businessType: HTMLFormElement,
-    businessSize: HTMLFormElement,
-    isBusinessAccount: HTMLFormElement
-  }
-
-  // input fields
-  private isBusinessAccount = false
-  private name = ''
-  private businessType = ''
-  private businessSize = ''
-  private branchName = ''
-
-  // Input field rules
-  private readonly orgNameRules = [v => !!v || 'An account name is required']
-  private readonly orgBusinessTypeRules = [v => !!v || 'A business type is required']
-  private readonly orgBusinessSizeRules = [v => !!v || 'A business size is required']
-
-  /** Emits an update message, so that we can sync with parent */
-  @Emit('update:org-business-type')
-  private emitUpdatedOrgBusinessType () {
-    const orgBusinessType: OrgBusinessType = {
-      name: this.name,
-      isBusinessAccount: this.isBusinessAccount,
-      ...((this.govmAccount || this.isBusinessAccount) && { branchName: this.branchName }),
-      ...(this.isBusinessAccount && { businessType: this.businessType, businessSize: this.businessSize, branchName: this.branchName })
-    }
-    return orgBusinessType
-  }
-
-  /** Emits the validity of the component. */
-  @Emit('valid')
-  private emitValid () {
-    let isFormValid = false
-    isFormValid = !this.$refs.isBusinessAccount?.hasError && !this.$refs.name?.hasError
-    if (this.isBusinessAccount && isFormValid) {
-      isFormValid = isFormValid && !this.$refs.businessType?.hasError && !this.$refs.businessSize?.hasError
-    }
-    return isFormValid
-  }
-
-  async mounted () {
-    try {
-    // load business type and size codes
-      this.isLoading = true
-      await this.getBusinessSizeCodes()
-      await this.getBusinessTypeCodes()
-      if (this.currentOrganization.name) {
-        this.name = this.currentOrganization.name
-        // incase if the new account is a premium account, default business type to business account
-        this.isBusinessAccount = this.currentOrganization.isBusinessAccount
-        this.businessType = this.currentOrganization.businessType
-        this.businessSize = this.currentOrganization.businessSize
-        this.branchName = this.currentOrganization.branchName
-      } else {
-        this.isBusinessAccount = this.currentOrganization.orgType !== Account.BASIC
-      }
-      // sync with parent tracking object on mount and remove validation errors
-      await this.onOrgBusinessTypeChange()
-    } catch (ex) {
-      // eslint-disable-next-line no-console
-      console.log(`error while loading account business type -  ${ex}`)
-    } finally {
-      this.isLoading = false
-    }
-  }
-
-  private get getOrgNameLabel (): string {
-    return this.govmAccount ? 'Ministry Name' : this.isBusinessAccount ? 'Legal Business Name' : 'Account Name'
-  }
-
-  private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
-    this.autoCompleteIsActive = false
-    this.name = autoCompleteSearchValue
-    // emit the update value to the parent
-    this.emitUpdatedOrgBusinessType()
-  }
-
-  // watches name and suggests auto completed names if it is a business account.
-  // similar to PPR - watch logic
-  async onOrgNameChange () {
-    // suggest auto complete values
-    if (this.isBusinessAccount) {
-      if (this.name) {
-        this.autoCompleteSearchValue = this.name
-      }
-      this.autoCompleteIsActive = this.name !== ''
-    }
-
-    // Incase it is a premium linked account, we need to update org name and clear parent duplicate name error (exclusive for linked premium sceanrio)
-    /** Emits a clear errors event to parent (exclusive for premium linked account scenario). */
-    if (this.premiumLinkedAccount && this.bcolDuplicateNameErrorMessage) {
-      this.$emit('update:org-name-clear-errors')
-    }
-
-    // emit the update value to the parent
-    await this.onOrgBusinessTypeChange()
-  }
-
-  async onOrgBusinessTypeChange (clearOrgName: boolean = false) {
-    if (clearOrgName) {
-      // Case for isBusinessAccount - when toggling between individual and business accounts, we ought to reset org name
-      this.name = ''
-    }
-    await this.$nextTick()
-    this.emitUpdatedOrgBusinessType()
-    this.emitValid()
-  }
-}
 </script>
 
 <style lang="scss" scoped>

@@ -12,7 +12,7 @@ DOCKER_NAME:=account-mailer
 #################################################################################
 # COMMANDS -- Setup                                                             #
 #################################################################################
-setup: install install-dev ## Setup the project
+setup: clean install install-dev ## Setup the project
 
 clean: clean-build clean-pyc clean-test ## Clean the project
 	rm -rf venv/
@@ -36,19 +36,25 @@ clean-test: ## clean test files
 	rm -f .coverage
 	rm -fr htmlcov/
 
-install: clean ## Install python virtrual environment
-	test -f venv/bin/activate || python3 -m venv  $(CURRENT_ABS_DIR)/venv
+build-req: clean ## Upgrade requirements
+	test -f venv/bin/activate || python3 -m venv  $(CURRENT_ABS_DIR)/venv ;\
 	. venv/bin/activate ;\
 	pip install --upgrade pip ;\
 	pip install -Ur requirements/prod.txt ;\
 	pip freeze | sort > requirements.txt ;\
 	cat requirements/repo-libraries.txt >> requirements.txt ;\
-	pip install -Ur requirements/repo-libraries.txt ;\
-	pip install -Ur requirements/dev.txt  ;\
-	touch venv/bin/activate  # update so it's as new as requirements/prod.txt
+	pip install -Ur requirements/repo-libraries.txt
+
+install: clean ## Install python virtrual environment
+	test -f venv/bin/activate || python3 -m venv  $(CURRENT_ABS_DIR)/venv ;\
+	. venv/bin/activate ;\
+	pip install --upgrade pip ;\
+	pip install -Ur requirements.txt
 
 install-dev: ## Install local application
-	. venv/bin/activate && pip install -e .
+	. venv/bin/activate ; \
+	pip install -Ur requirements/dev.txt; \
+	pip install -e .
 
 #################################################################################
 # COMMANDS - CI                                                                 #
@@ -125,7 +131,7 @@ tag: push ## tag image
 #################################################################################
 
 run: ## Run the project in local
-	. venv/bin/activate && python app.py
+	. venv/bin/activate && python -m flask run -p 5002
 
 #################################################################################
 # Self Documenting Commands                                                     #

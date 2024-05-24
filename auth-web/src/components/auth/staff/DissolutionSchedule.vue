@@ -1,5 +1,19 @@
 <template>
   <section id="dissolution-schedule">
+    <!-- Saving/Updating Job -->
+    <v-fade-transition>
+      <div
+        v-if="isSaving"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isSaving"
+        />
+      </div>
+    </v-fade-transition>
     <article class="section-container px-6 py-8">
       <!-- Dissolution Batch Size -->
       <template v-if="isEdit">
@@ -99,6 +113,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { InvoluntaryDissolutionConfigNames } from '@/util/constants'
 import { useStaffStore } from '@/stores/staff'
 
 export default defineComponent({
@@ -106,10 +121,11 @@ export default defineComponent({
   setup () {
     const state = reactive({
       menu: false,
-      numberOfBusinessesEdit: 0,
-      numberOfBusinessesNonEdit: 0,
+      numberOfBusinessesEdit: -1,
+      numberOfBusinessesNonEdit: -1,
       numberOfBusinessesRef: null,
-      isEdit: false
+      isEdit: false,
+      isSaving: false
     })
     const staffStore = useStaffStore()
 
@@ -119,7 +135,7 @@ export default defineComponent({
       await staffStore.getDissolutionConfigurations()
 
       // Get the batch size current value (number of businesses to be dissolved per job run)
-      const numDissolutions = staffStore.involuntaryDissolutionConfigurations.configurations.find(
+      const numDissolutions = staffStore.involuntaryDissolutionConfigurations?.configurations?.find(
         config => config.name === 'NUM_DISSOLUTIONS_ALLOWED').value
       state.numberOfBusinessesNonEdit = parseInt(numDissolutions)
     })
@@ -134,14 +150,27 @@ export default defineComponent({
     }
 
     /**
-     * Save button is clicked. Update the dissolution batch size.
+     * Save button is clicked. Update the dissolution batch size job.
      * Only save if the inputted number is valid.
-     * TODO: Implement logic (job) once the BE is done.
+     * Show spinner and block buttons.
      */
-    const saveBtnClicked = (): void => {
+    const saveBtnClicked = async (): Promise<void> => {
       if (state.numberOfBusinessesRef.validate()) {
-        // staffStore.updateDissolutionBatchSize(state.numberOfBusinesses)
-        state.numberOfBusinessesNonEdit = state.numberOfBusinessesEdit
+        state.isSaving = true // show the spinner
+        // Update store configurations array with the new number of inputted batch size
+        staffStore.involuntaryDissolutionConfigurations.configurations.find((config, index) => {
+          if (config.name === InvoluntaryDissolutionConfigNames.NUM_DISSOLUTIONS_ALLOWED) {
+            staffStore.involuntaryDissolutionConfigurations.configurations[index].value = String(state.numberOfBusinessesEdit)
+          }
+        })
+        // Make the PUT call to update the database with the new configurations array (with new batch size number)
+        try {
+          await staffStore.updateDissolutionConfigurations(staffStore.involuntaryDissolutionConfigurations)
+          state.numberOfBusinessesNonEdit = state.numberOfBusinessesEdit
+        } catch (err) {
+          console.error(err)
+        }
+        state.isSaving = false // hide the spinner
         triggerEditOnOff()
       }
     }

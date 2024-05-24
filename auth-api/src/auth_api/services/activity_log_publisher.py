@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2024 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -13,16 +13,18 @@
 # limitations under the License.
 """Service for publishing the activity stream data."""
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import current_app, g
 from sentry_sdk import capture_message
+from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy_continuum.plugins.flask import fetch_remote_addr
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api.config import get_named_config
 from auth_api.models.dataclass import Activity
 from auth_api.models import User as UserModel
-from auth_api.services.queue_publisher import publish_response
+from auth_api.services.gcp_queue import GcpQueue, queue
 
 
 CONFIG = get_named_config()
@@ -33,7 +35,7 @@ class ActivityLogPublisher:  # pylint: disable=too-many-instance-attributes, too
 
     @staticmethod
     def publish_activity(activity: Activity):  # pylint:disable=unused-argument
-        """Publish the activity asynchronously, using the given details."""
+        """Publish the activity using the given details."""
         try:
             # find user_id if haven't passed in
             if not activity.actor_id and g and 'jwt_oidc_token_info' in g:
@@ -50,19 +52,15 @@ class ActivityLogPublisher:  # pylint: disable=too-many-instance-attributes, too
                 'remoteAddr': fetch_remote_addr(),
                 'createdAt': f'{datetime.now()}'
             }
-            source = 'https://api.auth.bcregistry.gov.bc.ca/v1/accounts'
-
-            payload = {
-                'specversion': '1.x-wip',
-                'type': 'bc.registry.auth.activity',
-                'source': source,
-                'id': str(uuid.uuid1()),
-                'time': f'{datetime.now()}',
-                'datacontenttype': 'application/json',
-                'data': data
-            }
-            publish_response(payload=payload, client_name=CONFIG.NATS_ACTIVITY_CLIENT_NAME,
-                             subject=CONFIG.NATS_ACTIVITY_SUBJECT)
+            cloud_event = SimpleCloudEvent(
+                id=str(uuid.uuid4()),
+                source='sbc-auth-auth-api',
+                subject=None,
+                time=datetime.now(tz=timezone.utc).isoformat(),
+                type=QueueMessageTypes.ACTIVITY_LOG.value,
+                data=data
+            )
+            queue.publish(CONFIG.AUTH_EVENT_TOPIC, GcpQueue.to_queue_message(cloud_event))
         except Exception as err:  # noqa: B902 # pylint: disable=broad-except
             capture_message('Activity Queue Publish Event Error:' + str(err), level='error')
             current_app.logger.error('Activity Queue Publish Event Error:', exc_info=True)
