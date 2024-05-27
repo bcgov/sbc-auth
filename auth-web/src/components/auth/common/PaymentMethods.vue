@@ -115,6 +115,13 @@
               </div>
             </v-expand-transition>
           </div>
+
+          <p
+            v-if="(payment.type === paymentTypes.BCOL)"
+            class="mt-4 py-4 px-6 important"
+          >
+            {{ bcOnlineWarningMessage }}
+          </p>
         </div>
       </v-card>
     </template>
@@ -137,17 +144,56 @@
         />
       </v-col>
     </v-row>
+    <ModalDialog
+      ref="bcOnlineDialog"
+      max-width="650"
+      :show-icon="false"
+      :showCloseIcon="true"
+      :title="dialogTitle"
+      :text="dialogText"
+      dialog-class="warning-dialog"
+    >
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
+      </template>
+      <template #actions>
+        <div class="d-flex align-center justify-center w-100 h-100 ga-3">
+          <v-btn
+            large
+            outlined
+            color="outlined"
+            @click="cancelModal"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            large
+            color="primary"
+            class="font-weight-bold"
+            @click="continueModal"
+          >
+            Continue
+          </v-btn>
+        </div>
+      </template>
+    </ModalDialog>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import DocumentService from '@/services/document.services'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import { PaymentTypes } from '@/util/constants'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
@@ -225,7 +271,8 @@ export default defineComponent({
     PADInfoForm,
     LinkedBCOLBanner,
     GLPaymentForm,
-    TermsOfUseDialog
+    TermsOfUseDialog,
+    ModalDialog
   },
   props: {
     currentOrgType: { default: '' },
@@ -241,6 +288,13 @@ export default defineComponent({
   emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-eft-valid', 'payment-method-selected'],
   setup (props, { emit }) {
     const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails } = useOrgStore()
+    const bcOnlineDialog: InstanceType<typeof ModalDialog> = ref(null)
+
+    const state = reactive({
+      dialogTitle: 'BC Online Payment Option Ending Soon',
+      dialogText: 'The "BC Online" payment option will soon be retired. Are you sure you want to continue?',
+      bcOnlineWarningMessage: 'This payment method will soon be retired.'
+    })
 
     const selectedPaymentMethod = ref('')
     const paymentTypes = PaymentTypes
@@ -296,6 +350,11 @@ export default defineComponent({
     }
 
     const paymentMethodSelected = (payment, isTouch = true) => {
+      if (payment.type === PaymentTypes.BCOL && isTouch && selectedPaymentMethod.value !== PaymentTypes.BCOL) {
+        bcOnlineDialog.value.open()
+      } else {
+        state.bcOnlineWarningMessage = 'This payment method will soon be retired.'
+      }
       selectedPaymentMethod.value = payment.type
       isTouched.value = isTouch
       // Emit touched flag for the parent element
@@ -328,6 +387,16 @@ export default defineComponent({
       emit('is-eft-valid', isAccepted && isTouched.value)
     }
 
+    const cancelModal = () => {
+      bcOnlineDialog.value.close()
+      selectedPaymentMethod.value = ''
+    }
+
+    const continueModal = () => {
+      bcOnlineDialog.value.close()
+      state.bcOnlineWarningMessage = 'This payment method will soon be retired. It is recommended to select a different payment method.'
+    }
+
     onMounted(async () => {
       paymentMethodSelected({ type: props.currentSelectedPaymentMethod }, false)
       if (isPaymentEJV.value) {
@@ -336,6 +405,7 @@ export default defineComponent({
     })
 
     return {
+      ...toRefs(state),
       selectedPaymentMethod,
       paymentTypes,
       padInfo,
@@ -352,13 +422,46 @@ export default defineComponent({
       isPadInfoTouched,
       isPaymentSelected,
       updateEFTTermsAccepted,
-      isEFTTOSAccepted
+      isEFTTOSAccepted,
+      bcOnlineDialog,
+      cancelModal,
+      continueModal
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+@import '@/assets/scss/theme.scss';
+@import '@/assets/scss/actions.scss';
+.important {
+  background-color: #fff7e3;
+  border: 2px solid #fcba19;
+  color: #495057;
+  font-size: 12px;
+  margin-left: 4.5rem;
+  margin-right: 120px;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.ga-3 {
+  gap: 12px;
+}
+
+::v-deep {
+  .v-btn.v-btn--outlined {
+      border-color: var(--v-primary-base);
+      color: var(--v-primary-base);
+  }
+}
+
 .payment-card {
   transition: all ease-out 0.2s;
 
