@@ -96,7 +96,7 @@ describe('AccountDetails.vue', () => {
     orgStore.currentOrganization.accessType = AccessType.GOVN
     await wrapper.setProps({ viewOnlyMode: true, nameChangeAllowed: true })
     await wrapper.vm.$nextTick()
-    expect(wrapper.vm.accountTypeLabel).toBe('Government Agency Type:')
-    expect(wrapper.vm.accountSizeLabel).toBe('Government Agency Size:')
+    expect(wrapper.vm.accountTypeLabel).toBe('Business Type:')
+    expect(wrapper.vm.accountSizeLabel).toBe('Business Size:')
   })
 })
