@@ -96,7 +96,8 @@ export const useOrgStore = defineStore('org', () => {
     currentOrgPaymentDetails: null as OrgPaymentDetails,
     isCurrentSelectedProductsPremiumOnly: false,
     resetAccountTypeOnSetupAccount: false, // this flag use to check need to reset accounttype select when moving back and forth in stepper
-    vDisplayModeValue: ''// DisplayModeValues.VIEW_ONLY
+    vDisplayModeValue: '', // DisplayModeValues.VIEW_ONLY
+    originAccessType: undefined as string
   })
 
   function $reset () {
@@ -132,6 +133,7 @@ export const useOrgStore = defineStore('org', () => {
     state.isCurrentSelectedProductsPremiumOnly = false
     state.resetAccountTypeOnSetupAccount = false
     state.vDisplayModeValue = ''
+    state.originAccessType = undefined as string
   }
 
   /** Is True if the current account is premium. */
@@ -154,7 +156,7 @@ export const useOrgStore = defineStore('org', () => {
   })
 
   const isGovnOrg = computed<boolean>(() => {
-    return state.currentOrganization?.accessType === AccessType.GOVN
+    return state.originAccessType === AccessType.GOVN
   })
 
   // Note this will only work while the current organization is set for SBC_STAFF.
@@ -278,6 +280,7 @@ export const useOrgStore = defineStore('org', () => {
     const response = await OrgService.getOrganization(orgId)
     const organization = response?.data
     setCurrentOrganization(organization)
+    state.originAccessType = organization?.accessType
     return organization
   }
 

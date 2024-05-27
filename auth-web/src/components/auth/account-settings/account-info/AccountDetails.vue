@@ -35,7 +35,7 @@
                   {{ orgName }}
                 </div>
                 <div
-                  v-if="nameChangeAllowed && viewOnlyMode"
+                  v-if="canOrgChange"
                   v-can:CHANGE_ORG_NAME.hide
                 >
                   <span
@@ -139,7 +139,7 @@ export default defineComponent({
     const codeStore = useCodesStore()
     const orgStore = useOrgStore()
     const businessSizeCodes = computed(() => codeStore.businessSizeCodes)
-    const businessTypeCodes = computed(() => codeStore.businessTypeCodes)
+    const allBusinessTypeCodes = computed(() => codeStore.allBusinessTypeCodes)
 
     const localVars = (reactive({
       orgName: '',
@@ -177,7 +177,7 @@ export default defineComponent({
       return (codeArray && codeArray[0] && codeArray[0]?.desc) || ''
     }
     const getBusinessTypeLabel = computed(() => {
-      return getCodeLabel(businessTypeCodes.value, localVars.orgBusinessType.businessType)
+      return getCodeLabel(allBusinessTypeCodes.value, localVars.orgBusinessType.businessType)
     })
     const getBusinessSizeLabel = computed(() => {
       return getCodeLabel(businessSizeCodes.value, localVars.orgBusinessType.businessSize)
