@@ -32,7 +32,8 @@ threadloop==1.0.2
 thrift==0.20.0
 tornado==6.4
 urllib3==1.26.18
-zipp==3.18.2
+zipp==3.19.0
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
--e git+https://github.com/bcgov/sbc-auth.git#egg=auth-api&subdirectory=auth-api
+-e git+https://github.com/seeker25/sbc-auth.git@refactor_queues#egg=auth-api&subdirectory=auth-api
+-e git+https://github.com/seeker25/sbc-connect-common.git@small_tweaks#egg=gcp-queue&subdirectory=python/gcp-queue
 git+https://github.com/daxiom/simple-cloudevent.py.git
