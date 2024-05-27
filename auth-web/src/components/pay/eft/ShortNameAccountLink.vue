@@ -160,6 +160,7 @@ import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import PaymentService from '@/services/payment.services'
+import { ShortNameLinkStatus } from '@/util/constants'
 import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
 import { Vue } from 'vue-property-decorator'
 import _ from 'lodash'
@@ -237,7 +238,7 @@ export default defineComponent({
 
     async function evaluateLinks () {
       let pending = state.results.filter(result =>
-        result.statusCode === 'PENDING' && result.amountOwing > 0
+        result.statusCode === ShortNameLinkStatus.PENDING && result.amountOwing > 0
       )
 
       await Vue.nextTick()
