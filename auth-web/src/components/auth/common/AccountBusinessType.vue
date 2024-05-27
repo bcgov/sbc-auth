@@ -144,7 +144,7 @@
                 :label="getOrgTypeDropdownLabel"
                 item-text="desc"
                 item-value="code"
-                :items="businessTypeCodes"
+                :items="typeCodesItems"
                 data-test="select-business-type"
                 :rules="orgBusinessTypeRules"
                 :menu-props="{
@@ -182,7 +182,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountType, OrgNameLabel, SessionStorageKeys } from '@/util/constants'
+import { Account, AccountType, OrgNameLabel, SessionStorageKeys } from '@/util/constants'
 import { computed, defineComponent, nextTick, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import ConfigHelper from '@/util/config-helper'
 import { OrgBusinessType } from '@/models/Organization'
@@ -232,11 +232,12 @@ export default defineComponent({
 
     const {
       businessSizeCodes,
-      businessTypeCodes
+      businessTypeCodes,
+      governmentTypeCodes
     } = storeToRefs(codesStore)
 
     const currentOrganization = computed(() => orgStore.currentOrganization)
-    const isCurrentGovnOrg = currentOrganization.value?.accessType === AccessType.GOVN
+    const isCurrentGovnOrg = computed(() => orgStore.isGovnOrg)
 
     const state = reactive({
       accountInformationForm: null,
@@ -254,7 +255,8 @@ export default defineComponent({
       isGovnAccount: false,
       orgNameRules: [],
       orgBusinessTypeRules: [],
-      orgBusinessSizeRules: []
+      orgBusinessSizeRules: [],
+      typeCodesItems: []
     })
 
     const getOrgNameLabel = computed(() => {
@@ -281,6 +283,7 @@ export default defineComponent({
       state.isBusinessAccount = state.orgType === AccountType.BUSINESS
       state.isGovnAccount = state.orgType === AccountType.GOVN
       state.isIndividualAccount = state.orgType === AccountType.INDIVIDUAL
+      cleanOrgInfo()
     })
 
     function cleanOrgInfo () {
@@ -295,16 +298,17 @@ export default defineComponent({
         state.orgNameRules = [v => !!v || 'A government agency name is required']
         state.orgBusinessTypeRules = [v => !!v || 'A government agency type is required']
         state.orgBusinessSizeRules = [v => !!v || 'A government agency size is required']
+        state.typeCodesItems = governmentTypeCodes.value
       } else {
         state.orgNameRules = [v => !!v || 'An account name is required']
         state.orgBusinessTypeRules = [v => !!v || 'A business type is required']
         state.orgBusinessSizeRules = [v => !!v || 'A business size is required']
+        state.typeCodesItems = businessTypeCodes.value
       }
     }
 
     async function handleAccountTypeChange (newValue) {
       state.orgType = newValue
-      cleanOrgInfo()
       await onOrgBusinessTypeChange(!props.isEditAccount)
     }
 
@@ -401,7 +405,6 @@ export default defineComponent({
       onOrgNameChange,
       onOrgBusinessTypeChange,
       businessSizeCodes,
-      businessTypeCodes,
       handleAccountTypeChange,
       AccountType,
       getOrgTypeDropdownLabel,
