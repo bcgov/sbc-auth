@@ -642,6 +642,11 @@ export enum ShortNameStatus {
     UNLINKED = 'UNLINKED'
 }
 
+export enum ShortNameLinkStatus {
+    PENDING = 'PENDING',
+    LINKED = 'LINKED'
+}
+
 export enum ShortNameResponseStatus {
     EFT_SHORT_NAME_ALREADY_MAPPED = 'EFT_SHORT_NAME_ALREADY_MAPPED'
 }
