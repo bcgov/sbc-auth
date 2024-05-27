@@ -15,6 +15,7 @@
     :options.sync="tableDataOptions"
     :server-items-length="totalItems"
     :hide-default-footer="pageHide ? true : false"
+    :expanded.sync="expanded"
   >
     <!-- Headers (two rows) -->
     <template #header>
@@ -109,6 +110,15 @@
         </td>
       </tr>
     </template>
+    <!-- Expandable Row details -->
+    <template #expanded-item="{ headers, item }">
+      <slot
+        name="expanded-item"
+        :headers="headers"
+        :item="item"
+      />
+    </template>
+
     <template #[`body.append`]>
       <tr v-if="useObserver && !reachedEnd">
         <td :colspan="headers.length">
@@ -150,7 +160,8 @@ interface BaseTableStateI {
   headers: BaseTableHeaderI[],
   sortedItems: object[],
   tableDataOptions: DataOptions,
-  visibleItems: object[]
+  visibleItems: object[],
+  expanded: object[]
 }
 
 export default defineComponent({
@@ -177,7 +188,8 @@ export default defineComponent({
     hasTitleSlot: { type: Boolean },
     useObserver: { type: Boolean, required: false },
     observerCallback: { type: Function as PropType<() => Promise<boolean>>, required: false, default: null },
-    hideFilters: { type: Boolean, default: false }
+    hideFilters: { type: Boolean, default: false },
+    setExpanded: { default: () => [] as object[] }
   },
   emits: ['update-table-options'],
   setup (props, { emit }) {
@@ -187,7 +199,8 @@ export default defineComponent({
       headers: _.cloneDeep(props.setHeaders),
       sortedItems: [...props.setItems],
       tableDataOptions: props.setTableDataOptions,
-      visibleItems: []
+      visibleItems: [],
+      expanded: []
     }) as unknown) as BaseTableStateI
 
     const currentPage = ref(1)
@@ -240,7 +253,7 @@ export default defineComponent({
     const setSortedItems = (items: object[]) => {
       state.sortedItems = [...items]
     }
-
+    watch(() => props.setExpanded, (val: object[]) => { state.expanded = [...val] }, { immediate: true })
     watch(() => props.setItems, (val: object[]) => { state.sortedItems = [...val] }, { immediate: true })
     watch(() => props.setHeaders, (val: BaseTableHeaderI[]) => {
       // maintain filters
