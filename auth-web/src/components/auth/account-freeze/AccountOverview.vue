@@ -8,7 +8,7 @@
       >
         mdi-alert
       </v-icon>
-      You have overdue payments for your account. Please settle payment to reactivate your account.
+      You have overdue payments for your account. Please settle outstanding payments to reactivate your account.
     </p>
 
     <v-card

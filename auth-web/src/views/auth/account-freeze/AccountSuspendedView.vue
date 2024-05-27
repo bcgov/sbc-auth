@@ -37,7 +37,7 @@
             Your account is suspended from: <span class="font-weight-bold">{{ suspendedDate }}</span>
           </p>
           <p class="mt-4">
-            Please contact the account administrator to reactive your account.
+            Please contact the account administrator to reactivate your account.
           </p>
           <p class="mt-4 mb-10">
             Account Administrator Email: <a :href="'mailto:' + accountAdministratorEmail">{{ accountAdministratorEmail }}</a>
@@ -51,6 +51,7 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
+import moment from 'moment'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -68,7 +69,7 @@ export default defineComponent({
 
     const state = reactive({
       invoices: [],
-      suspendedDate: (currentOrganization.value?.suspendedOn) ? formatDate(new Date(currentOrganization.value.suspendedOn)) : '',
+      suspendedDate: (currentOrganization.value?.suspendedOn) ? formatDate(moment(currentOrganization.value.suspendedOn)) : '',
       accountAdministratorEmail: ''
     })
     return {

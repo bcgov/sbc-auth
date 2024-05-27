@@ -87,6 +87,7 @@
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
+import moment from 'moment'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -99,7 +100,7 @@ export default defineComponent({
     const calculateFailedInvoices: any = orgStore.calculateFailedInvoices
     const downloadNSFInvoicesPDF: any = orgStore.downloadNSFInvoicesPDF
     const formatDate = CommonUtils.formatDisplayDate
-    const suspendedDate = (currentOrganization.value?.suspendedOn) ? formatDate(new Date(currentOrganization.value.suspendedOn)) : ''
+    const suspendedDate = (currentOrganization.value?.suspendedOn) ? formatDate(moment(currentOrganization.value.suspendedOn)) : ''
 
     const state = reactive({
       nsfAmount: 0,
