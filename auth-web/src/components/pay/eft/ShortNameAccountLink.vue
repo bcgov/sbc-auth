@@ -236,12 +236,10 @@ export default defineComponent({
     })
 
     async function evaluateLinks () {
-      let pending = []
-      state.results.map(result => {
-        if (result.statusCode === 'PENDING' && result.amountOwing > 0) {
-          pending.push(result)
-        }
-      })
+      let pending = state.results.filter(result =>
+        result.statusCode === 'PENDING' && result.amountOwing > 0
+      )
+
       await Vue.nextTick()
       state.expanded = [...pending]
     }
@@ -377,7 +375,7 @@ export default defineComponent({
 
     .alert-item {
       .v-icon{
-        color: #F8661A;
+        color: $app-alert-orange;
       }
     }
   }
