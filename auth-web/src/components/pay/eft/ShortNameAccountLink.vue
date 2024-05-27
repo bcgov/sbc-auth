@@ -66,7 +66,7 @@
             >
               <span class="expanded-item scheduled-item">
                 <v-icon>mdi-clock-outline</v-icon>
-                {{ formatCurrency(item.amountOwing) }} will be applied to this account today at 6:00 p.m. Pacific Time.
+                {{ formatCurrency(item.amountOwing) }} will be applied to this account today at 5:00 p.m. PST or 6:00 p.m. PDT.
               </span>
             </td>
           </tr>
