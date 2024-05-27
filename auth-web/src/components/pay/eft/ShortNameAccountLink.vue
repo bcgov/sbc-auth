@@ -77,7 +77,7 @@
             class="new-actions mx-auto"
           >
             <!-- Cancel Payment / Unlink buttons-->
-            <template v-if="item?.hasPendingPayment">
+            <template v-if="item.hasPendingPayment">
               <v-btn
                 small
                 color="primary"
