@@ -197,4 +197,12 @@ export default defineComponent({
       padding: 16px 40px 0 40px;
     }
   }
+  .warning-dialog {
+    .v-card .v-card__text {
+      padding: 16px 40px 0 40px;
+      .modal-dialog-text {
+        text-align: left;
+      }
+    }
+  }
 </style>
