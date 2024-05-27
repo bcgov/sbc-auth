@@ -644,7 +644,7 @@ export enum ShortNameStatus {
 
 export enum ShortNameLinkStatus {
     PENDING = 'PENDING',
-    LINKED = 'PENDING'
+    LINKED = 'LINKED'
 }
 
 export enum ShortNameResponseStatus {
