@@ -16,6 +16,7 @@ import logging
 import os
 import random
 import time
+from concurrent.futures import CancelledError
 from contextlib import contextmanager
 
 import pytest
@@ -221,10 +222,16 @@ def mock_queue_auth(mocker):
 
 
 @pytest.fixture(autouse=True)
-def mock_pub_sub_call(monkeypatch):
+def mock_pub_sub_call(mocker):
     """Mock pub sub call."""
+    class PublisherMock:
+        """Publisher Mock."""
 
-    def publish(topic, message):
-        return True
+        def __init__(self, *args, **kwargs):
+            pass
 
-    monkeypatch.setattr('auth_api.services.gcp_queue.queue.publish', publish)
+        def publish(self, *args, **kwargs):
+            """Publish mock."""
+            raise CancelledError('This is a mock')
+
+    mocker.patch('google.cloud.pubsub_v1.PublisherClient', PublisherMock)
