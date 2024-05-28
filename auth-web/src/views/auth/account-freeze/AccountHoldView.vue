@@ -9,25 +9,33 @@
         <v-icon
           size="40"
           data-test="icon-lock-suspend-account"
-          color="error"
+          color="primary"
           class="mb-6"
         >
-          mdi-alert-circle-outline
+          mdi-clock-outline
         </v-icon>
         <h1 data-test="header-account-suspend">
-          Your Account is Suspended
+          Your Account is Temporarily on Hold
         </h1>
         <div
           v-if="isAdmin"
           data-test="div-is-admin"
         >
           <p class="mt-8 mb-10">
-            Your account is suspended. For more information, please contact the BC Online Partnership Office at:<br>
+            Your account is on hold until payment is received.
+            Once your payment is processed, your account will be activated.
+            We will send a notification email when your account is activated.<br>
           </p>
-          <p class="mt-1 mb-1">
-            Email: <span class="text-underline">bconline@gov.bc.ca</span>
+          <p class="mt-1 font-weight-bold">
+            Overdue Statements
           </p>
-          <p>Telephone: 1-800-663-6102</p>
+          <p
+            v-for="invoice in invoices"
+            :key="invoice.id"
+            class="mb-2 link"
+          >
+            {{ formatDateRange(invoice.fromDate, invoice.toDate) }}
+          </p>
         </div>
         <div
           v-else
@@ -51,12 +59,13 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
+import { FailedEFTInvoice } from '@/models/invoice'
 import moment from 'moment'
 import sanitizeHtml from 'sanitize-html'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
-  name: 'AccountSuspendedView',
+  name: 'AccountHoldView',
   props: {
     isAdmin: {
       type: Boolean,
@@ -67,12 +76,15 @@ export default defineComponent({
     const orgStore = useOrgStore()
     const currentOrganization = computed(() => orgStore.currentOrganization)
     const getAccountAdministrator = orgStore.getAccountAdministrator
+    const calculateFailedInvoices: any = orgStore.calculateFailedEFTInvoices
+    console.log(currentOrganization.value.id)
     const formatDate = CommonUtils.formatDisplayDate
+    const formatDateRange = CommonUtils.formatDateRange
 
     const state = reactive({
       invoices: [],
       suspendedDate: (currentOrganization.value?.suspendedOn) ? formatDate(moment(currentOrganization.value.suspendedOn)) : '',
-      accountAdministratorEmail: {}
+      accountAdministratorEmail: ''
     })
 
     async function setAdminContact () {
@@ -84,12 +96,15 @@ export default defineComponent({
       return sanitizeHtml(state.accountAdministratorEmail)
     })
 
-    onMounted(() => {
+    onMounted(async () => {
       setAdminContact()
+      const failedInvoices: FailedEFTInvoice = await calculateFailedInvoices()
+      state.invoices = failedInvoices?.invoices || []
     })
 
     return {
       ...toRefs(state),
+      formatDateRange,
       accountAdministratorEmail
     }
   }
@@ -97,7 +112,11 @@ export default defineComponent({
 </script>
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
-
+.link {
+    color: var(--v-primary-base) !important;
+    text-decoration: underline;
+    cursor: pointer;
+}
 .text-underline {
     text-decoration: underline;
 }

@@ -7,6 +7,25 @@ import moment from 'moment'
  * A class to put all the common utility methods.
  */
 export default class CommonUtils {
+  // formats two dates into a range string, takes in most date formats
+  // eg1. formatDateRange('2021-01-01', new Date()) => 'January 01, 2021 - May 27, 2024'
+  // eg2. formatDateRange('March 1 2024', moment()) => 'March 01 - May 27, 2024'
+  static formatDateRange (date1: string | Date | moment.Moment, date2: string | Date): string {
+    const dateObj1 = moment(date1)
+    const dateObj2 = moment(date2)
+    const year = (dateObj1.year() === dateObj2.year()) ? dateObj1.year() : ''
+    const month = (dateObj1.month() === dateObj2.month()) ? dateObj1.format('MMMM') : ''
+    if (date1 === date2) {
+      return dateObj1.format('MMMM DD, YYYY')
+    } else if (year && !month) {
+      return `${dateObj1.format('MMMM DD')} - ${dateObj2.format('MMMM DD')}, ${year}`
+    } else if (year && month) {
+      return `${month} ${dateObj1.date()} - ${dateObj2.date()}, ${year}`
+    } else {
+      return `${dateObj1.format('MMMM DD, YYYY')} - ${dateObj2.format('MMMM DD, YYYY')}`
+    }
+  }
+
   // checking url matches the regex
   static isUrl (value:string): boolean {
     return value?.startsWith('http')
@@ -113,7 +132,7 @@ export default class CommonUtils {
   }
 
   // Formatting date in the desired format for displaying in the template
-  static formatDisplayDate (date: Date | string, format?: string) {
+  static formatDisplayDate (date: Date | string | moment.Moment, format?: string) {
     // not working in CI (getting UTC datetime)
     return (date) ? moment(date.toLocaleString('en-US', { timeZone: 'America/Vancouver' }))
       .format(format || 'YYYY-MM-DD') : ''

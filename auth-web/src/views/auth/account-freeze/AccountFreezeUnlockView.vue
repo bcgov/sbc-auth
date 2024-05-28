@@ -74,7 +74,7 @@ import { AccountStatus, Pages } from '@/util/constants'
 import { Component, Vue } from 'vue-property-decorator'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'pinia'
-import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
+import AccountOverviewNSF from '@/components/auth/account-freeze/AccountOverviewNSF.vue'
 import AccountSuspendedView from './AccountSuspendedView.vue'
 import ConfigHelper from 'sbc-common-components/src/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -88,7 +88,7 @@ import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
-    AccountOverview,
+    AccountOverviewNSF,
     ReviewBankInformation,
     PaymentReview,
     Stepper,
@@ -129,7 +129,7 @@ export default class AccountFreezeUnlockView extends Vue {
       {
         title: 'Account Overview',
         stepName: 'Account Overview',
-        component: AccountOverview,
+        component: AccountOverviewNSF,
         componentProps: {}
       },
       {
