@@ -41,7 +41,7 @@ bp = Blueprint('worker', __name__)
 @ensure_authorized_queue_user
 def worker():
     """Worker to handle incoming queue pushes."""
-    if not (event_message := queue.get_simple_cloud_event(request)):
+    if not (event_message := queue.get_simple_cloud_event(request, wrapped=True)):
         # Return a 200, so event is removed from the Queue
         return {}, HTTPStatus.OK
 
