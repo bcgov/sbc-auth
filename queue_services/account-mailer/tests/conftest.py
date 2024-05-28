@@ -226,9 +226,10 @@ def mock_pub_sub_call(mocker):
     """Mock pub sub call."""
     class PublisherMock:
         """Publisher Mock."""
+
         def __init__(self, *args, **kwargs):
             pass
-        
+
         def publish(self, *args, **kwargs):
             """Publish mock."""
             raise CancelledError('This is a mock')
