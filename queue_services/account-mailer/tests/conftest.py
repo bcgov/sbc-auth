@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
-from concurrent.futures import CancelledError
 import logging
 import os
 import random
 import time
+from concurrent.futures import CancelledError
 from contextlib import contextmanager
 
 import pytest
