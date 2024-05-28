@@ -32,5 +32,3 @@ aiohttp
 orjson
 python-memcached
 redis
-google-auth==2.18.1
-google-cloud-pubsub==2.17.0

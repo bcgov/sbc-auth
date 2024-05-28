@@ -1,3 +1,4 @@
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
--e git+https://github.com/bcgov/sbc-auth.git#egg=auth-api&subdirectory=auth-api
+-e git+https://github.com/seeker25/sbc-auth.git@refactor_queues#egg=auth-api&subdirectory=auth-api
+-e git+https://github.com/seeker25/sbc-connect-common.git@small_tweaks#egg=gcp-queue&subdirectory=python/gcp-queue
 git+https://github.com/daxiom/simple-cloudevent.py.git
