@@ -614,6 +614,12 @@ export const useOrgStore = defineStore('org', () => {
     }
   }
 
+  async function getAccountAdministrator () {
+    const response = await OrgService.getOrgMembers(state.currentOrganization.id, 'ACTIVE')
+    const result = response?.data?.members.find((member: Member) => member.membershipTypeCode === MembershipType.Admin)
+    return result
+  }
+
   async function syncActiveOrgMembers () {
     const response = await OrgService.getOrgMembers(state.currentOrganization.id, 'ACTIVE')
     const result = response?.data?.members || []
@@ -1110,6 +1116,7 @@ export const useOrgStore = defineStore('org', () => {
     leaveTeam,
     updateMember,
     deleteUser,
+    getAccountAdministrator,
     syncActiveOrgMembers,
     syncAddress,
     syncPendingOrgMembers,

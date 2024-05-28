@@ -61,6 +61,7 @@ import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/com
 import CommonUtils from '@/util/common-util'
 import { FailedEFTInvoice } from '@/models/invoice'
 import moment from 'moment'
+import sanitizeHtml from 'sanitize-html'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -74,7 +75,9 @@ export default defineComponent({
   setup () {
     const orgStore = useOrgStore()
     const currentOrganization = computed(() => orgStore.currentOrganization)
+    const getAccountAdministrator = orgStore.getAccountAdministrator
     const calculateFailedInvoices: any = orgStore.calculateFailedEFTInvoices
+    console.log(currentOrganization.value.id)
     const formatDate = CommonUtils.formatDisplayDate
     const formatDateRange = CommonUtils.formatDateRange
 
@@ -84,14 +87,25 @@ export default defineComponent({
       accountAdministratorEmail: ''
     })
 
+    async function setAdminContact () {
+      const adminContact = await getAccountAdministrator()
+      state.accountAdministratorEmail = adminContact.user.contacts[0].email
+    }
+
+    const accountAdministratorEmail = computed(() => {
+      return sanitizeHtml(state.accountAdministratorEmail)
+    })
+
     onMounted(async () => {
+      setAdminContact()
       const failedInvoices: FailedEFTInvoice = await calculateFailedInvoices()
       state.invoices = failedInvoices?.invoices || []
     })
 
     return {
       ...toRefs(state),
-      formatDateRange
+      formatDateRange,
+      accountAdministratorEmail
     }
   }
 })

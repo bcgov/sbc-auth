@@ -125,7 +125,7 @@ export default defineComponent({
       await root.$router.push(`${Pages.MAKE_PAD_PAYMENT}${payment.id}/transactions/${encodedUrl}`)
     }
 
-    const isAccountEFTSuspended = currentOrganization.statusCode === AccountStatus.EFT_SUSPENDED
+    const isAccountEFTSuspended = currentOrganization.statusCode === AccountStatus.NSF_SUSPENDED
 
     const closeError = () => {
       errorDialog.value.close()

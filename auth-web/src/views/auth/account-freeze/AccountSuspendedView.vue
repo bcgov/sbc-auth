@@ -49,9 +49,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, toRefs } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import moment from 'moment'
+import sanitizeHtml from 'sanitize-html'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -65,15 +66,31 @@ export default defineComponent({
   setup () {
     const orgStore = useOrgStore()
     const currentOrganization = computed(() => orgStore.currentOrganization)
+    const getAccountAdministrator = orgStore.getAccountAdministrator
     const formatDate = CommonUtils.formatDisplayDate
 
     const state = reactive({
       invoices: [],
       suspendedDate: (currentOrganization.value?.suspendedOn) ? formatDate(moment(currentOrganization.value.suspendedOn)) : '',
-      accountAdministratorEmail: ''
+      accountAdministratorEmail: {}
     })
+
+    async function setAdminContact () {
+      const adminContact = await getAccountAdministrator()
+      state.accountAdministratorEmail = adminContact.user.contacts[0].email
+    }
+
+    const accountAdministratorEmail = computed(() => {
+      return sanitizeHtml(state.accountAdministratorEmail)
+    })
+
+    onMounted(() => {
+      setAdminContact()
+    })
+
     return {
-      ...toRefs(state)
+      ...toRefs(state),
+      accountAdministratorEmail
     }
   }
 })

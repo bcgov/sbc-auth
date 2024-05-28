@@ -9,7 +9,7 @@
       type="error"
       class="mb-11"
     >
-      <div v-html="errorText" />
+      <div v-sanitize="errorText" />
     </v-alert>
 
     <v-row class="mb-6">
