@@ -205,6 +205,10 @@ export default class PaymentService {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/nsf`)
   }
 
+  static getEFTInvoices (accountId: string | number): AxiosPromise<any> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/eft`)
+  }
+
   static downloadNSFInvoicesPDF (accountId: string | number): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/nsf/statement`
     const headers = { 'Accept': 'application/pdf' }

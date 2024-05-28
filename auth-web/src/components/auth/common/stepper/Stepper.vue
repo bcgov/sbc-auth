@@ -25,6 +25,9 @@
           class="step-divider mt-n1 mb-n1"
         />
       </template>
+      <p class="assistance-text ma-8 pt-5 pb-8">
+        If you need further assistance, reach us at <span class="font-weight-bold">1-877-526-1526</span>
+      </p>
     </v-container>
     <v-divider
       vertical
@@ -63,6 +66,7 @@
             keep-alive
             @final-step-action="emitFinalStepAction"
             @step-forward="emitStepForward"
+            @step-back="emitStepBack"
           />
         </template>
       </div>
@@ -174,6 +178,10 @@ export default class Stepper extends Vue {
 
   @Emit('step-forward')
   emitStepForward () : void {
+  }
+
+  @Emit('step-back')
+  emitStepBack () : void {
   }
 }
 </script>
@@ -393,5 +401,14 @@ export default class Stepper extends Vue {
 
   .error + hr {
     display: none;
+  }
+  .assistance-text {
+    border-top: 1px solid #e0e0e0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 256px;
+    text-align: center;
+    color: #495057;
   }
 </style>

@@ -46,10 +46,20 @@ export interface FailedInvoice {
   invoices?: InvoiceList[]
 }
 
+export interface FailedEFTInvoice {
+  invoices: InvoiceList[]
+  totalAmountDue: number
+}
+
 export interface NonSufficientFundsInvoiceListResponse {
   invoices: InvoiceList[]
   total: number
   totalAmount: number
   totalAmountRemaining: number
   nsfAmount: number
+}
+
+export interface EFTInvoiceListResponse {
+  invoices: InvoiceList[]
+  totalAmountDue: number
 }
