@@ -15,4 +15,3 @@ launchdarkly-server-sdk==8.2.1
 google-auth==2.28.2
 google-cloud-pubsub==2.20.2
 cachecontrol
-urllib3==1.26.18

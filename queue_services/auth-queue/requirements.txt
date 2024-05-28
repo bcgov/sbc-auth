@@ -44,7 +44,7 @@ six==1.16.0
 threadloop==1.0.2
 thrift==0.20.0
 tornado==6.4
-urllib3==1.26.18
+urllib3==2.2.1
 zipp==3.19.0
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
 -e git+https://github.com/seeker25/sbc-auth.git@refactor_queues#egg=auth-api&subdirectory=auth-api
