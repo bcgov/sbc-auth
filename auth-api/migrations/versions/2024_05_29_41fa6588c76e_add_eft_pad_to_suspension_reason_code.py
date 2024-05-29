@@ -20,12 +20,12 @@ def upgrade():
     op.execute("INSERT INTO suspension_reason_codes "
             "(code, description,\"default\") "
             "VALUES "
-            "('EFT', 'Electronic Funds Transfer', false)")
+            "('EFT_NSF', 'EFT NSF', false)")
     op.execute("INSERT INTO suspension_reason_codes "
             "(code, description,\"default\") "
             "VALUES "
-            "('PAD', 'Pre-Authorized Debit', false)")
+            "('PAD_NSF', 'PAD NSF', false)")
 
 
 def downgrade():
-    op.execute("DELETE FROM suspension_reason_codes WHERE code in ('EFT', 'PAD')")
+    op.execute("DELETE FROM suspension_reason_codes WHERE code in ('EFT_NSF', 'PAD_NSF')")
