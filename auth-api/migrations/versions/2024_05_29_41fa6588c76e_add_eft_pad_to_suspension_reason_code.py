@@ -17,15 +17,16 @@ depends_on = None
 
 
 def upgrade():
-    op.execute("INSERT INTO suspension_reason_codes "
-            "(code, description,\"default\") "
-            "VALUES "
-            "('EFT_NSF', 'EFT NSF', false)")
-    op.execute("INSERT INTO suspension_reason_codes "
+        op.execute("INSERT INTO suspension_reason_codes "
+                "(code, description,\"default\") "
+                "VALUES "
+                "('EFT_NSF', 'EFT NSF', false)")
+        op.execute("INSERT INTO suspension_reason_codes "
             "(code, description,\"default\") "
             "VALUES "
             "('PAD_NSF', 'PAD NSF', false)")
-
+        op.execute("update orgs set suspension_reason_code = 'PAD_NSF' where status_code = 'NSF_SUSPENDED'")
 
 def downgrade():
-    op.execute("DELETE FROM suspension_reason_codes WHERE code in ('EFT_NSF', 'PAD_NSF')")
+        op.execute("DELETE FROM suspension_reason_codes WHERE code in ('EFT_NSF', 'PAD_NSF')")
+        op.execute("update orgs set suspension_reason_code = NULL where status_code = 'NSF_SUSPENDED'")
