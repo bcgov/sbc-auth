@@ -251,7 +251,7 @@
             </v-row>
           </v-form>
         </v-container>
-        <SafeEmailView />
+        <SafeEmailView ref="safeEmailView" />
       </template>
     </BaseVExpansionPanel>
 
@@ -342,6 +342,7 @@ export default defineComponent({
   setup (props, { root }) {
     const searchBusinessForm: Ref<HTMLFormElement> = ref(null)
     const emailToAdd = ref(null)
+    const safeEmailViewRef = ref(null)
     const businessStore = useBusinessStore()
     const orgStore = useOrgStore()
     const userStore = useUserStore()
@@ -430,6 +431,7 @@ export default defineComponent({
           email: [emailToAdd.value]
         }
         await StaffService.addSafeEmail(safeListEmailsRequestBody)
+        await safeEmailViewRef.value.getSafeEmails()
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(`Unable to add the email, ${error}`)
@@ -441,6 +443,7 @@ export default defineComponent({
       formatBusinessIdentifier,
       goToInvoluntaryDissolution,
       goToManageBusiness,
+      safeEmailViewRef,
       isDevOrTest,
       isFormValid,
       search,

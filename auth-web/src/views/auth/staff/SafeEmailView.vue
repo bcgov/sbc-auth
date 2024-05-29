@@ -55,6 +55,7 @@ export default defineComponent({
       // Call the service method to delete the email from the server
       try {
         await StaffService.deleteSafeEmail(email)
+        await getSafeEmails()
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(`Unable to delete the email, ${error}`)
@@ -67,6 +68,7 @@ export default defineComponent({
 
     return {
       deleteEmail,
+      getSafeEmails,
       safeEmails
     }
   }
