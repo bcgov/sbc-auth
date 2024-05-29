@@ -76,7 +76,7 @@ export interface AffiliationResponse {
   state?: string
   goodStanding?: boolean
   adminFreeze?: boolean
-  dissolved?: boolean
+  inDissolution?: boolean
 }
 
 export interface NameRequestResponse {

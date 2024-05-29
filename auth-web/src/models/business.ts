@@ -39,7 +39,7 @@ export interface Business {
     status?: string
     goodStanding?: boolean
     adminFreeze?: boolean
-    dissolved?: boolean
+    inDissolution?: boolean
     affiliationInvites?: AffiliationInviteInfo[]
 }
 

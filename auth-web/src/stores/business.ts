@@ -83,6 +83,7 @@ export const useBusinessStore = defineStore('business', () => {
       ...(resp.nrNumber && { nrNumber: resp.nrNumber }),
       ...(resp.adminFreeze !== undefined ? { adminFreeze: resp.adminFreeze } : { adminFreeze: false }),
       ...(resp.goodStanding !== undefined ? { goodStanding: resp.goodStanding } : { goodStanding: true }),
+      ...(resp.inDissolution !== undefined ? { inDissolution: resp.inDissolution } : { inDissolution: false }),
       ...(resp.state && { status: resp.state })
     }
   }
