@@ -68,22 +68,32 @@ export const useBusinessStore = defineStore('business', () => {
 
   /* Internal function to build the business object. */
   function buildBusinessObject (resp: AffiliationResponse): Business {
+    // If a property exists in resp, add it to the business object. Otherwise, it won't appear.
+    const addConditionalProperty = (condition, property) => (condition ? property : {})
+
+    // Corp type is either the draft type (checked first) or the legal type.
+    const addCorpType = (draftType, legalType) => (draftType || legalType ? { corpType: { code: draftType || legalType } } : {})
+
+    // Boolean properties in the resp. If a property exists, add it to the business object. If not, it will have a default value.
+    const addBooleanProperty = (value, defaultValue, propertyName) => ({ [propertyName]: value !== undefined ? value : defaultValue })
+
     return {
       businessIdentifier: resp.identifier,
-      ...(resp.businessNumber && { businessNumber: resp.businessNumber }),
-      ...(resp.legalName &&
-          { name: determineDisplayName(resp.legalName, resp.legalType, resp.identifier, resp.alternateNames) }),
-      ...(resp.contacts && { contacts: resp.contacts }),
-      ...((resp.draftType || resp.legalType) && { corpType: { code: resp.draftType || resp.legalType } }),
-      ...(resp.legalType && { corpSubType: { code: resp.legalType } }),
-      ...(resp.folioNumber && { folioNumber: resp.folioNumber }),
-      ...(resp.lastModified && { lastModified: resp.lastModified }),
-      ...(resp.modified && { modified: resp.modified }),
-      ...(resp.modifiedBy && { modifiedBy: resp.modifiedBy }),
-      ...(resp.nrNumber && { nrNumber: resp.nrNumber }),
-      ...(resp.adminFreeze !== undefined ? { adminFreeze: resp.adminFreeze } : { adminFreeze: false }),
-      ...(resp.goodStanding !== undefined ? { goodStanding: resp.goodStanding } : { goodStanding: true }),
-      ...(resp.state && { status: resp.state })
+      ...addConditionalProperty(resp.businessNumber, { businessNumber: resp.businessNumber }),
+      ...addConditionalProperty(resp.businessNumber, { businessNumber: resp.businessNumber }),
+      ...addConditionalProperty(resp.legalName, { name: determineDisplayName(resp.legalName, resp.legalType, resp.identifier, resp.alternateNames) }),
+      ...addConditionalProperty(resp.contacts, { contacts: resp.contacts }),
+      ...addCorpType(resp.draftType, resp.legalType),
+      ...addConditionalProperty(resp.legalType, { corpSubType: { code: resp.legalType } }),
+      ...addConditionalProperty(resp.folioNumber, { folioNumber: resp.folioNumber }),
+      ...addConditionalProperty(resp.lastModified, { lastModified: resp.lastModified }),
+      ...addConditionalProperty(resp.modified, { modified: resp.modified }),
+      ...addConditionalProperty(resp.modifiedBy, { modifiedBy: resp.modifiedBy }),
+      ...addConditionalProperty(resp.nrNumber, { nrNumber: resp.nrNumber }),
+      ...addBooleanProperty(resp.adminFreeze, false, 'adminFreeze'),
+      ...addBooleanProperty(resp.goodStanding, true, 'goodStanding'),
+      ...addBooleanProperty(resp.inDissolution, false, 'inDissolution'),
+      ...addConditionalProperty(resp.state, { status: resp.state })
     }
   }
 

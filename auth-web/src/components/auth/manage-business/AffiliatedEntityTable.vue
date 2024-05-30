@@ -249,7 +249,7 @@ export default defineComponent({
     }
 
     const isDissolution = (item: Business) => {
-      return item.dissolved
+      return item.inDissolution
     }
 
     const getDetails = (item: Business): EntityAlertTypes[] => {
