@@ -43,13 +43,20 @@ import StaffService from '@/services/staff.services'
 export default defineComponent({
   name: 'SafeEmailView',
   setup () {
-    const getSafeEmails = async () => {
-      const response = await StaffService.getSafeEmails()
-      if (response?.data && response.status === 200) {
-        return response.data
+    const safeEmails = ref<SafeEmail[]>()
+
+    async function getSafeEmails () {
+      // Call to get the email list from the server
+      try {
+        const response = await StaffService.getSafeEmails()
+        if (response?.data && response.status === 200) {
+          safeEmails.value = response.data
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Unable to get the email list, ${error}`)
       }
     }
-    const safeEmails = ref<SafeEmail[]>()
 
     async function deleteEmail (email: string) {
       // Call the service method to delete the email from the server
@@ -63,7 +70,7 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      safeEmails.value = await getSafeEmails()
+      await getSafeEmails()
     })
 
     return {
