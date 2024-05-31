@@ -23,4 +23,4 @@ def upgrade():
 
 
 def downgrade():
-    op.execute('DELETE FROM permissions WHERE id=33')
+    op.execute('DELETE FROM permissions WHERE id=84')
