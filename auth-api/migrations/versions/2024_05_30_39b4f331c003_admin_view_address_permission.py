@@ -18,9 +18,9 @@ depends_on = None
 
 def upgrade():
     op.execute(
-        "INSERT INTO permissions (id, membership_type_code, actions) VALUES (84, 'ADMIN', 'view_address')"
+        "INSERT INTO permissions (membership_type_code, actions) VALUES ('ADMIN', 'view_address')"
     )
 
 
 def downgrade():
-    op.execute('DELETE FROM permissions WHERE id=84')
+    op.execute('DELETE FROM permissions WHERE membership_type_code=\'ADMIN\' and actions=\'view_address\'')
