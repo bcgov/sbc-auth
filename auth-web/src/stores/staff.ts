@@ -82,9 +82,9 @@ export const useStaffStore = defineStore('staff', () => {
     }
   }
 
-  /** Get the involuntary dissolution configurations array from Legal API. */
-  async function getDissolutionConfigurations (): Promise<void> {
-    const response = await StaffService.getInvoluntaryDissolutionConfigurations()
+  /** Get the involuntary dissolution configurations array (batch size only) from Legal API. */
+  async function getDissolutionBatchSize (): Promise<void> {
+    const response = await StaffService.getInvoluntaryDissolutionBatchSize()
     if (response?.data && response.status === 200) state.involuntaryDissolutionConfigurations = response.data
   }
 
@@ -311,7 +311,7 @@ export const useStaffStore = defineStore('staff', () => {
     approveAccountUnderReview,
     deleteOrg,
     getAccountTypes,
-    getDissolutionConfigurations,
+    getDissolutionBatchSize,
     getDissolutionStatistics,
     getGLCode,
     getGLCodeList,
