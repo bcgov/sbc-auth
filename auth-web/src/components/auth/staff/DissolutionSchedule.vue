@@ -22,7 +22,7 @@
             cols="12"
             sm="3"
           >
-            <label class="dissolution-batch-size-label">Dissolution Batch Size</label>
+            <span id="dissolution-batch-size-text">Dissolution Batch Size</span>
           </v-col>
           <v-col
             cols="12"
@@ -52,7 +52,7 @@
           cols="12"
           sm="3"
         >
-          <label class="schedule-summary-label">Schedule Summary</label>
+          <span id="schedule-summary-text">Schedule Summary</span>
         </v-col>
         <v-col
           cols="12"
@@ -206,7 +206,7 @@ export default defineComponent({
 .section-container {
   color: $gray9;
 
-  label {
+  #dissolution-batch-size-text, #schedule-summary-text {
     color: $gray9;
     font-weight: bold;
   }
