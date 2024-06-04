@@ -30,10 +30,10 @@
 </template>
 
 <script lang="ts">
-import { State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import { Organization } from '@/models/Organization'
+import { State } from 'pinia-class'
 import { useOrgStore } from '@/stores/org'
 
 @Component

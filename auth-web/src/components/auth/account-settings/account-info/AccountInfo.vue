@@ -437,7 +437,7 @@ export default class AccountInfo extends Mixins(
     )
   }
 
-  private get isDeactivateButtonVisible (): Boolean {
+  private get isDeactivateButtonVisible (): boolean {
     return this.currentOrganization?.statusCode !== AccountStatus.INACTIVE
   }
 
