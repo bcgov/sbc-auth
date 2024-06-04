@@ -22,7 +22,7 @@
             cols="12"
             sm="3"
           >
-            <label id="dissolution-batch-size-label">Dissolution Batch Size</label>
+            <label class="dissolution-batch-size-label">Dissolution Batch Size</label>
           </v-col>
           <v-col
             cols="12"
@@ -52,7 +52,7 @@
           cols="12"
           sm="3"
         >
-          <label id="schedule-summary-label">Schedule Summary</label>
+          <label class="schedule-summary-label">Schedule Summary</label>
         </v-col>
         <v-col
           cols="12"

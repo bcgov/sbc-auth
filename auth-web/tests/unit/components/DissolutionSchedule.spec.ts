@@ -39,13 +39,13 @@ describe('DissolutionSchedule.vue', () => {
   it('renders the component properly', () => {
     expect(wrapper.findComponent(DissolutionSchedule).exists()).toBe(true)
     expect(wrapper.find('#dissolution-schedule').isVisible()).toBe(true)
-    expect(wrapper.find('#schedule-summary-label').exists()).toBe(true)
+    expect(wrapper.find('.schedule-summary-label').exists()).toBe(true)
     expect(wrapper.find('.section-container').exists()).toBe(true)
   })
 
   it('shows the proper schedule summary text', async () => {
     await Vue.nextTick()
-    expect(wrapper.find('#schedule-summary-label').text()).toBe('Schedule Summary')
+    expect(wrapper.find('.schedule-summary-label').text()).toBe('Schedule Summary')
     expect(wrapper.find('span').text()).toContain('Moving 250 businesses into D1 dissolution every Tuesday,')
     expect(wrapper.find('span').text()).toContain(' Wednesday, and Thursday at 12:15 a.m. Pacific Time.')
   })
@@ -53,7 +53,7 @@ describe('DissolutionSchedule.vue', () => {
   it('clicking on edit button shows the editing panel', async () => {
     // verify that proper components don't exist
     expect(wrapper.vm.isEdit).toBe(false)
-    expect(wrapper.find('#dissolution-batch-size-label').exists()).toBe(false)
+    expect(wrapper.find('.dissolution-batch-size-label').exists()).toBe(false)
     expect(wrapper.find('#dissolution-batch-size-text-field').exists()).toBe(false)
 
     // verify Edit button and click it
@@ -63,7 +63,7 @@ describe('DissolutionSchedule.vue', () => {
 
     // verify that proper components exist and now are visible
     expect(wrapper.vm.isEdit).toBe(true)
-    expect(wrapper.find('#dissolution-batch-size-label').isVisible()).toBe(true)
+    expect(wrapper.find('.dissolution-batch-size-label').isVisible()).toBe(true)
     expect(wrapper.find('#dissolution-batch-size-text-field').isVisible()).toBe(true)
   })
 
@@ -71,7 +71,7 @@ describe('DissolutionSchedule.vue', () => {
     // verify that proper components don't exist
     expect(wrapper.vm.isEdit).toBe(false)
     expect(wrapper.find('#cancel-btn').exists()).toBe(false)
-    expect(wrapper.find('#dissolution-batch-size-label').exists()).toBe(false)
+    expect(wrapper.find('.dissolution-batch-size-label').exists()).toBe(false)
     expect(wrapper.find('#dissolution-batch-size-text-field').exists()).toBe(false)
 
     // Edit button clicked
@@ -88,7 +88,7 @@ describe('DissolutionSchedule.vue', () => {
 
     // verify that proper components don't exist anymore and are not shown
     expect(wrapper.vm.isEdit).toBe(false)
-    expect(wrapper.find('#dissolution-batch-size-label').exists()).toBe(false)
+    expect(wrapper.find('.dissolution-batch-size-label').exists()).toBe(false)
     expect(wrapper.find('#dissolution-batch-size-text-field').exists()).toBe(false)
   })
 
