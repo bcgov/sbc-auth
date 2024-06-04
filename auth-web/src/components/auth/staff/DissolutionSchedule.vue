@@ -113,7 +113,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
-import { InvoluntaryDissolutionConfigNames } from '@/util/constants'
 import { useStaffStore } from '@/stores/staff'
 
 export default defineComponent({
@@ -131,12 +130,11 @@ export default defineComponent({
 
     /** Set local properties to values from the store. */
     onMounted(async () => {
-      // Make the call to get the involuntary dissolution configurations array and set it in store.
-      await staffStore.getDissolutionConfigurations()
+      // Make the call to get the involuntary dissolution configurations array (with batch size only) and set it in store.
+      await staffStore.getDissolutionBatchSize()
 
       // Get the batch size current value (number of businesses to be dissolved per job run)
-      const numDissolutions = staffStore.involuntaryDissolutionConfigurations?.configurations?.find(
-        config => config.name === 'NUM_DISSOLUTIONS_ALLOWED').value
+      const numDissolutions = staffStore.involuntaryDissolutionConfigurations?.configurations[0]?.value
       state.numberOfBusinessesNonEdit = parseInt(numDissolutions)
     })
 
@@ -158,11 +156,7 @@ export default defineComponent({
       if (state.numberOfBusinessesRef.validate()) {
         state.isSaving = true // show the spinner
         // Update store configurations array with the new number of inputted batch size
-        staffStore.involuntaryDissolutionConfigurations.configurations.find((config, index) => {
-          if (config.name === InvoluntaryDissolutionConfigNames.NUM_DISSOLUTIONS_ALLOWED) {
-            staffStore.involuntaryDissolutionConfigurations.configurations[index].value = String(state.numberOfBusinessesEdit)
-          }
-        })
+        staffStore.involuntaryDissolutionConfigurations.configurations[0].value = String(state.numberOfBusinessesEdit)
         // Make the PUT call to update the database with the new configurations array (with new batch size number)
         try {
           await staffStore.updateDissolutionConfigurations(staffStore.involuntaryDissolutionConfigurations)
