@@ -63,7 +63,8 @@ export interface Organization {
   isBusinessAccount?: boolean,
   businessType?: string,
   businessSize?: string,
-  mailingAddress?: Address
+  mailingAddress?: Address,
+  modified?: string
 }
 
 export interface PADInfo {

@@ -77,6 +77,7 @@ import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account
 import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
 import StaffSuspendedAccountsTable from '@/components/auth/staff/account-management/StaffSuspendedAccountsTable.vue'
+import StaffInActiveAccountsTable from '@/components/auth/staff/account-management/StaffInActiveAccountsTable.vue'
 import TermsOfServiceDeclineView from '@/views/auth/TermsOfServiceDeclineView.vue'
 import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
@@ -703,6 +704,22 @@ export function getRoutes (): RouteConfig[] {
               {
                 text: StaffDashboardBreadcrumb.text,
                 to: { name: 'suspended' }
+              }
+            ],
+            showNavBar: true
+          }
+        },
+        {
+          path: 'inactive',
+          name: 'inactive',
+          component: StaffInActiveAccountsTable,
+          meta: {
+            requiresAuth: true,
+            allowedRoles: [Role.Staff],
+            breadcrumb: [
+              {
+                text: StaffDashboardBreadcrumb.text,
+                to: { name: 'inactive' }
               }
             ],
             showNavBar: true

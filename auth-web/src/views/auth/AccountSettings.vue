@@ -97,9 +97,16 @@
         Manage account information, team members, and authentication settings.
       </p>
     </div>
+
     <!-- Suspend Account Banner-->
     <AccountSuspendAlert
       v-if="showAccountFreezeBanner"
+      class="account-alert mb-0"
+    />
+
+    <!-- InActive Account Banner-->
+    <AccountInActiveAlert
+      v-if="showInActiveFreezeBanner"
       class="account-alert mb-0"
     />
 
@@ -356,6 +363,7 @@ import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
+import AccountInActiveAlert from '@/components/auth/common/AccountInActiveAlert.vue'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { useOrgStore } from '@/stores/org'
@@ -363,7 +371,8 @@ import { useUserStore } from '@/stores/user'
 
   @Component({
     components: {
-      AccountSuspendAlert
+      AccountSuspendAlert,
+      AccountInActiveAlert
     },
     computed: {
       ...mapState(useUserStore, [
@@ -451,6 +460,13 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     return this.isStaff && (
       this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED ||
       this.currentOrganization?.statusCode === AccountStatus.SUSPENDED
+    )
+  }
+
+  // show baner for staff user and account inactive
+  private get showInActiveFreezeBanner () {
+    return this.isStaff && (
+      this.currentOrganization?.statusCode === AccountStatus.INACTIVE
     )
   }
 

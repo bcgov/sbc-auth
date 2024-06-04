@@ -96,6 +96,14 @@
           </v-badge>
         </v-tab>
       </template>
+
+      <v-tab
+        v-if="canViewAccounts"
+        data-test="inactive-tab"
+        :to="pagesEnum.STAFF_DASHBOARD_InACTIVE"
+      >
+        InActive
+      </v-tab>
     </v-tabs>
 
     <!-- Tab Contents -->
@@ -119,6 +127,7 @@ import StaffCreateAccountModal from '@/components/auth/staff/account-management/
 import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account-management/StaffPendingAccountInvitationsTable.vue'
 import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
+import StaffInActiveAccountsTable from '@/components/auth/staff/account-management/StaffInActiveAccountsTable.vue'
 import { useCodesStore } from '@/stores/codes'
 import { useStaffStore } from '@/stores/staff'
 import { useTaskStore } from '@/stores/task'
@@ -129,7 +138,8 @@ enum TAB_CODE {
     PendingReview = 'pending-review-tab',
     Rejected = 'rejected-tab',
     Invitations = 'invitations-tab',
-    Suspended = 'suspended-tab'
+    Suspended = 'suspended-tab',
+    InActive = 'inactive-tab'
 }
 
 @Component({
@@ -138,6 +148,7 @@ enum TAB_CODE {
     StaffPendingAccountsTable,
     StaffRejectedAccountsTable,
     StaffPendingAccountInvitationsTable,
+    StaffInActiveAccountsTable,
     StaffCreateAccountModal
   },
   methods: {
@@ -198,6 +209,11 @@ export default class StaffAccountManagement extends Vue {
       id: 4,
       tabName: 'Suspended',
       code: TAB_CODE.Suspended
+    },
+    {
+      id: 5,
+      tabName: 'InActive',
+      code: TAB_CODE.InActive
     }
   ]
 
