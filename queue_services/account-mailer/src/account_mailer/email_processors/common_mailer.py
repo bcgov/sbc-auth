@@ -25,6 +25,7 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
     current_app.logger.debug('account  notification: %s', org_id)
 
     account_name: str = None
+    account_name_with_branch: str = None
     if org_id:
         org: OrgModel = OrgModel.find_by_id(org_id)
         account_name = org.name
