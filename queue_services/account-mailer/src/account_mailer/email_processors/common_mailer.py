@@ -28,13 +28,18 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
     if org_id:
         org: OrgModel = OrgModel.find_by_id(org_id)
         account_name = org.name
+        account_name_with_branch = org.name
+        if org.branch_name:
+            account_name_with_branch = f'{org.name} - {org.branch_name}'
 
     # fill in template
     filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), template_name)
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     jinja_kwargs = {
+        'account_number': org_id,
         'account_name': account_name,
+        'account_name_with_branch': account_name_with_branch,
         'url': get_login_url(),
         'logo_url': logo_url,
         'dashboard_url': get_dashboard_url(),
