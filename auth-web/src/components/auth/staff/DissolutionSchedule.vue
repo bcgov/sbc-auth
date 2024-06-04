@@ -22,13 +22,14 @@
             cols="12"
             sm="3"
           >
-            <label id="company-label">Dissolution Batch Size</label>
+            <span id="dissolution-batch-size-text">Dissolution Batch Size</span>
           </v-col>
           <v-col
             cols="12"
             sm="9"
           >
             <v-text-field
+              id="dissolution-batch-size-text-field"
               ref="numberOfBusinessesRef"
               v-model="numberOfBusinessesEdit"
               filled
@@ -51,7 +52,7 @@
           cols="12"
           sm="3"
         >
-          <label id="company-label">Schedule Summary</label>
+          <span id="schedule-summary-text">Schedule Summary</span>
         </v-col>
         <v-col
           cols="12"
@@ -70,7 +71,7 @@
             class="text-right"
           >
             <v-btn
-              class="edit-button"
+              id="edit-btn"
               @click="triggerEditOnOff()"
             >
               <v-icon>mdi-pencil</v-icon>
@@ -89,6 +90,7 @@
             class="text-right"
           >
             <v-btn
+              id="cancel-btn"
               color="primary"
               large
               outlined
@@ -98,6 +100,7 @@
               Cancel
             </v-btn>
             <v-btn
+              id="save-btn"
               color="primary"
               large
               @click="saveBtnClicked()"
@@ -203,14 +206,14 @@ export default defineComponent({
 .section-container {
   color: $gray9;
 
-  label {
+  #dissolution-batch-size-text, #schedule-summary-text {
     color: $gray9;
     font-weight: bold;
   }
 }
 
 // Remove background + shadow of the edit button. Change the colors to app blue.
-::v-deep .edit-button {
+::v-deep #edit-btn {
   background-color: transparent !important;
   color: $app-blue;
   box-shadow: none;
