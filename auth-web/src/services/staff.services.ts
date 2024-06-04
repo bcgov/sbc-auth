@@ -10,6 +10,7 @@ import {
 import { OrgFilterParams, OrgList, Organizations } from '@/models/Organization'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
+import { InvoluntaryDissolutionConfigNames } from '@/util/constants'
 import { SafeEmail } from '@/models/safe-email'
 import { axios } from '@/util/http-util'
 
@@ -57,8 +58,10 @@ export default class StaffService {
     return axios.get(`${ConfigHelper.getNotifiyAPIUrl()}/safe_list`)
   }
 
-  static async getInvoluntaryDissolutionConfigurations (): Promise<AxiosResponse<Configurations>> {
-    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/admin/configurations`)
+  static async getInvoluntaryDissolutionBatchSize (): Promise<AxiosResponse<Configurations>> {
+    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/admin/configurations`, {
+      params: { names: InvoluntaryDissolutionConfigNames.NUM_DISSOLUTIONS_ALLOWED }
+    })
   }
 
   static async getDissolutionStatistics (): Promise<AxiosResponse<DissolutionStatistics>> {
