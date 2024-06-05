@@ -173,8 +173,9 @@ export default defineComponent({
 
       states.state = States.SEARCHING
       const searchStatus = null // search all (ACTIVE + HISTORICAL)
-      const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes) ||
-        'BEN,SP,GP,CP' // safe fallback to same value as Prod
+      // fetch list of legal types from LaunchDarkly
+      // if not available, fall back to same value as Prod
+      const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes, 'BEN,SP,GP,CP')
 
       // Use appropriate service based on lookupType
       const searchService = (props.lookupType === LookupType.NR)
