@@ -170,9 +170,12 @@ export default defineComponent({
       if (!states.searchField || states.searchField?.length <= 2) {
         return
       }
+
       states.state = States.SEARCHING
       const searchStatus = null // search all (ACTIVE + HISTORICAL)
-      const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes)
+      const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes) ||
+        'BEN,SP,GP,CP' // safe fallback to same value as Prod
+
       // Use appropriate service based on lookupType
       const searchService = (props.lookupType === LookupType.NR)
         ? NameRequestLookupServices.search
