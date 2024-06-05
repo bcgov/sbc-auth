@@ -52,46 +52,44 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref } from '@vue/composition-api'
+import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { SafeEmail } from '@/models/safe-email'
 import StaffService from '@/services/staff.services'
 
 export default defineComponent({
   name: 'SafeEmailView',
   setup () {
-    const safeEmails = ref<SafeEmail[]>()
-    const alertMessage = ref('')
-    const alertType = ref('')
-    const deletedEmail = ref('')
-    const delEmailAlertMsg = ref('')
-    const delEmailAlertType = ref('')
+    const state = reactive({
+      safeEmails: [] as SafeEmail[],
+      alertMessage: '',
+      alertType: '',
+      deletedEmail: '',
+      delEmailAlertMsg: '',
+      delEmailAlertType: ''
+    })
 
     function showGeneralAlert (msg: string, type: string) {
-      alertMessage.value = msg
-      alertType.value = type
+      state.alertMessage = msg
+      state.alertType = type
       // 2 seconds timeout
       setTimeout(() => {
-        alertMessage.value = ''
+        state.alertMessage = ''
       }, 2000)
     }
 
     function showPerEmailAlert (email: string, type: string) {
-      deletedEmail.value = email
-      delEmailAlertType.value = type
-      if (type === 'success') {
-        delEmailAlertMsg.value = `Deleted`
-      } else {
-        delEmailAlertMsg.value = `Error`
-      }
+      state.deletedEmail = email
+      state.delEmailAlertType = type
+      state.delEmailAlertMsg = type === 'success' ? 'Deleted' : 'Error'
       // 1 seconds timeout
       setTimeout(() => {
-        deletedEmail.value = ''
+        state.deletedEmail = ''
       }, 1000)
     }
 
     async function getSafeEmails () {
       try {
-        safeEmails.value = (await StaffService.getSafeEmails()).data
+        state.safeEmails = (await StaffService.getSafeEmails()).data
       } catch (error) {
         showGeneralAlert(`Error fetching safe emails, ${error}`, 'error')
       }
@@ -114,15 +112,10 @@ export default defineComponent({
     })
 
     return {
+      ...toRefs(state),
       deleteEmail,
       getSafeEmails,
-      showGeneralAlert,
-      safeEmails,
-      alertMessage,
-      alertType,
-      deletedEmail,
-      delEmailAlertMsg,
-      delEmailAlertType
+      showGeneralAlert
     }
   }
 })
