@@ -432,9 +432,12 @@ export default defineComponent({
         }
         await StaffService.addSafeEmail(safeListEmailsRequestBody)
         await safeEmailView.value.getSafeEmails()
+        safeEmailView.value.showGeneralAlert(`Email ${emailToAdd.value} added successfully`, 'success')
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(`Unable to add the email, ${error}`)
+        const errMsg = `Error adding ${emailToAdd.value}, ${error}`
+        console.error(errMsg)
+        safeEmailView.value.showGeneralAlert(errMsg, 'error')
       }
     }
 
