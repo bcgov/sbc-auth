@@ -38,9 +38,9 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     jinja_kwargs = {
-        'account_number': org_id,
         'account_name': account_name,
         'account_name_with_branch': account_name_with_branch,
+        'account_number': org_id,
         'url': get_login_url(),
         'logo_url': logo_url,
         'dashboard_url': get_dashboard_url(),
