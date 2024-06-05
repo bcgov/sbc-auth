@@ -55,7 +55,18 @@ export default class StaffService {
   }
 
   static async getSafeEmails (): Promise<AxiosResponse<SafeEmail[]>> {
-    return axios.get(`${ConfigHelper.getNotifiyAPIUrl()}/safe_list`)
+    try {
+      const response: AxiosResponse<SafeEmail[]> = await axios.get(`${ConfigHelper.getNotifiyAPIUrl()}/safe_list`)
+      if (response.status === 200 && response.data) {
+        return response
+      } else {
+        throw new Error('Failed to fetch safe emails')
+      }
+    } catch (error) {
+      const errMsg = `Failed to fetch safe emails, ${error}`
+      console.error(errMsg)
+      throw Error(errMsg)
+    }
   }
 
   static async getInvoluntaryDissolutionBatchSize (): Promise<AxiosResponse<Configurations>> {
@@ -72,8 +83,19 @@ export default class StaffService {
     return axios.put(`${ConfigHelper.getLegalAPIV2Url()}/admin/configurations`, configurations)
   }
 
-  static async deleteSafeEmail (email: string): Promise<AxiosResponse<SafeEmail[]>> {
-    return axios.delete(`${ConfigHelper.getNotifiyAPIUrl()}/safe_list/${email}`)
+  static async deleteSafeEmail (email: string): Promise<AxiosResponse> {
+    try {
+      const response: AxiosResponse = await axios.delete(`${ConfigHelper.getNotifiyAPIUrl()}/safe_list/${email}`)
+      if (response.status === 200) {
+        return response
+      } else {
+        throw new Error(`Failed to delete safe email ${email}`)
+      }
+    } catch (error) {
+      const errMsg = `Unable to delete ${email}, ${error}`
+      console.error(errMsg)
+      throw Error(errMsg)
+    }
   }
 
   static async addSafeEmail (safeListEmailsRequestBody: SafeListEmailsRequestBody): Promise<AxiosResponse<SafeEmail[]>> {
