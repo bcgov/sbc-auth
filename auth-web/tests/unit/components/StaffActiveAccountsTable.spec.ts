@@ -1,7 +1,17 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
+import Vue from 'vue'
+import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
+import initialize from '@/plugins/i18n'
 import { useStaffStore } from '@/stores'
+
+Vue.use(VueRouter)
+Vue.use(Vuetify)
+const i18n = initialize(Vue)
+
+const vuetify = new Vuetify({})
+const router = new VueRouter()
 
 describe('StaffActiveAccountsTable.vue', () => {
   let wrapper: Wrapper<StaffActiveAccountsTable>
@@ -32,12 +42,12 @@ describe('StaffActiveAccountsTable.vue', () => {
       }
     ] as any
 
-    const vuetify = new Vuetify({})
-
     const $t = () => ''
     wrapper = shallowMount(StaffActiveAccountsTable, {
       localVue,
       vuetify,
+      router,
+      i18n,
       mocks: { $t }
     })
 

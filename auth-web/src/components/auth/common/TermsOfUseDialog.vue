@@ -91,7 +91,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script lang="ts">
 import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
 import { useUserStore } from '@/stores/user'
