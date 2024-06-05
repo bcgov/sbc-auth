@@ -17,9 +17,9 @@
               :options.sync="tableDataOptions"
               :disable-sort="true"
               :footer-props="{
-                itemsPerPageOptions: getPaginationOptions
+                itemsPerPageOptions: paginationOptions
               }"
-              :items-per-page="numberOfItems"
+              :items-per-page="numOfItems"
               hide-default-header
               fixed-header
               :loading="isTableLoading"
@@ -182,244 +182,252 @@
 
 <script lang="ts">
 import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
-import { Component, Mixins, Watch } from 'vue-property-decorator'
-import { Member, OrgAccountTypes, OrgFilterParams, OrgList, OrgMap, Organization } from '@/models/Organization'
-import { Action } from 'pinia-class'
+import {
+  DEFAULT_DATA_OPTIONS,
+  cachePageInfo,
+  getAndPruneCachedPageInfo,
+  getPaginationOptions,
+  hasCachedPageInfo,
+  numberOfItems,
+  saveItemsPerPage
+} from '@/components/datatable/resources'
+import { OrgAccountTypes, OrgFilterParams, OrgMap, Organization } from '@/models/Organization'
+import { computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import { EnumDictionary } from '@/models/util'
-import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
-import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import debounce from '@/util/debounce'
+import { useI18n } from 'vue-i18n-composable'
 import { useOrgStore } from '@/stores/org'
 import { useStaffStore } from '@/stores/staff'
 
-@Component({
-  components: {
-    SearchFilterInput
+export default defineComponent({
+  name: 'StaffActiveAccountsTable',
+
+  setup (props, { root }) {
+    const { t } = useI18n()
+    const orgStore = useOrgStore()
+    const staffStore = useStaffStore()
+
+    const state = reactive({
+      activeOrgs: [] as Organization[],
+      headerAccounts: [
+        { text: 'Account Name', value: 'name' },
+        { text: 'Branch Name', value: 'branchName' },
+        { text: 'Account Number', value: 'id' },
+        { text: 'BCOL Account Number', value: 'bcolAccountId' },
+        { text: 'Approved By', value: 'decisionMadeBy' },
+        { text: 'Account Type', value: 'orgType' },
+        { text: 'Actions', value: 'action' }
+      ],
+      accountTypeMap: {
+        [OrgAccountTypes.ALL]: {},
+        [OrgAccountTypes.BASIC]: {
+          accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
+          orgType: Account.BASIC
+        },
+        [OrgAccountTypes.BASIC_OUT_OF_PROVINCE]: {
+          accessType: [AccessType.EXTRA_PROVINCIAL],
+          orgType: Account.BASIC
+        },
+        [OrgAccountTypes.PREMIUM]: {
+          accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
+          orgType: Account.PREMIUM
+        },
+        [OrgAccountTypes.PREMIUM_OUT_OF_PROVINCE]: {
+          accessType: [AccessType.EXTRA_PROVINCIAL],
+          orgType: Account.PREMIUM
+        },
+        [OrgAccountTypes.GOVM]: {
+          accessType: [AccessType.GOVM]
+        },
+        [OrgAccountTypes.GOVN]: {
+          accessType: [AccessType.GOVN]
+        },
+        [OrgAccountTypes.DIRECTOR_SEARCH]: {
+          accessType: [AccessType.ANONYMOUS]
+        },
+        [OrgAccountTypes.STAFF]: {
+          accessType: [AccessType.GOVM],
+          orgType: Account.STAFF
+        },
+        [OrgAccountTypes.SBC_STAFF]: {
+          accessType: [AccessType.GOVM],
+          orgType: Account.SBC_STAFF
+        }
+      } as EnumDictionary<OrgAccountTypes, OrgMap>,
+      accountTypes: [] as string[],
+      formatDate: CommonUtils.formatDisplayDate,
+      totalAccountsCount: 0,
+      tableDataOptions: {} as Partial<DataOptions>,
+      isTableLoading: false,
+      searchParamsExist: false,
+      dropdown: [] as Array<boolean>,
+      searchParams: {
+        name: '',
+        branchName: '',
+        id: '',
+        bcolAccountId: '',
+        decisionMadeBy: '',
+        orgType: OrgAccountTypes.ALL,
+        statuses: [AccountStatus.ACTIVE]
+      } as OrgFilterParams
+    })
+
+    state.accountTypes = Array.from(Object.keys(state.accountTypeMap))
+    const paginationOptions = computed(() => getPaginationOptions())
+    const numOfItems = computed(() => numberOfItems())
+
+    const debouncedOrgSearch = debounce(async function (page = 1, pageLimit = numOfItems.value) {
+      try {
+        state.isTableLoading = true
+        const completeSearchParams: OrgFilterParams = {
+          ...state.searchParams,
+          orgType: undefined,
+          accessType: undefined,
+          ...getOrgAndAccessTypeFromAccountType(state.searchParams.orgType),
+          page: page,
+          limit: pageLimit
+        }
+        const activeAccountsResp = await staffStore.searchOrgs(completeSearchParams)
+        state.activeOrgs = activeAccountsResp.orgs
+        state.totalAccountsCount = activeAccountsResp?.total || 0
+      } catch (error) {
+        console.error(error)
+      } finally {
+        state.isTableLoading = false
+      }
+    })
+
+    function mounted () {
+      state.tableDataOptions = DEFAULT_DATA_OPTIONS
+      const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
+      try {
+        state.searchParams = JSON.parse(orgSearchFilter)
+      } catch {
+        // Do nothing, we have defaults for searchParams.
+      }
+      if (hasCachedPageInfo) {
+        state.tableDataOptions = getAndPruneCachedPageInfo()
+      }
+    }
+
+    watch(() => state.searchParams, function (value) {
+      state.searchParamsExist = doSearchParametersExist(value)
+      state.tableDataOptions = { ...getAndPruneCachedPageInfo(), page: 1 }
+      setSearchFilterToStorage(JSON.stringify(value))
+      debouncedOrgSearch()
+    }, { deep: true })
+
+    watch(() => state.tableDataOptions, function (val) {
+      debouncedOrgSearch(val?.page, val?.itemsPerPage)
+    }, { deep: true })
+
+    async function viewInBusinessRegistryDashboard (org: Organization) {
+      await syncBeforeNavigate(org)
+      root.$router.push(`/account/${org.id}/business`)
+    }
+
+    async function view (org: Organization) {
+      await syncBeforeNavigate(org)
+      root.$router.push(`/account/${org.id}/settings`)
+    }
+
+    function clearSearchParams () {
+      state.searchParams = {
+        name: '',
+        branchName: '',
+        id: '',
+        decisionMadeBy: '',
+        bcolAccountId: '',
+        orgType: OrgAccountTypes.ALL,
+        accessType: [],
+        statuses: [AccountStatus.ACTIVE]
+      }
+    }
+
+    async function syncBeforeNavigate (org: Organization) {
+      cachePageInfo(state.tableDataOptions)
+      await orgStore.syncOrganization(org.id)
+      await orgStore.addOrgSettings(org)
+      await orgStore.syncMembership(org.id)
+    }
+
+    function getIndexedTag (tag: string, index: number): string {
+      return `${tag}-${index}`
+    }
+
+    function getOrgAndAccessTypeFromAccountType (accountType: string): object {
+      return state.accountTypeMap[accountType]
+    }
+
+    function getAccountTypeFromOrgAndAccessType (org: Organization): any {
+      const entries = Object.entries(state.accountTypeMap)
+      const byAccessTypeAndOrgType = entries.find(([, value]) =>
+        value?.accessType?.includes(org.accessType) &&
+                value?.orgType === org.orgType
+      )
+      if (byAccessTypeAndOrgType) {
+        return byAccessTypeAndOrgType[0]
+      }
+      const byAccessType = entries.find(([, value]) =>
+        value?.accessType?.includes(org.accessType)
+      )
+      if (byAccessType) {
+        return byAccessType[0]
+      }
+      const byOrgType = entries.find(([, value]) =>
+        value?.orgType === org.orgType
+      )
+      if (byOrgType) {
+        return byOrgType[0]
+      }
+      return ''
+    }
+
+    const noDataMessage = computed(() => {
+      return t(
+        state.searchParamsExist
+          ? 'searchAccountNoResult'
+          : 'searchAccountStartMessage'
+      )
+    })
+
+    function setSearchFilterToStorage (val: string): void {
+      ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, val)
+    }
+
+    function doSearchParametersExist (params: OrgFilterParams): boolean {
+      return params.name.length > 0 ||
+                params.branchName.length > 0 ||
+                params.id.length > 0 ||
+                params.bcolAccountId.length > 0 ||
+                params.decisionMadeBy.length > 0 ||
+                (params.orgType.length > 0 && params.orgType !== OrgAccountTypes.ALL)
+    }
+
+    mounted()
+
+    return {
+      ...toRefs(state),
+      debouncedOrgSearch,
+      viewInBusinessRegistryDashboard,
+      view,
+      clearSearchParams,
+      syncBeforeNavigate,
+      getIndexedTag,
+      getOrgAndAccessTypeFromAccountType,
+      getAccountTypeFromOrgAndAccessType,
+      noDataMessage,
+      setSearchFilterToStorage,
+      doSearchParametersExist,
+      paginationOptions,
+      numOfItems,
+      saveItemsPerPage
+    }
   }
 })
-export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
-  @Action(useOrgStore) protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
-  @Action(useOrgStore) protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
-  @Action(useOrgStore) protected syncMembership!: (orgId: number) => Promise<Member>
-  @Action(useStaffStore) protected searchOrgs!: (filterParams: OrgFilterParams) => Promise<OrgList>
-
-  protected activeOrgs: Organization[] = []
-  protected readonly headerAccounts = [
-    {
-      text: 'Account Name',
-      value: 'name'
-    },
-    {
-      text: 'Branch Name',
-      value: 'branchName'
-    },
-    {
-      text: 'Account Number',
-      value: 'id'
-    },
-    {
-      text: 'Approved By',
-      value: 'decisionMadeBy'
-    },
-    {
-      text: 'Account Type',
-      value: 'orgType'
-    },
-    {
-      text: 'Actions',
-      value: 'action'
-    }
-  ]
-  protected readonly accountTypeMap: EnumDictionary<OrgAccountTypes, OrgMap> =
-    {
-      [OrgAccountTypes.ALL]: {
-      },
-      [OrgAccountTypes.BASIC]: {
-        accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
-        orgType: Account.BASIC
-      },
-      [OrgAccountTypes.BASIC_OUT_OF_PROVINCE]: {
-        accessType: [AccessType.EXTRA_PROVINCIAL],
-        orgType: Account.BASIC
-      },
-      [OrgAccountTypes.PREMIUM]: {
-        accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
-        orgType: Account.PREMIUM
-      },
-      [OrgAccountTypes.PREMIUM_OUT_OF_PROVINCE]: {
-        accessType: [AccessType.EXTRA_PROVINCIAL],
-        orgType: Account.PREMIUM
-      },
-      [OrgAccountTypes.GOVM]: {
-        accessType: [AccessType.GOVM]
-      },
-      [OrgAccountTypes.GOVN]: {
-        accessType: [AccessType.GOVN]
-      },
-      [OrgAccountTypes.DIRECTOR_SEARCH]: {
-        accessType: [AccessType.ANONYMOUS]
-      },
-      [OrgAccountTypes.STAFF]: {
-        accessType: [AccessType.GOVM],
-        orgType: Account.STAFF
-      },
-      [OrgAccountTypes.SBC_STAFF]: {
-        accessType: [AccessType.GOVM],
-        orgType: Account.SBC_STAFF
-      }
-    }
-  protected readonly accountTypes = Array.from(Object.keys(this.accountTypeMap))
-  protected formatDate = CommonUtils.formatDisplayDate
-  protected totalAccountsCount = 0
-  protected tableDataOptions: Partial<DataOptions> = {}
-  protected isTableLoading = false
-  protected searchParamsExist = false
-  /* V-model for dropdown menus. */
-  protected readonly dropdown: Array<boolean> = []
-  /* V-model for searching */
-  protected searchParams: OrgFilterParams = {
-    name: '',
-    branchName: '',
-    id: '',
-    decisionMadeBy: '',
-    orgType: OrgAccountTypes.ALL,
-    statuses: [AccountStatus.ACTIVE]
-  }
-
-  mounted () {
-    this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
-    const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
-    try {
-      this.searchParams = JSON.parse(orgSearchFilter)
-    } catch {
-      // Do nothing, we have defaults for searchParams.
-    }
-    if (this.hasCachedPageInfo) {
-      this.tableDataOptions = this.getAndPruneCachedPageInfo()
-    }
-  }
-
-  @Watch('searchParams', { deep: true })
-  searchChanged (value: OrgFilterParams) {
-    this.searchParamsExist = this.doSearchParametersExist(value)
-    this.tableDataOptions = { ...this.getAndPruneCachedPageInfo(), page: 1 }
-    this.setSearchFilterToStorage(JSON.stringify(value))
-    this.debouncedOrgSearch(this)
-  }
-
-  @Watch('tableDataOptions', { deep: true })
-  async tableDataOptionsChange (val) {
-    this.debouncedOrgSearch(this, val?.page, val?.itemsPerPage)
-  }
-
-  // Needed context here instead of this.
-  protected readonly debouncedOrgSearch = debounce(async (context: StaffActiveAccountsTable, page = 1, pageLimit = context.numberOfItems) => {
-    try {
-      context.isTableLoading = true
-      const completeSearchParams: OrgFilterParams = {
-        ...context.searchParams,
-        // orgType and accessType get overwritten from getOrgAndAccessTypeFromAccountType
-        orgType: undefined,
-        accessType: undefined,
-        ...context.getOrgAndAccessTypeFromAccountType(context.searchParams.orgType),
-        page: page,
-        limit: pageLimit
-      }
-      const activeAccountsResp = await context.searchOrgs(completeSearchParams)
-      context.activeOrgs = activeAccountsResp.orgs
-      context.totalAccountsCount = activeAccountsResp?.total || 0
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    } finally {
-      context.isTableLoading = false
-    }
-  })
-
-  protected async viewInBusinessRegistryDashboard (org: Organization) {
-    await this.syncBeforeNavigate(org)
-    this.$router.push(`/account/${org.id}/business`)
-  }
-
-  protected async view (org: Organization) {
-    await this.syncBeforeNavigate(org)
-    this.$router.push(`/account/${org.id}/settings`)
-  }
-
-  protected clearSearchParams () {
-    this.searchParams = {
-      name: '',
-      branchName: '',
-      id: '',
-      decisionMadeBy: '',
-      orgType: OrgAccountTypes.ALL,
-      accessType: [],
-      statuses: [AccountStatus.ACTIVE]
-    }
-  }
-
-  protected async syncBeforeNavigate (org: Organization) {
-    this.cachePageInfo(this.tableDataOptions)
-    await this.syncOrganization(org.id)
-    await this.addOrgSettings(org)
-    await this.syncMembership(org.id)
-  }
-
-  protected getIndexedTag (tag, index): string {
-    return `${tag}-${index}`
-  }
-
-  // Used to go from 'Basic' -> accessType: AccessType.REGULAR, orgType: Account.BASIC
-  protected getOrgAndAccessTypeFromAccountType (accountType: string): object {
-    return this.accountTypeMap[accountType]
-  }
-
-  // Used to go from OrgType -> OrgAccountTypes
-  protected getAccountTypeFromOrgAndAccessType (org:Organization): any {
-    const entries = Object.entries(this.accountTypeMap)
-    const byAccessTypeAndOrgType = entries.find(([, value]) =>
-      value?.accessType?.includes(org.accessType) &&
-                                                  value?.orgType === org.orgType)
-    if (byAccessTypeAndOrgType) {
-      return byAccessTypeAndOrgType[0]
-    }
-    const byAccessType = entries.find(([, value]) =>
-      value?.accessType?.includes(org.accessType))
-    if (byAccessType) {
-      return byAccessType[0]
-    }
-    const byOrgType = entries.find(([, value]) =>
-      value?.orgType === org.orgType)
-    if (byOrgType) {
-      return byOrgType[0]
-    }
-    return ''
-  }
-
-  protected get noDataMessage () {
-    return this.$t(
-      this.searchParamsExist
-        ? 'searchAccountNoResult'
-        : 'searchAccountStartMessage'
-    )
-  }
-
-  protected setSearchFilterToStorage (val:string):void {
-    ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, val)
-  }
-
-  protected doSearchParametersExist (searchParams: OrgFilterParams) {
-    return searchParams.name.length > 0 ||
-          searchParams.branchName.length > 0 ||
-          searchParams.id.length > 0 ||
-          searchParams.decisionMadeBy.length > 0 ||
-          (searchParams.orgType.length > 0 && searchParams.orgType !== OrgAccountTypes.ALL)
-  }
-}
 </script>
 
 <style lang="scss" scoped>
