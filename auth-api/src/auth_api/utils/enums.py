@@ -367,3 +367,10 @@ class NRActionCodes(Enum):
     RENEW = 'REN'  # restore with new name request
     RESTORATION = 'REST'  # FUTURE: unused? delete?
     RESUBMIT = 'RESUBMIT'  # FUTURE: unused? delete?
+
+
+class QueueSources(Enum):
+    """Queue sources for PAY."""
+
+    AUTH_API = 'auth-api'
+    AUTH_QUEUE = 'auth-queue'

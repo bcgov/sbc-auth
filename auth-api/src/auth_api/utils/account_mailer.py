@@ -18,9 +18,10 @@ from flask import current_app
 from simple_cloudevent import SimpleCloudEvent
 
 from auth_api.services.gcp_queue import GcpQueue, queue
+from auth_api.utils.enums import QueueSources
 
 
-def publish_to_mailer(notification_type, data=None, source='sbc-auth-auth-api'):
+def publish_to_mailer(notification_type, data=None, source=QueueSources.AUTH_API.value):
     """Publish to Account Mailer."""
     cloud_event = SimpleCloudEvent(
         id=str(uuid.uuid4()),
