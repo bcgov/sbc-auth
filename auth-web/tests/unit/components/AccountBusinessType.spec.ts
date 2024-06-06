@@ -80,9 +80,16 @@ describe('AccountBusinessType.vue', () => {
         govmAccount: false,
         isEditAccount: false
       },
-      mocks: { $t }
+      mocks: { $t },
+      data () {
+        return {
+          isLoading: false,
+          displayGovnType: true
+        }
+      }
     })
-    await wrapper.setData({ isLoading: false, isCurrentGovnOrg: false })
+    await flushPromises()
+    await wrapper.vm.$nextTick()
     expect(wrapper.find("[data-test='radio-government-account-type']").exists()).toBeTruthy()
   })
 

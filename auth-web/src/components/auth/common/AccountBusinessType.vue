@@ -32,7 +32,7 @@
       >
         <v-radio-group
           v-if="!govmAccount"
-          v-model="orgType"
+          v-model="accessType"
           row
           mandatory
           @change="handleAccountTypeChange"
@@ -42,7 +42,7 @@
             no-gutters
           >
             <v-col
-              cols="4"
+              cols="8"
               class="business-radio"
             >
               <v-radio
@@ -51,11 +51,6 @@
                 data-test="radio-individual-account-type"
                 class="px-4 py-5"
               />
-            </v-col>
-            <v-col
-              cols="4"
-              class="business-radio"
-            >
               <v-radio
                 label="Business"
                 :value="AccountType.BUSINESS"
@@ -64,6 +59,7 @@
               />
             </v-col>
             <v-col
+              v-if="!isEditing && displayGovnType"
               cols="4"
               class="business-radio"
             >
@@ -79,7 +75,6 @@
                     v-on="on"
                   >
                     <v-radio
-                      v-if="!isEditing && !isCurrentGovnOrg"
                       label="Government Agency"
                       :value="AccountType.GOVN"
                       data-test="radio-government-account-type"
@@ -265,11 +260,11 @@ export default defineComponent({
     } = storeToRefs(codesStore)
 
     const currentOrganization = computed(() => orgStore.currentOrganization)
-    const isCurrentGovnOrg = computed(() => orgStore.isGovnGovmOrg)
+    const displayGovnType = computed(() => !orgStore.isGovnGovmOrg && currentOrganization.value?.orgType === Account.PREMIUM)
 
     const state = reactive({
       accountInformationForm: null,
-      orgType: AccountType.INDIVIDUAL,
+      accessType: AccountType.INDIVIDUAL,
       autoCompleteIsActive: false,
       autoCompleteSearchValue: '',
       isLoading: false,
@@ -300,17 +295,17 @@ export default defineComponent({
     })
 
     const getOrgTypeDropdownLabel = computed(() =>
-      state.orgType === AccountType.GOVN ? 'Government Agency Type' : 'Business Type'
+      state.accessType === AccountType.GOVN ? 'Government Agency Type' : 'Business Type'
     )
 
     const getOrgSizeDropdownLabel = computed(() =>
-      state.orgType === AccountType.GOVN ? 'Government Agency Size' : 'Business Size'
+      state.accessType === AccountType.GOVN ? 'Government Agency Size' : 'Business Size'
     )
 
-    watch(() => state.orgType, () => {
-      state.isBusinessAccount = state.orgType === AccountType.BUSINESS
-      state.isGovnAccount = state.orgType === AccountType.GOVN
-      state.isIndividualAccount = state.orgType === AccountType.INDIVIDUAL
+    watch(() => state.accessType, () => {
+      state.isBusinessAccount = state.accessType === AccountType.BUSINESS
+      state.isGovnAccount = state.accessType === AccountType.GOVN
+      state.isIndividualAccount = state.accessType === AccountType.INDIVIDUAL
       cleanOrgInfo()
     })
 
@@ -336,7 +331,7 @@ export default defineComponent({
     }
 
     async function handleAccountTypeChange (newValue) {
-      state.orgType = newValue
+      state.accessType = newValue
       await onOrgBusinessTypeChange(!props.isEditAccount)
     }
 
@@ -387,7 +382,7 @@ export default defineComponent({
           state.isBusinessAccount = currentOrganization.value.orgType !== Account.BASIC
         }
         if (state.isBusinessAccount) {
-          state.orgType = AccountType.BUSINESS
+          state.accessType = AccountType.BUSINESS
         }
         await onOrgBusinessTypeChange()
       } catch (ex) {
@@ -440,7 +435,7 @@ export default defineComponent({
       getOrgTypeDropdownLabel,
       getOrgSizeDropdownLabel,
       isEditing: props.isEditAccount,
-      isCurrentGovnOrg
+      displayGovnType
     }
   }
 })
