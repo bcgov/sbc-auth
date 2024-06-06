@@ -14,15 +14,14 @@ describe('Business Lookup Services', () => {
     }
 
     const url = BusinessLookupServices.registriesSearchApiUrl + 'businesses/search/facets?start=0&rows=20' +
-      '&categories=legalType:A,BC,BEN,C,CC,CP,CUL,FI,GP,LL,LLC,LP,PA,S,SP,ULC,XCP,XL,XP,XS' +
-      `&query=value:${encodeURIComponent('FM1000002')}`
+      `&categories=legalType:SP&query=value:${encodeURIComponent('FM1000002')}`
 
     sinon.stub(axios, 'get').withArgs(url).returns(
       Promise.resolve({ data: { searchResults: { results: [result] } } })
     )
 
     // search and look at results
-    const results = await BusinessLookupServices.search('FM1000002')
+    const results = await BusinessLookupServices.search('FM1000002', 'SP')
     expect(results.length).toBe(1)
     expect(results[0]).toEqual(result)
 
@@ -32,14 +31,13 @@ describe('Business Lookup Services', () => {
   it('does not return a result when the business is not found', async () => {
     // mock unsuccesssful search
     const url = BusinessLookupServices.registriesSearchApiUrl + 'businesses/search/facets?start=0&rows=20' +
-      '&categories=legalType:A,BC,BEN,C,CC,CP,CUL,FI,GP,LL,LLC,LP,PA,S,SP,ULC,XCP,XL,XP,XS' +
-      `&query=value:${encodeURIComponent('FM1000003')}`
+      `&categories=legalType:SP&query=value:${encodeURIComponent('FM1000003')}`
 
     sinon.stub(axios, 'get').withArgs(url).returns(
       Promise.resolve({ data: { searchResults: { results: [] } } })
     )
 
-    const results = await BusinessLookupServices.search('FM1000003')
+    const results = await BusinessLookupServices.search('FM1000003', 'SP')
     expect(results.length).toBe(0)
 
     sinon.restore()
