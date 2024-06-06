@@ -144,7 +144,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         if search.decision_made_by:
             query = query.filter(Org.decision_made_by.ilike(f'%{search.decision_made_by}%'))
         if search.bcol_account_id:
-            query = query.filter(Org.bcol_account_id == search.bcol_account_id)
+            query = query.filter(Org.bcol_account_id.ilike(f'%{search.bcol_account_id}%'))
         if search.branch_name:
             query = query.filter(Org.branch_name.ilike(f'%{search.branch_name}%'))
         if search.name:
