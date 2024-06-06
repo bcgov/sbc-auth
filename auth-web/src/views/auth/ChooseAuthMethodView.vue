@@ -302,6 +302,8 @@
         </div>
       </v-expand-transition>
     </div>
+
+    <v-divider class="mb-6 mt-1" />
     <div>
       <header class="d-flex align-center">
         <span>Creating an account for a Canadian government agency?</span>
@@ -341,13 +343,13 @@
                   B.C. Provincial Government Ministry/Employee
                 </div>
                 <div class="mt-4">
-                  If you are a B.C. Provincial Government Ministry/Employee, please follow
+                  If you are a B.C. Provincial Government Ministry/Employee, please follow the
                   <a
                     :href="govnURL"
                     target="_blank"
                     class="learn-more-link"
                     rel="noopener noreferrer"
-                  >the Ministry Government Account Creation Process (PDF)
+                  > Ministry Government Account Creation Process (PDF)
                   </a>
                   to set up your account. You can login with your IDIR after approval.
                 </div>

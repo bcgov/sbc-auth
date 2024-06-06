@@ -5,29 +5,31 @@
     data-test="div-account-setup-stepper"
   >
     <v-container
-      class="stepper-nav pa-10 pr-0"
+      class="stepper-nav pa-10 pr-0 d-flex flex-column justify-space-between"
       :class="stepperColor"
     >
-      <template v-for="step in steps">
-        <v-stepper-step
-          :key="`${getStepIndex(step)}-step`"
-          class="pa-3"
-          :complete="currentStepNumber > getStepIndex(step)"
-          :step="getStepIndex(step)"
-          :data-test="`${getStepIndex(step)}-step`"
-        >
-          {{ getStepName(step) }}
-        </v-stepper-step>
-        <v-divider
-          v-if="step !== steps"
-          :key="`${getStepIndex(step)}-divider`"
-          vertical
-          class="step-divider mt-n1 mb-n1"
-        />
-      </template>
-      <p class="assistance-text ma-8 pt-5 pb-8">
+      <div>
+        <template v-for="step in steps">
+          <v-stepper-step
+            :key="`${getStepIndex(step)}-step`"
+            class="pa-3"
+            :complete="currentStepNumber > getStepIndex(step)"
+            :step="getStepIndex(step)"
+            :data-test="`${getStepIndex(step)}-step`"
+          >
+            {{ getStepName(step) }}
+          </v-stepper-step>
+          <v-divider
+            v-if="step !== steps"
+            :key="`${getStepIndex(step)}-divider`"
+            vertical
+            class="step-divider mt-n1 mb-n1"
+          />
+        </template>
+      </div>
+      <div class="mt-auto pt-5 pb-6 assistance-text ml-5 mr-5">
         If you need further assistance, reach us at <span class="font-weight-bold">1-877-526-1526</span>
-      </p>
+      </div>
     </v-container>
     <v-divider
       vertical
@@ -277,6 +279,9 @@ export default class Stepper extends Vue {
     width: 20rem;
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 
     hr:last-child {
       display: none;
@@ -404,11 +409,8 @@ export default class Stepper extends Vue {
   }
   .assistance-text {
     border-top: 1px solid #e0e0e0;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 256px;
     text-align: center;
     color: #495057;
+    margin-top: auto; /* Ensures it sticks to the bottom */
   }
 </style>

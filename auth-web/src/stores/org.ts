@@ -155,8 +155,8 @@ export const useOrgStore = defineStore('org', () => {
     return state.currentOrganization?.isBusinessAccount === true
   })
 
-  const isGovnOrg = computed<boolean>(() => {
-    return state.originAccessType === AccessType.GOVN
+  const isGovnGovmOrg = computed<boolean>(() => {
+    return state.originAccessType === (AccessType.GOVN) || (AccessType.GOVN)
   })
 
   // Note this will only work while the current organization is set for SBC_STAFF.
@@ -1169,6 +1169,6 @@ export const useOrgStore = defineStore('org', () => {
     removeOrgAccountFees,
     getNSFInvoices,
     downloadNSFInvoicesPDF,
-    isGovnOrg
+    isGovnGovmOrg
   }
 })

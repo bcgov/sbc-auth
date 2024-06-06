@@ -37,10 +37,13 @@
           mandatory
           @change="handleAccountTypeChange"
         >
-          <v-row justify="space-between">
+          <v-row
+            justify="space-between"
+            no-gutters
+          >
             <v-col
-              md="7"
-              class="business-radio xs"
+              cols="4"
+              class="business-radio"
             >
               <v-radio
                 label="Individual Person"
@@ -48,19 +51,44 @@
                 data-test="radio-individual-account-type"
                 class="px-4 py-5"
               />
+            </v-col>
+            <v-col
+              cols="4"
+              class="business-radio"
+            >
               <v-radio
-                label="Business Name"
+                label="Business"
                 :value="AccountType.BUSINESS"
                 data-test="radio-business-account-type"
                 class="px-4 py-5"
               />
-              <v-radio
-                v-if="!isEditing && !isCurrentGovnOrg"
-                label="Government Agency"
-                :value="AccountType.GOVN"
-                data-test="radio-government-account-type"
-                class="px-4 py-5"
-              />
+            </v-col>
+            <v-col
+              cols="4"
+              class="business-radio"
+            >
+              <v-tooltip
+                top
+                content-class="top-tooltip"
+                transition="fade-transition"
+              >
+                <template #activator="{ on, attrs }">
+                  <span
+                    v-bind="attrs"
+                    class="tooltip-activator"
+                    v-on="on"
+                  >
+                    <v-radio
+                      v-if="!isEditing && !isCurrentGovnOrg"
+                      label="Government Agency"
+                      :value="AccountType.GOVN"
+                      data-test="radio-government-account-type"
+                      class="px-4 py-5 w-100 tooltip-text"
+                    />
+                  </span>
+                </template>
+                <span>Government agency includes: townships, cities, districts, municipalities, and federal government.</span>
+              </v-tooltip>
             </v-col>
           </v-row>
         </v-radio-group>
@@ -237,7 +265,7 @@ export default defineComponent({
     } = storeToRefs(codesStore)
 
     const currentOrganization = computed(() => orgStore.currentOrganization)
-    const isCurrentGovnOrg = computed(() => orgStore.isGovnOrg)
+    const isCurrentGovnOrg = computed(() => orgStore.isGovnGovmOrg)
 
     const state = reactive({
       accountInformationForm: null,
@@ -350,14 +378,16 @@ export default defineComponent({
         if (currentOrganization.value?.name) {
           state.name = currentOrganization.value.name
           state.isBusinessAccount = currentOrganization.value.isBusinessAccount
+          state.isIndividualAccount = false
+          state.isGovnAccount = !currentOrganization.value.isBusinessAccount
           state.businessType = currentOrganization.value.businessType
           state.businessSize = currentOrganization.value.businessSize
           state.branchName = currentOrganization.value.branchName
         } else {
           state.isBusinessAccount = currentOrganization.value.orgType !== Account.BASIC
-          if (state.isBusinessAccount) {
-            state.orgType = AccountType.BUSINESS
-          }
+        }
+        if (state.isBusinessAccount) {
+          state.orgType = AccountType.BUSINESS
         }
         await onOrgBusinessTypeChange()
       } catch (ex) {
@@ -423,15 +453,79 @@ export default defineComponent({
 }
 .business-radio{
   display: flex;
+  justify-content: center;
   .v-radio{
-     padding: 10px;
     background-color: rgba(0,0,0,.06);
-    min-width: 50%;
+    width: 100%;
     border: 1px rgba(0,0,0,.06) !important;
   }
   .v-radio.theme--light.v-item--active {
       border: 1px solid var(--v-primary-base) !important;
       background-color: $BCgovInputBG !important;
   }
+}
+.tooltip-activator {
+  width: 100%;
+}
+.tooltip {
+  background-color: transparent;
+  opacity: 1 !important;
+
+  .tooltip-content {
+    min-width: 30rem;
+    padding: 2rem;
+  }
+}
+.tooltip-text {
+  .v-label{
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+  }
+}
+.tooltip-text:hover {
+    cursor: pointer;
+}
+.v-tooltip__content {
+  background-color: RGBA(73, 80, 87, 0.95) !important;
+  color: white !important;
+  border-radius: 4px;
+  font-size: 14px !important;
+  line-height: 18px !important;
+  padding: 15px !important;
+  letter-spacing: 0;
+  max-width: 360px !important;
+}
+.v-tooltip__content:after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  right: 100% !important;
+  margin-top: -10px !important;
+  border-top: 10px solid transparent !important;
+  border-bottom: 10px solid transparent !important;
+  border-right: 8px solid RGBA(73, 80, 87, .95) !important;
+}
+
+.top-tooltip:after {
+  top: 100% !important;
+  left: 45% !important;
+  margin-top: 0 !important;
+  border-right: 10px solid transparent !important;
+  border-left: 10px solid transparent !important;
+  border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
+}
+
+.right-tooltip:after {
+  top: 50% !important;
+  right: 100% !important;
+  margin-top: -10px !important;
+  border-bottom: 10px solid transparent !important;
+  border-left: 10px solid transparent !important;
+  border-top: 10px solid transparent !important;
+  border-right: 8px solid RGBA(73, 80, 87, 0.95) !important;
+}
+
+.align-vertical {
+  align-items: center;
 }
 </style>
