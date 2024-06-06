@@ -126,7 +126,7 @@ def handle_eft_available_notification(message_type, email_msg):
 def handle_nsf_lock_unlock_account(message_type, email_msg):
     """Handle the NSF lock/unlock account message."""
     if message_type == QueueMessageTypes.NSF_LOCK_ACCOUNT.value:
-        current_app.logger.debug('lock account message recieved:')
+        current_app.logger.debug('Lock account message received')
         template_name = TemplateType.NSF_LOCK_ACCOUNT_TEMPLATE_NAME.value
         org_id = email_msg.get('accountId')
         admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
@@ -136,7 +136,7 @@ def handle_nsf_lock_unlock_account(message_type, email_msg):
                                            subject, logo_url=logo_url)
         process_email(email_dict)
     elif message_type == QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value:
-        current_app.logger.debug('unlock account message received')
+        current_app.logger.debug('Unlock account message received')
         template_name = TemplateType.NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME.value
         org_id = email_msg.get('accountId')
         admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
