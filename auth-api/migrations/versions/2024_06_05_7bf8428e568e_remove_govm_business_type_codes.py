@@ -1,4 +1,4 @@
-"""empty message
+"""remove GOVM from business_type_codes
 
 Revision ID: 7bf8428e568e
 Revises: 39b4f331c003

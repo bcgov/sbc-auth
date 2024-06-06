@@ -156,7 +156,7 @@ export const useOrgStore = defineStore('org', () => {
   })
 
   const isGovnGovmOrg = computed<boolean>(() => {
-    return state.originAccessType === (AccessType.GOVN || AccessType.GOVN)
+    return [AccessType.GOVN, AccessType.GOVM].includes(state.originAccessType as AccessType)
   })
 
   // Note this will only work while the current organization is set for SBC_STAFF.
