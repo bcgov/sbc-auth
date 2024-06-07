@@ -140,7 +140,6 @@ class Org:  # pylint: disable=too-many-public-methods
         is_staff_review_needed = (
             access_type == AccessType.GOVN.value or
             (
-                access_type is not None and
                 access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) and
                 not AffidavitModel.find_approved_by_user_id(user_id=user_id)
             )
