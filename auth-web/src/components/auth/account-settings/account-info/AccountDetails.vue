@@ -151,10 +151,10 @@ export default defineComponent({
     }) as unknown) as AccountDetailsI
     watch(() => props.isBusinessAccount, (val: boolean) => { localVars.isAccountTypeBusiness = val })
 
-    const isGovnOrg = computed(() => orgStore.isGovnOrg)
-    const accountTypeLabel = computed(() => isGovnOrg.value ? 'Government Agency Type:' : 'Business Type:')
-    const accountSizeLabel = computed(() => isGovnOrg.value ? 'Government Agency Size:' : 'Business Size:')
-    const canOrgChange = computed(() => props.nameChangeAllowed && props.viewOnlyMode && !isGovnOrg.value)
+    const isGovnGovmOrg = computed(() => orgStore.isGovnGovmOrg)
+    const accountTypeLabel = computed(() => isGovnGovmOrg.value ? 'Government Agency Type:' : 'Business Type:')
+    const accountSizeLabel = computed(() => isGovnGovmOrg.value ? 'Government Agency Size:' : 'Business Size:')
+    const canOrgChange = computed(() => props.nameChangeAllowed && props.viewOnlyMode && !isGovnGovmOrg.value)
 
     const updateIsOrgBusinessTypeValid = (isValid: boolean) => {
       localVars.isOrgBusinessTypeValid = !!isValid
