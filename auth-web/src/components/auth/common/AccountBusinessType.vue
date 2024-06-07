@@ -263,7 +263,7 @@ export default defineComponent({
     } = storeToRefs(codesStore)
 
     const currentOrganization = computed(() => orgStore.currentOrganization)
-    const displayGovnType = computed(() => orgStore.isGovnGovmOrg && currentOrganization.value?.orgType === Account.PREMIUM)
+    const displayGovnType = computed(() => orgStore.isGovnGovmOrg)
 
     const state = reactive({
       accountInformationForm: null,
