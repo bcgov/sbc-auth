@@ -75,11 +75,14 @@
                     v-on="on"
                   >
                     <v-radio
-                      label="Government Agency"
                       :value="AccountType.GOVN"
                       data-test="radio-government-account-type"
-                      class="px-4 py-5 w-100 tooltip-text"
-                    />
+                      class="px-4 py-5 w-100"
+                    >
+                      <template v-slot:label>
+                        <span class="tooltip-text">Government Agency</span>
+                      </template>
+                    </v-radio>
                   </span>
                 </template>
                 <span>Government agency includes: townships, cities, districts, municipalities, and federal government.</span>
@@ -260,7 +263,7 @@ export default defineComponent({
     } = storeToRefs(codesStore)
 
     const currentOrganization = computed(() => orgStore.currentOrganization)
-    const displayGovnType = computed(() => !orgStore.isGovnGovmOrg && currentOrganization.value?.orgType === Account.PREMIUM)
+    const displayGovnType = computed(() => orgStore.isGovnGovmOrg && currentOrganization.value?.orgType === Account.PREMIUM)
 
     const state = reactive({
       accountInformationForm: null,
@@ -472,10 +475,7 @@ export default defineComponent({
   }
 }
 .tooltip-text {
-  .v-label{
-    text-decoration: underline dotted;
-    text-underline-offset: 2px;
-  }
+  border-bottom: 2px dotted;
 }
 .tooltip-text:hover {
     cursor: pointer;
