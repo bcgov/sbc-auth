@@ -137,7 +137,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, None)
 
         # Send an email to staff to remind review the pending account
-        is_staff_review_needed = access_type in (AccessType.GOVN.value, AccessType.GOVM.value) or (
+        is_staff_review_needed = access_type in (AccessType.GOVN.value) or (
             access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) and
             not AffidavitModel.find_approved_by_user_id(user_id=user_id)
         )
