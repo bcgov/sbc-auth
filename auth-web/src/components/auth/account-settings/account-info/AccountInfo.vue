@@ -157,7 +157,7 @@
             <!-- TODO: can use v-can instead of v-if if all user with change permisson have view also -->
             <AccountMailingAddress
               ref="mailingAddress"
-              :baseAddress="currentOrgAddress"
+              :baseAddress="originalAddress"
               :viewOnlyMode="isAddressViewOnly"
               @update:address="updateAddress"
               @valid="checkBaseAddressValidity"
