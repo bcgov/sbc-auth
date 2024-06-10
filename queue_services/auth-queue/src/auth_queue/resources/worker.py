@@ -119,7 +119,8 @@ def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
     elif message_type == QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value:
         org.status_code = OrgStatus.ACTIVE.value
         org.suspension_reason_code = None
-        publish_to_mailer(QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value, data, QueueSources.AUTH_QUEUE.value)
+        # Unlock requires a significant amount of data to generate a receipt, just carry forward queue data.
+        publish_to_mailer(QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value, queue_data, QueueSources.AUTH_QUEUE.value)
 
     org.flush()
     db.session.commit()
