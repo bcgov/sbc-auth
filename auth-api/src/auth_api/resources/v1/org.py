@@ -42,7 +42,7 @@ from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import AccessType, NotificationType, OrgStatus, OrgType, PatchActions, Status
 from auth_api.utils.role_validator import validate_roles
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role  # noqa: I005
-from auth_api.utils.util import get_request_environment
+from auth_api.utils.util import extract_numbers, get_request_environment
 
 
 bp = Blueprint('ORGS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/orgs')
@@ -64,7 +64,7 @@ def search_organizations():
         request.args.getlist('status', None),
         request.args.getlist('accessType', None),
         request.args.get('bcolAccountId', None),
-        request.args.get('id', None),
+        extract_numbers(request.args.get('id', None)),
         request.args.get('decisionMadeBy', None),
         request.args.get('orgType', None),
         int(request.args.get('page', 1)),
