@@ -1,10 +1,10 @@
-import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import StaffInactiveAccountsTable from '@/components/auth/staff/account-management/StaffInactiveAccountsTable.vue'
 import Vuetify from 'vuetify'
 import { useStaffStore } from '@/stores'
 
 describe('StaffInactiveAccountsTable.vue', () => {
-  let wrapper: any;
+  let wrapper: any
 
   const config = {
     'AUTH_API_URL': 'https://localhost:8080/api/v1/11',

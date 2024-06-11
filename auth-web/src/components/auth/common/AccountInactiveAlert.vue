@@ -30,14 +30,14 @@
 </template>
 
 <script lang="ts">
-import moment from 'moment'
-import { defineComponent, computed } from '@vue/composition-api'
-import { useOrgStore } from '@/stores/org'
+import { computed, defineComponent } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
+import moment from 'moment'
+import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'AccountInactiveAlert',
-  setup() {
+  setup () {
     const orgStore = useOrgStore()
     const currentOrganization = computed(() => orgStore.currentOrganization)
     const formatDate = CommonUtils.formatDisplayDate

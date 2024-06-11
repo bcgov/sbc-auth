@@ -148,24 +148,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api'
 import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
 import { OrgAccountTypes, OrgFilterParams, OrgMap, Organization } from '@/models/Organization'
-import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { useOrgStore } from '@/stores/org'
-import { useStaffStore } from '@/stores/staff'
+import { computed, defineComponent, reactive, ref, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import { EnumDictionary } from '@/models/util'
+import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import debounce from '@/util/debounce'
+import { useOrgStore } from '@/stores/org'
+import { useStaffStore } from '@/stores/staff'
 
 export default defineComponent({
   name: 'StaffInactiveAccountsTable',
-  components: {
-    PaginationMixin
-  },
-  setup(props, { root }) {
+  setup (props, { root }) {
     const paginationMixin = new PaginationMixin()
     const orgStore = useOrgStore()
     const staffStore = useStaffStore()
@@ -254,7 +251,11 @@ export default defineComponent({
         (searchParams.orgType.length > 0 && searchParams.orgType !== OrgAccountTypes.ALL)
     }
 
-    const numberOfItems = paginationMixin.numberOfItems;
+    const numberOfItems = paginationMixin.numberOfItems
+
+    const getOrgAndAccessTypeFromAccountType = (accountType: string): object => {
+      return accountTypeMap[accountType]
+    }
 
     const debouncedOrgSearch = debounce(async (page = 1, pageLimit = numberOfItems) => {
       try {
@@ -277,10 +278,6 @@ export default defineComponent({
         isTableLoading.value = false
       }
     })
-
-    const getOrgAndAccessTypeFromAccountType = (accountType: string): object => {
-      return accountTypeMap[accountType]
-    }
 
     const getAccountTypeFromOrgAndAccessType = (org: Organization): any => {
       const entries = Object.entries(accountTypeMap)
@@ -313,10 +310,7 @@ export default defineComponent({
       searchParams.statuses = [AccountStatus.INACTIVE]
     }
 
-    const view = async (org: Organization) => {
-      await syncBeforeNavigate(org)
-      root.$router.push(`/account/${org.id}/settings`)
-    }
+    const cachePageInfo = paginationMixin.cachePageInfo
 
     const syncBeforeNavigate = async (org: Organization) => {
       cachePageInfo(tableDataOptions.value)
@@ -325,9 +319,12 @@ export default defineComponent({
       await orgStore.syncMembership(org.id)
     }
 
-    const cachePageInfo = paginationMixin.cachePageInfo;
-    const saveItemsPerPage = paginationMixin.saveItemsPerPage;
-    const getPaginationOptions = paginationMixin.getPaginationOptions;
+    const view = async (org: Organization) => {
+      await syncBeforeNavigate(org)
+      root.$router.push(`/account/${org.id}/settings`)
+    }
+    const saveItemsPerPage = paginationMixin.saveItemsPerPage
+    const getPaginationOptions = paginationMixin.getPaginationOptions
 
     watch(searchParams, (value) => {
       searchParamsExist.value = doSearchParametersExist(value)
@@ -354,7 +351,6 @@ export default defineComponent({
       getIndexedTag,
       clearSearchParams,
       view,
-      getOrgAndAccessTypeFromAccountType,
       getAccountTypeFromOrgAndAccessType,
       saveItemsPerPage,
       getPaginationOptions,
