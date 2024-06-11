@@ -203,6 +203,7 @@ export interface OrgFilterParams {
   limit?: number
   branchName?: string
   id?: string,
+  bcolAccountId?: string,
   decisionMadeBy?: string
   orgType?: string
   accessType?: string[]

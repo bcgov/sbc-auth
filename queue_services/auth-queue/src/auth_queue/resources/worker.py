@@ -27,7 +27,7 @@ from auth_api.services.gcp_queue import queue
 from auth_api.services.gcp_queue.gcp_auth import ensure_authorized_queue_user
 from auth_api.services.rest_service import RestService
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import AccessType, ActivityAction, CorpType, OrgStatus
+from auth_api.utils.enums import AccessType, ActivityAction, CorpType, OrgStatus, QueueSources
 from dateutil import parser
 from flask import Blueprint, current_app, request
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -115,11 +115,12 @@ def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
         org.status_code = OrgStatus.NSF_SUSPENDED.value
         org.suspended_on = datetime.now()
         org.suspension_reason_code = queue_data.get('suspensionReasonCode', None)
-        publish_to_mailer(QueueMessageTypes.NSF_LOCK_ACCOUNT.value, data)
+        publish_to_mailer(QueueMessageTypes.NSF_LOCK_ACCOUNT.value, data, QueueSources.AUTH_QUEUE.value)
     elif message_type == QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value:
         org.status_code = OrgStatus.ACTIVE.value
         org.suspension_reason_code = None
-        publish_to_mailer(QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value, data)
+        # Unlock requires a significant amount of data to generate a receipt, just carry forward queue data.
+        publish_to_mailer(QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value, queue_data, QueueSources.AUTH_QUEUE.value)
 
     org.flush()
     db.session.commit()

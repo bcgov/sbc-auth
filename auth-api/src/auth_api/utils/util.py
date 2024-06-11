@@ -79,3 +79,10 @@ def get_request_environment():
     if os.getenv('FLASK_ENV') == 'production' and sandbox_host in request.host_url:
         env = 'sandbox'
     return env
+
+
+def extract_numbers(input_string: str):
+    """Extract numbers from an input string."""
+    if input_string is None:
+        return None
+    return ''.join([char for char in input_string if char.isdigit()])

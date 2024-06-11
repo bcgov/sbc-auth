@@ -96,6 +96,12 @@ def test_search_org_by_client(client, jwt, session, keycloak_mock):  # pylint:di
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
+    # Ensure no exception is thrown by including letters in the id.
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.get('/api/v1/orgs?id={}'.format('FFF1234'),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
     # system search
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv = client.get('/api/v1/orgs?name={}'.format(TestOrgInfo.org1.get('name')),
