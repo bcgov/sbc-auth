@@ -1,7 +1,10 @@
 <template>
   <div>
     <template v-if="isPaymentEJV">
-      <GLPaymentForm :canSelect="false" />
+      <GLPaymentForm
+        :canSelect="isBcolAdmin"
+        @is-gl-info-form-valid="isGLInfoValid"
+      />
     </template>
     <template v-else-if="!isPaymentEJV">
       <v-card
@@ -186,6 +189,7 @@
 </template>
 
 <script lang="ts">
+import { PaymentTypes, Role } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import CommonUtils from '@/util/common-util'
@@ -195,9 +199,9 @@ import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
-import { PaymentTypes } from '@/util/constants'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 const PAYMENT_METHODS = {
   [PaymentTypes.CREDIT_CARD]: {
@@ -285,8 +289,9 @@ export default defineComponent({
     isInitialTOSAccepted: { default: false },
     isInitialAcknowledged: { default: false }
   },
-  emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-eft-valid', 'payment-method-selected'],
+  emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-eft-valid', 'is-ejv-valid', 'payment-method-selected'],
   setup (props, { emit }) {
+    const { currentUser } = useUserStore()
     const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails } = useOrgStore()
     const bcOnlineDialog: InstanceType<typeof ModalDialog> = ref(null)
 
@@ -310,17 +315,21 @@ export default defineComponent({
       const paymentMethods = []
       if (props.currentOrgType) {
         const paymentTypes = paymentsPerAccountType[props.currentOrgType]
-        paymentTypes.forEach((paymentType) => {
-          if (PAYMENT_METHODS[paymentType]) {
-            paymentMethods.push(PAYMENT_METHODS[paymentType])
-          }
-        })
+        if (paymentTypes) {
+          paymentTypes.forEach((paymentType) => {
+            if (PAYMENT_METHODS[paymentType]) {
+              paymentMethods.push(PAYMENT_METHODS[paymentType])
+            }
+          })
+        }
       }
       if (currentOrgPaymentDetails?.eftEnable) {
         paymentMethods.push(PAYMENT_METHODS[PaymentTypes.EFT])
       }
       return paymentMethods
     })
+
+    const isBcolAdmin = currentUser?.roles.includes(Role.BcolStaffAdmin)
 
     const forceEditModeBCOL = computed(() =>
       props.currentSelectedPaymentMethod === PaymentTypes.BCOL &&
@@ -381,6 +390,10 @@ export default defineComponent({
       emit('is-pad-valid', isValid && isTouched.value)
     }
 
+    const isGLInfoValid = (isValid) => {
+      emit('is-ejv-valid', isValid)
+    }
+
     const updateEFTTermsAccepted = (isAccepted: boolean) => {
       isEFTTOSAccepted.value = isAccepted
       isTouched.value = true
@@ -425,7 +438,9 @@ export default defineComponent({
       isEFTTOSAccepted,
       bcOnlineDialog,
       cancelModal,
-      continueModal
+      continueModal,
+      isBcolAdmin,
+      isGLInfoValid
     }
   }
 })

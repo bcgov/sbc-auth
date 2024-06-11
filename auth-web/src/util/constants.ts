@@ -51,7 +51,8 @@ export enum Role {
     ViewAllTransactions = 'view_all_transactions',
     ManageEft = 'manage_eft',
     CreateCredits = 'create_credits',
-    FasRefund = 'fas_refund'
+    FasRefund = 'fas_refund',
+    BcolStaffAdmin = 'bcol_staff_admin'
 }
 
 export enum Pages {

@@ -1,10 +1,5 @@
 <template>
   <v-container class="pa-0">
-    <header class="view-header mb-8">
-      <h2 class="view-header__title">
-        General Ledger Codes
-      </h2>
-    </header>
     <!-- The below code is for filter, can be enabled once filter story is available -->
     <div
       v-if="false"
@@ -77,43 +72,48 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { defineComponent, reactive, toRefs } from '@vue/composition-api'
 import GLCodesDataTable from '@/components/auth/staff/gl-code/GLCodesDataTable.vue'
 
-@Component({
+export default defineComponent({
   components: {
     GLCodesDataTable
+  },
+  setup () {
+    const state = reactive({
+      clientSearchProp: [] as string[],
+      updateGLCodeTableCounter: 0,
+      clientSearch: '',
+      filterArray: [] as string[],
+      totalGLRecordCount: 0
+    })
+
+    function clearFilter(filter: string, isAll: boolean = false) {
+      state.clientSearch = ''
+      if (isAll) {
+        state.clientSearchProp = []
+      } else {
+        const index = state.clientSearchProp.findIndex((elem) => elem === filter)
+        if (index > -1) {
+          state.clientSearchProp.splice(index, 1)
+        }
+      }
+      state.updateGLCodeTableCounter++
+    }
+
+    function applyClientSearchFilter() {
+      state.clientSearchProp.push(state.clientSearch)
+      state.updateGLCodeTableCounter++
+      state.clientSearch = ''
+    }
+
+    return {
+      ...toRefs(state),
+      clearFilter,
+      applyClientSearchFilter
+    }
   }
 })
-export default class GLCodesListView extends Vue {
-  private clientSearchProp: string[] = []
-  private updateGLCodeTableCounter: number = 0
-  private clientSearch: string = ''
-  private filterArray = []
-  private totalGLRecordCount: number = 0
-
-  private async mounted () {
-  }
-
-  private clearFilter (filter, isAll: boolean = false) {
-    this.clientSearch = ''
-    if (isAll) {
-      this.clientSearchProp = []
-    } else {
-      const index = this.clientSearchProp.findIndex((elem) => elem === filter)
-      if (index > -1) {
-        this.filterArray.splice(index, 1)
-      }
-    }
-    this.updateGLCodeTableCounter++
-  }
-
-  private applyClientSearchFilter () {
-    this.clientSearchProp.push(this.clientSearch)
-    this.updateGLCodeTableCounter++
-    this.clientSearch = ''
-  }
-}
 </script>
 
 <style lang="scss" scoped>
