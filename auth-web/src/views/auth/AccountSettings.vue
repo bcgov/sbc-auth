@@ -104,9 +104,9 @@
       class="account-alert mb-0"
     />
 
-    <!-- InActive Account Banner-->
-    <AccountInActiveAlert
-      v-if="showInActiveFreezeBanner"
+    <!-- Inactive Account Banner-->
+    <AccountInactiveAlert
+      v-if="showInactiveFreezeBanner"
       class="account-alert mb-0"
     />
 
@@ -361,7 +361,7 @@ import { AccountStatus, LoginSource, Pages, Permission, Role } from '@/util/cons
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
-import AccountInActiveAlert from '@/components/auth/common/AccountInActiveAlert.vue'
+import AccountInactiveAlert from '@/components/auth/common/AccountInactiveAlert.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
 import ConfigHelper from '@/util/config-helper'
@@ -372,7 +372,7 @@ import { useUserStore } from '@/stores/user'
   @Component({
     components: {
       AccountSuspendAlert,
-      AccountInActiveAlert
+      AccountInactiveAlert
     },
     computed: {
       ...mapState(useUserStore, [
@@ -464,7 +464,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   }
 
   // show baner for staff user and account inactive
-  private get showInActiveFreezeBanner () {
+  private get showInactiveFreezeBanner () {
     return this.isStaff && (
       this.currentOrganization?.statusCode === AccountStatus.INACTIVE
     )

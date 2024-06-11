@@ -73,7 +73,7 @@ import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
 import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
-import StaffInActiveAccountsTable from '@/components/auth/staff/account-management/StaffInActiveAccountsTable.vue'
+import StaffInactiveAccountsTable from '@/components/auth/staff/account-management/StaffInactiveAccountsTable.vue'
 import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account-management/StaffPendingAccountInvitationsTable.vue'
 import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
@@ -712,7 +712,7 @@ export function getRoutes (): RouteConfig[] {
         {
           path: 'inactive',
           name: 'inactive',
-          component: StaffInActiveAccountsTable,
+          component: StaffInactiveAccountsTable,
           meta: {
             requiresAuth: true,
             allowedRoles: [Role.Staff],

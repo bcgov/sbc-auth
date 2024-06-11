@@ -76,7 +76,7 @@ export default class PaginationMixin extends Vue {
     }
   }
 
-  protected get getPaginationOptions () {
+  get getPaginationOptions () {
     return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.DEFAULT_ITEMS_PER_PAGE * (index + 1))
   }
 }
