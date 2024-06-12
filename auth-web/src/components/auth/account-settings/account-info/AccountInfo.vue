@@ -171,13 +171,13 @@
           <v-divider class="mt-3 mb-10" />
           <div class="form__btns">
             <v-btn
+              v-if="isDeactivateButtonVisible"
               v-can:DEACTIVATE_ACCOUNT.hide
               text
               color="primary"
               class="deactivate-btn font-weight-bold"
               data-test="deactivate-btn"
               to="/account-deactivate"
-              @click="learnMoreDialog = true"
             >
               Deactivate Account
             </v-btn>
@@ -437,6 +437,10 @@ export default class AccountInfo extends Mixins(
     )
   }
 
+  private get isDeactivateButtonVisible (): boolean {
+    return this.currentOrganization?.statusCode !== AccountStatus.INACTIVE
+  }
+
   get editAccountUrl () {
     return Pages.EDIT_ACCOUNT_TYPE
   }
@@ -620,6 +624,7 @@ export default class AccountInfo extends Mixins(
     switch (status) {
       case AccountStatus.NSF_SUSPENDED:
       case AccountStatus.SUSPENDED:
+      case AccountStatus.INACTIVE:
         return 'error'
       case AccountStatus.ACTIVE:
         return 'green'

@@ -354,7 +354,9 @@
                   <v-icon
                     color="primary"
                     class="small-icon"
-                  > mdi-open-in-new</v-icon>
+                  >
+                    mdi-open-in-new
+                  </v-icon>
                   to set up your account. You can login with your IDIR after approval.
                 </div>
                 <div class="mt-4 help-info__sub-header">
