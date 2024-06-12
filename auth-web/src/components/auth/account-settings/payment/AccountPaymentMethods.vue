@@ -22,6 +22,7 @@
       isTouchedUpdate="true"
       :isInitialTOSAccepted="isTOSandAcknowledgeCompleted"
       :isInitialAcknowledged="isTOSandAcknowledgeCompleted"
+      :isBcolAdmin="isBcolAdmin"
       @payment-method-selected="setSelectedPayment"
       @get-PAD-info="getPADInfo"
       @emit-bcol-info="setBcolInfo"
@@ -103,12 +104,13 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
+import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission, Role } from '@/util/constants'
 import { CreateRequestBody, OrgPaymentDetails, PADInfo, PADInfoValidation } from '@/models/Organization'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
+import { useAccount } from '@/composables/account-factory'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -144,12 +146,10 @@ export default defineComponent({
 
     const errorDialog = ref<InstanceType<typeof ModalDialog>>()
 
-    const currentOrganization = computed(() => orgStore.currentOrganization)
-    const currentOrgPaymentType = computed(() => orgStore.currentOrgPaymentType)
-    const currentMembership = computed(() => orgStore.currentMembership)
-    const currentOrgAddress = computed(() => orgStore.currentOrgAddress)
-    const permissions = computed(() => orgStore.permissions)
+    const { currentOrganization, currentOrgPaymentType, currentOrgAddress, currentMembership, permissions, currentOrgGLInfo } = useAccount()
+
     const currentUser = computed(() => userStore.currentUser)
+    const isBcolAdmin = currentUser.value.roles.includes(Role.BcolStaffAdmin)
 
     function setSelectedPayment (payment) {
       state.errorMessage = ''
@@ -158,18 +158,32 @@ export default defineComponent({
       state.paymentMethodChanged = payment.isTouched || false
     }
 
+    function isPadSelectedAndInvalid () {
+      return state.selectedPaymentMethod === PaymentTypes.PAD && !state.padValid
+    }
+
+    function isEftSelectedAndInvalid () {
+      return state.selectedPaymentMethod === PaymentTypes.EFT && !state.eftValid
+    }
+
+    function isEjvSelectedAndInvalid () {
+      return state.selectedPaymentMethod === PaymentTypes.EJV && !state.ejvValid
+    }
+
+    function paymentMethodNotChangedAndNotEjv () {
+      return !isBcolAdmin && !state.paymentMethodChanged && state.selectedPaymentMethod !== PaymentTypes.EJV
+    }
+
     const isDisableSaveBtn = computed(() => {
-      let disableSaveBtn = false
       if (state.isBtnSaved) {
-        disableSaveBtn = false
-      } else if ((state.selectedPaymentMethod === PaymentTypes.PAD && !state.padValid) ||
-                (state.selectedPaymentMethod === PaymentTypes.EFT && !state.eftValid) ||
-                (state.selectedPaymentMethod === PaymentTypes.EJV && !state.ejvValid) ||
-                (!state.paymentMethodChanged && state.selectedPaymentMethod !== PaymentTypes.EJV) ||
-                disableSaveButtonForBCOL()) {
-        disableSaveBtn = true
+        return false
       }
-      return disableSaveBtn
+
+      return isPadSelectedAndInvalid() ||
+            isEftSelectedAndInvalid() ||
+            isEjvSelectedAndInvalid() ||
+            paymentMethodNotChangedAndNotEjv() ||
+            disableSaveButtonForBCOL()
     })
 
     function disableSaveButtonForBCOL () {
@@ -227,9 +241,7 @@ export default defineComponent({
           ? Account.UNLINKED_PREMIUM : currentOrganization.value.orgType
         state.selectedPaymentMethod = ''
         const orgPayments: OrgPaymentDetails = await orgStore.getOrgPayments()
-        // TODO : revisit  if need
-        // if need to add more logic -> move to store
-        // now setting flag for futurePaymentMethod and TOS to show content and TOS checkbox
+        // setting flag for futurePaymentMethod and TOS to show content and TOS checkbox
         state.isFuturePaymentMethodAvailable = !!orgPayments.futurePaymentMethod || false
         state.isTOSandAcknowledgeCompleted = orgPayments.padTosAcceptedBy !== null || false
         state.selectedPaymentMethod = currentOrgPaymentType.value || ''
@@ -298,6 +310,14 @@ export default defineComponent({
           },
           bcOnlineCredential: state.bcolInfo
         }
+      } else if (state.selectedPaymentMethod === PaymentTypes.EJV) {
+        isValid = true
+        createRequestBody = {
+          paymentInfo: {
+            paymentMethod: PaymentTypes.EJV,
+            revenueAccount: currentOrgGLInfo.value
+          }
+        }
       } else {
         isValid = true
         createRequestBody = {
@@ -356,6 +376,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       setSelectedPayment,
+      isBcolAdmin,
       isDisableSaveBtn,
       getPADInfo,
       isPADValid,
