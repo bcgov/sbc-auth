@@ -281,11 +281,8 @@ export default defineComponent({
       initialize()
     }
 
-    async function save () {
-      state.isBtnSaved = false
-      state.isLoading = true
+    async function getCreateRequestBody () {
       let isValid = false
-
       let createRequestBody: CreateRequestBody
 
       if (state.selectedPaymentMethod === PaymentTypes.PAD) {
@@ -326,6 +323,15 @@ export default defineComponent({
           }
         }
       }
+
+      return { isValid, createRequestBody }
+    }
+
+    async function save () {
+      state.isBtnSaved = false
+      state.isLoading = true
+
+      const { isValid, createRequestBody } = await getCreateRequestBody()
 
       if (isValid) {
         try {
