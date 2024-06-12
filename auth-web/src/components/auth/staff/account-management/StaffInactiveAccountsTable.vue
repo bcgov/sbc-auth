@@ -8,13 +8,13 @@ import StaffAccountsTable from '@/components/auth/common/StaffAccountsTable.vue'
 import { defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
-  name: 'StaffActiveAccountsTable',
+  name: 'StaffInactiveAccountsTable',
   components: {
     StaffAccountsTable
   },
   data () {
     return {
-      accountStatus: AccountStatus.ACTIVE as AccountStatus
+      accountStatus: AccountStatus.INACTIVE as AccountStatus
     }
   }
 })

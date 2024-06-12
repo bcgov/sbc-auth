@@ -79,7 +79,7 @@
                       data-test="radio-government-account-type"
                       class="px-4 py-5 w-100"
                     >
-                      <template v-slot:label>
+                      <template #label>
                         <span class="tooltip-text">Government Agency</span>
                       </template>
                     </v-radio>

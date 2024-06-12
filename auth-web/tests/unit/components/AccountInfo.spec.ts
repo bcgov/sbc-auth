@@ -116,6 +116,19 @@ describe('AccountInfo.vue', () => {
       id: 1234
     })
     await flushPromises()
+
+    wrapper = shallowMount(AccountInfo, {
+      localVue,
+      vuetify,
+      mixins: [Steppable],
+      methods: {
+        getAccountFromSession: vi.fn(() => {
+          return {
+            id: 1
+          }
+        })
+      }
+    })
     expect(orgStore.currentOrganization.name).toBe('testOrg_suspended')
     expect(wrapper.find("[data-test='btn-suspend-account']").text()).toBe('Unsuspend Account')
     expect(wrapper.find("[data-test='div-account-number']").text()).toBe('1234')

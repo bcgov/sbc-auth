@@ -96,6 +96,14 @@
           </v-badge>
         </v-tab>
       </template>
+
+      <v-tab
+        v-if="canViewAccounts"
+        data-test="inactive-tab"
+        :to="pagesEnum.STAFF_DASHBOARD_INACTIVE"
+      >
+        Inactive
+      </v-tab>
     </v-tabs>
 
     <!-- Tab Contents -->
@@ -116,6 +124,7 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
 import StaffCreateAccountModal from '@/components/auth/staff/account-management/StaffCreateAccountModal.vue'
+import StaffInactiveAccountsTable from '@/components/auth/staff/account-management/StaffInactiveAccountsTable.vue'
 import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account-management/StaffPendingAccountInvitationsTable.vue'
 import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
@@ -129,7 +138,8 @@ enum TAB_CODE {
     PendingReview = 'pending-review-tab',
     Rejected = 'rejected-tab',
     Invitations = 'invitations-tab',
-    Suspended = 'suspended-tab'
+    Suspended = 'suspended-tab',
+    Inactive = 'inactive-tab'
 }
 
 @Component({
@@ -138,6 +148,7 @@ enum TAB_CODE {
     StaffPendingAccountsTable,
     StaffRejectedAccountsTable,
     StaffPendingAccountInvitationsTable,
+    StaffInactiveAccountsTable,
     StaffCreateAccountModal
   },
   methods: {
@@ -198,6 +209,11 @@ export default class StaffAccountManagement extends Vue {
       id: 4,
       tabName: 'Suspended',
       code: TAB_CODE.Suspended
+    },
+    {
+      id: 5,
+      tabName: 'Inactive',
+      code: TAB_CODE.Inactive
     }
   ]
 
