@@ -1,7 +1,10 @@
 <template>
   <div>
     <template v-if="isPaymentEJV">
-      <GLPaymentForm :canSelect="false" />
+      <GLPaymentForm
+        :canSelect="isBcolAdmin"
+        @is-gl-info-form-valid="isGLInfoValid"
+      />
     </template>
     <template v-else-if="!isPaymentEJV">
       <v-card
@@ -283,9 +286,10 @@ export default defineComponent({
     isAcknowledgeNeeded: { default: true },
     isTouchedUpdate: { default: false },
     isInitialTOSAccepted: { default: false },
-    isInitialAcknowledged: { default: false }
+    isInitialAcknowledged: { default: false },
+    isBcolAdmin: { default: false }
   },
-  emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-eft-valid', 'payment-method-selected'],
+  emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-eft-valid', 'is-ejv-valid', 'payment-method-selected'],
   setup (props, { emit }) {
     const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails } = useOrgStore()
     const bcOnlineDialog: InstanceType<typeof ModalDialog> = ref(null)
@@ -310,7 +314,7 @@ export default defineComponent({
       const paymentMethods = []
       if (props.currentOrgType) {
         const paymentTypes = paymentsPerAccountType[props.currentOrgType]
-        paymentTypes.forEach((paymentType) => {
+        paymentTypes?.forEach((paymentType) => {
           if (PAYMENT_METHODS[paymentType]) {
             paymentMethods.push(PAYMENT_METHODS[paymentType])
           }
@@ -381,6 +385,10 @@ export default defineComponent({
       emit('is-pad-valid', isValid && isTouched.value)
     }
 
+    const isGLInfoValid = (isValid) => {
+      emit('is-ejv-valid', isValid)
+    }
+
     const updateEFTTermsAccepted = (isAccepted: boolean) => {
       isEFTTOSAccepted.value = isAccepted
       isTouched.value = true
@@ -425,7 +433,8 @@ export default defineComponent({
       isEFTTOSAccepted,
       bcOnlineDialog,
       cancelModal,
-      continueModal
+      continueModal,
+      isGLInfoValid
     }
   }
 })
