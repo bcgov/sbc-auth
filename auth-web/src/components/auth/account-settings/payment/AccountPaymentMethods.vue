@@ -47,7 +47,6 @@
     <v-divider class="my-10" />
     <div class="form__btns d-flex">
       <v-btn
-        v-can:CHANGE_PAYMENT_METHOD.disable
         large
         class="save-btn"
         :class="{ 'disabled': isBtnSaved }"
@@ -205,6 +204,9 @@ export default defineComponent({
 
     function isEJVValid (isValid) {
       state.ejvValid = isValid
+      if (state.isBtnSaved) {
+        state.isBtnSaved = false
+      }
     }
 
     const isAcknowledgeNeeded = computed(() => {
