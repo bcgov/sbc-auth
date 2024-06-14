@@ -43,7 +43,7 @@ sentry-sdk==2.3.1
 six==1.16.0
 threadloop==1.0.2
 thrift==0.20.0
-tornado==6.4
+tornado==6.4.1
 urllib3==2.2.1
 zipp==3.19.0
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
