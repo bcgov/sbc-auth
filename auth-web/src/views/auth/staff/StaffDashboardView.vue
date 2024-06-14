@@ -143,13 +143,16 @@
     </v-card>
 
     <!-- GL Codes -->
-    <v-card
+    <BaseVExpansionPanel
       v-if="canViewGLCodes"
-      flat
-      class="mb-4 pa-8"
+      title="General Ledger Codes"
+      style="z-index: 0;"
+      class="mb-4"
     >
-      <GLCodesListView />
-    </v-card>
+      <template #content>
+        <GLCodesListView />
+      </template>
+    </BaseVExpansionPanel>
 
     <!-- Transactions -->
     <BaseVExpansionPanel
