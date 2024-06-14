@@ -36,7 +36,7 @@
               :rules="responsibilityCentreRules"
               data-test="input-responsibilityCentre"
               :disabled="!canSelect"
-              @input="emitGLInfo"
+              @change="emitGLInfo"
             />
           </v-col>
           <v-col cols="4" class="py-0">
@@ -50,7 +50,7 @@
               :rules="serviceLineRules"
               data-test="input-serviceLine"
               :disabled="!canSelect"
-              @input="emitGLInfo"
+              @change="emitGLInfo"
             />
           </v-col>
           <v-col cols="4" class="py-0">
@@ -64,7 +64,7 @@
               :rules="stobRules"
               data-test="input-stob"
               :disabled="!canSelect"
-              @input="emitGLInfo"
+              @change="emitGLInfo"
             />
           </v-col>
           <v-col cols="8" class="py-0">
@@ -78,7 +78,7 @@
               :rules="projectCodeRules"
               data-test="input-projectCode"
               :disabled="!canSelect"
-              @input="emitGLInfo"
+              @change="emitGLInfo"
             />
           </v-col>
         </v-row>

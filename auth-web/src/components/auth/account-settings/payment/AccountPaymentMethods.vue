@@ -149,7 +149,7 @@ export default defineComponent({
     const { currentOrganization, currentOrgPaymentType, currentOrgAddress, currentMembership, permissions, currentOrgGLInfo } = useAccount()
 
     const currentUser = computed(() => userStore.currentUser)
-    const isBcolAdmin = currentUser.value.roles.includes(Role.BcolStaffAdmin)
+    const isBcolAdmin = currentUser.value.roles?.includes(Role.BcolStaffAdmin)
 
     function setSelectedPayment (payment) {
       state.errorMessage = ''
