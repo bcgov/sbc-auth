@@ -395,7 +395,6 @@ export default defineComponent({
   }
 
   .fixed-action-column {
-    z-index: 3;
     position: sticky;
     right:0;
     left:0;
