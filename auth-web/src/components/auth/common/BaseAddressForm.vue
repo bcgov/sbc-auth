@@ -56,19 +56,13 @@ export default defineComponent({
       return isValid
     }
 
-    function watchEditing (editing: boolean) {
+    watch(() => props.editing, (editing) => {
       if (!editing) {
         loadAddressIntoInputAddress()
       }
-    }
-
-    // Watch the editing prop
-    watch(() => props.editing, watchEditing)
-
-    // Watch the address prop
-    watch(() => props.address, () => {
-      loadAddressIntoInputAddress()
     })
+
+    watch(() => props.address, loadAddressIntoInputAddress)
 
     onMounted(() => {
       if (props.address) {
