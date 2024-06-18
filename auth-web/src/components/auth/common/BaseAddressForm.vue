@@ -11,52 +11,79 @@
 
 <script lang="ts">
 import { Address, BaseAddressModel } from '@/models/address'
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { PropType, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
 import BaseAddress from '@bcrs-shared-components/base-address/BaseAddress.vue'
 import CommonUtils from '@/util/common-util'
 
-@Component({
+export default defineComponent({
+  name: 'BaseAddressForm',
   components: {
     BaseAddress
+  },
+  props: {
+    editing: {
+      type: Boolean,
+      default: true
+    },
+    schema: {
+      type: Object,
+      default: () => ({})
+    },
+    address: {
+      type: Object as PropType<Address>,
+      default: () => ({})
+    }
+  },
+  emit: ['valid', 'update:address'],
+  setup (props, { emit }) {
+    const inputaddress = ref<BaseAddressModel>({} as BaseAddressModel)
+
+    function loadAddressIntoInputAddress () {
+      // convert to address format to component
+      inputaddress.value = CommonUtils.convertAddressForComponent(props.address)
+      emitUpdateAddress(inputaddress.value)
+    }
+
+    function emitUpdateAddress (iaddress: BaseAddressModel): Address {
+      // convert back to Address
+      const address = CommonUtils.convertAddressForAuth(iaddress)
+      emit('update:address', address)
+      return address
+    }
+
+    function emitAddressValidity (isValid: boolean) {
+      emit('valid', isValid)
+      return isValid
+    }
+
+    function watchEditing (editing: boolean) {
+      if (!editing) {
+        loadAddressIntoInputAddress()
+      }
+    }
+
+    // Watch the editing prop
+    watch(() => props.editing, watchEditing)
+
+    // Watch the address prop
+    watch(() => props.address, () => {
+      loadAddressIntoInputAddress()
+    })
+
+    onMounted(() => {
+      if (props.address) {
+        loadAddressIntoInputAddress()
+      }
+    })
+
+    return {
+      inputaddress,
+      loadAddressIntoInputAddress,
+      emitUpdateAddress,
+      emitAddressValidity
+    }
   }
 })
-export default class BaseAddressForm extends Vue {
-  @Prop({ default: true }) editing: boolean
-  @Prop({ default: {} }) schema: any
-  @Prop({ default: () => ({} as Address) }) address: Address
-  private inputaddress: BaseAddressModel = {} as BaseAddressModel
-
-  mounted () {
-    if (this.address) {
-      this.loadAddressIntoInputAddress()
-    }
-  }
-
-  @Watch('editing')
-  private watchEditing (editing) {
-    if (!editing) {
-      this.loadAddressIntoInputAddress()
-    }
-  }
-
-  @Emit('update:address')
-  private emitUpdateAddress (iaddress): Address {
-    // convert back to Address
-    const address = CommonUtils.convertAddressForAuth(iaddress)
-    return address
-  }
-
-  @Emit('valid')
-  emitAddressValidity (isValid) {
-    return isValid
-  }
-
-  loadAddressIntoInputAddress () {
-    // convert to address format to component
-    this.inputaddress = CommonUtils.convertAddressForComponent(this.address)
-    this.emitUpdateAddress(this.inputaddress)
-  }
-}
 </script>
 
 <style lang="scss" scoped></style>
