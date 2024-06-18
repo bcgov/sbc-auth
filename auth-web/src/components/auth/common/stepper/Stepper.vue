@@ -27,7 +27,10 @@
           />
         </template>
       </div>
-      <div class="mt-auto pt-5 pb-6 assistance-text ml-5 mr-5">
+      <div
+        v-if="showContactInfo"
+        class="mt-auto pt-5 pb-6 assistance-text ml-5 mr-5"
+      >
         If you need further assistance, reach us at <span class="font-weight-bold">1-877-526-1526</span>
       </div>
     </v-container>
@@ -100,6 +103,7 @@ export default class Stepper extends Vue {
   @Prop({ default: '/business' }) redirectWhenDone!: string
   @Prop({ default: false }) isLoading!: boolean
   @Prop({ default: '' }) stepperColor!: string
+  @Prop({ default: true }) showContactInfo!: boolean
   steps: StepConfiguration[]
   currentStepNumber = 1
   useAlternateStep = false

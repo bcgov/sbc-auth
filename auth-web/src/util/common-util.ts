@@ -147,6 +147,12 @@ export default class CommonUtils {
     return moment(new Date()).format('MMMM DD, YYYY')
   }
 
+  static formatStatementString (fromDate: string, toDate: string) {
+    let result = `Statement: ${CommonUtils.formatDisplayDate(moment(fromDate), 'MMMM DD')} -`
+    result += `${CommonUtils.formatDisplayDate(moment(toDate), 'DD, YYYY')}`
+    return result
+  }
+
   static fileDownload (data: any, fileName: string, fileType: string = 'text/plain') {
     const blob = new Blob([data], { type: fileType })
     if (typeof window.navigator.msSaveBlob !== 'undefined') {

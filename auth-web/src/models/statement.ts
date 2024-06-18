@@ -27,6 +27,9 @@ export interface Frequencies {
 export interface StatementFilterParams {
   pageNumber?: number
   pageLimit?: number
+  filterPayload: {
+    isOwing?: string
+  }
 }
 
 export interface StatementListResponse {

@@ -115,6 +115,8 @@ export default class PaymentService {
     if (filterParams.pageLimit) {
       params.append('limit', filterParams.pageLimit.toString())
     }
+    this.appendFilterPayloadParams(params, filterParams)
+
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements`
     return axios.get(url, { params })
   }
@@ -176,6 +178,10 @@ export default class PaymentService {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?retryFailedPayment=true`, {})
   }
 
+  static createOutstandingAccountPayment (accountId: string | number) :AxiosPromise<Payment> {
+    return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?retryFailedPayment=true&payOutstandingBalance=true`, {})
+  }
+
   static getRevenueAccountDetails (accountId: number): AxiosPromise<any> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}`)
   }
@@ -235,14 +241,7 @@ export default class PaymentService {
     if (viewAll) {
       params.append('viewAll', `${viewAll}`)
     }
-
-    if (filterParams.filterPayload) {
-      for (const [key, value] of Object.entries(filterParams.filterPayload)) {
-        if (value) {
-          params.append(key, value)
-        }
-      }
-    }
+    this.appendFilterPayloadParams(params, filterParams)
 
     return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames?${params.toString()}`)
   }
@@ -258,15 +257,20 @@ export default class PaymentService {
     if (viewAll) {
       params.append('viewAll', `${viewAll}`)
     }
+
+    this.appendFilterPayloadParams(params, filterParams)
+
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames/summaries?${params.toString()}`)
+  }
+
+  static appendFilterPayloadParams (params: URLSearchParams, filterParams: any) {
     if (filterParams.filterPayload) {
       for (const [key, value] of Object.entries(filterParams.filterPayload)) {
         if (value) {
-          params.append(key, value)
+          params.append(key, value.toString())
         }
       }
     }
-
-    return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames/summaries?${params.toString()}`)
   }
 
   static getEFTShortNameLinks (shortNameId: number): AxiosPromise<any> {
