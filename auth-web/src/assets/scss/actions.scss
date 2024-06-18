@@ -1,3 +1,5 @@
+@import 'theme.scss';
+
 // For the dropdown text color.
 ::v-deep .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
   color: $app-blue;
@@ -22,4 +24,12 @@
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
   }
+}
+
+// Cancel and back buttons
+.secondary-btn {
+  background: white !important;
+  color: $app-blue !important;
+  padding: 0 28px 0 28px !important;
+  border: 1px solid $app-blue !important;
 }

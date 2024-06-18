@@ -98,7 +98,9 @@ export enum Pages {
     SETUP_GOVM_ACCOUNT_SUCCESS='setup-govm-account-success',
     DUPLICATE_ACCOUNT_WARNING='/duplicate-account-warning',
     AFFIDAVIT_COMPLETE = 'upload-affidavit',
-    LOGIN = 'login'
+    LOGIN = 'login',
+    PAY_OUTSTANDING_BALANCE = 'pay-outstanding-balance',
+    PAYMENT_OPTION = 'payment-option'
 }
 
 export enum Account {
