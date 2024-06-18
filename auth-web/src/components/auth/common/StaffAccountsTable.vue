@@ -211,6 +211,10 @@ export default defineComponent({
     accountStatus: {
       type: String as PropType<AccountStatus>,
       default: AccountStatus.ACTIVE
+    },
+    sessionStorageKeys: {
+      type: String as PropType<SessionStorageKeys>,
+      default: SessionStorageKeys.OrgSearchFilter
     }
   },
   setup (props, { root }) {
@@ -310,7 +314,7 @@ export default defineComponent({
 
     function mounted () {
       state.tableDataOptions = DEFAULT_DATA_OPTIONS
-      const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
+      const orgSearchFilter = ConfigHelper.getFromSession(props.sessionStorageKeys) || ''
       try {
         state.searchParams = JSON.parse(orgSearchFilter)
       } catch {
@@ -403,7 +407,7 @@ export default defineComponent({
     })
 
     function setSearchFilterToStorage (val: string): void {
-      ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, val)
+      ConfigHelper.addToSession(props.sessionStorageKeys, val)
     }
 
     function doSearchParametersExist (params: OrgFilterParams): boolean {
