@@ -34,20 +34,24 @@ export default defineComponent({
       default: () => ({})
     }
   },
-  emit: ['valid', 'update:address'],
+  emits: ['valid', 'update:address'],
   setup (props, { emit }) {
     const inputaddress = ref<BaseAddressModel>({} as BaseAddressModel)
+    let isUpdating = false
 
-    function loadAddressIntoInputAddress () {
+    function loadAddressIntoInputAddress() {
       // convert to address format to component
-      inputaddress.value = CommonUtils.convertAddressForComponent(props.address)
-      emitUpdateAddress(inputaddress.value)
+      if (!isUpdating) {
+        inputaddress.value = CommonUtils.convertAddressForComponent(props.address)
+      }
     }
 
     function emitUpdateAddress (iaddress: BaseAddressModel): Address {
       // convert back to Address
       const address = CommonUtils.convertAddressForAuth(iaddress)
+      isUpdating = true
       emit('update:address', address)
+      isUpdating = false
       return address
     }
 
@@ -56,13 +60,11 @@ export default defineComponent({
       return isValid
     }
 
-    watch(() => props.editing, (editing) => {
-      if (!editing) {
+    watch(() => props.address, (newAddress, oldAddress) => {
+      if (JSON.stringify(newAddress) !== JSON.stringify(oldAddress)) {
         loadAddressIntoInputAddress()
       }
-    })
-
-    watch(() => props.address, loadAddressIntoInputAddress)
+    }, { immediate: true, deep: true })
 
     onMounted(() => {
       if (props.address) {
