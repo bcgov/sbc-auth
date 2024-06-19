@@ -389,7 +389,6 @@ export default class AccountInfo extends Mixins(
   private async setup () {
     this.setAccountDetails()
     await this.syncAddress()
-
     // show this part only account is not anon
     if (!this.anonAccount) {
       this.originalAddress = this.currentOrgAddress
@@ -402,6 +401,9 @@ export default class AccountInfo extends Mixins(
         this.$refs.editAccountForm?.validate() // validate form fields and show error message
         // SBTODO create a method in child comp
         this.$refs.mailingAddress?.triggerValidate() // validate form fields and show error message for address component from sbc-common-comp
+      } else {
+        this.isCompleteAccountInfo = true
+        this.errorMessage = ''
       }
     } else {
       // inorder to hide the address if not premium account
