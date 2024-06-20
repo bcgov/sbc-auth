@@ -234,7 +234,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     def send_otp_authenticator_reset_notification(recipient_email, origin_url, org_id):
         """Send Authenticator reset notification to the user."""
         current_app.logger.debug('<send_otp_authenticator_reset_notification')
-        app_url = f"{origin_url}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}"
+        app_url = f'{origin_url}/'
         context_path = 'signin/bceid'
         login_url = f'{app_url}/{context_path}'
         data = {
