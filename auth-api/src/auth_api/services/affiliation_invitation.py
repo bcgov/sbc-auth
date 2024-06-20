@@ -278,7 +278,7 @@ class AffiliationInvitation:
         AffiliationInvitation\
             .send_affiliation_invitation(affiliation_invitation=affiliation_invitation,
                                          business_name=business['business']['legalName'],
-                                         app_url=invitation_origin,
+                                         app_url=invitation_origin + '/',
                                          email_addresses=affiliation_invitation.recipient_email)
         return AffiliationInvitation(affiliation_invitation)
 
@@ -341,7 +341,7 @@ class AffiliationInvitation:
             AffiliationInvitation\
                 .send_affiliation_invitation(affiliation_invitation=invitation,
                                              business_name=business['business']['legalName'],
-                                             app_url=invitation_origin,
+                                             app_url=invitation_origin + '/',
                                              email_addresses=invitation.recipient_email)
         # Expire invitation
         elif new_status == InvitationStatus.EXPIRED.value:
