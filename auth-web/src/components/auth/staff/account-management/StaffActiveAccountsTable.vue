@@ -1,5 +1,10 @@
 <template>
-  <StaffAccountsTable :accountStatus="accountStatus" :sessionStorageKeys="sessionStorageKeys" />
+  <StaffAccountsTable
+    :accountStatus="accountStatus"
+    :sessionStorageKey="sessionStorageKey"
+    :paginationNumberOfItemsKey="paginationNumberOfItemsKey"
+    :paginationOptionsKey="paginationOptionsKey"
+  />
 </template>
 
 <script lang="ts">
@@ -15,7 +20,9 @@ export default defineComponent({
   data () {
     return {
       accountStatus: AccountStatus.ACTIVE as AccountStatus,
-      sessionStorageKeys: SessionStorageKeys.OrgSearchFilter
+      sessionStorageKey: SessionStorageKeys.OrgSearchFilter,
+      paginationNumberOfItemsKey: SessionStorageKeys.PaginationNumberOfItems,
+      paginationOptionsKey: SessionStorageKeys.PaginationOptions,
     }
   }
 })
