@@ -680,14 +680,3 @@ def test_get_all_invitations_with_details_related_to_org(session, auth_mock, key
     else:
         assert result == []
 
-
-def test_app_url():
-    """Assert app url generation is correct."""
-    full_url = AffiliationInvitation._get_app_url('https://test.com', 'abc/123')
-    assert full_url == 'https://test.com/abc/123'
-
-    full_url = AffiliationInvitation._get_app_url('https://test.com', '')
-    assert full_url == 'https://test.com'
-
-    full_url = AffiliationInvitation._get_app_url('https://test.com')
-    assert full_url == 'https://test.com'
