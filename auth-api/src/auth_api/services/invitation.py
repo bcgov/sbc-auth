@@ -80,7 +80,6 @@ class Invitation:
         """Create a new invitation."""
         user_from_context: UserContext = kwargs['user_context']
         # Ensure that the current user is ADMIN or COORDINATOR on each org being invited to
-        context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         org_id = invitation_info['membership'][0]['orgId']
         membership_type = invitation_info['membership'][0]['membershipType']
         token_email_query_params: Dict = {}
@@ -115,7 +114,7 @@ class Invitation:
         invitation.login_source = mandatory_login_source
         invitation.save()
         Invitation.send_invitation(invitation, org_name, org.id, user.as_dict(),
-                                   f'{invitation_origin}/{context_path}', mandatory_login_source,
+                                   f'{invitation_origin}/', mandatory_login_source,
                                    org_status=org.status_code, query_params=token_email_query_params)
         ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.INVITE_TEAM_MEMBER.value,
                                                        name=invitation_info['recipientEmail'], value=membership_type,
@@ -148,7 +147,6 @@ class Invitation:
         """Update the specified invitation with new data."""
         # Ensure that the current user is ADMIN or COORDINATOR on each org being re-invited to
         token_email_query_params: Dict = {}
-        context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         for membership in self._model.membership:
             org_id = membership.org_id
             check_auth(org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
@@ -162,7 +160,7 @@ class Invitation:
         updated_invitation = self._model.update_invitation_as_retried()
         org_name = OrgModel.find_by_org_id(self._model.membership[0].org_id).name
         Invitation.send_invitation(updated_invitation, org_name, self._model.membership[0].org_id, user.as_dict(),
-                                   f'{invitation_origin}/{context_path}', self._model.login_source,
+                                   f'{invitation_origin}/', self._model.login_source,
                                    query_params=token_email_query_params)
         return Invitation(updated_invitation)
 
@@ -356,7 +354,6 @@ class Invitation:
         current_app.logger.debug('<notify_admin')
         admin_list = UserService.get_admins_for_membership(membership_id)
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
-        context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
 
         # Don't send email in case no admin exist in the org. (staff sent invitation)
         if len(admin_list) >= 1:
@@ -367,7 +364,7 @@ class Invitation:
 
         if admin_emails != '':
             Invitation.send_admin_notification(user.as_dict(),
-                                               f'{invitation_origin}/{context_path}',
+                                               f'{invitation_origin}/',
                                                admin_emails, invitation.membership[0].org.name,
                                                invitation.membership[0].org.id)
             current_app.logger.debug('>notify_admin')

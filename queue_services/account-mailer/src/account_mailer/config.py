@@ -123,7 +123,6 @@ class _Config():  # pylint: disable=too-few-public-methods
     WEB_APP_URL = os.getenv('WEB_APP_URL', 'localhost')
     WEB_APP_STATEMENT_PATH_URL = os.getenv('WEB_APP_STATEMENT_PATH_URL', 'account/orgId/settings/statements')
     DASHBOARD_URL = os.getenv('DASHBOARD_URL', 'localhost')
-    AUTH_WEB_TOKEN_CONFIRM_PATH = os.getenv('AUTH_WEB_TOKEN_CONFIRM_PATH')
     # PAD TOS PDF file name.
     PAD_TOS_FILE = os.getenv('PAD_TOS_FILE', 'BCROS-Business-Pre-Authorized-Debit-Agreement.pdf')
     # MHR QUALIFIED SUPPLIER PDF File name
@@ -165,7 +164,6 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
         default=f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}',
     )
 
-    AUTH_WEB_TOKEN_CONFIRM_PATH = ''
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_TEST_ISSUER')
     # Service account details
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')

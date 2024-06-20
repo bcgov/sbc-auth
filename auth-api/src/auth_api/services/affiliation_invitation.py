@@ -228,7 +228,6 @@ class AffiliationInvitation:
                                       # pylint:disable=unused-argument,too-many-locals
                                       user, invitation_origin, environment=None, **kwargs):
         """Create a new affiliation invitation."""
-        context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         from_org_id = affiliation_invitation_info['fromOrgId']
         if to_org_uuid := affiliation_invitation_info.get('toOrgUuid'):
             affiliation_invitation_info['toOrgId'] = AffiliationInvitation._get_org_id_from_org_uuid(to_org_uuid)
@@ -279,8 +278,7 @@ class AffiliationInvitation:
         AffiliationInvitation\
             .send_affiliation_invitation(affiliation_invitation=affiliation_invitation,
                                          business_name=business['business']['legalName'],
-                                         app_url=AffiliationInvitation._get_app_url(invitation_origin,
-                                                                                    context_path),
+                                         app_url=invitation_origin + '/',
                                          email_addresses=affiliation_invitation.recipient_email)
         return AffiliationInvitation(affiliation_invitation)
 
@@ -317,7 +315,6 @@ class AffiliationInvitation:
         check_auth(org_id=self._model.from_org_id,
                    one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
-        context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         invitation: AffiliationInvitationModel = self._model
 
         # Don't do any updates if the invitation is not in PENDING state
@@ -344,8 +341,7 @@ class AffiliationInvitation:
             AffiliationInvitation\
                 .send_affiliation_invitation(affiliation_invitation=invitation,
                                              business_name=business['business']['legalName'],
-                                             app_url=AffiliationInvitation._get_app_url(invitation_origin,
-                                                                                        context_path),
+                                             app_url=invitation_origin + '/',
                                              email_addresses=invitation.recipient_email)
         # Expire invitation
         elif new_status == InvitationStatus.EXPIRED.value:
@@ -438,15 +434,6 @@ class AffiliationInvitation:
             return None
 
         return AffiliationInvitation(invitation)
-
-    @staticmethod
-    def _get_app_url(app_url: str, context_path: str = None) -> str:
-        """Get app url concatenated with context_path if it exists."""
-        full_app_url = app_url
-        if context_path:
-            full_app_url = f'{full_app_url}/{context_path}'
-
-        return full_app_url
 
     @staticmethod
     def _get_token_confirm_path(app_url, org_name, token, query_params=None):

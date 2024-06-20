@@ -163,8 +163,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             current_app.logger.error('No user contact record for user id %s', self._model.user_id)
             current_app.logger.error('<send_notification_to_member failed')
         recipient = self._model.user.contacts[0].contact.email
-        context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
-        app_url = f'{origin_url}/{context_path}'
+        app_url = f'{origin_url}/'
         notification_type_for_mailer = ''
         data = {}
         if notification_type == NotificationType.ROLE_CHANGED.value:
