@@ -1,7 +1,7 @@
 """remove GOVM from business_type_codes
 
 Revision ID: 7bf8428e568e
-Revises: 39b4f331c003
+Revises: 1e4b6359f470
 Create Date: 2024-06-05 15:43:49.638951
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '7bf8428e568e'
-down_revision = '39b4f331c003'
+down_revision = '1e4b6359f470'
 branch_labels = None
 depends_on = None
 
