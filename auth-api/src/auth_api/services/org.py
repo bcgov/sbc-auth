@@ -887,7 +887,7 @@ class Org:  # pylint: disable=too-many-public-methods
             notification_type = QueueMessageTypes.NON_BCSC_ORG_REJECTED_NOTIFICATION.value
         else:
             return  # Don't send mail for any other status change
-        app_url = f"{origin_url}/"
+        app_url = f'{origin_url}/'
         data = {
             'accountId': org_id,
             'emailAddresses': receipt_admin_emails,
@@ -913,7 +913,7 @@ class Org:  # pylint: disable=too-many-public-methods
             notification_type = QueueMessageTypes.GOVM_REJECTED_NOTIFICATION.value
         else:
             return  # Don't send mail for any other status change
-        app_url = f"{origin_url}/"
+        app_url = f'{origin_url}/'
         data = {
             'accountId': org_id,
             'emailAddresses': receipt_admin_email,
