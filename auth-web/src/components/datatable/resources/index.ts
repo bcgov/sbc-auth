@@ -16,32 +16,31 @@ export const DEFAULT_DATA_OPTIONS: DataOptions = {
   mustSort: false
 }
 
-const getNumberOfItemsFromSessionStorage = (): number | undefined => {
-  const items = +ConfigHelper.getFromSession(SessionStorageKeys.PaginationNumberOfItems)
+const getNumberOfItemsFromSessionStorage = (key: SessionStorageKeys): number | undefined => {
+  const items = +ConfigHelper.getFromSession(key)
   return !isNaN(items) ? items : undefined
 }
 
-export const numberOfItems = (): number => {
-  return getNumberOfItemsFromSessionStorage() || DEFAULT_ITEMS_PER_PAGE
+export const numberOfItems = (key: SessionStorageKeys): number => {
+  return getNumberOfItemsFromSessionStorage(key) || DEFAULT_ITEMS_PER_PAGE
 }
 
-export const saveItemsPerPage = (val: number): void => {
-  ConfigHelper.addToSession(SessionStorageKeys.PaginationNumberOfItems, val)
+export const saveItemsPerPage = (val: number, key: SessionStorageKeys): void => {
+  ConfigHelper.addToSession(key, val)
 }
 
-export const cachePageInfo = (tableDataOptions: Partial<DataOptions>): void => {
-  ConfigHelper.addToSession(SessionStorageKeys.PaginationOptions, JSON.stringify(tableDataOptions))
+export const cachePageInfo = (tableDataOptions: Partial<DataOptions>, key: SessionStorageKeys): void => {
+  ConfigHelper.addToSession(key, JSON.stringify(tableDataOptions))
 }
 
-export const hasCachedPageInfo = (): boolean => {
-  const paginationOptions = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PaginationOptions) || '{}')
+export const hasCachedPageInfo = (key: SessionStorageKeys): boolean => {
+  const paginationOptions = JSON.parse(ConfigHelper.getFromSession(key) || '{}')
   return Object.keys(paginationOptions).length !== 0
 }
 
-export const getAndPruneCachedPageInfo = (): Partial<DataOptions> | undefined => {
-  const paginationOptions = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PaginationOptions) || '{}')
+export const getAndPruneCachedPageInfo = (key: SessionStorageKeys): Partial<DataOptions> | undefined => {
+  const paginationOptions = JSON.parse(ConfigHelper.getFromSession(key) || '{}')
   if (Object.keys(paginationOptions).length !== 0) {
-    ConfigHelper.removeFromSession(SessionStorageKeys.PaginationOptions)
     return paginationOptions
   }
   return undefined
