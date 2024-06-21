@@ -208,7 +208,7 @@
 </template>
 
 <script lang="ts">
-import { Account, AccountType, OrgNameLabel, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, AccountType, OrgNameLabel, SessionStorageKeys } from '@/util/constants'
 import { computed, defineComponent, nextTick, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import ConfigHelper from '@/util/config-helper'
 import { OrgBusinessType } from '@/models/Organization'
@@ -376,8 +376,8 @@ export default defineComponent({
         if (currentOrganization.value?.name) {
           state.name = currentOrganization.value.name
           state.isBusinessAccount = currentOrganization.value.isBusinessAccount
-          state.isIndividualAccount = false
-          state.isGovnAccount = !currentOrganization.value.isBusinessAccount
+          state.isGovnAccount = currentOrganization.value?.accessType === AccessType.GOVN
+          state.isIndividualAccount = !state.isBusinessAccount && !state.isGovnAccount
           state.businessType = currentOrganization.value.businessType
           state.businessSize = currentOrganization.value.businessSize
           state.branchName = currentOrganization.value.branchName
