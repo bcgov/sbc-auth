@@ -84,8 +84,7 @@ def upgrade():
         "PILOT",  # HRV
         "INTRN",  # Internal BCOL account
         "GOVOP",   # Other provincial govt. ministry
-        "GOVR",   # Registries who participate in BCOL
-        
+        "GOVR"   # Registries who participate in BCOL 
     ]
 
     for code in codes_to_remove:
