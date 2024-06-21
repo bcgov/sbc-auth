@@ -83,9 +83,8 @@ def upgrade():
     codes_to_remove = [
         "PILOT",  # HRV
         "INTRN",  # Internal BCOL account
-        "GOVOP"   # Other provincial govt. ministry
-        "GOVR",   # Registries who participate in BCOL
-        
+        "GOVOP",   # Other provincial govt. ministry
+        "GOVR"   # Registries who participate in BCOL 
     ]
 
     for code in codes_to_remove:
