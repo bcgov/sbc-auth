@@ -88,7 +88,7 @@ export default defineComponent({
       totalGLRecordCount: 0
     })
 
-    function clearFilter(filter: string, isAll: boolean = false) {
+    function clearFilter (filter: string, isAll: boolean = false) {
       state.clientSearch = ''
       if (isAll) {
         state.clientSearchProp = []
@@ -101,7 +101,7 @@ export default defineComponent({
       state.updateGLCodeTableCounter++
     }
 
-    function applyClientSearchFilter() {
+    function applyClientSearchFilter () {
       state.clientSearchProp.push(state.clientSearch)
       state.updateGLCodeTableCounter++
       state.clientSearch = ''

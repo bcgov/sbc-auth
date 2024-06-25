@@ -39,7 +39,7 @@ export default defineComponent({
     const inputaddress = ref<BaseAddressModel>({} as BaseAddressModel)
     let isUpdating = false
 
-    function loadAddressIntoInputAddress() {
+    function loadAddressIntoInputAddress () {
       // convert to address format to component
       if (!isUpdating) {
         inputaddress.value = CommonUtils.convertAddressForComponent(props.address)

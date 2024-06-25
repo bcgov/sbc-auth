@@ -220,7 +220,7 @@ export default defineComponent({
     paginationOptionsKey: {
       type: String as PropType<SessionStorageKeys>,
       default: SessionStorageKeys.PaginationOptions
-    },
+    }
   },
   setup (props, { root }) {
     const { t } = useI18n()
@@ -324,7 +324,7 @@ export default defineComponent({
       } catch {
         // Do nothing, we have defaults for searchParams.
       }
-      const hasInfo = hasCachedPageInfo(props.paginationOptionsKey);
+      const hasInfo = hasCachedPageInfo(props.paginationOptionsKey)
       if (hasInfo) {
         state.tableDataOptions = getAndPruneCachedPageInfo(props.paginationOptionsKey)
       }

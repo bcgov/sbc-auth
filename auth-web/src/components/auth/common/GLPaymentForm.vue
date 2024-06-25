@@ -1,17 +1,26 @@
 <template>
   <div>
-    <p v-if="canSelect" class="mb-9">
+    <p
+      v-if="canSelect"
+      class="mb-9"
+    >
       General Ledger codes for the account that is issued by the Finance department of the Ministry
     </p>
     <v-form ref="GlInfoForm">
       <section>
         <header class="mb-4 d-flex align-content-center">
-          <div data-test="pad-info-form-title" class="mr-1 font-weight-bold">
+          <div
+            data-test="pad-info-form-title"
+            class="mr-1 font-weight-bold"
+          >
             General Ledger Information
           </div>
         </header>
         <v-row>
-          <v-col cols="4" class="py-0">
+          <v-col
+            cols="4"
+            class="py-0"
+          >
             <v-text-field
               v-model="client"
               v-mask="'XXX'"
@@ -25,7 +34,10 @@
               @change="emitGLInfo"
             />
           </v-col>
-          <v-col cols="4" class="py-0">
+          <v-col
+            cols="4"
+            class="py-0"
+          >
             <v-text-field
               v-model="responsibilityCentre"
               v-mask="'XXXXX'"
@@ -39,7 +51,10 @@
               @change="emitGLInfo"
             />
           </v-col>
-          <v-col cols="4" class="py-0">
+          <v-col
+            cols="4"
+            class="py-0"
+          >
             <v-text-field
               v-model="serviceLine"
               v-mask="'XXXXX'"
@@ -53,7 +68,10 @@
               @change="emitGLInfo"
             />
           </v-col>
-          <v-col cols="4" class="py-0">
+          <v-col
+            cols="4"
+            class="py-0"
+          >
             <v-text-field
               v-model="stob"
               v-mask="'XXXX'"
@@ -67,7 +85,10 @@
               @change="emitGLInfo"
             />
           </v-col>
-          <v-col cols="8" class="py-0">
+          <v-col
+            cols="8"
+            class="py-0"
+          >
             <v-text-field
               v-model="projectCode"
               v-mask="'XXXXXXX'"
