@@ -176,7 +176,6 @@
 import {
   AffiliationInvitationStatus,
   AffiliationInvitationType,
-  AffiliationTypes,
   EntityAlertTypes,
   NrDisplayStates,
   NrState
@@ -225,18 +224,14 @@ export default defineComponent({
       return NrState.DRAFT === state.toUpperCase()
     }
 
-    const isIA = (type: string): boolean => {
-      return (type === AffiliationTypes.INCORPORATION_APPLICATION || type === AffiliationTypes.REGISTRATION)
-    }
-
     const isProcessing = (state: string): boolean => {
       return NrDisplayStates.PROCESSING === state
     }
 
-    /** Draft IA with Expired NR */
+    /** Draft Application with Expired NR */
     const isExpired = (item: Business): boolean => {
       return isDraft(status(item)) && (item.nameRequest && (item.nameRequest.expirationDate !== null) &&
-        (new Date(item.nameRequest.expirationDate) < new Date())) && isIA(type(item))
+        (new Date(item.nameRequest.expirationDate) < new Date()))
     }
 
     const isFrozed = (item: Business): boolean => {

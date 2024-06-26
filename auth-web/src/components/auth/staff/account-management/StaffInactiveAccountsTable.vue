@@ -22,7 +22,7 @@ export default defineComponent({
       accountStatus: AccountStatus.INACTIVE as AccountStatus,
       sessionStorageKey: SessionStorageKeys.InactiveSearchFilter,
       paginationNumberOfItemsKey: SessionStorageKeys.InactivePaginationNumberOfItems,
-      paginationOptionsKey: SessionStorageKeys.InactivePaginationOptions,
+      paginationOptionsKey: SessionStorageKeys.InactivePaginationOptions
     }
   }
 })

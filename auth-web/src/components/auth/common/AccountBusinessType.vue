@@ -32,7 +32,7 @@
       >
         <v-radio-group
           v-if="!govmAccount"
-          v-model="accessType"
+          v-model="accountType"
           row
           mandatory
           @change="handleAccountTypeChange"
@@ -267,22 +267,23 @@ export default defineComponent({
 
     const state = reactive({
       accountInformationForm: null,
-      accessType: AccountType.INDIVIDUAL,
+      accountType: currentOrganization.value?.isBusinessAccount ? AccountType.BUSINESS : AccountType.INDIVIDUAL,
       autoCompleteIsActive: false,
       autoCompleteSearchValue: '',
       isLoading: false,
-      isBusinessAccount: false,
-      name: '',
-      businessType: '',
-      businessSize: '',
-      governmentSize: '',
-      branchName: '',
-      isIndividualAccount: true,
-      isGovnAccount: false,
+      name: currentOrganization.value?.name || '',
+      businessType: currentOrganization.value?.businessType || '',
+      businessSize: currentOrganization.value?.businessSize || '',
+      governmentSize: currentOrganization.value?.businessSize || '',
+      branchName: currentOrganization.value?.branchName || '',
+      isBusinessAccount: currentOrganization.value?.isBusinessAccount || false,
+      isGovnAccount: currentOrganization.value?.accessType === AccessType.GOVN,
+      isIndividualAccount: !currentOrganization.value?.isBusinessAccount && !(currentOrganization.value?.accessType === AccessType.GOVN),
       orgNameRules: [],
       orgBusinessTypeRules: [],
       orgBusinessSizeRules: [],
-      typeCodesItems: []
+      typeCodesItems: [],
+      isInitialized: false
     })
 
     const getOrgNameLabel = computed(() => {
@@ -298,18 +299,20 @@ export default defineComponent({
     })
 
     const getOrgTypeDropdownLabel = computed(() =>
-      state.accessType === AccountType.GOVN ? 'Government Agency Type' : 'Business Type'
+      state.accountType === AccountType.GOVN ? 'Government Agency Type' : 'Business Type'
     )
 
     const getOrgSizeDropdownLabel = computed(() =>
-      state.accessType === AccountType.GOVN ? 'Government Agency Size' : 'Business Size'
+      state.accountType === AccountType.GOVN ? 'Government Agency Size' : 'Business Size'
     )
 
-    watch(() => state.accessType, () => {
-      state.isBusinessAccount = state.accessType === AccountType.BUSINESS
-      state.isGovnAccount = state.accessType === AccountType.GOVN
-      state.isIndividualAccount = state.accessType === AccountType.INDIVIDUAL
-      cleanOrgInfo()
+    watch(() => state.accountType, (newValue) => {
+      if (state.isInitialized) {
+        state.isBusinessAccount = newValue === AccountType.BUSINESS
+        state.isGovnAccount = newValue === AccountType.GOVN
+        state.isIndividualAccount = newValue === AccountType.INDIVIDUAL
+        cleanOrgInfo()
+      }
     })
 
     function cleanOrgInfo () {
@@ -320,6 +323,10 @@ export default defineComponent({
       if (state.accountInformationForm) {
         state.accountInformationForm.resetValidation()
       }
+      setBusinessTypeAndCode()
+    }
+
+    function setBusinessTypeAndCode () {
       if (state.isGovnAccount) {
         state.orgNameRules = [v => !!v || 'A government agency name is required']
         state.orgBusinessTypeRules = [v => !!v || 'A government agency type is required']
@@ -334,8 +341,10 @@ export default defineComponent({
     }
 
     async function handleAccountTypeChange (newValue) {
-      state.accessType = newValue
-      await onOrgBusinessTypeChange(!props.isEditAccount)
+      if (state.accountType !== newValue) {
+        state.accountType = newValue
+        await onOrgBusinessTypeChange(!props.isEditAccount)
+      }
     }
 
     function emitUpdatedOrgBusinessType () {
@@ -373,24 +382,19 @@ export default defineComponent({
         await codesStore.getGovernmentTypeCodes()
         await codesStore.getBusinessSizeCodes()
         await codesStore.getBusinessTypeCodes()
-        if (currentOrganization.value?.name) {
-          state.name = currentOrganization.value.name
-          state.isBusinessAccount = currentOrganization.value.isBusinessAccount
-          state.isGovnAccount = currentOrganization.value?.accessType === AccessType.GOVN
-          state.isIndividualAccount = !state.isBusinessAccount && !state.isGovnAccount
-          state.businessType = currentOrganization.value.businessType
-          state.businessSize = currentOrganization.value.businessSize
-          state.branchName = currentOrganization.value.branchName
-        } else {
+        if (!currentOrganization.value?.name) {
           state.isBusinessAccount = currentOrganization.value.orgType !== Account.BASIC
-        }
-        if (state.isBusinessAccount) {
-          state.accessType = AccountType.BUSINESS
+          if (state.isBusinessAccount) {
+            state.accountType = AccountType.BUSINESS
+          }
         }
         await onOrgBusinessTypeChange()
       } catch (ex) {
         console.error(`Error while loading account business type - ${ex}`)
       } finally {
+        setBusinessTypeAndCode()
+        await nextTick()
+        state.isInitialized = true
         state.isLoading = false
       }
     })
