@@ -8,6 +8,7 @@ import can from '@/directives/can'
 import flushPromises from 'flush-promises'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
+import OrgService from '@/services/org.services'
 
 document.body.setAttribute('data-app', 'true')
 
@@ -198,5 +199,65 @@ describe('AccountInfo.vue', () => {
     wrapper.setMethods({ showSuspendAccountDialog: stub })
     wrapper.find('.suspend-account-btn').trigger('click')
     expect(wrapper.vm.isSuspensionReasonFormValid).toBeTruthy()
+  })
+
+  it('creates correct requestBody with businessSize and businessType', async () => {
+    const orgStore = useOrgStore()
+    const mockUpdateOrg = vi.fn()
+    orgStore.updateOrg = mockUpdateOrg
+
+    wrapper = shallowMount(AccountInfo, {
+      localVue,
+      vuetify,
+      mixins: [Steppable],
+      methods: {
+        getAccountFromSession: vi.fn(() => ({ id: 1 }))
+      }
+    })
+
+    wrapper.setData({
+      accountDetails: {
+        name: 'New Name',
+        branchName: 'New Branch',
+        isBusinessAccount: true,
+        businessSize: 'LARGE',
+        businessType: 'CORPORATION'
+      },
+      currentOrganization: {
+        name: 'Old Name',
+        isBusinessAccount: false
+      }
+    })
+
+    await wrapper.vm.updateDetails()
+
+    expect(mockUpdateOrg).toHaveBeenCalledWith({
+      name: 'New Name',
+      branchName: 'New Branch',
+      isBusinessAccount: true,
+      businessSize: 'LARGE',
+      businessType: 'CORPORATION'
+    })
+
+    wrapper.setData({
+      accountDetails: {
+        name: 'New Name 2',
+        isBusinessAccount: false
+      },
+      currentOrganization: {
+        name: 'New Name',
+        branchName: 'New Branch',
+        isBusinessAccount: true,
+        businessSize: 'LARGE',
+        businessType: 'CORPORATION'
+      }
+    })
+
+    await wrapper.vm.updateDetails()
+
+    expect(mockUpdateOrg).toHaveBeenCalledWith({
+      name: 'New Name 2',
+      isBusinessAccount: false
+    })
   })
 })
