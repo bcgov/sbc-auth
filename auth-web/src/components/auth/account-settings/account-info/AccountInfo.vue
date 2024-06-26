@@ -564,10 +564,14 @@ export default class AccountInfo extends Mixins(
     if (typeof isBusinessAccount !== undefined) {
       createRequestBody.isBusinessAccount = isBusinessAccount
     }
-    if (this.isBusinessAccount && this.accountDetails) {
+
+    if (isBusinessAccount && 'businessSize' in this.accountDetails && businessSize !== null) {
       if (this.currentOrganization.businessSize !== businessSize) {
         createRequestBody.businessSize = businessSize
       }
+    }
+
+    if (isBusinessAccount && 'businessType' in this.accountDetails && businessType !== null) {
       if (this.currentOrganization.businessType !== businessType) {
         createRequestBody.businessType = businessType
       }
