@@ -1,7 +1,7 @@
 """Add in new products for BCFMS, BCRHP 
 
 Revision ID: af98933abe93
-Revises: 7bf8428e568e
+Revises: acc7e2e2c2d7
 Create Date: 2024-06-26 14:46:57.699068
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'af98933abe93'
-down_revision = '7bf8428e568e'
+down_revision = 'acc7e2e2c2d7'
 branch_labels = None
 depends_on = None
 
