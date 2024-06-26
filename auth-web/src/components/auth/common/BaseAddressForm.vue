@@ -46,13 +46,20 @@ export default defineComponent({
       }
     }
 
+    function addressesAreEqual (addr1: BaseAddressModel, addr2: BaseAddressModel): boolean {
+      return Object.keys(addr1).every(key => {
+        return (addr1 as any)[key] === (addr2 as any)[key]
+      })
+    }
+
     function emitUpdateAddress (iaddress: BaseAddressModel): Address {
-      // convert back to Address
-      const address = CommonUtils.convertAddressForAuth(iaddress)
-      isUpdating = true
-      emit('update:address', address)
-      isUpdating = false
-      return address
+      const newAddress = CommonUtils.convertAddressForAuth(iaddress)
+      if (!isUpdating && !addressesAreEqual(iaddress, inputaddress.value)) {
+        isUpdating = true
+        emit('update:address', newAddress)
+        isUpdating = false
+      }
+      return newAddress
     }
 
     function emitAddressValidity (isValid: boolean) {
@@ -64,17 +71,18 @@ export default defineComponent({
       if (JSON.stringify(newAddress) !== JSON.stringify(oldAddress)) {
         loadAddressIntoInputAddress()
       }
-    }, { immediate: true, deep: true })
+    }, { deep: true })
 
     onMounted(() => {
-      if (props.address) {
-        loadAddressIntoInputAddress()
-      }
+      loadAddressIntoInputAddress()
+    })
+
+    watch(() => props.editing, () => {
+      loadAddressIntoInputAddress()
     })
 
     return {
       inputaddress,
-      loadAddressIntoInputAddress,
       emitUpdateAddress,
       emitAddressValidity
     }
