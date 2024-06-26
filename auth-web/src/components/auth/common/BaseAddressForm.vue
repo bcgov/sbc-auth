@@ -46,7 +46,7 @@ export default defineComponent({
       }
     }
 
-    function addressesAreEqual(addr1: BaseAddressModel, addr2: BaseAddressModel): boolean {
+    function addressesAreEqual (addr1: BaseAddressModel, addr2: BaseAddressModel): boolean {
       return Object.keys(addr1).every(key => {
         return (addr1 as any)[key] === (addr2 as any)[key]
       })

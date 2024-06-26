@@ -8,7 +8,6 @@ import can from '@/directives/can'
 import flushPromises from 'flush-promises'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
-import OrgService from '@/services/org.services'
 
 document.body.setAttribute('data-app', 'true')
 
@@ -220,7 +219,7 @@ describe('AccountInfo.vue', () => {
         name: 'New Name',
         branchName: 'New Branch',
         isBusinessAccount: true,
-        businessSize: 'LARGE',
+        businessSize: '1',
         businessType: 'CORPORATION'
       },
       currentOrganization: {
@@ -235,7 +234,7 @@ describe('AccountInfo.vue', () => {
       name: 'New Name',
       branchName: 'New Branch',
       isBusinessAccount: true,
-      businessSize: 'LARGE',
+      businessSize: '1',
       businessType: 'CORPORATION'
     })
 
@@ -248,7 +247,7 @@ describe('AccountInfo.vue', () => {
         name: 'New Name',
         branchName: 'New Branch',
         isBusinessAccount: true,
-        businessSize: 'LARGE',
+        businessSize: '1',
         businessType: 'CORPORATION'
       }
     })
