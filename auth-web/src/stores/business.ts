@@ -400,8 +400,10 @@ export const useBusinessStore = defineStore('business', () => {
     if (response?.status === 200 && response?.data?.business?.legalName) {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
       return response.data.business
+    } else if (response?.status === 404) {
+      throw Error('No match found for Incorporation Number')
     } else {
-      throw Error('search failed')
+      throw Error('Search failed')
     }
   }
 
