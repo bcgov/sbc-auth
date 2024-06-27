@@ -388,8 +388,6 @@ export default defineComponent({
         localVars.affiliatedOrg = await orgStore.getOrganizationForAffiliate()
         localVars.canViewIncorporationSearchResult = true
       } catch (exception) {
-        // eslint-disable-next-line no-console
-        console.log('Error during search incorporations event!')
         localVars.errorMessage = exception?.message
         localVars.canViewIncorporationSearchResult = false
         businessStore.resetCurrentBusiness()
