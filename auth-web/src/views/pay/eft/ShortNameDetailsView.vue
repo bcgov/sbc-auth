@@ -20,7 +20,7 @@
       </p>
     </div>
 
-    <ShortNameAccountLinkage
+    <ShortNameAccountLink
       class="mb-12"
       :shortNameDetails="shortNameDetails"
       :highlightIndex="highlightIndex"
@@ -36,12 +36,12 @@
 import { PropType, computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import PaymentService from '@/services/payment.services'
-import ShortNameAccountLinkage from '@/components/pay/eft/ShortNameAccountLink.vue'
+import ShortNameAccountLink from '@/components/pay/eft/ShortNameAccountLink.vue'
 import ShortNameTransactions from '@/components/pay/eft/ShortNameTransactions.vue'
 
 export default defineComponent({
   name: 'ShortNameMappingView',
-  components: { ShortNameAccountLinkage, ShortNameTransactions },
+  components: { ShortNameAccountLink, ShortNameTransactions },
   props: {
     shortNameId: {
       type: String as PropType<string>,
@@ -67,10 +67,11 @@ export default defineComponent({
       return `Unsettled Amount for ${details.shortName}: ${unsettledAmount}`
     })
 
-    async function onLinkAccount () {
+    async function onLinkAccount (account: any, results: Array<any>) {
+      const indexOf = results.findIndex((result) => result.id === account.id)
       await loadShortname(props.shortNameId)
       state.snackbarText = `Bank short name ${state.shortNameDetails.shortName} was successfully linked.`
-      state.highlightIndex = 1 // highlight indexOf when multi-linking is implemented
+      state.highlightIndex = indexOf
       state.snackbar = true
 
       setTimeout(() => {
