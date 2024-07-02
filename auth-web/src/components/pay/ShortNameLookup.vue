@@ -1,7 +1,7 @@
 <template>
   <div id="short-name-lookup">
     <v-autocomplete
-      item-disabled="linkedBy"
+      :item-disabled="item => item.statusCode === 'LINKED'"
       :search-input.sync="searchField"
       :hide-no-data="state != LookupStates.NO_RESULTS"
       :items="searchResults"
@@ -89,7 +89,7 @@
             class="result-action"
           >
             <span
-              v-if="item.linkedBy"
+              v-if="item.statusCode === 'LINKED'"
               class="linked"
             >Linked</span>
             <span

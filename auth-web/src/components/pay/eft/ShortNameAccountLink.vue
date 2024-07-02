@@ -19,7 +19,7 @@
 
     <v-card-text
       v-if="isLinked"
-      class="pa-5 linked-text"
+      class="pa-0 linked-text"
     >
       <v-btn
         id="link-shortname-btn"
@@ -27,7 +27,7 @@
         outlined
         dark
         large
-        class="mt-0 mr-4 font-weight-regular"
+        class="mt-4 ml-4 font-weight-regular"
         @click="openAccountLinkingDialog()"
       >
         + Link a New Account
@@ -253,9 +253,9 @@ export default defineComponent({
       state.isShortNameLinkingDialogOpen = false
     }
 
-    function onLinkAccount (account: any) {
-      loadShortNameLinks()
-      emit('on-link-account', account)
+    async function onLinkAccount (account: any) {
+      await loadShortNameLinks()
+      emit('on-link-account', account, state.results)
     }
 
     async function unlinkAccount (item) {
@@ -340,8 +340,29 @@ export default defineComponent({
 .base-table__item-row-green {
   background-color: $table-green !important;
 }
+.v-card {
+  > div:first-of-type {
+    padding: 0!important;
+  }
+}
 
 ::v-deep {
+  table {
+    box-sizing: content-box;
+    thead {
+      tr {
+        th:first-of-type {
+        }
+      }
+    }
+    tbody {
+      tr {
+        td:first-of-type {
+          padding-left: 20px !important;
+        }
+      }
+    }
+  }
   .base-table__item-cell {
     padding: 16px 0 16px 0
   }
