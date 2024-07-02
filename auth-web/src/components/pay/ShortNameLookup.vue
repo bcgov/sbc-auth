@@ -1,7 +1,7 @@
 <template>
   <div id="short-name-lookup">
     <v-autocomplete
-      :item-disabled="item => item.statusCode === 'LINKED'"
+      :item-disabled="item => item.statusCode === ShortNameStatus.LINKED"
       :search-input.sync="searchField"
       :hide-no-data="state != LookupStates.NO_RESULTS"
       :items="searchResults"
@@ -89,7 +89,7 @@
             class="result-action"
           >
             <span
-              v-if="item.statusCode === 'LINKED'"
+              v-if="item.statusCode === ShortNameStatus.LINKED"
               class="linked"
             >Linked</span>
             <span
@@ -104,6 +104,7 @@
 </template>
 
 <script lang="ts">
+import { ShortNameStatus } from '@/util/constants'
 import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
@@ -251,6 +252,7 @@ export default defineComponent({
       onItemSelected,
       LookupStates,
       LookupType,
+      ShortNameStatus,
       reset
     }
   }
