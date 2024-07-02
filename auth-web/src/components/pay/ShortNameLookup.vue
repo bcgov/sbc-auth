@@ -104,12 +104,12 @@
 </template>
 
 <script lang="ts">
-import { ShortNameStatus } from '@/util/constants'
 import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import { LookupType } from '@/models/business-nr-lookup'
 import PaymentService from '@/services/payment.services'
+import { ShortNameStatus } from '@/util/constants'
 import _ from 'lodash'
 import { useOrgStore } from '@/stores/org'
 
