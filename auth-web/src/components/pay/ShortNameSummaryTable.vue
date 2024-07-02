@@ -315,7 +315,7 @@ export default defineComponent({
 
     async function onLinkAccount (account: any) {
       emit('on-link-account', account)
-      await loadTableSummaryData()
+      await loadTableSummaryData('page', 1)
     }
 
     async function updateDateRange ({ endDate, startDate }: { endDate?: string, startDate?: string }): void {
