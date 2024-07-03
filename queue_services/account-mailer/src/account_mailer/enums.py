@@ -28,6 +28,7 @@ class SubjectType(Enum):
     PAD_SETUP_FAILED = '[BC Registries and Online Services] Your Account is Temporarily Suspended'
     PAYMENT_PENDING = '[BC Registries and Online Services] Payment is now due for pending transaction on your account'
     EJV_FAILED = 'GL disbursement failure for EJV'
+    CSV_FAILED = 'CAS settlement failure'
     RESET_PASSCODE = 'BC Registries Account Passcode Reset'
     ADMIN_NOTIFICATION = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
                          'has responded for the invitation to join the account {account_name}'
@@ -120,6 +121,7 @@ class TemplateType(Enum):
     PAD_SETUP_FAILED_TEMPLATE_NAME = 'pad_setup_failed'
     PAYMENT_PENDING_TEMPLATE_NAME = 'paymanet_pending'
     EJV_FAILED_TEMPLATE_NAME = 'ejv_failed_email'
+    CSV_FAILED_TEMPLATE_NAME = 'csv_failed_email'
     RESET_PASSCODE_TEMPLATE_NAME = 'reset_passcode'
     ADMIN_NOTIFICATION_TEMPLATE_NAME = 'admin_notification_email'
     AFFILIATION_INVITATION_TEMPLATE_NAME = 'affiliation_invitation_email'

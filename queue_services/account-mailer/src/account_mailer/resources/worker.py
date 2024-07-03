@@ -28,7 +28,7 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 
 from account_mailer.auth_utils import get_login_url, get_member_emails
 from account_mailer.email_processors import (
-    account_unlock, common_mailer, ejv_failures, pad_confirmation, product_confirmation, refund_requested)
+    account_unlock, common_mailer, csv_failures, ejv_failures, pad_confirmation, product_confirmation, refund_requested)
 from account_mailer.enums import Constants, SubjectType, TemplateType, TitleType
 from account_mailer.services import minio_service, notification_service
 from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
@@ -64,6 +64,7 @@ def worker():
         handle_pad_setup_failed(message_type, email_msg)
         handle_payment_pending(message_type, email_msg)
         handle_ejv_failed(message_type, email_msg)
+        handle_csv_failed(message_type, email_msg)
         handle_reset_passcode(message_type, email_msg)
         handle_affiliation_invitation(message_type, email_msg)
         handle_product_actions(message_type, email_msg)
@@ -293,6 +294,14 @@ def handle_ejv_failed(message_type, email_msg):
     process_email(email_dict)
 
 
+def handle_csv_failed(message_type, email_msg):
+    """Handle the csv failed message."""
+    if message_type != QueueMessageTypes.CSV_FAILED.value:
+        return
+    email_dict = csv_failures.process(email_msg)
+    process_email(email_dict)
+
+
 def handle_reset_passcode(message_type, email_msg):
     """Handle the reset passcode message."""
     if message_type != QueueMessageTypes.RESET_PASSCODE.value:
@@ -437,6 +446,7 @@ def handle_other_messages(message_type, email_msg):
         QueueMessageTypes.PAD_SETUP_FAILED.value,
         QueueMessageTypes.PAYMENT_PENDING.value,
         QueueMessageTypes.EJV_FAILED.value,
+        QueueMessageTypes.CSV_FAILED.value,
         QueueMessageTypes.RESET_PASSCODE.value,
         QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value,
         QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value,

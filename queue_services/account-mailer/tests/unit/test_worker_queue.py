@@ -416,6 +416,27 @@ def test_ejv_failure_emails(app, session, client):
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.EJV_FAILED.value
 
 
+def test_csv_failure_emails(app, session, client):
+    """Assert that events can be retrieved and decoded from the Queue."""
+    with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
+        minio_file_name = 'BCR_PAYMENT_APPL_20240619.csv'
+        minio_bucket = 'payment-sftp'
+
+        # add an event to queue
+        mail_details = {
+            'fileName': minio_file_name,
+            'minioLocation': minio_bucket,
+            'errorMessages': {'error': 'test', 'row': 'row 2'}
+        }
+        helper_add_event_to_queue(client,
+                                  message_type=QueueMessageTypes.CSV_FAILED.value,
+                                  mail_details=mail_details)
+
+        mock_send.assert_called
+        assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
+        assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.CSV_FAILED.value
+
+
 def test_passcode_reset_email(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
