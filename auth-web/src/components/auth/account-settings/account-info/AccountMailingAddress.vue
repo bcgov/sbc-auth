@@ -17,7 +17,7 @@
         <div class="details">
           <div class="with-change-icon">
             <div class="mb-3">
-              <base-address-form
+              <BaseAddressForm
                 ref="mailingAddress"
                 :editing="!viewOnlyMode"
                 :schema="baseAddressSchema"
@@ -79,41 +79,53 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { defineComponent, ref } from '@vue/composition-api'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import { addressSchema } from '@/schemas'
 
-@Component({
+export default defineComponent({
+  name: 'AccountMailingAddress',
   components: {
     BaseAddressForm
+  },
+  props: {
+    baseAddress: {
+      type: Object,
+      default: () => null
+    },
+    viewOnlyMode: {
+      type: Boolean,
+      default: true
+    }
+  },
+  emit: ['valid', 'update:address'],
+  setup (props, { emit }) {
+    const baseAddressSchema = ref(addressSchema)
+
+    const mailingAddress = ref<HTMLFormElement | null>(null)
+
+    function updateAddress (address) {
+      emit('update:address', address)
+    }
+
+    function checkBaseAddressValidity (isValid) {
+      emit('valid', isValid)
+    }
+
+    function triggerValidate (): boolean {
+      // validate form fields and show error message for address component from sbc-common-component
+      return mailingAddress.value?.$refs.baseAddress?.$refs.addressForm?.validate()
+    }
+
+    return {
+      baseAddressSchema,
+      mailingAddress,
+      updateAddress,
+      checkBaseAddressValidity,
+      triggerValidate
+    }
   }
 })
-export default class AccountMailingAddress extends Vue {
-  @Prop({ default: null }) baseAddress: any
-  @Prop({ default: true }) viewOnlyMode: boolean
-
-  public baseAddressSchema = addressSchema
-
-  $refs: {
-    mailingAddress: HTMLFormElement
-  }
-
-  /** Emits an update message, so that we can sync with parent */
-  @Emit('update:address')
-  public updateAddress (address) {
-    return address
-  }
-
-  @Emit('valid')
-  public checkBaseAddressValidity (isValid) {
-    return isValid
-  }
-
-  triggerValidate (): boolean {
-    // validate form fields and show error message for address component from sbc-common-component
-    return this.$refs.mailingAddress?.$refs.baseAddress?.$refs.addressForm?.validate()
-  }
-}
 </script>
 
 <style lang="scss" scoped>

@@ -64,7 +64,7 @@ describe('AccountBusinessType.vue', () => {
       mocks: { $t
       }
     })
-    await wrapper.setData({ isLoading: false, orgType: AccountType.BUSINESS })
+    await wrapper.setData({ isLoading: false, orgType: AccountType.BUSINESS, isInitialized: true })
     await wrapper.vm.handleAccountTypeChange(AccountType.BUSINESS)
     await flushPromises()
     expect(wrapper.find("[data-test='input-branch-name']").isVisible()).toBeTruthy()

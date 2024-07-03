@@ -19,12 +19,11 @@
               :footer-props="{
                 itemsPerPageOptions: paginationOptions
               }"
-              :items-per-page="numOfItems"
               hide-default-header
               fixed-header
               :loading="isTableLoading"
               :mobile-breakpoint="0"
-              @update:items-per-page="saveItemsPerPage"
+              @update:options="updateItemsPerPage"
             >
               <!-- Loading -->
               <template #loading>
@@ -190,9 +189,7 @@ import {
   cachePageInfo,
   getAndPruneCachedPageInfo,
   getPaginationOptions,
-  hasCachedPageInfo,
-  numberOfItems,
-  saveItemsPerPage
+  hasCachedPageInfo
 } from '@/components/datatable/resources'
 import { OrgAccountTypes, OrgFilterParams, OrgMap, Organization } from '@/models/Organization'
 import { PropType, computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
@@ -211,6 +208,18 @@ export default defineComponent({
     accountStatus: {
       type: String as PropType<AccountStatus>,
       default: AccountStatus.ACTIVE
+    },
+    sessionStorageKey: {
+      type: String as PropType<SessionStorageKeys>,
+      default: SessionStorageKeys.OrgSearchFilter
+    },
+    paginationNumberOfItemsKey: {
+      type: String as PropType<SessionStorageKeys>,
+      default: SessionStorageKeys.PaginationNumberOfItems
+    },
+    paginationOptionsKey: {
+      type: String as PropType<SessionStorageKeys>,
+      default: SessionStorageKeys.PaginationOptions
     }
   },
   setup (props, { root }) {
@@ -285,9 +294,8 @@ export default defineComponent({
 
     state.accountTypes = Array.from(Object.keys(state.accountTypeMap))
     const paginationOptions = computed(() => getPaginationOptions())
-    const numOfItems = computed(() => numberOfItems())
 
-    const debouncedOrgSearch = debounce(async function (page = 1, pageLimit = numOfItems.value) {
+    const debouncedOrgSearch = debounce(async function (page = 1, pageLimit = state.tableDataOptions.itemsPerPage) {
       try {
         state.isTableLoading = true
         const completeSearchParams: OrgFilterParams = {
@@ -310,20 +318,21 @@ export default defineComponent({
 
     function mounted () {
       state.tableDataOptions = DEFAULT_DATA_OPTIONS
-      const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
+      const orgSearchFilter = ConfigHelper.getFromSession(props.sessionStorageKey) || ''
       try {
         state.searchParams = JSON.parse(orgSearchFilter)
       } catch {
         // Do nothing, we have defaults for searchParams.
       }
-      if (hasCachedPageInfo) {
-        state.tableDataOptions = getAndPruneCachedPageInfo()
+      const hasInfo = hasCachedPageInfo(props.paginationOptionsKey)
+      if (hasInfo) {
+        state.tableDataOptions = getAndPruneCachedPageInfo(props.paginationOptionsKey)
       }
     }
 
     watch(() => state.searchParams, function (value) {
       state.searchParamsExist = doSearchParametersExist(value)
-      state.tableDataOptions = { ...getAndPruneCachedPageInfo(), page: 1 }
+      state.tableDataOptions = { ...getAndPruneCachedPageInfo(props.paginationOptionsKey), page: 1 }
       setSearchFilterToStorage(JSON.stringify(value))
       debouncedOrgSearch()
     }, { deep: true })
@@ -356,7 +365,7 @@ export default defineComponent({
     }
 
     async function syncBeforeNavigate (org: Organization) {
-      cachePageInfo(state.tableDataOptions)
+      cachePageInfo(state.tableDataOptions, props.paginationOptionsKey)
       await orgStore.syncOrganization(org.id)
       await orgStore.addOrgSettings(org)
       await orgStore.syncMembership(org.id)
@@ -364,6 +373,10 @@ export default defineComponent({
 
     function getIndexedTag (tag: string, index: number): string {
       return `${tag}-${index}`
+    }
+
+    function updateItemsPerPage (options: DataOptions): void {
+      cachePageInfo(options, props.paginationOptionsKey)
     }
 
     function getOrgAndAccessTypeFromAccountType (accountType: string): object {
@@ -403,7 +416,7 @@ export default defineComponent({
     })
 
     function setSearchFilterToStorage (val: string): void {
-      ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, val)
+      ConfigHelper.addToSession(props.sessionStorageKey, val)
     }
 
     function doSearchParametersExist (params: OrgFilterParams): boolean {
@@ -435,8 +448,7 @@ export default defineComponent({
       setSearchFilterToStorage,
       doSearchParametersExist,
       paginationOptions,
-      numOfItems,
-      saveItemsPerPage,
+      updateItemsPerPage,
       isActiveAccounts
     }
   }

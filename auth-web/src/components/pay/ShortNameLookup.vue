@@ -1,7 +1,7 @@
 <template>
   <div id="short-name-lookup">
     <v-autocomplete
-      item-disabled="linkedBy"
+      :item-disabled="item => item.statusCode === ShortNameStatus.LINKED"
       :search-input.sync="searchField"
       :hide-no-data="state != LookupStates.NO_RESULTS"
       :items="searchResults"
@@ -89,7 +89,7 @@
             class="result-action"
           >
             <span
-              v-if="item.linkedBy"
+              v-if="item.statusCode === ShortNameStatus.LINKED"
               class="linked"
             >Linked</span>
             <span
@@ -109,6 +109,7 @@ import CommonUtils from '@/util/common-util'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import { LookupType } from '@/models/business-nr-lookup'
 import PaymentService from '@/services/payment.services'
+import { ShortNameStatus } from '@/util/constants'
 import _ from 'lodash'
 import { useOrgStore } from '@/stores/org'
 
@@ -251,6 +252,7 @@ export default defineComponent({
       onItemSelected,
       LookupStates,
       LookupType,
+      ShortNameStatus,
       reset
     }
   }

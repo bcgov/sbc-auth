@@ -199,4 +199,64 @@ describe('AccountInfo.vue', () => {
     wrapper.find('.suspend-account-btn').trigger('click')
     expect(wrapper.vm.isSuspensionReasonFormValid).toBeTruthy()
   })
+
+  it('creates correct requestBody with businessSize and businessType', async () => {
+    const orgStore = useOrgStore()
+    const mockUpdateOrg = vi.fn()
+    orgStore.updateOrg = mockUpdateOrg
+
+    wrapper = shallowMount(AccountInfo, {
+      localVue,
+      vuetify,
+      mixins: [Steppable],
+      methods: {
+        getAccountFromSession: vi.fn(() => ({ id: 1 }))
+      }
+    })
+
+    wrapper.setData({
+      accountDetails: {
+        name: 'New Name',
+        branchName: 'New Branch',
+        isBusinessAccount: true,
+        businessSize: '1',
+        businessType: 'CORPORATION'
+      },
+      currentOrganization: {
+        name: 'Old Name',
+        isBusinessAccount: false
+      }
+    })
+
+    await wrapper.vm.updateDetails()
+
+    expect(mockUpdateOrg).toHaveBeenCalledWith({
+      name: 'New Name',
+      branchName: 'New Branch',
+      isBusinessAccount: true,
+      businessSize: '1',
+      businessType: 'CORPORATION'
+    })
+
+    wrapper.setData({
+      accountDetails: {
+        name: 'New Name 2',
+        isBusinessAccount: false
+      },
+      currentOrganization: {
+        name: 'New Name',
+        branchName: 'New Branch',
+        isBusinessAccount: true,
+        businessSize: '1',
+        businessType: 'CORPORATION'
+      }
+    })
+
+    await wrapper.vm.updateDetails()
+
+    expect(mockUpdateOrg).toHaveBeenCalledWith({
+      name: 'New Name 2',
+      isBusinessAccount: false
+    })
+  })
 })
