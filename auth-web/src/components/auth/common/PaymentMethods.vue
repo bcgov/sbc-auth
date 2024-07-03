@@ -414,7 +414,7 @@ export default defineComponent({
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
       if (!hasOutstandingBalance) {
         bcOnlineDialog.value.close()
-      } else if (hasOutstandingBalance && isFromEFT) {
+      } else if (isFromEFT) {
         await root.$router.push({
           name: Pages.PAY_OUTSTANDING_BALANCE,
           params: { orgId: props.currentOrganization.id },

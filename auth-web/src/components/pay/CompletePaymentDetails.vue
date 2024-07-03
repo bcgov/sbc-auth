@@ -123,7 +123,7 @@ export default defineComponent({
     }
   },
   emits: ['step-forward'],
-  setup (props) {
+  setup (props, {root}) {
     const orgStore = useOrgStore()
     const paymentTypes = PaymentTypes
     const state = reactive({
@@ -142,7 +142,7 @@ export default defineComponent({
     }
 
     function goToPaymentOptions () {
-      this.$router.push(`${Pages.ACCOUNT_SETTINGS}/${Pages.PAYMENT_OPTION}`)
+      root.$router.push(`${Pages.ACCOUNT_SETTINGS}/${Pages.PAYMENT_OPTION}`)
     }
 
     function cancel () {

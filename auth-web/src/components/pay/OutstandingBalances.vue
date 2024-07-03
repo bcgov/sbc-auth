@@ -81,15 +81,15 @@
       class="payment-method-card mb-8 mt-8"
       data-test="cc-payment-card"
     >
-      <v-card-text class="payment-method-card-text py-2">
+      <v-card-text class="payment-method-card-text py-2 d-flex">
         <input
           type="radio"
-          class="payment-method-radio ml-8 mr-8"
+          class="payment-method-radio ml-8 mr-8 d-flex"
           name="payment-method"
           checked
         >
-        <div class="payment-method-description">
-          <div class="payment-type-label">
+        <div class="payment-method-description d-flex">
+          <div class="payment-type-label d-flex">
             <v-icon
               class="payment-type-icon pr-2"
               large
@@ -100,7 +100,7 @@
               Credit Card
             </div>
           </div>
-          <div class="payment-method-description pt-1">
+          <div class="payment-method-description pt-1 d-flex">
             For immediate settlement, pay any outstanding amounts owed using a credit card.
           </div>
         </div>
@@ -296,17 +296,14 @@ export default defineComponent({
   margin-bottom: 12px !important;
 
   .payment-method-card-text {
-    display: flex;
     align-items: center;
     min-height: 120px;
     .payment-method-radio {
       width: 24px;
       height: 24px;
-      display: flex;
       align-items: center;
     }
     .payment-type-label {
-      display: flex;
       .payment-type-icon {
         font-size: 24px !important;
         color: $app-dk-blue;
@@ -317,7 +314,6 @@ export default defineComponent({
       }
     }
     .payment-method-description{
-      display: flex;
       flex-direction: column;
       font-size: 14px;
     }
