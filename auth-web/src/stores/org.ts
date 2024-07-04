@@ -831,6 +831,11 @@ export const useOrgStore = defineStore('org', () => {
     setCurrentOrganizationPADInfo(undefined)
   }
 
+  async function createOutstandingAccountPayment () {
+    const response = await PaymentService.createOutstandingAccountPayment(state.currentOrganization.id)
+    return response?.data || {}
+  }
+
   async function createAccountPayment () {
     const response = await PaymentService.createAccountPayment(state.currentOrganization.id)
     return response?.data || {}
@@ -1139,6 +1144,7 @@ export const useOrgStore = defineStore('org', () => {
     calculateFailedEFTInvoices,
     resetAccountSetupProgress,
     resetAccountWhileSwitchingPremium,
+    createOutstandingAccountPayment,
     createAccountPayment,
     createTransaction,
     getInvoice,
