@@ -1,6 +1,6 @@
 <template>
   <div id="continuation-application-review-table">
-    <v-form class="fas-search continuation-application-search">
+    <v-form class="continuation-application-search continuation-application-search">
       <v-row
         dense
         class="row-margin"
@@ -160,6 +160,10 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 // Note this uses .fas-search
 @import '~/fas-ui/src/assets/scss/search.scss';
+
+// Rename .fas-search
+.continuation-application-search{
+  @extend .fas-search;}
 
 // Vuetify Override
 .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
