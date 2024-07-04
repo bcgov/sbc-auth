@@ -59,6 +59,7 @@
                       :scope="getIndexedTag('find-header-col2', i)"
                     >
                       <v-text-field
+                        v-if="!['action'].includes(header.value)"
                         :id="header.value"
                         input
                         type="search"
@@ -82,7 +83,7 @@
                       color="primary"
                       :class="['open-action-btn', { active: isActiveAccounts }]"
                       :data-test="getIndexedTag('view-account-button', item.id)"
-                      @click="view(item)"
+                      @click="view()"
                     >
                       {{ getButtonLabel(item.status) }}
                     </v-btn>
@@ -123,7 +124,7 @@ export default defineComponent({
       return reviewStates.includes(status) ? 'Review' : 'View'
     }
 
-    function view (item) {
+    function view () {
       // To be updated: route to Continuation Authorization Review page
       // root.$router.push()
     }
