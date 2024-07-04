@@ -23,3 +23,11 @@
     border-bottom-left-radius: 0;
   }
 }
+
+// Cancel and back buttons
+.secondary-btn {
+  background: white !important;
+  color: $app-blue !important;
+  padding: 0 28px 0 28px !important;
+  border: 1px solid $app-blue !important;
+}

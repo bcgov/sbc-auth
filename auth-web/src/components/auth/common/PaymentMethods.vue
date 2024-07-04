@@ -189,6 +189,7 @@
 </template>
 
 <script lang="ts">
+import { Pages, PaymentTypes } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import CommonUtils from '@/util/common-util'
@@ -198,7 +199,6 @@ import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
-import { PaymentTypes } from '@/util/constants'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { useOrgStore } from '@/stores/org'
 
@@ -290,8 +290,8 @@ export default defineComponent({
     isBcolAdmin: { default: false }
   },
   emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-eft-valid', 'is-ejv-valid', 'payment-method-selected'],
-  setup (props, { emit }) {
-    const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails } = useOrgStore()
+  setup (props, { emit, root }) {
+    const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary } = useOrgStore()
     const bcOnlineDialog: InstanceType<typeof ModalDialog> = ref(null)
 
     const state = reactive({
@@ -400,8 +400,27 @@ export default defineComponent({
       selectedPaymentMethod.value = ''
     }
 
-    const continueModal = () => {
-      bcOnlineDialog.value.close()
+    const hasBalanceOwing = async () => {
+      try {
+        const responseData = await getStatementsSummary(props.currentOrganization.id)
+        return responseData?.totalDue || responseData?.totalInvoiceDue
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    const continueModal = async () => {
+      const hasOutstandingBalance = await hasBalanceOwing()
+      const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
+      if (!hasOutstandingBalance) {
+        bcOnlineDialog.value.close()
+      } else if (isFromEFT) {
+        await root.$router.push({
+          name: Pages.PAY_OUTSTANDING_BALANCE,
+          params: { orgId: props.currentOrganization.id },
+          query: { changePaymentType: props.currentSelectedPaymentMethod }
+        })
+      }
       state.bcOnlineWarningMessage = 'This payment method will soon be retired. It is recommended to select a different payment method.'
     }
 

@@ -54,6 +54,7 @@ import NonBcscAdminInviteSetupView from '@/views/auth/create-account/non-bcsc/No
 import NonBcscInfoView from '@/views/auth/create-account/non-bcsc/NonBcscInfoView.vue'
 import PADTermsAndConditionsView from '@/views/auth/PADTermsAndConditionsView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
+import PayOutstandingBalanceView from '@/views/pay/PayOutstandingBalanceView.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
@@ -571,6 +572,17 @@ export function getRoutes (): RouteConfig[] {
       name: 'businessprofile',
       component: BusinessProfileView,
       meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true }
+    },
+    {
+      path: '/account/:orgId/pay-outstanding-balance',
+      name: 'pay-outstanding-balance',
+      component: PayOutstandingBalanceView,
+      props: (route) => (
+        { orgId: route.params.orgId.toString(),
+          paymentId: route.query.paymentId,
+          changePaymentType: route.query.changePaymentType
+        }),
+      meta: { requiresAuth: true, requiresProfile: true }
     },
     {
       path: '/makepayment/:paymentId/:redirectUrl(.*)',
