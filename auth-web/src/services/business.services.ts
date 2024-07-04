@@ -95,6 +95,7 @@ export default class BusinessService {
     CommonUtils.fileDownload(data?.data, `${businessIdentifier} Summary.pdf`, data?.headers['content-type'])
   }
 
+<<<<<<< HEAD
   /**
    * Fetches a continuation review object.
    * @param reviewId the review id
@@ -203,10 +204,14 @@ export default class BusinessService {
   }
 
   static async fetchContinuationBusinesses (): Promise<any> {
+=======
+  static async fetchContinuationReviews (): Promise<any> {
+>>>>>>> cb7d208d (Fixed naming, formatting)
     // Mock data simulating the expected response structure from the API
     return new Promise(resolve => resolve({
       data: [
         {
+          reviewId: '001',
           date: 'July 3, 2024',
           nrNumber: 'NR 0001234',
           businessIdentifier: 'LN958001',
@@ -214,6 +219,7 @@ export default class BusinessService {
           status: 'Awaiting Review'
         },
         {
+          reviewId: '002',
           date: 'April 4, 2024',
           nrNumber: 'NR 0001235',
           businessIdentifier: 'LN786002',
@@ -221,6 +227,7 @@ export default class BusinessService {
           status: 'Change Requested'
         },
         {
+          reviewId: '003',
           date: 'June 15, 2024',
           nrNumber: 'NR 0001239',
           businessIdentifier: 'LN965002',

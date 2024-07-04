@@ -7,20 +7,19 @@
     </header>
 
     <!-- Table Contents -->
-    <StaffContinuationInTable />
+    <StaffContinuationApplicationTable />
   </v-container>
 </template>
 
 <script lang="ts">
-
 import { Component, Vue } from 'vue-property-decorator'
-import StaffContinuationInTable from '@/components/auth/staff/continuation-in/StaffContinuationInTable.vue'
+import StaffContinuationApplicationTable from './StaffContinuationApplicationTable.vue'
 
   @Component({
     components: {
-      StaffContinuationInTable
+      StaffContinuationApplicationTable
     }
   })
-export default class StaffContinuationInReview extends Vue {
+export default class StaffContinuationApplicationReview extends Vue {
 }
 </script>

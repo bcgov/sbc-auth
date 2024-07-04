@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <v-form class="fas-search item-active-search">
+  <div id="continuation-application-review-table">
+    <v-form class="fas-search continuation-application-search">
       <v-row
         dense
         class="row-margin"
@@ -11,8 +11,8 @@
         >
           <transition name="slide-fade">
             <v-data-table
-              :headers="headerAccounts"
-              :items="businesses"
+              :headers="headers"
+              :items="reviews"
               :footer-props="{
                 itemsPerPageOptions: paginationOptions
               }"
@@ -43,7 +43,7 @@
                   <!-- First row has titles. -->
                   <tr class="header-row-1">
                     <th
-                      v-for="(header, i) in headerAccounts"
+                      v-for="(header, i) in headers"
                       :key="i"
                       class="font-weight-bold"
                     >
@@ -54,7 +54,7 @@
                   <!-- Second row has search boxes. Search and filter to be implemented -->
                   <tr class="header-row-2 mt-2 px-2">
                     <th
-                      v-for="(header, i) in headerAccounts"
+                      v-for="(header, i) in headers"
                       :key="getIndexedTag('find-header-row2', i)"
                       :scope="getIndexedTag('find-header-col2', i)"
                     >
@@ -81,9 +81,9 @@
                   <span class="open-action">
                     <v-btn
                       color="primary"
-                      :class="['open-action-btn', { active: isActiveAccounts }]"
-                      :data-test="getIndexedTag('view-account-button', item.id)"
-                      @click="view()"
+                      :class="['open-action-btn', getButtonLabel(item.status).toLowerCase()]"
+                      :data-test="getIndexedTag('view-continuation-button', item.reviewId)"
+                      @click="view(item.reviewId)"
                     >
                       {{ getButtonLabel(item.status) }}
                     </v-btn>
@@ -103,11 +103,11 @@ import { defineComponent, reactive } from '@vue/composition-api'
 import BusinessServices from '@/services/business.services'
 
 export default defineComponent({
-  name: 'StaffAccountsTable',
+  name: 'ContinuationReviewTable',
   setup () {
     const state = reactive({
-      businesses: [],
-      headerAccounts: [
+      reviews: [],
+      headers: [
         { text: 'Date Submitted', value: 'date' },
         { text: 'NR Number', value: 'nrNumber' },
         { text: 'Identifying Number', value: 'businessIdentifier' },
@@ -124,9 +124,9 @@ export default defineComponent({
       return reviewStates.includes(status) ? 'Review' : 'View'
     }
 
-    function view () {
-      // To be updated: route to Continuation Authorization Review page
-      // root.$router.push()
+    function view (reviewId: string) {
+      // route to Continuation Authorization Review page
+      this.$router.push(`/staff/continuation-review/${reviewId}`)
     }
 
     function getIndexedTag (tag: string, index: number): string {
@@ -142,12 +142,12 @@ export default defineComponent({
   },
   mounted () {
     this.isTableLoading = true
-    BusinessServices.fetchContinuationBusinesses()
+    BusinessServices.fetchContinuationReviews()
       .then(result => {
-        this.businesses = result.data
+        this.reviews = result.data
       })
       .catch(error => {
-        console.error('Failed to fetch businesses:', error)
+        console.error('Failed to fetch reviews:', error)
       })
       .finally(() => {
         this.isTableLoading = false
@@ -194,7 +194,7 @@ export default defineComponent({
   display: inline-flex;
 }
 
-.item-active-search {
+.continuation-application-search {
   table > thead > tr > th {
     width: 210px !important;
     min-width: 210px !important;
@@ -211,9 +211,15 @@ export default defineComponent({
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
-    min-width: 4.9rem !important;
   }
 
+  .open-action-btn.view {
+  min-width: 4.9rem !important;
+}
+
+.open-action-btn.review {
+  min-width: 6rem !important;
+}
   .more-actions-btn {
     padding-left: 0px;
     padding-right: 0px;
