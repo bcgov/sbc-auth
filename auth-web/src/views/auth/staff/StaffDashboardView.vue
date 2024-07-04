@@ -142,6 +142,14 @@
       <StaffAccountManagement />
     </v-card>
 
+    <!-- Continuation In Applications -->
+    <v-card
+      flat
+      class="mb-4 pa-8"
+    >
+      <StaffContinuationInReview />
+    </v-card>
+
     <!-- GL Codes -->
     <BaseVExpansionPanel
       v-if="canViewGLCodes"
@@ -309,6 +317,7 @@ import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import SafeEmailView from '@/views/auth/staff/SafeEmailView.vue'
 import { SafeListEmailsRequestBody } from '@/models/Staff'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
+import StaffContinuationInReview from '@/components/auth/staff/continuation-in/StaffContinuationInReview.vue'
 import StaffService from '@/services/staff.services'
 import { Transactions } from '@/components/auth/account-settings/transaction'
 import { useBusinessStore } from '@/stores/business'
@@ -340,6 +349,7 @@ export default defineComponent({
     IncorporationSearchResultView,
     PPRLauncher,
     StaffAccountManagement,
+    StaffContinuationInReview,
     Transactions
   },
   setup (props, { root }) {

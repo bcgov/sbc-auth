@@ -201,4 +201,37 @@ export default class BusinessService {
       return response
     })
   }
+
+  static async fetchContinuationBusinesses (): Promise<any> {
+    // Mock data simulating the expected response structure from the API
+    return new Promise(resolve => resolve({
+      data: [
+        {
+          date: 'July 3, 2024',
+          nrNumber: 'NR 0001234',
+          businessIdentifier: 'LN958001',
+          completingParty: 'John Doe',
+          status: 'Awaiting Review'
+        },
+        {
+          date: 'April 4, 2024',
+          nrNumber: 'NR 0001235',
+          businessIdentifier: 'LN786002',
+          completingParty: 'Jane Smith',
+          status: 'Change Requested'
+        },
+        {
+          date: 'June 15, 2024',
+          nrNumber: 'NR 0001239',
+          businessIdentifier: 'LN965002',
+          completingParty: 'Test Mark',
+          status: 'Rejected'
+        }
+      ]
+    } as any))
+
+    // const url = `${ConfigHelper.getLegalAPIV2Url()}/businesses/continuation-in`
+    // const response = await axios.get(url)
+    // return response.data
+  }
 }
