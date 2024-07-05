@@ -32,6 +32,7 @@ import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
 import CcPaymentView from '@/views/pay/CcPaymentView.vue'
 import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import ConfigHelper from '@/util/config-helper'
+import ContinuationAuthorizationReview from '@/views/auth/staff/ContinuationAuthorizationReview.vue'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
 import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
@@ -906,6 +907,20 @@ export function getRoutes (): RouteConfig[] {
         breadcrumb: [
           StaffDashboardBreadcrumb,
           InvoluntaryDissolutionBreadcrumb
+        ],
+        requiresAuth: true,
+        showNavBar: true
+      }
+    },
+    {
+      path: '/staff/continuation-review/:reviewId',
+      name: 'ContinuationReview',
+      component: ContinuationAuthorizationReview,
+      props: true,
+      meta: {
+        allowedRoles: [Role.Staff],
+        breadcrumb: [
+          StaffDashboardBreadcrumb
         ],
         requiresAuth: true,
         showNavBar: true

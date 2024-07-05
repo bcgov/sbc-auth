@@ -123,7 +123,7 @@ export default defineComponent({
     }
   },
   emits: ['step-forward'],
-  setup (props, {root}) {
+  setup (props, { root }) {
     const orgStore = useOrgStore()
     const paymentTypes = PaymentTypes
     const state = reactive({
