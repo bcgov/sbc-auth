@@ -13,14 +13,14 @@ const vuetify = new Vuetify({})
 
 const continuationReview = {
   filing: {
-    continuationIn: {},
-    review: {
-      id: 123,
-      completingParty: 'Joe Enduser',
-      status: ContinuationReviewStatus.AWAITING_REVIEW,
-      submissionDate: '2024-07-01T19:00:00.000+00:00',
-      creationDate: '2024-07-01T19:00:00.000+00:00'
-    }
+    continuationIn: {}
+  },
+  review: {
+    id: 123,
+    completingParty: 'Joe Enduser',
+    status: ContinuationReviewStatus.AWAITING_REVIEW,
+    submissionDate: '2024-07-01T19:00:00.000+00:00',
+    creationDate: '2024-07-01T19:00:00.000+00:00'
   }
 }
 
@@ -50,7 +50,7 @@ describe('ContinuationAuthorizationReviewResult component', () => {
     expect(wrapper.vm.continuationIn).toBeTruthy()
   })
 
-  it.skip('computed "isActionable"', () => {
+  it('computed "isActionable"', () => {
     expect(wrapper.vm.isActionable).toBe(true)
   })
 
@@ -71,7 +71,7 @@ describe('ContinuationAuthorizationReviewResult component', () => {
     expect(wrapper.find('#continuation-authorization-review-result').exists()).toBe(true)
   })
 
-  it.skip('rendered all the sections', () => {
+  it('rendered all the sections', () => {
     const sections = wrapper.findAll('section')
     expect(sections.length).toBe(2)
   })
@@ -82,13 +82,13 @@ describe('ContinuationAuthorizationReviewResult component', () => {
     // FUTURE: add more here
   })
 
-  it.skip('rendered the second section', () => {
+  it('rendered the second section', () => {
     const section = wrapper.findAll('section').at(1)
     expect(section.find('label').text()).toBe('Review Result')
     // FUTURE: add more here
   })
 
-  it('rendered a functional select component', () => {
+  it.skip('rendered a functional select component', () => {
     // BusinessService.downloadDocument = vi.fn().mockResolvedValue(null)
 
     // const button = wrapper.findAll('section').at(5).find('.download-affidavit-btn')
@@ -99,7 +99,7 @@ describe('ContinuationAuthorizationReviewResult component', () => {
     // vi.clearAllMocks()
   })
 
-  it('rendered a functional textarea component', () => {
+  it.skip('rendered a functional textarea component', () => {
     // BusinessService.downloadDocument = vi.fn().mockResolvedValue(null)
 
     // const button = wrapper.findAll('section').at(5).find('.download-authorization-btn')
