@@ -103,7 +103,7 @@ import { defineComponent, reactive } from '@vue/composition-api'
 import BusinessServices from '@/services/business.services'
 
 export default defineComponent({
-  name: 'ContinuationReviewTable',
+  name: 'ContinuationApplicationTable',
   setup () {
     const state = reactive({
       reviews: [],
@@ -219,11 +219,12 @@ export default defineComponent({
 
   .open-action-btn.view {
   min-width: 4.9rem !important;
-}
+  }
 
-.open-action-btn.review {
+  .open-action-btn.review {
   min-width: 6rem !important;
-}
+  }
+
   .more-actions-btn {
     padding-left: 0px;
     padding-right: 0px;

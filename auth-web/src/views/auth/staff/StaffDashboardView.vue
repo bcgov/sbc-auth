@@ -147,7 +147,7 @@
       flat
       class="mb-4 pa-8"
     >
-      <StaffContinuationApplicationReview />
+      <ContinuationApplications />
     </v-card>
 
     <!-- GL Codes -->
@@ -309,6 +309,7 @@ import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
 import { BaseVExpansionPanel } from '@/components'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import ContinuationApplications from '@/components/auth/staff/continuation-application/ContinuationApplications.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -317,7 +318,6 @@ import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import SafeEmailView from '@/views/auth/staff/SafeEmailView.vue'
 import { SafeListEmailsRequestBody } from '@/models/Staff'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
-import StaffContinuationApplicationReview from '@/components/auth/staff/continuation-application/StaffContinuationApplicationReview.vue'
 import StaffService from '@/services/staff.services'
 import { Transactions } from '@/components/auth/account-settings/transaction'
 import { useBusinessStore } from '@/stores/business'
@@ -349,7 +349,7 @@ export default defineComponent({
     IncorporationSearchResultView,
     PPRLauncher,
     StaffAccountManagement,
-    StaffContinuationApplicationReview,
+    ContinuationApplications,
     Transactions
   },
   setup (props, { root }) {

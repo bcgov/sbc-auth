@@ -1,5 +1,8 @@
 <template>
-  <v-container class="pa-0">
+  <v-container
+    id="continuation-applications-review"
+    class="pa-0"
+  >
     <header class="view-header align-center justify-space-between mt-n1 mb-4">
       <h2 class="view-header__title">
         Continuation Applications
@@ -7,19 +10,19 @@
     </header>
 
     <!-- Table Contents -->
-    <StaffContinuationApplicationTable />
+    <ContinuationApplicationTable />
   </v-container>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import StaffContinuationApplicationTable from './StaffContinuationApplicationTable.vue'
+import ContinuationApplicationTable from './ContinuationApplicationTable.vue'
 
   @Component({
     components: {
-      StaffContinuationApplicationTable
+      ContinuationApplicationTable
     }
   })
-export default class StaffContinuationApplicationReview extends Vue {
+export default class ContinuationApplications extends Vue {
 }
 </script>

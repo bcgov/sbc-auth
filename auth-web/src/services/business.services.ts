@@ -237,7 +237,7 @@ export default class BusinessService {
       ]
     } as any))
 
-    // const url = `${ConfigHelper.getLegalAPIV2Url()}/businesses/continuation-in`
+    // const url = `${ConfigHelper.getLegalAPIV2Url()}/reviews/continuation-in`
     // const response = await axios.get(url)
     // return response.data
   }
