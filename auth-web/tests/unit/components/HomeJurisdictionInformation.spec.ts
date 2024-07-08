@@ -1,6 +1,6 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import BusinessService from '@/services/business.services'
-import HomeJurisdictionInformation from '@/components/auth/staff/continuation-in/HomeJurisdictionInformation.vue'
+import HomeJurisdictionInformation from '@/components/auth/staff/continuation-application/HomeJurisdictionInformation.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'

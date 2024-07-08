@@ -1,5 +1,5 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import ExtraprovincialRegistrationBc from '@/components/auth/staff/continuation-in/ExtraprovincialRegistrationBc.vue'
+import ExtraprovincialRegistrationBc from '@/components/auth/staff/continuation-application/ExtraprovincialRegistrationBc.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
