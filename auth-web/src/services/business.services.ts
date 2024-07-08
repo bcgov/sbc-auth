@@ -1,10 +1,10 @@
 import { BNRequest, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad } from '@/models/business'
+import { ContinuationReviewIF, ContinuationReviewStatus } from '@/models/continuation-review'
 import { AxiosResponse } from 'axios'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import { ContinuationReviewIF } from '@/models/continuation-review'
 import { axios } from '@/util/http-util'
 
 export default class BusinessService {
@@ -98,7 +98,7 @@ export default class BusinessService {
   /**
    * Fetches a continuation review object.
    * @param reviewId the review id
-   * @returns a promise to return the axios response or the error response
+   * @returns a promise to return the data or the axios error response
    */
   static async fetchContinuationReview (reviewId: number): Promise<ContinuationReviewIF> {
     // safety check
@@ -107,9 +107,24 @@ export default class BusinessService {
     }
 
     // *** TODO: once the API is ready, replace this mocked data with the Axios call below
+    await new Promise(resolve => setTimeout(resolve, 1000))
     return new Promise(resolve => resolve({
-      review: {},
-      results: [],
+      review: {
+        id: 123,
+        completingParty: 'Joe Enduser',
+        status: ContinuationReviewStatus.AWAITING_REVIEW,
+        submissionDate: '2024-07-01T19:00:00.000+00:00',
+        creationDate: '2024-07-01T19:00:00.000+00:00'
+      },
+      results: [
+        {
+          status: ContinuationReviewStatus.CHANGE_REQUESTED,
+          comments: 'a long string...',
+          reviewer: 'Staffanie Stafford',
+          submissionDate: null,
+          creationDate: '2024-07-01T19:00:00.000+00:00'
+        }
+      ],
       filing: {
         continuationIn: {
           authorization: {
@@ -150,6 +165,27 @@ export default class BusinessService {
 
     // const url = `${ConfigHelper.getLegalAPIV2Url()}/continuation-reviews/${reviewId}`
     // return axios.get(url)
+  }
+
+  /**
+   * Saves a continuation review result.
+   * @param reviewResult the review result object
+   * @returns a promise to return the data or the axios error response
+   */
+  static async saveContinuationReviewResult (status: ContinuationReviewStatus, comment: string): Promise<any> {
+    // safety check
+    if (!status) {
+      throw new Error('Invalid parameters')
+    }
+
+    const data = { status, comment }
+
+    // *** TODO: once the API is ready, replace this mocked data with the Axios call below
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    return new Promise(resolve => resolve(data))
+
+    // const url = `${ConfigHelper.getLegalAPIV2Url()}/continuation-reviews/${reviewId}`
+    // return axios.post(url, data)
   }
 
   /**

@@ -31,7 +31,7 @@
     </ModalDialog>
 
     <!-- Home Jurisdiction -->
-    <article class="section-container">
+    <section class="section-container">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -50,10 +50,10 @@
           </div>
         </v-col>
       </v-row>
-    </article>
+    </section>
 
     <!-- Identifying Number in Home Jurisdiction -->
-    <article class="section-container">
+    <section class="section-container">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -72,10 +72,10 @@
           </div>
         </v-col>
       </v-row>
-    </article>
+    </section>
 
     <!-- Registered Name in Home Jurisdiction -->
-    <article class="section-container">
+    <section class="section-container">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -94,10 +94,10 @@
           </div>
         </v-col>
       </v-row>
-    </article>
+    </section>
 
     <!-- Business Number -->
-    <article class="section-container">
+    <section class="section-container">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -116,10 +116,10 @@
           </div>
         </v-col>
       </v-row>
-    </article>
+    </section>
 
     <!-- Date of Incorporation, Continuation, or Amalgamation in Foreign Jurisdiction -->
-    <article class="section-container">
+    <section class="section-container">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -138,12 +138,12 @@
           </div>
         </v-col>
       </v-row>
-    </article>
+    </section>
 
     <v-divider class="mx-6 mt-6 mb-3" />
 
     <!-- Continuation Authorization -->
-    <article class="section-container">
+    <section class="section-container">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -201,12 +201,12 @@
           </div>
         </v-col>
       </v-row>
-    </article>
+    </section>
 
     <v-divider class="mx-6 mt-6 mb-3" />
 
     <!-- Authorization Date -->
-    <article class="section-container">
+    <section class="section-container">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -225,7 +225,7 @@
           </div>
         </v-col>
       </v-row>
-    </article>
+    </section>
   </div>
 </template>
 
@@ -364,12 +364,12 @@ export default class HomeJurisdictionInformation extends Vue {
 }
 
 // reduce top whitespace for all articles except first one
-article:not(:first-child) {
-  padding-top: 1.25rem;
+section:not(:first-child) {
+  padding-top: 1.5rem;
 }
 
 // clear bottom whitespace for all articles except last one
-article:not(:last-child) {
+section:not(:last-child) {
   padding-bottom: 0;
 }
 
