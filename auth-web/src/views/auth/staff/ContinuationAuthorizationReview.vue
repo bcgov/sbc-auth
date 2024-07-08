@@ -1,5 +1,6 @@
 <template>
   <div id="continuation-authorization-review">
+    <!-- error dialog -->
     <ModalDialog
       ref="errorDialog"
       :title="dialogTitle"
@@ -26,6 +27,21 @@
         </v-btn>
       </template>
     </ModalDialog>
+
+    <!-- spinner -->
+    <v-fade-transition>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
+      </div>
+    </v-fade-transition>
 
     <v-container
       v-if="!!continuationReview"
@@ -147,6 +163,7 @@ export default class ContinuationAuthorizationReview extends Vue {
   @Prop({ required: true }) readonly reviewId: number
 
   // local variables
+  isLoading = false
   haveUnsavedChanges = false
   dialogTitle = ''
   dialogText = ''
@@ -168,7 +185,9 @@ export default class ContinuationAuthorizationReview extends Vue {
   }
 
   async mounted (): Promise<void> {
+    this.isLoading = true
     this.continuationReview = await BusinessService.fetchContinuationReview(this.reviewId).catch(() => null)
+    this.isLoading = false
 
     // check for expected data
     const review = this.continuationReview?.review
