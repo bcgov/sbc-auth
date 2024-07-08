@@ -75,8 +75,8 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import BusinessService from '@/services/business.services'
 import CardHeader from '@/components/auth/common/CardHeader.vue'
 import { ContinuationReviewIF } from '@/models/continuation-review'
-import ExtraprovincialRegistrationBc from '@/components/auth/staff/continuation-in/ExtraprovincialRegistrationBc.vue'
-import HomeJurisdictionInformation from '@/components/auth/staff/continuation-in/HomeJurisdictionInformation.vue'
+import ExtraprovincialRegistrationBc from '@/components/auth/staff/continuation-application/ExtraprovincialRegistrationBc.vue'
+import HomeJurisdictionInformation from '@/components/auth/staff/continuation-application/HomeJurisdictionInformation.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
 @Component({

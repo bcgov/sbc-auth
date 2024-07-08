@@ -142,6 +142,14 @@
       <StaffAccountManagement />
     </v-card>
 
+    <!-- Continuation Applications -->
+    <v-card
+      flat
+      class="mb-4 pa-8"
+    >
+      <ContinuationApplications />
+    </v-card>
+
     <!-- GL Codes -->
     <BaseVExpansionPanel
       v-if="canViewGLCodes"
@@ -301,6 +309,7 @@ import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
 import { BaseVExpansionPanel } from '@/components'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import ContinuationApplications from '@/components/auth/staff/continuation-application/ContinuationApplications.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -340,6 +349,7 @@ export default defineComponent({
     IncorporationSearchResultView,
     PPRLauncher,
     StaffAccountManagement,
+    ContinuationApplications,
     Transactions
   },
   setup (props, { root }) {
