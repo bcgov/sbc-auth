@@ -1,8 +1,29 @@
+export enum ContinuationReviewStatus {
+  AWAITING_REVIEW = 'AWAITING_REVIEW',
+  CHANGE_REQUESTED = 'CHANGE_REQUESTED',
+  RESUBMITTED = 'RESUBMITTED',
+  REJECTED = 'REJECTED',
+  ACCEPTED = 'ACCEPTED',
+  ABANDONED = 'ABANDONED'
+}
+
 /** The Review object inside the continuation review API response. */
-export interface ContinuationReviewReviewIF {}
+export interface ContinuationReviewReviewIF {
+  id: number
+  completingParty: string
+  status: ContinuationReviewStatus
+  submissionDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
+  creationDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00'
+}
 
 /** The Result object inside the continuation review API response. */
-export interface ContinuationReviewResultIF {}
+export interface ContinuationReviewResultIF {
+  status: ContinuationReviewStatus
+  comments: string // max 2000 chars
+  reviewer: string
+  submissionDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00'
+  creationDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00'
+}
 
 /** The Continuation In filing object inside the continuation review API response. */
 export interface ContinuationReviewFilingIF {
