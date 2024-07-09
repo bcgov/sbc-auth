@@ -169,7 +169,8 @@ export default class BusinessService {
 
   /**
    * Saves a continuation review result.
-   * @param reviewResult the review result object
+   * @param status the review status
+   * @param comment the review comment
    * @returns a promise to return the data or the axios error response
    */
   static async saveContinuationReviewResult (status: ContinuationReviewStatus, comment: string): Promise<any> {
