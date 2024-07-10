@@ -792,8 +792,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   populateContinuationInModalValues () {
     this.dialogTitle = this.$t('removeContinuationInConfirmTitle').toString()
     this.dialogText = this.$t('removeContinuationInConfirmText').toString()
-    this.primaryBtnText = 'Delete Continuation In Application'
-    this.secondaryBtnText = 'Keep Continuation In Application'
+    this.primaryBtnText = 'Delete Continuation Application'
+    this.secondaryBtnText = 'Keep Continuation Application'
     this.primaryBtnHandler = this.confirmRemovalContinuationIn
     this.secondaryBtnHandler = this.cancelRemoval
   }
