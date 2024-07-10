@@ -32,7 +32,7 @@ threadloop==1.0.2
 thrift==0.20.0
 tornado==6.4.1
 urllib3==2.2.2
-zipp==3.19.0
+zipp==3.19.1
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
 -e git+https://github.com/seeker25/sbc-auth.git@20087#egg=auth-api&subdirectory=auth-api
 -e git+https://github.com/seeker25/sbc-connect-common.git@small_tweaks#egg=gcp-queue&subdirectory=python/gcp-queue
