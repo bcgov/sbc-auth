@@ -179,7 +179,7 @@ export enum AffiliationTypes {
     NAME_REQUEST = 'Name Request',
     AMALGAMATION_APPLICATION = 'Amalgamation Application',
     INCORPORATION_APPLICATION = 'Incorporation Application',
-    CONTINUATION_IN = 'Continuation In Application',
+    CONTINUATION_IN = 'Continuation Application',
     CORPORATION = 'Corporation',
     REGISTRATION = 'Registration'
 }
@@ -328,13 +328,13 @@ export enum NrRequestTypeStrings {
   // Change Assumed Name (not used to display NR type, kept for reference)
   // XCASO = 'Change Assumed Name', // Extraprovincial Society
 
-  // Continuation in
-  BECT = 'Continuation In', // BC Benefit Company Incorporation
-  CCCT = 'Continuation In', // Community Contribution Co.
-  CT = 'Continuation In', // B.C. Company
-  CTC = 'Continuation In', // Cooperative
-  CTSO = 'Continuation In', // Society
-  ULCT = 'Continuation In', // Unlimited Liability Co.
+  // Continuation application
+  BECT = 'Continuation Application', // BC Benefit Company Incorporation
+  CCCT = 'Continuation Application', // Community Contribution Co.
+  CT = 'Continuation Application', // B.C. Company
+  CTC = 'Continuation Application', // Cooperative
+  CTSO = 'Continuation Application', // Society
+  ULCT = 'Continuation Application', // Unlimited Liability Co.
 
   // Conversion
   BECR = 'Conversion (Act)', // BC Benefit Company Incorporation
