@@ -4,7 +4,7 @@
     id="extraprovincial-registration-bc"
   >
     <!-- Registration Number in B.C. -->
-    <article class="section-container">
+    <section class="section-container">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -23,10 +23,10 @@
           </div>
         </v-col>
       </v-row>
-    </article>
+    </section>
 
     <!-- Registered Name in B.C. -->
-    <article class="section-container">
+    <section class="section-container">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -45,10 +45,10 @@
           </div>
         </v-col>
       </v-row>
-    </article>
+    </section>
 
     <!-- Date of Registration in B.C. -->
-    <article class="section-container">
+    <section class="section-container">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -67,7 +67,7 @@
           </div>
         </v-col>
       </v-row>
-    </article>
+    </section>
   </div>
 </template>
 
@@ -115,12 +115,12 @@ export default class ExtraprovincialRegistrationBc extends Vue {
 }
 
 // reduce top whitespace for all articles except first one
-article:not(:first-child) {
-  padding-top: 1.25rem;
+section:not(:first-child) {
+  padding-top: 1.5rem;
 }
 
 // clear bottom whitespace for all articles except last one
-article:not(:last-child) {
+section:not(:last-child) {
   padding-bottom: 0;
 }
 </style>
