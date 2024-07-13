@@ -33,7 +33,6 @@ import { computed, defineComponent, reactive, toRefs } from '@vue/composition-ap
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import _ from 'lodash'
-// import PaymentService from '@/services/payment.services'
 
 export default defineComponent({
   name: 'ShortNameRefund',
@@ -47,8 +46,7 @@ export default defineComponent({
       default: ''
     }
   },
-  emits: ['on-link-account'],
-  setup (props, { emit, root }) {
+  setup (props, { root }) {
     const state = reactive({
       actionDropdown: [],
       isShortNameLinkingDialogOpen: false,

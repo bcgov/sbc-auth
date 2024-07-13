@@ -9,7 +9,10 @@
       </h1>
     </div>
     <v-card class="pl-5 py-2 mt-5 pr-5">
-      <v-form ref="refundForm" v-model="isFormValid">
+      <v-form
+        ref="refundForm"
+        v-model="isFormValid"
+      >
         <v-card-text>
           <v-row no-gutters>
             <v-col class="col-12 col-sm-12 ">
@@ -96,19 +99,19 @@
             class="px-7"
             color="primary"
             data-test="btn-edit-routing-cancel"
-            @click="clearForm"
+            @click="handleCancelOrBack"
           >
-            <span>Cancel</span>
+            <span>{{ backButtonLabel }}</span>
           </v-btn>
           <v-btn
             large
-            color="primary"
+            :color="buttonColor"
             class="px-8 font-weight-bold"
             data-test="btn-edit-routing-done"
-            :disabled="!isFormValid"
+            :disabled="!isFormValid || isSubmitted"
             @click="submitRefundRequest"
           >
-            <span>Submit Refund Request</span>
+            <span>{{ buttonText }}</span>
           </v-btn>
         </v-card-actions>
       </v-form>
@@ -117,7 +120,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
+import { defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { EftRefundRequest } from '@/models/refund'
+import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'ShortNameRefundView',
@@ -131,12 +136,15 @@ export default defineComponent({
     unsettledAmount: {
       type: String,
       default: ''
+    },
+    shortNameId: {
+      type: Number,
+      default: undefined
     }
   },
-  emits: ['submit-refund-request'],
-  setup (props, { emit }) {
+  setup (props, { root }) {
     const state = reactive({
-      refundAmount: '',
+      refundAmount: undefined,
       casSupplierNum: '',
       email: '',
       staffComment: '',
@@ -155,39 +163,88 @@ export default defineComponent({
           return pattern.test(v) || 'Valid email is required'
         }
       ],
+      orgStore: useOrgStore(),
       staffCommentRules: [
         v => (v.length < 500) || 'Cannot exceed 500 characters'
-      ]
+      ],
+      isSubmitted: false
     })
 
     const refundForm = ref(null)
     const isFormValid = ref(false)
+    const buttonText = ref('Submit Refund Request')
+    const buttonColor = ref('primary')
+    const backButtonLabel = ref('Cancel')
 
-    const clearForm = () => {
-      state.refundAmount = ''
+    function handleCancelOrBack () {
+      if (backButtonLabel.value === 'Cancel') {
+        clearForm()
+      } else {
+        root.$router?.push({
+          name: 'shortnamedetails',
+          query: {
+            shortNameId: props.shortNameDetails.id
+          }
+        })
+      }
+    }
+
+    function clearForm () {
+      state.refundAmount = undefined
       state.casSupplierNum = ''
       state.email = ''
       state.staffComment = ''
       refundForm.value.resetValidation()
+      state.isSubmitted = false
+      buttonText.value = 'Submit Refund Request'
+      buttonColor.value = 'primary'
+      backButtonLabel.value = 'Cancel'
     }
 
-    const submitRefundRequest = () => {
+    async function submitRefundRequest () {
       if (refundForm.value.validate()) {
-        emit('submit-refund-request', {
+        const refundPayload: EftRefundRequest = {
+          shortNameId: props.shortNameDetails.id,
           refundAmount: state.refundAmount,
           casSupplierNum: state.casSupplierNum,
-          email: state.email,
-          staffComment: state.staffComment
-        })
+          refundEmail: state.email,
+          comment: state.staffComment,
+          shortName: props.shortNameDetails.shortName
+        }
+        try {
+          await state.orgStore.refundEFT(refundPayload)
+          state.isSubmitted = true
+          buttonText.value = 'Approved'
+          buttonColor.value = 'green'
+          backButtonLabel.value = 'Back'
+        } catch (error) {
+          state.isSubmitted = false
+          buttonText.value = 'Failed'
+          buttonColor.value = 'red'
+        }
       }
     }
+
+    watch(() => state.isSubmitted, (newVal) => {
+      if (newVal) {
+        buttonText.value = 'Approved'
+        buttonColor.value = 'green'
+      } else {
+        buttonText.value = 'Submit Refund Request'
+        buttonColor.value = 'primary'
+      }
+    })
 
     return {
       ...toRefs(state),
       refundForm,
       isFormValid,
       clearForm,
-      submitRefundRequest
+      submitRefundRequest,
+      buttonText,
+      buttonColor,
+      backButtonLabel,
+      handleCancelOrBack
     }
   }
 })

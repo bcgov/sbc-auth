@@ -895,7 +895,7 @@ export function getRoutes (): RouteConfig[] {
       component: ShortNameRefundView,
       meta: {
         requiresAuth: true,
-        allowedRoles: [Role.ManageEft],
+        allowedRoles: [Role.EftRefund],
         breadcrumb: [
           StaffDashboardBreadcrumb,
           ShortNameMappingBreadcrumb,

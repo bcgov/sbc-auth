@@ -16,9 +16,10 @@
         {{ unsettledAmountHeader }}
       </h1>
       <p class="mt-3 mb-0">
-        Review and verify short name details
+        Review and verify short name details {{ canEFTRefund }}, {{ displayRefundAlert }}
       </p>
       <v-alert
+        v-if="displayRefundAlert && canEFTRefund"
         class="mt-3 mb-0 alert-item account-alert-inner"
         :icon="false"
         prominent
@@ -39,6 +40,7 @@
     </div>
 
     <ShortNameRefund
+      v-if="displayRefundAlert && canEFTRefund"
       :shortNameDetails="shortNameDetails"
       :unsettledAmount="unsettledAmount"
       class="mb-12"
@@ -60,9 +62,12 @@
 import { PropType, computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import PaymentService from '@/services/payment.services'
+import { Role } from '@/util/constants'
 import ShortNameAccountLink from '@/components/pay/eft/ShortNameAccountLink.vue'
 import ShortNameRefund from '@/components/pay/eft/ShortNameRefund.vue'
 import ShortNameTransactions from '@/components/pay/eft/ShortNameTransactions.vue'
+import moment from 'moment'
+import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'ShortNameMappingView',
@@ -74,12 +79,16 @@ export default defineComponent({
     }
   },
   setup (props) {
+    const userStore = useUserStore()
+    const currentUser = computed(() => userStore.currentUser)
     const state = reactive({
       shortNameDetails: {},
       highlightIndex: -1,
       snackbar: false,
       snackbarText: '',
-      unsettledAmount: ''
+      unsettledAmount: '',
+      displayRefundAlert: false,
+      canEFTRefund: computed((): boolean => currentUser.value?.roles?.includes(Role.EftRefund))
     })
 
     onMounted(async () => {
@@ -88,8 +97,16 @@ export default defineComponent({
 
     const unsettledAmountHeader = computed<string>(() => {
       const details = state.shortNameDetails
+
       state.unsettledAmount = details.creditsRemaining !== undefined
         ? CommonUtils.formatAmount(details.creditsRemaining) : ''
+
+      state.displayRefundAlert = (
+        (details.creditsRemaining > 0 && details.linkedAccountsCount > 0) ||
+        (details.creditsRemaining > 0 && details.linkedAccountsCount <= 0 &&
+          moment(details.lastPaymentReceivedDate).isBefore(moment().subtract(30, 'days')))
+      )
+
       return `Unsettled Amount for ${details.shortName}: ${state.unsettledAmount}`
     })
 
