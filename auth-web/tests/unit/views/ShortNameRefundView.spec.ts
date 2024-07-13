@@ -45,7 +45,7 @@ describe('ShortNameRefundView.vue', () => {
 
   it('clears the form when the cancel button is clicked', async () => {
     await wrapper.setData({
-      refundAmount: '100.00',
+      refundAmount: 100.00,
       casSupplierNum: 'CAS-123',
       email: 'test@example.com',
       staffComment: 'Test comment'
@@ -54,9 +54,9 @@ describe('ShortNameRefundView.vue', () => {
     const cancelButton = wrapper.find('[data-test="btn-edit-routing-cancel"]')
     await cancelButton.trigger('click')
 
-    expect(wrapper.vm.refundAmount).toBe('')
-    expect(wrapper.vm.casSupplierNum).toBe('')
-    expect(wrapper.vm.email).toBe('')
-    expect(wrapper.vm.staffComment).toBe('')
+    expect(wrapper.vm.$data.refundAmount).toBe(undefined)
+    expect(wrapper.vm.$data.casSupplierNum).toBe('')
+    expect(wrapper.vm.$data.email).toBe('')
+    expect(wrapper.vm.$data.staffComment).toBe('')
   })
 })

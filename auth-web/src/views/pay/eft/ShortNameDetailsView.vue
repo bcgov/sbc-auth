@@ -69,6 +69,13 @@ import ShortNameTransactions from '@/components/pay/eft/ShortNameTransactions.vu
 import moment from 'moment'
 import { useUserStore } from '@/stores/user'
 
+interface ShortNameDetails {
+  shortName: string;
+  creditsRemaining?: number;
+  linkedAccountsCount: number;
+  lastPaymentReceivedDate: Date;
+}
+
 export default defineComponent({
   name: 'ShortNameMappingView',
   components: { ShortNameAccountLink, ShortNameTransactions, ShortNameRefund },
@@ -82,7 +89,7 @@ export default defineComponent({
     const userStore = useUserStore()
     const currentUser = computed(() => userStore.currentUser)
     const state = reactive({
-      shortNameDetails: {},
+      shortNameDetails: {} as ShortNameDetails,
       highlightIndex: -1,
       snackbar: false,
       snackbarText: '',
@@ -93,10 +100,7 @@ export default defineComponent({
 
     onMounted(async () => {
       await loadShortname(props.shortNameId)
-    })
-
-    const unsettledAmountHeader = computed<string>(() => {
-      const details = state.shortNameDetails
+      const details: ShortNameDetails = state.shortNameDetails
 
       state.unsettledAmount = details.creditsRemaining !== undefined
         ? CommonUtils.formatAmount(details.creditsRemaining) : ''
@@ -106,7 +110,10 @@ export default defineComponent({
         (details.creditsRemaining > 0 && details.linkedAccountsCount <= 0 &&
           moment(details.lastPaymentReceivedDate).isBefore(moment().subtract(30, 'days')))
       )
+    })
 
+    const unsettledAmountHeader = computed<string>(() => {
+      const details: ShortNameDetails = state.shortNameDetails
       return `Unsettled Amount for ${details.shortName}: ${state.unsettledAmount}`
     })
 
