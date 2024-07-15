@@ -121,7 +121,7 @@
 
           <p
             v-if="(payment.type === paymentTypes.BCOL)"
-            class="mt-4 py-4 px-6 important"
+            class="mt-4 py-4 px-6 important bcol-warning-text"
           >
             {{ bcOnlineWarningMessage }}
           </p>
@@ -525,4 +525,9 @@ export default defineComponent({
 .pad-form-container {
   max-width: 75ch;
 }
+
+.bcol-warning-text {
+  font-size: 14px;
+}
+
 </style>
