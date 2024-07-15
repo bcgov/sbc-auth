@@ -280,6 +280,10 @@ export default defineComponent({
   font-size: 16px;
   font-weight: bold;
 }
+.v-card__text {
+  color: $gray7 !important;
+}
+
 .amount-owing-details-card {
   border-color: $BCgovInputError !important;
   border-width: 2px !important;
@@ -302,6 +306,7 @@ export default defineComponent({
       width: 24px;
       height: 24px;
       align-items: center;
+      accent-color: $app-blue !important;
     }
     .payment-type-label {
       .payment-type-icon {

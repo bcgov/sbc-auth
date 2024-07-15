@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="complete-payment-details">
     <p class="mb-10 balance-paid">
       <v-icon
         class="pr-1"
@@ -195,6 +195,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "$assets/scss/theme.scss";
 @import "$assets/scss/actions.scss";
+
+.complete-payment-details {
+  color: $gray7;
+}
 
 .payment-type-header{
   .v-icon {
