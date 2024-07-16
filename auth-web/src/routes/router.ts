@@ -4,6 +4,7 @@ import {
   MyBusinessRegistryBreadcrumb,
   RegistryDashboardBreadcrumb,
   RegistryHomeBreadcrumb, ShortNameDetailsBreadcrumb, ShortNameMappingBreadcrumb,
+  ShortNameRefundBreadcrumb,
   StaffBusinessRegistryBreadcrumb,
   StaffDashboardBreadcrumb
 } from '@/resources/BreadcrumbResources'
@@ -71,6 +72,7 @@ import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SetupGovmAccountView from '@/views/auth/staff/SetupGovmAccountView.vue'
 import ShortNameDetailsView from '@/views/pay/eft/ShortNameDetailsView.vue'
 import ShortNameMappingView from '@/views/pay/ShortNameMappingView.vue'
+import ShortNameRefundView from '@/views/pay/eft/ShortNameRefundView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
@@ -886,6 +888,26 @@ export function getRoutes (): RouteConfig[] {
         showNavBar: true
       },
       props: (route) => ({ shortNameId: route.params.shortNameId })
+    },
+    {
+      path: '/pay/shortname-details/:shortNameId/refund',
+      name: 'shortnamerefund',
+      component: ShortNameRefundView,
+      meta: {
+        requiresAuth: true,
+        allowedRoles: [Role.EftRefund],
+        breadcrumb: [
+          StaffDashboardBreadcrumb,
+          ShortNameMappingBreadcrumb,
+          ShortNameDetailsBreadcrumb,
+          ShortNameRefundBreadcrumb
+        ],
+        showNavBar: true
+      },
+      props: route => ({
+        shortNameDetails: JSON.parse(route.query.shortNameDetails || '{}'),
+        unsettledAmount: route.query.unsettledAmount || ''
+      })
     },
     {
       path: '/pay/refund',

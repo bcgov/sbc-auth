@@ -54,6 +54,7 @@ export enum Role {
     FasSearch = 'fas_search',
     ViewAllTransactions = 'view_all_transactions',
     ManageEft = 'manage_eft',
+    EftRefund = 'eft_refund',
     CreateCredits = 'create_credits',
     FasRefund = 'fas_refund',
     BcolStaffAdmin = 'bcol_staff_admin'

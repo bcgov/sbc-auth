@@ -16,9 +16,35 @@
         {{ unsettledAmountHeader }}
       </h1>
       <p class="mt-3 mb-0">
-        Review and verify short name details
+        Review and verify short name details {{ canEFTRefund }}, {{ displayRefundAlert }}
       </p>
+      <v-alert
+        v-if="displayRefundAlert && canEFTRefund"
+        class="mt-3 mb-0 alert-item account-alert-inner"
+        :icon="false"
+        prominent
+        outlined
+        type="warning"
+      >
+        <div class="account-alert-inner mb-0">
+          <v-icon
+            medium
+          >
+            mdi-alert
+          </v-icon>
+          <p class="account-alert__info mb-0 pl-3">
+            Please verify if the {{ unsettledAmount }} balance is eligible for a refund, or you can link to a new account.
+          </p>
+        </div>
+      </v-alert>
     </div>
+
+    <ShortNameRefund
+      v-if="displayRefundAlert && canEFTRefund"
+      :shortNameDetails="shortNameDetails"
+      :unsettledAmount="unsettledAmount"
+      class="mb-12"
+    />
 
     <ShortNameAccountLink
       class="mb-12"
@@ -36,12 +62,23 @@
 import { PropType, computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import PaymentService from '@/services/payment.services'
+import { Role } from '@/util/constants'
 import ShortNameAccountLink from '@/components/pay/eft/ShortNameAccountLink.vue'
+import ShortNameRefund from '@/components/pay/eft/ShortNameRefund.vue'
 import ShortNameTransactions from '@/components/pay/eft/ShortNameTransactions.vue'
+import moment from 'moment'
+import { useUserStore } from '@/stores/user'
+
+interface ShortNameDetails {
+  shortName: string;
+  creditsRemaining?: number;
+  linkedAccountsCount: number;
+  lastPaymentReceivedDate: Date;
+}
 
 export default defineComponent({
   name: 'ShortNameMappingView',
-  components: { ShortNameAccountLink, ShortNameTransactions },
+  components: { ShortNameAccountLink, ShortNameTransactions, ShortNameRefund },
   props: {
     shortNameId: {
       type: String as PropType<string>,
@@ -49,22 +86,35 @@ export default defineComponent({
     }
   },
   setup (props) {
+    const userStore = useUserStore()
+    const currentUser = computed(() => userStore.currentUser)
     const state = reactive({
-      shortNameDetails: {},
+      shortNameDetails: {} as ShortNameDetails,
       highlightIndex: -1,
       snackbar: false,
-      snackbarText: ''
+      snackbarText: '',
+      unsettledAmount: '',
+      displayRefundAlert: false,
+      canEFTRefund: computed((): boolean => currentUser.value?.roles?.includes(Role.EftRefund))
     })
 
     onMounted(async () => {
       await loadShortname(props.shortNameId)
+      const details: ShortNameDetails = state.shortNameDetails
+
+      state.unsettledAmount = details.creditsRemaining !== undefined
+        ? CommonUtils.formatAmount(details.creditsRemaining) : ''
+
+      state.displayRefundAlert = (
+        (details.creditsRemaining > 0 && details.linkedAccountsCount > 0) ||
+        (details.creditsRemaining > 0 && details.linkedAccountsCount <= 0 &&
+          moment(details.lastPaymentReceivedDate).isBefore(moment().subtract(30, 'days')))
+      )
     })
 
     const unsettledAmountHeader = computed<string>(() => {
-      const details = state.shortNameDetails
-      const unsettledAmount = details.creditsRemaining !== undefined
-        ? CommonUtils.formatAmount(details.creditsRemaining) : ''
-      return `Unsettled Amount for ${details.shortName}: ${unsettledAmount}`
+      const details: ShortNameDetails = state.shortNameDetails
+      return `Unsettled Amount for ${details.shortName}: ${state.unsettledAmount}`
     })
 
     async function onLinkAccount (account: any, results: Array<any>) {
@@ -104,6 +154,17 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
+@import '@/assets/scss/theme.scss';
+  .account-alert-inner {
+    .v-icon {
+      color: $app-alert-orange;
+    }
+    background-color: $BCgovGold0 !important;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .account-alert__info {
+    flex: 1 1 auto;
+  }
 </style>

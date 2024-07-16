@@ -1,4 +1,5 @@
 import { EFTShortnameResponse, EFTTransactionFilterParams, EFTTransactionListResponse } from '@/models/eft-transaction'
+import { EftRefundRequest, RefundRequest } from '@/models/refund'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
 import { LinkedShortNameFilterParams, ShortNameSummaryFilterParams } from '@/models/pay/short-name'
@@ -16,7 +17,6 @@ import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { Payment } from '@/models/Payment'
 import { PaymentTypes } from '@/util/constants'
-import { RefundRequest } from '@/models/refund'
 import { axios } from '@/util/http-util'
 
 export default class PaymentService {
@@ -48,6 +48,11 @@ export default class PaymentService {
 
   static refundInvoice (invoiceId: string, refundPayload: RefundRequest): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}/refunds`
+    return axios.post(url, refundPayload)
+  }
+
+  static refundEFT (refundPayload: EftRefundRequest): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/shortname_refund`
     return axios.post(url, refundPayload)
   }
 
