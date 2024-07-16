@@ -351,7 +351,7 @@ export default defineComponent({
           item.accountId, ShortNamePaymentActions.APPLY_CREDITS)
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error('An errored occurred cancelling payments pending.', error)
+        console.error('An errored occurred applying payments.', error)
       }
       this.$emit('on-payment-action')
       state.loading = false
