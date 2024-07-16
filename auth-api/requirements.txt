@@ -74,7 +74,7 @@ tornado==6.4.1
 typing_extensions==4.12.0
 urllib3==2.2.2
 yarl==1.9.4
-zipp==3.19.0
+zipp==3.19.1
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
 -e git+https://github.com/seeker25/sbc-connect-common.git@small_tweaks#egg=gcp-queue&subdirectory=python/gcp-queue
 git+https://github.com/daxiom/simple-cloudevent.py.git

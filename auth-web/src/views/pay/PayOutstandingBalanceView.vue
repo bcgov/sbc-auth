@@ -85,11 +85,16 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      await getStatementSummary()
-      const isOwing = (statementSummary.value?.totalDue + statementSummary.value?.totalInvoiceDue) > 0
-      // Go to step two on the redirect back and payment has been completed
-      if (props.paymentId && props.changePaymentType && !isOwing) {
-        stepper.value.jumpToStep(2)
+      try {
+        await getStatementSummary()
+        const isOwing = (statementSummary.value?.totalDue + statementSummary.value?.totalInvoiceDue) > 0
+        // Go to step two on the redirect back and payment has been completed
+        if (props.paymentId && props.changePaymentType && !isOwing) {
+          stepper.value.jumpToStep(2)
+        }
+      } catch (error) {
+        // Failed to retrieve statement summary, so we should stay step 1
+        console.error('Failed getting statement summary', error)
       }
     })
 
