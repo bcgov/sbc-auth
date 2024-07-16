@@ -304,6 +304,10 @@ export default defineComponent({
   cursor: pointer;
 }
 
+.caution-box {
+  color: $gray7;
+}
+
 .choose-text {
   font-size: 16px;
   font-weight: bold;

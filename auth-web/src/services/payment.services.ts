@@ -1,9 +1,11 @@
+
 import { EFTShortnameResponse, EFTTransactionFilterParams, EFTTransactionListResponse } from '@/models/eft-transaction'
 import { EftRefundRequest, RefundRequest } from '@/models/refund'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
 import { LinkedShortNameFilterParams, ShortNameSummaryFilterParams } from '@/models/pay/short-name'
 import { PADInfo, PADInfoValidation } from '@/models/Organization'
+import { PaymentTypes, ShortNameLinkStatus } from '@/util/constants'
 import {
   StatementFilterParams,
   StatementListItem,
@@ -11,12 +13,12 @@ import {
   StatementNotificationSettings,
   StatementSettings
 } from '@/models/statement'
+
 import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { Payment } from '@/models/Payment'
-import { PaymentTypes } from '@/util/constants'
 import { axios } from '@/util/http-util'
 
 export default class PaymentService {
@@ -308,8 +310,20 @@ export default class PaymentService {
     return axios.post(url, body)
   }
 
-  static deleteShortNameLink (shortNameId: string, shortNameLinkId: string): AxiosPromise<EFTShortnameResponse> {
+  static unlinkShortNameAccount (shortNameId: string, shortNameLinkId: string): AxiosPromise<EFTShortnameResponse> {
+    const body = {
+      statusCode: ShortNameLinkStatus.INACTIVE
+    }
     const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/links/${shortNameLinkId}`
-    return axios.delete(url)
+    return axios.patch(url, body)
+  }
+
+  static async postShortnamePaymentAction (shortNameId: string, accountId: string, action: string): AxiosPromise<void> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/payment`
+    const body = {
+      action: action,
+      accountId: accountId
+    }
+    return axios.post(url, body)
   }
 }
