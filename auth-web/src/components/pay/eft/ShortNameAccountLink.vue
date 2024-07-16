@@ -346,8 +346,13 @@ export default defineComponent({
 
     async function applyPayment (item) {
       state.loading = true
-      await PaymentService.postShortnamePaymentAction(props.shortNameDetails.id,
-        item.accountId, ShortNamePaymentActions.APPLY_CREDITS)
+      try {
+        await PaymentService.postShortnamePaymentAction(props.shortNameDetails.id,
+          item.accountId, ShortNamePaymentActions.APPLY_CREDITS)
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('An errored occurred cancelling payments pending.', error)
+      }
       this.$emit('on-payment-action')
       state.loading = false
     }
@@ -374,8 +379,13 @@ export default defineComponent({
 
     async function cancelPayment (item) {
       state.loading = true
-      await PaymentService.postShortnamePaymentAction(props.shortNameDetails.id,
-        item.accountId, ShortNamePaymentActions.CANCEL)
+      try {
+        await PaymentService.postShortnamePaymentAction(props.shortNameDetails.id,
+          item.accountId, ShortNamePaymentActions.CANCEL)
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('An errored occurred cancelling payments pending.', error)
+      }
       emit('on-payment-action')
       state.loading = false
     }
