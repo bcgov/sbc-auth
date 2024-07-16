@@ -651,9 +651,16 @@ export enum ShortNameStatus {
     UNLINKED = 'UNLINKED'
 }
 
+export enum ShortNamePaymentActions {
+    APPLY_CREDITS = 'APPLY_CREDITS',
+    CANCEL = 'CANCEL',
+    REVERSE = 'REVERSE'
+}
+
 export enum ShortNameLinkStatus {
     PENDING = 'PENDING',
-    LINKED = 'LINKED'
+    LINKED = 'LINKED',
+    INACTIVE = 'INACTIVE'
 }
 
 export enum ShortNameResponseStatus {

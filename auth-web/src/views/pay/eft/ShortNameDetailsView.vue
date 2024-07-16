@@ -51,6 +51,7 @@
       :shortNameDetails="shortNameDetails"
       :highlightIndex="highlightIndex"
       @on-link-account="onLinkAccount"
+      @on-payment-action="onPaymentAction"
     />
 
     <ShortNameTransactions
@@ -100,6 +101,10 @@ export default defineComponent({
 
     onMounted(async () => {
       await loadShortname(props.shortNameId)
+      updateState()
+    })
+
+    function updateState () {
       const details: ShortNameDetails = state.shortNameDetails
 
       state.unsettledAmount = details.creditsRemaining !== undefined
@@ -107,10 +112,10 @@ export default defineComponent({
 
       state.displayRefundAlert = (
         (details.creditsRemaining > 0 && details.linkedAccountsCount > 0) ||
-        (details.creditsRemaining > 0 && details.linkedAccountsCount <= 0 &&
-          moment(details.lastPaymentReceivedDate).isBefore(moment().subtract(30, 'days')))
+          (details.creditsRemaining > 0 && details.linkedAccountsCount <= 0 &&
+              moment(details.lastPaymentReceivedDate).isBefore(moment().subtract(30, 'days')))
       )
-    })
+    }
 
     const unsettledAmountHeader = computed<string>(() => {
       const details: ShortNameDetails = state.shortNameDetails
@@ -127,6 +132,11 @@ export default defineComponent({
       setTimeout(() => {
         state.highlightIndex = -1
       }, 4000)
+    }
+
+    async function onPaymentAction () {
+      await loadShortname(props.shortNameId)
+      updateState()
     }
 
     async function loadShortname (shortnameId: string): Promise<void> {
@@ -146,6 +156,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       onLinkAccount,
+      onPaymentAction,
       formatCurrency: CommonUtils.formatAmount,
       unsettledAmountHeader
     }
