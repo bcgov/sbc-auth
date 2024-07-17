@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="!!continuationIn"
+    v-if="!!review && !!filing"
     id="home-jurisdiction-information"
   >
     <ModalDialog
@@ -230,9 +230,10 @@
 </template>
 
 <script lang="ts">
-import { CanJurisdictions, IntlJurisdictions, UsaJurisdiction } from '@bcrs-shared-components/jurisdiction/list-data'
+import { CanJurisdictions, IntlJurisdictions, UsaJurisdiction }
+  from '@bcrs-shared-components/jurisdiction/list-data'
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { ContinuationReviewFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
+import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
 import BusinessService from '@/services/business.services'
 import { CorpTypes } from '@/util/constants'
 import DateUtils from '@/util/date-utils'
@@ -249,16 +250,16 @@ export default class HomeJurisdictionInformation extends Vue {
     errorDialog: InstanceType<typeof ModalDialog>
   }
 
-  /** Continuation Review object that comes from parent component. */
-  @Prop({ required: true }) readonly continuationReview: ContinuationReviewIF
+  @Prop({ required: true }) readonly review: ContinuationReviewIF
+  @Prop({ required: true }) readonly filing: ContinuationFilingIF
 
   // local variables
   dialogTitle = ''
   dialogText = ''
   isDownloading = false
 
-  get continuationIn (): ContinuationReviewFilingIF {
-    return this.continuationReview?.filing?.continuationIn
+  get continuationIn () {
+    return this.filing?.continuationIn
   }
 
   get homeJurisdiction (): string {

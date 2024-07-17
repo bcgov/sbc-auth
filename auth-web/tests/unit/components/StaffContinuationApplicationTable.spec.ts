@@ -49,7 +49,7 @@ describe('StaffContinuationApplicationTable.vue', () => {
         },
         {
           reviewId: '124',
-          status: 'Accepted',
+          status: 'Approved',
           date: '2024-05-01',
           nrNumber: 'NR 1234568',
           businessIdentifier: 'LN987235',
@@ -80,7 +80,7 @@ describe('StaffContinuationApplicationTable.vue', () => {
         },
         {
           reviewId: '124',
-          status: 'Accepted',
+          status: 'Approved',
           date: '2024-05-02',
           nrNumber: 'NR 1234568',
           businessIdentifier: 'LN987235',
@@ -106,6 +106,6 @@ describe('StaffContinuationApplicationTable.vue', () => {
     expect(secondRowColumns.at(1).text()).toBe('NR 1234568')
     expect(secondRowColumns.at(2).text()).toBe('LN987235')
     expect(secondRowColumns.at(3).text()).toBe('John Doe')
-    expect(secondRowColumns.at(4).text()).toBe('Accepted')
+    expect(secondRowColumns.at(4).text()).toBe('Approved')
   })
 })

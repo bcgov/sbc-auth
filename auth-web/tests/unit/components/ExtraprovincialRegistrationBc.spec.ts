@@ -10,14 +10,14 @@ Vue.use(Vuetify)
 const localVue = createLocalVue()
 const vuetify = new Vuetify({})
 
-const continuationReview = {
-  filing: {
-    continuationIn: {
-      business: {
-        foundingDate: '2001-05-03T07:00:00.000+00:00',
-        identifier: 'A0054444',
-        legalName: 'FIRST AWIQ SHOPPING CENTRES BC LIMITED'
-      }
+const review = {}
+
+const filing = {
+  continuationIn: {
+    business: {
+      foundingDate: '2001-05-03T07:00:00.000+00:00',
+      identifier: 'A0054444',
+      legalName: 'FIRST AWIQ SHOPPING CENTRES BC LIMITED'
     }
   }
 }
@@ -28,7 +28,7 @@ describe('ExtraprovincialRegistrationBc component', () => {
   beforeAll(async () => {
     wrapper = mount(ExtraprovincialRegistrationBc, {
       localVue,
-      propsData: { continuationReview },
+      propsData: { review, filing },
       vuetify
     })
 
@@ -40,8 +40,9 @@ describe('ExtraprovincialRegistrationBc component', () => {
     wrapper.destroy()
   })
 
-  it('got the prop', () => {
-    expect(wrapper.vm.continuationReview).toBeTruthy()
+  it('got the props', () => {
+    expect(wrapper.vm.review).toBeTruthy()
+    expect(wrapper.vm.filing).toBeTruthy()
   })
 
   it('rendered the component', () => {

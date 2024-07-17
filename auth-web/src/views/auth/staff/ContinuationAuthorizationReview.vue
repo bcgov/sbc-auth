@@ -2,7 +2,7 @@
   <div id="continuation-authorization-review">
     <!-- error dialog -->
     <ModalDialog
-      ref="errorDialog"
+      ref="errorDialogComponent"
       :title="dialogTitle"
       :text="dialogText"
       dialog-class="notify-dialog"
@@ -21,14 +21,14 @@
           large
           color="error"
           data-test="dialog-ok-button"
-          @click="$refs.errorDialog.close()"
+          @click="onDialogClose(true)"
         >
           OK
         </v-btn>
       </template>
     </ModalDialog>
 
-    <!-- spinner -->
+    <!-- loading spinner -->
     <v-fade-transition>
       <div
         v-if="isLoading"
@@ -44,7 +44,7 @@
     </v-fade-transition>
 
     <v-container
-      v-if="!!continuationReview"
+      v-if="!!review && !!filing"
       class="view-container"
     >
       <div class="view-header mb-0">
@@ -61,10 +61,13 @@
         class="mt-8"
       >
         <CardHeader
-          icon="mdi-home-city-outline"
+          icon="mdi-domain"
           label="Extraprovincial Registration in B.C."
         />
-        <ExtraprovincialRegistrationBc :continuationReview="continuationReview" />
+        <ExtraprovincialRegistrationBc
+          :review="review"
+          :filing="filing"
+        />
       </v-card>
 
       <!-- Home Jurisdiction Information -->
@@ -74,10 +77,13 @@
         class="mt-8"
       >
         <CardHeader
-          icon="mdi-domain"
+          icon="mdi-home-city-outline"
           label="Home Jurisdiction Information"
         />
-        <HomeJurisdictionInformation :continuationReview="continuationReview" />
+        <HomeJurisdictionInformation
+          :review="review"
+          :filing="filing"
+        />
       </v-card>
 
       <!-- Continuation Authorization Review Result -->
@@ -89,9 +95,22 @@
         flat
         class="mt-6"
       >
-        <ContinuationAuthorizationReviewResult
-          ref="reviewResult"
-          :continuationReview="continuationReview"
+        <PreviousCorrespondence
+          ref="reviewResultComponent"
+          class="pt-8 px-6"
+          :review="review"
+          :filing="filing"
+          @review-result="reviewResult = $event"
+          @email-body-text="emailBodyText = $event"
+        />
+
+        <v-divider class="mt-7 mx-6" />
+
+        <ReviewResult
+          ref="reviewResultComponent"
+          class="py-8 px-6"
+          :review="review"
+          :filing="filing"
           @review-result="reviewResult = $event"
           @email-body-text="emailBodyText = $event"
         />
@@ -131,11 +150,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import { ContinuationReviewIF, ContinuationReviewStatus } from '@/models/continuation-review'
+import { ContinuationFilingIF, ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
 import BusinessService from '@/services/business.services'
 import CardHeader from '@/components/CardHeader.vue'
-import ContinuationAuthorizationReviewResult
-  from '@/components/auth/staff/continuation-application/ContinuationAuthorizationReviewResult.vue'
 import { EventBus } from '@/event-bus'
 import ExtraprovincialRegistrationBc
   from '@/components/auth/staff/continuation-application/ExtraprovincialRegistrationBc.vue'
@@ -143,20 +160,23 @@ import HomeJurisdictionInformation
   from '@/components/auth/staff/continuation-application/HomeJurisdictionInformation.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Pages } from '@/util/constants'
+import PreviousCorrespondence from '@/components/auth/staff/continuation-application/PreviousCorrespondence.vue'
+import ReviewResult from '@/components/auth/staff/continuation-application/ReviewResult.vue'
 
 @Component({
   components: {
     CardHeader,
-    ContinuationAuthorizationReviewResult,
     ExtraprovincialRegistrationBc,
     HomeJurisdictionInformation,
-    ModalDialog
+    ModalDialog,
+    PreviousCorrespondence,
+    ReviewResult
   }
 })
 export default class ContinuationAuthorizationReview extends Vue {
   $refs: {
-    errorDialog: InstanceType<typeof ModalDialog>
-    reviewResult: InstanceType<typeof ContinuationAuthorizationReviewResult>
+    errorDialogComponent: InstanceType<typeof ModalDialog>
+    reviewResultComponent: InstanceType<typeof ReviewResult>
   }
 
   /** Review ID that comes from route. */
@@ -164,44 +184,67 @@ export default class ContinuationAuthorizationReview extends Vue {
 
   // local variables
   isLoading = false
+  isSubmitting = false
   haveUnsavedChanges = false
   dialogTitle = ''
   dialogText = ''
-  continuationReview = null as ContinuationReviewIF
-  reviewResult = null as ContinuationReviewStatus
+  review = null as ContinuationReviewIF
+  filing = null as ContinuationFilingIF
+  reviewResult = null as ReviewStatus
   emailBodyText = ''
-  isSubmitting = false
 
-  /** Whether the current application is an extraprovincial continuation in. */
+  /** Whether the current application is an extraprovincial Continuation In. */
   get isExpro (): boolean {
-    const mode = this.continuationReview?.filing?.continuationIn?.mode
+    const mode = this.filing?.continuationIn?.mode
     return (mode === 'EXPRO')
   }
 
-  /** Whether this authorization review is actionable. */
+  /** Whether this Continuation Authorization Review is actionable. */
   get isActionable (): boolean {
-    const status = this.continuationReview?.review?.status
+    const status = this.review?.status
     return (status === 'AWAITING_REVIEW' || status === 'RESUBMITTED')
   }
 
+  /** Called when this page is mounted. */
   async mounted (): Promise<void> {
+    let review: ContinuationReviewIF
+    let filing: ContinuationFilingIF
+
     this.isLoading = true
-    this.continuationReview = await BusinessService.fetchContinuationReview(this.reviewId).catch(() => null)
+    review = await BusinessService.fetchContinuationReview(this.reviewId).catch(() => null)
+    if (!review) {
+      // eslint-disable-next-line no-console
+      console.log('Missing review =', review)
+    } else if (review.filingLink) {
+      filing = await BusinessService.fetchFiling(review.filingLink).catch(() => null)
+
+      if (!filing) {
+        // eslint-disable-next-line no-console
+        console.log('Missing filing =', filing)
+      }
+    }
     this.isLoading = false
 
     // check for expected data
-    const review = this.continuationReview?.review
-    const results = this.continuationReview?.results
-    const filing = this.continuationReview?.filing
-
-    if (!review || !results || !filing) {
-      // eslint-disable-next-line no-console
-      console.log(`Missing data for Continuation Review ${this.reviewId} = ${this.continuationReview}`)
-
+    if (review && filing) {
+      // assign local properties to unblock rendering
+      this.review = review
+      this.filing = filing
+    } else {
       // show error dialog
-      this.dialogTitle = 'Unable to fetch review'
-      this.dialogText = 'An error occurred while fetching the review. Please try again.'
-      this.$refs.errorDialog.open()
+      this.dialogTitle = 'Unable to load review'
+      this.dialogText = 'An error occurred while loading the review. Please try again.'
+      this.$refs.errorDialogComponent.open()
+    }
+  }
+
+  /** Called when dialog is closed. */
+  onDialogClose (returnToDashboard = true): void {
+    this.$refs.errorDialogComponent.close()
+
+    if (returnToDashboard) {
+      // route back to staff dashboard
+      this.$router.push(Pages.STAFF_DASHBOARD)
     }
   }
 
@@ -213,18 +256,25 @@ export default class ContinuationAuthorizationReview extends Vue {
     }
   }
 
+  /** Called when user clicks Cancel button. */
   onClickCancel (): void {
     this.haveUnsavedChanges = false
+    // route back to staff dashboard
     this.$router.push(Pages.STAFF_DASHBOARD)
   }
 
+  /** Called when user clicks Submit button. */
   async onClickSubmit (): Promise<void> {
-    if (!this.$refs.reviewResult.validate()) return
+    // check component validity
+    if (!this.$refs.reviewResultComponent.validate()) return
 
     try {
       this.isSubmitting = true
-      await BusinessService.saveContinuationReviewResult(this.reviewResult, this.emailBodyText)
+      await BusinessService.submitContinuationReviewResult(this.review.id, this.reviewResult, this.emailBodyText)
       this.haveUnsavedChanges = false
+
+      // route back to staff dashboard
+      this.$router.push(Pages.STAFF_DASHBOARD)
 
       // indicate success via toast (snackbar) on main page
       EventBus.$emit('show-toast', {
@@ -239,13 +289,10 @@ export default class ContinuationAuthorizationReview extends Vue {
       // show error dialog
       this.dialogTitle = 'Unable to submit review'
       this.dialogText = 'An error occurred while submitting the review. Please try again.'
-      this.$refs.errorDialog.open()
+      this.$refs.errorDialogComponent.open()
     } finally {
       this.isSubmitting = false
     }
-
-    // if submit succeeded, route back to staff dashboard
-    if (!this.haveUnsavedChanges) this.$router.push(Pages.STAFF_DASHBOARD)
   }
 
   /** Intercepts route change (but not page unloads). */

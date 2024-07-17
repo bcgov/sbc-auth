@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="!!continuationIn"
+    v-if="!!review && !!filing"
     id="extraprovincial-registration-bc"
   >
     <!-- Registration Number in B.C. -->
@@ -73,16 +73,16 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { ContinuationReviewFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
+import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
 import DateUtils from '@/util/date-utils'
 
 @Component({})
 export default class ExtraprovincialRegistrationBc extends Vue {
-  /** Continuation Review object that comes from parent component. */
-  @Prop({ required: true }) readonly continuationReview: ContinuationReviewIF
+  @Prop({ required: true }) readonly review: ContinuationReviewIF
+  @Prop({ required: true }) readonly filing: ContinuationFilingIF
 
-  get continuationIn (): ContinuationReviewFilingIF {
-    return this.continuationReview?.filing?.continuationIn
+  get continuationIn () {
+    return this.filing?.continuationIn
   }
 
   get identifier (): string {

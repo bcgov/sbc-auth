@@ -11,31 +11,31 @@ Vue.use(Vuetify)
 const localVue = createLocalVue()
 const vuetify = new Vuetify({})
 
-const continuationReview = {
-  filing: {
-    continuationIn: {
-      authorization: {
-        date: '2024-07-01',
-        files: [
-          {
-            fileKey: '0071dbd6-6095-46f6-b5e4-cc859b0ebf27.pdf',
-            fileName: 'My Authorization Document.pdf'
-          }
-        ]
-      },
-      foreignJurisdiction: {
-        affidavitFileKey: '007bd7bd-d421-49a9-9925-03ce561d044f.pdf',
-        affidavitFileName: 'My Director Affidavit.pdf',
-        country: 'CA',
-        identifier: 'AB-5444',
-        incorporationDate: '2001-04-02',
-        legalName: 'FIRST AWIQ SHOPPING CENTRES ALBERTA UNLIMITED',
-        region: 'AB',
-        taxId: '123456789'
-      },
-      nameRequest: {
-        legalType: 'CUL'
-      }
+const review = {}
+
+const filing = {
+  continuationIn: {
+    authorization: {
+      date: '2024-07-01',
+      files: [
+        {
+          fileKey: '0071dbd6-6095-46f6-b5e4-cc859b0ebf27.pdf',
+          fileName: 'My Authorization Document.pdf'
+        }
+      ]
+    },
+    foreignJurisdiction: {
+      affidavitFileKey: '007bd7bd-d421-49a9-9925-03ce561d044f.pdf',
+      affidavitFileName: 'My Director Affidavit.pdf',
+      country: 'CA',
+      identifier: 'AB-5444',
+      incorporationDate: '2001-04-02',
+      legalName: 'FIRST AWIQ SHOPPING CENTRES ALBERTA UNLIMITED',
+      region: 'AB',
+      taxId: '123456789'
+    },
+    nameRequest: {
+      legalType: 'CUL'
     }
   }
 }
@@ -46,7 +46,7 @@ describe('HomeJurisdictionInformation component', () => {
   beforeAll(async () => {
     wrapper = mount(HomeJurisdictionInformation, {
       localVue,
-      propsData: { continuationReview },
+      propsData: { review, filing },
       vuetify
     })
 
@@ -58,8 +58,9 @@ describe('HomeJurisdictionInformation component', () => {
     wrapper.destroy()
   })
 
-  it('got the prop', () => {
-    expect(wrapper.vm.continuationReview).toEqual(continuationReview)
+  it('got the props', () => {
+    expect(wrapper.vm.review).toEqual(review)
+    expect(wrapper.vm.filing).toEqual(filing)
   })
 
   it('computed "isContinuationInAffidavitRequired"', () => {

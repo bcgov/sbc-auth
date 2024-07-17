@@ -85,4 +85,44 @@ export default class DateUtils {
 
     return dateStr
   }
+
+  /**
+   * Converts a Date object to a time string (HH:MM am/pm) in Pacific timezone.
+   * @example "2021-01-01 07:00:00 GMT" -> "11:00 pm"
+   * @example "2021-01-01 08:00:00 GMT" -> "12:00 am"
+   */
+  static dateToPacificTime (date: Date): string {
+    // safety check
+    if (!isDate(date) || isNaN(date.getTime())) return null
+
+    // NB: some versions of Node have only en-US locale
+    // so use that and convert results accordingly
+    let timeStr = date.toLocaleTimeString('en-US', {
+      timeZone: 'America/Vancouver',
+      hour: 'numeric', // 11
+      minute: '2-digit', // 00
+      hour12: true // a.m./p.m.
+    })
+
+    // replace AM with am and PM with pm
+    timeStr = timeStr.replace('AM', 'am').replace('PM', 'pm')
+
+    return timeStr
+  }
+
+  /**
+   * Converts an API datetime string (in UTC) to a date and time string (Month Day, Year at HH:MM am/pm
+   * Pacific time).
+   * @example "2021-01-01T00:00:00.000000+00:00" -> "Dec 31, 2020 at 04:00 pm Pacific time" (PST example)
+   * @example "2021-07-01T00:00:00.000000+00:00" -> "Jun 30, 2021 at 05:00 pm Pacific time" (PDT example)
+   */
+  static apiToPacificDateTime (dateTimeString: string): string {
+    if (!dateTimeString) return null // safety check
+
+    const date = this.apiToDate(dateTimeString)
+    const dateStr = this.dateToPacificDate(date)
+    const timeStr = this.dateToPacificTime(date)
+
+    return `${dateStr} at ${timeStr} Pacific time`
+  }
 }
