@@ -98,7 +98,7 @@
           <span>{{ formatCurrency(item.amountOwing) }}</span>
         </template>
         <template #expanded-item="{ item }">
-          <tr class="expanded-item-row">
+          <tr class="expanded-item-row" v-if="item.hasPendingPayment">
             <td
               :colspan="headers.length"
               class="pb-5 pl-0"
@@ -147,14 +147,13 @@
                   v-model="actionDropdown[index]"
                   :attach="`#action-menu-${index}`"
                   offset-y
-                  nudge-left="74"
+                  nudge-left="156"
                 >
                   <template #activator="{ on }">
                     <v-btn
                       small
                       color="primary"
-                      min-height="2rem"
-                      class="more-actions-btn"
+                      class="more-actions-btn pa-0"
                       :loading="loading"
                       v-on="on"
                     >
@@ -163,7 +162,7 @@
                   </template>
                   <v-list>
                     <v-list-item
-                      class="actions-dropdown_item"
+                      class="actions-dropdown_item pl-6 pt-1 pb-1 ma-0"
                     >
                       <v-list-item-subtitle
                         @click="showConfirmUnlinkAccountModal(item)"
@@ -323,10 +322,11 @@ export default defineComponent({
     async function onLinkAccount (account: any) {
       await loadShortNameLinks()
       emit('on-link-account', account, state.results)
+      emit('on-payment-action')
     }
 
     function showApplyPayment (item: any) {
-      return props.shortNameDetails.creditsRemaining >= item.amountOwing
+      return item.amountOwing > 0 && props.shortNameDetails.creditsRemaining >= item.amountOwing
     }
 
     function dialogConfirm () {
@@ -448,7 +448,6 @@ export default defineComponent({
       showConfirmCancelPaymentModal,
       showConfirmUnlinkAccountModal,
       onLinkAccount,
-      unlinkAccount,
       applyPayment,
       showApplyPayment,
       getEFTShortNameSummaries,
@@ -510,6 +509,12 @@ export default defineComponent({
   }
   .base-table__item-cell {
     padding: 16px 0 16px 0
+  }
+
+  .new-actions {
+    .v-list {
+      width:206px
+    }
   }
 
   // Remove border for rows that are expanded with additional information
