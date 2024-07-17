@@ -50,90 +50,97 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
 import { ContinuationFilingIF, ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
+import { defineComponent, reactive } from '@vue/composition-api'
 import AutoResize from 'vue-auto-resize'
 import CommonUtils from '@/util/common-util'
 import moment from 'moment'
 
-@Component({
-  directives: { AutoResize }
+export default defineComponent({
+  name: 'PreviousCorrespondence',
+
+  directives: { AutoResize },
+
+  props: {
+    review: { type: Object as () => ContinuationReviewIF, required: true },
+    filing: { type: Object as () => ContinuationFilingIF, required: true }
+  },
+
+  setup (props) {
+    const state = reactive({
+      /** The list of correspondence items. */
+      get correspondences (): Array<any> {
+        if (!props.review) return [] // safety check
+
+        const list = []
+
+        // always add initial submission
+        // get date and user from review object
+        list.push({
+          label: `${strToPacificDateTime(props.review.creationDate)} &mdash; ` +
+            `Application Submitted &mdash; ${props.review.completingParty}`,
+          body: ''
+        })
+
+        // add items according to review results
+        props.review.results.forEach((result) => {
+          // did staff request a change?
+          if (result.status === ReviewStatus.CHANGE_REQUESTED) {
+            list.push({
+              label: `${strToPacificDateTime(result.creationDate)} &mdash; ` +
+                `Change Requested &mdash; ${result.reviewer}`,
+              body: result.comments
+            })
+
+            // did user resubmit?
+            // get date from result object; don't display user
+            if (result.submissionDate) {
+              list.push({
+                label: `${strToPacificDateTime(result.submissionDate)} &mdash; ` +
+                  'Application Resubmitted',
+                body: ''
+              })
+            }
+          }
+
+          // did staff approve the review?
+          if (result.status === ReviewStatus.APPROVED) {
+            list.push({
+              label: `${strToPacificDateTime(result.creationDate)} &mdash; ` +
+                `Application Approved &mdash; ${result.reviewer}`,
+              body: result.comments
+            })
+          }
+
+          // did staff reject the review?
+          if (result.status === ReviewStatus.REJECTED) {
+            list.push({
+              label: `${strToPacificDateTime(result.creationDate)} &mdash; ` +
+                `Application Rejected &mdash; ${result.reviewer}`,
+              body: result.comments
+            })
+          }
+        })
+
+        return list
+      }
+    })
+
+    /**
+     * Converts a date-time string to a Pacific date-time string.
+     * Sample input: "2024-06-04T04:20:00+00:00".
+     * Sample output: "Jun 3, 2024 at 9:20 pm Pacific Time".
+     */
+    function strToPacificDateTime (str: string): string {
+      const date = moment.utc(str).toDate()
+      return CommonUtils.formatDisplayDate(date, 'MMM D, YYYY [at] h:mm a [Pacific Time]')
+    }
+
+    return {
+      ...state
+    }
+  }
 })
-export default class PreviousCorrespondence extends Vue {
-  @Prop({ required: true }) readonly review: ContinuationReviewIF
-  @Prop({ required: true }) readonly filing: ContinuationFilingIF
-
-  /** The list of correspondence items. */
-  get correspondences (): Array<any> {
-    if (!this.review) return [] // safety check
-
-    const list = []
-
-    // always add initial submission
-    // get date and user from review object
-    list.push({
-      label: `${this.strToPacificDateTime(this.review.creationDate)} &mdash; ` +
-        `Application Submitted &mdash; ${this.review.completingParty}`,
-      body: ''
-    })
-
-    // add items according to review results
-    this.review.results.forEach((result) => {
-      // did staff request a change?
-      if (result.status === ReviewStatus.CHANGE_REQUESTED) {
-        list.push({
-          label: `${this.strToPacificDateTime(result.creationDate)} &mdash; ` +
-            `Change Requested &mdash; ${result.reviewer}`,
-          body: result.comments
-        })
-
-        // did user resubmit?
-        // get date from result object; don't display user
-        if (result.submissionDate) {
-          list.push({
-            label: `${this.strToPacificDateTime(result.submissionDate)} &mdash; ` +
-              'Application Resubmitted',
-            body: ''
-          })
-        }
-      }
-
-      // did staff approve the review?
-      if (result.status === ReviewStatus.APPROVED) {
-        list.push({
-          label: `${this.strToPacificDateTime(result.creationDate)} &mdash; ` +
-            `Application Approved &mdash; ${result.reviewer}`,
-          body: result.comments
-        })
-      }
-
-      // did staff reject the review?
-      if (result.status === ReviewStatus.REJECTED) {
-        list.push({
-          label: `${this.strToPacificDateTime(result.creationDate)} &mdash; ` +
-            `Application Rejected &mdash; ${result.reviewer}`,
-          body: result.comments
-        })
-      }
-    })
-
-    return list
-  }
-
-  /**
-   * Converts a date-time string to a Pacific date-time string.
-   * @example
-   * Sample input: "Mon, 03 Jun 2024 18:45:00 GMT".
-   * Sample output: "Jun 4, 2024 at 9:15 am Pacific Time".
-   * @example
-   * Sample input: "2024-06-04T04:20:00+00:00".
-   * Sample output: "Jun 3, 2024 at 9:20 pm Pacific Time".
-   */
-  private strToPacificDateTime (str: string): string {
-    const date = moment.utc(str).toDate()
-    return CommonUtils.formatDisplayDate(date, 'MMM D, YYYY [at] h:mm a [Pacific Time]')
-  }
-}
 </script>
 
 <style lang="scss" scoped>

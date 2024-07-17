@@ -3,6 +3,7 @@
     <!-- error dialog -->
     <ModalDialog
       ref="errorDialogComponent"
+      :isPersistent="true"
       :title="dialogTitle"
       :text="dialogText"
       dialog-class="notify-dialog"
@@ -21,7 +22,7 @@
           large
           color="error"
           data-test="dialog-ok-button"
-          @click="onDialogClose(true)"
+          @click="onDialogClose()"
         >
           OK
         </v-btn>
@@ -96,12 +97,9 @@
         class="mt-6"
       >
         <PreviousCorrespondence
-          ref="reviewResultComponent"
           class="pt-8 px-6"
           :review="review"
           :filing="filing"
-          @review-result="reviewResult = $event"
-          @email-body-text="emailBodyText = $event"
         />
 
         <v-divider class="mt-7 mx-6" />
@@ -149,8 +147,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { ContinuationFilingIF, ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
+import { defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
 import CardHeader from '@/components/CardHeader.vue'
 import { EventBus } from '@/event-bus'
@@ -163,7 +161,9 @@ import { Pages } from '@/util/constants'
 import PreviousCorrespondence from '@/components/auth/staff/continuation-application/PreviousCorrespondence.vue'
 import ReviewResult from '@/components/auth/staff/continuation-application/ReviewResult.vue'
 
-@Component({
+export default defineComponent({
+  name: 'ContinuationAuthorizationReview',
+
   components: {
     CardHeader,
     ExtraprovincialRegistrationBc,
@@ -171,140 +171,139 @@ import ReviewResult from '@/components/auth/staff/continuation-application/Revie
     ModalDialog,
     PreviousCorrespondence,
     ReviewResult
-  }
-})
-export default class ContinuationAuthorizationReview extends Vue {
-  $refs: {
-    errorDialogComponent: InstanceType<typeof ModalDialog>
-    reviewResultComponent: InstanceType<typeof ReviewResult>
-  }
+  },
 
-  /** Review ID that comes from route. */
-  @Prop({ required: true }) readonly reviewId: number
+  props: {
+    /** Review id that comes from route. */
+    reviewId: { type: String, required: true }
+  },
 
-  // local variables
-  isLoading = false
-  isSubmitting = false
-  haveUnsavedChanges = false
-  dialogTitle = ''
-  dialogText = ''
-  review = null as ContinuationReviewIF
-  filing = null as ContinuationFilingIF
-  reviewResult = null as ReviewStatus
-  emailBodyText = ''
+  setup (props) {
+    // refs
+    const errorDialogComponent: InstanceType<typeof ModalDialog> = ref(null)
+    const reviewResultComponent: InstanceType<typeof ReviewResult> = ref(null)
 
-  /** Whether the current application is an extraprovincial Continuation In. */
-  get isExpro (): boolean {
-    const mode = this.filing?.continuationIn?.mode
-    return (mode === 'EXPRO')
-  }
+    const state = reactive({
+      // local properties
+      isLoading: false,
+      isSubmitting: false,
+      haveUnsavedChanges: false,
+      dialogTitle: '',
+      dialogText: '',
+      review: null as ContinuationReviewIF,
+      filing: null as ContinuationFilingIF,
+      reviewResult: null as ReviewStatus,
+      emailBodyText: '',
 
-  /** Whether this Continuation Authorization Review is actionable. */
-  get isActionable (): boolean {
-    const status = this.review?.status
-    return (status === 'AWAITING_REVIEW' || status === 'RESUBMITTED')
-  }
+      /** Whether the current application is an extraprovincial Continuation In. */
+      get isExpro (): boolean {
+        const mode = this.filing?.continuationIn?.mode
+        return (mode === 'EXPRO')
+      },
 
-  /** Called when this page is mounted. */
-  async mounted (): Promise<void> {
-    let review: ContinuationReviewIF
-    let filing: ContinuationFilingIF
+      /** Whether this Continuation Authorization Review is actionable. */
+      get isActionable (): boolean {
+        const status = this.review?.status
+        return (status === 'AWAITING_REVIEW' || status === 'RESUBMITTED')
+      }
+    })
 
-    this.isLoading = true
-    review = await BusinessService.fetchContinuationReview(this.reviewId).catch(() => null)
-    if (!review) {
-      // eslint-disable-next-line no-console
-      console.log('Missing review =', review)
-    } else if (review.filingLink) {
-      filing = await BusinessService.fetchFiling(review.filingLink).catch(() => null)
+    /** Called when dialog is closed. */
+    function onDialogClose (): void {
+      const value = errorDialogComponent.value as any; value.close()
 
-      if (!filing) {
-        // eslint-disable-next-line no-console
-        console.log('Missing filing =', filing)
+      if (!state.haveUnsavedChanges) {
+        // route back to staff dashboard
+        this.$router.push(Pages.STAFF_DASHBOARD)
       }
     }
-    this.isLoading = false
 
-    // check for expected data
-    if (review && filing) {
-      // assign local properties to unblock rendering
-      this.review = review
-      this.filing = filing
-    } else {
-      // show error dialog
-      this.dialogTitle = 'Unable to load review'
-      this.dialogText = 'An error occurred while loading the review. Please try again.'
-      this.$refs.errorDialogComponent.open()
-    }
-  }
-
-  /** Called when dialog is closed. */
-  onDialogClose (returnToDashboard = true): void {
-    this.$refs.errorDialogComponent.close()
-
-    if (returnToDashboard) {
+    /** Called when user clicks Cancel button. */
+    function onClickCancel (): void {
+      state.haveUnsavedChanges = false
       // route back to staff dashboard
       this.$router.push(Pages.STAFF_DASHBOARD)
     }
-  }
 
-  @Watch('reviewResult')
-  @Watch('emailBodyText')
-  onDataChanged (): void {
-    if (this.reviewResult || this.emailBodyText) {
-      this.haveUnsavedChanges = true
+    /** Called when user clicks Submit button. */
+    async function onClickSubmit (): Promise<void> {
+      // check component validity
+      if (!(reviewResultComponent as any).value.validate()) return
+
+      try {
+        state.isSubmitting = true
+        await BusinessService.submitContinuationReviewResult(state.review.id, state.reviewResult, state.emailBodyText)
+        state.haveUnsavedChanges = false
+
+        // route back to staff dashboard
+        this.$router.push(Pages.STAFF_DASHBOARD)
+
+        // indicate success via toast (snackbar) on main page
+        EventBus.$emit('show-toast', {
+          message: 'Review submitted successfully',
+          type: 'primary',
+          timeout: 3000
+        })
+      } catch (error) {
+        console.log(`Error submitting review = ${error}`) // eslint-disable-line no-console
+
+        // show error dialog
+        state.dialogTitle = 'Unable to submit review'
+        state.dialogText = 'An error occurred while submitting the review. Please try again.'
+        const v = errorDialogComponent.value as any; v.open()
+      } finally {
+        state.isSubmitting = false
+      }
+    }
+
+    watch(() => state.reviewResult, () => {
+      if (state.reviewResult) state.haveUnsavedChanges = true
+    })
+
+    watch(() => state.emailBodyText, () => {
+      if (state.emailBodyText) state.haveUnsavedChanges = true
+    })
+
+    onMounted(async () => {
+      let review: ContinuationReviewIF
+      let filing: ContinuationFilingIF
+
+      state.isLoading = true
+      review = await BusinessService.fetchContinuationReview(+props.reviewId).catch(() => null)
+      if (!review) {
+        console.log(`Failed to fetch review # ${props.reviewId}`) // eslint-disable-line no-console
+      } else if (review.filingLink) {
+        filing = await BusinessService.fetchFiling(review.filingLink).catch(() => null)
+
+        if (!filing) {
+          console.log(`Failed to fetch filing for review = ${review}`) // eslint-disable-line no-console
+        }
+      }
+      state.isLoading = false
+
+      // check for expected data
+      if (review && filing) {
+        // assign local properties to unblock rendering
+        state.review = review
+        state.filing = filing
+      } else {
+        // show error dialog
+        state.dialogTitle = 'Unable to load review'
+        state.dialogText = 'An error occurred while loading the review. Please try again.'
+        const v = errorDialogComponent.value as any; v.open()
+      }
+    })
+
+    return {
+      errorDialogComponent,
+      reviewResultComponent,
+      onDialogClose,
+      onClickCancel,
+      onClickSubmit,
+      ...toRefs(state)
     }
   }
-
-  /** Called when user clicks Cancel button. */
-  onClickCancel (): void {
-    this.haveUnsavedChanges = false
-    // route back to staff dashboard
-    this.$router.push(Pages.STAFF_DASHBOARD)
-  }
-
-  /** Called when user clicks Submit button. */
-  async onClickSubmit (): Promise<void> {
-    // check component validity
-    if (!this.$refs.reviewResultComponent.validate()) return
-
-    try {
-      this.isSubmitting = true
-      await BusinessService.submitContinuationReviewResult(this.review.id, this.reviewResult, this.emailBodyText)
-      this.haveUnsavedChanges = false
-
-      // route back to staff dashboard
-      this.$router.push(Pages.STAFF_DASHBOARD)
-
-      // indicate success via toast (snackbar) on main page
-      EventBus.$emit('show-toast', {
-        message: 'Review submitted successfully',
-        type: 'primary',
-        timeout: 3000
-      })
-    } catch (error) {
-      // eslint-disable-line no-console
-      console.log(`Error submitting review = ${error}`)
-
-      // show error dialog
-      this.dialogTitle = 'Unable to submit review'
-      this.dialogText = 'An error occurred while submitting the review. Please try again.'
-      this.$refs.errorDialogComponent.open()
-    } finally {
-      this.isSubmitting = false
-    }
-  }
-
-  /** Intercepts route change (but not page unloads). */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async beforeRouteLeave (to, from, next): Promise<void> {
-    if (this.haveUnsavedChanges) {
-      alert('You have unsaved changes. Please cancel or submit this review instead.')
-    } else {
-      next()
-    }
-  }
-}
+})
 </script>
 
 <style lang="scss" scoped>

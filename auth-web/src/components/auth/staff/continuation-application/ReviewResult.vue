@@ -52,84 +52,95 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { ContinuationFilingIF, ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
+import { defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
 
 type VuetifyRuleFunction = (v: any) => boolean | string
 
-@Component({})
-export default class ReviewResult extends Vue {
-  $refs: {
-    form: HTMLFormElement
+export default defineComponent({
+  name: 'ReviewResult',
+
+  props: {
+    review: { type: Object as () => ContinuationReviewIF, required: true },
+    filing: { type: Object as () => ContinuationFilingIF, required: true }
+  },
+
+  setup (props) {
+    // refs
+    const form: InstanceType<typeof HTMLFormElement> = ref(null)
+
+    const state = reactive({
+      // local properties
+      reviewResult: null as ReviewStatus,
+      reviewResultItems: [
+        { desc: 'Approve', code: ReviewStatus.APPROVED },
+        { desc: 'Request Change', code: ReviewStatus.CHANGE_REQUESTED },
+        { desc: 'Reject', code: ReviewStatus.REJECTED }
+      ],
+      emailBodyText: '',
+
+      /** Whether this Continuation Authorization Review is actionable. */
+      get isActionable (): boolean {
+        const status = props.review?.status
+        return (
+          status === ReviewStatus.AWAITING_REVIEW ||
+          status === ReviewStatus.RESUBMITTED
+        )
+      },
+
+      /** Whether the email body text is required. */
+      get isEmailBodyTextRequired (): boolean {
+        return (
+          this.reviewResult === ReviewStatus.CHANGE_REQUESTED ||
+          this.reviewResult === ReviewStatus.REJECTED
+        )
+      },
+
+      /** The email body text label. */
+      get emailBodyTextLabel (): string {
+        return this.isEmailBodyTextRequired
+          ? 'Email Body Text (Required)'
+          : 'Email Body Text (Optional)'
+      },
+
+      /** The review result rules. */
+      get reviewResultRules (): Array<VuetifyRuleFunction> {
+        return [
+          (v: string) => !!v || 'A review result is required'
+        ]
+      },
+
+      /** The email body text rules. */
+      get emailBodyTextRules (): Array<VuetifyRuleFunction> {
+        return [
+          () =>
+            !this.isEmailBodyTextRequired ||
+            (this.emailBodyText.trim().length > 0) ||
+            'Email body text is required'
+        ]
+      }
+    })
+
+    /**
+     * Called externally to validate the form.
+     * @returns True if valid, else False
+     */
+    function validate (): boolean {
+      return form.value.validate()
+    }
+
+    /** When a new Review Result is selected, resets validation to clear any visual errors. */
+    watch(() => state.reviewResult, () => {
+      form.value.resetValidation()
+    })
+
+    return {
+      form,
+      validate,
+      ...toRefs(state)
+    }
   }
-
-  @Prop({ required: true }) readonly review: ContinuationReviewIF
-  @Prop({ required: true }) readonly filing: ContinuationFilingIF
-
-  // local variables
-  reviewResult = null as ReviewStatus
-  readonly reviewResultItems = [
-    { desc: 'Approve', code: ReviewStatus.APPROVED },
-    { desc: 'Request Change', code: ReviewStatus.CHANGE_REQUESTED },
-    { desc: 'Reject', code: ReviewStatus.REJECTED }
-  ]
-  emailBodyText = ''
-
-  /** Whether this Continuation Authorization Review is actionable. */
-  get isActionable (): boolean {
-    const status = this.review?.status
-    return (
-      status === ReviewStatus.AWAITING_REVIEW ||
-      status === ReviewStatus.RESUBMITTED
-    )
-  }
-
-  /** Whether the email body text is required. */
-  get isEmailBodyTextRequired (): boolean {
-    return (
-      this.reviewResult === ReviewStatus.CHANGE_REQUESTED ||
-      this.reviewResult === ReviewStatus.REJECTED
-    )
-  }
-
-  /** The email body text label. */
-  get emailBodyTextLabel (): string {
-    return this.isEmailBodyTextRequired
-      ? 'Email Body Text (Required)'
-      : 'Email Body Text (Optional)'
-  }
-
-  /** The review result rules. */
-  get reviewResultRules (): Array<VuetifyRuleFunction> {
-    return [
-      (v: string) => !!v || 'A review result is required'
-    ]
-  }
-
-  /** The email body text rules. */
-  get emailBodyTextRules (): Array<VuetifyRuleFunction> {
-    return [
-      () =>
-        !this.isEmailBodyTextRequired ||
-        (this.emailBodyText.trim().length > 0) ||
-        'Email body text is required'
-    ]
-  }
-
-  /**
-   * Called externally to validate the form.
-   * @returns True if valid, else False
-   */
-  public validate (): boolean {
-    return this.$refs.form.validate()
-  }
-
-  /** When a new Review Result is selected, resets validation to clear any visual errors. */
-  @Watch('reviewResult')
-  private onReviewResultChanged (): void {
-    this.$refs.form.resetValidation()
-  }
-}
+})
 </script>
 
 <style lang="scss" scoped>

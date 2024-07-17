@@ -72,43 +72,54 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
 import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
+import { defineComponent, reactive } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import moment from 'moment'
 
-@Component({})
-export default class ExtraprovincialRegistrationBc extends Vue {
-  @Prop({ required: true }) readonly review: ContinuationReviewIF
-  @Prop({ required: true }) readonly filing: ContinuationFilingIF
+export default defineComponent({
+  name: 'ExtraprovincialRegistrationBc',
 
-  get continuationIn () {
-    return this.filing?.continuationIn
-  }
+  props: {
+    review: { type: Object as () => ContinuationReviewIF, required: true },
+    filing: { type: Object as () => ContinuationFilingIF, required: true }
+  },
 
-  get identifier (): string {
-    return this.continuationIn?.business?.identifier
-  }
+  setup (props) {
+    const state = reactive({
+      get continuationIn (): any {
+        return props.filing?.continuationIn
+      },
 
-  get legalName (): string {
-    return this.continuationIn?.business?.legalName
-  }
+      get identifier (): string {
+        return this.continuationIn?.business?.identifier
+      },
 
-  get foundingDate (): string {
-    return this.strToPacificDate(this.continuationIn?.business?.foundingDate)
-  }
+      get legalName (): string {
+        return this.continuationIn?.business?.legalName
+      },
 
-  /**
-   * Converts a date-time string to a Pacific date string.
-   * @example
-   * Sample input: "2007-01-23T08:00:00.000+00:00".
-   * Sample output: "Jan 23, 2007".
-   */
-  private strToPacificDate (str: string): string {
-    const date = moment.utc(str).toDate()
-    return CommonUtils.formatDisplayDate(date, 'MMM D, YYYY')
+      get foundingDate (): string {
+        return strToPacificDate(this.continuationIn?.business?.foundingDate)
+      }
+    })
+
+    /**
+     * Converts a date-time string to a Pacific date string.
+     * @example
+     * Sample input: "2007-01-23T08:00:00.000+00:00".
+     * Sample output: "Jan 23, 2007".
+     */
+    function strToPacificDate (str: string): string {
+      const date = moment.utc(str).toDate()
+      return CommonUtils.formatDisplayDate(date, 'MMM D, YYYY')
+    }
+
+    return {
+      ...state
+    }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>

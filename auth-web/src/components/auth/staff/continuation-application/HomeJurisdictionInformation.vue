@@ -4,7 +4,7 @@
     id="home-jurisdiction-information"
   >
     <ModalDialog
-      ref="errorDialog"
+      ref="errorDialogComponent"
       :title="dialogTitle"
       :text="dialogText"
       dialog-class="notify-dialog"
@@ -23,7 +23,7 @@
           large
           color="error"
           data-test="dialog-ok-button"
-          @click="$refs.errorDialog.close()"
+          @click="errorDialogComponent.close()"
         >
           OK
         </v-btn>
@@ -230,10 +230,9 @@
 </template>
 
 <script lang="ts">
-import { CanJurisdictions, IntlJurisdictions, UsaJurisdiction }
-  from '@bcrs-shared-components/jurisdiction/list-data'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { CanJurisdictions, IntlJurisdictions, UsaJurisdiction } from '@bcrs-shared-components/jurisdiction/list-data'
 import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
+import { defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
 import CommonUtils from '@/util/common-util'
 import { CorpTypes } from '@/util/constants'
@@ -241,122 +240,135 @@ import { JurisdictionLocation } from '@bcrs-shared-components/enums'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import moment from 'moment'
 
-@Component({
+export default defineComponent({
+  name: 'HomeJurisdictionInformation',
+
   components: {
     ModalDialog
+  },
+
+  props: {
+    review: { type: Object as () => ContinuationReviewIF, required: true },
+    filing: { type: Object as () => ContinuationFilingIF, required: true }
+  },
+
+  setup (props) {
+    // refs
+    const errorDialogComponent: InstanceType<typeof ModalDialog> = ref(null)
+
+    const state = reactive({
+      // local properties
+      dialogTitle: '',
+      dialogText: '',
+      isDownloading: false,
+
+      get continuationIn (): any {
+        return props.filing?.continuationIn
+      },
+
+      get homeJurisdiction (): string {
+        const region = this.continuationIn?.foreignJurisdiction?.region
+        const country = this.continuationIn?.foreignJurisdiction?.country
+
+        if (country === JurisdictionLocation.CA) {
+          if (region === 'FEDERAL') return 'Federal'
+          const prov = CanJurisdictions.find(can => can.value === region)?.text
+          return (prov || 'Canada')
+        }
+
+        if (country === JurisdictionLocation.US) {
+          const state = UsaJurisdiction.find(usa => usa.value === region)?.text
+          return (state ? `${state}, US` : 'USA')
+        }
+
+        return IntlJurisdictions.find(intl => intl.value === country)?.text || null
+      },
+
+      get identifier (): any {
+        return this.continuationIn?.foreignJurisdiction?.identifier
+      },
+
+      get legalName (): any {
+        return this.continuationIn?.foreignJurisdiction?.legalName
+      },
+
+      get taxId (): any {
+        return this.continuationIn?.foreignJurisdiction?.taxId
+      },
+
+      get incorporationDate (): string {
+        return strToPacificDate(this.continuationIn?.foreignJurisdiction?.incorporationDate)
+      },
+
+      get authorizationFiles (): any {
+        return this.continuationIn?.authorization?.files
+      },
+
+      get authorizationDate (): string {
+        return strToPacificDate(this.continuationIn?.authorization?.date)
+      },
+
+      /**
+       * Whether a continuation in director affidavit is required.
+       * Is true if the business is a Continued In ULC from Alberta or Nova Scotia.
+       */
+      get isContinuationInAffidavitRequired (): boolean {
+        const entityType = this.continuationIn?.nameRequest?.legalType
+        const country = this.continuationIn?.foreignJurisdiction?.country
+        const region = this.continuationIn?.foreignJurisdiction?.region
+
+        return (
+          entityType === CorpTypes.ULC_CONTINUE_IN &&
+          country === 'CA' &&
+          (region === 'AB' || region === 'NS')
+        )
+      }
+    })
+
+    /** Downloads the director affidavit document. */
+    async function downloadAffidavitDocument (): Promise<void> {
+      await download(state.continuationIn?.foreignJurisdiction?.affidavitFileKey,
+        state.continuationIn?.foreignJurisdiction?.affidavitFileName)
+    }
+
+    /** Downloads the specified authorization document. */
+    async function downloadAuthorizationDocument (item: { fileKey: string, fileName: string }): Promise<void> {
+      await download(item.fileKey, item.fileName)
+    }
+
+    /** Downloads the specified document. */
+    async function download (documentKey: string, documentName: string): Promise<void> {
+      if (!documentKey || !documentName) return // safety check
+
+      state.isDownloading = true
+      await BusinessService.downloadDocument(documentKey, documentName).catch(error => {
+        // eslint-disable-next-line no-console
+        console.log('downloadDocument() error =', error)
+        state.dialogTitle = 'Unable to download document'
+        state.dialogText = 'An error occurred while downloading the document. Please try again.'
+        const v = errorDialogComponent.value as any; v.open()
+      })
+      state.isDownloading = false
+    }
+
+    /**
+     * Converts a date string to a Pacific date string.
+     * Sample input: "2024-07-01".
+     * Sample output: "Jul 1, 2024".
+     */
+    function strToPacificDate (str: string): string {
+      const date = moment(str).toDate()
+      return CommonUtils.formatDisplayDate(date, 'MMM D, YYYY')
+    }
+
+    return {
+      errorDialogComponent,
+      downloadAffidavitDocument,
+      downloadAuthorizationDocument,
+      ...toRefs(state)
+    }
   }
 })
-export default class HomeJurisdictionInformation extends Vue {
-  $refs: {
-    errorDialog: InstanceType<typeof ModalDialog>
-  }
-
-  @Prop({ required: true }) readonly review: ContinuationReviewIF
-  @Prop({ required: true }) readonly filing: ContinuationFilingIF
-
-  // local variables
-  dialogTitle = ''
-  dialogText = ''
-  isDownloading = false
-
-  get continuationIn () {
-    return this.filing?.continuationIn
-  }
-
-  get homeJurisdiction (): string {
-    const region = this.continuationIn?.foreignJurisdiction?.region
-    const country = this.continuationIn?.foreignJurisdiction?.country
-
-    if (country === JurisdictionLocation.CA) {
-      if (region === 'FEDERAL') return 'Federal'
-      const prov = CanJurisdictions.find(can => can.value === region)?.text
-      return (prov || 'Canada')
-    }
-
-    if (country === JurisdictionLocation.US) {
-      const state = UsaJurisdiction.find(usa => usa.value === region)?.text
-      return (state ? `${state}, US` : 'USA')
-    }
-
-    return IntlJurisdictions.find(intl => intl.value === country)?.text || null
-  }
-
-  get identifier (): any {
-    return this.continuationIn?.foreignJurisdiction?.identifier
-  }
-
-  get legalName (): any {
-    return this.continuationIn?.foreignJurisdiction?.legalName
-  }
-
-  get taxId (): any {
-    return this.continuationIn?.foreignJurisdiction?.taxId
-  }
-
-  get incorporationDate (): string {
-    return this.strToPacificDate(this.continuationIn?.foreignJurisdiction?.incorporationDate)
-  }
-
-  get authorizationFiles (): any {
-    return this.continuationIn?.authorization?.files
-  }
-
-  get authorizationDate (): string {
-    return this.strToPacificDate(this.continuationIn?.authorization?.date)
-  }
-
-  /**
-   * Whether a continuation in director affidavit is required.
-   * Is true if the business is a Continued In ULC from Alberta or Nova Scotia.
-   */
-  get isContinuationInAffidavitRequired (): boolean {
-    const entityType = this.continuationIn?.nameRequest?.legalType
-    const country = this.continuationIn?.foreignJurisdiction?.country
-    const region = this.continuationIn?.foreignJurisdiction?.region
-
-    return (
-      entityType === CorpTypes.ULC_CONTINUE_IN &&
-      country === 'CA' &&
-      (region === 'AB' || region === 'NS')
-    )
-  }
-
-  /** Downloads the director affidavit document. */
-  async downloadAffidavitDocument (): Promise<void> {
-    await this.download(this.continuationIn?.foreignJurisdiction?.affidavitFileKey,
-      this.continuationIn?.foreignJurisdiction?.affidavitFileName)
-  }
-
-  /** Downloads the specified authorization document. */
-  async downloadAuthorizationDocument (item: { fileKey: string, fileName: string }): Promise<void> {
-    await this.download(item.fileKey, item.fileName)
-  }
-
-  /** Downloads the specified document. */
-  private async download (documentKey: string, documentName: string): Promise<void> {
-    if (!documentKey || !documentName) return // safety check
-
-    this.isDownloading = true
-    await BusinessService.downloadDocument(documentKey, documentName).catch(error => {
-      // eslint-disable-next-line no-console
-      console.log('downloadDocument() error =', error)
-      this.dialogTitle = 'Unable to download document'
-      this.dialogText = 'An error occurred while downloading the document. Please try again.'
-      this.$refs.errorDialog.open()
-    })
-    this.isDownloading = false
-  }
-
-  /**
-   * Converts a date string to a Pacific date string.
-   * Sample input: "2024-07-01".
-   * Sample output: "Jul 1, 2024".
-   */
-  private strToPacificDate (str: string): string {
-    const date = moment(str).toDate()
-    return CommonUtils.formatDisplayDate(date, 'MMM D, YYYY')
-  }
-}
 </script>
 
 <style lang="scss" scoped>
