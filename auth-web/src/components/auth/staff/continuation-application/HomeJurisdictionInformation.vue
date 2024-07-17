@@ -235,10 +235,11 @@ import { CanJurisdictions, IntlJurisdictions, UsaJurisdiction }
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
 import BusinessService from '@/services/business.services'
+import CommonUtils from '@/util/common-util'
 import { CorpTypes } from '@/util/constants'
-import DateUtils from '@/util/date-utils'
 import { JurisdictionLocation } from '@bcrs-shared-components/enums'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import moment from 'moment'
 
 @Component({
   components: {
@@ -293,8 +294,7 @@ export default class HomeJurisdictionInformation extends Vue {
   }
 
   get incorporationDate (): string {
-    const date = DateUtils.yyyyMmDdToDate(this.continuationIn?.foreignJurisdiction?.incorporationDate)
-    return DateUtils.dateToPacificDate(date, true)
+    return this.strToPacificDate(this.continuationIn?.foreignJurisdiction?.incorporationDate)
   }
 
   get authorizationFiles (): any {
@@ -302,8 +302,7 @@ export default class HomeJurisdictionInformation extends Vue {
   }
 
   get authorizationDate (): string {
-    const date = DateUtils.yyyyMmDdToDate(this.continuationIn?.authorization?.date)
-    return DateUtils.dateToPacificDate(date, true)
+    return this.strToPacificDate(this.continuationIn?.authorization?.date)
   }
 
   /**
@@ -346,6 +345,16 @@ export default class HomeJurisdictionInformation extends Vue {
       this.$refs.errorDialog.open()
     })
     this.isDownloading = false
+  }
+
+  /**
+   * Converts a date string to a Pacific date string.
+   * Sample input: "2024-07-01".
+   * Sample output: "Jul 1, 2024".
+   */
+  private strToPacificDate (str: string): string {
+    const date = moment(str).toDate()
+    return CommonUtils.formatDisplayDate(date, 'MMM D, YYYY')
   }
 }
 </script>

@@ -74,7 +74,8 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
-import DateUtils from '@/util/date-utils'
+import CommonUtils from '@/util/common-util'
+import moment from 'moment'
 
 @Component({})
 export default class ExtraprovincialRegistrationBc extends Vue {
@@ -94,8 +95,18 @@ export default class ExtraprovincialRegistrationBc extends Vue {
   }
 
   get foundingDate (): string {
-    const date = DateUtils.apiToDate(this.continuationIn?.business?.foundingDate)
-    return DateUtils.dateToPacificDate(date, true)
+    return this.strToPacificDate(this.continuationIn?.business?.foundingDate)
+  }
+
+  /**
+   * Converts a date-time string to a Pacific date string.
+   * @example
+   * Sample input: "2007-01-23T08:00:00.000+00:00".
+   * Sample output: "Jan 23, 2007".
+   */
+  private strToPacificDate (str: string): string {
+    const date = moment.utc(str).toDate()
+    return CommonUtils.formatDisplayDate(date, 'MMM D, YYYY')
   }
 }
 </script>
