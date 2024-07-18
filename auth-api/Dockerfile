@@ -1,57 +1,75 @@
-FROM python:3.8.5-buster
+FROM python:3.12.2-bullseye as development_build
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
 
 ENV VCS_REF=${VCS_REF}
 ENV BUILD_DATE=${BUILD_DATE}
+ENV PORT=5001
 
 LABEL org.label-schema.vcs-ref=${VCS_REF} \
-      org.label-schema.build-date=${BUILD_DATE}
+    org.label-schema.build-date=${BUILD_DATE}
 
 USER root
 
-# Create working directory
-RUN mkdir /opt/app-root && chmod 755 /opt/app-root
-WORKDIR /opt/app-root
+LABEL maintainer="BCROS"
+LABEL vendor="BCROS"
 
-# Install dependencies and tools
+ARG APP_ENV \
+  UID=1000 \
+  GID=1000
+
+ENV APP_ENV=${APP_ENV} \
+  PYTHONFAULTHANDLER=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PYTHONDONTWRITEBYTECODE=1 \
+  PIP_NO_CACHE_DIR=1 \
+  PIP_DISABLE_PIP_VERSION_CHECK=1 \
+  PIP_DEFAULT_TIMEOUT=100 \
+  PIP_ROOT_USER_ACTION=ignore \
+  POETRY_VERSION=1.8.3 \
+  POETRY_NO_INTERACTION=1 \
+  POETRY_VIRTUALENVS_CREATE=false \
+  POETRY_CACHE_DIR='/var/cache/pypoetry' \
+  POETRY_HOME='/usr/local'
+
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
+
 RUN apt-get update && apt-get upgrade -y \
-    && apt-get install --no-install-recommends -y \
-       bash \
-       build-essential \
-       curl \
-       git \
-       libpq-dev \
-    # Clean up cache
-    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+  && apt-get install --no-install-recommends -y \
+    bash \
+    build-essential \
+    curl \
+    git \
+    libpq-dev \
+  && curl -sSL 'https://install.python-poetry.org' | python3 - \
+  && poetry --version \
+  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+  && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
+WORKDIR /code
 
-# Add Poetry to PATH
-ENV PATH="/root/.local/bin:${PATH}"
+RUN groupadd -g "${GID}" -r web \
+  && useradd -d '/code' -g web -l -r -u "${UID}" web \
+  && chown web:web -R '/code'
 
-# Copy only requirements to cache them in docker layer
-COPY ./pyproject.toml ./poetry.lock /opt/app-root/
+COPY --chown=web:web ./poetry.lock ./pyproject.toml /code/
 
-# Project initialization
-RUN poetry version \
-    && poetry run pip install -U pip \
-    && poetry install --no-interaction --no-ansi
+COPY --chown=web:web ./src /code/src
+COPY --chown=web:web ./README.md /code
 
-# Copy the rest of the application code
-COPY . .
+RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
+  echo "$APP_ENV" \
+  && poetry version \
+  && poetry run pip install -U pip \
+  && poetry install \
+    $(if [ -z ${APP_ENV+x} ] || [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
+    --no-interaction --no-ansi
 
-# Install any remaining dependencies (if needed)
-RUN poetry install
+USER web
 
-# Set Python path
-ENV PYTHONPATH=/opt/app-root/src
+FROM development_build AS production_build
+COPY --chown=web:web . /code
 
-# Running as non-root user
-USER 1001
-
-ENTRYPOINT ["bash", "docker-entrypoint.sh"]
+CMD gunicorn --bind 0.0.0.0:${PORT} --config /code/gunicorn_config.py wsgi:app
