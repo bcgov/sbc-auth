@@ -13,11 +13,6 @@ const router = new VueRouter()
 localVue.use(Vuetify)
 localVue.use(VueRouter)
 
-const mockSession = {
-  'NRO_URL': 'Mock NRO URL',
-  'NAME_REQUEST_URL': 'Mock Name Request URL'
-}
-
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
@@ -25,17 +20,12 @@ describe('AccountFreezeUnlockView', () => {
   let wrapper: any
 
   beforeEach(() => {
-    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const orgStore = useOrgStore()
     const userStore = useUserStore()
 
     orgStore.currentOrganization = {
       statusCode: AccountStatus.NSF_SUSPENDED
     } as any
-    orgStore.calculateFailedInvoices = vi.fn(() => ({
-      totalTransactionAmount: 10,
-      totalAmountToPay: 20
-    })) as any
 
     userStore.currentUser = {
       firstName: 'Fred',
@@ -73,46 +63,6 @@ describe('AccountFreezeUnlockView', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('h1').exists()).toBe(false)
   })
-})
-
-describe('AccountFreezeUnlockView (NSF)', () => {
-  let wrapper: any
-
-  beforeEach(() => {
-    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
-    const orgStore = useOrgStore()
-    const userStore = useUserStore()
-
-    orgStore.currentOrganization = {
-      statusCode: AccountStatus.NSF_SUSPENDED
-    } as any
-    orgStore.calculateFailedInvoices = vi.fn(() => ({
-      totalTransactionAmount: 10,
-      totalAmountToPay: 20
-    })) as any
-
-    userStore.currentUser = {
-      firstName: 'Fred',
-      lastName: 'Flinstone',
-      roles: [Role.Staff]
-    } as any
-
-    wrapper = mount(AccountFreezeUnlockView, {
-      localVue,
-      router,
-      vuetify,
-      mocks: {
-        $t: (mock) => mock
-      }
-    })
-    wrapper.vm.isViewLoading = false
-  })
-
-  afterEach(() => {
-    vi.resetModules()
-    vi.clearAllMocks()
-    wrapper.destroy()
-  })
 
   it('Should render NSF view', async () => {
     wrapper.vm.isAccountStatusNsfSuspended = true
@@ -127,11 +77,10 @@ describe('AccountFreezeUnlockView (NSF)', () => {
   })
 })
 
-describe('AccountFreezeUnlockView (NSF EFT)', () => {
+describe('AccountFreezeUnlockView (EFT)', () => {
   let wrapper: any
 
   beforeEach(() => {
-    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const orgStore = useOrgStore()
     const userStore = useUserStore()
 

@@ -122,12 +122,6 @@
       </template>
     </ModalDialog>
   </v-container>
-  <v-container
-    v-else-if="!isViewLoading"
-    class="view-container"
-  >
-    <AccountSuspendedView :isAdmin="true" />
-  </v-container>
 </template>
 
 <script lang="ts">
@@ -136,7 +130,6 @@ import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Ste
 import { defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
 import AccountOverviewNSF from '@/components/auth/account-freeze/AccountOverviewNSF.vue'
-import AccountSuspendedView from './AccountSuspendedView.vue'
 import ConfigHelper from 'sbc-common-components/src/util/config-helper'
 import MakePayment from '@/components/auth/account-freeze/MakePayment.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -160,8 +153,7 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-unused-components
     MakePayment,
     Stepper,
-    ModalDialog,
-    AccountSuspendedView
+    ModalDialog
   },
   setup (props, { root }) {
     const { createAccountPayment, getOrgPayments } = useOrgStore()
