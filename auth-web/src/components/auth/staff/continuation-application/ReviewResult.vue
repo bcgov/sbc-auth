@@ -53,7 +53,7 @@
 
 <script lang="ts">
 import { ContinuationFilingIF, ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
-import { defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
 
 type VuetifyRuleFunction = (v: any) => boolean | string
 
@@ -80,36 +80,36 @@ export default defineComponent({
       emailBodyText: '',
 
       /** Whether the email body text is required. */
-      get isEmailBodyTextRequired (): boolean {
+      isEmailBodyTextRequired: computed<boolean>(() => {
         return (
-          this.reviewResult === ReviewStatus.CHANGE_REQUESTED ||
-          this.reviewResult === ReviewStatus.REJECTED
+          state.reviewResult === ReviewStatus.CHANGE_REQUESTED ||
+          state.reviewResult === ReviewStatus.REJECTED
         )
-      },
+      }),
 
       /** The email body text label. */
-      get emailBodyTextLabel (): string {
-        return this.isEmailBodyTextRequired
+      emailBodyTextLabel: computed<string>(() => {
+        return state.isEmailBodyTextRequired
           ? 'Email Body Text (Required)'
           : 'Email Body Text (Optional)'
-      },
+      }),
 
       /** The review result rules. */
-      get reviewResultRules (): Array<VuetifyRuleFunction> {
+      reviewResultRules: computed<Array<VuetifyRuleFunction>>(() => {
         return [
           (v: string) => !!v || 'A review result is required'
         ]
-      },
+      }),
 
       /** The email body text rules. */
-      get emailBodyTextRules (): Array<VuetifyRuleFunction> {
+      emailBodyTextRules: computed<Array<VuetifyRuleFunction>>(() => {
         return [
           () =>
-            !this.isEmailBodyTextRequired ||
-            (this.emailBodyText.trim().length > 0) ||
+            !state.isEmailBodyTextRequired ||
+            (state.emailBodyText.trim().length > 0) ||
             'Email body text is required'
         ]
-      }
+      })
     })
 
     /**

@@ -232,7 +232,7 @@
 <script lang="ts">
 import { CanJurisdictions, IntlJurisdictions, UsaJurisdiction } from '@bcrs-shared-components/jurisdiction/list-data'
 import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
-import { defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
+import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
 import CommonUtils from '@/util/common-util'
 import { CorpTypes } from '@/util/constants'
@@ -262,13 +262,13 @@ export default defineComponent({
       dialogText: '',
       isDownloading: false,
 
-      get continuationIn (): any {
+      continuationIn: computed<any>(() => {
         return props.filing?.continuationIn
-      },
+      }),
 
-      get homeJurisdiction (): string {
-        const region = this.continuationIn?.foreignJurisdiction?.region
-        const country = this.continuationIn?.foreignJurisdiction?.country
+      homeJurisdiction: computed<string>(() => {
+        const region = state.continuationIn?.foreignJurisdiction?.region
+        const country = state.continuationIn?.foreignJurisdiction?.country
 
         if (country === JurisdictionLocation.CA) {
           if (region === 'FEDERAL') return 'Federal'
@@ -282,47 +282,47 @@ export default defineComponent({
         }
 
         return IntlJurisdictions.find(intl => intl.value === country)?.text || null
-      },
+      }),
 
-      get identifier (): any {
-        return this.continuationIn?.foreignJurisdiction?.identifier
-      },
+      identifier: computed<string>(() => {
+        return state.continuationIn?.foreignJurisdiction?.identifier
+      }),
 
-      get legalName (): any {
-        return this.continuationIn?.foreignJurisdiction?.legalName
-      },
+      legalName: computed<string>(() => {
+        return state.continuationIn?.foreignJurisdiction?.legalName
+      }),
 
-      get taxId (): any {
-        return this.continuationIn?.foreignJurisdiction?.taxId
-      },
+      taxId: computed<string>(() => {
+        return state.continuationIn?.foreignJurisdiction?.taxId
+      }),
 
-      get incorporationDate (): string {
-        return strToPacificDate(this.continuationIn?.foreignJurisdiction?.incorporationDate)
-      },
+      incorporationDate: computed<string>(() => {
+        return strToPacificDate(state.continuationIn?.foreignJurisdiction?.incorporationDate)
+      }),
 
-      get authorizationFiles (): any {
-        return this.continuationIn?.authorization?.files
-      },
+      authorizationFiles: computed<Array<any>>(() => {
+        return state.continuationIn?.authorization?.files
+      }),
 
-      get authorizationDate (): string {
-        return strToPacificDate(this.continuationIn?.authorization?.date)
-      },
+      authorizationDate: computed<string>(() => {
+        return strToPacificDate(state.continuationIn?.authorization?.date)
+      }),
 
       /**
        * Whether a continuation in director affidavit is required.
        * Is true if the business is a Continued In ULC from Alberta or Nova Scotia.
        */
-      get isContinuationInAffidavitRequired (): boolean {
-        const entityType = this.continuationIn?.nameRequest?.legalType
-        const country = this.continuationIn?.foreignJurisdiction?.country
-        const region = this.continuationIn?.foreignJurisdiction?.region
+      isContinuationInAffidavitRequired: computed<boolean>(() => {
+        const entityType = state.continuationIn?.nameRequest?.legalType
+        const country = state.continuationIn?.foreignJurisdiction?.country
+        const region = state.continuationIn?.foreignJurisdiction?.region
 
         return (
           entityType === CorpTypes.ULC_CONTINUE_IN &&
           country === 'CA' &&
           (region === 'AB' || region === 'NS')
         )
-      }
+      })
     })
 
     /** Downloads the director affidavit document. */

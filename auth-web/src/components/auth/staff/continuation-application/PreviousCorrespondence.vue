@@ -51,7 +51,7 @@
 
 <script lang="ts">
 import { ContinuationFilingIF, ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
-import { defineComponent, reactive } from '@vue/composition-api'
+import { computed, defineComponent, reactive } from '@vue/composition-api'
 import AutoResize from 'vue-auto-resize'
 import CommonUtils from '@/util/common-util'
 import moment from 'moment'
@@ -69,7 +69,7 @@ export default defineComponent({
   setup (props) {
     const state = reactive({
       /** The list of correspondence items. */
-      get correspondences (): Array<any> {
+      correspondences: computed<Array<any>>(() => {
         if (!props.review) return [] // safety check
 
         const list = []
@@ -123,7 +123,7 @@ export default defineComponent({
         })
 
         return list
-      }
+      })
     })
 
     /**

@@ -73,7 +73,7 @@
 
 <script lang="ts">
 import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
-import { defineComponent, reactive } from '@vue/composition-api'
+import { computed, defineComponent, reactive } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import moment from 'moment'
 
@@ -87,21 +87,21 @@ export default defineComponent({
 
   setup (props) {
     const state = reactive({
-      get continuationIn (): any {
+      continuationIn: computed<any>(() => {
         return props.filing?.continuationIn
-      },
+      }),
 
-      get identifier (): string {
-        return this.continuationIn?.business?.identifier
-      },
+      identifier: computed<string>(() => {
+        return state.continuationIn?.business?.identifier
+      }),
 
-      get legalName (): string {
-        return this.continuationIn?.business?.legalName
-      },
+      legalName: computed<string>(() => {
+        return state.continuationIn?.business?.legalName
+      }),
 
-      get foundingDate (): string {
-        return strToPacificDate(this.continuationIn?.business?.foundingDate)
-      }
+      foundingDate: computed<string>(() => {
+        return strToPacificDate(state.continuationIn?.business?.foundingDate)
+      })
     })
 
     /**

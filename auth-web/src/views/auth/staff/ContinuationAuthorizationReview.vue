@@ -151,7 +151,7 @@
 
 <script lang="ts">
 import { ContinuationFilingIF, ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
-import { defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
 import CardHeader from '@/components/CardHeader.vue'
 import { EventBus } from '@/event-bus'
@@ -181,7 +181,7 @@ export default defineComponent({
     reviewId: { type: String, required: true }
   },
 
-  setup (props) {
+  setup (props, { root }) {
     // refs
     const errorDialogComponent: InstanceType<typeof ModalDialog> = ref(null)
     const reviewResultComponent: InstanceType<typeof ReviewResult> = ref(null)
@@ -199,16 +199,16 @@ export default defineComponent({
       emailBodyText: '',
 
       /** Whether the current application is an extraprovincial Continuation In. */
-      get isExpro (): boolean {
-        const mode = this.filing?.continuationIn?.mode
+      isExpro: computed<boolean>(() => {
+        const mode = state.filing?.continuationIn?.mode
         return (mode === 'EXPRO')
-      },
+      }),
 
       /** Whether this Continuation Authorization Review is actionable. */
-      get isActionable (): boolean {
-        const status = this.review?.status
+      isActionable: computed<boolean>(() => {
+        const status = state.review?.status
         return (status === 'AWAITING_REVIEW' || status === 'RESUBMITTED')
-      }
+      })
     })
 
     /** Called when dialog is closed. */
@@ -217,7 +217,7 @@ export default defineComponent({
 
       if (!state.haveUnsavedChanges) {
         // route back to staff dashboard
-        this.$router.push(Pages.STAFF_DASHBOARD)
+        root.$router.push(Pages.STAFF_DASHBOARD)
       }
     }
 
@@ -225,7 +225,7 @@ export default defineComponent({
     function onClickCancel (): void {
       state.haveUnsavedChanges = false
       // route back to staff dashboard
-      this.$router.push(Pages.STAFF_DASHBOARD)
+      root.$router.push(Pages.STAFF_DASHBOARD)
     }
 
     /** Called when user clicks Submit button. */
@@ -239,7 +239,7 @@ export default defineComponent({
         state.haveUnsavedChanges = false
 
         // route back to staff dashboard
-        this.$router.push(Pages.STAFF_DASHBOARD)
+        root.$router.push(Pages.STAFF_DASHBOARD)
 
         // indicate success via toast (snackbar) on main page
         EventBus.$emit('show-toast', {
