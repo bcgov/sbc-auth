@@ -70,3 +70,23 @@ export interface ContinuationFilingIF {
     status: any // we don't care about this
   }
 }
+
+/** The Continuation Review search params. */
+export interface ReviewFilterParams {
+    submissionDate?: string
+    page?: number
+    limit?: number
+    nrNumber?: string
+    identifier?: string,
+    completingParty?: string,
+    decisionMadeBy?: string
+    status?: string
+  }
+
+/** The Continuation Review API returns search results. */
+export interface ReviewList {
+    reviews: ContinuationReviewIF[]
+    limit: number
+    page: number
+    total: number
+  }

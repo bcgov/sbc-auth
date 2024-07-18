@@ -1,6 +1,6 @@
 <template>
   <div id="continuation-application-review-table">
-    <v-form class="continuation-application-search continuation-application-search">
+    <v-form class="fas-search continuation-review-search">
       <v-row
         dense
         class="row-margin"
@@ -13,12 +13,28 @@
             <v-data-table
               :headers="headers"
               :items="reviews"
-              :footer-props="{ itemsPerPageOptions: paginationOptions }"
+              :server-items-length="totalItemsCount"
+              :options.sync="tableDataOptions"
+              :disable-sort="true"
+              :footer-props="{
+                itemsPerPageOptions: paginationOptions
+              }"
               hide-default-header
               fixed-header
               :loading="isTableLoading"
               :mobile-breakpoint="0"
+              @update:options="updateItemsPerPage"
             >
+              <!-- Displaying Status -->
+              <template #[`item.status`]="{ item }">
+                <div>{{ displayStatus(item.status) }}</div>
+              </template>
+
+              <!-- Displaying Formatted Date -->
+              <template #[`item.submissionDate`]="{ item }">
+                <div>{{ formatDate(item.submissionDate) }}</div>
+              </template>
+
               <!-- Loading -->
               <template #loading>
                 <div
@@ -30,9 +46,10 @@
 
               <!-- No data -->
               <template #no-data>
-                <div class="py-8 no-data">
-                  No data available
-                </div>
+                <div
+                  v-sanitize="noDataMessage"
+                  class="py-8 no-data"
+                />
               </template>
 
               <!-- Headers (two rows) -->
@@ -42,14 +59,15 @@
                   <tr class="header-row-1">
                     <th
                       v-for="(header, i) in headers"
-                      :key="i"
+                      :key="getIndexedTag('find-header-row', i)"
+                      :scope="getIndexedTag('find-header-col', i)"
                       class="font-weight-bold"
                     >
                       {{ header.text }}
                     </th>
                   </tr>
 
-                  <!-- Second row has search boxes. Search and filter to be implemented -->
+                  <!-- Second row has search boxes. -->
                   <tr class="header-row-2 mt-2 px-2">
                     <th
                       v-for="(header, i) in headers"
@@ -57,8 +75,9 @@
                       :scope="getIndexedTag('find-header-col2', i)"
                     >
                       <v-text-field
-                        v-if="!['action'].includes(header.value)"
+                        v-if="!['action','status'].includes(header.value)"
                         :id="header.value"
+                        v-model.trim="reviewParams[header.value]"
                         input
                         type="search"
                         autocomplete="off"
@@ -68,6 +87,39 @@
                         dense
                         hide-details="auto"
                       />
+
+                      <div
+                        v-else-if="['status'].includes(header.value)"
+                        class="mt-0"
+                      >
+                        <v-select
+                          v-model="reviewParams[header.value]"
+                          :items="statusTypes"
+                          filled
+                          item-text="text"
+                          item-value="value"
+                          data-test="select-status"
+                          v-bind="$attrs"
+                          hide-details="auto"
+                          v-on="$listeners"
+                        />
+                      </div>
+
+                      <v-btn
+                        v-else-if="searchParamsExist && header.value === 'action'"
+                        outlined
+                        color="primary"
+                        class="action-btn clear-filter-button"
+                        @click="clearSearchParams()"
+                      >
+                        <span class="clear-filter cursor-pointer">
+                          Clear Filters
+                          <v-icon
+                            small
+                            color="primary"
+                          >mdi-close</v-icon>
+                        </span>
+                      </v-btn>
                     </th>
                   </tr>
                 </thead>
@@ -80,8 +132,8 @@
                     <v-btn
                       color="primary"
                       :class="['open-action-btn', getButtonLabel(item.status).toLowerCase()]"
-                      :data-test="getIndexedTag('view-continuation-button', item.reviewId)"
-                      @click="view(item.reviewId)"
+                      :data-test="getIndexedTag('view-continuation-button', item.id)"
+                      @click="view(item.id)"
                     >
                       {{ getButtonLabel(item.status) }}
                     </v-btn>
@@ -97,60 +149,198 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from '@vue/composition-api'
-import BusinessServices from '@/services/business.services'
-import { ContinuationReviewIF } from '@/models/continuation-review'
+import { ContinuationReviewIF, ReviewFilterParams } from '@/models/continuation-review'
+import {
+  DEFAULT_DATA_OPTIONS,
+  cachePageInfo,
+  getAndPruneCachedPageInfo,
+  getPaginationOptions,
+  hasCachedPageInfo
+} from '@/components/datatable/resources'
+import { PropType, computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
+import { DataOptions } from 'vuetify'
+import { SessionStorageKeys } from '@/util/constants'
+import debounce from '@/util/debounce'
+import moment from 'moment'
+import { useI18n } from 'vue-i18n-composable'
+import { useStaffStore } from '@/stores/staff'
 
 export default defineComponent({
   name: 'ContinuationApplicationTable',
-  setup () {
+  props: {
+    reviewSessionStorageKey: {
+      type: String as PropType<SessionStorageKeys>,
+      default: SessionStorageKeys.ReviewSearchFilter
+    },
+    reviewPaginationNumberOfItemsKey: {
+      type: String as PropType<SessionStorageKeys>,
+      default: SessionStorageKeys.ReviewPaginationNumberOfItems
+    },
+    reviewPaginationOptionsKey: {
+      type: String as PropType<SessionStorageKeys>,
+      default: SessionStorageKeys.ReviewPaginationOptions
+    }
+  },
+  setup (props) {
+    const { t } = useI18n()
+    const staffStore = useStaffStore()
+
     const state = reactive({
       reviews: [] as Array<ContinuationReviewIF>,
       headers: [
-        { text: 'Date Submitted', value: 'date' },
+        { text: 'Date Submitted', value: 'submissionDate' },
         { text: 'NR Number', value: 'nrNumber' },
-        { text: 'Identifying Number', value: 'businessIdentifier' },
+        { text: 'Identifying Number', value: 'identifier' },
         { text: 'Completing Party', value: 'completingParty' },
         { text: 'Status', value: 'status' },
         { text: 'Actions', value: 'action' }
       ],
+      statusTypes: ref<{ text: string; value: string }[]>([
+        { text: 'Awaiting Review', value: 'AWAITING_REVIEW' },
+        { text: 'Change Requested', value: 'CHANGE_REQUESTED' },
+        { text: 'Resubmitted', value: 'RESUBMITTED' },
+        { text: 'Rejected', value: 'REJECTED' },
+        { text: 'Accepted', value: 'ACCEPTED' },
+        { text: 'Abandoned', value: 'ABANDONED' }
+      ]),
+      formatDate: CommonUtils.formatDisplayDate,
+      totalItemsCount: 0,
+      tableDataOptions: {} as Partial<DataOptions>,
       isTableLoading: false,
-      paginationOptions: [5, 10, 15, 20]
+      searchParamsExist: false,
+      dropdown: [] as Array<boolean>,
+      reviewParams: {
+        submissionDate: '',
+        nrNumber: '',
+        identifier: '',
+        completingParty: '',
+        status: ''
+      } as ReviewFilterParams
     })
 
-    function getButtonLabel (status) {
-      const reviewStates = ['Awaiting Review', 'Resubmitted']
-      return reviewStates.includes(status) ? 'Review' : 'View'
+    const paginationOptions = computed(() => getPaginationOptions())
+
+    const debouncedOrgSearch = debounce(async function (page = 1, pageLimit = state.tableDataOptions.itemsPerPage) {
+      try {
+        state.isTableLoading = true
+        const completeSearchParams: ReviewFilterParams = {
+          ...state.reviewParams,
+          page: page,
+          limit: pageLimit
+        }
+        console.log(completeSearchParams)
+        const searchReviewResp = await staffStore.searchReviews(completeSearchParams)
+        state.reviews = searchReviewResp.reviews
+        state.totalItemsCount = searchReviewResp?.total || 0
+      } catch (error) {
+        console.error(error)
+      } finally {
+        state.isTableLoading = false
+      }
+    })
+
+    function mounted () {
+      state.tableDataOptions = DEFAULT_DATA_OPTIONS
+      const reviewSearchFilter = ConfigHelper.getFromSession(props.reviewSessionStorageKey) || ''
+      try {
+        state.reviewParams = JSON.parse(reviewSearchFilter)
+      } catch {
+        // Do nothing, we have defaults for review searchParams.
+      }
+      const hasInfo = hasCachedPageInfo(props.reviewPaginationOptionsKey)
+      if (hasInfo) {
+        state.tableDataOptions = getAndPruneCachedPageInfo(props.reviewPaginationOptionsKey)
+      }
     }
 
-    function view (reviewId: string) {
-      // route to Continuation Authorization Review page
+    watch(() => state.reviewParams, function (value) {
+      state.searchParamsExist = doSearchParametersExist(value)
+      state.tableDataOptions = { ...getAndPruneCachedPageInfo(props.reviewPaginationOptionsKey), page: 1 }
+      setSearchFilterToStorage(JSON.stringify(value))
+      debouncedOrgSearch()
+    }, { deep: true })
+
+    watch(() => state.tableDataOptions, function (val) {
+      debouncedOrgSearch(val?.page, val?.itemsPerPage)
+    }, { deep: true })
+
+    function getButtonLabel (status: string) {
+      const reviewStates = ['AWAITING_REVIEW', 'RESUBMITTED']
+      return reviewStates.includes(status) ? 'Review' : 'View'
+    }
+    async function view (reviewId: string) {
       this.$router.push(`/staff/continuation-review/${reviewId}`)
+    }
+
+    function clearSearchParams () {
+      state.reviewParams = {
+        submissionDate: '',
+        nrNumber: '',
+        identifier: '',
+        completingParty: '',
+        status: ''
+      }
     }
 
     function getIndexedTag (tag: string, index: number): string {
       return `${tag}-${index}`
     }
 
-    return {
-      ...state,
-      getButtonLabel,
-      view,
-      getIndexedTag
+    function updateItemsPerPage (options: DataOptions): void {
+      cachePageInfo(options, props.reviewPaginationOptionsKey)
     }
-  },
-  mounted () {
-    this.isTableLoading = true
-    BusinessServices.fetchContinuationReviews()
-      .then(result => {
-        this.reviews = result.data
-      })
-      .catch(error => {
-        console.error('Failed to fetch reviews:', error)
-      })
-      .finally(() => {
-        this.isTableLoading = false
-      })
+
+    const noDataMessage = computed(() => {
+      return t(
+        state.searchParamsExist
+          ? 'searchReviewsNoResult'
+          : 'searchReviewStartMessage'
+      )
+    })
+
+    function setSearchFilterToStorage (val: string): void {
+      ConfigHelper.addToSession(props.reviewSessionStorageKey, val)
+    }
+
+    function doSearchParametersExist (params: ReviewFilterParams): boolean {
+      return params.submissionDate.length > 0 ||
+                params.nrNumber.length > 0 ||
+                params.identifier.length > 0 ||
+                params.completingParty.length > 0 ||
+                params.status.length > 0
+    }
+
+    // Method to display the status
+    function displayStatus (status: string): string {
+      return status
+        .toLowerCase()
+        .replace(/_/g, ' ')
+        .replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase())
+    }
+    // Method to format dates
+    const formatDate = (dateString) => {
+      return moment(dateString).format('MMMM D, YYYY') // Format like "May 5, 2024"
+    }
+
+    mounted()
+
+    return {
+      ...toRefs(state),
+      debouncedOrgSearch,
+      view,
+      clearSearchParams,
+      displayStatus,
+      formatDate,
+      getIndexedTag,
+      getButtonLabel,
+      noDataMessage,
+      setSearchFilterToStorage,
+      doSearchParametersExist,
+      paginationOptions,
+      updateItemsPerPage
+    }
   }
 })
 </script>
@@ -159,10 +349,6 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 // Note this uses .fas-search
 @import '~/fas-ui/src/assets/scss/search.scss';
-
-// Rename .fas-search
-.continuation-application-search{
-  @extend .fas-search;}
 
 // Vuetify Override
 .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
@@ -197,7 +383,7 @@ export default defineComponent({
   display: inline-flex;
 }
 
-.continuation-application-search {
+.continuation-review-search {
   table > thead > tr > th {
     width: 210px !important;
     min-width: 210px !important;

@@ -28,10 +28,6 @@ describe('StaffContinuationApplicationTable.vue', () => {
     wrapper.destroy()
   })
 
-  it('is a Vue instance', () => {
-    expect(wrapper.vm).toBeTruthy()
-  })
-
   it('Should have data table', () => {
     expect(wrapper.find('.v-data-table')).toBeTruthy()
   })

@@ -5,11 +5,13 @@ import { SyncAccountPayload, Task } from '@/models/Task'
 import { computed, reactive, toRefs } from '@vue/composition-api'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
+import BusinessService from '@/services/business.services'
 import { Contact } from '@/models/contact'
 import { Invitation } from '@/models/Invitation'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
+import { ReviewFilterParams } from '@/models/continuation-review'
 import StaffService from '@/services/staff.services'
 import TaskService from '@/services/task.services'
 import { User } from '@/models/user'
@@ -248,6 +250,19 @@ export const useStaffStore = defineStore('staff', () => {
     return {}
   }
 
+  async function searchReviews (filterParams: ReviewFilterParams) {
+    const response = await BusinessService.searchReviews(filterParams)
+    if (response?.data) {
+      return {
+        limit: response.data.limit,
+        page: response.data.page,
+        total: response.data.total,
+        reviews: response.data.reviews
+      }
+    }
+    return {}
+  }
+
   async function syncPendingStaffOrgs () {
     const response = await StaffService.getStaffOrgs(AccountStatus.PENDING_STAFF_REVIEW)
     state.pendingStaffOrgs = response?.data?.orgs || []
@@ -322,6 +337,7 @@ export const useStaffStore = defineStore('staff', () => {
     rejectorOnHoldAccountUnderReview,
     resendPendingOrgInvitation,
     searchOrgs,
+    searchReviews,
     ...toRefs(state),
     suspendedReviewCount,
     syncTaskUnderReview,

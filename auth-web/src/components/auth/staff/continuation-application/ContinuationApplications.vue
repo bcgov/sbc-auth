@@ -10,18 +10,30 @@
     </header>
 
     <!-- Table Contents -->
-    <ContinuationApplicationTable />
+    <ContinuationApplicationTable
+      :reviewSessionStorageKey="reviewSessionStorageKey"
+      :reviewPaginationNumberOfItemsKey="reviewPaginationNumberOfItemsKey"
+      :reviewPaginationOptionsKey="reviewPaginationOptionsKey"
+    />
   </v-container>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
 import ContinuationApplicationTable from './ContinuationApplicationTable.vue'
+import { SessionStorageKeys } from '@/util/constants'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
+export default defineComponent({
+  name: 'ContinuationApplications',
   components: {
     ContinuationApplicationTable
+  },
+  data () {
+    return {
+      reviewSessionStorageKey: SessionStorageKeys.ReviewSearchFilter,
+      reviewPaginationNumberOfItemsKey: SessionStorageKeys.ReviewPaginationNumberOfItems,
+      reviewPaginationOptionsKey: SessionStorageKeys.ReviewPaginationOptions
+    }
   }
 })
-export default class ContinuationApplications extends Vue {}
 </script>
