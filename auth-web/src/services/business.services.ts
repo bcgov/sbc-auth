@@ -1,6 +1,6 @@
 import { BNRequest, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad } from '@/models/business'
-import { ContinuationReviewIF, ContinuationReviewStatus } from '@/models/continuation-review'
+import { ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
 import { AxiosResponse } from 'axios'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -96,97 +96,62 @@ export default class BusinessService {
   }
 
   /**
+   * Fetches a filing by its URL.
+   * @param url the full URL of the filing
+   * @returns a promise to return the filing
+   */
+  static async fetchFiling (url: string): Promise<any> {
+    // safety check
+    if (!url) throw new Error('Invalid parameters')
+
+    return axios.get(url)
+      .then(response => {
+        const filing = response?.data?.filing
+        if (!filing) {
+          // eslint-disable-next-line no-console
+          console.log('fetchFiling() error - invalid response =', response)
+          throw new Error('Invalid API response')
+        }
+        return filing
+      })
+  }
+
+  /**
    * Fetches a continuation review object.
    * @param reviewId the review id
    * @returns a promise to return the data or the axios error response
    */
   static async fetchContinuationReview (reviewId: number): Promise<ContinuationReviewIF> {
     // safety check
-    if (!reviewId) {
-      throw new Error('Invalid parameters')
-    }
+    if (!reviewId) throw new Error('Invalid parameters')
 
-    // *** TODO: once the API is ready, replace this mocked data with the Axios call below
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    return new Promise(resolve => resolve({
-      review: {
-        id: 123,
-        completingParty: 'Joe Enduser',
-        status: ContinuationReviewStatus.AWAITING_REVIEW,
-        submissionDate: '2024-07-01T19:00:00.000+00:00',
-        creationDate: '2024-07-01T19:00:00.000+00:00'
-      },
-      results: [
-        {
-          status: ContinuationReviewStatus.CHANGE_REQUESTED,
-          comments: 'a long string...',
-          reviewer: 'Staffanie Stafford',
-          submissionDate: null,
-          creationDate: '2024-07-01T19:00:00.000+00:00'
+    const url = `${ConfigHelper.getLegalAPIV2Url()}/admin/reviews/${reviewId}`
+    return axios.get(url)
+      .then(response => {
+        const review = response?.data
+        if (!review) {
+          // eslint-disable-next-line no-console
+          console.log('fetchContinuationReview() error - invalid response =', response)
+          throw new Error('Invalid API response')
         }
-      ],
-      filing: {
-        continuationIn: {
-          authorization: {
-            date: '2024-07-01',
-            files: [
-              {
-                fileKey: '0071dbd6-6095-46f6-b5e4-cc859b0ebf27.pdf',
-                fileName: 'My Authorization Document.pdf'
-              },
-              {
-                fileKey: 'xxx.pdf',
-                fileName: 'Invalid File.pdf'
-              }
-            ]
-          },
-          business: {
-            foundingDate: '2001-05-03T07:00:00.000+00:00',
-            identifier: 'A0054444',
-            legalName: 'FIRST AWIQ SHOPPING CENTRES BC LIMITED'
-          },
-          foreignJurisdiction: {
-            affidavitFileKey: '007bd7bd-d421-49a9-9925-03ce561d044f.pdf',
-            affidavitFileName: 'My Director Affidavit.pdf',
-            country: 'CA',
-            identifier: 'AB-5444',
-            incorporationDate: '2001-04-02',
-            legalName: 'FIRST AWIQ SHOPPING CENTRES ALBERTA UNLIMITED',
-            region: 'AB',
-            taxId: '123456789'
-          },
-          mode: 'EXPRO',
-          nameRequest: {
-            legalType: 'CUL'
-          }
-        }
-      }
-    }))
-
-    // const url = `${ConfigHelper.getLegalAPIV2Url()}/continuation-reviews/${reviewId}`
-    // return axios.get(url)
+        return review
+      })
   }
 
   /**
-   * Saves a continuation review result.
+   * Submits a continuation review result.
    * @param status the review status
-   * @param comment the review comment
+   * @param comment the optional review comment
    * @returns a promise to return the data or the axios error response
    */
-  static async saveContinuationReviewResult (status: ContinuationReviewStatus, comment: string): Promise<any> {
+  static async submitContinuationReviewResult (reviewId: number, status: ReviewStatus, comment: string): Promise<any> {
     // safety check
-    if (!status) {
-      throw new Error('Invalid parameters')
-    }
+    if (!status) throw new Error('Invalid parameters')
 
     const data = { status, comment }
+    const url = `${ConfigHelper.getLegalAPIV2Url()}/admin/reviews/${reviewId}`
 
-    // *** TODO: once the API is ready, replace this mocked data with the Axios call below
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    return new Promise(resolve => resolve(data))
-
-    // const url = `${ConfigHelper.getLegalAPIV2Url()}/continuation-reviews/${reviewId}`
-    // return axios.post(url, data)
+    return axios.post(url, data)
   }
 
   /**
@@ -198,9 +163,7 @@ export default class BusinessService {
    */
   static async downloadDocument (documentKey: string, documentName: string): Promise<AxiosResponse> {
     // safety checks
-    if (!documentKey || !documentName) {
-      throw new Error('Invalid parameters')
-    }
+    if (!documentKey || !documentName) throw new Error('Invalid parameters')
 
     const url = `${ConfigHelper.getLegalAPIV2Url()}/documents/${documentKey}`
     const config = {
@@ -239,33 +202,35 @@ export default class BusinessService {
     })
   }
 
+  // *** TODO: this should return type "array of reviews"
   static async fetchContinuationReviews (): Promise<any> {
     // Mock data simulating the expected response structure from the API
+    await new Promise(resolve => setTimeout(resolve, 1000))
     return new Promise(resolve => resolve({
       data: [
         {
-          reviewId: '001',
+          reviewId: 1,
           date: 'July 3, 2024',
           nrNumber: 'NR 0001234',
           businessIdentifier: 'LN958001',
           completingParty: 'John Doe',
-          status: 'Awaiting Review'
+          status: 'Approved'
         },
         {
-          reviewId: '002',
+          reviewId: 2,
           date: 'April 4, 2024',
           nrNumber: 'NR 0001235',
           businessIdentifier: 'LN786002',
           completingParty: 'Jane Smith',
-          status: 'Change Requested'
+          status: 'Resubmitted'
         },
         {
-          reviewId: '003',
+          reviewId: 3,
           date: 'June 15, 2024',
           nrNumber: 'NR 0001239',
           businessIdentifier: 'LN965002',
           completingParty: 'Test Mark',
-          status: 'Rejected'
+          status: 'Awaiting Review'
         }
       ]
     } as any))

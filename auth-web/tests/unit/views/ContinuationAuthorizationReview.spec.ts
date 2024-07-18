@@ -1,12 +1,13 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import BusinessService from '@/services/business.services'
 import ContinuationAuthorizationReview from '@/views/auth/staff/ContinuationAuthorizationReview.vue'
-import ContinuationAuthorizationReviewResult
-  from '@/components/auth/staff/continuation-application/ContinuationAuthorizationReviewResult.vue'
 import ExtraprovincialRegistrationBc
   from '@/components/auth/staff/continuation-application/ExtraprovincialRegistrationBc.vue'
 import HomeJurisdictionInformation
   from '@/components/auth/staff/continuation-application/HomeJurisdictionInformation.vue'
+import PreviousCorrespondence from '@/components/auth/staff/continuation-application/PreviousCorrespondence.vue'
+import ReviewResult from '@/components/auth/staff/continuation-application/ReviewResult.vue'
+import { ReviewStatus } from '@/models/continuation-review'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
@@ -17,18 +18,24 @@ const localVue = createLocalVue()
 const vuetify = new Vuetify({})
 
 describe('ExtraprovincialRegistrationBc component', () => {
-  let wrapper: Wrapper<ContinuationAuthorizationReview>
+  let wrapper: Wrapper<any>
 
   beforeAll(async () => {
     // mock "fetchContinuationReview" business service
     vi.spyOn(BusinessService, 'fetchContinuationReview').mockImplementation((): any => {
       return Promise.resolve({
-        review: {},
-        results: {},
-        filing: {
-          continuationIn: {
-            mode: 'EXPRO'
-          }
+        filingLink: 'https://filingLink',
+        status: ReviewStatus.AWAITING_REVIEW
+      })
+    })
+
+    // mock "fetchFiling" business service
+    vi.spyOn(BusinessService, 'fetchFiling').mockImplementation((): any => {
+      return Promise.resolve({
+        header: {},
+        business: {},
+        continuationIn: {
+          mode: 'EXPRO'
         }
       })
     })
@@ -39,7 +46,8 @@ describe('ExtraprovincialRegistrationBc component', () => {
       stubs: {
         ExtraprovincialRegistrationBc: true,
         HomeJurisdictionInformation: true,
-        ContinuationAuthorizationReviewResult: true
+        PreviousCorrespondence: true,
+        ReviewResult: true
       },
       vuetify
     })
@@ -57,7 +65,11 @@ describe('ExtraprovincialRegistrationBc component', () => {
   })
 
   it('fetched the continuation review object', () => {
-    expect(wrapper.vm.continuationReview).toBeTruthy()
+    expect(wrapper.vm.review).toBeTruthy()
+  })
+
+  it('fetched the continuation filing object', () => {
+    expect(wrapper.vm.filing).toBeTruthy()
   })
 
   it('computed "isExpro"', () => {
@@ -96,6 +108,13 @@ describe('ExtraprovincialRegistrationBc component', () => {
     expect(wrapper.find('h2').text()).toBe('Continuation Authorization Review Result')
     const vcard2 = wrapper.find('#continuation-authorization-review-result-vcard')
     expect(vcard2.exists()).toBe(true)
-    expect(vcard2.findComponent(ContinuationAuthorizationReviewResult).exists()).toBe(true)
+    expect(vcard2.findComponent(PreviousCorrespondence).exists()).toBe(true)
+    expect(vcard2.findComponent(ReviewResult).exists()).toBe(true)
+  })
+
+  it('rendered the actions', () => {
+    const div = wrapper.find('#actions-wrapper')
+    expect(div.find('.cancel-btn').exists()).toBe(true)
+    expect(div.find('.submit-btn').exists()).toBe(true)
   })
 })
