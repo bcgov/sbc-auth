@@ -55,18 +55,18 @@ install: clean ## Install python virtrual environment
 ci: lint flake8 test ## CI flow
 
 pylint: ## Linting with pylint
-	. venv/bin/activate && pylint --rcfile=setup.cfg  src/$(PROJECT_NAME)
+	poetry run pylint --rcfile=setup.cfg  src/$(PROJECT_NAME)
 
 flake8: ## Linting with flake8
-	. venv/bin/activate && flake8 src/$(PROJECT_NAME) tests
+	poetry run flake8 src/$(PROJECT_NAME) tests
 
 lint: pylint flake8 ## run all lint type scripts
 
 test: ## Unit testing
-	. venv/bin/activate && pytest
+	poetry run pytest
 
 mac-cov: local-test ## Run the coverage report and display in a browser window (mac)
-	open -a "Google Chrome" htmlcov/index.html
+	@open -a "Google Chrome" htmlcov/index.html
 
 #################################################################################
 # COMMANDS - CD
@@ -122,11 +122,8 @@ tag: push ## tag image
 #################################################################################
 # COMMANDS - Local                                                              #
 #################################################################################
-run: db ## Run the project in local
-	. venv/bin/activate && python -m flask run -p 5000
-
-db: ## Update the local database
-	. venv/bin/activate && python -m manage.py db upgrade
+run: ## Run the project in local
+	poetry run flask run -p 5000
 
 #################################################################################
 # Self Documenting Commands                                                     #
