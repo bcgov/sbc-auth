@@ -414,7 +414,7 @@ export default class Stepper extends Vue {
   .assistance-text {
     border-top: 1px solid #e0e0e0;
     text-align: center;
-    color: #495057;
+    color: white;
     margin-top: auto; /* Ensures it sticks to the bottom */
   }
 </style>

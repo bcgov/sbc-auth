@@ -23,7 +23,7 @@
         >
           {{ errorMessage }}
         </div>
-        <sbc-system-error
+        <SbcSystemError
           v-if="showErrorModal && errorMessage"
           title="Payment Failed"
           primaryButtonTitle="Continue to Account Page"
@@ -37,52 +37,63 @@
 
 <script lang="ts">
 
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import PaymentServices from '@/services/payment.services'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
+import { useI18n } from 'vue-i18n-composable'
 
-@Component({
+export default defineComponent({
+  name: 'CcPaymentReturnView',
   components: {
     SbcSystemError
+  },
+  props: {
+    paymentId: { type: String, default: '' },
+    transactionId: { type: String, default: '' },
+    payResponseUrl: { type: String, default: '' }
+  },
+  setup (props) {
+    const { t } = useI18n()
+    const state = reactive({
+      errorMessage: '',
+      returnUrl: '',
+      // show modal when paybc is down..otherwise [all unhandled technical error , show plain text error message..]
+      showErrorModal: false
+    })
+
+    function goToUrl (url: string) {
+      window.location.href = url
+    }
+
+    onMounted(async () => {
+      if (!props.paymentId || !props.transactionId) {
+        state.errorMessage = t('payNoParams').toString()
+        return
+      }
+
+      try {
+        const { data } = await PaymentServices.updateTransactionForPadPayment(props.paymentId, props.transactionId, props.payResponseUrl)
+        state.returnUrl = data.clientSystemUrl
+
+        if (data?.paySystemReasonCode === 'SERVICE_UNAVAILABLE') {
+          // PayBC is down, show the custom modal
+          state.errorMessage = t('payFailedMessagePayBcDown').toString()
+          state.showErrorModal = true
+        } else {
+          goToUrl(state.returnUrl)
+        }
+      } catch {
+        state.showErrorModal = false
+        state.errorMessage = t('payFailedMessage').toString()
+      }
+    })
+
+    return {
+      ...toRefs(state),
+      goToUrl
+    }
   }
 })
-export default class CcPaymentReturnView extends Vue {
-  @Prop() paymentId: string
-  @Prop() transactionId: string
-  @Prop() payResponseUrl: string
-  returnUrl: string
-  errorMessage: string = ''
-  // show modal when paybc is down..otherwise [all unhandled technical error , show plain text error message..]
-  showErrorModal: boolean = false
-
-  mounted () {
-    if (!this.paymentId || !this.transactionId) {
-      this.errorMessage = this.$t('payNoParams').toString()
-      return
-    }
-    PaymentServices.updateTransactionForPadPayment(this.paymentId, this.transactionId, this.payResponseUrl)
-      .then(response => {
-        this.returnUrl = response.data.clientSystemUrl
-        if (response.data.paySystemReasonCode && response.data.paySystemReasonCode === 'SERVICE_UNAVAILABLE') {
-          // PayBC down time..Show the custom modal
-          this.errorMessage = this.$t('payFailedMessagePayBcDown').toString()
-          this.showErrorModal = true
-        } else {
-          // all good..go back
-          this.goToUrl(this.returnUrl)
-        }
-      })
-      .catch(() => {
-        // technical error..need not to show the modal
-        this.showErrorModal = false
-        this.errorMessage = this.$t('payFailedMessage').toString()
-      })
-  }
-
-  goToUrl (url: string) {
-    window.location.href = url
-  }
-}
 </script>
 
 <style lang="scss" scoped>

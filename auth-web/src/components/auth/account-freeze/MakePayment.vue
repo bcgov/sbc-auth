@@ -23,7 +23,9 @@
             type="radio"
             class="radio ml-6 mr-12"
             name="payment-method"
+            value="EFT"
             checked
+            @change="onPaymentMethodChange"
           >
           <div>
             <h2>Electronic Funds Transfer</h2>
@@ -47,6 +49,9 @@
             type="radio"
             class="radio ml-6 mr-12"
             name="payment-method"
+            value="CC"
+            checked
+            @change="onPaymentMethodChange"
           >
           <div>
             <h2>Credit Card</h2>
@@ -102,7 +107,7 @@ import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'MakePayment',
-  emits: ['step-forward', 'step-back'],
+  emits: ['step-forward', 'step-back', 'final-step-action', 'selected-payment-method'],
   setup (_, { emit }) {
     const orgStore = useOrgStore()
     const updateOrg = orgStore.updateOrg
@@ -114,7 +119,8 @@ export default defineComponent({
       refreshPAD: 0,
       isTouched: false,
       isLoading: false,
-      errorText: ''
+      errorText: '',
+      paymentMethod: PaymentTypes.EFT
     })
 
     onMounted(async () => {
@@ -126,6 +132,10 @@ export default defineComponent({
       state.padInfo.isTOSAccepted = !!(cfsAccount?.bankAccountNumber && cfsAccount?.bankInstitutionNumber && cfsAccount?.bankTransitNumber)
       state.refreshPAD++
     })
+
+    function onPaymentMethodChange (event: any) {
+      state.paymentMethod = event.target.value
+    }
 
     async function verifyPAD () {
       state.errorText = ''
@@ -151,7 +161,7 @@ export default defineComponent({
 
     async function goNext () {
       if (!state.isTouched) {
-        emit('step-forward')
+        emit('final-step-action')
       } else {
         state.isLoading = true
         let isValid = state.isTouched ? await verifyPAD() : true
@@ -167,7 +177,7 @@ export default defineComponent({
           try {
             await updateOrg(createRequestBody)
             state.isLoading = false
-            emit('step-forward')
+            emit('final-step-action')
           } catch (error) {
             // eslint-disable-next-line no-console
             console.error(error)
@@ -183,6 +193,7 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
+      onPaymentMethodChange,
       goNext,
       goBack
     }

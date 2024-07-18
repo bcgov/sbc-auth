@@ -98,7 +98,10 @@
           <span>{{ formatCurrency(item.amountOwing) }}</span>
         </template>
         <template #expanded-item="{ item }">
-          <tr class="expanded-item-row" v-if="item.hasPendingPayment">
+          <tr
+            v-if="item.hasPendingPayment"
+            class="expanded-item-row"
+          >
             <td
               :colspan="headers.length"
               class="pb-5 pl-0"

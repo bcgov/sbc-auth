@@ -1,41 +1,37 @@
+import '../test-utils/composition-api-setup' // important to import this first
+import { AccountStatus, PaymentTypes, Role } from '@/util/constants'
 import { createLocalVue, mount } from '@vue/test-utils'
-
+import { useOrgStore, useUserStore } from '@/stores'
 import AccountFreezeUnlockView from '@/views/auth/account-freeze/AccountFreezeUnlockView.vue'
-import { AccountStatus } from '@/util/constants'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import { useOrgStore } from '@/stores'
+import flushPromises from 'flush-promises'
 
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-const router = new VueRouter()
+const localVue = createLocalVue()
 const vuetify = new Vuetify({})
-
-const mockSession = {
-  'NRO_URL': 'Mock NRO URL',
-  'NAME_REQUEST_URL': 'Mock Name Request URL'
-}
+const router = new VueRouter()
+localVue.use(Vuetify)
+localVue.use(VueRouter)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-describe('AccountFreezeUnlockView.vue', () => {
+describe('AccountFreezeUnlockView', () => {
   let wrapper: any
 
   beforeEach(() => {
-    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
-    const localVue = createLocalVue()
     const orgStore = useOrgStore()
+    const userStore = useUserStore()
+
     orgStore.currentOrganization = {
       statusCode: AccountStatus.NSF_SUSPENDED
     } as any
-    orgStore.calculateFailedInvoices = vi.fn(() => {
-      return {
-        totalTransactionAmount: 10,
-        totalAmountToPay: 20
-      }
-    }) as any
+
+    userStore.currentUser = {
+      firstName: 'Fred',
+      lastName: 'Flinstone',
+      roles: [Role.Staff]
+    } as any
 
     wrapper = mount(AccountFreezeUnlockView, {
       localVue,
@@ -43,11 +39,9 @@ describe('AccountFreezeUnlockView.vue', () => {
       vuetify,
       mocks: {
         $t: (mock) => mock
-      },
-      computed: {
-        isAccountStatusNsfSuspended: Boolean
       }
     })
+    wrapper.vm.isViewLoading = false
   })
 
   afterEach(() => {
@@ -56,23 +50,82 @@ describe('AccountFreezeUnlockView.vue', () => {
     wrapper.destroy()
   })
 
-  it('is a Vue instance', () => {
+  it('Should be a Vue instance', () => {
     expect(wrapper.vm).toBeTruthy()
   })
 
-  it('should render page title', () => {
+  it('Should have error dialog', () => {
+    expect(wrapper.find({ ref: 'errorDialog' }).exists()).toBe(true)
+  })
+
+  it('Should not render view if not loaded', async () => {
+    wrapper.vm.isViewLoading = true
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('h1').exists()).toBe(false)
+  })
+
+  it('Should render NSF view', async () => {
+    wrapper.vm.isAccountStatusNsfSuspended = true
+    await wrapper.vm.$nextTick()
     expect(wrapper.find('h1').text()).toBe('This account has been temporarily suspended')
+    expect(wrapper.find('p').text()).toBe('To unlock your account, please complete the following steps.')
+    expect(wrapper.find('.view-header__icon .v-icon').exists()).toBe(true)
   })
 
-  it('should render page title icon', () => {
-    expect(wrapper.find('.view-header__icon').find('.v-icon').exists()).toBe(true)
+  it('Should render <Stepper>', () => {
+    expect(wrapper.findComponent({ name: 'stepper' }).exists()).toBe(true)
+  })
+})
+
+describe('AccountFreezeUnlockView (EFT)', () => {
+  let wrapper: any
+
+  beforeEach(() => {
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
+
+    orgStore.currentOrganization = {
+      statusCode: AccountStatus.NSF_SUSPENDED
+    } as any
+
+    orgStore.calculateFailedInvoices = vi.fn(() => ({
+      totalTransactionAmount: 10,
+      totalAmountToPay: 20
+    })) as any
+
+    orgStore.getOrgPayments = vi.fn().mockReturnValue({ paymentMethod: PaymentTypes.EFT })
+
+    userStore.currentUser = {
+      firstName: 'Fred',
+      lastName: 'Flinstone',
+      roles: [Role.Staff]
+    } as any
+
+    wrapper = mount(AccountFreezeUnlockView, {
+      localVue,
+      router,
+      vuetify,
+      mocks: {
+        $t: (mock) => mock
+      }
+    })
+    wrapper.vm.isViewLoading = false
   })
 
-  it('should render stepper', () => {
-    expect(wrapper.find('stepper')).toBeTruthy()
+  afterEach(() => {
+    vi.resetModules()
+    vi.clearAllMocks()
+    wrapper.destroy()
   })
 
-  it('should have error dialog', () => {
-    expect(wrapper.find({ ref: 'errorDialog' })).toBeTruthy()
+  it('Should render NSF EFT view', async () => {
+    wrapper.vm.isAccountStatusNsfSuspended = true
+    await flushPromises()
+    expect(wrapper.find('h1').text()).toBe('Your Account is Suspended')
+    expect(wrapper.vm.stepperConfig.length).toBe(2)
+  })
+
+  it('Should render <Stepper>', () => {
+    expect(wrapper.findComponent({ name: 'stepper' }).exists()).toBe(true)
   })
 })

@@ -15,7 +15,7 @@
           v-if="!errorMessage"
           class="loading-msg"
         >
-          {{ $t('paymentPrepareMsg') }}
+          {{ t('paymentPrepareMsg') }}
         </div>
         <div
           v-if="errorMessage && !showErrorModal"
@@ -23,7 +23,7 @@
         >
           {{ errorMessage }}
         </div>
-        <sbc-system-error
+        <SbcSystemError
           v-if="showErrorModal && errorMessage"
           title="Payment Failed"
           primaryButtonTitle="Continue to Account Page"
@@ -37,55 +37,67 @@
 
 <script lang="ts">
 
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import PaymentServices from '@/services/payment.services'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
+import { useI18n } from 'vue-i18n-composable'
 
-@Component({
+export default defineComponent({
+  name: 'CcPaymentView',
   components: {
     SbcSystemError
+  },
+  props: {
+    paymentId: { type: String, default: '' },
+    redirectUrl: { type: String, default: '' }
+  },
+  setup (props) {
+    const { t } = useI18n()
+    const state = reactive({
+      errorMessage: '',
+      showErrorModal: false,
+      returnUrl: ''
+    })
+
+    const goToUrl = (url: string) => {
+      window.location.href = url || props.redirectUrl
+    }
+
+    onMounted(() => {
+      if (!props.paymentId || !redirectUrlFixed()) {
+        state.errorMessage = t('payNoParams').toString()
+        return
+      }
+      PaymentServices.createTransactionForPadPayment(props.paymentId, redirectUrlFixed())
+        .then(response => {
+          state.returnUrl = response.data.paySystemUrl
+          goToUrl(state.returnUrl)
+        })
+        .catch(error => {
+          state.errorMessage = t('payFailedMessage').toString()
+          if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') {
+            // Transaction is already completed. Show as a modal.
+            goToUrl(redirectUrlFixed())
+          } else {
+            state.showErrorModal = true
+          }
+        })
+    })
+
+    function redirectUrlFixed () {
+      if (!props.redirectUrl.includes('://')) {
+        return props.redirectUrl.replace(':/', '://')
+      }
+      return props.redirectUrl
+    }
+
+    return {
+      ...toRefs(state),
+      t,
+      goToUrl
+    }
   }
 })
-export default class CcPaymentView extends Vue {
-  @Prop() paymentId: string
-  @Prop() redirectUrl: string
-  errorMessage: string = ''
-  showErrorModal: boolean = false
-  returnUrl: string
-
-  mounted () {
-    if (!this.paymentId || !this.redirectUrlFixed) {
-      this.errorMessage = this.$t('payNoParams').toString()
-      return
-    }
-    PaymentServices.createTransactionForPadPayment(this.paymentId, this.redirectUrlFixed)
-      .then(response => {
-        this.returnUrl = response.data.paySystemUrl
-        this.goToUrl(this.returnUrl)
-      })
-      .catch(error => {
-        this.errorMessage = this.$t('payFailedMessage').toString()
-        if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') {
-          // Transaction is already completed. Show as a modal.
-          this.goToUrl(this.redirectUrlFixed)
-        } else {
-          this.showErrorModal = true
-        }
-      })
-  }
-
-  // We need this, otherwise we can get redirect Urls with just a single slash.
-  get redirectUrlFixed () {
-    if (!this.redirectUrl.includes('://')) {
-      return this.redirectUrl.replace(':/', '://')
-    }
-    return this.redirectUrl
-  }
-
-  goToUrl (url: string) {
-    window.location.href = url || this.redirectUrlFixed
-  }
-}
 </script>
 
 <style lang="scss" scoped>
