@@ -234,11 +234,10 @@ import { CanJurisdictions, IntlJurisdictions, UsaJurisdiction } from '@bcrs-shar
 import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
 import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
-import CommonUtils from '@/util/common-util'
 import { CorpTypes } from '@/util/constants'
 import { JurisdictionLocation } from '@bcrs-shared-components/enums'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import moment from 'moment'
+import moment from 'moment-timezone'
 
 export default defineComponent({
   name: 'HomeJurisdictionInformation',
@@ -358,7 +357,7 @@ export default defineComponent({
      */
     function strToPacificDate (str: string): string {
       const date = moment(str).toDate()
-      return CommonUtils.formatDisplayDate(date, 'MMM D, YYYY')
+      return (date) ? moment(date).tz('America/Vancouver').format('MMM D, YYYY') : ''
     }
 
     return {

@@ -53,8 +53,7 @@
 import { ContinuationFilingIF, ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
 import { computed, defineComponent, reactive } from '@vue/composition-api'
 import AutoResize from 'vue-auto-resize'
-import CommonUtils from '@/util/common-util'
-import moment from 'moment'
+import moment from 'moment-timezone'
 
 export default defineComponent({
   name: 'PreviousCorrespondence',
@@ -133,7 +132,7 @@ export default defineComponent({
      */
     function strToPacificDateTime (str: string): string {
       const date = moment.utc(str).toDate()
-      return CommonUtils.formatDisplayDate(date, 'MMM D, YYYY [at] h:mm a [Pacific Time]')
+      return (date) ? moment(date).tz('America/Vancouver').format('MMM D, YYYY [at] h:mm a [Pacific Time]') : ''
     }
 
     return {

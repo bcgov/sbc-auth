@@ -74,8 +74,7 @@
 <script lang="ts">
 import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
 import { computed, defineComponent, reactive } from '@vue/composition-api'
-import CommonUtils from '@/util/common-util'
-import moment from 'moment'
+import moment from 'moment-timezone'
 
 export default defineComponent({
   name: 'ExtraprovincialRegistrationBc',
@@ -112,7 +111,7 @@ export default defineComponent({
      */
     function strToPacificDate (str: string): string {
       const date = moment.utc(str).toDate()
-      return CommonUtils.formatDisplayDate(date, 'MMM D, YYYY')
+      return (date) ? moment(date).tz('America/Vancouver').format('MMM D, YYYY') : ''
     }
 
     return {
