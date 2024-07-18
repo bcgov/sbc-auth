@@ -398,10 +398,10 @@ export default class AccountInfo extends Mixins(
   }
   private get isBusinessInfoIncomplete (): boolean {
     return this.isBusinessAccount &&
-        !(this.accountDetails?.businessSize && this.accountDetails?.businessType);
+        !(this.accountDetails?.businessSize && this.accountDetails?.businessType)
   }
   private get isAddressInfoIncomplete (): boolean {
-    return this.currentOrgAddress ? Object.keys(this.currentOrgAddress).length === 0 : true;
+    return this.currentOrgAddress ? Object.keys(this.currentOrgAddress).length === 0 : true
   }
 
   private async setup () {
@@ -410,18 +410,19 @@ export default class AccountInfo extends Mixins(
     // show this part only account is not anon
     if (!this.anonAccount) {
       this.originalAddress = this.currentOrgAddress
-      const getWarningMessage = (condition: Boolean) => condition
-        ? 'This account info is incomplete. You will not be able to proceed until an account administrator enters the missing information for this account.'
-        : 'Your account info is incomplete. Please update any missing account details or address.';
+      const getWarningMessage = (condition: boolean) => condition
+        ? 'This account info is incomplete. You will not be able to proceed until an account administrator ' +
+          'entered the missing information for this account.'
+        : 'Your account info is incomplete. Please update any missing account details or address.'
 
       if (this.isBusinessInfoIncomplete || this.isAddressInfoIncomplete) {
-        this.isCompleteAccountInfo = false;
-        this.warningMessage = getWarningMessage(this.isBusinessInfoIncomplete ? this.nameChangeNotAllowed : !this.isAddressEditable);
-        this.$refs.editAccountForm?.validate(); // Validate form fields and show error message
-        this.$refs.mailingAddress?.triggerValidate(); // Validate form fields and show error message for address component from sbc-common-comp
+        this.isCompleteAccountInfo = false
+        this.warningMessage = getWarningMessage(this.isBusinessInfoIncomplete ? this.nameChangeNotAllowed : !this.isAddressEditable)
+        this.$refs.editAccountForm?.validate() // Validate form fields and show error message
+        this.$refs.mailingAddress?.triggerValidate() // Validate form fields and show error message for address component from sbc-common-comp
       } else {
-        this.isCompleteAccountInfo = true;
-        this.warningMessage = '';
+        this.isCompleteAccountInfo = true
+        this.warningMessage = ''
       }
     } else {
       // inorder to hide the address if not premium account
@@ -605,7 +606,7 @@ export default class AccountInfo extends Mixins(
       this.originalAddress = this.currentOrgAddress
       if (!this.isBusinessInfoIncomplete && !this.isAddressInfoIncomplete) {
         this.isCompleteAccountInfo = true
-        this.warningMessage = '';
+        this.warningMessage = ''
       }
       this.viewOnlyMode({ component: 'address', mode: true })
       this.viewOnlyMode({ component: 'account', mode: true })
