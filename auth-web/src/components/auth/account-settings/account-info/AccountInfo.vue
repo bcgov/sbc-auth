@@ -815,13 +815,13 @@ export default class AccountInfo extends Mixins(
 }
 .custom-warning {
   border-radius: 4px;
-  border: 1px solid #FCBA19 !important;
-  background: #FFF7E3 !important;
-  color: #495057;
+  border: 1px solid $BCgovGold5 !important;
+  background: $BCgovGold0 !important;
+  color: $gray7;
 }
 ::v-deep {
   .custom-warning .v-icon {
-    color: #F8661A !important;
+    color: $app-alert-orange !important;
   }
 }
 </style>
