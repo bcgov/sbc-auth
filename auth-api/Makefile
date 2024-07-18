@@ -48,6 +48,8 @@ install: clean ## Install python virtrual environment
 	pip install poetry ;\
 	poetry install
 
+install-dev: ## Instal development dependencies
+	poetry install --with dev
 
 #################################################################################
 # COMMANDS - CI                                                                 #
