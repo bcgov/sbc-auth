@@ -49,6 +49,7 @@ install: clean ## Install python virtrual environment
 	poetry install
 
 install-dev: ## Instal development dependencies
+	poetry add --dev pylint astroid
 	poetry install --with dev
 
 #################################################################################

@@ -92,9 +92,10 @@ simple-cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py.git"}
 sql-versioning = {git = "https://github.com/bcgov/lear.git", subdirectory = "python/common/sql-versioning", branch = "feature-legal-name"}
 
 [tool.poetry.group.dev.dependencies]
+astroid = "2.12.13"
 coverage = "^5.5"
 pylint-flask = "^0.6.0"
-pylint = "^2.7.4"
+pylint = "^2.15.0"
 pytest = "^6.2.4"
 pytest-cov = "^2.11.1"
 pytest-env = "^0.6.2"
