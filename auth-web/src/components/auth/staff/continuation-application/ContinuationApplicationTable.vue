@@ -13,9 +13,7 @@
             <v-data-table
               :headers="headers"
               :items="reviews"
-              :footer-props="{
-                itemsPerPageOptions: paginationOptions
-              }"
+              :footer-props="{ itemsPerPageOptions: paginationOptions }"
               hide-default-header
               fixed-header
               :loading="isTableLoading"
@@ -101,12 +99,13 @@
 <script lang="ts">
 import { defineComponent, reactive } from '@vue/composition-api'
 import BusinessServices from '@/services/business.services'
+import { ContinuationReviewIF } from '@/models/continuation-review'
 
 export default defineComponent({
   name: 'ContinuationApplicationTable',
   setup () {
     const state = reactive({
-      reviews: [],
+      reviews: [] as Array<ContinuationReviewIF>,
       headers: [
         { text: 'Date Submitted', value: 'date' },
         { text: 'NR Number', value: 'nrNumber' },
