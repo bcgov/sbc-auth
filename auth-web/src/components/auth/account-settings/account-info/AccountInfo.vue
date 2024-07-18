@@ -398,10 +398,10 @@ export default class AccountInfo extends Mixins(
   }
   private get isBusinessInfoIncomplete (): boolean {
     return this.isBusinessAccount &&
-        !(this.accountDetails.businessSize && this.accountDetails.businessType);
+        !(this.accountDetails?.businessSize && this.accountDetails?.businessType);
   }
   private get isAddressInfoIncomplete (): boolean {
-    return Object.keys(this.currentOrgAddress).length === 0;
+    return this.currentOrgAddress ? Object.keys(this.currentOrgAddress).length === 0 : true;
   }
 
   private async setup () {
@@ -596,7 +596,7 @@ export default class AccountInfo extends Mixins(
     }
 
     try {
-      // await this.updateOrg(createRequestBody)
+      await this.updateOrg(createRequestBody)
       // FUTURE: change 'staff view other account' flow so it doesn't need to fake load the other account globally
       // if staff updating a user account don't reload header -- causes staff account to get loaded in
       // Remove Vuex with Vue 3
