@@ -15,6 +15,15 @@
           {{ errorMessage }}
         </v-alert>
 
+        <v-alert
+          v-show="warningMessage"
+          type="warning"
+          icon="$error"
+          class="mb-6 custom-warning"
+        >
+          {{ warningMessage }}
+        </v-alert>
+
         <div v-show="!anonAccount">
           <div class="nv-list-item mb-6">
             <div
@@ -359,6 +368,7 @@ export default class AccountInfo extends Mixins(
   private originalAddress: Address = null // store the original address..do not modify it afterwards
 
   private errorMessage: string = ''
+  private warningMessage: string = ''
 
   private isBaseAddressValid: boolean = false
   private isCompleteAccountInfo = true
@@ -386,24 +396,32 @@ export default class AccountInfo extends Mixins(
       businessSize: this.currentOrganization?.businessSize || ''
     }
   }
+  private get isBusinessInfoIncomplete (): boolean {
+    return this.isBusinessAccount &&
+        !(this.accountDetails.businessSize && this.accountDetails.businessType);
+  }
+  private get isAddressInfoIncomplete (): boolean {
+    return Object.keys(this.currentOrgAddress).length === 0;
+  }
+
   private async setup () {
     this.setAccountDetails()
     await this.syncAddress()
     // show this part only account is not anon
     if (!this.anonAccount) {
       this.originalAddress = this.currentOrgAddress
-      if (Object.keys(this.currentOrgAddress).length === 0) {
-        this.isCompleteAccountInfo = false
-        this.errorMessage = this.isAddressEditable
-          ? 'Your account info is incomplete. Please enter your address in order to proceed.'
-          : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator ' +
-            'entered the missing information for this account.'
-        this.$refs.editAccountForm?.validate() // validate form fields and show error message
-        // SBTODO create a method in child comp
-        this.$refs.mailingAddress?.triggerValidate() // validate form fields and show error message for address component from sbc-common-comp
+      const getWarningMessage = (condition: Boolean) => condition
+        ? 'This account info is incomplete. You will not be able to proceed until an account administrator enters the missing information for this account.'
+        : 'Your account info is incomplete. Please update any missing account details or address.';
+
+      if (this.isBusinessInfoIncomplete || this.isAddressInfoIncomplete) {
+        this.isCompleteAccountInfo = false;
+        this.warningMessage = getWarningMessage(this.isBusinessInfoIncomplete ? this.nameChangeNotAllowed : !this.isAddressEditable);
+        this.$refs.editAccountForm?.validate(); // Validate form fields and show error message
+        this.$refs.mailingAddress?.triggerValidate(); // Validate form fields and show error message for address component from sbc-common-comp
       } else {
-        this.isCompleteAccountInfo = true
-        this.errorMessage = ''
+        this.isCompleteAccountInfo = true;
+        this.warningMessage = '';
       }
     } else {
       // inorder to hide the address if not premium account
@@ -578,14 +596,16 @@ export default class AccountInfo extends Mixins(
     }
 
     try {
-      await this.updateOrg(createRequestBody)
+      // await this.updateOrg(createRequestBody)
       // FUTURE: change 'staff view other account' flow so it doesn't need to fake load the other account globally
       // if staff updating a user account don't reload header -- causes staff account to get loaded in
       // Remove Vuex with Vue 3
       if (!(this.isStaff && !this.isStaffAccount)) this.$store.commit('updateHeader')
       this.addressChanged = false
-      if (this.baseAddress) {
+      this.originalAddress = this.currentOrgAddress
+      if (!this.isBusinessInfoIncomplete && !this.isAddressInfoIncomplete) {
         this.isCompleteAccountInfo = true
+        this.warningMessage = '';
       }
       this.viewOnlyMode({ component: 'address', mode: true })
       this.viewOnlyMode({ component: 'account', mode: true })
@@ -594,9 +614,6 @@ export default class AccountInfo extends Mixins(
         case 409:
           this.errorMessage =
             'An account with this name already exists. Try a different account name.'
-          break
-        case 400:
-          this.errorMessage = 'Invalid account name'
           break
         default:
           this.errorMessage =
@@ -794,5 +811,16 @@ export default class AccountInfo extends Mixins(
   font-size: 1rem !important;
   text-decoration: underline;
   margin-right: auto;
+}
+.custom-warning {
+  border-radius: 4px;
+  border: 1px solid #FCBA19 !important;
+  background: #FFF7E3 !important;
+  color: #495057;
+}
+::v-deep {
+  .custom-warning .v-icon {
+    color: #F8661A !important;
+  }
 }
 </style>
