@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="!!continuationIn"
+    v-if="!!review && !!filing"
     id="extraprovincial-registration-bc"
   >
     <!-- Registration Number in B.C. -->
@@ -72,32 +72,53 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { ContinuationReviewFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
-import DateUtils from '@/util/date-utils'
+import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
+import { computed, defineComponent, reactive } from '@vue/composition-api'
+import moment from 'moment-timezone'
 
-@Component({})
-export default class ExtraprovincialRegistrationBc extends Vue {
-  /** Continuation Review object that comes from parent component. */
-  @Prop({ required: true }) readonly continuationReview: ContinuationReviewIF
+export default defineComponent({
+  name: 'ExtraprovincialRegistrationBc',
 
-  get continuationIn (): ContinuationReviewFilingIF {
-    return this.continuationReview?.filing?.continuationIn
+  props: {
+    review: { type: Object as () => ContinuationReviewIF, required: true },
+    filing: { type: Object as () => ContinuationFilingIF, required: true }
+  },
+
+  setup (props) {
+    const state = reactive({
+      continuationIn: computed<any>(() => {
+        return props.filing?.continuationIn
+      }),
+
+      identifier: computed<string>(() => {
+        return state.continuationIn?.business?.identifier
+      }),
+
+      legalName: computed<string>(() => {
+        return state.continuationIn?.business?.legalName
+      }),
+
+      foundingDate: computed<string>(() => {
+        return strToPacificDate(state.continuationIn?.business?.foundingDate)
+      })
+    })
+
+    /**
+     * Converts a date-time string to a Pacific date string.
+     * @example
+     * Sample input: "2007-01-23T08:00:00.000+00:00".
+     * Sample output: "January 23, 2007".
+     */
+    function strToPacificDate (str: string): string {
+      const date = moment.utc(str).toDate()
+      return (date) ? moment(date).tz('America/Vancouver').format('MMMM D, YYYY') : ''
+    }
+
+    return {
+      ...state
+    }
   }
-
-  get identifier (): string {
-    return this.continuationIn?.business?.identifier
-  }
-
-  get legalName (): string {
-    return this.continuationIn?.business?.legalName
-  }
-
-  get foundingDate (): string {
-    const date = DateUtils.apiToDate(this.continuationIn?.business?.foundingDate)
-    return DateUtils.dateToPacificDate(date, true)
-  }
-}
+})
 </script>
 
 <style lang="scss" scoped>

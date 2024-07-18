@@ -18,11 +18,10 @@
 import { Component, Vue } from 'vue-property-decorator'
 import ContinuationApplicationTable from './ContinuationApplicationTable.vue'
 
-  @Component({
-    components: {
-      ContinuationApplicationTable
-    }
-  })
-export default class ContinuationApplications extends Vue {
-}
+@Component({
+  components: {
+    ContinuationApplicationTable
+  }
+})
+export default class ContinuationApplications extends Vue {}
 </script>
