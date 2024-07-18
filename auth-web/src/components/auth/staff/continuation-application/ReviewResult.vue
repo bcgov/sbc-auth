@@ -1,6 +1,6 @@
 <template>
   <section
-    v-if="!!review && !!filing && isActionable"
+    v-if="!!review && !!filing"
     id="review-result"
     class="section-container"
   >
@@ -65,7 +65,7 @@ export default defineComponent({
     filing: { type: Object as () => ContinuationFilingIF, required: true }
   },
 
-  setup (props) {
+  setup () {
     // refs
     const form: InstanceType<typeof HTMLFormElement> = ref(null)
 
@@ -78,15 +78,6 @@ export default defineComponent({
         { desc: 'Reject', code: ReviewStatus.REJECTED }
       ],
       emailBodyText: '',
-
-      /** Whether this Continuation Authorization Review is actionable. */
-      get isActionable (): boolean {
-        const status = props.review?.status
-        return (
-          status === ReviewStatus.AWAITING_REVIEW ||
-          status === ReviewStatus.RESUBMITTED
-        )
-      },
 
       /** Whether the email body text is required. */
       get isEmailBodyTextRequired (): boolean {

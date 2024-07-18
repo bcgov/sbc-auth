@@ -98,20 +98,23 @@
       >
         <PreviousCorrespondence
           class="pt-8 px-6"
+          :class="{ 'pb-8' :! isActionable }"
           :review="review"
           :filing="filing"
         />
 
-        <v-divider class="mt-7 mx-6" />
+        <template v-if="isActionable">
+          <v-divider class="mt-8 mx-6" />
 
-        <ReviewResult
-          ref="reviewResultComponent"
-          class="py-8 px-6"
-          :review="review"
-          :filing="filing"
-          @review-result="reviewResult = $event"
-          @email-body-text="emailBodyText = $event"
-        />
+          <ReviewResult
+            ref="reviewResultComponent"
+            class="py-8 px-6"
+            :review="review"
+            :filing="filing"
+            @review-result="reviewResult = $event"
+            @email-body-text="emailBodyText = $event"
+          />
+        </template>
       </v-card>
     </v-container>
 
