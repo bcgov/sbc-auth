@@ -176,6 +176,15 @@ export default defineComponent({
     ReviewResult
   },
 
+  /** Intercepts route change (but not page unloads). */
+  async beforeRouteLeave (to, from, next) {
+    if (this.haveUnsavedChanges) {
+      alert('You have unsaved changes. Please cancel or submit this review instead.')
+    } else {
+      next()
+    }
+  },
+
   props: {
     /** Review id that comes from route. */
     reviewId: { type: String, required: true }
@@ -215,6 +224,7 @@ export default defineComponent({
     function onDialogClose (): void {
       const value = errorDialogComponent.value as any; value.close()
 
+      // stay on this page if there are unsaved changes
       if (!state.haveUnsavedChanges) {
         // route back to staff dashboard
         root.$router.push(Pages.STAFF_DASHBOARD)
