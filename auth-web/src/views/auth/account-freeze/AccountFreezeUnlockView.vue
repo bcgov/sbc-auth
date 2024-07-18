@@ -267,3 +267,15 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+@import '@/assets/scss/theme.scss';
+
+.important {
+  background-color: #fae9e9;
+  border: 2px solid #d3272c;
+  color: #495057;
+  font-size: 12px;
+}
+
+</style>
