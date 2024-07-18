@@ -78,7 +78,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
-import { FailedEFTInvoice } from '@/models/invoice'
+import { FailedInvoice } from '@/models/invoice'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -88,7 +88,7 @@ export default defineComponent({
     const orgStore = useOrgStore()
     const currentOrganization = computed(() => orgStore.currentOrganization)
     const currentMembership = computed(() => orgStore.currentMembership)
-    const calculateFailedInvoices: any = orgStore.calculateFailedEFTInvoices
+    const calculateFailedInvoices: any = orgStore.calculateFailedInvoices
     const downloadNSFInvoicesPDF: any = orgStore.downloadNSFInvoicesPDF
     const formatDate = CommonUtils.formatDisplayDate
     const formatDateRange = CommonUtils.formatDateRange
@@ -104,9 +104,9 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      const failedInvoices: FailedEFTInvoice = await calculateFailedInvoices()
+      const failedInvoices: FailedInvoice = await calculateFailedInvoices()
       state.invoices = failedInvoices?.invoices || []
-      state.totalAmountDue = failedInvoices?.totalAmountDue || 0
+      state.totalAmountDue = failedInvoices?.totalAmountToPay || 0
     })
 
     return {

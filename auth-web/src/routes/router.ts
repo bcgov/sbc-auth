@@ -21,7 +21,6 @@ import AccountInstructions from '@/components/auth/create-account/non-bcsc/Accou
 import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.vue'
 import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
 import AccountSetupLanding from '@/views/auth/create-account/AccountSetupLanding.vue'
-import AccountSuspendedUnlockView from '@/views/auth/account-freeze/AccountSuspendedUnlockView.vue'
 import AccountSwitching from '@/views/auth/AccountSwitching.vue'
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
@@ -425,13 +424,6 @@ export function getRoutes (): RouteConfig[] {
       path: '/account-freeze-nsf',
       name: 'account-freeze-nsf',
       component: AccountFreezeUnlockView,
-      props: true,
-      meta: { requiresAuth: true, requiresProfile: true }
-    },
-    {
-      path: '/account-unlock',
-      name: 'account-unlock',
-      component: AccountSuspendedUnlockView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },
