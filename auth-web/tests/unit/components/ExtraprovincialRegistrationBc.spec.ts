@@ -23,7 +23,7 @@ const filing = {
 }
 
 describe('ExtraprovincialRegistrationBc component', () => {
-  let wrapper: Wrapper<ExtraprovincialRegistrationBc>
+  let wrapper: Wrapper<any>
 
   beforeAll(async () => {
     wrapper = mount(ExtraprovincialRegistrationBc, {

@@ -45,7 +45,7 @@ const review = {
 const filing = {}
 
 describe('PreviousCorrespondence component', () => {
-  let wrapper: Wrapper<PreviousCorrespondence>
+  let wrapper: Wrapper<any>
 
   beforeAll(async () => {
     wrapper = mount(PreviousCorrespondence, {

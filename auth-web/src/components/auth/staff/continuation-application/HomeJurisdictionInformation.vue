@@ -353,11 +353,11 @@ export default defineComponent({
     /**
      * Converts a date string to a Pacific date string.
      * Sample input: "2024-07-01".
-     * Sample output: "Jul 1, 2024".
+     * Sample output: "July 1, 2024".
      */
     function strToPacificDate (str: string): string {
       const date = moment(str).toDate()
-      return (date) ? moment(date).tz('America/Vancouver').format('MMM D, YYYY') : ''
+      return (date) ? moment(date).tz('America/Vancouver').format('MMMM D, YYYY') : ''
     }
 
     return {

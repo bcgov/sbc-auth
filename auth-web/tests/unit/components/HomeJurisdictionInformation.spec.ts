@@ -41,7 +41,7 @@ const filing = {
 }
 
 describe('HomeJurisdictionInformation component', () => {
-  let wrapper: Wrapper<HomeJurisdictionInformation>
+  let wrapper: Wrapper<any>
 
   beforeAll(async () => {
     wrapper = mount(HomeJurisdictionInformation, {

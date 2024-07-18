@@ -132,7 +132,7 @@ export default defineComponent({
      */
     function strToPacificDateTime (str: string): string {
       const date = moment.utc(str).toDate()
-      return (date) ? moment(date).tz('America/Vancouver').format('MMM D, YYYY [at] h:mm a [Pacific Time]') : ''
+      return (date) ? moment(date).tz('America/Vancouver').format('MMM D, YYYY [at] h:mm a [Pacific time]') : ''
     }
 
     return {

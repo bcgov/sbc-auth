@@ -7,6 +7,7 @@ import HomeJurisdictionInformation
   from '@/components/auth/staff/continuation-application/HomeJurisdictionInformation.vue'
 import PreviousCorrespondence from '@/components/auth/staff/continuation-application/PreviousCorrespondence.vue'
 import ReviewResult from '@/components/auth/staff/continuation-application/ReviewResult.vue'
+import { ReviewStatus } from '@/models/continuation-review'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
@@ -17,13 +18,14 @@ const localVue = createLocalVue()
 const vuetify = new Vuetify({})
 
 describe('ExtraprovincialRegistrationBc component', () => {
-  let wrapper: Wrapper<ContinuationAuthorizationReview>
+  let wrapper: Wrapper<any>
 
   beforeAll(async () => {
     // mock "fetchContinuationReview" business service
     vi.spyOn(BusinessService, 'fetchContinuationReview').mockImplementation((): any => {
       return Promise.resolve({
-        filingLink: 'https://filingLink'
+        filingLink: 'https://filingLink',
+        status: ReviewStatus.AWAITING_REVIEW
       })
     })
 
@@ -108,5 +110,11 @@ describe('ExtraprovincialRegistrationBc component', () => {
     expect(vcard2.exists()).toBe(true)
     expect(vcard2.findComponent(PreviousCorrespondence).exists()).toBe(true)
     expect(vcard2.findComponent(ReviewResult).exists()).toBe(true)
+  })
+
+  it('rendered the actions', () => {
+    const div = wrapper.find('#actions-wrapper')
+    expect(div.find('.cancel-btn').exists()).toBe(true)
+    expect(div.find('.submit-btn').exists()).toBe(true)
   })
 })

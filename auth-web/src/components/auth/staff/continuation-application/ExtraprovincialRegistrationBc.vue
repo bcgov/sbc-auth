@@ -107,11 +107,11 @@ export default defineComponent({
      * Converts a date-time string to a Pacific date string.
      * @example
      * Sample input: "2007-01-23T08:00:00.000+00:00".
-     * Sample output: "Jan 23, 2007".
+     * Sample output: "January 23, 2007".
      */
     function strToPacificDate (str: string): string {
       const date = moment.utc(str).toDate()
-      return (date) ? moment(date).tz('America/Vancouver').format('MMM D, YYYY') : ''
+      return (date) ? moment(date).tz('America/Vancouver').format('MMMM D, YYYY') : ''
     }
 
     return {

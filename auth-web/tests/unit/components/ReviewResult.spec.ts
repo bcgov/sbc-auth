@@ -22,7 +22,7 @@ const review = {
 const filing = {}
 
 describe('ReviewResult component', () => {
-  let wrapper: Wrapper<ReviewResult>
+  let wrapper: Wrapper<any>
 
   beforeAll(async () => {
     wrapper = mount(ReviewResult, {
@@ -42,10 +42,6 @@ describe('ReviewResult component', () => {
   it('got the props', () => {
     expect(wrapper.vm.review).toEqual(review)
     expect(wrapper.vm.filing).toEqual(filing)
-  })
-
-  it('computed "isActionable"', () => {
-    expect(wrapper.vm.isActionable).toBe(true)
   })
 
   it('computed initial "isEmailBodyTextRequired"', () => {
