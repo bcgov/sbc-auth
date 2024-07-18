@@ -1,5 +1,5 @@
 import '../test-utils/composition-api-setup' // important to import this first
-import { AccountStatus, Role } from '@/util/constants'
+import { AccountStatus, PaymentTypes, Role } from '@/util/constants'
 import { createLocalVue, mount } from '@vue/test-utils'
 import { useOrgStore, useUserStore } from '@/stores'
 import AccountFreezeUnlockView from '@/views/auth/account-freeze/AccountFreezeUnlockView.vue'
@@ -144,7 +144,7 @@ describe('AccountFreezeUnlockView (NSF EFT)', () => {
       totalAmountToPay: 20
     })) as any
 
-    orgStore.getOrgPayments = vi.fn().mockReturnValue({ paymentMethod: 'EFT' })
+    orgStore.getOrgPayments = vi.fn().mockReturnValue({ paymentMethod: PaymentTypes.EFT })
 
     userStore.currentUser = {
       firstName: 'Fred',
