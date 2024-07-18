@@ -111,7 +111,7 @@
               v-model="actionDropdown[index]"
               :attach="`#action-menu-${index}`"
               offset-y
-              nudge-left="74"
+              nudge-left="130"
             >
               <template #activator="{ on }">
                 <v-btn
@@ -414,5 +414,11 @@ export default defineComponent({
 
 #short-name-summaries {
   border: 1px solid #e9ecef
+}
+
+.new-actions {
+  .v-list {
+    width:180px
+  }
 }
 </style>

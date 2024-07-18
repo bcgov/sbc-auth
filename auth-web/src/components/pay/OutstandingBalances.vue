@@ -10,7 +10,14 @@
       outlined
       flat
       class="amount-owing-details-card mb-8 mt-8"
+      :loading="loading"
     >
+      <template #progress>
+        <v-progress-linear
+          color="red"
+          indeterminate
+        />
+      </template>
       <v-card-text class="py-2 px-6">
         <v-row>
           <v-col cols="9">
@@ -21,54 +28,66 @@
           </v-col>
         </v-row>
         <v-divider class="my-2 mt-1" />
-        <v-row
-          v-for="statement in statementsOwing"
-          :key="statement.id"
-          data-test="statement-row"
-        >
-          <v-col
-            cols="9"
-            class="statement-col"
-            data-test="statement-label"
+        <template v-if="!loading && !statementOwingError">
+          <v-row
+            v-for="statement in statementsOwing"
+            :key="statement.id"
+            data-test="statement-row"
           >
-            <a
-              class="link"
-              @click="downloadStatement(statement)"
-            >{{ formatStatementString(statement.fromDate, statement.toDate) }}</a>
-          </v-col>
-          <v-col
-            class="text-end statement-col"
-            data-test="statement-owing-value"
-          >
-            {{ formatCurrency(statement.amountOwing) }}
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col
-            cols="9"
-            class="statement-col"
-          >
-            Other unpaid transactions
-          </v-col>
-          <v-col
-            class="text-end statement-col"
-            data-test="total-other-owing"
-          >
-            {{ formatCurrency(invoicesOwing) }}
-          </v-col>
-        </v-row>
-        <v-divider class="my-2 mt-1" />
-        <v-row class="font-weight-bold">
-          <v-col cols="9">
-            Total Amount Due
-          </v-col>
-          <v-col
-            class="text-end"
-            data-test="total-amount-due"
-          >
-            {{ formatCurrency(totalAmountDue) }}
-          </v-col>
-        </v-row>
+            <v-col
+              cols="9"
+              class="statement-col"
+              data-test="statement-label"
+            >
+              <a
+                class="link"
+                @click="downloadStatement(statement)"
+              >{{ formatStatementString(statement.fromDate, statement.toDate) }}</a>
+            </v-col>
+            <v-col
+              class="text-end statement-col"
+              data-test="statement-owing-value"
+            >
+              {{ formatCurrency(statement.amountOwing) }}
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col
+              cols="9"
+              class="statement-col"
+            >
+              Other unpaid transactions
+            </v-col>
+            <v-col
+              class="text-end statement-col"
+              data-test="total-other-owing"
+            >
+              {{ formatCurrency(invoicesOwing) }}
+            </v-col>
+          </v-row>
+          <v-divider class="my-2 mt-1" />
+          <v-row class="font-weight-bold">
+            <v-col cols="9">
+              Total Amount Due
+            </v-col>
+            <v-col
+              class="text-end"
+              data-test="total-amount-due"
+            >
+              {{ formatCurrency(totalAmountDue) }}
+            </v-col>
+          </v-row>
+        </template>
+        <template v-if="statementOwingError">
+          <div class="pt-4 pb-4">
+            <CautionBox
+              data-test="caution-box-details"
+              setImportantWord="Error"
+              :setAlert="true"
+              :setMsg="'An error has occurred fetching amount owing details.'"
+            />
+          </div>
+        </template>
       </v-card-text>
     </v-card>
     <div>
@@ -129,6 +148,7 @@
         </v-btn>
         <v-spacer />
         <v-btn
+          :loading="handlingPayment"
           large
           color="primary"
           :disabled="!totalAmountDue"
@@ -146,7 +166,7 @@
 
 <script lang="ts">
 
-import { PropType, computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
+import { PropType, computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CautionBox from '@/components/auth/common/CautionBox.vue'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from 'sbc-common-components/src/util/config-helper'
@@ -179,10 +199,14 @@ export default defineComponent({
     const orgStore = useOrgStore()
     const state = reactive({
       statementsOwing: [],
-      invoicesOwing: 0
+      invoicesOwing: 0,
+      loading: false,
+      handlingPayment: false,
+      statementOwingError: false
     })
 
     const handlePayment = async () => {
+      state.handlingPayment = true
       const payment: Payment = await orgStore.createOutstandingAccountPayment()
       const baseUrl = ConfigHelper.getAuthContextPath()
       const queryParams = `?paymentId=${payment?.id}&changePaymentType=${props.changePaymentType}`
@@ -191,6 +215,7 @@ export default defineComponent({
 
       // redirect to make payment UI
       await root.$router.push(`${Pages.MAKE_PAD_PAYMENT}${payment.id}/transactions/${encodedUrl}`)
+      state.handlingPayment = false
     }
 
     function goBack () {
@@ -214,8 +239,16 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      await getStatementsOwing()
-      state.invoicesOwing = statementSummary.value.totalInvoiceDue
+      state.loading = true
+      state.statementOwingError = false
+      try {
+        await getStatementsOwing()
+        state.invoicesOwing = statementSummary.value.totalInvoiceDue
+      } catch (error) {
+        state.statementOwingError = true
+        console.error('Error fetching statements owing.', error)
+      }
+      state.loading = false
     })
 
     const totalAmountDue = computed<number>(() => {
@@ -245,11 +278,6 @@ export default defineComponent({
           'or wait until all unpaid transactions are settled by your current method.'
     }
 
-    watch([statementSummary], ([newStatementSummary]) => {
-      // Perform actions when any of the watched props change
-      console.log('statementSummary changed to:', newStatementSummary)
-    })
-
     return {
       ...toRefs(state),
       goBack,
@@ -276,10 +304,18 @@ export default defineComponent({
   cursor: pointer;
 }
 
+.caution-box {
+  color: $gray7;
+}
+
 .choose-text {
   font-size: 16px;
   font-weight: bold;
 }
+.v-card__text {
+  color: $gray7 !important;
+}
+
 .amount-owing-details-card {
   border-color: $BCgovInputError !important;
   border-width: 2px !important;
@@ -302,6 +338,7 @@ export default defineComponent({
       width: 24px;
       height: 24px;
       align-items: center;
+      accent-color: $app-blue !important;
     }
     .payment-type-label {
       .payment-type-icon {

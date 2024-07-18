@@ -6,6 +6,45 @@
       @close-short-name-linking-dialog="closeShortNameLinkingDialog"
       @on-link-account="onLinkAccount"
     />
+    <ModalDialog
+      ref="confirmationDialog"
+      max-width="720"
+      :show-icon="false"
+      :showCloseIcon="true"
+      dialog-class="confirmation-dialog"
+      :title="`${confirmDialogTitle}`"
+    >
+      <template #text>
+        <p class="pt-4">
+          {{ confirmDialogText }}
+        </p>
+      </template>
+      <template #actions>
+        <div class="d-flex justify-center dialog-button-container">
+          <v-btn
+            outlined
+            large
+            depressed
+            class="mr-3"
+            color="primary"
+            data-test="btn-cancel-change-access-type-dialog"
+            @click="dialogConfirmClose"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            large
+            depressed
+            class="font-weight-bold btn-dialog"
+            data-test="btn-confirm-change-access-type-dialog"
+            color="primary"
+            @click="dialogConfirm"
+          >
+            Confirm
+          </v-btn>
+        </div>
+      </template>
+    </ModalDialog>
     <v-card-title class="card-title">
       <v-icon
         class="pr-5"
@@ -59,7 +98,7 @@
           <span>{{ formatCurrency(item.amountOwing) }}</span>
         </template>
         <template #expanded-item="{ item }">
-          <tr class="expanded-item-row">
+          <tr class="expanded-item-row" v-if="item.hasPendingPayment">
             <td
               :colspan="headers.length"
               class="pb-5 pl-0"
@@ -76,30 +115,46 @@
             :id="`action-menu-${index}`"
             class="new-actions mx-auto"
           >
-            <!-- Cancel Payment / Unlink buttons-->
+            <!-- Cancel Payment-->
             <template v-if="item.hasPendingPayment">
               <v-btn
                 small
                 color="primary"
                 min-width="5rem"
                 min-height="2rem"
-                class="open-action-btn"
+                class="open-action-btn single-action-btn"
+                :loading="loading"
+                @click="showConfirmCancelPaymentModal(item)"
               >
                 Cancel Payment
+              </v-btn>
+            </template>
+            <!-- Apply Payments / Unlink Buttons -->
+            <template v-else-if="showApplyPayment(item)">
+              <v-btn
+                small
+                color="primary"
+                min-width="5rem"
+                min-height="2rem"
+                class="open-action-btn"
+                :loading="loading"
+                @click="applyPayment(item)"
+              >
+                Apply Payments
               </v-btn>
               <span class="more-actions">
                 <v-menu
                   v-model="actionDropdown[index]"
                   :attach="`#action-menu-${index}`"
                   offset-y
-                  nudge-left="74"
+                  nudge-left="156"
                 >
                   <template #activator="{ on }">
                     <v-btn
                       small
                       color="primary"
-                      min-height="2rem"
-                      class="more-actions-btn"
+                      class="more-actions-btn pa-0"
+                      :loading="loading"
                       v-on="on"
                     >
                       <v-icon>{{ actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
@@ -107,11 +162,12 @@
                   </template>
                   <v-list>
                     <v-list-item
-                      class="actions-dropdown_item"
-                      data-test="link-account-button"
+                      class="actions-dropdown_item pl-6 pt-1 pb-1 ma-0"
                     >
-                      <v-list-item-subtitle>
-                        <span class="pl-1 cursor-pointer">Cancel payment and remove linkage</span>
+                      <v-list-item-subtitle
+                        @click="showConfirmUnlinkAccountModal(item)"
+                      >
+                        <span class="pl-1 cursor-pointer">Unlink Account</span>
                       </v-list-item-subtitle>
                     </v-list-item>
                   </v-list>
@@ -125,8 +181,9 @@
                 color="primary"
                 min-width="5rem"
                 min-height="2rem"
-                class="open-action-btn unlink-action-btn"
-                @click="unlinkAccount(item)"
+                class="open-action-btn single-action-btn"
+                :loading="loading"
+                @click="showConfirmUnlinkAccountModal(item)"
               >
                 Unlink Account
               </v-btn>
@@ -155,19 +212,20 @@
 </template>
 <script lang="ts">
 
-import { computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import { Ref, computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { ShortNameLinkStatus, ShortNamePaymentActions } from '@/util/constants'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
-import { ShortNameLinkStatus } from '@/util/constants'
 import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
 import { Vue } from 'vue-property-decorator'
 import _ from 'lodash'
 
 export default defineComponent({
   name: 'ShortNameAccountLinkage',
-  components: { BaseVDataTable, ShortNameLinkingDialog },
+  components: { ModalDialog, BaseVDataTable, ShortNameLinkingDialog },
   props: {
     shortNameDetails: {
       type: Object,
@@ -178,8 +236,13 @@ export default defineComponent({
       default: -1
     }
   },
-  emits: ['on-link-account'],
+  emits: ['on-link-account', 'on-payment-action'],
   setup (props, { emit }) {
+    const enum ConfirmationType {
+      CANCEL_PAYMENT = 'cancelPayment',
+      UNLINK_ACCOUNT = 'unlinkAccount'
+    }
+    const confirmationDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const headers = [
       {
         col: 'linkedAccount',
@@ -217,6 +280,9 @@ export default defineComponent({
       actionDropdown: [],
       isShortNameLinkingDialogOpen: false,
       eftShortNameSummary: {},
+      confirmDialogTitle: '',
+      confirmDialogText: '',
+      confirmObject: undefined,
       results: [],
       totalResults: 0,
       filters: {
@@ -256,10 +322,76 @@ export default defineComponent({
     async function onLinkAccount (account: any) {
       await loadShortNameLinks()
       emit('on-link-account', account, state.results)
+      emit('on-payment-action')
+    }
+
+    function showApplyPayment (item: any) {
+      return item.amountOwing > 0 && props.shortNameDetails.creditsRemaining >= item.amountOwing
+    }
+
+    function dialogConfirm () {
+      confirmationDialog.value.close()
+      const confirmationType = state.confirmObject.type
+      if (confirmationType === ConfirmationType.CANCEL_PAYMENT) {
+        cancelPayment(state.confirmObject.item)
+      } else if (confirmationType === ConfirmationType.UNLINK_ACCOUNT) {
+        unlinkAccount(state.confirmObject.item)
+      }
+      resetConfirmationDialog()
+    }
+
+    function dialogConfirmClose () {
+      confirmationDialog.value.close()
+    }
+
+    async function applyPayment (item) {
+      state.loading = true
+      try {
+        await PaymentService.postShortnamePaymentAction(props.shortNameDetails.id,
+          item.accountId, ShortNamePaymentActions.APPLY_CREDITS)
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('An errored occurred applying payments.', error)
+      }
+      this.$emit('on-payment-action')
+      state.loading = false
+    }
+
+    function resetConfirmationDialog () {
+      state.confirmDialogTitle = ''
+      state.confirmDialogText = ''
+      state.confirmObject = undefined
+    }
+
+    function showConfirmCancelPaymentModal (item) {
+      state.confirmDialogTitle = 'Cancel Payment'
+      state.confirmDialogText = 'The applied amount will be returned to the short name.'
+      state.confirmObject = { item: item, type: ConfirmationType.CANCEL_PAYMENT }
+      confirmationDialog.value.open()
+    }
+
+    function showConfirmUnlinkAccountModal (item) {
+      state.confirmDialogTitle = 'Unlink Account'
+      state.confirmDialogText = 'The link with this account will be removed.'
+      state.confirmObject = { item: item, type: ConfirmationType.UNLINK_ACCOUNT }
+      confirmationDialog.value.open()
+    }
+
+    async function cancelPayment (item) {
+      state.loading = true
+      try {
+        await PaymentService.postShortnamePaymentAction(props.shortNameDetails.id,
+          item.accountId, ShortNamePaymentActions.CANCEL)
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('An errored occurred cancelling payments pending.', error)
+      }
+      emit('on-payment-action')
+      state.loading = false
     }
 
     async function unlinkAccount (item) {
-      const response = await PaymentService.deleteShortNameLink(props.shortNameDetails.id, item.id)
+      const response = await PaymentService.unlinkShortNameAccount(props.shortNameDetails.id, item.id)
       if (!response) {
         throw new Error('No response from delete short name link')
       }
@@ -297,7 +429,7 @@ export default defineComponent({
       state.loading = false
     }
 
-    watch(() => props.shortNameDetails.id, () => {
+    watch(() => props.shortNameDetails, () => {
       getEFTShortNameSummaries()
       loadShortNameLinks()
     })
@@ -308,10 +440,16 @@ export default defineComponent({
       headers,
       isLinked,
       accountDisplayText,
+      confirmationDialog,
       openAccountLinkingDialog,
       closeShortNameLinkingDialog,
+      dialogConfirm,
+      dialogConfirmClose,
+      showConfirmCancelPaymentModal,
+      showConfirmUnlinkAccountModal,
       onLinkAccount,
-      unlinkAccount,
+      applyPayment,
+      showApplyPayment,
       getEFTShortNameSummaries,
       formatCurrency: CommonUtils.formatAmount,
       formatAccountDisplayName: CommonUtils.formatAccountDisplayName
@@ -325,6 +463,12 @@ export default defineComponent({
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/ShortnameTables.scss';
 
+.dialog-button-container {
+  width: 100%;
+  .v-btn {
+    width: 106px
+  }
+}
 .card-title {
   background-color: $app-lt-blue;
   justify-content: left;
@@ -367,13 +511,19 @@ export default defineComponent({
     padding: 16px 0 16px 0
   }
 
+  .new-actions {
+    .v-list {
+      width:206px
+    }
+  }
+
   // Remove border for rows that are expanded with additional information
   tr:has(+ tr.expanded-item-row) td {
     border-bottom: none !important;
   }
 }
 
-.unlink-action-btn {
+.single-action-btn {
   border-radius: 4px !important;
 }
 
@@ -386,6 +536,7 @@ export default defineComponent({
       font-size: 16px;
       grid-template-columns: 35px 1fr;
       align-items: start;
+      color: $gray7;
 
       .v-icon {
         justify-content: left;

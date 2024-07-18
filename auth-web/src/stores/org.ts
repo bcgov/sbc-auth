@@ -37,6 +37,7 @@ import {
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { EFTInvoiceListResponse, FailedEFTInvoice, FailedInvoice, NonSufficientFundsInvoiceListResponse } from '@/models/invoice'
+import { EftRefundRequest, RefundRequest } from './../models/refund'
 import { Products, ProductsRequestBody } from '@/models/Staff'
 import { StatementFilterParams, StatementNotificationSettings, StatementSettings, StatementsSummary } from '@/models/statement'
 import { computed, reactive, toRefs } from '@vue/composition-api'
@@ -53,7 +54,6 @@ import KeyCloakService from 'sbc-common-components/src/services/keycloak.service
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import PermissionService from '@/services/permission.services'
-import { RefundRequest } from './../models/refund'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
@@ -856,6 +856,11 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data || {}
   }
 
+  async function refundEFT (refundPayload: EftRefundRequest) {
+    const response = await PaymentService.refundEFT(refundPayload)
+    return response?.data || {}
+  }
+
   async function updateInvoicePaymentMethodAsCreditCard (invoicePayload) {
     const response = await PaymentService.updateInvoicePaymentMethodAsCreditCard(invoicePayload.paymentId, invoicePayload.accountId)
     return response?.data || {}
@@ -1157,6 +1162,7 @@ export const useOrgStore = defineStore('org', () => {
     addToCurrentSelectedProducts,
     resetoCurrentSelectedProducts,
     refundInvoice,
+    refundEFT,
     setSubscribedProducts,
     currentSelectedProductsPremiumOnly,
     fetchCurrentOrganizationGLInfo,
