@@ -1,4 +1,4 @@
-FROM python:3.12.2-bullseye as development_build
+FROM python:3.8.16-bullseye as development_build
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"

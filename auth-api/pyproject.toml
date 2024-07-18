@@ -6,7 +6,7 @@ authors = ["\"BC Registries and Online Services\""]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.8"
 flask-caching = "2.3.0"
 flask-cors = "3.0.10"
 flask-mail = "0.10.0"
@@ -89,7 +89,6 @@ zipp = "3.19.1"
 sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", rev = "master", subdirectory = "python"}
 gcp-queue = {git = "https://github.com/seeker25/sbc-connect-common.git", branch = "small_tweaks", subdirectory = "python/gcp-queue"}
 simple-cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py.git"}
-sql-versioning = {git = "https://github.com/bcgov/lear.git", subdirectory = "python/common/sql-versioning", branch = "feature-legal-name"}
 
 [tool.poetry.group.dev.dependencies]
 astroid = "2.12.13"
