@@ -91,10 +91,9 @@ gcp-queue = {git = "https://github.com/seeker25/sbc-connect-common.git", branch 
 simple-cloudevent = {git = "https://github.com/daxiom/simple-cloudevent.py.git"}
 
 [tool.poetry.group.dev.dependencies]
-astroid = "2.12.13"
+pylint = "3.2.3"
 coverage = "^5.5"
 pylint-flask = "^0.6.0"
-pylint = "^2.15.0"
 pytest = "^6.2.4"
 pytest-cov = "^2.11.1"
 pytest-env = "^0.6.2"
@@ -113,6 +112,7 @@ freezegun = "^1.1.0"
 faker = "^8.1.1"
 pytest-asyncio = "^0.14.0"
 mock = "^4.0.3"
+astroid = "^3.2.3"
 
 [build-system]
 requires = ["poetry-core"]
