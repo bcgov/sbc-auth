@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8"
 flask-caching = "2.3.0"
-flask-cors = "3.0.10"
+flask-cors = "4.0.1"
 flask-mail = "0.10.0"
 flask-migrate = "<3"
 flask-moment = "1.0.5"
