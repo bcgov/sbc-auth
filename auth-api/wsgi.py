@@ -17,7 +17,7 @@ from auth_api import create_app
 
 
 # Openshift s2i expects a lower case name of application
-application = create_app() # pylint: disable=invalid-name
+app = create_app() # pylint: disable=invalid-name
 
 if __name__ == "__main__":
-    application.run()
+    app.run()
