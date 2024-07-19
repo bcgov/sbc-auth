@@ -21,7 +21,7 @@ license: ## Verify source code license headers.
 setup: clean install install-dev ## Setup the project
 
 clean: clean-build clean-pyc clean-test ## Clean the project
-	rm -rf venv/
+	rm -rf .venv/
 
 clean-build: ## Clean build files
 	rm -fr build/
