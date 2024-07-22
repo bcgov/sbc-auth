@@ -1,7 +1,7 @@
 <template>
   <div id="short-name-lookup">
     <v-autocomplete
-      :item-disabled="item => item.statusCode === ShortNameStatus.LINKED"
+      :item-disabled="item => item.statusCode === ShortNameStatus.LINKED || item.statusCode === ShortNameStatus.PENDING"
       :search-input.sync="searchField"
       :hide-no-data="state != LookupStates.NO_RESULTS"
       :items="searchResults"
@@ -89,7 +89,7 @@
             class="result-action"
           >
             <span
-              v-if="item.statusCode === ShortNameStatus.LINKED"
+              v-if="item.statusCode === ShortNameStatus.LINKED || item.statusCode === ShortNameStatus.PENDING"
               class="linked"
             >Linked</span>
             <span
