@@ -71,16 +71,18 @@ export interface ContinuationFilingIF {
   }
 }
 
-/** The Continuation Review search params. */
+/** The Continuation Review search and sort params. */
 export interface ReviewFilterParams {
     submissionDate?: string
     page?: number
     limit?: number
     nrNumber?: string
-    identifier?: string,
-    completingParty?: string,
+    identifier?: string
+    completingParty?: string
     decisionMadeBy?: string
     status?: string
+    sortBy?: string
+    sortDesc?: boolean
   }
 
 /** The Continuation Review API returns search results. */

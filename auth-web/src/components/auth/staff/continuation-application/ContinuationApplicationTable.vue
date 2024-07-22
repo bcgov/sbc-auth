@@ -62,8 +62,17 @@
                       :key="getIndexedTag('find-header-row', i)"
                       :scope="getIndexedTag('find-header-col', i)"
                       class="font-weight-bold"
+                      :style="reviewParams.sortBy === header.value ? 'color: black' : ''"
+                      @click="!['action'].includes(header.value) ? changeSort(header.value) : null"
                     >
                       {{ header.text }}
+                      <v-icon
+                        v-if="!['action'].includes(header.value) && reviewParams.sortBy === header.value"
+                        small
+                        :style="reviewParams.sortBy === header.value ? 'color: black' : ''"
+                      >
+                        {{ reviewParams.sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
+                      </v-icon>
                     </th>
                   </tr>
 
@@ -210,13 +219,17 @@ export default defineComponent({
       tableDataOptions: {} as Partial<DataOptions>,
       isTableLoading: false,
       searchParamsExist: false,
+      sortBy: 'submissionDate',
+      sortDesc: false,
       dropdown: [] as Array<boolean>,
       reviewParams: {
         submissionDate: '',
         nrNumber: '',
         identifier: '',
         completingParty: '',
-        status: ''
+        status: '',
+        sortBy: 'submissionDate',
+        sortDesc: false
       } as ReviewFilterParams
     })
 
@@ -225,13 +238,14 @@ export default defineComponent({
     const debouncedOrgSearch = debounce(async function (page = 1, pageLimit = state.tableDataOptions.itemsPerPage) {
       try {
         state.isTableLoading = true
+        console.log(state.reviewParams)
         const completeSearchParams: ReviewFilterParams = {
           ...state.reviewParams,
           page: page,
           limit: pageLimit
         }
-        console.log(completeSearchParams)
         const searchReviewResp = await staffStore.searchReviews(completeSearchParams)
+        console.log(completeSearchParams)
         state.reviews = searchReviewResp.reviews
         state.totalItemsCount = searchReviewResp?.total || 0
       } catch (error) {
@@ -276,6 +290,7 @@ export default defineComponent({
 
     function clearSearchParams () {
       state.reviewParams = {
+        ...state.reviewParams,
         submissionDate: '',
         nrNumber: '',
         identifier: '',
@@ -324,6 +339,20 @@ export default defineComponent({
       return moment(dateString).format('MMMM D, YYYY') // Format like "May 5, 2024"
     }
 
+    function changeSort (column: string) {
+      if (state.sortBy === column) {
+        state.sortDesc = !this.sortDesc
+      } else {
+        state.sortBy = column
+        state.sortDesc = false
+      }
+      state.reviewParams = {
+        ...state.reviewParams,
+        sortBy: state.sortBy,
+        sortDesc: state.sortDesc
+      }
+    }
+
     mounted()
 
     return {
@@ -331,6 +360,7 @@ export default defineComponent({
       debouncedOrgSearch,
       view,
       clearSearchParams,
+      changeSort,
       displayStatus,
       formatDate,
       getIndexedTag,
