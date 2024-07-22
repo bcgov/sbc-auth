@@ -202,13 +202,6 @@ export default class BusinessService {
     })
   }
 
-  static async fetchContinuationReviews (): Promise<ContinuationReviewIF[]> {
-    const url = `${ConfigHelper.getLegalAPIV2Url()}/admin/reviews`
-    const response = await axios.get(url)
-    const data = response.data.reviews
-    return data
-  }
-
   static async searchReviews (reviewFilter?: ReviewFilterParams): Promise<AxiosResponse<ReviewList>> {
     const params = new URLSearchParams()
     for (const key in reviewFilter) {

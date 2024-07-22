@@ -195,6 +195,14 @@ export default defineComponent({
   setup (props) {
     const { t } = useI18n()
     const staffStore = useStaffStore()
+    const statusDisplayMap = {
+      AWAITING_REVIEW: 'Awaiting Review',
+      CHANGE_REQUESTED: 'Change Requested',
+      RESUBMITTED: 'Resubmitted',
+      REJECTED: 'Rejected',
+      APPROVED: 'Approved',
+      ABANDONED: 'Abandoned'
+    }
 
     const state = reactive({
       reviews: [] as Array<ContinuationReviewIF>,
@@ -206,14 +214,14 @@ export default defineComponent({
         { text: 'Status', value: 'status' },
         { text: 'Actions', value: 'action' }
       ],
-      statusTypes: ref<{ text: string; value: string }[]>([
+      statusTypes: [
         { text: 'Awaiting Review', value: 'AWAITING_REVIEW' },
         { text: 'Change Requested', value: 'CHANGE_REQUESTED' },
         { text: 'Resubmitted', value: 'RESUBMITTED' },
         { text: 'Rejected', value: 'REJECTED' },
-        { text: 'Accepted', value: 'ACCEPTED' },
+        { text: 'Approved', value: 'APPROVED' },
         { text: 'Abandoned', value: 'ABANDONED' }
-      ]),
+      ],
       formatDate: CommonUtils.formatDisplayDate,
       totalItemsCount: 0,
       tableDataOptions: {} as Partial<DataOptions>,
@@ -328,11 +336,8 @@ export default defineComponent({
     }
 
     // Method to display the status
-    function displayStatus (status: string): string {
-      return status
-        .toLowerCase()
-        .replace(/_/g, ' ')
-        .replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase())
+    function displayStatus(status: string): string {
+      return statusDisplayMap[status]
     }
     // Method to format dates
     const formatDate = (dateString) => {

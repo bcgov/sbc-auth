@@ -251,16 +251,21 @@ export const useStaffStore = defineStore('staff', () => {
   }
 
   async function searchReviews (filterParams: ReviewFilterParams) {
-    const response = await BusinessService.searchReviews(filterParams)
-    if (response?.data) {
-      return {
-        limit: response.data.limit,
-        page: response.data.page,
-        total: response.data.total,
-        reviews: response.data.reviews
+    try {
+      const response = await BusinessService.searchReviews(filterParams)
+      if (response?.data) {
+        return {
+          limit: response.data.limit,
+          page: response.data.page,
+          total: response.data.total,
+          reviews: response.data.reviews
+        }
       }
+      return {}
+    } catch (error) {
+      console.error('Error fetching reviews:', error)
+      return null
     }
-    return {}
   }
 
   async function syncPendingStaffOrgs () {
