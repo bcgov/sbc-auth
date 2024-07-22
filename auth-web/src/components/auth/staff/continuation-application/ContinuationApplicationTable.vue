@@ -103,13 +103,18 @@
                       >
                         <v-select
                           v-model="reviewParams[header.value]"
+                          label="Status"
                           :items="statusTypes"
                           filled
                           item-text="text"
                           item-value="value"
+                          multiple
+                          attach
+                          close-on-content-click="false"
                           data-test="select-status"
                           v-bind="$attrs"
                           hide-details="auto"
+                          clearable
                           v-on="$listeners"
                         />
                       </div>
@@ -166,7 +171,7 @@ import {
   getPaginationOptions,
   hasCachedPageInfo
 } from '@/components/datatable/resources'
-import { PropType, computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { PropType, computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
@@ -235,7 +240,7 @@ export default defineComponent({
         nrNumber: '',
         identifier: '',
         completingParty: '',
-        status: '',
+        status: [],
         sortBy: 'submissionDate',
         sortDesc: false
       } as ReviewFilterParams
@@ -246,14 +251,12 @@ export default defineComponent({
     const debouncedOrgSearch = debounce(async function (page = 1, pageLimit = state.tableDataOptions.itemsPerPage) {
       try {
         state.isTableLoading = true
-        console.log(state.reviewParams)
         const completeSearchParams: ReviewFilterParams = {
           ...state.reviewParams,
           page: page,
           limit: pageLimit
         }
         const searchReviewResp = await staffStore.searchReviews(completeSearchParams)
-        console.log(completeSearchParams)
         state.reviews = searchReviewResp.reviews
         state.totalItemsCount = searchReviewResp?.total || 0
       } catch (error) {
@@ -303,7 +306,7 @@ export default defineComponent({
         nrNumber: '',
         identifier: '',
         completingParty: '',
-        status: ''
+        status: []
       }
     }
 
@@ -336,7 +339,7 @@ export default defineComponent({
     }
 
     // Method to display the status
-    function displayStatus(status: string): string {
+    function displayStatus (status: string): string {
       return statusDisplayMap[status]
     }
     // Method to format dates

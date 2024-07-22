@@ -205,7 +205,13 @@ export default class BusinessService {
   static async searchReviews (reviewFilter?: ReviewFilterParams): Promise<AxiosResponse<ReviewList>> {
     const params = new URLSearchParams()
     for (const key in reviewFilter) {
-      params.append(key, reviewFilter[key])
+      const value = reviewFilter[key]
+      if (Array.isArray(value)) {
+        // for status, which is an array
+        value.forEach(item => params.append(key, item))
+      } else {
+        params.append(key, value)
+      }
     }
     return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/admin/reviews`, { params })
   }

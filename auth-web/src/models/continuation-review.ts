@@ -80,7 +80,7 @@ export interface ReviewFilterParams {
     identifier?: string
     completingParty?: string
     decisionMadeBy?: string
-    status?: string
+    status?: []
     sortBy?: string
     sortDesc?: boolean
   }
