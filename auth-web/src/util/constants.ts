@@ -651,7 +651,8 @@ export enum AffiliationInvitationType {
 
 export enum ShortNameStatus {
     LINKED = 'LINKED',
-    UNLINKED = 'UNLINKED'
+    UNLINKED = 'UNLINKED',
+    PENDING = 'PENDING'
 }
 
 export enum ShortNamePaymentActions {
