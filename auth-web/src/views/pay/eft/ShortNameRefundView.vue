@@ -54,6 +54,7 @@
                 </v-col>
                 <v-text-field
                   v-model.trim="casSupplierNum"
+                  hint="This number should be created in CAS before issuing a refund"
                   filled
                   label="CAS Supplier Number"
                   persistent-hint
@@ -68,6 +69,7 @@
                 </v-col>
                 <v-text-field
                   v-model.trim="email"
+                  hint="The email provided in the client's Direct Deposit Application form"
                   filled
                   label="Email"
                   persistent-hint
