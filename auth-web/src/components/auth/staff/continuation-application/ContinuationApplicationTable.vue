@@ -116,7 +116,18 @@
                           hide-details="auto"
                           clearable
                           v-on="$listeners"
-                        />
+                        >
+                          <template #selection="{ item, index }">
+                            <!-- Display "Multiple" if multiple statuses are selected -->
+                            <span v-if="reviewParams[header.value].length > 1 && index === 0">
+                              Multiple
+                            </span>
+                            <!-- Display the item text if only one is selected -->
+                            <span v-else-if="reviewParams[header.value].length === 1">
+                              {{ item.text }}
+                            </span>
+                          </template>
+                        </v-select>
                       </div>
 
                       <v-btn
@@ -172,6 +183,7 @@ import {
   hasCachedPageInfo
 } from '@/components/datatable/resources'
 import { PropType, computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import BusinessService from '@/services/business.services'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
@@ -179,7 +191,6 @@ import { SessionStorageKeys } from '@/util/constants'
 import debounce from '@/util/debounce'
 import moment from 'moment'
 import { useI18n } from 'vue-i18n-composable'
-import { useStaffStore } from '@/stores/staff'
 
 export default defineComponent({
   name: 'ContinuationApplicationTable',
@@ -199,7 +210,6 @@ export default defineComponent({
   },
   setup (props) {
     const { t } = useI18n()
-    const staffStore = useStaffStore()
     const statusDisplayMap = {
       AWAITING_REVIEW: 'Awaiting Review',
       CHANGE_REQUESTED: 'Change Requested',
@@ -256,7 +266,7 @@ export default defineComponent({
           page: page,
           limit: pageLimit
         }
-        const searchReviewResp = await staffStore.searchReviews(completeSearchParams)
+        const searchReviewResp = await BusinessService.searchReviews(completeSearchParams)
         state.reviews = searchReviewResp.reviews
         state.totalItemsCount = searchReviewResp?.total || 0
       } catch (error) {

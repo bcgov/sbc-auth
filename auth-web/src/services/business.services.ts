@@ -1,6 +1,6 @@
 import { BNRequest, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad } from '@/models/business'
-import { ContinuationReviewIF, ReviewFilterParams, ReviewList, ReviewStatus } from '@/models/continuation-review'
+import { ContinuationReviewIF, ReviewFilterParams, ReviewStatus } from '@/models/continuation-review'
 import { AxiosResponse } from 'axios'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -202,7 +202,7 @@ export default class BusinessService {
     })
   }
 
-  static async searchReviews (reviewFilter?: ReviewFilterParams): Promise<AxiosResponse<ReviewList>> {
+  static async searchReviews (reviewFilter: ReviewFilterParams) {
     const params = new URLSearchParams()
     for (const key in reviewFilter) {
       const value = reviewFilter[key]
@@ -213,6 +213,15 @@ export default class BusinessService {
         params.append(key, value)
       }
     }
-    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/admin/reviews`, { params })
+    try {
+      const response = await axios.get(`${ConfigHelper.getLegalAPIV2Url()}/admin/reviews`, { params })
+      if (response?.data) {
+        return response.data
+      }
+      return null
+    } catch (error) {
+      console.error('Error fetching reviews:', error)
+      return null
+    }
   }
 }
