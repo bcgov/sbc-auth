@@ -102,6 +102,7 @@ def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
     current_app.logger.debug('>>>>>>>process_pay_lock_unlock_event>>>>>')
     message_type = event_message.type
     queue_data = event_message.data
+    skip_notification = queue_data.get('skipNotification', False)
     org_id = queue_data.get('accountId')
     org: OrgModel = OrgModel.find_by_org_id(org_id)
     if org is None:
@@ -115,12 +116,14 @@ def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
         org.status_code = OrgStatus.NSF_SUSPENDED.value
         org.suspended_on = datetime.now()
         org.suspension_reason_code = queue_data.get('suspensionReasonCode', None)
-        publish_to_mailer(QueueMessageTypes.NSF_LOCK_ACCOUNT.value, data, QueueSources.AUTH_QUEUE.value)
+        if skip_notification is False:
+            publish_to_mailer(QueueMessageTypes.NSF_LOCK_ACCOUNT.value, data, QueueSources.AUTH_QUEUE.value)
     elif message_type == QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value:
         org.status_code = OrgStatus.ACTIVE.value
         org.suspension_reason_code = None
-        # Unlock requires a significant amount of data to generate a receipt, just carry forward queue data.
-        publish_to_mailer(QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value, queue_data, QueueSources.AUTH_QUEUE.value)
+        if skip_notification is False:
+            # Unlock requires a significant amount of data to generate a receipt, just carry forward queue data.
+            publish_to_mailer(QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value, queue_data, QueueSources.AUTH_QUEUE.value)
 
     org.flush()
     db.session.commit()

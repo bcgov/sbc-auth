@@ -54,13 +54,15 @@ def helper_add_activity_log_event_to_queue(client, details):
     post_to_queue(client, payload)
 
 
-def helper_add_lock_unlock_event_to_queue(client, message_type: str, org_id):
+def helper_add_lock_unlock_event_to_queue(client, message_type: str, org_id, skip_notification: bool = False):
     """Add event to the Queue."""
     queue_payload = {
         'accountId': org_id,
         'accountName': 'DEV - PAD01',
         'suspensionReasonCode': 'OWNER_CHANGE'
     }
+    if skip_notification:
+        queue_payload['skipNotification'] = True
     payload = build_request_for_queue_push(message_type, queue_payload)
     post_to_queue(client, payload)
 
