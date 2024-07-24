@@ -128,7 +128,12 @@ export default class CommonUtils {
 
   // Format amount for displaying dollar currency
   static formatAmount (amount: number): string {
-    return `$${amount.toFixed(2)}`
+    return amount.toLocaleString('en-CA', {
+      style: 'currency',
+      currency: 'CAD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })
   }
 
   // Formatting date in the desired format for displaying in the template

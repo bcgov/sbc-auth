@@ -28,7 +28,7 @@
         >
           mdi-format-list-bulleted
         </v-icon>
-        Payment History
+        Short Name Payment History
       </h2>
     </template>
     <template #header-filter-slot />
