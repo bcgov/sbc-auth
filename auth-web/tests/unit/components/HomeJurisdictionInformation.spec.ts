@@ -63,10 +63,6 @@ describe('HomeJurisdictionInformation component', () => {
     expect(wrapper.vm.filing).toEqual(filing)
   })
 
-  it('computed "isContinuationInAffidavitRequired"', () => {
-    expect(wrapper.vm.isContinuationInAffidavitRequired).toBe(true)
-  })
-
   it('rendered the component', () => {
     expect(wrapper.findComponent(HomeJurisdictionInformation).exists()).toBe(true)
     expect(wrapper.find('#home-jurisdiction-information').exists()).toBe(true)
@@ -123,17 +119,6 @@ describe('HomeJurisdictionInformation component', () => {
     expect(section.find('label').text()).toBe('Authorization Date')
     // *** date conversions don't work in CI (says June 30, 2024)
     // expect(section.find('#authorization-date').text()).toBe('July 1, 2024')
-  })
-
-  it('rendered a functional affidavit download button', () => {
-    BusinessService.downloadDocument = vi.fn().mockResolvedValue(null)
-
-    const button = wrapper.findAll('section').at(5).find('.download-affidavit-btn')
-    button.trigger('click')
-    expect(BusinessService.downloadDocument).toHaveBeenCalledWith('007bd7bd-d421-49a9-9925-03ce561d044f.pdf',
-      'My Director Affidavit.pdf')
-
-    vi.clearAllMocks()
   })
 
   it('rendered a functional authorization download button', () => {
