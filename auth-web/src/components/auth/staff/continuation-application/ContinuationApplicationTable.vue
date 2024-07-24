@@ -103,7 +103,7 @@
                       >
                         <v-select
                           v-model="reviewParams[header.value]"
-                          label="Status"
+                          :placeholder="reviewParams[header.value].length > 0 ? '' : 'Status'"
                           :items="statusTypes"
                           filled
                           item-text="text"
