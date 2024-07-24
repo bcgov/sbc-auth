@@ -46,6 +46,7 @@
     </template>
     <template #item-slot-transactionAmount="{ item }">
       <span>{{ formatTransactionAmount(item) }}</span>
+      <span class="transaction-details">{{ formatBalanceAmount(item) }}</span>
     </template>
   </BaseVDataTable>
 </template>
@@ -158,8 +159,13 @@ export default defineComponent({
       }
       return amount
     }
+    function formatBalanceAmount (item: any) {
+      if (item.balance === undefined) return ''
+      return `Balance: ${CommonUtils.formatAmount(item.balance)}`
+    }
 
     return {
+      formatBalanceAmount,
       formatTransactionAmount,
       formatDate: CommonUtils.formatDisplayDate,
       formatAccountDisplayName: CommonUtils.formatAccountDisplayName,
