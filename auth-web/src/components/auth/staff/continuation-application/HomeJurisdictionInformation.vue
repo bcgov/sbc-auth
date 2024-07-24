@@ -157,28 +157,6 @@
           sm="9"
           class="pt-4 pt-sm-0"
         >
-          <!-- the director's affidavit file -->
-          <template v-if="isContinuationInAffidavitRequired">
-            <v-btn
-              v-if="continuationIn?.foreignJurisdiction?.affidavitFileName"
-              text
-              color="primary"
-              class="download-affidavit-btn mt-sm-n2 d-block ml-n4"
-              :disabled="isDownloading"
-              :loading="isDownloading"
-              @click="downloadAffidavitDocument()"
-            >
-              <v-icon>mdi-file-pdf-outline</v-icon>
-              <span>{{ continuationIn?.foreignJurisdiction?.affidavitFileName }}</span>
-            </v-btn>
-            <div v-else>
-              <v-icon color="error">
-                mdi-close
-              </v-icon>
-              <span class="pl-2">Missing Affidavit</span>
-            </div>
-          </template>
-
           <!-- the proof of authorization file(s) -->
           <v-btn
             v-for="item in authorizationFiles"
@@ -234,7 +212,6 @@ import { CanJurisdictions, IntlJurisdictions, UsaJurisdiction } from '@bcrs-shar
 import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
 import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
-import { CorpTypes } from '@/util/constants'
 import { JurisdictionLocation } from '@bcrs-shared-components/enums'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import moment from 'moment-timezone'
@@ -305,30 +282,8 @@ export default defineComponent({
 
       authorizationDate: computed<string>(() => {
         return strToPacificDate(state.continuationIn?.authorization?.date)
-      }),
-
-      /**
-       * Whether a continuation in director affidavit is required.
-       * Is true if the business is a Continued In ULC from Alberta or Nova Scotia.
-       */
-      isContinuationInAffidavitRequired: computed<boolean>(() => {
-        const entityType = state.continuationIn?.nameRequest?.legalType
-        const country = state.continuationIn?.foreignJurisdiction?.country
-        const region = state.continuationIn?.foreignJurisdiction?.region
-
-        return (
-          entityType === CorpTypes.ULC_CONTINUE_IN &&
-          country === 'CA' &&
-          (region === 'AB' || region === 'NS')
-        )
       })
     })
-
-    /** Downloads the director affidavit document. */
-    async function downloadAffidavitDocument (): Promise<void> {
-      await download(state.continuationIn?.foreignJurisdiction?.affidavitFileKey,
-        state.continuationIn?.foreignJurisdiction?.affidavitFileName)
-    }
 
     /** Downloads the specified authorization document. */
     async function downloadAuthorizationDocument (item: { fileKey: string, fileName: string }): Promise<void> {
@@ -362,7 +317,6 @@ export default defineComponent({
 
     return {
       errorDialogComponent,
-      downloadAffidavitDocument,
       downloadAuthorizationDocument,
       ...toRefs(state)
     }
@@ -394,7 +348,6 @@ section:not(:last-child) {
   padding-bottom: 0;
 }
 
-.download-affidavit-btn,
 .download-authorization-btn {
   // nudge icon down a bit to line up with text
   .v-icon {
