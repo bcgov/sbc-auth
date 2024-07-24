@@ -159,10 +159,11 @@
             v-if="isGovnAccount || isBusinessAccount "
             justify="space-between"
             data-test="business-account-type-details"
+            no-gutters
           >
             <v-col
               cols="6"
-              class="py-0"
+              class="pr-2"
             >
               <v-select
                 v-model="businessType"
@@ -182,7 +183,7 @@
             </v-col>
             <v-col
               cols="6"
-              class="py-0"
+              class="pl-2"
             >
               <v-select
                 v-model="businessSize"
