@@ -54,7 +54,7 @@ export default class PaymentService {
   }
 
   static refundEFT (refundPayload: EftRefundRequest): AxiosPromise<any> {
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/shortname_refund`
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/shortname-refund`
     return axios.post(url, refundPayload)
   }
 
