@@ -1,6 +1,6 @@
 import { BNRequest, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad } from '@/models/business'
-import { ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
+import { ContinuationReviewIF, ReviewFilterParams, ReviewStatus } from '@/models/continuation-review'
 import { AxiosResponse } from 'axios'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -202,41 +202,26 @@ export default class BusinessService {
     })
   }
 
-  // *** TODO: this should return type "array of reviews"
-  static async fetchContinuationReviews (): Promise<any> {
-    // Mock data simulating the expected response structure from the API
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    return new Promise(resolve => resolve({
-      data: [
-        {
-          reviewId: 1,
-          date: 'July 3, 2024',
-          nrNumber: 'NR 0001234',
-          businessIdentifier: 'LN958001',
-          completingParty: 'John Doe',
-          status: 'Approved'
-        },
-        {
-          reviewId: 2,
-          date: 'April 4, 2024',
-          nrNumber: 'NR 0001235',
-          businessIdentifier: 'LN786002',
-          completingParty: 'Jane Smith',
-          status: 'Resubmitted'
-        },
-        {
-          reviewId: 3,
-          date: 'June 15, 2024',
-          nrNumber: 'NR 0001239',
-          businessIdentifier: 'LN965002',
-          completingParty: 'Test Mark',
-          status: 'Awaiting Review'
-        }
-      ]
-    } as any))
-
-    // const url = `${ConfigHelper.getLegalAPIV2Url()}/reviews/continuation-in`
-    // const response = await axios.get(url)
-    // return response.data
+  static async searchReviews (reviewFilter: ReviewFilterParams) {
+    const params = new URLSearchParams()
+    for (const key in reviewFilter) {
+      const value = reviewFilter[key]
+      if (Array.isArray(value)) {
+        // for status, which is an array
+        value.forEach(item => params.append(key, item))
+      } else {
+        params.append(key, value)
+      }
+    }
+    try {
+      const response = await axios.get(`${ConfigHelper.getLegalAPIV2Url()}/admin/reviews`, { params })
+      if (response?.data) {
+        return response.data
+      }
+      return null
+    } catch (error) {
+      console.error('Error fetching reviews:', error)
+      return null
+    }
   }
 }

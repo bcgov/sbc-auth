@@ -1,6 +1,7 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { useCodesStore, useOrgStore, useStaffStore, useTaskStore, useUserStore } from '@/stores'
 import { BaseVExpansionPanel } from '@/components'
+import ContinuationApplications from '@/components/auth/staff/continuation-application/ContinuationApplications.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import { MembershipType } from '@/models/Organization'
@@ -49,7 +50,7 @@ describe('StaffDashboardView tests', () => {
     wrapper = mount(StaffDashboardView, {
       localVue,
       vuetify,
-      stubs: ['Transactions', 'StaffAccountManagement', 'PPRLauncher', 'GLCodesListView']
+      stubs: ['Transactions', 'StaffAccountManagement', 'ContinuationApplications', 'PPRLauncher', 'GLCodesListView']
     })
   })
 
@@ -63,6 +64,7 @@ describe('StaffDashboardView tests', () => {
     expect(wrapper.findComponent(PPRLauncher).exists()).toBe(true)
     expect(wrapper.findComponent(IncorporationSearchResultView).exists()).toBe(true)
     expect(wrapper.findComponent(StaffAccountManagement).exists()).toBe(true)
+    expect(wrapper.findComponent(ContinuationApplications).exists()).toBe(true)
     expect(wrapper.find('#EFT-button').exists())
     expect(wrapper.find('#involuntary-dissolution-button').exists())
     const expansionPanels = wrapper.findAll(BaseVExpansionPanel)
