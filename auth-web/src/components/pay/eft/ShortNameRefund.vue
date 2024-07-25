@@ -69,9 +69,9 @@ export default defineComponent({
     function initiateRefund () {
       root.$router?.push({
         name: 'shortnamerefund',
-        query: {
-          shortNameDetails: JSON.stringify(props.shortNameDetails),
-          unsettledAmount: props.unsettledAmount
+        params: {
+          'shortNameDetails': JSON.stringify(props.shortNameDetails),
+          'unsettledAmount': props.unsettledAmount
         }
       })
     }
