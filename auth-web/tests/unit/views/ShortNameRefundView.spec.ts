@@ -43,20 +43,22 @@ describe('ShortNameRefundView.vue', () => {
     expect(wrapper.find('[data-test="staffComment"]').exists()).toBe(true)
   })
 
-  it('clears the form when the cancel button is clicked', async () => {
-    await wrapper.setData({
-      refundAmount: 100.00,
-      casSupplierNum: 'CAS-123',
-      email: 'test@example.com',
-      staffComment: 'Test comment'
+  it('return to previous page when cancel button is clicked', async () => {
+    const router = new VueRouter()
+    wrapper = mount(ShortNameRefundView, {
+      propsData: {
+        shortNameDetails: { shortName: 'TEST', creditsRemaining: '500.0' },
+        unsettledAmount: '100.0'
+      },
+      localVue,
+      vuetify,
+      router
     })
+    const push = sinon.stub(wrapper.vm.$router, 'push')
 
-    const cancelButton = wrapper.find('[data-test="btn-edit-routing-cancel"]')
-    await cancelButton.trigger('click')
+    await wrapper.find('[data-test="btn-edit-cancel"]').trigger('click')
 
-    expect(wrapper.vm.$data.refundAmount).toBe(undefined)
-    expect(wrapper.vm.$data.casSupplierNum).toBe('')
-    expect(wrapper.vm.$data.email).toBe('')
-    expect(wrapper.vm.$data.staffComment).toBe('')
+    expect(push.calledWith({ name: 'shortnamedetails' })).toBe(true)
+    push.restore()
   })
 })

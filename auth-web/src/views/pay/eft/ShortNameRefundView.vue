@@ -45,6 +45,7 @@
                   persistent-hint
                   data-test="refundAmount"
                   :rules="refundAmountRules"
+                  :disabled="isFormDisabled"
                 />
               </v-row>
 
@@ -60,6 +61,7 @@
                   persistent-hint
                   data-test="casSupplierNumber"
                   :rules="casSupplierNumRules"
+                  :disabled="isFormDisabled"
                 />
               </v-row>
 
@@ -75,6 +77,7 @@
                   persistent-hint
                   data-test="email"
                   :rules="emailRules"
+                  :disabled="isFormDisabled"
                 />
               </v-row>
 
@@ -89,6 +92,7 @@
                   persistent-hint
                   data-test="staffComment"
                   :rules="staffCommentRules"
+                  :disabled="isFormDisabled"
                 />
               </v-row>
             </v-col>
@@ -100,20 +104,27 @@
             outlined
             class="px-7"
             color="primary"
-            data-test="btn-edit-routing-cancel"
-            @click="handleCancelOrBack"
+            data-test="btn-edit-cancel"
+            :disabled="isLoading"
+            @click="handleCancelButton"
           >
-            <span>{{ backButtonLabel }}</span>
+            <span>Cancel</span>
           </v-btn>
           <v-btn
             large
             :color="buttonColor"
             class="px-8 font-weight-bold"
-            data-test="btn-edit-routing-done"
-            :disabled="!isFormValid || isSubmitted"
+            data-test="btn-edit-done"
+            :disabled="!isFormValid || isFormDisabled"
             @click="submitRefundRequest"
           >
-            <span>{{ buttonText }}</span>
+            <span v-if="!isLoading">{{ buttonText }}</span>
+            <v-progress-circular
+              v-else
+              indeterminate
+              color="white"
+              size="24"
+            />
           </v-btn>
         </v-card-actions>
       </v-form>
@@ -122,7 +133,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { EftRefundRequest } from '@/models/refund'
 import { useOrgStore } from '@/stores/org'
 
@@ -150,9 +161,11 @@ export default defineComponent({
       casSupplierNum: '',
       email: '',
       staffComment: '',
+      isLoading: false,
       refundAmountRules: [
         v => !!v || 'Refund Amount is required',
-        v => parseFloat(v) < parseFloat(props.shortNameDetails?.creditsRemaining) || 'Amount must be less than unsettled amount on short name',
+        v => parseFloat(v) > 0 || 'Refund Amount must be greater than zero',
+        v => parseFloat(v) <= parseFloat(props.shortNameDetails?.creditsRemaining) || 'Amount must be less than unsettled amount on short name',
         v => /^\d+(\.\d{1,2})?$/.test(v) || 'Amounts must be less than 2 decimal places'
       ],
       casSupplierNumRules: [
@@ -176,34 +189,15 @@ export default defineComponent({
     const isFormValid = ref(false)
     const buttonText = ref('Submit Refund Request')
     const buttonColor = ref('primary')
-    const backButtonLabel = ref('Cancel')
 
-    function handleCancelOrBack () {
-      if (backButtonLabel.value === 'Cancel') {
-        clearForm()
-      } else {
-        root.$router?.push({
-          name: 'shortnamedetails',
-          query: {
-            shortNameId: props.shortNameDetails.id
-          }
-        })
-      }
-    }
-
-    function clearForm () {
-      state.refundAmount = undefined
-      state.casSupplierNum = ''
-      state.email = ''
-      state.staffComment = ''
-      refundForm.value.resetValidation()
-      state.isSubmitted = false
-      buttonText.value = 'Submit Refund Request'
-      buttonColor.value = 'primary'
-      backButtonLabel.value = 'Cancel'
+    function handleCancelButton () {
+      root.$router?.push({
+        name: 'shortnamedetails'
+      })
     }
 
     async function submitRefundRequest () {
+      state.isLoading = true
       if (refundForm.value.validate()) {
         const refundPayload: EftRefundRequest = {
           shortNameId: props.shortNameDetails.id,
@@ -218,14 +212,21 @@ export default defineComponent({
           state.isSubmitted = true
           buttonText.value = 'Approved'
           buttonColor.value = 'green'
-          backButtonLabel.value = 'Back'
         } catch (error) {
           state.isSubmitted = false
           buttonText.value = 'Failed'
           buttonColor.value = 'red'
+        } finally {
+          state.isLoading = false
         }
+      } else {
+        state.isLoading = false
       }
     }
+
+    const isFormDisabled = computed(() => {
+      return state.isSubmitted || state.isLoading
+    })
 
     watch(() => state.isSubmitted, (newVal) => {
       if (newVal) {
@@ -240,13 +241,12 @@ export default defineComponent({
     return {
       ...toRefs(state),
       refundForm,
+      isFormDisabled,
       isFormValid,
-      clearForm,
       submitRefundRequest,
       buttonText,
       buttonColor,
-      backButtonLabel,
-      handleCancelOrBack
+      handleCancelButton
     }
   }
 })
