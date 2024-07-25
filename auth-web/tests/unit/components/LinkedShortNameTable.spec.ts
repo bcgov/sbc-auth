@@ -1,5 +1,6 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components'
+import CommonUtils from '@/util/common-util'
 import LinkedShortNameTableVue from '@/components/pay/LinkedShortNameTable.vue'
 import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
@@ -112,7 +113,7 @@ describe('LinkedShortNameTable.vue', () => {
       expect(columns.at(1).text()).toBe(linkedShortNameResponse.items[i].accountName)
       expect(columns.at(2).text()).toBe(linkedShortNameResponse.items[i].accountBranch)
       expect(columns.at(3).text()).toBe(linkedShortNameResponse.items[i].accountId)
-      expect(columns.at(4).text()).toBe(`$${linkedShortNameResponse.items[i].amountOwing.toFixed(2)}`)
+      expect(columns.at(4).text()).toBe(`${CommonUtils.formatAmount(linkedShortNameResponse.items[i].amountOwing)}`)
       expect(columns.at(5).text()).toBe(linkedShortNameResponse.items[i].statementId.toString())
     }
   })

@@ -195,6 +195,10 @@ describe('Common Util Test', () => {
     expect(CommonUtil.trimTrailingSlashURL('abc/')).toBe('abc')
   })
 
+  it('formatAmount returns formatted amount', () => {
+    expect(CommonUtil.formatAmount(1234.567)).toBe('$1,234.57')
+  })
+
   afterEach(() => {
     window.location.pathname = pathname
   })

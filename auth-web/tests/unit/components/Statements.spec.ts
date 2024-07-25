@@ -101,8 +101,8 @@ describe('Statements.vue', () => {
     })
     expect(wrapper.vm.formatAmount(0)).toBe('$0.00')
     expect(wrapper.vm.formatAmount(1)).toBe('$1.00')
-    expect(wrapper.vm.formatAmount(1000)).toBe('$1000.00')
-    expect(wrapper.vm.formatAmount(1000.1)).toBe('$1000.10')
+    expect(wrapper.vm.formatAmount(1000)).toBe('$1,000.00')
+    expect(wrapper.vm.formatAmount(1000.1)).toBe('$1,000.10')
     wrapper.destroy()
   })
 
