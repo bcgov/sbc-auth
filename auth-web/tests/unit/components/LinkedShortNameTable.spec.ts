@@ -7,6 +7,7 @@ import { axios } from '@/util/http-util'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
 import sinon from 'sinon'
+import CommonUtils from '@/util/common-util'
 
 sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
   AUTH_API_URL: 'https://localhost:8080/api/v1/11',
@@ -112,7 +113,7 @@ describe('LinkedShortNameTable.vue', () => {
       expect(columns.at(1).text()).toBe(linkedShortNameResponse.items[i].accountName)
       expect(columns.at(2).text()).toBe(linkedShortNameResponse.items[i].accountBranch)
       expect(columns.at(3).text()).toBe(linkedShortNameResponse.items[i].accountId)
-      expect(columns.at(4).text()).toBe(`$${linkedShortNameResponse.items[i].amountOwing.toFixed(2)}`)
+      expect(columns.at(4).text()).toBe(`${CommonUtils.formatAmount(linkedShortNameResponse.items[i].amountOwing)}`)
       expect(columns.at(5).text()).toBe(linkedShortNameResponse.items[i].statementId.toString())
     }
   })
