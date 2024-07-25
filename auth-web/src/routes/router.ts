@@ -897,8 +897,9 @@ export function getRoutes (): RouteConfig[] {
         showNavBar: true
       },
       props: route => ({
-        shortNameDetails: JSON.parse(route.query.shortNameDetails || '{}'),
-        unsettledAmount: route.query.unsettledAmount || ''
+        shortNameId: Number(route.params.shortNameId),
+        shortNameDetails: route.params.shortNameDetails ? JSON.parse(route.params.shortNameDetails) : {},
+        unsettledAmount: route.params.unsettledAmount || ''
       })
     },
     {
