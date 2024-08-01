@@ -2136,10 +2136,14 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
 
 @pytest.mark.parametrize('test_name, businesses, drafts, drafts_with_nrs, nrs, dates', [
     ('businesses_only', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)], [], [], [], []),
-    ('drafts_only', [], [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)], [], [], []),
+    ('drafts_only', [],
+     [('T12dfhsff1', CorpType.BC.value, CorpType.TMP.value),
+      ('T12dfhsff2', CorpType.GP.value, CorpType.RTMP.value)],
+     [], [], []),
     ('nrs_only', [], [], [], [('NR 1234567', 'NEW'), ('NR 1234566', 'NEW')], []),
     ('drafts_with_nrs', [], [],
-     [('T12dfhsff1', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff2', CorpType.GP.value, 'NR 1234566')],
+     [('T12dfhsff1', CorpType.BC.value, CorpType.TMP.value, 'NR 1234567'),
+      ('T12dfhsff2', CorpType.GP.value, CorpType.RTMP.value, 'NR 1234566')],
      [('NR 1234567', 'AML'), ('NR 1234566', 'AML')], []),
     ('affiliations_order', [], [],
      [], [('abcde1', CorpType.BC.value, 'NR 123456'),
@@ -2148,8 +2152,10 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
           ('abcde4', CorpType.BC.value, 'NR 123459')],
      [datetime(2021, 1, 1), datetime(2022, 2, 1), datetime(2022, 3, 1), datetime(2023, 2, 1)]),
     ('all', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)],
-     [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)],
-     [('T12dfhsff3', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff4', CorpType.GP.value, 'NR 1234566')],
+     [('T12dfhsff1', CorpType.BC.value, CorpType.TMP.value),
+      ('T12dfhsff2', CorpType.GP.value, CorpType.RTMP.value)],
+     [('T12dfhsff3', CorpType.BC.value, CorpType.TMP.value, 'NR 1234567'),
+      ('T12dfhsff4', CorpType.GP.value, CorpType.RTMP.value, 'NR 1234566')],
      [('NR 1234567', 'AML'), ('NR 1234566', 'AML'), ('NR 1234565', 'AML')],
      [datetime(2021, 1, 1), datetime(2022, 2, 1)])
 ])
@@ -2178,12 +2184,14 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
     drafts_details = [{
         'identifier': data[0],
         'legalType': data[1],
+        'draftType': data[2],
     } for data in drafts]
 
     drafts_with_nr_details = [{
         'identifier': data[0],
         'legalType': data[1],
-        'nrNumber': data[2]
+        'draftType': data[2],
+        'nrNumber': data[3]
     } for data in drafts_with_nrs]
 
     nrs_details = [{
@@ -2228,7 +2236,7 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
     assert rv.json.get('entities', None) and isinstance(rv.json['entities'], list)
     assert len(rv.json['entities']) == len(businesses) + len(drafts) + len(nrs)
 
-    drafts_nr_numbers = [data[2] for data in drafts_with_nrs]
+    drafts_nr_numbers = [data[3] for data in drafts_with_nrs]
     for entity in rv.json['entities']:
         if entity['legalType'] == CorpType.NR.value:
             assert entity['nameRequest']['nrNum'] not in drafts_nr_numbers
