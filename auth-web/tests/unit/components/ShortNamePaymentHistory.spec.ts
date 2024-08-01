@@ -82,7 +82,7 @@ describe('ShortNamePaymentHistory.vue', () => {
 
     sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'get')
-    get.returns(new Promise(resolve => resolve({ data: historyResponse })))
+    get.returns(Promise.resolve({ data: historyResponse }))
 
     wrapper = mount(ShortNameTransactions, {
       propsData: {
