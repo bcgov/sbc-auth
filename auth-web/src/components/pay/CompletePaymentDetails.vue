@@ -122,6 +122,7 @@
 </template>
 
 <script lang="ts">
+import { CreateRequestBody, PADInfo, PADInfoValidation } from '@/models/Organization'
 import { Pages, PaymentTypes } from '@/util/constants'
 import { PropType, computed, defineComponent, reactive, toRefs } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
@@ -129,7 +130,6 @@ import CautionBox from '@/components/auth/common/CautionBox.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import { useOrgStore } from '@/stores'
-import { CreateRequestBody, PADInfo, PADInfoValidation } from '@/models/Organization'
 
 export default defineComponent({
   name: 'CompletePaymentDetails',
@@ -166,7 +166,8 @@ export default defineComponent({
       isInitialTOSAccepted: true,
       isInitialAcknowledged: false,
       checkErrors: false,
-      padValid: false
+      padValid: false,
+      isPaymentChanged: false
     })
 
     function setBcolInfo (bcolProfile: BcolProfile) {
@@ -264,6 +265,7 @@ export default defineComponent({
         try {
           await orgStore.updateOrg(createRequestBody)
           orgStore.setCurrentOrganizationPaymentType(props.changePaymentType)
+          state.isPaymentChanged = true
           goToPaymentOptions()
         } catch (error) {
           switch (error.response.status) {
