@@ -22,6 +22,11 @@ export interface EFTTransactionListResponse {
 }
 
 export interface EFTTransactionState {
+  errorDialogTitle?: string,
+  errorDialogText?: string,
+  confirmDialogTitle?: string
+  confirmDialogText?: string
+  confirmObject?: object
   filters: EFTTransactionFilterParams
   loading: boolean
   results: EFTTransaction[]
