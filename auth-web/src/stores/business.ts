@@ -76,10 +76,8 @@ export const useBusinessStore = defineStore('business', () => {
 
     // Boolean properties in the resp. If a property exists, add it to the business object. If not, it will have a default value.
     const addBooleanProperty = (value, defaultValue, propertyName) => ({ [propertyName]: value !== undefined ? value : defaultValue })
-
     return {
       businessIdentifier: resp.identifier,
-      ...addConditionalProperty(resp.businessNumber, { businessNumber: resp.businessNumber }),
       ...addConditionalProperty(resp.businessNumber, { businessNumber: resp.businessNumber }),
       ...addConditionalProperty(resp.legalName, { name: determineDisplayName(resp.legalName, resp.legalType, resp.identifier, resp.alternateNames) }),
       ...addConditionalProperty(resp.contacts, { contacts: resp.contacts }),
@@ -90,12 +88,11 @@ export const useBusinessStore = defineStore('business', () => {
       ...addConditionalProperty(resp.modified, { modified: resp.modified }),
       ...addConditionalProperty(resp.modifiedBy, { modifiedBy: resp.modifiedBy }),
       ...addConditionalProperty(resp.nrNumber, { nrNumber: resp.nrNumber }),
-      ...addConditionalProperty(resp.state, { status: resp.state }),
       ...addConditionalProperty(resp.effectiveDate, { effectiveDate: resp.effectiveDate }),
       ...addBooleanProperty(resp.adminFreeze, false, 'adminFreeze'),
       ...addBooleanProperty(resp.goodStanding, true, 'goodStanding'),
       ...addBooleanProperty(resp.inDissolution, false, 'inDissolution'),
-      ...addConditionalProperty(resp.state, { status: resp.state })
+      status: resp.state || resp.draftStatus
     }
   }
 

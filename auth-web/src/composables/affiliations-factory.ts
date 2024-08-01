@@ -83,7 +83,7 @@ export const useAffiliations = () => {
   const status = (business: Business): string => {
     if (isTemporaryBusiness(business)) {
       // Reflect 'Pending | Payment Incomplete' status
-      if (business.status === BusinessState.PENDING) {
+      if (business.status === 'PENDING') {
         return BusinessState.PENDING
       }
       if (business.status) {
