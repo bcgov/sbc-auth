@@ -461,11 +461,7 @@ class Affiliation:
             if businesses_key in data:
                 businesses = list(data[businesses_key])
             if drafts_key in data:
-                # set draft type so that UI knows its a draft entity
-                draft_reg_types = [CorpType.GP.value, CorpType.SP.value]
-                drafts = [
-                    {'draftType': CorpType.RTMP.value if draft['legalType'] in draft_reg_types
-                        else CorpType.TMP.value, **draft} for draft in data[drafts_key]]
+                drafts = data[drafts_key]
         return name_requests, businesses, drafts
 
     @staticmethod
