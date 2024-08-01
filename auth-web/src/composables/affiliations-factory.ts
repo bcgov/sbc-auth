@@ -86,11 +86,13 @@ export const useAffiliations = () => {
       if (business.status === BusinessState.PENDING) {
         return BusinessState.PENDING
       }
-      if (business.effectiveDate) {
-        return BusinessState.FUTURE_EFFECTIVE
-      }
       if (business.status) {
         return BusinessState[business.status]
+      }
+      // Other statuses (AWAITING_REVIEW, CHANGE_REQUESTED) are more important
+      // Don't show future effective when there are other statuses
+      if (business.effectiveDate) {
+        return BusinessState.FUTURE_EFFECTIVE
       }
       return BusinessState.DRAFT
     }
