@@ -90,6 +90,8 @@ export const useBusinessStore = defineStore('business', () => {
       ...addConditionalProperty(resp.modified, { modified: resp.modified }),
       ...addConditionalProperty(resp.modifiedBy, { modifiedBy: resp.modifiedBy }),
       ...addConditionalProperty(resp.nrNumber, { nrNumber: resp.nrNumber }),
+      ...addConditionalProperty(resp.state, { status: resp.state }),
+      ...addConditionalProperty(resp.effectiveDate, { effectiveDate: resp.effectiveDate }),
       ...addBooleanProperty(resp.adminFreeze, false, 'adminFreeze'),
       ...addBooleanProperty(resp.goodStanding, true, 'goodStanding'),
       ...addBooleanProperty(resp.inDissolution, false, 'inDissolution'),

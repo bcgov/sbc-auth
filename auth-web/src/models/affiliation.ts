@@ -77,6 +77,7 @@ export interface AffiliationResponse {
   goodStanding?: boolean
   adminFreeze?: boolean
   inDissolution?: boolean
+  effectiveDate?: Date
 }
 
 export interface NameRequestResponse {
