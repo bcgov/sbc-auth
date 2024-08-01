@@ -101,6 +101,7 @@
           depressed
           class="secondary-btn"
           data-test="btn-stepper-back"
+          :loading="isLoading"
           @click="cancel"
         >
           <span>{{ cancelButtonText }}</span>
@@ -109,6 +110,7 @@
         <v-btn
           large
           color="primary"
+          :loading="isLoading"
           @click="complete"
         >
           <span>{{ nextButtonText }}</span>
@@ -167,7 +169,8 @@ export default defineComponent({
       isInitialAcknowledged: false,
       checkErrors: false,
       padValid: false,
-      isPaymentChanged: false
+      isPaymentChanged: false,
+      isLoading: false
     })
 
     function setBcolInfo (bcolProfile: BcolProfile) {
@@ -248,7 +251,8 @@ export default defineComponent({
       state.padInfo = padInfoValue
     }
 
-    async function complete () {
+    async function complete() {
+      state.isLoading = true
       state.checkErrors = true
       state.isInitialTOSAccepted = true
       state.errorMessage = ''
@@ -256,6 +260,7 @@ export default defineComponent({
         const isValid = !!(state.bcolInfo.userId && state.bcolInfo.password)
         if (!isValid) {
           state.errorMessage = 'Missing User ID and Password for BC Online.'
+          state.isLoading = false
           return
         }
       }
@@ -272,12 +277,14 @@ export default defineComponent({
             case 400:
             case 409:
               state.errorMessage = error.response.data.message
+              state.isLoading = false
               break
             default:
               state.errorMessage = 'An error occurred while attempting to create your account.'
           }
         }
       }
+      state.isLoading = false
     }
 
     const cancelButtonText = computed(() => {
