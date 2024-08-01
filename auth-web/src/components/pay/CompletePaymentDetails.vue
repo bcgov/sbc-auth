@@ -111,7 +111,7 @@
           color="primary"
           @click="complete"
         >
-          <span>Next</span>
+          <span>{{ nextButtonText }}</span>
           <v-icon class="ml-2">
             mdi-arrow-right
           </v-icon>
@@ -284,6 +284,10 @@ export default defineComponent({
       return props.changePaymentType === PaymentTypes.PAD ? 'Back' : 'Cancel'
     })
 
+    const nextButtonText = computed(() => {
+      return props.changePaymentType === PaymentTypes.PAD ? 'Next' : 'Complete'
+    })
+
     return {
       ...toRefs(state),
       complete,
@@ -293,6 +297,7 @@ export default defineComponent({
       cancel,
       getPADInfo,
       cancelButtonText,
+      nextButtonText,
       isPADValid
     }
   }

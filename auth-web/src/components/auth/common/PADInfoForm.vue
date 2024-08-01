@@ -118,7 +118,7 @@
             <v-checkbox
               v-model="isAcknowledged"
               hide-details
-              :class="['align-checkbox-label--top']"
+              class="align-checkbox-label--top"
               data-test="check-isAcknowledged"
               @change="emitPreAuthDebitInfo"
             >
@@ -136,7 +136,6 @@
             <div class="terms-container">
               <TermsOfUseDialog
                 :isAlreadyAccepted="isTOSAccepted"
-                :color="tosColor"
                 :checkErrors="checkErrors"
                 :tosText="'terms and conditions'"
                 :tosType="'termsofuse_pad'"
@@ -234,7 +233,6 @@ export default defineComponent({
     }) as unknown) as PADInfoFormState
 
     const acknowledgeColor = computed(() => props.checkErrors && !state.isAcknowledged ? 'error--text' : '')
-    const tosColor = computed(() => props.checkErrors && !state.isTOSAccepted ? 'error--text' : '')
 
     const accountNumberRules = computed((): ((v: any) => true | string)[] => {
       const rules: ((v: any) => true | string)[] = [
@@ -313,8 +311,7 @@ export default defineComponent({
       emitPreAuthDebitInfo,
       emitIsPreAuthDebitFormValid,
       emitIsPadInfoTouched,
-      acknowledgeColor,
-      tosColor
+      acknowledgeColor
     }
   }
 })

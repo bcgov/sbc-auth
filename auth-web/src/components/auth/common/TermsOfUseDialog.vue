@@ -10,8 +10,8 @@
     />
     <v-checkbox
       v-model="termsAccepted"
-      hide-details
-      :class="['terms-checkbox', 'align-checkbox-label--top', 'ma-0', 'pa-0', termsColor]"
+      color="primary"
+      class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
       :disabled="!canCheckTerms"
       required
       data-test="check-termsAccepted"
@@ -99,7 +99,6 @@ export default defineComponent({
   name: 'TermsOfUseDialog',
   components: { TermsOfUse },
   props: {
-    color: { type: String, default: '' },
     tosType: { type: String, default: 'termsofuse' },
     tosHeading: { type: String, default: 'Terms of Use Agreement' },
     tosCheckBoxLabelAppend: { type: String, default: '' },
