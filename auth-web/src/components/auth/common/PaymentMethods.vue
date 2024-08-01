@@ -17,7 +17,6 @@
         class="payment-card py-8 px-8 mb-4 elevation-1"
         :class="{'selected': isPaymentSelected(payment)}"
         :data-test="`div-payment-${payment.type}`"
-        @click="paymentMethodSelected(payment)"
       >
         <div>
           <header class="d-flex align-center">
@@ -353,8 +352,27 @@ export default defineComponent({
       }
     }
 
-    const paymentMethodSelected = (payment, isTouch = true) => {
-      if (payment.type === PaymentTypes.BCOL && isTouch && selectedPaymentMethod.value !== PaymentTypes.BCOL) {
+    const hasBalanceOwing = async () => {
+      try {
+        const responseData = await getStatementsSummary(props.currentOrganization.id)
+        return responseData?.totalDue || responseData?.totalInvoiceDue
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    const paymentMethodSelected = async (payment, isTouch = true) => {
+      if (payment.type === PaymentTypes.PAD) {
+        const hasOutstandingBalance = await hasBalanceOwing()
+        if (hasOutstandingBalance) {
+          await root.$router.push({
+            name: Pages.PAY_OUTSTANDING_BALANCE,
+            params: { orgId: props.currentOrganization.id },
+            query: { changePaymentType: payment.type }
+          })
+        }
+        return
+      } else if (payment.type === PaymentTypes.BCOL && isTouch && selectedPaymentMethod.value !== PaymentTypes.BCOL) {
         bcOnlineDialog.value.open()
       } else {
         state.bcOnlineWarningMessage = 'This payment method will soon be retired.'
@@ -398,15 +416,6 @@ export default defineComponent({
     const cancelModal = () => {
       bcOnlineDialog.value.close()
       selectedPaymentMethod.value = ''
-    }
-
-    const hasBalanceOwing = async () => {
-      try {
-        const responseData = await getStatementsSummary(props.currentOrganization.id)
-        return responseData?.totalDue || responseData?.totalInvoiceDue
-      } catch (error) {
-        console.log(error)
-      }
     }
 
     const continueModal = async () => {

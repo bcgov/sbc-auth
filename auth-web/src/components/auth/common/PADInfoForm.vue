@@ -118,12 +118,12 @@
             <v-checkbox
               v-model="isAcknowledged"
               hide-details
-              class="align-checkbox-label--top"
+              :class="['align-checkbox-label--top']"
               data-test="check-isAcknowledged"
               @change="emitPreAuthDebitInfo"
             >
               <template #label>
-                {{ acknowledgementLabel }}
+                <span :class="acknowledgeColor">{{ acknowledgementLabel }}</span>
               </template>
             </v-checkbox>
           </v-col>
@@ -136,6 +136,8 @@
             <div class="terms-container">
               <TermsOfUseDialog
                 :isAlreadyAccepted="isTOSAccepted"
+                :color="tosColor"
+                :checkErrors="checkErrors"
                 :tosText="'terms and conditions'"
                 :tosType="'termsofuse_pad'"
                 :tosHeading="'Business Pre-Authorized Debit Terms and Conditions Agreement BC Registries and Online Services'"
@@ -183,7 +185,8 @@ export default defineComponent({
     isInitialAcknowledged: { type: Boolean, default: false },
     isInitialTOSAccepted: { type: Boolean, default: false },
     isTOSNeeded: { type: Boolean, default: true },
-    padInformation: { default: () => { return {} as PADInfo } }
+    padInformation: { default: () => { return {} as PADInfo } },
+    checkErrors: { type: Boolean, default: false }
   },
   emits: ['emit-pre-auth-debit-info', 'is-pre-auth-debit-form-valid', 'is-pad-info-touched'],
   setup (props, { emit }) {
@@ -229,6 +232,9 @@ export default defineComponent({
           ' (3) day confirmation period has ended.'
       })
     }) as unknown) as PADInfoFormState
+
+    const acknowledgeColor = computed(() => props.checkErrors && !state.isAcknowledged ? 'error--text' : '')
+    const tosColor = computed(() => props.checkErrors && !state.isTOSAccepted ? 'error--text' : '')
 
     const accountNumberRules = computed((): ((v: any) => true | string)[] => {
       const rules: ((v: any) => true | string)[] = [
@@ -306,7 +312,9 @@ export default defineComponent({
       updateTermsAccepted,
       emitPreAuthDebitInfo,
       emitIsPreAuthDebitFormValid,
-      emitIsPadInfoTouched
+      emitIsPadInfoTouched,
+      acknowledgeColor,
+      tosColor
     }
   }
 })
@@ -333,5 +341,9 @@ export default defineComponent({
 
   .help-btn {
     margin-top: -2px;
+  }
+
+  .error--text ::v-deep .v-icon {
+    color: var(--v-error-base) !important;
   }
 </style>

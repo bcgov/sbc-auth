@@ -10,16 +10,15 @@
     />
     <v-checkbox
       v-model="termsAccepted"
-      color="primary"
-      class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
       hide-details
+      :class="['terms-checkbox', 'align-checkbox-label--top', 'ma-0', 'pa-0', termsColor]"
       :disabled="!canCheckTerms"
       required
       data-test="check-termsAccepted"
       @change="emitTermsAcceptanceStatus"
     >
       <template #label>
-        <span>I have read, understood and agree to the
+        <span :class="termsColor">I have read, understood and agree to the
           <strong
             class="faux-link"
             role="button"
@@ -100,12 +99,14 @@ export default defineComponent({
   name: 'TermsOfUseDialog',
   components: { TermsOfUse },
   props: {
+    color: { type: String, default: '' },
     tosType: { type: String, default: 'termsofuse' },
     tosHeading: { type: String, default: 'Terms of Use Agreement' },
     tosCheckBoxLabelAppend: { type: String, default: '' },
     tosText: { type: String, default: '' },
     isUserTOS: { type: Boolean, default: false },
-    isAlreadyAccepted: { type: Boolean, default: false }
+    isAlreadyAccepted: { type: Boolean, default: false },
+    checkErrors: { type: Boolean, default: false }
   },
   setup (props, { emit }) {
     const userStore = useUserStore()
@@ -116,6 +117,7 @@ export default defineComponent({
     const atBottom = ref(false)
 
     const tooltipTxt = computed(() => 'Please read and agree to the Terms Of Use')
+    const termsColor = computed(() => !termsAccepted.value && props.checkErrors ? 'error--text' : '')
 
     onMounted(() => {
       termsDialog.value = false
@@ -163,6 +165,7 @@ export default defineComponent({
     }
 
     return {
+      termsColor,
       termsDialog,
       termsAccepted,
       canCheckTerms,
@@ -274,5 +277,4 @@ h2 {
 .agree-btn {
   font-weight: 600;
 }
-
 </style>

@@ -102,9 +102,11 @@
     >
       <v-card-text class="payment-method-card-text py-2 d-flex">
         <input
+          v-model="selectedPaymentMethod"
           type="radio"
           class="payment-method-radio ml-8 mr-8 d-flex"
           name="payment-method"
+          value="cc"
           checked
         >
         <div class="payment-method-description d-flex">
@@ -121,6 +123,40 @@
           </div>
           <div class="payment-method-description pt-1 d-flex">
             For immediate settlement, pay any outstanding amounts owed using a credit card.
+          </div>
+        </div>
+      </v-card-text>
+    </v-card>
+
+    <v-card
+      outlined
+      flat
+      class="payment-method-card mb-8 mt-8"
+      data-test="pad-payment-card"
+    >
+      <v-card-text class="payment-method-card-text py-2 d-flex">
+        <input
+          v-model="selectedPaymentMethod"
+          type="radio"
+          class="payment-method-radio ml-8 mr-8 d-flex"
+          name="payment-method"
+          value="pad"
+        >
+        <div class="payment-method-description d-flex">
+          <div class="payment-type-label d-flex">
+            <v-icon
+              class="payment-type-icon pr-2"
+              large
+            >
+              mdi-bank-outline
+            </v-icon>
+            <div class="payment-type-description">
+              Pre-authorized Debit
+            </div>
+          </div>
+          <div class="payment-method-description pt-1 d-flex">
+            To pay using your Pre-Authorized Debit Account, please note that the Canadian Payment
+            Association requires a confirmation period of 3 days before deducting funds.
           </div>
         </div>
       </v-card-text>
@@ -191,6 +227,11 @@ export default defineComponent({
     statementSummary: {
       type: Object,
       default: () => ({})
+    },
+    stepForward: {
+      type: Function as PropType<() => void>,
+      required: false,
+      default: undefined
     }
   },
   emits: ['step-forward'],
@@ -202,7 +243,8 @@ export default defineComponent({
       invoicesOwing: 0,
       loading: false,
       handlingPayment: false,
-      statementOwingError: false
+      statementOwingError: false,
+      selectedPaymentMethod: 'cc'
     })
 
     const handlePayment = async () => {
@@ -214,7 +256,7 @@ export default defineComponent({
       const encodedUrl = encodeURIComponent(returnUrl)
 
       // redirect to make payment UI
-      await root.$router.push(`${Pages.MAKE_PAD_PAYMENT}${payment.id}/transactions/${encodedUrl}`)
+      await root.$router.push(`${Pages.MAKE_CC_PAYMENT}${payment.id}/transactions/${encodedUrl}`)
       state.handlingPayment = false
     }
 
@@ -223,7 +265,11 @@ export default defineComponent({
     }
 
     function goNext () {
-      handlePayment()
+      if (state.selectedPaymentMethod === 'pad') {
+        props.stepForward()
+      } else {
+        handlePayment()
+      }
     }
 
     async function getStatementsOwing () {
