@@ -427,7 +427,7 @@ export default defineComponent({
       switch (businessStatus) {
         case BusinessState.AWAITING_REVIEW:
         case BusinessState.REJECTED:
-        case BusinessState.FUTURE_EFFECTIVE:
+        case BusinessState.PAID:
         case BusinessState.PENDING:
           if ((item.corpType?.code || item.corpType) === CorpTypes.REGISTRATION) {
             return 'Open Registration'

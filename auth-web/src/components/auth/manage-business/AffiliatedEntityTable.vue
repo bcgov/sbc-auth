@@ -139,6 +139,12 @@
         <!-- Status -->
         <template #item-slot-Status="{ item }">
           <span>{{ status(item) }}</span>
+          <!-- Future Effective Icon for PAID status -->
+          <template v-if="status(item) === BusinessState.PAID">
+            <v-icon class="future-effective-icon">
+              mdi-information-outline
+            </v-icon>
+          </template>
           <EntityDetails
             v-if="isExpired(item) ||
               isFrozed(item) ||
@@ -176,6 +182,7 @@
 import {
   AffiliationInvitationStatus,
   AffiliationInvitationType,
+  BusinessState,
   EntityAlertTypes,
   NrDisplayStates,
   NrState
@@ -345,7 +352,8 @@ export default defineComponent({
       isBadstanding,
       isDissolution,
       getAffiliationInvitationStatus,
-      AffiliationInvitationStatus
+      AffiliationInvitationStatus,
+      BusinessState
     }
   }
 })
@@ -523,6 +531,11 @@ export default defineComponent({
     border-radius: 10px;
     background-color: lightgray;
   }
+}
+
+.future-effective-icon {
+  color: #4169E1 !important;
+  margin-left: 4px;
 }
 
 </style>

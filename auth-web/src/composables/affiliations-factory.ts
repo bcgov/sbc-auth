@@ -92,7 +92,7 @@ export const useAffiliations = () => {
       // Other statuses (AWAITING_REVIEW, CHANGE_REQUESTED) are more important
       // Don't show future effective when there are other statuses
       if (business.effectiveDate) {
-        return BusinessState.FUTURE_EFFECTIVE
+        return BusinessState.PAID
       }
       return BusinessState.DRAFT
     }
