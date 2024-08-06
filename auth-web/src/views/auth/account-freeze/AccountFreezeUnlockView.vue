@@ -156,7 +156,7 @@ export default defineComponent({
     ModalDialog
   },
   setup (props, { root }) {
-    const { createAccountPayment, getOrgPayments } = useOrgStore()
+    const { createAccountPayment, createOutstandingAccountPayment, getOrgPayments } = useOrgStore()
     const { currentOrganization } = storeToRefs(useOrgStore())
     const errorDialog = ref(null)
     const stepper = ref(null)
@@ -180,7 +180,12 @@ export default defineComponent({
     })
 
     async function unlockAccount () {
-      const payment = await createAccountPayment()
+      let payment
+      if (state.hasEFTPaymentMethod) {
+        payment = await createOutstandingAccountPayment()
+      } else {
+        payment = await createAccountPayment()
+      }
       const baseUrl = ConfigHelper.getAuthContextPath()
       const returnUrl = `${baseUrl}/${Pages.ACCOUNT_UNLOCK_SUCCESS}`
       const encodedUrl = encodeURIComponent(returnUrl)
