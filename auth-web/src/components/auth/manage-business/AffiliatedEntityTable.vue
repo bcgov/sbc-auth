@@ -141,12 +141,19 @@
           <span>{{ status(item) }}</span>
           <!-- Future Effective Icon for PAID_FE status -->
           <template v-if="status(item) === BusinessState.PAID_FE">
-            <v-icon
-              class="ml-1"
-              color="#F8661A"
-            >
-              mdi-information-outline
-            </v-icon>
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  class="ml-1"
+                  color="#F8661A"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-information-outline
+                </v-icon>
+              </template>
+              <span>Effective Date: {{ formatDate(item.effectiveDate) }}</span>
+            </v-tooltip>
           </template>
           <EntityDetails
             v-if="isExpired(item) ||
@@ -163,6 +170,7 @@
             :details="[EntityAlertTypes.PROCESSING]"
           />
         </template>
+
         <!-- Actions -->
         <template #item-slot-Actions="{ item, index }">
           <AffiliationAction
@@ -200,6 +208,7 @@ import EntityDetails from './EntityDetails.vue'
 
 import { useAffiliations } from '@/composables'
 import { useOrgStore } from '@/stores/org'
+import moment from 'moment'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',
@@ -320,6 +329,11 @@ export default defineComponent({
       return affiliationInviteInfos.length > 0 && affiliationInviteInfos[0].status
     }
 
+    // Method to format dates
+    const formatDate = (dateString) => {
+      return moment(dateString).format('MMMM D, YYYY') // Format like "May 5, 2024"
+    }
+
     return {
       selectedColumns,
       columns,
@@ -327,6 +341,7 @@ export default defineComponent({
       getRequestForAuthorizationStatusText,
       clearFiltersTrigger,
       clearFilters,
+      formatDate,
       isloading,
       headers,
       affiliations,
