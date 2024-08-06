@@ -33,7 +33,7 @@
             mdi-alert
           </v-icon>
           <p class="account-alert__info mb-0 pl-3">
-            Please verify if the {{ unsettledAmount }} balance is eligible for a refund, or you can link to a new account.
+            Caution: Please verify if the {{ unsettledAmount }} balance is eligible for a refund, or you can link to a new account.
           </p>
         </div>
       </v-alert>
@@ -177,5 +177,6 @@ export default defineComponent({
   }
   .account-alert__info {
     flex: 1 1 auto;
+    color: $TextColorGray;
   }
 </style>
