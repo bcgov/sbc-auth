@@ -64,8 +64,8 @@ export default defineComponent({
     const isLoading = ref(false)
     const statementSummary = ref(null)
     const stepper = ref(null)
-    const enableEFTtoPADFeature = computed(() => {
-      return LaunchDarklyService.getFlag(LDFlags.EnableEFTtoPAD) || false
+    const enableEFTBalanceByPADFeature = computed(() => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableEFTBalanceByPAD) || false
     })
     const stepperConfig: StepConfiguration[] = [
       {
@@ -77,7 +77,7 @@ export default defineComponent({
           changePaymentType: props.changePaymentType,
           statementSummary: statementSummary,
           stepForward: handleStepForward,
-          enableEFTtoPADFeature: enableEFTtoPADFeature.value
+          enableEFTBalanceByPADFeature: enableEFTBalanceByPADFeature.value
         }
       },
       {
@@ -89,7 +89,7 @@ export default defineComponent({
           paymentId: props.paymentId,
           changePaymentType: props.changePaymentType,
           stepJumpTo: handleStepJumpTo,
-          enableEFTtoPADFeature: enableEFTtoPADFeature.value
+          enableEFTBalanceByPADFeature: enableEFTBalanceByPADFeature.value
         }
       }
     ]
@@ -145,7 +145,7 @@ export default defineComponent({
       handleStepForward,
       handleStepBack,
       getPaymentTypeText,
-      enableEFTtoPADFeature
+      enableEFTBalanceByPADFeature
     }
   }
 })
