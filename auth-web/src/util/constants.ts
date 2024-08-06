@@ -405,13 +405,16 @@ export enum NrRequestTypeStrings {
 
 export enum BusinessState {
     ACTIVE = 'Active',
+    APPROVED = 'Approved',
     DRAFT = 'Draft',
     AWAITING_REVIEW = 'Pending Staff Review',
     CHANGE_REQUESTED = 'Change Requested',
     REJECTED = 'Rejected',
     HISTORICAL = 'Historical',
     PENDING = 'Pending | Payment Incomplete',
-    PAID = 'Future Effective' // Future effective and paid
+    PAID = 'Paid | Pending', // Paid and not a Future effective, the Filer hasn't processed yet
+    PAID_FE = 'Future Effective' // Paid and FE
+
 }
 
 export enum AccessType {

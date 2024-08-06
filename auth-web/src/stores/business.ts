@@ -77,6 +77,19 @@ export const useBusinessStore = defineStore('business', () => {
     // Boolean properties in the resp. If a property exists, add it to the business object. If not, it will have a default value.
     const addBooleanProperty = (value, defaultValue, propertyName) => ({ [propertyName]: value !== undefined ? value : defaultValue })
 
+    // Determine the status based on effectiveDate and existing status fields
+    const determineStatus = (resp) => {
+      // Show status FE when:
+      // - it's a paid and approved FE
+      // - it's a paid FE, not approved yet, no other draft statuses
+      // When there are other DRAFT statuses, they would override PAID in the api
+      if ((resp.draftStatus === 'APPROVED' || resp.draftStatus === 'PAID') && resp.effectiveDate) {
+        return 'PAID_FE'
+      }
+      // when there is no draftStatus, the state could be ACTIVE or HISTORICAL
+      return resp.state || resp.draftStatus
+    }
+
     return {
       businessIdentifier: resp.identifier,
       ...addConditionalProperty(resp.businessNumber, { businessNumber: resp.businessNumber }),
@@ -93,7 +106,7 @@ export const useBusinessStore = defineStore('business', () => {
       ...addBooleanProperty(resp.adminFreeze, false, 'adminFreeze'),
       ...addBooleanProperty(resp.goodStanding, true, 'goodStanding'),
       ...addBooleanProperty(resp.inDissolution, false, 'inDissolution'),
-      status: resp.state || resp.draftStatus // when there is no draftStatus, the state could be ACTIVE or HISTORICAL
+      status: determineStatus(resp)
     }
   }
 

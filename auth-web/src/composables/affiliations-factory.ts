@@ -82,10 +82,6 @@ export const useAffiliations = () => {
   /** Returns the status of the affiliation. */
   const status = (business: Business): string => {
     if (isTemporaryBusiness(business)) {
-      // When the business has a effectiveDate and no other draft statuses (like "AWAITING_REVIEW" and "CHANGE_REQUESTED"),
-      // the draftStatus fetched from api is PAID
-      // which will correctly be reflected in business.status, so no need to check business.effectiveDate.
-      // When there are other statuses, they would override PAID in the api, so future effective won't show
       if (business.status) {
         return BusinessState[business.status]
       }

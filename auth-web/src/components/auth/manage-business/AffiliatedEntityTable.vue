@@ -139,9 +139,12 @@
         <!-- Status -->
         <template #item-slot-Status="{ item }">
           <span>{{ status(item) }}</span>
-          <!-- Future Effective Icon for PAID status -->
-          <template v-if="status(item) === BusinessState.PAID">
-            <v-icon class="future-effective-icon">
+          <!-- Future Effective Icon for PAID_FE status -->
+          <template v-if="status(item) === BusinessState.PAID_FE">
+            <v-icon
+              class="ml-1"
+              color="#F8661A"
+            >
               mdi-information-outline
             </v-icon>
           </template>
@@ -532,10 +535,4 @@ export default defineComponent({
     background-color: lightgray;
   }
 }
-
-.future-effective-icon {
-  color: #4169E1 !important;
-  margin-left: 4px;
-}
-
 </style>

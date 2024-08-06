@@ -429,6 +429,7 @@ export default defineComponent({
         case BusinessState.REJECTED:
         case BusinessState.PAID:
         case BusinessState.PENDING:
+        case BusinessState.APPROVED:
           if ((item.corpType?.code || item.corpType) === CorpTypes.REGISTRATION) {
             return 'Open Registration'
           }
