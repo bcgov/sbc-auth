@@ -469,7 +469,8 @@ export enum LDFlags {
     AllowableBusinessSearchTypes = 'allowable-business-search-types',
     AllowableBusinessPasscodeTypes = 'allowable-business-passcode-types',
     EnableAffiliationDelegation = 'enable-affiliation-delegation',
-    EnableCreditCardPremium = 'enable-credit-card-premium'
+    EnableCreditCardPremium = 'enable-credit-card-premium',
+    EnableEFTtoPAD = 'enable-eft-to-pad',
 }
 
 export enum DateFilterCodes {

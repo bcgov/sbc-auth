@@ -129,6 +129,7 @@
     </v-card>
 
     <v-card
+      v-if="enableEFTtoPADFeature"
       outlined
       flat
       class="payment-method-card mb-8 mt-8"
@@ -232,7 +233,8 @@ export default defineComponent({
       type: Function as PropType<() => void>,
       required: false,
       default: undefined
-    }
+    },
+    enableEFTtoPADFeature: { type: Boolean, default: false }
   },
   emits: ['step-forward'],
   setup (props, { root }) {

@@ -28,12 +28,12 @@
 </template>
 
 <script lang="ts">
-
+import { LDFlags, PaymentTypes } from '@/util/constants'
 import { PropType, computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import CompletePaymentDetails from '@/components/pay/CompletePaymentDetails.vue'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OutstandingBalances from '@/components/pay/OutstandingBalances.vue'
-import { PaymentTypes } from '@/util/constants'
 import { useOrgStore } from '@/stores'
 
 export default defineComponent({
@@ -64,6 +64,9 @@ export default defineComponent({
     const isLoading = ref(false)
     const statementSummary = ref(null)
     const stepper = ref(null)
+    const enableEFTtoPADFeature = computed(() => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableEFTtoPAD) || false
+    })
     const stepperConfig: StepConfiguration[] = [
       {
         title: 'Outstanding Balances',
@@ -73,7 +76,8 @@ export default defineComponent({
           orgId: props.orgId,
           changePaymentType: props.changePaymentType,
           statementSummary: statementSummary,
-          stepForward: handleStepForward
+          stepForward: handleStepForward,
+          enableEFTtoPADFeature: enableEFTtoPADFeature.value
         }
       },
       {
@@ -84,7 +88,8 @@ export default defineComponent({
           orgId: props.orgId,
           paymentId: props.paymentId,
           changePaymentType: props.changePaymentType,
-          stepJumpTo: handleStepJumpTo
+          stepJumpTo: handleStepJumpTo,
+          enableEFTtoPADFeature: enableEFTtoPADFeature.value
         }
       }
     ]
@@ -139,7 +144,8 @@ export default defineComponent({
       stepperConfig,
       handleStepForward,
       handleStepBack,
-      getPaymentTypeText
+      getPaymentTypeText,
+      enableEFTtoPADFeature
     }
   }
 })
