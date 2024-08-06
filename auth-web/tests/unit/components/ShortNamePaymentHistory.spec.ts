@@ -41,7 +41,6 @@ describe('ShortNamePaymentHistory.vue', () => {
           'shortNameId': 2,
           'statementNumber': 5374449,
           'transactionDate': '2024-08-01T00:01:30.885474',
-          'transactionDescription': 'Payment Reversed',
           'transactionType': 'STATEMENT_REVERSE'
         },
         {
@@ -50,13 +49,12 @@ describe('ShortNamePaymentHistory.vue', () => {
           'accountName': 'Odysseus Chiu',
           'amount': 131.5,
           'historicalId': 3,
-          'isProcessing': true,
+          'isProcessing': false,
           'isReversible': false,
           'shortNameBalance': 368.5,
           'shortNameId': 2,
           'statementNumber': 5455966,
           'transactionDate': '2024-07-31T22:22:31.058547',
-          'transactionDescription': 'Statement Paid',
           'transactionType': 'STATEMENT_PAID'
         },
         {
@@ -71,7 +69,6 @@ describe('ShortNamePaymentHistory.vue', () => {
           'shortNameId': 2,
           'statementNumber': 5374449,
           'transactionDate': '2024-07-31T00:00:00',
-          'transactionDescription': 'Statement Paid',
           'transactionType': 'STATEMENT_PAID'
         }
       ],
@@ -128,7 +125,7 @@ describe('ShortNamePaymentHistory.vue', () => {
     for (let i = 0; i < historyResponse.items.length; i++) {
       const columns = itemRows.at(i).findAll(itemCell)
       expect(columns.at(0).text()).toBe(wrapper.vm.formatDate(historyResponse.items[i].transactionDate))
-      expect(columns.at(1).text()).toContain(historyResponse.items[i].transactionDescription)
+      expect(columns.at(1).text()).toContain(wrapper.vm.formatDescription(historyResponse.items[i]))
       expect(columns.at(2).text()).toBe(historyResponse.items[i].statementNumber
         ? historyResponse.items[i].statementNumber.toString() : '')
       expect(columns.at(3).text()).toContain(

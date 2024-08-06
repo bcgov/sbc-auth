@@ -684,6 +684,12 @@ export enum ShortNameHistoryType {
     STATEMENT_REVERSE = 'STATEMENT_REVERSE'
 }
 
+export enum ShortNameHistoryTypeDescription {
+    FUNDS_RECEIVED = 'Funds Received',
+    STATEMENT_PAID = 'Statement Paid',
+    STATEMENT_REVERSE = 'Payment Reversed'
+}
+
 export enum CfsAccountStatus {
     PENDING = 'PENDING',
     PENDING_PAD_ACTIVATION = 'PENDING_PAD_ACTIVATION',

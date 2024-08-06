@@ -140,7 +140,12 @@
 </template>
 <script lang="ts">
 import { Ref, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
-import { ShortNamePaymentActions, ShortNameReversePaymentErrors } from '@/util/constants'
+import {
+  ShortNameHistoryType,
+  ShortNameHistoryTypeDescription,
+  ShortNamePaymentActions,
+  ShortNameReversePaymentErrors
+} from '@/util/constants'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../../datatable/resources'
@@ -260,7 +265,7 @@ export default defineComponent({
     function formatTransactionAmount (item: any) {
       if (item.amount === undefined) return ''
       let amount = CommonUtils.formatAmount(item.amount)
-      if (isStatementTransaction(item)) {
+      if (item.transactionType === ShortNameHistoryType.STATEMENT_REVERSE) {
         amount = `-${amount}`
       }
       return amount
@@ -272,8 +277,8 @@ export default defineComponent({
     }
 
     function formatDescription (item: any) {
-      if (item.isProcessing) return `${item.transactionDescription} (Processing)`
-      return item.transactionDescription
+      if (item.isProcessing) return `${ShortNameHistoryTypeDescription[item.transactionType]} (Processing)`
+      return ShortNameHistoryTypeDescription[item.transactionType]
     }
 
     function formatTransactionDate (str: string): string {
