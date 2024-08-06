@@ -82,17 +82,12 @@ export const useAffiliations = () => {
   /** Returns the status of the affiliation. */
   const status = (business: Business): string => {
     if (isTemporaryBusiness(business)) {
-      // Reflect 'Pending | Payment Incomplete' status
-      if (business.status === 'PENDING') {
-        return BusinessState.PENDING
-      }
+      // When the business has a effectiveDate and no other draft statuses (like "AWAITING_REVIEW" and "CHANGE_REQUESTED"),
+      // the draftStatus fetched from api is PAID
+      // which will correctly be reflected in business.status, so no need to check business.effectiveDate.
+      // When there are other statuses, they would override PAID in the api, so future effective won't show
       if (business.status) {
         return BusinessState[business.status]
-      }
-      // Other statuses (AWAITING_REVIEW, CHANGE_REQUESTED) are more important
-      // Don't show future effective when there are other statuses
-      if (business.effectiveDate) {
-        return BusinessState.PAID
       }
       return BusinessState.DRAFT
     }
@@ -110,8 +105,9 @@ export const useAffiliations = () => {
         return NrDisplayStates[NrState.HOLD]
       } else return NrDisplayStates[state] || 'Unknown'
     }
-    if (business.status === 'HISTORICAL') {
-      return BusinessState.HISTORICAL
+    // When the business is not temp, could be ACTIVE or HISTORICAL
+    if (business.status) {
+      return BusinessState[business.status]
     }
     return BusinessState.ACTIVE
   }
