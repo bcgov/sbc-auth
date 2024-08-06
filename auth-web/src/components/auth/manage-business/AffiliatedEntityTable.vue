@@ -205,10 +205,9 @@ import { AffiliationInviteInfo } from '@/models/affiliation'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import EntityDetails from './EntityDetails.vue'
-
+import moment from 'moment'
 import { useAffiliations } from '@/composables'
 import { useOrgStore } from '@/stores/org'
-import moment from 'moment'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',
