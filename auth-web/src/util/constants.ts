@@ -411,7 +411,8 @@ export enum BusinessState {
     REJECTED = 'Rejected',
     HISTORICAL = 'Historical',
     FUTURE_EFFECTIVE = 'Future Effective - Paid',
-    PENDING = 'Pending | Payment Incomplete'
+    PENDING = 'Pending | Payment Incomplete',
+    PAID = 'Paid'
 }
 
 export enum AccessType {
