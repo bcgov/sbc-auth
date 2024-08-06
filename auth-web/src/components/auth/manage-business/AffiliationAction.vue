@@ -428,6 +428,7 @@ export default defineComponent({
         case BusinessState.AWAITING_REVIEW:
         case BusinessState.REJECTED:
         case BusinessState.PAID:
+        case BusinessState.PAID_FE:
         case BusinessState.PENDING:
         case BusinessState.APPROVED:
           if ((item.corpType?.code || item.corpType) === CorpTypes.REGISTRATION) {
