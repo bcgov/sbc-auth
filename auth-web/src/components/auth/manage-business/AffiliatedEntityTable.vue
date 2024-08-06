@@ -152,7 +152,7 @@
                   mdi-information-outline
                 </v-icon>
               </template>
-              <span>Effective Date: {{ formatDate(item.effectiveDate) }}</span>
+              <span>This filing will become effective on {{ formatDate(item.effectiveDate) }}</span>
             </v-tooltip>
           </template>
           <EntityDetails
@@ -330,7 +330,14 @@ export default defineComponent({
 
     // Method to format dates
     const formatDate = (dateString) => {
-      return moment(dateString).format('MMMM D, YYYY') // Format like "May 5, 2024"
+      if (!dateString) {
+        return '' // Return an empty string if the input is null, undefined, or empty
+      }
+      const date = moment(dateString)
+      if (!date.isValid()) {
+        return '' // Handle invalid dates by returning an empty string
+      }
+      return date.format('MMMM D, YYYY') // Format like "May 5, 2024"
     }
 
     return {
