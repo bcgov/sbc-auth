@@ -129,10 +129,12 @@ def handle_nsf_lock_unlock_account(message_type, email_msg):
         current_app.logger.debug('Lock account message received')
         template_name = TemplateType.NSF_LOCK_ACCOUNT_TEMPLATE_NAME.value
         org_id = email_msg.get('accountId')
-        admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
+        emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
+        if additional_emails := email_msg.get('additionalEmails'):
+            emails += ',' + additional_emails
         subject = SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
         logo_url = email_msg.get('logo_url')
-        email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
+        email_dict = common_mailer.process(org_id, emails, template_name,
                                            subject, logo_url=logo_url)
         process_email(email_dict)
     elif message_type == QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value:
