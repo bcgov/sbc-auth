@@ -83,12 +83,12 @@
 
               <v-row>
                 <v-col class="col-6 col-sm-3 font-weight-bold">
-                  Staff Comment
+                  Reason for Refund
                 </v-col>
                 <v-text-field
                   v-model.trim="staffComment"
                   filled
-                  label="Staff Comment (Optional)"
+                  label="Reason for Refund"
                   persistent-hint
                   data-test="staffComment"
                   :rules="staffCommentRules"
@@ -180,6 +180,7 @@ export default defineComponent({
       ],
       orgStore: useOrgStore(),
       staffCommentRules: [
+        v => !!v || 'Reason for Refund is required',
         v => (v.length < 500) || 'Cannot exceed 500 characters'
       ],
       isSubmitted: false
@@ -212,6 +213,10 @@ export default defineComponent({
           state.isSubmitted = true
           buttonText.value = 'Approved'
           buttonColor.value = 'green'
+          state.isLoading = false
+          // 2-second delay before navigating away
+          await new Promise(resolve => setTimeout(resolve, 2000)) // 2-second delay
+          handleCancelButton()
         } catch (error) {
           state.isSubmitted = false
           buttonText.value = 'Failed'
