@@ -291,31 +291,14 @@
 </template>
 
 <script lang="ts">
-import {
-  AccessType,
-  AccountStatus,
-  Pages,
-  Permission,
-  Role,
-  SuspensionReason
-} from '@/util/constants'
-import { Action, Getter, State } from 'pinia-class'
-import { Component, Mixins } from 'vue-property-decorator'
-import {
-  CreateRequestBody,
-  OrgBusinessType,
-  Organization
-} from '@/models/Organization'
-
+import { AccessType, AccountStatus, Pages, Permission, Role, SuspensionReason } from '@/util/constants'
+import { CreateRequestBody, OrgBusinessType } from '@/models/Organization'
+import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { useAccount, useAccountChangeHandler } from '@/composables'
 import AccountAccessType from '@/components/auth/account-settings/account-info/AccountAccessType.vue'
-import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
 import AccountMailingAddress from '@/components/auth/account-settings/account-info/AccountMailingAddress.vue'
-import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { Address } from '@/models/address'
-import { Code } from '@/models/Code'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
@@ -323,372 +306,328 @@ import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
-@Component({
+export default defineComponent({
   components: {
     OrgAdminContact,
     LinkedBCOLBanner,
     ModalDialog,
-    AccountBusinessTypePicker,
     AccountDetails,
     AccountMailingAddress,
     AccountAccessType
+  },
+  setup (props, { root }) {
+    const codesStore = useCodesStore()
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
+
+    const { setAccountChangedHandler, beforeDestroy } = useAccountChangeHandler()
+    const {
+      currentOrganization,
+      currentOrgPaymentType,
+      currentOrgAddress,
+      permissions,
+      getAccountFromSession,
+      isPremiumAccount,
+      anonAccount,
+      isGovmAccount,
+      isStaffAccount,
+      isSbcStaffAccount
+    } = useAccount()
+
+    const state = reactive({
+      dialogTitle: '',
+      dialogText: '',
+      selectedSuspensionReasonCode: '',
+      suspensionCompleteDialogText: '',
+      isSuspensionReasonFormValid: false,
+      addressChanged: false,
+      originalAddress: null,
+      errorMessage: '',
+      warningMessage: '',
+      isBaseAddressValid: false,
+      isCompleteAccountInfo: true,
+      accountDetails: {} as OrgBusinessType,
+      isAddressViewOnly: true,
+      isAccountInfoViewOnly: true,
+      isAccessTypeViewOnly: true,
+      editAccountForm: null,
+      mailingAddress: null,
+      suspendAccountDialog: null,
+      suspensionCompleteDialog: null,
+      suspensionReasonForm: null,
+
+      suspensionReasonCodes: computed(() => codesStore.suspensionReasonCodes),
+      currentUser: computed(() => userStore.currentUser),
+      isBusinessAccount: computed(() => orgStore.isBusinessAccount),
+      baseAddress: computed(() => currentOrgAddress.value),
+
+      isStaff: computed(() => userStore.currentUser.roles.includes(Role.Staff)),
+      isSuspendButtonVisible: computed(() => (
+        (currentOrganization.value.statusCode === AccountStatus.ACTIVE ||
+        currentOrganization.value.statusCode === AccountStatus.SUSPENDED) &&
+        userStore.currentUser.roles.includes(Role.StaffSuspendAccounts)
+      )),
+      isDeactivateButtonVisible: computed(() => currentOrganization.value?.statusCode !== AccountStatus.INACTIVE),
+      editAccountUrl: Pages.EDIT_ACCOUNT_TYPE,
+      canChangeAccessType: computed(() => userStore.currentUser.roles.includes(Role.StaffManageAccounts)),
+      isAddressEditable: computed(() => [Permission.CHANGE_ADDRESS].some(per => permissions.value.includes(per))),
+      isAdminContactViewable: computed(() => [Permission.VIEW_ADMIN_CONTACT].some(per => permissions.value.includes(per))),
+      isAccountStatusActive: computed(() => currentOrganization.value.statusCode === AccountStatus.ACTIVE),
+      accountType: computed(() => {
+        if (isStaffAccount.value) {
+          return 'BC Registry Staff'
+        } else if (isSbcStaffAccount.value) {
+          return 'SBC Staff'
+        }
+        return isPremiumAccount.value ? 'Premium' : 'Basic'
+      }),
+      isAddressInfoIncomplete: computed(() => (
+        currentOrgAddress.value ? Object.keys(currentOrgAddress.value).length === 0 : true
+      )),
+      nameChangeNotAllowed: computed(() => (anonAccount.value || isGovmAccount.value))
+    })
+
+    const suspensionSelectRules = [
+      v => !!v || 'A reason for suspension is required'
+    ]
+
+    const setAccountDetails = () => {
+      state.accountDetails = {
+        ...state.accountDetails,
+        name: currentOrganization.value?.name || '',
+        branchName: currentOrganization.value?.branchName || '',
+        businessType: currentOrganization.value.businessType || '',
+        businessSize: currentOrganization.value?.businessSize || ''
+      }
+    }
+
+    const isBusinessInfoIncomplete = computed(() => (
+      state.isBusinessAccount && !(state.accountDetails?.businessSize && state.accountDetails?.businessType)
+    ))
+
+    const getWarningMessage = (condition: boolean) => condition
+      ? 'This account info is incomplete. You will not be able to proceed until an account administrator ' +
+          'entered the missing information for this account.'
+      : 'Your account info is incomplete. Please update any missing account details or address.'
+
+    const setup = async () => {
+      setAccountDetails()
+      await orgStore.syncAddress()
+      if (!anonAccount.value) {
+        state.originalAddress = currentOrgAddress.value
+        if (isBusinessInfoIncomplete.value || state.isAddressInfoIncomplete) {
+          state.isCompleteAccountInfo = false
+          state.warningMessage = getWarningMessage(isBusinessInfoIncomplete.value ? state.nameChangeNotAllowed : !state.isAddressEditable)
+        } else {
+          state.isCompleteAccountInfo = true
+          state.warningMessage = ''
+        }
+      } else {
+        state.baseAddress = null
+      }
+    }
+
+    const viewOnlyMode = async (details) => {
+      const { component, mode } = details
+      if (component === 'address') {
+        state.isAddressViewOnly = mode
+      }
+      if (component === 'account') {
+        state.isAccountInfoViewOnly = mode
+      }
+      if (component === 'accessType') {
+        if (!mode) {
+          await orgStore.getOrgPayments()
+        }
+        state.isAccessTypeViewOnly = mode
+      }
+    }
+
+    const updateDetails = async () => {
+      state.errorMessage = ''
+      const { branchName, businessSize, businessType, name, isBusinessAccount } = state.accountDetails
+
+      let createRequestBody: CreateRequestBody = {}
+      if (state.baseAddress && state.addressChanged && JSON.stringify(state.originalAddress) !== JSON.stringify(currentOrgAddress.value)) {
+        createRequestBody.mailingAddress = { ...state.baseAddress }
+      }
+      if (name !== currentOrganization.value.name) {
+        createRequestBody.name = name
+      }
+      if (branchName !== currentOrganization.value.branchName) {
+        createRequestBody.branchName = branchName
+      }
+      // need to check type since we need to send false also
+      // eslint-disable-next-line valid-typeof
+      if (typeof isBusinessAccount !== undefined) {
+        createRequestBody.isBusinessAccount = isBusinessAccount
+      }
+      if (isBusinessAccount && 'businessSize' in state.accountDetails && businessSize !== null) {
+        if (currentOrganization.value.businessSize !== businessSize) {
+          createRequestBody.businessSize = businessSize
+        }
+      }
+      if (isBusinessAccount && 'businessType' in state.accountDetails && businessType !== null) {
+        if (currentOrganization.value.businessType !== businessType) {
+          createRequestBody.businessType = businessType
+        }
+      }
+
+      try {
+        await orgStore.updateOrg(createRequestBody)
+        if (!(state.isStaff && !isStaffAccount.value)) root.$store.commit('updateHeader')
+        state.addressChanged = false
+        state.originalAddress = currentOrgAddress.value
+        if (!isBusinessInfoIncomplete.value && !state.isAddressInfoIncomplete) {
+          state.isCompleteAccountInfo = true
+          state.warningMessage = ''
+        }
+        viewOnlyMode({ component: 'address', mode: true })
+        viewOnlyMode({ component: 'account', mode: true })
+      } catch (err) {
+        switch (err.response.status) {
+          case 409:
+            state.errorMessage = 'An account with this name already exists. Try a different account name.'
+            break
+          default:
+            state.errorMessage = 'An error occurred while attempting to update your account.'
+        }
+      }
+    }
+
+    const resetAddress = () => {
+      state.baseAddress = state.originalAddress
+      viewOnlyMode('address')
+    }
+
+    const getStatusColor = (status) => {
+      switch (status) {
+        case AccountStatus.NSF_SUSPENDED:
+        case AccountStatus.SUSPENDED:
+        case AccountStatus.INACTIVE:
+          return 'error'
+        case AccountStatus.ACTIVE:
+          return 'green'
+        default:
+          return 'primary'
+      }
+    }
+
+    const getDialogStatusButtonColor = (status) => {
+      switch (status) {
+        case AccountStatus.NSF_SUSPENDED:
+        case AccountStatus.SUSPENDED:
+          return 'green'
+        case AccountStatus.ACTIVE:
+          return 'error'
+        default:
+          return 'primary'
+      }
+    }
+
+    const getStatusText = (status) => {
+      switch (status) {
+        case AccountStatus.NSF_SUSPENDED:
+          return SuspensionReason.NSF_SUSPENDED
+        case AccountStatus.SUSPENDED:
+          return SuspensionReason.SUSPENDED
+        default:
+          return status
+      }
+    }
+
+    const updateAndSaveAccountDetails = (accountDetails) => {
+      state.accountDetails = accountDetails
+      updateDetails()
+    }
+
+    const updateAndSaveAccessTypeDetails = async (accessType: string) => {
+      await orgStore.updateOrganizationAccessType(accessType, currentOrganization.value.id, true)
+      if (accessType === AccessType.REGULAR) {
+        await orgStore.removeOrgAccountFees(currentOrganization.value.id)
+      }
+      viewOnlyMode({ component: 'accessType', mode: true })
+    }
+
+    const showSuspendAccountDialog = (status) => {
+      if (status === AccountStatus.ACTIVE) {
+        state.dialogTitle = 'Suspend Account'
+        state.dialogText = 'suspendAccountText'
+      } else {
+        state.dialogTitle = 'Unsuspend Account'
+        state.dialogText = 'unsuspendAccountText'
+      }
+      state.suspendAccountDialog.open()
+    }
+
+    const confirmSuspendAccount = async () => {
+      state.isSuspensionReasonFormValid = state.suspensionReasonForm?.validate()
+      if (state.isSuspensionReasonFormValid) {
+        await orgStore.suspendOrganization(state.selectedSuspensionReasonCode)
+        state.suspendAccountDialog.close()
+        if (currentOrganization.value.statusCode === AccountStatus.SUSPENDED) {
+          state.suspensionCompleteDialogText = `The account ${currentOrganization.value.name} has been suspended.`
+          state.suspensionCompleteDialog.open()
+        }
+      }
+    }
+
+    const closeSuspendAccountDialog = () => {
+      state.suspendAccountDialog.close()
+    }
+
+    const closeSuspensionCompleteDialog = () => {
+      state.suspensionCompleteDialog.close()
+    }
+
+    const checkBaseAddressValidity = (isValid) => {
+      state.isBaseAddressValid = !!isValid
+    }
+
+    const updateAddress = (address: Address) => {
+      state.addressChanged = true
+      orgStore.setCurrentOrganizationAddress(address)
+    }
+
+    onMounted(async () => {
+      const accountSettings = getAccountFromSession()
+      await orgStore.syncOrganization(accountSettings?.id)
+      setAccountChangedHandler(setup)
+      await setup()
+    })
+
+    onBeforeUnmount(() => { beforeDestroy() })
+
+    return {
+      ...toRefs(state),
+      currentOrganization,
+      currentOrgAddress,
+      permissions,
+      currentOrgPaymentType,
+      suspensionSelectRules,
+      isBusinessInfoIncomplete,
+      anonAccount,
+      isGovmAccount,
+      isStaffAccount,
+      setAccountDetails,
+      setup,
+      viewOnlyMode,
+      updateDetails,
+      resetAddress,
+      getStatusColor,
+      getDialogStatusButtonColor,
+      getStatusText,
+      updateAndSaveAccountDetails,
+      updateAndSaveAccessTypeDetails,
+      showSuspendAccountDialog,
+      confirmSuspendAccount,
+      closeSuspendAccountDialog,
+      closeSuspensionCompleteDialog,
+      checkBaseAddressValidity,
+      updateAddress
+    }
   }
 })
-export default class AccountInfo extends Mixins(
-  AccountChangeMixin,
-  AccountMixin
-) {
-  @State(useCodesStore) private suspensionReasonCodes!: Code[]
-  @State(useOrgStore) public currentMembership!: Organization
-  @State(useOrgStore) public currentOrgAddress!: Address
-  @State(useOrgStore) public permissions!: string[]
-  @State(useOrgStore) public currentOrgPaymentType!: string
-  @State(useUserStore) public currentUser!: KCUserProfile
-
-  @Getter(useOrgStore) public isBusinessAccount!: boolean
-  @Action(useOrgStore) public setCurrentOrganizationAddress!: (address: Address) => void
-
-  @Action(useOrgStore) public updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
-
-  @Action(useOrgStore) syncAddress!: () => Address
-  @Action(useOrgStore) getOrgPayments!: () => any
-  @Action(useOrgStore) updateOrganizationAccessType!: (accessType: string, orgId: number, syncOrg: boolean) =>
-    Promise<boolean>
-
-  @Action(useOrgStore) syncOrganization!: (currentAccount: number) => Promise<Organization>
-  @Action(useOrgStore) suspendOrganization!: (selectedSuspensionReasonCode: string) => Promise<Organization>
-  @Action(useOrgStore) removeOrgAccountFees!: (orgId: number) => Promise<void>
-
-  private dialogTitle: string = ''
-  private dialogText: string = ''
-  private selectedSuspensionReasonCode: string = ''
-  private suspensionCompleteDialogText: string = ''
-  private isSuspensionReasonFormValid: boolean = false
-  private addressChanged = false
-  private originalAddress: Address = null // store the original address..do not modify it afterwards
-
-  private errorMessage: string = ''
-  private warningMessage: string = ''
-
-  private isBaseAddressValid: boolean = false
-  private isCompleteAccountInfo = true
-  private accountDetails: OrgBusinessType = {}
-  public isAddressViewOnly = true
-  public isAccountInfoViewOnly = true
-  public isAccessTypeViewOnly = true
-
-  $refs: {
-    editAccountForm: HTMLFormElement
-    mailingAddress: HTMLFormElement
-    suspendAccountDialog: InstanceType<typeof ModalDialog>
-    suspensionCompleteDialog: InstanceType<typeof ModalDialog>
-    suspensionReasonForm: HTMLFormElement
-    accountBusinessTypePickerRef: HTMLFormElement
-  }
-
-  private setAccountDetails () {
-    // Create a new object, to trigger the watch in AccountDetails.
-    this.accountDetails = {
-      ...this.accountDetails,
-      name: this.currentOrganization?.name || '',
-      branchName: this.currentOrganization?.branchName || '',
-      businessType: this.currentOrganization.businessType || '',
-      businessSize: this.currentOrganization?.businessSize || ''
-    }
-  }
-  private get isBusinessInfoIncomplete (): boolean {
-    return this.isBusinessAccount &&
-        !(this.accountDetails?.businessSize && this.accountDetails?.businessType)
-  }
-  private get isAddressInfoIncomplete (): boolean {
-    return this.currentOrgAddress ? Object.keys(this.currentOrgAddress).length === 0 : true
-  }
-
-  private async setup () {
-    this.setAccountDetails()
-    await this.syncAddress()
-    // show this part only account is not anon
-    if (!this.anonAccount) {
-      this.originalAddress = this.currentOrgAddress
-      const getWarningMessage = (condition: boolean) => condition
-        ? 'This account info is incomplete. You will not be able to proceed until an account administrator ' +
-          'entered the missing information for this account.'
-        : 'Your account info is incomplete. Please update any missing account details or address.'
-
-      if (this.isBusinessInfoIncomplete || this.isAddressInfoIncomplete) {
-        this.isCompleteAccountInfo = false
-        this.warningMessage = getWarningMessage(this.isBusinessInfoIncomplete ? this.nameChangeNotAllowed : !this.isAddressEditable)
-        this.$refs.editAccountForm?.validate() // Validate form fields and show error message
-        this.$refs.mailingAddress?.triggerValidate() // Validate form fields and show error message for address component from sbc-common-comp
-      } else {
-        this.isCompleteAccountInfo = true
-        this.warningMessage = ''
-      }
-    } else {
-      // inorder to hide the address if not premium account
-      this.baseAddress = null
-    }
-  }
-
-  private get isStaff (): boolean {
-    return this.currentUser.roles.includes(Role.Staff)
-  }
-  // update account detaisl from child component
-  public updateAndSaveAccountDetails (accountDetails) {
-    this.accountDetails = accountDetails
-    // once we got the values , set to values and save
-    this.updateDetails()
-  }
-
-  // update account access type from child component
-  public async updateAndSaveAccessTypeDetails (accessType: string) {
-    await this.updateOrganizationAccessType(accessType, this.currentOrganization.id, true)
-    // Only remove the account fees if going from GOVN -> PREMIUM (REGULAR)
-    if (accessType === AccessType.REGULAR) {
-      await this.removeOrgAccountFees(this.currentOrganization.id)
-    }
-    this.viewOnlyMode({ component: 'accessType', mode: true })
-  }
-
-  private get isSuspendButtonVisible (): boolean {
-    return (
-      (this.currentOrganization.statusCode === AccountStatus.ACTIVE ||
-        this.currentOrganization.statusCode === AccountStatus.SUSPENDED) &&
-      this.currentUser.roles.includes(Role.StaffSuspendAccounts)
-    )
-  }
-
-  private get isDeactivateButtonVisible (): boolean {
-    return this.currentOrganization?.statusCode !== AccountStatus.INACTIVE
-  }
-
-  get editAccountUrl () {
-    return Pages.EDIT_ACCOUNT_TYPE
-  }
-
-  get canChangeAccessType (): boolean {
-    return this.currentUser.roles.includes(Role.StaffManageAccounts)
-  }
-
-  private suspensionSelectRules = [
-    v => !!v || 'A reason for suspension is required'
-  ]
-
-  private async mounted () {
-    const accountSettings = this.getAccountFromSession()
-    await this.syncOrganization(accountSettings.id)
-    this.setAccountChangedHandler(this.setup)
-    await this.setup()
-  }
-
-  private get baseAddress () {
-    return this.currentOrgAddress
-  }
-  private get nameChangeNotAllowed () {
-    return (this.anonAccount || this.isGovmAccount)
-  }
-
-  resetAddress () {
-    this.baseAddress = this.originalAddress
-    this.viewOnlyMode('address')
-  }
-  // use same funtion to toggle both account info and mailer view mode
-  public async viewOnlyMode (details) {
-    const { component, mode } = details
-    if (component === 'address') {
-      this.isAddressViewOnly = mode
-    }
-    if (component === 'account') {
-      this.isAccountInfoViewOnly = mode
-    }
-    if (component === 'accessType') {
-      // Get org payment methods if it is edit mode
-      if (!mode) {
-        await this.getOrgPayments()
-      }
-      this.isAccessTypeViewOnly = mode
-    }
-  }
-
-  private set baseAddress (address) {
-    this.setCurrentOrganizationAddress(address)
-  }
-
-  async beforeRouteLeave (to, from, next) {
-    if (!this.isAddressEditable || this.isCompleteAccountInfo) {
-      next()
-    } else {
-      // eslint-disable-next-line no-console
-      console.log('account info incomplete.blocking navigation')
-    }
-  }
-
-  private updateAddress (address: Address) {
-    this.addressChanged = true
-    this.setCurrentOrganizationAddress(address)
-  }
-
-  private async showSuspendAccountDialog (status) {
-    if (status === AccountStatus.ACTIVE) {
-      this.dialogTitle = 'Suspend Account'
-      this.dialogText = this.$t('suspendAccountText').toString()
-    } else {
-      this.dialogTitle = 'Unsuspend Account'
-      this.dialogText = this.$t('unsuspendAccountText').toString()
-    }
-    this.$refs.suspendAccountDialog.open()
-  }
-
-  private async confirmSuspendAccount (): Promise<void> {
-    this.isSuspensionReasonFormValid = this.$refs.suspensionReasonForm?.validate()
-    if (this.isSuspensionReasonFormValid) {
-      await this.suspendOrganization(this.selectedSuspensionReasonCode)
-      this.$refs.suspendAccountDialog.close()
-      if (this.currentOrganization.statusCode === AccountStatus.SUSPENDED) {
-        this.suspensionCompleteDialogText = `The account ${this.currentOrganization.name} has been suspended.`
-        this.$refs.suspensionCompleteDialog.open()
-      }
-    }
-  }
-
-  private closeSuspendAccountDialog () {
-    this.$refs.suspendAccountDialog.close()
-  }
-
-  private closeSuspensionCompleteDialog () {
-    this.$refs.suspensionCompleteDialog.close()
-  }
-
-  private async updateDetails () {
-    this.errorMessage = ''
-    const { branchName, businessSize, businessType, name, isBusinessAccount } = this.accountDetails
-
-    let createRequestBody: CreateRequestBody = {}
-    if (
-      this.baseAddress &&
-      this.addressChanged &&
-      JSON.stringify(this.originalAddress) !==
-        JSON.stringify(this.currentOrgAddress)
-    ) {
-      createRequestBody.mailingAddress = { ...this.baseAddress }
-    }
-    if (name !== this.currentOrganization.name) {
-      createRequestBody.name = name
-    }
-    if (branchName !== this.currentOrganization.branchName) {
-      createRequestBody.branchName = branchName
-    }
-    // need to check type since we need to send false also
-    // eslint-disable-next-line valid-typeof
-    if (typeof isBusinessAccount !== undefined) {
-      createRequestBody.isBusinessAccount = isBusinessAccount
-    }
-
-    if (isBusinessAccount && 'businessSize' in this.accountDetails && businessSize !== null) {
-      if (this.currentOrganization.businessSize !== businessSize) {
-        createRequestBody.businessSize = businessSize
-      }
-    }
-
-    if (isBusinessAccount && 'businessType' in this.accountDetails && businessType !== null) {
-      if (this.currentOrganization.businessType !== businessType) {
-        createRequestBody.businessType = businessType
-      }
-    }
-
-    try {
-      await this.updateOrg(createRequestBody)
-      // FUTURE: change 'staff view other account' flow so it doesn't need to fake load the other account globally
-      // if staff updating a user account don't reload header -- causes staff account to get loaded in
-      // Remove Vuex with Vue 3
-      if (!(this.isStaff && !this.isStaffAccount)) this.$store.commit('updateHeader')
-      this.addressChanged = false
-      this.originalAddress = this.currentOrgAddress
-      if (!this.isBusinessInfoIncomplete && !this.isAddressInfoIncomplete) {
-        this.isCompleteAccountInfo = true
-        this.warningMessage = ''
-      }
-      this.viewOnlyMode({ component: 'address', mode: true })
-      this.viewOnlyMode({ component: 'account', mode: true })
-    } catch (err) {
-      switch (err.response.status) {
-        case 409:
-          this.errorMessage =
-            'An account with this name already exists. Try a different account name.'
-          break
-        default:
-          this.errorMessage =
-            'An error occurred while attempting to update your account.'
-      }
-    }
-  }
-
-  private checkBaseAddressValidity (isValid) {
-    this.isBaseAddressValid = !!isValid
-  }
-
-  get isAddressEditable (): boolean {
-    return [Permission.CHANGE_ADDRESS].some(per =>
-      this.permissions.includes(per)
-    )
-  }
-
-  // SBTODO May be v-can
-  get isAdminContactViewable (): boolean {
-    return [Permission.VIEW_ADMIN_CONTACT].some(per =>
-      this.permissions.includes(per)
-    )
-  }
-
-  get isAccountStatusActive (): boolean {
-    return this.currentOrganization.statusCode === AccountStatus.ACTIVE
-  }
-
-  private getStatusColor (status) {
-    switch (status) {
-      case AccountStatus.NSF_SUSPENDED:
-      case AccountStatus.SUSPENDED:
-      case AccountStatus.INACTIVE:
-        return 'error'
-      case AccountStatus.ACTIVE:
-        return 'green'
-      default:
-        return 'primary'
-    }
-  }
-
-  private getDialogStatusButtonColor (status) {
-    switch (status) {
-      case AccountStatus.NSF_SUSPENDED:
-      case AccountStatus.SUSPENDED:
-        return 'green'
-      case AccountStatus.ACTIVE:
-        return 'error'
-      default:
-        return 'primary'
-    }
-  }
-
-  private getStatusText (status) {
-    switch (status) {
-      case AccountStatus.NSF_SUSPENDED:
-        return SuspensionReason.NSF_SUSPENDED
-      case AccountStatus.SUSPENDED:
-        return SuspensionReason.SUSPENDED
-      default:
-        return status
-    }
-  }
-
-  get accountType () {
-    if (this.isStaffAccount) {
-      return 'BC Registry Staff'
-    } else if (this.isSbcStaffAccount) {
-      return 'SBC Staff'
-    }
-    return this.isPremiumAccount ? 'Premium' : 'Basic'
-  }
-}
 </script>
 
 <style lang="scss" scoped>

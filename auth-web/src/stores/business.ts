@@ -30,6 +30,7 @@ import { Contact } from '@/models/contact'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgService from '@/services/org.services'
 import { defineStore } from 'pinia'
+import moment from 'moment'
 import { useOrgStore } from './org'
 
 export const useBusinessStore = defineStore('business', () => {
@@ -77,9 +78,22 @@ export const useBusinessStore = defineStore('business', () => {
     // Boolean properties in the resp. If a property exists, add it to the business object. If not, it will have a default value.
     const addBooleanProperty = (value, defaultValue, propertyName) => ({ [propertyName]: value !== undefined ? value : defaultValue })
 
+    // Determine the status based on effectiveDate and existing status fields
+    const determineStatus = (resp) => {
+      // Show status FE when:
+      // - it's a paid and approved FE
+      // - it's a paid FE, in future date, not approved yet, no other draft statuses
+      // When it's an overdue FE, the status will be PAID and show 'Filed and Pending'
+      // When there are other DRAFT statuses, they would override PAID in the api
+      if ((resp.draftStatus === 'APPROVED' || resp.draftStatus === 'PAID') && resp.effectiveDate && moment(resp.effectiveDate).isAfter(moment())) {
+        return 'PAID_FE'
+      }
+      // when there is no draftStatus, the state could be ACTIVE or HISTORICAL
+      return resp.state || resp.draftStatus
+    }
+
     return {
       businessIdentifier: resp.identifier,
-      ...addConditionalProperty(resp.businessNumber, { businessNumber: resp.businessNumber }),
       ...addConditionalProperty(resp.businessNumber, { businessNumber: resp.businessNumber }),
       ...addConditionalProperty(resp.legalName, { name: determineDisplayName(resp.legalName, resp.legalType, resp.identifier, resp.alternateNames) }),
       ...addConditionalProperty(resp.contacts, { contacts: resp.contacts }),
@@ -90,10 +104,11 @@ export const useBusinessStore = defineStore('business', () => {
       ...addConditionalProperty(resp.modified, { modified: resp.modified }),
       ...addConditionalProperty(resp.modifiedBy, { modifiedBy: resp.modifiedBy }),
       ...addConditionalProperty(resp.nrNumber, { nrNumber: resp.nrNumber }),
+      ...addConditionalProperty(resp.effectiveDate, { effectiveDate: resp.effectiveDate }),
       ...addBooleanProperty(resp.adminFreeze, false, 'adminFreeze'),
       ...addBooleanProperty(resp.goodStanding, true, 'goodStanding'),
       ...addBooleanProperty(resp.inDissolution, false, 'inDissolution'),
-      ...addConditionalProperty(resp.state, { status: resp.state })
+      status: determineStatus(resp)
     }
   }
 
