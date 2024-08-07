@@ -284,7 +284,7 @@ export default class PaymentService {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/links`)
   }
 
-  static getEFTTransactions (shortNameId: string, filterParams: EFTTransactionFilterParams): AxiosPromise<EFTTransactionListResponse> {
+  static getEFTShortnameHistory (shortNameId: string, filterParams: EFTTransactionFilterParams): AxiosPromise<EFTTransactionListResponse> {
     const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
@@ -293,7 +293,7 @@ export default class PaymentService {
       params.append('limit', filterParams.pageLimit.toString())
     }
 
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/transactions`
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/history`
     return axios.get(url, { params })
   }
 
@@ -318,12 +318,8 @@ export default class PaymentService {
     return axios.patch(url, body)
   }
 
-  static async postShortnamePaymentAction (shortNameId: string, accountId: string, action: string): AxiosPromise<void> {
+  static async postShortnamePaymentAction (shortNameId: string, bodyParams: any): AxiosPromise<void> {
     const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/payment`
-    const body = {
-      action: action,
-      accountId: accountId
-    }
-    return axios.post(url, body)
+    return axios.post(url, bodyParams)
   }
 }

@@ -27,7 +27,7 @@
             depressed
             class="mr-3"
             color="primary"
-            data-test="btn-cancel-change-access-type-dialog"
+            data-test="btn-cancel-confirmation-dialog"
             @click="dialogConfirmClose"
           >
             Cancel
@@ -36,7 +36,7 @@
             large
             depressed
             class="font-weight-bold btn-dialog"
-            data-test="btn-confirm-change-access-type-dialog"
+            data-test="btn-confirm-confirmation-dialog"
             color="primary"
             @click="dialogConfirm"
           >
@@ -104,7 +104,7 @@
           >
             <td
               :colspan="headers.length"
-              class="pb-5 pl-0"
+              class="pb-5 pl-4"
             >
               <span class="expanded-item scheduled-item">
                 <v-icon>mdi-clock-outline</v-icon>
@@ -250,32 +250,32 @@ export default defineComponent({
       {
         col: 'linkedAccount',
         hasFilter: false,
-        minWidth: '200px',
+        width: '200px',
         value: 'Linked Account'
       },
       {
         col: 'accountBranch',
         hasFilter: false,
-        minWidth: '200px',
+        width: '210px',
         value: 'Branch'
       },
       {
         col: 'statementId',
         hasFilter: false,
-        minWidth: '200px',
+        width: '260px',
         value: 'Latest Statement Number'
       },
       {
         col: 'amountOwing',
         hasFilter: false,
-        minWidth: '175px',
+        width: '175px',
         value: 'Amount Owing'
       },
       {
         col: 'actions',
         hasFilter: false,
         value: 'Actions',
-        minWidth: '150px'
+        width: '150px'
       }
     ]
 
@@ -350,8 +350,11 @@ export default defineComponent({
     async function applyPayment (item) {
       state.loading = true
       try {
-        await PaymentService.postShortnamePaymentAction(props.shortNameDetails.id,
-          item.accountId, ShortNamePaymentActions.APPLY_CREDITS)
+        const params = {
+          action: ShortNamePaymentActions.APPLY_CREDITS,
+          accountId: item.accountId
+        }
+        await PaymentService.postShortnamePaymentAction(props.shortNameDetails.id, params)
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('An errored occurred applying payments.', error)
@@ -383,8 +386,11 @@ export default defineComponent({
     async function cancelPayment (item) {
       state.loading = true
       try {
-        await PaymentService.postShortnamePaymentAction(props.shortNameDetails.id,
-          item.accountId, ShortNamePaymentActions.CANCEL)
+        const params = {
+          action: ShortNamePaymentActions.CANCEL,
+          accountId: item.accountId
+        }
+        await PaymentService.postShortnamePaymentAction(props.shortNameDetails.id, params)
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('An errored occurred cancelling payments pending.', error)
@@ -494,26 +500,9 @@ export default defineComponent({
 }
 
 ::v-deep {
-  table {
-    box-sizing: content-box;
-    thead {
-      tr {
-        th:first-of-type {
-        }
-      }
-    }
-    tbody {
-      tr {
-        td:first-of-type {
-          padding-left: 20px !important;
-        }
-      }
-    }
+  .base-table__header__title{
+    padding: 16px
   }
-  .base-table__item-cell {
-    padding: 16px 0 16px 0
-  }
-
   .new-actions {
     .v-list {
       width:206px
@@ -535,7 +524,6 @@ export default defineComponent({
     .expanded-item {
       display: grid;
       max-width: 80%;
-      padding: 5px 0px 0px 0px;
       font-size: 16px;
       grid-template-columns: 35px 1fr;
       align-items: start;
