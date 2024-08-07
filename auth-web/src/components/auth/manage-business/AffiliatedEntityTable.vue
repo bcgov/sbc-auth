@@ -337,7 +337,7 @@ export default defineComponent({
       if (!date.isValid()) {
         return '' // Handle invalid dates by returning an empty string
       }
-      return date.format('MMMM D, YYYY') // Format like "May 5, 2024"
+      return date.format('MMM D, YYYY [at] h:mm a [Pacific time.]') // Format like "Aug 10, 2024 at 11:59 pm Pacific time."
     }
 
     return {

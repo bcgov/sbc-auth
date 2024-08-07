@@ -30,6 +30,7 @@ import { Contact } from '@/models/contact'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgService from '@/services/org.services'
 import { defineStore } from 'pinia'
+import moment from 'moment'
 import { useOrgStore } from './org'
 
 export const useBusinessStore = defineStore('business', () => {
@@ -81,9 +82,10 @@ export const useBusinessStore = defineStore('business', () => {
     const determineStatus = (resp) => {
       // Show status FE when:
       // - it's a paid and approved FE
-      // - it's a paid FE, not approved yet, no other draft statuses
+      // - it's a paid FE, in future date, not approved yet, no other draft statuses
+      // When it's an overdue FE, the status will be PAID and show 'Filed and Pending'
       // When there are other DRAFT statuses, they would override PAID in the api
-      if ((resp.draftStatus === 'APPROVED' || resp.draftStatus === 'PAID') && resp.effectiveDate) {
+      if ((resp.draftStatus === 'APPROVED' || resp.draftStatus === 'PAID') && resp.effectiveDate && moment(resp.effectiveDate).isAfter(moment())) {
         return 'PAID_FE'
       }
       // when there is no draftStatus, the state could be ACTIVE or HISTORICAL

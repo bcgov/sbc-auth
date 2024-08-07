@@ -412,7 +412,7 @@ export enum BusinessState {
     REJECTED = 'Rejected',
     HISTORICAL = 'Historical',
     PENDING = 'Pending | Payment Incomplete',
-    PAID = 'Paid | Pending', // Paid and not a Future effective, the Filer hasn't processed yet
+    PAID = 'Filed and Pending', // Paid and the Filer hasn't processed yet, or overdue FE
     PAID_FE = 'Future Effective' // Paid and FE
 
 }

@@ -80,7 +80,7 @@ describe('AffiliatedEntityTable.vue', () => {
       mocks: { $t: () => '' }
     })
 
-    expect(wrapper.find('.table-header').text()).toContain('My List (10)')
+    expect(wrapper.find('.table-header').text()).toContain('My List (13)')
 
     // Wait for the component to render after any state changes
     await wrapper.vm.$nextTick()
@@ -185,6 +185,33 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Resume Draft')
+
+    // nineth item
+    columns = itemRows.at(startCountAt + 8).findAll(itemCell)
+    expect(columns.at(0).text()).toBe('Test Continuation 001')
+    expect(columns.at(1).text()).toBe('')
+    expect(columns.at(2).text()).toContain('Continuation Application')
+    expect(columns.at(2).text()).toContain('BC Unlimited Liability Company')
+    expect(columns.at(3).text()).toBe('Future Effective')
+    expect(columns.at(4).text()).toBe('Open Application')
+
+    // tenth item
+    columns = itemRows.at(startCountAt + 9).findAll(itemCell)
+    expect(columns.at(0).text()).toBe('Numbered Benefit Company')
+    expect(columns.at(1).text()).toBe('Pending')
+    expect(columns.at(2).text()).toContain('Incorporation Application')
+    expect(columns.at(2).text()).toContain('BC Benefit Company')
+    expect(columns.at(3).text()).toBe('Pending Staff Review')
+    expect(columns.at(4).text()).toBe('Open Application')
+
+    // eleventh item
+    columns = itemRows.at(startCountAt + 10).findAll(itemCell)
+    expect(columns.at(0).text()).toBe('Test Amalgamation 002')
+    expect(columns.at(1).text()).toBe('')
+    expect(columns.at(2).text()).toContain('Amalgamation Application')
+    expect(columns.at(2).text()).toContain('')
+    expect(columns.at(3).text()).toBe('Filed and Pending')
+    expect(columns.at(4).text()).toBe('Open Application')
   })
 
   it('Render affiliated entity table with correct actions menu', async () => {
@@ -270,7 +297,7 @@ describe('AffiliatedEntityTable.vue', () => {
 
     // verify elements with invitations are on top
     const allRows = wrapper.findAll('.base-table__item-row')
-    expect(allRows.length).toBe(10)
+    expect(allRows.length).toBe(13)
 
     for (let i = 0; i < allWithInvites.length; i++) {
       // check that all with invites have the entry in table too
