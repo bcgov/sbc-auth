@@ -1,7 +1,6 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components'
-import CommonUtils from '@/util/common-util'
-import ShortNameTransactions from '@/components/pay/eft/ShortNameTransactions.vue'
+import ShortNameTransactions from '@/components/pay/eft/ShortNamePaymentHistory.vue'
 import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
 import { axios } from '@/util/http-util'
@@ -17,51 +16,60 @@ sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
 const vuetify = new Vuetify({})
 // Selectors
 const { header, headerTitles, itemRow, itemCell } = baseVdataTable
-const headers = ['Date', 'Description', 'Related Statement Number', 'Amount']
+const headers = ['Date', 'Description', 'Related Statement Number', 'Amount', 'Actions']
 
-describe('ShortNameTransactions.vue', () => {
+describe('ShortNamePaymentHistory.vue', () => {
   setupIntersectionObserverMock()
   let wrapper: Wrapper<any>
   let sandbox: any
   let localVue: VueConstructor<any>
-  let transactionsResponse: any
+  let historyResponse: any
 
   beforeEach(async () => {
     localVue = createLocalVue()
-    transactionsResponse = {
+    historyResponse = {
       items: [
         {
-          'accountBranch': 'Test Branch',
+          'accountBranch': 'Sushi Division',
           'accountId': '3202',
-          'accountName': 'ABC 123',
+          'accountName': 'Odysseus Chiu',
+          'amount': 351.5,
+          'historicalId': 5,
+          'isProcessing': true,
+          'isReversible': false,
+          'shortNameBalance': 368.5,
           'shortNameId': 2,
-          'statementId': 5374449,
-          'transactionAmount': 451.5,
-          'transactionDate': '2023-11-27T16:24:37.522500',
-          'transactionDescription': 'Statement Paid',
-          'transactionId': null
+          'statementNumber': 5374449,
+          'transactionDate': '2024-08-01T00:01:30.885474',
+          'transactionType': 'STATEMENT_REVERSE'
         },
         {
-          'accountBranch': null,
-          'accountId': null,
-          'accountName': null,
+          'accountBranch': 'Sushi Division',
+          'accountId': '3202',
+          'accountName': 'Odysseus Chiu',
+          'amount': 131.5,
+          'historicalId': 3,
+          'isProcessing': false,
+          'isReversible': false,
+          'shortNameBalance': 368.5,
           'shortNameId': 2,
-          'statementId': null,
-          'transactionAmount': 151.5,
-          'transactionDate': '2023-11-24T13:47:47',
-          'transactionDescription': 'Funds Received',
-          'transactionId': 6
+          'statementNumber': 5455966,
+          'transactionDate': '2024-07-31T22:22:31.058547',
+          'transactionType': 'STATEMENT_PAID'
         },
         {
-          'accountBranch': null,
-          'accountId': null,
-          'accountName': null,
+          'accountBranch': 'Sushi Division',
+          'accountId': '3202',
+          'accountName': 'Odysseus Chiu',
+          'amount': 351.5,
+          'historicalId': 4,
+          'isProcessing': false,
+          'isReversible': false,
+          'shortNameBalance': 17.0,
           'shortNameId': 2,
-          'statementId': null,
-          'transactionAmount': 300.0,
-          'transactionDate': '2023-11-22T13:47:47',
-          'transactionDescription': 'Funds Received',
-          'transactionId': 2
+          'statementNumber': 5374449,
+          'transactionDate': '2024-07-31T00:00:00',
+          'transactionType': 'STATEMENT_PAID'
         }
       ],
       'limit': 5,
@@ -71,7 +79,7 @@ describe('ShortNameTransactions.vue', () => {
 
     sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'get')
-    get.returns(new Promise(resolve => resolve({ data: transactionsResponse })))
+    get.returns(Promise.resolve({ data: historyResponse }))
 
     wrapper = mount(ShortNameTransactions, {
       propsData: {
@@ -97,7 +105,7 @@ describe('ShortNameTransactions.vue', () => {
     await wrapper.setProps({ shortNameDetails: { id: 1, shortName: 'SHORTNAME' } })
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('#table-title-cell').text()).toContain('Payment History')
+    expect(wrapper.find('#table-title-cell').text()).toContain('Short Name Payment History')
 
     // verify table
     expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
@@ -113,16 +121,20 @@ describe('ShortNameTransactions.vue', () => {
     await wrapper.vm.$nextTick()
     // verify data
     const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
-    expect(itemRows.length).toBe(transactionsResponse.items.length)
-    for (let i = 0; i < transactionsResponse.items.length; i++) {
+    expect(itemRows.length).toBe(historyResponse.items.length)
+    for (let i = 0; i < historyResponse.items.length; i++) {
       const columns = itemRows.at(i).findAll(itemCell)
-      expect(columns.at(0).text()).toBe(
-        CommonUtils.formatDisplayDate(transactionsResponse.items[i].transactionDate, 'MMMM DD, YYYY'))
-      expect(columns.at(1).text()).toContain(transactionsResponse.items[i].transactionDescription)
-      expect(columns.at(2).text()).toBe(transactionsResponse.items[i].statementId
-        ? transactionsResponse.items[i].statementId.toString() : '')
+      expect(columns.at(0).text()).toBe(wrapper.vm.formatDate(historyResponse.items[i].transactionDate))
+      expect(columns.at(1).text()).toContain(wrapper.vm.formatDescription(historyResponse.items[i]))
+      expect(columns.at(2).text()).toBe(historyResponse.items[i].statementNumber
+        ? historyResponse.items[i].statementNumber.toString() : '')
       expect(columns.at(3).text()).toContain(
-        CommonUtils.formatAmount(transactionsResponse.items[i].transactionAmount))
+        wrapper.vm.formatTransactionAmount(historyResponse.items[i].amount))
+      if (historyResponse.items[i].isReversible) {
+        expect(columns.at(4).find("[data-test='reverse-payment-btn']").exists()).toBeTruthy()
+      } else {
+        expect(columns.at(4).find("[data-test='reverse-payment-btn']").exists()).toBeFalsy()
+      }
     }
   })
 })
