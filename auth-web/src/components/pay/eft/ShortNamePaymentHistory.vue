@@ -265,7 +265,7 @@ export default defineComponent({
     function formatTransactionAmount (item: any) {
       if (item.amount === undefined) return ''
       let amount = CommonUtils.formatAmount(item.amount)
-      if (item.transactionType === ShortNameHistoryType.STATEMENT_REVERSE) {
+      if (item.transactionType === ShortNameHistoryType.STATEMENT_PAID) {
         amount = `-${amount}`
       }
       return amount
