@@ -82,6 +82,9 @@ export const useAffiliations = () => {
   /** Returns the status of the affiliation. */
   const status = (business: Business): string => {
     if (isTemporaryBusiness(business)) {
+      if (business.status) {
+        return BusinessState[business.status]
+      }
       return BusinessState.DRAFT
     }
     if (isNameRequest(business)) {
@@ -98,10 +101,16 @@ export const useAffiliations = () => {
         return NrDisplayStates[NrState.HOLD]
       } else return NrDisplayStates[state] || 'Unknown'
     }
+    // When the business is not temp, could be ACTIVE or HISTORICAL
     if (business.status) {
-      return business.status.charAt(0)?.toUpperCase() + business.status?.slice(1)?.toLowerCase()
+      return BusinessState[business.status]
     }
     return BusinessState.ACTIVE
+  }
+
+  /** Returns true if the affiliation is a temporary business and in draft state. */
+  const isDraftFiling = (business: Business): boolean => {
+    return isTemporaryBusiness(business) && status(business) === BusinessState.DRAFT
   }
 
   /** Returns true if the affiliation is a numbered IA. */
@@ -290,6 +299,7 @@ export const useAffiliations = () => {
     canUseNameRequest,
     tempDescription,
     isTemporaryBusiness,
+    isDraftFiling,
     getEntityType,
     isBusinessAffiliated,
     actionDropdown

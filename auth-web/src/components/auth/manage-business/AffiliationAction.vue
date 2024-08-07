@@ -75,7 +75,7 @@
               data-test="remove-button"
               @click="removeAffiliationOrInvitation(item)"
             >
-              <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
+              <v-list-item-subtitle v-if="isDraftFiling(item)">
                 <v-icon small>mdi-delete-forever</v-icon>
                 <span class="pl-1">Delete {{ tempDescription(item) }}</span>
               </v-list-item-subtitle>
@@ -106,7 +106,7 @@
 </template>
 
 <script lang='ts'>
-import { AffiliationInvitationStatus, AffiliationInvitationType, CorpTypes, LDFlags,
+import { AffiliationInvitationStatus, AffiliationInvitationType, BusinessState, CorpTypes, LDFlags,
   NrDisplayStates, NrTargetTypes } from '@/util/constants'
 import { FilingTypes, NrRequestActionCodes } from '@bcrs-shared-components/enums'
 import { PropType, defineComponent } from '@vue/composition-api'
@@ -130,7 +130,7 @@ export default defineComponent({
     const orgStore = useOrgStore()
     const businessStore = useBusinessStore()
 
-    const { affiliations, status, isBusinessAffiliated, isNameRequest,
+    const { affiliations, status, isBusinessAffiliated, isNameRequest, isDraftFiling,
       isTemporaryBusiness, getEntityType, tempDescription, actionDropdown } = useAffiliations()
 
     /** Create a business record in LEAR. */
@@ -406,7 +406,7 @@ export default defineComponent({
         }
       }
 
-      if (isTemporaryBusiness(item)) {
+      if (isDraftFiling(item)) {
         return 'Resume Draft'
       }
       if (isNameRequest(item)) {
@@ -423,7 +423,23 @@ export default defineComponent({
             return 'Open Name Request'
         }
       }
-      return 'Manage Business'
+      const businessStatus = status(item)
+      switch (businessStatus) {
+        case BusinessState.AWAITING_REVIEW:
+        case BusinessState.REJECTED:
+        case BusinessState.PAID:
+        case BusinessState.PAID_FE:
+        case BusinessState.PENDING:
+        case BusinessState.APPROVED:
+          if ((item.corpType?.code || item.corpType) === CorpTypes.REGISTRATION) {
+            return 'Open Registration'
+          }
+          return 'Open Application'
+        case BusinessState.CHANGE_REQUESTED:
+          return 'Make Changes'
+        default:
+          return 'Manage Business'
+      }
     }
 
     const isShowRemoveAsPrimaryAction = (item: Business): boolean => {
@@ -620,6 +636,7 @@ export default defineComponent({
       isOpenExternal,
       isShowRemoveAsPrimaryAction,
       isTemporaryBusiness,
+      isDraftFiling,
       open,
       openNewAffiliationInvite,
       redirect,

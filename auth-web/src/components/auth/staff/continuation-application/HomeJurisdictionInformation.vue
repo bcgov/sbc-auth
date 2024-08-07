@@ -143,7 +143,7 @@
     <v-divider class="mx-6 mt-6 mb-3" />
 
     <!-- Continuation Authorization -->
-    <section class="section-container">
+    <section class="section-container continuation-authorization">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -348,11 +348,12 @@ section:not(:last-child) {
   padding-bottom: 0;
 }
 
+.continuation-authorization .col-sm-9 {
+  // adjust second column to vertically line up with first column
+  margin-top: -6px;
+}
+
 .download-authorization-btn {
-  // nudge icon down a bit to line up with text
-  .v-icon {
-    margin-top: 2px;
-  }
   // make button text larger than default
   span {
     font-size: $px-15;
