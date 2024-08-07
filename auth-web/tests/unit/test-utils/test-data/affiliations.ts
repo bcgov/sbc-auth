@@ -132,6 +132,35 @@ export const businesses: Business[] = [
       code: CorpTypes.BENEFIT_COMPANY
     }
   },
+  // Continuation Application, Future Effective
+  {
+    businessIdentifier: 'TP897324',
+    name: 'Test Continuation 001',
+    corpType: {
+      code: CorpTypes.CONTINUATION_IN },
+    corpSubType: {
+      code: CorpTypes.ULC_CONTINUE_IN },
+    status: 'PAID_FE',
+    effectiveDate: new Date('2024-09-02T06:59:00+00:00')
+  },
+  // Incorporation Application, Awaiting staff review
+  {
+    businessIdentifier: 'TP856324',
+    corpType: {
+      code: CorpTypes.INCORPORATION_APPLICATION },
+    corpSubType: {
+      code: CorpTypes.BENEFIT_COMPANY },
+    status: 'AWAITING_REVIEW'
+  },
+  // Amalgamation Application, overdue Future Effective
+  {
+    businessIdentifier: 'TP897326',
+    name: 'Test Amalgamation 002',
+    corpType: {
+      code: CorpTypes.AMALGAMATION_APPLICATION },
+    status: 'PAID',
+    effectiveDate: new Date('2023-09-02T06:59:00+00:00')
+  },
   // request access (invitations)
   // single
   {

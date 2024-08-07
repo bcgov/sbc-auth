@@ -40,6 +40,7 @@ export interface Business {
     goodStanding?: boolean
     adminFreeze?: boolean
     inDissolution?: boolean
+    effectiveDate?: Date
     affiliationInvites?: AffiliationInviteInfo[]
 }
 

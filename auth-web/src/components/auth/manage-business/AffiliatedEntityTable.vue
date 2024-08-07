@@ -139,6 +139,22 @@
         <!-- Status -->
         <template #item-slot-Status="{ item }">
           <span>{{ status(item) }}</span>
+          <!-- Future Effective Icon for PAID_FE status -->
+          <template v-if="status(item) === BusinessState.PAID_FE">
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  class="ml-1"
+                  color="#F8661A"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-information-outline
+                </v-icon>
+              </template>
+              <span>This filing will become effective on {{ formatDate(item.effectiveDate) }}</span>
+            </v-tooltip>
+          </template>
           <EntityDetails
             v-if="isExpired(item) ||
               isFrozed(item) ||
@@ -154,6 +170,7 @@
             :details="[EntityAlertTypes.PROCESSING]"
           />
         </template>
+
         <!-- Actions -->
         <template #item-slot-Actions="{ item, index }">
           <AffiliationAction
@@ -176,6 +193,7 @@
 import {
   AffiliationInvitationStatus,
   AffiliationInvitationType,
+  BusinessState,
   EntityAlertTypes,
   NrDisplayStates,
   NrState
@@ -187,7 +205,7 @@ import { AffiliationInviteInfo } from '@/models/affiliation'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import EntityDetails from './EntityDetails.vue'
-
+import moment from 'moment'
 import { useAffiliations } from '@/composables'
 import { useOrgStore } from '@/stores/org'
 
@@ -310,6 +328,18 @@ export default defineComponent({
       return affiliationInviteInfos.length > 0 && affiliationInviteInfos[0].status
     }
 
+    // Method to format dates
+    const formatDate = (dateString) => {
+      if (!dateString) {
+        return '' // Return an empty string if the input is null, undefined, or empty
+      }
+      const date = moment(dateString)
+      if (!date.isValid()) {
+        return '' // Handle invalid dates by returning an empty string
+      }
+      return date.format('MMM D, YYYY [at] h:mm a [Pacific time.]') // Format like "Aug 10, 2024 at 11:59 pm Pacific time."
+    }
+
     return {
       selectedColumns,
       columns,
@@ -317,6 +347,7 @@ export default defineComponent({
       getRequestForAuthorizationStatusText,
       clearFiltersTrigger,
       clearFilters,
+      formatDate,
       isloading,
       headers,
       affiliations,
@@ -345,7 +376,8 @@ export default defineComponent({
       isBadstanding,
       isDissolution,
       getAffiliationInvitationStatus,
-      AffiliationInvitationStatus
+      AffiliationInvitationStatus,
+      BusinessState
     }
   }
 })
@@ -524,5 +556,4 @@ export default defineComponent({
     background-color: lightgray;
   }
 }
-
 </style>
