@@ -350,7 +350,6 @@ export default defineComponent({
       isAddressViewOnly: true,
       isAccountInfoViewOnly: true,
       isAccessTypeViewOnly: true,
-      baseAddress: currentOrgAddress.value,
       editAccountForm: null,
       mailingAddress: null,
       suspendAccountDialog: null,
@@ -360,6 +359,7 @@ export default defineComponent({
       suspensionReasonCodes: computed(() => codesStore.suspensionReasonCodes),
       currentUser: computed(() => userStore.currentUser),
       isBusinessAccount: computed(() => orgStore.isBusinessAccount),
+      baseAddress: computed(() => currentOrgAddress.value),
 
       isStaff: computed(() => userStore.currentUser.roles.includes(Role.Staff)),
       isSuspendButtonVisible: computed(() => (
