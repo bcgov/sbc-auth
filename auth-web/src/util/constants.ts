@@ -670,6 +670,13 @@ export enum ShortNamePaymentActions {
     REVERSE = 'REVERSE'
 }
 
+export enum ShortNameReversePaymentErrors {
+    INVALID_STATE = 'EFT_PAYMENT_ACTION_CREDIT_LINK_STATUS_INVALID',
+    UNPAID_STATEMENT = 'EFT_PAYMENT_ACTION_UNPAID_STATEMENT',
+    UNPAID_STATEMENT_INVOICE = 'EFT_PAYMENT_INVOICE_REVERSE_UNEXPECTED_STATUS',
+    EXCEEDS_SIXTY_DAYS = 'EFT_PAYMENT_ACTION_REVERSAL_EXCEEDS_SIXTY_DAYS'
+}
+
 export enum ShortNameLinkStatus {
     PENDING = 'PENDING',
     LINKED = 'LINKED',
@@ -680,8 +687,16 @@ export enum ShortNameResponseStatus {
     EFT_SHORT_NAME_ALREADY_MAPPED = 'EFT_SHORT_NAME_ALREADY_MAPPED'
 }
 
-export enum ShortNameTransactionRowType {
-    STATEMENT_PAID = 'Statement Paid'
+export enum ShortNameHistoryType {
+    FUNDS_RECEIVED = 'FUNDS_RECEIVED',
+    STATEMENT_PAID = 'STATEMENT_PAID',
+    STATEMENT_REVERSE = 'STATEMENT_REVERSE'
+}
+
+export enum ShortNameHistoryTypeDescription {
+    FUNDS_RECEIVED = 'Funds Received',
+    STATEMENT_PAID = 'Statement Paid',
+    STATEMENT_REVERSE = 'Payment Reversed'
 }
 
 export enum CfsAccountStatus {

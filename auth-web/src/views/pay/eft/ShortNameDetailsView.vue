@@ -33,7 +33,7 @@
             mdi-alert
           </v-icon>
           <p class="account-alert__info mb-0 pl-3">
-            Please verify if the {{ unsettledAmount }} balance is eligible for a refund, or you can link to a new account.
+            Caution: Please verify if the {{ unsettledAmount }} balance is eligible for a refund, or you can link to a new account.
           </p>
         </div>
       </v-alert>
@@ -54,8 +54,9 @@
       @on-payment-action="onPaymentAction"
     />
 
-    <ShortNameTransactions
+    <ShortNamePaymentHistory
       :shortNameDetails="shortNameDetails"
+      @on-payment-action="onPaymentAction"
     />
   </v-container>
 </template>
@@ -65,8 +66,8 @@ import CommonUtils from '@/util/common-util'
 import PaymentService from '@/services/payment.services'
 import { Role } from '@/util/constants'
 import ShortNameAccountLink from '@/components/pay/eft/ShortNameAccountLink.vue'
+import ShortNamePaymentHistory from '@/components/pay/eft/ShortNamePaymentHistory.vue'
 import ShortNameRefund from '@/components/pay/eft/ShortNameRefund.vue'
-import ShortNameTransactions from '@/components/pay/eft/ShortNameTransactions.vue'
 import moment from 'moment'
 import { useUserStore } from '@/stores/user'
 
@@ -79,7 +80,7 @@ interface ShortNameDetails {
 
 export default defineComponent({
   name: 'ShortNameMappingView',
-  components: { ShortNameAccountLink, ShortNameTransactions, ShortNameRefund },
+  components: { ShortNameAccountLink, ShortNamePaymentHistory, ShortNameRefund },
   props: {
     shortNameId: {
       type: String as PropType<string>,
@@ -177,5 +178,6 @@ export default defineComponent({
   }
   .account-alert__info {
     flex: 1 1 auto;
+    color: $TextColorGray;
   }
 </style>
