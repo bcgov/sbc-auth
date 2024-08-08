@@ -190,7 +190,7 @@ export default defineComponent({
       const returnUrl = `${baseUrl}/${Pages.ACCOUNT_UNLOCK_SUCCESS}`
       const encodedUrl = encodeURIComponent(returnUrl)
       // redirect to make payment UI
-      await root.$router.push(`${Pages.MAKE_PAD_PAYMENT}${payment.id}/transactions/${encodedUrl}`)
+      await root.$router.push(`${Pages.MAKE_CC_PAYMENT}${payment.id}/transactions/${encodedUrl}`)
     }
 
     async function checkPaymentMethods () {

@@ -118,6 +118,12 @@ export default defineComponent({
     PaymentMethods,
     ModalDialog
   },
+  props: {
+    hasPaymentChanged: {
+      type: Boolean,
+      default: false
+    }
+  },
   emits: ['emit-bcol-info'],
   setup (props, { emit, root }) {
     const orgStore = useOrgStore()
@@ -127,7 +133,7 @@ export default defineComponent({
       savedOrganizationType: '',
       selectedPaymentMethod: '',
       padInfo: {} as PADInfo,
-      isBtnSaved: false,
+      isBtnSaved: props.hasPaymentChanged,
       disableSaveBtn: false,
       errorMessage: '',
       errorTitle: 'Payment Update Failed',
@@ -136,7 +142,7 @@ export default defineComponent({
       isLoading: false,
       padValid: false,
       ejvValid: false,
-      paymentMethodChanged: false,
+      paymentMethodChanged: props.hasPaymentChanged,
       isFuturePaymentMethodAvailable: false, // set true if in between 3 days cooling period
       isTOSandAcknowledgeCompleted: false // set true if TOS already accepted
     })

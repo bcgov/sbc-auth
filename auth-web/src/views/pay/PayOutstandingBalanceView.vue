@@ -2,6 +2,17 @@
   <v-container
     class="view-container"
   >
+    <div
+      v-if="changePaymentType !== ''"
+      class="view-header flex-column"
+    >
+      <h1
+        class="view-header__title"
+        data-test="account-settings-title"
+      >
+        Changing Payment Method to {{ getPaymentTypeText }}
+      </h1>
+    </div>
     <v-card flat>
       <Stepper
         ref="stepper"
@@ -17,10 +28,11 @@
 </template>
 
 <script lang="ts">
-
-import { PropType, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { LDFlags, PaymentTypes } from '@/util/constants'
+import { PropType, computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import CompletePaymentDetails from '@/components/pay/CompletePaymentDetails.vue'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OutstandingBalances from '@/components/pay/OutstandingBalances.vue'
 import { useOrgStore } from '@/stores'
 
@@ -52,6 +64,9 @@ export default defineComponent({
     const isLoading = ref(false)
     const statementSummary = ref(null)
     const stepper = ref(null)
+    const enableEFTBalanceByPADFeature = computed(() => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableEFTBalanceByPAD) || false
+    })
     const stepperConfig: StepConfiguration[] = [
       {
         title: 'Outstanding Balances',
@@ -60,7 +75,9 @@ export default defineComponent({
         componentProps: {
           orgId: props.orgId,
           changePaymentType: props.changePaymentType,
-          statementSummary: statementSummary
+          statementSummary: statementSummary,
+          stepForward: handleStepForward,
+          enableEFTBalanceByPADFeature: enableEFTBalanceByPADFeature.value
         }
       },
       {
@@ -70,7 +87,9 @@ export default defineComponent({
         componentProps: {
           orgId: props.orgId,
           paymentId: props.paymentId,
-          changePaymentType: props.changePaymentType
+          changePaymentType: props.changePaymentType,
+          stepJumpTo: handleStepJumpTo,
+          enableEFTBalanceByPADFeature: enableEFTBalanceByPADFeature.value
         }
       }
     ]
@@ -98,20 +117,35 @@ export default defineComponent({
       }
     })
 
-    const handleStepForward = () => {
+    function handleStepForward () {
       stepper.value.stepForward()
     }
 
-    const handleStepBack = () => {
+    function handleStepBack () {
       stepper.value.stepBack()
     }
+
+    function handleStepJumpTo (num) {
+      stepper.value.jumpToStep(num)
+    }
+
+    const getPaymentTypeText = computed(() => {
+      if (props.changePaymentType === PaymentTypes.BCOL) {
+        return 'BC Online'
+      } else if (props.changePaymentType === PaymentTypes.PAD) {
+        return 'Pre-authorized Debit'
+      }
+      return ''
+    })
 
     return {
       isLoading,
       stepper,
       stepperConfig,
       handleStepForward,
-      handleStepBack
+      handleStepBack,
+      getPaymentTypeText,
+      enableEFTBalanceByPADFeature
     }
   }
 })

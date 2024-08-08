@@ -100,7 +100,7 @@ export enum Pages {
     STAFF_DASHBOARD_INVITATIONS = '/staff/dashboard/invitations',
     STAFF_DASHBOARD_SUSPENDED = '/staff/dashboard/suspended',
     STAFF_DASHBOARD_INACTIVE = '/staff/dashboard/inactive',
-    MAKE_PAD_PAYMENT = '/make-cc-payment/',
+    MAKE_CC_PAYMENT = '/make-cc-payment/',
     STAFF_GOVM_SETUP_ACCOUNT = '/staff-govm-setup-account',
     SETUP_GOVM_ACCOUNT_SUCCESS='setup-govm-account-success',
     DUPLICATE_ACCOUNT_WARNING='/duplicate-account-warning',
@@ -478,7 +478,8 @@ export enum LDFlags {
     AllowableBusinessSearchTypes = 'allowable-business-search-types',
     AllowableBusinessPasscodeTypes = 'allowable-business-passcode-types',
     EnableAffiliationDelegation = 'enable-affiliation-delegation',
-    EnableCreditCardPremium = 'enable-credit-card-premium'
+    EnableCreditCardPremium = 'enable-credit-card-premium',
+    EnableEFTBalanceByPAD = 'enable-eft-balance-by-pad',
 }
 
 export enum DateFilterCodes {
