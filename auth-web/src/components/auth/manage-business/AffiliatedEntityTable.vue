@@ -141,12 +141,16 @@
           <span>{{ status(item) }}</span>
           <!-- Future Effective Icon for PAID_FE status -->
           <template v-if="status(item) === BusinessState.PAID_FE">
-            <v-tooltip bottom>
+            <v-tooltip
+              top
+              :max-width="'300px'"
+            >
               <template #activator="{ on, attrs }">
                 <v-icon
                   class="ml-1"
                   color="#F8661A"
                   v-bind="attrs"
+                  style="cursor: pointer; font-size: 1.5em; margin-left: 4px;"
                   v-on="on"
                 >
                   mdi-information-outline
@@ -157,19 +161,22 @@
           </template>
           <!-- Alert Icon for CHANGE_REQUESTED status -->
           <template v-if="status(item) === BusinessState.CHANGE_REQUESTED">
-            <v-tooltip bottom>
+            <v-tooltip
+              top
+              :max-width="'300px'"
+            >
               <template #activator="{ on, attrs }">
                 <v-icon
                   class="ml-1"
                   color="#F8661A"
                   v-bind="attrs"
+                  style="cursor: pointer; font-size: 1.5em; margin-left: 4px;"
                   v-on="on"
                 >
                   mdi-alert
                 </v-icon>
               </template>
-              <span> {{ (item.corpType?.code || item.corpType) === CorpTypes.REGISTRATION ? 'This registration': 'This application' }}
-                requires you to make changes before resubmitting.</span>
+              <span> This application requires you to make changes before resubmitting.</span>
             </v-tooltip>
           </template>
           <EntityDetails
