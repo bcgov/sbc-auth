@@ -146,7 +146,7 @@
 </template>
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
-import { Ref, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { Ref, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
@@ -365,6 +365,10 @@ export default defineComponent({
 
     watch(() => props.currentTab, () => {
       loadData()
+    })
+
+    onMounted(async () => {
+      await loadData()
     })
 
     async function loadData () {

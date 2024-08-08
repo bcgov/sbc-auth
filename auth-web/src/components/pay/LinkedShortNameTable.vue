@@ -78,7 +78,7 @@
 </template>
 <script lang="ts">
 import { AccountStatus, CfsAccountStatus, SessionStorageKeys, ShortNameStatus, SuspensionReason } from '@/util/constants'
-import { defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import { defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -243,6 +243,10 @@ export default defineComponent({
 
     watch(() => props.currentTab, () => {
       loadData()
+    })
+
+    onMounted(async () => {
+      await loadData()
     })
 
     watch(() => state.filters, (filters: any) => {
