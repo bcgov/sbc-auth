@@ -184,15 +184,14 @@ export default defineComponent({
     }
 
     function goToPaymentOptions () {
-      root.$router.push(`${Pages.ACCOUNT_SETTINGS}/${Pages.PAYMENT_OPTION}`)
+      root.$router?.push({
+        name: Pages.PAYMENT_OPTION,
+        params: { hasPaymentChanged: state.isPaymentChanged }
+      })
     }
 
     function cancel () {
-      if (props.changePaymentType === PaymentTypes.PAD) {
-        props.stepJumpTo(1)
-      } else {
-        goToPaymentOptions()
-      }
+      goToPaymentOptions()
     }
 
     function isPADValid (isValid) {

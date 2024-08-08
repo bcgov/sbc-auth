@@ -362,7 +362,8 @@ export default defineComponent({
     }
 
     const paymentMethodSelected = async (payment, isTouch = true) => {
-      if (payment.type === PaymentTypes.PAD) {
+      const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
+      if (payment.type === PaymentTypes.PAD && isFromEFT) {
         const hasOutstandingBalance = await hasBalanceOwing()
         if (hasOutstandingBalance) {
           await root.$router.push({
@@ -371,7 +372,6 @@ export default defineComponent({
             query: { changePaymentType: payment.type }
           })
         }
-        return
       } else if (payment.type === PaymentTypes.BCOL && isTouch && selectedPaymentMethod.value !== PaymentTypes.BCOL) {
         bcOnlineDialog.value.open()
       } else {
