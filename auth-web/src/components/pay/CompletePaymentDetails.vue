@@ -170,7 +170,9 @@ export default defineComponent({
       checkErrors: false,
       padValid: false,
       isPaymentChanged: false,
-      isLoading: false
+      isLoading: false,
+      cancelButtonText: computed((): string => props.changePaymentType === PaymentTypes.PAD ? 'Back' : 'Cancel'),
+      nextButtonText: computed((): string => props.changePaymentType === PaymentTypes.PAD ? 'Next' : 'Complete')
     })
 
     function setBcolInfo (bcolProfile: BcolProfile) {
@@ -250,7 +252,7 @@ export default defineComponent({
       state.padInfo = padInfoValue
     }
 
-    async function complete() {
+    async function complete () {
       state.isLoading = true
       state.checkErrors = true
       state.isInitialTOSAccepted = true
@@ -286,14 +288,6 @@ export default defineComponent({
       state.isLoading = false
     }
 
-    const cancelButtonText = computed(() => {
-      return props.changePaymentType === PaymentTypes.PAD ? 'Back' : 'Cancel'
-    })
-
-    const nextButtonText = computed(() => {
-      return props.changePaymentType === PaymentTypes.PAD ? 'Next' : 'Complete'
-    })
-
     return {
       ...toRefs(state),
       complete,
@@ -302,8 +296,6 @@ export default defineComponent({
       warningMessage,
       cancel,
       getPADInfo,
-      cancelButtonText,
-      nextButtonText,
       isPADValid
     }
   }

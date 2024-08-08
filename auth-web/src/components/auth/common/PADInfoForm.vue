@@ -171,7 +171,9 @@ interface PADInfoFormState {
   transitNumber: string,
   showPremiumPADInfo: ComputedRef<boolean>,
   acknowledgementLabel: ComputedRef<string>,
-  padInfoSubtitle: ComputedRef<string>
+  padInfoSubtitle: ComputedRef<string>,
+  acknowledgeColor: ComputedRef<string>,
+  accountNumberRules: ComputedRef<((v: any) => true | string)[]>
 }
 
 export default defineComponent({
@@ -229,21 +231,19 @@ export default defineComponent({
           ' (3) day confirmation period has ended.'
           : 'This account will not be able to perform any transactions until the mandatory' +
           ' (3) day confirmation period has ended.'
+      }),
+      acknowledgeColor: computed((): string => props.checkErrors && !state.isAcknowledged ? 'error--text' : ''),
+      accountNumberRules: computed((): ((v: any) => true | string)[] => {
+        const rules: ((v: any) => true | string)[] = [
+          v => !!v || 'Account Number is required',
+          v => (v.length >= 7 && v.length <= 12) || 'Account Number should be between 7 to 12 digits'
+        ]
+        if (state.isTouched) {
+          rules.push(v => (!v.includes('X') || 'Edited payment information should not contain masked digits (i.e. XXX)'))
+        }
+        return rules
       })
     }) as unknown) as PADInfoFormState
-
-    const acknowledgeColor = computed(() => props.checkErrors && !state.isAcknowledged ? 'error--text' : '')
-
-    const accountNumberRules = computed((): ((v: any) => true | string)[] => {
-      const rules: ((v: any) => true | string)[] = [
-        v => !!v || 'Account Number is required',
-        v => (v.length >= 7 && v.length <= 12) || 'Account Number should be between 7 to 12 digits'
-      ]
-      if (state.isTouched) {
-        rules.push(v => (!v.includes('X') || 'Edited payment information should not contain masked digits (i.e. XXX)'))
-      }
-      return rules
-    })
 
     // emits
     const emitIsPreAuthDebitFormValid = () => {
@@ -302,7 +302,6 @@ export default defineComponent({
 
     return {
       accountMask,
-      accountNumberRules,
       institutionNumberRules,
       transitNumberRules,
       ...toRefs(state),
@@ -310,8 +309,7 @@ export default defineComponent({
       updateTermsAccepted,
       emitPreAuthDebitInfo,
       emitIsPreAuthDebitFormValid,
-      emitIsPadInfoTouched,
-      acknowledgeColor
+      emitIsPadInfoTouched
     }
   }
 })
