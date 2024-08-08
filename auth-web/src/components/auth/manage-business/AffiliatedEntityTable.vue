@@ -155,6 +155,23 @@
               <span>This filing will become effective on {{ formatDate(item.effectiveDate) }}</span>
             </v-tooltip>
           </template>
+          <!-- Alert Icon for CHANGE_REQUESTED status -->
+          <template v-if="status(item) === BusinessState.CHANGE_REQUESTED">
+            <v-tooltip bottom>
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  class="ml-1"
+                  color="#F8661A"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-alert
+                </v-icon>
+              </template>
+              <span> {{ (item.corpType?.code || item.corpType) === CorpTypes.REGISTRATION ? 'This registration': 'This application' }}
+                requires you to make changes before resubmitting.</span>
+            </v-tooltip>
+          </template>
           <EntityDetails
             v-if="isExpired(item) ||
               isFrozed(item) ||
@@ -195,6 +212,7 @@ import {
   AffiliationInvitationStatus,
   AffiliationInvitationType,
   BusinessState,
+  CorpTypes,
   EntityAlertTypes,
   NrDisplayStates,
   NrState
@@ -358,6 +376,7 @@ export default defineComponent({
       isRejectedName,
       isApprovedName,
       nameRequestType,
+      CorpTypes,
       name,
       open,
       number,
