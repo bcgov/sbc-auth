@@ -2,18 +2,18 @@
   <div>
     <BaseVDataTable
       id="linked-bank-short-names"
-      :clearFiltersTrigger="state.clearFiltersTrigger"
+      :clearFiltersTrigger="clearFiltersTrigger"
       itemKey="id"
-      :loading="false"
+      :loading="loading"
       loadingText="Loading Linked Bank Short Names..."
       noDataText="No records to show."
-      :setItems="state.results"
+      :setItems="results"
       :setHeaders="headers"
-      :setTableDataOptions="state.options"
+      :setTableDataOptions="options"
       :hasTitleSlot="true"
-      :totalItems="state.totalResults"
+      :totalItems="totalResults"
       :pageHide="true"
-      :filters="state.filters"
+      :filters="filters"
       :updateFilter="updateFilter"
       :useObserver="true"
       :observerCallback="infiniteScrollCallback"
@@ -23,13 +23,13 @@
         <h2 class="ml-4 py-6">
           EFT Enabled Accounts
           <span class="font-weight-regular">
-            ({{ state.totalResults }})
+            ({{ totalResults }})
           </span>
         </h2>
       </template>
       <template #header-filter-slot-actions>
         <v-btn
-          v-if="state.filters.isActive"
+          v-if="filters.isActive"
           class="clear-btn mx-auto mt-auto"
           color="primary"
           outlined
@@ -78,7 +78,7 @@
 </template>
 <script lang="ts">
 import { AccountStatus, CfsAccountStatus, SessionStorageKeys, ShortNameStatus, SuspensionReason } from '@/util/constants'
-import { defineComponent, onMounted, reactive, watch } from '@vue/composition-api'
+import { defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -93,6 +93,9 @@ import { useShortNameTable } from '@/composables/short-name-table-factory'
 export default defineComponent({
   name: 'LinkedShortNameTable',
   components: { BaseVDataTable },
+  props: {
+    currentTab: { default: 0 }
+  },
   setup (props, { emit, root }) {
     const state = reactive<LinkedShortNameState>({
       results: [],
@@ -228,7 +231,7 @@ export default defineComponent({
       })
     }
 
-    onMounted(async () => {
+    async function loadData () {
       try {
         state.filters.filterPayload = JSON.parse(
           ConfigHelper.getFromSession(SessionStorageKeys.LinkedShortNamesFilter)) || state.filters.filterPayload
@@ -236,6 +239,10 @@ export default defineComponent({
         // Silent catch
       }
       await loadTableData()
+    }
+
+    watch(() => props.currentTab, () => {
+      loadData()
     })
 
     watch(() => state.filters, (filters: any) => {
@@ -243,6 +250,7 @@ export default defineComponent({
     }, { deep: true })
 
     return {
+      ...toRefs(state),
       clearFilters,
       infiniteScrollCallback,
       headers,

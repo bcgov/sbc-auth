@@ -27,7 +27,7 @@
       id="short-name-summaries"
       :clearFiltersTrigger="clearFiltersTrigger"
       itemKey="id"
-      :loading="false"
+      :loading="loading"
       loadingText="Loading Short names..."
       noDataText="No records to show."
       :setItems="results"
@@ -146,7 +146,7 @@
 </template>
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
-import { Ref, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { Ref, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
@@ -162,7 +162,8 @@ export default defineComponent({
   name: 'ShortNameSummaryTable',
   components: { BaseVDataTable, DatePicker, ShortNameLinkingDialog },
   props: {
-    linkedAccount: { default: {} }
+    linkedAccount: { default: {} },
+    currentTab: { default: 0 }
   },
   emits: ['on-link-account'],
   setup (props, { emit, root }) {
@@ -362,7 +363,11 @@ export default defineComponent({
       onLinkedAccount(account)
     })
 
-    onMounted(async () => {
+    watch(() => props.currentTab, () => {
+      loadData()
+    })
+
+    async function loadData () {
       const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesSummaryFilter)
       if (orgSearchFilter) {
         try {
@@ -376,7 +381,7 @@ export default defineComponent({
         }
       }
       await loadTableSummaryData()
-    })
+    }
 
     watch(() => state.filters, (filters: any) => {
       ConfigHelper.addToSession(SessionStorageKeys.ShortNamesSummaryFilter, JSON.stringify(filters.filterPayload))
