@@ -7,6 +7,7 @@
     :content-class="dialogClass"
     :max-width="maxWidth"
     @keydown.esc="close()"
+    @click:outside="close()"
   >
     <v-card>
       <!-- title -->
