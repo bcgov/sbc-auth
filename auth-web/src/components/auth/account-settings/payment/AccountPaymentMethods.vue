@@ -27,7 +27,6 @@
       @get-PAD-info="getPADInfo"
       @emit-bcol-info="setBcolInfo"
       @is-pad-valid="isPADValid"
-      @is-eft-valid="isEFTValid"
       @is-ejv-valid="isEJVValid"
     />
     <v-slide-y-transition>
@@ -136,7 +135,6 @@ export default defineComponent({
       errorText: '',
       isLoading: false,
       padValid: false,
-      eftValid: false,
       ejvValid: false,
       paymentMethodChanged: false,
       isFuturePaymentMethodAvailable: false, // set true if in between 3 days cooling period
@@ -161,10 +159,6 @@ export default defineComponent({
       return state.selectedPaymentMethod === PaymentTypes.PAD && !state.padValid
     }
 
-    function isEftSelectedAndInvalid () {
-      return state.selectedPaymentMethod === PaymentTypes.EFT && !state.eftValid
-    }
-
     function isEjvSelectedAndInvalid () {
       return state.selectedPaymentMethod === PaymentTypes.EJV && !state.ejvValid
     }
@@ -179,7 +173,6 @@ export default defineComponent({
       }
 
       return isPadSelectedAndInvalid() ||
-            isEftSelectedAndInvalid() ||
             isEjvSelectedAndInvalid() ||
             paymentMethodNotChangedAndNotEjv() ||
             disableSaveButtonForBCOL()
@@ -196,10 +189,6 @@ export default defineComponent({
 
     function isPADValid (isValid) {
       state.padValid = isValid
-    }
-
-    function isEFTValid (isValid) {
-      state.eftValid = isValid
     }
 
     function isEJVValid (isValid) {
@@ -388,7 +377,6 @@ export default defineComponent({
       isDisableSaveBtn,
       getPADInfo,
       isPADValid,
-      isEFTValid,
       isEJVValid,
       isAcknowledgeNeeded,
       initialize,
