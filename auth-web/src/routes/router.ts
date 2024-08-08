@@ -314,7 +314,8 @@ export function getRoutes (): RouteConfig[] {
         {
           path: 'payment-option',
           name: 'payment-option',
-          component: accountPaymentOption
+          component: accountPaymentOption,
+          props: true
         },
         {
           path: 'transactions',
