@@ -27,7 +27,7 @@
       id="short-name-summaries"
       :clearFiltersTrigger="clearFiltersTrigger"
       itemKey="id"
-      :loading="false"
+      :loading="loading"
       loadingText="Loading Short names..."
       noDataText="No records to show."
       :setItems="results"
@@ -162,7 +162,8 @@ export default defineComponent({
   name: 'ShortNameSummaryTable',
   components: { BaseVDataTable, DatePicker, ShortNameLinkingDialog },
   props: {
-    linkedAccount: { default: {} }
+    linkedAccount: { default: {} },
+    currentTab: { default: 0 }
   },
   emits: ['on-link-account'],
   setup (props, { emit, root }) {
@@ -362,7 +363,15 @@ export default defineComponent({
       onLinkedAccount(account)
     })
 
+    watch(() => props.currentTab, () => {
+      loadData()
+    })
+
     onMounted(async () => {
+      await loadData()
+    })
+
+    async function loadData () {
       const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesSummaryFilter)
       if (orgSearchFilter) {
         try {
@@ -376,7 +385,7 @@ export default defineComponent({
         }
       }
       await loadTableSummaryData()
-    })
+    }
 
     watch(() => state.filters, (filters: any) => {
       ConfigHelper.addToSession(SessionStorageKeys.ShortNamesSummaryFilter, JSON.stringify(filters.filterPayload))
