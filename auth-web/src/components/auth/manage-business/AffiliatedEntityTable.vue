@@ -163,6 +163,7 @@
             icon="mdi-alert"
             :showAlertHeader="true"
             :details="getDetails(item)"
+            :corpType="item.corpType?.code || item.corpType"
           />
           <EntityDetails
             v-if="isProcessing(status(item))"
