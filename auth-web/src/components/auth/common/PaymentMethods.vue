@@ -95,16 +95,6 @@
                     To send us a payment through electronic funds transfer (EFT), please read the
                     <a @click="getEftInstructions">Electronic Funds Transfer Payment Instructions</a>.
                   </div>
-                  <div class="terms-container">
-                    <TermsOfUseDialog
-                      :isAlreadyAccepted="isEFTTOSAccepted"
-                      :tosText="'Terms and Conditions of the Electronic Funds Transfer'"
-                      :tosType="'termsofuse_pad'"
-                      :tosHeading="'Electronic Funds Transfer Terms and Conditions Agreement, BC Registry and Online Services'"
-                      :tosCheckBoxLabelAppend="'for BC Registry Services'"
-                      @terms-acceptance-status="updateEFTTermsAccepted($event)"
-                    />
-                  </div>
                 </div>
 
                 <!-- Other Payment Types -->
@@ -199,7 +189,6 @@ import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
-import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { useOrgStore } from '@/stores/org'
 
 const PAYMENT_METHODS = {
@@ -274,7 +263,6 @@ export default defineComponent({
     PADInfoForm,
     LinkedBCOLBanner,
     GLPaymentForm,
-    TermsOfUseDialog,
     ModalDialog
   },
   props: {
@@ -289,7 +277,7 @@ export default defineComponent({
     isInitialAcknowledged: { default: false },
     isBcolAdmin: { default: false }
   },
-  emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-eft-valid', 'is-ejv-valid', 'payment-method-selected'],
+  emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected'],
   setup (props, { emit, root }) {
     const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary } = useOrgStore()
     const bcOnlineDialog: InstanceType<typeof ModalDialog> = ref(null)
@@ -305,7 +293,6 @@ export default defineComponent({
     const padInfo = ref({})
     const isTouched = ref(false)
     const ejvPaymentInformationTitle = 'General Ledger Information'
-    const isEFTTOSAccepted = ref(false)
 
     // this object can define the payment methods allowed for each account tyoes
     const paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
@@ -389,12 +376,6 @@ export default defineComponent({
       emit('is-ejv-valid', isValid)
     }
 
-    const updateEFTTermsAccepted = (isAccepted: boolean) => {
-      isEFTTOSAccepted.value = isAccepted
-      isTouched.value = true
-      emit('is-eft-valid', isAccepted && isTouched.value)
-    }
-
     const cancelModal = () => {
       bcOnlineDialog.value.close()
       selectedPaymentMethod.value = ''
@@ -448,8 +429,6 @@ export default defineComponent({
       isPADValid,
       isPadInfoTouched,
       isPaymentSelected,
-      updateEFTTermsAccepted,
-      isEFTTOSAccepted,
       bcOnlineDialog,
       cancelModal,
       continueModal,
