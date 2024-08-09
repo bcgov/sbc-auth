@@ -7,6 +7,9 @@ SECURITY LABEL FOR anon ON COLUMN users.last_name
 SECURITY LABEL FOR anon ON COLUMN users.first_name
   IS 'MASKED WITH FUNCTION anon.fake_first_name()';
 
+SECURITY LABEL FOR anon ON COLUMN users.email
+  IS 'MASKED WITH FUNCTION anon.fake_email()';
+
 SECURITY LABEL FOR anon ON COLUMN contacts.phone
   IS 'MASKED WITH FUNCTION anon.random_phone()';
 
