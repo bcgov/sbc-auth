@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - data_warehouse/sql/**
+      - jobs/gcp-db-data-masking/sql/**
 jobs:
  move-files:
   runs-on: ubuntu-latest
