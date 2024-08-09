@@ -1,0 +1,21 @@
+name: Move sql scripts to GCP bucket
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - jobs/gcp-db-data-masking/sql/**
+jobs:
+ move-files:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions-hub/gcloud@master
+      env:
+        PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+      with:
+        args: cp -r "jobs/gcp-db-data-masking/sql/*" "gs://auth-db-dump-prod/"
+        cli: gsutil
