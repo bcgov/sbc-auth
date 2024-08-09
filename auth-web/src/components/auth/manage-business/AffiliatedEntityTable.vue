@@ -155,7 +155,7 @@
             v-if="status(item) === BusinessState.CHANGE_REQUESTED"
             icon="mdi-alert"
             maxWidth="300px"
-            :colour="'#F8661A'"
+            colour="#F8661A"
             :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
             :location="{top: true}"
           >
