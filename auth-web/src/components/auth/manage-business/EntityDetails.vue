@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { EntityAlertTypes } from '@/util/constants'
+import { CorpTypes, EntityAlertTypes } from '@/util/constants'
 import IconTooltip from '@/components/IconTooltip.vue'
 import { PropType } from 'vue'
 import { defineComponent } from '@vue/composition-api'
@@ -47,6 +47,10 @@ export default defineComponent({
   props: {
     details: {
       type: Array as PropType<Array<EntityAlertTypes>>,
+      required: true
+    },
+    corpType: {
+      type: String,
       required: true
     },
     showAlertHeader: {
@@ -72,10 +76,25 @@ export default defineComponent({
           return { message: 'This business is in liquidation', colour: '#D3272C', priority: 2 }
         case EntityAlertTypes.DISSOLUTION:
           return { message: 'This business is in the process of being dissolved', colour: '#D3272C', priority: 1 }
-        case EntityAlertTypes.EXPIRED:
-          return { message: 'This incorporation application is no longer valid; the name request is expired.',
+        case EntityAlertTypes.EXPIRED: {
+          let typeLabel: string
+          switch (props.corpType) {
+            case CorpTypes.REGISTRATION:
+              typeLabel = 'registration '
+              break
+            case CorpTypes.CONTINUATION_IN:
+              typeLabel = 'continuation application'
+              break
+            case CorpTypes.AMALGAMATION_APPLICATION:
+              typeLabel = 'amalgamation application'
+              break
+            default:
+              typeLabel = 'incorporation application'
+          }
+          return { message: `This ${typeLabel} is no longer valid; the name request is expired.`,
             colour: '#D3272C',
             priority: 5 }
+        }
         default:
           return null
       }

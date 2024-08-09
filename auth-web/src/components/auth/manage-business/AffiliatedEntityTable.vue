@@ -140,21 +140,30 @@
         <template #item-slot-Status="{ item }">
           <span>{{ status(item) }}</span>
           <!-- Future Effective Icon for PAID_FE status -->
-          <template v-if="status(item) === BusinessState.PAID_FE">
-            <v-tooltip bottom>
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  class="ml-1"
-                  color="#F8661A"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-information-outline
-                </v-icon>
-              </template>
-              <span>This filing will become effective on {{ formatDate(item.effectiveDate) }}</span>
-            </v-tooltip>
-          </template>
+          <IconTooltip
+            v-if="status(item) === BusinessState.PAID_FE"
+            icon="mdi-information-outline"
+            maxWidth="300px"
+            :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
+            :location="{top: true}"
+          >
+            <span>This filing will become effective on {{ formatDate(item.effectiveDate) }}</span>
+          </IconTooltip>
+
+          <!-- Alert Icon for CHANGE_REQUESTED status -->
+          <IconTooltip
+            v-if="status(item) === BusinessState.CHANGE_REQUESTED"
+            icon="mdi-alert"
+            maxWidth="300px"
+            colour="#F8661A"
+            :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
+            :location="{top: true}"
+          >
+            <div>
+              <strong>Alert:</strong><br>
+              <span> This application requires you to make changes before resubmitting.</span>
+            </div>
+          </IconTooltip>
           <EntityDetails
             v-if="isExpired(item) ||
               isFrozed(item) ||
@@ -163,6 +172,7 @@
             icon="mdi-alert"
             :showAlertHeader="true"
             :details="getDetails(item)"
+            :corpType="item.corpType?.code || item.corpType"
           />
           <EntityDetails
             v-if="isProcessing(status(item))"
@@ -194,6 +204,7 @@ import {
   AffiliationInvitationStatus,
   AffiliationInvitationType,
   BusinessState,
+  CorpTypes,
   EntityAlertTypes,
   NrDisplayStates,
   NrState
@@ -205,13 +216,14 @@ import { AffiliationInviteInfo } from '@/models/affiliation'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import EntityDetails from './EntityDetails.vue'
+import IconTooltip from '@/components/IconTooltip.vue'
 import moment from 'moment'
 import { useAffiliations } from '@/composables'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',
-  components: { AffiliationAction, EntityDetails, BaseVDataTable },
+  components: { AffiliationAction, EntityDetails, BaseVDataTable, IconTooltip },
   props: {
     loading: { default: false },
     highlightIndex: { default: -1 }
@@ -357,6 +369,7 @@ export default defineComponent({
       isRejectedName,
       isApprovedName,
       nameRequestType,
+      CorpTypes,
       name,
       open,
       number,
@@ -412,6 +425,11 @@ export default defineComponent({
   .names-block {
     display: table;
   }
+
+  .icon-tooltip-style {
+  font-size: 1.5em;
+  margin-left: 4px;
+}
 
   .names-text {
     display: table-cell;
