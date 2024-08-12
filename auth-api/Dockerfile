@@ -7,6 +7,8 @@ ENV VCS_REF=${VCS_REF}
 ENV BUILD_DATE=${BUILD_DATE}
 ENV PORT=8080
 
+CMD gunicorn --bind 0.0.0.0:${PORT} --config /code/gunicorn_config.py wsgi:app
+
 LABEL org.label-schema.vcs-ref=${VCS_REF} \
     org.label-schema.build-date=${BUILD_DATE}
 
