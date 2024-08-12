@@ -36,7 +36,7 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Install docker-compose
         run: |
           make setup
       - name: Lint with pylint
