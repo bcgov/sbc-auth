@@ -7,7 +7,6 @@ ENV VCS_REF=${VCS_REF}
 ENV BUILD_DATE=${BUILD_DATE}
 ENV PORT=8080
 
-
 LABEL org.label-schema.vcs-ref=${VCS_REF} \
     org.label-schema.build-date=${BUILD_DATE}
 
