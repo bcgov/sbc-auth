@@ -13,6 +13,7 @@
 # limitations under the License.
 """Provides the WSGI entry point for running the application
 """
+import os
 from auth_api import create_app
 
 
@@ -20,4 +21,5 @@ from auth_api import create_app
 app = create_app() # pylint: disable=invalid-name
 
 if __name__ == "__main__":
-    app.run()
+    server_port = os.environ.get('PORT', '8080')
+    app.run(debug=False, port=server_port, host='0.0.0.0')
