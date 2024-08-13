@@ -24,19 +24,19 @@ def test_meta_no_commit_hash(client):
     """Assert that the endpoint returns just the services __version__."""
     from auth_api.version import __version__  # pylint: disable=import-outside-toplevel
 
-    rv = client.get('/api/v1/meta/info')
+    rv = client.get("/api/v1/meta/info")
 
     assert rv.status_code == 200
-    assert rv.json == {'API': f'auth_api/{__version__}'}
+    assert rv.json == {"API": f"auth_api/{__version__}"}
 
 
 def test_meta_with_commit_hash(monkeypatch, client):
     """Assert that the endpoint return __version__ and the last git hash used to build the services image."""
     from auth_api.version import __version__  # pylint: disable=import-outside-toplevel
 
-    commit_hash = 'deadbeef_ha'
-    monkeypatch.setenv('OPENSHIFT_BUILD_COMMIT', commit_hash)
+    commit_hash = "deadbeef_ha"
+    monkeypatch.setenv("OPENSHIFT_BUILD_COMMIT", commit_hash)
 
-    rv = client.get('/api/v1/meta/info')
+    rv = client.get("/api/v1/meta/info")
     assert rv.status_code == 200
-    assert rv.json == {'API': f'auth_api/{__version__}-{commit_hash}'}
+    assert rv.json == {"API": f"auth_api/{__version__}-{commit_hash}"}

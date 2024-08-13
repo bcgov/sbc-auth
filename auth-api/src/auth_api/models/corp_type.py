@@ -19,7 +19,7 @@ from .base_model import BaseCodeModel
 class CorpType(BaseCodeModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This class manages all of the base data about a Corp Type."""
 
-    __tablename__ = 'corp_types'
+    __tablename__ = "corp_types"
 
     @classmethod
     def get_default_corp_type(cls):

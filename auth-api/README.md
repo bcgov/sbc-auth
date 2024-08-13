@@ -1,8 +1,5 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
-[![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/development/graph/badge.svg?flag=authapi)](https://codecov.io/gh/bcgov/sbc-auth/tree/development/auth-api)
-![Auth API CHECK CI](https://github.com/bcgov/sbc-auth/workflows/Auth%20API%20CHECK%20CI/badge.svg)
-![Auth API DEV CD](https://github.com/bcgov/sbc-auth/workflows/Auth%20API%20DEV%20CD/badge.svg)
-![Auth API TEST CD](https://github.com/bcgov/sbc-auth/workflows/Auth%20API%20TEST%20CD/badge.svg)
+
 # AUTH API
 
 BC Registries authentication and authorization services.
@@ -29,14 +26,14 @@ You also need to set up the variables used for environment-specific settings:
 
 To prepare your local database:
 1. In the [root project folder](../docker/docker-compose.yml): `docker-compose up -d`
-2. In your `venv` environment: `python manage.py db upgrade`
+2. In your environment: `peotry run flask db upgrade` or `flask db upgrade`
 
 
 Note:
 
 **[Windows Users]**
 If using WSL, may need to change the host from localhost -> <computer-name>.local
-EX. in config.py and .env. 
+EX. in config.py and .env.
 
 **[Mac Users]**
 : You might get an error regarding the SSL certificate verification failed.
@@ -82,4 +79,3 @@ pip install certifi /Applications/Python\ 3.7/Install\ Certificates.command
 View the [document](../docs/build-deploy.md).
 
 ## Github Actions
-

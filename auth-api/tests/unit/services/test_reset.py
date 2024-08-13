@@ -29,14 +29,19 @@ from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from tests.utilities.factory_scenarios import KeycloakScenario, TestEntityInfo, TestJwtClaims, TestUserInfo
 from tests.utilities.factory_utils import (
-    factory_entity_model, factory_membership_model, factory_org_model, factory_user_model, patch_token_info)
+    factory_entity_model,
+    factory_membership_model,
+    factory_org_model,
+    factory_user_model,
+    patch_token_info,
+)
 
 
 def test_reset(session, auth_mock, monkeypatch):  # pylint: disable=unused-argument
     """Assert that can be reset data by the provided token."""
     user_with_token = TestUserInfo.user_tester
-    user_with_token['keycloak_guid'] = TestJwtClaims.tester_role['sub']
-    user_with_token['idp_userid'] = TestJwtClaims.tester_role['idp_userid']
+    user_with_token["keycloak_guid"] = TestJwtClaims.tester_role["sub"]
+    user_with_token["idp_userid"] = TestJwtClaims.tester_role["idp_userid"]
     user = factory_user_model(user_info=user_with_token)
     org = factory_org_model(user_id=user.id)
     factory_membership_model(user.id, org.id)
@@ -56,8 +61,8 @@ def test_reset(session, auth_mock, monkeypatch):  # pylint: disable=unused-argum
     found_entity = EntityService.find_by_entity_id(entity.id)
     assert found_entity is not None
     dictionary = found_entity.as_dict()
-    assert dictionary['business_identifier'] == TestEntityInfo.entity1['businessIdentifier']
-    assert not dictionary['pass_code_claimed']
+    assert dictionary["business_identifier"] == TestEntityInfo.entity1["businessIdentifier"]
+    assert not dictionary["pass_code_claimed"]
 
     found_memeber = MembershipService.get_members_for_org(org.id)
     assert found_memeber is None
@@ -73,7 +78,7 @@ def test_reset_user_notexists(session, auth_mock, monkeypatch):  # pylint: disab
 def test_reset_user_without_tester_role(session, auth_mock, monkeypatch):  # pylint: disable=unused-argument
     """Assert that can not be reset data by the user doesn't have tester role."""
     user_with_token = TestUserInfo.user_tester
-    user_with_token['keycloak_guid'] = TestJwtClaims.tester_role['sub']
+    user_with_token["keycloak_guid"] = TestJwtClaims.tester_role["sub"]
     user = factory_user_model(user_info=user_with_token)
     org = factory_org_model(user_id=user.id)
 
@@ -96,12 +101,12 @@ def test_reset_bceid_user(session, auth_mock, monkeypatch):  # pylint: disable=u
     assert user is not None
     user_id = user.id
     user_with_token = TestUserInfo.user_bceid_tester
-    user_with_token['keycloak_guid'] = user_id
-    user_with_token['idp_userid'] = user_id
+    user_with_token["keycloak_guid"] = user_id
+    user_with_token["idp_userid"] = user_id
     user = factory_user_model(user_info=user_with_token)
     org = factory_org_model(user_id=user.id)
 
-    patch_token_info(TestJwtClaims.get_test_user(user_id, 'BCEID'), monkeypatch)
+    patch_token_info(TestJwtClaims.get_test_user(user_id, "BCEID"), monkeypatch)
     response = ResetDataService.reset()
     assert response is None
 

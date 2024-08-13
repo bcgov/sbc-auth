@@ -14,12 +14,11 @@
 """Mounting the end-points."""
 from typing import Optional
 
-import os
 from flask import Blueprint, Flask  # noqa: I001
-from .v1 import v1_endpoint
-from .reset import bp as reset_bp
 
-TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')
+from .v1 import v1_endpoint
+
+TEST_BLUEPRINT = Blueprint("TEST", __name__, url_prefix="/test")
 
 
 class Endpoints:  # pylint: disable=too-few-public-methods
@@ -39,10 +38,6 @@ class Endpoints:  # pylint: disable=too-few-public-methods
     def _mount_endpoints(self):
         """Mount the endpoints of the system."""
         v1_endpoint.init_app(self.app)
-
-        if os.getenv('FLASK_ENV', 'production') in ['development', 'testing']:
-            self.app.register_blueprint(TEST_BLUEPRINT)
-            self.app.register_blueprint(reset_bp)
 
 
 endpoints = Endpoints()

@@ -22,6 +22,7 @@ from .codes import Codes
 from .contact import Contact
 from .documents import Documents
 from .entity import Entity
+from .flags import Flags
 from .invitation import Invitation
 from .membership import Membership
 from .minio import MinioService
@@ -33,4 +34,3 @@ from .simple_org import SimpleOrg
 from .task import Task
 from .user import User
 from .user_settings import UserSettings
-from .flags import Flags

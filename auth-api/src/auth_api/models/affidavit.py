@@ -12,46 +12,51 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This manages an Affidavit record in the Auth service."""
+from sql_versioning import Versioned
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.enums import AffidavitStatus
 
-from .base_model import VersionedModel
+from .base_model import BaseModel
 from .db import db
 from .membership import Membership
 from .org import Org
 from .user import User
 
 
-class Affidavit(VersionedModel):
+class Affidavit(Versioned, BaseModel):
     """This is the model for a Affidavit."""
 
-    __tablename__ = 'affidavits'
+    __tablename__ = "affidavits"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     document_id = Column(String(60), index=True)
     issuer = Column(String(250))
-    status_code = Column(ForeignKey('affidavit_statuses.code'), nullable=False)
+    status_code = Column(ForeignKey("affidavit_statuses.code"), nullable=False)
     decision_made_by = Column(String(250))
     decision_made_on = Column(DateTime, nullable=True)
-    user_id = Column(ForeignKey('users.id'), nullable=False)
+    user_id = Column(ForeignKey("users.id"), nullable=False)
 
-    contacts = relationship('ContactLink', primaryjoin='Affidavit.id == ContactLink.affidavit_id', lazy='select')
-    status = relationship('AffidavitStatus', foreign_keys=[status_code], lazy='select')
-    user = relationship('User', foreign_keys=[user_id], lazy='select')
+    contacts = relationship(
+        "ContactLink", primaryjoin="Affidavit.id == ContactLink.affidavit_id", lazy="select", back_populates="affidavit"
+    )
+    status = relationship("AffidavitStatus", foreign_keys=[status_code], lazy="select")
+    user = relationship("User", foreign_keys=[user_id], lazy="select")
 
     @classmethod
     def find_by_org_id(cls, org_id: int, filtered_affidavit_statuses=None):
         """Find an affidavit by org id."""
         if filtered_affidavit_statuses is None:
             filtered_affidavit_statuses = [AffidavitStatus.INACTIVE.value]
-        return db.session.query(Affidavit) \
-            .join(Membership, Membership.user_id == Affidavit.user_id) \
-            .join(Org, Org.id == Membership.org_id) \
-            .filter(Org.id == org_id) \
-            .filter(Affidavit.status_code.notin_(filtered_affidavit_statuses)) \
-            .one_or_none()  # There should be only one record at most, else throw error
+        return (
+            db.session.query(Affidavit)
+            .join(Membership, Membership.user_id == Affidavit.user_id)
+            .join(Org, Org.id == Membership.org_id)
+            .filter(Org.id == org_id)
+            .filter(Affidavit.status_code.notin_(filtered_affidavit_statuses))
+            .one_or_none()
+        )  # There should be only one record at most, else throw error
 
     @classmethod
     def find_pending_by_user_id(cls, user_id: int):
@@ -70,8 +75,10 @@ class Affidavit(VersionedModel):
             affidavit_status = [status]
         else:
             affidavit_status = [AffidavitStatus.PENDING.value, AffidavitStatus.APPROVED.value]
-        return db.session.query(Affidavit) \
-            .join(User, User.id == Affidavit.user_id) \
-            .filter(Affidavit.status_code.in_(affidavit_status)) \
-            .filter(User.keycloak_guid == user_guid) \
+        return (
+            db.session.query(Affidavit)
+            .join(User, User.id == Affidavit.user_id)
+            .filter(Affidavit.status_code.in_(affidavit_status))
+            .filter(User.keycloak_guid == user_guid)
             .one_or_none()
+        )

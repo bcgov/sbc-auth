@@ -28,9 +28,9 @@ class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-p
         """Maps all of the Entity fields to a default schema."""
 
         model = EntityModel
-        exclude = ('id', 'pass_code')
+        exclude = ("id", "pass_code")
 
-    contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
+    contacts = fields.Pluck("ContactLinkSchema", "contact", many=True)
     corp_type = fields.Nested(CorpTypeSchema, many=False)
     corp_sub_type = fields.Nested(CorpTypeSchema, many=False)
-    affiliations = fields.Nested('AffiliationSchema', many=True, only=('id', 'created', 'certified_by_name'))
+    affiliations = fields.Nested("AffiliationSchema", many=True, only=("id", "created", "certified_by_name"))

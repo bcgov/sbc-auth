@@ -19,8 +19,8 @@ Test-Suite to ensure that the /accounts endpoint is working as expected.
 
 import copy
 import json
+from http import HTTPStatus
 
-from auth_api import status as http_status
 from auth_api.schemas import utils as schema_utils
 from auth_api.utils.enums import OrgStatus
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
@@ -32,11 +32,15 @@ def test_bcol_profiles_returns_200(app, client, jwt, session):  # pylint:disable
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
-    rv = client.post('/api/v1/bcol-profiles', data=json.dumps(TestOrgInfo.bcol_linked().get('bcOnlineCredential')),
-                     headers=headers, content_type='application/json')
+    rv = client.post(
+        "/api/v1/bcol-profiles",
+        data=json.dumps(TestOrgInfo.bcol_linked().get("bcOnlineCredential")),
+        headers=headers,
+        content_type="application/json",
+    )
 
-    assert rv.status_code == http_status.HTTP_200_OK
-    assert schema_utils.validate(rv.json, 'bconline_response')[0]
+    assert rv.status_code == HTTPStatus.OK
+    assert schema_utils.validate(rv.json, "bconline_response")[0]
 
 
 def test_bcol_id_already_linked(client, jwt, session):
@@ -44,18 +48,24 @@ def test_bcol_id_already_linked(client, jwt, session):
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     headers = factory_auth_header(jwt=jwt, claims=claims)
 
-    rv = client.post('/api/v1/bcol-profiles', data=json.dumps(TestOrgInfo.bcol_linked().get('bcOnlineCredential')),
-                     headers=headers, content_type='application/json')
+    rv = client.post(
+        "/api/v1/bcol-profiles",
+        data=json.dumps(TestOrgInfo.bcol_linked().get("bcOnlineCredential")),
+        headers=headers,
+        content_type="application/json",
+    )
 
     bcol_org = factory_org_model(org_info=TestOrgInfo.org3, bcol_info=TestOrgInfo.bcol_linked())
-    bcol_org.bcol_account_id = rv.json['accountNumber']
+    bcol_org.bcol_account_id = rv.json["accountNumber"]
     bcol_org.save()
 
-    rv_duplicate = client.post('/api/v1/bcol-profiles',
-                               data=json.dumps(TestOrgInfo.bcol_linked().get('bcOnlineCredential')),
-                               headers=headers,
-                               content_type='application/json')
-    assert rv_duplicate.status_code == http_status.HTTP_409_CONFLICT
+    rv_duplicate = client.post(
+        "/api/v1/bcol-profiles",
+        data=json.dumps(TestOrgInfo.bcol_linked().get("bcOnlineCredential")),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_duplicate.status_code == HTTPStatus.CONFLICT
 
 
 def test_bcol_id_already_linked_to_rejected(client, jwt, session):
@@ -63,16 +73,22 @@ def test_bcol_id_already_linked_to_rejected(client, jwt, session):
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     headers = factory_auth_header(jwt=jwt, claims=claims)
 
-    rv = client.post('/api/v1/bcol-profiles', data=json.dumps(TestOrgInfo.bcol_linked().get('bcOnlineCredential')),
-                     headers=headers, content_type='application/json')
+    rv = client.post(
+        "/api/v1/bcol-profiles",
+        data=json.dumps(TestOrgInfo.bcol_linked().get("bcOnlineCredential")),
+        headers=headers,
+        content_type="application/json",
+    )
 
     bcol_org = factory_org_model(org_info=TestOrgInfo.org3, bcol_info=TestOrgInfo.bcol_linked())
-    bcol_org.bcol_account_id = rv.json['accountNumber']
+    bcol_org.bcol_account_id = rv.json["accountNumber"]
     bcol_org.status_code = OrgStatus.REJECTED.value
     bcol_org.save()
 
-    rv_duplicate = client.post('/api/v1/bcol-profiles',
-                               data=json.dumps(TestOrgInfo.bcol_linked().get('bcOnlineCredential')),
-                               headers=headers,
-                               content_type='application/json')
-    assert rv_duplicate.status_code == http_status.HTTP_200_OK
+    rv_duplicate = client.post(
+        "/api/v1/bcol-profiles",
+        data=json.dumps(TestOrgInfo.bcol_linked().get("bcOnlineCredential")),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_duplicate.status_code == HTTPStatus.OK

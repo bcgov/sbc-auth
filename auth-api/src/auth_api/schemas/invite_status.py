@@ -14,11 +14,10 @@
 """Manager for invitation status schema and export."""
 
 from auth_api.models import InvitationStatus as InvitationStatusModel
-
 from auth_api.models import ma
 
 
-class InvitationStatusSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class InvitationStatusSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Invitation Status model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

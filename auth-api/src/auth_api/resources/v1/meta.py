@@ -20,13 +20,11 @@ from flask import Blueprint, jsonify
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.run_version import get_run_version
 
+bp = Blueprint("META", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/meta")
 
-bp = Blueprint('META', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/meta')
 
-
-@bp.route('/info')
+@bp.route("/info")
 def get_meta_info():
     """Return a JSON object with meta information about the Service."""
     version = get_run_version()
-    return jsonify(
-        API=f'auth_api/{version}')
+    return jsonify(API=f"auth_api/{version}")

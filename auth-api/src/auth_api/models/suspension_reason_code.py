@@ -25,4 +25,4 @@ class SuspensionReasonCode(BaseCodeModel):  # pylint: disable=too-few-public-met
     That is supported by auth system.
     """
 
-    __tablename__ = 'suspension_reason_codes'
+    __tablename__ = "suspension_reason_codes"

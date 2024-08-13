@@ -22,8 +22,8 @@ from auth_api.utils.user_context import UserContext, user_context
 @user_context
 def validate(**kwargs) -> ValidatorResponse:
     """Validate and return correct access type."""
-    access_type: str = kwargs.get('accessType')
-    user: UserContext = kwargs['user_context']
+    access_type: str = kwargs.get("accessType")
+    user: UserContext = kwargs["user_context"]
     error = None
     validator_response = ValidatorResponse()
     if access_type:
@@ -31,11 +31,16 @@ def validate(**kwargs) -> ValidatorResponse:
             error = Error.USER_CANT_CREATE_ANONYMOUS_ORG
         if not user.is_staff_admin() and access_type in AccessType.GOVM.value:
             error = Error.USER_CANT_CREATE_GOVM_ORG
-        if not user.is_bceid_user() and access_type in \
-                (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
+        if not user.is_bceid_user() and access_type in (
+            AccessType.EXTRA_PROVINCIAL.value,
+            AccessType.REGULAR_BCEID.value,
+        ):
             error = Error.USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG
-        if user.is_bceid_user() and access_type not in \
-                (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value, AccessType.GOVN.value):
+        if user.is_bceid_user() and access_type not in (
+            AccessType.EXTRA_PROVINCIAL.value,
+            AccessType.REGULAR_BCEID.value,
+            AccessType.GOVN.value,
+        ):
             error = Error.USER_CANT_CREATE_REGULAR_ORG
         if error is not None:
             validator_response.add_error(error)
@@ -46,5 +51,5 @@ def validate(**kwargs) -> ValidatorResponse:
             access_type = AccessType.EXTRA_PROVINCIAL.value
         elif not user.is_staff_admin():
             access_type = AccessType.REGULAR.value
-    validator_response.add_info({'access_type': access_type})
+    validator_response.add_info({"access_type": access_type})
     return validator_response

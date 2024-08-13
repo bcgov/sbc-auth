@@ -17,9 +17,9 @@
 Test-Suite to ensure that the /tester/reset endpoint is working as expected.
 """
 import json
+from http import HTTPStatus
 from unittest.mock import patch
 
-from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.services import ResetTestData as ResetDataService
@@ -30,28 +30,30 @@ from tests.utilities.factory_utils import factory_auth_header
 def test_reset(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert the endpoint can reset the test data."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
-                     headers=headers, content_type='application/json')
+    rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json"
+    )
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.tester_role)
-    rv = client.post('/test/reset', headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+    rv = client.post("/test/reset", headers=headers, content_type="application/json")
+    assert rv.status_code == HTTPStatus.NO_CONTENT
 
 
 def test_reset_unauthorized(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert the endpoint get a unauthorized error if don't have tester role."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
-                     headers=headers, content_type='application/json')
+    rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json"
+    )
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post('/test/reset', headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+    rv = client.post("/test/reset", headers=headers, content_type="application/json")
+    assert rv.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_reset_returns_exception(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the code type can not be fetched and with expcetion."""
-    with patch.object(ResetDataService, 'reset', side_effect=BusinessException(Error.UNDEFINED_ERROR, None)):
+    with patch.object(ResetDataService, "reset", side_effect=BusinessException(Error.UNDEFINED_ERROR, None)):
         headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.tester_role)
-        rv = client.post('/test/reset', headers=headers, content_type='application/json')
-        assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+        rv = client.post("/test/reset", headers=headers, content_type="application/json")
+        assert rv.status_code == HTTPStatus.BAD_REQUEST

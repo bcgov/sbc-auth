@@ -16,22 +16,17 @@
 from flask import Blueprint, request
 from flask_cors import cross_origin
 
-from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
 from auth_api.services.org import Org
-from auth_api.tracer import Tracer
+from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import Role
 
-
-bp = Blueprint('BCOL_PROFILES', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/bcol-profiles')
-
-TRACER = Tracer.get_instance()
+bp = Blueprint("BCOL_PROFILES", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/bcol-profiles")
 
 
-@bp.route('', methods=['POST', 'OPTIONS'])
-@cross_origin(origins='*', methods=['POST'])
-@TRACER.trace()
+@bp.route("", methods=["POST", "OPTIONS"])
+@cross_origin(origins="*", methods=["POST"])
 @_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def post_for_bcol_details():
     """Return BC Online profile details."""
@@ -41,5 +36,5 @@ def post_for_bcol_details():
         bcol_response = Org.get_bcol_details(bcol_credential=request_json)
         response, status = bcol_response.json(), bcol_response.status_code
     except BusinessException as exception:
-        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status
