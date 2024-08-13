@@ -22,9 +22,9 @@ from auth_api.utils.user_context import user_context
 @user_context
 def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     """Validate and return org name."""
-    name = kwargs.get('name')
-    branch_name = kwargs.get('branch_name')
-    org_id = kwargs.get('org_id', None)
+    name = kwargs.get("name")
+    branch_name = kwargs.get("branch_name")
+    org_id = kwargs.get("org_id", None)
     validator_response = ValidatorResponse()
     existing_similar_orgs = OrgModel.find_similar_org_by_name(name, org_id=org_id, branch_name=branch_name)
     if existing_similar_orgs:

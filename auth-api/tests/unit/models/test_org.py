@@ -26,22 +26,22 @@ from tests.utilities.factory_utils import factory_user_model
 
 def factory_org_model(name, session):
     """Produce a templated org model."""
-    org_type = OrgTypeModel(code='TEST', description='Test')
+    org_type = OrgTypeModel(code="TEST", description="Test")
     session.add(org_type)
     session.commit()
 
-    org_status = OrgStatusModel(code='TEST', description='Test')
+    org_status = OrgStatusModel(code="TEST", description="Test")
     session.add(org_status)
     session.commit()
 
-    preferred_payment = PaymentTypeModel(code='TEST', description='Test')
+    preferred_payment = PaymentTypeModel(code="TEST", description="Test")
     session.add(preferred_payment)
     session.commit()
     org = OrgModel(name=name)
     org.org_type = org_type
     org.org_status = OrgStatusModel.get_default_status()
     org.preferred_payment = preferred_payment
-    org.branch_name = ''
+    org.branch_name = ""
     org.save()
 
     return org
@@ -49,7 +49,7 @@ def factory_org_model(name, session):
 
 def test_org(session):
     """Assert that an Org can be stored in the service."""
-    org = factory_org_model(name='My Test Org', session=session)
+    org = factory_org_model(name="My Test Org", session=session)
     session.add(org)
     session.commit()
     assert org.id is not None
@@ -57,19 +57,17 @@ def test_org(session):
 
 def test_org_create_from_dictionary(session):  # pylint:disable=unused-argument
     """Assert that an Org can be created from a dictionary."""
-    org_info = {
-        'name': 'My Test Org'
-    }
+    org_info = {"name": "My Test Org"}
 
     org_model = OrgModel.create_from_dict(org_info).save()
     assert org_model
     assert org_model.id
-    assert org_model.name == org_info['name']
+    assert org_model.name == org_info["name"]
 
 
 def test_org_find_by_id(session):  # pylint:disable=unused-argument
     """Assert that an Org can retrieved by its id."""
-    org = factory_org_model(name='My Test Org', session=session)
+    org = factory_org_model(name="My Test Org", session=session)
     session.add(org)
     session.commit()
 
@@ -80,7 +78,7 @@ def test_org_find_by_id(session):  # pylint:disable=unused-argument
 
 def test_org_find_by_uuid(session):
     """Assert that an Org can be retrieved by its uuid."""
-    org = factory_org_model(name='My Test Org', session=session)
+    org = factory_org_model(name="My Test Org", session=session)
     session.add(org)
     session.commit()
 
@@ -92,7 +90,7 @@ def test_org_find_by_uuid(session):
 
 def test_org_find_by_name(session):  # pylint:disable=unused-argument
     """Assert that an Org can retrieved by its name."""
-    org = factory_org_model(name='My Test Org', session=session)
+    org = factory_org_model(name="My Test Org", session=session)
     session.add(org)
     session.commit()
 
@@ -105,7 +103,7 @@ def test_org_find_by_name(session):  # pylint:disable=unused-argument
 
 def test_org_find_by_name_inactive(session):  # pylint:disable=unused-argument
     """Assert that an inactive Org can not be retrieved by its name."""
-    org = factory_org_model(name='My Test Org', session=session)
+    org = factory_org_model(name="My Test Org", session=session)
     session.add(org)
     session.commit()
 
@@ -117,7 +115,7 @@ def test_org_find_by_name_inactive(session):  # pylint:disable=unused-argument
 
 def test_find_similar_org_by_name(session):  # pylint:disable=unused-argument
     """Assert that an Org can retrieved by its name."""
-    org = factory_org_model(name='My Test Org', session=session)
+    org = factory_org_model(name="My Test Org", session=session)
     session.add(org)
     session.commit()
 
@@ -125,13 +123,13 @@ def test_find_similar_org_by_name(session):  # pylint:disable=unused-argument
     assert found_org
     assert found_org.name == org.name
 
-    found_org = OrgModel.find_similar_org_by_name('Test Or')
+    found_org = OrgModel.find_similar_org_by_name("Test Or")
     assert not found_org
 
 
 def test_find_similar_org_by_name_inactive(session):  # pylint:disable=unused-argument
     """Assert that an inactive Org can not be retrieved by its name."""
-    org = factory_org_model(name='My Test Org', session=session)
+    org = factory_org_model(name="My Test Org", session=session)
     session.add(org)
     session.commit()
 
@@ -143,22 +141,20 @@ def test_find_similar_org_by_name_inactive(session):  # pylint:disable=unused-ar
 
 def test_update_org_from_dict(session):  # pylint:disable=unused-argument
     """Assert that an Org can be updated from a dictionary."""
-    org = factory_org_model(name='My Test Org', session=session)
+    org = factory_org_model(name="My Test Org", session=session)
     session.add(org)
     session.commit()
 
-    update_dictionary = {
-        'name': 'My Updated Test Org'
-    }
+    update_dictionary = {"name": "My Updated Test Org"}
     org.update_org_from_dict(update_dictionary)
     assert org
-    assert org.name == update_dictionary['name']
+    assert org.name == update_dictionary["name"]
 
 
 def test_count_org_from_dict(session):  # pylint:disable=unused-argument
     """Assert that an Org can be updated from a dictionary."""
     user = factory_user_model()
-    org = factory_org_model(name='My Test Org', session=session)
+    org = factory_org_model(name="My Test Org", session=session)
     org.created_by_id = user.id
     session.add(org)
     session.commit()
@@ -167,9 +163,7 @@ def test_count_org_from_dict(session):  # pylint:disable=unused-argument
 
 def test_create_from_dict(session):  # pylint:disable=unused-argument
     """Assert that an Org can be created from schema."""
-    org_info = {
-        'name': 'My Test Org'
-    }
+    org_info = {"name": "My Test Org"}
 
     result_org = OrgModel.create_from_dict(org_info).save()
 
@@ -185,7 +179,7 @@ def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
 
 def test_delete(session):  # pylint:disable=unused-argument
     """Assert that an Org can be updated from a dictionary."""
-    org = factory_org_model(name='My Test Org', session=session)
+    org = factory_org_model(name="My Test Org", session=session)
     session.add(org)
     session.commit()
     assert org.status_code == OrgStatusEnum.ACTIVE.value

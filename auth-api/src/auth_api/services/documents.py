@@ -14,18 +14,15 @@
 """Service for managing the documents."""
 
 from jinja2 import Environment, FileSystemLoader
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.config import get_named_config
 from auth_api.models import Documents as DocumentsModel
 from auth_api.schemas import DocumentSchema
 
-
-ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
+ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 CONFIG = get_named_config()
 
 
-@ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
 class Documents:
     """Manages the documents in DB.
 
@@ -36,7 +33,6 @@ class Documents:
         """Return an invitation service instance."""
         self._model = model
 
-    @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the User as a python dict.
 

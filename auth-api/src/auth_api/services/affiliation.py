@@ -18,7 +18,6 @@ from typing import Dict, List
 
 from flask import current_app
 from requests.exceptions import HTTPError
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 from sqlalchemy.orm import contains_eager, subqueryload
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
@@ -40,11 +39,11 @@ from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRName
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
+
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
 
 
-@ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
 class Affiliation:
     """Manages all aspect of Affiliation data.
 
@@ -65,7 +64,6 @@ class Affiliation:
         """Return the entity for this affiliation as a service."""
         return EntityService(self._model.entity)
 
-    @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the affiliation as a python dictionary.
 
@@ -78,7 +76,7 @@ class Affiliation:
     @staticmethod
     def find_visible_affiliations_by_org_id(org_id, environment=None):
         """Given an org_id, this will return the entities affiliated with it."""
-        current_app.logger.debug(f'<find_visible_affiliations_by_org_id for org_id {org_id}')
+        current_app.logger.debug(f"<find_visible_affiliations_by_org_id for org_id {org_id}")
         if not org_id:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -90,53 +88,57 @@ class Affiliation:
 
         # 3806 : Filter out the NR affiliation if there is IA affiliation for the same NR.
         # Dict with key as NR number and value as name
-        nr_number_name_dict = {d['business_identifier']: d['name']
-                               for d in data if d['corp_type']['code'] == CorpType.NR.value}
+        nr_number_name_dict = {
+            d["business_identifier"]: d["name"] for d in data if d["corp_type"]["code"] == CorpType.NR.value
+        }
         # Create a list of all temporary business names
         temp_types = [CorpType.TMP.value, CorpType.ATMP.value, CorpType.CTMP.value, CorpType.RTMP.value]
-        tmp_business_list = [d['name'] for d in data if d['corp_type']['code'] in temp_types]
+        tmp_business_list = [d["name"] for d in data if d["corp_type"]["code"] in temp_types]
 
         # NR Numbers
         nr_numbers = nr_number_name_dict.keys()
 
         filtered_affiliations: list = []
         for entity in data:
-            if entity['corp_type']['code'] == CorpType.NR.value:
+            if entity["corp_type"]["code"] == CorpType.NR.value:
                 # If there is a TMP affiliation present for the NR, do not show NR
-                if not entity['business_identifier'] in tmp_business_list:
+                if not entity["business_identifier"] in tmp_business_list:
                     filtered_affiliations.append(entity)
 
-            elif entity['corp_type']['code'] in temp_types:
+            elif entity["corp_type"]["code"] in temp_types:
 
                 # If affiliation is not for a named company IA, and not a Numbered company
                 # (name and businessIdentifier same)
                 # --> Its a Temp affiliation with incorporation complete.
                 # In this case, a TMP affiliation will be there but the name will be BC...
-                if entity['name'] in nr_numbers or entity['name'] == entity['business_identifier']:
+                if entity["name"] in nr_numbers or entity["name"] == entity["business_identifier"]:
                     # If temp affiliation is for an NR, change the name to NR's name
-                    if entity['name'] in nr_numbers:
-                        entity['nr_number'] = entity['name']
-                        entity['name'] = nr_number_name_dict[entity['name']]
+                    if entity["name"] in nr_numbers:
+                        entity["nr_number"] = entity["name"]
+                        entity["name"] = nr_number_name_dict[entity["name"]]
 
                     filtered_affiliations.append(entity)
             else:
                 filtered_affiliations.append(entity)
 
-        current_app.logger.debug('>find_visible_affiliations_by_org_id')
+        current_app.logger.debug(">find_visible_affiliations_by_org_id")
         return filtered_affiliations
 
     @staticmethod
     def find_affiliations_by_org_id(org_id, environment=None):
         """Return business affiliations for the org."""
         # Accomplished in service instead of model (easier to avoid circular reference issues).
-        entities = db.session.query(Entity) \
-            .join(AffiliationModel) \
+        entities = (
+            db.session.query(Entity)
+            .join(AffiliationModel)
             .options(
                 contains_eager(Entity.affiliations),
                 subqueryload(Entity.contacts).subqueryload(ContactLink.contact),
                 subqueryload(Entity.created_by),
-                subqueryload(Entity.modified_by)) \
+                subqueryload(Entity.modified_by),
+            )
             .filter(AffiliationModel.org_id == org_id, Entity.affiliations.any(AffiliationModel.org_id == org_id))
+        )
         if environment:
             entities = entities.filter(AffiliationModel.environment == environment)
         else:
@@ -147,9 +149,9 @@ class Affiliation:
     @staticmethod
     def find_affiliation(org_id, business_identifier, environment=None):
         """Return business affiliation by the org id and business identifier."""
-        affiliation = AffiliationModel.find_affiliation_by_org_id_and_business_identifier(org_id,
-                                                                                          business_identifier,
-                                                                                          environment)
+        affiliation = AffiliationModel.find_affiliation_by_org_id_and_business_identifier(
+            org_id, business_identifier, environment
+        )
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         return Affiliation(affiliation).as_dict()
@@ -158,7 +160,7 @@ class Affiliation:
     def create_affiliation(org_id, business_identifier, environment=None, pass_code=None, certified_by_name=None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
-        current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
+        current_app.logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
         # Security check below.
         org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
         if org is None:
@@ -167,33 +169,32 @@ class Affiliation:
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        current_app.logger.debug('<create_affiliation entity found')
+        current_app.logger.debug("<create_affiliation entity found")
         entity_id = entity.identifier
         entity_type = entity.corp_type
 
         if not Affiliation.is_authorized(entity, pass_code):
-            current_app.logger.debug('<create_affiliation not authorized')
+            current_app.logger.debug("<create_affiliation not authorized")
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
-        current_app.logger.debug('<create_affiliation find affiliation')
+        current_app.logger.debug("<create_affiliation find affiliation")
         # Ensure this affiliation does not already exist
         affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id, environment)
         if affiliation is not None:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
-        affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=certified_by_name,
-                                       environment=environment)
+        affiliation = AffiliationModel(
+            org_id=org_id, entity_id=entity_id, certified_by_name=certified_by_name, environment=environment
+        )
         affiliation.save()
 
-        if entity_type not in ['SP', 'GP']:
+        if entity_type not in ["SP", "GP"]:
             entity.set_pass_code_claimed(True)
-        if entity_type not in [CorpType.RTMP.value,
-                               CorpType.TMP.value,
-                               CorpType.ATMP.value,
-                               CorpType.CTMP.value]:
+        if entity_type not in [CorpType.RTMP.value, CorpType.TMP.value, CorpType.ATMP.value, CorpType.CTMP.value]:
             name = entity.name if len(entity.name) > 0 else entity.business_identifier
-            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                                           name=name, id=entity.business_identifier))
+            ActivityLogPublisher.publish_activity(
+                Activity(org_id, ActivityAction.CREATE_AFFILIATION.value, name=name, id=entity.business_identifier)
+            )
         return Affiliation(affiliation)
 
     @staticmethod
@@ -201,11 +202,12 @@ class Affiliation:
         """Return True if user is authorized to create an affiliation."""
         if Affiliation.is_staff_or_sbc_staff():
             return True
-        if entity.corp_type in ['SP', 'GP']:
+        if entity.corp_type in ["SP", "GP"]:
             if not pass_code:
                 return False
-            token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
-                                                          config_secret='ENTITY_SVC_CLIENT_SECRET')
+            token = RestService.get_service_account_token(
+                config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+            )
             return Affiliation._validate_firms_party(token, entity.business_identifier, pass_code)
         if pass_code:
             return validate_passcode(pass_code, entity.pass_code)
@@ -214,8 +216,9 @@ class Affiliation:
         return True
 
     @staticmethod
-    def create_new_business_affiliation(affiliation_data: AffiliationData,  # pylint: disable=too-many-locals
-                                        environment: str = None):
+    def create_new_business_affiliation(  # pylint: disable=too-many-locals
+        affiliation_data: AffiliationData, environment: str = None
+    ):
         """Initiate a new incorporation."""
         org_id = affiliation_data.org_id
         business_identifier = affiliation_data.business_identifier
@@ -223,7 +226,7 @@ class Affiliation:
         phone = affiliation_data.phone
         certified_by_name = affiliation_data.certified_by_name
 
-        current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
+        current_app.logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
         user_is_staff = Affiliation.is_staff_or_sbc_staff()
         if not user_is_staff and (not email and not phone):
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
@@ -239,62 +242,81 @@ class Affiliation:
         if not (nr_json := Affiliation._get_nr_details(business_identifier)):
             raise BusinessException(Error.NR_NOT_FOUND, None)
 
-        status = nr_json.get('state')
+        status = nr_json.get("state")
 
-        if status not in (NRStatus.APPROVED.value, NRStatus.CONDITIONAL.value,
-                          NRStatus.DRAFT.value, NRStatus.INPROGRESS.value):
+        if status not in (
+            NRStatus.APPROVED.value,
+            NRStatus.CONDITIONAL.value,
+            NRStatus.DRAFT.value,
+            NRStatus.INPROGRESS.value,
+        ):
             raise BusinessException(Error.NR_INVALID_STATUS, None)
 
-        if not nr_json.get('applicants'):
+        if not nr_json.get("applicants"):
             raise BusinessException(Error.NR_INVALID_APPLICANTS, None)
 
-        nr_phone = nr_json.get('applicants').get('phoneNumber')
-        nr_email = nr_json.get('applicants').get('emailAddress')
+        nr_phone = nr_json.get("applicants").get("phoneNumber")
+        nr_email = nr_json.get("applicants").get("emailAddress")
 
         if status == NRStatus.DRAFT.value:
             invoices = Affiliation.get_nr_payment_details(business_identifier)
 
             # Ideally there should be only one or two (priority fees) payment request for the NR.
-            if not (invoices and invoices['invoices'] and invoices['invoices'][0].get('statusCode') == 'COMPLETED'):
+            if not (invoices and invoices["invoices"] and invoices["invoices"][0].get("statusCode") == "COMPLETED"):
                 raise BusinessException(Error.NR_NOT_PAID, None)
 
         # If consentFlag is not R, N or Null for a CONDITIONAL NR throw error
-        if status == NRStatus.CONDITIONAL.value and nr_json.get('consentFlag', None) not in (None, 'R', 'N'):
+        if status == NRStatus.CONDITIONAL.value and nr_json.get("consentFlag", None) not in (None, "R", "N"):
             raise BusinessException(Error.NR_NOT_APPROVED, None)
 
-        if not user_is_staff and ((phone and re.sub(r'\D', '', phone) != re.sub(r'\D', '', nr_phone)) or
-                                  (email and email.casefold() != nr_email.casefold())):
+        if not user_is_staff and (
+            (phone and re.sub(r"\D", "", phone) != re.sub(r"\D", "", nr_phone))
+            or (email and email.casefold() != nr_email.casefold())
+        ):
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
         # Create an entity with the Name from NR if entity doesn't exist
         if not entity:
             # Filter the names from NR response and get the name which has status APPROVED as the name.
             # Filter the names from NR response and get the name which has status CONDITION as the name.
-            nr_name_state = NRNameStatus.APPROVED.value if status == NRStatus.APPROVED.value \
-                else NRNameStatus.CONDITION.value
-            name = next((name.get('name') for name in nr_json.get('names') if
-                        name.get('state', None) == nr_name_state), None)
+            nr_name_state = (
+                NRNameStatus.APPROVED.value if status == NRStatus.APPROVED.value else NRNameStatus.CONDITION.value
+            )
+            name = next(
+                (name.get("name") for name in nr_json.get("names") if name.get("state", None) == nr_name_state), None
+            )
 
-            entity = EntityService.save_entity({
-                'businessIdentifier': business_identifier,
-                'name': name or business_identifier,
-                'corpTypeCode': CorpType.NR.value,
-                'passCodeClaimed': True
-            })
+            entity = EntityService.save_entity(
+                {
+                    "businessIdentifier": business_identifier,
+                    "name": name or business_identifier,
+                    "corpTypeCode": CorpType.NR.value,
+                    "passCodeClaimed": True,
+                }
+            )
 
         # Affiliation may already already exist.
-        if not (affiliation_model :=
-                AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier, environment)):
+        if not (
+            affiliation_model := AffiliationModel.find_affiliation_by_org_and_entity_ids(
+                org_id, entity.identifier, environment
+            )
+        ):
             # Create an affiliation with org
             affiliation_model = AffiliationModel(
-                org_id=org_id, entity_id=entity.identifier, certified_by_name=certified_by_name)
+                org_id=org_id, entity_id=entity.identifier, certified_by_name=certified_by_name
+            )
 
-            if entity.corp_type not in [CorpType.RTMP.value,
-                                        CorpType.TMP.value,
-                                        CorpType.ATMP.value,
-                                        CorpType.CTMP.value]:
-                ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                                               name=entity.name, id=entity.business_identifier))
+            if entity.corp_type not in [
+                CorpType.RTMP.value,
+                CorpType.TMP.value,
+                CorpType.ATMP.value,
+                CorpType.CTMP.value,
+            ]:
+                ActivityLogPublisher.publish_activity(
+                    Activity(
+                        org_id, ActivityAction.CREATE_AFFILIATION.value, name=entity.name, id=entity.business_identifier
+                    )
+                )
         affiliation_model.certified_by_name = certified_by_name
         affiliation_model.environment = environment
         affiliation_model.save()
@@ -305,10 +327,10 @@ class Affiliation:
     @staticmethod
     def get_nr_payment_details(business_identifier):
         """Get the NR payment details."""
-        pay_api_url = current_app.config.get('PAY_API_URL')
+        pay_api_url = current_app.config.get("PAY_API_URL")
         invoices = RestService.get(
-            f'{pay_api_url}/payment-requests?businessIdentifier={business_identifier}',
-            token=RestService.get_service_account_token()
+            f"{pay_api_url}/payment-requests?businessIdentifier={business_identifier}",
+            token=RestService.get_service_account_token(),
         ).json()
         return invoices
 
@@ -321,20 +343,22 @@ class Affiliation:
         log_delete_draft = delete_affiliation_request.log_delete_draft
         email_addresses = delete_affiliation_request.email_addresses
 
-        current_app.logger.info(f'<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}')
+        current_app.logger.info(f"<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}")
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        entity = EntityService.find_by_business_identifier(business_identifier,
-                                                           allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
+        entity = EntityService.find_by_business_identifier(
+            business_identifier, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF)
+        )
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity_id = entity.identifier
 
-        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=org_id, entity_id=entity_id,
-                                                                              environment=environment)
+        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(
+            org_id=org_id, entity_id=entity_id, environment=environment
+        )
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -347,10 +371,7 @@ class Affiliation:
         affiliation.delete()
         entity.set_pass_code_claimed(False)
 
-        if entity.corp_type in [CorpType.RTMP.value,
-                                CorpType.TMP.value,
-                                CorpType.ATMP.value,
-                                CorpType.CTMP.value]:
+        if entity.corp_type in [CorpType.RTMP.value, CorpType.TMP.value, CorpType.ATMP.value, CorpType.CTMP.value]:
             return
 
         # When registering a business (also RTMP and TMP in between):
@@ -360,13 +381,15 @@ class Affiliation:
         # 4. unaffilliate a business (with NR in identifier)
         # 5. affilliate a business (with FM or BC in identifier)
         # Users can also intentionally delete a draft. We want to log this action.
-        name_request = (entity.status in [NRStatus.DRAFT.value, NRStatus.CONSUMED.value] and
-                        entity.corp_type == CorpType.NR.value) or 'NR ' in entity.business_identifier
+        name_request = (
+            entity.status in [NRStatus.DRAFT.value, NRStatus.CONSUMED.value] and entity.corp_type == CorpType.NR.value
+        ) or "NR " in entity.business_identifier
         publish = log_delete_draft or not name_request
         if publish:
             name = entity.name if len(entity.name) > 0 else entity.business_identifier
-            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
-                                                           name=name, id=entity.business_identifier))
+            ActivityLogPublisher.publish_activity(
+                Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value, name=name, id=entity.business_identifier)
+            )
 
     @staticmethod
     @user_context
@@ -377,37 +400,41 @@ class Affiliation:
         # 2. staff takes NR, creates a business
         # 3. filer updates the business for staff (which creates a new entity)
         # 4. fix_stale_affiliations is called, and fixes the client's affiliation to point at this new entity
-        user_from_context: UserContext = kwargs['user_context']
+        user_from_context: UserContext = kwargs["user_context"]
         if not user_from_context.is_system():
             return
-        nr_number: str = entity_details.get('nrNumber')
-        bootstrap_identifier: str = entity_details.get('bootstrapIdentifier')
-        identifier: str = entity_details.get('identifier')
-        current_app.logger.debug(f'<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier}')
+        nr_number: str = entity_details.get("nrNumber")
+        bootstrap_identifier: str = entity_details.get("bootstrapIdentifier")
+        identifier: str = entity_details.get("identifier")
+        current_app.logger.debug(f"<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier}")
         from_entity: Entity = EntityService.find_by_business_identifier(nr_number, skip_auth=True)
         # Find entity with nr_number (stale, because this is now a business)
-        if from_entity and from_entity.corp_type == 'NR' and \
-                (to_entity := EntityService.find_by_business_identifier(identifier, skip_auth=True)):
+        if (
+            from_entity
+            and from_entity.corp_type == "NR"
+            and (to_entity := EntityService.find_by_business_identifier(identifier, skip_auth=True))
+        ):
             affiliations = AffiliationModel.find_affiliations_by_entity_id(from_entity.identifier, environment)
             for affiliation in affiliations:
                 # These are already handled by the filer.
                 if affiliation.org_id == org_id:
                     continue
                 current_app.logger.debug(
-                        f'Moving affiliation {affiliation.id} from {from_entity.identifier} to {to_entity.identifier}')
+                    f"Moving affiliation {affiliation.id} from {from_entity.identifier} to {to_entity.identifier}"
+                )
                 affiliation.entity_id = to_entity.identifier
                 affiliation.environment = environment
                 affiliation.save()
 
-        current_app.logger.debug('>fix_stale_affiliations')
+        current_app.logger.debug(">fix_stale_affiliations")
 
     @staticmethod
     def _affiliation_details_url(affiliation: AffiliationModel) -> str:
         """Determine url to call for affiliation details."""
         # only have LEAR and NAMEX affiliations
         if affiliation.entity.corp_type_code == CorpType.NR.value:
-            return current_app.config.get('NAMEX_AFFILIATION_DETAILS_URL')
-        return current_app.config.get('LEAR_AFFILIATION_DETAILS_URL')
+            return current_app.config.get("NAMEX_AFFILIATION_DETAILS_URL")
+        return current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
 
     @staticmethod
     async def get_affiliation_details(affiliations: List[AffiliationModel]) -> List:
@@ -415,25 +442,29 @@ class Affiliation:
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
         for affiliation in affiliations:
             url = Affiliation._affiliation_details_url(affiliation)
-            url_identifiers.setdefault(url, [affiliation.entity.business_identifier])\
-                .append(affiliation.entity.business_identifier)
+            url_identifiers.setdefault(url, [affiliation.entity.business_identifier]).append(
+                affiliation.entity.business_identifier
+            )
 
-        call_info = [{'url': url, 'payload': {'identifiers': identifiers}}
-                     for url, identifiers in url_identifiers.items()]
+        call_info = [
+            {"url": url, "payload": {"identifiers": identifiers}} for url, identifiers in url_identifiers.items()
+        ]
 
         token = RestService.get_service_account_token(
-            config_id='ENTITY_SVC_CLIENT_ID', config_secret='ENTITY_SVC_CLIENT_SECRET')
+            config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+        )
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token)
             combined = Affiliation._combine_affiliation_details(responses)
             # Should provide us with ascending order
             affiliations_sorted = sorted(affiliations, key=lambda x: x.created, reverse=True)
             # Provide us with a dict with the max created date.
-            ordered = {affiliation.entity.business_identifier:
-                       affiliation.created for affiliation in affiliations_sorted}
+            ordered = {
+                affiliation.entity.business_identifier: affiliation.created for affiliation in affiliations_sorted
+            }
 
             def sort_key(item):
-                identifier = item.get('identifier', item.get('nameRequest', {}).get('nrNum', ''))
+                identifier = item.get("identifier", item.get("nameRequest", {}).get("nrNum", ""))
                 return ordered.get(identifier, datetime.datetime.min)
 
             combined.sort(key=sort_key, reverse=True)
@@ -441,22 +472,22 @@ class Affiliation:
             return combined
         except ServiceUnavailableException as err:
             current_app.logger.debug(err)
-            current_app.logger.debug('Failed to get affiliations details: %s', affiliations)
-            raise ServiceUnavailableException('Failed to get affiliation details') from err
+            current_app.logger.debug("Failed to get affiliations details: %s", affiliations)
+            raise ServiceUnavailableException("Failed to get affiliation details") from err
 
     @staticmethod
     def _group_details(details):
         name_requests = {}
         businesses = []
         drafts = []
-        businesses_key = 'businessEntities'
-        drafts_key = 'draftEntities'
+        businesses_key = "businessEntities"
+        drafts_key = "draftEntities"
         for data in details:
             if isinstance(data, list):
                 # assume this is an NR list
                 for name_request in data:
                     # i.e. {'NR1234567': {...}}
-                    name_requests[name_request['nrNum']] = {'legalType': CorpType.NR.value, 'nameRequest': name_request}
+                    name_requests[name_request["nrNum"]] = {"legalType": CorpType.NR.value, "nameRequest": name_request}
                 continue
             if businesses_key in data:
                 businesses = list(data[businesses_key])
@@ -466,9 +497,11 @@ class Affiliation:
 
     @staticmethod
     def _update_draft_type_for_amalgamation_nr(business):
-        if business.get('draftType', None) \
-                            and business['nameRequest']['request_action_cd'] == NRActionCodes.AMALGAMATE.value:
-            business['draftType'] = CorpType.ATMP.value
+        if (
+            business.get("draftType", None)
+            and business["nameRequest"]["request_action_cd"] == NRActionCodes.AMALGAMATE.value
+        ):
+            business["draftType"] = CorpType.ATMP.value
         return business
 
     @staticmethod
@@ -476,12 +509,12 @@ class Affiliation:
         # combine NRs
         for business in drafts + businesses:
             # Only drafts have nrNumber coming back from legal-api.
-            if 'nrNumber' in business and (nr_num := business['nrNumber']):
-                if business['nrNumber'] in name_requests:
-                    business['nameRequest'] = name_requests[nr_num]['nameRequest']
+            if "nrNumber" in business and (nr_num := business["nrNumber"]):
+                if business["nrNumber"] in name_requests:
+                    business["nameRequest"] = name_requests[nr_num]["nameRequest"]
                     business = Affiliation._update_draft_type_for_amalgamation_nr(business)
                     # Remove the business if the draft associated to the NR is consumed.
-                    if business['nameRequest']['stateCd'] == NRStatus.CONSUMED.value:
+                    if business["nameRequest"]["stateCd"] == NRStatus.CONSUMED.value:
                         drafts.remove(business)
                     del name_requests[nr_num]
                 else:
@@ -499,11 +532,12 @@ class Affiliation:
     @staticmethod
     def _get_nr_details(nr_number: str):
         """Return NR details by calling legal-api."""
-        nr_api_url = current_app.config.get('NAMEX_API_URL')
-        get_nr_url = f'{nr_api_url}/requests/{nr_number}'
+        nr_api_url = current_app.config.get("NAMEX_API_URL")
+        get_nr_url = f"{nr_api_url}/requests/{nr_number}"
         try:
             token = RestService.get_service_account_token(
-                config_id='ENTITY_SVC_CLIENT_ID', config_secret='ENTITY_SVC_CLIENT_SECRET')
+                config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+            )
             get_nr_response = RestService.get(get_nr_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
             current_app.logger.info(e)
@@ -513,26 +547,26 @@ class Affiliation:
 
     @staticmethod
     def _validate_firms_party(token, business_identifier, party_name_str: str):
-        legal_api_url = current_app.config.get('LEGAL_API_URL') + current_app.config.get('LEGAL_API_VERSION_2')
-        parties_url = f'{ legal_api_url }/businesses/{business_identifier}/parties'
+        legal_api_url = current_app.config.get("LEGAL_API_URL") + current_app.config.get("LEGAL_API_VERSION_2")
+        parties_url = f"{legal_api_url}/businesses/{business_identifier}/parties"
         try:
             lear_response = RestService.get(parties_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
             current_app.logger.info(e)
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
         parties_json = lear_response.json()
-        for party in parties_json['parties']:
-            officer = party.get('officer')
-            if officer.get('partyType') == 'organization':
-                party_name = officer.get('organizationName')
+        for party in parties_json["parties"]:
+            officer = party.get("officer")
+            if officer.get("partyType") == "organization":
+                party_name = officer.get("organizationName")
             else:
-                party_name = officer.get('lastName') + ', ' + officer.get('firstName')
-                if officer.get('middleInitial'):
-                    party_name = party_name + ' ' + officer.get('middleInitial')
+                party_name = officer.get("lastName") + ", " + officer.get("firstName")
+                if officer.get("middleInitial"):
+                    party_name = party_name + " " + officer.get("middleInitial")
 
             # remove duplicate spaces
-            party_name_str = ' '.join(party_name_str.split())
-            party_name = ' '.join(party_name.split())
+            party_name_str = " ".join(party_name_str.split())
+            party_name = " ".join(party_name.split())
 
             if party_name_str.upper() == party_name.upper():
                 return True
@@ -542,9 +576,10 @@ class Affiliation:
     @user_context
     def is_staff_or_sbc_staff(**kwargs):
         """Return True if user is staff or sbc staff."""
-        user_from_context: UserContext = kwargs['user_context']
+        user_from_context: UserContext = kwargs["user_context"]
         current_user: UserService = UserService.find_by_jwt_token(silent_mode=True)
-        if user_from_context.is_staff() or \
-           (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)):
+        if user_from_context.is_staff() or (
+            current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)
+        ):
             return True
         return False

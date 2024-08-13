@@ -27,8 +27,6 @@ class AffidavitSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-fe
         """Maps all of the affidavit fields to a default schema."""
 
         model = AffidavitModel
-        exclude = (
-            'id',
-        )
+        exclude = ("id",)
 
-    contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
+    contacts = fields.Pluck("ContactLinkSchema", "contact", many=True)

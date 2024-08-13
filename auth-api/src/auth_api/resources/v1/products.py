@@ -14,28 +14,24 @@
 """API endpoints for managing a Product resource."""
 
 import json
+from http import HTTPStatus
 
 from flask import Blueprint
 from flask_cors import cross_origin
 
-from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.services import Product as ProductService
-from auth_api.tracer import Tracer
 from auth_api.utils.endpoints_enums import EndpointEnum
 
-
-bp = Blueprint('PRODUCTS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/products')
-TRACER = Tracer.get_instance()
+bp = Blueprint("PRODUCTS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/products")
 
 
-@bp.route('', methods=['GET', 'OPTIONS'])
-@cross_origin(origins='*', methods=['GET'])
-@TRACER.trace()
+@bp.route("", methods=["GET", "OPTIONS"])
+@cross_origin(origins="*", methods=["GET"])
 def get_products():
     """Get a list of all products."""
     try:
-        response, status = json.dumps(ProductService.get_products()), http_status.HTTP_200_OK
+        response, status = json.dumps(ProductService.get_products()), HTTPStatus.OK
     except BusinessException as exception:
-        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status

@@ -21,13 +21,9 @@ from auth_api.models import UserStatusCode as UserStatusCodeModel
 
 def test_status_code(session):
     """Assert that a User Status Code can be stored in the database."""
-    status_code = UserStatusCodeModel(
-        id=100,
-        name='TEST',
-        description='TEST CODE'
-    )
+    status_code = UserStatusCodeModel(id=100, name="TEST", description="TEST CODE")
     status_code = status_code.save()
     assert status_code.id is not None
-    status_code = UserStatusCodeModel.get_user_status_by_name('TEST')
+    status_code = UserStatusCodeModel.get_user_status_by_name("TEST")
     assert status_code.id == 100
     assert UserStatusCodeModel.get_default_type() == 1

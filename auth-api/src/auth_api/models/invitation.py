@@ -30,26 +30,26 @@ from .invite_status import InvitationStatus
 class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """Model for a Invitation record."""
 
-    __tablename__ = 'invitations'
+    __tablename__ = "invitations"
 
     id = Column(Integer, primary_key=True)
-    sender_id = Column(ForeignKey('users.id'), nullable=False)
+    sender_id = Column(ForeignKey("users.id"), nullable=False)
     recipient_email = Column(String(100), nullable=False)
     sent_date = Column(DateTime, nullable=False)
     accepted_date = Column(DateTime, nullable=True)
     token = Column(String(100), nullable=True)  # stores the one time invitation token
-    invitation_status_code = Column(ForeignKey('invitation_statuses.code'), nullable=False, default='PENDING')
-    type = Column(ForeignKey('invitation_types.code'), nullable=False, default='STANDARD')
+    invitation_status_code = Column(ForeignKey("invitation_statuses.code"), nullable=False, default="PENDING")
+    type = Column(ForeignKey("invitation_types.code"), nullable=False, default="STANDARD")
 
-    invitation_status = relationship('InvitationStatus', foreign_keys=[invitation_status_code])
-    sender = relationship('User', foreign_keys=[sender_id])
-    membership = relationship('InvitationMembership', cascade='all,delete')
+    invitation_status = relationship("InvitationStatus", foreign_keys=[invitation_status_code])
+    sender = relationship("User", foreign_keys=[sender_id])
+    membership = relationship("InvitationMembership", cascade="all,delete", back_populates="invitation")
     login_source = Column(String(20), nullable=True)
 
     @hybrid_property
     def expires_on(self):
         """Calculate the expiry date based on the config value."""
-        if self.invitation_status_code == 'PENDING':
+        if self.invitation_status_code == "PENDING":
             return self.sent_date + timedelta(days=int(get_named_config().TOKEN_EXPIRY_PERIOD))
         return None
 
@@ -57,10 +57,10 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     def status(self):
         """Calculate the status based on the config value."""
         current_time = datetime.now()
-        if self.invitation_status_code == 'PENDING':
+        if self.invitation_status_code == "PENDING":
             expiry_time = self.sent_date + timedelta(days=int(get_named_config().TOKEN_EXPIRY_PERIOD))
             if current_time >= expiry_time:
-                return 'EXPIRED'
+                return "EXPIRED"
         return self.invitation_status_code
 
     @classmethod
@@ -70,14 +70,14 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
             invitation = Invitation()
             invitation.sender_id = user_id
             invitation.type = invitation_type
-            invitation.recipient_email = invitation_info['recipientEmail']
+            invitation.recipient_email = invitation_info["recipientEmail"]
             invitation.sent_date = datetime.now()
             invitation.invitation_status = InvitationStatus.get_default_status()
 
-            for member in invitation_info['membership']:
+            for member in invitation_info["membership"]:
                 invitation_membership = InvitationMembership()
-                invitation_membership.org_id = member['orgId']
-                invitation_membership.membership_type_code = member['membershipType']
+                invitation_membership.org_id = member["orgId"]
+                invitation_membership.membership_type_code = member["membershipType"]
                 invitation.membership.append(invitation_membership)
 
             invitation.save()
@@ -103,23 +103,32 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     @staticmethod
     def find_pending_invitations_by_user(user_id):
         """Find all invitations that are not in accepted state."""
-        return db.session.query(Invitation). \
-            filter(Invitation.sender_id == user_id). \
-            filter(Invitation.invitation_status_code != 'ACCEPTED').all()
+        return (
+            db.session.query(Invitation)
+            .filter(Invitation.sender_id == user_id)
+            .filter(Invitation.invitation_status_code != "ACCEPTED")
+            .all()
+        )
 
     @staticmethod
     def find_pending_invitations_by_org(org_id):
         """Find all invitations that are not in accepted state."""
-        return db.session.query(Invitation) \
-            .filter(Invitation.membership.any(InvitationMembership.org_id == org_id)) \
-            .filter(Invitation.invitation_status_code != 'ACCEPTED').all()
+        return (
+            db.session.query(Invitation)
+            .filter(Invitation.membership.any(InvitationMembership.org_id == org_id))
+            .filter(Invitation.invitation_status_code != "ACCEPTED")
+            .all()
+        )
 
     @staticmethod
     def find_invitations_by_status(user_id, status):
         """Find all invitations that are not in accepted state."""
-        return db.session.query(Invitation). \
-            filter(Invitation.sender_id == user_id). \
-            filter(Invitation.invitation_status_code == status).all()
+        return (
+            db.session.query(Invitation)
+            .filter(Invitation.sender_id == user_id)
+            .filter(Invitation.invitation_status_code == status)
+            .all()
+        )
 
     def update_invitation_as_retried(self):
         """Update this invitation with the new data."""

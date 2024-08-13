@@ -13,23 +13,24 @@
 # limitations under the License.
 """This manages the login options for an account/org."""
 
+from sql_versioning import Versioned
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .base_model import VersionedModel
+from .base_model import BaseModel
 
 
-class AccountLoginOptions(VersionedModel):  # pylint: disable=too-few-public-methods
+class AccountLoginOptions(Versioned, BaseModel):  # pylint: disable=too-few-public-methods
     """Model for Account login options."""
 
-    __tablename__ = 'account_login_options'
+    __tablename__ = "account_login_options"
 
     id = Column(Integer, primary_key=True)
     login_source = Column(String(20), nullable=False)
-    org_id = Column(ForeignKey('orgs.id'), nullable=False)
+    org_id = Column(ForeignKey("orgs.id"), nullable=False)
     is_active = Column(Boolean(), default=True)
 
-    org = relationship('Org', foreign_keys=[org_id], lazy='select')
+    org = relationship("Org", foreign_keys=[org_id], lazy="select")
 
     @classmethod
     def find_active_by_org_id(cls, account_id):

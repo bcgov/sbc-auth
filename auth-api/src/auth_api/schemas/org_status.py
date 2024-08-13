@@ -14,11 +14,10 @@
 """Manager for org status schema and export."""
 
 from auth_api.models import OrgStatus as OrgStatusModel
-
 from auth_api.models import ma
 
 
-class OrgStatusSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class OrgStatusSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the OrgStatus model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

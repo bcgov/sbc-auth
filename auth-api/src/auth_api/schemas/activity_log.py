@@ -25,4 +25,4 @@ class ActivityLogSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-
         """Maps all of the Activity Log fields to a default schema."""
 
         model = ActivityLogModel
-        exclude = ('id', 'remote_addr')
+        exclude = ("id", "remote_addr")

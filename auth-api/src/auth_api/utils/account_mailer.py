@@ -14,6 +14,7 @@
 """helper to publish to mailer."""
 import uuid
 from datetime import datetime, timezone
+
 from flask import current_app
 from simple_cloudevent import SimpleCloudEvent
 
@@ -29,9 +30,9 @@ def publish_to_mailer(notification_type, data=None, source=QueueSources.AUTH_API
         subject=None,
         time=datetime.now(tz=timezone.utc).isoformat(),
         type=notification_type,
-        data=data
+        data=data,
     )
     try:
-        queue.publish(current_app.config.get('ACCOUNT_MAILER_TOPIC'), GcpQueue.to_queue_message(cloud_event))
+        queue.publish(current_app.config.get("ACCOUNT_MAILER_TOPIC"), GcpQueue.to_queue_message(cloud_event))
     except Exception as e:  # NOQA # pylint: disable=broad-except
-        current_app.logger.error(f'Failed to publish to mailer: {str(e)}')
+        current_app.logger.error(f"Failed to publish to mailer: {str(e)}")

@@ -18,5 +18,4 @@ These will get initialized by the application
 
 from flask_mail import Mail
 
-
 mail = Mail()  # pylint: disable=invalid-name

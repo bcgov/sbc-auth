@@ -18,7 +18,7 @@ from auth_api.models import CorpType as CorpTypeModel
 from auth_api.models import ma
 
 
-class CorpTypeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class CorpTypeSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the CorpType model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
@@ -27,4 +27,4 @@ class CorpTypeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too
         model = CorpTypeModel
         # front end expects desc still
 
-    description = fields.String(data_key='desc')
+    description = fields.String(data_key="desc")

@@ -22,7 +22,7 @@ from .base_model import BaseCodeModel
 class InvitationStatus(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """This is the Invitation Status model for the Auth service."""
 
-    __tablename__ = 'invitation_statuses'
+    __tablename__ = "invitation_statuses"
 
     @classmethod
     def get_default_status(cls):

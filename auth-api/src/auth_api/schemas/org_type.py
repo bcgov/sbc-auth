@@ -14,11 +14,10 @@
 """Manager for org type schema and export."""
 
 from auth_api.models import OrgType as OrgTypeModel
-
 from auth_api.models import ma
 
 
-class OrgTypeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class OrgTypeSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the OrgType model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

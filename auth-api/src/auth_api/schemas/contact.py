@@ -17,8 +17,8 @@ from marshmallow import fields, post_dump
 
 from auth_api.models import Contact as ContactModel
 
-from .base_schema import BaseSchema
 from ..utils.util import mask_email
+from .base_schema import BaseSchema
 
 
 class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
@@ -28,10 +28,10 @@ class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-
         """Maps all of the User fields to a default schema."""
 
         model = ContactModel
-        exclude = ('id', 'links', 'created', 'created_by', 'modified', 'modified_by')
+        exclude = ("id", "links", "created", "created_by", "modified", "modified_by")
 
-    email = fields.String(data_key='email')
-    phone = fields.String(data_key='phone')
+    email = fields.String(data_key="email")
+    phone = fields.String(data_key="phone")
 
 
 class ContactSchemaPublic(BaseSchema):  # pylint: disable=too-many-ancestors
@@ -41,13 +41,28 @@ class ContactSchemaPublic(BaseSchema):  # pylint: disable=too-many-ancestors
         """Maps all of the User fields to a default schema."""
 
         model = ContactModel
-        exclude = ('id', 'links', 'created', 'created_by', 'modified', 'modified_by', 'phone', 'phone_extension',
-                   'postal_code', 'street', 'city', 'region', 'street_additional', 'country', 'delivery_instructions')
+        exclude = (
+            "id",
+            "links",
+            "created",
+            "created_by",
+            "modified",
+            "modified_by",
+            "phone",
+            "phone_extension",
+            "postal_code",
+            "street",
+            "city",
+            "region",
+            "street_additional",
+            "country",
+            "delivery_instructions",
+        )
 
-    email = fields.String(data_key='email')
+    email = fields.String(data_key="email")
 
     @post_dump(pass_many=False)
     def _mask_email_field(self, data, many):  # pylint: disable=unused-argument
         """Mask email field."""
-        data['email'] = mask_email(data.get('email'))
+        data["email"] = mask_email(data.get("email"))
         return data

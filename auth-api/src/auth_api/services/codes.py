@@ -37,7 +37,7 @@ class Codes:
         :return: Class reference or None.
         """
         for model_class in db.Model._decl_class_registry.values():  # pylint:disable=protected-access
-            if hasattr(model_class, '__table__') and model_class.__table__.fullname == code_type:
+            if hasattr(model_class, "__table__") and model_class.__table__.fullname == code_type:
                 if issubclass(model_class, BaseCodeModel):
                     return model_class
 
@@ -57,13 +57,14 @@ class Codes:
                     data = []
                     # transform each of entry to a dictionary base on schema.
                     for entry in codes:
-                        module_name = f'auth_api.schemas.{entry.__tablename__}'
-                        class_name = f'{entry.__class__.__name__}Schema'
+                        module_name = f"auth_api.schemas.{entry.__tablename__}"
+                        class_name = f"{entry.__class__.__name__}Schema"
                         try:
                             schema = getattr(importlib.import_module(module_name), class_name)
                         except ModuleNotFoundError:
-                            schema = getattr(importlib.import_module('auth_api.schemas.basecode_type'),
-                                             'BaseCodeSchema')
+                            schema = getattr(
+                                importlib.import_module("auth_api.schemas.basecode_type"), "BaseCodeSchema"
+                            )
                         code_schema = schema()
                         data.append(code_schema.dump(entry, many=False))
                 return data
