@@ -154,9 +154,9 @@
                           v-on="$listeners"
                         >
                           <template #selection="{ item, index }">
-                            <!-- Display "Multiple" if multiple statuses are selected -->
+                            <!-- Display "Multiple Selected" if multiple statuses are selected -->
                             <span v-if="reviewParams[header.value].length > 1 && index === 0">
-                              Multiple
+                              Multiple Selected
                             </span>
                             <!-- Display the item text if only one is selected -->
                             <span v-else-if="reviewParams[header.value].length === 1">
@@ -290,7 +290,7 @@ export default defineComponent({
         nrNumber: '',
         identifier: '',
         completingParty: '',
-        status: [],
+        status: ['AWAITING_REVIEW', 'CHANGE_REQUESTED', 'RESUBMITTED'],
         sortBy: 'submissionDate',
         sortDesc: false
       } as ReviewFilterParams
