@@ -15,9 +15,9 @@
 
 Test suite to ensure that the Product service routines are working as expected.
 """
+from unittest import mock
 from unittest.mock import ANY, patch
 
-from unittest import mock
 import pytest
 
 from auth_api.models.contact_link import ContactLink as ContactLinkModel

@@ -16,9 +16,9 @@
 Test suite to ensure that the Task service routines are working as expected.
 """
 from datetime import datetime
+from unittest import mock
 from unittest.mock import patch
 
-from unittest import mock
 import pytest
 
 from auth_api.models import ContactLink as ContactLinkModel

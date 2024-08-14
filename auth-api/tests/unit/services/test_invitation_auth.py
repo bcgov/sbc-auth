@@ -15,9 +15,9 @@
 
 Test suite to ensure that the Invitation service authentication / login source checks are correct.
 """
+from unittest import mock
 from unittest.mock import ANY, patch
 
-from unittest import mock
 import pytest
 
 from auth_api.exceptions import BusinessException

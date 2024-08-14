@@ -18,7 +18,6 @@ Test-Suite to ensure that the /users endpoint is working as expected.
 """
 import copy
 from http import HTTPStatus
-
 from unittest import mock
 
 from auth_api.models import ContactLink as ContactLinkModel

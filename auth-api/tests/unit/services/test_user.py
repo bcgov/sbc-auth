@@ -17,9 +17,9 @@
 Test-Suite to ensure that the User Service is working as expected.
 """
 import json
+from unittest import mock
 from unittest.mock import patch
 
-from unittest import mock
 import pytest
 from werkzeug.exceptions import HTTPException
 

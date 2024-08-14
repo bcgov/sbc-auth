@@ -76,6 +76,10 @@ max-line-length = 120
 docstring-min-length=10
 count = true
 
+[tool.zimports]
+black-line-length = 120
+keep-unused-type-checking = true
+
 [tool.black]
 target-version =  ["py310", "py311", "py312"]
 line-length = 120

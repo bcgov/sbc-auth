@@ -16,9 +16,9 @@
 Test suite to ensure that the correct product notifications are generated.
 """
 
+from unittest import mock
 from unittest.mock import patch
 
-from unittest import mock
 import pytest
 from sbc_common_components.utils.enums import QueueMessageTypes
 
