@@ -21,8 +21,8 @@ import json
 import time
 import uuid
 from http import HTTPStatus
-
 from unittest import mock
+
 import pytest
 from sqlalchemy import event
 

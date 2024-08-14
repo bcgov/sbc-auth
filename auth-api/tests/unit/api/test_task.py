@@ -18,8 +18,8 @@ Test-Suite to ensure that the /tasks endpoint is working as expected.
 import datetime as dt
 import json
 from http import HTTPStatus
-
 from unittest import mock
+
 import pytest
 
 from auth_api.models import ProductCode as ProductCodeModel

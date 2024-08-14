@@ -16,9 +16,9 @@
 Test suite to ensure that the Org service routines are working as expected.
 """
 from http import HTTPStatus
+from unittest import mock
 from unittest.mock import ANY, Mock, patch
 
-from unittest import mock
 import pytest
 from requests import Response
 from werkzeug.exceptions import HTTPException

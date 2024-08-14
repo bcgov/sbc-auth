@@ -59,14 +59,15 @@ class _Config:  # pylint: disable=too-few-public-methods
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
     SECRET_KEY = "a secret"
-    AUTH_LD_SDK_KEY = os.getenv("AUTH_LD_SDK_KEY", None)
-
     TESTING = False
     DEBUG = False
 
     ALEMBIC_INI = "migrations/alembic.ini"
     # Config to skip migrations when alembic migrate is used
     SKIPPED_MIGRATIONS = ["authorizations_view"]
+
+    SQLALCHEMY_ECHO = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # POSTGRESQL
     DB_USER = os.getenv("DATABASE_USERNAME", "")
@@ -78,8 +79,6 @@ class _Config:  # pylint: disable=too-few-public-methods
         SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host={DB_UNIX_SOCKET}"
     else:
         SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"
-    SQLALCHEMY_ECHO = False
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv("JWT_OIDC_WELL_KNOWN_CONFIG")
@@ -107,7 +106,6 @@ class _Config:  # pylint: disable=too-few-public-methods
         CACHE_DEFAULT_TIMEOUT = 300
 
     CACHE_MEMCACHED_SERVERS = os.getenv("CACHE_MEMCACHED_SERVERS")
-
     CACHE_REDIS_HOST = os.getenv("CACHE_REDIS_HOST")
     CACHE_REDIS_PORT = os.getenv("CACHE_REDIS_PORT")
 
@@ -118,25 +116,25 @@ class _Config:  # pylint: disable=too-few-public-methods
     ENTITY_SVC_CLIENT_ID = os.getenv("ENTITY_SERVICE_ACCOUNT_CLIENT_ID")
     ENTITY_SVC_CLIENT_SECRET = os.getenv("ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET")
 
-    # Upstream Keycloak settings
+    # Upstream Keycloak setting - should be removed
     KEYCLOAK_BCROS_BASE_URL = os.getenv("KEYCLOAK_BCROS_BASE_URL")
     KEYCLOAK_BCROS_REALMNAME = os.getenv("KEYCLOAK_BCROS_REALMNAME")
     KEYCLOAK_BCROS_ADMIN_CLIENTID = os.getenv("KEYCLOAK_BCROS_ADMIN_CLIENTID")
     KEYCLOAK_BCROS_ADMIN_SECRET = os.getenv("KEYCLOAK_BCROS_ADMIN_SECRET")
 
     # API Endpoints
-    BCOL_API_URL = os.getenv("BCOL_API_URL")
-    LEGAL_API_URL = os.getenv("LEGAL_API_URL", "")
-    NAMEX_API_URL = os.getenv("NAMEX_API_URL", "")
-    NOTIFY_API_URL = os.getenv("NOTIFY_API_URL")
-    PAY_API_SANDBOX_URL = os.getenv("PAY_API_SANDBOX_URL")
-    PAY_API_URL = os.getenv("PAY_API_URL")
+    BCOL_API_URL = os.getenv("BCOL_API_URL", "") + os.getenv("BCOL_API_VERSION", "")
+    NAMEX_API_URL = os.getenv("NAMEX_API_URL", "") + os.getenv("NAMEX_API_VERSION", "")
+    NOTIFY_API_URL = os.getenv("NOTIFY_API_URL", "") + os.getenv("NOTIFY_API_VERSION", "")
+    PAY_API_URL = os.getenv("PAY_API_URL", "") + os.getenv("PAY_API_VERSION", "")
 
+    LEGAL_API_URL = os.getenv("LEGAL_API_URL", "")
     LEGAL_API_VERSION = os.getenv("LEGAL_API_VERSION")
     LEGAL_API_VERSION_2 = os.getenv("LEGAL_API_VERSION_2", "")
 
     LEAR_AFFILIATION_DETAILS_URL = f"{LEGAL_API_URL + LEGAL_API_VERSION_2}/businesses/search"
     NAMEX_AFFILIATION_DETAILS_URL = f"{NAMEX_API_URL}/requests/search"
+    PAY_API_SANDBOX_URL = os.getenv("PAY_API_SANDBOX_URL")
 
     # PUB/SUB - PUB: account-mailer-dev, auth-event-dev
     ACCOUNT_MAILER_TOPIC = os.getenv("ACCOUNT_MAILER_TOPIC", "account-mailer-dev")
@@ -153,7 +151,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     # email
     MAIL_FROM_ID = os.getenv("MAIL_FROM_ID")
 
-    # mail token  configuration
+    # mail token configuration
     EMAIL_SECURITY_PASSWORD_SALT = os.getenv("EMAIL_SECURITY_PASSWORD_SALT")
     EMAIL_TOKEN_SECRET_KEY = os.getenv("EMAIL_TOKEN_SECRET_KEY")
     TOKEN_EXPIRY_PERIOD = os.getenv("TOKEN_EXPIRY_PERIOD")
@@ -196,6 +194,9 @@ class _Config:  # pylint: disable=too-few-public-methods
     # NR Supported Request types.
     NR_SUPPORTED_REQUEST_TYPES: List[str] = os.getenv("NR_SUPPORTED_REQUEST_TYPES", "BC").replace(" ", "").split(",")
     AUTH_WEB_SANDBOX_HOST = os.getenv("AUTH_WEB_SANDBOX_HOST", "localhost")
+
+    # LaunchDarkly SDK key
+    AUTH_LD_SDK_KEY = os.getenv("AUTH_LD_SDK_KEY", None)
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods

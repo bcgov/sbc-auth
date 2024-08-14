@@ -16,9 +16,8 @@
 Test suite to ensure that the Membership service routines are working as expected.
 """
 
-from unittest.mock import ANY, patch
-
 from unittest import mock
+from unittest.mock import ANY, patch
 
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models.dataclass import Activity

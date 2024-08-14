@@ -16,9 +16,9 @@
 Test suite to ensure that the Affiliation Invitation service routines are working as expected.
 """
 from datetime import datetime, timedelta
+from unittest import mock
 from unittest.mock import patch
 
-from unittest import mock
 import pytest
 from freezegun import freeze_time
 from sbc_common_components.utils.enums import QueueMessageTypes
