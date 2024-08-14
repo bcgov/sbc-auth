@@ -107,12 +107,9 @@ def build_cache(app):
         cache.clear()
         if not app.config.get("TESTING", False):
             try:
-                from auth_api.services.permissions import (  # pylint: disable=import-outside-toplevel
-                    Permissions as PermissionService,
-                )
-                from auth_api.services.products import (  # pylint: disable=import-outside-toplevel
-                    Product as ProductService,
-                )
+                # pylint: disable=import-outside-toplevel
+                from auth_api.services.permissions import Permissions as PermissionService
+                from auth_api.services.products import Product as ProductService
 
                 PermissionService.build_all_permission_cache()
                 ProductService.build_all_products_cache()
