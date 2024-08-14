@@ -1,5 +1,12 @@
 <template>
   <div id="continuation-application-review-table">
+    <DatePicker
+      v-show="showDatePicker"
+      ref="datePicker"
+      :reset="dateRangeReset"
+      class="date-picker"
+      @submit="updateDateRange($event)"
+    />
     <v-form class="fas-search continuation-review-search">
       <v-row
         dense
@@ -121,15 +128,6 @@
                             </v-icon>
                           </template>
                         </v-text-field>
-
-                        <DatePicker
-                          v-show="showDatePicker"
-                          ref="datePicker"
-                          :reset="dateRangeReset"
-                          :style="{ height: tableDataOptions.itemsPerPage === 5 ? '200px' : 'auto' }"
-                          class="date-picker"
-                          @submit="updateDateRange($event)"
-                        />
                       </div>
 
                       <!-- Drop down menu to select statuses -->
@@ -608,11 +606,6 @@ export default defineComponent({
 
 // The date picker position
 .date-picker {
-  position: absolute;
-  top: -50%;
-  left: 200%;
-  z-index: 1000;
-  width: 700px;
-  max-width: none;
+  left: 40%;
 }
 </style>
