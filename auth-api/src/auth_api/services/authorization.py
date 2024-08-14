@@ -196,9 +196,8 @@ class Authorization:
 
         check_product_based_auth = False
         if product_code:
-            from auth_api.services.products import (  # pylint:disable=cyclic-import, import-outside-toplevel
-                Product as ProductService,
-            )
+            # pylint:disable=cyclic-import, import-outside-toplevel
+            from auth_api.services.products import Product as ProductService
 
             product_type: str = ProductService.find_product_type_by_code(product_code)
             # TODO should we reject if the product code is unknown??
