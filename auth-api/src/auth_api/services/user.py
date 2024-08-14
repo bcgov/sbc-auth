@@ -514,7 +514,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         if contact_link:
             del contact_link.user
             contact_link = contact_link.flush()
-            contact_link.commit()
+            contact_link.save()
             # clean up any orphaned contacts and links
             if not contact_link.has_links():
                 contact = contact_link.contact

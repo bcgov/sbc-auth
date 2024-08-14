@@ -736,7 +736,7 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link = ContactLinkModel.find_by_org_id(org.id)
         if contact_link:
             del contact_link.org
-            contact_link.commit()
+            contact_link.save()
             # clean up any orphaned contacts and links
             if not contact_link.has_links():
                 contact = contact_link.contact

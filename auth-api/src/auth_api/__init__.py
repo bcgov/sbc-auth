@@ -20,6 +20,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate, upgrade
+from sbc_common_components.utils.camel_case_response import convert_to_camel
 
 import auth_api.config as config  # pylint:disable=consider-using-from-import
 from auth_api.config import _Config
@@ -60,6 +61,8 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
     queue.init_app(app)
     mail.init_app(app)
     endpoints.init_app(app)
+
+    app.after_request(convert_to_camel)
 
     setup_jwt_manager(app, jwt)
     register_shellcontext(app)

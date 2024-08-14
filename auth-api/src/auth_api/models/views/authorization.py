@@ -75,11 +75,9 @@ class Authorization(db.Model):
             cls.query.filter_by(product_code=product_code, business_identifier=business_identifier)
             .order_by(
                 expression.case(
-                    (
-                        (Authorization.org_membership == ADMIN, 1),
-                        (Authorization.org_membership == COORDINATOR, 2),
-                        (Authorization.org_membership == USER, 3),
-                    )
+                    (Authorization.org_membership == ADMIN, 1),
+                    (Authorization.org_membership == COORDINATOR, 2),
+                    (Authorization.org_membership == USER, 3),
                 )
             )
             .first()

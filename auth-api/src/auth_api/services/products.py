@@ -546,15 +546,13 @@ class Product:
         )
 
         active_subscription_case = case(
-            [
-                (
-                    and_(
-                        MembershipModel.status == Status.ACTIVE.value,
-                        ProductSubscriptionModel.status_code == ProductSubscriptionStatus.ACTIVE.value,
-                    ),
-                    1,
+            (
+                and_(
+                    MembershipModel.status == Status.ACTIVE.value,
+                    ProductSubscriptionModel.status_code == ProductSubscriptionStatus.ACTIVE.value,
                 ),
-            ],
+                1,
+            ),
             else_=0,
         )
 

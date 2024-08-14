@@ -42,10 +42,11 @@ class SimpleOrg:  # pylint: disable=too-few-public-methods
     @classmethod
     def search(cls, search_criteria: SimpleOrgSearch):
         """Search org records and returned a simplified result set."""
+        # pylint:disable=not-callable
         current_app.logger.debug("<search")
         query = db.session.query(OrgModel)
 
-        query = query.filter_conditionally(search_criteria.id, OrgModel.id, is_like=True)
+        query = query.filter_conditionally(search_criteria.id, func.cast(OrgModel.id, String), is_like=True)
         query = query.filter_conditionally(search_criteria.name, OrgModel.name, is_like=True)
         if search_criteria.exclude_statuses:
             query = query.filter(OrgModel.status_code.notin_(search_criteria.statuses))

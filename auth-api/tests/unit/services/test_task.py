@@ -142,7 +142,7 @@ def test_update_task(session, keycloak_mock, monkeypatch, test_name, rmv_contact
     AffidavitService.create_affidavit(affidavit_info=affidavit_info)
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
-    assert org_dict["org_status"] == OrgStatus.PENDING_STAFF_REVIEW.value
+    assert org_dict["status_code"] == OrgStatus.PENDING_STAFF_REVIEW.value
 
     if rmv_contact:
         # remove contact link
@@ -184,7 +184,7 @@ def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unuse
     AffidavitService.create_affidavit(affidavit_info=affidavit_info)
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
-    assert org_dict["org_status"] == OrgStatus.PENDING_STAFF_REVIEW.value
+    assert org_dict["status_code"] == OrgStatus.PENDING_STAFF_REVIEW.value
 
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
     patch_token_info(token_info, monkeypatch)

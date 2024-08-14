@@ -171,7 +171,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
 
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
-    assert org_dict["org_status"] == OrgStatus.PENDING_STAFF_REVIEW.value
+    assert org_dict["status_code"] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict["id"]
 
     task_search = TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=10)
@@ -227,7 +227,7 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
 
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
-    assert org_dict["org_status"] == OrgStatus.PENDING_STAFF_REVIEW.value
+    assert org_dict["status_code"] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict["id"]
 
     task_search = TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=10)

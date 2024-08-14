@@ -152,7 +152,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
             db.session.query(Org)
             .outerjoin(ContactLink)
             .outerjoin(Contact)
-            .options(contains_eager("contacts").contains_eager("contact"))
+            .options(contains_eager(Org.contacts).load_only(ContactLink.org_id))
         )
 
         if search.access_type:
@@ -244,7 +244,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
             db.session.query(Org)
             .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id)
             .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id)
-            .options(contains_eager("invitations").contains_eager("invitation"))
+            .options(contains_eager(Org.invitations).load_only(InvitationMembership.invitation_id))
             .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value)
             .filter(
                 (

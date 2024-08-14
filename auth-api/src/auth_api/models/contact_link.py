@@ -38,7 +38,7 @@ class ContactLink(Versioned, BaseModel):  # pylint: disable=too-few-public-metho
     affidavit_id = Column(Integer, ForeignKey("affidavits.id"))
 
     contact = relationship("Contact", foreign_keys=[contact_id])
-    entity = relationship("Entity", back_populates="contacts", foreign_keys=[entity_id])
+    entity = relationship("Entity", foreign_keys=[entity_id])
     user = relationship("User", foreign_keys=[user_id], lazy="select")
     org = relationship("Org", foreign_keys=[org_id], lazy="select")
     affidavit = relationship("Affidavit", foreign_keys=[affidavit_id], lazy="select")

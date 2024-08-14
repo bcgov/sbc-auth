@@ -798,7 +798,7 @@ def test_delete_user_as_only_admin_returns_400(
     contact_link = ContactLinkModel()
     contact_link.contact = contact
     contact_link.user = user_model
-    contact_link.commit()
+    contact_link.save()
 
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims["sub"] = str(user_model.keycloak_guid)
@@ -831,14 +831,14 @@ def test_delete_user_is_member_returns_204(
     contact_link = ContactLinkModel()
     contact_link.contact = contact
     contact_link.user = user_model
-    contact_link.commit()
+    contact_link.save()
 
     user_model2 = factory_user_model(user_info=TestUserInfo.user2)
     contact = factory_contact_model()
     contact_link = ContactLinkModel()
     contact_link.contact = contact
     contact_link.user = user_model2
-    contact_link.commit()
+    contact_link.save()
 
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims["sub"] = str(user_model2.keycloak_guid)

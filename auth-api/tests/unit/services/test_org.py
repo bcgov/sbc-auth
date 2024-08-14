@@ -928,7 +928,7 @@ def test_delete_contact_org_link(session, auth_mock):  # pylint:disable=unused-a
     contact_link.contact = contact
     contact_link.entity = entity._model  # pylint:disable=protected-access
     contact_link.org = org._model  # pylint:disable=protected-access
-    contact_link.commit()
+    contact_link.save()
 
     OrgService.delete_contact(org_id=org_id)
     OrgService.find_by_org_id(org_id)
@@ -1023,7 +1023,7 @@ def test_create_org_with_linked_bcol_account(session, keycloak_mock, monkeypatch
     dictionary = org.as_dict()
 
     assert dictionary["name"] == TestOrgInfo.bcol_linked()["name"]
-    assert dictionary["org_type"] == OrgType.PREMIUM.value
+    assert dictionary["type_code"] == OrgType.PREMIUM.value
     assert dictionary["bcol_user_id"] is not None
     assert dictionary["bcol_account_id"] is not None
     assert dictionary["bcol_account_name"] is not None
@@ -1050,7 +1050,7 @@ def test_create_org_with_different_name_than_bcol_account(
     dictionary = org.as_dict()
 
     assert dictionary["name"] == TestOrgInfo.bcol_linked_different_name()["name"]
-    assert dictionary["org_type"] == OrgType.PREMIUM.value
+    assert dictionary["type_code"] == OrgType.PREMIUM.value
     assert dictionary["bcol_user_id"] is not None
     assert dictionary["bcol_account_id"] is not None
     assert dictionary["bcol_account_name"] is not None

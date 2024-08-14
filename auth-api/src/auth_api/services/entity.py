@@ -238,7 +238,7 @@ class Entity:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         del contact_link.entity
-        contact_link.commit()
+        contact_link.save()
 
         if not contact_link.has_links():
             contact = contact_link.contact
