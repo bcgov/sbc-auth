@@ -307,7 +307,7 @@ def test_delete_contact_entity_link(session, auth_mock):  # pylint:disable=unuse
     contact_link.contact = contact
     contact_link.entity = entity._model  # pylint:disable=protected-access
     contact_link.org = org._model  # pylint:disable=protected-access
-    contact_link.commit()
+    contact_link.save()
 
     updated_entity = entity.delete_contact()
 
@@ -353,7 +353,7 @@ def test_delete_entity(app, session):  # pylint:disable=unused-argument
     contact_link.contact = contact
     contact_link.entity = entity._model  # pylint:disable=protected-access
     contact_link.org = org._model  # pylint:disable=protected-access
-    contact_link.commit()
+    contact_link.save()
 
     entity.delete()
 

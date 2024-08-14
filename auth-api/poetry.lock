@@ -2,13 +2,13 @@
 
 [[package]]
 name = "aiohappyeyeballs"
-version = "2.3.5"
+version = "2.3.6"
 description = "Happy Eyeballs for asyncio"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "aiohappyeyeballs-2.3.5-py3-none-any.whl", hash = "sha256:4d6dea59215537dbc746e93e779caea8178c866856a721c9c660d7a5a7b8be03"},
-    {file = "aiohappyeyeballs-2.3.5.tar.gz", hash = "sha256:6fa48b9f1317254f122a07a131a86b71ca6946ca989ce6326fff54a99a920105"},
+    {file = "aiohappyeyeballs-2.3.6-py3-none-any.whl", hash = "sha256:15dca2611fa78442f1cb54cf07ffb998573f2b4fbeab45ca8554c045665c896b"},
+    {file = "aiohappyeyeballs-2.3.6.tar.gz", hash = "sha256:88211068d2a40e0436033956d7de3926ff36d54776f8b1022d6b21320cadae79"},
 ]
 
 [[package]]
@@ -862,7 +862,7 @@ six = "^1.16.0"
 [package.source]
 type = "git"
 url = "https://github.com/seeker25/flask-jwt-oidc.git"
-reference = "HEAD"
+reference = "main"
 resolved_reference = "d208d4643e3b17358f7295bee0f955e67ba6ac88"
 
 [[package]]
@@ -1634,23 +1634,23 @@ tests = ["pytest", "pytz", "simplejson"]
 
 [[package]]
 name = "marshmallow-sqlalchemy"
-version = "1.0.0"
+version = "1.1.0"
 description = "SQLAlchemy integration with the marshmallow (de)serialization library"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "marshmallow_sqlalchemy-1.0.0-py3-none-any.whl", hash = "sha256:f415d57809e3555b6323356589aba91e36e4470f35953d3a10c755ac5c3307df"},
-    {file = "marshmallow_sqlalchemy-1.0.0.tar.gz", hash = "sha256:20a0f2fcdd5bddc86444fa01461f17f9b6a12a8ddd4ca8c9b34fe2f2e35d00a2"},
+    {file = "marshmallow_sqlalchemy-1.1.0-py3-none-any.whl", hash = "sha256:cce261148e4c6ec4ee275f3d29352933380a1afa2fd3933f5e9ecd02fdc16ade"},
+    {file = "marshmallow_sqlalchemy-1.1.0.tar.gz", hash = "sha256:2ab092da269dafa8a05d51a58409af71a8d2183958ba47143127dd239e0359d8"},
 ]
 
 [package.dependencies]
-marshmallow = ">=3.10.0"
+marshmallow = ">=3.18.0"
 SQLAlchemy = ">=1.4.40,<3.0"
 
 [package.extras]
 dev = ["marshmallow-sqlalchemy[tests]", "pre-commit (>=3.5,<4.0)", "tox"]
-docs = ["alabaster (==0.7.16)", "sphinx (==7.2.6)", "sphinx-issues (==4.0.0)"]
-tests = ["pytest (<8)", "pytest-lazy-fixture (>=0.6.2)"]
+docs = ["alabaster (==1.0.0)", "sphinx (==8.0.2)", "sphinx-issues (==4.1.0)"]
+tests = ["pytest (<9)", "pytest-lazy-fixtures"]
 
 [[package]]
 name = "mccabe"
@@ -2506,7 +2506,7 @@ jaeger-client = "*"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-common-components.git"
-reference = "HEAD"
+reference = "master"
 resolved_reference = "22978d810dc4e85c51c3129936686b0a17124e64"
 subdirectory = "python"
 
@@ -2576,7 +2576,7 @@ develop = false
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-connect-common.git"
-reference = "HEAD"
+reference = "main"
 resolved_reference = "c898988d239dc261b2b186465a1887f15512c102"
 subdirectory = "python/sql-versioning"
 
@@ -2718,6 +2718,43 @@ python-versions = "*"
 files = [
     {file = "strict-rfc3339-0.7.tar.gz", hash = "sha256:5cad17bedfc3af57b399db0fed32771f18fc54bbd917e85546088607ac5e1277"},
 ]
+
+[[package]]
+name = "structlog"
+version = "24.4.0"
+description = "Structured Logging for Python"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "structlog-24.4.0-py3-none-any.whl", hash = "sha256:597f61e80a91cc0749a9fd2a098ed76715a1c8a01f73e336b746504d1aad7610"},
+    {file = "structlog-24.4.0.tar.gz", hash = "sha256:b27bfecede327a6d2da5fbc96bd859f114ecc398a6389d664f62085ee7ae6fc4"},
+]
+
+[package.extras]
+dev = ["freezegun (>=0.2.8)", "mypy (>=1.4)", "pretend", "pytest (>=6.0)", "pytest-asyncio (>=0.17)", "rich", "simplejson", "twisted"]
+docs = ["cogapp", "furo", "myst-parser", "sphinx", "sphinx-notfound-page", "sphinxcontrib-mermaid", "sphinxext-opengraph", "twisted"]
+tests = ["freezegun (>=0.2.8)", "pretend", "pytest (>=6.0)", "pytest-asyncio (>=0.17)", "simplejson"]
+typing = ["mypy (>=1.4)", "rich", "twisted"]
+
+[[package]]
+name = "structured-logging"
+version = "0.4.0"
+description = ""
+optional = false
+python-versions = "^3.9"
+files = []
+develop = false
+
+[package.dependencies]
+flask = ">= 1"
+structlog = "^24.1.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/bcgov/sbc-connect-common.git"
+reference = "main"
+resolved_reference = "c898988d239dc261b2b186465a1887f15512c102"
+subdirectory = "python/structured-logging"
 
 [[package]]
 name = "threadloop"
@@ -2933,4 +2970,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "67e07cb6aa671911af005043571bff93842df67f46a6a6c9f74602c37fc37429"
+content-hash = "91300dafa227a6c3d1f7d8d3b6f3310e2f783b27275fc07f4ae431e0702c3e31"

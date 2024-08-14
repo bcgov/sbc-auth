@@ -10,17 +10,36 @@ BC Registries authentication and authorization services.
 Follow the instructions of the [Development Readme](https://github.com/bcgov/entity/blob/master/docs/development.md)
 to setup your local development environment.
 
-## Development Setup
+## Technology Stack Used
+* Python, Flask
+* Postgres -  SQLAlchemy, psycopg2-binary & alembic
 
-1. Follow the [instructions](https://github.com/bcgov/entity/blob/master/docs/setup-forking-workflow.md) to checkout the project from GitHub.
-2. Open the auth-api directory in VS Code to treat it as a project (or WSL projec). To prevent version clashes, set up a
-virtual environment to install the Python packages used by this project.
-3. Run `make setup` to set up the virtual environment and install libraries.
-4. Next run `pip install .` to set up the environment for running tests.
+### setup
+Fork the repo and submitted a PR with accompanning tests.
 
-You also need to set up the variables used for environment-specific settings:
-1. Copy the [dotenv template file](../docs/dotenv_template) to somewhere above the source code and rename to `.env`. You will need to fill in missing values.
-   .github\workflows\auth-api-ci.yml could provide some hints for unit tests.
+Set to use the local repo for the virtual environment
+```bash
+poetry config virtualenvs.in-project true
+```
+Install the dependencies
+```bash
+poetry install
+```
+
+Configure the .env
+
+### manage the DB
+```bash
+poetry shell
+```
+
+```bash
+flask db upgrade
+```
+
+```bash
+flask db migrate
+```
 
 ## Running the Auth Database on localhost
 

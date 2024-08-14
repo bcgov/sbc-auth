@@ -806,7 +806,6 @@ def setup_affiliation_invitation_data(
             data=json.dumps(TestContactInfo.contact1),
             content_type="application/json",
         )
-
     dictionary_from_org = json.loads(rv_from_org.data)
     dictionary_to_org = json.loads(rv_to_org.data)
     dictionary_entity = json.loads(rv_entity.data)

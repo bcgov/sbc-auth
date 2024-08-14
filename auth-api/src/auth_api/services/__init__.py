@@ -29,7 +29,6 @@ from .minio import MinioService
 from .org import Org
 from .permissions import Permissions
 from .products import Product
-from .reset import ResetTestData
 from .simple_org import SimpleOrg
 from .task import Task
 from .user import User

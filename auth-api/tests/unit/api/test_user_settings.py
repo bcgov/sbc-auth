@@ -41,7 +41,7 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     contact_link = ContactLinkModel()
     contact_link.contact = contact
     contact_link.user = user_model
-    contact_link.commit()
+    contact_link.save()
     kc_id = user_model.keycloak_guid
 
     claims = copy.deepcopy(TestJwtClaims.updated_test.value)

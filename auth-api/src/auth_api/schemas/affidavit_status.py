@@ -11,23 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Manager for contact link schema and export."""
-
+"""Manager for corp type schema and export."""
 from marshmallow import fields
 
-from auth_api.models import ContactLink as ContactLinkModel
-
-from .base_schema import BaseSchema
-from .contact import ContactSchema
+from auth_api.models import AffidavitStatus as AffidavitStatusModel
+from auth_api.models import ma
 
 
-class ContactLinkSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
-    """This is the schema for the Contact link model."""
+class AffidavitStatusSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the AffidavitStatus model."""
 
-    class Meta(BaseSchema.Meta):  # pylint: disable=too-few-public-methods
-        """Maps all of the User fields to a default schema."""
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the AffidavitStatus fields to a default schema."""
 
-        model = ContactLinkModel
-        exclude = ("id", "user", "entity", "org", "version")
+        model = AffidavitStatusModel
+        # front end expects desc still
 
-    contact = fields.Nested(ContactSchema, many=False)
+    description = fields.String(data_key="desc")

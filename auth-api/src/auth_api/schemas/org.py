@@ -34,10 +34,11 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
             "suspension_reason",
             "products",
             "login_options",
-            "type_code",
         )
 
-    type_code = fields.String(data_key="org_type")
+    org_type = fields.Pluck("OrgTypeSchema", "code", data_key="org_type")
+    org_status = fields.Pluck("OrgStatusSchema", "code", data_key="org_status")
+    type_code = fields.String(data_key="type_code")
     status_code = fields.String(data_key="status_code")
     suspension_reason_code = fields.String(data_key="suspension_reason_code")
     business_size = fields.String(data_key="business_size")

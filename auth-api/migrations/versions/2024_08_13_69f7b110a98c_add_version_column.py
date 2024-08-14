@@ -21,6 +21,9 @@ def upgrade():
     with op.batch_alter_table("account_login_options", schema=None) as batch_op:
         batch_op.add_column(sa.Column("version", sa.Integer(), nullable=False, server_default="1"))
 
+    with op.batch_alter_table("affiliations", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("version", sa.Integer(), nullable=False, server_default="1"))
+
     with op.batch_alter_table("affidavits", schema=None) as batch_op:
         batch_op.add_column(sa.Column("version", sa.Integer(), nullable=False, server_default="1"))
 
@@ -69,6 +72,9 @@ def downgrade():
         batch_op.drop_column("version")
 
     with op.batch_alter_table("affidavits", schema=None) as batch_op:
+        batch_op.drop_column("version")
+
+    with op.batch_alter_table("affiliations", schema=None) as batch_op:
         batch_op.drop_column("version")
 
     with op.batch_alter_table("account_login_options", schema=None) as batch_op:

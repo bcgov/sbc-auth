@@ -36,7 +36,7 @@ class Codes:
         :param table_fullname: String with fullname of table.
         :return: Class reference or None.
         """
-        for model_class in db.Model._decl_class_registry.values():  # pylint:disable=protected-access
+        for model_class in db.Model.registry._class_registry.values():  # pylint:disable=protected-access
             if hasattr(model_class, "__table__") and model_class.__table__.fullname == code_type:
                 if issubclass(model_class, BaseCodeModel):
                     return model_class

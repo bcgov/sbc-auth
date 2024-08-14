@@ -44,3 +44,4 @@ class InvitationMembershipSchema(BaseSchema):  # pylint: disable=too-many-ancest
     )
 
     invitation = fields.Nested("InvitationSchema", only=("id", "recipient_email", "sent_date", "expires_on", "status"))
+    membership_type = fields.Pluck("MembershipTypeSchema", "code", data_key="membership_type")

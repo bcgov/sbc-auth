@@ -684,7 +684,7 @@ def test_delete_contact_user_link(session, auth_mock, keycloak_mock, monkeypatch
     contact_link.user = user_model
     contact_link.org = org._model  # pylint:disable=protected-access
     contact_link = contact_link.flush()
-    contact_link.commit()
+    contact_link.save()
 
     deleted_contact = UserService.delete_contact()
 
@@ -708,7 +708,7 @@ def test_delete_user(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:
     contact_link = ContactLinkModel()
     contact_link.contact = contact
     contact_link.user = user_model
-    contact_link.commit()
+    contact_link.save()
 
     patch_token_info(TestJwtClaims.user_test, monkeypatch)
 
@@ -735,7 +735,7 @@ def test_delete_user_where_org_has_affiliations(
     contact_link.contact = contact
     contact_link.user = user_model
     contact_link = contact_link.flush()
-    contact_link.commit()
+    contact_link.save()
 
     patch_token_info(TestJwtClaims.user_test, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id).as_dict()
@@ -770,7 +770,7 @@ def test_delete_user_where_user_is_member_on_org(
     contact_link = ContactLinkModel()
     contact_link.contact = contact
     contact_link.user = user_model
-    contact_link.commit()
+    contact_link.save()
 
     patch_token_info(
         TestJwtClaims.get_test_user(user_model.keycloak_guid, idp_userid=user_model.idp_userid), monkeypatch
@@ -789,7 +789,7 @@ def test_delete_user_where_user_is_member_on_org(
     contact_link = ContactLinkModel()
     contact_link.contact = contact
     contact_link.user = user_model2
-    contact_link.commit()
+    contact_link.save()
 
     membership = MembershipModel(
         org_id=org_id, user_id=user_model2.id, membership_type_code="USER", membership_type_status=Status.ACTIVE.value
@@ -821,7 +821,7 @@ def test_delete_user_where_org_has_another_owner(
     contact_link = ContactLinkModel()
     contact_link.contact = contact
     contact_link.user = user_model
-    contact_link.commit()
+    contact_link.save()
 
     patch_token_info(
         TestJwtClaims.get_test_user(user_model.keycloak_guid, idp_userid=user_model.idp_userid), monkeypatch
@@ -840,7 +840,7 @@ def test_delete_user_where_org_has_another_owner(
     contact_link = ContactLinkModel()
     contact_link.contact = contact
     contact_link.user = user_model2
-    contact_link.commit()
+    contact_link.save()
 
     membership = MembershipModel(
         org_id=org_id, user_id=user_model2.id, membership_type_code="ADMIN", membership_type_status=Status.ACTIVE.value

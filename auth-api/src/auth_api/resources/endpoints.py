@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Mounting the end-points."""
+import os
 from typing import Optional
 
 from flask import Blueprint, Flask  # noqa: I001
@@ -38,6 +39,9 @@ class Endpoints:  # pylint: disable=too-few-public-methods
     def _mount_endpoints(self):
         """Mount the endpoints of the system."""
         v1_endpoint.init_app(self.app)
+
+        if os.getenv("FLASK_ENV", "production") in ["development", "testing"]:
+            self.app.register_blueprint(TEST_BLUEPRINT)
 
 
 endpoints = Endpoints()

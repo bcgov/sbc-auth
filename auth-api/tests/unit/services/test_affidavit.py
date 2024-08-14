@@ -36,7 +36,7 @@ def test_create_affidavit(session, keycloak_mock, monkeypatch):  # pylint:disabl
     affidavit = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
 
     assert affidavit
-    assert affidavit.as_dict().get("status", None) == AffidavitStatus.PENDING.value
+    assert affidavit.as_dict().get("status_code", None) == AffidavitStatus.PENDING.value
 
 
 def test_create_affidavit_duplicate(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
@@ -48,14 +48,14 @@ def test_create_affidavit_duplicate(session, keycloak_mock, monkeypatch):  # pyl
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     affidavit = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
 
-    assert affidavit.as_dict().get("status", None) == AffidavitStatus.PENDING.value
+    assert affidavit.as_dict().get("status_code", None) == AffidavitStatus.PENDING.value
     new_affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     affidavit2 = AffidavitService.create_affidavit(affidavit_info=new_affidavit_info)
     new_affidavit_info_2 = TestAffidavit.get_test_affidavit_with_contact()
     affidavit3 = AffidavitService.create_affidavit(affidavit_info=new_affidavit_info_2)
-    assert affidavit.as_dict().get("status", None) == AffidavitStatus.INACTIVE.value
-    assert affidavit2.as_dict().get("status", None) == AffidavitStatus.INACTIVE.value
-    assert affidavit3.as_dict().get("status", None) == AffidavitStatus.PENDING.value
+    assert affidavit.as_dict().get("status_code", None) == AffidavitStatus.INACTIVE.value
+    assert affidavit2.as_dict().get("status_code", None) == AffidavitStatus.INACTIVE.value
+    assert affidavit3.as_dict().get("status_code", None) == AffidavitStatus.PENDING.value
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
@@ -71,7 +71,7 @@ def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     AffidavitService.create_affidavit(affidavit_info=affidavit_info)
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
-    assert org_dict["org_status"] == OrgStatus.PENDING_STAFF_REVIEW.value
+    assert org_dict["status_code"] == OrgStatus.PENDING_STAFF_REVIEW.value
     task_model = TaskModel.find_by_task_for_account(org_dict["id"], status=TaskStatus.OPEN.value)
     assert task_model.relationship_id == org_dict["id"]
     assert task_model.action == TaskAction.AFFIDAVIT_REVIEW.value
@@ -83,7 +83,7 @@ def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     task = TaskService.update_task(TaskService(task_model), task_info)
     task_dict = task.as_dict()
     affidavit = AffidavitService.find_affidavit_by_org_id(task_dict["relationship_id"])
-    assert affidavit["status"] == AffidavitStatus.APPROVED.value
+    assert affidavit["status_code"] == AffidavitStatus.APPROVED.value
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
@@ -123,12 +123,12 @@ def test_reject_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unus
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     affidavit = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
 
-    assert affidavit1.as_dict().get("status", None) == AffidavitStatus.INACTIVE.value
-    assert affidavit.as_dict().get("status", None) == AffidavitStatus.PENDING.value
+    assert affidavit1.as_dict().get("status_code", None) == AffidavitStatus.INACTIVE.value
+    assert affidavit.as_dict().get("status_code", None) == AffidavitStatus.PENDING.value
 
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
-    assert org_dict["org_status"] == OrgStatus.PENDING_STAFF_REVIEW.value
+    assert org_dict["status_code"] == OrgStatus.PENDING_STAFF_REVIEW.value
     task_model = TaskModel.find_by_task_for_account(org_dict["id"], status=TaskStatus.OPEN.value)
     assert task_model.relationship_id == org_dict["id"]
     assert task_model.action == TaskAction.AFFIDAVIT_REVIEW.value
@@ -140,4 +140,4 @@ def test_reject_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unus
     task = TaskService.update_task(TaskService(task_model), task_info)
     task_dict = task.as_dict()
     affidavit = AffidavitService.find_affidavit_by_org_id(task_dict["relationship_id"])
-    assert affidavit["status"] == AffidavitStatus.REJECTED.value
+    assert affidavit["status_code"] == AffidavitStatus.REJECTED.value

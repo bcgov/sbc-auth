@@ -86,7 +86,8 @@ class Membership(
             .join(OrgModel)
             .filter(OrgModel.id == org_id)
         )
-        count_q = query.statement.with_only_columns([func.count()]).order_by(None)
+        # pylint:disable=not-callable
+        count_q = query.statement.with_only_columns(func.count(), maintain_column_froms=True).order_by(None)
         count = query.session.execute(count_q).scalar()
         return count
 
@@ -198,7 +199,9 @@ class Membership(
             .join(OrgModel)
             .filter(OrgModel.id == org_id)
         )
-        count_q = query.statement.with_only_columns([func.count()]).order_by(None)
+
+        # pylint:disable=not-callable
+        count_q = query.statement.with_only_columns(func.count(), maintain_column_froms=True).order_by(None)
         count = query.session.execute(count_q).scalar()
         return count
 
@@ -218,7 +221,8 @@ class Membership(
             .join(OrgModel)
             .filter(OrgModel.id == org_id)
         )
-        count_q = query.statement.with_only_columns([func.count()]).order_by(None)
+        # pylint:disable=not-callable
+        count_q = query.statement.with_only_columns(func.count(), maintain_column_froms=True).order_by(None)
         count = query.session.execute(count_q).scalar()
         return count
 
