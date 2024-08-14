@@ -84,7 +84,7 @@
                       :scope="getIndexedTag('find-header-col2', i)"
                     >
                       <v-text-field
-                        v-if="!['action','status'].includes(header.value)"
+                        v-if="!['action','status','submissionDate'].includes(header.value)"
                         :id="header.value"
                         v-model.trim="reviewParams[header.value]"
                         input
@@ -97,6 +97,42 @@
                         hide-details="auto"
                       />
 
+                      <!-- Date Picker to select date submitted range -->
+                      <div v-else-if="['submissionDate'].includes(header.value)">
+                        <v-text-field
+                          :value="reviewParams.startDate ? 'Custom':''"
+                          filled
+                          :placeholder="'Date Submitted'"
+                          readonly
+                          dense
+                          hide-details="auto"
+                          @click="showDatePicker = true"
+                        >
+                          <template #append>
+                            <v-icon
+                              v-if="reviewParams.startDate"
+                              color="primary"
+                              @click="updateDateRange({ startDate: '', endDate: '' })"
+                            >
+                              mdi-close
+                            </v-icon>
+                            <v-icon color="primary">
+                              mdi-calendar
+                            </v-icon>
+                          </template>
+                        </v-text-field>
+
+                        <DatePicker
+                          v-show="showDatePicker"
+                          ref="datePicker"
+                          :reset="dateRangeReset"
+                          :style="{ height: tableDataOptions.itemsPerPage === 5 ? '200px' : 'auto' }"
+                          class="date-picker"
+                          @submit="updateDateRange($event)"
+                        />
+                      </div>
+
+                      <!-- Drop down menu to select statuses -->
                       <div
                         v-else-if="['status'].includes(header.value)"
                         class="mt-0"
@@ -182,11 +218,12 @@ import {
   getPaginationOptions,
   hasCachedPageInfo
 } from '@/components/datatable/resources'
-import { PropType, computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import { PropType, computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
+import { DatePicker } from '@/components'
 import { SessionStorageKeys } from '@/util/constants'
 import debounce from '@/util/debounce'
 import moment from 'moment'
@@ -194,6 +231,7 @@ import { useI18n } from 'vue-i18n-composable'
 
 export default defineComponent({
   name: 'ContinuationApplicationTable',
+  components: { DatePicker },
   props: {
     reviewSessionStorageKey: {
       type: String as PropType<SessionStorageKeys>,
@@ -244,9 +282,11 @@ export default defineComponent({
       searchParamsExist: false,
       sortBy: 'submissionDate',
       sortDesc: false,
+      showDatePicker: false,
       dropdown: [] as Array<boolean>,
       reviewParams: {
-        submissionDate: '',
+        startDate: '',
+        endDate: '',
         nrNumber: '',
         identifier: '',
         completingParty: '',
@@ -275,6 +315,17 @@ export default defineComponent({
         state.isTableLoading = false
       }
     })
+
+    // date picker stuff
+    const dateRangeReset = ref(0)
+    const updateDateRange = (val: { endDate?: string, startDate?: string }) => {
+      state.showDatePicker = false
+      if (!(val.endDate && val.startDate)) {
+        val = { startDate: '', endDate: '' }
+      }
+      state.reviewParams.startDate = val.startDate
+      state.reviewParams.endDate = val.endDate
+    }
 
     function mounted () {
       state.tableDataOptions = DEFAULT_DATA_OPTIONS
@@ -310,9 +361,11 @@ export default defineComponent({
     }
 
     function clearSearchParams () {
+      dateRangeReset.value++
       state.reviewParams = {
         ...state.reviewParams,
-        submissionDate: '',
+        startDate: '',
+        endDate: '',
         nrNumber: '',
         identifier: '',
         completingParty: '',
@@ -341,7 +394,7 @@ export default defineComponent({
     }
 
     function doSearchParametersExist (params: ReviewFilterParams): boolean {
-      return params.submissionDate.length > 0 ||
+      return params.startDate.length > 0 ||
                 params.nrNumber.length > 0 ||
                 params.identifier.length > 0 ||
                 params.completingParty.length > 0 ||
@@ -376,6 +429,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       debouncedOrgSearch,
+      dateRangeReset,
       view,
       clearSearchParams,
       changeSort,
@@ -387,7 +441,8 @@ export default defineComponent({
       setSearchFilterToStorage,
       doSearchParametersExist,
       paginationOptions,
-      updateItemsPerPage
+      updateItemsPerPage,
+      updateDateRange
     }
   }
 })
@@ -549,6 +604,15 @@ export default defineComponent({
     padding-left: 3px !important;
     padding-right: 3px !important;
   }
+}
 
+// The date picker position
+.date-picker {
+  position: absolute;
+  top: -50%;
+  left: 200%;
+  z-index: 1000;
+  width: 700px;
+  max-width: none;
 }
 </style>
