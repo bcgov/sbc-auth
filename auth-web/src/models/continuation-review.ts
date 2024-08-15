@@ -73,14 +73,15 @@ export interface ContinuationFilingIF {
 
 /** The Continuation Review search and sort params. */
 export interface ReviewFilterParams {
-    submissionDate?: string
+    startDate?: string // The start date for submission date range
+    endDate?: string // The end date for submission date range
     page?: number
     limit?: number
     nrNumber?: string
     identifier?: string
     completingParty?: string
     decisionMadeBy?: string
-    status?: []
+    status?: string[]
     sortBy?: string
     sortDesc?: boolean
   }
