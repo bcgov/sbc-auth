@@ -253,8 +253,7 @@ export default defineComponent({
       const getStatementsListResponse = await getStatementsList(filterParams)
 
       if ((pageNumber === 1 || !pageNumber) && getStatementsListResponse?.items?.length > 0) {
-        const topId = getStatementsListResponse.items[0].id
-        getStatementsListResponse.items.forEach(item => { item.isNew = item.id === topId })
+        getStatementsListResponse.items[0].isNew = true
       }
 
       statementsList.value = getStatementsListResponse?.items || []
