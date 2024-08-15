@@ -107,7 +107,7 @@
           v-if="isStatementTransaction(item)"
           class="transaction-details"
         >
-          {{ formatAccountDisplayName(item) }}
+          {{ formatAdditionalDescription(item) }}
         </span>
       </template>
       <template #item-slot-transactionAmount="{ item }">
@@ -262,6 +262,13 @@ export default defineComponent({
       return item?.statementNumber
     }
 
+    function formatAdditionalDescription (item: any) {
+      if (item.transactionType === ShortNameHistoryType.INVOICE_REFUND) {
+        return item.invoiceId
+      }
+      return CommonUtils.formatAccountDisplayName(item)
+    }
+
     function formatTransactionAmount (item: any) {
       if (item.amount === undefined) return ''
       let amount = CommonUtils.formatAmount(item.amount)
@@ -364,7 +371,7 @@ export default defineComponent({
       formatBalanceAmount,
       formatTransactionAmount,
       formatDate: formatTransactionDate,
-      formatAccountDisplayName: CommonUtils.formatAccountDisplayName,
+      formatAdditionalDescription,
       formatDescription,
       dialogConfirm,
       dialogConfirmClose,
