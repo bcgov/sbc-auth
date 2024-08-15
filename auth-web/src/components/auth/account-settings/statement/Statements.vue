@@ -273,7 +273,9 @@ export default defineComponent({
         root.$router.push(`/${Pages.MAIN}/${currentOrganization.id}/settings/account-info`)
       } else {
         await loadStatementsList()
-        await getStatementsSummary()
+        if (hasEFTPaymentMethod.value) {
+          await getStatementsSummary()
+        }
       }
     }
 
@@ -356,8 +358,8 @@ export default defineComponent({
 
     onMounted(async () => {
       setAccountChangedHandler(initialize)
-      initialize()
       getOrgPayments()
+      initialize()
     })
 
     watch(tableDataOptions, (newValue) => {
