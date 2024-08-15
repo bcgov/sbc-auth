@@ -253,8 +253,8 @@ export default defineComponent({
       const getStatementsListResponse = await getStatementsList(filterParams)
 
       if ((pageNumber === 1 || !pageNumber) && getStatementsListResponse?.items?.length > 0) {
-        const maxId = Math.max(...getStatementsListResponse.items.map(item => item.id))
-        getStatementsListResponse.items.forEach(item => { item.isNew = item.id === maxId })
+        const topId = getStatementsListResponse.items[0].id
+        getStatementsListResponse.items.forEach(item => { item.isNew = item.id === topId })
       }
 
       statementsList.value = getStatementsListResponse?.items || []
