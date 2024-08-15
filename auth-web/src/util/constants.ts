@@ -690,12 +690,14 @@ export enum ShortNameResponseStatus {
 
 export enum ShortNameHistoryType {
     FUNDS_RECEIVED = 'FUNDS_RECEIVED',
+    INVOICE_REFUND = 'INVOICE_REFUND',
     STATEMENT_PAID = 'STATEMENT_PAID',
     STATEMENT_REVERSE = 'STATEMENT_REVERSE'
 }
 
 export enum ShortNameHistoryTypeDescription {
     FUNDS_RECEIVED = 'Funds Received',
+    INVOICE_REFUND = 'Invoice Refund',
     STATEMENT_PAID = 'Statement Paid',
     STATEMENT_REVERSE = 'Payment Reversed'
 }

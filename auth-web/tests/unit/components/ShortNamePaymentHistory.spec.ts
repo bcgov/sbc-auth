@@ -33,6 +33,21 @@ describe('ShortNamePaymentHistory.vue', () => {
           'accountBranch': 'Sushi Division',
           'accountId': '3202',
           'accountName': 'Odysseus Chiu',
+          'amount': 50,
+          'historicalId': 5,
+          'isProcessing': true,
+          'isReversible': false,
+          'shortNameBalance': 418.5,
+          'shortNameId': 2,
+          'statementNumber': 5374449,
+          'invoiceId': 12345,
+          'transactionDate': '2024-08-01T00:01:30.885474',
+          'transactionType': 'INVOICE_REFUND'
+        },
+        {
+          'accountBranch': 'Sushi Division',
+          'accountId': '3202',
+          'accountName': 'Odysseus Chiu',
           'amount': 351.5,
           'historicalId': 5,
           'isProcessing': true,
@@ -126,6 +141,7 @@ describe('ShortNamePaymentHistory.vue', () => {
       const columns = itemRows.at(i).findAll(itemCell)
       expect(columns.at(0).text()).toBe(wrapper.vm.formatDate(historyResponse.items[i].transactionDate))
       expect(columns.at(1).text()).toContain(wrapper.vm.formatDescription(historyResponse.items[i]))
+      expect(columns.at(1).text()).toContain(wrapper.vm.formatAdditionalDescription(historyResponse.items[i]))
       expect(columns.at(2).text()).toBe(historyResponse.items[i].statementNumber
         ? historyResponse.items[i].statementNumber.toString() : '')
       expect(columns.at(3).text()).toContain(
