@@ -4,7 +4,7 @@
       v-show="showDatePicker"
       ref="datePicker"
       :reset="dateRangeReset"
-      class="date-picker"
+      class="mt-n4"
       @submit="updateDateRange($event)"
     />
     <v-form class="fas-search continuation-review-search">
@@ -602,10 +602,5 @@ export default defineComponent({
     padding-left: 3px !important;
     padding-right: 3px !important;
   }
-}
-
-// The date picker position
-.date-picker {
-  left: 40%;
 }
 </style>
