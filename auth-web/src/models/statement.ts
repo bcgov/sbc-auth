@@ -15,7 +15,7 @@ export interface StatementSettings {
 }
 
 export interface StatementsSummary {
-  oldestOverdueDate?: string
+  oldestDueDate?: string
   totalDue: number
 }
 

@@ -62,7 +62,7 @@ describe('OutstandingBalances.vue', () => {
 
     wrapper = mount(OutstandingBalances, {
       propsData: {
-        statementSummary: { 'oldestOverdueDate': '2023-12-01', 'totalDue': 351.5, 'totalInvoiceDue': 50.0 }
+        statementSummary: { 'oldestDueDate': '2023-12-01', 'totalDue': 351.5, 'totalInvoiceDue': 50.0 }
       },
       localVue,
       vuetify
@@ -85,7 +85,7 @@ describe('OutstandingBalances.vue', () => {
       localVue,
       vuetify,
       propsData: {
-        statementSummary: { 'oldestOverdueDate': '2023-12-01', 'totalDue': 351.5, 'totalInvoiceDue': 50.0 }
+        statementSummary: { 'oldestDueDate': '2023-12-01', 'totalDue': 351.5, 'totalInvoiceDue': 50.0 }
       },
       mocks: { $t
       }
@@ -97,7 +97,7 @@ describe('OutstandingBalances.vue', () => {
     // Change the prop value
     const propsData = {
       statementSummary: {
-        'oldestOverdueDate': '2023-12-01',
+        'oldestDueDate': '2023-12-01',
         'totalDue': 551.5,
         'totalInvoiceDue': 50.0
       }
