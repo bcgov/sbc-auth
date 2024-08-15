@@ -220,7 +220,7 @@ export default defineComponent({
       try {
         const data = await orgStore.getStatementsSummary()
         paymentOwingAmount.value = data?.totalDue
-        paymentDueDate.value = data?.oldestOverdueDate
+        paymentDueDate.value = data?.oldestDueDate
         return data
       } catch (error) {
         // eslint-disable-next-line no-console
