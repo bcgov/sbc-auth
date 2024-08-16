@@ -201,7 +201,8 @@ export default defineComponent({
         const accountIds = eftAccounts.map((org) => org.accountId)
 
         const eftShortNamesResponse = await PaymentService.getEFTShortNames(
-          { 'filterPayload': { 'accountIdList': accountIds.join(',') } }
+          { 'filterPayload': { 'accountIdList': accountIds.join(',') },
+            'pageLimit': accountIds.length }
         )
 
         const eftShortNames = eftShortNamesResponse.data.items
