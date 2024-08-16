@@ -39,10 +39,11 @@
               depressed
               color="primary"
               width="120"
-              class="font-weight-bold ml-auto"
-              :outlined="!isPaymentSelected(payment)"
+              :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangeFromEFTEnabled() }]"
+              :outlined="!isPaymentSelected(payment) && isChangeFromEFTEnabled()"
               :aria-label="'Select' + ' ' + payment.title"
               :data-test="`btn-payment-${payment.type}`"
+              :disabled="!isChangeFromEFTEnabled()"
               @click="paymentMethodSelected(payment)"
             >
               <span>{{ (isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT' }}</span>
@@ -178,13 +179,14 @@
 </template>
 
 <script lang="ts">
-import { Pages, PaymentTypes } from '@/util/constants'
+import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import DocumentService from '@/services/document.services'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
@@ -399,6 +401,11 @@ export default defineComponent({
       selectedPaymentMethod.value = ''
     }
 
+    const isChangeFromEFTEnabled = () => {
+      const enableEFTPaymentMethod: boolean = LaunchDarklyService.getFlag(LDFlags.EnablePaymentChangeFromEFT, false)
+      return props.currentOrgPaymentType !== PaymentTypes.EFT || enableEFTPaymentMethod
+    }
+
     const continueModal = async () => {
       const hasOutstandingBalance = await hasBalanceOwing()
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
@@ -441,7 +448,8 @@ export default defineComponent({
       bcOnlineDialog,
       cancelModal,
       continueModal,
-      isGLInfoValid
+      isGLInfoValid,
+      isChangeFromEFTEnabled
     }
   }
 })
@@ -516,6 +524,10 @@ export default defineComponent({
 
 .bcol-warning-text {
   font-size: 14px;
+}
+
+.disabled {
+  pointer-events: none;
 }
 
 </style>
