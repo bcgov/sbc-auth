@@ -358,8 +358,8 @@ export default defineComponent({
 
     onMounted(async () => {
       setAccountChangedHandler(initialize)
-      getOrgPayments()
-      initialize()
+      await getOrgPayments()
+      await initialize()
     })
 
     watch(tableDataOptions, (newValue) => {
