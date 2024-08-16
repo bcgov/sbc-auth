@@ -293,6 +293,8 @@ export default {
         state.isLoading = false
         state.isSettingsModalOpen = true
       } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error)
         state.isLoading = false
       }
     }
