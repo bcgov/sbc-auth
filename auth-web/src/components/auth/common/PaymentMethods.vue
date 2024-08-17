@@ -19,7 +19,7 @@
         :data-test="`div-payment-${payment.type}`"
       >
         <div>
-          <header class="d-flex align-center">
+          <header class="d-flex align-center flex-grow-1">
             <div class="payment-icon-container mt-n2">
               <v-icon
                 x-large
@@ -28,22 +28,50 @@
                 {{ payment.icon }}
               </v-icon>
             </div>
-            <div class="pr-8">
+            <div class="pr-8 flex-grow-1">
               <h3 class="title font-weight-bold payment-title mt-n1">
                 {{ payment.title }}
               </h3>
               <div>{{ payment.subtitle }}</div>
             </div>
+            <v-tooltip
+              v-if="!isChangePaymentEnabled() && !isPaymentSelected(payment)"
+              top
+              content-class="top-tooltip"
+              transition="fade-transition"
+            >
+              <template #activator="{ on, attrs }">
+                <div
+                  v-bind="attrs"
+                  class="btn-tooltip-wrap"
+                  v-on="on"
+                >
+                  <v-btn
+                    large
+                    depressed
+                    color="primary"
+                    width="120"
+                    :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangePaymentEnabled() }]"
+                    :aria-label="'Select' + ' ' + payment.title"
+                    :data-test="`btn-payment-${payment.type}`"
+                    disabled
+                  >
+                    <span>{{ isPaymentSelected(payment) ? 'SELECTED' : 'SELECT' }}</span>
+                  </v-btn>
+                </div>
+              </template>
+              <span>This payment method is not available after EFT is selected.</span>
+            </v-tooltip>
             <v-btn
+              v-if="isPaymentSelected(payment) || isChangePaymentEnabled()"
               large
               depressed
               color="primary"
               width="120"
-              :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangeFromEFTEnabled() }]"
-              :outlined="!isPaymentSelected(payment) && isChangeFromEFTEnabled()"
+              :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangePaymentEnabled() }]"
+              :outlined="!isPaymentSelected(payment) && isChangePaymentEnabled()"
               :aria-label="'Select' + ' ' + payment.title"
               :data-test="`btn-payment-${payment.type}`"
-              :disabled="!isChangeFromEFTEnabled()"
               @click="paymentMethodSelected(payment)"
             >
               <span>{{ (isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT' }}</span>
@@ -401,7 +429,7 @@ export default defineComponent({
       selectedPaymentMethod.value = ''
     }
 
-    const isChangeFromEFTEnabled = () => {
+    const isChangePaymentEnabled = () => {
       const enableEFTPaymentMethod: boolean = LaunchDarklyService.getFlag(LDFlags.EnablePaymentChangeFromEFT, false)
       return props.currentOrgPaymentType !== PaymentTypes.EFT || enableEFTPaymentMethod
     }
@@ -449,7 +477,7 @@ export default defineComponent({
       cancelModal,
       continueModal,
       isGLInfoValid,
-      isChangeFromEFTEnabled
+      isChangePaymentEnabled
     }
   }
 })
@@ -458,6 +486,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
+@import '@/assets/scss/tooltip.scss';
 .important {
   background-color: #fff7e3;
   border: 2px solid #fcba19;
@@ -530,4 +559,11 @@ export default defineComponent({
   pointer-events: none;
 }
 
+.d-flex {
+  display: flex;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
 </style>
