@@ -48,9 +48,46 @@
                 <div>{{ displayStatus(item.status) }}</div>
               </template>
 
-              <!-- Displaying Formatted Date -->
+              <!-- Displaying Formatted Submission Date -->
               <template #[`item.submissionDate`]="{ item }">
                 <div>{{ formatDate(item.submissionDate) }}</div>
+              </template>
+
+              <!-- Displaying Formatted Future Effective Date and Tooltips-->
+              <template #[`item.effectiveDate`]="{ item }">
+                <div>
+                  {{ formatDate(item.effectiveDate) }}
+                  <IconTooltip
+                    v-if="item.effectiveDate && passedEffectiveDate('item.effectiveDate') "
+                    icon="mdi-alert"
+                    maxWidth="300px"
+                    colour="#D3272C"
+                    :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
+                    :location="{top: true}"
+                  >
+                    <div>
+                      <strong>Alert:</strong><br>
+                      <span> The Future Effective Date for this filing has passed.</span>
+                    </div>
+                  </IconTooltip>
+                  <IconTooltip
+                    v-if="item.effectiveDate && daysLeft(item.effectiveDate) !== null"
+                    icon="mdi-alert"
+                    maxWidth="300px"
+                    colour="#F8661A"
+                    :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
+                    :location="{top: true}"
+                  >
+                    <div>
+                      <strong>Alert:</strong><br>
+                      <span>
+                        The Future Effective Date for this filing is in
+                        {{ daysLeft(item.effectiveDate) }}
+                        {{ daysLeft(item.effectiveDate) === 1 ? 'day' : 'days' }}.
+                      </span>
+                    </div>
+                  </IconTooltip>
+                </div>
               </template>
 
               <!-- Loading -->
@@ -259,6 +296,7 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import { DatePicker } from '@/components'
+import IconTooltip from '@/components/IconTooltip.vue'
 import { SessionStorageKeys } from '@/util/constants'
 import debounce from '@/util/debounce'
 import moment from 'moment'
@@ -266,7 +304,7 @@ import { useI18n } from 'vue-i18n-composable'
 
 export default defineComponent({
   name: 'ContinuationApplicationTable',
-  components: { DatePicker },
+  components: { DatePicker, IconTooltip },
   props: {
     reviewSessionStorageKey: {
       type: String as PropType<SessionStorageKeys>,
@@ -459,7 +497,24 @@ export default defineComponent({
     }
     // Method to format dates
     const formatDate = (dateString) => {
+      if (!dateString) {
+        return '' // when no FE date, return empty string
+      }
       return moment(dateString).format('MMMM D, YYYY') // Format like "May 5, 2024"
+    }
+    // Method to check if FE date has passed
+    const passedEffectiveDate = (effectiveDate: string): boolean => {
+      return !moment(effectiveDate).isAfter(moment())
+    }
+    // Method to check FE days left
+    const daysLeft = (effectiveDate: string): number | null => {
+      const diffHours = moment(effectiveDate).diff(moment(), 'hours')
+      if (diffHours > 0 && diffHours <= 24) {
+        return 1
+      } else {
+        const diffDays = moment(effectiveDate).diff(moment(), 'days')
+        return diffDays > 0 && diffDays <= 3 ? diffDays : null
+      }
     }
 
     function changeSort (column: string) {
@@ -486,6 +541,7 @@ export default defineComponent({
       view,
       clearSearchParams,
       changeSort,
+      daysLeft,
       displayStatus,
       formatDate,
       getIndexedTag,
@@ -494,6 +550,7 @@ export default defineComponent({
       setSearchFilterToStorage,
       doSearchParametersExist,
       paginationOptions,
+      passedEffectiveDate,
       updateItemsPerPage,
       updateDateRange,
       updateEffectiveDateRange
