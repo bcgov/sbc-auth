@@ -45,7 +45,7 @@ flask db migrate
 
 To prepare your local database:
 1. In the [root project folder](../docker/docker-compose.yml): `docker-compose up -d`
-2. In your environment: `peotry run flask db upgrade` or `flask db upgrade`
+2. In your environment: `poetry run flask db upgrade` or `flask db upgrade`
 
 
 Note:
@@ -72,8 +72,8 @@ pip install certifi /Applications/Python\ 3.7/Install\ Certificates.command
 
 ## Running AUTH-API
 
-1. Start the flask server with `(python -m flask run -p 5000)`
-2. View the [OpenAPI Docs](http://127.0.0.1:5000/api/v1).
+1. Start the flask server with `(poetry run flask run)`
+2. View the [OpenAPI Docs](http://127.0.0.1:8080/api/v1).
 
 ## Running Liniting
 

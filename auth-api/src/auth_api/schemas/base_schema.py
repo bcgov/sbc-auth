@@ -21,12 +21,6 @@ from auth_api.models import ma
 class BaseSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors
     """Base Schema."""
 
-    def __init__(self, *args, **kwargs):
-        """Excludes versions. Otherwise database will query <name>_versions table."""
-        if hasattr(self.opts.model, "versions") and (len(self.opts.fields) == 0):
-            self.opts.exclude += ("versions",)
-        super().__init__(*args, **kwargs)
-
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta class to declare any class attributes."""
 
@@ -44,14 +38,10 @@ class BaseSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors
     def _remove_empty(self, data, many):
         """Remove all empty values and versions from the dumped dict."""
         if not many:
-            for key in list(data):
-                if key == "versions":
-                    data.pop(key)
-
             return {key: value for key, value in data.items() if value is not None}
         for item in data:
             for key in list(item):
-                if (key == "versions") or (item[key] is None):
+                if item[key] is None:
                     item.pop(key)
 
         return data
