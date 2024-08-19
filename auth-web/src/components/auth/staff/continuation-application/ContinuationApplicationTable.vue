@@ -227,9 +227,27 @@
                         >
                           <template #selection="{ item, index }">
                             <!-- Display "Multiple Selected" if multiple statuses are selected -->
-                            <span v-if="reviewParams[header.value].length > 1 && index === 0">
-                              Multiple Selected
-                            </span>
+                            <v-tooltip
+                              v-if="reviewParams[header.value].length > 1 && index === 0"
+                              bottom
+                            >
+                              <template #activator="{ on, attrs }">
+                                <span
+                                  v-bind="attrs"
+                                  v-on="on"
+                                >
+                                  Multiple Selected
+                                </span>
+                              </template>
+                              <span>
+                                <!-- when hover over 'Multiple Selected' showing what are selected. -->
+                                {{
+                                  reviewParams[header.value]
+                                    .map(statusValue => statusTypes.find(status => status.value === statusValue)?.text)
+                                    .join(', ')
+                                }}
+                              </span>
+                            </v-tooltip>
                             <!-- Display the item text if only one is selected -->
                             <span v-else-if="reviewParams[header.value].length === 1">
                               {{ item.text }}
