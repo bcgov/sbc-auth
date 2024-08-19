@@ -154,54 +154,72 @@
 
                       <!-- Date Picker to select date submitted range -->
                       <div v-else-if="['submissionDate'].includes(header.value)">
-                        <v-text-field
-                          :value="reviewParams.startDate ? 'Custom':''"
-                          filled
-                          :placeholder="'Date Submitted'"
-                          readonly
-                          dense
-                          hide-details="auto"
-                          @click="showDatePicker = true"
+                        <v-tooltip
+                          bottom
                         >
-                          <template #append>
-                            <v-icon
-                              v-if="reviewParams.startDate"
-                              color="primary"
-                              @click="updateDateRange({ startDate: '', endDate: '' })"
+                          <template #activator="{ on, attrs }">
+                            <v-text-field
+                              v-bind="attrs"
+                              :value="truncatedDateRange(reviewParams.startDate, reviewParams.endDate)"
+                              filled
+                              :placeholder="'Date Submitted'"
+                              readonly
+                              dense
+                              hide-details="auto"
+                              v-on="on"
+                              @click="showDatePicker = true"
                             >
-                              mdi-close
-                            </v-icon>
-                            <v-icon color="primary">
-                              mdi-calendar
-                            </v-icon>
+                              <template #append>
+                                <v-icon
+                                  v-if="reviewParams.startDate"
+                                  color="primary"
+                                  @click="updateDateRange({ startDate: '', endDate: '' })"
+                                >
+                                  mdi-close
+                                </v-icon>
+                                <v-icon color="primary">
+                                  mdi-calendar
+                                </v-icon>
+                              </template>
+                            </v-text-field>
                           </template>
-                        </v-text-field>
+                          {{ fullDateRange(reviewParams.startDate, reviewParams.endDate) }}
+                        </v-tooltip>
                       </div>
 
                       <!-- Date Picker to select effective date range -->
                       <div v-else-if="['effectiveDate'].includes(header.value)">
-                        <v-text-field
-                          :value="reviewParams.startEffectiveDate ? 'Custom':''"
-                          filled
-                          :placeholder="'Future Effective Date'"
-                          readonly
-                          dense
-                          hide-details="auto"
-                          @click="showEffectiveDatePicker = true"
+                        <v-tooltip
+                          bottom
                         >
-                          <template #append>
-                            <v-icon
-                              v-if="reviewParams.startEffectiveDate"
-                              color="primary"
-                              @click="updateEffectiveDateRange({ startDate: '', endDate: '' })"
+                          <template #activator="{ on, attrs }">
+                            <v-text-field
+                              v-bind="attrs"
+                              :value="truncatedDateRange(reviewParams.startEffectiveDate, reviewParams.endEffectiveDate)"
+                              filled
+                              :placeholder="'Future Effective Date'"
+                              readonly
+                              dense
+                              hide-details="auto"
+                              v-on="on"
+                              @click="showEffectiveDatePicker = true"
                             >
-                              mdi-close
-                            </v-icon>
-                            <v-icon color="primary">
-                              mdi-calendar
-                            </v-icon>
+                              <template #append>
+                                <v-icon
+                                  v-if="reviewParams.startEffectiveDate"
+                                  color="primary"
+                                  @click="updateEffectiveDateRange({ startDate: '', endDate: '' })"
+                                >
+                                  mdi-close
+                                </v-icon>
+                                <v-icon color="primary">
+                                  mdi-calendar
+                                </v-icon>
+                              </template>
+                            </v-text-field>
                           </template>
-                        </v-text-field>
+                          {{ fullDateRange(reviewParams.startEffectiveDate, reviewParams.endEffectiveDate) }}
+                        </v-tooltip>
                       </div>
 
                       <!-- Drop down menu to select statuses -->
@@ -430,6 +448,18 @@ export default defineComponent({
       state.reviewParams.startEffectiveDate = val.startDate
       state.reviewParams.endEffectiveDate = val.endDate
     }
+    const fullDateRange = (startDate, endDate) => {
+      if (startDate && endDate) {
+        return `${moment(startDate).format('MMMM D, YYYY')} - ${moment(endDate).format('MMMM D, YYYY')}`
+      }
+      return ''
+    }
+    const truncatedDateRange = (startDate, endDate) => {
+      if (startDate && endDate) {
+        return `${moment(startDate).format('MMM D')} - ${moment(endDate).format('MMM D')}`
+      }
+      return ''
+    }
 
     function mounted () {
       state.tableDataOptions = DEFAULT_DATA_OPTIONS
@@ -562,10 +592,12 @@ export default defineComponent({
       daysLeft,
       displayStatus,
       formatDate,
+      fullDateRange,
       getIndexedTag,
       getButtonLabel,
       noDataMessage,
       setSearchFilterToStorage,
+      truncatedDateRange,
       doSearchParametersExist,
       paginationOptions,
       passedEffectiveDate,
