@@ -24,6 +24,7 @@ from sbc_common_components.utils.camel_case_response import convert_to_camel
 
 import auth_api.config as config  # pylint:disable=consider-using-from-import
 from auth_api.config import _Config
+from auth_api.exceptions import ExceptionHandler
 from auth_api.extensions import mail
 from auth_api.models import db, ma
 from auth_api.resources import endpoints
@@ -64,6 +65,7 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
 
     app.after_request(convert_to_camel)
 
+    ExceptionHandler(app)
     setup_jwt_manager(app, jwt)
     register_shellcontext(app)
     build_cache(app)
