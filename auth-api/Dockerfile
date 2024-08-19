@@ -1,4 +1,4 @@
-FROM python:3.12.4-bullseye as development_build
+FROM python:3.12.5-bullseye as development_build
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
@@ -73,7 +73,7 @@ RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   echo "$APP_ENV" \
   && poetry version \
   # Install deps:
-  && poetry run pip install -U pip \
+  && poetry update \
   && poetry install \
     $(if [ -z ${APP_ENV+x} ] | [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
     --no-interaction --no-ansi
