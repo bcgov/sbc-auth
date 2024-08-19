@@ -1,5 +1,6 @@
 <template>
   <div id="continuation-application-review-table">
+    <!-- Date submitted date range picker -->
     <DatePicker
       v-show="showDatePicker"
       ref="datePicker"
@@ -7,6 +8,16 @@
       class="mt-n4"
       @submit="updateDateRange($event)"
     />
+
+    <!-- Future effective date range picker -->
+    <DatePicker
+      v-show="showEffectiveDatePicker"
+      ref="effectiveDatePicker"
+      :reset="effectiveDateRangeReset"
+      class="mt-n4"
+      @submit="updateEffectiveDateRange($event)"
+    />
+
     <v-form class="fas-search continuation-review-search">
       <v-row
         dense
@@ -91,7 +102,7 @@
                       :scope="getIndexedTag('find-header-col2', i)"
                     >
                       <v-text-field
-                        v-if="!['action','status','submissionDate'].includes(header.value)"
+                        v-if="!['action','status','submissionDate','effectiveDate'].includes(header.value)"
                         :id="header.value"
                         v-model.trim="reviewParams[header.value]"
                         input
@@ -120,6 +131,32 @@
                               v-if="reviewParams.startDate"
                               color="primary"
                               @click="updateDateRange({ startDate: '', endDate: '' })"
+                            >
+                              mdi-close
+                            </v-icon>
+                            <v-icon color="primary">
+                              mdi-calendar
+                            </v-icon>
+                          </template>
+                        </v-text-field>
+                      </div>
+
+                      <!-- Date Picker to select effective date range -->
+                      <div v-else-if="['effectiveDate'].includes(header.value)">
+                        <v-text-field
+                          :value="reviewParams.startEffectiveDate ? 'Custom':''"
+                          filled
+                          :placeholder="'Future Effective Date'"
+                          readonly
+                          dense
+                          hide-details="auto"
+                          @click="showEffectiveDatePicker = true"
+                        >
+                          <template #append>
+                            <v-icon
+                              v-if="reviewParams.startEffectiveDate"
+                              color="primary"
+                              @click="updateEffectiveDateRange({ startDate: '', endDate: '' })"
                             >
                               mdi-close
                             </v-icon>
@@ -259,6 +296,7 @@ export default defineComponent({
       reviews: [] as Array<ContinuationReviewIF>,
       headers: [
         { text: 'Date Submitted', value: 'submissionDate' },
+        { text: 'Future Effective Date', value: 'effectiveDate' },
         { text: 'NR Number', value: 'nrNumber' },
         { text: 'Identifying Number', value: 'identifier' },
         { text: 'Completing Party', value: 'completingParty' },
@@ -281,10 +319,13 @@ export default defineComponent({
       sortBy: 'submissionDate',
       sortDesc: false,
       showDatePicker: false,
+      showEffectiveDatePicker: false,
       dropdown: [] as Array<boolean>,
       reviewParams: {
         startDate: '',
         endDate: '',
+        startEffectiveDate: '',
+        endEffectiveDate: '',
         nrNumber: '',
         identifier: '',
         completingParty: '',
@@ -324,6 +365,15 @@ export default defineComponent({
       state.reviewParams.startDate = val.startDate
       state.reviewParams.endDate = val.endDate
     }
+    const effectiveDateRangeReset = ref(0)
+    const updateEffectiveDateRange = (val: { endDate?: string, startDate?: string }) => {
+      state.showEffectiveDatePicker = false
+      if (!(val.endDate && val.startDate)) {
+        val = { startDate: '', endDate: '' }
+      }
+      state.reviewParams.startEffectiveDate = val.startDate
+      state.reviewParams.endEffectiveDate = val.endDate
+    }
 
     function mounted () {
       state.tableDataOptions = DEFAULT_DATA_OPTIONS
@@ -360,10 +410,13 @@ export default defineComponent({
 
     function clearSearchParams () {
       dateRangeReset.value++
+      effectiveDateRangeReset.value++
       state.reviewParams = {
         ...state.reviewParams,
         startDate: '',
         endDate: '',
+        startEffectiveDate: '',
+        endEffectiveDate: '',
         nrNumber: '',
         identifier: '',
         completingParty: '',
@@ -393,6 +446,7 @@ export default defineComponent({
 
     function doSearchParametersExist (params: ReviewFilterParams): boolean {
       return params.startDate.length > 0 ||
+                params.startEffectiveDate.length > 0 ||
                 params.nrNumber.length > 0 ||
                 params.identifier.length > 0 ||
                 params.completingParty.length > 0 ||
@@ -428,6 +482,7 @@ export default defineComponent({
       ...toRefs(state),
       debouncedOrgSearch,
       dateRangeReset,
+      effectiveDateRangeReset,
       view,
       clearSearchParams,
       changeSort,
@@ -440,7 +495,8 @@ export default defineComponent({
       doSearchParametersExist,
       paginationOptions,
       updateItemsPerPage,
-      updateDateRange
+      updateDateRange,
+      updateEffectiveDateRange
     }
   }
 })
