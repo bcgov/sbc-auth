@@ -58,7 +58,7 @@
                 <div>
                   {{ formatDate(item.effectiveDate) }}
                   <IconTooltip
-                    v-if="item.effectiveDate && expiredDate(item.effectiveDate) "
+                    v-if="expiredDate(item.effectiveDate)"
                     icon="mdi-alert"
                     maxWidth="300px"
                     colour="#D3272C"
@@ -112,7 +112,7 @@
                     </div>
                   </IconTooltip>
                   <IconTooltip
-                    v-if=" expiredDate(item.nrExpiryDate) "
+                    v-if="expiredDate(item.nrExpiryDate)"
                     icon="mdi-alert"
                     maxWidth="300px"
                     colour="#D3272C"
@@ -337,12 +337,40 @@
                   <span class="open-action">
                     <v-btn
                       color="primary"
-                      :class="['open-action-btn', getButtonLabel(item.status).toLowerCase()]"
+                      :class="['open-action-btn', { active: item.nrNumber && !['APPROVED', 'REJECTED', 'ABANDONED'].includes(item.status) }]"
                       :data-test="getIndexedTag('view-continuation-button', item.id)"
                       @click="view(item.id)"
                     >
                       {{ getButtonLabel(item.status) }}
                     </v-btn>
+                  </span>
+                  <!-- More Actions Menu -->
+                  <span
+                    v-if="item.nrNumber && !['APPROVED', 'REJECTED', 'ABANDONED'].includes(item.status)"
+                  >
+                    <v-menu
+                      v-model="dropdown[item.nrNumber]"
+                      offset-y
+                      nudge-left="158"
+                    >
+                      <template #activator="{ on }">
+                        <v-btn
+                          color="primary"
+                          class="more-actions-btn"
+                          v-on="on"
+                        >
+                          <v-icon>{{ dropdown[item.nrNumber] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                        </v-btn>
+                      </template>
+                      <v-list>
+                        <v-list-item>
+                          <v-list-item-subtitle>
+                            <v-icon style="font-size: 14px">mdi-format-list-bulleted</v-icon>
+                            <span class="pl-2">Open Name Request</span>
+                          </v-list-item-subtitle>
+                        </v-list-item>
+                      </v-list>
+                    </v-menu>
                   </span>
                 </div>
               </template>
@@ -527,6 +555,7 @@ export default defineComponent({
       const reviewStates = ['AWAITING_REVIEW', 'RESUBMITTED']
       return reviewStates.includes(status) ? 'Review' : 'View'
     }
+
     async function view (reviewId: string) {
       this.$router.push(`/staff/continuation-review/${reviewId}`)
     }
@@ -591,7 +620,7 @@ export default defineComponent({
     const expiredDate = (effectiveDate: string): boolean => {
       return effectiveDate && !moment(effectiveDate).isAfter(moment())
     }
-    // Method to check FE days left
+    // Method to check FE or NR days left
     const daysLeft = (effectiveDate: string): number | null => {
       const diffHours = moment(effectiveDate).diff(moment(), 'hours')
       if (diffHours > 0 && diffHours <= 24) {
@@ -697,18 +726,12 @@ export default defineComponent({
   }
 
   .open-action-btn {
+    min-width: 7rem !important;
     &.active {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
+      min-width: 5rem !important;
     }
-  }
-
-  .open-action-btn.view {
-  min-width: 4.9rem !important;
-  }
-
-  .open-action-btn.review {
-  min-width: 6rem !important;
   }
 
   .more-actions-btn {
