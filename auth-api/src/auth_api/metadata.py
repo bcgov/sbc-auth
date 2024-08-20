@@ -11,18 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""Tests to assure the version utilities.
-
-Test-Suite to ensure that the version utilities are working as expected.
+"""Get metadata information from pyproject.toml
 """
-from auth_api import utils
-from auth_api.version import __version__
-from tests import skip_in_pod
+import os
+from importlib.metadata import metadata, version
 
-
-@skip_in_pod
-def test_get_version():
-    """Assert thatThe version is returned correctly."""
-    rv = utils.run_version.get_run_version()
-    assert rv == __version__
+meta = metadata(__package__ or __name__)
+APP_NAME = meta["Name"]
+APP_VERSION = meta["Version"]
+APP_RUNNING_PROJECT = os.getenv("DEPLOYMENT_PROJECT", "local")
+APP_RUNNING_ENVIRONMENT = os.getenv("DEPLOYMENT_ENV", "production")
+FLASK_VERSION = version("flask")

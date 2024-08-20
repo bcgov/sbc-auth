@@ -18,13 +18,13 @@ from marshmallow import fields
 from auth_api.models import ma
 
 
-class BaseCodeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class BaseCodeSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the BaseCode model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps fields to a default schema."""
 
-        fields = ('code', 'description', 'default', 'is_government_agency', 'is_business')
+        fields = ("code", "description", "default", "is_government_agency", "is_business")
 
     # front end expects desc still
-    description = fields.String(data_key='desc')
+    description = fields.String(data_key="desc")

@@ -11,9 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Bring in the common JWT Manager."""
-from flask_jwt_oidc import JwtManager
+"""Endpoints to check and manage the health of the service."""
+from flask import Blueprint, jsonify
+
+from auth_api.metadata import APP_VERSION, FLASK_VERSION
+
+bp = Blueprint("META", __name__, url_prefix="/meta")
 
 
-# lower case name as used by convention in most Flask apps
-jwt = JwtManager()  # pylint: disable=invalid-name
+@bp.route("/info")
+def info():
+    """Return a JSON object with meta information about the Service."""
+    return jsonify(API=f"auth_api/{APP_VERSION}", FrameWork=f"{FLASK_VERSION}")

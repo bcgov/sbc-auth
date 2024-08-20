@@ -16,22 +16,25 @@
 This is a mapping between status codes and descriptions for Org objects.
 """
 
+from sql_versioning import Versioned
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .base_model import VersionedModel
+from .base_model import BaseModel
 
 
-class OrgSettings(VersionedModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class OrgSettings(
+    Versioned, BaseModel
+):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Org Settings record."""
 
-    __tablename__ = 'org_settings'
+    __tablename__ = "org_settings"
 
     id = Column(Integer, primary_key=True)
-    org_id = Column(ForeignKey('orgs.id'), nullable=False)
+    org_id = Column(ForeignKey("orgs.id"), nullable=False)
     setting = Column(String(100))
     enabled = Column(Boolean(), default=False, nullable=False)
-    org = relationship('Org')
+    org = relationship("Org")
 
     @classmethod
     def get_org_settings(cls, org_id):
@@ -41,7 +44,7 @@ class OrgSettings(VersionedModel):  # pylint: disable=too-few-public-methods # T
     @classmethod
     def is_admin_auto_approved_invitees(cls, org_id):
         """Return the default status code for an Org."""
-        org_model = cls.query.filter_by(org_id=org_id, setting='ADMIN_AUTO_APPROVAL_FOR_MEMBER_ACCEPTANCE').first()
+        org_model = cls.query.filter_by(org_id=org_id, setting="ADMIN_AUTO_APPROVAL_FOR_MEMBER_ACCEPTANCE").first()
         if org_model is not None:
             return org_model.enabled
         return False

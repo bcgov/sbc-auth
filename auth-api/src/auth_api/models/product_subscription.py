@@ -16,35 +16,41 @@
 The ProductSubscription object connects Org models to one or more ProductSubscription models.
 """
 
+from sql_versioning import Versioned
 from sqlalchemy import Column, ForeignKey, Integer, and_
 from sqlalchemy.orm import relationship
 
 from ..utils.roles import VALID_SUBSCRIPTION_STATUSES
-from .base_model import VersionedModel
+from .base_model import BaseModel
 
 
-class ProductSubscription(VersionedModel):  # pylint: disable=too-few-public-methods
+class ProductSubscription(Versioned, BaseModel):  # pylint: disable=too-few-public-methods
     """Model for a Product Subscription model."""
 
-    __tablename__ = 'product_subscriptions'
+    __tablename__ = "product_subscriptions"
 
     id = Column(Integer, primary_key=True)
-    org_id = Column(ForeignKey('orgs.id'), nullable=False, index=True)
-    product_code = Column(ForeignKey('product_codes.code'), nullable=False)
+    org_id = Column(ForeignKey("orgs.id"), nullable=False, index=True)
+    product_code = Column(ForeignKey("product_codes.code"), nullable=False)
 
-    product = relationship('ProductCode', foreign_keys=[product_code], lazy='select')
-    status_code = Column(ForeignKey('product_subscriptions_statuses.code'), nullable=False)
-    product_subscriptions_status = relationship('ProductSubscriptionsStatus')
+    product = relationship("ProductCode", foreign_keys=[product_code], lazy="select")
+    status_code = Column(ForeignKey("product_subscriptions_statuses.code"), nullable=False)
+    product_subscriptions_status = relationship("ProductSubscriptionsStatus")
 
     @classmethod
     def find_by_org_ids(cls, org_ids, valid_statuses=VALID_SUBSCRIPTION_STATUSES):
         """Find an product subscription instance that matches the provided org ids."""
         return cls.query.filter(
-            and_(ProductSubscription.org_id.in_(org_ids), ProductSubscription.status_code.in_(valid_statuses))).all()
+            and_(ProductSubscription.org_id.in_(org_ids), ProductSubscription.status_code.in_(valid_statuses))
+        ).all()
 
     @classmethod
     def find_by_org_id_product_code(cls, org_id, product_code, valid_statuses=VALID_SUBSCRIPTION_STATUSES):
         """Find an product subscription instance that matches the provided id."""
         return cls.query.filter(
-            and_(ProductSubscription.org_id == org_id, ProductSubscription.product_code == product_code,
-                 ProductSubscription.status_code.in_(valid_statuses))).first()
+            and_(
+                ProductSubscription.org_id == org_id,
+                ProductSubscription.product_code == product_code,
+                ProductSubscription.status_code.in_(valid_statuses),
+            )
+        ).first()

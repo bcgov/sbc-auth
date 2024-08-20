@@ -25,7 +25,7 @@ from .base_model import BaseCodeModel
 class ProductSubscriptionsStatus(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """This is the model for an ProductSubscription Status record."""
 
-    __tablename__ = 'product_subscriptions_statuses'
+    __tablename__ = "product_subscriptions_statuses"
 
     @declared_attr
     def code(cls):  # pylint:disable=no-self-argument, # noqa: N805

@@ -22,7 +22,7 @@ from .base_model import BaseCodeModel
 class AffiliationInvitationType(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """This is the Affiliation Invitation Type model for the Auth service."""
 
-    __tablename__ = 'affiliation_invitation_types'
+    __tablename__ = "affiliation_invitation_types"
 
     @classmethod
     def get_default_type(cls):

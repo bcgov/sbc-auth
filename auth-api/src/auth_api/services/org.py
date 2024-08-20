@@ -12,18 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Organization data."""
-from datetime import datetime
+# pylint:disable=too-many-lines
 import json
+from datetime import datetime
+from http import HTTPStatus
 from typing import Dict, List, Tuple
 
 from flask import current_app, g
 from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 from sbc_common_components.utils.enums import QueueMessageTypes
 
-from auth_api import status as http_status
-from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
@@ -31,9 +30,10 @@ from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
-from auth_api.models import User as UserModel
 from auth_api.models import Task as TaskModel
+from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
+from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
 from auth_api.services.user import User as UserService
@@ -43,9 +43,23 @@ from auth_api.services.validators.bcol_credentials import validate as bcol_crede
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, AffidavitStatus, LoginSource, OrgStatus, OrgType, PatchActions, PaymentAccountStatus,
-    PaymentMethod, Status, SuspensionReasonCode, TaskRelationshipStatus, TaskRelationshipType,
-    TaskStatus, TaskTypePrefix, TaskAction)
+    AccessType,
+    ActivityAction,
+    AffidavitStatus,
+    LoginSource,
+    OrgStatus,
+    OrgType,
+    PatchActions,
+    PaymentAccountStatus,
+    PaymentMethod,
+    Status,
+    SuspensionReasonCode,
+    TaskAction,
+    TaskRelationshipStatus,
+    TaskRelationshipType,
+    TaskStatus,
+    TaskTypePrefix,
+)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I005
 from auth_api.utils.util import camelback2snake
 
@@ -61,7 +75,7 @@ from .rest_service import RestService
 from .task import Task as TaskService
 from .validators.validator_response import ValidatorResponse
 
-ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
+ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 
 
 class Org:  # pylint: disable=too-many-public-methods
@@ -74,7 +88,6 @@ class Org:  # pylint: disable=too-many-public-methods
         """Return an Org Service."""
         self._model = model
 
-    @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the internal Org model as a dictionary.
 
@@ -87,25 +100,25 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def create_org(org_info: dict, user_id):
         """Create a new organization."""
-        current_app.logger.debug('<create_org ')
+        current_app.logger.debug("<create_org ")
         # bcol is treated like an access type as well;so its outside the scheme
-        mailing_address = org_info.pop('mailingAddress', None)
-        payment_info = org_info.pop('paymentInfo', {})
-        product_subscriptions = org_info.pop('productSubscriptions', None)
+        mailing_address = org_info.pop("mailingAddress", None)
+        payment_info = org_info.pop("paymentInfo", {})
+        product_subscriptions = org_info.pop("productSubscriptions", None)
 
         bcol_profile_flags = None
         response = Org._validate_and_raise_error(org_info)
         # If the account is created using BCOL credential, verify its valid bc online account
-        bcol_details_response = response.get('bcol_response', None)
+        bcol_details_response = response.get("bcol_response", None)
         if bcol_details_response is not None and (bcol_details := bcol_details_response.json()) is not None:
             Org._map_response_to_org(bcol_details, org_info)
-            bcol_profile_flags = bcol_details.get('profileFlags')
+            bcol_profile_flags = bcol_details.get("profileFlags")
 
-        access_type = response.get('access_type')
+        access_type = response.get("access_type")
 
         # set premium for GOVM accounts..TODO remove if not needed this logic
         if access_type == AccessType.GOVM.value:
-            org_info.update({'typeCode': OrgType.PREMIUM.value})
+            org_info.update({"typeCode": OrgType.PREMIUM.value})
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.access_type = access_type
@@ -124,9 +137,8 @@ class Org:  # pylint: disable=too-many-public-methods
         Org.create_membership(access_type, org, user_id)
 
         if product_subscriptions is not None:
-            subscription_data = {'subscriptions': product_subscriptions}
-            ProductService.create_product_subscription(org.id, subscription_data=subscription_data,
-                                                       skip_auth=True)
+            subscription_data = {"subscriptions": product_subscriptions}
+            ProductService.create_product_subscription(org.id, subscription_data=subscription_data, skip_auth=True)
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
 
@@ -137,12 +149,9 @@ class Org:  # pylint: disable=too-many-public-methods
         # raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, None)
 
         # Send an email to staff to remind review the pending account
-        is_staff_review_needed = (
-            access_type == AccessType.GOVN.value or
-            (
-                access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) and
-                not AffidavitModel.find_approved_by_user_id(user_id=user_id)
-            )
+        is_staff_review_needed = access_type == AccessType.GOVN.value or (
+            access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
+            and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
         )
 
         user = UserModel.find_by_jwt_token()
@@ -153,7 +162,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         ProductService.update_org_product_keycloak_groups(org.id)
 
-        current_app.logger.info(f'<created_org org_id:{org.id}')
+        current_app.logger.info(f"<created_org org_id:{org.id}")
 
         return Org(org)
 
@@ -161,21 +170,27 @@ class Org:  # pylint: disable=too-many-public-methods
     def _create_staff_review_task(org: OrgModel, user: UserModel):
         org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
         # create a staff review task for this account
-        task_type = TaskTypePrefix.GOVN_REVIEW.value if org.access_type == AccessType.GOVN.value \
+        task_type = (
+            TaskTypePrefix.GOVN_REVIEW.value
+            if org.access_type == AccessType.GOVN.value
             else TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
-        action = TaskAction.AFFIDAVIT_REVIEW.value if user.login_source == LoginSource.BCEID.value \
+        )
+        action = (
+            TaskAction.AFFIDAVIT_REVIEW.value
+            if user.login_source == LoginSource.BCEID.value
             else TaskAction.ACCOUNT_REVIEW.value
+        )
 
         task_info = {
-            'name': org.name,
-            'relationshipId': org.id,
-            'relatedTo': user.id,
-            'dateSubmitted': datetime.today(),
-            'relationshipType': TaskRelationshipType.ORG.value,
-            'type': task_type,
-            'action': action,
-            'status': TaskStatus.OPEN.value,
-            'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+            "name": org.name,
+            "relationshipId": org.id,
+            "relatedTo": user.id,
+            "dateSubmitted": datetime.today(),
+            "relationshipType": TaskRelationshipType.ORG.value,
+            "type": task_type,
+            "action": action,
+            "status": TaskStatus.OPEN.value,
+            "relationship_status": TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
         }
         TaskService.create_task(task_info=task_info, do_commit=False)
         Org.send_staff_review_account_reminder(relationship_id=org.id)
@@ -184,10 +199,11 @@ class Org:  # pylint: disable=too-many-public-methods
     @user_context
     def create_membership(access_type, org, user_id, **kwargs):
         """Create membership account."""
-        user: UserContext = kwargs['user_context']
+        user: UserContext = kwargs["user_context"]
         if not user.is_staff_admin() and access_type != AccessType.ANONYMOUS.value:
-            membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='ADMIN',
-                                         membership_type_status=Status.ACTIVE.value)
+            membership = MembershipModel(
+                org_id=org.id, user_id=user_id, membership_type_code="ADMIN", membership_type_status=Status.ACTIVE.value
+            )
             membership.add_to_session()
 
             # Add the user to account_holders group
@@ -195,78 +211,93 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     @user_context
-    def _create_payment_settings(org_model: OrgModel, payment_info: dict,  # pylint: disable=too-many-arguments
-                                 payment_method: str, mailing_address=None,
-                                 is_new_org: bool = True, **kwargs):
+    def _create_payment_settings(
+        org_model: OrgModel,
+        payment_info: dict,  # pylint: disable=too-many-arguments
+        payment_method: str,
+        mailing_address=None,
+        is_new_org: bool = True,
+        **kwargs,
+    ):
         """Add payment settings for the org."""
-        pay_url = current_app.config.get('PAY_API_URL')
-        org_name_for_pay = f'{org_model.name}-{org_model.branch_name}' if org_model.branch_name else org_model.name
+        pay_url = current_app.config.get("PAY_API_URL")
+        org_name_for_pay = f"{org_model.name}-{org_model.branch_name}" if org_model.branch_name else org_model.name
         pay_request = {
-            'accountId': org_model.id,
+            "accountId": org_model.id,
             # pay needs the most unique idenitfier.So combine name and branch name
-            'accountName': org_name_for_pay,
-            'branchName': org_model.branch_name or ''
+            "accountName": org_name_for_pay,
+            "branchName": org_model.branch_name or "",
         }
 
         if payment_method:
-            pay_request['paymentInfo'] = {'methodOfPayment': payment_method}
+            pay_request["paymentInfo"] = {"methodOfPayment": payment_method}
 
         if mailing_address:
-            pay_request['contactInfo'] = mailing_address
+            pay_request["contactInfo"] = mailing_address
 
         if payment_method and org_model.bcol_account_id:
-            pay_request['bcolAccountNumber'] = org_model.bcol_account_id
-            pay_request['bcolUserId'] = org_model.bcol_user_id
+            pay_request["bcolAccountNumber"] = org_model.bcol_account_id
+            pay_request["bcolUserId"] = org_model.bcol_user_id
 
-        if (revenue_account := payment_info.get('revenueAccount')) is not None:
-            pay_request.setdefault('paymentInfo', {})
-            pay_request['paymentInfo']['revenueAccount'] = revenue_account
+        if (revenue_account := payment_info.get("revenueAccount")) is not None:
+            pay_request.setdefault("paymentInfo", {})
+            pay_request["paymentInfo"]["revenueAccount"] = revenue_account
 
         if payment_method == PaymentMethod.PAD.value:  # PAD has bank related details
-            pay_request['paymentInfo']['bankTransitNumber'] = payment_info.get('bankTransitNumber', None)
-            pay_request['paymentInfo']['bankInstitutionNumber'] = payment_info.get('bankInstitutionNumber', None)
-            pay_request['paymentInfo']['bankAccountNumber'] = payment_info.get('bankAccountNumber', None)
-            pay_request['padTosAcceptedBy'] = kwargs['user_context'].user_name
+            pay_request["paymentInfo"]["bankTransitNumber"] = payment_info.get("bankTransitNumber", None)
+            pay_request["paymentInfo"]["bankInstitutionNumber"] = payment_info.get("bankInstitutionNumber", None)
+            pay_request["paymentInfo"]["bankAccountNumber"] = payment_info.get("bankAccountNumber", None)
+            pay_request["padTosAcceptedBy"] = kwargs["user_context"].user_name
         # invoke pay-api
         token = RestService.get_service_account_token()
         if is_new_org:
-            response = RestService.post(endpoint=f'{pay_url}/accounts',
-                                        data=pay_request, token=token, raise_for_status=True)
+            response = RestService.post(
+                endpoint=f"{pay_url}/accounts", data=pay_request, token=token, raise_for_status=True
+            )
         else:
-            response = RestService.put(endpoint=f'{pay_url}/accounts/{org_model.id}',
-                                       data=pay_request, token=token, raise_for_status=True)
+            response = RestService.put(
+                endpoint=f"{pay_url}/accounts/{org_model.id}", data=pay_request, token=token, raise_for_status=True
+            )
 
-        if response.status_code == http_status.HTTP_200_OK:
+        if response.status_code == HTTPStatus.OK:
             payment_account_status = PaymentAccountStatus.CREATED
-        elif response.status_code == http_status.HTTP_202_ACCEPTED:
+        elif response.status_code == HTTPStatus.ACCEPTED:
             payment_account_status = PaymentAccountStatus.PENDING
         else:
             payment_account_status = PaymentAccountStatus.FAILED
 
         if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
-            payment_method_description = PaymentMethod(payment_method).name if payment_method in [
-                item.value for item in PaymentMethod] else ''
-            ActivityLogPublisher.publish_activity(Activity(org_model.id, ActivityAction.PAYMENT_INFO_CHANGE.value,
-                                                           name=org_model.name,
-                                                           value=payment_method_description))
+            payment_method_description = (
+                PaymentMethod(payment_method).name if payment_method in [item.value for item in PaymentMethod] else ""
+            )
+            ActivityLogPublisher.publish_activity(
+                Activity(
+                    org_model.id,
+                    ActivityAction.PAYMENT_INFO_CHANGE.value,
+                    name=org_model.name,
+                    value=payment_method_description,
+                )
+            )
         return payment_account_status
 
     @staticmethod
     def _validate_and_raise_error(org_info: dict):
         """Execute the validators in chain and raise error or return."""
         validators = [account_limit_validate, access_type_validate, duplicate_org_name_validate]
-        arg_dict = {'accessType': org_info.get('accessType', None),
-                    'name': org_info.get('name'),
-                    'branch_name': org_info.get('branchName')}
-        if (bcol_credential := org_info.pop('bcOnlineCredential', None)) is not None:
+        arg_dict = {
+            "accessType": org_info.get("accessType", None),
+            "name": org_info.get("name"),
+            "branch_name": org_info.get("branchName"),
+        }
+        if (bcol_credential := org_info.pop("bcOnlineCredential", None)) is not None:
             validators.insert(0, bcol_credentials_validate)  # first validator should be bcol ,thus 0th position
-            arg_dict['bcol_credential'] = bcol_credential
+            arg_dict["bcol_credential"] = bcol_credential
 
         validator_response_list: List[ValidatorResponse] = []
         for validate in validators:
             validator_response_list.append(validate(**arg_dict))
 
-        not_valid_obj = next((x for x in validator_response_list if getattr(x, 'is_valid', None) is False), None)
+        not_valid_obj = next((x for x in validator_response_list if getattr(x, "is_valid", None) is False), None)
         if not_valid_obj:
             raise BusinessException(not_valid_obj.error[0], None)
 
@@ -277,35 +308,37 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def _get_default_payment_method_for_creditcard():
-        return PaymentMethod.DIRECT_PAY.value if current_app.config.get(
-            'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
+        return (
+            PaymentMethod.DIRECT_PAY.value
+            if current_app.config.get("DIRECT_PAY_ENABLED")
+            else PaymentMethod.CREDIT_CARD.value
+        )
 
     @staticmethod
     def get_bcol_details(bcol_credential: Dict, org_id=None):
         """Retrieve and validate BC Online credentials."""
-        arg_dict = {'bcol_credential': bcol_credential,
-                    'org_id': org_id}
+        arg_dict = {"bcol_credential": bcol_credential, "org_id": org_id}
         validator_obj = bcol_credentials_validate(**arg_dict)
         if not validator_obj.is_valid:
             raise BusinessException(validator_obj.error[0], None)
-        return validator_obj.info.get('bcol_response', None)
+        return validator_obj.info.get("bcol_response", None)
 
     @staticmethod
     def _map_response_to_org(bcol_response, org_info, do_link_name=True):
-        org_info.update({
-            'bcol_account_id': bcol_response.get('accountNumber'),
-            'bcol_user_id': bcol_response.get('userId'),
-        })
+        org_info.update(
+            {
+                "bcol_account_id": bcol_response.get("accountNumber"),
+                "bcol_user_id": bcol_response.get("userId"),
+            }
+        )
 
         if do_link_name:
-            org_info.update({
-                'bcol_account_name': bcol_response.get('orgName')
-            })
+            org_info.update({"bcol_account_name": bcol_response.get("orgName")})
 
         # New org who linked to BCOL account will use BCOL account name as default name
         # Existing account keep their account name to avoid payment info change.
-        if not org_info.get('name') and do_link_name:
-            org_info.update({'name': bcol_response.get('orgName')})
+        if not org_info.get("name") and do_link_name:
+            org_info.update({"name": bcol_response.get("orgName")})
 
     @staticmethod
     def add_contact_to_org(mailing_address, org):
@@ -319,7 +352,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
     def update_org(self, org_info):  # pylint: disable=too-many-locals, too-many-statements
         """Update the passed organization with the new info."""
-        current_app.logger.debug('<update_org ')
+        current_app.logger.debug("<update_org ")
 
         has_org_updates: bool = False  # update the org table if this variable is set true
         has_status_changing: bool = False
@@ -327,43 +360,41 @@ class Org:  # pylint: disable=too-many-public-methods
         org_model: OrgModel = self._model
         # to enforce necessary details for govm account creation
         is_govm_account = org_model.access_type == AccessType.GOVM.value
-        is_govm_account_creation = \
-            is_govm_account and org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
+        is_govm_account_creation = is_govm_account and org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
 
         # validate if name or branch name is getting updatedtest_org.py
-        branch_name = org_info.get('branchName', None)
-        org_name = org_info.get('name', None)
+        branch_name = org_info.get("branchName", None)
+        org_name = org_info.get("name", None)
         current_org_name = org_name or org_model.name
         name_updated = branch_name or org_name
         if name_updated:
-            arg_dict = {'name': current_org_name,
-                        'branch_name': branch_name,
-                        'org_id': org_model.id}
+            arg_dict = {"name": current_org_name, "branch_name": branch_name, "org_id": org_model.id}
             duplicate_org_name_validate(is_fatal=True, **arg_dict)
 
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
-        if bcol_credential := org_info.pop('bcOnlineCredential', None):
+        if bcol_credential := org_info.pop("bcOnlineCredential", None):
             bcol_response = Org.get_bcol_details(bcol_credential, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info, do_link_name=False)
-            ProductService.create_subscription_from_bcol_profile(org_model.id, bcol_response.get('profileFlags'))
+            ProductService.create_subscription_from_bcol_profile(org_model.id, bcol_response.get("profileFlags"))
             has_org_updates = True
 
-        product_subscriptions = org_info.pop('productSubscriptions', None)
+        product_subscriptions = org_info.pop("productSubscriptions", None)
 
-        mailing_address = org_info.pop('mailingAddress', None)
-        payment_info = org_info.pop('paymentInfo', {})
-        Org._is_govm_missing_account_data(is_govm_account_creation, mailing_address, payment_info.get('revenueAccount'))
+        mailing_address = org_info.pop("mailingAddress", None)
+        payment_info = org_info.pop("paymentInfo", {})
+        Org._is_govm_missing_account_data(is_govm_account_creation, mailing_address, payment_info.get("revenueAccount"))
 
         if is_govm_account_creation:
             has_org_updates = True
-            org_info['statusCode'] = OrgStatus.PENDING_STAFF_REVIEW.value
+            org_info["statusCode"] = OrgStatus.PENDING_STAFF_REVIEW.value
             has_status_changing = True
             self._create_gov_account_task(org_model)
         if product_subscriptions is not None:
-            subscription_data = {'subscriptions': product_subscriptions}
-            ProductService.create_product_subscription(self._model.id, subscription_data=subscription_data,
-                                                       skip_auth=True)
+            subscription_data = {"subscriptions": product_subscriptions}
+            ProductService.create_product_subscription(
+                self._model.id, subscription_data=subscription_data, skip_auth=True
+            )
 
         # Update mailing address Or create new one
         if mailing_address:
@@ -381,7 +412,7 @@ class Org:  # pylint: disable=too-many-public-methods
             has_org_updates = True
 
         if has_org_updates:
-            excluded = ('type_code',) if has_status_changing else EXCLUDED_FIELDS
+            excluded = ("type_code",) if has_status_changing else EXCLUDED_FIELDS
             self._model.update_org_from_dict(camelback2snake(org_info), exclude=excluded)
             if is_govm_account_creation:
                 # send mail after the org is committed to DB
@@ -393,7 +424,7 @@ class Org:  # pylint: disable=too-many-public-methods
         Org._publish_activity_on_name_change(org_model.id, org_name)
 
         ProductService.update_org_product_keycloak_groups(org_model.id)
-        current_app.logger.debug('>update_org ')
+        current_app.logger.debug(">update_org ")
         return self
 
     @staticmethod
@@ -404,27 +435,35 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def _publish_activity_on_mailing_address_change(org_id: int, org_name: str, mailing_address: str):
         if mailing_address:
-            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ACCOUNT_ADDRESS_CHANGE.value,
-                                                           name=org_name, value=json.dumps(mailing_address)))
+            ActivityLogPublisher.publish_activity(
+                Activity(
+                    org_id,
+                    ActivityAction.ACCOUNT_ADDRESS_CHANGE.value,
+                    name=org_name,
+                    value=json.dumps(mailing_address),
+                )
+            )
 
     @staticmethod
     def _publish_activity_on_name_change(org_id: int, org_name: str):
         if org_name:
-            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ACCOUNT_NAME_CHANGE.value,
-                                                           name=org_name, value=org_name))
+            ActivityLogPublisher.publish_activity(
+                Activity(org_id, ActivityAction.ACCOUNT_NAME_CHANGE.value, name=org_name, value=org_name)
+            )
 
     @staticmethod
     def _create_payment_for_org(mailing_address, org, payment_info, is_new_org: bool = True) -> PaymentAccountStatus:
         """Create Or update payment info for org."""
-        selected_payment_method = payment_info.get('paymentMethod', None)
+        selected_payment_method = payment_info.get("paymentMethod", None)
         payment_method = None
-        arg_dict = {'selected_payment_method': selected_payment_method,
-                    'access_type': org.access_type,
-                    'org_type': OrgType[org.type_code]
-                    }
+        arg_dict = {
+            "selected_payment_method": selected_payment_method,
+            "access_type": org.access_type,
+            "org_type": OrgType[org.type_code],
+        }
         if is_new_org or selected_payment_method:
             validator_obj = payment_type_validate(is_fatal=True, **arg_dict)
-            payment_method = validator_obj.info.get('payment_type')
+            payment_method = validator_obj.info.get("payment_type")
         Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org)
 
     @staticmethod
@@ -432,16 +471,17 @@ class Org:  # pylint: disable=too-many-public-methods
         # create a staff review task for this account
         task_type = TaskTypePrefix.GOVM_REVIEW.value
         user: UserModel = UserModel.find_by_jwt_token()
-        task_info = {'name': org_model.name,
-                     'relationshipId': org_model.id,
-                     'relatedTo': user.id,
-                     'dateSubmitted': datetime.today(),
-                     'relationshipType': TaskRelationshipType.ORG.value,
-                     'type': task_type,
-                     'action': TaskAction.ACCOUNT_REVIEW.value,
-                     'status': TaskStatus.OPEN.value,
-                     'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
-                     }
+        task_info = {
+            "name": org_model.name,
+            "relationshipId": org_model.id,
+            "relatedTo": user.id,
+            "dateSubmitted": datetime.today(),
+            "relationshipType": TaskRelationshipType.ORG.value,
+            "type": task_type,
+            "action": TaskAction.ACCOUNT_REVIEW.value,
+            "status": TaskStatus.OPEN.value,
+            "relationship_status": TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        }
         TaskService.create_task(task_info=task_info, do_commit=False)
 
     @staticmethod
@@ -457,7 +497,7 @@ class Org:  # pylint: disable=too-many-public-methods
         1 - If there is any active PAD transactions going on, then cannot be deleted.
 
         """
-        current_app.logger.debug(f'<Delete Org {org_id}')
+        current_app.logger.debug(f"<Delete Org {org_id}")
         # Affiliation uses OrgService, adding as local import
         # pylint:disable=import-outside-toplevel, cyclic-import
         from auth_api.services.affiliation import Affiliation as AffiliationService
@@ -476,9 +516,9 @@ class Org:  # pylint: disable=too-many-public-methods
         # Find all active affiliations and remove them.
         entities = AffiliationService.find_affiliations_by_org_id(org_id)
         for entity in entities:
-            delete_affiliation_request = DeleteAffiliationRequest(org_id=org_id,
-                                                                  business_identifier=entity['business_identifier'],
-                                                                  reset_passcode=True)
+            delete_affiliation_request = DeleteAffiliationRequest(
+                org_id=org_id, business_identifier=entity["business_identifier"], reset_passcode=True
+            )
             AffiliationService.delete_affiliation(delete_affiliation_request)
 
         # Deactivate all members.
@@ -505,29 +545,30 @@ class Org:  # pylint: disable=too-many-public-methods
 
         ProductService.update_org_product_keycloak_groups(org.id)
 
-        current_app.logger.debug('org Inactivated>')
+        current_app.logger.debug("org Inactivated>")
 
     @staticmethod
     def _delete_pay_account(org_id):
-        pay_url = current_app.config.get('PAY_API_URL')
+        pay_url = current_app.config.get("PAY_API_URL")
         try:
             token = RestService.get_service_account_token()
-            pay_response = RestService.delete(endpoint=f'{pay_url}/accounts/{org_id}', token=token,
-                                              raise_for_status=False)
+            pay_response = RestService.delete(
+                endpoint=f"{pay_url}/accounts/{org_id}", token=token, raise_for_status=False
+            )
             pay_response.raise_for_status()
         except HTTPError as pay_err:
             current_app.logger.info(pay_err)
             response_json = pay_response.json()
-            error_type = response_json.get('type')
+            error_type = response_json.get("type")
             error: Error = Error[error_type] if error_type in Error.__members__ else Error.PAY_ACCOUNT_DEACTIVATE_ERROR
             raise BusinessException(error, pay_err) from pay_err
 
     def get_payment_info(self):
         """Return the Payment Details for an org by calling Pay API."""
-        pay_url = current_app.config.get('PAY_API_URL')
+        pay_url = current_app.config.get("PAY_API_URL")
         # invoke pay-api
         token = RestService.get_service_account_token()
-        response = RestService.get(endpoint=f'{pay_url}/accounts/{self._model.id}', token=token, retry_on_failure=True)
+        response = RestService.get(endpoint=f"{pay_url}/accounts/{self._model.id}", token=token, retry_on_failure=True)
         return response.json()
 
     @staticmethod
@@ -555,17 +596,17 @@ class Org:  # pylint: disable=too-many-public-methods
         if not org_model:
             return None
 
-        orgs = {'orgs': []}
+        orgs = {"orgs": []}
 
         for org in org_model:
-            orgs['orgs'].append(Org(org).as_dict())
+            orgs["orgs"].append(Org(org).as_dict())
 
         return orgs
 
     @staticmethod
     def get_login_options_for_org(org_id, allowed_roles: Tuple = None):
         """Get the payment settings for the given org."""
-        current_app.logger.debug('get_login_options(>')
+        current_app.logger.debug("get_login_options(>")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -578,7 +619,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def add_login_option(org_id, login_source):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
-        current_app.logger.debug('>add_login_option')
+        current_app.logger.debug(">add_login_option")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -593,7 +634,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def update_login_option(org_id, login_source):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
-        current_app.logger.debug('>update_login_option')
+        current_app.logger.debug(">update_login_option")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -607,15 +648,21 @@ class Org:  # pylint: disable=too-many-public-methods
 
         login_option = AccountLoginOptionsModel(login_source=login_source, org_id=org_id)
         login_option.save()
-        ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.AUTHENTICATION_METHOD_CHANGE.value,
-                                                       name=org.name, value=login_source,
-                                                       id=login_option.id))
+        ActivityLogPublisher.publish_activity(
+            Activity(
+                org_id,
+                ActivityAction.AUTHENTICATION_METHOD_CHANGE.value,
+                name=org.name,
+                value=login_source,
+                id=login_option.id,
+            )
+        )
         return login_option
 
     @staticmethod
     def get_contacts(org_id):
         """Get the contacts for the given org."""
-        current_app.logger.debug('get_contacts>')
+        current_app.logger.debug("get_contacts>")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -623,13 +670,13 @@ class Org:  # pylint: disable=too-many-public-methods
         collection = []
         for contact_link in org.contacts:
             collection.append(ContactService(contact_link.contact).as_dict())
-        return {'contacts': collection}
+        return {"contacts": collection}
 
     @staticmethod
     def add_contact(org_id, contact_info):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
-        current_app.logger.debug('>add_contact')
+        current_app.logger.debug(">add_contact")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -645,14 +692,14 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.contact = contact
         contact_link.org = org
         contact_link.save()
-        current_app.logger.debug('<add_contact')
+        current_app.logger.debug("<add_contact")
 
         return ContactService(contact)
 
     @staticmethod
     def update_contact(org_id, contact_info):
         """Update the existing contact for this org."""
-        current_app.logger.debug('>update_contact ')
+        current_app.logger.debug(">update_contact ")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -665,7 +712,7 @@ class Org:  # pylint: disable=too-many-public-methods
         contact = contact_link.contact
         contact.update_from_dict(**camelback2snake(contact_info))
         contact.save()
-        current_app.logger.debug('<update_contact ')
+        current_app.logger.debug("<update_contact ")
 
         # return the updated contact
         return ContactService(contact)
@@ -673,13 +720,13 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def delete_contact(org_id):
         """Delete the contact for this org."""
-        current_app.logger.debug('>delete_contact ')
+        current_app.logger.debug(">delete_contact ")
         org = OrgModel.find_by_org_id(org_id)
         if not org or not org.contacts:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         deleted_contact = Org.__delete_contact(org)
-        current_app.logger.debug('<delete_contact ')
+        current_app.logger.debug("<delete_contact ")
 
         return ContactService(deleted_contact)
 
@@ -689,7 +736,7 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link = ContactLinkModel.find_by_org_id(org.id)
         if contact_link:
             del contact_link.org
-            contact_link.commit()
+            contact_link.save()
             # clean up any orphaned contacts and links
             if not contact_link.has_links():
                 contact = contact_link.contact
@@ -706,56 +753,48 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def search_orgs(search: OrgSearch, environment):  # pylint: disable=too-many-locals
         """Search for orgs based on input parameters."""
-        orgs_result = {
-            'orgs': [],
-            'page': search.page,
-            'limit': search.limit,
-            'total': 0
-        }
+        orgs_result = {"orgs": [], "page": search.page, "limit": search.limit, "total": 0}
         include_invitations: bool = False
         search.access_type, is_staff_admin = Org.refine_access_type(search.access_type)
         if search.statuses and OrgStatus.PENDING_ACTIVATION.value in search.statuses:
             # only staff admin can see director search accounts
             if not is_staff_admin:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-            org_models, orgs_result['total'] = OrgModel.search_pending_activation_orgs(name=search.name)
+            org_models, orgs_result["total"] = OrgModel.search_pending_activation_orgs(name=search.name)
             include_invitations = True
         else:
-            org_models, orgs_result['total'] = OrgModel.search_org(search, environment)
+            org_models, orgs_result["total"] = OrgModel.search_org(search, environment)
 
         for org in org_models:
-            orgs_result['orgs'].append({
-                **Org(org).as_dict(),
-                'contacts': [ContactSchema(exclude=('links',)).dump(org.contacts[0].contact, many=False)]
-                if org.contacts else [],
-                'invitations': [
-                    InvitationSchema(exclude=('membership',)).dump(org.invitations[0].invitation, many=False)
-                ]
-                if include_invitations and org.invitations else [],
-            })
+            orgs_result["orgs"].append(
+                {
+                    **Org(org).as_dict(),
+                    "contacts": (
+                        [ContactSchema(exclude=("links",)).dump(org.contacts[0].contact, many=False)]
+                        if org.contacts
+                        else []
+                    ),
+                    "invitations": (
+                        [InvitationSchema(exclude=("membership",)).dump(org.invitations[0].invitation, many=False)]
+                        if include_invitations and org.invitations
+                        else []
+                    ),
+                }
+            )
         return orgs_result
 
     @staticmethod
-    def search_orgs_by_affiliation(
-        business_identifier, environment, excluded_org_types
-    ):
+    def search_orgs_by_affiliation(business_identifier, environment, excluded_org_types):
         """Search for orgs based on input parameters."""
-        orgs, total = OrgModel.search_orgs_by_business_identifier(
-            business_identifier,
-            environment,
-            excluded_org_types
-        )
+        orgs, total = OrgModel.search_orgs_by_business_identifier(business_identifier, environment, excluded_org_types)
 
-        return {
-            'orgs': orgs,
-            'total': total
-        }
+        return {"orgs": orgs, "total": total}
 
     @staticmethod
     @user_context
     def refine_access_type(access_types, **kwargs):
         """Find Access Type."""
-        user_from_context: UserContext = kwargs['user_context']
+        user_from_context: UserContext = kwargs["user_context"]
         roles = user_from_context.roles
 
         is_staff_admin = Role.STAFF_CREATE_ACCOUNTS.value in roles or Role.STAFF_MANAGE_ACCOUNTS.value in roles
@@ -770,7 +809,7 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def bcol_account_link_check(bcol_account_id, org_id=None):
         """Validate the BCOL id is linked or not. If already linked, return True."""
-        if current_app.config.get('BCOL_ACCOUNT_LINK_CHECK'):
+        if current_app.config.get("BCOL_ACCOUNT_LINK_CHECK"):
             org = OrgModel.find_by_bcol_id(bcol_account_id)
             if org and org.id != org_id:  # check if already taken up by different org
                 return True
@@ -787,7 +826,7 @@ class Org:  # pylint: disable=too-many-public-methods
             3) suspend it
 
         """
-        current_app.logger.debug('<change_org_status ')
+        current_app.logger.debug("<change_org_status ")
 
         user: UserModel = UserModel.find_by_jwt_token()
         org_model = self._model
@@ -798,20 +837,26 @@ class Org:  # pylint: disable=too-many-public-methods
             org_model.suspension_reason_code = suspension_reason_code
         org_model.save()
         if status_code == OrgStatus.SUSPENDED.value:
-            suspension_reason_description = SuspensionReasonCode[suspension_reason_code].value \
-                if suspension_reason_code in [
-                item.name for item in SuspensionReasonCode] else ''
-            ActivityLogPublisher.publish_activity(Activity(org_model.id, ActivityAction.ACCOUNT_SUSPENSION.value,
-                                                           name=org_model.name,
-                                                           value=suspension_reason_description))
-        current_app.logger.debug('change_org_status>')
+            suspension_reason_description = (
+                SuspensionReasonCode[suspension_reason_code].value
+                if suspension_reason_code in [item.name for item in SuspensionReasonCode]
+                else ""
+            )
+            ActivityLogPublisher.publish_activity(
+                Activity(
+                    org_model.id,
+                    ActivityAction.ACCOUNT_SUSPENSION.value,
+                    name=org_model.name,
+                    value=suspension_reason_description,
+                )
+            )
+        current_app.logger.debug("change_org_status>")
         return Org(org_model)
 
     @staticmethod
-    def approve_or_reject(org_id: int, is_approved: bool, origin_url: str = None,
-                          task_action: str = None):
+    def approve_or_reject(org_id: int, is_approved: bool, origin_url: str = None, task_action: str = None):
         """Mark the affidavit as approved or rejected."""
-        current_app.logger.debug('<find_affidavit_by_org_id ')
+        current_app.logger.debug("<find_affidavit_by_org_id ")
         # Get the org and check what's the current status
         org: OrgModel = OrgModel.find_by_org_id(org_id)
 
@@ -834,52 +879,53 @@ class Org:  # pylint: disable=too-many-public-methods
         org.save()
         # Find admin email addresses
         admin_emails = UserService.get_admin_emails_for_org(org_id)
-        if admin_emails != '':
+        if admin_emails != "":
             if org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
                 Org.send_approved_rejected_notification(admin_emails, org.name, org.id, org.status_code, origin_url)
             elif org.access_type in (AccessType.GOVM.value, AccessType.GOVN.value):
-                Org.send_approved_rejected_govm_govn_notification(admin_emails, org.name, org.id, org.status_code,
-                                                                  origin_url)
+                Org.send_approved_rejected_govm_govn_notification(
+                    admin_emails, org.name, org.id, org.status_code, origin_url
+                )
         else:
             # continue but log error
-            current_app.logger.error('No admin email record for org id %s', org_id)
+            current_app.logger.error("No admin email record for org id %s", org_id)
 
-        current_app.logger.debug('>find_affidavit_by_org_id ')
+        current_app.logger.debug(">find_affidavit_by_org_id ")
         return Org(org)
 
     @staticmethod
-    def send_staff_review_account_reminder(relationship_id,
-                                           task_relationship_type=TaskRelationshipType.ORG.value):
+    def send_staff_review_account_reminder(relationship_id, task_relationship_type=TaskRelationshipType.ORG.value):
         """Send staff review account reminder notification."""
-        current_app.logger.debug('<send_staff_review_account_reminder')
+        current_app.logger.debug("<send_staff_review_account_reminder")
         user: UserModel = UserModel.find_by_jwt_token()
-        recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
+        recipient = current_app.config.get("STAFF_ADMIN_EMAIL")
         # Get task id that is related with the task. Task Relationship Type can be ORG, PRODUCT etc.
-        task = TaskModel.find_by_task_relationship_id(task_relationship_type=task_relationship_type,
-                                                      relationship_id=relationship_id)
-        context_path = f'review-account/{task.id}'
+        task = TaskModel.find_by_task_relationship_id(
+            task_relationship_type=task_relationship_type, relationship_id=relationship_id
+        )
+        context_path = f"review-account/{task.id}"
         app_url = f"{g.get('origin_url', '')}/"
-        review_url = f'{app_url}/{context_path}'
+        review_url = f"{app_url}/{context_path}"
         first_name = user.firstname
         last_name = user.lastname
 
         data = {
-            'emailAddresses': recipient,
-            'contextUrl': review_url,
-            'userFirstName': first_name,
-            'userLastName': last_name
+            "emailAddresses": recipient,
+            "contextUrl": review_url,
+            "userFirstName": first_name,
+            "userLastName": last_name,
         }
         try:
             publish_to_mailer(QueueMessageTypes.STAFF_REVIEW_ACCOUNT.value, data=data)
-            current_app.logger.debug('<send_staff_review_account_reminder')
+            current_app.logger.debug("<send_staff_review_account_reminder")
         except Exception as e:  # noqa=B901
-            current_app.logger.error('<send_staff_review_account_reminder failed')
+            current_app.logger.error("<send_staff_review_account_reminder failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
     def send_approved_rejected_notification(receipt_admin_emails, org_name, org_id, org_status: OrgStatus, origin_url):
         """Send Approved/Rejected notification to the user."""
-        current_app.logger.debug('<send_approved_rejected_notification')
+        current_app.logger.debug("<send_approved_rejected_notification")
 
         if org_status == OrgStatus.ACTIVE.value:
             notification_type = QueueMessageTypes.NON_BCSC_ORG_APPROVED_NOTIFICATION.value
@@ -887,25 +933,21 @@ class Org:  # pylint: disable=too-many-public-methods
             notification_type = QueueMessageTypes.NON_BCSC_ORG_REJECTED_NOTIFICATION.value
         else:
             return  # Don't send mail for any other status change
-        app_url = f'{origin_url}/'
-        data = {
-            'accountId': org_id,
-            'emailAddresses': receipt_admin_emails,
-            'contextUrl': app_url,
-            'orgName': org_name
-        }
+        app_url = f"{origin_url}/"
+        data = {"accountId": org_id, "emailAddresses": receipt_admin_emails, "contextUrl": app_url, "orgName": org_name}
         try:
             publish_to_mailer(notification_type, data=data)
-            current_app.logger.debug('<send_approved_rejected_notification')
+            current_app.logger.debug("<send_approved_rejected_notification")
         except Exception as e:  # noqa=B901
-            current_app.logger.error('<send_approved_rejected_notification failed')
+            current_app.logger.error("<send_approved_rejected_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
-    def send_approved_rejected_govm_govn_notification(receipt_admin_email, org_name, org_id, org_status: OrgStatus,
-                                                      origin_url):
+    def send_approved_rejected_govm_govn_notification(
+        receipt_admin_email, org_name, org_id, org_status: OrgStatus, origin_url
+    ):
         """Send Approved govm notification to the user."""
-        current_app.logger.debug('<send_approved_rejected_govm_govn_notification')
+        current_app.logger.debug("<send_approved_rejected_govm_govn_notification")
 
         if org_status == OrgStatus.ACTIVE.value:
             notification_type = QueueMessageTypes.GOVM_APPROVED_NOTIFICATION.value
@@ -913,36 +955,31 @@ class Org:  # pylint: disable=too-many-public-methods
             notification_type = QueueMessageTypes.GOVM_REJECTED_NOTIFICATION.value
         else:
             return  # Don't send mail for any other status change
-        app_url = f'{origin_url}/'
-        data = {
-            'accountId': org_id,
-            'emailAddresses': receipt_admin_email,
-            'contextUrl': app_url,
-            'orgName': org_name
-        }
+        app_url = f"{origin_url}/"
+        data = {"accountId": org_id, "emailAddresses": receipt_admin_email, "contextUrl": app_url, "orgName": org_name}
         try:
             publish_to_mailer(notification_type, data=data)
-            current_app.logger.debug('send_approved_rejected_govm_govn_notification>')
+            current_app.logger.debug("send_approved_rejected_govm_govn_notification>")
         except Exception as e:  # noqa=B901
-            current_app.logger.error('<send_approved_rejected_govm_govn_notification failed')
+            current_app.logger.error("<send_approved_rejected_govm_govn_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     def change_org_access_type(self, access_type):
         """Update the access type of the org."""
-        current_app.logger.debug('<change_org_access_type ')
+        current_app.logger.debug("<change_org_access_type ")
         org_model = self._model
         org_model.access_type = access_type
         org_model.save()
-        current_app.logger.debug('change_org_access_type>')
+        current_app.logger.debug("change_org_access_type>")
         return Org(org_model)
 
     def change_org_api_access(self, has_api_access):
         """Update the org API access."""
-        current_app.logger.debug('<change_org_api_access')
+        current_app.logger.debug("<change_org_api_access")
         org_model = self._model
         org_model.has_api_access = has_api_access
         org_model.save()
-        current_app.logger.debug('change_org_api_access>')
+        current_app.logger.debug("change_org_api_access>")
         return Org(org_model)
 
     def patch_org(self, action: str = None, request_json: Dict[str, any] = None):
@@ -951,21 +988,25 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.PATCH_INVALID_ACTION, None)
 
         if patch_action == PatchActions.UPDATE_STATUS:
-            status_code = request_json.get('statusCode', None)
-            suspension_reason_code = request_json.get('suspensionReasonCode', None)
+            status_code = request_json.get("statusCode", None)
+            suspension_reason_code = request_json.get("suspensionReasonCode", None)
             if status_code is None:
                 raise BusinessException(Error.INVALID_INPUT, None)
             if status_code == OrgStatus.SUSPENDED.value and suspension_reason_code is None:
                 raise BusinessException(Error.INVALID_INPUT, None)
             return self.change_org_status(status_code, suspension_reason_code).as_dict()
         if patch_action == PatchActions.UPDATE_ACCESS_TYPE:
-            access_type = request_json.get('accessType', None)
+            access_type = request_json.get("accessType", None)
             # Currently, only accounts with the following access types can be updated
-            if access_type is None or access_type not in [AccessType.REGULAR.value, AccessType.REGULAR_BCEID.value,
-                                                          AccessType.EXTRA_PROVINCIAL.value, AccessType.GOVN.value]:
+            if access_type is None or access_type not in [
+                AccessType.REGULAR.value,
+                AccessType.REGULAR_BCEID.value,
+                AccessType.EXTRA_PROVINCIAL.value,
+                AccessType.GOVN.value,
+            ]:
                 raise BusinessException(Error.INVALID_INPUT, None)
             return self.change_org_access_type(access_type).as_dict()
         if patch_action == PatchActions.UPDATE_API_ACCESS:
-            has_api_access = request_json.get('hasApiAccess', False)
+            has_api_access = request_json.get("hasApiAccess", False)
             return self.change_org_api_access(has_api_access).as_dict()
         return None

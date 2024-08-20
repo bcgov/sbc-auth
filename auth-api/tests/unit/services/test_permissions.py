@@ -26,14 +26,14 @@ def test_build_all_permission_cache(session):  # pylint: disable=unused-argument
     """Assert that building cache works."""
     PermissionService.build_all_permission_cache()
     assert cache is not None
-    assert cache.get((None, 'ADMIN')) is not None
+    assert cache.get((None, "ADMIN")) is not None
 
 
 def test_get_permissions_for_membership_cache_miss(session):  # pylint: disable=unused-argument
     """Assert the cache miss and hit."""
     PermissionService.build_all_permission_cache()
-    with patch('auth_api.models.Permissions.get_permissions_by_membership') as method:
-        PermissionService.get_permissions_for_membership('ACTIVE', 'ADMIN')
-        assert not method.called, 'Should Not miss the Cache'
-        PermissionService.get_permissions_for_membership('invalid', 'invalid')
-        assert method.called, 'Should miss the Cache'
+    with patch("auth_api.models.Permissions.get_permissions_by_membership") as method:
+        PermissionService.get_permissions_for_membership("ACTIVE", "ADMIN")
+        assert not method.called, "Should Not miss the Cache"
+        PermissionService.get_permissions_for_membership("invalid", "invalid")
+        assert method.called, "Should miss the Cache"
