@@ -553,7 +553,7 @@ export default defineComponent({
 
     function getButtonLabel (status: string) {
       const reviewStates = ['AWAITING_REVIEW', 'RESUBMITTED']
-      return reviewStates.includes(status) ? 'Review' : 'View'
+      return reviewStates.includes(status) ? 'Review' : 'Open'
     }
 
     async function view (reviewId: string) {
