@@ -29,6 +29,7 @@ export interface ContinuationReviewIF {
   status: ReviewStatus
   submissionDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
   effectiveDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
+  nrExpiryDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
 }
 
 /** The Continuation In object in the filing API response. */

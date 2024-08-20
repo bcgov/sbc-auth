@@ -58,7 +58,7 @@
                 <div>
                   {{ formatDate(item.effectiveDate) }}
                   <IconTooltip
-                    v-if="item.effectiveDate && passedEffectiveDate('item.effectiveDate') "
+                    v-if="item.effectiveDate && expiredDate(item.effectiveDate) "
                     icon="mdi-alert"
                     maxWidth="300px"
                     colour="#D3272C"
@@ -71,7 +71,7 @@
                     </div>
                   </IconTooltip>
                   <IconTooltip
-                    v-if="item.effectiveDate && daysLeft(item.effectiveDate) !== null"
+                    v-if="item.effectiveDate && daysLeft(item.effectiveDate) && daysLeft(item.effectiveDate) <= 3"
                     icon="mdi-alert"
                     maxWidth="300px"
                     colour="#F8661A"
@@ -85,6 +85,43 @@
                         {{ daysLeft(item.effectiveDate) }}
                         {{ daysLeft(item.effectiveDate) === 1 ? 'day' : 'days' }}.
                       </span>
+                    </div>
+                  </IconTooltip>
+                </div>
+              </template>
+
+              <!-- Displaying NR Number and Tooltips-->
+              <template #[`item.nrNumber`]="{ item }">
+                <div>
+                  {{ item.nrNumber }}
+                  <IconTooltip
+                    v-if="item.nrExpiryDate && daysLeft(item.nrExpiryDate) && daysLeft(item.nrExpiryDate) <= 14"
+                    icon="mdi-alert"
+                    maxWidth="300px"
+                    colour="#F8661A"
+                    :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
+                    :location="{top: true}"
+                  >
+                    <div>
+                      <strong>Alert:</strong><br>
+                      <span>
+                        The Name Request will expire in
+                        {{ daysLeft(item.nrExpiryDate) }}
+                        {{ daysLeft(item.nrExpiryDate) === 1 ? 'day' : 'days' }}.
+                      </span>
+                    </div>
+                  </IconTooltip>
+                  <IconTooltip
+                    v-if=" expiredDate(item.nrExpiryDate) "
+                    icon="mdi-alert"
+                    maxWidth="300px"
+                    colour="#D3272C"
+                    :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
+                    :location="{top: true}"
+                  >
+                    <div>
+                      <strong>Alert:</strong><br>
+                      <span> This Name Request has expired.</span>
                     </div>
                   </IconTooltip>
                 </div>
@@ -550,9 +587,9 @@ export default defineComponent({
       }
       return moment(dateString).format('MMMM D, YYYY') // Format like "May 5, 2024"
     }
-    // Method to check if FE date has passed
-    const passedEffectiveDate = (effectiveDate: string): boolean => {
-      return !moment(effectiveDate).isAfter(moment())
+    // Method to check if FE date or NR date has passed
+    const expiredDate = (effectiveDate: string): boolean => {
+      return effectiveDate && !moment(effectiveDate).isAfter(moment())
     }
     // Method to check FE days left
     const daysLeft = (effectiveDate: string): number | null => {
@@ -561,7 +598,7 @@ export default defineComponent({
         return 1
       } else {
         const diffDays = moment(effectiveDate).diff(moment(), 'days')
-        return diffDays > 0 && diffDays <= 3 ? diffDays : null
+        return diffDays > 0 ? diffDays : null
       }
     }
 
@@ -600,7 +637,7 @@ export default defineComponent({
       truncatedDateRange,
       doSearchParametersExist,
       paginationOptions,
-      passedEffectiveDate,
+      expiredDate,
       updateItemsPerPage,
       updateDateRange,
       updateEffectiveDateRange
