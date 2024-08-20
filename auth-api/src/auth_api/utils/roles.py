@@ -20,44 +20,50 @@ from .enums import OrgStatus, OrgType, ProductSubscriptionStatus, Status
 class Role(Enum):
     """User Role."""
 
-    VIEWER = 'view'
-    EDITOR = 'edit'
-    PUBLIC_USER = 'public_user'
-    ACCOUNT_HOLDER = 'account_holder'
-    GOV_ACCOUNT_USER = 'gov_account_user'
-    ANONYMOUS_USER = 'anonymous_user'
-    ACCOUNT_IDENTITY = 'account_identity'
-    MANAGE_EFT = 'manage_eft'
+    VIEWER = "view"
+    EDITOR = "edit"
+    PUBLIC_USER = "public_user"
+    ACCOUNT_HOLDER = "account_holder"
+    GOV_ACCOUNT_USER = "gov_account_user"
+    ANONYMOUS_USER = "anonymous_user"
+    ACCOUNT_IDENTITY = "account_identity"
+    MANAGE_EFT = "manage_eft"
 
-    SYSTEM = 'system'
-    TESTER = 'tester'
+    SYSTEM = "system"
+    TESTER = "tester"
 
-    STAFF = 'staff'
-    STAFF_VIEW_ACCOUNTS = 'view_accounts'
-    STAFF_MANAGE_ACCOUNTS = 'manage_accounts'
-    STAFF_SEARCH = 'search'
-    STAFF_CREATE_ACCOUNTS = 'create_accounts'
-    STAFF_MANAGE_BUSINESS = 'manage_business'
-    STAFF_SUSPEND_ACCOUNTS = 'suspend_accounts'
+    STAFF = "staff"
+    STAFF_VIEW_ACCOUNTS = "view_accounts"
+    STAFF_MANAGE_ACCOUNTS = "manage_accounts"
+    STAFF_SEARCH = "search"
+    STAFF_CREATE_ACCOUNTS = "create_accounts"
+    STAFF_MANAGE_BUSINESS = "manage_business"
+    STAFF_SUSPEND_ACCOUNTS = "suspend_accounts"
 
 
 # Membership types
-STAFF = 'STAFF'
-COORDINATOR = 'COORDINATOR'
-ADMIN = 'ADMIN'
-USER = 'USER'
+STAFF = "STAFF"
+COORDINATOR = "COORDINATOR"
+ADMIN = "ADMIN"
+USER = "USER"
 
 VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value, Status.PENDING_STAFF_REVIEW.value)
-VALID_ORG_STATUSES = (OrgStatus.ACTIVE.value, OrgStatus.NSF_SUSPENDED.value,
-                      OrgStatus.SUSPENDED.value, OrgStatus.PENDING_INVITE_ACCEPT.value,
-                      OrgStatus.PENDING_STAFF_REVIEW.value)
-VALID_SUBSCRIPTION_STATUSES = (ProductSubscriptionStatus.ACTIVE.value,
-                               ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value,
-                               ProductSubscriptionStatus.REJECTED.value)
+VALID_ORG_STATUSES = (
+    OrgStatus.ACTIVE.value,
+    OrgStatus.NSF_SUSPENDED.value,
+    OrgStatus.SUSPENDED.value,
+    OrgStatus.PENDING_INVITE_ACCEPT.value,
+    OrgStatus.PENDING_STAFF_REVIEW.value,
+)
+VALID_SUBSCRIPTION_STATUSES = (
+    ProductSubscriptionStatus.ACTIVE.value,
+    ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value,
+    ProductSubscriptionStatus.REJECTED.value,
+)
 
 CLIENT_ADMIN_ROLES = (COORDINATOR, ADMIN)
 CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, USER)
 ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF)
-EXCLUDED_FIELDS = ('status_code', 'type_code')
+EXCLUDED_FIELDS = ("status_code", "type_code")
 
 PREMIUM_ORG_TYPES = (OrgType.PREMIUM.value, OrgType.SBC_STAFF.value, OrgType.STAFF.value)

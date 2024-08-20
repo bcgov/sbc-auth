@@ -13,27 +13,23 @@
 # limitations under the License.
 """API endpoints for managing a User resource."""
 import json
+from http import HTTPStatus
 
 from flask import Blueprint, g, jsonify
 from flask_cors import cross_origin
 
-from auth_api import status as http_status
-from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
 from auth_api.schemas import UserSettingsSchema
 from auth_api.services.user import User as UserService
 from auth_api.services.user_settings import UserSettings as UserSettingsService
-from auth_api.tracer import Tracer
+from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 
-
-bp = Blueprint('USER_SETTINGS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/users/<string:user_id>/settings')
-TRACER = Tracer.get_instance()
+bp = Blueprint("USER_SETTINGS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/users/<string:user_id>/settings")
 
 
-@bp.route('', methods=['GET', 'OPTIONS'])
-@cross_origin(origins='*', methods=['GET'])
-@TRACER.trace()
+@bp.route("", methods=["GET", "OPTIONS"])
+@cross_origin(origins="*", methods=["GET"])
 @_jwt.requires_auth
 def get_user_settings(user_id):
     """Get info related to the user.
@@ -42,15 +38,15 @@ def get_user_settings(user_id):
     """
     token = g.jwt_oidc_token_info
 
-    if token.get('sub', None) != user_id:
-        return {'message': 'Unauthorized'}, http_status.HTTP_401_UNAUTHORIZED
+    if token.get("sub", None) != user_id:
+        return {"message": "Unauthorized"}, HTTPStatus.UNAUTHORIZED
 
     try:
         user = UserService.find_by_jwt_token(silent_mode=True)
         user_id = user.identifier if user else None
         all_settings = UserSettingsService.fetch_user_settings(user_id)
-        response, status = jsonify(UserSettingsSchema(many=True).dump(all_settings)), http_status.HTTP_200_OK
+        response, status = jsonify(UserSettingsSchema(many=True).dump(all_settings)), HTTPStatus.OK
 
     except BusinessException:
-        response, status = json.dumps([]), http_status.HTTP_200_OK
+        response, status = json.dumps([]), HTTPStatus.OK
     return response, status

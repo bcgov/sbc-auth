@@ -17,19 +17,23 @@
 Test-Suite to ensure that the /users endpoint is working as expected.
 """
 import copy
-import mock
+from http import HTTPStatus
+from unittest import mock
 
-from auth_api import status as http_status
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
+from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
-    factory_auth_header, factory_contact_model, factory_user_model, patch_token_info)
-from tests.conftest import mock_token
+    factory_auth_header,
+    factory_contact_model,
+    factory_user_model,
+    patch_token_info,
+)
 
 
-@mock.patch('auth_api.services.affiliation_invitation.RestService.get_service_account_token', mock_token)
+@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that get works and adhere to schema."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
@@ -37,38 +41,38 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     contact_link = ContactLinkModel()
     contact_link.contact = contact
     contact_link.user = user_model
-    contact_link.commit()
+    contact_link.save()
     kc_id = user_model.keycloak_guid
 
     claims = copy.deepcopy(TestJwtClaims.updated_test.value)
-    claims['sub'] = str(kc_id)
-    claims['idp_userid'] = str(user_model.idp_userid)
+    claims["sub"] = str(kc_id)
+    claims["idp_userid"] = str(user_model.idp_userid)
     patch_token_info(claims, monkeypatch)
 
     OrgService.create_org(TestOrgInfo.org_branch_name, user_id=user_model.id)
 
     # post token with updated claims
     headers = factory_auth_header(jwt=jwt, claims=claims)
-    rv = client.get(f'/api/v1/users/{kc_id}/settings', headers=headers, content_type='application/json')
+    rv = client.get(f"/api/v1/users/{kc_id}/settings", headers=headers, content_type="application/json")
     item_list = rv.json
-    account = next(obj for obj in item_list if obj['type'] == 'ACCOUNT')
-    assert account['accountType'] == 'BASIC'
-    assert account['additionalLabel'] == TestOrgInfo.org_branch_name.get('branchName')
-    assert rv.status_code == http_status.HTTP_200_OK
-    assert schema_utils.validate(item_list, 'user_settings_response')[0]
-    assert account['productSettings'] == f'/account/{account["id"]}/restricted-product'
+    account = next(obj for obj in item_list if obj["type"] == "ACCOUNT")
+    assert account["accountType"] == "BASIC"
+    assert account["additionalLabel"] == TestOrgInfo.org_branch_name.get("branchName")
+    assert rv.status_code == HTTPStatus.OK
+    assert schema_utils.validate(item_list, "user_settings_response")[0]
+    assert account["productSettings"] == f'/account/{account["id"]}/restricted-product'
 
-    kc_id_no_user = TestUserInfo.user1.get('keycloak_guid')
+    kc_id_no_user = TestUserInfo.user1.get("keycloak_guid")
     claims = copy.deepcopy(TestJwtClaims.updated_test.value)
-    claims['sub'] = str(kc_id_no_user)
+    claims["sub"] = str(kc_id_no_user)
     patch_token_info(claims, monkeypatch)
     # post token with updated claims
     headers = factory_auth_header(jwt=jwt, claims=claims)
-    rv = client.get(f'/api/v1/users/{kc_id_no_user}/settings', headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_200_OK
-    assert schema_utils.validate(item_list, 'user_settings_response')[0]
+    rv = client.get(f"/api/v1/users/{kc_id_no_user}/settings", headers=headers, content_type="application/json")
+    assert rv.status_code == HTTPStatus.OK
+    assert schema_utils.validate(item_list, "user_settings_response")[0]
     item_list = rv.json
-    account = next((obj for obj in item_list if obj['type'] == 'ACCOUNT'), None)
+    account = next((obj for obj in item_list if obj["type"] == "ACCOUNT"), None)
     assert account is None
-    user_profile = next(obj for obj in item_list if obj['type'] == 'USER_PROFILE')
-    assert '/userprofile' in user_profile.get('urlpath')
+    user_profile = next(obj for obj in item_list if obj["type"] == "USER_PROFILE")
+    assert "/userprofile" in user_profile.get("urlpath")

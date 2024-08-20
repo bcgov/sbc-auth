@@ -27,14 +27,15 @@ class MinioService:
     @staticmethod
     def create_signed_put_url(file_name: str, prefix_key: str = AFFIDAVIT_FOLDER_NAME) -> dict:
         """Return a pre-signed URL for new doc upload."""
-        current_app.logger.debug('Creating pre-signed URL.')
+        current_app.logger.debug("Creating pre-signed URL.")
         minio_client: Minio = MinioService._get_client()
-        file_extension: str = file_name.split('.')[-1]
-        key = f'{prefix_key}/{str(uuid.uuid4())}.{file_extension}'
+        file_extension: str = file_name.split(".")[-1]
+        key = f"{prefix_key}/{str(uuid.uuid4())}.{file_extension}"
         signed_url_details = {
-            'preSignedUrl': minio_client.presigned_put_object(current_app.config['MINIO_BUCKET_ACCOUNTS'], key,
-                                                              timedelta(minutes=5)),
-            'key': key
+            "preSignedUrl": minio_client.presigned_put_object(
+                current_app.config["MINIO_BUCKET_ACCOUNTS"], key, timedelta(minutes=5)
+            ),
+            "key": key,
         }
 
         return signed_url_details
@@ -43,15 +44,16 @@ class MinioService:
     def create_signed_get_url(key: str) -> str:
         """Return a pre-signed URL for uploaded document."""
         minio_client: Minio = MinioService._get_client()
-        current_app.logger.debug('Creating pre-signed GET URL.')
+        current_app.logger.debug("Creating pre-signed GET URL.")
 
-        return minio_client.presigned_get_object(current_app.config['MINIO_BUCKET_ACCOUNTS'], key, timedelta(hours=1))
+        return minio_client.presigned_get_object(current_app.config["MINIO_BUCKET_ACCOUNTS"], key, timedelta(hours=1))
 
     @staticmethod
     def _get_client() -> Minio:
         """Return a minio client."""
-        minio_endpoint = current_app.config['MINIO_ENDPOINT']
-        minio_key = current_app.config['MINIO_ACCESS_KEY']
-        minio_secret = current_app.config['MINIO_ACCESS_SECRET']
-        return Minio(minio_endpoint, access_key=minio_key, secret_key=minio_secret,
-                     secure=current_app.config['MINIO_SECURE'])
+        minio_endpoint = current_app.config["MINIO_ENDPOINT"]
+        minio_key = current_app.config["MINIO_ACCESS_KEY"]
+        minio_secret = current_app.config["MINIO_ACCESS_SECRET"]
+        return Minio(
+            minio_endpoint, access_key=minio_key, secret_key=minio_secret, secure=current_app.config["MINIO_SECURE"]
+        )

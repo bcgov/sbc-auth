@@ -14,11 +14,10 @@
 """Manager for suspension reason schema and export."""
 
 from auth_api.models import SuspensionReasonCode as SuspensionReasonCodeModel
-
 from auth_api.models import ma
 
 
-class SuspensionReasonCodeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class SuspensionReasonCodeSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the SuspensionReasonCode model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

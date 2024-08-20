@@ -1,7 +1,9 @@
 """Converter module to support decimal and datetime serialization."""
-from decimal import Decimal
+
 from datetime import datetime
+from decimal import Decimal
 from typing import Any, Dict
+
 import cattrs
 
 

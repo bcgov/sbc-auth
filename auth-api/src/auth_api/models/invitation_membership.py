@@ -25,13 +25,13 @@ from .base_model import BaseModel
 class InvitationMembership(BaseModel):  # pylint: disable=too-few-public-methods
     """Model for Invitation Membership.  Associates Invitation, Orgs and Membership type."""
 
-    __tablename__ = 'invitation_memberships'
+    __tablename__ = "invitation_memberships"
 
     id = Column(Integer, primary_key=True)
-    invitation_id = Column(ForeignKey('invitations.id'), nullable=False, index=True)
-    org_id = Column(ForeignKey('orgs.id'), nullable=False)
-    membership_type_code = Column(ForeignKey('membership_types.code'), nullable=False)
+    invitation_id = Column(ForeignKey("invitations.id"), nullable=False, index=True)
+    org_id = Column(ForeignKey("orgs.id"), nullable=False)
+    membership_type_code = Column(ForeignKey("membership_types.code"), nullable=False)
 
-    membership_type = relationship('MembershipType', foreign_keys=[membership_type_code])
-    org = relationship('Org', foreign_keys=[org_id])
-    invitation = relationship('Invitation', foreign_keys=[invitation_id])
+    membership_type = relationship("MembershipType", foreign_keys=[membership_type_code])
+    org = relationship("Org", foreign_keys=[org_id])
+    invitation = relationship("Invitation", foreign_keys=[invitation_id])

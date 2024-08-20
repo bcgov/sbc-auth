@@ -22,7 +22,7 @@ from .base_model import BaseCodeModel
 class PaymentType(BaseCodeModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for a Payment Type."""
 
-    __tablename__ = 'payment_types'
+    __tablename__ = "payment_types"
 
     @classmethod
     def get_default_payment_type(cls):

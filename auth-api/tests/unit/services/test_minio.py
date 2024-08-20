@@ -25,26 +25,26 @@ from auth_api.services import MinioService
 
 def test_create_signed_put_url(session):  # pylint:disable=unused-argument
     """Assert that the a PUT url can be pre-signed."""
-    file_name = 'affidavit-test.pdf'
-    signed_url = MinioService.create_signed_put_url(file_name, prefix_key='Test')
+    file_name = "affidavit-test.pdf"
+    signed_url = MinioService.create_signed_put_url(file_name, prefix_key="Test")
     assert signed_url
-    assert signed_url.get('key').startswith('Test/')
-    assert signed_url.get('key').endswith('.pdf')
+    assert signed_url.get("key").startswith("Test/")
+    assert signed_url.get("key").endswith(".pdf")
 
 
 def test_create_signed_get_url(session, tmpdir):  # pylint:disable=unused-argument
     """Assert that a GET url can be pre-signed."""
-    d = tmpdir.mkdir('subdir')
-    fh = d.join('test-file.txt')
-    fh.write('Test File')
+    d = tmpdir.mkdir("subdir")
+    fh = d.join("test-file.txt")
+    fh.write("Test File")
     filename = os.path.join(fh.dirname, fh.basename)
 
-    test_file = open(filename, 'rb')
-    files = {'upload_file': test_file}
+    test_file = open(filename, "rb")
+    files = {"upload_file": test_file}
     file_name = fh.basename
-    signed_url = MinioService.create_signed_put_url(file_name, prefix_key='Test')
-    key = signed_url.get('key')
-    pre_signed_put = signed_url.get('preSignedUrl')
+    signed_url = MinioService.create_signed_put_url(file_name, prefix_key="Test")
+    key = signed_url.get("key")
+    pre_signed_put = signed_url.get("preSignedUrl")
     requests.put(pre_signed_put, files=files)
 
     pre_signed_get = MinioService.create_signed_get_url(key)
