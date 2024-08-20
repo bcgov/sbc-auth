@@ -11,22 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Meta information about the service.
+"""Manager for corp type schema and export."""
+from marshmallow import fields
 
-Currently this only provides API versioning information
-"""
-from flask import Blueprint, jsonify
-
-from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.run_version import get_run_version
+from auth_api.models import UserStatusCode as UserStatusModel
+from auth_api.models import ma
 
 
-bp = Blueprint('META', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/meta')
+class UserStatusSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the UserStatus model."""
 
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the UserStatus fields to a default schema."""
 
-@bp.route('/info')
-def get_meta_info():
-    """Return a JSON object with meta information about the Service."""
-    version = get_run_version()
-    return jsonify(
-        API=f'auth_api/{version}')
+        model = UserStatusModel
+        # front end expects desc still
+
+    description = fields.String(data_key="desc")

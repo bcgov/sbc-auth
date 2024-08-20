@@ -27,9 +27,11 @@ class MembershipSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-f
         """Maps all of the Membership fields to a default schema."""
 
         model = MembershipModel
-        fields = ('id', 'membership_type_code', 'user', 'org', 'membership_status')
+        fields = ("id", "membership_type_code", "user", "org", "membership_status", "membership_type")
 
-    user = fields.Nested('UserSchema', only=(
-        'firstname', 'lastname', 'username', 'modified', 'contacts', 'login_source', 'id'))
-    org = fields.Nested('OrgSchema', only=('id', 'name', 'affiliated_entities', 'org_type', 'members', 'invitations'))
-    membership_status = fields.Pluck('MembershipStatusCodeSchema', 'name', data_key='membershipStatus')
+    user = fields.Nested(
+        "UserSchema", only=("firstname", "lastname", "username", "modified", "contacts", "login_source", "id")
+    )
+    org = fields.Nested("OrgSchema", only=("id", "name", "affiliated_entities", "org_type", "members", "invitations"))
+    membership_status = fields.Pluck("MembershipStatusCodeSchema", "name", data_key="membershipStatus")
+    membership_type = fields.Pluck("MembershipTypeSchema", "code", data_key="membershipType")

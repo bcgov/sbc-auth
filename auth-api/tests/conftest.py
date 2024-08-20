@@ -12,188 +12,173 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
-from concurrent.futures import CancelledError
 import time
+from concurrent.futures import CancelledError
 
 import pytest
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
+from sqlalchemy_utils import create_database, database_exists, drop_database
 
 from auth_api import create_app, setup_jwt_manager
-from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models import db as _db
+from auth_api.utils.auth import jwt as _jwt
 
 
-def mock_token(config_id='', config_secret=''):
+def mock_token(config_id="", config_secret=""):
     """Mock token generator."""
-    return 'TOKEN....'
+    return "TOKEN...."
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session", autouse=True)
 def app():
     """Return a session-wide application configured in TEST mode."""
-    _app = create_app('testing')
+    _app = create_app("testing")
 
     return _app
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function", autouse=True)
 def app_request():
     """Return a session-wide application configured in TEST mode."""
-    _app = create_app('testing')
+    _app = create_app("testing")
 
     return _app
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def client(app):  # pylint: disable=redefined-outer-name
     """Return a session-wide Flask test client."""
     return app.test_client()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def jwt():
     """Return a session-wide jwt manager."""
     return _jwt
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def client_ctx(app):  # pylint: disable=redefined-outer-name
     """Return session-wide Flask test client."""
     with app.test_client() as _client:
         yield _client
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session", autouse=True)
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
-    """Return a session-wide initialised database.
-
-    Drops schema, and recreate.
-    """
+    """Return a session-wide initialised database."""
     with app.app_context():
-        drop_schema_sql = """DROP SCHEMA public CASCADE;
-                             CREATE SCHEMA public;
-                             GRANT ALL ON SCHEMA public TO postgres;
-                             GRANT ALL ON SCHEMA public TO public;
-                          """
-
-        sess = _db.session()
-        sess.execute(drop_schema_sql)
-        sess.commit()
-
-        # ############################################
-        # There are 2 approaches, an empty database, or the same one that the app will use
-        #     create the tables
-        #     _db.create_all()
-        # or
-        # Use Alembic to load all of the DB revisions including supporting lookup data
-        # This is the path we'll use in auth_api!!
-
-        # even though this isn't referenced directly, it sets up the internal configs that upgrade needs
+        if database_exists(_db.engine.url):
+            drop_database(_db.engine.url)
+        create_database(_db.engine.url)
+        _db.session().execute(text('SET TIME ZONE "UTC";'))
         Migrate(app, _db)
         upgrade()
-
         return _db
 
 
-@pytest.fixture(scope='function')
-def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
+@pytest.fixture(scope="function")
+def session(db, app):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a function-scoped session."""
     with app.app_context():
-        conn = db.engine.connect()
-        txn = conn.begin()
+        with db.engine.connect() as conn:
+            transaction = conn.begin()
+            sess = db._make_scoped_session(dict(bind=conn))  # pylint: disable=protected-access
+            # Establish SAVEPOINT (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
+            nested = sess.begin_nested()
+            old_session = db.session
+            db.session = sess
+            db.session.commit = nested.commit
+            db.session.rollback = nested.rollback
 
-        options = dict(bind=conn, binds={})
-        sess = db.create_scoped_session(options=options)
+            @event.listens_for(sess, "after_transaction_end")
+            def restart_savepoint(sess2, trans):  # pylint: disable=unused-variable
+                nonlocal nested
+                if trans.nested:
+                    # Handle where test DOESN'T session.commit()
+                    sess2.expire_all()
+                    nested = sess.begin_nested()
+                    # When using a SAVEPOINT via the Session.begin_nested() or Connection.begin_nested() methods,
+                    # the transaction object returned must be used to commit or rollback the SAVEPOINT.
+                    # Calling the Session.commit() or Connection.commit() methods will always commit the
+                    # outermost transaction; this is a SQLAlchemy 2.0 specific behavior that is
+                    # reversed from the 1.x series
+                    db.session = sess
+                    db.session.commit = nested.commit
+                    db.session.rollback = nested.rollback
 
-        # establish  a SAVEPOINT just before beginning the test
-        # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
-        sess.begin_nested()
-
-        @event.listens_for(sess(), 'after_transaction_end')
-        def restart_savepoint(sess2, trans):  # pylint: disable=unused-variable
-            # Detecting whether this is indeed the nested transaction of the test
-            if trans.nested and not trans._parent.nested:  # pylint: disable=protected-access
-                # Handle where test DOESN'T session.commit(),
-                sess2.expire_all()
-                sess.begin_nested()
-
-        db.session = sess
-
-        sql = text('select 1')
-        sess.execute(sql)
-
-        yield sess
-
-        # Cleanup
-        sess.remove()
-        # This instruction rollsback any commit that were executed in the tests.
-        txn.rollback()
-        conn.close()
+            try:
+                yield db.session
+            finally:
+                db.session.remove()
+                transaction.rollback()
+                event.remove(sess, "after_transaction_end", restart_savepoint)
+                db.session = old_session
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def auto(docker_services, app):
     """Spin up a keycloak instance and initialize jwt."""
-    if app.config['USE_TEST_KEYCLOAK_DOCKER']:
-        docker_services.start('keycloak')
-        docker_services.wait_for_service('keycloak', 8081)
+    if app.config["USE_TEST_KEYCLOAK_DOCKER"]:
+        docker_services.start("keycloak")
+        docker_services.wait_for_service("keycloak", 8081, timeout=60.0)
 
     setup_jwt_manager(app, _jwt)
 
-    if app.config['USE_DOCKER_MOCK']:
-        docker_services.start('minio')
-        docker_services.start('notify')
-        docker_services.start('bcol')
-        docker_services.start('pay')
-        docker_services.start('proxy')
-        docker_services.wait_for_service('minio', 9000)
-        time.sleep(10)
+    if app.config["USE_DOCKER_MOCK"]:
+        docker_services.start("minio")
+        docker_services.start("notify")
+        docker_services.start("bcol")
+        docker_services.start("pay")
+        docker_services.start("proxy")
+        docker_services.wait_for_service("minio", 9000, timeout=60.0)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def docker_compose_files(pytestconfig):
     """Get the docker-compose.yml absolute path."""
     import os
-    return [
-        os.path.join(str(pytestconfig.rootdir), 'tests/docker', 'docker-compose.yml')
-    ]
+
+    return [os.path.join(str(pytestconfig.rootdir), "tests/docker", "docker-compose.yml")]
 
 
 @pytest.fixture()
 def auth_mock(monkeypatch):
     """Mock check_auth."""
-    monkeypatch.setattr('auth_api.services.entity.check_auth', lambda *args, **kwargs: None)
-    monkeypatch.setattr('auth_api.services.org.check_auth', lambda *args, **kwargs: None)
-    monkeypatch.setattr('auth_api.services.invitation.check_auth', lambda *args, **kwargs: None)
-    monkeypatch.setattr('auth_api.services.affiliation_invitation.check_auth', lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.entity.check_auth", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.org.check_auth", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.invitation.check_auth", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.affiliation_invitation.check_auth", lambda *args, **kwargs: None)
 
 
 @pytest.fixture()
 def notify_mock(monkeypatch):
     """Mock send_email."""
-    monkeypatch.setattr('auth_api.services.invitation.send_email', lambda *args, **kwargs: None)
-    monkeypatch.setattr('auth_api.services.affiliation_invitation.send_email', lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.invitation.send_email", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.affiliation_invitation.send_email", lambda *args, **kwargs: None)
 
 
 @pytest.fixture()
 def notify_org_mock(monkeypatch):
     """Mock send_email."""
-    monkeypatch.setattr('auth_api.services.org.send_email', lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.org.send_email", lambda *args, **kwargs: None)
 
 
 @pytest.fixture()
 def keycloak_mock(monkeypatch):
     """Mock keycloak services."""
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.join_account_holders_group',
-                        lambda *args, **kwargs: None)
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.join_users_group',
-                        lambda *args, **kwargs: None)
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group',
-                        lambda *args, **kwargs: None)
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.add_or_remove_product_keycloak_groups',
-                        lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        "auth_api.services.keycloak.KeycloakService.join_account_holders_group", lambda *args, **kwargs: None
+    )
+    monkeypatch.setattr("auth_api.services.keycloak.KeycloakService.join_users_group", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        "auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group", lambda *args, **kwargs: None
+    )
+    monkeypatch.setattr(
+        "auth_api.services.keycloak.KeycloakService.add_or_remove_product_keycloak_groups", lambda *args, **kwargs: None
+    )
 
 
 @pytest.fixture()
@@ -203,8 +188,9 @@ def business_exception_mock(monkeypatch):
     def get_business(business_identifier, token):
         raise BusinessException(Error.AFFILIATION_INVITATION_BUSINESS_NOT_FOUND, None)
 
-    monkeypatch.setattr('auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details',
-                        get_business)
+    monkeypatch.setattr(
+        "auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details", get_business
+    )
 
 
 @pytest.fixture()
@@ -212,36 +198,31 @@ def business_mock(monkeypatch):
     """Mock get business call."""
 
     def get_business(business_identifier, token):
-        return {
-            'business': {
-                'identifier': 'CP0002103',
-                'legalName': 'BarFoo, Inc.',
-                'legalType': 'CP'
-            }
-        }
+        return {"business": {"identifier": "CP0002103", "legalName": "BarFoo, Inc.", "legalType": "CP"}}
 
     def get_businesses(business_identifiers, token):
         return [
             {
-                'identifier': 'CP0002103',
-                'legalName': 'BarFoo, Inc.',
-                'legalType': 'CP',
-                'state': 'ACTIVE',
+                "identifier": "CP0002103",
+                "legalName": "BarFoo, Inc.",
+                "legalType": "CP",
+                "state": "ACTIVE",
             },
             {
-
-                'identifier': 'CP0002104',
-                'legalName': 'BarFooMeToo, Inc.',
-                'legalType': 'CP',
-                'state': 'ACTIVE',
-            }
+                "identifier": "CP0002104",
+                "legalName": "BarFooMeToo, Inc.",
+                "legalType": "CP",
+                "state": "ACTIVE",
+            },
         ]
 
-    monkeypatch.setattr('auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details',
-                        get_business)
+    monkeypatch.setattr(
+        "auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details", get_business
+    )
 
-    monkeypatch.setattr('auth_api.services.affiliation_invitation.AffiliationInvitation._get_multiple_business_details',
-                        get_businesses)
+    monkeypatch.setattr(
+        "auth_api.services.affiliation_invitation.AffiliationInvitation._get_multiple_business_details", get_businesses
+    )
 
 
 @pytest.fixture()
@@ -250,21 +231,13 @@ def nr_mock(monkeypatch):
 
     def get_nr(business_identifier):
         return {
-            'applicants': {
-                'emailAddress': 'test@test.com',
-                'phoneNumber': '1112223333'
-            },
-            'names': [
-                {
-                    'name': 'TEST INC..',
-                    'state': 'APPROVED'
-                }
-            ],
-            'state': 'APPROVED',
-            'requestTypeCd': 'BC'
+            "applicants": {"emailAddress": "test@test.com", "phoneNumber": "1112223333"},
+            "names": [{"name": "TEST INC..", "state": "APPROVED"}],
+            "state": "APPROVED",
+            "requestTypeCd": "BC",
         }
 
-    monkeypatch.setattr('auth_api.services.affiliation.Affiliation._get_nr_details', get_nr)
+    monkeypatch.setattr("auth_api.services.affiliation.Affiliation._get_nr_details", get_nr)
 
 
 @pytest.fixture()
@@ -273,20 +246,12 @@ def minio_mock(monkeypatch):
 
     def get_nr(business_identifier):
         return {
-            'applicants': {
-                'emailAddress': 'test@test.com',
-                'phoneNumber': '1112223333'
-            },
-            'names': [
-                {
-                    'name': 'TEST INC..',
-                    'state': 'APPROVED'
-                }
-            ],
-            'state': 'APPROVED'
+            "applicants": {"emailAddress": "test@test.com", "phoneNumber": "1112223333"},
+            "names": [{"name": "TEST INC..", "state": "APPROVED"}],
+            "state": "APPROVED",
         }
 
-    monkeypatch.setattr('auth_api.services.minio.MinioService._get_client', get_nr)
+    monkeypatch.setattr("auth_api.services.minio.MinioService._get_client", get_nr)
 
 
 @pytest.fixture()
@@ -294,22 +259,13 @@ def staff_user_mock(monkeypatch):
     """Mock user_context."""
 
     def token_info():  # pylint: disable=unused-argument; mocks of library methods
-        return {
-            'username': 'staff user',
-            'realm_access': {
-                'roles': [
-                    'staff',
-                    'edit',
-                    'create_accounts'
-                ]
-            }
-        }
+        return {"username": "staff user", "realm_access": {"roles": ["staff", "edit", "create_accounts"]}}
 
     def mock_auth():  # pylint: disable=unused-argument; mocks of library methods
-        return 'test'
+        return "test"
 
-    monkeypatch.setattr('auth_api.utils.user_context._get_token', mock_auth)
-    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
+    monkeypatch.setattr("auth_api.utils.user_context._get_token", mock_auth)
+    monkeypatch.setattr("auth_api.utils.user_context._get_token_info", token_info)
 
 
 @pytest.fixture()
@@ -317,21 +273,13 @@ def bceid_user_mock(monkeypatch):
     """Mock user_context."""
 
     def token_info():  # pylint: disable=unused-argument; mocks of library methods
-        return {
-            'username': 'CP1234567 user',
-            'realm_access': {
-                'roles': [
-                    'edit',
-                    'create_accounts'
-                ]
-            }
-        }
+        return {"username": "CP1234567 user", "realm_access": {"roles": ["edit", "create_accounts"]}}
 
     def mock_auth():  # pylint: disable=unused-argument; mocks of library methods
-        return 'test'
+        return "test"
 
-    monkeypatch.setattr('auth_api.utils.user_context._get_token', mock_auth)
-    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
+    monkeypatch.setattr("auth_api.utils.user_context._get_token", mock_auth)
+    monkeypatch.setattr("auth_api.utils.user_context._get_token_info", token_info)
 
 
 @pytest.fixture()
@@ -339,27 +287,19 @@ def system_user_mock(monkeypatch):
     """Mock user_context."""
 
     def token_info():  # pylint: disable=unused-argument; mocks of library methods
-        return {
-            'username': 'staff user',
-            'realm_access': {
-                'roles': [
-                    'staff',
-                    'edit',
-                    'system'
-                ]
-            }
-        }
+        return {"username": "staff user", "realm_access": {"roles": ["staff", "edit", "system"]}}
 
     def mock_auth():  # pylint: disable=unused-argument; mocks of library methods
-        return 'test'
+        return "test"
 
-    monkeypatch.setattr('auth_api.utils.user_context._get_token', mock_auth)
-    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
+    monkeypatch.setattr("auth_api.utils.user_context._get_token", mock_auth)
+    monkeypatch.setattr("auth_api.utils.user_context._get_token_info", token_info)
 
 
 @pytest.fixture(autouse=True)
 def mock_pub_sub_call(mocker):
     """Mock pub sub call."""
+
     class PublisherMock:
         """Publisher Mock."""
 
@@ -368,6 +308,6 @@ def mock_pub_sub_call(mocker):
 
         def publish(self, *args, **kwargs):
             """Publish mock."""
-            raise CancelledError('This is a mock')
+            raise CancelledError("This is a mock")
 
-    mocker.patch('google.cloud.pubsub_v1.PublisherClient', PublisherMock)
+    mocker.patch("google.cloud.pubsub_v1.PublisherClient", PublisherMock)

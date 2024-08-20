@@ -28,5 +28,5 @@ class AffiliationSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-
 
         model = AffiliationModel
 
-    entity = fields.Nested('EntitySchema', many=False, data_key='business')
-    org = fields.Nested('OrgSchema', many=False, data_key='organization')
+    entity = fields.Nested("EntitySchema", many=False, data_key="business")
+    org = fields.Nested("OrgSchema", many=False, data_key="organization")

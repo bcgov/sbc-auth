@@ -19,7 +19,7 @@ from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import ma
 
 
-class MembershipTypeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class MembershipTypeSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the MembershipType model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
@@ -27,5 +27,5 @@ class MembershipTypeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestor
 
         model = MembershipTypeModel
 
-    code = fields.String(data_key='name')
-    description = fields.String(data_key='desc')
+    code = fields.String(data_key="name")
+    description = fields.String(data_key="desc")

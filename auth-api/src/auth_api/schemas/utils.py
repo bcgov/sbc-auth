@@ -21,8 +21,7 @@ from typing import Tuple
 
 from jsonschema import Draft7Validator, RefResolver, SchemaError
 
-
-BASE_URI = 'https://bcrs.gov.bc.ca/.well_known/schemas'
+BASE_URI = "https://bcrs.gov.bc.ca/.well_known/schemas"
 
 
 def get_schema(filename: str) -> dict:
@@ -32,10 +31,10 @@ def get_schema(filename: str) -> dict:
 
 def _load_json_schema(filename: str):
     """Return the given schema file identified by filename."""
-    relative_path = path.join('schemas', filename)
+    relative_path = path.join("schemas", filename)
     absolute_path = path.join(path.dirname(__file__), relative_path)
 
-    with open(absolute_path, 'r', encoding='utf-8') as schema_file:
+    with open(absolute_path, "r", encoding="utf-8") as schema_file:
         schema = json.loads(schema_file.read())
 
         return schema
@@ -48,16 +47,16 @@ def get_schema_store(validate_schema: bool = False, schema_search_path: str = No
     """
     try:
         if not schema_search_path:
-            schema_search_path = path.join(path.dirname(__file__), 'schemas')
+            schema_search_path = path.join(path.dirname(__file__), "schemas")
         schemastore = {}
         fnames = listdir(schema_search_path)
         for fname in fnames:
             fpath = path.join(schema_search_path, fname)
-            if fpath[-5:] == '.json':
-                with open(fpath, 'r', encoding='utf-8') as schema_fd:
+            if fpath[-5:] == ".json":
+                with open(fpath, "r", encoding="utf-8") as schema_fd:
                     schema = json.load(schema_fd)
-                    if '$id' in schema:
-                        schemastore[schema['$id']] = schema
+                    if "$id" in schema:
+                        schemastore[schema["$id"]] = schema
 
         if validate_schema:
             for _, schema in schemastore.items():
@@ -69,39 +68,36 @@ def get_schema_store(validate_schema: bool = False, schema_search_path: str = No
         raise error
 
 
-def validate(json_data: json,
-             schema_id: str,
-             schema_store: dict = None,
-             validate_schema: bool = False,
-             schema_search_path: str = None
-             ) -> Tuple[bool, iter]:
+def validate(
+    json_data: json,
+    schema_id: str,
+    schema_store: dict = None,
+    validate_schema: bool = False,
+    schema_search_path: str = None,
+) -> Tuple[bool, iter]:
     """Load the json file and validate against loaded schema."""
     try:
         if not schema_search_path:
-            schema_search_path = path.join(path.dirname(__file__), 'schemas')
+            schema_search_path = path.join(path.dirname(__file__), "schemas")
 
         if not schema_store:
             schema_store = get_schema_store(validate_schema, schema_search_path)
 
-        schema = schema_store.get(f'{BASE_URI}/{schema_id}')
+        schema = schema_store.get(f"{BASE_URI}/{schema_id}")
         if validate_schema:
             Draft7Validator.check_schema(schema)
 
         schema_file_path = path.join(schema_search_path, schema_id)
-        resolver = RefResolver(f'file://{schema_file_path}.json', schema, schema_store)
+        resolver = RefResolver(f"file://{schema_file_path}.json", schema, schema_store)
 
-        if Draft7Validator(schema,
-                           format_checker=Draft7Validator.FORMAT_CHECKER,
-                           resolver=resolver
-                           ) \
-                .is_valid(json_data):
+        if Draft7Validator(schema, format_checker=Draft7Validator.FORMAT_CHECKER, resolver=resolver).is_valid(
+            json_data
+        ):
             return True, None
 
-        errors = Draft7Validator(schema,
-                                 format_checker=Draft7Validator.FORMAT_CHECKER,
-                                 resolver=resolver
-                                 ) \
-            .iter_errors(json_data)
+        errors = Draft7Validator(schema, format_checker=Draft7Validator.FORMAT_CHECKER, resolver=resolver).iter_errors(
+            json_data
+        )
         return False, errors
 
     except SchemaError as error:

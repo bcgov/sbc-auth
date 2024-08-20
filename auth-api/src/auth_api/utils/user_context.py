@@ -35,14 +35,15 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         """Return a User Context object."""
         token_info: Dict = _get_token_info() or {}
         self._token_info = token_info
-        self._user_name: str = token_info.get('username', token_info.get('preferred_username', None))
-        self._first_name: str = token_info.get('firstname', None)
-        self._last_name: str = token_info.get('lastname', None)
+        self._user_name: str = token_info.get("username", token_info.get("preferred_username", None))
+        self._first_name: str = token_info.get("firstname", None)
+        self._last_name: str = token_info.get("lastname", None)
         self._bearer_token: str = _get_token()
-        self._roles: list = token_info.get('realm_access', None).get('roles', []) if 'realm_access' in token_info \
-            else []
-        self._sub: str = token_info.get('sub', None)
-        self._login_source: str = token_info.get('loginSource', None)
+        self._roles: list = (
+            token_info.get("realm_access", None).get("roles", []) if "realm_access" in token_info else []
+        )
+        self._sub: str = token_info.get("sub", None)
+        self._login_source: str = token_info.get("loginSource", None)
         self._name: str = f"{token_info.get('firstname', None)} {token_info.get('lastname', None)}"
 
     @property
@@ -108,14 +109,14 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
     @property
     def account_id_claim(self) -> Dict:
         """Return the account id."""
-        return _get_token_info().get('Account-Id', None)
+        return _get_token_info().get("Account-Id", None)
 
     @property
     def account_id(self) -> Dict:
         """Return the account id."""
-        account_id = _get_token_info().get('Account-Id', None)
+        account_id = _get_token_info().get("Account-Id", None)
         if not account_id:
-            account_id = request.headers['Account-Id'] if request and 'Account-Id' in request.headers else None
+            account_id = request.headers["Account-Id"] if request and "Account-Id" in request.headers else None
         return account_id
 
     @property
@@ -130,16 +131,16 @@ def user_context(function):
     @functools.wraps(function)
     def wrapper(*func_args, **func_kwargs):
         context = _get_context()
-        func_kwargs['user_context'] = context
+        func_kwargs["user_context"] = context
         return function(*func_args, **func_kwargs)
 
     return wrapper
 
 
 def _get_token_info() -> Dict:
-    return g.jwt_oidc_token_info if g and 'jwt_oidc_token_info' in g else {}
+    return g.jwt_oidc_token_info if g and "jwt_oidc_token_info" in g else {}
 
 
 def _get_token() -> str:
-    token: str = request.headers['Authorization'] if request and 'Authorization' in request.headers else None
-    return token.replace('Bearer ', '') if token else None
+    token: str = request.headers["Authorization"] if request and "Authorization" in request.headers else None
+    return token.replace("Bearer ", "") if token else None

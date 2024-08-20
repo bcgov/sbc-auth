@@ -14,34 +14,34 @@
 """Constants definitions."""
 
 # Group names
-GROUP_PUBLIC_USERS = 'public_users'
-GROUP_ACCOUNT_HOLDERS = 'account_holders'
-GROUP_ANONYMOUS_USERS = 'anonymous_users'
-GROUP_GOV_ACCOUNT_USERS = 'gov_account_users'
-GROUP_API_GW_USERS = 'api_gateway_users'
-GROUP_API_GW_SANDBOX_USERS = 'api_gateway_sandbox_users'
+GROUP_PUBLIC_USERS = "public_users"
+GROUP_ACCOUNT_HOLDERS = "account_holders"
+GROUP_ANONYMOUS_USERS = "anonymous_users"
+GROUP_GOV_ACCOUNT_USERS = "gov_account_users"
+GROUP_API_GW_USERS = "api_gateway_users"
+GROUP_API_GW_SANDBOX_USERS = "api_gateway_sandbox_users"
 
 # Affidavit folder
-AFFIDAVIT_FOLDER_NAME = 'Affidavits'
+AFFIDAVIT_FOLDER_NAME = "Affidavits"
 
 # BCol profile to product mapping, this will grow as and when more products are onboarded.
 BCOL_PROFILE_PRODUCT_MAP = {
-    'VS': 'VS',
-    'PPR': 'RPPR',
-    'RURLPROP': 'RPT',
-          # 'COURT_SERVICES': 'CSO',
-          # "OSBR":'',
-          #     "ADS",
-          #     "COLIN_TYPE",
-          #     "COMP",
-          #     "ICBC",
-          #     "MH",
-          #     "LTO",
-          #     "SES",
-          #     "PPR",
-          # "CCREF",
-          # "CCREL",
-          # "ATSOURCE",
-          # "EMERGIS",
-          # "LOCATION_CODE"
+    "VS": "VS",
+    "PPR": "RPPR",
+    "RURLPROP": "RPT",
+    # 'COURT_SERVICES': 'CSO',
+    # "OSBR":'',
+    #     "ADS",
+    #     "COLIN_TYPE",
+    #     "COMP",
+    #     "ICBC",
+    #     "MH",
+    #     "LTO",
+    #     "SES",
+    #     "PPR",
+    # "CCREF",
+    # "CCREL",
+    # "ATSOURCE",
+    # "EMERGIS",
+    # "LOCATION_CODE"
 }

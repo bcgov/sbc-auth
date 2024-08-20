@@ -24,7 +24,7 @@ from .base_model import BaseCodeModel
 class MembershipType(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """This is the Membership Type model for the Auth service."""
 
-    __tablename__ = 'membership_types'
+    __tablename__ = "membership_types"
 
     label = Column(String(200))
     icon = Column(String(100))

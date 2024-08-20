@@ -49,7 +49,7 @@ class Permissions:  # pylint: disable=too-few-public-methods
                 cache.set(key, val)
 
         except SQLAlchemyError as e:
-            current_app.logger.info('Error on building cache %s', e)
+            current_app.logger.info("Error on building cache %s", e)
 
     @staticmethod
     def get_permissions_for_membership(org_status, membership_type):
@@ -57,15 +57,17 @@ class Permissions:  # pylint: disable=too-few-public-methods
         # Just a tweak til we get all org status to DB
         # TODO fix this logic
         if org_status not in (
-                OrgStatus.NSF_SUSPENDED.value, OrgStatus.PENDING_STAFF_REVIEW.value, OrgStatus.SUSPENDED.value):
+            OrgStatus.NSF_SUSPENDED.value,
+            OrgStatus.PENDING_STAFF_REVIEW.value,
+            OrgStatus.SUSPENDED.value,
+        ):
             org_status = None
         key_tuple = (org_status, membership_type)
         actions_from_cache = cache.get(key_tuple)
         if actions_from_cache:
             actions = actions_from_cache
         else:
-            permissions = PermissionsModel.get_permissions_by_membership(org_status,
-                                                                         membership_type)
+            permissions = PermissionsModel.get_permissions_by_membership(org_status, membership_type)
             actions = []
             for permission in permissions:
                 actions.append(permission.actions)
