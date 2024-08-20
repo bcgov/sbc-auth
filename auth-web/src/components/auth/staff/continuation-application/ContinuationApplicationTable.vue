@@ -71,7 +71,7 @@
                     </div>
                   </IconTooltip>
                   <IconTooltip
-                    v-if="item.effectiveDate && daysLeft(item.effectiveDate) && daysLeft(item.effectiveDate) <= 3"
+                    v-if="daysLeft(item.effectiveDate) && daysLeft(item.effectiveDate) <= 3"
                     icon="mdi-alert"
                     maxWidth="300px"
                     colour="#F8661A"
@@ -95,7 +95,7 @@
                 <div>
                   {{ item.nrNumber }}
                   <IconTooltip
-                    v-if="item.nrExpiryDate && daysLeft(item.nrExpiryDate) && daysLeft(item.nrExpiryDate) <= 14"
+                    v-if="daysLeft(item.nrExpiryDate) && daysLeft(item.nrExpiryDate) <= 14"
                     icon="mdi-alert"
                     maxWidth="300px"
                     colour="#F8661A"
@@ -622,6 +622,9 @@ export default defineComponent({
     }
     // Method to check FE or NR days left
     const daysLeft = (effectiveDate: string): number | null => {
+      if (!effectiveDate) {
+        return null
+      }
       const diffHours = moment(effectiveDate).diff(moment(), 'hours')
       if (diffHours > 0 && diffHours <= 24) {
         return 1
