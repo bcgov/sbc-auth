@@ -15,17 +15,14 @@
 import uuid
 from datetime import datetime, timezone
 
-from flask import current_app, g
-from sentry_sdk import capture_message
-from simple_cloudevent import SimpleCloudEvent
-from sqlalchemy_continuum.plugins.flask import fetch_remote_addr
+from flask import current_app, g, request
 from sbc_common_components.utils.enums import QueueMessageTypes
+from simple_cloudevent import SimpleCloudEvent
 
 from auth_api.config import get_named_config
-from auth_api.models.dataclass import Activity
 from auth_api.models import User as UserModel
+from auth_api.models.dataclass import Activity
 from auth_api.services.gcp_queue import GcpQueue, queue
-
 
 CONFIG = get_named_config()
 
@@ -38,29 +35,28 @@ class ActivityLogPublisher:  # pylint: disable=too-many-instance-attributes, too
         """Publish the activity using the given details."""
         try:
             # find user_id if haven't passed in
-            if not activity.actor_id and g and 'jwt_oidc_token_info' in g:
+            if not activity.actor_id and g and "jwt_oidc_token_info" in g:
                 user: UserModel = UserModel.find_by_jwt_token()
                 activity.actor_id = user.id if user else None
             data = {
-                'actorId': activity.actor_id,
-                'action': activity.action,
-                'itemType': 'ACCOUNT',
-                'itemName': activity.name,
-                'itemId': activity.id,
-                'itemValue': activity.value,
-                'orgId': activity.org_id,
-                'remoteAddr': fetch_remote_addr(),
-                'createdAt': f'{datetime.now()}'
+                "actorId": activity.actor_id,
+                "action": activity.action,
+                "itemType": "ACCOUNT",
+                "itemName": activity.name,
+                "itemId": activity.id,
+                "itemValue": activity.value,
+                "orgId": activity.org_id,
+                "remoteAddr": request.remote_addr,
+                "createdAt": f"{datetime.now()}",
             }
             cloud_event = SimpleCloudEvent(
                 id=str(uuid.uuid4()),
-                source='sbc-auth-auth-api',
+                source="sbc-auth-auth-api",
                 subject=None,
                 time=datetime.now(tz=timezone.utc).isoformat(),
                 type=QueueMessageTypes.ACTIVITY_LOG.value,
-                data=data
+                data=data,
             )
             queue.publish(CONFIG.AUTH_EVENT_TOPIC, GcpQueue.to_queue_message(cloud_event))
-        except Exception as err:  # noqa: B902 # pylint: disable=broad-except
-            capture_message('Activity Queue Publish Event Error:' + str(err), level='error')
-            current_app.logger.error('Activity Queue Publish Event Error:', exc_info=True)
+        except Exception:  # noqa: B902 # pylint: disable=broad-except
+            current_app.logger.error("Activity Queue Publish Event Error:", exc_info=True)

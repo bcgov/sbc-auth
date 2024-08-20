@@ -30,7 +30,7 @@ def assert_valid_schema(data: dict, schema_file: dict):
 
 def _load_json_schema(filename: str):
     """Return the given schema file identified by filename."""
-    relative_path = join('schemas', filename)
+    relative_path = join("schemas", filename)
     absolute_path = join(dirname(__file__), relative_path)
 
     with open(absolute_path) as schema_file:

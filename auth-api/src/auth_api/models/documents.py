@@ -27,22 +27,32 @@ from .db import db
 class Documents(BaseModel):
     """This is the model for a documents."""
 
-    __tablename__ = 'documents'
+    __tablename__ = "documents"
 
     # TODO version concept is not well refined..this is the first version..refine it
     version_id = Column(String(10), primary_key=True, autoincrement=False)
-    type = Column('type', String(30), nullable=False)
-    content_type = Column('content_type', String(20), nullable=False)
-    content = Column('content', Text)
+    type = Column("type", String(30), nullable=False)
+    content_type = Column("content_type", String(20), nullable=False)
+    content = Column("content", Text)
 
     @classmethod
     def fetch_latest_document_by_type(cls, file_type) -> Documents:
         """Fetch latest document of any time."""
-        return db.session.query(Documents).filter(
-            Documents.type == file_type).order_by(desc(Documents.version_id)).limit(1).one_or_none()
+        return (
+            db.session.query(Documents)
+            .filter(Documents.type == file_type)
+            .order_by(desc(Documents.version_id))
+            .limit(1)
+            .one_or_none()
+        )
 
     @classmethod
     def find_latest_version_by_type(cls, file_type) -> Documents:
         """Fetch latest document of any time."""
-        return db.session.query(Documents.version_id).filter(
-            Documents.type == file_type).order_by(desc(Documents.version_id)).limit(1).scalar()
+        return (
+            db.session.query(Documents.version_id)
+            .filter(Documents.type == file_type)
+            .order_by(desc(Documents.version_id))
+            .limit(1)
+            .scalar()
+        )

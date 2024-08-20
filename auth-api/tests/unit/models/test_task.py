@@ -28,28 +28,41 @@ def test_task_model(session):
     """Assert that a task can be stored in the service."""
     user = factory_user_model()
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
-    task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type=task_type, status=TaskStatus.OPEN.value,
-                     related_to=user.id)
+    task = TaskModel(
+        name="TEST",
+        date_submitted=datetime.now(),
+        relationship_type=TaskRelationshipType.ORG.value,
+        relationship_id=10,
+        type=task_type,
+        status=TaskStatus.OPEN.value,
+        related_to=user.id,
+    )
 
     session.add(task)
     session.commit()
     assert task.id is not None
-    assert task.name == 'TEST'
+    assert task.name == "TEST"
 
 
 def test_task_model_with_due_date(session):
     """Assert that a task can be stored in the service."""
     user = factory_user_model()
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
-    task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type=task_type, due_date=datetime.now(),
-                     status=TaskStatus.OPEN.value, related_to=user.id)
+    task = TaskModel(
+        name="TEST",
+        date_submitted=datetime.now(),
+        relationship_type=TaskRelationshipType.ORG.value,
+        relationship_id=10,
+        type=task_type,
+        due_date=datetime.now(),
+        status=TaskStatus.OPEN.value,
+        related_to=user.id,
+    )
 
     session.add(task)
     session.commit()
     assert task.id is not None
-    assert task.name == 'TEST'
+    assert task.name == "TEST"
     assert task.due_date is not None
 
 
@@ -57,11 +70,17 @@ def test_fetch_tasks(session):  # pylint:disable=unused-argument
     """Assert that we can fetch all tasks."""
     user = factory_user_model()
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
-    task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type=task_type, due_date=datetime.now(),
-                     status=TaskStatus.OPEN.value, related_to=user.id,
-                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
-                     )
+    task = TaskModel(
+        name="TEST",
+        date_submitted=datetime.now(),
+        relationship_type=TaskRelationshipType.ORG.value,
+        relationship_id=10,
+        type=task_type,
+        due_date=datetime.now(),
+        status=TaskStatus.OPEN.value,
+        related_to=user.id,
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+    )
     session.add(task)
     session.commit()
 
@@ -70,7 +89,7 @@ def test_fetch_tasks(session):  # pylint:disable=unused-argument
         type=task_type,
         status=[TaskStatus.OPEN.value],
         page=1,
-        limit=10
+        limit=10,
     )
 
     found_tasks, count = TaskModel.fetch_tasks(task_search)
@@ -85,9 +104,16 @@ def test_find_task_by_id(session):  # pylint:disable=unused-argument
     """Assert that we can fetch all tasks."""
     user = factory_user_model()
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
-    task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type=task_type, due_date=datetime.now(),
-                     status=TaskStatus.OPEN.value, related_to=user.id)
+    task = TaskModel(
+        name="TEST",
+        date_submitted=datetime.now(),
+        relationship_type=TaskRelationshipType.ORG.value,
+        relationship_id=10,
+        type=task_type,
+        due_date=datetime.now(),
+        status=TaskStatus.OPEN.value,
+        related_to=user.id,
+    )
     session.add(task)
     session.commit()
     found_task = TaskModel.find_by_task_id(task.id)
@@ -106,7 +132,7 @@ def test_fetch_tasks_pagination(session):  # pylint:disable=unused-argument
         type=task_type,
         status=[TaskStatus.OPEN.value],
         page=3,
-        limit=2
+        limit=2,
     )
 
     found_tasks, count = TaskModel.fetch_tasks(task_search)
@@ -118,33 +144,48 @@ def test_task_model_account_id(session):
     """Assert that a task can be stored along with account id column."""
     user = factory_user_model()
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
-    task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type=task_type, status=TaskStatus.OPEN.value,
-                     account_id=10, related_to=user.id)
+    task = TaskModel(
+        name="TEST",
+        date_submitted=datetime.now(),
+        relationship_type=TaskRelationshipType.ORG.value,
+        relationship_id=10,
+        type=task_type,
+        status=TaskStatus.OPEN.value,
+        account_id=10,
+        related_to=user.id,
+    )
 
     session.add(task)
     session.commit()
     assert task.id is not None
-    assert task.name == 'TEST'
+    assert task.name == "TEST"
     assert task.account_id == 10
 
 
 def test_fetch_pending_tasks_descending(session):  # pylint:disable=unused-argument
     """Assert that we can fetch all tasks."""
     user = factory_user_model()
-    task = TaskModel(name='TEST 1', date_submitted=datetime.now(),
-                     relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type=TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value,
-                     status=TaskStatus.OPEN.value,
-                     related_to=user.id,
-                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
+    task = TaskModel(
+        name="TEST 1",
+        date_submitted=datetime.now(),
+        relationship_type=TaskRelationshipType.ORG.value,
+        relationship_id=10,
+        type=TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value,
+        status=TaskStatus.OPEN.value,
+        related_to=user.id,
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+    )
     task.save()
-    task = TaskModel(name='TEST 2', date_submitted=datetime(2021, 5, 25),
-                     relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type=TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value,
-                     status=TaskStatus.OPEN.value,
-                     related_to=user.id,
-                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
+    task = TaskModel(
+        name="TEST 2",
+        date_submitted=datetime(2021, 5, 25),
+        relationship_type=TaskRelationshipType.ORG.value,
+        relationship_id=10,
+        type=TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value,
+        status=TaskStatus.OPEN.value,
+        related_to=user.id,
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+    )
     task.save()
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
 
@@ -153,31 +194,36 @@ def test_fetch_pending_tasks_descending(session):  # pylint:disable=unused-argum
         type=task_type,
         status=[TaskStatus.OPEN.value],
         page=1,
-        limit=2
+        limit=2,
     )
 
     found_tasks, count = TaskModel.fetch_tasks(task_search)
     assert found_tasks
-    assert found_tasks[0].name == 'TEST 2'
-    assert found_tasks[1].name == 'TEST 1'
+    assert found_tasks[0].name == "TEST 2"
+    assert found_tasks[1].name == "TEST 1"
     assert count == 2
 
 
 def test_finding_task_by_relationship_id(session):  # pylint:disable=unused-argument
     """Assert that we can fetch all tasks."""
     user = factory_user_model()
-    task = TaskModel(name='TEST 1', date_submitted=datetime.now(),
-                     relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type=TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value,
-                     status=TaskStatus.OPEN.value,
-                     related_to=user.id,
-                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
+    task = TaskModel(
+        name="TEST 1",
+        date_submitted=datetime.now(),
+        relationship_type=TaskRelationshipType.ORG.value,
+        relationship_id=10,
+        type=TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value,
+        status=TaskStatus.OPEN.value,
+        related_to=user.id,
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+    )
     task.save()
 
     found_task = TaskModel.find_by_task_relationship_id(
-        task_relationship_type=TaskRelationshipType.ORG.value, relationship_id=10)
+        task_relationship_type=TaskRelationshipType.ORG.value, relationship_id=10
+    )
     assert found_task
-    assert found_task.name == 'TEST 1'
+    assert found_task.name == "TEST 1"
     assert found_task.relationship_id == 10
     assert found_task.status == TaskStatus.OPEN.value
 
@@ -185,17 +231,21 @@ def test_finding_task_by_relationship_id(session):  # pylint:disable=unused-argu
 def test_find_by_task_for_user(session):  # pylint:disable=unused-argument
     """Assert that we can fetch all tasks."""
     user = factory_user_model()
-    task = TaskModel(name='TEST 1', date_submitted=datetime.now(),
-                     relationship_type=TaskRelationshipType.USER.value,
-                     relationship_id=user.id, type=TaskTypePrefix.BCEID_ADMIN.value,
-                     status=TaskStatus.OPEN.value,
-                     related_to=user.id,
-                     account_id=10,
-                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
+    task = TaskModel(
+        name="TEST 1",
+        date_submitted=datetime.now(),
+        relationship_type=TaskRelationshipType.USER.value,
+        relationship_id=user.id,
+        type=TaskTypePrefix.BCEID_ADMIN.value,
+        status=TaskStatus.OPEN.value,
+        related_to=user.id,
+        account_id=10,
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+    )
     task.save()
 
     found_task = TaskModel.find_by_user_and_status(org_id=10, status=TaskStatus.OPEN.value)
     assert found_task
-    assert found_task.name == 'TEST 1'
+    assert found_task.name == "TEST 1"
     assert found_task.relationship_id == user.id
     assert found_task.status == TaskStatus.OPEN.value

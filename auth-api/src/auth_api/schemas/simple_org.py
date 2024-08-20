@@ -33,7 +33,4 @@ class SimpleOrgInfoSchema:  # pylint: disable=too-few-public-methods
 
         https://www.attrs.org/en/stable/init.html
         """
-        return cls(id=row.id,
-                   name=row.name,
-                   branch_name=row.branch_name,
-                   status=row.status_code)
+        return cls(id=row.id, name=row.name, branch_name=row.branch_name, status=row.status_code)

@@ -13,8 +13,8 @@
 # limitations under the License.
 """This module holds data classes."""
 
-from typing import List, Optional
 from dataclasses import dataclass, field
+from typing import List, Optional
 
 from auth_api.utils.enums import KeycloakGroupActions
 
@@ -123,7 +123,7 @@ class OrgSearch:  # pylint: disable=too-many-instance-attributes
 
 
 @dataclass
-class SimpleOrgSearch:   # pylint: disable=too-many-instance-attributes
+class SimpleOrgSearch:  # pylint: disable=too-many-instance-attributes
     """Used for searching organizations."""
 
     id: str
@@ -137,17 +137,17 @@ class SimpleOrgSearch:   # pylint: disable=too-many-instance-attributes
 
 
 @dataclass
-class TaskSearch:   # pylint: disable=too-many-instance-attributes
+class TaskSearch:  # pylint: disable=too-many-instance-attributes
     """Used for searching tasks."""
 
     status: List[str] = field()
-    relationship_status: str = ''
-    name: str = ''
-    start_date: str = ''
-    end_date: str = ''
-    type: str = ''
-    modified_by: str = ''
-    submitted_sort_order: str = 'asc'
+    relationship_status: str = ""
+    name: str = ""
+    start_date: str = ""
+    end_date: str = ""
+    type: str = ""
+    modified_by: str = ""
+    submitted_sort_order: str = "asc"
     page: int = 1
     limit: int = 10
 

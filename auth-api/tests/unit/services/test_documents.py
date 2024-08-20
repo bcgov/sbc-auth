@@ -24,37 +24,37 @@ from tests.utilities.factory_utils import get_tos_latest_version
 
 def test_as_dict(session):  # pylint: disable=unused-argument
     """Assert that a document is rendered correctly as a dictionary."""
-    _model = DocumentsModel.fetch_latest_document_by_type('termsofuse')
+    _model = DocumentsModel.fetch_latest_document_by_type("termsofuse")
     termsofuse = DocumentService(_model)
     dictionary = termsofuse.as_dict()
-    assert dictionary['type'] == 'termsofuse'
+    assert dictionary["type"] == "termsofuse"
 
 
 def test_with_valid_type(session):  # pylint: disable=unused-argument
     """Assert that a document is rendered correctly as a dictionary."""
-    terms_of_use = DocumentService.fetch_latest_document('termsofuse')
+    terms_of_use = DocumentService.fetch_latest_document("termsofuse")
     assert terms_of_use is not None
 
 
 def test_with_no_valid_type(session):  # pylint: disable=unused-argument
     """Assert that a document is rendered correctly as a dictionary."""
-    terms_of_use = DocumentService.fetch_latest_document('sometype')
+    terms_of_use = DocumentService.fetch_latest_document("sometype")
     assert terms_of_use is None
 
 
 def test_find_latest_version_by_invalid_type(session):  # pylint: disable=unused-argument
     """Assert that a document is rendered correctly as a dictionary."""
-    terms_of_use = DocumentService.find_latest_version_by_type('sometype')
+    terms_of_use = DocumentService.find_latest_version_by_type("sometype")
     assert terms_of_use is None
 
 
 def test_find_latest_version_by_type(session):  # pylint: disable=unused-argument
     """Assert that a document is rendered correctly as a dictionary."""
-    terms_of_use = DocumentService.find_latest_version_by_type('termsofuse')
+    terms_of_use = DocumentService.find_latest_version_by_type("termsofuse")
     assert terms_of_use == get_tos_latest_version()
 
 
 def test_find_latest_version_for_director_search(session):  # pylint: disable=unused-argument
     """Assert that a document is rendered correctly as a dictionary."""
-    terms_of_use = DocumentService.find_latest_version_by_type('termsofuse_directorsearch')
-    assert terms_of_use == 'd1'
+    terms_of_use = DocumentService.find_latest_version_by_type("termsofuse_directorsearch")
+    assert terms_of_use == "d1"

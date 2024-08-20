@@ -25,7 +25,7 @@ from .base_model import BaseCodeModel
 class OrgStatus(BaseCodeModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Org Status record."""
 
-    __tablename__ = 'org_statuses'
+    __tablename__ = "org_statuses"
 
     @declared_attr
     def code(cls):  # pylint:disable=no-self-argument, # noqa: N805
