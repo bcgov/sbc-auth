@@ -28,6 +28,7 @@
       @emit-bcol-info="setBcolInfo"
       @is-pad-valid="isPADValid"
       @is-ejv-valid="isEJVValid"
+      @cancel="cancel"
     />
     <v-slide-y-transition>
       <div
