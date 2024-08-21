@@ -123,7 +123,7 @@ def _rename_sequence(m, new_table_name, table):
     if id_column is not None and id_column.server_default is not None:
         seq = id_column.server_default.arg.text
         # format is 'nextval(\'org_id_seq\'::regclass)'
-        seq_name = re.search("nextval\('(.*)'::regclass", seq).group(1)
+        seq_name = re.search("nextval\\('(.*)'::regclass", seq).group(1)
         new_seq_name = seq_name.replace(table, new_table_name, 1)
         if seq_name != new_seq_name:
             op.execute(f"ALTER sequence {seq_name} RENAME TO {new_seq_name}")
