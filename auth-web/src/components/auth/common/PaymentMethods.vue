@@ -306,7 +306,7 @@ export default defineComponent({
     isInitialAcknowledged: { default: false },
     isBcolAdmin: { default: false }
   },
-  emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected'],
+  emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save'],
   setup (props, { emit, root }) {
     const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary } = useOrgStore()
     const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
@@ -461,6 +461,7 @@ export default defineComponent({
 
       if (isEFTSelected) {
         warningDialog.value.close()
+        emit('save')
       } else {
         if (!hasOutstandingBalance) {
           warningDialog.value.close()
