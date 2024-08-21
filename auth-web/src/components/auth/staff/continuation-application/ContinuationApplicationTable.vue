@@ -363,7 +363,7 @@
                         </v-btn>
                       </template>
                       <v-list>
-                        <v-list-item>
+                        <v-list-item @click="goToNameXUI(item.nrNumber)">
                           <v-list-item-subtitle>
                             <v-icon style="font-size: 14px">mdi-format-list-bulleted</v-icon>
                             <span class="pl-2">Open Name Request</span>
@@ -400,6 +400,7 @@ import { DatePicker } from '@/components'
 import IconTooltip from '@/components/IconTooltip.vue'
 import { SessionStorageKeys } from '@/util/constants'
 import debounce from '@/util/debounce'
+import { goToNameXUI } from '@/util/navigation'
 import moment from 'moment'
 import { useI18n } from 'vue-i18n-composable'
 
@@ -669,6 +670,7 @@ export default defineComponent({
       truncatedDateRange,
       doSearchParametersExist,
       paginationOptions,
+      goToNameXUI,
       expiredDate,
       updateItemsPerPage,
       updateDateRange,
