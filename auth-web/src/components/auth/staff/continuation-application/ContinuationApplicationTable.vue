@@ -71,7 +71,7 @@
                     </div>
                   </IconTooltip>
                   <IconTooltip
-                    v-if="daysLeft(item.futureEffectiveDate) && daysLeft(item.futureEffectiveDate) <= 3"
+                    v-if="item.futureEffectiveDate && daysLeft(item.futureEffectiveDate) <= 3"
                     icon="mdi-alert"
                     maxWidth="300px"
                     colour="#F8661A"
@@ -82,8 +82,7 @@
                       <strong>Alert:</strong><br>
                       <span>
                         The Future Effective Date for this filing is in
-                        {{ daysLeft(item.futureEffectiveDate) }}
-                        {{ daysLeft(item.futureEffectiveDate) === 1 ? 'day' : 'days' }}.
+                        {{ daysLeftText(item.futureEffectiveDate) }}.
                       </span>
                     </div>
                   </IconTooltip>
@@ -95,7 +94,7 @@
                 <div>
                   {{ item.nrNumber }}
                   <IconTooltip
-                    v-if="daysLeft(item.nrExpiryDate) && daysLeft(item.nrExpiryDate) <= 14"
+                    v-if="item.nrExpiryDate && daysLeft(item.nrExpiryDate) <= 14"
                     icon="mdi-alert"
                     maxWidth="300px"
                     colour="#F8661A"
@@ -106,8 +105,8 @@
                       <strong>Alert:</strong><br>
                       <span>
                         The Name Request will expire in
-                        {{ daysLeft(item.nrExpiryDate) }}
-                        {{ daysLeft(item.nrExpiryDate) === 1 ? 'day' : 'days' }}.
+                        {{ daysLeftText(item.nrExpiryDate) }}.
+
                       </span>
                     </div>
                   </IconTooltip>
@@ -657,16 +656,23 @@ export default defineComponent({
       return effectiveDate && !moment(effectiveDate).isAfter(moment())
     }
     // Method to check FE or NR days left
-    const daysLeft = (effectiveDate: string): number | null => {
-      if (!effectiveDate) {
-        return null
-      }
+    const daysLeft = (effectiveDate: string): number => {
       const diffHours = moment(effectiveDate).diff(moment(), 'hours')
       if (diffHours > 0 && diffHours <= 24) {
         return 1
       } else {
         const diffDays = moment(effectiveDate).diff(moment(), 'days')
-        return diffDays > 0 ? diffDays : null
+        return diffDays > 0 ? diffDays : 50
+      }
+    }
+    // Method to display FE or NR days left text
+    const daysLeftText = (effectiveDate: string): string => {
+      const diffHours = moment(effectiveDate).diff(moment(), 'hours')
+      if (diffHours > 0 && diffHours <= 24) {
+        return '1 day'
+      } else {
+        const diffDays = moment(effectiveDate).diff(moment(), 'days')
+        return `${diffDays} days`
       }
     }
 
@@ -701,6 +707,7 @@ export default defineComponent({
       clearSearchParams,
       changeSort,
       daysLeft,
+      daysLeftText,
       displayStatus,
       formatDate,
       fullDateRange,
