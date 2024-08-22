@@ -153,7 +153,12 @@
                       v-for="(header, i) in headers"
                       :key="getIndexedTag('find-header-row', i)"
                       :scope="getIndexedTag('find-header-col', i)"
-                      class="font-weight-bold"
+                      :class="{
+                        'font-weight-bold': true,
+                        'nr-number-column': header.value === 'nrNumber',
+                        'submission-date-column': header.value === 'submissionDate',
+                        'identifier-column': header.value === 'identifier'
+                      }"
                       :style="reviewParams.sortBy === header.value ? 'color: black' : ''"
                       @click="!['action'].includes(header.value) ? changeSort(header.value) : null"
                     >
@@ -174,6 +179,11 @@
                       v-for="(header, i) in headers"
                       :key="getIndexedTag('find-header-row2', i)"
                       :scope="getIndexedTag('find-header-col2', i)"
+                      :class="{
+                        'nr-number-column': header.value === 'nrNumber',
+                        'submission-date-column': header.value === 'submissionDate',
+                        'identifier-column': header.value === 'identifier'
+                      }"
                     >
                       <v-text-field
                         v-if="!['action','status','submissionDate','effectiveDate'].includes(header.value)"
@@ -722,6 +732,21 @@ export default defineComponent({
   table > thead > tr > th {
     width: 210px !important;
     min-width: 210px !important;
+  }
+
+  .nr-number-column {
+    width: 140px !important;
+    min-width: 140px !important;
+  }
+
+  .submission-date-column {
+    width: 180px !important;
+    min-width: 180px !important;
+  }
+
+  .identifier-column {
+    width: 180px !important;
+    min-width: 180px !important;
   }
 
   .open-action-btn,
