@@ -306,11 +306,7 @@
                               </template>
                               <span>
                                 <!-- when hover over 'Multiple Selected' showing what are selected. -->
-                                {{
-                                  reviewParams[header.value]
-                                    .map(statusValue => statusTypes.find(status => status.value === statusValue)?.text)
-                                    .join(', ')
-                                }}
+                                {{ formattedStatuses() }}
                               </span>
                             </v-tooltip>
                             <!-- Display the item text if only one is selected -->
@@ -645,6 +641,12 @@ export default defineComponent({
       }
     }
 
+    function formattedStatuses () : string {
+      return state.reviewParams['status']
+        .map(statusValue => state.statusTypes.find(status => status.value === statusValue)?.text)
+        .join(', ')
+    }
+
     function changeSort (column: string) {
       if (state.sortBy === column) {
         state.sortDesc = !this.sortDesc
@@ -684,7 +686,8 @@ export default defineComponent({
       expiredDate,
       updateItemsPerPage,
       updateDateRange,
-      updateEffectiveDateRange
+      updateEffectiveDateRange,
+      formattedStatuses
     }
   }
 })
