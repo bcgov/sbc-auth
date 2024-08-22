@@ -240,6 +240,7 @@
                                 <v-icon
                                   color="primary"
                                   :style="{ marginTop: '-2px' }"
+                                  @click="showDatePicker = true"
                                 >
                                   mdi-calendar
                                 </v-icon>
@@ -279,6 +280,7 @@
                                 <v-icon
                                   color="primary"
                                   :style="{ marginTop: '-2px' }"
+                                  @click="showEffectiveDatePicker = true"
                                 >
                                   mdi-calendar
                                 </v-icon>
