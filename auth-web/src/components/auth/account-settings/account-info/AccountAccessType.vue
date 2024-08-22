@@ -4,7 +4,7 @@
       <v-card elevation="0">
         <div class="account-label">
           <div
-            class="nav-list-title font-weight-bold pl-3"
+            class="nav-list-title font-weight-bold"
             data-test="title"
           >
             Access Type

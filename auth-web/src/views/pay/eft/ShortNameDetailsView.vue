@@ -33,7 +33,7 @@
             mdi-alert
           </v-icon>
           <p class="account-alert__info mb-0 pl-3">
-            Caution: Please verify if the {{ unsettledAmount }} balance is eligible for a refund, or you can link to a new account.
+            <strong>Caution:</strong> Please verify if the {{ unsettledAmount }} balance is eligible for a refund, or you can link to a new account.
           </p>
         </div>
       </v-alert>
