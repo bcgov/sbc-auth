@@ -197,7 +197,19 @@
                         :placeholder="header.text"
                         dense
                         hide-details="auto"
-                      />
+                      >
+                        <!-- Clear icon -->
+                        <template #append>
+                          <v-icon
+                            v-if="reviewParams[header.value]"
+                            color="primary"
+                            :style="{ marginTop: '-2px' }"
+                            @click="clearOneParam(header.value)"
+                          >
+                            mdi-close
+                          </v-icon>
+                        </template>
+                      </v-text-field>
 
                       <!-- Date Picker to select date submitted range -->
                       <div v-else-if="['submissionDate'].includes(header.value)">
@@ -220,11 +232,15 @@
                                 <v-icon
                                   v-if="reviewParams.startDate"
                                   color="primary"
+                                  :style="{ marginTop: '-2px' }"
                                   @click="updateDateRange({ startDate: '', endDate: '' })"
                                 >
                                   mdi-close
                                 </v-icon>
-                                <v-icon color="primary">
+                                <v-icon
+                                  color="primary"
+                                  :style="{ marginTop: '-2px' }"
+                                >
                                   mdi-calendar
                                 </v-icon>
                               </template>
@@ -255,11 +271,15 @@
                                 <v-icon
                                   v-if="reviewParams.startEffectiveDate"
                                   color="primary"
+                                  :style="{ marginTop: '-2px' }"
                                   @click="updateEffectiveDateRange({ startDate: '', endDate: '' })"
                                 >
                                   mdi-close
                                 </v-icon>
-                                <v-icon color="primary">
+                                <v-icon
+                                  color="primary"
+                                  :style="{ marginTop: '-2px' }"
+                                >
                                   mdi-calendar
                                 </v-icon>
                               </template>
@@ -583,6 +603,13 @@ export default defineComponent({
       }
     }
 
+    function clearOneParam (param: string) {
+      state.reviewParams = {
+        ...state.reviewParams,
+        [param]: ''
+      }
+    }
+
     function getIndexedTag (tag: string, index: number): string {
       return `${tag}-${index}`
     }
@@ -687,7 +714,8 @@ export default defineComponent({
       updateItemsPerPage,
       updateDateRange,
       updateEffectiveDateRange,
-      formattedStatuses
+      formattedStatuses,
+      clearOneParam
     }
   }
 })
