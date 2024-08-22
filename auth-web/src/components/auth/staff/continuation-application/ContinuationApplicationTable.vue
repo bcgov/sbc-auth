@@ -355,7 +355,7 @@
                     v-if="item.nrNumber && !['APPROVED', 'REJECTED', 'ABANDONED'].includes(item.status)"
                   >
                     <v-menu
-                      v-model="dropdown[item.nrNumber]"
+                      v-model="dropdown[item.id]"
                       offset-y
                       nudge-left="158"
                     >
