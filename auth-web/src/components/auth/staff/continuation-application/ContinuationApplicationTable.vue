@@ -753,6 +753,11 @@ export default defineComponent({
   }
 }
 
+::v-deep .v-input__icon--clear .v-icon {
+  margin-top: -2px;
+  color: var(--v-primary-base);
+}
+
 .business-dashboard-icon {
   opacity: 1;
   width: 14px;
@@ -809,6 +814,7 @@ export default defineComponent({
 
   // Inline for Clear Filters
   .clear-filter-button {
+    margin-top: 2px;
     padding: 7px !important;
   }
 
