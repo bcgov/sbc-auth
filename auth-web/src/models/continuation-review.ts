@@ -28,7 +28,7 @@ export interface ContinuationReviewIF {
   results: Array<ContinuationReviewResultIF>
   status: ReviewStatus
   submissionDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
-  effectiveDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
+  futureEffectiveDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
   nrExpiryDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
 }
 

@@ -54,11 +54,11 @@
               </template>
 
               <!-- Displaying Formatted Future Effective Date and Tooltips-->
-              <template #[`item.effectiveDate`]="{ item }">
+              <template #[`item.futureEffectiveDate`]="{ item }">
                 <div>
-                  {{ formatDate(item.effectiveDate) }}
+                  {{ formatDate(item.futureEffectiveDate) }}
                   <IconTooltip
-                    v-if="expiredDate(item.effectiveDate)"
+                    v-if="expiredDate(item.futureEffectiveDate)"
                     icon="mdi-alert"
                     maxWidth="300px"
                     colour="#D3272C"
@@ -71,7 +71,7 @@
                     </div>
                   </IconTooltip>
                   <IconTooltip
-                    v-if="daysLeft(item.effectiveDate) && daysLeft(item.effectiveDate) <= 3"
+                    v-if="daysLeft(item.futureEffectiveDate) && daysLeft(item.futureEffectiveDate) <= 3"
                     icon="mdi-alert"
                     maxWidth="300px"
                     colour="#F8661A"
@@ -82,8 +82,8 @@
                       <strong>Alert:</strong><br>
                       <span>
                         The Future Effective Date for this filing is in
-                        {{ daysLeft(item.effectiveDate) }}
-                        {{ daysLeft(item.effectiveDate) === 1 ? 'day' : 'days' }}.
+                        {{ daysLeft(item.futureEffectiveDate) }}
+                        {{ daysLeft(item.futureEffectiveDate) === 1 ? 'day' : 'days' }}.
                       </span>
                     </div>
                   </IconTooltip>
@@ -186,7 +186,7 @@
                       }"
                     >
                       <v-text-field
-                        v-if="!['action','status','submissionDate','effectiveDate'].includes(header.value)"
+                        v-if="!['action','status','submissionDate','futureEffectiveDate'].includes(header.value)"
                         :id="header.value"
                         v-model.trim="reviewParams[header.value]"
                         input
@@ -235,7 +235,7 @@
                       </div>
 
                       <!-- Date Picker to select effective date range -->
-                      <div v-else-if="['effectiveDate'].includes(header.value)">
+                      <div v-else-if="['futureEffectiveDate'].includes(header.value)">
                         <v-tooltip
                           bottom
                         >
@@ -442,7 +442,7 @@ export default defineComponent({
       reviews: [] as Array<ContinuationReviewIF>,
       headers: [
         { text: 'Date Submitted', value: 'submissionDate' },
-        { text: 'Future Effective Date', value: 'effectiveDate' },
+        { text: 'Future Effective Date', value: 'futureEffectiveDate' },
         { text: 'NR Number', value: 'nrNumber' },
         { text: 'Identifying Number', value: 'identifier' },
         { text: 'Completing Party', value: 'completingParty' },
