@@ -18,7 +18,8 @@ export const goToNameRequest = (nameRequest: NameRequest): void => {
 
 /** Navigation handler for NameX UI. */
 export const goToNameXUI = (nrNumber: string): void => {
-  window.location.href = `${ConfigHelper.getNameXUrl()}nameExamination/NR${nrNumber}`
+  const cleanedNrNumber = nrNumber.replace(/^NR\s*/, '')
+  window.open(`${ConfigHelper.getNameXUrl()}examine?nr=${cleanedNrNumber}`)
 }
 
 /** Navigation handler for OneStop application */
