@@ -215,7 +215,7 @@
 </template>
 <script lang="ts">
 
-import { Ref, computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { Ref, computed, defineComponent, nextTick, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { ShortNameLinkStatus, ShortNamePaymentActions } from '@/util/constants'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
@@ -223,7 +223,6 @@ import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
 import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
-import { Vue } from 'vue-property-decorator'
 import _ from 'lodash'
 
 export default defineComponent({
@@ -310,7 +309,7 @@ export default defineComponent({
         result.statusCode === ShortNameLinkStatus.PENDING && result.amountOwing > 0
       )
 
-      await Vue.nextTick()
+      await nextTick()
       state.expanded = [...pending]
     }
 
