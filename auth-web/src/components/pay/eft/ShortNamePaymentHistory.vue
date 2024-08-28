@@ -140,7 +140,7 @@
   </div>
 </template>
 <script lang="ts">
-import { Ref, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { Ref, defineComponent, nextTick, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import {
   ShortNameHistoryType,
   ShortNameHistoryTypeDescription,
@@ -153,7 +153,6 @@ import { DEFAULT_DATA_OPTIONS } from '../../datatable/resources'
 import { EFTTransactionState } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
-import { Vue } from 'vue-property-decorator'
 import _ from 'lodash'
 import moment from 'moment-timezone'
 
@@ -255,7 +254,7 @@ export default defineComponent({
     }
 
     async function scrollToTop () {
-      await Vue.nextTick()
+      await nextTick()
       if (historyTable.value) {
         const tableWrapper = historyTable.value.$el.querySelector('.v-data-table__wrapper')
         if (tableWrapper) {
