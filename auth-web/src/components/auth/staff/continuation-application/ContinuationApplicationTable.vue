@@ -375,7 +375,8 @@
                   <span class="open-action">
                     <v-btn
                       color="primary"
-                      :class="['open-action-btn', { active: item.nrNumber }]"
+                      class="open-action-btn"
+                      :class="{ 'active': item.nrNumber }"
                       :data-test="getIndexedTag('view-continuation-button', item.id)"
                       @click="view(item.id)"
                     >
@@ -687,7 +688,7 @@ export default defineComponent({
     const feDaysLeftText = (effectiveDate: string): string => {
       const diffHours = moment(effectiveDate).diff(moment(), 'hours')
       if (diffHours > 0 && diffHours <= 24) {
-        return '1 day'
+        return `${diffHours} hour${diffHours > 1 ? 's' : ''}`
       } else {
         const diffDays = moment(effectiveDate).diff(moment(), 'days')
         return `${diffDays} days`
@@ -695,8 +696,9 @@ export default defineComponent({
     }
     // Method to display NR days left text
     const nrDaysLeftText = (effectiveDate: string): string => {
-      const diffHours = moment(effectiveDate).diff(moment(), 'hours')
-      if (diffHours > 0 && diffHours <= 24) {
+      const expiryDate = moment(effectiveDate).endOf('day')
+      const currentDate = moment().endOf('day')
+      if (expiryDate.isSame(currentDate, 'day')) {
         return '<b>today</b>'
       } else {
         const diffDays = moment(effectiveDate).diff(moment(), 'days')
