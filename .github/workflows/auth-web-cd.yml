@@ -4,12 +4,11 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "auth-web/**"
+      - feature*
   workflow_dispatch:
     inputs:
-      environment:
-        description: "Environment"
+      target:
+        description: "Deploy To"
         required: true
         type: choice
         options:
@@ -17,19 +16,14 @@ on:
         - test
         - sandbox
         - prod
-      tagname:
-        description: "Specify a previous version (git tag) to deploy"
-        required: false
-        default: ""
 
 jobs:
   account-ui-cd:
-    uses: bcgov/bcregistry-sre/.github/workflows/ui-cd-node20.yaml@main
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-cd.yaml@main
     with:
-      environment: ${{ inputs.environment }}
-      tagname: ${{ inputs.tagname }}
+      target: ${{ inputs.target }}
+      app_name: "account-ui"
       working_directory: "./auth-web"
     secrets:
-      APP_NAME: "account-ui"
-      OP_CONNECT_URL: ${{ secrets.OP_CONNECT_URL }}
-      OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
+      WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
+      GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
