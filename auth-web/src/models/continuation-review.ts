@@ -28,6 +28,8 @@ export interface ContinuationReviewIF {
   results: Array<ContinuationReviewResultIF>
   status: ReviewStatus
   submissionDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
+  futureEffectiveDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
+  nrExpiryDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
 }
 
 /** The Continuation In object in the filing API response. */
@@ -75,6 +77,8 @@ export interface ContinuationFilingIF {
 export interface ReviewFilterParams {
     startDate?: string // The start date for submission date range
     endDate?: string // The end date for submission date range
+    startEffectiveDate?: string // The start date for future effective date range
+    endEffectiveDate?: string // The end date for future effective date range
     page?: number
     limit?: number
     nrNumber?: string

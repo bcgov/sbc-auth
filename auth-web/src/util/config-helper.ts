@@ -76,6 +76,10 @@ export default class ConfigHelper {
     return `${import.meta.env.VUE_APP_NAME_REQUEST_URL}`
   }
 
+  static getNameXUrl () {
+    return `${import.meta.env.VUE_APP_NAMEX_WEB_URL}`
+  }
+
   static getBceIdOsdLink () {
     return `${import.meta.env.VUE_APP_BCEID_OSD_LINK}`
   }
