@@ -9,6 +9,15 @@ export interface StatementListItem {
   paymentMethods?: string[]
 }
 
+export interface Statement {
+  id?: number
+  isInterimStatement?: boolean
+  frequency: string
+  fromDate: string
+  toDate: string
+  paymentMethods: string[]
+}
+
 export interface StatementSettings {
   currentFrequency?: StatementListItem
   frequencies: Frequencies[]

@@ -32,12 +32,12 @@
           </v-col>
         </v-row>
         <v-row
-          v-for="invoice in invoices"
-          :key="invoice.id"
+          v-for="statement in statements"
+          :key="statement.id"
         >
           <v-col class="pt-0">
             <div class="link">
-              {{ formatDateRange(invoice.fromDate, invoice.toDate) }}
+              {{ formatDateRange(statement.fromDate, statement.toDate) }}
             </div>
           </v-col>
         </v-row>
@@ -95,7 +95,7 @@ export default defineComponent({
     const suspendedDate = (currentOrganization.value?.suspendedOn) ? formatDate(new Date(currentOrganization.value.suspendedOn)) : ''
 
     const state = reactive({
-      invoices: [],
+      statements: [],
       totalAmountDue: 0
     })
 
@@ -105,7 +105,7 @@ export default defineComponent({
 
     onMounted(async () => {
       const failedInvoices: FailedInvoice = await calculateFailedInvoices()
-      state.invoices = failedInvoices?.invoices || []
+      state.statements = failedInvoices?.statements || []
       state.totalAmountDue = failedInvoices?.totalAmountToPay || 0
     })
 
