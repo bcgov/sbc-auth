@@ -66,7 +66,9 @@
                         {{ formatDate(item.futureEffectiveDate) }}
                       </span>
                     </template>
-                    <span>{{ formatDate(item.futureEffectiveDate) }} at {{ formatTime(item.futureEffectiveDate) }} Pacific time</span>
+                    <div class="bottom-tooltip">
+                      <span>{{ formatDate(item.futureEffectiveDate) }} at {{ formatTime(item.futureEffectiveDate) }} Pacific time</span>
+                    </div>
                   </v-tooltip>
                   <IconTooltip
                     v-if="expiredDate(item.futureEffectiveDate)"
@@ -933,5 +935,18 @@ export default defineComponent({
     padding-left: 3px !important;
     padding-right: 3px !important;
   }
+
+  ::v-deep .bottom-tooltip:before {
+  content: ' ';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  margin-left: -10px;
+  width: 20px;
+  height: 20px;
+  border-width: 10px 10px 10px 10px;
+  border-style: solid;
+  border-color: transparent transparent RGBA(73, 80, 87, .95) transparent;
+}
 }
 </style>
