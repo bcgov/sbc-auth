@@ -20,5 +20,6 @@ __mock__
 
 .env
 .env.bak
+!.env.example
 *.firebaserc
 .firebase
