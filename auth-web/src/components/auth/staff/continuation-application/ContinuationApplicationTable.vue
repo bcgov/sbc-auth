@@ -1,5 +1,6 @@
 <template>
   <div id="continuation-application-review-table">
+    <!-- Date submitted date range picker -->
     <DatePicker
       v-show="showDatePicker"
       ref="datePicker"
@@ -7,6 +8,16 @@
       class="mt-n4"
       @submit="updateDateRange($event)"
     />
+
+    <!-- Future effective date range picker -->
+    <DatePicker
+      v-show="showEffectiveDatePicker"
+      ref="effectiveDatePicker"
+      :reset="effectiveDateRangeReset"
+      class="mt-n4"
+      @submit="updateEffectiveDateRange($event)"
+    />
+
     <v-form class="fas-search continuation-review-search">
       <v-row
         dense
@@ -37,9 +48,95 @@
                 <div>{{ displayStatus(item.status) }}</div>
               </template>
 
-              <!-- Displaying Formatted Date -->
+              <!-- Displaying Formatted Submission Date -->
               <template #[`item.submissionDate`]="{ item }">
                 <div>{{ formatDate(item.submissionDate) }}</div>
+              </template>
+
+              <!-- Displaying Formatted Future Effective Date and Tooltips-->
+              <template #[`item.futureEffectiveDate`]="{ item }">
+                <div>
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <span
+                        v-bind="attrs"
+                        style="border-bottom: 1px dotted"
+                        v-on="on"
+                      >
+                        {{ formatDate(item.futureEffectiveDate) }}
+                      </span>
+                    </template>
+                    <div class="bottom-tooltip">
+                      <span>{{ formatDate(item.futureEffectiveDate) }} at {{ formatTime(item.futureEffectiveDate) }} Pacific time</span>
+                    </div>
+                  </v-tooltip>
+                  <IconTooltip
+                    v-if="expiredDate(item.futureEffectiveDate)"
+                    icon="mdi-alert"
+                    maxWidth="300px"
+                    colour="#D3272C"
+                    :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
+                    :location="{top: true}"
+                  >
+                    <div>
+                      <strong>Alert:</strong><br>
+                      <span> The Future Effective Date for this filing has passed.</span>
+                    </div>
+                  </IconTooltip>
+                  <IconTooltip
+                    v-if="item.futureEffectiveDate && daysLeft(item.futureEffectiveDate) <= 3"
+                    icon="mdi-alert"
+                    maxWidth="300px"
+                    colour="#F8661A"
+                    :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
+                    :location="{top: true}"
+                  >
+                    <div>
+                      <strong>Alert:</strong><br>
+                      <span>
+                        The Future Effective Date for this filing is in
+                        {{ feDaysLeftText(item.futureEffectiveDate) }}.
+                      </span>
+                    </div>
+                  </IconTooltip>
+                </div>
+              </template>
+
+              <!-- Displaying NR Number and Tooltips-->
+              <template #[`item.nrNumber`]="{ item }">
+                <div>
+                  {{ item.nrNumber }}
+                  <IconTooltip
+                    v-if="item.nrExpiryDate && daysLeft(item.nrExpiryDate) <= 14"
+                    icon="mdi-alert"
+                    maxWidth="300px"
+                    colour="#F8661A"
+                    :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
+                    :location="{top: true}"
+                  >
+                    <div>
+                      <strong>Alert:</strong><br>
+                      <span>
+                        The Name Request will expire
+                        <span v-html="nrDaysLeftText(item.nrExpiryDate)" />.
+
+                      </span>
+                    </div>
+                  </IconTooltip>
+                  <IconTooltip
+                    v-if="expiredDate(item.nrExpiryDate)"
+                    icon="mdi-alert"
+                    maxWidth="300px"
+                    colour="#D3272C"
+                    :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
+                    :location="{top: true}"
+                  >
+                    <div>
+                      <strong>Alert:</strong><br>
+                      <span> This Name Request has expired.</span>
+                    </div>
+                  </IconTooltip>
+                </div>
               </template>
 
               <!-- Loading -->
@@ -68,7 +165,12 @@
                       v-for="(header, i) in headers"
                       :key="getIndexedTag('find-header-row', i)"
                       :scope="getIndexedTag('find-header-col', i)"
-                      class="font-weight-bold"
+                      :class="{
+                        'font-weight-bold': true,
+                        'nr-number-column': header.value === 'nrNumber',
+                        'submission-date-column': header.value === 'submissionDate',
+                        'identifier-column': header.value === 'identifier'
+                      }"
                       :style="reviewParams.sortBy === header.value ? 'color: black' : ''"
                       @click="!['action'].includes(header.value) ? changeSort(header.value) : null"
                     >
@@ -89,9 +191,14 @@
                       v-for="(header, i) in headers"
                       :key="getIndexedTag('find-header-row2', i)"
                       :scope="getIndexedTag('find-header-col2', i)"
+                      :class="{
+                        'nr-number-column': header.value === 'nrNumber',
+                        'submission-date-column': header.value === 'submissionDate',
+                        'identifier-column': header.value === 'identifier'
+                      }"
                     >
                       <v-text-field
-                        v-if="!['action','status','submissionDate'].includes(header.value)"
+                        v-if="!['action','status','submissionDate','futureEffectiveDate'].includes(header.value)"
                         :id="header.value"
                         v-model.trim="reviewParams[header.value]"
                         input
@@ -102,32 +209,98 @@
                         :placeholder="header.text"
                         dense
                         hide-details="auto"
-                      />
+                      >
+                        <!-- Clear icon -->
+                        <template #append>
+                          <v-icon
+                            v-if="reviewParams[header.value]"
+                            color="primary"
+                            :style="{ marginTop: '-2px' }"
+                            @click="clearOneParam(header.value)"
+                          >
+                            mdi-close
+                          </v-icon>
+                        </template>
+                      </v-text-field>
 
                       <!-- Date Picker to select date submitted range -->
                       <div v-else-if="['submissionDate'].includes(header.value)">
-                        <v-text-field
-                          :value="reviewParams.startDate ? 'Custom':''"
-                          filled
-                          :placeholder="'Date Submitted'"
-                          readonly
-                          dense
-                          hide-details="auto"
-                          @click="showDatePicker = true"
+                        <v-tooltip
+                          bottom
                         >
-                          <template #append>
-                            <v-icon
-                              v-if="reviewParams.startDate"
-                              color="primary"
-                              @click="updateDateRange({ startDate: '', endDate: '' })"
+                          <template #activator="{ on, attrs }">
+                            <v-text-field
+                              v-bind="attrs"
+                              :value="truncatedDateRange(reviewParams.startDate, reviewParams.endDate)"
+                              filled
+                              :placeholder="'Date Submitted'"
+                              readonly
+                              dense
+                              hide-details="auto"
+                              v-on="on"
+                              @click="showDatePicker = true"
                             >
-                              mdi-close
-                            </v-icon>
-                            <v-icon color="primary">
-                              mdi-calendar
-                            </v-icon>
+                              <template #append>
+                                <v-icon
+                                  v-if="reviewParams.startDate"
+                                  color="primary"
+                                  :style="{ marginTop: '-2px' }"
+                                  @click="updateDateRange({ startDate: '', endDate: '' })"
+                                >
+                                  mdi-close
+                                </v-icon>
+                                <v-icon
+                                  color="primary"
+                                  :style="{ marginTop: '-2px' }"
+                                  @click="showDatePicker = true"
+                                >
+                                  mdi-calendar
+                                </v-icon>
+                              </template>
+                            </v-text-field>
                           </template>
-                        </v-text-field>
+                          {{ fullDateRange(reviewParams.startDate, reviewParams.endDate) }}
+                        </v-tooltip>
+                      </div>
+
+                      <!-- Date Picker to select effective date range -->
+                      <div v-else-if="['futureEffectiveDate'].includes(header.value)">
+                        <v-tooltip
+                          bottom
+                        >
+                          <template #activator="{ on, attrs }">
+                            <v-text-field
+                              v-bind="attrs"
+                              :value="truncatedDateRange(reviewParams.startEffectiveDate, reviewParams.endEffectiveDate)"
+                              filled
+                              :placeholder="'Future Effective Date'"
+                              readonly
+                              dense
+                              hide-details="auto"
+                              v-on="on"
+                              @click="showEffectiveDatePicker = true"
+                            >
+                              <template #append>
+                                <v-icon
+                                  v-if="reviewParams.startEffectiveDate"
+                                  color="primary"
+                                  :style="{ marginTop: '-2px' }"
+                                  @click="updateEffectiveDateRange({ startDate: '', endDate: '' })"
+                                >
+                                  mdi-close
+                                </v-icon>
+                                <v-icon
+                                  color="primary"
+                                  :style="{ marginTop: '-2px' }"
+                                  @click="showEffectiveDatePicker = true"
+                                >
+                                  mdi-calendar
+                                </v-icon>
+                              </template>
+                            </v-text-field>
+                          </template>
+                          {{ fullDateRange(reviewParams.startEffectiveDate, reviewParams.endEffectiveDate) }}
+                        </v-tooltip>
                       </div>
 
                       <!-- Drop down menu to select statuses -->
@@ -153,9 +326,23 @@
                         >
                           <template #selection="{ item, index }">
                             <!-- Display "Multiple Selected" if multiple statuses are selected -->
-                            <span v-if="reviewParams[header.value].length > 1 && index === 0">
-                              Multiple Selected
-                            </span>
+                            <v-tooltip
+                              v-if="reviewParams[header.value].length > 1 && index === 0"
+                              bottom
+                            >
+                              <template #activator="{ on, attrs }">
+                                <span
+                                  v-bind="attrs"
+                                  v-on="on"
+                                >
+                                  Multiple Selected
+                                </span>
+                              </template>
+                              <span>
+                                <!-- when hover over 'Multiple Selected' showing what are selected. -->
+                                {{ formattedStatuses() }}
+                              </span>
+                            </v-tooltip>
                             <!-- Display the item text if only one is selected -->
                             <span v-else-if="reviewParams[header.value].length === 1">
                               {{ item.text }}
@@ -190,12 +377,41 @@
                   <span class="open-action">
                     <v-btn
                       color="primary"
-                      :class="['open-action-btn', getButtonLabel(item.status).toLowerCase()]"
+                      class="open-action-btn"
+                      :class="{ 'active': item.nrNumber }"
                       :data-test="getIndexedTag('view-continuation-button', item.id)"
                       @click="view(item.id)"
                     >
                       {{ getButtonLabel(item.status) }}
                     </v-btn>
+                  </span>
+                  <!-- More Actions Menu -->
+                  <span
+                    v-if="item.nrNumber"
+                  >
+                    <v-menu
+                      v-model="dropdown[item.id]"
+                      offset-y
+                      nudge-left="158"
+                    >
+                      <template #activator="{ on }">
+                        <v-btn
+                          color="primary"
+                          class="more-actions-btn"
+                          v-on="on"
+                        >
+                          <v-icon>{{ dropdown[item.nrNumber] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                        </v-btn>
+                      </template>
+                      <v-list>
+                        <v-list-item @click="goToNameXUI(item.nrNumber)">
+                          <v-list-item-subtitle>
+                            <v-icon style="font-size: 14px">mdi-format-list-bulleted</v-icon>
+                            <span class="pl-2">Open Name Request</span>
+                          </v-list-item-subtitle>
+                        </v-list-item>
+                      </v-list>
+                    </v-menu>
                   </span>
                 </div>
               </template>
@@ -222,14 +438,16 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import { DatePicker } from '@/components'
+import IconTooltip from '@/components/IconTooltip.vue'
 import { SessionStorageKeys } from '@/util/constants'
 import debounce from '@/util/debounce'
+import { goToNameXUI } from '@/util/navigation'
 import moment from 'moment'
 import { useI18n } from 'vue-i18n-composable'
 
 export default defineComponent({
   name: 'ContinuationApplicationTable',
-  components: { DatePicker },
+  components: { DatePicker, IconTooltip },
   props: {
     reviewSessionStorageKey: {
       type: String as PropType<SessionStorageKeys>,
@@ -259,6 +477,7 @@ export default defineComponent({
       reviews: [] as Array<ContinuationReviewIF>,
       headers: [
         { text: 'Date Submitted', value: 'submissionDate' },
+        { text: 'Future Effective Date', value: 'futureEffectiveDate' },
         { text: 'NR Number', value: 'nrNumber' },
         { text: 'Identifying Number', value: 'identifier' },
         { text: 'Completing Party', value: 'completingParty' },
@@ -281,10 +500,13 @@ export default defineComponent({
       sortBy: 'submissionDate',
       sortDesc: false,
       showDatePicker: false,
+      showEffectiveDatePicker: false,
       dropdown: [] as Array<boolean>,
       reviewParams: {
         startDate: '',
         endDate: '',
+        startEffectiveDate: '',
+        endEffectiveDate: '',
         nrNumber: '',
         identifier: '',
         completingParty: '',
@@ -324,6 +546,27 @@ export default defineComponent({
       state.reviewParams.startDate = val.startDate
       state.reviewParams.endDate = val.endDate
     }
+    const effectiveDateRangeReset = ref(0)
+    const updateEffectiveDateRange = (val: { endDate?: string, startDate?: string }) => {
+      state.showEffectiveDatePicker = false
+      if (!(val.endDate && val.startDate)) {
+        val = { startDate: '', endDate: '' }
+      }
+      state.reviewParams.startEffectiveDate = val.startDate
+      state.reviewParams.endEffectiveDate = val.endDate
+    }
+    const fullDateRange = (startDate, endDate) => {
+      if (startDate && endDate) {
+        return `${moment(startDate).format('MMMM D, YYYY')} - ${moment(endDate).format('MMMM D, YYYY')}`
+      }
+      return ''
+    }
+    const truncatedDateRange = (startDate, endDate) => {
+      if (startDate && endDate) {
+        return `${moment(startDate).format('MMM D')} - ${moment(endDate).format('MMM D')}`
+      }
+      return ''
+    }
 
     function mounted () {
       state.tableDataOptions = DEFAULT_DATA_OPTIONS
@@ -352,22 +595,33 @@ export default defineComponent({
 
     function getButtonLabel (status: string) {
       const reviewStates = ['AWAITING_REVIEW', 'RESUBMITTED']
-      return reviewStates.includes(status) ? 'Review' : 'View'
+      return reviewStates.includes(status) ? 'Review' : 'Open'
     }
+
     async function view (reviewId: string) {
       this.$router.push(`/staff/continuation-review/${reviewId}`)
     }
 
     function clearSearchParams () {
       dateRangeReset.value++
+      effectiveDateRangeReset.value++
       state.reviewParams = {
         ...state.reviewParams,
         startDate: '',
         endDate: '',
+        startEffectiveDate: '',
+        endEffectiveDate: '',
         nrNumber: '',
         identifier: '',
         completingParty: '',
         status: []
+      }
+    }
+
+    function clearOneParam (param: string) {
+      state.reviewParams = {
+        ...state.reviewParams,
+        [param]: ''
       }
     }
 
@@ -393,6 +647,7 @@ export default defineComponent({
 
     function doSearchParametersExist (params: ReviewFilterParams): boolean {
       return params.startDate.length > 0 ||
+                params.startEffectiveDate.length > 0 ||
                 params.nrNumber.length > 0 ||
                 params.identifier.length > 0 ||
                 params.completingParty.length > 0 ||
@@ -405,7 +660,58 @@ export default defineComponent({
     }
     // Method to format dates
     const formatDate = (dateString) => {
+      if (!dateString) {
+        return '' // when no FE date, return empty string
+      }
       return moment(dateString).format('MMMM D, YYYY') // Format like "May 5, 2024"
+    }
+    const formatTime = (dateString) => {
+      if (!dateString) {
+        return '' // when no FE date, return empty string
+      }
+      return moment(dateString).format('h:mm a') // Format like "12:46 pm"
+    }
+
+    // Method to check if FE date or NR date has passed
+    const expiredDate = (effectiveDate: string): boolean => {
+      return effectiveDate && !moment(effectiveDate).isAfter(moment())
+    }
+    // Method to check FE or NR days left
+    const daysLeft = (effectiveDate: string): number => {
+      const diffHours = moment(effectiveDate).diff(moment(), 'hours')
+      if (diffHours > 0 && diffHours <= 24) {
+        return 1
+      } else {
+        const diffDays = moment(effectiveDate).diff(moment(), 'days')
+        return diffDays > 0 ? diffDays : 50
+      }
+    }
+    // Method to display FE days left text
+    const feDaysLeftText = (effectiveDate: string): string => {
+      const diffHours = moment(effectiveDate).diff(moment(), 'hours')
+      if (diffHours > 0 && diffHours <= 24) {
+        return `${diffHours} hour${diffHours > 1 ? 's' : ''}`
+      } else {
+        const diffDays = moment(effectiveDate).diff(moment(), 'days')
+        return `${diffDays} days`
+      }
+    }
+    // Method to display NR days left text
+    const nrDaysLeftText = (effectiveDate: string): string => {
+      const expiryDate = moment(effectiveDate).endOf('day')
+      const currentDate = moment().endOf('day')
+      if (expiryDate.isSame(currentDate, 'day')) {
+        return '<b>today</b>'
+      } else {
+        const diffDays = moment(effectiveDate).diff(moment(), 'days')
+        return `in ${diffDays} days`
+      }
+    }
+
+    function formattedStatuses () : string {
+      return state.reviewParams['status']
+        .map(statusValue => state.statusTypes.find(status => status.value === statusValue)?.text)
+        .join(', ')
     }
 
     function changeSort (column: string) {
@@ -428,19 +734,31 @@ export default defineComponent({
       ...toRefs(state),
       debouncedOrgSearch,
       dateRangeReset,
+      effectiveDateRangeReset,
       view,
       clearSearchParams,
       changeSort,
+      daysLeft,
+      feDaysLeftText,
+      nrDaysLeftText,
       displayStatus,
       formatDate,
+      formatTime,
+      fullDateRange,
       getIndexedTag,
       getButtonLabel,
       noDataMessage,
       setSearchFilterToStorage,
+      truncatedDateRange,
       doSearchParametersExist,
       paginationOptions,
+      goToNameXUI,
+      expiredDate,
       updateItemsPerPage,
-      updateDateRange
+      updateDateRange,
+      updateEffectiveDateRange,
+      formattedStatuses,
+      clearOneParam
     }
   }
 })
@@ -476,6 +794,11 @@ export default defineComponent({
   }
 }
 
+::v-deep .v-input__icon--clear .v-icon {
+  margin-top: -2px;
+  color: var(--v-primary-base);
+}
+
 .business-dashboard-icon {
   opacity: 1;
   width: 14px;
@@ -490,6 +813,21 @@ export default defineComponent({
     min-width: 210px !important;
   }
 
+  .nr-number-column {
+    width: 140px !important;
+    min-width: 140px !important;
+  }
+
+  .submission-date-column {
+    width: 180px !important;
+    min-width: 180px !important;
+  }
+
+  .identifier-column {
+    width: 180px !important;
+    min-width: 180px !important;
+  }
+
   .open-action-btn,
   .more-actions-btn {
     box-shadow: 0 1px 1px 0px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
@@ -497,18 +835,12 @@ export default defineComponent({
   }
 
   .open-action-btn {
+    min-width: 7rem !important;
     &.active {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
+      min-width: 5rem !important;
     }
-  }
-
-  .open-action-btn.view {
-  min-width: 4.9rem !important;
-  }
-
-  .open-action-btn.review {
-  min-width: 6rem !important;
   }
 
   .more-actions-btn {
@@ -523,6 +855,7 @@ export default defineComponent({
 
   // Inline for Clear Filters
   .clear-filter-button {
+    margin-top: 2px;
     padding: 7px !important;
   }
 
@@ -602,5 +935,18 @@ export default defineComponent({
     padding-left: 3px !important;
     padding-right: 3px !important;
   }
+}
+
+.bottom-tooltip:before {
+  content: ' ';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  margin-left: -10px;
+  width: 20px;
+  height: 20px;
+  border-width: 10px 10px 10px 10px;
+  border-style: solid;
+  border-color: transparent transparent rgba(50, 50, 50, 0.7) transparent;
 }
 </style>
