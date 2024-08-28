@@ -96,7 +96,7 @@ export default defineComponent({
     })
 
     onMounted(async () => {
-      setAdminContact()
+      await setAdminContact()
       const failedInvoices: FailedInvoice = await calculateFailedInvoices()
       state.statements = failedInvoices?.statements || []
     })
