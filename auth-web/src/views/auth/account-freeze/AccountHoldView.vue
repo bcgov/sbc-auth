@@ -30,11 +30,11 @@
             Overdue Statements
           </p>
           <p
-            v-for="invoice in invoices"
-            :key="invoice.id"
+            v-for="statement in statements"
+            :key="statement.id"
             class="mb-2 link"
           >
-            {{ formatDateRange(invoice.fromDate, invoice.toDate) }}
+            {{ formatDateRange(statement.fromDate, statement.toDate) }}
           </p>
         </div>
         <div
@@ -59,7 +59,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
-import { FailedEFTInvoice } from '@/models/invoice'
+import { FailedInvoice } from '@/models/invoice'
 import moment from 'moment'
 import sanitizeHtml from 'sanitize-html'
 import { useOrgStore } from '@/stores/org'
@@ -76,13 +76,12 @@ export default defineComponent({
     const orgStore = useOrgStore()
     const currentOrganization = computed(() => orgStore.currentOrganization)
     const getAccountAdministrator = orgStore.getAccountAdministrator
-    const calculateFailedInvoices: any = orgStore.calculateFailedEFTInvoices
-    console.log(currentOrganization.value.id)
+    const calculateFailedInvoices: any = orgStore.calculateFailedInvoices
     const formatDate = CommonUtils.formatDisplayDate
     const formatDateRange = CommonUtils.formatDateRange
 
     const state = reactive({
-      invoices: [],
+      statements: [],
       suspendedDate: (currentOrganization.value?.suspendedOn) ? formatDate(moment(currentOrganization.value.suspendedOn)) : '',
       accountAdministratorEmail: ''
     })
@@ -97,9 +96,9 @@ export default defineComponent({
     })
 
     onMounted(async () => {
-      setAdminContact()
-      const failedInvoices: FailedEFTInvoice = await calculateFailedInvoices()
-      state.invoices = failedInvoices?.invoices || []
+      await setAdminContact()
+      const failedInvoices: FailedInvoice = await calculateFailedInvoices()
+      state.statements = failedInvoices?.statements || []
     })
 
     return {

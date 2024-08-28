@@ -1,4 +1,5 @@
-import { LineItem } from '.'
+import { LineItem } from './line-item'
+import { Statement } from './statement'
 
 export interface InvoiceList {
   consInvNumber?: string
@@ -44,22 +45,14 @@ export interface FailedInvoice {
   totalTransactionAmount?: number
   totalAmountToPay?: number
   invoices?: InvoiceList[]
-}
-
-export interface FailedEFTInvoice {
-  invoices: InvoiceList[]
-  totalAmountDue: number
+  statements?: Statement[]
 }
 
 export interface NonSufficientFundsInvoiceListResponse {
   invoices: InvoiceList[]
+  statements: Statement[]
   total: number
   totalAmount: number
   totalAmountRemaining: number
   nsfAmount: number
-}
-
-export interface EFTInvoiceListResponse {
-  invoices: InvoiceList[]
-  totalAmountDue: number
 }
