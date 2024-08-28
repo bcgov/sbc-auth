@@ -935,8 +935,9 @@ export default defineComponent({
     padding-left: 3px !important;
     padding-right: 3px !important;
   }
+}
 
-  ::v-deep .bottom-tooltip:before {
+.bottom-tooltip:before {
   content: ' ';
   position: absolute;
   top: -20px;
@@ -946,7 +947,6 @@ export default defineComponent({
   height: 20px;
   border-width: 10px 10px 10px 10px;
   border-style: solid;
-  border-color: transparent transparent RGBA(73, 80, 87, .95) transparent;
-}
+  border-color: transparent transparent rgba(50, 50, 50, 0.7) transparent;
 }
 </style>
