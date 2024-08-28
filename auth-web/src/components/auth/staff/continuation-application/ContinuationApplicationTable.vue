@@ -56,7 +56,18 @@
               <!-- Displaying Formatted Future Effective Date and Tooltips-->
               <template #[`item.futureEffectiveDate`]="{ item }">
                 <div>
-                  {{ formatDate(item.futureEffectiveDate) }}
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <span
+                        v-bind="attrs"
+                        style="border-bottom: 1px dotted"
+                        v-on="on"
+                      >
+                        {{ formatDate(item.futureEffectiveDate) }}
+                      </span>
+                    </template>
+                    <span>{{ formatDate(item.futureEffectiveDate) }} at {{ formatTime(item.futureEffectiveDate) }} Pacific time</span>
+                  </v-tooltip>
                   <IconTooltip
                     v-if="expiredDate(item.futureEffectiveDate)"
                     icon="mdi-alert"
@@ -82,7 +93,7 @@
                       <strong>Alert:</strong><br>
                       <span>
                         The Future Effective Date for this filing is in
-                        {{ daysLeftText(item.futureEffectiveDate) }}.
+                        {{ feDaysLeftText(item.futureEffectiveDate) }}.
                       </span>
                     </div>
                   </IconTooltip>
@@ -104,8 +115,8 @@
                     <div>
                       <strong>Alert:</strong><br>
                       <span>
-                        The Name Request will expire in
-                        {{ daysLeftText(item.nrExpiryDate) }}.
+                        The Name Request will expire
+                        <span v-html="nrDaysLeftText(item.nrExpiryDate)" />.
 
                       </span>
                     </div>
@@ -364,7 +375,7 @@
                   <span class="open-action">
                     <v-btn
                       color="primary"
-                      :class="['open-action-btn', { active: item.nrNumber && !['APPROVED', 'REJECTED', 'ABANDONED'].includes(item.status) }]"
+                      :class="['open-action-btn', { active: item.nrNumber }]"
                       :data-test="getIndexedTag('view-continuation-button', item.id)"
                       @click="view(item.id)"
                     >
@@ -373,7 +384,7 @@
                   </span>
                   <!-- More Actions Menu -->
                   <span
-                    v-if="item.nrNumber && !['APPROVED', 'REJECTED', 'ABANDONED'].includes(item.status)"
+                    v-if="item.nrNumber"
                   >
                     <v-menu
                       v-model="dropdown[item.id]"
@@ -651,6 +662,13 @@ export default defineComponent({
       }
       return moment(dateString).format('MMMM D, YYYY') // Format like "May 5, 2024"
     }
+    const formatTime = (dateString) => {
+      if (!dateString) {
+        return '' // when no FE date, return empty string
+      }
+      return moment(dateString).format('h:mm a') // Format like "12:46 pm"
+    }
+
     // Method to check if FE date or NR date has passed
     const expiredDate = (effectiveDate: string): boolean => {
       return effectiveDate && !moment(effectiveDate).isAfter(moment())
@@ -665,14 +683,24 @@ export default defineComponent({
         return diffDays > 0 ? diffDays : 50
       }
     }
-    // Method to display FE or NR days left text
-    const daysLeftText = (effectiveDate: string): string => {
+    // Method to display FE days left text
+    const feDaysLeftText = (effectiveDate: string): string => {
       const diffHours = moment(effectiveDate).diff(moment(), 'hours')
       if (diffHours > 0 && diffHours <= 24) {
         return '1 day'
       } else {
         const diffDays = moment(effectiveDate).diff(moment(), 'days')
         return `${diffDays} days`
+      }
+    }
+    // Method to display NR days left text
+    const nrDaysLeftText = (effectiveDate: string): string => {
+      const diffHours = moment(effectiveDate).diff(moment(), 'hours')
+      if (diffHours > 0 && diffHours <= 24) {
+        return '<b>today</b>'
+      } else {
+        const diffDays = moment(effectiveDate).diff(moment(), 'days')
+        return `in ${diffDays} days`
       }
     }
 
@@ -707,9 +735,11 @@ export default defineComponent({
       clearSearchParams,
       changeSort,
       daysLeft,
-      daysLeftText,
+      feDaysLeftText,
+      nrDaysLeftText,
       displayStatus,
       formatDate,
+      formatTime,
       fullDateRange,
       getIndexedTag,
       getButtonLabel,
