@@ -264,7 +264,7 @@ export default defineComponent({
     } = storeToRefs(codesStore)
 
     const currentOrganization = computed(() => orgStore.currentOrganization)
-    const displayGovnType = computed(() => orgStore.isGovnGovmOrg)
+    const displayGovnType = computed(() => orgStore.isGovnGovmOrg || orgStore.currentAccountSettings?.id === undefined)
 
     const state = reactive({
       accountInformationForm: null,
@@ -451,6 +451,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
+@import '@/assets/scss/tooltip.scss';
 .view-container {
     padding: 0 !important;
 }
@@ -466,63 +467,6 @@ export default defineComponent({
       border: 1px solid var(--v-primary-base) !important;
       background-color: $BCgovInputBG !important;
   }
-}
-.tooltip-activator {
-  width: 100%;
-}
-.tooltip {
-  background-color: transparent;
-  opacity: 1 !important;
-
-  .tooltip-content {
-    min-width: 30rem;
-    padding: 2rem;
-  }
-}
-.tooltip-text {
-  border-bottom: 2px dotted;
-}
-.tooltip-text:hover {
-    cursor: pointer;
-}
-.v-tooltip__content {
-  background-color: RGBA(73, 80, 87, 0.95) !important;
-  color: white !important;
-  border-radius: 4px;
-  font-size: 14px !important;
-  line-height: 18px !important;
-  padding: 15px !important;
-  letter-spacing: 0;
-  max-width: 360px !important;
-}
-.v-tooltip__content:after {
-  content: "" !important;
-  position: absolute !important;
-  top: 50% !important;
-  right: 100% !important;
-  margin-top: -10px !important;
-  border-top: 10px solid transparent !important;
-  border-bottom: 10px solid transparent !important;
-  border-right: 8px solid RGBA(73, 80, 87, .95) !important;
-}
-
-.top-tooltip:after {
-  top: 100% !important;
-  left: 45% !important;
-  margin-top: 0 !important;
-  border-right: 10px solid transparent !important;
-  border-left: 10px solid transparent !important;
-  border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
-}
-
-.right-tooltip:after {
-  top: 50% !important;
-  right: 100% !important;
-  margin-top: -10px !important;
-  border-bottom: 10px solid transparent !important;
-  border-left: 10px solid transparent !important;
-  border-top: 10px solid transparent !important;
-  border-right: 8px solid RGBA(73, 80, 87, 0.95) !important;
 }
 
 .align-vertical {

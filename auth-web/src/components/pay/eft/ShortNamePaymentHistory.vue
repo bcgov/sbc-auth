@@ -67,6 +67,7 @@
     </ModalDialog>
     <BaseVDataTable
       id="eft-transactions-table"
+      ref="historyTable"
       class="transaction-list"
       itemKey="id"
       :loading="state.loading"
@@ -139,7 +140,7 @@
   </div>
 </template>
 <script lang="ts">
-import { Ref, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { Ref, defineComponent, nextTick, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import {
   ShortNameHistoryType,
   ShortNameHistoryTypeDescription,
@@ -172,6 +173,7 @@ export default defineComponent({
     }
     const confirmationDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const errorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const historyTable: Ref<InstanceType<typeof BaseVDataTable>> = ref(null)
     const headers = [
       {
         col: 'transactionDate',
@@ -215,13 +217,14 @@ export default defineComponent({
       totalResults: 0,
       filters: {
         pageNumber: 1,
-        pageLimit: 5
+        pageLimit: 10
       },
       loading: false,
       options: _.cloneDeep(DEFAULT_DATA_OPTIONS)
     })
 
     watch(() => props.shortNameDetails, () => {
+      state.filters.pageNumber = 1
       return loadTransactions(props.shortNameDetails.id, false)
     }, { deep: true })
 
@@ -233,6 +236,13 @@ export default defineComponent({
           /* We use appendToResults for infinite scroll, so we keep the existing results. */
           state.results = appendToResults ? state.results.concat(response.data.items) : response.data.items
           state.totalResults = response.data.total
+
+          if (!appendToResults) {
+            await scrollToTop()
+            // Need to reset observer state. The infinite scroll observer will stop working if it previously reached
+            // the last set of results
+            historyTable.value.reachedEnd = false
+          }
         } else {
           throw new Error('No response from getEFTTransactions')
         }
@@ -241,6 +251,16 @@ export default defineComponent({
         console.error('Failed to getEFTTransactions list.', error)
       }
       state.loading = false
+    }
+
+    async function scrollToTop () {
+      await nextTick()
+      if (historyTable.value) {
+        const tableWrapper = historyTable.value.$el.querySelector('.v-data-table__wrapper')
+        if (tableWrapper) {
+          tableWrapper.scrollTop = 0
+        }
+      }
     }
 
     async function infiniteScrollCallback () {
@@ -252,7 +272,7 @@ export default defineComponent({
 
     function calculateTableHeight () {
       if (state.results.length <= state.filters.pageLimit) return null
-      const height = state.results.length * 40
+      const height = state.results.length * 75
       if (height > 400) return '400px'
 
       return `${height}px`
@@ -368,6 +388,7 @@ export default defineComponent({
       ...toRefs(state),
       errorDialog,
       confirmationDialog,
+      historyTable,
       formatBalanceAmount,
       formatTransactionAmount,
       formatDate: formatTransactionDate,
@@ -399,6 +420,7 @@ export default defineComponent({
 
   .v-data-table__wrapper {
     overflow-y: auto;
+    max-height: 400px;
   }
 
   .v-data-table__empty-wrapper {

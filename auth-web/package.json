@@ -1,15 +1,17 @@
 {
   "name": "auth-web",
-  "version": "2.6.71",
+  "version": "2.6.79",
   "appName": "Auth Web",
   "sbcName": "SBC Common Components",
   "private": true,
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build-check": "vite build",
     "preview": "vite preview --port 8080",
     "lint": "eslint . --ext ts,vue --fix src",
     "lint:nofix": "eslint . --ext ts,vue --no-fix",
+    "test": "vitest run",
     "test:unit": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage"
