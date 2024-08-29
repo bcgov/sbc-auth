@@ -36,8 +36,8 @@ import {
 } from '@/models/Organization'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
-import { EFTInvoiceListResponse, FailedEFTInvoice, FailedInvoice, NonSufficientFundsInvoiceListResponse } from '@/models/invoice'
 import { EftRefundRequest, RefundRequest } from './../models/refund'
+import { FailedInvoice, NonSufficientFundsInvoiceListResponse } from '@/models/invoice'
 import { Products, ProductsRequestBody } from '@/models/Staff'
 import { StatementFilterParams, StatementNotificationSettings, StatementSettings, StatementsSummary } from '@/models/statement'
 import { computed, reactive, toRefs } from '@vue/composition-api'
@@ -766,16 +766,6 @@ export const useOrgStore = defineStore('org', () => {
     }
   }
 
-  async function getEFTInvoices (): Promise<EFTInvoiceListResponse> {
-    try {
-      const response = await PaymentService.getEFTInvoices(state.currentOrganization.id)
-      return response?.data || {}
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('get EFT invoices operation failed! - ', error)
-    }
-  }
-
   async function downloadNSFInvoicesPDF (): Promise<any> {
     try {
       const response = await PaymentService.downloadNSFInvoicesPDF(state.currentOrganization.id)
@@ -789,26 +779,17 @@ export const useOrgStore = defineStore('org', () => {
   async function calculateFailedInvoices (): Promise<FailedInvoice> {
     const nsfInvoices = await getNSFInvoices()
     const invoices = nsfInvoices?.invoices || []
+    const statements = nsfInvoices?.statements || []
     const totalAmount = nsfInvoices?.totalAmount || 0
     const totalAmountRemaining = nsfInvoices?.totalAmountRemaining || 0
     const nsfAmount = nsfInvoices?.nsfAmount || 0
 
     return {
       invoices: invoices,
+      statements: statements,
       nsfFee: nsfAmount,
       totalAmountToPay: totalAmountRemaining,
       totalTransactionAmount: totalAmount
-    }
-  }
-
-  async function calculateFailedEFTInvoices (): Promise<FailedEFTInvoice> {
-    const fetchInvoices = await getEFTInvoices()
-    const invoices = fetchInvoices?.invoices || []
-    const totalAmountDue = fetchInvoices?.totalAmountDue || 0
-
-    return {
-      invoices: invoices,
-      totalAmountDue: totalAmountDue
     }
   }
 
@@ -1146,7 +1127,6 @@ export const useOrgStore = defineStore('org', () => {
     updateStatementNotifications,
     getOrgPayments,
     calculateFailedInvoices,
-    calculateFailedEFTInvoices,
     resetAccountSetupProgress,
     resetAccountWhileSwitchingPremium,
     createOutstandingAccountPayment,

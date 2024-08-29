@@ -19,7 +19,7 @@
         :data-test="`div-payment-${payment.type}`"
       >
         <div>
-          <header class="d-flex align-center">
+          <header class="d-flex align-center flex-grow-1">
             <div class="payment-icon-container mt-n2">
               <v-icon
                 x-large
@@ -28,22 +28,50 @@
                 {{ payment.icon }}
               </v-icon>
             </div>
-            <div class="pr-8">
+            <div class="pr-8 flex-grow-1">
               <h3 class="title font-weight-bold payment-title mt-n1">
                 {{ payment.title }}
               </h3>
               <div>{{ payment.subtitle }}</div>
             </div>
+            <v-tooltip
+              v-if="!isChangePaymentEnabled() && !isPaymentSelected(payment)"
+              top
+              content-class="top-tooltip"
+              transition="fade-transition"
+            >
+              <template #activator="{ on, attrs }">
+                <div
+                  v-bind="attrs"
+                  class="btn-tooltip-wrap"
+                  v-on="on"
+                >
+                  <v-btn
+                    large
+                    depressed
+                    color="primary"
+                    width="120"
+                    :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangePaymentEnabled() }]"
+                    :aria-label="'Select' + ' ' + payment.title"
+                    :data-test="`btn-payment-${payment.type}`"
+                    disabled
+                  >
+                    <span>{{ isPaymentSelected(payment) ? 'SELECTED' : 'SELECT' }}</span>
+                  </v-btn>
+                </div>
+              </template>
+              <span>This payment method is not available after EFT is selected.</span>
+            </v-tooltip>
             <v-btn
+              v-if="isPaymentSelected(payment) || isChangePaymentEnabled()"
               large
               depressed
               color="primary"
               width="120"
-              :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangeFromEFTEnabled() }]"
-              :outlined="!isPaymentSelected(payment) && isChangeFromEFTEnabled()"
+              :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangePaymentEnabled() }]"
+              :outlined="!isPaymentSelected(payment) && isChangePaymentEnabled()"
               :aria-label="'Select' + ' ' + payment.title"
               :data-test="`btn-payment-${payment.type}`"
-              :disabled="!isChangeFromEFTEnabled()"
               @click="paymentMethodSelected(payment)"
             >
               <span>{{ (isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT' }}</span>
@@ -138,7 +166,7 @@
       </v-col>
     </v-row>
     <ModalDialog
-      ref="bcOnlineDialog"
+      ref="warningDialog"
       max-width="650"
       :show-icon="false"
       :showCloseIcon="true"
@@ -278,16 +306,29 @@ export default defineComponent({
     isInitialAcknowledged: { default: false },
     isBcolAdmin: { default: false }
   },
-  emits: ['get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected'],
+  emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save'],
   setup (props, { emit, root }) {
     const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary } = useOrgStore()
-    const bcOnlineDialog: InstanceType<typeof ModalDialog> = ref(null)
+    const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
 
     const state = reactive({
-      dialogTitle: 'BC Online Payment Option Ending Soon',
-      dialogText: 'The "BC Online" payment option will soon be retired. Are you sure you want to continue?',
-      bcOnlineWarningMessage: 'This payment method will soon be retired.'
+      bcOnlineWarningMessage: 'This payment method will soon be retired.',
+      dialogTitle: '',
+      dialogText: ''
     })
+
+    const openBCOnlineDialog = () => {
+      state.dialogTitle = 'BC Online Payment Option Ending Soon'
+      state.dialogText = 'The "BC Online" payment option will soon be retired. Are you sure you want to continue?'
+      warningDialog.value.open()
+    }
+
+    const openEFTWarningDialog = () => {
+      state.dialogTitle = 'Confirm Payment Method Change'
+      state.dialogText = `Are you sure you want to change your payment method to Electronic Funds Transfer?
+                This action cannot be undone, and you will not be able to select a different payment method later.`
+      warningDialog.value.open()
+    }
 
     const selectedPaymentMethod = ref('')
     const paymentTypes = PaymentTypes
@@ -350,9 +391,20 @@ export default defineComponent({
       }
     }
 
+    const enableEFTPaymentMethod = () => {
+      const enableEFTPayment: boolean = LaunchDarklyService.getFlag(LDFlags.EnablePaymentChangeFromEFT, false)
+      return enableEFTPayment
+    }
+
+    const isChangePaymentEnabled = () => {
+      return props.currentOrgPaymentType !== PaymentTypes.EFT || enableEFTPaymentMethod()
+    }
+
     const paymentMethodSelected = async (payment, isTouch = true) => {
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
-      if (payment.type === PaymentTypes.PAD && isFromEFT) {
+      if (payment.type === PaymentTypes.EFT && isTouch && selectedPaymentMethod.value !== PaymentTypes.EFT && !enableEFTPaymentMethod()) {
+        openEFTWarningDialog()
+      } else if (payment.type === PaymentTypes.PAD && isFromEFT) {
         const hasOutstandingBalance = await hasBalanceOwing()
         if (hasOutstandingBalance) {
           await root.$router.push({
@@ -362,7 +414,7 @@ export default defineComponent({
           })
         }
       } else if (payment.type === PaymentTypes.BCOL && isTouch && selectedPaymentMethod.value !== PaymentTypes.BCOL) {
-        bcOnlineDialog.value.open()
+        openBCOnlineDialog()
       } else {
         state.bcOnlineWarningMessage = 'This payment method will soon be retired.'
       }
@@ -397,28 +449,31 @@ export default defineComponent({
     }
 
     const cancelModal = () => {
-      bcOnlineDialog.value.close()
+      warningDialog.value.close()
       selectedPaymentMethod.value = ''
-    }
-
-    const isChangeFromEFTEnabled = () => {
-      const enableEFTPaymentMethod: boolean = LaunchDarklyService.getFlag(LDFlags.EnablePaymentChangeFromEFT, false)
-      return props.currentOrgPaymentType !== PaymentTypes.EFT || enableEFTPaymentMethod
+      emit('cancel')
     }
 
     const continueModal = async () => {
       const hasOutstandingBalance = await hasBalanceOwing()
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
-      if (!hasOutstandingBalance) {
-        bcOnlineDialog.value.close()
-      } else if (isFromEFT) {
-        await root.$router.push({
-          name: Pages.PAY_OUTSTANDING_BALANCE,
-          params: { orgId: props.currentOrganization.id },
-          query: { changePaymentType: props.currentSelectedPaymentMethod }
-        })
+      const isEFTSelected = selectedPaymentMethod.value === PaymentTypes.EFT
+
+      if (isEFTSelected) {
+        warningDialog.value.close()
+        emit('save')
+      } else {
+        if (!hasOutstandingBalance) {
+          warningDialog.value.close()
+        } else if (isFromEFT) {
+          await root.$router.push({
+            name: Pages.PAY_OUTSTANDING_BALANCE,
+            params: { orgId: props.currentOrganization.id },
+            query: { changePaymentType: props.currentSelectedPaymentMethod }
+          })
+        }
+        state.bcOnlineWarningMessage = 'This payment method will soon be retired. It is recommended to select a different payment method.'
       }
-      state.bcOnlineWarningMessage = 'This payment method will soon be retired. It is recommended to select a different payment method.'
     }
 
     onMounted(async () => {
@@ -445,11 +500,11 @@ export default defineComponent({
       isPADValid,
       isPadInfoTouched,
       isPaymentSelected,
-      bcOnlineDialog,
+      warningDialog,
       cancelModal,
       continueModal,
       isGLInfoValid,
-      isChangeFromEFTEnabled
+      isChangePaymentEnabled
     }
   }
 })
@@ -458,6 +513,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
+@import '@/assets/scss/tooltip.scss';
 .important {
   background-color: #fff7e3;
   border: 2px solid #fcba19;
@@ -530,4 +586,11 @@ export default defineComponent({
   pointer-events: none;
 }
 
+.d-flex {
+  display: flex;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
 </style>
