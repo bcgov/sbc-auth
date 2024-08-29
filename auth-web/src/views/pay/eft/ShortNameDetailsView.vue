@@ -33,8 +33,9 @@
             mdi-alert
           </v-icon>
           <p class="account-alert__info mb-0 pl-3">
-            <strong>Caution:</strong> Please verify if the unsettled amount of {{ unsettledAmount }} on the short name can be refunded or linked to a new account.
-            If it's insufficient to settle an outstanding statement, the settlement process will be on hold until full payment is received.
+            <strong>Caution:</strong> Please verify if the unsettled amount of {{ unsettledAmount }} on the short name
+            can be refunded or linked to a new account. If it's insufficient to settle an outstanding statement,
+            the settlement process will be on hold until full payment is received.
           </p>
         </div>
       </v-alert>
