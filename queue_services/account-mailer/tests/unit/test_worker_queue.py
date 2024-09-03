@@ -489,7 +489,10 @@ def test_payment_reminder_notification_email(app, session, client):
             'dueDate': '2023-09-15 00:00:00',
             'emailAddresses': 'test@test.com',
             'statementFrequency': 'MONTHLY',
-            'totalAmountOwing': 351.5
+            'statementMonth': 'August',
+            'statementNumber': 12345,
+            'totalAmountOwing': 351.5,
+            'shortNameLinksCount': 1
         }
         helper_add_event_to_queue(client,
                                   message_type=QueueMessageTypes.PAYMENT_REMINDER_NOTIFICATION.value,
@@ -513,7 +516,10 @@ def test_payment_due_notification_email(app, session, client):
             'dueDate': '2023-09-15 00:00:00',
             'emailAddresses': 'test@test.com',
             'statementFrequency': 'MONTHLY',
-            'totalAmountOwing': 351.5
+            'statementMonth': 'August',
+            'statementNumber': 12345,
+            'totalAmountOwing': 351.5,
+            'shortNameLinksCount': 1
         }
         helper_add_event_to_queue(client,
                                   message_type=QueueMessageTypes.PAYMENT_DUE_NOTIFICATION.value,
