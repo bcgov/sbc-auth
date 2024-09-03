@@ -33,27 +33,51 @@
         Settings
       </v-btn>
     </header>
-    <div
-      v-if="enableEFTPaymentMethod && hasEFTPaymentMethod"
-      class="statement-owing d-flex flex-wrap flex-row"
-    >
+    <template v-if="enableEFTPaymentMethod && hasEFTPaymentMethod">
       <div
-        v-if="paymentOwingAmount && paymentDueDate"
-        class="total"
+          class="statement-owing d-flex flex-wrap flex-row"
       >
-        <p class="amount font-weight-bold">
-          Total Amount Owing: {{ formatAmount(paymentOwingAmount) }}
-        </p>
-        <p class="date font-weight-regular">
-          Payment Due Date: {{ formatDate(paymentDueDate) }}
-        </p>
+        <div
+            v-if="paymentOwingAmount && paymentDueDate"
+            class="total"
+        >
+          <p class="amount font-weight-bold">
+            Total Amount Owing: {{ formatAmount(paymentOwingAmount) }}
+          </p>
+          <p class="date font-weight-regular">
+            Payment Due Date: {{ formatDate(paymentDueDate) }}
+          </p>
+        </div>
+        <div class="instructions d-flex ma-0 justify-end align-end">
+          <p class="text-right ma-0">
+            <a @click="getEftInstructions">How to pay with electronic funds transfer</a>
+          </p>
+        </div>
       </div>
-      <div class="instructions d-flex ma-0 justify-end align-end">
-        <p class="text-right ma-0">
-          <a @click="getEftInstructions">How to pay with electronic funds transfer</a>
-        </p>
+      <div v-if="shortNameLinksCount > 1" 
+          class="flex-row mt-4">
+        <v-alert
+            class="mt-3 mb-0 alert-item account-alert-inner"
+            :icon="false"
+            prominent
+            outlined
+            type="warning"
+        >
+          <div class="account-alert-inner mb-0">
+            <v-icon
+                medium
+            >
+              mdi-alert
+            </v-icon>
+            <p class="account-alert__info mb-0 pl-3">
+              <strong>Caution:</strong> Recent partial payments are not reflected in amount owing. Payment will not be
+              applied to the amount owing until full amount has been received for <strong>all accounts</strong> that are
+              linked to your short name.
+            </p>
+          </div>
+        </v-alert>
       </div>
-    </div>
+    </template>
     <div>
       <v-data-table
         class="statement-list"
@@ -146,6 +170,7 @@
 </template>
 
 <script lang="ts">
+import CautionBox from '@/components/auth/common/CautionBox.vue'
 import { Account, LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { PropType, Ref, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
@@ -164,7 +189,7 @@ import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'StatementsView',
-  components: { StatementsSettings },
+  components: { CautionBox, StatementsSettings },
   mixins: [AccountChangeMixin],
   props: {
     orgId: {
@@ -187,6 +212,7 @@ export default defineComponent({
     const isLoading = ref(false)
     const paymentOwingAmount = ref<number>(0)
     const paymentDueDate = ref<Date>(null)
+    const shortNameLinksCount = ref<number>(0)
     const statementSettingsModal: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const hasEFTPaymentMethod = ref(false)
 
@@ -221,6 +247,7 @@ export default defineComponent({
         const data = await orgStore.getStatementsSummary()
         paymentOwingAmount.value = data?.totalDue
         paymentDueDate.value = data?.oldestDueDate
+        shortNameLinksCount.value = data?.shortNameLinksCount
         return data
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -376,6 +403,7 @@ export default defineComponent({
       enableEFTPaymentMethod,
       paymentOwingAmount,
       paymentDueDate,
+      shortNameLinksCount,
       isStatementNew,
       isStatementOverdue,
       getEftInstructions,
@@ -485,5 +513,22 @@ export default defineComponent({
 
 .loading-container {
   background: rgba(255,255,255, 0.8);
+}
+
+.account-alert-inner {
+  .v-icon {
+    color: $app-red;
+  }
+  background-color: $app-background-error !important;
+  border-color: $app-red !important;
+  border-radius: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+.account-alert__info {
+  flex: 1 1 auto;
+  color: $gray7;
+  font-size: 12px;
 }
 </style>
