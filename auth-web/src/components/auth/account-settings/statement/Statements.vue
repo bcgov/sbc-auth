@@ -170,7 +170,6 @@
 </template>
 
 <script lang="ts">
-import CautionBox from '@/components/auth/common/CautionBox.vue'
 import { Account, LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { PropType, Ref, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
@@ -189,7 +188,7 @@ import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'StatementsView',
-  components: { CautionBox, StatementsSettings },
+  components: { StatementsSettings },
   mixins: [AccountChangeMixin],
   props: {
     orgId: {
