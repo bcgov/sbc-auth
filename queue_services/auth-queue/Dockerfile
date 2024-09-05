@@ -72,4 +72,4 @@ USER web
 FROM development_build AS production_build
 COPY --chown=web:web . /code
 
-CMD gunicorn --bind 0.0.0.0:${PORT} --config /code/gunicorn_config.py wsgi:app
+CMD gunicorn --bind 0.0.0.0:${PORT} --config /code/gunicorn_config.py app:app
