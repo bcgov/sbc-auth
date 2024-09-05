@@ -43,6 +43,7 @@ update: ## Upgrade lock
 install: clean ## Install python virtrual environment
 	unset HOME ## unset HOME because it's in the DEV .env file, will cause permissions issues
 	pip install poetry ;\
+	poetry config virtualenvs.in-project true ;\
 	poetry install
 
 install-dev: ## Instal development dependencies
