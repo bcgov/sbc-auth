@@ -1,4 +1,4 @@
-FROM python:3.12.2
+FROM python:3.12.2 as development_build
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
