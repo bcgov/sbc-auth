@@ -6,7 +6,7 @@ authors = ["\"BC Registries and Online Services\""]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.8"
 CacheControl = "0.14.0"
 Flask = "1.1.2"
 Jinja2 = "3.0.3"

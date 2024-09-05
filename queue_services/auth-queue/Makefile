@@ -41,10 +41,13 @@ update: ## Upgrade lock
 	poetry update
 
 install: clean ## Install python virtrual environment
-	test -f .venv/bin/activate || python3.12 -m venv  $(CURRENT_ABS_DIR)/.venv ;\
-	. .venv/bin/activate ;\
-	pipx install poetry
+	unset HOME ## unset HOME because it's in the DEV .env file, will cause permissions issues
+	pip install poetry ;\
 	poetry install
+
+install-dev: ## Instal development dependencies
+	poetry add --dev pylint astroid
+	poetry install --with dev
 
 #################################################################################
 # COMMANDS - CI                                                                 #
@@ -60,7 +63,7 @@ flake8: ## Linting with flake8
 lint: pylint flake8 ## run all lint type scripts
 
 test: ## Unit testing
-	. .venv/bin/activate && pytest
+	poetry run pytest
 
 mac-cov: test ## Run the coverage report and display in a browser window (mac)
 	@open -a "Google Chrome" htmlcov/index.html
