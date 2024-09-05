@@ -50,7 +50,11 @@ install-dev: ## Instal development dependencies
 	poetry add --dev pylint astroid
 	poetry install --with dev
 	pwd
-	ls -la
+	ls -la .venv
+	ls -la .venv/src
+	ls -la .venv/src/sbc-auth
+	ls -la .venv/src/sbc-auth/auth-api
+
 
 #################################################################################
 # COMMANDS - CI                                                                 #
