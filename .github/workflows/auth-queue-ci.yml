@@ -43,13 +43,9 @@ jobs:
       - name: Install dependencies
         run: |
           make setup
-          pwd
-          ls -la
       - name: Lint with pylint
         id: pylint
         run: |
-          pwd
-          ls -la
           make pylint
       - name: Lint with flake8
         id: flake8

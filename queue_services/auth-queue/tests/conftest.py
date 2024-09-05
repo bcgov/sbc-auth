@@ -71,7 +71,13 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         import os
         import sys
 
-        venv_src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, '.venv/src/sbc-auth/auth-api'))
+        venv_src_path = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__),
+                os.pardir,
+                '.venv/src/sbc-auth/auth-api'
+            )
+        )
         if venv_src_path not in sys.path:
             sys.path.insert(0, venv_src_path)
 
