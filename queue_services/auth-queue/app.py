@@ -17,9 +17,26 @@
 """Initialize Flask app."""
 
 import os
+import sys
+
 from auth_queue import create_app
+
+
 app = create_app()
 
 if __name__ == '__main__':
-    server_port = os.environ.get('PORT', '5001')
+    venv_src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.venv/src/sbc-auth/auth-api'))
+
+    if venv_src_path not in sys.path:
+        sys.path.insert(0, venv_src_path)
+    x = sys.path
+
+    auth_api_folder = [folder for folder in sys.path if 'auth-api' in folder][0]
+    migration_path = auth_api_folder.replace('/auth-api', '/auth-api/migrations')
+
+    # '/Users/abolyach/bc_reg/bcreg-apps/sbc-auth-fork/queue_services/auth-queue/.venv/src/sbc-auth/auth-api'
+
+
+    auth_api_folder = [folder for folder in sys.path if 'auth-api' in folder][0]
+    server_port = os.environ.get('PORT', '8080')
     app.run(debug=False, port=server_port, host='0.0.0.0')
