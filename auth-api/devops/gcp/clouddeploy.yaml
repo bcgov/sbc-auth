@@ -39,7 +39,7 @@ serialPipeline:
       verify: false
    deployParameters:
    - values:
-      deploy-env: "test"
+      deploy-env: "development"
       deploy-project-id: "gtksf3-test"
       service-name: "auth-api-test"
       container-name: "auth-api-test"
@@ -52,7 +52,7 @@ serialPipeline:
       verify: false
    deployParameters:
    - values:
-      deploy-env: "sandbox"
+      deploy-env: "production"
       deploy-project-id: "gtksf3-tools"
       service-name: "auth-api-sandbox"
       container-name: "auth-api-sandbox"
