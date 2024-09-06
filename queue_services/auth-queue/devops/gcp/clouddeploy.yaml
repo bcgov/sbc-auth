@@ -15,7 +15,7 @@
 apiVersion: deploy.cloud.google.com/v1
 kind: DeliveryPipeline
 metadata:
- name: auth-api-pipeline
+ name: auth-queue-pipeline
 description: Deployment pipeline
 serialPipeline:
  stages:
@@ -28,8 +28,8 @@ serialPipeline:
    - values:
       deploy-env: "development"
       deploy-project-id: "gtksf3-dev"
-      service-name: "auth-api-dev"
-      container-name: "auth-api-dev"
+      service-name: "auth-queue-dev"
+      container-name: "auth-queue-dev"
       cloudsql-instances: "gtksf3-dev:northamerica-northeast1:auth-db-dev"
       service-account: "sa-api@gtksf3-dev.iam.gserviceaccount.com"
  - targetId: gtksf3-test
@@ -41,8 +41,8 @@ serialPipeline:
    - values:
       deploy-env: "development"
       deploy-project-id: "gtksf3-test"
-      service-name: "auth-api-test"
-      container-name: "auth-api-test"
+      service-name: "auth-queue-test"
+      container-name: "auth-queue-test"
       cloudsql-instances: "gtksf3-test:northamerica-northeast1:auth-db-test"
       service-account: "sa-api@gtksf3-test.iam.gserviceaccount.com"
  - targetId: gtksf3-sandbox
@@ -54,8 +54,8 @@ serialPipeline:
    - values:
       deploy-env: "production"
       deploy-project-id: "gtksf3-tools"
-      service-name: "auth-api-sandbox"
-      container-name: "auth-api-sandbox"
+      service-name: "auth-queue-sandbox"
+      container-name: "auth-queue-sandbox"
       cloudsql-instances: "gtksf3-tools:northamerica-northeast1:auth-db-sandbox"
       service-account: "sa-api@gtksf3-tools.iam.gserviceaccount.com"
  - targetId: gtksf3-prod
@@ -67,8 +67,8 @@ serialPipeline:
    - values:
       deploy-env: "production"
       deploy-project-id: "gtksf3-prod"
-      service-name: "auth-api-prod"
-      container-name: "auth-api-prod"
+      service-name: "auth-queue-prod"
+      container-name: "auth-queue-prod"
       cloudsql-instances: "gtksf3-prod:northamerica-northeast1:auth-db-prod"
       service-account: "sa-api@gtksf3-prod.iam.gserviceaccount.com"
       max-scale: "10"
