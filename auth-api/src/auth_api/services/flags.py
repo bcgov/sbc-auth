@@ -49,9 +49,9 @@ class Flags:
         self.app = app
         self.sdk_key = app.config.get("AUTH_LD_SDK_KEY")
 
-        if self.sdk_key or app.env != "production":
+        if self.sdk_key or app.config['ENV'] != "production":
 
-            if app.env == "testing":
+            if app.config['ENV'] == "testing":
                 factory = Files.new_data_source(paths=["flags.json"], auto_update=True)
                 config = Config(sdk_key=self.sdk_key, update_processor_class=factory, send_events=False)
             else:
