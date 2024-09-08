@@ -402,7 +402,7 @@ Werkzeug = "3.0.0"
 type = "git"
 url = "https://github.com/bolyachevets/sbc-auth.git"
 reference = "auth-queue-up-python"
-resolved_reference = "b93d942a15f072c3698b32a7bf7cc7a67e97802f"
+resolved_reference = "b80cf6747bc1403f4a8145d3f0af49e32e5521b3"
 subdirectory = "build-deps"
 
 [[package]]
