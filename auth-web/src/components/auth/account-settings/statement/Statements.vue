@@ -40,7 +40,10 @@
         <div
           class="total"
         >
-          <p class="amount font-weight-bold">
+          <p
+            class="amount font-weight-bold"
+            :class="{ 'owing' : paymentDueDate}"
+          >
             Total Amount Owing: {{ formatAmount(paymentOwingAmount) }}
           </p>
           <p class="font-weight-regular">
