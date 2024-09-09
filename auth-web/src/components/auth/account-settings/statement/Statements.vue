@@ -172,13 +172,12 @@
 <script lang="ts">
 import { Account, LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
-import { PropType, Ref, computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { PropType, computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import { StatementFilterParams, StatementListItem } from '@/models/statement'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
 import DocumentService from '@/services/document.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
 import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
 import moment from 'moment'
