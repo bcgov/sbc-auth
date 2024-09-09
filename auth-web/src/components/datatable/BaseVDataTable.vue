@@ -181,7 +181,7 @@ export default defineComponent({
     totalItems: { type: Number, required: true },
     pageHide: { default: false },
     updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, default: () => {} },
-    filters: { default: () => ({ isActive: false, filterPayload: {} }), required: false },
+    filters: { default: function () { return { isActive: false, filterPayload: {} }}, required: false },
     customPagination: { default: false },
     highlightIndex: { default: -1 },
     highlightClass: { type: String, default: '' },
