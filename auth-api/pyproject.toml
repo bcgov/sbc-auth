@@ -12,12 +12,8 @@ flask-migrate = "^4.0.7"
 flask-moment = "^1.0.6"
 flask-sqlalchemy = "^3.1.1"
 flask-marshmallow = "^1.2.1"
-flask = "3.0.2"
 gunicorn = "^22.0.0"
-python-dotenv = "^1.0.1"
-jinja2 = "3.1.3"
 pg8000 = "^1.31.2"
-launchdarkly-server-sdk = "9.5.0"
 flask-mail = "^0.10.0"
 bcrypt = "^4.2.0"
 pyhumps = "^3.8.0"
@@ -27,16 +23,15 @@ cachelib = "0.9.0"
 minio = "^7.2.7"
 aiohttp = "^3.10.2"
 cattrs = "^23.2.3"
-jsonschema = "4.17.3"
 orjson = "^3.10.7"
 sqlalchemy-utils = "^0.41.2"
 
 # VCS dependencies
-sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", subdirectory = "python", branch = "master"}
 sql-versioning = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/sql-versioning", branch = "main" }
 flask-jwt-oidc = {git = "https://github.com/seeker25/flask-jwt-oidc.git", branch = "main" }
-gcp-queue = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/gcp-queue", branch = "main" }
 structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging", branch = "main" }
+#build-deps = { git = "https://github.com/bcgov/sbc-auth.git", rev = "feature-gcp-migration", subdirectory = "build-deps" }
+build-deps = { git = "https://github.com/bolyachevets/sbc-auth.git", rev = "auth-queue-up-python", subdirectory = "build-deps" }
 
 [tool.poetry.group.test.dependencies]
 psycopg2 = "^2.9.9"

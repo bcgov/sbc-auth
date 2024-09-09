@@ -27,7 +27,7 @@ def setup():
     """Initialize app with dev env for testing."""
     global app
     app = Flask(__name__)
-    app.env = "testing"
+    app.config["ENV"] = "testing"
 
 
 def test_flags_constructor_no_app(setup):
@@ -69,7 +69,7 @@ def test_init_app_dev_no_key(setup):
 
 def test_init_app_prod_with_key(setup):
     """Ensure that extension can be initialized with a key in prod."""
-    app.env = "production"
+    app.config["ENV"] = "production"
     app.config["AUTH_LD_SDK_KEY"] = "https://no.flag/avail"
 
     with app.app_context():
@@ -82,7 +82,7 @@ def test_init_app_prod_with_key(setup):
 
 def test_init_app_prod_no_key(setup):
     """Ensure that extension can be initialized with no key in prod."""
-    app.env = "production"
+    app.config["ENV"] = "production"
     app.config["AUTH_LD_SDK_KEY"] = None
 
     with app.app_context():
