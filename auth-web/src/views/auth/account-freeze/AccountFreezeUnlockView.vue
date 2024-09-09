@@ -180,12 +180,23 @@ export default defineComponent({
     })
 
     async function unlockAccount () {
-      let payment
-      if (state.hasEFTPaymentMethod) {
-        payment = await createOutstandingAccountPayment()
-      } else {
-        payment = await createAccountPayment()
+      if (state.isLoading) {
+        return
       }
+      state.isLoading = true
+      let payment
+      try {
+        if (state.hasEFTPaymentMethod) {
+          payment = await createOutstandingAccountPayment()
+        } else {
+          payment = await createAccountPayment()
+        }
+      } catch (error) {
+        console.log(error)
+      } finally {
+        state.isLoading = false
+      }
+
       const baseUrl = ConfigHelper.getAuthContextPath()
       const returnUrl = `${baseUrl}/${Pages.ACCOUNT_UNLOCK_SUCCESS}`
       const encodedUrl = encodeURIComponent(returnUrl)
