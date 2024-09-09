@@ -349,7 +349,7 @@ export default defineComponent({
     }
 
     const openSettingsModal = () => {
-      state.statementSettingsModal.value?.openSettings()
+      state.statementSettingsModal.openSettings()
     }
 
     const customSortActive = (items, index, isDescending) => {
