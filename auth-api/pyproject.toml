@@ -30,8 +30,7 @@ sqlalchemy-utils = "^0.41.2"
 sql-versioning = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/sql-versioning", branch = "main" }
 flask-jwt-oidc = {git = "https://github.com/seeker25/flask-jwt-oidc.git", branch = "main" }
 structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging", branch = "main" }
-#build-deps = { git = "https://github.com/bcgov/sbc-auth.git", rev = "feature-gcp-migration", subdirectory = "build-deps" }
-build-deps = { git = "https://github.com/bolyachevets/sbc-auth.git", rev = "auth-queue-up-python", subdirectory = "build-deps" }
+build-deps = { git = "https://github.com/bcgov/sbc-auth.git", rev = "feature-gcp-migration", subdirectory = "build-deps" }
 
 [tool.poetry.group.test.dependencies]
 psycopg2 = "^2.9.9"
