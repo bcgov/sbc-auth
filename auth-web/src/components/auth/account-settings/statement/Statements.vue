@@ -35,17 +35,23 @@
     </header>
     <template v-if="enableEFTPaymentMethod && hasEFTPaymentMethod">
       <div
-          class="statement-owing d-flex flex-wrap flex-row"
+        class="statement-owing d-flex flex-wrap flex-row"
       >
         <div
-            class="total"
+          class="total"
         >
           <p class="amount font-weight-bold">
             Total Amount Owing: {{ formatAmount(paymentOwingAmount) }}
           </p>
           <p class="font-weight-regular">
-            <span v-if="paymentDueDate" class="due-date">Payment Due Date: {{ formatDate(paymentDueDate) }}</span>
-            <span v-else class="non-due-date">Next statement will be available on {{ nextStatementDate }}</span>
+            <span
+              v-if="paymentDueDate"
+              class="due-date"
+            >Payment Due Date: {{ formatDate(paymentDueDate) }}</span>
+            <span
+              v-else
+              class="non-due-date"
+            >Next statement will be available on {{ nextStatementDate }}</span>
           </p>
         </div>
         <div class="instructions d-flex ma-0 justify-end align-end">
@@ -54,18 +60,20 @@
           </p>
         </div>
       </div>
-      <div v-if="shortNameLinksCount > 1" 
-          class="flex-row mt-4">
+      <div
+        v-if="shortNameLinksCount > 1"
+        class="flex-row mt-4"
+      >
         <v-alert
-            class="mt-3 mb-0 alert-item account-alert-inner"
-            :icon="false"
-            prominent
-            outlined
-            type="warning"
+          class="mt-3 mb-0 alert-item account-alert-inner"
+          :icon="false"
+          prominent
+          outlined
+          type="warning"
         >
           <div class="account-alert-inner mb-0">
             <v-icon
-                medium
+              medium
             >
               mdi-alert
             </v-icon>
@@ -220,38 +228,38 @@ export default defineComponent({
       shortNameLinksCount: 0,
       statementSettingsModal: null,
       hasEFTPaymentMethod: false,
-      headerStatements: computed(() => { 
-          const headers = [
-            {
-              text: 'Date',
-              align: 'left',
-              sortable: false,
-              value: 'dateRange'
-            },
-            {
-              text: 'Frequency',
-              align: 'left',
-              sortable: false,
-              value: 'frequency'
-            },
-            {
-              text: 'Statement Number',
-              align: 'left',
-              sortable: false,
-              value: 'statementNumber'
-            },
-            {
-              text: 'Downloads',
-              align: 'right',
-              sortable: false,
-              value: 'action'
-            }
-          ]
-          if (state.hasEFTPaymentMethod && enableEFTPaymentMethod()) {
-            headers.splice(2, 0, { text: 'Payment Methods', align: 'left', sortable: false, value: 'paymentMethods' })
+      headerStatements: computed(() => {
+        const headers = [
+          {
+            text: 'Date',
+            align: 'left',
+            sortable: false,
+            value: 'dateRange'
+          },
+          {
+            text: 'Frequency',
+            align: 'left',
+            sortable: false,
+            value: 'frequency'
+          },
+          {
+            text: 'Statement Number',
+            align: 'left',
+            sortable: false,
+            value: 'statementNumber'
+          },
+          {
+            text: 'Downloads',
+            align: 'right',
+            sortable: false,
+            value: 'action'
           }
-          return headers
-        }),
+        ]
+        if (state.hasEFTPaymentMethod && enableEFTPaymentMethod()) {
+          headers.splice(2, 0, { text: 'Payment Methods', align: 'left', sortable: false, value: 'paymentMethods' })
+        }
+        return headers
+      }),
       nextStatementDate: computed<string>(() => {
         return moment().add(1, 'M').startOf('month').format('MMMM D, YYYY')
       })
@@ -372,7 +380,6 @@ export default defineComponent({
       return [...Array(PAGINATION_COUNTER_STEP)].map((value, index) => ITEMS_PER_PAGE * (index + 1))
     }
 
-
     const getIndexedTag = (tag, index) => {
       return `${tag}-${index}`
     }
@@ -447,7 +454,7 @@ export default defineComponent({
       frequencyDisplay,
       paymentMethodsDisplay,
       getIndexedTag,
-      openSettingsModal,
+      openSettingsModal
     }
   }
 })
