@@ -86,6 +86,7 @@
           large
           color="primary"
           :loading="isLoading"
+          :disabled="isLoading"
           data-test="btn-reviewbank-next"
           @click="goNext"
         >
@@ -176,11 +177,11 @@ export default defineComponent({
           }
           try {
             await updateOrg(createRequestBody)
-            state.isLoading = false
             emit('final-step-action')
           } catch (error) {
             // eslint-disable-next-line no-console
             console.error(error)
+          } finally {
             state.isLoading = false
           }
         }
