@@ -121,7 +121,10 @@
                   <v-divider class="mb-7" />
                   <div class="mb-7">
                     To send us a payment through electronic funds transfer (EFT), please read the
-                    <a @click="getEftInstructions">Electronic Funds Transfer Payment Instructions</a>.
+                    <a
+                      class="text-decoration-underline"
+                      @click="getEftInstructions"
+                    >Electronic Funds Transfer Payment Instructions</a>.
                   </div>
                 </div>
 
@@ -514,6 +517,10 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/tooltip.scss';
+.text-decoration-underline {
+  text-decoration: underline;
+}
+
 .important {
   background-color: #fff7e3;
   border: 2px solid #fcba19;

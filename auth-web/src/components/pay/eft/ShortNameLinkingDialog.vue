@@ -254,7 +254,7 @@ h4 {
   background-color: #fff7e3;
   border: 2px solid #fcba19;
   color: #495057;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .w-100 {

@@ -35,16 +35,19 @@
     </header>
     <template v-if="enableEFTPaymentMethod && hasEFTPaymentMethod">
       <div
-          class="statement-owing d-flex flex-wrap flex-row"
+        class="statement-owing d-flex flex-wrap flex-row mb-2"
       >
         <div
-            v-if="paymentOwingAmount && paymentDueDate"
-            class="total"
+          :class="{'owing': paymentOwingAmount > 0}"
+          class="total"
         >
           <p class="amount font-weight-bold">
             Total Amount Owing: {{ formatAmount(paymentOwingAmount) }}
           </p>
-          <p class="date font-weight-regular">
+          <p
+            v-if="paymentDueDate && paymentOwingAmount"
+            class="date font-weight-regular"
+          >
             Payment Due Date: {{ formatDate(paymentDueDate) }}
           </p>
         </div>
@@ -54,18 +57,20 @@
           </p>
         </div>
       </div>
-      <div v-if="shortNameLinksCount > 1" 
-          class="flex-row mt-4">
+      <div
+        v-if="shortNameLinksCount > 1"
+        class="flex-row mt-4"
+      >
         <v-alert
-            class="mt-3 mb-0 alert-item account-alert-inner"
-            :icon="false"
-            prominent
-            outlined
-            type="warning"
+          class="mt-3 mb-0 alert-item account-alert-inner"
+          :icon="false"
+          prominent
+          outlined
+          type="warning"
         >
           <div class="account-alert-inner mb-0">
             <v-icon
-                medium
+              medium
             >
               mdi-alert
             </v-icon>
@@ -170,7 +175,7 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags, Pages, PaymentTypes } from '@/util/constants'
+import { Account, LDFlags, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { PropType, Ref, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
 import { StatementFilterParams, StatementListItem } from '@/models/statement'
@@ -216,7 +221,12 @@ export default defineComponent({
     const hasEFTPaymentMethod = ref(false)
 
     const isStatementNew = (item: StatementListItem) => {
-      return item.isNew
+      let isNew = item.isNew
+      const statementsDownloaded = JSON.parse(sessionStorage.getItem(SessionStorageKeys.StatementsDownloaded)) || []
+      if (statementsDownloaded?.includes(item.id)) {
+        isNew = false
+      }
+      return isNew
     }
 
     const isStatementOverdue = (item: StatementListItem) => {
@@ -266,6 +276,9 @@ export default defineComponent({
         // eslint-disable-next-line no-console
         console.log(error)
       } finally {
+        const statementsDownloaded = JSON.parse(sessionStorage.getItem(SessionStorageKeys.StatementsDownloaded)) || []
+        statementsDownloaded.push(item.id)
+        sessionStorage.setItem(SessionStorageKeys.StatementsDownloaded, JSON.stringify(statementsDownloaded))
         isLoading.value = false
       }
     }
@@ -476,13 +489,18 @@ export default defineComponent({
     flex: 0 0 300px;
     .amount {
       font-size: 18px;
-      color: $app-red;
+      color: #495057;
       margin: 0;
     }
     .date {
       font-size: 14px;
-      color: $app-red;
+      color: #495057;
       margin: 0;
+    }
+    &.owing {
+      .amount, .date {
+        color: $app-red;
+      }
     }
   }
 }
