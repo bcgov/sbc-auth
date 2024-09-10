@@ -35,7 +35,7 @@
     </header>
     <template v-if="enableEFTPaymentMethod && hasEFTPaymentMethod">
       <div
-        class="statement-owing d-flex flex-wrap flex-row"
+        class="statement-owing d-flex flex-wrap flex-row  mb-2"
       >
         <div
           class="total"
@@ -181,7 +181,7 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags, Pages, PaymentTypes } from '@/util/constants'
+import { Account, LDFlags, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { PropType, computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import { StatementFilterParams, StatementListItem } from '@/models/statement'
@@ -269,7 +269,12 @@ export default defineComponent({
     })
 
     const isStatementNew = (item: StatementListItem) => {
-      return item.isNew
+      let isNew = item.isNew
+      const statementsDownloaded = JSON.parse(sessionStorage.getItem(SessionStorageKeys.StatementsDownloaded)) || []
+      if (statementsDownloaded?.includes(item.id)) {
+        isNew = false
+      }
+      return isNew
     }
 
     const isStatementOverdue = (item: StatementListItem) => {
@@ -319,6 +324,9 @@ export default defineComponent({
         // eslint-disable-next-line no-console
         console.log(error)
       } finally {
+        const statementsDownloaded = JSON.parse(sessionStorage.getItem(SessionStorageKeys.StatementsDownloaded)) || []
+        statementsDownloaded.push(item.id)
+        sessionStorage.setItem(SessionStorageKeys.StatementsDownloaded, JSON.stringify(statementsDownloaded))
         state.isLoading = false
       }
     }
@@ -494,6 +502,11 @@ export default defineComponent({
       font-size: 14px;
       color: $gray7;
       margin: 0;
+    }
+    &.owing {
+      .amount, .date {
+        color: $app-red;
+      }
     }
   }
 }
