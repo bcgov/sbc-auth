@@ -80,6 +80,10 @@ export default class AccountLoginOptionsChooser extends Mixins(AccountChangeMixi
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
 
+.text-decoration-underline {
+  text-decoration: underline;
+}
+
 .view-container {
   max-width: 60rem;
 }
