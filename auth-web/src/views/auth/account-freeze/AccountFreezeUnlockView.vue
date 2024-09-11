@@ -156,8 +156,9 @@ export default defineComponent({
     ModalDialog
   },
   setup (props, { root }) {
-    const { createAccountPayment, createOutstandingAccountPayment, getOrgPayments } = useOrgStore()
-    const { currentOrganization } = storeToRefs(useOrgStore())
+    const orgStore = useOrgStore()
+    const { createAccountPayment, createOutstandingAccountPayment, getOrgPayments } = orgStore
+    const { currentOrganization } = storeToRefs(orgStore)
     const errorDialog = ref(null)
     const stepper = ref(null)
 
@@ -179,8 +180,13 @@ export default defineComponent({
       isAccountStatusNsfSuspended: false
     })
 
-    async function unlockAccount () {
+    async function unlockAccount (alternateFlow: string) {
       if (state.isLoading) {
+        return
+      }
+
+      if (alternateFlow === 'eft-payment-instructions') {
+        await root.$router.push(`${Pages.ACCOUNT_HOLD}`)
         return
       }
       state.isLoading = true
@@ -227,6 +233,23 @@ export default defineComponent({
       stepper.value.stepBack()
     }
 
+    // Check on a polling basis if our account is unlocked, if it's unlocked redirect to account unlocked.
+    async function pollForAccountUnlock (tries = 0) {
+      tries++
+      if (tries >= 5) {
+        return
+      }
+      await orgStore.syncOrganization(currentOrganization.value?.id)
+      if ([AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED]
+        .includes(currentOrganization.value.statusCode as AccountStatus)) {
+        setTimeout(async () => {
+          await pollForAccountUnlock(tries)
+        }, 2000)
+      } else {
+        await root.$router.push(`${Pages.ACCOUNT_UNLOCK_SUCCESS}`)
+      }
+    }
+
     onMounted(async () => {
       state.isAccountStatusNsfSuspended = currentOrganization.value.statusCode === AccountStatus.NSF_SUSPENDED
       await checkPaymentMethods()
@@ -268,6 +291,9 @@ export default defineComponent({
         ]
       }
       state.isViewLoading = false
+      setTimeout(async () => {
+        await pollForAccountUnlock(0)
+      }, 2000)
     })
 
     return {
