@@ -59,7 +59,7 @@
         </div>
         <div class="instructions d-flex ma-0 justify-end align-end">
           <p class="text-right ma-0">
-            <a @click="getEftInstructions">How to pay with electronic funds transfer</a>
+            <a @click="downloadEFTInstructions">How to pay with electronic funds transfer</a>
           </p>
         </div>
       </div>
@@ -187,13 +187,13 @@ import { PropType, computed, defineComponent, onMounted, reactive, toRefs, watch
 import { StatementFilterParams, StatementListItem } from '@/models/statement'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
-import DocumentService from '@/services/document.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 
 import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
 import moment from 'moment'
 import { paymentTypeDisplay } from '../../../../resources/display-mappers'
 import { useAccountChangeHandler } from '@/composables'
+import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -268,6 +268,8 @@ export default defineComponent({
       })
     })
 
+    const { downloadEFTInstructions } = useDownloader(orgStore, state)
+
     const isStatementNew = (item: StatementListItem) => {
       let isNew = item.isNew
       const statementsDownloaded = JSON.parse(sessionStorage.getItem(SessionStorageKeys.StatementsDownloaded)) || []
@@ -279,19 +281,6 @@ export default defineComponent({
 
     const isStatementOverdue = (item: StatementListItem) => {
       return item.isOverdue
-    }
-
-    const getEftInstructions = async (): Promise<any> => {
-      state.isLoading = true
-      try {
-        const downloadData = await DocumentService.getEftInstructions()
-        CommonUtils.fileDownload(downloadData?.data, `bcrs_eft_instructions.pdf`, downloadData?.headers['content-type'])
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error)
-      } finally {
-        state.isLoading = false
-      }
     }
 
     const getStatementsList = async (filterParams: any): Promise<any> => {
@@ -455,10 +444,10 @@ export default defineComponent({
       formatDate,
       formatAmount,
       downloadStatement,
+      downloadEFTInstructions,
       enableEFTPaymentMethod,
       isStatementNew,
       isStatementOverdue,
-      getEftInstructions,
       getPaginationOptions,
       customSortActive,
       formatDateRange,
