@@ -6,7 +6,7 @@ authors = ["Avni Salhotra <avni.salhotra@gov.bc.ca>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.8"
 cachecontrol = "0.14.0"
 flask = "1.1.2"
 jinja2 = "3.0.3"
