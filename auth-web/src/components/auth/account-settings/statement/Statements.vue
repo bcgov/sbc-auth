@@ -444,7 +444,7 @@ export default defineComponent({
       await initialize()
     })
 
-    watch(state.tableDataOptions, (newValue: any) => {
+    watch(() => state.tableDataOptions, (newValue: any) => {
       const pageNumber = newValue.page || 1
       const itemsPerPage = newValue.itemsPerPage
       loadStatementsList(pageNumber, itemsPerPage)
