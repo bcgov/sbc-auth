@@ -1,4 +1,4 @@
-FROM FROM python:3.8.10 as development_build
+FROM python:3.8.10 as development_build
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
