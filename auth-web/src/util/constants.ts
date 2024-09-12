@@ -108,7 +108,8 @@ export enum Pages {
     AFFIDAVIT_COMPLETE = 'upload-affidavit',
     LOGIN = 'login',
     PAY_OUTSTANDING_BALANCE = 'pay-outstanding-balance',
-    PAYMENT_OPTION = 'payment-option'
+    PAYMENT_OPTION = 'payment-option',
+    ACCOUNT_HOLD = 'account-hold'
 }
 
 export enum Account {
