@@ -336,6 +336,7 @@ export default defineComponent({
       state.isLoading = true
 
       const { isValid, createRequestBody } = await getCreateRequestBody()
+      const selectedPaymentMethod = state.selectedPaymentMethod
 
       if (isValid) {
         try {
@@ -344,8 +345,8 @@ export default defineComponent({
           state.isLoading = false
           state.paymentMethodChanged = false
           initialize()
-          orgStore.setCurrentOrganizationPaymentType(state.selectedPaymentMethod)
-          if (state.selectedPaymentMethod === PaymentTypes.EFT) {
+          orgStore.setCurrentOrganizationPaymentType(selectedPaymentMethod)
+          if (selectedPaymentMethod === PaymentTypes.EFT) {
             const recipientList = []
             await orgStore.syncActiveOrgMembers()
             state.activeOrgMembers.forEach((member) => {
