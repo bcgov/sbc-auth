@@ -64,7 +64,7 @@
         </div>
       </div>
       <div
-        v-if="shortNameLinksCount > 1"
+        v-if="shortNameLinksCount > 1 && isEftUnderPayment"
         class="flex-row mt-4"
       >
         <v-alert
@@ -229,6 +229,7 @@ export default defineComponent({
       paymentOwingAmount: 0,
       paymentDueDate: null,
       shortNameLinksCount: 0,
+      isEftUnderPayment: false,
       statementSettingsModal: null,
       hasEFTPaymentMethod: false,
       headerStatements: computed(() => {
@@ -294,6 +295,7 @@ export default defineComponent({
         state.paymentOwingAmount = data?.totalDue
         state.paymentDueDate = data?.oldestDueDate
         state.shortNameLinksCount = data?.shortNameLinksCount
+        state.isEftUnderPayment = data?.isEftUnderPayment
         return data
       } catch (error) {
         // eslint-disable-next-line no-console
