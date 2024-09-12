@@ -105,11 +105,14 @@
 
 <script lang="ts">
 import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission, Role } from '@/util/constants'
-import { CreateRequestBody, OrgPaymentDetails, PADInfo, PADInfoValidation } from '@/models/Organization'
+import {
+  CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation
+} from '@/models/Organization'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
+import { StatementNotificationSettings } from '@/models/statement'
 import { useAccount } from '@/composables/account-factory'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
@@ -146,7 +149,9 @@ export default defineComponent({
       ejvValid: false,
       paymentMethodChanged: props.hasPaymentChanged,
       isFuturePaymentMethodAvailable: false, // set true if in between 3 days cooling period
-      isTOSandAcknowledgeCompleted: false // set true if TOS already accepted
+      isTOSandAcknowledgeCompleted: false, // set true if TOS already accepted
+      activeOrgMembers: computed<Member[]>(() => orgStore.activeOrgMembers),
+      currentOrganization: computed<Organization>(() => orgStore.currentOrganization)
     })
 
     const errorDialog = ref<InstanceType<typeof ModalDialog>>()
@@ -331,6 +336,7 @@ export default defineComponent({
       state.isLoading = true
 
       const { isValid, createRequestBody } = await getCreateRequestBody()
+      const selectedPaymentMethod = state.selectedPaymentMethod
 
       if (isValid) {
         try {
@@ -339,7 +345,27 @@ export default defineComponent({
           state.isLoading = false
           state.paymentMethodChanged = false
           initialize()
-          orgStore.setCurrentOrganizationPaymentType(state.selectedPaymentMethod)
+          orgStore.setCurrentOrganizationPaymentType(selectedPaymentMethod)
+          if (selectedPaymentMethod === PaymentTypes.EFT) {
+            const recipientList = []
+            await orgStore.syncActiveOrgMembers()
+            state.activeOrgMembers.forEach((member) => {
+              if (member.membershipTypeCode !== MembershipType.User) {
+                recipientList.push({
+                  authUserId: member.user?.id,
+                  firstname: member.user?.firstname,
+                  lastname: member.user?.lastname,
+                  email: member.user?.contacts[0]?.email
+                })
+              }
+            })
+            const statementNotification: StatementNotificationSettings = {
+              statementNotificationEnabled: true,
+              recipients: recipientList,
+              accountName: state.currentOrganization.name
+            }
+            await orgStore.updateStatementNotifications(statementNotification)
+          }
         } catch (error) {
           console.error(error)
           state.isLoading = false
