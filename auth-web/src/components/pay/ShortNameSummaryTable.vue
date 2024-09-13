@@ -52,6 +52,18 @@
           </span>
         </h2>
       </template>
+      <template #item-slot-shortName="{ item }">
+        <span>{{ item.shortName }}</span>
+        <v-chip
+          v-if="item.refundStatus === ShortNameRefundStatus.PENDING_REFUND"
+          small
+          label
+          color="info"
+          class="item-chip"
+        >
+          {{ ShortNameRefundLable.PENDING_REFUND }}
+        </v-chip>
+      </template>
       <template #header-filter-slot-lastPaymentReceivedDate>
         <div @click="clickDatePicker()">
           <v-text-field
@@ -147,12 +159,12 @@
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
 import { Ref, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { SessionStorageKeys, ShortNameRefundLable, ShortNameRefundStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { SessionStorageKeys } from '@/util/constants'
 import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
 import { ShortNameSummaryState } from '@/models/pay/short-name'
 import _ from 'lodash'
@@ -410,7 +422,9 @@ export default defineComponent({
       cancelAndResetAccountLinkingDialog,
       closeAccountAlreadyLinkedDialog,
       datePicker,
-      viewDetails
+      viewDetails,
+      ShortNameRefundStatus,
+      ShortNameRefundLable
     }
   }
 })
@@ -429,5 +443,9 @@ export default defineComponent({
   .v-list {
     width:180px
   }
+}
+
+.item-chip {
+  margin-left: 4px
 }
 </style>
