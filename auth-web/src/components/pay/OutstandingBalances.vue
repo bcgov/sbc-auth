@@ -209,8 +209,8 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from 'sbc-common-components/src/util/config-helper'
 import { Pages } from '@/util/constants'
 import { Payment } from '@/models/Payment'
-import { StatementListItem } from '@/models/statement'
 import moment from 'moment'
+import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores'
 
 export default defineComponent({
@@ -248,6 +248,7 @@ export default defineComponent({
       statementOwingError: false,
       selectedPaymentMethod: 'cc'
     })
+    const { downloadStatement } = useDownloader(orgStore, state)
 
     const handlePayment = async () => {
       state.handlingPayment = true
@@ -306,19 +307,6 @@ export default defineComponent({
 
     function currentDateString () {
       return CommonUtils.formatDisplayDate(moment(), 'MMMM DD, YYYY')
-    }
-
-    async function downloadStatement (statement: StatementListItem) {
-      try {
-        const fileType = 'application/pdf'
-        const response = await orgStore.getStatement({ statementId: statement.id, type: fileType })
-        const contentDispArr = response?.headers['content-disposition'].split('=')
-        const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-statement-pdf`
-        CommonUtils.fileDownload(response.data, fileName, 'application/pdf')
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error)
-      }
     }
 
     function alertMessage () {
