@@ -14,7 +14,7 @@
 
     <v-row class="mb-6">
       <v-col
-        class="card d-flex selected"
+        class="card d-flex"
       >
         <label
           class="d-flex"
