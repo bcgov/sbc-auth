@@ -53,7 +53,6 @@
             class="radio ml-6 mr-12"
             name="payment-method"
             value="CC"
-            checked
             @change="onPaymentMethodChange"
           >
           <div>
