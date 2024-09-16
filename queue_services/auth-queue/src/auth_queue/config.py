@@ -59,9 +59,6 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    SENTRY_ENABLE = os.getenv('SENTRY_ENABLE', 'False')
-    SENTRY_DSN = os.getenv('SENTRY_DSN', None)
-
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     AUTH_LD_SDK_KEY = os.getenv('AUTH_LD_SDK_KEY', None)
