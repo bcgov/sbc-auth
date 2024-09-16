@@ -735,3 +735,11 @@ export enum OrgNameLabel {
     BUSINESS = 'Legal Business Name',
     REGULAR = 'Account Name'
 }
+
+export enum ShortNameRefundStatus {
+    PENDING_REFUND = 'PENDING_REFUND'
+}
+
+export enum ShortNameRefundLabel {
+    PENDING_REFUND = 'REFUND REQUEST'
+}
