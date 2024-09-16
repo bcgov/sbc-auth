@@ -61,7 +61,7 @@
           color="info"
           class="item-chip"
         >
-          {{ ShortNameRefundLable.PENDING_REFUND }}
+          {{ ShortNameRefundLabel.PENDING_REFUND }}
         </v-chip>
       </template>
       <template #header-filter-slot-lastPaymentReceivedDate>
@@ -159,7 +159,7 @@
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
 import { Ref, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
-import { SessionStorageKeys, ShortNameRefundLable, ShortNameRefundStatus } from '@/util/constants'
+import { SessionStorageKeys, ShortNameRefundLabel, ShortNameRefundStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
@@ -424,7 +424,7 @@ export default defineComponent({
       datePicker,
       viewDetails,
       ShortNameRefundStatus,
-      ShortNameRefundLable
+      ShortNameRefundLabel
     }
   }
 })

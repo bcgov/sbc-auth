@@ -740,6 +740,6 @@ export enum ShortNameRefundStatus {
     PENDING_REFUND = 'PENDING_REFUND'
 }
 
-export enum ShortNameRefundLable {
+export enum ShortNameRefundLabel {
     PENDING_REFUND = 'REFUND REQUEST'
 }
