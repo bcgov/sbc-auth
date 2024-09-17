@@ -268,7 +268,7 @@
                   <li>
                     <v-icon small>
                       mdi-phone
-                    </v-icon>  Victoria Office: <a href="tel:+1-800-663-6102">1-800-663-6102</a>
+                    </v-icon>  Victoria Office: <a href="tel:250-387-7848">250-387-7848</a>
                   </li>
                   <li>
                     <v-icon small>

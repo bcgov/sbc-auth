@@ -415,7 +415,10 @@ def handle_payment_reminder_or_due(message_type, email_msg):
             'logo_url': logo_url,
             'due_date': due_date.strftime('%B ') + format_day_with_suffix(due_date.day) + f' {due_date.year}',
             'total_amount_owing': format_currency(email_msg.get('totalAmountOwing')),
-            'statement_frequency': email_msg.get('statementFrequency').lower()
+            'statement_frequency': email_msg.get('statementFrequency').lower(),
+            'statement_month': email_msg.get('statementMonth'),
+            'statement_number': email_msg.get('statementNumber'),
+            'short_name_links_count': email_msg.get('shortNameLinksCount'),
         })
     process_email(email_dict)
 

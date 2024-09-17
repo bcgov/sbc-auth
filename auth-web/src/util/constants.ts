@@ -34,7 +34,8 @@ export enum SessionStorageKeys {
     NameRequestUrl = 'NAME_REQUEST_URL',
     PprWebUrl = 'PPR_WEB_URL',
     SiteminderLogoutUrl = 'SITEMINDER_LOGOUT_URL',
-    PayApiUrl = 'PAY_API_URL'
+    PayApiUrl = 'PAY_API_URL',
+    StatementsDownloaded = 'STATEMENTS_DOWNLOADED'
 }
 
 export enum Role {
@@ -107,7 +108,8 @@ export enum Pages {
     AFFIDAVIT_COMPLETE = 'upload-affidavit',
     LOGIN = 'login',
     PAY_OUTSTANDING_BALANCE = 'pay-outstanding-balance',
-    PAYMENT_OPTION = 'payment-option'
+    PAYMENT_OPTION = 'payment-option',
+    ACCOUNT_HOLD = 'account-hold'
 }
 
 export enum Account {
@@ -732,4 +734,12 @@ export enum OrgNameLabel {
     GOVN = 'Government Agency Name',
     BUSINESS = 'Legal Business Name',
     REGULAR = 'Account Name'
+}
+
+export enum ShortNameRefundStatus {
+    PENDING_REFUND = 'PENDING_REFUND'
+}
+
+export enum ShortNameRefundLabel {
+    PENDING_REFUND = 'REFUND REQUEST'
 }

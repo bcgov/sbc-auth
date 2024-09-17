@@ -33,27 +33,62 @@
         Settings
       </v-btn>
     </header>
-    <div
-      v-if="enableEFTPaymentMethod && hasEFTPaymentMethod"
-      class="statement-owing d-flex flex-wrap flex-row"
-    >
+    <template v-if="enableEFTPaymentMethod && hasEFTPaymentMethod">
       <div
-        v-if="paymentOwingAmount && paymentDueDate"
-        class="total"
+        class="statement-owing d-flex flex-wrap flex-row  mb-2"
       >
-        <p class="amount font-weight-bold">
-          Total Amount Owing: {{ formatAmount(paymentOwingAmount) }}
-        </p>
-        <p class="date font-weight-regular">
-          Payment Due Date: {{ formatDate(paymentDueDate) }}
-        </p>
+        <div
+          class="total"
+        >
+          <p
+            class="amount font-weight-bold"
+            :class="{ 'owing' : paymentDueDate}"
+          >
+            Total Amount Owing: {{ formatAmount(paymentOwingAmount) }}
+          </p>
+          <p class="font-weight-regular">
+            <span
+              v-if="paymentDueDate"
+              class="due-date"
+            >Payment Due Date: {{ formatDate(paymentDueDate) }}</span>
+            <span
+              v-else
+              class="non-due-date"
+            >Next statement will be available on {{ nextStatementDate }}</span>
+          </p>
+        </div>
+        <div class="instructions d-flex ma-0 justify-end align-end">
+          <p class="text-right ma-0">
+            <a @click="downloadEFTInstructions">How to pay with electronic funds transfer</a>
+          </p>
+        </div>
       </div>
-      <div class="instructions d-flex ma-0 justify-end align-end">
-        <p class="text-right ma-0">
-          <a @click="getEftInstructions">How to pay with electronic funds transfer</a>
-        </p>
+      <div
+        v-if="shortNameLinksCount > 1 && isEftUnderPayment"
+        class="flex-row mt-4"
+      >
+        <v-alert
+          class="mt-3 mb-0 alert-item account-alert-inner"
+          :icon="false"
+          prominent
+          outlined
+          type="warning"
+        >
+          <div class="account-alert-inner mb-0">
+            <v-icon
+              medium
+            >
+              mdi-alert
+            </v-icon>
+            <p class="account-alert__info mb-0 pl-3">
+              <strong>Caution:</strong> Recent partial payments are not reflected in amount owing. Payment will not be
+              applied to the amount owing until full amount has been received for <strong>all accounts</strong> that are
+              linked to your short name.
+            </p>
+          </div>
+        </v-alert>
       </div>
-    </div>
+    </template>
     <div>
       <v-data-table
         class="statement-list"
@@ -146,20 +181,19 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags, Pages, PaymentTypes } from '@/util/constants'
+import { Account, LDFlags, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
-import { PropType, Ref, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
+import { PropType, computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import { StatementFilterParams, StatementListItem } from '@/models/statement'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
-import DocumentService from '@/services/document.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
 import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
 import moment from 'moment'
 import { paymentTypeDisplay } from '../../../../resources/display-mappers'
 import { useAccountChangeHandler } from '@/composables'
+import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -180,35 +214,74 @@ export default defineComponent({
     const currentMembership: Member = orgStore.currentMembership
     const getStatement: any = orgStore.getStatement
     const { setAccountChangedHandler } = useAccountChangeHandler()
-    const totalStatementsCount = ref<number>(0)
-    const tableDataOptions = ref<any>({})
-    const isDataLoading = ref<boolean>(false)
-    const statementsList = ref<StatementListItem[]>([])
-    const isLoading = ref(false)
-    const paymentOwingAmount = ref<number>(0)
-    const paymentDueDate = ref<Date>(null)
-    const statementSettingsModal: Ref<InstanceType<typeof ModalDialog>> = ref(null)
-    const hasEFTPaymentMethod = ref(false)
+
+    const enableEFTPaymentMethod = async () => {
+      const enableEFTPaymentMethod: string | boolean = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod, false)
+      return enableEFTPaymentMethod
+    }
+
+    const state = reactive({
+      totalStatementsCount: 0,
+      tableDataOptions: {},
+      isDataLoading: false,
+      statementsList: [],
+      isLoading: false,
+      paymentOwingAmount: 0,
+      paymentDueDate: null,
+      shortNameLinksCount: 0,
+      isEftUnderPayment: false,
+      statementSettingsModal: null,
+      hasEFTPaymentMethod: false,
+      headerStatements: computed(() => {
+        const headers = [
+          {
+            text: 'Date',
+            align: 'left',
+            sortable: false,
+            value: 'dateRange'
+          },
+          {
+            text: 'Frequency',
+            align: 'left',
+            sortable: false,
+            value: 'frequency'
+          },
+          {
+            text: 'Statement Number',
+            align: 'left',
+            sortable: false,
+            value: 'statementNumber'
+          },
+          {
+            text: 'Downloads',
+            align: 'right',
+            sortable: false,
+            value: 'action'
+          }
+        ]
+        if (state.hasEFTPaymentMethod && enableEFTPaymentMethod()) {
+          headers.splice(2, 0, { text: 'Payment Methods', align: 'left', sortable: false, value: 'paymentMethods' })
+        }
+        return headers
+      }),
+      nextStatementDate: computed<string>(() => {
+        return moment().add(1, 'M').startOf('month').format('MMMM D, YYYY')
+      })
+    })
+
+    const { downloadEFTInstructions } = useDownloader(orgStore, state)
 
     const isStatementNew = (item: StatementListItem) => {
-      return item.isNew
+      let isNew = item.isNew
+      const statementsDownloaded = JSON.parse(sessionStorage.getItem(SessionStorageKeys.StatementsDownloaded)) || []
+      if (statementsDownloaded?.includes(item.id)) {
+        isNew = false
+      }
+      return isNew
     }
 
     const isStatementOverdue = (item: StatementListItem) => {
       return item.isOverdue
-    }
-
-    const getEftInstructions = async (): Promise<any> => {
-      isLoading.value = true
-      try {
-        const downloadData = await DocumentService.getEftInstructions()
-        CommonUtils.fileDownload(downloadData?.data, `bcrs_eft_instructions.pdf`, downloadData?.headers['content-type'])
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error)
-      } finally {
-        isLoading.value = false
-      }
     }
 
     const getStatementsList = async (filterParams: any): Promise<any> => {
@@ -219,8 +292,10 @@ export default defineComponent({
     const getStatementsSummary = async (): Promise<any> => {
       try {
         const data = await orgStore.getStatementsSummary()
-        paymentOwingAmount.value = data?.totalDue
-        paymentDueDate.value = data?.oldestDueDate
+        state.paymentOwingAmount = data?.totalDue
+        state.paymentDueDate = data?.oldestDueDate
+        state.shortNameLinksCount = data?.shortNameLinksCount
+        state.isEftUnderPayment = data?.isEftUnderPayment
         return data
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -229,7 +304,7 @@ export default defineComponent({
     }
 
     const downloadStatement = async (item, type) => {
-      isLoading.value = true
+      state.isLoading = true
       try {
         const downloadType = (type === 'CSV') ? 'text/csv' : 'application/pdf'
         const response = await getStatement({ statementId: item.id, type: downloadType })
@@ -240,12 +315,15 @@ export default defineComponent({
         // eslint-disable-next-line no-console
         console.log(error)
       } finally {
-        isLoading.value = false
+        const statementsDownloaded = JSON.parse(sessionStorage.getItem(SessionStorageKeys.StatementsDownloaded)) || []
+        statementsDownloaded.push(item.id)
+        sessionStorage.setItem(SessionStorageKeys.StatementsDownloaded, JSON.stringify(statementsDownloaded))
+        state.isLoading = false
       }
     }
 
     const loadStatementsList = async (pageNumber?: number, itemsPerPage?: number) => {
-      isDataLoading.value = true
+      state.isDataLoading = true
       const filterParams: StatementFilterParams = {
         pageNumber: pageNumber,
         pageLimit: itemsPerPage
@@ -256,9 +334,9 @@ export default defineComponent({
         getStatementsListResponse.items[0].isNew = true
       }
 
-      statementsList.value = getStatementsListResponse?.items || []
-      totalStatementsCount.value = getStatementsListResponse?.total || 0
-      isDataLoading.value = false
+      state.statementsList = getStatementsListResponse?.items || []
+      state.totalStatementsCount = getStatementsListResponse?.total || 0
+      state.isDataLoading = false
     }
 
     const isStatementsAllowed = async () => {
@@ -273,14 +351,14 @@ export default defineComponent({
         root.$router.push(`/${Pages.MAIN}/${currentOrganization.id}/settings/account-info`)
       } else {
         await loadStatementsList()
-        if (hasEFTPaymentMethod.value) {
+        if (state.hasEFTPaymentMethod) {
           await getStatementsSummary()
         }
       }
     }
 
     const openSettingsModal = () => {
-      statementSettingsModal.value?.openSettings()
+      state.statementSettingsModal.openSettings()
     }
 
     const customSortActive = (items, index, isDescending) => {
@@ -302,11 +380,6 @@ export default defineComponent({
 
     const getPaginationOptions = () => {
       return [...Array(PAGINATION_COUNTER_STEP)].map((value, index) => ITEMS_PER_PAGE * (index + 1))
-    }
-
-    const enableEFTPaymentMethod = async () => {
-      const enableEFTPaymentMethod: string | boolean = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod, false)
-      return enableEFTPaymentMethod
     }
 
     const getIndexedTag = (tag, index) => {
@@ -349,7 +422,7 @@ export default defineComponent({
       try {
         const orgPayments: OrgPaymentDetails = await orgStore.getOrgPayments()
         const paymentMethod = orgPayments.paymentMethod === PaymentTypes.EFT
-        hasEFTPaymentMethod.value = paymentMethod
+        state.hasEFTPaymentMethod = paymentMethod
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log(error)
@@ -362,72 +435,28 @@ export default defineComponent({
       await initialize()
     })
 
-    watch(tableDataOptions, (newValue) => {
+    watch(() => state.tableDataOptions, (newValue: any) => {
       const pageNumber = newValue.page || 1
       const itemsPerPage = newValue.itemsPerPage
       loadStatementsList(pageNumber, itemsPerPage)
     }, { immediate: true })
 
     return {
+      ...toRefs(state),
       formatDate,
       formatAmount,
-      isLoading,
       downloadStatement,
+      downloadEFTInstructions,
       enableEFTPaymentMethod,
-      paymentOwingAmount,
-      paymentDueDate,
       isStatementNew,
       isStatementOverdue,
-      getEftInstructions,
       getPaginationOptions,
       customSortActive,
       formatDateRange,
       frequencyDisplay,
       paymentMethodsDisplay,
       getIndexedTag,
-      openSettingsModal,
-      statementsList,
-      totalStatementsCount,
-      tableDataOptions,
-      isDataLoading,
-      statementSettingsModal,
-      hasEFTPaymentMethod
-    }
-  },
-  computed: {
-    headerStatements (): any[] {
-      const headers = [
-        {
-          text: 'Date',
-          align: 'left',
-          sortable: false,
-          value: 'dateRange'
-        },
-        {
-          text: 'Frequency',
-          align: 'left',
-          sortable: false,
-          value: 'frequency'
-        },
-        {
-          text: 'Statement Number',
-          align: 'left',
-          sortable: false,
-          value: 'statementNumber'
-        },
-        {
-          text: 'Downloads',
-          align: 'right',
-          sortable: false,
-          value: 'action'
-        }
-      ]
-
-      if (this.hasEFTPaymentMethod && this.enableEFTPaymentMethod()) {
-        headers.splice(2, 0, { text: 'Payment Methods', align: 'left', sortable: false, value: 'paymentMethods' })
-      }
-
-      return headers
+      openSettingsModal
     }
   }
 })
@@ -446,16 +475,29 @@ export default defineComponent({
 }
 .statement-owing {
   .total {
-    flex: 0 0 300px;
+    flex: 0 0 400px;
     .amount {
       font-size: 18px;
-      color: $app-red;
+      color: $gray7;
       margin: 0;
     }
-    .date {
+    .owing {
+      color: $app-red;
+    }
+    .due-date {
       font-size: 14px;
       color: $app-red;
       margin: 0;
+    }
+    .non-due-date {
+      font-size: 14px;
+      color: $gray7;
+      margin: 0;
+    }
+    &.owing {
+      .amount, .date {
+        color: $app-red;
+      }
     }
   }
 }
@@ -485,5 +527,22 @@ export default defineComponent({
 
 .loading-container {
   background: rgba(255,255,255, 0.8);
+}
+
+.account-alert-inner {
+  .v-icon {
+    color: $app-red;
+  }
+  background-color: $app-background-error !important;
+  border-color: $app-red !important;
+  border-radius: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+.account-alert__info {
+  flex: 1 1 auto;
+  color: $gray7;
+  font-size: 12px;
 }
 </style>
