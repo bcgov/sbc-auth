@@ -20,8 +20,6 @@ jobs:
   setup-job:
     runs-on: ubuntu-20.04
 
-    if: github.repository == 'bcgov/sbc-auth'
-
     steps:
       - uses: actions/checkout@v4
       - run: "true"
