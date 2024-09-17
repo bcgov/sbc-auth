@@ -75,10 +75,10 @@
       </div>
     </v-alert>
 
-    <ShortNamePatchDialog
-      :isShortNamePatchDialogOpen="displayShortNamePatchDialog"
+    <ShortNameFinancialDialog
+      :isShortNameFinancialDialogOpen="displayShortNameFinancialDialog"
       :shortName="shortName"
-      :shortNamePatchDialogType="shortNamePatchDialogType"
+      :shortNameFinancialDialogType="shortNameFinancialDialogType"
       @on-patch="onShortNamePatch"
       @close-short-name-email-dialog="closeShortNameLinkingDialog"
     />
@@ -110,7 +110,7 @@ import CommonUtils from '@/util/common-util'
 import PaymentService from '@/services/payment.services'
 import { Role } from '@/util/constants'
 import ShortNameAccountLink from '@/components/pay/eft/ShortNameAccountLink.vue'
-import ShortNamePatchDialog from '@/components/pay/eft/ShortNamePatchDialog.vue'
+import ShortNameFinancialDialog from '@/components/pay/eft/ShortNameFinancialDialog.vue'
 import ShortNamePaymentHistory from '@/components/pay/eft/ShortNamePaymentHistory.vue'
 import ShortNameRefund from '@/components/pay/eft/ShortNameRefund.vue'
 import moment from 'moment'
@@ -125,7 +125,7 @@ interface ShortNameDetails {
 
 export default defineComponent({
   name: 'ShortNameMappingView',
-  components: { ShortNameAccountLink, ShortNamePatchDialog, ShortNamePaymentHistory, ShortNameRefund },
+  components: { ShortNameAccountLink, ShortNameFinancialDialog, ShortNamePaymentHistory, ShortNameRefund },
   props: {
     shortNameId: {
       type: String as PropType<string>,
@@ -144,8 +144,8 @@ export default defineComponent({
       unsettledAmount: '',
       displayRefundAlert: false,
       canEFTRefund: computed((): boolean => currentUser.value?.roles?.includes(Role.EftRefund)),
-      displayShortNamePatchDialog: false,
-      shortNamePatchDialogType: ''
+      displayShortNameFinancialDialog: false,
+      shortNameFinancialDialogType: ''
     })
 
     onMounted(async () => {
@@ -172,7 +172,7 @@ export default defineComponent({
     })
 
     function closeShortNameLinkingDialog () {
-      state.displayShortNamePatchDialog = false
+      state.displayShortNameFinancialDialog = false
     }
 
     async function onLinkAccount (account: any, results: Array<any>) {
@@ -188,13 +188,13 @@ export default defineComponent({
     }
 
     function openShortNameEmailDialog () {
-      state.shortNamePatchDialogType = 'EMAIL'
-      state.displayShortNamePatchDialog = true
+      state.shortNameFinancialDialogType = 'EMAIL'
+      state.displayShortNameFinancialDialog = true
     }
 
     function openShortNameSupplierNumberDialog () {
-      state.shortNamePatchDialogType = 'CAS_SUPPLIER_NUMBER'
-      state.displayShortNamePatchDialog = true
+      state.shortNameFinancialDialogType = 'CAS_SUPPLIER_NUMBER'
+      state.displayShortNameFinancialDialog = true
     }
 
     async function onPaymentAction () {

@@ -1,6 +1,6 @@
 <template>
   <div
-    id="short-name-patch-dialog"
+    id="short-name-financial-dialog"
   >
     <ModalDialog
       ref="modalDialog"
@@ -12,21 +12,21 @@
       @close-dialog="resetAccountLinkingDialog"
     >
       <template #text>
-        <p v-if="shortNamePatchDialogType === 'EMAIL'">
+        <p v-if="shortNameFinancialDialogType === 'EMAIL'">
           Enter the contact email provided in the client's Direct Deposit Application form
         </p>
-        <p v-if="shortNamePatchDialogType === 'CAS_SUPPLIER_NUMBER'">
+        <p v-if="shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER'">
           Enter the supplier number created in CAS for this short name
         </p>
         <v-text-field
-          v-if="shortNamePatchDialogType === 'EMAIL'"
+          v-if="shortNameFinancialDialogType === 'EMAIL'"
           v-model="email"
           filled
           label="Email Address"
           persistent-hint
         />
         <v-text-field
-          v-if="shortNamePatchDialogType === 'CAS_SUPPLIER_NUMBER'"
+          v-if="shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER'"
           v-model="casSupplierNumber"
           filled
           label="CAS Supplier Number"
@@ -58,23 +58,23 @@
   </div>
 </template>
 <script lang="ts">
-import { Ref, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { Ref, computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
 
 export default defineComponent({
-  name: 'ShortNamePatchDialog',
+  name: 'ShortNameFinancialDialog',
   components: { ModalDialog },
   props: {
-    isShortNamePatchDialogOpen: {
+    isShortNameFinancialDialogOpen: {
       type: Boolean,
       default: false
     },
     shortName: {
       default: {}
     },
-    shortNamePatchDialogType: {
+    shortNameFinancialDialogType: {
       type: String,
       default: ''
     }
@@ -88,6 +88,8 @@ export default defineComponent({
       casSupplierNumber: ''
     })
 
+    const isCasSupplierNumber = computed(() => state.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER')
+
     function openAccountLinkingDialog (item: EFTShortnameResponse, dialogType) {
       state.shortName = item
       if (dialogType === 'EMAIL') {
@@ -99,9 +101,9 @@ export default defineComponent({
     }
 
     function dialogTitle () {
-      if (props.shortNamePatchDialogType === 'EMAIL') {
+      if (props.shortNameFinancialDialogType === 'EMAIL') {
         return 'Email'
-      } else if (props.shortNamePatchDialogType === 'CAS_SUPPLIER_NUMBER') {
+      } else if (props.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER') {
         return 'CAS Supplier Number'
       }
     }
@@ -118,18 +120,18 @@ export default defineComponent({
     }
 
     async function patchShortName () {
-      if (props.shortNamePatchDialogType === 'EMAIL') {
+      if (props.shortNameFinancialDialogType === 'EMAIL') {
         await PaymentService.patchEFTShortName(state.shortName.id, { email: state.email })
-      } else if (props.shortNamePatchDialogType === 'CAS_SUPPLIER_NUMBER') {
+      } else if (props.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER') {
         await PaymentService.patchEFTShortName(state.shortName.id, { casSupplierNumber: state.casSupplierNumber })
       }
       emit('on-patch')
       cancelAndResetAccountLinkingDialog()
     }
 
-    watch(() => props.isShortNamePatchDialogOpen, (shortNameNewValue) => {
+    watch(() => props.isShortNameFinancialDialogOpen, (shortNameNewValue) => {
       if (shortNameNewValue && props.shortName) {
-        openAccountLinkingDialog(props.shortName, props.shortNamePatchDialogType)
+        openAccountLinkingDialog(props.shortName, props.shortNameFinancialDialogType)
       }
     })
 
