@@ -32,9 +32,12 @@ from dateutil import parser
 from flask import Blueprint, current_app, request
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
+from structured_logging import StructuredLogging
 
 
 bp = Blueprint('worker', __name__)
+
+logger = StructuredLogging.get_logger()
 
 
 @bp.route('/', methods=('POST',))
@@ -46,9 +49,9 @@ def worker():
         return {}, HTTPStatus.OK
 
     try:
-        current_app.logger.info('Event message received: %s', json.dumps(dataclasses.asdict(event_message)))
+        logger.info('Event message received: %s', json.dumps(dataclasses.asdict(event_message)))
         if is_message_processed(event_message):
-            current_app.logger.info('Event message already processed, skipping.')
+            logger.info('Event message already processed, skipping.')
             return {}, HTTPStatus.OK
         if event_message.type == QueueMessageTypes.NAMES_EVENT.value:
             process_name_events(event_message)
@@ -58,7 +61,7 @@ def worker():
                                     QueueMessageTypes.NSF_LOCK_ACCOUNT.value]:
             process_pay_lock_unlock_event(event_message)
     except Exception: # NOQA # pylint: disable=broad-except
-        current_app.logger.error('Error processing event:', exc_info=True)
+        logger.error('Error processing event:', exc_info=True)
     # Return a 200, so the event is removed from the Queue
     return {}, HTTPStatus.OK
 
@@ -78,7 +81,7 @@ def is_message_processed(event_message):
 
 def process_activity_log(data):
     """Process activity log events."""
-    current_app.logger.debug('>>>>>>>process_activity_log>>>>>')
+    logger.debug('>>>>>>>process_activity_log>>>>>')
     activity_model = ActivityLogModel(actor_id=data.get('actorId'),
                                       action=data.get('action'),
                                       item_type=data.get('itemType'),
@@ -92,21 +95,21 @@ def process_activity_log(data):
     try:
         activity_model.save()
     except Exception as e:  # NOQA # pylint: disable=broad-except
-        current_app.logger.error('DB Error: %s', e)
+        logger.error('DB Error: %s', e)
         db.session.rollback()
-    current_app.logger.debug('<<<<<<<process_activity_log<<<<<')
+    logger.debug('<<<<<<<process_activity_log<<<<<')
 
 
 def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
     """Process a pay event to either unlock or lock an account. Source message comes from Pay-api."""
-    current_app.logger.debug('>>>>>>>process_pay_lock_unlock_event>>>>>')
+    logger.debug('>>>>>>>process_pay_lock_unlock_event>>>>>')
     message_type = event_message.type
     queue_data = event_message.data
     skip_notification = queue_data.get('skipNotification', False)
     org_id = queue_data.get('accountId')
     org: OrgModel = OrgModel.find_by_org_id(org_id)
     if org is None:
-        current_app.logger.error('Unknown org for orgid %s', org_id)
+        logger.error('Unknown org for orgid %s', org_id)
         return
 
     data = {
@@ -128,7 +131,7 @@ def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
 
     org.flush()
     db.session.commit()
-    current_app.logger.debug('<<<<<<<process_pay_lock_unlock_event<<<<<')
+    logger.debug('<<<<<<<process_pay_lock_unlock_event<<<<<')
 
 
 def process_name_events(event_message: SimpleCloudEvent):
@@ -153,13 +156,13 @@ def process_name_events(event_message: SimpleCloudEvent):
                 }
             }
     """
-    current_app.logger.debug('>>>>>>>process_name_events>>>>>')
+    logger.debug('>>>>>>>process_name_events>>>>>')
     request_data = event_message.data.get('request') or event_message.data.get('name')
     nr_number = request_data['nrNum']
     nr_status = request_data['newState']
     nr_entity = EntityModel.find_by_business_identifier(nr_number)
     if nr_entity is None:
-        current_app.logger.info("Entity doesn't exist, creating a new entity.")
+        logger.info("Entity doesn't exist, creating a new entity.")
         nr_entity = EntityModel(
             business_identifier=nr_number,
             corp_type_code=CorpType.NR.value
@@ -171,7 +174,7 @@ def process_name_events(event_message: SimpleCloudEvent):
     nr_entity.last_modified = parser.parse(event_message.time)
     # Future - None needs to be replaced with whatever we decide to fill the data with.
     if nr_status == 'DRAFT' and not AffiliationModel.find_affiliations_by_business_identifier(nr_number, None):
-        current_app.logger.info('Status is DRAFT, getting invoices for account')
+        logger.info('Status is DRAFT, getting invoices for account')
         token = None
         # Find account details for the NR.
         with current_app.test_request_context('service_token'):
@@ -185,13 +188,13 @@ def process_name_events(event_message: SimpleCloudEvent):
         if invoices and invoices['invoices'] \
                 and (auth_account_id := invoices['invoices'][0].get('paymentAccount').get('accountId')) \
                 and str(auth_account_id).isnumeric():
-            current_app.logger.info('Account ID received : %s', auth_account_id)
+            logger.info('Account ID received : %s', auth_account_id)
             # Auth account id can be service account value too, so doing a query lookup than find_by_id
             org: OrgModel = db.session.query(OrgModel).filter(OrgModel.id == auth_account_id).one_or_none()
             # If account is present and is not a gov account, then affiliate.
             if org and org.access_type != AccessType.GOVM.value:
                 nr_entity.pass_code_claimed = True
-                current_app.logger.info('Creating affiliation between Entity : %s and Org : %s', nr_entity, org)
+                logger.info('Creating affiliation between Entity : %s and Org : %s', nr_entity, org)
                 affiliation: AffiliationModel = AffiliationModel(entity=nr_entity, org=org)
                 affiliation.flush()
                 activity: ActivityLogModel = ActivityLogModel(org_id=org.id,
@@ -203,4 +206,4 @@ def process_name_events(event_message: SimpleCloudEvent):
                 activity.flush()
 
     nr_entity.save()
-    current_app.logger.debug('<<<<<<<process_name_events<<<<<<<<<<')
+    logger.debug('<<<<<<<process_name_events<<<<<<<<<<')
