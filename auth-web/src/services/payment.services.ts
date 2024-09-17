@@ -249,6 +249,14 @@ export default class PaymentService {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames?${params.toString()}`)
   }
 
+  static getEFTShortName (shortNameId: string): AxiosPromise<EFTShortnameResponse> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`)
+  }
+
+  static patchEFTShortName (shortNameId: string, body: any): AxiosPromise<EFTShortnameResponse> {
+    return axios.patch(`${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`, body)
+  }
+
   static getEFTShortNameSummaries (filterParams: ShortNameSummaryFilterParams, viewAll = false): AxiosPromise<any> {
     const params = new URLSearchParams()
     if (filterParams.pageNumber) {
