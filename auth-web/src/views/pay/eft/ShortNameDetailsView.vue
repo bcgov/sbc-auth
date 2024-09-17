@@ -11,8 +11,8 @@
     >
       {{ snackbarText }}
     </v-snackbar>
-    <div class="view-header flex-column">
-      <div>
+    <div class="view-header flex-column d-flex justify-space-between">
+      <div class="shortname-title">
         <h1 class="view-header__title">
           {{ shortNameDetails.shortName }}
         </h1>
@@ -20,7 +20,7 @@
           <span class="font-weight-bold">Unsettled Amount: </span>{{ unsettledAmount }}
         </p>
       </div>
-      <div>
+      <div class="shortname-info">
         <div class="mb-6 overflow-wrap">
           <span class="font-weight-bold">CAS Supplier Number: </span>
           {{ shortName.casSupplierNumber || 'N/A' }}
@@ -257,17 +257,15 @@ export default defineComponent({
     color: $TextColorGray;
   }
   .v-application .view-header {
-    display: flex;
     flex-direction: row!important;
-    justify-content: space-between;
     margin-top: 40px;
     margin-bottom: 60px;
-    > div {
+    .shortname-title, .shortname-info {
       z-index: 1;
       flex: 1 1 100%;
-      &:nth-child(2) {
-        flex: 0 0 400px;
-      }
+    }
+    .shortname-info {
+      flex: 0 0 320px;
     }
     &:after {
       content: '';
