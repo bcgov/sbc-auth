@@ -12,21 +12,21 @@
       @close-dialog="resetAccountLinkingDialog"
     >
       <template #text>
-        <p v-if="shortNameFinancialDialogType === 'EMAIL'">
+        <p v-if="isDialogTypeEmail">
           Enter the contact email provided in the client's Direct Deposit Application form
         </p>
-        <p v-if="shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER'">
+        <p v-if="isDialogTypeCasSupplierNumber">
           Enter the supplier number created in CAS for this short name
         </p>
         <v-text-field
-          v-if="shortNameFinancialDialogType === 'EMAIL'"
+          v-if="isDialogTypeEmail"
           v-model="email"
           filled
           label="Email Address"
           persistent-hint
         />
         <v-text-field
-          v-if="shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER'"
+          v-if="isDialogTypeCasSupplierNumber"
           v-model="casSupplierNumber"
           filled
           label="CAS Supplier Number"
@@ -85,10 +85,10 @@ export default defineComponent({
     const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const state = reactive<any>({
       email: '',
-      casSupplierNumber: ''
+      casSupplierNumber: '',
+      isDialogTypeEmail: computed(() => props.shortNameFinancialDialogType === 'EMAIL'),
+      isDialogTypeCasSupplierNumber: computed(() => props.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER')
     })
-
-    const isCasSupplierNumber = computed(() => state.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER')
 
     function openAccountLinkingDialog (item: EFTShortnameResponse, dialogType) {
       state.shortName = item
@@ -101,9 +101,9 @@ export default defineComponent({
     }
 
     function dialogTitle () {
-      if (props.shortNameFinancialDialogType === 'EMAIL') {
+      if (state.isDialogTypeEmail) {
         return 'Email'
-      } else if (props.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER') {
+      } else if (state.isDialogTypeCasSupplierNumber) {
         return 'CAS Supplier Number'
       }
     }
@@ -120,9 +120,9 @@ export default defineComponent({
     }
 
     async function patchShortName () {
-      if (props.shortNameFinancialDialogType === 'EMAIL') {
+      if (state.isDialogTypeEmail) {
         await PaymentService.patchEFTShortName(state.shortName.id, { email: state.email })
-      } else if (props.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER') {
+      } else if (state.isDialogTypeCasSupplierNumber) {
         await PaymentService.patchEFTShortName(state.shortName.id, { casSupplierNumber: state.casSupplierNumber })
       }
       emit('on-patch')
