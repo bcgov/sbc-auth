@@ -3,7 +3,7 @@
     <ShortNameLinkingDialog
       :isShortNameLinkingDialogOpen="isShortNameLinkingDialogOpen"
       :selectedShortName="eftShortNameSummary"
-      @close-short-name-email-dialog="closeShortNameLinkingDialog"
+      @close-short-name-linking-dialog="closeShortNameLinkingDialog"
       @on-link-account="onLinkAccount"
     />
     <ModalDialog
