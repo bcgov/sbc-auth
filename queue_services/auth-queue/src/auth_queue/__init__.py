@@ -41,7 +41,7 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(config.get_named_config(run_mode))
-    app.config["ENV"] = run_mode
+    app.config['ENV'] = run_mode
 
     db.init_app(app)
     flags.init_app(app)

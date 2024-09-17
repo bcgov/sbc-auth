@@ -39,6 +39,7 @@ bp = Blueprint('worker', __name__)
 
 logger = StructuredLogging.get_logger()
 
+
 @bp.route('/', methods=('POST',))
 @ensure_authorized_queue_user
 def worker():
