@@ -24,9 +24,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
       - run: "true"
   linting:
     needs: setup-job
@@ -64,7 +61,9 @@ jobs:
       PAY_API_VERSION: "/api/v1"
 
     runs-on: ubuntu-20.04
-
+    strategy:
+      matrix:
+        python-version: [3.12]
     services:
       postgres:
         image: postgres:12
@@ -80,7 +79,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install docker-compose
