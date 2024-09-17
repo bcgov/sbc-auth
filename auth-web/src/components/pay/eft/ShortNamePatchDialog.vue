@@ -1,0 +1,194 @@
+<template>
+  <div
+    id="short-name-patch-dialog"
+  >
+    <ModalDialog
+      ref="modalDialog"
+      max-width="720"
+      :show-icon="false"
+      :showCloseIcon="true"
+      dialog-class="lookup-dialog"
+      :title="dialogTitle()"
+      @close-dialog="resetAccountLinkingDialog"
+    >
+      <template #text>
+        <p v-if="shortNamePatchDialogType === 'EMAIL'">
+          Enter the contact email provided in the client's Direct Deposit Application form
+        </p>
+        <p v-if="shortNamePatchDialogType === 'CAS_SUPPLIER_NUMBER'">
+          Enter the supplier number created in CAS for this short name
+        </p>
+        <v-text-field
+          v-if="shortNamePatchDialogType === 'EMAIL'"
+          v-model="email"
+          filled
+          label="Email Address"
+          persistent-hint
+        />
+        <v-text-field
+          v-if="shortNamePatchDialogType === 'CAS_SUPPLIER_NUMBER'"
+          v-model="casSupplierNumber"
+          filled
+          label="CAS Supplier Number"
+          persistent-hint
+        />
+      </template>
+      <template #actions>
+        <div class="d-flex align-center justify-center w-100 h-100 ga-3">
+          <v-btn
+            large
+            outlined
+            color="outlined"
+            data-test="dialog-ok-button"
+            @click="cancelAndResetAccountLinkingDialog()"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            large
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="patchShortName()"
+          >
+            Save
+          </v-btn>
+        </div>
+      </template>
+    </ModalDialog>
+  </div>
+</template>
+<script lang="ts">
+import { Ref, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { EFTShortnameResponse } from '@/models/eft-transaction'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import PaymentService from '@/services/payment.services'
+
+export default defineComponent({
+  name: 'ShortNamePatchDialog',
+  components: { ModalDialog },
+  props: {
+    isShortNamePatchDialogOpen: {
+      type: Boolean,
+      default: false
+    },
+    shortName: {
+      default: {}
+    },
+    shortNamePatchDialogType: {
+      type: String,
+      default: ''
+    }
+  },
+  emits: ['on-patch', 'close-short-name-email-dialog'],
+  setup (props, { emit }) {
+    const modalDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const state = reactive<any>({
+      email: '',
+      casSupplierNumber: ''
+    })
+
+    function openAccountLinkingDialog (item: EFTShortnameResponse, dialogType) {
+      state.shortName = item
+      if (dialogType === 'EMAIL') {
+        state.email = state.shortName.email
+      } else if (dialogType === 'CAS_SUPPLIER_NUMBER') {
+        state.casSupplierNumber = state.shortName.casSupplierNumber
+      }
+      modalDialog.value.open()
+    }
+
+    function dialogTitle () {
+      if (props.shortNamePatchDialogType === 'EMAIL') {
+        return 'Email'
+      } else if (props.shortNamePatchDialogType === 'CAS_SUPPLIER_NUMBER') {
+        return 'CAS Supplier Number'
+      }
+    }
+
+    function resetAccountLinkingDialog () {
+      state.email = ''
+      state.casSupplierNumber = ''
+      emit('close-short-name-email-dialog')
+    }
+
+    function cancelAndResetAccountLinkingDialog () {
+      modalDialog.value.close()
+      resetAccountLinkingDialog()
+    }
+
+    async function patchShortName () {
+      if (props.shortNamePatchDialogType === 'EMAIL') {
+        await PaymentService.patchEFTShortName(state.shortName.id, { email: state.email })
+      } else if (props.shortNamePatchDialogType === 'CAS_SUPPLIER_NUMBER') {
+        await PaymentService.patchEFTShortName(state.shortName.id, { casSupplierNumber: state.casSupplierNumber })
+      }
+      emit('on-patch')
+      cancelAndResetAccountLinkingDialog()
+    }
+
+    watch(() => props.isShortNamePatchDialogOpen, (shortNameNewValue) => {
+      if (shortNameNewValue && props.shortName) {
+        openAccountLinkingDialog(props.shortName, props.shortNamePatchDialogType)
+      }
+    })
+
+    return {
+      ...toRefs(state),
+      modalDialog,
+      accountLinkingErrorDialog,
+      openAccountLinkingDialog,
+      resetAccountLinkingDialog,
+      cancelAndResetAccountLinkingDialog,
+      patchShortName,
+      dialogTitle
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+@import '@/assets/scss/theme.scss';
+@import '@/assets/scss/actions.scss';
+@import '@/assets/scss/ShortnameTables.scss';
+
+.actions-dropdown_item {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  &:hover {
+    background-color: $gray1;
+    color: $app-blue !important;
+  }
+}
+
+h4 {
+  color: black;
+}
+
+.important {
+  background-color: #fff7e3;
+  border: 2px solid #fcba19;
+  color: #495057;
+  font-size: 14px;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.ga-3 {
+  gap: 12px;
+}
+
+::v-deep {
+  .v-btn.v-btn--outlined {
+      border-color: var(--v-primary-base);
+      color: var(--v-primary-base);
+  }
+}
+
+</style>
