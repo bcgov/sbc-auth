@@ -34,7 +34,6 @@ python-dateutil = "2.9.0.post0"
 pytz = "2024.1"
 rsa = "4.9"
 semver = "3.0.2"
-sentry-sdk = "2.3.1"
 six = "1.16.0"
 threadloop = "1.0.2"
 thrift = "0.20.0"
@@ -47,6 +46,8 @@ zipp = "3.19.1"
 auth-api = { git = "https://github.com/bcgov/sbc-auth.git", rev = "feature-gcp-migration", subdirectory = "auth-api" }
 simple-cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py.git" }
 build-deps = { git = "https://github.com/bcgov/sbc-auth.git", rev = "feature-gcp-migration", subdirectory = "build-deps" }
+# TODO move this build-deps
+structured-logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging", branch = "main" }
 
 [tool.poetry.group.dev.dependencies]
 psycopg2 = "^2.9.9"
