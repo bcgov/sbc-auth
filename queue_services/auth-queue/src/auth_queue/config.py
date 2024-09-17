@@ -59,9 +59,6 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    SENTRY_ENABLE = os.getenv('SENTRY_ENABLE', 'False')
-    SENTRY_DSN = os.getenv('SENTRY_DSN', None)
-
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     AUTH_LD_SDK_KEY = os.getenv('AUTH_LD_SDK_KEY', None)
@@ -73,6 +70,11 @@ class _Config:  # pylint: disable=too-few-public-methods
     DB_HOST = os.getenv('DATABASE_HOST', '')
     DB_PORT = os.getenv('DATABASE_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
+
+    if DB_UNIX_SOCKET := os.getenv('DATABASE_UNIX_SOCKET', None):
+        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host={DB_UNIX_SOCKET}'
+    else:
+        SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
 
     # PUB/SUB - PUB: account-mailer-dev, SUB: auth-event-dev and namex-nr-state-dev
     ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
