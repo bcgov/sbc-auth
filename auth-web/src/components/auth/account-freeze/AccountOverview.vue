@@ -15,6 +15,7 @@
       outlined
       flat
       class="suspended-info-card mb-12"
+      :loading="loading"
     >
       <v-card-text class="py-2 px-6">
         <v-row>
@@ -36,9 +37,12 @@
           :key="statement.id"
         >
           <v-col class="pt-0">
-            <div class="link">
+            <a
+              class="text-decoration-underline"
+              @click="downloadStatement(statement)"
+            >
               {{ formatDateRange(statement.fromDate, statement.toDate) }}
-            </div>
+            </a>
           </v-col>
         </v-row>
         <v-divider class="my-2" />
@@ -79,6 +83,7 @@
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
+import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -93,11 +98,12 @@ export default defineComponent({
     const formatDate = CommonUtils.formatDisplayDate
     const formatDateRange = CommonUtils.formatDateRange
     const suspendedDate = (currentOrganization.value?.suspendedOn) ? formatDate(new Date(currentOrganization.value.suspendedOn)) : ''
-
     const state = reactive({
       statements: [],
-      totalAmountDue: 0
+      totalAmountDue: 0,
+      loading: false
     })
+    const { downloadStatement } = useDownloader(orgStore, state)
 
     const goNext = () => {
       emit('step-forward')
@@ -113,6 +119,7 @@ export default defineComponent({
       ...toRefs(state),
       currentOrganization,
       currentMembership,
+      downloadStatement,
       suspendedDate,
       downloadNSFInvoicesPDF,
       goNext,
@@ -125,6 +132,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "$assets/scss/theme.scss";
+
+.text-decoration-underline {
+  text-decoration: underline;
+}
 
 .link {
   color: var(--v-primary-base) !important;

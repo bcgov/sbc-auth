@@ -16,9 +16,13 @@
 import os
 from importlib.metadata import metadata, version
 
+<<<<<<< HEAD:auth-api/src/auth_api/metadata.py
 meta = metadata(__package__ or __name__)
 APP_NAME = meta["Name"]
 APP_VERSION = meta["Version"]
 APP_RUNNING_PROJECT = os.getenv("DEPLOYMENT_PROJECT", "local")
 APP_RUNNING_ENVIRONMENT = os.getenv("DEPLOYMENT_ENV", "production")
 FLASK_VERSION = version("flask")
+=======
+__version__ = '2.10.5'  # pylint: disable=invalid-name
+>>>>>>> main:auth-api/src/auth_api/version.py

@@ -1,6 +1,8 @@
 <template>
   <v-container class="view-container">
-    <v-row justify="center">
+    <v-row
+      justify="center"
+    >
       <v-col
         cols="12"
         sm="6"
@@ -34,7 +36,12 @@
             :key="statement.id"
             class="mb-2 link"
           >
-            {{ formatDateRange(statement.fromDate, statement.toDate) }}
+            <a
+              class="text-decoration-underline"
+              @click="downloadStatement(statement)"
+            >
+              {{ formatDateRange(statement.fromDate, statement.toDate) }}
+            </a>
           </p>
         </div>
         <div
@@ -62,6 +69,7 @@ import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
 import moment from 'moment'
 import sanitizeHtml from 'sanitize-html'
+import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -81,10 +89,12 @@ export default defineComponent({
     const formatDateRange = CommonUtils.formatDateRange
 
     const state = reactive({
+      loading: false, //  unused, but still used in our downloader.
       statements: [],
       suspendedDate: (currentOrganization.value?.suspendedOn) ? formatDate(moment(currentOrganization.value.suspendedOn)) : '',
       accountAdministratorEmail: ''
     })
+    const { downloadStatement } = useDownloader(orgStore, state)
 
     async function setAdminContact () {
       const adminContact = await getAccountAdministrator()
@@ -104,7 +114,8 @@ export default defineComponent({
     return {
       ...toRefs(state),
       formatDateRange,
-      accountAdministratorEmail
+      accountAdministratorEmail,
+      downloadStatement
     }
   }
 })

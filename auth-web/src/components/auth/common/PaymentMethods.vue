@@ -121,7 +121,10 @@
                   <v-divider class="mb-7" />
                   <div class="mb-7">
                     To send us a payment through electronic funds transfer (EFT), please read the
-                    <a @click="getEftInstructions">Electronic Funds Transfer Payment Instructions</a>.
+                    <a
+                      class="text-decoration-underline"
+                      @click="downloadEFTInstructions"
+                    >Electronic Funds Transfer Payment Instructions</a>.
                   </div>
                 </div>
 
@@ -210,14 +213,13 @@
 import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
-import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
-import DocumentService from '@/services/document.services'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
+import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
 
 const PAYMENT_METHODS = {
@@ -311,6 +313,7 @@ export default defineComponent({
     const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary } = useOrgStore()
     const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
 
+    const orgStore = useOrgStore()
     const state = reactive({
       bcOnlineWarningMessage: 'This payment method will soon be retired.',
       dialogTitle: '',
@@ -372,15 +375,7 @@ export default defineComponent({
       return (selectedPaymentMethod.value === payment.type)
     }
 
-    const getEftInstructions = async () => {
-      try {
-        const downloadData = await DocumentService.getEftInstructions()
-        CommonUtils.fileDownload(downloadData?.data, `bcrs_eft_instructions.pdf`, downloadData?.headers['content-type'])
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error)
-      }
-    }
+    const { downloadEFTInstructions } = useDownloader(orgStore, state)
 
     const hasBalanceOwing = async () => {
       try {
@@ -493,7 +488,7 @@ export default defineComponent({
       allowedPaymentMethods,
       forceEditModeBCOL,
       isPaymentEJV,
-      getEftInstructions,
+      downloadEFTInstructions,
       paymentMethodSelected,
       getPADInfo,
       setBcolInfo,
@@ -514,6 +509,10 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/tooltip.scss';
+.text-decoration-underline {
+  text-decoration: underline;
+}
+
 .important {
   background-color: #fff7e3;
   border: 2px solid #fcba19;

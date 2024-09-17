@@ -11,35 +11,77 @@
     >
       {{ snackbarText }}
     </v-snackbar>
-    <div class="view-header flex-column">
-      <h1 class="view-header__title">
-        {{ unsettledAmountHeader }}
-      </h1>
-      <p class="mt-3 mb-0">
-        Review and verify short name details
-      </p>
-      <v-alert
-        v-if="displayRefundAlert && canEFTRefund"
-        class="mt-3 mb-0 alert-item account-alert-inner"
-        :icon="false"
-        prominent
-        outlined
-        type="warning"
-      >
-        <div class="account-alert-inner mb-0">
-          <v-icon
-            medium
+    <div class="view-header flex-column d-flex justify-space-between">
+      <div class="shortname-title">
+        <h1 class="view-header__title">
+          {{ shortNameDetails.shortName }}
+        </h1>
+        <p class="mt-3 mb-0">
+          <span class="font-weight-bold">Unsettled Amount: </span>{{ unsettledAmount }}
+        </p>
+      </div>
+      <div class="shortname-info">
+        <div class="mb-6 overflow-wrap">
+          <span class="font-weight-bold">CAS Supplier Number: </span>
+          {{ shortName.casSupplierNumber || 'N/A' }}
+          <span
+            class="primary--text cursor-pointer"
+            data-test="btn-edit"
+            @click="openShortNameSupplierNumberDialog()"
           >
-            mdi-alert
-          </v-icon>
-          <p class="account-alert__info mb-0 pl-3">
-            <strong>Caution:</strong> Please verify if the unsettled amount of {{ unsettledAmount }} on the short name
-            can be refunded or linked to a new account. If it's insufficient to settle an outstanding statement,
-            the settlement process will be on hold until full payment is received.
-          </p>
+            <v-icon
+              color="primary"
+              size="20"
+            > mdi-pencil</v-icon>
+            Edit
+          </span>
         </div>
-      </v-alert>
+        <div class="overflow-wrap">
+          <span class="font-weight-bold">Email: </span>
+          {{ shortName.email || 'N/A' }}
+          <span
+            class="primary--text cursor-pointer"
+            data-test="btn-edit"
+            @click="openShortNameEmailDialog()"
+          >
+            <v-icon
+              color="primary"
+              size="20"
+            > mdi-pencil</v-icon>
+            Edit
+          </span>
+        </div>
+      </div>
     </div>
+    <v-alert
+      v-if="displayRefundAlert && canEFTRefund"
+      class="mt-3 mb-4 alert-item account-alert-inner"
+      :icon="false"
+      prominent
+      outlined
+      type="warning"
+    >
+      <div class="account-alert-inner mb-0">
+        <v-icon
+          medium
+        >
+          mdi-alert
+        </v-icon>
+        <p class="account-alert__info mb-0 pl-3">
+          <strong>Caution:</strong> Please verify if the unsettled amount of {{ unsettledAmount }} on the short name
+          can be refunded or linked to a new account. If it's insufficient to settle an outstanding statement,
+          the settlement process will be on hold until full payment is received.
+        </p>
+      </div>
+    </v-alert>
+
+    <ShortNameFinancialDialog
+      :isShortNameFinancialDialogOpen="displayShortNameFinancialDialog"
+      :shortName="shortName"
+      :shortNameFinancialDialogType="shortNameFinancialDialogType"
+      @on-patch="onShortNamePatch"
+      @close-short-name-email-dialog="closeShortNameLinkingDialog"
+    />
 
     <ShortNameRefund
       v-if="displayRefundAlert && canEFTRefund"
@@ -68,6 +110,7 @@ import CommonUtils from '@/util/common-util'
 import PaymentService from '@/services/payment.services'
 import { Role } from '@/util/constants'
 import ShortNameAccountLink from '@/components/pay/eft/ShortNameAccountLink.vue'
+import ShortNameFinancialDialog from '@/components/pay/eft/ShortNameFinancialDialog.vue'
 import ShortNamePaymentHistory from '@/components/pay/eft/ShortNamePaymentHistory.vue'
 import ShortNameRefund from '@/components/pay/eft/ShortNameRefund.vue'
 import moment from 'moment'
@@ -82,7 +125,7 @@ interface ShortNameDetails {
 
 export default defineComponent({
   name: 'ShortNameMappingView',
-  components: { ShortNameAccountLink, ShortNamePaymentHistory, ShortNameRefund },
+  components: { ShortNameAccountLink, ShortNameFinancialDialog, ShortNamePaymentHistory, ShortNameRefund },
   props: {
     shortNameId: {
       type: String as PropType<string>,
@@ -94,12 +137,15 @@ export default defineComponent({
     const currentUser = computed(() => userStore.currentUser)
     const state = reactive({
       shortNameDetails: {} as ShortNameDetails,
+      shortName: {},
       highlightIndex: -1,
       snackbar: false,
       snackbarText: '',
       unsettledAmount: '',
       displayRefundAlert: false,
-      canEFTRefund: computed((): boolean => currentUser.value?.roles?.includes(Role.EftRefund))
+      canEFTRefund: computed((): boolean => currentUser.value?.roles?.includes(Role.EftRefund)),
+      displayShortNameFinancialDialog: false,
+      shortNameFinancialDialogType: ''
     })
 
     onMounted(async () => {
@@ -125,6 +171,10 @@ export default defineComponent({
       return `Unsettled Amount for ${details.shortName}: ${state.unsettledAmount}`
     })
 
+    function closeShortNameLinkingDialog () {
+      state.displayShortNameFinancialDialog = false
+    }
+
     async function onLinkAccount (account: any, results: Array<any>) {
       const indexOf = results.findIndex((result) => result.id === account.id)
       await loadShortname(props.shortNameId)
@@ -137,9 +187,24 @@ export default defineComponent({
       }, 4000)
     }
 
+    function openShortNameEmailDialog () {
+      state.shortNameFinancialDialogType = 'EMAIL'
+      state.displayShortNameFinancialDialog = true
+    }
+
+    function openShortNameSupplierNumberDialog () {
+      state.shortNameFinancialDialogType = 'CAS_SUPPLIER_NUMBER'
+      state.displayShortNameFinancialDialog = true
+    }
+
     async function onPaymentAction () {
       await loadShortname(props.shortNameId)
       updateState()
+    }
+
+    async function onShortNamePatch () {
+      const eftShortNameResponse = await PaymentService.getEFTShortName(state.shortNameDetails.id)
+      state.shortName = eftShortNameResponse.data
     }
 
     async function loadShortname (shortnameId: string): Promise<void> {
@@ -147,6 +212,8 @@ export default defineComponent({
         const response = await PaymentService.getEFTShortnameSummary(shortnameId)
         if (response?.data) {
           state.shortNameDetails = response.data['items'][0]
+          const eftShortNameResponse = await PaymentService.getEFTShortName(state.shortNameDetails.id)
+          state.shortName = eftShortNameResponse.data
         } else {
           throw new Error('No response from getEFTShortname')
         }
@@ -160,8 +227,12 @@ export default defineComponent({
       ...toRefs(state),
       onLinkAccount,
       onPaymentAction,
+      onShortNamePatch,
+      openShortNameEmailDialog,
+      openShortNameSupplierNumberDialog,
       formatCurrency: CommonUtils.formatAmount,
-      unsettledAmountHeader
+      unsettledAmountHeader,
+      closeShortNameLinkingDialog
     }
   }
 })
@@ -169,6 +240,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
+  #shortname-details {
+    padding-top: 0;
+  }
   .account-alert-inner {
     .v-icon {
       color: $app-alert-orange;
@@ -181,5 +255,33 @@ export default defineComponent({
   .account-alert__info {
     flex: 1 1 auto;
     color: $TextColorGray;
+  }
+  .v-application .view-header {
+    flex-direction: row!important;
+    margin-top: 40px;
+    margin-bottom: 60px;
+    .shortname-title, .shortname-info {
+      z-index: 1;
+      flex: 1 1 100%;
+    }
+    .shortname-info {
+      flex: 0 0 320px;
+    }
+    &:after {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -20px;
+      z-index: 0;
+      width: 100%;
+      height: 160px;
+      background-color: white;
+      margin-top: 20px;
+    }
+  }
+  .overflow-wrap {
+    overflow-wrap: anywhere;
   }
 </style>
