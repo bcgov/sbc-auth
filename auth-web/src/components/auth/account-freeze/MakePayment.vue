@@ -14,7 +14,7 @@
 
     <v-row class="mb-6">
       <v-col
-        class="card d-flex selected"
+        class="card d-flex"
       >
         <label
           class="d-flex"
@@ -30,7 +30,10 @@
           <div>
             <h2>Electronic Funds Transfer</h2>
             <p>
-              Follow the <span class="link">payment instruction</span> to make a payment.
+              Follow the                     <a
+                class="text-decoration-underline"
+                @click="downloadEFTInstructions"
+              >payment instructions </a>to make a payment.
               Processing may take 2-5 business days after you paid.
               You will receive an email notification once your account is unlocked.
             </p>
@@ -50,7 +53,6 @@
             class="radio ml-6 mr-12"
             name="payment-method"
             value="CC"
-            checked
             @change="onPaymentMethodChange"
           >
           <div>
@@ -86,6 +88,7 @@
           large
           color="primary"
           :loading="isLoading"
+          :disabled="isLoading"
           data-test="btn-reviewbank-next"
           @click="goNext"
         >
@@ -103,6 +106,7 @@
 import { CreateRequestBody, OrgPaymentDetails, PADInfo, PADInfoValidation } from '@/models/Organization'
 import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { PaymentTypes } from '@/util/constants'
+import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -161,7 +165,7 @@ export default defineComponent({
 
     async function goNext () {
       if (!state.isTouched) {
-        emit('final-step-action')
+        emit('final-step-action', state.paymentMethod === PaymentTypes.EFT ? 'eft-payment-instructions' : '')
       } else {
         state.isLoading = true
         let isValid = state.isTouched ? await verifyPAD() : true
@@ -176,11 +180,11 @@ export default defineComponent({
           }
           try {
             await updateOrg(createRequestBody)
-            state.isLoading = false
             emit('final-step-action')
           } catch (error) {
             // eslint-disable-next-line no-console
             console.error(error)
+          } finally {
             state.isLoading = false
           }
         }
@@ -191,8 +195,11 @@ export default defineComponent({
       emit('step-back')
     }
 
+    const { downloadEFTInstructions } = useDownloader(orgStore, state)
+
     return {
       ...toRefs(state),
+      downloadEFTInstructions,
       onPaymentMethodChange,
       goNext,
       goBack
@@ -203,6 +210,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/styles/theme.scss';
+
+.text-decoration-underline {
+  text-decoration: underline;
+}
 
 .radio {
   transform: scale(1.5);

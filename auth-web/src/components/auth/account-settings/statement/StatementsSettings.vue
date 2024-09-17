@@ -286,7 +286,11 @@ export default {
         await orgStore.syncActiveOrgMembers()
         await orgStore.fetchStatementSettings()
         await orgStore.getStatementRecipients()
-        state.frequencySelected = state.statementSettings?.currentFrequency?.frequency || state.statementSettings?.frequencies[0].frequency
+        if (isEFT) {
+          state.frequencySelected = state.statementSettings?.frequencies[2].frequency
+        } else {
+          state.frequencySelected = state.statementSettings?.currentFrequency?.frequency || state.statementSettings?.frequencies[0].frequency
+        }
         state.sendStatementNotifications = state.currentStatementNotificationSettings.statementNotificationEnabled
         state.emailRecipientList = [...state.currentStatementNotificationSettings.recipients]
         await prepareAutoCompleteList()
@@ -359,7 +363,9 @@ export default {
     }
 
     const showFrequencyChangeDate = (frequency: StatementListItem) => {
-      return (frequency.frequency === state.frequencySelected) && (frequency.frequency !== state.statementSettings?.currentFrequency?.frequency)
+      if (!isEFT()) {
+        return (frequency.frequency === state.frequencySelected) && (frequency.frequency !== state.statementSettings?.currentFrequency?.frequency)
+      }
     }
 
     const capitalizeLabel = (value) => {

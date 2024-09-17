@@ -414,6 +414,10 @@ export default defineComponent({
 @import '@/assets/scss/ShortnameTables.scss';
 
 ::v-deep{
+  .base-table__item-cell {
+    vertical-align: top;
+  }
+
   #table-title-cell {
     background-color: $app-lt-blue;
   }
