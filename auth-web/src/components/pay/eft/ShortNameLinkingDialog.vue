@@ -96,7 +96,7 @@
   </div>
 </template>
 <script lang="ts">
-import { Ref, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { Ref, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -200,9 +200,6 @@ export default defineComponent({
       const data = await orgStore.getStatementsList({}, organizationId)
       state.statementId = data.items[0].id
     }
-
-    onMounted(async () => {
-    })
 
     watch(() => [state.selectedAccount], ([selectedAccount]) => {
       if (selectedAccount?.accountId) {
