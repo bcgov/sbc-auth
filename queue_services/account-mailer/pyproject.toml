@@ -46,6 +46,7 @@ build-deps = { git = "https://github.com/bcgov/sbc-auth.git", rev = "feature-gcp
 structured-logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging", branch = "main" }
 
 [tool.poetry.group.dev.dependencies]
+psycopg2 = "^2.9.9"
 pytest = "^8.3.2"
 pytest-mock = "^3.14.0"
 pyhamcrest = "^2.1.0"
