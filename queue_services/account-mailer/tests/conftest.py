@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
-import logging
 import os
 import random
 import time
@@ -26,15 +25,6 @@ from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 
 from account_mailer import create_app
-
-
-def setup_logging(conf):
-    """Create the services logger.
-
-    TODO should be reworked to load in the proper loggers and remove others
-    """
-    if conf and os.path.isfile(conf):
-        logging.config.fileConfig(conf)
 
 
 @contextmanager
@@ -107,8 +97,6 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         Migrate(app, _db, directory=migration_path)
         upgrade()
 
-        # Restore the logging, alembic and sqlalchemy have their own logging from alembic.ini.
-        setup_logging(os.path.abspath('logging.conf'))
         return _db
 
 
