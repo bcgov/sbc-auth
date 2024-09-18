@@ -64,4 +64,4 @@ class MinioService:
         logger.debug(f'GET URL for {key}')
         minio_endpoint = current_app.config['MINIO_ENDPOINT']
 
-        return f'https://{minio_endpoint}/public/{key}'
+        return f'https://{minio_endpoint}/public/{key}'  # noqa: E231
