@@ -6,15 +6,8 @@ authors = ["Avni Salhotra <avni.salhotra@gov.bc.ca>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-cachecontrol = "0.14.0"
-flask = "1.1.2"
-jinja2 = "3.0.3"
-markupsafe = "2.0.1"
-werkzeug = "<2"
-attrs = "23.2.0"
+python = "^3.12"
 blinker = "1.8.2"
-certifi = "2024.7.4"
 charset-normalizer = "3.3.2"
 click = "8.1.7"
 expiringdict = "1.2.2"
@@ -27,10 +20,7 @@ grpcio-status = "1.48.2"
 grpcio = "1.64.0"
 idna = "3.7"
 importlib-resources = "5.13.0"
-itsdangerous = "2.0.1"
 jaeger-client = "4.8.0"
-jsonschema = "4.17.3"
-launchdarkly-server-sdk = "8.2.1"
 msgpack = "1.0.8"
 opentracing = "2.4.0"
 pkgutil-resolve-name = "1.3.10"
@@ -38,9 +28,7 @@ protobuf = ">=3.19.5,<3.20.0"
 pyrfc3339 = "1.1"
 pycountry = "23.12.11"
 pyrsistent = "0.20.0"
-python-dotenv = "1.0.1"
 pytz = "2024.1"
-requests = "2.32.2"
 semver = "3.0.2"
 sentry-sdk = {extras = ["flask"], version = "^2.14.0"}
 six = "1.16.0"
@@ -51,10 +39,11 @@ urllib3 = "2.2.2"
 zipp = "3.19.1"
 
 # VCS dependencies
-sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", rev = "master", subdirectory = "python" }
-auth-api = { git = "https://github.com/seeker25/sbc-auth.git", rev = "20087", subdirectory = "auth-api" }
-gcp-queue = { git = "https://github.com/seeker25/sbc-connect-common.git", branch = "small_tweaks", subdirectory = "python/gcp-queue" }
+auth-api = { git = "https://github.com/bcgov/sbc-auth.git", rev = "feature-gcp-migration", subdirectory = "auth-api" }
 simple-cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py.git" }
+build-deps = { git = "https://github.com/bcgov/sbc-auth.git", rev = "feature-gcp-migration", subdirectory = "build-deps" }
+# TODO move this build-deps
+structured-logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging", branch = "main" }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
