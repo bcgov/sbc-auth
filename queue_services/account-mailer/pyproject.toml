@@ -30,7 +30,6 @@ pycountry = "23.12.11"
 pyrsistent = "0.20.0"
 pytz = "2024.1"
 semver = "3.0.2"
-sentry-sdk = {extras = ["flask"], version = "^2.14.0"}
 six = "1.16.0"
 threadloop = "1.0.2"
 thrift = "0.20.0"
@@ -42,8 +41,6 @@ zipp = "3.19.1"
 auth-api = { git = "https://github.com/bcgov/sbc-auth.git", rev = "feature-gcp-migration", subdirectory = "auth-api" }
 simple-cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py.git" }
 build-deps = { git = "https://github.com/bcgov/sbc-auth.git", rev = "feature-gcp-migration", subdirectory = "build-deps" }
-# TODO move this build-deps
-structured-logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging", branch = "main" }
 
 [tool.poetry.group.dev.dependencies]
 psycopg2 = "^2.9.9"

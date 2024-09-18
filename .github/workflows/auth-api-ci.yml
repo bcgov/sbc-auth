@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "auth-api/**"
+      - "build-deps/**"
   workflow_dispatch:
 
 defaults:
