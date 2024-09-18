@@ -396,13 +396,14 @@ MarkupSafe = "2.1.1"
 python-dotenv = "^1.0.1"
 requests = "2.32.3"
 sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", rev = "master", subdirectory = "python"}
+structured-logging = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/structured-logging"}
 Werkzeug = "3.0.0"
 
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
 reference = "feature-gcp-migration"
-resolved_reference = "e49cd575f694b62eb53fa5c6d525337b0c5629d3"
+resolved_reference = "88914cdadaaf1cc0e1f5fa6c463a7d4e1cdc0c38"
 subdirectory = "build-deps"
 
 [[package]]
@@ -3120,4 +3121,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "c27bbf90f8dce3a74db9771ac5bca291f863bb82e1658c6f9046a30e284d082d"
+content-hash = "ae8f1ccd43b3c8bac963e42b3065d596788881a7e201a82f2174b923673f4a7d"
