@@ -5,10 +5,10 @@ on:
     branches:
       - main
     paths:
-      - "queue_services/auth-queue/**"
+      - "queue_services/account-mailer/**"
       - "auth-api/src/auth_api/models/**"
       - "auth-api/src/auth_api/services/gcp_queue/*"
-      - "auth-api/src/auth_api/services/activity_log_publisher.py"
+      - "auth-api/src/auth_api/utils/account_mailer.py"
       - "auth-api/src/auth_api/utils/enums.py"
   workflow_dispatch:
     inputs:
