@@ -19,21 +19,15 @@ from __future__ import annotations
 
 import os
 
-import sentry_sdk
 from auth_api.models import db
 from auth_api.resources.ops import bp as ops_bp
 from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
 from auth_api.utils.cache import cache
-from auth_api.utils.util_logging import setup_logging
 from flask import Flask
-from sentry_sdk.integrations.flask import FlaskIntegration
 
 from account_mailer import config
 from account_mailer.resources.worker import bp as worker_endpoint
-
-
-setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
 
 
 def register_endpoints(app: Flask):
@@ -52,13 +46,7 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(config.get_named_config(run_mode))
-
-    if str(app.config.get('SENTRY_ENABLE')).lower() == 'true':
-        if app.config.get('SENTRY_DSN', None):
-            sentry_sdk.init(  # pylint: disable=abstract-class-instantiated
-                dsn=app.config.get('SENTRY_DSN'),
-                integrations=[FlaskIntegration()]
-            )
+    app.config['ENV'] = run_mode
 
     db.init_app(app)
     flags.init_app(app)

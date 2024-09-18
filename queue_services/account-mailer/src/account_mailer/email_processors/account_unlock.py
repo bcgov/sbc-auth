@@ -19,13 +19,17 @@ from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import AuthHeaderType, ContentType
 from flask import current_app
 from jinja2 import Template
+from structured_logging import StructuredLogging
 
 from account_mailer.email_processors import generate_template
 
 
+logger = StructuredLogging.get_logger()
+
+
 def process(data: dict, token: str) -> dict:
     """Build the email for Account Unlocked notification."""
-    current_app.logger.debug('email_msg notification: %s', data)
+    logger.debug('email_msg notification: %s', data)
     pdf_attachment = _get_account_unlock_pdf(data, token)
     html_body = _get_account_unlock_email(data)
     return {
@@ -72,7 +76,7 @@ def _get_account_unlock_pdf(data, token):
                                        additional_headers={'Accept': 'application/pdf'})
     pdf_attachment = None
     if report_response.status_code != 200:
-        current_app.logger.error('Failed to get pdf')
+        logger.error('Failed to get pdf')
     else:
         pdf_attachment = base64.b64encode(report_response.content)
 
