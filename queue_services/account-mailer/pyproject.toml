@@ -30,7 +30,6 @@ pycountry = "23.12.11"
 pyrsistent = "0.20.0"
 pytz = "2024.1"
 semver = "3.0.2"
-sentry-sdk = {extras = ["flask"], version = "^2.14.0"}
 six = "1.16.0"
 threadloop = "1.0.2"
 thrift = "0.20.0"
