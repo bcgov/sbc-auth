@@ -51,7 +51,7 @@ def get_local_formatted_date(date_val: datetime, dt_format: str = '%Y-%m-%d'):
 
 def format_currency(amount: str):
     """Format currency to two decimal places."""
-    return f'{float(amount):0,.2f}'
+    return f'{float(amount):0,.2f}'   # noqa: E231
 
 
 def format_day_with_suffix(day: int) -> str:
