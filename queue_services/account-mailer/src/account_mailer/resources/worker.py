@@ -23,7 +23,7 @@ from auth_api.services.gcp_queue import queue
 from auth_api.services.gcp_queue.gcp_auth import ensure_authorized_queue_user
 from auth_api.services.rest_service import RestService
 from auth_api.utils.roles import ADMIN, COORDINATOR
-from flask import Blueprint, current_app, request
+from flask import Blueprint, request
 from sbc_common_components.utils.enums import QueueMessageTypes
 from structured_logging import StructuredLogging
 
