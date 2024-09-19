@@ -1,21 +1,24 @@
 # Payment Due for {{ account_number }}: {{ account_name_with_branch }}
 
 {% if short_name_links_count > 1 %}
-    There's an amount owing on your account for your {{ statement_month }} statement (#{{ statement_number }}), which is due today {{ due_date }}.
+There's an amount owing on your account for your {{ statement_month }} statement (#{{ statement_number }}), which is due today ({{ due_date }}).
 {% else %}
-    There's an amount owing of {{ total_amount_owing }} on your account for your {{ statement_month }} statement (#{{ statement_number }}), which is due today {{ due_date }}.
+There's an amount owing of ${{ total_amount_owing }} on your account for your {{ statement_month }} statement (#{{ statement_number }}), which is due today ({{ due_date }}).
 {% endif %}
 
 {% if short_name_links_count > 1 %}
-    If you've made a payment recently, please verify that you've paid the full amount indicated on your statement and settle any remaining balance by {{ due_date }}. This will help ensure the smooth processing of your account and services.
+If you've made a payment recently, please verify that you've paid the full amount indicated on your statement and settle any remaining balance by {{ due_date }}. This will help ensure the smooth processing of your account and services.
 {% else %}
-    To avoid any disruptions to your services, please make your payment as soon as possible.
+To avoid any disruptions to your services, please make your payment as soon as possible.
 {% endif %}
 
 [Log in to view your {{ statement_frequency }} statements]({{ payment_statement_url }})
 
+{% if short_name_links_count == 1 %}
 If you've recently made a payment, please disregard this message.
+{% endif %}
 
+---
 **Business Registry**
 BC Registries and Online Services
 Toll Free: 1-877-526-1526
