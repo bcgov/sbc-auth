@@ -1,4 +1,5 @@
-FROM python:3.12.5-bullseye as development_build
+FROM python:3.12.2 as development_build
+USER root
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
@@ -10,25 +11,26 @@ ENV PORT=8080
 LABEL org.label-schema.vcs-ref=${VCS_REF} \
     org.label-schema.build-date=${BUILD_DATE}
 
-USER root
-
-LABEL maintainer="BCROS"
 LABEL vendor="BCROS"
 
 ARG APP_ENV \
+  # Needed for fixing permissions of files created by Docker:
   UID=1000 \
   GID=1000
 
 ENV APP_ENV=${APP_ENV} \
+  # python:
   PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
   PYTHONHASHSEED=random \
   PYTHONDONTWRITEBYTECODE=1 \
+  # pip:
   PIP_NO_CACHE_DIR=1 \
   PIP_DISABLE_PIP_VERSION_CHECK=1 \
   PIP_DEFAULT_TIMEOUT=100 \
   PIP_ROOT_USER_ACTION=ignore \
-  POETRY_VERSION=1.8.3 \
+  # poetry:
+  POETRY_VERSION=1.3.2 \
   POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
@@ -43,8 +45,9 @@ RUN apt-get update && apt-get upgrade -y \
     curl \
     git \
     libpq-dev \
-  && curl -sSL 'https://install.python-poetry.org' | python3 - \
+  && curl -sSL 'https://install.python-poetry.org' | python - \
   && poetry --version \
+  # Cleaning cache:
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
@@ -67,6 +70,7 @@ RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
     $(if [ -z ${APP_ENV+x} ] || [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
     --no-interaction --no-ansi
 
+# Running as non-root user:
 USER web
 
 FROM development_build AS production_build
