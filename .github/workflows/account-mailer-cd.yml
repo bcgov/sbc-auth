@@ -22,12 +22,12 @@ on:
         - sandbox
         - prod
 jobs:
-  auth-api-cd:
+  account-mailer-cd:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-cd.yaml@main
     with:
       target: ${{ inputs.target }}
-      app_name: "auth-queue"
-      working_directory: "./queue_services/auth-queue"
+      app_name: "account-mailer"
+      working_directory: "./queue_services/account-mailer"
     secrets:
       WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
