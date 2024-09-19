@@ -1,4 +1,4 @@
-FROM python:3.12.2 as development_build
+FROM python:3.12.5-bullseye as development_build
 USER root
 
 ARG VCS_REF="missing"
@@ -30,7 +30,7 @@ ENV APP_ENV=${APP_ENV} \
   PIP_DEFAULT_TIMEOUT=100 \
   PIP_ROOT_USER_ACTION=ignore \
   # poetry:
-  POETRY_VERSION=1.3.2 \
+  POETRY_VERSION=1.8.3 \
   POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
@@ -45,8 +45,9 @@ RUN apt-get update && apt-get upgrade -y \
     curl \
     git \
     libpq-dev \
-  && curl -sSL 'https://install.python-poetry.org' | python - \
+  && curl -sSL 'https://install.python-poetry.org' | python3 - \
   && poetry --version \
+  && poetry config installer.max-workers 1 \
   # Cleaning cache:
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*
