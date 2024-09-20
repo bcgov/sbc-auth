@@ -403,7 +403,7 @@ Werkzeug = "3.0.0"
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
 reference = "feature-gcp-migration"
-resolved_reference = "b387965a8e56cae6af86754f577c42d8515532e0"
+resolved_reference = "458939f62d4b7818abfb03c263b2802d13ae5fea"
 subdirectory = "build-deps"
 
 [[package]]
