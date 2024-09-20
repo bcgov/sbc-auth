@@ -263,7 +263,7 @@ class Invitation:
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
-    def send_invitation(  # pylint: disable=too-many-arguments
+    def send_invitation(  # pylint: disable=too-many-positional-arguments,too-many-arguments
         invitation: InvitationModel,
         org_name,
         org_id,
