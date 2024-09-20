@@ -45,7 +45,7 @@ class ProductSubscription(Versioned, BaseModel):  # pylint: disable=too-few-publ
         ).all()
 
     @classmethod
-    def find_by_org_id_product_code(cls, org_id, product_code, valid_statuses=VALID_SUBSCRIPTION_STATUSES):
+    def find_by_org_id_product_code(cls, org_id: int, product_code, valid_statuses=VALID_SUBSCRIPTION_STATUSES):
         """Find an product subscription instance that matches the provided id."""
         return cls.query.filter(
             and_(
