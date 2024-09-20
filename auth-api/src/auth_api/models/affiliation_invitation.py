@@ -232,7 +232,10 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     def find_all_related_to_org(cls, org_id: int, search_filter=AffiliationInvitationSearch()):
         """Return all affiliation invitations that are related to the org (from org or to org) filtered by statuses."""
         query = db.session.query(AffiliationInvitation).filter(
-            or_(AffiliationInvitation.to_org_id == org_id, AffiliationInvitation.from_org_id == org_id)
+            or_(
+                AffiliationInvitation.to_org_id.cast(Integer) == org_id.cast(Integer),
+                AffiliationInvitation.from_org_id.cast(Integer) == org_id.cast(Integer),
+            )
         )
 
         return cls.filter_by(search_filter=search_filter, query=query)
