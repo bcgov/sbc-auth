@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "auth-api"
-version = "3.0.3"
+version = "3.0.4"
 description = ""
 authors = ["\"BC Registries and Online Services\""]
 readme = "README.md"
@@ -25,6 +25,7 @@ aiohttp = "^3.10.2"
 cattrs = "^23.2.3"
 orjson = "^3.10.7"
 sqlalchemy-utils = "^0.41.2"
+psycopg2 = "^2.9.9"
 
 # VCS dependencies
 sql-versioning = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/sql-versioning", branch = "main" }

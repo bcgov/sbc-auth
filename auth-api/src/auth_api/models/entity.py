@@ -66,9 +66,9 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods, too-many-ins
         return None
 
     @classmethod
-    def find_by_entity_id(cls, entity_id):
+    def find_by_entity_id(cls, entity_id: int):
         """Find an Entity instance that matches the provided id."""
-        return cls.query.filter_by(id=entity_id).first()
+        return cls.query.filter_by(id=int(entity_id or -1)).first()
 
     def reset(self):
         """Reset an Entity back to init state."""

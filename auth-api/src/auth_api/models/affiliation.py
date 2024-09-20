@@ -55,20 +55,20 @@ class Affiliation(
         return query
 
     @classmethod
-    def find_affiliation_by_org_and_entity_ids(cls, org_id, entity_id, environment) -> Affiliation:
+    def find_affiliation_by_org_and_entity_ids(cls, org_id: int, entity_id: int, environment) -> Affiliation:
         """Return an affiliation for the provided org and entity ids."""
-        query = cls.filter_environment(environment).filter_by(org_id=org_id, entity_id=entity_id)
+        query = cls.filter_environment(environment).filter_by(org_id=int(org_id or -1), entity_id=int(entity_id or -1))
         return query.one_or_none()
 
     @classmethod
-    def find_affiliations_by_entity_id(cls, entity_id, environment) -> List[Affiliation]:
+    def find_affiliations_by_entity_id(cls, entity_id: int, environment) -> List[Affiliation]:
         """Return affiliations for the provided entity id."""
-        return cls.filter_environment(environment).filter_by(entity_id=entity_id).all()
+        return cls.filter_environment(environment).filter_by(entity_id=int(entity_id or -1)).all()
 
     @classmethod
     def find_affiliation_by_ids(cls, org_id: int, affiliation_id: int) -> Affiliation:
         """Return the first Affiliation with the provided ids."""
-        return cls.query.filter_by(org_id=org_id).filter_by(id=affiliation_id).one_or_none()
+        return cls.query.filter_by(org_id=int(org_id or -1)).filter_by(id=int(affiliation_id or -1)).one_or_none()
 
     @classmethod
     def find_affiliations_by_org_id(cls, org_id: int, environment: str) -> List[Affiliation]:
@@ -81,7 +81,7 @@ class Affiliation(
                     EntityModel.business_identifier, EntityModel.corp_type_code
                 )
             )
-            .filter(Affiliation.org_id == org_id)
+            .filter(Affiliation.org_id == int(org_id or -1))
         )
         if environment:
             query = query.filter(Affiliation.environment == environment)
@@ -112,7 +112,7 @@ class Affiliation(
                     EntityModel.business_identifier, EntityModel.corp_type_code
                 )
             )
-            .filter(Affiliation.org_id == org_id)
+            .filter(Affiliation.org_id == int(org_id or -1))
             .filter(EntityModel.business_identifier == business_identifier)
         )
         if environment:

@@ -61,12 +61,12 @@ class Affidavit(Versioned, BaseModel):
     @classmethod
     def find_pending_by_user_id(cls, user_id: int):
         """Find pending affidavit by user id."""
-        return cls.query.filter_by(user_id=user_id, status_code=AffidavitStatus.PENDING.value).one_or_none()
+        return cls.query.filter_by(user_id=int(user_id or -1), status_code=AffidavitStatus.PENDING.value).one_or_none()
 
     @classmethod
     def find_approved_by_user_id(cls, user_id: int):
         """Find pending affidavit by user id."""
-        return cls.query.filter_by(user_id=user_id, status_code=AffidavitStatus.APPROVED.value).one_or_none()
+        return cls.query.filter_by(user_id=int(user_id or -1), status_code=AffidavitStatus.APPROVED.value).one_or_none()
 
     @classmethod
     def find_effective_by_user_guid(cls, user_guid: str, status: str = None):

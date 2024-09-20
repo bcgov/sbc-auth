@@ -187,13 +187,16 @@ class Invitation:
     def delete_invitation(invitation_id):
         """Delete the specified invitation."""
         # Ensure that the current user is ADMIN or COORDINATOR for each org in the invitation
-        invitation = InvitationModel.find_invitation_by_id(invitation_id)
-        if invitation is None:
+        if invitation_id:
+            invitation = InvitationModel.find_invitation_by_id(invitation_id)
+            if invitation is None:
+                raise BusinessException(Error.DATA_NOT_FOUND, None)
+            for membership in invitation.membership:
+                org_id = membership.org_id
+                check_auth(org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+            invitation.delete()
+        else:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        for membership in invitation.membership:
-            org_id = membership.org_id
-            check_auth(org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
-        invitation.delete()
 
     @staticmethod
     @user_context

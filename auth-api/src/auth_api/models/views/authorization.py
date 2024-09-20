@@ -54,10 +54,10 @@ class Authorization(db.Model):
         auth = None
         if keycloak_guid and business_identifier and org_id:
             auth = cls.query.filter_by(
-                keycloak_guid=keycloak_guid, business_identifier=business_identifier, org_id=org_id
+                keycloak_guid=keycloak_guid, business_identifier=business_identifier, org_id=int(org_id or -1)
             ).one_or_none()
         elif business_identifier and org_id:
-            auth = cls.query.filter_by(business_identifier=business_identifier, org_id=org_id).first()
+            auth = cls.query.filter_by(business_identifier=business_identifier, org_id=int(org_id or -1)).first()
         elif keycloak_guid and business_identifier:
             auth = cls.query.filter_by(keycloak_guid=keycloak_guid, business_identifier=business_identifier).first()
         elif is_staff and business_identifier:
@@ -86,23 +86,23 @@ class Authorization(db.Model):
     @classmethod
     def find_user_authorization_by_org_id(cls, keycloak_guid: uuid, org_id: int):
         """Return authorization view object."""
-        return cls.query.filter_by(keycloak_guid=keycloak_guid, org_id=org_id).one_or_none()
+        return cls.query.filter_by(keycloak_guid=keycloak_guid, org_id=int(org_id or -1)).one_or_none()
 
     @classmethod
     def find_authorization_for_admin_by_org_id(cls, org_id: int):
         """Return authorization view object for staff."""
         # staff gets ADMIN level access
-        return cls.query.filter_by(org_id=org_id, org_membership=ADMIN).first()
+        return cls.query.filter_by(org_id=int(org_id or -1), org_membership=ADMIN).first()
 
     @classmethod
     def find_account_authorization_by_org_id_and_product_for_user(cls, keycloak_guid: uuid, org_id: int, product: str):
         """Return authorization view object."""
-        return cls.query.filter_by(keycloak_guid=keycloak_guid, org_id=org_id, product_code=product).one_or_none()
+        return cls.query.filter_by(keycloak_guid=keycloak_guid, org_id=int(org_id or -1), product_code=product).one_or_none()
 
     @classmethod
     def find_account_authorization_by_org_id_and_product(cls, org_id: int, product: str):
         """Return authorization view object."""
-        return cls.query.filter_by(org_id=org_id, product_code=product, org_membership=ADMIN).first()
+        return cls.query.filter_by(org_id=int(org_id or -1), product_code=product, org_membership=ADMIN).first()
 
     @classmethod
     def find_all_authorizations_for_user(cls, keycloak_guid):
