@@ -55,13 +55,13 @@ class Affiliation(
         return query
 
     @classmethod
-    def find_affiliation_by_org_and_entity_ids(cls, org_id, entity_id, environment) -> Affiliation:
+    def find_affiliation_by_org_and_entity_ids(cls, org_id: int, entity_id: int, environment) -> Affiliation:
         """Return an affiliation for the provided org and entity ids."""
         query = cls.filter_environment(environment).filter_by(org_id=org_id, entity_id=entity_id)
         return query.one_or_none()
 
     @classmethod
-    def find_affiliations_by_entity_id(cls, entity_id, environment) -> List[Affiliation]:
+    def find_affiliations_by_entity_id(cls, entity_id: int, environment) -> List[Affiliation]:
         """Return affiliations for the provided entity id."""
         return cls.filter_environment(environment).filter_by(entity_id=entity_id).all()
 

@@ -33,6 +33,6 @@ class AccountLoginOptions(Versioned, BaseModel):  # pylint: disable=too-few-publ
     org = relationship("Org", foreign_keys=[org_id], lazy="select")
 
     @classmethod
-    def find_active_by_org_id(cls, account_id):
+    def find_active_by_org_id(cls, account_id: int):
         """Find an account setting instance that matches the provided org_id."""
         return cls.query.filter_by(org_id=account_id).filter_by(is_active=True).first()
