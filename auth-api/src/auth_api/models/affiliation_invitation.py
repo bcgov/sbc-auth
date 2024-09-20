@@ -118,27 +118,39 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
             results = db.session.query(AffiliationInvitation)
 
         if search_filter.from_org_id:
-            results = results.filter(AffiliationInvitation.from_org_id == int(search_filter.from_org_id))
+            results = results.filter(
+                AffiliationInvitation.from_org_id.cast(Integer) == search_filter.from_org_id.cast(Integer)
+            )
             filter_set = True
 
         if search_filter.to_org_id:
-            results = results.filter(AffiliationInvitation.to_org_id == int(search_filter.to_org_id))
+            results = results.filter(
+                AffiliationInvitation.to_org_id.cast(Integer) == search_filter.to_org_id.cast(Integer)
+            )
             filter_set = True
 
         if search_filter.sender_id:
-            results = results.filter(AffiliationInvitation.sender_id == int(search_filter.sender_id))
+            results = results.filter(
+                AffiliationInvitation.sender_id.cast(Integer) == search_filter.sender_id.cast(Integer)
+            )
             filter_set = True
 
         if search_filter.approver_id:
-            results = results.filter(AffiliationInvitation.approver_id == int(search_filter.approver_id))
+            results = results.filter(
+                AffiliationInvitation.approver_id.cast(Integer) == search_filter.approver_id.cast(Integer)
+            )
             filter_set = True
 
         if search_filter.entity_id:
-            results = results.filter(AffiliationInvitation.entity_id == int(search_filter.entity_id))
+            results = results.filter(
+                AffiliationInvitation.entity_id.cast(Integer) == search_filter.entity_id.cast(Integer)
+            )
             filter_set = True
 
         if search_filter.affiliation_id:
-            results = results.filter(AffiliationInvitation.affiliation_id == int(search_filter.affiliation_id))
+            results = results.filter(
+                AffiliationInvitation.affiliation_id.cast(Integer) == search_filter.affiliation_id.cast(Integer)
+            )
             filter_set = True
 
         if search_filter.status_codes:
