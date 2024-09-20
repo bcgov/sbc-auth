@@ -403,7 +403,7 @@ Werkzeug = "3.0.0"
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
 reference = "feature-gcp-migration"
-resolved_reference = "458939f62d4b7818abfb03c263b2802d13ae5fea"
+resolved_reference = "b03e1083c85649c5dcfe85cdae7cbae13ac0f40f"
 subdirectory = "build-deps"
 
 [[package]]
@@ -3127,4 +3127,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "ae8f1ccd43b3c8bac963e42b3065d596788881a7e201a82f2174b923673f4a7d"
+content-hash = "825b0312c3e9765cc9fd00497d83cb481981a01fef671928ecdf00dd34c66a1a"
