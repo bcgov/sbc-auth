@@ -93,7 +93,7 @@ class Task(BaseModel):
         return pagination.items, pagination.total
 
     @classmethod
-    def find_by_task_id(cls, task_id):
+    def find_by_task_id(cls, task_id: int):
         """Find a task instance that matches the provided id."""
         return db.session.query(Task).filter_by(id=task_id).first()
 
@@ -113,7 +113,7 @@ class Task(BaseModel):
         )
 
     @classmethod
-    def find_by_task_for_account(cls, org_id, status):
+    def find_by_task_for_account(cls, org_id: int, status):
         """Find a task instance that matches the provided id."""
         return (
             db.session.query(Task)
@@ -122,7 +122,7 @@ class Task(BaseModel):
         )
 
     @classmethod
-    def find_by_user_and_status(cls, org_id, status):
+    def find_by_user_and_status(cls, org_id: int, status):
         """Find a task instance that matches the provided id."""
         return (
             db.session.query(Task)
