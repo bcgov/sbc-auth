@@ -40,7 +40,7 @@ class RestService:
     """Service to invoke Rest services which uses OAuth 2.0 implementation."""
 
     @staticmethod
-    def _invoke(  # pylint: disable=too-many-arguments
+    def _invoke(  # pylint: disable=too-many-positional-arguments,too-many-arguments
         rest_method,
         endpoint,
         token=None,
@@ -102,7 +102,7 @@ class RestService:
                 current_app.logger.info(f"response : {response.text if response else ''}")
 
     @staticmethod
-    def post(  # pylint: disable=too-many-arguments
+    def post(  # pylint: disable=too-many-positional-arguments,too-many-arguments
         endpoint,
         token=None,
         auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
@@ -127,7 +127,7 @@ class RestService:
         )
 
     @staticmethod
-    def put(  # pylint: disable=too-many-arguments
+    def put(  # pylint: disable=too-many-positional-arguments,too-many-arguments
         endpoint,
         token=None,
         auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
@@ -140,7 +140,7 @@ class RestService:
         return RestService._invoke("put", endpoint, token, auth_header_type, content_type, data, raise_for_status)
 
     @staticmethod
-    def patch(  # pylint: disable=too-many-arguments
+    def patch(  # pylint: disable=too-many-positional-arguments,too-many-arguments
         endpoint,
         token=None,
         auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
@@ -165,7 +165,7 @@ class RestService:
         )
 
     @staticmethod
-    def delete(  # pylint: disable=too-many-arguments
+    def delete(  # pylint: disable=too-many-positional-arguments,too-many-arguments
         endpoint,
         token=None,
         auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
@@ -190,7 +190,7 @@ class RestService:
         )
 
     @staticmethod
-    def get(  # pylint: disable=too-many-arguments
+    def get(  # pylint: disable=too-many-positional-arguments,too-many-arguments
         endpoint,
         token=None,
         auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,

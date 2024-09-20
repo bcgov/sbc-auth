@@ -34,7 +34,7 @@ class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many
     org_id = Column(Integer, nullable=True, index=True)
 
     @classmethod
-    def fetch_activity_logs_for_account(  # pylint: disable=too-many-arguments
+    def fetch_activity_logs_for_account(  # pylint: disable=too-many-positional-arguments,too-many-arguments
         cls,
         org_id: int,
         item_name: str,

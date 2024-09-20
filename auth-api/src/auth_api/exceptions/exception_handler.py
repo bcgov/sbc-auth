@@ -32,12 +32,12 @@ class ExceptionHandler:
         if app:
             self.init_app(app)
 
-    def auth_handler(self, error):  # pylint: disable=no-self-use
+    def auth_handler(self, error):  # pylint: disable=useless-option-value
         """Handle AuthError."""
         http_logger.error(error.error)
         return error.error, error.status_code, RESPONSE_HEADERS
 
-    def db_handler(self, error):  # pylint: disable=no-self-use
+    def db_handler(self, error):  # pylint: disable=useless-option-value
         """Handle Database error."""
         logger.exception(error)
         error_text = error.__dict__["code"] if hasattr(error.__dict__, "code") else ""
@@ -45,14 +45,16 @@ class ExceptionHandler:
         status_code = error.status_code if hasattr(error, "status_code") else 500
         return {"error": "{}".format(error_text), "message": "{}".format(message_text)}, status_code, RESPONSE_HEADERS
 
-    def std_handler(self, error):  # pylint: disable=no-self-use
+    def std_handler(self, error):  # pylint: disable=useless-option-value
         """Handle standard exception."""
         if isinstance(error, HTTPException):
             http_logger.error(error)
-            message = dict(message=error.message if hasattr(error, "message") else error.description)
+            message = dict(  # pylint: disable=use-dict-literal
+                message=error.message if hasattr(error, "message") else error.description
+            )
         else:
             logger.exception(error)
-            message = dict(message="Internal server error")
+            message = dict(message="Internal server error")  # pylint: disable=use-dict-literal
         return message, error.code if isinstance(error, HTTPException) else 500, RESPONSE_HEADERS
 
     def init_app(self, app):
