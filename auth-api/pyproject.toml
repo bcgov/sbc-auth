@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "auth-api"
-version = "3.0.2"
+version = "3.0.3"
 description = ""
 authors = ["\"BC Registries and Online Services\""]
 readme = "README.md"
