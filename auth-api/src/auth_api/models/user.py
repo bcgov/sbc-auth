@@ -227,7 +227,7 @@ class User(BaseModel):
         return None
 
     @classmethod
-    def find_users_by_org_id_by_status_by_roles(cls, org_id, roles, status=Status.ACTIVE.value):
+    def find_users_by_org_id_by_status_by_roles(cls, org_id: int, roles, status=Status.ACTIVE.value):
         """Find all members of the org with a status."""
         return (
             db.session.query(User)

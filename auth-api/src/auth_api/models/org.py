@@ -118,7 +118,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         return cls.query.filter_by(uuid=org_uuid).first()
 
     @classmethod
-    def find_by_org_id(cls, org_id):
+    def find_by_org_id(cls, org_id: int):
         """Find an Org instance that matches the provided id."""
         return cls.query.filter_by(id=org_id).first()
 
@@ -238,7 +238,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         return query
 
     @classmethod
-    def search_pending_activation_orgs(cls, name):
+    def search_pending_activation_orgs(cls, name: str):
         """Find all orgs with the given type."""
         query = (
             db.session.query(Org)
@@ -271,7 +271,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         return cls.query.filter_by(access_type=org_type).all()
 
     @classmethod
-    def find_similar_org_by_name(cls, name, org_id=None, branch_name=None):
+    def find_similar_org_by_name(cls, name, org_id: int = None, branch_name=None):
         """Find an Org instance that matches the provided name."""
         query = cls.query.filter(
             and_(
