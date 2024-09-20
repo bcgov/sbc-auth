@@ -146,7 +146,7 @@ class User(BaseModel):
     @user_context
     def update_from_jwt_token(
         cls,
-        user,  # pylint:disable=too-many-arguments
+        user,  # pylint:disable=too-many-positional-arguments
         first_name: str,
         last_name: str,
         is_login: bool = False,
