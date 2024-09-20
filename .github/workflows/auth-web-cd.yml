@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - feature*
+      paths:
+        - "auth-web/**"
   workflow_dispatch:
     inputs:
       target:

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature*
     paths:
       - "queue_services/auth-queue/**"
       - "auth-api/src/auth_api/models/**"
