@@ -26,7 +26,7 @@ class UserSettings:  # pylint: disable=too-few-public-methods, too-many-instance
     Can extended to product which user has access to.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-positional-arguments,too-many-arguments
         self,
         id_,
         label,

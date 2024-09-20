@@ -115,8 +115,8 @@ class _Config:  # pylint: disable=too-few-public-methods
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv("SBC_AUTH_ADMIN_CLIENT_ID")
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv("SBC_AUTH_ADMIN_CLIENT_SECRET")
 
-    ENTITY_SVC_CLIENT_ID = os.getenv("ENTITY_SERVICE_ACCOUNT_CLIENT_ID")
-    ENTITY_SVC_CLIENT_SECRET = os.getenv("ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET")
+    ENTITY_SVC_CLIENT_ID = os.getenv("ENTITY_SVC_CLIENT_ID")
+    ENTITY_SVC_CLIENT_SECRET = os.getenv("ENTITY_SVC_CLIENT_SECRET")
 
     # Upstream Keycloak setting - should be removed
     KEYCLOAK_BCROS_BASE_URL = os.getenv("KEYCLOAK_BCROS_BASE_URL")

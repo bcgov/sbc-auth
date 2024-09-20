@@ -213,7 +213,7 @@ class Org:  # pylint: disable=too-many-public-methods
     @user_context
     def _create_payment_settings(
         org_model: OrgModel,
-        payment_info: dict,  # pylint: disable=too-many-arguments
+        payment_info: dict,  # pylint: disable=too-many-positional-arguments
         payment_method: str,
         mailing_address=None,
         is_new_org: bool = True,
