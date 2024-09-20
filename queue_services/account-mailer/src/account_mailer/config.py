@@ -91,8 +91,15 @@ class _Config():  # pylint: disable=too-few-public-methods
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('SBC_AUTH_ADMIN_CLIENT_SECRET')
 
     # API endpoints
-    PAY_API_URL = os.getenv('PAY_API_URL')
-    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
+    PAY_API_URL = os.getenv('PAY_API_URL', '')
+    PAY_API_VERSION = os.getenv('PAY_API_VERSION', '')
+    PAY_API_URL = PAY_API_URL + PAY_API_VERSION
+    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL', '')
+    NOTIFY_API_VERSION = os.getenv('NOTIFY_API_VERSION', '')
+    NOTIFY_API_URL = NOTIFY_API_URL + NOTIFY_API_VERSION
+    REPORT_API_URL = os.getenv('REPORT_API_URL', '')
+    REPORT_API_VERSION = os.getenv('REPORT_API_VERSION', '')
+    REPORT_API_URL = REPORT_API_URL + REPORT_API_VERSION
     REPORT_API_BASE_URL = f'{os.getenv("REPORT_API_URL")}/reports'
 
     # PUB/SUB - SUB: account-mailer-dev
