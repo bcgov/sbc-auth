@@ -44,24 +44,24 @@ class ContactLink(Versioned, BaseModel):  # pylint: disable=too-few-public-metho
     affidavit = relationship("Affidavit", foreign_keys=[affidavit_id], lazy="select")
 
     @classmethod
-    def find_by_entity_id(cls, entity_id):
+    def find_by_entity_id(cls, entity_id: int):
         """Return the first contact link with the provided entity id."""
-        return cls.query.filter_by(entity_id=entity_id).first()
+        return cls.query.filter_by(entity_id=int(entity_id or -1)).first()
 
     @classmethod
-    def find_by_user_id(cls, user_id):
+    def find_by_user_id(cls, user_id: int):
         """Return the first contact link with the provided user id."""
-        return cls.query.filter_by(user_id=user_id).first()
+        return cls.query.filter_by(user_id=int(user_id or -1)).first()
 
     @classmethod
-    def find_by_org_id(cls, org_id):
+    def find_by_org_id(cls, org_id: int):
         """Return the first contact link with the provided org id."""
-        return cls.query.filter_by(org_id=org_id).first()
+        return cls.query.filter_by(org_id=int(org_id or -1)).first()
 
     @classmethod
-    def find_by_affidavit_id(cls, affidavit_id):
+    def find_by_affidavit_id(cls, affidavit_id: int):
         """Return the first contact link with the provided affidavit id."""
-        return cls.query.filter_by(affidavit_id=affidavit_id).one_or_none()
+        return cls.query.filter_by(affidavit_id=int(affidavit_id or -1)).one_or_none()
 
     def has_links(self):
         """Check whether there are any remaining links for this contact."""

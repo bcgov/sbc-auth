@@ -64,7 +64,7 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         return self.invitation_status_code
 
     @classmethod
-    def create_from_dict(cls, invitation_info: dict, user_id, invitation_type):
+    def create_from_dict(cls, invitation_info: dict, user_id: int, invitation_type):
         """Create a new Invitation from the provided dictionary."""
         if invitation_info:
             invitation = Invitation()
@@ -85,23 +85,23 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         return None
 
     @classmethod
-    def find_invitations_by_user(cls, user_id):
+    def find_invitations_by_user(cls, user_id: int):
         """Find all invitation sent by the given user."""
-        return cls.query.filter_by(sender_id=user_id).all()
+        return cls.query.filter_by(sender_id=int(user_id or -1)).all()
 
     @classmethod
-    def find_invitation_by_id(cls, invitation_id):
+    def find_invitation_by_id(cls, invitation_id: int):
         """Find an invitation record that matches the id."""
-        return cls.query.filter_by(id=invitation_id).first()
+        return cls.query.filter_by(id=int(invitation_id or -1)).first()
 
     @classmethod
-    def find_invitations_by_org(cls, org_id, status=None):
+    def find_invitations_by_org(cls, org_id: int, status=None):
         """Find all invitations sent for specific org filtered by status."""
-        results = cls.query.filter(Invitation.membership.any(InvitationMembership.org_id == org_id))
+        results = cls.query.filter(Invitation.membership.any(InvitationMembership.org_id == int(org_id or -1)))
         return results.filter(Invitation.status == status.value).all() if status else results.all()
 
     @staticmethod
-    def find_pending_invitations_by_user(user_id):
+    def find_pending_invitations_by_user(user_id: int):
         """Find all invitations that are not in accepted state."""
         return (
             db.session.query(Invitation)
@@ -111,7 +111,7 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         )
 
     @staticmethod
-    def find_pending_invitations_by_org(org_id):
+    def find_pending_invitations_by_org(org_id: int):
         """Find all invitations that are not in accepted state."""
         return (
             db.session.query(Invitation)
@@ -121,7 +121,7 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         )
 
     @staticmethod
-    def find_invitations_by_status(user_id, status):
+    def find_invitations_by_status(user_id: int, status):
         """Find all invitations that are not in accepted state."""
         return (
             db.session.query(Invitation)
