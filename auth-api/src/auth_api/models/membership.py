@@ -70,12 +70,12 @@ class Membership(
     @classmethod
     def find_membership_by_id(cls, membership_id: int) -> Membership:
         """Find the first membership with the given id and return it."""
-        return cls.query.filter_by(id=membership_id).first()
+        return cls.query.filter_by(id=int(membership_id or -1)).first()
 
     @classmethod
     def find_members_by_org_id(cls, org_id: int) -> List[Membership]:
         """Return all members of the org with a status."""
-        return cls.query.filter_by(org_id=org_id).all()
+        return cls.query.filter_by(org_id=int(org_id or -1)).all()
 
     @classmethod
     def get_pending_members_count_by_org_id(cls, org_id: int) -> int:
@@ -84,7 +84,7 @@ class Membership(
             db.session.query(Membership)
             .filter(and_(Membership.status == Status.PENDING_APPROVAL.value))
             .join(OrgModel)
-            .filter(OrgModel.id == org_id)
+            .filter(OrgModel.id == int(org_id or -1))
         )
         # pylint:disable=not-callable
         count_q = query.statement.with_only_columns(func.count(), maintain_column_froms=True).order_by(None)
@@ -100,7 +100,7 @@ class Membership(
             db.session.query(Membership)
             .filter(and_(Membership.status == status, Membership.membership_type_code.in_(roles)))
             .join(OrgModel)
-            .filter(OrgModel.id == org_id)
+            .filter(OrgModel.id == int(org_id or -1))
             .all()
         )
 
@@ -109,7 +109,7 @@ class Membership(
         """Find the orgs for a user."""
         records = (
             cls.query.join(OrgModel)
-            .filter(cls.user_id == user_id)
+            .filter(cls.user_id == int(user_id or -1))
             .filter(cls.status.in_(valid_statuses))
             .filter(OrgModel.status_code.in_(VALID_ORG_STATUSES))
             .all()
@@ -122,7 +122,7 @@ class Membership(
         """Find staff orgs memberships for a user."""
         return (
             cls.query.join(OrgModel)
-            .filter(cls.user_id == user_id)
+            .filter(cls.user_id == int(user_id or -1))
             .filter(cls.status == Status.ACTIVE.value)
             .filter(OrgModel.status_code.in_(VALID_ORG_STATUSES))
             .filter(OrgModel.type_code == OrgType.STAFF.value)
@@ -163,14 +163,14 @@ class Membership(
     @classmethod
     def find_membership_by_userid(cls, user_id: int) -> Membership:
         """Get the membership for the specified user."""
-        records = cls.query.filter(cls.user_id == user_id).order_by(desc(Membership.created)).first()
+        records = cls.query.filter(cls.user_id == int(user_id or -1)).order_by(desc(Membership.created)).first()
 
         return records
 
     @classmethod
     def find_memberships_by_user_ids(cls, user_id: int) -> List[Membership]:
         """Get the memberships for the specified user ids."""
-        records = cls.query.filter(cls.user_id == user_id).order_by(desc(Membership.created)).all()
+        records = cls.query.filter(cls.user_id == int(user_id or -1)).order_by(desc(Membership.created)).all()
 
         return records
 
@@ -178,8 +178,8 @@ class Membership(
     def find_membership_by_user_and_org_all_status(cls, user_id: int, org_id: int) -> Membership:
         """Get the membership for the specified user and org with all membership statuses."""
         records = (
-            cls.query.filter(cls.user_id == user_id)
-            .filter(cls.org_id == org_id)
+            cls.query.filter(cls.user_id == int(user_id or -1))
+            .filter(cls.org_id == int(org_id or -1))
             .order_by(desc(Membership.created))
             .first()
         )
@@ -193,13 +193,13 @@ class Membership(
             db.session.query(Membership)
             .filter(
                 and_(
-                    Membership.org_id == org_id,
+                    Membership.org_id == int(org_id or -1),
                     Membership.status == Status.ACTIVE.value,
                     Membership.membership_type_code == ADMIN,
                 )
             )
             .join(OrgModel)
-            .filter(OrgModel.id == org_id)
+            .filter(OrgModel.id == int(org_id or -1))
         )
 
         # pylint:disable=not-callable
@@ -214,14 +214,14 @@ class Membership(
             db.session.query(Membership)
             .filter(
                 and_(
-                    Membership.user_id == user_id,
-                    Membership.org_id == org_id,
+                    Membership.user_id == int(user_id or -1),
+                    Membership.org_id == int(org_id or -1),
                     Membership.status == Status.ACTIVE.value,
                     Membership.membership_type_code.in_((ADMIN, COORDINATOR)),
                 )
             )
             .join(OrgModel)
-            .filter(OrgModel.id == org_id)
+            .filter(OrgModel.id == int(org_id or -1))
         )
         # pylint:disable=not-callable
         count_q = query.statement.with_only_columns(func.count(), maintain_column_froms=True).order_by(None)
@@ -235,7 +235,7 @@ class Membership(
             db.session.query(Membership)
             .filter(
                 and_(
-                    Membership.user_id == user_id,
+                    Membership.user_id == int(user_id or -1),
                     Membership.status == Status.ACTIVE.value,
                     Membership.org.has(OrgModel.type_code == OrgType.SBC_STAFF.value),
                 )

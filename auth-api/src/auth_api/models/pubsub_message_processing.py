@@ -24,9 +24,9 @@ class PubSubMessageProcessing(db.Model):
     processed = Column(DateTime, nullable=True)
 
     @classmethod
-    def find_by_id(cls, identifier):
+    def find_by_id(cls, identifier: int):
         """Find a pubsub message processing by id."""
-        return cls.query.filter_by(id=identifier).one_or_none()
+        return cls.query.filter_by(id=int(identifier)).one_or_none()
 
     @classmethod
     def find_by_cloud_event_id_and_type(cls, cloud_event_id, message_type):

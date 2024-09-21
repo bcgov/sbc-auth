@@ -35,4 +35,4 @@ class AccountLoginOptions(Versioned, BaseModel):  # pylint: disable=too-few-publ
     @classmethod
     def find_active_by_org_id(cls, account_id: int):
         """Find an account setting instance that matches the provided org_id."""
-        return cls.query.filter_by(org_id=account_id).filter_by(is_active=True).first()
+        return cls.query.filter_by(org_id=int(account_id or -1)).filter_by(is_active=True).first()

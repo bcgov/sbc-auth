@@ -446,7 +446,7 @@ class AffiliationInvitation:
         # If staff return full list
         if user_from_context.is_staff():
             return AffiliationInvitationModel.filter_by(
-                AffiliationInvitationSearch(to_org_id=org_id, status_codes=["PENDING"])
+                AffiliationInvitationSearch(to_org_id=int(org_id), status_codes=["PENDING"])
             )
 
         current_user: UserService = UserService.find_by_jwt_token()
