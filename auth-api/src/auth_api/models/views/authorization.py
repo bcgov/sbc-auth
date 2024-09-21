@@ -97,7 +97,9 @@ class Authorization(db.Model):
     @classmethod
     def find_account_authorization_by_org_id_and_product_for_user(cls, keycloak_guid: uuid, org_id: int, product: str):
         """Return authorization view object."""
-        return cls.query.filter_by(keycloak_guid=keycloak_guid, org_id=int(org_id or -1), product_code=product).one_or_none()
+        return cls.query.filter_by(
+            keycloak_guid=keycloak_guid, org_id=int(org_id or -1), product_code=product
+        ).one_or_none()
 
     @classmethod
     def find_account_authorization_by_org_id_and_product(cls, org_id: int, product: str):

@@ -117,7 +117,9 @@ class Task(BaseModel):
         """Find a task instance that matches the provided id."""
         return (
             db.session.query(Task)
-            .filter_by(relationship_id=int(org_id or -1), relationship_type=TaskRelationshipType.ORG.value, status=status)
+            .filter_by(
+                relationship_id=int(org_id or -1), relationship_type=TaskRelationshipType.ORG.value, status=status
+            )
             .first()
         )
 
