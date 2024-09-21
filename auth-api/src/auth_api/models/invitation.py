@@ -87,17 +87,17 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     @classmethod
     def find_invitations_by_user(cls, user_id: int):
         """Find all invitation sent by the given user."""
-        return cls.query.filter_by(sender_id=user_id).all()
+        return cls.query.filter_by(sender_id=int(user_id or -1)).all()
 
     @classmethod
     def find_invitation_by_id(cls, invitation_id: int):
         """Find an invitation record that matches the id."""
-        return cls.query.filter_by(id=invitation_id).first()
+        return cls.query.filter_by(id=int(invitation_id or -1)).first()
 
     @classmethod
     def find_invitations_by_org(cls, org_id: int, status=None):
         """Find all invitations sent for specific org filtered by status."""
-        results = cls.query.filter(Invitation.membership.any(InvitationMembership.org_id.cast(Integer) == org_id))
+        results = cls.query.filter(Invitation.membership.any(InvitationMembership.org_id == int(org_id or -1)))
         return results.filter(Invitation.status == status.value).all() if status else results.all()
 
     @staticmethod

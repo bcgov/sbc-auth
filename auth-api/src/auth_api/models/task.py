@@ -95,7 +95,7 @@ class Task(BaseModel):
     @classmethod
     def find_by_task_id(cls, task_id: int):
         """Find a task instance that matches the provided id."""
-        return db.session.query(Task).filter_by(id=task_id).first()
+        return db.session.query(Task).filter_by(id=int(task_id or -1)).first()
 
     @classmethod
     def find_by_task_relationship_id(
@@ -117,7 +117,9 @@ class Task(BaseModel):
         """Find a task instance that matches the provided id."""
         return (
             db.session.query(Task)
-            .filter_by(relationship_id=org_id, relationship_type=TaskRelationshipType.ORG.value, status=status)
+            .filter_by(
+                relationship_id=int(org_id or -1), relationship_type=TaskRelationshipType.ORG.value, status=status
+            )
             .first()
         )
 
@@ -126,7 +128,7 @@ class Task(BaseModel):
         """Find a task instance that matches the provided id."""
         return (
             db.session.query(Task)
-            .filter_by(account_id=org_id, relationship_type=TaskRelationshipType.USER.value, status=status)
+            .filter_by(account_id=int(org_id or -1), relationship_type=TaskRelationshipType.USER.value, status=status)
             .first()
         )
 

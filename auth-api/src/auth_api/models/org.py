@@ -120,7 +120,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
     @classmethod
     def find_by_org_id(cls, org_id: int):
         """Find an Org instance that matches the provided id."""
-        return cls.query.filter_by(id=org_id).first()
+        return cls.query.filter_by(id=int(org_id or -1)).first()
 
     @classmethod
     def find_by_bcol_id(cls, bcol_account_id):

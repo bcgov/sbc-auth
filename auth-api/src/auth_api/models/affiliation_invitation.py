@@ -118,39 +118,27 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
             results = db.session.query(AffiliationInvitation)
 
         if search_filter.from_org_id:
-            results = results.filter(
-                AffiliationInvitation.from_org_id.cast(Integer) == search_filter.from_org_id.cast(Integer)
-            )
+            results = results.filter(AffiliationInvitation.from_org_id == int(search_filter.from_org_id))
             filter_set = True
 
         if search_filter.to_org_id:
-            results = results.filter(
-                AffiliationInvitation.to_org_id.cast(Integer) == search_filter.to_org_id.cast(Integer)
-            )
+            results = results.filter(AffiliationInvitation.to_org_id == int(search_filter.to_org_id))
             filter_set = True
 
         if search_filter.sender_id:
-            results = results.filter(
-                AffiliationInvitation.sender_id.cast(Integer) == search_filter.sender_id.cast(Integer)
-            )
+            results = results.filter(AffiliationInvitation.sender_id == int(search_filter.sender_id))
             filter_set = True
 
         if search_filter.approver_id:
-            results = results.filter(
-                AffiliationInvitation.approver_id.cast(Integer) == search_filter.approver_id.cast(Integer)
-            )
+            results = results.filter(AffiliationInvitation.approver_id == int(search_filter.approver_id))
             filter_set = True
 
         if search_filter.entity_id:
-            results = results.filter(
-                AffiliationInvitation.entity_id.cast(Integer) == search_filter.entity_id.cast(Integer)
-            )
+            results = results.filter(AffiliationInvitation.entity_id == int(search_filter.entity_id))
             filter_set = True
 
         if search_filter.affiliation_id:
-            results = results.filter(
-                AffiliationInvitation.affiliation_id.cast(Integer) == search_filter.affiliation_id.cast(Integer)
-            )
+            results = results.filter(AffiliationInvitation.affiliation_id == int(search_filter.affiliation_id))
             filter_set = True
 
         if search_filter.status_codes:
@@ -173,7 +161,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     @classmethod
     def find_invitation_by_id(cls, invitation_id: int):
         """Find an affiliation invitation record that matches the id."""
-        return cls.query.filter_by(id=invitation_id).first()
+        return cls.query.filter_by(id=int(invitation_id or -1)).first()
 
     @classmethod
     def find_invitations_from_org(cls, org_id: int, status=None):
@@ -196,7 +184,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     @classmethod
     def find_invitations_by_affiliation(cls, affiliation_id: int):
         """Find all affiliation invitations associated to an affiliation."""
-        return cls.query.filter_by(affiliation_id=affiliation_id).all()
+        return cls.query.filter_by(affiliation_id=int(affiliation_id or -1)).all()
 
     @staticmethod
     def find_invitations_by_org_entity_ids(from_org_id: int, entity_id: int):
@@ -232,7 +220,10 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     def find_all_related_to_org(cls, org_id: int, search_filter=AffiliationInvitationSearch()):
         """Return all affiliation invitations that are related to the org (from org or to org) filtered by statuses."""
         query = db.session.query(AffiliationInvitation).filter(
-            or_(AffiliationInvitation.to_org_id == int(org_id), AffiliationInvitation.from_org_id == int(org_id))
+            or_(
+                AffiliationInvitation.to_org_id == int(org_id or -1),
+                AffiliationInvitation.from_org_id == int(org_id or -1),
+            )
         )
 
         return cls.filter_by(search_filter=search_filter, query=query)

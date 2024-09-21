@@ -39,12 +39,14 @@ class OrgSettings(
     @classmethod
     def get_org_settings(cls, org_id: int):
         """Return the default status code for an Org."""
-        return cls.query.filter_by(org_id=org_id).all()
+        return cls.query.filter_by(org_id=int(org_id or -1)).all()
 
     @classmethod
     def is_admin_auto_approved_invitees(cls, org_id: int):
         """Return the default status code for an Org."""
-        org_model = cls.query.filter_by(org_id=org_id, setting="ADMIN_AUTO_APPROVAL_FOR_MEMBER_ACCEPTANCE").first()
+        org_model = cls.query.filter_by(
+            org_id=int(org_id or -1), setting="ADMIN_AUTO_APPROVAL_FOR_MEMBER_ACCEPTANCE"
+        ).first()
         if org_model is not None:
             return org_model.enabled
         return False
