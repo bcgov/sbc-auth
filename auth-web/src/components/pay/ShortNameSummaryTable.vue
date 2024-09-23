@@ -97,6 +97,9 @@
       <template #item-slot-lastPaymentReceivedDate="{ item }">
         <span>{{ formatDate(item.lastPaymentReceivedDate) }}</span>
       </template>
+      <template #item-slot-shortNameType="{ item }">
+        <span>{{ getShortNameTypeDescription(item.shortNameType) }}</span>
+      </template>
       <template #item-slot-creditsRemaining="{ item }">
         <span>{{ formatAmount(item.creditsRemaining) }}</span>
       </template>
@@ -159,7 +162,11 @@
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
 import { Ref, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
-import { SessionStorageKeys, ShortNameRefundLabel, ShortNameRefundStatus } from '@/util/constants'
+import {
+  SessionStorageKeys,
+  ShortNameRefundLabel,
+  ShortNameRefundStatus
+} from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
@@ -167,6 +174,7 @@ import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
 import { ShortNameSummaryState } from '@/models/pay/short-name'
+import ShortNameUtils from '@/util/short-name-utils'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
 
@@ -213,22 +221,26 @@ export default defineComponent({
     const {
       infiniteScrollCallback, loadTableSummaryData, updateFilter
     } = useShortNameTable(state, emit)
-    const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px') => ({
+    const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px',
+      width = '125px', filterItems = []) => ({
       col,
       customFilter: {
         filterApiFn: hasFilter ? (val: any) => loadTableSummaryData(col, val || '') : null,
         clearable: true,
+        items: filterItems.length > 0 ? filterItems : undefined,
         label,
         type,
         value: filterValue
       },
       hasFilter,
       minWidth,
+      width,
       value
     })
 
     const {
       shortName = '',
+      shortNameType = '',
       lastPaymentReceivedDate = '',
       creditsRemaining = '',
       linkedAccountsCount = ''
@@ -237,13 +249,24 @@ export default defineComponent({
     const headers = [
       createHeader('shortName', 'Bank Short Name', 'text', 'Short Name', shortName),
       createHeader(
+        'shortNameType',
+        'Type',
+        'select',
+        'Type',
+        shortNameType,
+        true,
+        '125px',
+        '200px',
+        ShortNameUtils.ShortNameTypeItems
+      ),
+      createHeader(
         'lastPaymentReceivedDate',
         'Last Payment Received Date',
         'text',
         'Last Payment Received Date',
         lastPaymentReceivedDate,
         false,
-        '200px'
+        '275px'
       ),
       createHeader(
         'creditsRemaining',
@@ -256,10 +279,13 @@ export default defineComponent({
       ),
       createHeader(
         'linkedAccountsCount',
-        'Number of Linked Accounts',
+        'Linked Accounts',
         'text',
-        'Number of Linked Accounts',
-        linkedAccountsCount
+        'Linked Accounts',
+        linkedAccountsCount,
+        true,
+        '100px',
+        '125px'
       ),
       {
         col: 'actions',
@@ -272,6 +298,7 @@ export default defineComponent({
     function defaultFilterPayload () {
       return {
         shortName: '',
+        shortNameType: '',
         creditsRemaining: '',
         linkedAccountsCount: '',
         paymentReceivedStartDate: '',
@@ -424,7 +451,8 @@ export default defineComponent({
       datePicker,
       viewDetails,
       ShortNameRefundStatus,
-      ShortNameRefundLabel
+      ShortNameRefundLabel,
+      getShortNameTypeDescription: ShortNameUtils.getShortNameTypeDescription
     }
   }
 })

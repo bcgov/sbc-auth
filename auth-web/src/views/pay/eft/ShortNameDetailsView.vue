@@ -16,12 +16,16 @@
         <h1 class="view-header__title">
           {{ shortNameDetails.shortName }}
         </h1>
-        <p class="mt-3 mb-0">
+        <p class="mt-6 mb-0">
           <span class="font-weight-bold">Unsettled Amount: </span>{{ unsettledAmount }}
         </p>
       </div>
       <div class="shortname-info">
-        <div class="mb-6 overflow-wrap">
+        <div class="mb-2 overflow-wrap">
+          <span class="font-weight-bold">Type: </span>
+          {{ getShortNameTypeDescription(shortName.shortNameType) }}
+        </div>
+        <div class="mb-2 overflow-wrap">
           <span class="font-weight-bold">CAS Supplier Number: </span>
           {{ shortName.casSupplierNumber || 'N/A' }}
           <span
@@ -113,6 +117,7 @@ import ShortNameAccountLink from '@/components/pay/eft/ShortNameAccountLink.vue'
 import ShortNameFinancialDialog from '@/components/pay/eft/ShortNameFinancialDialog.vue'
 import ShortNamePaymentHistory from '@/components/pay/eft/ShortNamePaymentHistory.vue'
 import ShortNameRefund from '@/components/pay/eft/ShortNameRefund.vue'
+import ShortNameUtils from '@/util/short-name-utils'
 import moment from 'moment'
 import { useUserStore } from '@/stores/user'
 
@@ -232,7 +237,8 @@ export default defineComponent({
       openShortNameSupplierNumberDialog,
       formatCurrency: CommonUtils.formatAmount,
       unsettledAmountHeader,
-      closeShortNameLinkingDialog
+      closeShortNameLinkingDialog,
+      getShortNameTypeDescription: ShortNameUtils.getShortNameTypeDescription
     }
   }
 })

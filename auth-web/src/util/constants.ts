@@ -691,6 +691,16 @@ export enum ShortNameResponseStatus {
     EFT_SHORT_NAME_ALREADY_MAPPED = 'EFT_SHORT_NAME_ALREADY_MAPPED'
 }
 
+export enum ShortNameType {
+    EFT = 'EFT',
+    WIRE = 'WIRE'
+}
+
+export enum ShortNameTypeDescription {
+    EFT = 'EFT',
+    WIRE = 'Wire Transfer'
+}
+
 export enum ShortNameHistoryType {
     FUNDS_RECEIVED = 'FUNDS_RECEIVED',
     INVOICE_REFUND = 'INVOICE_REFUND',
