@@ -24,6 +24,7 @@
           filled
           label="Email Address"
           persistent-hint
+          :rules="emailAddressRules"
         />
         <v-text-field
           v-if="isDialogTypeCasSupplierNumber"
@@ -48,6 +49,7 @@
             large
             color="primary"
             data-test="dialog-ok-button"
+            :disabled="isFormValid()"
             @click="patchShortName()"
           >
             Save
@@ -89,6 +91,23 @@ export default defineComponent({
       isDialogTypeEmail: computed(() => props.shortNameFinancialDialogType === 'EMAIL'),
       isDialogTypeCasSupplierNumber: computed(() => props.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER')
     })
+
+    const emailAddressRules = [
+      v => !!v || 'Email address is required',
+      v => {
+        const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        return pattern.test(v) || 'Valid email is required'
+      }
+    ]
+
+    function isFormValid () {
+      if (state.isDialogTypeEmail) {
+        return emailAddressRules.every(rule => rule(state.email) !== true)
+      } else if (state.isDialogTypeCasSupplierNumber) {
+        return !state.casSupplierNumber
+      }
+      return false
+    }
 
     function openAccountLinkingDialog (item: EFTShortnameResponse, dialogType) {
       state.shortName = item
@@ -143,7 +162,9 @@ export default defineComponent({
       resetAccountLinkingDialog,
       cancelAndResetAccountLinkingDialog,
       patchShortName,
-      dialogTitle
+      emailAddressRules,
+      dialogTitle,
+      isFormValid
     }
   }
 })
