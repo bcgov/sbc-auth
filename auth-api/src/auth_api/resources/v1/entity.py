@@ -119,7 +119,7 @@ def delete_entity(business_identifier):
 
         if entity:
             entity.delete()
-            response, status = {}, HTTPStatus.NO_CONTENT
+            response, status = jsonify({"message": "success"}), HTTPStatus.NO_CONTENT
         else:
             response, status = (
                 jsonify({"message": f"A business for {business_identifier} was not found."}),
