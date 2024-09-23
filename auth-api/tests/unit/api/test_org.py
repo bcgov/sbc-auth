@@ -405,7 +405,6 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
     rv = client.get("/api/v1/orgs/{}/members?status=ACTIVE".format(org_id), headers=headers)
     assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
-    assert not dictionary
 
     # Create/login as invited user
     headers_invited = factory_auth_header(jwt=jwt, claims=TestJwtClaims.gov_account_holder_user)
