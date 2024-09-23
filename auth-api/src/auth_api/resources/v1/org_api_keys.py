@@ -15,7 +15,7 @@
 
 from http import HTTPStatus
 
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
@@ -60,7 +60,7 @@ def delete_organization_api_key(org_id, key):
     """Revoke API Key."""
     try:
         ApiGatewayService.revoke_key(org_id, key)
-        response, status = {}, HTTPStatus.OK
+        response, status = jsonify({"message": "success"}), HTTPStatus.OK
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status

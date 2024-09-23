@@ -15,7 +15,7 @@
 
 from http import HTTPStatus
 
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException, Error
@@ -153,7 +153,7 @@ def delete_affiliation_invitation(affiliation_invitation_id):
     """Delete the specified affiliation invitation."""
     try:
         AffiliationInvitationService.delete_affiliation_invitation(affiliation_invitation_id)
-        response, status = {}, HTTPStatus.OK
+        response, status = jsonify({"message": "success"}), HTTPStatus.OK
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status
