@@ -61,6 +61,7 @@
 </template>
 <script lang="ts">
 import { Ref, computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import CommonUtils from '@/util/common-util'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
@@ -83,6 +84,7 @@ export default defineComponent({
   },
   emits: ['on-patch', 'close-short-name-email-dialog'],
   setup (props, { emit }) {
+    const emailAddressRules = CommonUtils.emailRules()
     const modalDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const state = reactive<any>({
@@ -91,14 +93,6 @@ export default defineComponent({
       isDialogTypeEmail: computed(() => props.shortNameFinancialDialogType === 'EMAIL'),
       isDialogTypeCasSupplierNumber: computed(() => props.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER')
     })
-
-    const emailAddressRules = [
-      v => !!v || 'Email address is required',
-      v => {
-        const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        return pattern.test(v) || 'Valid email is required'
-      }
-    ]
 
     function isFormValid () {
       if (state.isDialogTypeEmail) {
