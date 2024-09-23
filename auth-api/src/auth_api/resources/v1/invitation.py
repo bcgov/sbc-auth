@@ -15,7 +15,7 @@
 
 from http import HTTPStatus
 
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
@@ -92,7 +92,7 @@ def delete_invitation(invitation_id):
     """Delete the specified invitation."""
     try:
         InvitationService.delete_invitation(invitation_id)
-        response, status = {}, HTTPStatus.OK
+        response, status = jsonify({"message": "success"}), HTTPStatus.OK
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status
@@ -104,7 +104,7 @@ def validate_invitation_token(invitation_token):
     """Check whether the passed token is valid."""
     try:
         InvitationService.validate_token(invitation_token)
-        response, status = {}, HTTPStatus.OK
+        response, status = jsonify({"message": "success"}), HTTPStatus.OK
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status
