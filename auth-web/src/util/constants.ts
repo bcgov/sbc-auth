@@ -705,14 +705,20 @@ export enum ShortNameHistoryType {
     FUNDS_RECEIVED = 'FUNDS_RECEIVED',
     INVOICE_REFUND = 'INVOICE_REFUND',
     STATEMENT_PAID = 'STATEMENT_PAID',
-    STATEMENT_REVERSE = 'STATEMENT_REVERSE'
+    STATEMENT_REVERSE = 'STATEMENT_REVERSE',
+    SN_REFUND_PENDING_APPROVAL = 'SN_REFUND_PENDING_APPROVAL',
+    SN_REFUND_APPROVED = 'SN_REFUND_APPROVED',
+    SN_REFUND_REJECTED = 'SN_REFUND_REJECTED'
 }
 
 export enum ShortNameHistoryTypeDescription {
     FUNDS_RECEIVED = 'Funds Received',
     INVOICE_REFUND = 'Invoice Refund',
     STATEMENT_PAID = 'Statement Paid',
-    STATEMENT_REVERSE = 'Payment Reversed'
+    STATEMENT_REVERSE = 'Payment Reversed',
+    SN_REFUND_PENDING_APPROVAL = 'Short Name Refund Request',
+    SN_REFUND_APPROVED = 'Short Name Refund Request',
+    SN_REFUND_REJECTED = 'Short Name Refund Request'
 }
 
 export enum CfsAccountStatus {

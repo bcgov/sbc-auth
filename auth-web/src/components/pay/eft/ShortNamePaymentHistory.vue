@@ -104,10 +104,7 @@
       </template>
       <template #item-slot-transactionDescription="{ item }">
         <span>{{ formatDescription(item) }}</span>
-        <span
-          v-if="isStatementTransaction(item)"
-          class="transaction-details"
-        >
+        <span class="transaction-details">
           {{ formatAdditionalDescription(item) }}
         </span>
       </template>
@@ -132,6 +129,20 @@
               @click="showConfirmReversePaymentModal(item)"
             >
               Reverse Payment
+            </v-btn>
+          </template>
+          <template v-if="showRefundDetailAction(item)">
+            <v-btn
+                small
+                color="primary"
+                min-width="5rem"
+                min-height="2rem"
+                class="open-action-btn single-action-btn"
+                data-test="reverse-payment-button"
+                :loading="loading"
+                @click="showConfirmReversePaymentModal(item)"
+            >
+              Refund Detail
             </v-btn>
           </template>
         </div>
@@ -171,6 +182,10 @@ export default defineComponent({
     const enum ConfirmationType {
       REVERSE_PAYMENT = 'reversePayment',
     }
+    const shortNameRefundTypes: string[] = [
+      ShortNameHistoryType.SN_REFUND_PENDING_APPROVAL,
+      ShortNameHistoryType.SN_REFUND_APPROVED,
+      ShortNameHistoryType.SN_REFUND_REJECTED]
     const confirmationDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const errorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const historyTable: Ref<InstanceType<typeof BaseVDataTable>> = ref(null)
@@ -282,20 +297,39 @@ export default defineComponent({
       return item?.statementNumber
     }
 
+    function showRefundDetailAction (item: any) {
+      return shortNameRefundTypes.includes(item.transactionType)
+    }
+
     function formatAdditionalDescription (item: any) {
-      if (item.transactionType === ShortNameHistoryType.INVOICE_REFUND) {
-        return item.invoiceId
+      switch (item.transactionType) {
+        case ShortNameHistoryType.INVOICE_REFUND:
+          return item.invoiceId
+        case ShortNameHistoryType.SN_REFUND_PENDING_APPROVAL:
+          return 'Pending Approval'
+        case ShortNameHistoryType.SN_REFUND_APPROVED:
+          return 'Approved'
+        case ShortNameHistoryType.SN_REFUND_REJECTED:
+          return 'Declined'
+        default:
+          return CommonUtils.formatAccountDisplayName(item) ? item.accountId && item.accountName : ''
       }
-      return CommonUtils.formatAccountDisplayName(item)
     }
 
     function formatTransactionAmount (item: any) {
       if (item.amount === undefined) return ''
       let amount = CommonUtils.formatAmount(item.amount)
-      if (item.transactionType === ShortNameHistoryType.STATEMENT_PAID) {
-        amount = `-${amount}`
+
+      switch (item.transactionType) {
+        case ShortNameHistoryType.STATEMENT_PAID:
+        case ShortNameHistoryType.SN_REFUND_PENDING_APPROVAL:
+        case ShortNameHistoryType.SN_REFUND_APPROVED:
+          return `-${amount}`
+        case ShortNameHistoryType.SN_REFUND_REJECTED:
+          return `-`
+        default:
+          return amount
       }
-      return amount
     }
 
     function formatBalanceAmount (item: any) {
@@ -398,6 +432,7 @@ export default defineComponent({
       dialogConfirmClose,
       dialogErrorClose,
       showConfirmReversePaymentModal,
+      showRefundDetailAction,
       headers,
       state,
       infiniteScrollCallback,
