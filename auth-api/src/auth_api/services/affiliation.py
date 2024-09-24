@@ -19,6 +19,7 @@ from typing import Dict, List
 from flask import current_app
 from requests.exceptions import HTTPError
 from sqlalchemy.orm import contains_eager, subqueryload
+from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
@@ -42,6 +43,8 @@ from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
+
+logger = StructuredLogging.get_logger()
 
 
 class Affiliation:
@@ -76,7 +79,7 @@ class Affiliation:
     @staticmethod
     def find_visible_affiliations_by_org_id(org_id, environment=None):
         """Given an org_id, this will return the entities affiliated with it."""
-        current_app.logger.debug(f"<find_visible_affiliations_by_org_id for org_id {org_id}")
+        logger.debug(f"<find_visible_affiliations_by_org_id for org_id {org_id}")
         if not org_id:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -121,7 +124,7 @@ class Affiliation:
             else:
                 filtered_affiliations.append(entity)
 
-        current_app.logger.debug(">find_visible_affiliations_by_org_id")
+        logger.debug(">find_visible_affiliations_by_org_id")
         return filtered_affiliations
 
     @staticmethod
@@ -160,7 +163,7 @@ class Affiliation:
     def create_affiliation(org_id, business_identifier, environment=None, pass_code=None, certified_by_name=None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
-        current_app.logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
+        logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
         # Security check below.
         org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
         if org is None:
@@ -169,15 +172,15 @@ class Affiliation:
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        current_app.logger.debug("<create_affiliation entity found")
+        logger.debug("<create_affiliation entity found")
         entity_id = entity.identifier
         entity_type = entity.corp_type
 
         if not Affiliation.is_authorized(entity, pass_code):
-            current_app.logger.debug("<create_affiliation not authorized")
+            logger.debug("<create_affiliation not authorized")
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
-        current_app.logger.debug("<create_affiliation find affiliation")
+        logger.debug("<create_affiliation find affiliation")
         # Ensure this affiliation does not already exist
         affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id, environment)
         if affiliation is not None:
@@ -226,7 +229,7 @@ class Affiliation:
         phone = affiliation_data.phone
         certified_by_name = affiliation_data.certified_by_name
 
-        current_app.logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
+        logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
         user_is_staff = Affiliation.is_staff_or_sbc_staff()
         if not user_is_staff and (not email and not phone):
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
@@ -343,7 +346,7 @@ class Affiliation:
         log_delete_draft = delete_affiliation_request.log_delete_draft
         email_addresses = delete_affiliation_request.email_addresses
 
-        current_app.logger.info(f"<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}")
+        logger.info(f"<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}")
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -406,7 +409,7 @@ class Affiliation:
         nr_number: str = entity_details.get("nrNumber")
         bootstrap_identifier: str = entity_details.get("bootstrapIdentifier")
         identifier: str = entity_details.get("identifier")
-        current_app.logger.debug(f"<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier}")
+        logger.debug(f"<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier}")
         from_entity: Entity = EntityService.find_by_business_identifier(nr_number, skip_auth=True)
         # Find entity with nr_number (stale, because this is now a business)
         if (
@@ -419,14 +422,14 @@ class Affiliation:
                 # These are already handled by the filer.
                 if affiliation.org_id == org_id:
                     continue
-                current_app.logger.debug(
+                logger.debug(
                     f"Moving affiliation {affiliation.id} from {from_entity.identifier} to {to_entity.identifier}"
                 )
                 affiliation.entity_id = to_entity.identifier
                 affiliation.environment = environment
                 affiliation.save()
 
-        current_app.logger.debug(">fix_stale_affiliations")
+        logger.debug(">fix_stale_affiliations")
 
     @staticmethod
     def _affiliation_details_url(affiliation: AffiliationModel) -> str:
@@ -471,8 +474,8 @@ class Affiliation:
 
             return combined
         except ServiceUnavailableException as err:
-            current_app.logger.debug(err)
-            current_app.logger.debug("Failed to get affiliations details: %s", affiliations)
+            logger.debug(err)
+            logger.debug("Failed to get affiliations details: %s", affiliations)
             raise ServiceUnavailableException("Failed to get affiliation details") from err
 
     @staticmethod
@@ -540,7 +543,7 @@ class Affiliation:
             )
             get_nr_response = RestService.get(get_nr_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
-            current_app.logger.info(e)
+            logger.info(e)
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
 
         return get_nr_response.json()
@@ -552,7 +555,7 @@ class Affiliation:
         try:
             lear_response = RestService.get(parties_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
-            current_app.logger.info(e)
+            logger.info(e)
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
         parties_json = lear_response.json()
         for party in parties_json["parties"]:

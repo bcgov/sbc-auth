@@ -17,9 +17,12 @@ from datetime import datetime, timezone
 
 from flask import current_app
 from simple_cloudevent import SimpleCloudEvent
+from structured_logging import StructuredLogging
 
 from auth_api.services.gcp_queue import GcpQueue, queue
 from auth_api.utils.enums import QueueSources
+
+logger = StructuredLogging.get_logger()
 
 
 def publish_to_mailer(notification_type, data=None, source=QueueSources.AUTH_API.value):
@@ -35,4 +38,5 @@ def publish_to_mailer(notification_type, data=None, source=QueueSources.AUTH_API
     try:
         queue.publish(current_app.config.get("ACCOUNT_MAILER_TOPIC"), GcpQueue.to_queue_message(cloud_event))
     except Exception as e:  # NOQA # pylint: disable=broad-except
-        current_app.logger.error(f"Failed to publish to mailer: {str(e)}")
+        error_msg = f"Failed to publish to mailer {e}"
+        logger.error(error_msg)

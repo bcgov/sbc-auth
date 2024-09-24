@@ -19,7 +19,6 @@ All modules and lookups get their configuration from the Flask config,
 rather than reading environment variables directly or by accessing this configuration directly.
 """
 
-import logging
 import os
 import sys
 from typing import List
@@ -206,8 +205,6 @@ class DevConfig(_Config):  # pylint: disable=too-few-public-methods
 
     TESTING = False
     DEBUG = True
-    if os.getenv("DISABLE_JAEGER_TRACING", "False").lower() == "true":
-        logging.getLogger("jaeger_tracing").disabled = True
 
 
 class TestConfig(_Config):  # pylint: disable=too-few-public-methods
