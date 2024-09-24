@@ -21,6 +21,7 @@ from typing import Dict, List
 import aiohttp
 import requests
 from flask import current_app
+from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -36,6 +37,8 @@ from auth_api.utils.roles import Role
 from auth_api.utils.user_context import UserContext, user_context
 
 from .keycloak_user import KeycloakUser
+
+logger = StructuredLogging.get_logger()
 
 
 class KeycloakService:
@@ -243,7 +246,7 @@ class KeycloakService:
         add_groups = [kg for kg in kgs if kg.group_action == KeycloakGroupActions.ADD_TO_GROUP.value]
         remove_groups = [kg for kg in kgs if kg.group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value]
         for keycloak_group_subscription in add_groups + remove_groups:
-            current_app.logger.debug(
+            logger.debug(
                 f"Action: {keycloak_group_subscription.group_action} "
                 f"Product: {keycloak_group_subscription.product_code} "
                 f"Keycloak Group: {keycloak_group_subscription.group_name} "
@@ -288,13 +291,13 @@ class KeycloakService:
             tasks = await asyncio.gather(*tasks, return_exceptions=True)
             for task in tasks:
                 if isinstance(task, aiohttp.ClientConnectionError):
-                    current_app.logger.error("Connection error")
+                    logger.error("Connection error")
                 elif isinstance(task, asyncio.TimeoutError):
-                    current_app.logger.error("Timeout error")
+                    logger.error("Timeout error")
                 elif isinstance(task, Exception):
-                    current_app.logger.error(f"Exception: {task}")
+                    logger.error(f"Exception: {task}")
                 elif task.status != 204:
-                    current_app.logger.error(f"Returned non 204: {task.method} - {task.url} - {task.status}")
+                    logger.error(f"Returned non 204: {task.method} - {task.url} - {task.status}")
 
     @staticmethod
     def add_user_to_group(user_id: str, group_name: str):

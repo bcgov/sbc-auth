@@ -13,9 +13,9 @@
 # limitations under the License.
 """Service for managing Simplified Organization data."""
 
-from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sqlalchemy import String, and_, desc, func, or_
+from structured_logging import StructuredLogging
 
 from auth_api.config import get_named_config
 from auth_api.models import Org as OrgModel
@@ -26,7 +26,7 @@ from auth_api.utils.converter import Converter
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 CONFIG = get_named_config()
-
+logger = StructuredLogging.get_logger()
 
 class SimpleOrg:  # pylint: disable=too-few-public-methods
     """Manages a simplified version of organization data.
@@ -43,7 +43,7 @@ class SimpleOrg:  # pylint: disable=too-few-public-methods
     def search(cls, search_criteria: SimpleOrgSearch):
         """Search org records and returned a simplified result set."""
         # pylint:disable=not-callable
-        current_app.logger.debug("<search")
+        logger.debug("<search")
         query = db.session.query(OrgModel)
 
         query = query.filter_conditionally(search_criteria.id, func.cast(OrgModel.id, String), is_like=True)
@@ -79,7 +79,7 @@ class SimpleOrg:  # pylint: disable=too-few-public-methods
         converter = Converter()
         org_list = converter.unstructure(org_list)
 
-        current_app.logger.debug(">search")
+        logger.debug(">search")
         return {
             "page": search_criteria.page,
             "limit": search_criteria.limit,

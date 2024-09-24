@@ -284,13 +284,12 @@ pg8000 = "^1.31.2"
 pyhumps = "^3.8.0"
 sql-versioning = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/sql-versioning"}
 sqlalchemy-utils = "^0.41.2"
-structured_logging = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/structured-logging"}
 
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
 reference = "feature-gcp-migration"
-resolved_reference = "88914cdadaaf1cc0e1f5fa6c463a7d4e1cdc0c38"
+resolved_reference = "982da0808ebba331522623811c0a4b1d5342e9e4"
 subdirectory = "auth-api"
 
 [[package]]
@@ -375,7 +374,7 @@ Werkzeug = "3.0.0"
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
 reference = "feature-gcp-migration"
-resolved_reference = "88914cdadaaf1cc0e1f5fa6c463a7d4e1cdc0c38"
+resolved_reference = "982da0808ebba331522623811c0a4b1d5342e9e4"
 subdirectory = "build-deps"
 
 [[package]]

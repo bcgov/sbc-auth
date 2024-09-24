@@ -18,6 +18,7 @@ from http import HTTPStatus
 import orjson
 from flask import Blueprint, current_app, g, jsonify, request
 from flask_cors import cross_origin
+from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.models import Affiliation as AffiliationModel
@@ -43,7 +44,7 @@ from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, U
 from auth_api.utils.util import extract_numbers, get_request_environment
 
 bp = Blueprint("ORGS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs")
-
+logger = StructuredLogging.get_logger()
 
 @bp.route("", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["GET", "POST"])
@@ -96,7 +97,7 @@ def search_organizations():
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.MANAGE_EFT.value])
 def search_simple_orgs():
     """Return simplified organization information."""
-    current_app.logger.info("<search_simple_orgs")
+    logger.info("<search_simple_orgs")
 
     org_id = request.args.get("id", None)
     page: int = int(request.args.get("page", "1"))
@@ -123,7 +124,7 @@ def search_simple_orgs():
         HTTPStatus.OK,
     )
 
-    current_app.logger.info(">search_simple_orgs")
+    logger.info(">search_simple_orgs")
     return jsonify(response), status
 
 

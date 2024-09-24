@@ -23,6 +23,7 @@ from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
 from sqlalchemy.exc import DataError
+from structured_logging import StructuredLogging
 
 from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
@@ -51,7 +52,7 @@ from .rest_service import RestService
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 CONFIG = get_named_config()
-
+logger = StructuredLogging.get_logger()
 
 class AffiliationInvitation:
     """Manages Affiliation Invitation data.
@@ -207,11 +208,11 @@ class AffiliationInvitation:
         if affiliation_invitation_type == AffiliationInvitationType.REQUEST:
             admin_emails = UserService.get_admin_emails_for_org(org_id)
             if admin_emails != "":
-                current_app.logger.debug(f"Sending emails to: ${admin_emails}")
+                logger.debug(f"Sending emails to: ${admin_emails}")
                 return admin_emails
 
             # continue but log error
-            current_app.logger.error("No admin email record for org id %s", org_id)
+            logger.error("No admin email record for org id %s", org_id)
             return None
 
         if affiliation_invitation_type == AffiliationInvitationType.EMAIL:
@@ -322,7 +323,7 @@ class AffiliationInvitation:
         try:
             get_business_response = RestService.get(get_businesses_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
-            current_app.logger.info(e)
+            logger.info(e)
             raise BusinessException(Error.AFFILIATION_INVITATION_BUSINESS_NOT_FOUND, None) from e
 
         return get_business_response.json()
@@ -337,7 +338,7 @@ class AffiliationInvitation:
         try:
             get_business_response = RestService.post(get_businesses_url, token=token, data=data)
         except (HTTPError, ServiceUnavailableException) as e:
-            current_app.logger.info(e)
+            logger.info(e)
             raise BusinessException(Error.AFFILIATION_INVITATION_BUSINESS_NOT_FOUND, None) from e
 
         return get_business_response.json()["businessEntities"]
@@ -492,7 +493,7 @@ class AffiliationInvitation:
         email_addresses=None,
     ):
         """Send the email notification."""
-        current_app.logger.debug("<send_affiliation_invitation")
+        logger.debug("<send_affiliation_invitation")
         affiliation_invitation_type = affiliation_invitation.type
         from_org_name = affiliation_invitation.from_org.name
         from_org_id = affiliation_invitation.from_org_id
@@ -536,11 +537,11 @@ class AffiliationInvitation:
         except BusinessException as exception:
             affiliation_invitation.invitation_status_code = InvitationStatus.FAILED.value
             affiliation_invitation.save()
-            current_app.logger.debug(">send_affiliation_invitation failed")
-            current_app.logger.debug(exception)
+            logger.debug(">send_affiliation_invitation failed")
+            logger.debug(exception)
             raise BusinessException(Error.FAILED_AFFILIATION_INVITATION, None) from exception
 
-        current_app.logger.debug(">send_affiliation_invitation")
+        logger.debug(">send_affiliation_invitation")
 
     @staticmethod
     def send_affiliation_invitation_authorization_email(
@@ -622,7 +623,7 @@ class AffiliationInvitation:
         **kwargs,
     ):
         """Add an affiliation from the affiliation invitation."""
-        current_app.logger.debug(">accept_affiliation_invitation")
+        logger.debug(">accept_affiliation_invitation")
         affiliation_invitation: AffiliationInvitationModel = AffiliationInvitationModel.find_invitation_by_id(
             affiliation_invitation_id
         )
@@ -661,7 +662,7 @@ class AffiliationInvitation:
                 affiliation_invitation=affiliation_invitation, is_authorized=True
             )
 
-        current_app.logger.debug("<accept_affiliation_invitation")
+        logger.debug("<accept_affiliation_invitation")
         return AffiliationInvitation(affiliation_invitation)
 
     @classmethod

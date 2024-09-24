@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Manage the Feature Flags initialization, setup and service."""
-import logging
 
 from flask import current_app
 from ldclient import Context
@@ -20,9 +19,11 @@ from ldclient import get as ldclient_get  # noqa: I001
 from ldclient import set_config as ldclient_set_config
 from ldclient.config import Config  # noqa: I005
 from ldclient.integrations import Files
+from structured_logging import StructuredLogging
 
 from auth_api.models import User
 
+logger = StructuredLogging.get_logger()
 
 class Flags:
     """Wrapper around the feature flag system.
@@ -70,7 +71,7 @@ class Flags:
                 self.init_app(current_app)
                 client = current_app.extensions["featureflags"]
             except KeyError:
-                logging.warning("Couldn't retrieve launch darkly client from extensions.")
+                logger.warning("Couldn't retrieve launch darkly client from extensions.")
                 client = None
 
         return client

@@ -21,6 +21,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate, upgrade
 from sbc_common_components.utils.camel_case_response import convert_to_camel
+from structured_logging import StructuredLogging
 
 import auth_api.config as config  # pylint:disable=consider-using-from-import
 from auth_api.config import _Config
@@ -32,9 +33,8 @@ from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
 from auth_api.utils.auth import jwt
 from auth_api.utils.cache import cache
-from auth_api.utils.util_logging import setup_logging
 
-setup_logging(os.path.join(_Config.PROJECT_ROOT, "logging.conf"))
+logger = StructuredLogging.get_logger()
 
 
 def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
@@ -50,13 +50,11 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
 
     if run_mode != "testing":
         Migrate(app, db)
-        app.logger.info("Running migration upgrade.")
+        logger.info("Running migration upgrade.")
         with app.app_context():
             execute_migrations(app)
 
-    # Alembic has it's own logging config, we'll need to restore our logging here.
-    setup_logging(os.path.join(_Config.PROJECT_ROOT, "logging.conf"))
-    app.logger.info("Finished migration upgrade.")
+    logger.info("Finished migration upgrade.")
 
     ma.init_app(app)
     queue.init_app(app)
@@ -78,8 +76,8 @@ def execute_migrations(app):
     try:
         upgrade(directory="migrations", revision="head", sql=False, tag=None)
     except Exception as e:  # NOQA pylint: disable=broad-except
-        app.logger.disabled = False
-        app.logger.error("Error processing migrations:", exc_info=True)
+        logger.disabled = False
+        logger.error("Error processing migrations:", exc_info=True)
         raise e
 
 
@@ -119,5 +117,5 @@ def build_cache(app):
                 PermissionService.build_all_permission_cache()
                 ProductService.build_all_products_cache()
             except Exception as e:  # NOQA # pylint:disable=broad-except
-                app.logger.error("Error on caching ")
-                app.logger.error(e)
+                logger.error("Error on caching ")
+                logger.error(e)
