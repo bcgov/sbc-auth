@@ -1,3 +1,4 @@
+"""Keycloak resource, will ultimately get swapped out."""
 # Copyright © 2024 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
