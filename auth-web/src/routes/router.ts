@@ -898,7 +898,7 @@ export function getRoutes (): RouteConfig[] {
         showNavBar: true
       },
       props: route => ({
-        shortNameId: route.params.shortNameId,
+        shortNameId: Number(route.params.shortNameId),
         eftRefundId: route.params.eftRefundId ? Number(route.params.shortNameId) : undefined
       })
     },
