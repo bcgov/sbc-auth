@@ -62,7 +62,7 @@ def handle_http_error(error):
 
 def handle_uncaught_error(error: Exception):  # pylint: disable=unused-argument
     """Handle any uncaught exceptions."""
-    
+
     error_msg = f"Uncaught exception {error}"
     logger.error(error_msg)
     response = jsonify({"message": "Internal server error"})
