@@ -127,7 +127,7 @@ describe('ShortNameSummaryTable.vue', () => {
       expect(columns.at(1).text()).toBe(
         ShortNameUtils.getShortNameTypeDescription(shortNameSummaryResponse.items[i].shortNameType))
       expect(columns.at(2).text()).toBe(
-        CommonUtils.formatDisplayDate(shortNameSummaryResponse.items[i].lastPaymentReceivedDate, 'MMMM DD, YYYY'))
+        CommonUtils.formatUtcToPacificDate(shortNameSummaryResponse.items[i].lastPaymentReceivedDate, 'MMMM DD, YYYY'))
       expect(columns.at(3).text()).toBe(
         CommonUtils.formatAmount(shortNameSummaryResponse.items[i].creditsRemaining))
       expect(columns.at(4).text()).toBe(shortNameSummaryResponse.items[i].linkedAccountsCount.toString())

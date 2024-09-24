@@ -139,7 +139,7 @@
               Requested By Qualified Receiver
             </v-col>
             <v-col class="pl-0">
-              {{ refundDetails.createdBy }} {{ formatDate(refundDetails.createdOn) }}
+              {{ refundDetails.createdBy }} {{ formatDate(refundDetails.createdOn, dateDisplayFormat) }}
             </v-col>
           </v-row>
           <v-row v-if="readOnly">
@@ -155,7 +155,7 @@
               Approved By Expense Authority
             </v-col>
             <v-col class="pl-0">
-              {{ refundDetails.updatedBy }} {{ formatDate(refundDetails.updatedOn) }}
+              {{ refundDetails.updatedBy }} {{ formatDate(refundDetails.updatedOn, dateDisplayFormat) }}
             </v-col>
           </v-row>
           <v-row v-if="readOnly">
@@ -212,7 +212,6 @@ import { EFTRefundType } from '@/util/constants'
 import { EftRefundRequest } from '@/models/refund'
 import PaymentService from '@/services/payment.services'
 import ShortNameUtils from '@/util/short-name-utils'
-import moment from 'moment-timezone'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -228,6 +227,7 @@ export default defineComponent({
     }
   },
   setup (props, { root }) {
+    const dateDisplayFormat = 'MMM DD, YYYY h:mm A [Pacific Time]'
     const state = reactive({
       shortNameDetails: {} as ShortNameDetails,
       refundDetails: {} as EFTRefund,
@@ -273,12 +273,6 @@ export default defineComponent({
         await loadShortnameRefund(props.eftRefundId)
       }
     })
-
-    function formatDate (str: string): string {
-      const date = moment.utc(str).toDate()
-      return (date) ? moment(date).tz('America/Vancouver')
-        .format('MMM DD, YYYY h:mm A [Pacific Time]') : ''
-    }
 
     async function loadShortnameDetails (shortnameId: number): Promise<void> {
       try {
@@ -381,7 +375,8 @@ export default defineComponent({
       formatAmount,
       getShortNameTypeDescription: ShortNameUtils.getShortNameTypeDescription,
       getEFTRefundTypeDescription: ShortNameUtils.getEFTRefundTypeDescription,
-      formatDate
+      formatDate: CommonUtils.formatUtcToPacificDate,
+      dateDisplayFormat
     }
   }
 })

@@ -100,7 +100,7 @@
       </template>
       <template #header-filter-slot />
       <template #item-slot-transactionDate="{ item }">
-        <span>{{ formatDate(item.transactionDate, 'MMMM DD, YYYY') }}</span>
+        <span>{{ formatDate(item.transactionDate, dateDisplayFormat) }}</span>
       </template>
       <template #item-slot-transactionDescription="{ item }">
         <span>{{ formatDescription(item) }}</span>
@@ -165,7 +165,6 @@ import { EFTTransactionState } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
-import moment from 'moment-timezone'
 
 export default defineComponent({
   name: 'ShortNamePaymentHistory',
@@ -179,6 +178,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit, root }) {
+    const dateDisplayFormat = 'MMMM D, YYYY'
     const enum ConfirmationType {
       REVERSE_PAYMENT = 'reversePayment',
     }
@@ -338,11 +338,6 @@ export default defineComponent({
       return ShortNameHistoryTypeDescription[item.transactionType]
     }
 
-    function formatTransactionDate (str: string): string {
-      const date = moment.utc(str).toDate()
-      return (date) ? moment(date).tz('America/Vancouver').format('MMMM D, YYYY') : ''
-    }
-
     function viewRefundDetails (id: string) {
       if (!id) return
       root.$router?.push({
@@ -431,7 +426,8 @@ export default defineComponent({
       historyTable,
       formatBalanceAmount,
       formatTransactionAmount,
-      formatDate: formatTransactionDate,
+      formatDate: CommonUtils.formatUtcToPacificDate,
+      dateDisplayFormat,
       formatAdditionalDescription,
       formatDescription,
       dialogConfirm,

@@ -95,7 +95,7 @@
         </v-btn>
       </template>
       <template #item-slot-lastPaymentReceivedDate="{ item }">
-        <span>{{ formatDate(item.lastPaymentReceivedDate) }}</span>
+        <span>{{ formatDate(item.lastPaymentReceivedDate, dateDisplayFormat) }}</span>
       </template>
       <template #item-slot-shortNameType="{ item }">
         <span>{{ getShortNameTypeDescription(item.shortNameType) }}</span>
@@ -187,6 +187,7 @@ export default defineComponent({
   },
   emits: ['on-link-account'],
   setup (props, { emit, root }) {
+    const dateDisplayFormat = 'MMMM DD, YYYY'
     const datePicker = ref(null)
     const accountLinkingDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
@@ -308,10 +309,6 @@ export default defineComponent({
 
     function formatAmount (amount: number) {
       return amount !== undefined ? CommonUtils.formatAmount(amount) : ''
-    }
-
-    function formatDate (date: string) {
-      return date ? CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY') : ''
     }
 
     function openAccountLinkingDialog (item: EFTShortnameResponse) {
@@ -437,7 +434,8 @@ export default defineComponent({
       headers,
       updateFilter,
       formatAmount,
-      formatDate,
+      formatDate: CommonUtils.formatUtcToPacificDate,
+      dateDisplayFormat,
       updateDateRange,
       onLinkAccount,
       clickDatePicker,
