@@ -205,8 +205,6 @@ class DevConfig(_Config):  # pylint: disable=too-few-public-methods
 
     TESTING = False
     DEBUG = True
-    if os.getenv("DISABLE_JAEGER_TRACING", "False").lower() == "true":
-        logging.getLogger("jaeger_tracing").disabled = True
 
 
 class TestConfig(_Config):  # pylint: disable=too-few-public-methods
