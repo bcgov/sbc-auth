@@ -76,8 +76,8 @@ def execute_migrations(app):
     try:
         upgrade(directory="migrations", revision="head", sql=False, tag=None)
     except Exception as e:  # NOQA pylint: disable=broad-except
-        logger.disabled = False
-        logger.error("Error processing migrations:", exc_info=True)
+        error_msg = f"Error processing migrations {e}"
+        logger.error(error_msg)
         raise e
 
 
@@ -117,5 +117,5 @@ def build_cache(app):
                 PermissionService.build_all_permission_cache()
                 ProductService.build_all_products_cache()
             except Exception as e:  # NOQA # pylint:disable=broad-except
-                logger.error("Error on caching ")
-                logger.error(e)
+                error_msg = f"Error on caching {e}"
+                logger.error(error_msg)

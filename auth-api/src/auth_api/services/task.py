@@ -201,7 +201,8 @@ class Task:  # pylint: disable=too-many-instance-attributes
             mailer_type = QueueMessageTypes.RESUBMIT_BCEID_ORG_NOTIFICATION.value
 
         if admin_emails == "":
-            logger.error("No admin email record for org id %s", org.id)
+            error_msg = f"No admin email record for org id {org.id}"
+            logger.error(error_msg)
             logger.error("<send_approval_notification_to_member failed")
             return
 

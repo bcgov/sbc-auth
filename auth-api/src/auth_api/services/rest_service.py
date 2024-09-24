@@ -281,10 +281,12 @@ class RestService:
             for task in tasks:
                 if isinstance(task, ClientConnectorError):
                     # if no response from task we will go in here (i.e. namex-api is down)
-                    logger.error("---Error in _call_urls_in_parallel: no response from %s---", task.os_error)
+                    error_msg = f"---Error in _call_urls_in_parallel: no response from {task.os_error} ---"
+                    logger.error(error_msg)
                     raise ServiceUnavailableException(f"No response from {task.os_error}")
                 if task.status != HTTPStatus.OK:
-                    logger.error("---Error in _call_urls_in_parallel: error response from %s---", task.url)
+                    error_msg = f"---Error in _call_urls_in_parallel: error response from {task.url} ---"
+                    logger.error(error_msg)
                     raise ServiceUnavailableException(f"Error response from {task.url}")
                 task_json = await task.json()
                 responses.append(task_json)

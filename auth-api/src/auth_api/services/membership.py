@@ -170,7 +170,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         org_name = self._model.org.name
         org_id = self._model.org.id
         if not self._model.user.contacts:
-            logger.error("No user contact record for user id %s", self._model.user_id)
+            error_msg = f"No user contact record for user id {self._model.user_id}"
+            logger.error(error_msg)
             logger.error("<send_notification_to_member failed")
         recipient = self._model.user.contacts[0].contact.email
         app_url = f"{origin_url}/"

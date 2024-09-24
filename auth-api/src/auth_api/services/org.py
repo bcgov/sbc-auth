@@ -890,7 +890,8 @@ class Org:  # pylint: disable=too-many-public-methods
                 )
         else:
             # continue but log error
-            logger.error("No admin email record for org id %s", org_id)
+            error_msg = f"No admin email record for org id {org_id}"
+            logger.error(error_msg)
 
         logger.debug(">find_affidavit_by_org_id ")
         return Org(org)

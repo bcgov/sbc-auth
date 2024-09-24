@@ -144,6 +144,7 @@ class Invitation:
                 publish_to_mailer(notification_type=QueueMessageTypes.TEAM_MEMBER_INVITED.value, data=data)
                 logger.debug("send_team_member_invitation_notification>")
             except Exception as e:  # noqa=B901
+                
                 logger.error("<send_team_member_invitation_notification failed")
                 raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
         return Invitation(invitation)
@@ -458,7 +459,8 @@ class Invitation:
                     if membership_model.status not in (Status.ACTIVE.value, Status.PENDING_STAFF_REVIEW.value):
                         Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
                 except BusinessException as exception:
-                    logger.error("<send_notification_to_admin failed", exception.message)
+                    error_msg = f"<send_notification_to_admin failed {exception.message} ---"
+                    logger.error(error_msg)
 
         invitation.login_source = login_source  # Update login source to the source when accepted
         invitation.accepted_date = datetime.now()

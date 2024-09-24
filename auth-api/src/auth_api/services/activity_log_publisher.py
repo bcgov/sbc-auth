@@ -60,5 +60,6 @@ class ActivityLogPublisher:  # pylint: disable=too-many-instance-attributes, too
                 data=data,
             )
             queue.publish(CONFIG.AUTH_EVENT_TOPIC, GcpQueue.to_queue_message(cloud_event))
-        except Exception:  # noqa: B902 # pylint: disable=broad-except
-            logger.error("Activity Queue Publish Event Error:", exc_info=True)
+        except Exception as e:  # noqa: B902 # pylint: disable=broad-except
+            error_msg = f"Activity Queue Publish Event Error: {e}"
+            logger.error(error_msg)

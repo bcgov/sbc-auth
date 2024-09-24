@@ -38,4 +38,5 @@ def publish_to_mailer(notification_type, data=None, source=QueueSources.AUTH_API
     try:
         queue.publish(current_app.config.get("ACCOUNT_MAILER_TOPIC"), GcpQueue.to_queue_message(cloud_event))
     except Exception as e:  # NOQA # pylint: disable=broad-except
-        logger.error(f"Failed to publish to mailer: {str(e)}")
+        error_msg = f"Failed to publish to mailer {e}"
+        logger.error(error_msg)
