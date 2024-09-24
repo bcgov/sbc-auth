@@ -29,7 +29,6 @@ from .documents_affidavit import bp as documents_affidavit_bp
 from .entity import bp as entity_bp
 from .invitation import bp as invitation_bp
 from .keycloak import bp as keycloak_bp
-from .meta import bp as meta_bp
 from .notifications import bp as notifications_bp
 from .org import bp as org_bp
 from .org_api_keys import bp as org_api_keys_bp

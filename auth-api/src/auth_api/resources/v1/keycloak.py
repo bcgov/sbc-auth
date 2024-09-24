@@ -18,10 +18,9 @@
 from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
 
-from auth_api import status as http_status
-from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
 from auth_api.services.keycloak import KeycloakService
+from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import Role
 
@@ -35,9 +34,9 @@ def get_keycloak_users_by_role():
     """Return keycloak name + email by role."""
     role = request.args.get('role', None)
     if role is None:
-        response, status = {'message': 'Role query parameter is required'}, http_status.HTTP_400_BAD_REQUEST
+        response, status = {'message': 'Role query parameter is required'}, 400
     try:
-        response, status = KeycloakService.get_user_emails_with_role(role), http_status.HTTP_200_OK
+        response, status = KeycloakService.get_user_emails_with_role(role), 200
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
     return jsonify(response), status
