@@ -183,7 +183,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         """Handle search query order by."""
         # If searching by id, surface the perfect matches to the top
         if search.id:
-            return query.order_by(desc(Org.id == search.id), Org.created.desc())
+            return query.order_by(desc(Org.id == int(search.id or -1)), Org.created.desc())
 
         return query.order_by(Org.created.desc())
 
