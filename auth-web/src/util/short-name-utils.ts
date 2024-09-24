@@ -5,7 +5,7 @@ import { EFTRefundTypeDescription, ShortNameType, ShortNameTypeDescription } fro
  */
 export default class ShortNameUtils {
   // Header Filter item definitions used for drop down select
-  static ShortNameTypeItems = [
+  static readonly ShortNameTypeItems = [
     { text: ShortNameTypeDescription[ShortNameType.EFT], value: ShortNameType.EFT },
     { text: ShortNameTypeDescription[ShortNameType.WIRE], value: ShortNameType.WIRE }
   ]
