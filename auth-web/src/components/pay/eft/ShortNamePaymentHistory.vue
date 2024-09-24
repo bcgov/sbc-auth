@@ -185,7 +185,7 @@ export default defineComponent({
     const shortNameRefundTypes: string[] = [
       ShortNameHistoryType.SN_REFUND_PENDING_APPROVAL,
       ShortNameHistoryType.SN_REFUND_APPROVED,
-      ShortNameHistoryType.SN_REFUND_REJECTED]
+      ShortNameHistoryType.SN_REFUND_DECLINED]
     const confirmationDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const errorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const historyTable: Ref<InstanceType<typeof BaseVDataTable>> = ref(null)
@@ -305,7 +305,7 @@ export default defineComponent({
           return 'Pending Approval'
         case ShortNameHistoryType.SN_REFUND_APPROVED:
           return 'Approved'
-        case ShortNameHistoryType.SN_REFUND_REJECTED:
+        case ShortNameHistoryType.SN_REFUND_DECLINED:
           return 'Declined'
         default:
           return CommonUtils.formatAccountDisplayName(item) ? item.accountId && item.accountName : ''
@@ -321,7 +321,7 @@ export default defineComponent({
         case ShortNameHistoryType.SN_REFUND_PENDING_APPROVAL:
         case ShortNameHistoryType.SN_REFUND_APPROVED:
           return `-${amount}`
-        case ShortNameHistoryType.SN_REFUND_REJECTED:
+        case ShortNameHistoryType.SN_REFUND_DECLINED:
           return `-`
         default:
           return amount
