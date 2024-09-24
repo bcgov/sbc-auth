@@ -23,6 +23,7 @@ from auth_api.utils.constants import AFFIDAVIT_FOLDER_NAME
 
 logger = StructuredLogging.get_logger()
 
+
 class MinioService:
     """Document Storage class."""
 

@@ -24,6 +24,7 @@ from ..utils.enums import OrgStatus
 
 logger = StructuredLogging.get_logger()
 
+
 class Permissions:  # pylint: disable=too-few-public-methods
     """Service for user settings."""
 

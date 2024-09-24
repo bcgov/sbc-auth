@@ -25,6 +25,7 @@ from auth_api.models import User
 
 logger = StructuredLogging.get_logger()
 
+
 class Flags:
     """Wrapper around the feature flag system.
 

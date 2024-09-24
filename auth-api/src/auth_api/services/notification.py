@@ -21,6 +21,7 @@ from .rest_service import RestService
 
 logger = StructuredLogging.get_logger()
 
+
 def send_email(subject: str, sender: str, recipients: str, html_body: str):  # pylint:disable=unused-argument
     """Send the email asynchronously, using the given details."""
     logger.info(f"send_email {recipients}")

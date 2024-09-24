@@ -64,6 +64,7 @@ from .task import Task as TaskService
 QUALIFIED_SUPPLIER_PRODUCT_CODES = [ProductCode.MHR_QSLN.value, ProductCode.MHR_QSHD.value, ProductCode.MHR_QSHM.value]
 logger = StructuredLogging.get_logger()
 
+
 class Product:
     """Manages all aspects of Products data.
 

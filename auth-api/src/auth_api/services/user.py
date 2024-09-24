@@ -61,6 +61,7 @@ from .keycloak import KeycloakService
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 logger = StructuredLogging.get_logger()
 
+
 class User:  # pylint: disable=too-many-instance-attributes disable=too-many-public-methods
     """Manages all aspects of the User Entity.
 
@@ -649,9 +650,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
                     is_user_an_owner = True
             elif member.membership_type_code == ADMIN:
                 org_has_other_owners = True
-        logger.info(
-            f"Org :{org.name} --> User Owner : {is_user_an_owner},Has other owners :{org_has_other_owners}"
-        )
+        logger.info(f"Org :{org.name} --> User Owner : {is_user_an_owner},Has other owners :{org_has_other_owners}")
         if is_user_an_owner and not org_has_other_owners:
             logger.info(f"Affiliated entities : {len(org.affiliated_entities)}")
             if len(org.affiliated_entities) == 0:

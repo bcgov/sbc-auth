@@ -41,6 +41,7 @@ from auth_api.utils.util import camelback2snake  # noqa: I005
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 logger = StructuredLogging.get_logger()
 
+
 class Task:  # pylint: disable=too-many-instance-attributes
     """Manages all aspects of the Task Entity.
 

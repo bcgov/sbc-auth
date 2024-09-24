@@ -35,6 +35,7 @@ from .user_status_code import UserStatusCode
 
 logger = StructuredLogging.get_logger()
 
+
 class User(BaseModel):
     """This is the model for a User."""
 

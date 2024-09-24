@@ -60,6 +60,7 @@ ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 CONFIG = get_named_config()
 logger = StructuredLogging.get_logger()
 
+
 class Invitation:
     """Manages Invitation data.
 

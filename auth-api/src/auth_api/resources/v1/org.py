@@ -46,6 +46,7 @@ from auth_api.utils.util import extract_numbers, get_request_environment
 bp = Blueprint("ORGS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs")
 logger = StructuredLogging.get_logger()
 
+
 @bp.route("", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["GET", "POST"])
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])

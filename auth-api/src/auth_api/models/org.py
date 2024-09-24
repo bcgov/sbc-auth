@@ -42,6 +42,7 @@ from .org_type import OrgType
 
 logger = StructuredLogging.get_logger()
 
+
 class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """Model for an Org record."""
 

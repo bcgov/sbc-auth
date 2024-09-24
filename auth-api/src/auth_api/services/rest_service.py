@@ -37,6 +37,7 @@ from auth_api.utils.enums import AuthHeaderType, ContentType
 RETRY_ADAPTER = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[404]))
 logger = StructuredLogging.get_logger()
 
+
 class RestService:
     """Service to invoke Rest services which uses OAuth 2.0 implementation."""
 
@@ -280,9 +281,7 @@ class RestService:
             for task in tasks:
                 if isinstance(task, ClientConnectorError):
                     # if no response from task we will go in here (i.e. namex-api is down)
-                    logger.error(
-                        "---Error in _call_urls_in_parallel: no response from %s---", task.os_error
-                    )
+                    logger.error("---Error in _call_urls_in_parallel: no response from %s---", task.os_error)
                     raise ServiceUnavailableException(f"No response from {task.os_error}")
                 if task.status != HTTPStatus.OK:
                     logger.error("---Error in _call_urls_in_parallel: error response from %s---", task.url)

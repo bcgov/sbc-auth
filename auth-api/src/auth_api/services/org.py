@@ -79,6 +79,7 @@ from .validators.validator_response import ValidatorResponse
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 logger = StructuredLogging.get_logger()
 
+
 class Org:  # pylint: disable=too-many-public-methods
     """Manages all aspects of Org data.
 

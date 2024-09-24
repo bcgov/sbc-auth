@@ -31,6 +31,7 @@ from auth_api.utils.user_context import UserContext, user_context
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 logger = StructuredLogging.get_logger()
 
+
 class ActivityLog:  # pylint: disable=too-many-instance-attributes
     """Manages all aspects of the Activity Log Entity."""
 

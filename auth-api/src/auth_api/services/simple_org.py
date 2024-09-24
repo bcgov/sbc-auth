@@ -28,6 +28,7 @@ ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 CONFIG = get_named_config()
 logger = StructuredLogging.get_logger()
 
+
 class SimpleOrg:  # pylint: disable=too-few-public-methods
     """Manages a simplified version of organization data.
 

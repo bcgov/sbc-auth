@@ -28,6 +28,7 @@ from auth_api.services.gcp_queue import GcpQueue, queue
 CONFIG = get_named_config()
 logger = StructuredLogging.get_logger()
 
+
 class ActivityLogPublisher:  # pylint: disable=too-many-instance-attributes, too-few-public-methods
     """Class for Activity Log Publishing."""
 
