@@ -303,26 +303,21 @@ class KeycloakService:
     def get_user_emails_with_role(role: str):
         """Get user emails with the role name."""
         config = current_app.config
-        base_url = config.get('KEYCLOAK_BASE_URL')
-        realm = config.get('KEYCLOAK_REALMNAME')
-        timeout = config.get('CONNECT_TIMEOUT', 60)
+        base_url = config.get("KEYCLOAK_BASE_URL")
+        realm = config.get("KEYCLOAK_REALMNAME")
+        timeout = config.get("CONNECT_TIMEOUT", 60)
         admin_token = KeycloakService._get_admin_token()
 
-        headers = {
-            'Content-Type': ContentType.JSON.value,
-            'Authorization': f'Bearer {admin_token}'
-        }
+        headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
 
         users = []
-        get_role_users = f'{base_url}/auth/admin/realms/{realm}/roles/{role}/users'
+        get_role_users = f"{base_url}/auth/admin/realms/{realm}/roles/{role}/users"
         response = requests.get(get_role_users, headers=headers, timeout=timeout)
         if response.status_code == 404:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         response.raise_for_status()
         for user in response.json():
-            users.append({'firstName': user['firstName'],
-                          'lastName': user['lastName'],
-                          'email': user['email']})
+            users.append({"firstName": user["firstName"], "lastName": user["lastName"], "email": user["email"]})
         return users
 
     @staticmethod
