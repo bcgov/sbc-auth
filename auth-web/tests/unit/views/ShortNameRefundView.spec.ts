@@ -1,3 +1,4 @@
+import { axios } from '@/util/http-util'
 import { createLocalVue, mount } from '@vue/test-utils'
 import ShortNameRefundView from '@/views/pay/eft/ShortNameRefundView.vue'
 import Vue from 'vue'
@@ -9,17 +10,33 @@ Vue.use(Vuetify)
 Vue.use(VueRouter)
 
 describe('ShortNameRefundView.vue', () => {
-  let wrapper
+  let wrapper: any
   const localVue = createLocalVue()
   const vuetify = new Vuetify({})
-  let sandbox
+  let sandbox: any
+  let summaryResponse: any
 
   beforeEach(() => {
+    summaryResponse = {
+      'items': [
+        {
+          'creditsRemaining': 300.0,
+          'id': 2,
+          'lastPaymentReceivedDate': '2023-11-24T13:47:47',
+          'linkedAccountsCount': 0,
+          'refundStatus': 'PENDING_REFUND',
+          'shortName': 'SNAME100',
+          'shortNameType': 'EFT'
+        }
+      ]
+    }
+
     sandbox = sinon.createSandbox()
+    const get = sandbox.stub(axios, 'get')
+    get.returns(new Promise(resolve => resolve({ data: summaryResponse })))
     wrapper = mount(ShortNameRefundView, {
       propsData: {
-        shortNameDetails: { shortName: 'TEST', creditsRemaining: '500.0' },
-        unsettledAmount: '100.0'
+        shortNameDetails: { shortName: 'TEST', creditsRemaining: '500.0' }
       },
       localVue,
       vuetify
@@ -47,8 +64,7 @@ describe('ShortNameRefundView.vue', () => {
     const router = new VueRouter()
     wrapper = mount(ShortNameRefundView, {
       propsData: {
-        shortNameDetails: { shortName: 'TEST', creditsRemaining: '500.0' },
-        unsettledAmount: '100.0'
+        shortNameDetails: { shortName: 'TEST', creditsRemaining: '500.0' }
       },
       localVue,
       vuetify,

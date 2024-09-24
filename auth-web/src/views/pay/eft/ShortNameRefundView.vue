@@ -236,7 +236,7 @@ export default defineComponent({
       email: '',
       staffComment: '',
       isLoading: false,
-      readOnly: true,
+      readOnly: false,
       refundAmountRules: [
         v => !!v || 'Refund Amount is required',
         v => parseFloat(v) > 0 || 'Refund Amount must be greater than zero',
@@ -285,8 +285,6 @@ export default defineComponent({
         const response = await PaymentService.getEFTShortnameSummary(shortnameId)
         if (response?.data) {
           state.shortNameDetails = response.data['items'][0]
-          const eftShortNameResponse = await PaymentService.getEFTShortName(state.shortNameDetails.id)
-          state.shortName = eftShortNameResponse.data
         } else {
           throw new Error('No response from getEFTShortname')
         }
@@ -310,6 +308,10 @@ export default defineComponent({
       }
     }
 
+    function formatAmount (amount: number) {
+      return amount !== undefined ? CommonUtils.formatAmount(amount) : ''
+    }
+
     const refundForm = ref(null)
     const isFormValid = ref(false)
     const buttonText = ref('Submit Refund Request')
@@ -325,12 +327,11 @@ export default defineComponent({
       state.isLoading = true
       if (refundForm.value.validate()) {
         const refundPayload: EftRefundRequest = {
-          shortNameId: props.shortNameDetails.id,
+          shortNameId: state.shortNameDetails.id,
           refundAmount: state.refundAmount,
           casSupplierNum: state.casSupplierNum,
           refundEmail: state.email,
-          comment: state.staffComment,
-          shortName: props.shortNameDetails.shortName
+          comment: state.staffComment
         }
         try {
           await state.orgStore.refundEFT(refundPayload)
@@ -377,7 +378,7 @@ export default defineComponent({
       buttonText,
       buttonColor,
       handleCancelButton,
-      formatAmount: CommonUtils.formatAmount,
+      formatAmount,
       getShortNameTypeDescription: ShortNameUtils.getShortNameTypeDescription,
       getEFTRefundTypeDescription: ShortNameUtils.getEFTRefundTypeDescription,
       formatDate
