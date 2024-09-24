@@ -122,7 +122,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
             filter_set = True
 
         if search_filter.to_org_id:
-            to_org_id = int(search_filter.to_org_id) if search_filter.to_org_id not in ['NaN', None, ''] else -1
+            to_org_id = int(search_filter.to_org_id) if search_filter.to_org_id not in ["NaN", ""] else -1
             results = results.filter(AffiliationInvitation.to_org_id == to_org_id)
             filter_set = True
 
