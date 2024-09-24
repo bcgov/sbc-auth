@@ -52,6 +52,7 @@ RUN apt-get update && apt-get upgrade -y \
     wait-for-it \
   && curl -sSL 'https://install.python-poetry.org' | python - \
   && poetry --version \
+  && poetry config installer.max-workers 1 \
   # Cleaning cache:
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*
