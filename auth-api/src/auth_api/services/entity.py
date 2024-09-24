@@ -17,8 +17,8 @@ import secrets
 import string
 from typing import Tuple
 
-from flask import current_app
 from sbc_common_components.utils.enums import QueueMessageTypes
+from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -33,6 +33,8 @@ from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
+
+logger = StructuredLogging.get_logger()
 
 
 class Entity:
@@ -179,7 +181,7 @@ class Entity:
         """Reset the entity passcode and send email."""
         user_from_context: UserContext = kwargs["user_context"]
         check_auth(one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
-        current_app.logger.debug("reset passcode")
+        logger.debug("reset passcode")
         entity: EntityModel = EntityModel.find_by_business_identifier(business_identifier)
         # generate passcode and set
         new_pass_code = "".join(secrets.choice(string.digits) for i in range(9))

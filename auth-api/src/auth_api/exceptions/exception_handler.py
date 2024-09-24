@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Function to handle all exceptions."""
-import logging
-
 from flask_jwt_oidc import AuthError
 from sqlalchemy.exc import SQLAlchemyError
+from structured_logging import StructuredLogging
 from werkzeug.exceptions import HTTPException, default_exceptions
 
-logger = logging.getLogger("api-exceptions")
-http_logger = logging.getLogger("api-exceptions-http")
+logger = StructuredLogging.get_logger()
 
 RESPONSE_HEADERS = {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"}
 
@@ -34,7 +32,7 @@ class ExceptionHandler:
 
     def auth_handler(self, error):  # pylint: disable=useless-option-value
         """Handle AuthError."""
-        http_logger.error(error.error)
+        logger.error(error.error)
         return error.error, error.status_code, RESPONSE_HEADERS
 
     def db_handler(self, error):  # pylint: disable=useless-option-value
@@ -48,7 +46,7 @@ class ExceptionHandler:
     def std_handler(self, error):  # pylint: disable=useless-option-value
         """Handle standard exception."""
         if isinstance(error, HTTPException):
-            http_logger.error(error)
+            logger.error(error)
             message = dict(  # pylint: disable=use-dict-literal
                 message=error.message if hasattr(error, "message") else error.description
             )

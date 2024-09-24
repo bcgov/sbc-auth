@@ -60,7 +60,6 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods, too-many-ins
         if entity_info:
             entity = Entity(**camelback2snake(entity_info))
             entity.pass_code = passcode_hash(entity.pass_code)
-            # current_app.logger.debug(f"Creating entity from dictionary {entity_info}")
             entity.save()
             return entity
         return None

@@ -18,8 +18,8 @@ This module manages the activity logs.
 
 import json
 
-from flask import current_app
 from jinja2 import Environment, FileSystemLoader
+from structured_logging import StructuredLogging
 
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.schemas import ActivityLogSchema
@@ -29,6 +29,7 @@ from auth_api.utils.roles import ADMIN, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
+logger = StructuredLogging.get_logger()
 
 
 class ActivityLog:  # pylint: disable=too-many-instance-attributes
@@ -66,7 +67,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         limit: int = int(kwargs.get("limit"))
         search_args = (item_name, item_type, action, page, limit)
 
-        current_app.logger.debug("<fetch_activity logs ")
+        logger.debug("<fetch_activity logs ")
         results, count = ActivityLogModel.fetch_activity_logs_for_account(org_id, *search_args)
         is_staff_access = user_from_context.is_staff()
         for result in results:
@@ -83,7 +84,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         logs["page"] = page
         logs["limit"] = limit
 
-        current_app.logger.debug(">fetch_activity logs")
+        logger.debug(">fetch_activity logs")
         return logs
 
     @staticmethod

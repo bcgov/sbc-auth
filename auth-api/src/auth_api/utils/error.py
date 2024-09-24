@@ -32,14 +32,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 """Core error handlers and custom exceptions."""
-import logging
 import sys
 
 from flask import jsonify
+from structured_logging import StructuredLogging
 from werkzeug.exceptions import HTTPException
 from werkzeug.routing import RoutingException
 
-logger = logging.getLogger(__name__)
+logger = StructuredLogging.get_logger()
 
 
 def init_app(app):
@@ -62,7 +62,9 @@ def handle_http_error(error):
 
 def handle_uncaught_error(error: Exception):  # pylint: disable=unused-argument
     """Handle any uncaught exceptions."""
-    logger.error("Uncaught exception", exc_info=sys.exc_info())
+
+    error_msg = f"Uncaught exception {error}"
+    logger.error(error_msg)
     response = jsonify({"message": "Internal server error"})
     response.status_code = 500
     return response

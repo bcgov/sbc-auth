@@ -15,9 +15,10 @@
 import uuid
 from datetime import datetime, timezone
 
-from flask import current_app, g, request
+from flask import g, request
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
+from structured_logging import StructuredLogging
 
 from auth_api.config import get_named_config
 from auth_api.models import User as UserModel
@@ -25,6 +26,7 @@ from auth_api.models.dataclass import Activity
 from auth_api.services.gcp_queue import GcpQueue, queue
 
 CONFIG = get_named_config()
+logger = StructuredLogging.get_logger()
 
 
 class ActivityLogPublisher:  # pylint: disable=too-many-instance-attributes, too-few-public-methods
@@ -58,5 +60,6 @@ class ActivityLogPublisher:  # pylint: disable=too-many-instance-attributes, too
                 data=data,
             )
             queue.publish(CONFIG.AUTH_EVENT_TOPIC, GcpQueue.to_queue_message(cloud_event))
-        except Exception:  # noqa: B902 # pylint: disable=broad-except
-            current_app.logger.error("Activity Queue Publish Event Error:", exc_info=True)
+        except Exception as e:  # noqa: B902 # pylint: disable=broad-except
+            error_msg = f"Activity Queue Publish Event Error: {e}"
+            logger.error(error_msg)

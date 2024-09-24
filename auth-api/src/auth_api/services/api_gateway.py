@@ -18,6 +18,7 @@ from typing import Dict, List
 
 from flask import current_app
 from requests.exceptions import HTTPError
+from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models.org import Org as OrgModel
@@ -28,6 +29,8 @@ from auth_api.utils.api_gateway import generate_client_representation
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_API_GW_SANDBOX_USERS, GROUP_API_GW_USERS
 from auth_api.utils.roles import ADMIN, STAFF
 from auth_api.utils.user_context import UserContext, user_context
+
+logger = StructuredLogging.get_logger()
 
 
 class ApiGateway:
@@ -45,7 +48,7 @@ class ApiGateway:
         B - If consumer already exists,
         1 - Create key for specific environment.
         """
-        current_app.logger.debug("<create_key ")
+        logger.debug("<create_key ")
         env = request_json.get("environment", "sandbox")
         name = request_json.get("keyName")
         org: OrgModel = OrgModel.find_by_id(org_id)
@@ -75,7 +78,7 @@ class ApiGateway:
 
     @classmethod
     def _get_api_gw_key(cls, env):
-        current_app.logger.info("_get_api_gw_key %s", env)
+        logger.info("_get_api_gw_key %s", env)
         return current_app.config.get("API_GW_KEY") if env == "prod" else current_app.config.get("API_GW_NON_PROD_KEY")
 
     @classmethod
@@ -117,7 +120,7 @@ class ApiGateway:
     @classmethod
     def revoke_key(cls, org_id: int, api_key: str):
         """Revoke api key."""
-        current_app.logger.debug("<revoke_key ")
+        logger.debug("<revoke_key ")
         check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         # Find the environment for this key, based on it consumer changes.
         email_id: str = None
@@ -143,7 +146,7 @@ class ApiGateway:
     @classmethod
     def get_api_keys(cls, org_id: int) -> List[Dict[str, any]]:
         """Get all api keys."""
-        current_app.logger.debug("<get_api_keys ")
+        logger.debug("<get_api_keys ")
         check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         api_keys_response = {"consumer": {"consumerKey": []}}
         for env in ("sandbox", "prod"):
@@ -217,7 +220,7 @@ class ApiGateway:
         - Mask the details and call pay sandbox endpoint to create a sandbox account.
         """
         if not current_app.config.get("PAY_API_SANDBOX_URL"):
-            current_app.logger.warning("Sandbox URL not provided, skipping sandbox pay account creation")
+            logger.warning("Sandbox URL not provided, skipping sandbox pay account creation")
             return
         user: UserContext = kwargs["user_context"]
         pay_account = cls._get_pay_account(org, user)
@@ -240,7 +243,7 @@ class ApiGateway:
 
     @classmethod
     def _create_sandbox_pay_account(cls, pay_request, user):
-        current_app.logger.info("Creating Sandbox Payload %s", pay_request)
+        logger.info("Creating Sandbox Payload %s", pay_request)
         pay_sandbox_accounts_endpoint = f"{current_app.config.get('PAY_API_SANDBOX_URL')}/accounts?sandbox=true"
         RestService.post(
             endpoint=pay_sandbox_accounts_endpoint, token=user.bearer_token, data=pay_request, raise_for_status=True
@@ -254,7 +257,7 @@ class ApiGateway:
 
     @classmethod
     def _get_api_consumer_endpoint(cls, env):
-        current_app.logger.info("_get_api_consumer_endpoint %s", env)
+        logger.info("_get_api_consumer_endpoint %s", env)
         return (
             current_app.config.get("API_GW_CONSUMERS_API_URL")
             if env == "prod"

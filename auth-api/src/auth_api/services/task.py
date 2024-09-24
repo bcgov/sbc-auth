@@ -22,6 +22,7 @@ from typing import Dict, List
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.utils.enums import QueueMessageTypes
+from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models import Membership as MembershipModel
@@ -38,6 +39,7 @@ from auth_api.utils.notifications import ProductSubscriptionInfo
 from auth_api.utils.util import camelback2snake  # noqa: I005
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
+logger = StructuredLogging.get_logger()
 
 
 class Task:  # pylint: disable=too-many-instance-attributes
@@ -70,19 +72,19 @@ class Task:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def create_task(task_info: dict, do_commit: bool = True):
         """Create a new task record."""
-        current_app.logger.debug("<create_task ")
+        logger.debug("<create_task ")
         task_model = TaskModel(**camelback2snake(task_info))
         task_model.flush()
         if do_commit:  # Task mostly comes as a part of parent transaction.So do not commit unless asked.
             db.session.commit()
 
-        current_app.logger.debug(">create_task ")
+        logger.debug(">create_task ")
         return Task(task_model)
 
     @staticmethod
     def close_task(task_id, remarks: [] = None, do_commit: bool = True):
         """Close a task."""
-        current_app.logger.debug("<close_task ")
+        logger.debug("<close_task ")
         task_model: TaskModel = TaskModel.find_by_id(task_id)
         task_model.status = TaskStatus.CLOSED.value
         task_model.remarks = remarks
@@ -92,7 +94,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
 
     def update_task(self, task_info: Dict = None, origin_url: str = None):
         """Update a task record."""
-        current_app.logger.debug("<update_task ")
+        logger.debug("<update_task ")
         task_model: TaskModel = self._model
         task_relationship_status = task_info.get("relationshipStatus")
 
@@ -106,13 +108,13 @@ class Task:  # pylint: disable=too-many-instance-attributes
 
         self._update_relationship(origin_url=origin_url)
         db.session.commit()
-        current_app.logger.debug(">update_task ")
+        logger.debug(">update_task ")
         return Task(task_model)
 
     def _update_relationship(self, origin_url: str = None):
         """Retrieve the relationship record and update the status."""
         task_model: TaskModel = self._model
-        current_app.logger.debug("<update_task_relationship ")
+        logger.debug("<update_task_relationship ")
         is_approved: bool = task_model.relationship_status == TaskRelationshipStatus.ACTIVE.value
         is_hold: bool = task_model.status == TaskStatus.HOLD.value
 
@@ -165,7 +167,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
             task_model.user.verified = True
             task_model.user.save()
 
-        current_app.logger.debug(">update_task_relationship ")
+        logger.debug(">update_task_relationship ")
 
     @staticmethod
     def get_task_remark(task_model: TaskModel):
@@ -199,8 +201,9 @@ class Task:  # pylint: disable=too-many-instance-attributes
             mailer_type = QueueMessageTypes.RESUBMIT_BCEID_ORG_NOTIFICATION.value
 
         if admin_emails == "":
-            current_app.logger.error("No admin email record for org id %s", org.id)
-            current_app.logger.error("<send_approval_notification_to_member failed")
+            error_msg = f"No admin email record for org id {org.id}"
+            logger.error(error_msg)
+            logger.error("<send_approval_notification_to_member failed")
             return
 
         data = {
@@ -214,9 +217,9 @@ class Task:  # pylint: disable=too-many-instance-attributes
         }
         try:
             publish_to_mailer(mailer_type, data=data)
-            current_app.logger.debug("<send_approval_notification_to_member")
+            logger.debug("<send_approval_notification_to_member")
         except Exception as e:  # noqa=B901
-            current_app.logger.error("<send_notification_to_member failed")
+            logger.error("<send_notification_to_member failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
@@ -224,20 +227,20 @@ class Task:  # pylint: disable=too-many-instance-attributes
         """Approve/Reject Affidavit and Org."""
         from auth_api.services import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
 
-        current_app.logger.debug("<update_task_org ")
+        logger.debug("<update_task_org ")
 
         OrgService.approve_or_reject(
             org_id=org_id, is_approved=is_approved, origin_url=origin_url, task_action=task_action
         )
 
-        current_app.logger.debug(">update_task_org ")
+        logger.debug(">update_task_org ")
 
     @staticmethod
     def _update_bceid_admin(is_approved: bool, user_id: int):
         """Approve/Reject BCeId Admin User and Affidavit."""
         from auth_api.services import Affidavit  # pylint:disable=cyclic-import, import-outside-toplevel
 
-        current_app.logger.debug("<update_bceid_admin_to_org ")
+        logger.debug("<update_bceid_admin_to_org ")
 
         # Update user
         user: UserModel = UserModel.find_by_id(user_id)
@@ -250,22 +253,22 @@ class Task:  # pylint: disable=too-many-instance-attributes
         # Update affidavit
         Affidavit.approve_or_reject_bceid_admin(admin_user_id=user_id, is_approved=is_approved, user=user)
 
-        current_app.logger.debug(">update_bceid_admin_to_org ")
+        logger.debug(">update_bceid_admin_to_org ")
 
     @staticmethod
     def _update_product_subscription(product_sub_info: ProductSubscriptionInfo):
         """Review Product Subscription."""
-        current_app.logger.debug("<_update_product_subscription ")
+        logger.debug("<_update_product_subscription ")
         from auth_api.services import Product as ProductService  # pylint:disable=cyclic-import, import-outside-toplevel
 
         # Approve/Reject Product subscription
         ProductService.update_product_subscription(product_sub_info=product_sub_info, is_new_transaction=False)
-        current_app.logger.debug(">_update_product_subscription ")
+        logger.debug(">_update_product_subscription ")
 
     @staticmethod
     def fetch_tasks(task_search: TaskSearch):
         """Search all tasks."""
-        current_app.logger.debug("<fetch_tasks ")
+        logger.debug("<fetch_tasks ")
         task_models, count = TaskModel.fetch_tasks(task_search)  # pylint: disable=unused-variable
 
         tasks = {
@@ -275,5 +278,5 @@ class Task:  # pylint: disable=too-many-instance-attributes
             "limit": task_search.limit,
         }
 
-        current_app.logger.debug(">fetch_tasks ")
+        logger.debug(">fetch_tasks ")
         return tasks
