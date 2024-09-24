@@ -133,14 +133,14 @@
           </template>
           <template v-if="showRefundDetailAction(item)">
             <v-btn
-                small
-                color="primary"
-                min-width="5rem"
-                min-height="2rem"
-                class="open-action-btn single-action-btn"
-                data-test="reverse-payment-button"
-                :loading="loading"
-                @click="showConfirmReversePaymentModal(item)"
+              small
+              color="primary"
+              min-width="5rem"
+              min-height="2rem"
+              class="open-action-btn single-action-btn"
+              data-test="reverse-payment-button"
+              :loading="loading"
+              @click="viewRefundDetails(item.eftRefundId)"
             >
               Refund Detail
             </v-btn>
@@ -178,7 +178,7 @@ export default defineComponent({
       })
     }
   },
-  setup (props, { emit }) {
+  setup (props, { emit, root }) {
     const enum ConfirmationType {
       REVERSE_PAYMENT = 'reversePayment',
     }
@@ -293,10 +293,6 @@ export default defineComponent({
       return `${height}px`
     }
 
-    function isStatementTransaction (item: any) {
-      return item?.statementNumber
-    }
-
     function showRefundDetailAction (item: any) {
       return shortNameRefundTypes.includes(item.transactionType)
     }
@@ -345,6 +341,16 @@ export default defineComponent({
     function formatTransactionDate (str: string): string {
       const date = moment.utc(str).toDate()
       return (date) ? moment(date).tz('America/Vancouver').format('MMMM D, YYYY') : ''
+    }
+
+    function viewRefundDetails (id: string) {
+      if (!id) return
+      root.$router?.push({
+        name: 'shortnamerefund',
+        params: {
+          eftRefundId: id
+        }
+      })
     }
 
     async function reversePayment (item: any) {
@@ -437,7 +443,7 @@ export default defineComponent({
       state,
       infiniteScrollCallback,
       calculateTableHeight,
-      isStatementTransaction
+      viewRefundDetails
     }
   }
 })

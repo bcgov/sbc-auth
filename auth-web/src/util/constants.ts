@@ -691,6 +691,18 @@ export enum ShortNameResponseStatus {
     EFT_SHORT_NAME_ALREADY_MAPPED = 'EFT_SHORT_NAME_ALREADY_MAPPED'
 }
 
+export enum EFTRefundType {
+    APPROVED = 'APPROVED',
+    PENDING_APPROVAL = 'PENDING_APPROVAL',
+    REJECTED = 'REJECTED'
+}
+
+export enum EFTRefundTypeDescription {
+    APPROVED = 'Approved',
+    PENDING_APPROVAL = 'Requested',
+    REJECTED = 'Declined'
+}
+
 export enum ShortNameType {
     EFT = 'EFT',
     WIRE = 'WIRE'

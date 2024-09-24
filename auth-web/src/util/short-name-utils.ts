@@ -1,4 +1,4 @@
-import { ShortNameType, ShortNameTypeDescription } from '@/util/constants'
+import { EFTRefundTypeDescription, ShortNameType, ShortNameTypeDescription } from '@/util/constants'
 
 /**
  * A class to put all the common short name utility methods.
@@ -12,5 +12,9 @@ export default class ShortNameUtils {
 
   static getShortNameTypeDescription (type: string) {
     return type ? ShortNameTypeDescription[type] : type
+  }
+
+  static getEFTRefundTypeDescription (type: string) {
+    return type ? EFTRefundTypeDescription[type] : type
   }
 }

@@ -114,19 +114,13 @@ import CommonUtils from '@/util/common-util'
 import PaymentService from '@/services/payment.services'
 import { Role } from '@/util/constants'
 import ShortNameAccountLink from '@/components/pay/eft/ShortNameAccountLink.vue'
+import { ShortNameDetails } from '@/models/pay/short-name'
 import ShortNameFinancialDialog from '@/components/pay/eft/ShortNameFinancialDialog.vue'
 import ShortNamePaymentHistory from '@/components/pay/eft/ShortNamePaymentHistory.vue'
 import ShortNameRefund from '@/components/pay/eft/ShortNameRefund.vue'
 import ShortNameUtils from '@/util/short-name-utils'
 import moment from 'moment'
 import { useUserStore } from '@/stores/user'
-
-interface ShortNameDetails {
-  shortName: string;
-  creditsRemaining?: number;
-  linkedAccountsCount: number;
-  lastPaymentReceivedDate: Date;
-}
 
 export default defineComponent({
   name: 'ShortNameMappingView',

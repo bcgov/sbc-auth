@@ -883,7 +883,7 @@ export function getRoutes (): RouteConfig[] {
       props: (route) => ({ shortNameId: route.params.shortNameId })
     },
     {
-      path: '/pay/shortname-details/:shortNameId/refund',
+      path: '/pay/shortname-details/:shortNameId/refund/:eftRefundId',
       name: 'shortnamerefund',
       component: ShortNameRefundView,
       meta: {
@@ -899,8 +899,7 @@ export function getRoutes (): RouteConfig[] {
       },
       props: route => ({
         shortNameId: Number(route.params.shortNameId),
-        shortNameDetails: route.params.shortNameDetails ? JSON.parse(route.params.shortNameDetails) : {},
-        unsettledAmount: route.params.unsettledAmount || ''
+        eftRefundId: route.params.eftRefundId ? Number(route.params.shortNameId) : undefined
       })
     },
     {
