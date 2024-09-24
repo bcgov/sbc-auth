@@ -24,6 +24,7 @@
           filled
           label="Email Address"
           persistent-hint
+          :rules="emailAddressRules"
         />
         <v-text-field
           v-if="isDialogTypeCasSupplierNumber"
@@ -48,6 +49,7 @@
             large
             color="primary"
             data-test="dialog-ok-button"
+            :disabled="isFormValid()"
             @click="patchShortName()"
           >
             Save
@@ -59,6 +61,7 @@
 </template>
 <script lang="ts">
 import { Ref, computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import CommonUtils from '@/util/common-util'
 import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
@@ -81,6 +84,7 @@ export default defineComponent({
   },
   emits: ['on-patch', 'close-short-name-email-dialog'],
   setup (props, { emit }) {
+    const emailAddressRules = CommonUtils.emailRules()
     const modalDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const state = reactive<any>({
@@ -89,6 +93,15 @@ export default defineComponent({
       isDialogTypeEmail: computed(() => props.shortNameFinancialDialogType === 'EMAIL'),
       isDialogTypeCasSupplierNumber: computed(() => props.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER')
     })
+
+    function isFormValid () {
+      if (state.isDialogTypeEmail) {
+        return emailAddressRules.every(rule => rule(state.email) !== true)
+      } else if (state.isDialogTypeCasSupplierNumber) {
+        return !state.casSupplierNumber
+      }
+      return false
+    }
 
     function openAccountLinkingDialog (item: EFTShortnameResponse, dialogType) {
       state.shortName = item
@@ -143,7 +156,9 @@ export default defineComponent({
       resetAccountLinkingDialog,
       cancelAndResetAccountLinkingDialog,
       patchShortName,
-      dialogTitle
+      emailAddressRules,
+      dialogTitle,
+      isFormValid
     }
   }
 })
