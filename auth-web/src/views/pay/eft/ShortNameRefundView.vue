@@ -27,10 +27,19 @@
 
               <v-row>
                 <v-col class="col-6 col-sm-3 font-weight-bold">
+                  Type
+                </v-col>
+                <v-col class="pl-0">
+                  {{ getShortNameTypeDescription(shortNameDetails.shortNameType) }}
+                </v-col>
+              </v-row>
+
+              <v-row v-if="!readOnly">
+                <v-col class="col-6 col-sm-3 font-weight-bold">
                   Unsettled Amount on Short Name
                 </v-col>
                 <v-col class="pl-0">
-                  {{ unsettledAmount }}
+                  {{ formatAmount(shortNameDetails.creditsRemaining) }}
                 </v-col>
               </v-row>
 
@@ -38,7 +47,14 @@
                 <v-col class="col-6 col-sm-3 font-weight-bold">
                   Refund Amount
                 </v-col>
+                <v-col
+                  v-if="readOnly"
+                  class="pl-0"
+                >
+                  {{ formatAmount(refundDetails.refundAmount) }}
+                </v-col>
                 <v-text-field
+                  v-else
                   v-model.trim="refundAmount"
                   filled
                   label="Refund Amount"
@@ -53,7 +69,14 @@
                 <v-col class="col-6 col-sm-3 font-weight-bold">
                   CAS Supplier Number
                 </v-col>
+                <v-col
+                  v-if="readOnly"
+                  class="pl-0"
+                >
+                  {{ refundDetails.casSupplierNumber }}
+                </v-col>
                 <v-text-field
+                  v-else
                   v-model.trim="casSupplierNum"
                   hint="This number should be created in CAS before issuing a refund"
                   filled
@@ -69,7 +92,14 @@
                 <v-col class="col-6 col-sm-3 font-weight-bold">
                   Email
                 </v-col>
+                <v-col
+                  v-if="readOnly"
+                  class="pl-0"
+                >
+                  {{ refundDetails.refundEmail }}
+                </v-col>
                 <v-text-field
+                  v-else
                   v-model.trim="email"
                   hint="The email provided in the client's Direct Deposit Application form"
                   filled
@@ -81,11 +111,18 @@
                 />
               </v-row>
 
-              <v-row>
+              <v-row v-if="!readOnly">
                 <v-col class="col-6 col-sm-3 font-weight-bold">
                   Reason for Refund
                 </v-col>
+                <v-col
+                  v-if="readOnly"
+                  class="pl-0"
+                >
+                  {{ refundDetails.comment }}
+                </v-col>
                 <v-text-field
+                  v-else
                   v-model.trim="staffComment"
                   filled
                   label="Reason for Refund"
@@ -97,8 +134,43 @@
               </v-row>
             </v-col>
           </v-row>
+          <v-row v-if="readOnly">
+            <v-col class="col-6 col-sm-3 font-weight-bold">
+              Requested By Qualified Receiver
+            </v-col>
+            <v-col class="pl-0">
+              {{ refundDetails.createdBy }} {{ formatDate(refundDetails.createdOn, dateDisplayFormat) }}
+            </v-col>
+          </v-row>
+          <v-row v-if="readOnly">
+            <v-col class="col-6 col-sm-3 font-weight-bold">
+              Qualified Receiver Comment
+            </v-col>
+            <v-col class="pl-0">
+              {{ refundDetails.comment }}
+            </v-col>
+          </v-row>
+          <v-row v-if="readOnly && isApproved()">
+            <v-col class="col-6 col-sm-3 font-weight-bold">
+              Approved By Expense Authority
+            </v-col>
+            <v-col class="pl-0">
+              {{ refundDetails.updatedBy }} {{ formatDate(refundDetails.updatedOn, dateDisplayFormat) }}
+            </v-col>
+          </v-row>
+          <v-row v-if="readOnly">
+            <v-col class="col-6 col-sm-3 font-weight-bold">
+              Refund Status
+            </v-col>
+            <v-col class="pl-0">
+              {{ getEFTRefundTypeDescription(refundDetails.status) }}
+            </v-col>
+          </v-row>
         </v-card-text>
-        <v-card-actions class="pr-4 justify-end pa-3 pb-5">
+        <v-card-actions
+          v-if="!readOnly"
+          class="pr-4 justify-end pa-3 pb-5"
+        >
           <v-btn
             large
             outlined
@@ -133,39 +205,42 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { EFTRefund, ShortNameDetails } from '@/models/pay/short-name'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import CommonUtils from '@/util/common-util'
+import { EFTRefundType } from '@/util/constants'
 import { EftRefundRequest } from '@/models/refund'
+import PaymentService from '@/services/payment.services'
+import ShortNameUtils from '@/util/short-name-utils'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'ShortNameRefundView',
   props: {
-    shortNameDetails: {
-      type: Object,
-      default: () => ({
-        shortName: ''
-      })
-    },
-    unsettledAmount: {
-      type: String,
-      default: ''
-    },
     shortNameId: {
+      type: Number,
+      default: undefined
+    },
+    eftRefundId: {
       type: Number,
       default: undefined
     }
   },
   setup (props, { root }) {
+    const dateDisplayFormat = 'MMM DD, YYYY h:mm A [Pacific Time]'
     const state = reactive({
+      shortNameDetails: {} as ShortNameDetails,
+      refundDetails: {} as EFTRefund,
       refundAmount: undefined,
       casSupplierNum: '',
       email: '',
       staffComment: '',
       isLoading: false,
+      readOnly: false,
       refundAmountRules: [
         v => !!v || 'Refund Amount is required',
         v => parseFloat(v) > 0 || 'Refund Amount must be greater than zero',
-        v => parseFloat(v) <= parseFloat(props.shortNameDetails?.creditsRemaining) || 'Amount must be less than unsettled amount on short name',
+        v => parseFloat(v) <= parseFloat(state.shortNameDetails?.creditsRemaining) || 'Amount must be less than unsettled amount on short name',
         v => /^\d+(\.\d{1,2})?$/.test(v) || 'Amounts must be less than 2 decimal places'
       ],
       casSupplierNumRules: [
@@ -186,6 +261,51 @@ export default defineComponent({
       isSubmitted: false
     })
 
+    function isApproved () {
+      return state.refundDetails?.status === EFTRefundType.APPROVED
+    }
+
+    onMounted(async () => {
+      await loadShortnameDetails(props.shortNameId)
+
+      if (props.eftRefundId) {
+        state.readOnly = true
+        await loadShortnameRefund(props.eftRefundId)
+      }
+    })
+
+    async function loadShortnameDetails (shortnameId: number): Promise<void> {
+      try {
+        const response = await PaymentService.getEFTShortnameSummary(shortnameId)
+        if (response?.data) {
+          state.shortNameDetails = response.data['items'][0]
+        } else {
+          throw new Error('No response from getEFTShortname')
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to getEFTShortname.', error)
+      }
+    }
+
+    async function loadShortnameRefund (eftRefundId: number): Promise<void> {
+      try {
+        const response = await PaymentService.getEFTRefund(eftRefundId)
+        if (response?.data) {
+          state.refundDetails = response.data
+        } else {
+          throw new Error('No response from getEFTRefund')
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to getEFTRefund.', error)
+      }
+    }
+
+    function formatAmount (amount: number) {
+      return amount !== undefined ? CommonUtils.formatAmount(amount) : ''
+    }
+
     const refundForm = ref(null)
     const isFormValid = ref(false)
     const buttonText = ref('Submit Refund Request')
@@ -201,12 +321,11 @@ export default defineComponent({
       state.isLoading = true
       if (refundForm.value.validate()) {
         const refundPayload: EftRefundRequest = {
-          shortNameId: props.shortNameDetails.id,
+          shortNameId: state.shortNameDetails.id,
           refundAmount: state.refundAmount,
           casSupplierNum: state.casSupplierNum,
           refundEmail: state.email,
-          comment: state.staffComment,
-          shortName: props.shortNameDetails.shortName
+          comment: state.staffComment
         }
         try {
           await state.orgStore.refundEFT(refundPayload)
@@ -245,13 +364,19 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
+      isApproved,
       refundForm,
       isFormDisabled,
       isFormValid,
       submitRefundRequest,
       buttonText,
       buttonColor,
-      handleCancelButton
+      handleCancelButton,
+      formatAmount,
+      getShortNameTypeDescription: ShortNameUtils.getShortNameTypeDescription,
+      getEFTRefundTypeDescription: ShortNameUtils.getEFTRefundTypeDescription,
+      formatDate: CommonUtils.formatUtcToPacificDate,
+      dateDisplayFormat
     }
   }
 })

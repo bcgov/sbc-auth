@@ -301,8 +301,13 @@ export default class PaymentService {
     return axios.get(url, { params })
   }
 
-  static getEFTShortnameSummary (shortNameId: string): AxiosPromise<EFTShortnameResponse> {
+  static getEFTShortnameSummary (shortNameId: string | number): AxiosPromise<EFTShortnameResponse> {
     const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/summaries?shortNameId=${shortNameId}`
+    return axios.get(url)
+  }
+
+  static getEFTRefund (eftRefundId: number): AxiosPromise<EFTShortnameResponse> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/shortname-refund/${eftRefundId}`
     return axios.get(url)
   }
 
