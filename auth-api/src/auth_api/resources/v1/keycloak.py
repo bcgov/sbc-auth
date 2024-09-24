@@ -27,6 +27,7 @@ from auth_api.utils.roles import Role
 
 bp = Blueprint('KEYCLOAK', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/keycloak')
 
+
 @bp.route('/users', methods=['GET', 'OPTIONS'])
 @cross_origin(origins='*', methods=['GET'])
 @_jwt.has_one_of_roles([Role.SYSTEM.value])
