@@ -1,9 +1,9 @@
-import { axios } from '@/util/http-util'
 import { createLocalVue, mount } from '@vue/test-utils'
 import ShortNameRefundView from '@/views/pay/eft/ShortNameRefundView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
+import { axios } from '@/util/http-util'
 import sinon from 'sinon'
 
 Vue.use(Vuetify)
