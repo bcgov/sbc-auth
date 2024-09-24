@@ -12,6 +12,10 @@
   .base-table__header__filter {
     padding-left: 16px;
     padding-right: 4px;
+    .v-input {
+      font-size: 14px;
+      color: #495057;
+    }
   }
   .base-table__item-row {
     color: #495057;

@@ -100,14 +100,11 @@
       </template>
       <template #header-filter-slot />
       <template #item-slot-transactionDate="{ item }">
-        <span>{{ formatDate(item.transactionDate, 'MMMM DD, YYYY') }}</span>
+        <span>{{ formatDate(item.transactionDate, dateDisplayFormat) }}</span>
       </template>
       <template #item-slot-transactionDescription="{ item }">
         <span>{{ formatDescription(item) }}</span>
-        <span
-          v-if="isStatementTransaction(item)"
-          class="transaction-details"
-        >
+        <span class="transaction-details">
           {{ formatAdditionalDescription(item) }}
         </span>
       </template>
@@ -134,6 +131,20 @@
               Reverse Payment
             </v-btn>
           </template>
+          <template v-if="showRefundDetailAction(item)">
+            <v-btn
+              small
+              color="primary"
+              min-width="5rem"
+              min-height="2rem"
+              class="open-action-btn single-action-btn"
+              data-test="reverse-payment-button"
+              :loading="loading"
+              @click="viewRefundDetails(item.eftRefundId)"
+            >
+              Refund Detail
+            </v-btn>
+          </template>
         </div>
       </template>
     </BaseVDataTable>
@@ -154,7 +165,6 @@ import { EFTTransactionState } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
-import moment from 'moment-timezone'
 
 export default defineComponent({
   name: 'ShortNamePaymentHistory',
@@ -167,10 +177,15 @@ export default defineComponent({
       })
     }
   },
-  setup (props, { emit }) {
+  setup (props, { emit, root }) {
+    const dateDisplayFormat = 'MMMM D, YYYY'
     const enum ConfirmationType {
       REVERSE_PAYMENT = 'reversePayment',
     }
+    const shortNameRefundTypes: string[] = [
+      ShortNameHistoryType.SN_REFUND_PENDING_APPROVAL,
+      ShortNameHistoryType.SN_REFUND_APPROVED,
+      ShortNameHistoryType.SN_REFUND_REJECTED]
     const confirmationDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const errorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const historyTable: Ref<InstanceType<typeof BaseVDataTable>> = ref(null)
@@ -278,24 +293,39 @@ export default defineComponent({
       return `${height}px`
     }
 
-    function isStatementTransaction (item: any) {
-      return item?.statementNumber
+    function showRefundDetailAction (item: any) {
+      return shortNameRefundTypes.includes(item.transactionType)
     }
 
     function formatAdditionalDescription (item: any) {
-      if (item.transactionType === ShortNameHistoryType.INVOICE_REFUND) {
-        return item.invoiceId
+      switch (item.transactionType) {
+        case ShortNameHistoryType.INVOICE_REFUND:
+          return item.invoiceId
+        case ShortNameHistoryType.SN_REFUND_PENDING_APPROVAL:
+          return 'Pending Approval'
+        case ShortNameHistoryType.SN_REFUND_APPROVED:
+          return 'Approved'
+        case ShortNameHistoryType.SN_REFUND_REJECTED:
+          return 'Declined'
+        default:
+          return CommonUtils.formatAccountDisplayName(item) ? item.accountId && item.accountName : ''
       }
-      return CommonUtils.formatAccountDisplayName(item)
     }
 
     function formatTransactionAmount (item: any) {
       if (item.amount === undefined) return ''
       let amount = CommonUtils.formatAmount(item.amount)
-      if (item.transactionType === ShortNameHistoryType.STATEMENT_PAID) {
-        amount = `-${amount}`
+
+      switch (item.transactionType) {
+        case ShortNameHistoryType.STATEMENT_PAID:
+        case ShortNameHistoryType.SN_REFUND_PENDING_APPROVAL:
+        case ShortNameHistoryType.SN_REFUND_APPROVED:
+          return `-${amount}`
+        case ShortNameHistoryType.SN_REFUND_REJECTED:
+          return `-`
+        default:
+          return amount
       }
-      return amount
     }
 
     function formatBalanceAmount (item: any) {
@@ -308,9 +338,14 @@ export default defineComponent({
       return ShortNameHistoryTypeDescription[item.transactionType]
     }
 
-    function formatTransactionDate (str: string): string {
-      const date = moment.utc(str).toDate()
-      return (date) ? moment(date).tz('America/Vancouver').format('MMMM D, YYYY') : ''
+    function viewRefundDetails (id: string) {
+      if (!id) return
+      root.$router?.push({
+        name: 'shortnamerefund',
+        params: {
+          eftRefundId: id
+        }
+      })
     }
 
     async function reversePayment (item: any) {
@@ -391,18 +426,20 @@ export default defineComponent({
       historyTable,
       formatBalanceAmount,
       formatTransactionAmount,
-      formatDate: formatTransactionDate,
+      formatDate: CommonUtils.formatUtcToPacificDate,
+      dateDisplayFormat,
       formatAdditionalDescription,
       formatDescription,
       dialogConfirm,
       dialogConfirmClose,
       dialogErrorClose,
       showConfirmReversePaymentModal,
+      showRefundDetailAction,
       headers,
       state,
       infiniteScrollCallback,
       calculateTableHeight,
-      isStatementTransaction
+      viewRefundDetails
     }
   }
 })
