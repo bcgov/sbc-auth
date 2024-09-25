@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Function to handle all exceptions."""
+import traceback
+
+from flask import request
 from flask_jwt_oidc import AuthError
 from sqlalchemy.exc import SQLAlchemyError
 from structured_logging import StructuredLogging
@@ -37,22 +40,23 @@ class ExceptionHandler:
 
     def db_handler(self, error):  # pylint: disable=useless-option-value
         """Handle Database error."""
-        logger.exception(error)
+        stack_trace = traceback.format_exc()
+        message_text = str(error.__dict__["orig"]) if "orig" in error.__dict__ else "Internal server error"
+        error_message = f"[{{error: {message_text}}}, {{stack_trace: {stack_trace}}}]"
+        logger.exception(error_message)
         error_text = error.__dict__["code"] if hasattr(error.__dict__, "code") else ""
-        message_text = str(error.__dict__["orig"]) if hasattr(error.__dict__, "orig") else "Internal server error"
         status_code = error.status_code if hasattr(error, "status_code") else 500
         return {"error": "{}".format(error_text), "message": "{}".format(message_text)}, status_code, RESPONSE_HEADERS
 
     def std_handler(self, error):  # pylint: disable=useless-option-value
         """Handle standard exception."""
         if isinstance(error, HTTPException):
-            logger.error(error)
-            message = dict(  # pylint: disable=use-dict-literal
-                message=error.message if hasattr(error, "message") else error.description
-            )
+            logger.error(f"[{{Error occurred: {error.code}}}, {{Path: {request.path}}}]")
+            message = dict(message=error.description, path=request.path)
         else:
             logger.exception(error)
-            message = dict(message="Internal server error")  # pylint: disable=use-dict-literal
+            message = dict(message="Internal server error")
+
         return message, error.code if isinstance(error, HTTPException) else 500, RESPONSE_HEADERS
 
     def init_app(self, app):
