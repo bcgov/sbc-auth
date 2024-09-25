@@ -248,7 +248,16 @@ export default defineComponent({
     } = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesSummaryFilter) || '{}')
 
     const headers = [
-      createHeader('shortName', 'Bank Short Name', 'text', 'Short Name', shortName),
+      createHeader(
+        'shortName',
+        'Bank Short Name',
+        'text',
+        'Short Name',
+        shortName,
+        true,
+        '200px',
+        '200px'
+      ),
       createHeader(
         'shortNameType',
         'Type',
@@ -256,7 +265,7 @@ export default defineComponent({
         'Type',
         shortNameType,
         true,
-        '125px',
+        '200px',
         '200px',
         ShortNameUtils.ShortNameTypeItems
       ),
@@ -276,7 +285,8 @@ export default defineComponent({
         'Unsettled Amount',
         creditsRemaining,
         true,
-        '200px'
+        '185px',
+        '185px'
       ),
       createHeader(
         'linkedAccountsCount',
@@ -285,8 +295,8 @@ export default defineComponent({
         'Linked Accounts',
         linkedAccountsCount,
         true,
-        '100px',
-        '125px'
+        '170px',
+        '170px'
       ),
       {
         col: 'actions',
