@@ -151,8 +151,8 @@ class Membership(
     def find_membership_by_user_and_org(cls, user_id: int, org_id: int) -> Membership:
         """Get the membership for the specified user and org."""
         records = (
-            cls.query.filter(cls.user_id == user_id)
-            .filter(cls.org_id == org_id)
+            cls.query.filter(cls.user_id == int(user_id or -1))
+            .filter(cls.org_id == int(org_id or -1))
             .filter(cls.status.in_(VALID_STATUSES))
             .order_by(desc(Membership.created))
             .first()

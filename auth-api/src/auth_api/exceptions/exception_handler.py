@@ -42,7 +42,7 @@ class ExceptionHandler:
         """Handle Database error."""
         stack_trace = traceback.format_exc()
         message_text = str(error.__dict__["orig"]) if "orig" in error.__dict__ else "Internal server error"
-        error_message = f"[{{error: {message_text}}}, {{stack_trace: {stack_trace}}}]"
+        error_message = f"{{error: {message_text}, stack_trace: {stack_trace}}}"
         logger.exception(error_message)
         error_text = error.__dict__["code"] if hasattr(error.__dict__, "code") else ""
         status_code = error.status_code if hasattr(error, "status_code") else 500
@@ -51,10 +51,12 @@ class ExceptionHandler:
     def std_handler(self, error):  # pylint: disable=useless-option-value
         """Handle standard exception."""
         if isinstance(error, HTTPException):
-            logger.error(f"[{{Error occurred: {error.code}}}, {{Path: {request.path}}}]")
+            logger.error(f"{{error code: {error.code}, path: {request.path}}}")
             message = dict(message=error.description, path=request.path)
         else:
-            logger.exception(error)
+            stack_trace = traceback.format_exc()
+            error_message = f"{{error: {error}, stack_trace: {stack_trace}}}"
+            logger.exception(error_message)
             message = dict(message="Internal server error")
 
         return message, error.code if isinstance(error, HTTPException) else 500, RESPONSE_HEADERS
