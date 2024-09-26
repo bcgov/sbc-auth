@@ -51,7 +51,15 @@ class ExceptionHandler:
     def std_handler(self, error):  # pylint: disable=useless-option-value
         """Handle standard exception."""
         if isinstance(error, HTTPException):
-            logger.error(f"{{error code: {error.code}, path: {request.path}}}")
+            error_message = (
+                f"{{error code: {error.code}, "
+                f"method: {request.method}, "
+                f"path: {request.path}, "
+                f"params: {request.query_string}, "
+                f"origin: {request.remote_addr}, "
+                f"headers: {request.headers} }}"
+            )
+            logger.error(error_message)
             message = dict(message=error.description, path=request.path)
         else:
             stack_trace = traceback.format_exc()
