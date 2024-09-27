@@ -179,7 +179,9 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     @classmethod
     def find_invitations_by_entity(cls, entity_id: int, status=None):
         """Find all affiliation invitations sent for specific entity filtered by status."""
-        results = db.session.query(AffiliationInvitation).filter(AffiliationInvitation.entity_id == int(entity_id, -1))
+        results = db.session.query(AffiliationInvitation).filter(
+            AffiliationInvitation.entity_id == int(entity_id or -1)
+        )
         return results.filter(AffiliationInvitation.status == status.value).all() if status else results.all()
 
     @classmethod
@@ -193,7 +195,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         return (
             db.session.query(AffiliationInvitation)
             .filter(AffiliationInvitation.from_org_id == int(from_org_id or -1))
-            .filter(AffiliationInvitation.entity_id == int(entity_id, -1))
+            .filter(AffiliationInvitation.entity_id == int(entity_id or -1))
             .filter(
                 or_(
                     AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value,
