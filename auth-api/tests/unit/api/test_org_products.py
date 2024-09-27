@@ -782,3 +782,30 @@ def test_org_product_resubmission(client, jwt, session, keycloak_mock):
         qsln_product_info["subscriptions"][0]["productCode"],
         "ACTIVE",
     )
+
+
+def test_get_org_products_validation_error(client, jwt, session, keycloak_mock):
+    """Assert that MHR sub products subscriptions can be created and approved."""
+    # setup user and org
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+
+    rv_products = client.get(
+        "/api/v1/orgs/None/products",
+        headers=user_headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.BAD_REQUEST
+
+    rv_products = client.get(
+        "/api/v1/orgs/A1234/products",
+        headers=user_headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.BAD_REQUEST
+
+    rv_products = client.get(
+        "/api/v1/orgs//products",
+        headers=user_headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.NOT_FOUND
