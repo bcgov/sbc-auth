@@ -167,19 +167,21 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     @classmethod
     def find_invitations_from_org(cls, org_id: int, status=None):
         """Find all affiliation invitations sent from a specific org filtered by status."""
-        results = db.session.query(AffiliationInvitation).filter(AffiliationInvitation.from_org_id == org_id)
+        results = db.session.query(AffiliationInvitation).filter(AffiliationInvitation.from_org_id == int(org_id or -1))
         return results.filter(AffiliationInvitation.status == status.value).all() if status else results.all()
 
     @classmethod
     def find_invitations_to_org(cls, org_id: int, status=None):
         """Find all affiliation invitations sent to a specific org filtered by status."""
-        results = db.session.query(AffiliationInvitation).filter(AffiliationInvitation.to_org_id == org_id)
+        results = db.session.query(AffiliationInvitation).filter(AffiliationInvitation.to_org_id == int(org_id or -1))
         return results.filter(AffiliationInvitation.status == status.value).all() if status else results.all()
 
     @classmethod
     def find_invitations_by_entity(cls, entity_id: int, status=None):
         """Find all affiliation invitations sent for specific entity filtered by status."""
-        results = db.session.query(AffiliationInvitation).filter(AffiliationInvitation.entity_id == entity_id)
+        results = db.session.query(AffiliationInvitation).filter(
+            AffiliationInvitation.entity_id == int(entity_id or -1)
+        )
         return results.filter(AffiliationInvitation.status == status.value).all() if status else results.all()
 
     @classmethod
@@ -192,8 +194,8 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         """Find all affiliation invitation for org and entity ids."""
         return (
             db.session.query(AffiliationInvitation)
-            .filter(AffiliationInvitation.from_org_id == from_org_id)
-            .filter(AffiliationInvitation.entity_id == entity_id)
+            .filter(AffiliationInvitation.from_org_id == int(from_org_id or -1))
+            .filter(AffiliationInvitation.entity_id == int(entity_id or -1))
             .filter(
                 or_(
                     AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value,
