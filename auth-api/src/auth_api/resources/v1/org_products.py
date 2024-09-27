@@ -25,7 +25,7 @@ from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import Role
 
-bp = Blueprint("ORG_PRODUCTS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs/<int:org_id>/products")
+bp = Blueprint("ORG_PRODUCTS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs/<string:org_id>/products")
 
 
 @bp.route("", methods=["GET", "OPTIONS"])
@@ -33,6 +33,10 @@ bp = Blueprint("ORG_PRODUCTS", __name__, url_prefix=f"{EndpointEnum.API_V1.value
 @_jwt.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value])
 def get_org_product_subscriptions(org_id):
     """GET a new product subscription to the org using the request body."""
+
+    if not org_id or org_id == "None" or not org_id.isdigit():
+        return {"message": "The organization ID is in an incorrect format."}, HTTPStatus.BAD_REQUEST
+
     try:
         include_hidden = request.args.get("include_hidden", None) == "true"  # used by NDS
         response, status = (
@@ -49,6 +53,10 @@ def get_org_product_subscriptions(org_id):
 @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def post_org_product_subscription(org_id):
     """Post a new product subscription to the org using the request body."""
+
+    if not org_id or org_id == "None" or not org_id.isdigit():
+        return {"message": "The organization ID is in an incorrect format."}, HTTPStatus.BAD_REQUEST
+
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "org_product_subscription")
     if not valid_format:
@@ -68,6 +76,10 @@ def post_org_product_subscription(org_id):
 @_jwt.has_one_of_roles([Role.PUBLIC_USER.value])
 def patch_org_product_subscription(org_id):
     """Patch existing product subscription to resubmit it for review."""
+
+    if not org_id or org_id == "None" or not org_id.isdigit():
+        return {"message": "The organization ID is in an incorrect format."}, HTTPStatus.BAD_REQUEST
+
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "org_product_subscription")
     if not valid_format:
