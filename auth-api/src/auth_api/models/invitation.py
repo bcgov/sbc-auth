@@ -115,7 +115,7 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         """Find all invitations that are not in accepted state."""
         return (
             db.session.query(Invitation)
-            .filter(Invitation.membership.any(InvitationMembership.org_id == org_id))
+            .filter(Invitation.membership.any(InvitationMembership.org_id == int(org_id or -1)))
             .filter(Invitation.invitation_status_code != "ACCEPTED")
             .all()
         )
@@ -125,7 +125,7 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         """Find all invitations that are not in accepted state."""
         return (
             db.session.query(Invitation)
-            .filter(Invitation.sender_id == user_id)
+            .filter(Invitation.sender_id == int(user_id or -1))
             .filter(Invitation.invitation_status_code == status)
             .all()
         )

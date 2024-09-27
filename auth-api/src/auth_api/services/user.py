@@ -133,7 +133,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             enabled_in_kc = getattr(existing_kc_user, "enabled", True)
             if getattr(user_model, "status", None) == Status.INACTIVE.value and not enabled_in_kc:
                 membership_model = MembershipModel.find_membership_by_userid(user_model.id)
-                re_enable_user = membership_model.org_id == org_id
+                re_enable_user = membership_model.org_id == int(org_id or -1)
             if user_model and not re_enable_user:
                 logger.debug("Existing users found in DB")
                 users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))

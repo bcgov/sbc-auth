@@ -105,7 +105,7 @@ class Task(BaseModel):
         return (
             db.session.query(Task)
             .filter(
-                Task.relationship_id == relationship_id,
+                Task.relationship_id == int(relationship_id or -1),
                 Task.relationship_type == task_relationship_type,
                 Task.status == task_status,
             )

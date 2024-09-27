@@ -49,7 +49,7 @@ class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many
         query = (
             db.session.query(ActivityLog, User)
             .outerjoin(User, User.id == ActivityLog.actor_id)
-            .filter(ActivityLog.org_id == org_id)
+            .filter(ActivityLog.org_id == int(org_id or -1))
             .order_by(desc(ActivityLog.created))
         )
 
