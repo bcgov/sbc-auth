@@ -49,7 +49,7 @@ class ProductSubscription(Versioned, BaseModel):  # pylint: disable=too-few-publ
         """Find an product subscription instance that matches the provided id."""
         return cls.query.filter(
             and_(
-                ProductSubscription.org_id == org_id,
+                ProductSubscription.org_id == int(org_id or -1),
                 ProductSubscription.product_code == product_code,
                 ProductSubscription.status_code.in_(valid_statuses),
             )

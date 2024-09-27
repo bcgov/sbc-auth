@@ -140,7 +140,10 @@ class Affiliation:
                 subqueryload(Entity.created_by),
                 subqueryload(Entity.modified_by),
             )
-            .filter(AffiliationModel.org_id == org_id, Entity.affiliations.any(AffiliationModel.org_id == org_id))
+            .filter(
+                AffiliationModel.org_id == int(org_id or -1),
+                Entity.affiliations.any(AffiliationModel.org_id == int(org_id or -1)),
+            )
         )
         if environment:
             entities = entities.filter(AffiliationModel.environment == environment)
