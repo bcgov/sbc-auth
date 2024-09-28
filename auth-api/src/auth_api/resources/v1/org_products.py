@@ -34,13 +34,13 @@ bp = Blueprint("ORG_PRODUCTS", __name__, url_prefix=f"{EndpointEnum.API_V1.value
 def get_org_product_subscriptions(org_id):
     """GET a new product subscription to the org using the request body."""
 
-    if not org_id or org_id == "None" or not org_id.isdigit():
+    if not org_id or org_id == "None" or not org_id.isdigit() or int(org_id) < 0:
         return {"message": "The organization ID is in an incorrect format."}, HTTPStatus.BAD_REQUEST
 
     try:
         include_hidden = request.args.get("include_hidden", None) == "true"  # used by NDS
         response, status = (
-            json.dumps(ProductService.get_all_product_subscription(org_id=org_id, include_hidden=include_hidden)),
+            json.dumps(ProductService.get_all_product_subscription(org_id=int(org_id), include_hidden=include_hidden)),
             HTTPStatus.OK,
         )
     except BusinessException as exception:
@@ -54,7 +54,7 @@ def get_org_product_subscriptions(org_id):
 def post_org_product_subscription(org_id):
     """Post a new product subscription to the org using the request body."""
 
-    if not org_id or org_id == "None" or not org_id.isdigit():
+    if not org_id or org_id == "None" or not org_id.isdigit() or int(org_id) < 0:
         return {"message": "The organization ID is in an incorrect format."}, HTTPStatus.BAD_REQUEST
 
     request_json = request.get_json()
@@ -63,8 +63,8 @@ def post_org_product_subscription(org_id):
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
 
     try:
-        subscriptions = ProductService.create_product_subscription(org_id, request_json)
-        ProductService.update_org_product_keycloak_groups(org_id)
+        subscriptions = ProductService.create_product_subscription(int(org_id), request_json)
+        ProductService.update_org_product_keycloak_groups(int(org_id))
         response, status = {"subscriptions": subscriptions}, HTTPStatus.CREATED
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
@@ -77,7 +77,7 @@ def post_org_product_subscription(org_id):
 def patch_org_product_subscription(org_id):
     """Patch existing product subscription to resubmit it for review."""
 
-    if not org_id or org_id == "None" or not org_id.isdigit():
+    if not org_id or org_id == "None" or not org_id.isdigit() or int(org_id) < 0:
         return {"message": "The organization ID is in an incorrect format."}, HTTPStatus.BAD_REQUEST
 
     request_json = request.get_json()
@@ -86,7 +86,7 @@ def patch_org_product_subscription(org_id):
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
 
     try:
-        subscriptions = ProductService.resubmit_product_subscription(org_id, request_json)
+        subscriptions = ProductService.resubmit_product_subscription(int(org_id), request_json)
         response, status = {"subscriptions": subscriptions}, HTTPStatus.OK
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code

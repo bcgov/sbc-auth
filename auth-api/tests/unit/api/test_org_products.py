@@ -804,6 +804,13 @@ def test_get_org_products_validation_error(client, jwt, session, keycloak_mock):
     assert rv_products.status_code == HTTPStatus.BAD_REQUEST
 
     rv_products = client.get(
+        "/api/v1/orgs/-1/products",
+        headers=user_headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.BAD_REQUEST
+
+    rv_products = client.get(
         "/api/v1/orgs//products",
         headers=user_headers,
         content_type="application/json",
