@@ -54,15 +54,6 @@
       </template>
       <template #item-slot-shortName="{ item }">
         <span>{{ item.shortName }}</span>
-        <v-chip
-          v-if="item.refundStatus === ShortNameRefundStatus.PENDING_REFUND"
-          small
-          label
-          color="info"
-          class="item-chip"
-        >
-          {{ ShortNameRefundLabel.PENDING_REFUND }}
-        </v-chip>
       </template>
       <template #header-filter-slot-lastPaymentReceivedDate>
         <div @click="clickDatePicker()">
@@ -101,7 +92,16 @@
         <span>{{ getShortNameTypeDescription(item.shortNameType) }}</span>
       </template>
       <template #item-slot-creditsRemaining="{ item }">
-        <span>{{ formatAmount(item.creditsRemaining) }}</span>
+        <span class="pr-2">{{ formatAmount(item.creditsRemaining) }}</span>
+        <v-chip
+            v-if="item.refundStatus === ShortNameRefundStatus.PENDING_REFUND"
+            small
+            label
+            text-color="white"
+            class="primary pl-2 pr-2"
+        >
+          {{ ShortNameRefundLabel.PENDING_REFUND }}
+        </v-chip>
       </template>
       <template #item-slot-linkedAccountsCount="{ item }">
         <span>{{ item.linkedAccountsCount }}</span>
@@ -276,6 +276,7 @@ export default defineComponent({
         'Last Payment Received Date',
         lastPaymentReceivedDate,
         false,
+        '275px',
         '275px'
       ),
       createHeader(
@@ -285,8 +286,8 @@ export default defineComponent({
         'Unsettled Amount',
         creditsRemaining,
         true,
-        '185px',
-        '185px'
+        '215px',
+        '215px'
       ),
       createHeader(
         'linkedAccountsCount',
@@ -295,8 +296,8 @@ export default defineComponent({
         'Linked Accounts',
         linkedAccountsCount,
         true,
-        '170px',
-        '170px'
+        '175px',
+        '175px'
       ),
       {
         col: 'actions',
@@ -479,9 +480,5 @@ export default defineComponent({
   .v-list {
     width:180px
   }
-}
-
-.item-chip {
-  margin-left: 4px
 }
 </style>
