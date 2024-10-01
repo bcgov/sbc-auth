@@ -16,7 +16,7 @@
         <h1 class="view-header__title">
           {{ shortNameDetails.shortName }}
         </h1>
-        <p class="mt-3 mb-0">
+        <p class="mt-3 mb-0 unsettled-amount">
           <span class="font-weight-bold">Unsettled Amount: </span>{{ unsettledAmount }}
         </p>
       </div>
@@ -25,29 +25,29 @@
           <span class="font-weight-bold">CAS Supplier Number: </span>
           {{ shortName.casSupplierNumber || 'N/A' }}
           <span
-            class="primary--text cursor-pointer"
+            class="pl-4 primary--text cursor-pointer"
             data-test="btn-edit"
             @click="openShortNameSupplierNumberDialog()"
           >
             <v-icon
               color="primary"
               size="20"
-            > mdi-pencil</v-icon>
+            > mdi-pencil-outline</v-icon>
             Edit
           </span>
         </div>
         <div class="overflow-wrap">
           <span class="font-weight-bold">Email: </span>
-          {{ shortName.email || 'N/A' }}
+          <span class="email">{{ shortName.email || 'N/A' }}</span>
           <span
-            class="primary--text cursor-pointer"
+            class="pl-4 primary--text cursor-pointer"
             data-test="btn-edit"
             @click="openShortNameEmailDialog()"
           >
             <v-icon
               color="primary"
               size="20"
-            > mdi-pencil</v-icon>
+            > mdi-pencil-outline</v-icon>
             Edit
           </span>
         </div>
@@ -240,6 +240,20 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
+  .email {
+    word-wrap: break-word;
+    word-break: break-all;
+  }
+  .view-header__title {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  .unsettled-amount {
+    font-size: 18px;
+  }
+  .shortname-info {
+    font-size: 18px;
+  }
   #shortname-details {
     padding-top: 0;
   }
