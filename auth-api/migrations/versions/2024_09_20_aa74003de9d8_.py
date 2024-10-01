@@ -34,10 +34,6 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["status_code"],
-            ["affidavit_statuses.code"],
-        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
@@ -77,10 +73,6 @@ def upgrade():
             ["business_type"], ["business_type_codes.code"], name="orgs_business_type_fkey", ondelete="SET NULL"
         ),
         sa.ForeignKeyConstraint(
-            ["status_code"],
-            ["org_statuses.code"],
-        ),
-        sa.ForeignKeyConstraint(
             ["suspension_reason_code"],
             ["suspension_reason_codes.code"],
             name="orgs_suspension_reason_code_fkey",
@@ -109,6 +101,10 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
+        sa.ForeignKeyConstraint(
+            ["status_code"],
+            ["affidavit_statuses.code"],
+        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
@@ -125,6 +121,10 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
+        sa.ForeignKeyConstraint(
+            ["status_code"],
+            ["affidavit_statuses.code"],
+        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
