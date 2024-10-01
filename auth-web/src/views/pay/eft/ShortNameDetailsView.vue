@@ -279,7 +279,7 @@ export default defineComponent({
       flex: 1 1 100%;
     }
     .shortname-info {
-      flex: 0 0 320px;
+      flex: 0 0 380px;
     }
     &:after {
       content: '';

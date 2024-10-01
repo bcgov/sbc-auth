@@ -49,7 +49,7 @@
             large
             color="primary"
             data-test="dialog-ok-button"
-            :disabled="!email || isFormInvalid()"
+            :disabled="isFormInvalid()"
             @click="patchShortName()"
           >
             Save
@@ -96,9 +96,9 @@ export default defineComponent({
 
     function isFormInvalid () {
       if (state.isDialogTypeEmail) {
-        return emailAddressRules.some(rule => rule(state.email) !== true)
+        return !state.email || emailAddressRules.some(rule => rule(state.email) !== true)
       } else if (state.isDialogTypeCasSupplierNumber) {
-        return state.casSupplierNumber
+        return !state.casSupplierNumber
       }
       return true
     }
