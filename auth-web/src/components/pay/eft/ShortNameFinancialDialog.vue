@@ -49,7 +49,7 @@
             large
             color="primary"
             data-test="dialog-ok-button"
-            :disabled="isFormValid()"
+            :disabled="isFormInvalid()"
             @click="patchShortName()"
           >
             Save
@@ -84,7 +84,7 @@ export default defineComponent({
   },
   emits: ['on-patch', 'close-short-name-email-dialog'],
   setup (props, { emit }) {
-    const emailAddressRules = CommonUtils.emailRules()
+    const emailAddressRules = CommonUtils.emailRules(true)
     const modalDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const state = reactive<any>({
@@ -94,13 +94,13 @@ export default defineComponent({
       isDialogTypeCasSupplierNumber: computed(() => props.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER')
     })
 
-    function isFormValid () {
+    function isFormInvalid () {
       if (state.isDialogTypeEmail) {
-        return emailAddressRules.every(rule => rule(state.email) !== true)
+        return !state.email || emailAddressRules.some(rule => rule(state.email) !== true)
       } else if (state.isDialogTypeCasSupplierNumber) {
         return !state.casSupplierNumber
       }
-      return false
+      return true
     }
 
     function openAccountLinkingDialog (item: EFTShortnameResponse, dialogType) {
@@ -158,7 +158,7 @@ export default defineComponent({
       patchShortName,
       emailAddressRules,
       dialogTitle,
-      isFormValid
+      isFormInvalid
     }
   }
 })
