@@ -34,6 +34,10 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
+        sa.ForeignKeyConstraint(
+            ["status_code"],
+            ["affidavit_statuses.code"],
+        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
