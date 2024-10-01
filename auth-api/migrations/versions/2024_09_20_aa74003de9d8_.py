@@ -34,22 +34,6 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["created_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["modified_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["status_code"],
-            ["affidavit_statuses.code"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["user_id"],
-            ["users.id"],
-        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
@@ -89,14 +73,6 @@ def upgrade():
             ["business_type"], ["business_type_codes.code"], name="orgs_business_type_fkey", ondelete="SET NULL"
         ),
         sa.ForeignKeyConstraint(
-            ["created_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["modified_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
             ["status_code"],
             ["org_statuses.code"],
         ),
@@ -129,18 +105,6 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["created_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["modified_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["org_id"],
-            ["orgs.id"],
-        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
@@ -157,22 +121,6 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["created_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["entity_id"],
-            ["entities.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["modified_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["org_id"],
-            ["orgs.id"],
-        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
@@ -200,18 +148,6 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["created_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["entity_id"],
-            ["entities.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["modified_by_id"],
-            ["users.id"],
-        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
@@ -232,28 +168,12 @@ def upgrade():
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(
-            ["created_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
             ["membership_type_code"],
             ["membership_types.code"],
         ),
         sa.ForeignKeyConstraint(
-            ["modified_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["org_id"],
-            ["orgs.id"],
-        ),
-        sa.ForeignKeyConstraint(
             ["status"],
             ["membership_status_codes.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["user_id"],
-            ["users.id"],
         ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
@@ -275,18 +195,6 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["created_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["modified_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["org_id"],
-            ["orgs.id"],
-        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
@@ -302,18 +210,6 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["created_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["modified_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["org_id"],
-            ["orgs.id"],
-        ),
         sa.ForeignKeyConstraint(
             ["product_code"],
             ["product_codes.code"],
@@ -342,34 +238,6 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["affidavit_id"],
-            ["affidavits.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["contact_id"],
-            ["contacts.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["created_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["entity_id"],
-            ["entities.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["modified_by_id"],
-            ["users.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["org_id"],
-            ["orgs.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["user_id"],
-            ["users.id"],
-        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
