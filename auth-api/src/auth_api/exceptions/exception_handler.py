@@ -59,7 +59,7 @@ class ExceptionHandler:
                 f"origin: {request.remote_addr}, "
                 f"headers: {request.headers} }}"
             )
-            logger.error(error_message)
+            logger.warning(error_message)
             message = dict(message=error.description, path=request.path)
         else:
             stack_trace = traceback.format_exc()
