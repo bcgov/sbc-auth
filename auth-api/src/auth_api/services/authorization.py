@@ -17,7 +17,7 @@ This module is to handle authorization related queries.
 """
 from typing import Dict, Optional
 
-from flask import abort, current_app, jsonify
+from flask import abort, current_app
 from structured_logging import StructuredLogging
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
@@ -92,7 +92,7 @@ class Authorization:
     def get_user_authorizations_for_entity(business_identifier: str, expanded: bool = False, **kwargs):
         """Get User authorizations for the entity."""
         user_from_context: UserContext = kwargs["user_context"]
-        auth_response = jsonify({"message": "success"})
+        auth_response = {}
         auth = None
         token_roles = user_from_context.roles
         logger.debug(f"check roles=:{token_roles}")
