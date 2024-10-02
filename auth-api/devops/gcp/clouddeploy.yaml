@@ -32,6 +32,9 @@ serialPipeline:
       container-name: "auth-api-dev"
       cloudsql-instances: "gtksf3-dev:northamerica-northeast1:auth-db-dev"
       service-account: "sa-api@gtksf3-dev.iam.gserviceaccount.com"
+      containerConcurrency: "20"
+      resources-cpu: "2000m"
+      resources-memory: "2Gi"
  - targetId: gtksf3-test
    profiles: [test]
    strategy:
@@ -42,6 +45,9 @@ serialPipeline:
       deploy-env: "development"
       deploy-project-id: "gtksf3-test"
       service-name: "auth-api-test"
+      containerConcurrency: "30"
+      resources-cpu: "4000m"
+      resources-memory: "2Gi"
       container-name: "auth-api-test"
       cloudsql-instances: "gtksf3-test:northamerica-northeast1:auth-db-test"
       service-account: "sa-api@gtksf3-test.iam.gserviceaccount.com"
@@ -54,6 +60,9 @@ serialPipeline:
    - values:
       deploy-env: "production"
       deploy-project-id: "gtksf3-tools"
+      containerConcurrency: "60"
+      resources-cpu: "8000m"
+      resources-memory: "4Gi"
       service-name: "auth-api-sandbox"
       container-name: "auth-api-sandbox"
       cloudsql-instances: "gtksf3-tools:northamerica-northeast1:auth-db-sandbox"
@@ -69,6 +78,9 @@ serialPipeline:
       deploy-project-id: "gtksf3-prod"
       service-name: "auth-api-prod"
       container-name: "auth-api-prod"
+      containerConcurrency: "30"
+      resources-cpu: "4000m"
+      resources-memory: "2Gi"
       cloudsql-instances: "gtksf3-prod:northamerica-northeast1:auth-db-prod"
       service-account: "sa-api@gtksf3-prod.iam.gserviceaccount.com"
       max-scale: "10"
