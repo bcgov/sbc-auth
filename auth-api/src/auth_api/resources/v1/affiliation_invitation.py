@@ -153,7 +153,7 @@ def delete_affiliation_invitation(affiliation_invitation_id):
     """Delete the specified affiliation invitation."""
     try:
         AffiliationInvitationService.delete_affiliation_invitation(affiliation_invitation_id)
-        response, status = jsonify({"message": "success"}), HTTPStatus.OK
+        response, status = {}, HTTPStatus.OK
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status

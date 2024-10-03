@@ -60,7 +60,7 @@ def delete_organization_api_key(org_id, key):
     """Revoke API Key."""
     try:
         ApiGatewayService.revoke_key(org_id, key)
-        response, status = jsonify({"message": "success"}), HTTPStatus.OK
+        response, status = {}, HTTPStatus.OK
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status
