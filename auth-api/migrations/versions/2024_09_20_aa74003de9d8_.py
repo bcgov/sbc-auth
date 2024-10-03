@@ -66,22 +66,6 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["business_size"], ["business_size_codes.code"], name="orgs_business_size_fkey", ondelete="SET NULL"
-        ),
-        sa.ForeignKeyConstraint(
-            ["business_type"], ["business_type_codes.code"], name="orgs_business_type_fkey", ondelete="SET NULL"
-        ),
-        sa.ForeignKeyConstraint(
-            ["suspension_reason_code"],
-            ["suspension_reason_codes.code"],
-            name="orgs_suspension_reason_code_fkey",
-            ondelete="SET NULL",
-        ),
-        sa.ForeignKeyConstraint(
-            ["type_code"],
-            ["org_types.code"],
-        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
@@ -163,14 +147,6 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["membership_type_code"],
-            ["membership_types.code"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["status"],
-            ["membership_status_codes.id"],
-        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
@@ -206,14 +182,6 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["product_code"],
-            ["product_codes.code"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["status_code"],
-            ["product_subscriptions_statuses.code"],
-        ),
         sa.PrimaryKeyConstraint("id", "version"),
         sqlite_autoincrement=True,
     )
