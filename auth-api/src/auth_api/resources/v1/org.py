@@ -474,7 +474,7 @@ def delete_org_affiliation_by_business_identifier(org_id, business_identifier):
             log_delete_draft=request_json.get("logDeleteDraft", False),
         )
         AffiliationService.delete_affiliation(delete_affiliation_request, env)
-        response, status = jsonify({"message": "success"}), HTTPStatus.OK
+        response, status = {}, HTTPStatus.OK
 
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
@@ -496,7 +496,7 @@ def get_organization_members(org_id):
         if members:
             response, status = {"members": MembershipSchema(exclude=["org"]).dump(members, many=True)}, HTTPStatus.OK
         else:
-            response, status = jsonify({"message": "success"}), HTTPStatus.OK
+            response, status = {}, HTTPStatus.OK
 
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
