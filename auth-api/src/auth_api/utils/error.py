@@ -32,8 +32,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 """Core error handlers and custom exceptions."""
-import sys
-
 from flask import jsonify
 from structured_logging import StructuredLogging
 from werkzeug.exceptions import HTTPException

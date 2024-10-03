@@ -60,12 +60,12 @@ class ExceptionHandler:
                 f"headers: {request.headers} }}"
             )
             logger.warning(error_message)
-            message = dict(message=error.description, path=request.path)
+            message = {"message": error.description, "path": request.path}
         else:
             stack_trace = traceback.format_exc()
             error_message = f"{{error: {error}, stack_trace: {stack_trace}}}"
             logger.exception(error_message)
-            message = dict(message="Internal server error")
+            message = {"message": "Internal server error"}
 
         return message, error.code if isinstance(error, HTTPException) else 500, RESPONSE_HEADERS
 

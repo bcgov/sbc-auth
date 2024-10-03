@@ -17,7 +17,7 @@ This module is to handle authorization related queries.
 """
 from typing import Dict, Optional
 
-from flask import abort, current_app
+from flask import abort
 from structured_logging import StructuredLogging
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
