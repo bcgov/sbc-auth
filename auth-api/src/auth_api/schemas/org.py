@@ -43,7 +43,7 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
     suspension_reason_code = fields.String(data_key="suspension_reason_code")
     business_size = fields.String(data_key="business_size")
     business_type = fields.String(data_key="business_type")
-    contacts = fields.Pluck("ContactLinkSchema", "contact", many=True, data_key="mailing_address")
+    contacts = fields.Pluck("ContactLinkSchema", "contact", many=True, data_key="contacts")
 
     @post_dump(pass_many=False)
     def _include_dynamic_fields(self, data, many):
@@ -53,8 +53,8 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
                 # Adding a dynamic field businessName for making other application integrations easy.
                 data["businessName"] = data.get("name")
             # Map the mailing address to the first from contact as there can be only one mailing address.
-
-            if (mailing_address := data.get("mailing_address", None)) is not None and mailing_address:
-                data["mailing_address"] = mailing_address[0]
+            if (mailing_address := data.get("contacts", None)) is not None and mailing_address:
+                if mailing_address[0] is not None and mailing_address[0].get("street", None) is not None:
+                    data["mailing_address"] = mailing_address[0]
 
         return data

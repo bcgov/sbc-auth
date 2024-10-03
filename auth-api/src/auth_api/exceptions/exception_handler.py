@@ -35,7 +35,7 @@ class ExceptionHandler:
 
     def auth_handler(self, error):  # pylint: disable=useless-option-value
         """Handle AuthError."""
-        logger.error(error.error)
+        logger.warning(error.error)
         return error.error, error.status_code, RESPONSE_HEADERS
 
     def db_handler(self, error):  # pylint: disable=useless-option-value
