@@ -160,7 +160,7 @@ class Product:
                 if product_model.premium_only and org.type_code not in PREMIUM_ORG_TYPES:
                     continue
 
-                subscription_status = Product.find_subscription_status(org, product_model)
+                subscription_status = Product.find_subscription_status(org, product_model, auto_approve)
                 product_subscription = Product._subscribe_and_publish_activity(org_id,
                                                                                product_code,
                                                                                subscription_status,
