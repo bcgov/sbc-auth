@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import os
 
+from auth_api.exceptions import ExceptionHandler
 from auth_api.models import db
 from auth_api.resources.ops import bp as ops_bp
 from auth_api.services.flags import flags
@@ -54,5 +55,6 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     queue.init_app(app)
 
     register_endpoints(app)
+    ExceptionHandler(app)
 
     return app
