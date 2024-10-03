@@ -14,7 +14,7 @@
 """API endpoints for managing an Org resource."""
 import json
 
-from flask import Blueprint, request
+from flask import Blueprint, g, request
 from flask_cors import cross_origin
 
 from auth_api import status as http_status
@@ -50,7 +50,7 @@ def get_org_product_subscriptions(org_id):
 @bp.route('', methods=['POST'])
 @cross_origin(origins='*')
 @TRACER.trace()
-@_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+@_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value, Role.SYSTEM.value])
 def post_org_product_subscription(org_id):
     """Post a new product subscription to the org using the request body."""
     request_json = request.get_json()
@@ -59,7 +59,15 @@ def post_org_product_subscription(org_id):
         return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
     try:
-        subscriptions = ProductService.create_product_subscription(org_id, request_json)
+        roles = g.jwt_oidc_token_info.get('realm_access').get('roles')
+        auto_approve = False
+        skip_auth = False
+        if Role.SYSTEM.value in roles:
+            auto_approve = True
+            skip_auth = True
+        subscriptions = ProductService.create_product_subscription(org_id, request_json,
+                                                                   skip_auth=skip_auth,
+                                                                   auto_approve=auto_approve)
         ProductService.update_org_product_keycloak_groups(org_id)
         response, status = {'subscriptions': subscriptions}, http_status.HTTP_201_CREATED
     except BusinessException as exception:
