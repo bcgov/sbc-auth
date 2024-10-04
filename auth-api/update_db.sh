@@ -1,3 +1,4 @@
 #! /bin/sh
 echo 'starting upgrade'
-poetry run flask db upgrade
+export DEPLOYMENT_ENV=migration
+flask db upgrade
