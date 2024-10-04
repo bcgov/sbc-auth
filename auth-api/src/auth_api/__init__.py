@@ -17,6 +17,7 @@ This module is the API for the Authroization system.
 """
 import os
 
+from flask_migrate import Migrate, upgrade
 from flask import Flask
 from flask_cors import CORS
 from sbc_common_components.utils.camel_case_response import convert_to_camel
@@ -42,22 +43,39 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
     app.config.from_object(config.CONFIGURATION[run_mode])
 
     CORS(app, resources="*")
-
-    flags.init_app(app)
     db.init_app(app)
-    ma.init_app(app)
-    queue.init_app(app)
-    mail.init_app(app)
-    endpoints.init_app(app)
 
-    app.after_request(convert_to_camel)
+    if run_mode == "migration":
+        Migrate(app, db)
+        app.logger.info("Running migration upgrade.")
+        with app.app_context():
+            execute_migrations(app)
+        app.logger.info("Finished migration upgrade.")
+    else:
+        flags.init_app(app)
+        ma.init_app(app)
+        queue.init_app(app)
+        mail.init_app(app)
+        endpoints.init_app(app)
 
-    ExceptionHandler(app)
-    setup_jwt_manager(app, jwt)
-    register_shellcontext(app)
-    build_cache(app)
+        app.after_request(convert_to_camel)
+
+        ExceptionHandler(app)
+        setup_jwt_manager(app, jwt)
+        register_shellcontext(app)
+        build_cache(app)
 
     return app
+
+
+def execute_migrations(app):
+    """Execute the database migrations."""
+    try:
+        upgrade(directory="migrations", revision="head", sql=False, tag=None)
+    except Exception as e:  # NOQA pylint: disable=broad-except
+        app.logger.disabled = False
+        app.logger.error("Error processing migrations:", exc_info=True)
+        raise e
 
 
 def setup_jwt_manager(app, jwt_manager):
