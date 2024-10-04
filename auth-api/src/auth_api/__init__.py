@@ -19,12 +19,10 @@ import os
 
 from flask import Flask
 from flask_cors import CORS
-from flask_migrate import Migrate, upgrade
 from sbc_common_components.utils.camel_case_response import convert_to_camel
 from structured_logging import StructuredLogging
 
 import auth_api.config as config  # pylint:disable=consider-using-from-import
-from auth_api.config import _Config
 from auth_api.exceptions import ExceptionHandler
 from auth_api.extensions import mail
 from auth_api.models import db, ma
@@ -47,15 +45,6 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
 
     flags.init_app(app)
     db.init_app(app)
-
-    if run_mode != "testing":
-        Migrate(app, db)
-        logger.info("Running migration upgrade.")
-        with app.app_context():
-            execute_migrations(app)
-
-    logger.info("Finished migration upgrade.")
-
     ma.init_app(app)
     queue.init_app(app)
     mail.init_app(app)
@@ -69,16 +58,6 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
     build_cache(app)
 
     return app
-
-
-def execute_migrations(app):
-    """Execute the database migrations."""
-    try:
-        upgrade(directory="migrations", revision="head", sql=False, tag=None)
-    except Exception as e:  # NOQA pylint: disable=broad-except
-        error_msg = f"Error processing migrations {e}"
-        logger.error(error_msg)
-        raise e
 
 
 def setup_jwt_manager(app, jwt_manager):
