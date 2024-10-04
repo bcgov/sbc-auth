@@ -17,9 +17,9 @@ This module is the API for the Authroization system.
 """
 import os
 
-from flask_migrate import Migrate, upgrade
 from flask import Flask
 from flask_cors import CORS
+from flask_migrate import Migrate, upgrade
 from sbc_common_components.utils.camel_case_response import convert_to_camel
 from structured_logging import StructuredLogging
 
