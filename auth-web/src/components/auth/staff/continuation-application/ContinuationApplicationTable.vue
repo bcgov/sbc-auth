@@ -280,40 +280,11 @@
                     <v-btn
                       color="primary"
                       class="open-action-btn"
-                      :class="{ 'active': item.nrNumber }"
                       :data-test="getIndexedTag('view-continuation-button', item.id)"
                       @click="view(item.id)"
                     >
                       {{ getButtonLabel(item.status) }}
                     </v-btn>
-                  </span>
-                  <!-- More Actions Menu -->
-                  <span
-                    v-if="item.nrNumber"
-                  >
-                    <v-menu
-                      v-model="dropdown[item.id]"
-                      offset-y
-                      nudge-left="158"
-                    >
-                      <template #activator="{ on }">
-                        <v-btn
-                          color="primary"
-                          class="more-actions-btn"
-                          v-on="on"
-                        >
-                          <v-icon>{{ dropdown[item.nrNumber] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                        </v-btn>
-                      </template>
-                      <v-list>
-                        <v-list-item @click="goToNameXUI(item.nrNumber)">
-                          <v-list-item-subtitle>
-                            <v-icon style="font-size: 14px">mdi-format-list-bulleted</v-icon>
-                            <span class="pl-2">Open Name Request</span>
-                          </v-list-item-subtitle>
-                        </v-list-item>
-                      </v-list>
-                    </v-menu>
                   </span>
                 </div>
               </template>
@@ -343,7 +314,6 @@ import { DatePicker } from '@/components'
 import IconTooltip from '@/components/IconTooltip.vue'
 import { SessionStorageKeys } from '@/util/constants'
 import debounce from '@/util/debounce'
-import { goToNameXUI } from '@/util/navigation'
 import moment from 'moment'
 import { useI18n } from 'vue-i18n-composable'
 
@@ -620,7 +590,6 @@ export default defineComponent({
       truncatedDateRange,
       doSearchParametersExist,
       paginationOptions,
-      goToNameXUI,
       expiredDate,
       updateItemsPerPage,
       updateDateRange,
@@ -695,29 +664,8 @@ export default defineComponent({
     min-width: 180px !important;
   }
 
-  .open-action-btn,
-  .more-actions-btn {
-    box-shadow: 0 1px 1px 0px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
-    -webkit-box-shadow: 0 1px 1px 0px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
-  }
-
   .open-action-btn {
     min-width: 7rem !important;
-    &.active {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      min-width: 5rem !important;
-    }
-  }
-
-  .more-actions-btn {
-    padding-left: 0px;
-    padding-right: 0px;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    max-width: 30px !important;
-    min-width: 30px !important;
-    margin-left: 0.05rem;
   }
 
   // Inline for Clear Filters
