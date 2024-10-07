@@ -100,7 +100,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     REPORT_API_URL = os.getenv('REPORT_API_URL', '')
     REPORT_API_VERSION = os.getenv('REPORT_API_VERSION', '')
     REPORT_API_URL = REPORT_API_URL + REPORT_API_VERSION
-    REPORT_API_BASE_URL = f'{os.getenv("REPORT_API_URL")}/reports'
+    REPORT_API_BASE_URL = f'{REPORT_API_URL}/reports'
 
     # PUB/SUB - SUB: account-mailer-dev
     # If blank in PUB/SUB, this should match the https endpoint the subscription is pushing to.
