@@ -4,7 +4,8 @@ export enum ReviewStatus {
   RESUBMITTED = 'RESUBMITTED',
   REJECTED = 'REJECTED',
   ABANDONED = 'ABANDONED',
-  APPROVED = 'APPROVED'
+  APPROVED = 'APPROVED',
+  CANCELLED = 'CANCELLED'
 }
 
 /** The Result object inside the Continuation Review API response. */
@@ -18,7 +19,7 @@ export interface ContinuationReviewResultIF {
 
 /** The Continuation Review API response. */
 export interface ContinuationReviewIF {
-  completingParty: string
+  officeEmail: string
   creationDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00'
   filingId: number
   filingLink: string // URL for the continuation in filing
@@ -28,7 +29,6 @@ export interface ContinuationReviewIF {
   results: Array<ContinuationReviewResultIF>
   status: ReviewStatus
   submissionDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
-  futureEffectiveDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
   nrExpiryDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00
 }
 
@@ -77,13 +77,11 @@ export interface ContinuationFilingIF {
 export interface ReviewFilterParams {
     startDate?: string // The start date for submission date range
     endDate?: string // The end date for submission date range
-    startEffectiveDate?: string // The start date for future effective date range
-    endEffectiveDate?: string // The end date for future effective date range
     page?: number
     limit?: number
     nrNumber?: string
     identifier?: string
-    completingParty?: string
+    officeEmail?: string
     decisionMadeBy?: string
     status?: string[]
     sortBy?: string
