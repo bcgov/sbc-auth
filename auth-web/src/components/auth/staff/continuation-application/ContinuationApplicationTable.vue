@@ -36,7 +36,10 @@
             >
               <!-- Displaying Status -->
               <template #[`item.status`]="{ item }">
-                <div>{{ displayStatus(item.status) }}</div>
+                <div>
+                  <span :class="['status-dot', item.status]" />
+                  {{ displayStatus(item.status) }}
+                </div>
               </template>
 
               <!-- Displaying Formatted Submission Date -->
@@ -764,4 +767,20 @@ export default defineComponent({
   border-style: solid;
   border-color: transparent transparent rgba(50, 50, 50, 0.7) transparent;
 }
+
+.status-dot {
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.status-dot.AWAITING_REVIEW { background-color:#F8661A; }
+.status-dot.CHANGE_REQUESTED { background-color:#1D4ED8; }
+.status-dot.RESUBMITTED { background-color:#D3272C; }
+.status-dot.REJECTED { background-color: lightgray; }
+.status-dot.APPROVED { background-color: lightgray; }
+.status-dot.ABANDONED { background-color: lightgray; }
+.status-dot.CANCELLED { background-color: lightgray; }
 </style>
