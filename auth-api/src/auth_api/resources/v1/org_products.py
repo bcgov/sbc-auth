@@ -60,14 +60,9 @@ def post_org_product_subscription(org_id):
 
     try:
         roles = g.jwt_oidc_token_info.get('realm_access').get('roles')
-        auto_approve = False
-        skip_auth = False
-        if Role.SYSTEM.value in roles:
-            auto_approve = True
-            skip_auth = True
         subscriptions = ProductService.create_product_subscription(org_id, request_json,
-                                                                   skip_auth=skip_auth,
-                                                                   auto_approve=auto_approve)
+                                                                   skip_auth=Role.SYSTEM.value in roles,
+                                                                   auto_approve=Role.SYSTEM.value in roles)
         ProductService.update_org_product_keycloak_groups(org_id)
         response, status = {'subscriptions': subscriptions}, http_status.HTTP_201_CREATED
     except BusinessException as exception:
