@@ -774,13 +774,13 @@ export default defineComponent({
   border-radius: 50%;
   display: inline-block;
   margin-right: 8px;
-}
 
-.status-dot.AWAITING_REVIEW { background-color:#F8661A; }
-.status-dot.CHANGE_REQUESTED { background-color:#2c56c7; }
-.status-dot.RESUBMITTED { background-color:#D3272C; }
-.status-dot.REJECTED { background-color: lightgray; }
-.status-dot.APPROVED { background-color: lightgray; }
-.status-dot.ABANDONED { background-color: lightgray; }
-.status-dot.CANCELLED { background-color: lightgray; }
+  &.AWAITING_REVIEW { background-color: $app-alert-orange; }
+  &.CHANGE_REQUESTED { background-color: $app-blue; }
+  &.RESUBMITTED { background-color: $app-red; }
+  &.REJECTED,
+  &.APPROVED,
+  &.ABANDONED,
+  &.CANCELLED { background-color: $gray3; }
+}
 </style>
