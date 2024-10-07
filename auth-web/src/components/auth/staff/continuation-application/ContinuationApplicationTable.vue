@@ -777,7 +777,7 @@ export default defineComponent({
 }
 
 .status-dot.AWAITING_REVIEW { background-color:#F8661A; }
-.status-dot.CHANGE_REQUESTED { background-color:#1D4ED8; }
+.status-dot.CHANGE_REQUESTED { background-color:#2c56c7; }
 .status-dot.RESUBMITTED { background-color:#D3272C; }
 .status-dot.REJECTED { background-color: lightgray; }
 .status-dot.APPROVED { background-color: lightgray; }
