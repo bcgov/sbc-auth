@@ -137,37 +137,42 @@ def assert_product_parent_and_child_statuses(client, jwt, org_id,
     assert parent_mhr_product.get('subscriptionStatus') == parent_status
 
 
-@pytest.mark.parametrize('org_product_info', [
-    TestOrgProductsInfo.mhr_qs_lawyer_and_notaries,
-    TestOrgProductsInfo.mhr_qs_home_manufacturers,
-    TestOrgProductsInfo.mhr_qs_home_dealers
+@pytest.mark.parametrize('test_name, org_product_info', [
+    ('lawyer_notary', TestOrgProductsInfo.mhr_qs_lawyer_and_notaries),
+    ('home_manufacturers', TestOrgProductsInfo.mhr_qs_home_manufacturers),
+    ('home_dealers', TestOrgProductsInfo.mhr_qs_home_dealers),
+    ('system_no_approval', TestOrgProductsInfo.mhr_qs_home_manufacturers)
 ])
-def test_add_single_org_product_mhr_qualified_supplier_approve(client, jwt, session, keycloak_mock, org_product_info):
+def test_add_single_org_product_mhr_qualified_supplier_approve(client, jwt, session, keycloak_mock,
+                                                               test_name, org_product_info):
     """Assert that MHR sub products subscriptions can be created and approved."""
     # setup user and org
     staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
     user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+
     rv = client.post('/api/v1/users', headers=user_headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_premium),
                      headers=user_headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
 
-    # Create product subscription
+    if test_name == 'system_no_approval':
+        user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
                               data=json.dumps(org_product_info),
                               headers=user_headers, content_type='application/json')
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    # Fetch org products and validate subscription status
+    subscription_status = 'ACTIVE' if test_name == 'system_no_approval' else 'PENDING_STAFF_REVIEW'
     assert_product_parent_and_child_statuses(client, jwt,
                                              dictionary.get('id'),
-                                             'MHR', 'PENDING_STAFF_REVIEW',
+                                             'MHR', subscription_status,
                                              org_product_info['subscriptions'][0]['productCode'],
-                                             'PENDING_STAFF_REVIEW')
+                                             subscription_status)
+    if test_name == 'system_no_approval':
+        return
 
-    # Should show up as a review task for staff
     rv = client.get('/api/v1/tasks', headers=staff_headers, content_type='application/json')
 
     item_list = rv.json
@@ -181,7 +186,6 @@ def test_add_single_org_product_mhr_qualified_supplier_approve(client, jwt, sess
     assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
     assert task['externalSourceId'] == org_product_info['subscriptions'][0]['externalSourceId']
 
-    # Approve task
     rv = client.put('/api/v1/tasks/{}'.format(task['id']),
                     data=json.dumps({'relationshipStatus': 'ACTIVE'}),
                     headers=staff_headers, content_type='application/json')
@@ -193,7 +197,6 @@ def test_add_single_org_product_mhr_qualified_supplier_approve(client, jwt, sess
     assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
     assert task['externalSourceId'] == org_product_info['subscriptions'][0]['externalSourceId']
 
-    # MHR parent and sub product should be active
     assert_product_parent_and_child_statuses(client, jwt,
                                              dictionary.get('id'),
                                              'MHR', 'ACTIVE',
