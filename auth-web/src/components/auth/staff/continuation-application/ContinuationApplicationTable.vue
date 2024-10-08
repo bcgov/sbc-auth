@@ -385,7 +385,7 @@ export default defineComponent({
         { text: 'Date Submitted', value: 'submissionDate' },
         { text: 'NR Number', value: 'nrNumber' },
         { text: 'Identifying Number', value: 'identifier' },
-        { text: 'Registered Office', value: 'completingParty' },
+        { text: 'Registered Office', value: 'officeEmail' },
         { text: 'Status', value: 'status' },
         { text: 'Actions', value: 'action' }
       ],
