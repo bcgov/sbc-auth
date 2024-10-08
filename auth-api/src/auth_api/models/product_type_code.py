@@ -22,7 +22,7 @@ from .base_model import BaseCodeModel
 class ProductTypeCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """Product type code table to store all the types of products supported by auth system."""
 
-    __tablename__ = 'product_type_codes'
+    __tablename__ = "product_type_codes"
 
     @classmethod
     def find_by_code(cls, code):

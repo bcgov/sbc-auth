@@ -17,9 +17,8 @@ import secrets
 import string
 from typing import Tuple
 
-from flask import current_app
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 from sbc_common_components.utils.enums import QueueMessageTypes
+from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -32,10 +31,12 @@ from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.roles import ALL_ALLOWED_ROLES
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
+
 from .authorization import check_auth
 
+logger = StructuredLogging.get_logger()
 
-@ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
+
 class Entity:
     """Manages all aspect of Entity data.
 
@@ -86,7 +87,6 @@ class Entity:
         self._model.pass_code_claimed = pass_code_claimed
         self._model.save()
 
-    @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the entity as a python dictionary.
 
@@ -97,8 +97,9 @@ class Entity:
         return obj
 
     @classmethod
-    def find_by_business_identifier(cls, business_identifier: str = None,
-                                    allowed_roles: Tuple = None, skip_auth: bool = False):
+    def find_by_business_identifier(
+        cls, business_identifier: str = None, allowed_roles: Tuple = None, skip_auth: bool = False
+    ):
         """Given a business identifier, this will return the corresponding entity or None."""
         if not business_identifier:
             return None
@@ -131,12 +132,12 @@ class Entity:
         if not entity_info:
             return None
 
-        existing_entity = EntityModel.find_by_business_identifier(entity_info['businessIdentifier'])
+        existing_entity = EntityModel.find_by_business_identifier(entity_info["businessIdentifier"])
         if existing_entity is None:
             entity_model = EntityModel.create_from_dict(entity_info)
         else:
             # TODO temporary allow update passcode, should replace with reset passcode endpoint.
-            entity_info['passCode'] = passcode_hash(entity_info['passCode'])
+            entity_info["passCode"] = passcode_hash(entity_info["passCode"])
             existing_entity.update_from_dict(**camelback2snake(entity_info))
             entity_model = existing_entity
             entity_model.commit()
@@ -153,20 +154,20 @@ class Entity:
         """
         if not entity_info or not business_identifier:
             return None
-        user_from_context: UserContext = kwargs['user_context']
+        user_from_context: UserContext = kwargs["user_context"]
         if not user_from_context.is_system():
             check_auth(one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
         entity = EntityModel.find_by_business_identifier(business_identifier)
         if entity is None or entity.corp_type_code is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         if user_from_context.is_system():
-            if entity_info.get('passCode') is not None:
-                entity_info['passCode'] = passcode_hash(entity_info['passCode'])
+            if entity_info.get("passCode") is not None:
+                entity_info["passCode"] = passcode_hash(entity_info["passCode"])
 
         # Small mapping from state -> status. EX in LEAR: Business.State.HISTORICAL
-        if 'state' in entity_info:
-            entity_info['status'] = entity_info['state']
-            del entity_info['state']
+        if "state" in entity_info:
+            entity_info["status"] = entity_info["state"]
+            del entity_info["state"]
 
         entity.update_from_dict(**camelback2snake(entity_info))
         entity.commit()
@@ -178,28 +179,25 @@ class Entity:
     @user_context
     def reset_passcode(business_identifier: str, email_addresses: str = None, **kwargs):
         """Reset the entity passcode and send email."""
-        user_from_context: UserContext = kwargs['user_context']
+        user_from_context: UserContext = kwargs["user_context"]
         check_auth(one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
-        current_app.logger.debug('reset passcode')
+        logger.debug("reset passcode")
         entity: EntityModel = EntityModel.find_by_business_identifier(business_identifier)
         # generate passcode and set
-        new_pass_code = ''.join(secrets.choice(string.digits) for i in range(9))
+        new_pass_code = "".join(secrets.choice(string.digits) for i in range(9))
 
         entity.pass_code = passcode_hash(new_pass_code)
         entity.pass_code_claimed = False
         entity.save()
         if email_addresses:
             mailer_payload = {
-                'emailAddresses': email_addresses,
-                'passCode': new_pass_code,
-                'businessIdentifier': business_identifier,
-                'businessName': entity.name,
-                'isStaffInitiated': user_from_context.is_staff()
+                "emailAddresses": email_addresses,
+                "passCode": new_pass_code,
+                "businessIdentifier": business_identifier,
+                "businessName": entity.name,
+                "isStaffInitiated": user_from_context.is_staff(),
             }
-            publish_to_mailer(
-                notification_type=QueueMessageTypes.RESET_PASSCODE.value,
-                data=mailer_payload
-            )
+            publish_to_mailer(notification_type=QueueMessageTypes.RESET_PASSCODE.value, data=mailer_payload)
 
         entity = Entity(entity)
         return entity
@@ -242,7 +240,7 @@ class Entity:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         del contact_link.entity
-        contact_link.commit()
+        contact_link.save()
 
         if not contact_link.has_links():
             contact = contact_link.contact

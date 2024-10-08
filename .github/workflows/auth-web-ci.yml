@@ -4,9 +4,10 @@ on:
   pull_request:
     branches:
       - main
-      - feature-business-registry-dashboard-updates
+      - feature*
     paths:
       - "auth-web/**"
+  workflow_dispatch:
 
 defaults:
   run:
@@ -14,71 +15,10 @@ defaults:
     working-directory: ./auth-web
 
 jobs:
-  setup-job:
-    runs-on: ubuntu-20.04
-
-    if: github.repository == 'bcgov/sbc-auth'
-
-    steps:
-      - uses: actions/checkout@v4
-      - run: "true"
-
-  linting:
-    needs: setup-job
-    runs-on: ubuntu-20.04
-
-    strategy:
-      matrix:
-        node-version: [20.5.1]
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        run: |
-          make setup
-      - name: Linting
-        run: |
-          make lint
-
-  testing-coverage:
-    needs: setup-job
-    runs-on: ubuntu-20.04
-
-    strategy:
-      matrix:
-        node-version: [20.5.1]
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        run: |
-          make setup
-      - name: Test with Vitest
-        id: test
-        run: |
-          make test
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          flags: authweb
-          name: codecov-auth-web
-          fail_ci_if_error: false
-
-  build-check:
-    needs: setup-job
-    runs-on: ubuntu-20.04
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: build to check strictness
-        id: build
-        run: |
-          make build-nc
+  account-ui-ci:
+    uses: bcgov/bcregistry-sre/.github/workflows/frontend-ci.yaml@main
+    with:
+      node_version: "20.5.1"
+      app_name: "account-ui"
+      working_directory: "./auth-web"
+      codecov_flag: "authweb"

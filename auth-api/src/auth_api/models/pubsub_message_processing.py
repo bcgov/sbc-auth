@@ -3,17 +3,19 @@
 NOTE: Only use this when it's not possible to use other indicators to track message processing.
       Currently used by the account-mailer / auth-queue. This prevents duplicates.
 """
-import datetime as dt
-import pytz
 
+import datetime as dt
+
+import pytz
 from sqlalchemy import Column, DateTime, Integer, String
+
 from .db import db
 
 
 class PubSubMessageProcessing(db.Model):
     """PubSub Message Processing for cloud event messages."""
 
-    __tablename__ = 'pubsub_message_processing'
+    __tablename__ = "pubsub_message_processing"
 
     id = Column(Integer, index=True, primary_key=True)
     cloud_event_id = Column(String(250), nullable=False)
@@ -22,9 +24,9 @@ class PubSubMessageProcessing(db.Model):
     processed = Column(DateTime, nullable=True)
 
     @classmethod
-    def find_by_id(cls, identifier):
+    def find_by_id(cls, identifier: int):
         """Find a pubsub message processing by id."""
-        return cls.query.filter_by(id=identifier).one_or_none()
+        return cls.query.filter_by(id=int(identifier)).one_or_none()
 
     @classmethod
     def find_by_cloud_event_id_and_type(cls, cloud_event_id, message_type):

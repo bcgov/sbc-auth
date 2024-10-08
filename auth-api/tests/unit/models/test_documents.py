@@ -26,7 +26,7 @@ def test_documents_with_insert(session):
 
     Start with a blank document.
     """
-    doc_latest = Documents.fetch_latest_document_by_type('termsofuse')
+    doc_latest = Documents.fetch_latest_document_by_type("termsofuse")
     assert doc_latest.version_id == get_tos_latest_version()
 
 
@@ -35,11 +35,11 @@ def test_documents_with_insert_some_type(session):
 
     Start with a blank document.
     """
-    html_content = '<HTML>'
+    html_content = "<HTML>"
     # putting higher numbers so that version number doesnt collide with existing in db
-    doc = Documents(version_id=20, type='sometype', content=html_content, content_type='text/html')
+    doc = Documents(version_id=20, type="sometype", content=html_content, content_type="text/html")
     session.add(doc)
     session.commit()
 
-    doc_latest = Documents.fetch_latest_document_by_type('sometype')
+    doc_latest = Documents.fetch_latest_document_by_type("sometype")
     assert doc_latest.content == html_content

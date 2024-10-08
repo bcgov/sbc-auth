@@ -14,37 +14,33 @@
 """API endpoints for managing a Product resource."""
 
 import json
+from http import HTTPStatus
 
 from flask import Blueprint, request
 from flask_cors import cross_origin
 
-from auth_api import status as http_status
-from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
 from auth_api.services import Permissions as PermissionsService
-from auth_api.tracer import Tracer
+from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 
-bp = Blueprint('MEMBER_PERMISSIONS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/permissions')
-TRACER = Tracer.get_instance()
+bp = Blueprint("MEMBER_PERMISSIONS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/permissions")
 
 
-@bp.route('/<string:org_status>/<string:membership_type>', methods=['GET', 'OPTIONS'])
-@cross_origin(origins='*', methods=['GET'])
-@TRACER.trace()
+@bp.route("/<string:org_status>/<string:membership_type>", methods=["GET", "OPTIONS"])
+@cross_origin(origins="*", methods=["GET"])
 @_jwt.requires_auth
 def get_membership_permissions(org_status, membership_type):
     """Get a list of all permissions for the membership."""
     try:
-        case = request.args.get('case')
+        case = request.args.get("case")
         permissions = PermissionsService.get_permissions_for_membership(org_status.upper(), membership_type.upper())
-        if case == 'lower':
+        if case == "lower":
             permissions = [x.lower() for x in permissions]
-        elif case == 'upper':
+        elif case == "upper":
             permissions = [x.upper() for x in permissions]
 
-        response, status = json.dumps(permissions), \
-            http_status.HTTP_200_OK
+        response, status = json.dumps(permissions), HTTPStatus.OK
     except BusinessException as exception:
-        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status

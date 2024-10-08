@@ -17,8 +17,8 @@
 Test-Suite to ensure that the /permissions endpoint is working as expected.
 """
 import json
+from http import HTTPStatus
 
-from auth_api import status as http_status
 from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import factory_auth_header
 
@@ -26,18 +26,17 @@ from tests.utilities.factory_utils import factory_auth_header
 def test_permissions_returns_200(client, jwt, session):  # pylint:disable=unused-argument
     """Assert get permissions endpoint returns 200."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.get('/api/v1/permissions/active/admin?case=upper', headers=headers, content_type='application/json')
+    rv = client.get("/api/v1/permissions/active/admin?case=upper", headers=headers, content_type="application/json")
 
-    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
-    present = 'CHANGE_ORG_NAME' in dictionary
+    present = "CHANGE_ORG_NAME" in dictionary
     assert present is True
 
     """Assert get permissions endpoint returns 200."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.get('/api/v1/permissions/foo/bar', headers=headers, content_type='application'
-                                                                                 '/json')
-    assert rv.status_code == http_status.HTTP_200_OK
+    rv = client.get("/api/v1/permissions/foo/bar", headers=headers, content_type="application" "/json")
+    assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
     assert len(dictionary) == 0
 
@@ -45,9 +44,9 @@ def test_permissions_returns_200(client, jwt, session):  # pylint:disable=unused
 def test_returns_empty_string_permissions(client, jwt, session):  # pylint:disable=unused-argument
     """Assert get permissions endpoint returns 200."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.get('/api/v1/permissions/active/admin?case=upper', headers=headers, content_type='application/json')
+    rv = client.get("/api/v1/permissions/active/admin?case=upper", headers=headers, content_type="application/json")
 
-    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
-    present = 'VIEW_USER_LOGINSOURCE' in dictionary
+    present = "VIEW_USER_LOGINSOURCE" in dictionary
     assert present is True

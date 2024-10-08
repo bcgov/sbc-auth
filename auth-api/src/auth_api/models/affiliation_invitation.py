@@ -20,10 +20,10 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from auth_api.config import get_named_config
-from auth_api.utils.enums import InvitationStatus as InvitationStatuses
 from auth_api.utils.enums import AffiliationInvitationType as AffiliationInvitationTypeEnum
-from .affiliation_invitation_type import AffiliationInvitationType
+from auth_api.utils.enums import InvitationStatus as InvitationStatuses
 
+from .affiliation_invitation_type import AffiliationInvitationType
 from .base_model import BaseModel
 from .dataclass import AffiliationInvitationSearch
 from .db import db
@@ -33,31 +33,31 @@ from .invite_status import InvitationStatus
 class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-attributes
     """Model for an Affiliation Invitation record."""
 
-    __tablename__ = 'affiliation_invitations'
+    __tablename__ = "affiliation_invitations"
 
     id = Column(Integer, primary_key=True)
-    from_org_id = Column(ForeignKey('orgs.id'), nullable=False, index=True)
-    to_org_id = Column(ForeignKey('orgs.id'), nullable=True, index=True)
-    entity_id = Column(ForeignKey('entities.id'), nullable=False, index=True)
-    affiliation_id = Column(ForeignKey('affiliations.id'), nullable=True, index=True)
-    sender_id = Column(ForeignKey('users.id'), nullable=False)
-    approver_id = Column(ForeignKey('users.id'), nullable=True)
+    from_org_id = Column(ForeignKey("orgs.id"), nullable=False, index=True)
+    to_org_id = Column(ForeignKey("orgs.id"), nullable=True, index=True)
+    entity_id = Column(ForeignKey("entities.id"), nullable=False, index=True)
+    affiliation_id = Column(ForeignKey("affiliations.id"), nullable=True, index=True)
+    sender_id = Column(ForeignKey("users.id"), nullable=False)
+    approver_id = Column(ForeignKey("users.id"), nullable=True)
     recipient_email = Column(String(8000), nullable=True)
     sent_date = Column(DateTime, nullable=False)
     accepted_date = Column(DateTime, nullable=True)
     token = Column(String(100), nullable=True)  # stores the one time affiliation invitation token
     login_source = Column(String(20), nullable=True)
-    invitation_status_code = Column(ForeignKey('invitation_statuses.code'), nullable=False, default='PENDING')
-    type = Column(ForeignKey('affiliation_invitation_types.code'), nullable=False, default='EMAIL')
+    invitation_status_code = Column(ForeignKey("invitation_statuses.code"), nullable=False, default="PENDING")
+    type = Column(ForeignKey("affiliation_invitation_types.code"), nullable=False, default="EMAIL")
     additional_message = Column(String(4000), nullable=True)
     is_deleted = Column(Boolean(), default=False)
 
-    invitation_status = relationship('InvitationStatus', foreign_keys=[invitation_status_code])
-    sender = relationship('User', foreign_keys=[sender_id])
-    entity = relationship('Entity', foreign_keys=[entity_id], lazy='select')
-    from_org = relationship('Org', foreign_keys=[from_org_id], lazy='select')
-    to_org = relationship('Org', foreign_keys=[to_org_id], lazy='select')
-    affiliation = relationship('Affiliation', foreign_keys=[affiliation_id], lazy='select')
+    invitation_status = relationship("InvitationStatus", foreign_keys=[invitation_status_code])
+    sender = relationship("User", foreign_keys=[sender_id])
+    entity = relationship("Entity", foreign_keys=[entity_id], lazy="select")
+    from_org = relationship("Org", foreign_keys=[from_org_id], lazy="select")
+    to_org = relationship("Org", foreign_keys=[to_org_id], lazy="select")
+    affiliation = relationship("Affiliation", foreign_keys=[affiliation_id], lazy="select")
 
     @hybrid_property
     def expires_on(self):
@@ -76,7 +76,8 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
 
         if self.invitation_status_code == InvitationStatuses.PENDING.value:
             expiry_time = self.sent_date + timedelta(
-                minutes=int(get_named_config().AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS))
+                minutes=int(get_named_config().AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS)
+            )
             if current_time >= expiry_time:
                 return InvitationStatuses.EXPIRED.value
         return self.invitation_status_code
@@ -90,14 +91,14 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         affiliation_invitation = AffiliationInvitation()
         affiliation_invitation.sender_id = user_id
         affiliation_invitation.affiliation_id = affiliation_id
-        affiliation_invitation.from_org_id = invitation_info['fromOrgId']
-        affiliation_invitation.to_org_id = invitation_info['toOrgId']
-        affiliation_invitation.entity_id = invitation_info['entityId']
-        affiliation_invitation.recipient_email = invitation_info.get('recipientEmail')
+        affiliation_invitation.from_org_id = invitation_info["fromOrgId"]
+        affiliation_invitation.to_org_id = invitation_info["toOrgId"]
+        affiliation_invitation.entity_id = invitation_info["entityId"]
+        affiliation_invitation.recipient_email = invitation_info.get("recipientEmail")
         affiliation_invitation.sent_date = datetime.now()
-        affiliation_invitation.type = invitation_info.get('type')
+        affiliation_invitation.type = invitation_info.get("type")
         affiliation_invitation.invitation_status = InvitationStatus.get_default_status()
-        affiliation_invitation.additional_message = invitation_info.get('additionalMessage', None)
+        affiliation_invitation.additional_message = invitation_info.get("additionalMessage", None)
 
         if affiliation_invitation.type is None:
             affiliation_invitation.type = AffiliationInvitationType.get_default_type().code
@@ -117,32 +118,34 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
             results = db.session.query(AffiliationInvitation)
 
         if search_filter.from_org_id:
-            results = results.filter(AffiliationInvitation.from_org_id == search_filter.from_org_id)
+            results = results.filter(AffiliationInvitation.from_org_id == int(search_filter.from_org_id))
             filter_set = True
 
         if search_filter.to_org_id:
-            results = results.filter(AffiliationInvitation.to_org_id == search_filter.to_org_id)
+            to_org_id = int(search_filter.to_org_id) if search_filter.to_org_id not in ["NaN", ""] else -1
+            results = results.filter(AffiliationInvitation.to_org_id == to_org_id)
             filter_set = True
 
         if search_filter.sender_id:
-            results = results.filter(AffiliationInvitation.sender_id == search_filter.sender_id)
+            results = results.filter(AffiliationInvitation.sender_id == int(search_filter.sender_id))
             filter_set = True
 
         if search_filter.approver_id:
-            results = results.filter(AffiliationInvitation.approver_id == search_filter.approver_id)
+            results = results.filter(AffiliationInvitation.approver_id == int(search_filter.approver_id))
             filter_set = True
 
         if search_filter.entity_id:
-            results = results.filter(AffiliationInvitation.entity_id == search_filter.entity_id)
+            results = results.filter(AffiliationInvitation.entity_id == int(search_filter.entity_id))
             filter_set = True
 
         if search_filter.affiliation_id:
-            results = results.filter(AffiliationInvitation.affiliation_id == search_filter.affiliation_id)
+            results = results.filter(AffiliationInvitation.affiliation_id == int(search_filter.affiliation_id))
             filter_set = True
 
         if search_filter.status_codes:
             results = results.filter(
-                AffiliationInvitation.status.in_(search_filter.status_codes))  # pylint: disable=no-member
+                AffiliationInvitation.invitation_status_code.in_(search_filter.status_codes)
+            )  # pylint: disable=no-member
             filter_set = True
 
         if search_filter.invitation_types:
@@ -152,51 +155,57 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         results = results.filter(AffiliationInvitation.is_deleted == search_filter.is_deleted)
 
         if not filter_set:
-            raise ValueError('At least one filter has to be set!')
+            raise ValueError("At least one filter has to be set!")
 
         return results.all()
 
     @classmethod
-    def find_invitation_by_id(cls, invitation_id):
+    def find_invitation_by_id(cls, invitation_id: int):
         """Find an affiliation invitation record that matches the id."""
-        return cls.query.filter_by(id=invitation_id).first()
+        return cls.query.filter_by(id=int(invitation_id or -1)).first()
 
     @classmethod
-    def find_invitations_from_org(cls, org_id, status=None):
+    def find_invitations_from_org(cls, org_id: int, status=None):
         """Find all affiliation invitations sent from a specific org filtered by status."""
-        results = db.session.query(AffiliationInvitation) \
-            .filter(AffiliationInvitation.from_org_id == org_id)
+        results = db.session.query(AffiliationInvitation).filter(AffiliationInvitation.from_org_id == int(org_id or -1))
         return results.filter(AffiliationInvitation.status == status.value).all() if status else results.all()
 
     @classmethod
-    def find_invitations_to_org(cls, org_id, status=None):
+    def find_invitations_to_org(cls, org_id: int, status=None):
         """Find all affiliation invitations sent to a specific org filtered by status."""
-        results = db.session.query(AffiliationInvitation) \
-            .filter(AffiliationInvitation.to_org_id == org_id)
+        results = db.session.query(AffiliationInvitation).filter(AffiliationInvitation.to_org_id == int(org_id or -1))
         return results.filter(AffiliationInvitation.status == status.value).all() if status else results.all()
 
     @classmethod
-    def find_invitations_by_entity(cls, entity_id, status=None):
+    def find_invitations_by_entity(cls, entity_id: int, status=None):
         """Find all affiliation invitations sent for specific entity filtered by status."""
-        results = db.session.query(AffiliationInvitation) \
-            .filter(AffiliationInvitation.entity_id == entity_id)
+        results = db.session.query(AffiliationInvitation).filter(
+            AffiliationInvitation.entity_id == int(entity_id or -1)
+        )
         return results.filter(AffiliationInvitation.status == status.value).all() if status else results.all()
 
     @classmethod
-    def find_invitations_by_affiliation(cls, affiliation_id):
+    def find_invitations_by_affiliation(cls, affiliation_id: int):
         """Find all affiliation invitations associated to an affiliation."""
-        return cls.query.filter_by(affiliation_id=affiliation_id).all()
+        return cls.query.filter_by(affiliation_id=int(affiliation_id or -1)).all()
 
     @staticmethod
     def find_invitations_by_org_entity_ids(from_org_id: int, entity_id: int):
         """Find all affiliation invitation for org and entity ids."""
-        return db.session.query(AffiliationInvitation) \
-            .filter(AffiliationInvitation.from_org_id == from_org_id) \
-            .filter(AffiliationInvitation.entity_id == entity_id) \
-            .filter(or_(AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value,
-                        AffiliationInvitation.invitation_status_code == InvitationStatuses.ACCEPTED.value)).all()
+        return (
+            db.session.query(AffiliationInvitation)
+            .filter(AffiliationInvitation.from_org_id == int(from_org_id or -1))
+            .filter(AffiliationInvitation.entity_id == int(entity_id or -1))
+            .filter(
+                or_(
+                    AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value,
+                    AffiliationInvitation.invitation_status_code == InvitationStatuses.ACCEPTED.value,
+                )
+            )
+            .all()
+        )
 
-    def update_invitation_as_retried(self, sender_id):
+    def update_invitation_as_retried(self, sender_id: int):
         """Update this affiliation invitation with the new data."""
         self.sender_id = sender_id
         self.sent_date = datetime.now()
@@ -211,11 +220,13 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         return self
 
     @classmethod
-    def find_all_related_to_org(cls, org_id, search_filter=AffiliationInvitationSearch()):
+    def find_all_related_to_org(cls, org_id: int, search_filter=AffiliationInvitationSearch()):
         """Return all affiliation invitations that are related to the org (from org or to org) filtered by statuses."""
-        query = db.session.query(AffiliationInvitation) \
-            .filter(
-            or_(AffiliationInvitation.to_org_id == org_id, AffiliationInvitation.from_org_id == org_id)
+        query = db.session.query(AffiliationInvitation).filter(
+            or_(
+                AffiliationInvitation.to_org_id == int(org_id or -1),
+                AffiliationInvitation.from_org_id == int(org_id or -1),
+            )
         )
 
         return cls.filter_by(search_filter=search_filter, query=query)

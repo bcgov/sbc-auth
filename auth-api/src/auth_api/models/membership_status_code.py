@@ -24,7 +24,7 @@ from .base_model import BaseModel
 class MembershipStatusCode(BaseModel):  # pylint: disable=too-few-public-methods
     """This is the Membership Status model for the Auth service."""
 
-    __tablename__ = 'membership_status_codes'
+    __tablename__ = "membership_status_codes"
 
     id = Column(Integer, primary_key=True, autoincrement=False)
     name = Column(String(25))

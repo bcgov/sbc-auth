@@ -27,19 +27,15 @@ class UserSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-pub
         """Maps all of the User fields to a default schema."""
 
         model = UserModel
-        exclude = (
-            'orgs',
-            'is_terms_of_use_accepted',
-            'terms_of_use_accepted_version',
-            'terms_of_use_version'
-        )
+        exclude = ("orgs", "is_terms_of_use_accepted", "terms_of_use_accepted_version", "terms_of_use_version")
 
-    user_terms = fields.Method('get_user_terms_object')
-    contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
+    user_terms = fields.Method("get_user_terms_object")
+    contacts = fields.Pluck("ContactLinkSchema", "contact", many=True)
+    user_status = fields.Pluck("UserStatusSchema", "id", data_key="user_status")
 
     def get_user_terms_object(self, obj):
         """Map terms properties into nested object."""
         return {
-            'isTermsOfUseAccepted': obj.is_terms_of_use_accepted,
-            'termsOfUseAcceptedVersion': obj.terms_of_use_accepted_version
+            "isTermsOfUseAccepted": obj.is_terms_of_use_accepted,
+            "termsOfUseAcceptedVersion": obj.terms_of_use_accepted_version,
         }

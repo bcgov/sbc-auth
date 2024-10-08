@@ -17,8 +17,8 @@ from marshmallow import fields, post_dump
 
 from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
 
-from .base_schema import BaseSchema
 from ..utils.util import mask_email
+from .base_schema import BaseSchema
 
 
 class AffiliationInvitationSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
@@ -29,12 +29,25 @@ class AffiliationInvitationSchema(BaseSchema):  # pylint: disable=too-many-ances
 
         model = AffiliationInvitationModel
         fields = (
-            'id', 'from_org', 'to_org', 'business_identifier', 'recipient_email', 'sent_date', 'expires_on',
-            'accepted_date', 'status', 'token', 'type', 'affiliation_id', 'additional_message', 'is_deleted')
+            "id",
+            "from_org",
+            "to_org",
+            "business_identifier",
+            "recipient_email",
+            "sent_date",
+            "expires_on",
+            "accepted_date",
+            "status",
+            "token",
+            "type",
+            "affiliation_id",
+            "additional_message",
+            "is_deleted",
+        )
 
-    from_org = fields.Nested('OrgSchema', only=('id', 'name', 'org_type'))
-    to_org = fields.Nested('OrgSchema', only=('id', 'name', 'org_type'), allow_none=True, required=False)
-    business_identifier = fields.String(attribute='entity.business_identifier', data_key='business_identifier')
+    from_org = fields.Nested("OrgSchema", only=("id", "name", "org_type"))
+    to_org = fields.Nested("OrgSchema", only=("id", "name", "org_type"), allow_none=True, required=False)
+    business_identifier = fields.String(attribute="entity.business_identifier", data_key="business_identifier")
 
 
 # pylint: disable=too-many-ancestors, too-few-public-methods
@@ -44,5 +57,5 @@ class AffiliationInvitationSchemaPublic(AffiliationInvitationSchema):
     @post_dump(pass_many=False)
     def _mask_recipient_email_field(self, data, many):  # pylint: disable=unused-argument
         """Mask recipient email field."""
-        data['recipient_email'] = mask_email(data.get('recipient_email'))
+        data["recipient_email"] = mask_email(data.get("recipient_email"))
         return data

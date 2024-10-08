@@ -17,13 +17,14 @@
 Test-Suite to ensure that the /documents/affidavit endpoint is working as expected.
 """
 
-from auth_api import status as http_status
+from http import HTTPStatus
+
 from auth_api.utils.enums import ContentType
 
 
 def test_affidavit_returns_200(client, jwt, session):  # pylint:disable=unused-argument
     """Assert get affidavit documents endpoint returns 200."""
-    rv = client.get('/api/v1/documents/affidavit')
-    assert rv.headers['Content-Type'] == ContentType.PDF.value
-    assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.headers['Content-Disposition'] == 'attachment; filename=affidavit_v1.pdf'
+    rv = client.get("/api/v1/documents/affidavit")
+    assert rv.headers["Content-Type"] == ContentType.PDF.value
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.headers["Content-Disposition"] == "attachment; filename=affidavit_v1.pdf"

@@ -29,12 +29,6 @@ FLASK_DEBUG=True
 POD_TESTING=True
 SQLALCHEMY_ECHO=False
 
-# The sentry.io Data Source Name for the project. For local development this should always be blank, to prevent the
-# logging (and emailing) of errors. However it can be temporarily set when working with sentry itself.
-#
-SENTRY_ENABLE=False
-SENTRY_DSN=
-
 # keycloak settings
 JWT_OIDC_ISSUER=
 JWT_OIDC_WELL_KNOWN_CONFIG=
