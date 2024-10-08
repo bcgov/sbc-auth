@@ -14,12 +14,11 @@
 """Provides the WSGI entry point for running the application
 """
 import os
+
 from auth_api import create_app
 
-
-# Openshift s2i expects a lower case name of application
-app = create_app() # pylint: disable=invalid-name
+app = create_app()  # pylint: disable=invalid-name
 
 if __name__ == "__main__":
-    server_port = os.environ.get('PORT', '8080')
-    app.run(debug=False, port=server_port, host='0.0.0.0')
+    server_port = os.environ.get("PORT", "5000")
+    app.run(debug=False, threaded=False, port=server_port, host="0.0.0.0")

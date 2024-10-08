@@ -17,29 +17,30 @@ Orgs, and Entities can have multiple contacts, consisting of mailing addresses,
 physical addresses, emails, and phone numbers.
 """
 
+from sql_versioning import Versioned
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .base_model import VersionedModel
+from .base_model import BaseModel
 
 
-class Contact(VersionedModel):  # pylint: disable=too-few-public-methods
+class Contact(Versioned, BaseModel):  # pylint: disable=too-few-public-methods
     """This class manages contact information for orgs and entities."""
 
-    __tablename__ = 'contacts'
+    __tablename__ = "contacts"
 
     id = Column(Integer, primary_key=True)
-    street = Column('street', String(250), index=True)
-    street_additional = Column('street_additional', String(250))
-    city = Column('city', String(100))
-    region = Column('region', String(100))
-    country = Column('country', String(20))
-    postal_code = Column('postal_code', String(15))
-    delivery_instructions = Column('delivery_instructions', String(4096))
-    phone = Column('phone', String(15))
-    phone_extension = Column('phone_extension', String(10))
-    email = Column('email', String(100))
+    street = Column("street", String(250), index=True)
+    street_additional = Column("street_additional", String(250))
+    city = Column("city", String(100))
+    region = Column("region", String(100))
+    country = Column("country", String(20))
+    postal_code = Column("postal_code", String(15))
+    delivery_instructions = Column("delivery_instructions", String(4096))
+    phone = Column("phone", String(15))
+    phone_extension = Column("phone_extension", String(10))
+    email = Column("email", String(100))
     # MVP contact has been migrated over to the contact linking table (revised data model)
-    entity_id = Column(Integer, ForeignKey('entities.id'))
+    entity_id = Column(Integer, ForeignKey("entities.id"))
 
-    links = relationship('ContactLink', cascade='all, delete-orphan')
+    links = relationship("ContactLink", cascade="all, delete-orphan", back_populates="contact")

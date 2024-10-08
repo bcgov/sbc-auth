@@ -25,4 +25,4 @@ class BusinessSizeCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     That is supported by auth system.
     """
 
-    __tablename__ = 'business_size_codes'
+    __tablename__ = "business_size_codes"

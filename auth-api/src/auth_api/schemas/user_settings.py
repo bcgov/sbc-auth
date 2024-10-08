@@ -18,23 +18,29 @@ from marshmallow import post_dump
 from auth_api.models import ma
 
 
-class UserSettingsSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class UserSettingsSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the User Settings model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the User Settings fields to a default schema."""
 
-        fields = ('id', 'label', 'additional_label', 'urlorigin', 'urlpath', 'type', 'account_type', 'account_status',
-                  'product_settings')
+        fields = (
+            "id",
+            "label",
+            "additional_label",
+            "urlorigin",
+            "urlpath",
+            "type",
+            "account_type",
+            "account_status",
+            "product_settings",
+        )
 
     @post_dump(pass_many=True)
     def _remove_empty(self, data, many):
         """Remove all empty values from the dumped dict."""
         if not many:
-            return {
-                key: value for key, value in data.items()
-                if value or isinstance(value, float)
-            }
+            return {key: value for key, value in data.items() if value or isinstance(value, float)}
         for item in data:
             for key in list(item):
                 value = item[key]

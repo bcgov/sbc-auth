@@ -18,14 +18,12 @@ from enum import Enum
 from typing import Optional
 
 from sbc_common_components.utils.enums import QueueMessageTypes
+
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.utils.enums import ProductCode, ProductSubscriptionStatus
 
-DETAILED_MHR_NOTIFICATIONS = (ProductCode.MHR_QSLN.value,
-                              ProductCode.MHR_QSHD.value,
-                              ProductCode.MHR_QSHM.value
-                              )
+DETAILED_MHR_NOTIFICATIONS = (ProductCode.MHR_QSLN.value, ProductCode.MHR_QSHD.value, ProductCode.MHR_QSHM.value)
 
 
 @dataclass
@@ -56,27 +54,27 @@ class ProductNotificationInfo:
 class ProductSubjectDescriptor(Enum):
     """Notification product subject descriptor."""
 
-    MHR_QUALIFIED_SUPPLIER = 'Manufactured Home Registry Qualified Supplier'
+    MHR_QUALIFIED_SUPPLIER = "Manufactured Home Registry Qualified Supplier"
 
 
 # e.g. You've been approved for {{MHR_QUALIFIED_SUPPLIER}} access to...
 class ProductAccessDescriptor(Enum):
     """Notification product access descriptor."""
 
-    MHR_QUALIFIED_SUPPLIER = 'Qualified Supplier'
+    MHR_QUALIFIED_SUPPLIER = "Qualified Supplier"
 
 
 # e.g. You've been approved for Qualified Supplier access to {{MHR}}.
 class ProductCategoryDescriptor(Enum):
     """Notification product category descriptor."""
 
-    MHR = 'the Manufactured Home Registry'
+    MHR = "the Manufactured Home Registry"
 
 
 class NotificationAttachmentType(Enum):
     """Notification attachment type."""
 
-    MHR_QS = 'QUALIFIED_SUPPLIER'
+    MHR_QS = "QUALIFIED_SUPPLIER"
 
 
 def get_product_notification_type(product_notification_info: ProductNotificationInfo):
@@ -133,22 +131,19 @@ def get_product_notification_data(product_notification_info: ProductNotification
 
 def get_default_product_notification_data(product_model: ProductCodeModel, recipient_emails: str):
     """Get the default product notification data."""
-    data = {
-        'productName': product_model.description,
-        'emailAddresses': recipient_emails
-    }
+    data = {"productName": product_model.description, "emailAddresses": recipient_emails}
     return data
 
 
 def get_mhr_qs_approval_data(product_model: ProductCodeModel, recipient_emails: str, is_reapproved: bool = False):
     """Get the mhr qualified supplier product approval notification data."""
     data = {
-        'subjectDescriptor': ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
-        'productAccessDescriptor': ProductAccessDescriptor.MHR_QUALIFIED_SUPPLIER.value,
-        'categoryDescriptor': ProductCategoryDescriptor.MHR.value,
-        'isReapproved': is_reapproved,
-        'productName': product_model.description,
-        'emailAddresses': recipient_emails
+        "subjectDescriptor": ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+        "productAccessDescriptor": ProductAccessDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+        "categoryDescriptor": ProductCategoryDescriptor.MHR.value,
+        "isReapproved": is_reapproved,
+        "productName": product_model.description,
+        "emailAddresses": recipient_emails,
     }
     return data
 
@@ -156,14 +151,14 @@ def get_mhr_qs_approval_data(product_model: ProductCodeModel, recipient_emails: 
 def get_mhr_qs_rejected_data(product_model: ProductCodeModel, recipient_emails: str, reject_reason: str = None):
     """Get the mhr qualified supplier product rejected notification data."""
     data = {
-        'subjectDescriptor': ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
-        'productAccessDescriptor': ProductAccessDescriptor.MHR_QUALIFIED_SUPPLIER.value,
-        'accessDisclaimer': True,
-        'categoryDescriptor': ProductCategoryDescriptor.MHR.value,
-        'productName': product_model.description,
-        'emailAddresses': recipient_emails,
-        'remarks': reject_reason,
-        'contactType': get_notification_contact_type(product_model.code)
+        "subjectDescriptor": ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+        "productAccessDescriptor": ProductAccessDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+        "accessDisclaimer": True,
+        "categoryDescriptor": ProductCategoryDescriptor.MHR.value,
+        "productName": product_model.description,
+        "emailAddresses": recipient_emails,
+        "remarks": reject_reason,
+        "contactType": get_notification_contact_type(product_model.code),
     }
     return data
 
@@ -171,18 +166,18 @@ def get_mhr_qs_rejected_data(product_model: ProductCodeModel, recipient_emails: 
 def get_mhr_qs_confirmation_data(product_model: ProductCodeModel, recipient_emails: str):
     """Get the mhr qualified supplier product confirmation notification data."""
     data = {
-        'subjectDescriptor': ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
-        'productAccessDescriptor': ProductAccessDescriptor.MHR_QUALIFIED_SUPPLIER.value,
-        'categoryDescriptor': ProductCategoryDescriptor.MHR.value,
-        'productName': product_model.description,
-        'emailAddresses': recipient_emails,
-        'contactType': get_notification_contact_type(product_model.code),
-        'hasAgreementAttachment': True,
-        'attachmentType': NotificationAttachmentType.MHR_QS.value,
+        "subjectDescriptor": ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+        "productAccessDescriptor": ProductAccessDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+        "categoryDescriptor": ProductCategoryDescriptor.MHR.value,
+        "productName": product_model.description,
+        "emailAddresses": recipient_emails,
+        "contactType": get_notification_contact_type(product_model.code),
+        "hasAgreementAttachment": True,
+        "attachmentType": NotificationAttachmentType.MHR_QS.value,
     }
     return data
 
 
 def get_notification_contact_type(product_code: str) -> str:
     """Get the notification contact type for a product."""
-    return 'BCOL' if product_code == ProductCode.MHR_QSLN.value else 'BCREG'
+    return "BCOL" if product_code == ProductCode.MHR_QSLN.value else "BCREG"

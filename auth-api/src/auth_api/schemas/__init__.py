@@ -15,19 +15,21 @@
 
 from .activity_log import ActivityLogSchema
 from .affidavit import AffidavitSchema
+from .affidavit_status import AffidavitStatusSchema
 from .affiliation import AffiliationSchema
+from .affiliation_invitation import AffiliationInvitationSchema
 from .contact import ContactSchema, ContactSchemaPublic
 from .contact_link import ContactLinkSchema
 from .corp_type import CorpTypeSchema
 from .documents import DocumentSchema
 from .entity import EntitySchema
-from .affiliation_invitation import AffiliationInvitationSchema
 from .invitation import InvitationSchema
 from .invitation_membership import InvitationMembershipSchema
 from .membership import MembershipSchema
 from .membership_status_code import MembershipStatusCodeSchema
 from .membership_types import MembershipTypeSchema
 from .org import OrgSchema
+from .org_status import OrgStatusSchema
 from .org_type import OrgTypeSchema
 from .product_code import ProductCodeSchema
 from .product_subscription import ProductSubscriptionSchema
@@ -35,3 +37,4 @@ from .suspension_reason_code import SuspensionReasonCodeSchema
 from .task import TaskSchema
 from .user import UserSchema
 from .user_settings import UserSettingsSchema
+from .user_status import UserStatusSchema

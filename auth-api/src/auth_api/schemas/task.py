@@ -16,6 +16,7 @@
 from marshmallow import fields
 
 from auth_api.models import Task as TaskModel
+
 from .base_schema import BaseSchema
 from .user import UserSchema
 

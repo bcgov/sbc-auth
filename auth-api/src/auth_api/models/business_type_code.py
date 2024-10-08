@@ -17,6 +17,7 @@ It defines the type of business the account is primarily doing.
 """
 
 from sqlalchemy import Boolean, Column
+
 from .base_model import BaseCodeModel
 
 
@@ -26,7 +27,7 @@ class BusinessTypeCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     That is supported by auth system.
     """
 
-    __tablename__ = 'business_type_codes'
+    __tablename__ = "business_type_codes"
 
     is_government_agency = Column(Boolean(), nullable=True)
     is_business = Column(Boolean(), nullable=True)

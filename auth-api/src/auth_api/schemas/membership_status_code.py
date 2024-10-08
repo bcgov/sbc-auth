@@ -14,11 +14,10 @@
 """Manager for membership type schema and export."""
 
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
-
 from auth_api.models import ma
 
 
-class MembershipStatusCodeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class MembershipStatusCodeSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the MembershipStatusCode model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

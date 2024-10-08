@@ -18,8 +18,7 @@ This module manages the User Information.
 from datetime import datetime
 from typing import Dict
 
-from flask import current_app
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -38,8 +37,9 @@ from auth_api.utils.util import camelback2snake
 
 from .user import User as UserService
 
+logger = StructuredLogging.get_logger()
 
-@ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
+
 class Affidavit:  # pylint: disable=too-many-instance-attributes
     """Manages all aspects of the Affidavit Entity."""
 
@@ -47,7 +47,6 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         """Return a affidavit object."""
         self._model = model
 
-    @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the Affidavit as a python dict.
 
@@ -60,7 +59,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def create_affidavit(affidavit_info: Dict):
         """Create a new affidavit record."""
-        current_app.logger.debug('<create_affidavit ')
+        logger.debug("<create_affidavit ")
         user = UserService.find_by_jwt_token()
         # If the user already have a pending affidavit, raise error
         existing_affidavit: AffidavitModel = AffidavitModel.find_pending_by_user_id(user_id=user.identifier)
@@ -71,12 +70,12 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
             existing_affidavit.flush()
             trigger_task_update = True
 
-        contact = affidavit_info.pop('contact')
+        contact = affidavit_info.pop("contact")
         affidavit_model = AffidavitModel(
-            issuer=affidavit_info.get('issuer'),
-            document_id=affidavit_info.get('documentId'),
+            issuer=affidavit_info.get("issuer"),
+            document_id=affidavit_info.get("documentId"),
             status_code=AffidavitStatus.PENDING.value,
-            user_id=user.identifier
+            user_id=user.identifier,
         )
         affidavit_model.add_to_session()
 
@@ -112,55 +111,57 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
                 task_model: TaskModel = TaskModel.find_by_user_and_status(org.id, TaskStatus.HOLD.value)
 
             if task_model:
-                task_info = {'name': org.name,
-                             'relationshipId': task_model.relationship_id,
-                             'relatedTo': user.identifier,
-                             'dateSubmitted': task_model.date_submitted,
-                             'relationshipType': task_model.relationship_type,
-                             'type': task_model.type,
-                             'action': task_model.action,
-                             'status': TaskStatus.OPEN.value,
-                             'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
-                             'account_id': task_model.account_id
-                             }
+                task_info = {
+                    "name": org.name,
+                    "relationshipId": task_model.relationship_id,
+                    "relatedTo": user.identifier,
+                    "dateSubmitted": task_model.date_submitted,
+                    "relationshipType": task_model.relationship_type,
+                    "type": task_model.type,
+                    "action": task_model.action,
+                    "status": TaskStatus.OPEN.value,
+                    "relationship_status": TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+                    "account_id": task_model.account_id,
+                }
                 new_task = TaskService.create_task(task_info=task_info, do_commit=False)
 
                 # Send notification mail to staff review task
                 from auth_api.services import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
+
                 if task_model.relationship_type == TaskRelationshipType.USER.value:
                     OrgService.send_staff_review_account_reminder(
-                        relationship_id=user.identifier,
-                        task_relationship_type=TaskRelationshipType.USER.value)
+                        relationship_id=user.identifier, task_relationship_type=TaskRelationshipType.USER.value
+                    )
                 else:
                     OrgService.send_staff_review_account_reminder(relationship_id=org.id)
 
-                remarks = [f'User Uploaded New affidavit .Created New task id: {new_task.identifier}']
+                remarks = [f"User Uploaded New affidavit .Created New task id: {new_task.identifier}"]
                 TaskService.close_task(task_model.id, remarks)
 
     @staticmethod
     def find_affidavit_by_org_id(org_id: int, filtered_affidavit_statuses=None):
         """Return affidavit for the org by finding the admin for the org."""
-        current_app.logger.debug('<find_affidavit_by_org_id ')
+        logger.debug("<find_affidavit_by_org_id ")
         affidavit = AffidavitModel.find_by_org_id(org_id, filtered_affidavit_statuses)
         affidavit_dict = Affidavit(affidavit).as_dict()
-        affidavit_dict['documentUrl'] = MinioService.create_signed_get_url(affidavit.document_id)
-        current_app.logger.debug('>find_affidavit_by_org_id ')
+        affidavit_dict["documentUrl"] = MinioService.create_signed_get_url(affidavit.document_id)
+        logger.debug(">find_affidavit_by_org_id ")
         return affidavit_dict
 
     @staticmethod
     def find_affidavit_by_user_guid(user_guid: str, status: str = None):
         """Return affidavit for the user."""
-        current_app.logger.debug('<find_affidavit_by_user_guid ')
+        logger.debug("<find_affidavit_by_user_guid ")
         affidavit = AffidavitModel.find_effective_by_user_guid(user_guid, status)
         affidavit_dict = Affidavit(affidavit).as_dict()
-        affidavit_dict['documentUrl'] = MinioService.create_signed_get_url(affidavit.document_id)
-        current_app.logger.debug('>find_affidavit_by_user_guid ')
+        affidavit_dict["documentUrl"] = MinioService.create_signed_get_url(affidavit.document_id)
+        logger.debug(">find_affidavit_by_user_guid ")
         return affidavit_dict
 
     @staticmethod
     def approve_or_reject(org_id: int, is_approved: bool, user: UserModel):
         """Mark the affidavit as approved or rejected."""
-        current_app.logger.debug('<approve_or_reject ')
+        logger.debug("<approve_or_reject ")
         # In order to get the pending affidavit to be reviewed, we need to filter out the following cases
         # 1. Inactive affidavits - usually while the old affidavit is made inactive
         # while the task is put on hold and the user uploads a new one.
@@ -170,13 +171,13 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         affidavit.decision_made_by = user.username
         affidavit.decision_made_on = datetime.now()
         affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
-        current_app.logger.debug('>approve_or_reject')
+        logger.debug(">approve_or_reject")
         return Affidavit(affidavit)
 
     @staticmethod
     def approve_or_reject_bceid_admin(admin_user_id: int, is_approved: bool, user: UserModel):
         """Mark the BCeId Admin Affidavit as approved or rejected."""
-        current_app.logger.debug('<approve_or_reject_bceid_admin ')
+        logger.debug("<approve_or_reject_bceid_admin ")
         affidavit: AffidavitModel = AffidavitModel.find_approved_by_user_id(admin_user_id)
         if affidavit is None:
             affidavit = AffidavitModel.find_pending_by_user_id(admin_user_id)
@@ -187,5 +188,5 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
             affidavit.decision_made_on = datetime.now()
             affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
 
-        current_app.logger.debug('>approve_or_reject_bceid_admin ')
+        logger.debug(">approve_or_reject_bceid_admin ")
         return Affidavit(affidavit)

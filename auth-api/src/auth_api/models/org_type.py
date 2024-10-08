@@ -22,7 +22,7 @@ from .base_model import BaseCodeModel
 class OrgType(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """This is the model for an Org Type record."""
 
-    __tablename__ = 'org_types'
+    __tablename__ = "org_types"
 
     @classmethod
     def get_default_type(cls):

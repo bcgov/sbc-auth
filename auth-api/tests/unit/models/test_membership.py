@@ -28,18 +28,18 @@ from tests.utilities.factory_utils import factory_user_model
 def factory_membersip_model(session):
     """Produce a templated org model."""
     user = factory_user_model()
-    org_type = OrgTypeModel(code='TEST', description='Test')
+    org_type = OrgTypeModel(code="TEST", description="Test")
     session.add(org_type)
     session.commit()
 
-    org_status = OrgStatusModel(code='TEST', description='Test')
+    org_status = OrgStatusModel(code="TEST", description="Test")
     session.add(org_status)
     session.commit()
 
-    preferred_payment = PaymentTypeModel(code='TEST', description='Test')
+    preferred_payment = PaymentTypeModel(code="TEST", description="Test")
     session.add(preferred_payment)
     session.commit()
-    org = OrgModel(name='Test Org')
+    org = OrgModel(name="Test Org")
     org.org_type = org_type
     org.org_status = OrgStatusModel.get_default_status()
     org.preferred_payment = preferred_payment

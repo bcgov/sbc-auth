@@ -18,49 +18,50 @@ Address and the other data entities have a many-to-many relationship,
 which requires this type of linkage to avoid duplication.
 """
 
+from sql_versioning import Versioned
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
-from .base_model import VersionedModel
+from .base_model import BaseModel
 
 
-class ContactLink(VersionedModel):  # pylint: disable=too-few-public-methods
+class ContactLink(Versioned, BaseModel):  # pylint: disable=too-few-public-methods
     """This class manages linkages between contacts and other data entities."""
 
-    __tablename__ = 'contact_links'
+    __tablename__ = "contact_links"
 
     id = Column(Integer, primary_key=True)
-    contact_id = Column(Integer, ForeignKey('contacts.id'), index=True)
-    entity_id = Column(Integer, ForeignKey('entities.id'), index=True)
-    user_id = Column(Integer, ForeignKey('users.id'), index=True)
-    org_id = Column(Integer, ForeignKey('orgs.id'), index=True)
-    affidavit_id = Column(Integer, ForeignKey('affidavits.id'))
+    contact_id = Column(Integer, ForeignKey("contacts.id"), index=True)
+    entity_id = Column(Integer, ForeignKey("entities.id"), index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    org_id = Column(Integer, ForeignKey("orgs.id"), index=True)
+    affidavit_id = Column(Integer, ForeignKey("affidavits.id"))
 
-    contact = relationship('Contact', foreign_keys=[contact_id])
-    entity = relationship('Entity', back_populates='contacts', foreign_keys=[entity_id])
-    user = relationship('User', foreign_keys=[user_id], lazy='select')
-    org = relationship('Org', foreign_keys=[org_id], lazy='select')
-    affidavit = relationship('Affidavit', foreign_keys=[affidavit_id], lazy='select')
+    contact = relationship("Contact", foreign_keys=[contact_id])
+    entity = relationship("Entity", foreign_keys=[entity_id])
+    user = relationship("User", foreign_keys=[user_id], lazy="select")
+    org = relationship("Org", foreign_keys=[org_id], lazy="select")
+    affidavit = relationship("Affidavit", foreign_keys=[affidavit_id], lazy="select")
 
     @classmethod
-    def find_by_entity_id(cls, entity_id):
+    def find_by_entity_id(cls, entity_id: int):
         """Return the first contact link with the provided entity id."""
-        return cls.query.filter_by(entity_id=entity_id).first()
+        return cls.query.filter_by(entity_id=int(entity_id or -1)).first()
 
     @classmethod
-    def find_by_user_id(cls, user_id):
+    def find_by_user_id(cls, user_id: int):
         """Return the first contact link with the provided user id."""
-        return cls.query.filter_by(user_id=user_id).first()
+        return cls.query.filter_by(user_id=int(user_id or -1)).first()
 
     @classmethod
-    def find_by_org_id(cls, org_id):
+    def find_by_org_id(cls, org_id: int):
         """Return the first contact link with the provided org id."""
-        return cls.query.filter_by(org_id=org_id).first()
+        return cls.query.filter_by(org_id=int(org_id or -1)).first()
 
     @classmethod
-    def find_by_affidavit_id(cls, affidavit_id):
+    def find_by_affidavit_id(cls, affidavit_id: int):
         """Return the first contact link with the provided affidavit id."""
-        return cls.query.filter_by(affidavit_id=affidavit_id).one_or_none()
+        return cls.query.filter_by(affidavit_id=int(affidavit_id or -1)).one_or_none()
 
     def has_links(self):
         """Check whether there are any remaining links for this contact."""

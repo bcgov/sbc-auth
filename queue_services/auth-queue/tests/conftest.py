@@ -49,11 +49,12 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     Drops all existing tables - Meta follows Postgres FKs
     """
     with app.app_context():
-        drop_schema_sql = """DROP SCHEMA public CASCADE;
-                                     CREATE SCHEMA public;
-                                     GRANT ALL ON SCHEMA public TO postgres;
-                                     GRANT ALL ON SCHEMA public TO public;
-                                  """
+        drop_schema_sql = text("""
+            DROP SCHEMA public CASCADE;
+            CREATE SCHEMA public;
+            GRANT ALL ON SCHEMA public TO postgres;
+            GRANT ALL ON SCHEMA public TO public;
+        """)
 
         sess = _db.session()
         sess.execute(drop_schema_sql)
@@ -68,9 +69,21 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         # This is the path we'll use in legal_api!!
 
         # even though this isn't referenced directly, it sets up the internal configs that upgrade
+        import os
         import sys
+
+        venv_src_path = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__),
+                os.pardir,
+                '.venv/src/sbc-auth/auth-api'
+            )
+        )
+        if venv_src_path not in sys.path:
+            sys.path.insert(0, venv_src_path)
+
         auth_api_folder = [folder for folder in sys.path if 'auth-api' in folder][0]
-        migration_path = auth_api_folder.replace('/auth-api/src', '/auth-api/migrations')
+        migration_path = auth_api_folder.replace('/auth-api', '/auth-api/migrations')
 
         Migrate(app, _db, directory=migration_path)
         upgrade()
@@ -105,7 +118,7 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         txn = conn.begin()
 
         options = dict(bind=conn, binds={})
-        sess = db.create_scoped_session(options=options)
+        sess = db._make_scoped_session(options=options)
 
         # establish  a SAVEPOINT just before beginning the test
         # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)

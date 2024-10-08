@@ -18,7 +18,7 @@ from enum import Enum
 class EndpointEnum(str, Enum):
     """Endpoint route url paths."""
 
-    API_V1 = '/api/v1'
-    API = '/api'
-    TEST_API = '/test'
+    API_V1 = "/api/v1"
+    API = "/api"
+    TEST_API = "/test"
     DEFAULT_API = API_V1
