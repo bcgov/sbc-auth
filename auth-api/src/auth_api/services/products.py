@@ -311,7 +311,7 @@ class Product:
         """Return the subscriptions status based on org type."""
         # GOVM accounts has default active subscriptions
         skip_review_types = [AccessType.GOVM.value]
-        if product_model.need_review:
+        if product_model.need_review and auto_approve is False:
             return (
                 ProductSubscriptionStatus.ACTIVE.value
                 if (org.access_type in skip_review_types)

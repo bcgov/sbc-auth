@@ -50,7 +50,7 @@ def get_org_product_subscriptions(org_id):
 
 @bp.route("", methods=["POST"])
 @cross_origin(origins="*")
-@_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+@_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value, Role.SYSTEM.value])
 def post_org_product_subscription(org_id):
     """Post a new product subscription to the org using the request body."""
 
