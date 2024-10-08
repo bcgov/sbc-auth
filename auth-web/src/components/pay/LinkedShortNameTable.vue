@@ -41,6 +41,9 @@
           </v-icon>
         </v-btn>
       </template>
+      <template #item-slot-shortNameType="{ item }">
+        <span>{{ getShortNameTypeDescription(item.shortNameType) }}</span>
+      </template>
       <template #item-slot-accountName="{ item }">
         <span>{{ item.accountName }}</span>
         <v-chip
@@ -77,13 +80,20 @@
   </div>
 </template>
 <script lang="ts">
-import { AccountStatus, CfsAccountStatus, SessionStorageKeys, ShortNameStatus, SuspensionReason } from '@/util/constants'
+import {
+  AccountStatus,
+  CfsAccountStatus,
+  SessionStorageKeys,
+  ShortNameStatus,
+  SuspensionReason
+} from '@/util/constants'
 import { defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '..'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
 import { LinkedShortNameState } from '@/models/pay/short-name'
+import ShortNameUtils from '@/util/short-name-utils'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
 
@@ -113,22 +123,26 @@ export default defineComponent({
     })
 
     const { infiniteScrollCallback, loadTableData, updateFilter } = useShortNameTable(state, emit)
-    const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px') => ({
+    const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px',
+      width = '125px', filterItems = []) => ({
       col,
       customFilter: {
         filterApiFn: hasFilter ? (val: any) => loadTableData(col, val || '') : null,
         clearable: true,
+        items: filterItems.length > 0 ? filterItems : undefined,
         label,
         type,
         value: filterValue
       },
       hasFilter,
       minWidth,
+      width,
       value
     })
 
     const {
       shortName = '',
+      shortNameType = '',
       accountName = '',
       accountBranch = '',
       accountId = '',
@@ -145,6 +159,17 @@ export default defineComponent({
         shortName,
         true,
         '180px'
+      ),
+      createHeader(
+        'shortNameType',
+        'Type',
+        'select',
+        'Type',
+        shortNameType,
+        true,
+        '200px',
+        '200px',
+        ShortNameUtils.ShortNameTypeItems
       ),
       createHeader(
         'accountName',
@@ -212,6 +237,7 @@ export default defineComponent({
       return {
         accountName: '',
         shortName: '',
+        shortNameType: '',
         accountBranch: '',
         accountId: '',
         state: ShortNameStatus.LINKED
@@ -264,7 +290,8 @@ export default defineComponent({
       formatAmount,
       CfsAccountStatus,
       AccountStatus,
-      SuspensionReason
+      SuspensionReason,
+      getShortNameTypeDescription: ShortNameUtils.getShortNameTypeDescription
     }
   }
 })

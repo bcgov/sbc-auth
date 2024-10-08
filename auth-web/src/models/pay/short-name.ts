@@ -77,3 +77,27 @@ export interface ShortNameSummaryState {
   snackbar: boolean
   highlightIndex: number
 }
+
+export interface ShortNameDetails {
+  shortName: string;
+  creditsRemaining?: number;
+  linkedAccountsCount: number;
+  lastPaymentReceivedDate: Date;
+}
+
+export interface EFTRefund {
+  id: number;
+  casSupplierNumber?: string;
+  comment?: string;
+  createdBy?: string;
+  createdName?: string;
+  createdOn?: Date;
+  declineReason?: string;
+  refundAmount?: number;
+  refundEmail?: string;
+  shortnameId?: number;
+  status?: string;
+  updatedBy?: string;
+  updatedName?: string;
+  updatedOn?: Date;
+}

@@ -1,5 +1,6 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components'
+import CommonUtils from '@/util/common-util'
 import ShortNameTransactions from '@/components/pay/eft/ShortNamePaymentHistory.vue'
 import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
@@ -139,7 +140,8 @@ describe('ShortNamePaymentHistory.vue', () => {
     expect(itemRows.length).toBe(historyResponse.items.length)
     for (let i = 0; i < historyResponse.items.length; i++) {
       const columns = itemRows.at(i).findAll(itemCell)
-      expect(columns.at(0).text()).toBe(wrapper.vm.formatDate(historyResponse.items[i].transactionDate))
+      expect(columns.at(0).text()).toBe(
+        CommonUtils.formatUtcToPacificDate(historyResponse.items[i].transactionDate, wrapper.vm.dateDisplayFormat))
       expect(columns.at(1).text()).toContain(wrapper.vm.formatDescription(historyResponse.items[i]))
       expect(columns.at(1).text()).toContain(wrapper.vm.formatAdditionalDescription(historyResponse.items[i]))
       expect(columns.at(2).text()).toBe(historyResponse.items[i].statementNumber

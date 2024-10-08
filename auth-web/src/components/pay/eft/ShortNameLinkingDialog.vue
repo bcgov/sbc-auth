@@ -12,6 +12,9 @@
       @close-dialog="resetAccountLinkingDialog"
     >
       <template #text>
+        <p class="mb-1">
+          Short Name Type: {{ getShortNameTypeDescription(currentShortName.shortNameType) }}
+        </p>
         <p>After the account has been linked, payment will be applied at 6:00 p.m. Pacific Time.</p>
         <h4>
           Search by Account ID or Name to Link:
@@ -103,6 +106,7 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
 import ShortNameLookup from '@/components/pay/ShortNameLookup.vue'
 import { ShortNameResponseStatus } from '@/util/constants'
+import ShortNameUtils from '@/util/short-name-utils'
 import { useOrgStore } from '@/stores/org'
 
 interface ShortNameLinkingDialog {
@@ -223,7 +227,8 @@ export default defineComponent({
       cancelAndResetAccountLinkingDialog,
       closeAccountAlreadyLinkedDialog,
       linkAccount,
-      isUnsettledAmountAndOwingAmountMatch
+      isUnsettledAmountAndOwingAmountMatch,
+      getShortNameTypeDescription: ShortNameUtils.getShortNameTypeDescription
     }
   }
 })
@@ -272,5 +277,4 @@ h4 {
       color: var(--v-primary-base);
   }
 }
-
 </style>

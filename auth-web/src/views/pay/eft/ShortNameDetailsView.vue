@@ -16,38 +16,42 @@
         <h1 class="view-header__title">
           {{ shortNameDetails.shortName }}
         </h1>
-        <p class="mt-3 mb-0">
+        <p class="mt-3 mb-0 unsettled-amount">
           <span class="font-weight-bold">Unsettled Amount: </span>{{ unsettledAmount }}
         </p>
       </div>
       <div class="shortname-info">
-        <div class="mb-6 overflow-wrap">
+        <div class="mb-2 overflow-wrap">
+          <span class="font-weight-bold">Type: </span>
+          {{ getShortNameTypeDescription(shortName.shortNameType) }}
+        </div>
+        <div class="mb-2 overflow-wrap">
           <span class="font-weight-bold">CAS Supplier Number: </span>
           {{ shortName.casSupplierNumber || 'N/A' }}
           <span
-            class="primary--text cursor-pointer"
+            class="pl-4 primary--text cursor-pointer"
             data-test="btn-edit"
             @click="openShortNameSupplierNumberDialog()"
           >
             <v-icon
               color="primary"
               size="20"
-            > mdi-pencil</v-icon>
+            > mdi-pencil-outline</v-icon>
             Edit
           </span>
         </div>
         <div class="overflow-wrap">
           <span class="font-weight-bold">Email: </span>
-          {{ shortName.email || 'N/A' }}
+          <span class="email">{{ shortName.email || 'N/A' }}</span>
           <span
-            class="primary--text cursor-pointer"
+            class="pl-4 primary--text cursor-pointer"
             data-test="btn-edit"
             @click="openShortNameEmailDialog()"
           >
             <v-icon
               color="primary"
               size="20"
-            > mdi-pencil</v-icon>
+            > mdi-pencil-outline</v-icon>
             Edit
           </span>
         </div>
@@ -110,18 +114,13 @@ import CommonUtils from '@/util/common-util'
 import PaymentService from '@/services/payment.services'
 import { Role } from '@/util/constants'
 import ShortNameAccountLink from '@/components/pay/eft/ShortNameAccountLink.vue'
+import { ShortNameDetails } from '@/models/pay/short-name'
 import ShortNameFinancialDialog from '@/components/pay/eft/ShortNameFinancialDialog.vue'
 import ShortNamePaymentHistory from '@/components/pay/eft/ShortNamePaymentHistory.vue'
 import ShortNameRefund from '@/components/pay/eft/ShortNameRefund.vue'
+import ShortNameUtils from '@/util/short-name-utils'
 import moment from 'moment'
 import { useUserStore } from '@/stores/user'
-
-interface ShortNameDetails {
-  shortName: string;
-  creditsRemaining?: number;
-  linkedAccountsCount: number;
-  lastPaymentReceivedDate: Date;
-}
 
 export default defineComponent({
   name: 'ShortNameMappingView',
@@ -232,7 +231,8 @@ export default defineComponent({
       openShortNameSupplierNumberDialog,
       formatCurrency: CommonUtils.formatAmount,
       unsettledAmountHeader,
-      closeShortNameLinkingDialog
+      closeShortNameLinkingDialog,
+      getShortNameTypeDescription: ShortNameUtils.getShortNameTypeDescription
     }
   }
 })
@@ -240,6 +240,20 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
+  .email {
+    word-wrap: break-word;
+    word-break: break-all;
+  }
+  .view-header__title {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  .unsettled-amount {
+    font-size: 18px;
+  }
+  .shortname-info {
+    font-size: 18px;
+  }
   #shortname-details {
     padding-top: 0;
   }
@@ -265,7 +279,7 @@ export default defineComponent({
       flex: 1 1 100%;
     }
     .shortname-info {
-      flex: 0 0 320px;
+      flex: 0 0 380px;
     }
     &:after {
       content: '';
@@ -276,7 +290,7 @@ export default defineComponent({
       top: -20px;
       z-index: 0;
       width: 100%;
-      height: 160px;
+      height: 180px;
       background-color: white;
       margin-top: 20px;
     }

@@ -2,6 +2,7 @@ import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import LinkedShortNameTableVue from '@/components/pay/LinkedShortNameTable.vue'
+import ShortNameUtils from '@/util/short-name-utils'
 import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
 import { axios } from '@/util/http-util'
@@ -17,7 +18,15 @@ sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
 const vuetify = new Vuetify({})
 // Selectors
 const { header, headerTitles, itemRow, itemCell } = baseVdataTable
-const headers = ['Short Name', 'Account Name', 'Branch Name', 'Account Number', 'Total Amount Owing', 'Latest Statement Number', 'Actions']
+const headers = [
+  'Short Name',
+  'Type',
+  'Account Name',
+  'Branch Name',
+  'Account Number',
+  'Total Amount Owing',
+  'Latest Statement Number',
+  'Actions']
 
 describe('LinkedShortNameTable.vue', () => {
   setupIntersectionObserverMock()
@@ -38,6 +47,7 @@ describe('LinkedShortNameTable.vue', () => {
           'createdOn': '2023-11-24T21:49:25.833501',
           'id': 2,
           'shortName': 'ODYCHIU',
+          'shortNameType': 'EFT',
           'statementId': 5407509,
           'statusCode': 'LINKED'
         },
@@ -49,6 +59,7 @@ describe('LinkedShortNameTable.vue', () => {
           'createdOn': '2024-02-02T15:57:37.067542',
           'id': 155,
           'shortName': 'SNAME142',
+          'shortNameType': 'WIRE',
           'statementId': 5399172,
           'statusCode': 'LINKED'
         },
@@ -60,6 +71,7 @@ describe('LinkedShortNameTable.vue', () => {
           'createdOn': '2024-01-30T21:43:50.597984',
           'id': 11,
           'shortName': 'TST6',
+          'shortNameType': 'EFT',
           'statementId': 5407288,
           'statusCode': 'LINKED'
         }
@@ -110,11 +122,13 @@ describe('LinkedShortNameTable.vue', () => {
     for (let i = 0; i < linkedShortNameResponse.items.length; i++) {
       const columns = itemRows.at(i).findAll(itemCell)
       expect(columns.at(0).text()).toBe(linkedShortNameResponse.items[i].shortName)
-      expect(columns.at(1).text()).toBe(linkedShortNameResponse.items[i].accountName)
-      expect(columns.at(2).text()).toBe(linkedShortNameResponse.items[i].accountBranch)
-      expect(columns.at(3).text()).toBe(linkedShortNameResponse.items[i].accountId)
-      expect(columns.at(4).text()).toBe(`${CommonUtils.formatAmount(linkedShortNameResponse.items[i].amountOwing)}`)
-      expect(columns.at(5).text()).toBe(linkedShortNameResponse.items[i].statementId.toString())
+      expect(columns.at(1).text()).toBe(
+        ShortNameUtils.getShortNameTypeDescription(linkedShortNameResponse.items[i].shortNameType))
+      expect(columns.at(2).text()).toBe(linkedShortNameResponse.items[i].accountName)
+      expect(columns.at(3).text()).toBe(linkedShortNameResponse.items[i].accountBranch)
+      expect(columns.at(4).text()).toBe(linkedShortNameResponse.items[i].accountId)
+      expect(columns.at(5).text()).toBe(`${CommonUtils.formatAmount(linkedShortNameResponse.items[i].amountOwing)}`)
+      expect(columns.at(6).text()).toBe(linkedShortNameResponse.items[i].statementId.toString())
     }
   })
 })
