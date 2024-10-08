@@ -1,3 +1,4 @@
+import 'moment-timezone'
 import { Address, BaseAddressModel } from '@/models/address'
 import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 import { NrRequestTypeStrings, Permission } from '@/util/constants'
@@ -150,6 +151,13 @@ export default class CommonUtils {
   // Formatting date in the desired format for vue date pickers
   static formatCurrentDate () {
     return moment(new Date()).format('MMMM DD, YYYY')
+  }
+
+  static formatUtcToPacificDate (dateStr: string, format: string): string {
+    if (!dateStr) return ''
+    const date = moment.utc(dateStr).toDate()
+    return (date) ? moment(date).tz('America/Vancouver')
+      .format(format) : ''
   }
 
   static formatStatementString (fromDate: string, toDate: string) {

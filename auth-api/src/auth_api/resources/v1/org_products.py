@@ -15,7 +15,7 @@
 import json
 from http import HTTPStatus
 
-from flask import Blueprint, request
+from flask import Blueprint, g, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
@@ -63,9 +63,12 @@ def post_org_product_subscription(org_id):
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
 
     try:
-        subscriptions = ProductService.create_product_subscription(int(org_id), request_json)
+        roles = g.jwt_oidc_token_info.get('realm_access').get('roles')
+        subscriptions = ProductService.create_product_subscription(int(org_id), request_json,
+                                                                   skip_auth=Role.SYSTEM.value in roles,
+                                                                   auto_approve=Role.SYSTEM.value in roles)
         ProductService.update_org_product_keycloak_groups(int(org_id))
-        response, status = {"subscriptions": subscriptions}, HTTPStatus.CREATED
+        response, status = {'subscriptions': subscriptions}, HTTPStatus.CREATED
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status

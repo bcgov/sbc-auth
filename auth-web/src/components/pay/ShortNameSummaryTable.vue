@@ -54,15 +54,6 @@
       </template>
       <template #item-slot-shortName="{ item }">
         <span>{{ item.shortName }}</span>
-        <v-chip
-          v-if="item.refundStatus === ShortNameRefundStatus.PENDING_REFUND"
-          small
-          label
-          color="info"
-          class="item-chip"
-        >
-          {{ ShortNameRefundLabel.PENDING_REFUND }}
-        </v-chip>
       </template>
       <template #header-filter-slot-lastPaymentReceivedDate>
         <div @click="clickDatePicker()">
@@ -95,10 +86,22 @@
         </v-btn>
       </template>
       <template #item-slot-lastPaymentReceivedDate="{ item }">
-        <span>{{ formatDate(item.lastPaymentReceivedDate) }}</span>
+        <span>{{ formatDate(item.lastPaymentReceivedDate, dateDisplayFormat) }}</span>
+      </template>
+      <template #item-slot-shortNameType="{ item }">
+        <span>{{ getShortNameTypeDescription(item.shortNameType) }}</span>
       </template>
       <template #item-slot-creditsRemaining="{ item }">
-        <span>{{ formatAmount(item.creditsRemaining) }}</span>
+        <span class="pr-2">{{ formatAmount(item.creditsRemaining) }}</span>
+        <v-chip
+            v-if="item.refundStatus === ShortNameRefundStatus.PENDING_REFUND"
+            small
+            label
+            text-color="white"
+            class="primary pl-2 pr-2"
+        >
+          {{ ShortNameRefundLabel.PENDING_REFUND }}
+        </v-chip>
       </template>
       <template #item-slot-linkedAccountsCount="{ item }">
         <span>{{ item.linkedAccountsCount }}</span>
@@ -159,7 +162,11 @@
 <script lang="ts">
 import { BaseVDataTable, DatePicker } from '..'
 import { Ref, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
-import { SessionStorageKeys, ShortNameRefundLabel, ShortNameRefundStatus } from '@/util/constants'
+import {
+  SessionStorageKeys,
+  ShortNameRefundLabel,
+  ShortNameRefundStatus
+} from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '../datatable/resources'
@@ -167,6 +174,7 @@ import { EFTShortnameResponse } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import ShortNameLinkingDialog from '@/components/pay/eft/ShortNameLinkingDialog.vue'
 import { ShortNameSummaryState } from '@/models/pay/short-name'
+import ShortNameUtils from '@/util/short-name-utils'
 import _ from 'lodash'
 import { useShortNameTable } from '@/composables/short-name-table-factory'
 
@@ -179,6 +187,7 @@ export default defineComponent({
   },
   emits: ['on-link-account'],
   setup (props, { emit, root }) {
+    const dateDisplayFormat = 'MMMM DD, YYYY'
     const datePicker = ref(null)
     const accountLinkingDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const accountLinkingErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
@@ -213,29 +222,53 @@ export default defineComponent({
     const {
       infiniteScrollCallback, loadTableSummaryData, updateFilter
     } = useShortNameTable(state, emit)
-    const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px') => ({
+    const createHeader = (col, label, type, value, filterValue = '', hasFilter = true, minWidth = '125px',
+      width = '125px', filterItems = []) => ({
       col,
       customFilter: {
         filterApiFn: hasFilter ? (val: any) => loadTableSummaryData(col, val || '') : null,
         clearable: true,
+        items: filterItems.length > 0 ? filterItems : undefined,
         label,
         type,
         value: filterValue
       },
       hasFilter,
       minWidth,
+      width,
       value
     })
 
     const {
       shortName = '',
+      shortNameType = '',
       lastPaymentReceivedDate = '',
       creditsRemaining = '',
       linkedAccountsCount = ''
     } = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.ShortNamesSummaryFilter) || '{}')
 
     const headers = [
-      createHeader('shortName', 'Bank Short Name', 'text', 'Short Name', shortName),
+      createHeader(
+        'shortName',
+        'Bank Short Name',
+        'text',
+        'Short Name',
+        shortName,
+        true,
+        '200px',
+        '200px'
+      ),
+      createHeader(
+        'shortNameType',
+        'Type',
+        'select',
+        'Type',
+        shortNameType,
+        true,
+        '200px',
+        '200px',
+        ShortNameUtils.ShortNameTypeItems
+      ),
       createHeader(
         'lastPaymentReceivedDate',
         'Last Payment Received Date',
@@ -243,7 +276,8 @@ export default defineComponent({
         'Last Payment Received Date',
         lastPaymentReceivedDate,
         false,
-        '200px'
+        '275px',
+        '275px'
       ),
       createHeader(
         'creditsRemaining',
@@ -252,14 +286,18 @@ export default defineComponent({
         'Unsettled Amount',
         creditsRemaining,
         true,
-        '200px'
+        '215px',
+        '215px'
       ),
       createHeader(
         'linkedAccountsCount',
-        'Number of Linked Accounts',
+        'Linked Accounts',
         'text',
-        'Number of Linked Accounts',
-        linkedAccountsCount
+        'Linked Accounts',
+        linkedAccountsCount,
+        true,
+        '175px',
+        '175px'
       ),
       {
         col: 'actions',
@@ -272,6 +310,7 @@ export default defineComponent({
     function defaultFilterPayload () {
       return {
         shortName: '',
+        shortNameType: '',
         creditsRemaining: '',
         linkedAccountsCount: '',
         paymentReceivedStartDate: '',
@@ -281,10 +320,6 @@ export default defineComponent({
 
     function formatAmount (amount: number) {
       return amount !== undefined ? CommonUtils.formatAmount(amount) : ''
-    }
-
-    function formatDate (date: string) {
-      return date ? CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY') : ''
     }
 
     function openAccountLinkingDialog (item: EFTShortnameResponse) {
@@ -410,7 +445,8 @@ export default defineComponent({
       headers,
       updateFilter,
       formatAmount,
-      formatDate,
+      formatDate: CommonUtils.formatUtcToPacificDate,
+      dateDisplayFormat,
       updateDateRange,
       onLinkAccount,
       clickDatePicker,
@@ -424,7 +460,8 @@ export default defineComponent({
       datePicker,
       viewDetails,
       ShortNameRefundStatus,
-      ShortNameRefundLabel
+      ShortNameRefundLabel,
+      getShortNameTypeDescription: ShortNameUtils.getShortNameTypeDescription
     }
   }
 })
@@ -443,9 +480,5 @@ export default defineComponent({
   .v-list {
     width:180px
   }
-}
-
-.item-chip {
-  margin-left: 4px
 }
 </style>

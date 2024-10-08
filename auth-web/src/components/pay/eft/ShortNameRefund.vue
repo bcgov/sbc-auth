@@ -70,8 +70,7 @@ export default defineComponent({
       root.$router?.push({
         name: 'shortnamerefund',
         params: {
-          'shortNameDetails': JSON.stringify(props.shortNameDetails),
-          'unsettledAmount': props.unsettledAmount
+          shortNameId: props.shortNameDetails.id
         }
       })
     }

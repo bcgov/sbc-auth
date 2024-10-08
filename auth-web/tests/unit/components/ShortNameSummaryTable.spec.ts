@@ -2,6 +2,7 @@ import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import ShortNameSummaryTableVue from '@/components/pay/ShortNameSummaryTable.vue'
+import ShortNameUtils from '@/util/short-name-utils'
 import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
 import { axios } from '@/util/http-util'
@@ -23,9 +24,10 @@ const itemCell = baseVdataTable.itemCell
 
 const headers = [
   'Short Name',
+  'Type',
   'Last Payment Received Date',
   'Unsettled Amount',
-  'Number of Linked Accounts',
+  'Linked Accounts',
   'Actions'
 ]
 
@@ -44,35 +46,40 @@ describe('ShortNameSummaryTable.vue', () => {
           id: 142,
           lastPaymentReceivedDate: '2024-01-28T10:00:00',
           linkedAccountsCount: 0,
-          shortName: 'SNAME129'
+          shortName: 'SNAME129',
+          shortNameType: 'EFT'
         },
         {
           creditsRemaining: 151.5,
           id: 123,
           lastPaymentReceivedDate: '2024-01-28T10:00:00',
           linkedAccountsCount: 0,
-          shortName: 'SNAME110'
+          shortName: 'SNAME110',
+          shortNameType: 'WIRE'
         },
         {
           creditsRemaining: 204.0,
           id: 158,
           lastPaymentReceivedDate: '2024-01-27T10:00:00',
           linkedAccountsCount: 1,
-          shortName: 'SNAME145'
+          shortName: 'SNAME145',
+          shortNameType: 'WIRE'
         },
         {
           creditsRemaining: 50.25,
           id: 156,
           lastPaymentReceivedDate: '2024-01-27T10:00:00',
           linkedAccountsCount: 1,
-          shortName: 'SNAME143'
+          shortName: 'SNAME143',
+          shortNameType: 'EFT'
         },
         {
           creditsRemaining: 0.0,
           id: 134,
           lastPaymentReceivedDate: '2023-11-24T10:00:00',
           linkedAccountsCount: 2,
-          shortName: 'SNAME121'
+          shortName: 'SNAME121',
+          shortNameType: 'EFT'
         }
       ],
       total: 5
@@ -118,10 +125,12 @@ describe('ShortNameSummaryTable.vue', () => {
       const columns = itemRows.at(i).findAll(itemCell)
       expect(columns.at(0).text()).toBe(shortNameSummaryResponse.items[i].shortName)
       expect(columns.at(1).text()).toBe(
-        CommonUtils.formatDisplayDate(shortNameSummaryResponse.items[i].lastPaymentReceivedDate, 'MMMM DD, YYYY'))
+        ShortNameUtils.getShortNameTypeDescription(shortNameSummaryResponse.items[i].shortNameType))
       expect(columns.at(2).text()).toBe(
+        CommonUtils.formatUtcToPacificDate(shortNameSummaryResponse.items[i].lastPaymentReceivedDate, 'MMMM DD, YYYY'))
+      expect(columns.at(3).text()).toBe(
         CommonUtils.formatAmount(shortNameSummaryResponse.items[i].creditsRemaining))
-      expect(columns.at(3).text()).toBe(shortNameSummaryResponse.items[i].linkedAccountsCount.toString())
+      expect(columns.at(4).text()).toBe(shortNameSummaryResponse.items[i].linkedAccountsCount.toString())
     }
   })
 })
