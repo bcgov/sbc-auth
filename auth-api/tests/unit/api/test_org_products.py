@@ -154,14 +154,18 @@ def assert_product_parent_and_child_statuses(client, jwt, org_id, parent_code, p
     assert parent_mhr_product.get("subscriptionStatus") == parent_status
 
 
-@pytest.mark.parametrize('test_name, org_product_info', [
-    ('lawyer_notary', TestOrgProductsInfo.mhr_qs_lawyer_and_notaries),
-    ('home_manufacturers', TestOrgProductsInfo.mhr_qs_home_manufacturers),
-    ('home_dealers', TestOrgProductsInfo.mhr_qs_home_dealers),
-    ('system_no_approval', TestOrgProductsInfo.mhr_qs_home_manufacturers)
-])
-def test_add_single_org_product_mhr_qualified_supplier_approve(client, jwt, session, keycloak_mock,
-                                                               test_name, org_product_info):
+@pytest.mark.parametrize(
+    "test_name, org_product_info",
+    [
+        ("lawyer_notary", TestOrgProductsInfo.mhr_qs_lawyer_and_notaries),
+        ("home_manufacturers", TestOrgProductsInfo.mhr_qs_home_manufacturers),
+        ("home_dealers", TestOrgProductsInfo.mhr_qs_home_dealers),
+        ("system_no_approval", TestOrgProductsInfo.mhr_qs_home_manufacturers),
+    ],
+)
+def test_add_single_org_product_mhr_qualified_supplier_approve(
+    client, jwt, session, keycloak_mock, test_name, org_product_info
+):
     """Assert that MHR sub products subscriptions can be created and approved."""
     # setup user and org
     staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
@@ -173,8 +177,8 @@ def test_add_single_org_product_mhr_qualified_supplier_approve(client, jwt, sess
     assert rv.status_code == HTTPStatus.CREATED
     dictionary = json.loads(rv.data)
 
-    if test_name == 'system_no_approval':
-       user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    if test_name == "system_no_approval":
+        user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv_products = client.post(
         f"/api/v1/orgs/{dictionary.get('id')}/products",
         data=json.dumps(org_product_info),
@@ -184,7 +188,7 @@ def test_add_single_org_product_mhr_qualified_supplier_approve(client, jwt, sess
     assert rv_products.status_code == HTTPStatus.CREATED
     assert schema_utils.validate(rv_products.json, "org_product_subscriptions_response")[0]
 
-    subscription_status = 'ACTIVE' if test_name == 'system_no_approval' else 'PENDING_STAFF_REVIEW'
+    subscription_status = "ACTIVE" if test_name == "system_no_approval" else "PENDING_STAFF_REVIEW"
     assert_product_parent_and_child_statuses(
         client,
         jwt,
@@ -195,9 +199,9 @@ def test_add_single_org_product_mhr_qualified_supplier_approve(client, jwt, sess
         subscription_status,
     )
 
-    if test_name == 'system_no_approval':
-       return
-      
+    if test_name == "system_no_approval":
+        return
+
     rv = client.get("/api/v1/tasks", headers=staff_headers, content_type="application/json")
     item_list = rv.json
     assert schema_utils.validate(item_list, "paged_response")[0]

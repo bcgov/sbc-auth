@@ -148,7 +148,7 @@ class Product:
         subscription_data: Dict[str, Any],  # pylint: disable=too-many-locals
         is_new_transaction: bool = True,
         skip_auth=False,
-        auto_approve=False
+        auto_approve=False,
     ):
         """Create product subscription for the user.
 
