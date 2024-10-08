@@ -17,12 +17,12 @@
 A simple decorator to validate roles.
 """
 from functools import wraps
+from http import HTTPStatus
 from typing import Dict
 
 from flask import abort, g
 
-from auth_api.auth import jwt as _jwt
-from auth_api import status as http_status
+from auth_api.utils.auth import jwt as _jwt
 
 
 def validate_roles(**role_args):
@@ -38,16 +38,21 @@ def validate_roles(**role_args):
         @_jwt.requires_auth
         def wrapper(*args, **kwargs):
             token_info: Dict = _get_token_info() or {}
-            user_roles: list = token_info.get('realm_access', None).get('roles', []) if 'realm_access' in token_info \
-                else []
-            allowed_roles = role_args.get('allowed_roles', [])
-            not_allowed_roles = role_args.get('not_allowed_roles', [])
+            user_roles: list = (
+                token_info.get("realm_access", None).get("roles", []) if "realm_access" in token_info else []
+            )
+            allowed_roles = role_args.get("allowed_roles", [])
+            not_allowed_roles = role_args.get("not_allowed_roles", [])
             if len(set(allowed_roles).intersection(user_roles)) < 1:
-                abort(http_status.HTTP_401_UNAUTHORIZED,
-                      description='Missing the role(s) required to access this endpoint')
+                abort(
+                    HTTPStatus.UNAUTHORIZED,
+                    description="Missing the role(s) required to access this endpoint",
+                )
             if len(set(not_allowed_roles).intersection(user_roles)) > 0:
-                abort(http_status.HTTP_401_UNAUTHORIZED,
-                      description='Not allowed role(s) present.Denied access to this endpoint')
+                abort(
+                    HTTPStatus.UNAUTHORIZED,
+                    description="Not allowed role(s) present.Denied access to this endpoint",
+                )
             return func(*args, **kwargs)
 
         return wrapper
@@ -56,4 +61,4 @@ def validate_roles(**role_args):
 
 
 def _get_token_info() -> Dict:
-    return g.jwt_oidc_token_info if g and 'jwt_oidc_token_info' in g else {}
+    return g.jwt_oidc_token_info if g and "jwt_oidc_token_info" in g else {}

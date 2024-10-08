@@ -29,7 +29,15 @@ class InvitationSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-f
 
         model = InvitationModel
         fields = (
-            'id', 'recipient_email', 'sent_date', 'expires_on', 'accepted_date', 'status', 'membership', 'token',
-            'type')
+            "id",
+            "recipient_email",
+            "sent_date",
+            "expires_on",
+            "accepted_date",
+            "status",
+            "membership",
+            "token",
+            "type",
+        )
 
     membership = fields.Nested(InvitationMembershipSchema, many=True)

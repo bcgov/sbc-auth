@@ -24,12 +24,10 @@ from .base_model import BaseModel
 class Permissions(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """Model for a Permissions model.  Associates Roles and Actions."""
 
-    __tablename__ = 'permissions'
+    __tablename__ = "permissions"
 
     id = Column(Integer, primary_key=True)
-    membership_type_code = Column(
-        String(25), nullable=True
-    )
+    membership_type_code = Column(String(25), nullable=True)
     org_status_code = Column(String(25), nullable=True)
     actions = Column(String(100), primary_key=True, autoincrement=False)
 

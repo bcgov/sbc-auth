@@ -15,13 +15,11 @@
 
 import datetime
 
-from flask import current_app, g
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
-from sqlalchemy_continuum.plugins.flask import fetch_remote_addr
 
-from .db import activity_plugin, db
+from .db import db
 
 
 class BaseModel(db.Model):
@@ -32,22 +30,22 @@ class BaseModel(db.Model):
     @declared_attr
     def created_by_id(cls):  # pylint:disable=no-self-argument, # noqa: N805
         """Return foreign key for created by."""
-        return Column(ForeignKey('users.id'), default=cls._get_current_user)
+        return Column(ForeignKey("users.id"), default=cls._get_current_user)
 
     @declared_attr
     def modified_by_id(cls):  # pylint:disable=no-self-argument, # noqa: N805
         """Return foreign key for modified by."""
-        return Column(ForeignKey('users.id'), onupdate=cls._get_current_user)
+        return Column(ForeignKey("users.id"), onupdate=cls._get_current_user)
 
     @declared_attr
     def created_by(cls):  # pylint:disable=no-self-argument, # noqa: N805
         """Return relationship for created by."""
-        return relationship('User', foreign_keys=[cls.created_by_id], post_update=True, uselist=False)
+        return relationship("User", foreign_keys=[cls.created_by_id], post_update=True, uselist=False)
 
     @declared_attr
     def modified_by(cls):  # pylint:disable=no-self-argument, # noqa: N805
         """Return relationship for modified by."""
-        return relationship('User', foreign_keys=[cls.modified_by_id], post_update=True, uselist=False)
+        return relationship("User", foreign_keys=[cls.modified_by_id], post_update=True, uselist=False)
 
     @classmethod
     def find_by_id(cls, identifier: int):
@@ -62,6 +60,7 @@ class BaseModel(db.Model):
         """
         try:
             from .user import User as UserModel  # pylint:disable=cyclic-import, import-outside-toplevel
+
             user = UserModel.find_by_jwt_token()
             if not user:
                 return None
@@ -77,16 +76,16 @@ class BaseModel(db.Model):
 
         Will not update readonly, private fields, or relationship fields.
         """
-        readonly = ['id', 'created', 'modified', 'created_by_id', 'modified_by_id']
+        readonly = ["id", "created", "modified", "created_by_id", "modified_by_id"]
         columns = self.__table__.columns.keys()
         relationships = self.__mapper__.relationships.keys()
 
-        _excluded_fields = kwargs.pop('_exclude', ())
+        _excluded_fields = kwargs.pop("_exclude", ())
 
         changes = {}
         for key in columns:
             # don't update private/protected
-            if key.startswith('_'):
+            if key.startswith("_"):
                 continue
 
             # only update if allowed, exists, and is not a relationship
@@ -97,7 +96,7 @@ class BaseModel(db.Model):
             if allowed and exists and not is_relationship:
                 val = getattr(self, key)
                 if val != kwargs[key]:
-                    changes[key] = {'old': val, 'new': kwargs[key]}
+                    changes[key] = {"old": val, "new": kwargs[key]}
                     setattr(self, key, kwargs[key])
         return changes
 
@@ -110,7 +109,6 @@ class BaseModel(db.Model):
         """Save and flush."""
         db.session.add(self)
         db.session.flush()
-        self.create_activity(self)
         return self
 
     def add_to_session(self):
@@ -121,7 +119,6 @@ class BaseModel(db.Model):
         """Save and commit."""
         db.session.add(self)
         db.session.flush()
-        self.create_activity(self)
         db.session.commit()
 
         return self
@@ -130,7 +127,6 @@ class BaseModel(db.Model):
         """Delete and commit."""
         db.session.delete(self)
         db.session.flush()
-        self.create_activity(self, is_delete=True)
         db.session.commit()
 
     @staticmethod
@@ -143,23 +139,6 @@ class BaseModel(db.Model):
         if self:
             db.session.delete(self)
             db.session.commit()
-
-    @classmethod
-    def create_activity(cls, obj, is_delete=False):
-        """Create activity records if the model is versioned."""
-        if isinstance(obj, VersionedModel) and not current_app.config.get('DISABLE_ACTIVITY_LOGS'):
-            if is_delete:
-                verb = 'delete'
-            else:
-                verb = 'update' if obj.modified_by is not None else 'create'
-
-            activity = activity_plugin.activity_cls(verb=verb, object=obj, data={
-                'user_name': g.jwt_oidc_token_info.get('preferred_username',
-                                                       None) if g and 'jwt_oidc_token_info' in g else None,
-                'remote_addr': fetch_remote_addr()
-            })
-
-            db.session.add(activity)
 
 
 class BaseCodeModel(db.Model):
@@ -187,13 +166,3 @@ class BaseCodeModel(db.Model):
         db.session.add(self)
         db.session.commit()
         return self
-
-
-class VersionedModel(BaseModel):
-    """This class manages all of the base code, type or status model functions."""
-
-    __abstract__ = True
-
-    __versioned__ = {
-        'exclude': []
-    }

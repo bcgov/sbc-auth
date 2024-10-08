@@ -15,7 +15,7 @@
 """This exports all of the models and schemas used by the application."""
 # noqa: I004
 # noqa: I001, I003, I004
-from sbc_common_components.tracing.db_tracing import DBTracing  # noqa: I001, I004
+
 from sqlalchemy import event  # noqa: I001
 from sqlalchemy.engine import Engine  # noqa: I001, I003, I004
 
@@ -51,12 +51,9 @@ from .product_subscription import ProductSubscription
 from .product_subscriptions_status import ProductSubscriptionsStatus
 from .product_type_code import ProductTypeCode
 from .pubsub_message_processing import PubSubMessageProcessing
+from .staff_remark_code import StaffRemarkCode
 from .suspension_reason_code import SuspensionReasonCode
 from .task import Task
 from .user import User
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
-from .staff_remark_code import StaffRemarkCode
-
-
-event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)

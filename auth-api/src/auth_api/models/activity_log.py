@@ -21,7 +21,7 @@ from .db import db
 class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """Model for ActivityLog Org record."""
 
-    __tablename__ = 'activity_logs'
+    __tablename__ = "activity_logs"
 
     id = Column(Integer, primary_key=True)
     actor_id = Column(Integer, nullable=True, index=True)  # who did the activity, refers to user id in the user table.
@@ -34,16 +34,24 @@ class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many
     org_id = Column(Integer, nullable=True, index=True)
 
     @classmethod
-    def fetch_activity_logs_for_account(cls, org_id: int, item_name: str,  # pylint:disable=too-many-arguments
-                                        item_type: str,
-                                        action: str,
-                                        page: int, limit: int):
+    def fetch_activity_logs_for_account(  # pylint: disable=too-many-positional-arguments,too-many-arguments
+        cls,
+        org_id: int,
+        item_name: str,
+        item_type: str,
+        action: str,
+        page: int,
+        limit: int,
+    ):
         """Fetch all activity logs."""
         from . import User  # pylint:disable=cyclic-import, import-outside-toplevel
-        query = db.session.query(ActivityLog, User). \
-            outerjoin(User, User.id == ActivityLog.actor_id). \
-            filter(ActivityLog.org_id == org_id). \
-            order_by(desc(ActivityLog.created))
+
+        query = (
+            db.session.query(ActivityLog, User)
+            .outerjoin(User, User.id == ActivityLog.actor_id)
+            .filter(ActivityLog.org_id == int(org_id or -1))
+            .order_by(desc(ActivityLog.created))
+        )
 
         if item_name:
             query = query.filter(ActivityLog.item_name == item_name)

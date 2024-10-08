@@ -17,16 +17,14 @@ This module manages the User Information.
 """
 
 import json
+from http import HTTPStatus
 from typing import Dict, List
 
-from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from requests import HTTPError
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 from sbc_common_components.utils.enums import QueueMessageTypes
+from structured_logging import StructuredLogging
 
-from auth_api import status as http_status
-from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -35,13 +33,21 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
+from auth_api.models.dataclass import Activity
 from auth_api.schemas import UserSchema
-
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils import util
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, DocumentType, IdpHint, LoginSource, OrgStatus, Status, UserStatus)
+    AccessType,
+    ActivityAction,
+    DocumentType,
+    IdpHint,
+    LoginSource,
+    OrgStatus,
+    Status,
+    UserStatus,
+)
 from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
@@ -52,11 +58,10 @@ from .contact import Contact as ContactService
 from .documents import Documents as DocumentService
 from .keycloak import KeycloakService
 
+ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
+logger = StructuredLogging.get_logger()
 
-ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
-
-@ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
 class User:  # pylint: disable=too-many-instance-attributes disable=too-many-public-methods
     """Manages all aspects of the User Entity.
 
@@ -89,7 +94,6 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         """Return the type for the user."""
         return self._model.type
 
-    @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the User as a python dict.
 
@@ -100,9 +104,12 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         return obj
 
     @staticmethod
-    def create_user_and_add_membership(memberships: List[dict], org_id,
-                                       # pylint: disable=too-many-locals, too-many-statements, too-many-branches
-                                       single_mode: bool = False):
+    def create_user_and_add_membership(
+        memberships: List[dict],
+        org_id,
+        # pylint: disable=too-many-locals, too-many-statements, too-many-branches
+        single_mode: bool = False,
+    ):
         """
         Create user(s) in the  DB and upstream keycloak.
 
@@ -113,26 +120,26 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         """
         User._validate_and_throw_exception(memberships, org_id, single_mode)
 
-        current_app.logger.debug('create_user')
+        logger.debug("create_user")
         users = []
         for membership in memberships:
-            username = membership['username']
-            current_app.logger.debug(f'create user username: {username}')
+            username = membership["username"]
+            logger.debug(f"create user username: {username}")
             create_user_request = User._create_kc_user(membership)
-            db_username = IdpHint.BCROS.value + '/' + username
+            db_username = IdpHint.BCROS.value + "/" + username
             user_model = UserModel.find_by_username(db_username)
             re_enable_user = False
             existing_kc_user = KeycloakService.get_user_by_username(username)
-            enabled_in_kc = getattr(existing_kc_user, 'enabled', True)
-            if getattr(user_model, 'status', None) == Status.INACTIVE.value and not enabled_in_kc:
+            enabled_in_kc = getattr(existing_kc_user, "enabled", True)
+            if getattr(user_model, "status", None) == Status.INACTIVE.value and not enabled_in_kc:
                 membership_model = MembershipModel.find_membership_by_userid(user_model.id)
-                re_enable_user = membership_model.org_id == org_id
+                re_enable_user = membership_model.org_id == int(org_id or -1)
             if user_model and not re_enable_user:
-                current_app.logger.debug('Existing users found in DB')
+                logger.debug("Existing users found in DB")
                 users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))
                 continue
 
-            if membership.get('update_password_on_login', True):  # by default , reset needed
+            if membership.get("update_password_on_login", True):  # by default , reset needed
                 create_user_request.update_password_on_login()
             try:
                 if re_enable_user:
@@ -140,11 +147,13 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
                 else:
                     kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
             except BusinessException as err:
-                current_app.logger.error('create_user in keycloak failed :duplicate user %s', err)
+                error_msg = f"create_user in keycloak failed :duplicate user {err}"
+                logger.error(error_msg)
                 users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))
                 continue
             except HTTPError as err:
-                current_app.logger.error('create_user in keycloak failed %s', err)
+                error_msg = f"create_user in keycloak failed {err}"
+                logger.error(error_msg)
                 users.append(User._get_error_dict(username, Error.FAILED_ADDING_USER_ERROR))
                 continue
             try:
@@ -154,17 +163,18 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
                     user_model.login_source = LoginSource.BCROS.value
                     user_model.flush()
                     membership_model.status = Status.ACTIVE.value
-                    membership_model.membership_type_code = membership['membershipType']
+                    membership_model.membership_type_code = membership["membershipType"]
                     membership_model.flush()
                 else:
                     user_model = User._create_new_user_and_membership(db_username, kc_user, membership, org_id)
 
                 db.session.commit()  # commit is for session ;need not to invoke for every object
                 user_dict = User(user_model).as_dict()
-                user_dict.update({'http_status': http_status.HTTP_201_CREATED, 'error': ''})
+                user_dict.update({"http_status": HTTPStatus.CREATED, "error": ""})
                 users.append(user_dict)
             except Exception as e:  # NOQA # pylint: disable=broad-except
-                current_app.logger.error('Error on  create_user_and_add_membership: %s', e)
+                error_msg = f"Error on  create_user_and_add_membership {e}"
+                logger.error(error_msg)
                 db.session.rollback()
                 if re_enable_user:
                     User._update_user_in_kc(create_user_request)
@@ -173,7 +183,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
                 users.append(User._get_error_dict(username, Error.FAILED_ADDING_USER_ERROR))
                 continue
 
-        return {'users': users}
+        return {"users": users}
 
     @staticmethod
     def _update_user_in_kc(create_user_request):
@@ -185,7 +195,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @staticmethod
     def _validate_and_throw_exception(memberships, org_id, single_mode):
         if single_mode:  # make sure no bulk operation and only owner is created using if no auth
-            if len(memberships) > 1 or memberships[0].get('membershipType') not in [ADMIN, COORDINATOR]:
+            if len(memberships) > 1 or memberships[0].get("membershipType") not in [ADMIN, COORDINATOR]:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
         else:
             check_auth(org_id=org_id, one_of_roles=(COORDINATOR, ADMIN, STAFF))
@@ -196,23 +206,35 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
 
     @staticmethod
     def _create_new_user_and_membership(db_username, kc_user, membership, org_id):
-        user_model: UserModel = UserModel(username=db_username,
-                                          is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
-                                          type=Role.ANONYMOUS_USER.name,
-                                          email=membership.get('email', None),
-                                          firstname=kc_user.first_name, lastname=kc_user.last_name,
-                                          login_source=LoginSource.BCROS.value)
+        user_model: UserModel = UserModel(
+            username=db_username,
+            is_terms_of_use_accepted=False,
+            status=Status.ACTIVE.value,
+            type=Role.ANONYMOUS_USER.name,
+            email=membership.get("email", None),
+            firstname=kc_user.first_name,
+            lastname=kc_user.last_name,
+            login_source=LoginSource.BCROS.value,
+        )
         user_model.flush()
-        membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
-                                           membership_type_code=membership['membershipType'],
-                                           membership_type_status=Status.ACTIVE.value)
+        membership_model = MembershipModel(
+            org_id=org_id,
+            user_id=user_model.id,
+            membership_type_code=membership["membershipType"],
+            membership_type_status=Status.ACTIVE.value,
+        )
 
         membership_model.flush()
-        name = {'first_name': user_model.firstname, 'last_name': user_model.lastname}
-        ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.APPROVE_TEAM_MEMBER.value,
-                                                       name=json.dumps(name),
-                                                       value=membership['membershipType'],
-                                                       id=user_model.id))
+        name = {"first_name": user_model.firstname, "last_name": user_model.lastname}
+        ActivityLogPublisher.publish_activity(
+            Activity(
+                org_id,
+                ActivityAction.APPROVE_TEAM_MEMBER.value,
+                name=json.dumps(name),
+                value=membership["membershipType"],
+                id=user_model.id,
+            )
+        )
         return user_model
 
     @staticmethod
@@ -227,28 +249,26 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             KeycloakService.reset_otp(str(user.keycloak_guid))
             User.send_otp_authenticator_reset_notification(user.email, origin_url, org_id)
         except HTTPError as err:
-            current_app.logger.error('update_user in keycloak failed %s', err)
+            error_msg = f"update_user in keycloak failed {err}"
+            logger.error(error_msg)
             raise BusinessException(Error.UNDEFINED_ERROR, err) from err
 
     @staticmethod
     def send_otp_authenticator_reset_notification(recipient_email, origin_url, org_id):
         """Send Authenticator reset notification to the user."""
-        current_app.logger.debug('<send_otp_authenticator_reset_notification')
-        app_url = f'{origin_url}/'
-        context_path = 'signin/bceid'
-        login_url = f'{app_url}/{context_path}'
-        data = {
-            'accountId': org_id,
-            'emailAddresses': recipient_email,
-            'contextUrl': login_url
-        }
+        logger.debug("<send_otp_authenticator_reset_notification")
+        app_url = f"{origin_url}/"
+        context_path = "signin/bceid"
+        login_url = f"{app_url}/{context_path}"
+        data = {"accountId": org_id, "emailAddresses": recipient_email, "contextUrl": login_url}
         try:
             publish_to_mailer(QueueMessageTypes.OTP_AUTHENTICATOR_RESET_NOTIFICATION.value, data=data)
-            current_app.logger.debug('<send_otp_authenticator_reset_notification')
-            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.RESET_2FA.value,
-                                                           name=recipient_email))
+            logger.debug("<send_otp_authenticator_reset_notification")
+            ActivityLogPublisher.publish_activity(
+                Activity(org_id, ActivityAction.RESET_2FA.value, name=recipient_email)
+            )
         except Exception as e:  # noqa=B901
-            current_app.logger.error('<send_otp_authenticator_reset_notification failed')
+            logger.error("<send_otp_authenticator_reset_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
@@ -263,14 +283,15 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
 
         check_auth(org_id=org_id, one_of_roles=(ADMIN, STAFF))
         update_user_request = KeycloakUser()
-        update_user_request.user_name = user_name.replace(IdpHint.BCROS.value + '/', '')
-        update_user_request.password = user_info['password']
+        update_user_request.user_name = user_name.replace(IdpHint.BCROS.value + "/", "")
+        update_user_request.password = user_info["password"]
         update_user_request.update_password_on_login()
 
         try:
             kc_user = KeycloakService.update_user(update_user_request)
         except HTTPError as err:
-            current_app.logger.error('update_user in keycloak failed %s', err)
+            error_msg = f"update_user in keycloak failed {err}"
+            logger.error(error_msg)
             raise BusinessException(Error.UNDEFINED_ERROR, err) from err
         return kc_user
 
@@ -285,7 +306,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         3) set user status as INACTIVE
         4) set membership as inactive
         """
-        user_from_context: UserContext = kwargs['user_context']
+        user_from_context: UserContext = kwargs["user_context"]
         admin_user: UserModel = UserModel.find_by_jwt_token()
 
         if not admin_user:
@@ -323,31 +344,31 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         membership.status = Status.INACTIVE.value
         membership.save()
         update_user_request = KeycloakUser()
-        update_user_request.user_name = user_name.replace(IdpHint.BCROS.value + '/', '')
+        update_user_request.user_name = user_name.replace(IdpHint.BCROS.value + "/", "")
         update_user_request.enabled = False
         KeycloakService.update_user(update_user_request)
 
     @staticmethod
     def _create_kc_user(membership):
         create_user_request = KeycloakUser()
-        create_user_request.first_name = membership['username']
-        create_user_request.user_name = membership['username']
-        create_user_request.password = membership['password']
+        create_user_request.first_name = membership["username"]
+        create_user_request.user_name = membership["username"]
+        create_user_request.password = membership["password"]
         create_user_request.enabled = True
-        create_user_request.attributes = {'access_type': AccessType.ANONYMOUS.value}
+        create_user_request.attributes = {"access_type": AccessType.ANONYMOUS.value}
         return create_user_request
 
     @classmethod
     @user_context
     def save_from_jwt_token(cls, request_json: Dict = None, **kwargs):
         """Save user to database (create/update)."""
-        current_app.logger.debug('save_from_jwt_token')
-        user_from_context: UserContext = kwargs['user_context']
+        logger.debug("save_from_jwt_token")
+        user_from_context: UserContext = kwargs["user_context"]
         if not user_from_context.token_info:
             return None
         request_json = {} if not request_json else request_json
 
-        is_anonymous_user = user_from_context.token_info.get('accessType', None) == AccessType.ANONYMOUS.value
+        is_anonymous_user = user_from_context.token_info.get("accessType", None) == AccessType.ANONYMOUS.value
         if is_anonymous_user:
             existing_user = UserModel.find_by_username(user_from_context.user_name)
         else:
@@ -358,16 +379,20 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         if existing_user is None:
             user_model = UserModel.create_from_jwt_token(first_name, last_name)
         else:
-            user_model = UserModel.update_from_jwt_token(existing_user, first_name, last_name,
-                                                         is_login=request_json.get('isLogin', False))
+            user_model = UserModel.update_from_jwt_token(
+                existing_user, first_name, last_name, is_login=request_json.get("isLogin", False)
+            )
 
         if not user_model:
             return None
 
         # If terms accepted, double check if there is a new TOS in place. If so, update the flag to false.
         if user_model.is_terms_of_use_accepted:
-            document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value if is_anonymous_user \
+            document_type = (
+                DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value
+                if is_anonymous_user
                 else DocumentType.TERMS_OF_USE.value
+            )
             # get the digit version of the terms of service..ie d1 gives 1 ; d2 gives 2..for proper comparison
             latest_version = util.digitify(DocumentService.find_latest_version_by_type(document_type))
             current_version = util.digitify(user_model.terms_of_use_accepted_version)
@@ -381,12 +406,18 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @user_context
     def _get_names(existing_user, request_json, **kwargs):
         # For BCeID, IDIM doesn't want to use the names from token
-        user_from_context: UserContext = kwargs['user_context']
+        user_from_context: UserContext = kwargs["user_context"]
         if user_from_context.login_source == LoginSource.BCEID.value:
-            first_name: str = request_json.get('firstName', existing_user.firstname) if existing_user \
-                else request_json.get('firstName', None)
-            last_name: str = request_json.get('lastName', existing_user.lastname) if existing_user \
-                else request_json.get('lastName', None)
+            first_name: str = (
+                request_json.get("firstName", existing_user.firstname)
+                if existing_user
+                else request_json.get("firstName", None)
+            )
+            last_name: str = (
+                request_json.get("lastName", existing_user.lastname)
+                if existing_user
+                else request_json.get("lastName", None)
+            )
         else:
             first_name: str = user_from_context.first_name
             last_name: str = user_from_context.last_name
@@ -395,7 +426,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @staticmethod
     def get_contacts():
         """Get the contact associated with this user."""
-        current_app.logger.debug('get_contact')
+        logger.debug("get_contact")
         user = UserModel.find_by_jwt_token()
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -403,17 +434,16 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         collection = []
         for contact_link in user.contacts:
             collection.append(ContactService(contact_link.contact).as_dict())
-        return {'contacts': collection}
+        return {"contacts": collection}
 
     @staticmethod
     def _get_error_dict(username, error):
-        return {'username': username, 'http_status': error.value[1],
-                'error': error.value[0]}
+        return {"username": username, "http_status": error.value[1], "error": error.value[0]}
 
     @staticmethod
     def add_contact(contact_info: dict, throw_error_for_duplicates: bool = True):
         """Add contact information for an existing user."""
-        current_app.logger.debug('add_contact')
+        logger.debug("add_contact")
         user = UserModel.find_by_jwt_token()
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -439,7 +469,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @staticmethod
     def update_contact(contact_info: dict):
         """Update a contact for an existing user."""
-        current_app.logger.debug('update_contact')
+        logger.debug("update_contact")
         user = UserModel.find_by_jwt_token()
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -462,8 +492,8 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @user_context
     def update_terms_of_use(is_terms_accepted, terms_of_use_version, **kwargs):
         """Update terms of use for an existing user."""
-        current_app.logger.debug('update_terms_of_use')
-        user_from_context: UserContext = kwargs['user_context']
+        logger.debug("update_terms_of_use")
+        user_from_context: UserContext = kwargs["user_context"]
         if user_from_context.token_info is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         user = UserModel.update_terms_of_use(is_terms_accepted, terms_of_use_version)
@@ -472,7 +502,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @staticmethod
     def delete_contact():
         """Delete the contact for an existing user."""
-        current_app.logger.info('delete_contact')
+        logger.info("delete_contact")
         user = UserModel.find_by_jwt_token()
         if not user or not user.contacts:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -490,7 +520,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         if contact_link:
             del contact_link.user
             contact_link = contact_link.flush()
-            contact_link.commit()
+            contact_link.save()
             # clean up any orphaned contacts and links
             if not contact_link.has_links():
                 contact = contact_link.contact
@@ -500,7 +530,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         return None
 
     @staticmethod
-    def find_users(first_name='', last_name='', email=''):
+    def find_users(first_name="", last_name="", email=""):
         """Return a list of users matching either the given username or the given email."""
         return UserModel.find_users(first_name=first_name, last_name=last_name, email=email)
 
@@ -508,18 +538,18 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @user_context
     def find_by_jwt_token(cls, **kwargs):
         """Find user from database by user token."""
-        user_from_context: UserContext = kwargs['user_context']
+        user_from_context: UserContext = kwargs["user_context"]
         if not user_from_context.token_info:
             return None
 
         user_model = UserModel.find_by_jwt_token()
 
         if not user_model:
-            if kwargs.get('silent_mode', False):
+            if kwargs.get("silent_mode", False):
                 return None
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        is_anonymous_user = user_from_context.token_info.get('accessType', None) == AccessType.ANONYMOUS.value
+        is_anonymous_user = user_from_context.token_info.get("accessType", None) == AccessType.ANONYMOUS.value
         is_govm_user = user_from_context.login_source == LoginSource.STAFF.value
         # If terms accepted , double check if there is a new TOS in place. If so, update the flag to false.
         if user_model.is_terms_of_use_accepted:
@@ -563,7 +593,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     def get_admin_emails_for_org(org_id: int, status=Status.ACTIVE.value):
         """Get admin emails for an org."""
         admin_list = UserModel.find_users_by_org_id_by_status_by_roles(org_id, CLIENT_ADMIN_ROLES, status)
-        return ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
+        return ",".join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
 
     @staticmethod
     def delete_user():
@@ -577,7 +607,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         5) Delete the contact information for the user and the accepted terms of service
         6) Mark the user record as inactive
         """
-        current_app.logger.debug('<delete_user')
+        logger.debug("<delete_user")
 
         user: UserModel = UserModel.find_by_jwt_token()
         if not user:
@@ -587,11 +617,11 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
 
         user_orgs: List[OrgModel] = MembershipModel.find_orgs_for_user(user.id)
 
-        current_app.logger.info(f'Found {len(user_orgs or [])} orgs for the user')
+        logger.info(f"Found {len(user_orgs or [])} orgs for the user")
 
         if user_orgs:
             for org in user_orgs:
-                current_app.logger.debug(f'Org : {org.name},  Status : {org.status_code}')
+                logger.debug(f"Org : {org.name},  Status : {org.status_code}")
                 if org.status_code == Status.ACTIVE.name:
                     User.__remove_org_membership(org, user.id)
 
@@ -611,7 +641,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         # Remove user from account_holders group
         KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
 
-        current_app.logger.debug('<delete_user')
+        logger.debug("<delete_user")
 
     @staticmethod
     def __remove_org_membership(org, user_id):
@@ -625,10 +655,9 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
                     is_user_an_owner = True
             elif member.membership_type_code == ADMIN:
                 org_has_other_owners = True
-        current_app.logger.info(
-            f'Org :{org.name} --> User Owner : {is_user_an_owner},Has other owners :{org_has_other_owners}')
+        logger.info(f"Org :{org.name} --> User Owner : {is_user_an_owner},Has other owners :{org_has_other_owners}")
         if is_user_an_owner and not org_has_other_owners:
-            current_app.logger.info(f'Affiliated entities : {len(org.affiliated_entities)}')
+            logger.info(f"Affiliated entities : {len(org.affiliated_entities)}")
             if len(org.affiliated_entities) == 0:
                 org.status_code = OrgStatus.INACTIVE.value
                 org.flush()
@@ -645,14 +674,15 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @user_context
     def is_context_user_staff(**kwargs):
         """Check if user in user context has is a staff."""
-        user_from_context: UserContext = kwargs['user_context']
+        user_from_context: UserContext = kwargs["user_context"]
         return user_from_context.is_staff()
 
     @staticmethod
     def is_user_admin_or_coordinator(user, org_id: int) -> bool:
         """Check if user(userservice wrapper) provided is admin or coordinator for the given org id."""
-        current_user_membership: MembershipModel = \
-            MembershipModel.find_membership_by_user_and_org(user_id=user.identifier, org_id=org_id)
+        current_user_membership: MembershipModel = MembershipModel.find_membership_by_user_and_org(
+            user_id=user.identifier, org_id=org_id
+        )
 
         if current_user_membership is None:
             return False

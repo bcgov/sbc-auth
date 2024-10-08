@@ -13,58 +13,54 @@
 # limitations under the License.
 """API endpoints for managing an API gateway keys for org."""
 
+from http import HTTPStatus
+
 from flask import Blueprint, request
 from flask_cors import cross_origin
 
-from auth_api import status as http_status
-from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import ApiGateway as ApiGatewayService
-from auth_api.tracer import Tracer
+from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import Role
 
-bp = Blueprint('KEYS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/orgs/<int:org_id>/api-keys')
-TRACER = Tracer.get_instance()
+bp = Blueprint("KEYS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs/<int:org_id>/api-keys")
 
 
-@bp.route('', methods=['GET', 'OPTIONS'])
-@cross_origin(origins='*', methods=['GET', 'POST'])
-@TRACER.trace()
+@bp.route("", methods=["GET", "OPTIONS"])
+@cross_origin(origins="*", methods=["GET", "POST"])
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
 def get_organization_api_keys(org_id):
     """Get all API keys for the account."""
-    return ApiGatewayService.get_api_keys(org_id), http_status.HTTP_200_OK
+    return ApiGatewayService.get_api_keys(org_id), HTTPStatus.OK
 
 
-@bp.route('', methods=['POST'])
-@cross_origin(origins='*')
-@TRACER.trace()
+@bp.route("", methods=["POST"])
+@cross_origin(origins="*")
 @_jwt.has_one_of_roles([Role.SYSTEM.value])
 def post_organization_api_key(org_id):
     """Create new api key for the org."""
     request_json = request.get_json()
-    valid_format, errors = schema_utils.validate(request_json, 'api_key')
+    valid_format, errors = schema_utils.validate(request_json, "api_key")
 
     if not valid_format:
-        return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+        return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
     try:
-        response, status = ApiGatewayService.create_key(org_id, request_json), http_status.HTTP_201_CREATED
+        response, status = ApiGatewayService.create_key(org_id, request_json), HTTPStatus.CREATED
     except BusinessException as exception:
-        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status
 
 
-@bp.route('/<string:key>', methods=['DELETE', 'OPTIONS'])
-@cross_origin(origins='*', methods=['DELETE'])
-@TRACER.trace()
+@bp.route("/<string:key>", methods=["DELETE", "OPTIONS"])
+@cross_origin(origins="*", methods=["DELETE"])
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
 def delete_organization_api_key(org_id, key):
     """Revoke API Key."""
     try:
         ApiGatewayService.revoke_key(org_id, key)
-        response, status = {}, http_status.HTTP_200_OK
+        response, status = {}, HTTPStatus.OK
     except BusinessException as exception:
-        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status

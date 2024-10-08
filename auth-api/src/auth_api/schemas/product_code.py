@@ -19,16 +19,16 @@ from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ma
 
 
-class ProductCodeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class ProductCodeSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the ProductCodeModel model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the ProductSubscription fields to a default schema."""
 
         model = ProductCodeModel
-        exclude = ['default', 'linked_product_code', 'can_resubmit']
+        exclude = ["default", "linked_product_code", "can_resubmit"]
 
-    type_code = fields.String(data_key='type')
-    parent_code = fields.String(data_key='parentCode')
-    premium_only = fields.Boolean(data_key='premiumOnly')
-    need_review = fields.Boolean(data_key='needReview')
+    type_code = fields.String(data_key="type")
+    parent_code = fields.String(data_key="parentCode")
+    premium_only = fields.Boolean(data_key="premiumOnly")
+    need_review = fields.Boolean(data_key="needReview")

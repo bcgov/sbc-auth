@@ -16,29 +16,35 @@
 
 Test-Suite to ensure that the /ops endpoint is working as expected.
 """
+from sqlalchemy.exc import SQLAlchemyError
+
+from auth_api.models import db
 
 
 def test_ops_healthz_success(client):
     """Assert that the service is healthy if it can successfully access the database."""
-    rv = client.get('/ops/healthz')
+    rv = client.get("/ops/healthz")
 
     assert rv.status_code == 200
-    assert rv.json == {'message': 'api is healthy'}
+    assert rv.json == {"message": "api is healthy"}
 
 
-def test_ops_healthz_fail(app_request):
+def test_ops_healthz_fail(app_request, monkeypatch):
     """Assert that the service is unhealthy if a connection toThe database cannot be made."""
-    app_request.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://does:not@exist:5432/nada'
-    with app_request.test_client() as client:
-        rv = client.get('/ops/healthz')
 
+    def db_error(_):
+        raise SQLAlchemyError(1, 2, code="42")
+
+    monkeypatch.setattr(db.session, "execute", db_error)
+    with app_request.test_client() as client:
+        rv = client.get("/ops/healthz")
         assert rv.status_code == 500
-        assert rv.json == {'message': 'api is down'}
+        assert rv.json == {"message": "api is down"}
 
 
 def test_ops_readyz(client):
     """Asserts that the service is ready to serve."""
-    rv = client.get('/ops/readyz')
+    rv = client.get("/ops/readyz")
 
     assert rv.status_code == 200
-    assert rv.json == {'message': 'api is ready'}
+    assert rv.json == {"message": "api is ready"}

@@ -62,9 +62,6 @@ class _Config():  # pylint: disable=too-few-public-methods
     TESTING = False
     DEBUG = False
 
-    SENTRY_ENABLE = os.getenv('SENTRY_ENABLE', 'False')
-    SENTRY_DSN = os.getenv('SENTRY_DSN', None)
-
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     AUTH_LD_SDK_KEY = os.getenv('AUTH_LD_SDK_KEY', None)
@@ -75,7 +72,10 @@ class _Config():  # pylint: disable=too-few-public-methods
     DB_NAME = os.getenv('DATABASE_NAME', '')
     DB_HOST = os.getenv('DATABASE_HOST', '')
     DB_PORT = os.getenv('DATABASE_PORT', '5432')
-    SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+    if DB_UNIX_SOCKET := os.getenv('DATABASE_UNIX_SOCKET', None):
+        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host={DB_UNIX_SOCKET}'  # noqa: E231, E501
+    else:
+        SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'  # noqa: E231, E501
 
     # Keycloak & Jwt
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_ISSUER')
@@ -91,9 +91,16 @@ class _Config():  # pylint: disable=too-few-public-methods
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('SBC_AUTH_ADMIN_CLIENT_SECRET')
 
     # API endpoints
-    PAY_API_URL = os.getenv('PAY_API_URL')
-    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
-    REPORT_API_BASE_URL = f'{os.getenv("REPORT_API_URL")}/reports'
+    PAY_API_URL = os.getenv('PAY_API_URL', '')
+    PAY_API_VERSION = os.getenv('PAY_API_VERSION', '')
+    PAY_API_URL = PAY_API_URL + PAY_API_VERSION
+    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL', '')
+    NOTIFY_API_VERSION = os.getenv('NOTIFY_API_VERSION', '')
+    NOTIFY_API_URL = NOTIFY_API_URL + NOTIFY_API_VERSION
+    REPORT_API_URL = os.getenv('REPORT_API_URL', '')
+    REPORT_API_VERSION = os.getenv('REPORT_API_VERSION', '')
+    REPORT_API_URL = REPORT_API_URL + REPORT_API_VERSION
+    REPORT_API_BASE_URL = f'{REPORT_API_URL}/reports'
 
     # PUB/SUB - SUB: account-mailer-dev
     # If blank in PUB/SUB, this should match the https endpoint the subscription is pushing to.
@@ -161,7 +168,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_TEST_URL',
-        default=f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}',
+        default=f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}',  # noqa: E231
     )
 
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_TEST_ISSUER')

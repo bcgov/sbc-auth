@@ -22,4 +22,4 @@ from .base_model import BaseCodeModel
 class StaffRemarkCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """Staff Remarks against an account."""
 
-    __tablename__ = 'staff_remark_codes'
+    __tablename__ = "staff_remark_codes"

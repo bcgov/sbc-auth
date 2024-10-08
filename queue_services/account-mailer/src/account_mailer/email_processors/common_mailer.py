@@ -15,14 +15,18 @@
 from auth_api.models import Org as OrgModel
 from flask import current_app
 from jinja2 import Template
+from structured_logging import StructuredLogging
 
 from account_mailer.auth_utils import get_dashboard_url, get_login_url, get_payment_statements_url
 from account_mailer.email_processors import generate_template
 
 
+logger = StructuredLogging.get_logger()
+
+
 def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> dict:
     """Build the email for Account notification."""
-    current_app.logger.debug('account  notification: %s', org_id)
+    logger.debug('account  notification: %s', org_id)
 
     account_name: str = None
     account_name_with_branch: str = None
@@ -47,7 +51,7 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
         'payment_statement_url': get_payment_statements_url(org_id),
         **kwargs
     }
-    current_app.logger.debug('notification args: %s', jinja_kwargs)
+    logger.debug('notification args: %s', jinja_kwargs)
 
     html_out = jnja_template.render(jinja_kwargs)
 

@@ -16,9 +16,9 @@
 Test Utility for creating model factory.
 """
 import datetime
-from sqlalchemy import event
 
 from requests.exceptions import HTTPError
+from sqlalchemy import event
 
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import Affiliation as AffiliationModel
@@ -39,17 +39,31 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.utils.enums import (
-    AccessType, InvitationType, OrgType, ProductSubscriptionStatus, TaskRelationshipStatus, TaskRelationshipType,
-    TaskStatus, TaskTypePrefix)
+    AccessType,
+    InvitationType,
+    OrgType,
+    ProductSubscriptionStatus,
+    TaskRelationshipStatus,
+    TaskRelationshipType,
+    TaskStatus,
+    TaskTypePrefix,
+)
 from auth_api.utils.roles import Role
 from tests.utilities.factory_scenarios import (
-    JWT_HEADER, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgTypeInfo, TestUserInfo)
+    JWT_HEADER,
+    TestBCOLInfo,
+    TestContactInfo,
+    TestEntityInfo,
+    TestOrgInfo,
+    TestOrgTypeInfo,
+    TestUserInfo,
+)
 from tests.utilities.sqlalchemy import clear_event_listeners
 
 
 def factory_auth_header(jwt, claims):
     """Produce JWT tokens for use in tests."""
-    return {'Authorization': 'Bearer ' + jwt.create_jwt(claims=claims, header=JWT_HEADER)}
+    return {"Authorization": "Bearer " + jwt.create_jwt(claims=claims, header=JWT_HEADER)}
 
 
 def factory_entity_model(entity_info: dict = TestEntityInfo.entity1, user_id=None) -> EntityModel:
@@ -69,23 +83,24 @@ def factory_entity_service(entity_info: dict = TestEntityInfo.entity1):
 
 def factory_user_model(user_info: dict = TestUserInfo.user1):
     """Produce a user model."""
-    roles = user_info.get('roles', None)
-    if user_info.get('access_type', None) == AccessType.ANONYMOUS.value:
+    roles = user_info.get("roles", None)
+    if user_info.get("access_type", None) == AccessType.ANONYMOUS.value:
         user_type = Role.ANONYMOUS_USER.name
     elif Role.STAFF.value in roles:
         user_type = Role.STAFF.name
     else:
         user_type = None
 
-    user = UserModel(username=user_info['username'],
-                     firstname=user_info['firstname'],
-                     lastname=user_info['lastname'],
-                     keycloak_guid=user_info.get('keycloak_guid', None),
-                     type=user_type,
-                     email='test@test.com',
-                     login_source=user_info.get('login_source', None),
-                     idp_userid=user_info.get('idp_userid', None)
-                     )
+    user = UserModel(
+        username=user_info["username"],
+        firstname=user_info["firstname"],
+        lastname=user_info["lastname"],
+        keycloak_guid=user_info.get("keycloak_guid", None),
+        type=user_type,
+        email="test@test.com",
+        login_source=user_info.get("login_source", None),
+        idp_userid=user_info.get("idp_userid", None),
+    )
 
     user.save()
     return user
@@ -93,16 +108,17 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
 
 def factory_user_model_with_contact(user_info: dict = TestUserInfo.user1, keycloak_guid=None):
     """Produce a user model."""
-    user_type = Role.ANONYMOUS_USER.name if user_info.get('access_type', None) == AccessType.ANONYMOUS.value else None
-    user = UserModel(username=user_info.get('username', user_info.get('preferred_username')),
-                     firstname=user_info['firstname'],
-                     lastname=user_info['lastname'],
-                     keycloak_guid=user_info.get('keycloak_guid', keycloak_guid),
-                     type=user_type,
-                     email='test@test.com',
-                     login_source=user_info.get('loginSource'),
-                     idp_userid=user_info.get('idp_userid', None)
-                     )
+    user_type = Role.ANONYMOUS_USER.name if user_info.get("access_type", None) == AccessType.ANONYMOUS.value else None
+    user = UserModel(
+        username=user_info.get("username", user_info.get("preferred_username")),
+        firstname=user_info["firstname"],
+        lastname=user_info["lastname"],
+        keycloak_guid=user_info.get("keycloak_guid", keycloak_guid),
+        type=user_type,
+        email="test@test.com",
+        login_source=user_info.get("loginSource"),
+        idp_userid=user_info.get("idp_userid", None),
+    )
 
     user.save()
 
@@ -116,56 +132,58 @@ def factory_user_model_with_contact(user_info: dict = TestUserInfo.user1, keyclo
     return user
 
 
-def factory_membership_model(user_id, org_id, member_type='ADMIN', member_status=1):
+def factory_membership_model(user_id, org_id, member_type="ADMIN", member_status=1):
     """Produce a Membership model."""
-    membership = MembershipModel(user_id=user_id,
-                                 org_id=org_id,
-                                 membership_type_code=member_type,
-                                 membership_type_status=member_status)
+    membership = MembershipModel(
+        user_id=user_id, org_id=org_id, membership_type_code=member_type, membership_type_status=member_status
+    )
 
     membership.created_by_id = user_id
     membership.save()
     return membership
 
 
-def factory_org_model(org_info: dict = TestOrgInfo.org1,
-                      org_type_info: dict = None,
-                      org_status_info: dict = None,
-                      user_id=None,
-                      bcol_info: dict = TestBCOLInfo.bcol1):
+def factory_org_model(
+    org_info: dict = TestOrgInfo.org1,
+    org_type_info: dict = None,
+    org_status_info: dict = None,
+    user_id=None,
+    bcol_info: dict = TestBCOLInfo.bcol1,
+):
     """Produce a templated org model."""
     org_type = OrgTypeModel.get_default_type()
-    if org_type_info and org_type_info['code'] != TestOrgTypeInfo.implicit['code']:
-        org_type = OrgTypeModel(code=org_type_info['code'], description=org_type_info['desc'])
+    if org_type_info and org_type_info["code"] != TestOrgTypeInfo.implicit["code"]:
+        org_type = OrgTypeModel(code=org_type_info["code"], description=org_type_info["desc"])
         org_type.save()
 
     if org_status_info is not None:
-        org_status = OrgStatusModel(code=org_status_info['code'], description=org_status_info['desc'])
+        org_status = OrgStatusModel(code=org_status_info["code"], description=org_status_info["desc"])
         org_status.save()
     else:
         org_status = OrgStatusModel.get_default_status()
 
-    org = OrgModel(name=org_info['name'])
+    org = OrgModel(name=org_info["name"])
     org.org_type = org_type
-    org.access_type = org_info.get('accessType', '')
+    org.access_type = org_info.get("accessType", "")
     org.org_status = org_status
     org.created_by_id = user_id
-    org.bcol_account_id = bcol_info.get('bcol_account_id', '')
-    org.bcol_user_id = bcol_info.get('bcol_user_id', '')
+    org.bcol_account_id = bcol_info.get("bcol_account_id", "")
+    org.bcol_user_id = bcol_info.get("bcol_user_id", "")
     org.save()
 
     return org
 
 
-def factory_org_service(org_info: dict = TestOrgInfo.org1,
-                        org_type_info: dict = None,
-                        org_status_info: dict = None,
-                        bcol_info: dict = TestBCOLInfo.bcol1):
+def factory_org_service(
+    org_info: dict = TestOrgInfo.org1,
+    org_type_info: dict = None,
+    org_status_info: dict = None,
+    bcol_info: dict = TestBCOLInfo.bcol1,
+):
     """Produce a templated org service."""
-    org_model = factory_org_model(org_info=org_info,
-                                  org_type_info=org_type_info,
-                                  org_status_info=org_status_info,
-                                  bcol_info=bcol_info)
+    org_model = factory_org_model(
+        org_info=org_info, org_type_info=org_type_info, org_status_info=org_status_info, bcol_info=bcol_info
+    )
     org_service = OrgService(org_model)
     return org_service
 
@@ -193,83 +211,70 @@ def factory_affiliation_service(entity_id, org_id):
     return affiliation_service
 
 
-def factory_affiliation_invitation(from_org_id,
-                                   business_identifier,
-                                   to_org_id=None,
-                                   to_org_uuid=None,
-                                   invitation_type='EMAIL'):
+def factory_affiliation_invitation(
+    from_org_id, business_identifier, to_org_id=None, to_org_uuid=None, invitation_type="EMAIL"
+):
     """Produce an affiliation invitation for the given from/to org, business and email."""
     affiliation_invitation_dict = {
-        'fromOrgId': from_org_id,
-        'toOrgId': to_org_id,
-        'businessIdentifier': business_identifier,
-        'type': invitation_type
+        "fromOrgId": from_org_id,
+        "toOrgId": to_org_id,
+        "businessIdentifier": business_identifier,
+        "type": invitation_type,
     }
 
     if to_org_uuid:
-        affiliation_invitation_dict['toOrgUuid'] = to_org_uuid
+        affiliation_invitation_dict["toOrgUuid"] = to_org_uuid
 
     return affiliation_invitation_dict
 
 
 def factory_contact_model(contact_info: dict = TestContactInfo.contact1):
     """Return a valid contact object with the provided fields."""
-    contact = ContactModel(email=contact_info['email'])
+    contact = ContactModel(email=contact_info["email"])
     contact.save()
     return contact
 
 
-def factory_invitation(org_id,
-                       email='abc123@email.com',
-                       sent_date=datetime.datetime.now().strftime('Y-%m-%d %H:%M:%S'),
-                       membership_type='USER'):
+def factory_invitation(
+    org_id,
+    email="abc123@email.com",
+    sent_date=datetime.datetime.now().strftime("Y-%m-%d %H:%M:%S"),
+    membership_type="USER",
+):
     """Produce an invite for the given org and email."""
     return {
-        'recipientEmail': email,
-        'sentDate': sent_date,
-        'membership': [
-            {
-                'membershipType': membership_type,
-                'orgId': org_id
-            }
-        ]
+        "recipientEmail": email,
+        "sentDate": sent_date,
+        "membership": [{"membershipType": membership_type, "orgId": org_id}],
     }
 
 
-def factory_invitation_anonymous(org_id,
-                                 email='abc123@email.com',
-                                 sent_date=datetime.datetime.now().strftime('Y-%m-%d %H:%M:%S'),
-                                 membership_type='ADMIN'):
+def factory_invitation_anonymous(
+    org_id,
+    email="abc123@email.com",
+    sent_date=datetime.datetime.now().strftime("Y-%m-%d %H:%M:%S"),
+    membership_type="ADMIN",
+):
     """Produce an invite for the given org and email."""
     return {
-        'recipientEmail': email,
-        'sentDate': sent_date,
-        'type': InvitationType.DIRECTOR_SEARCH.value,
-        'membership': [
-            {
-                'membershipType': membership_type,
-                'orgId': org_id
-            }
-        ]
+        "recipientEmail": email,
+        "sentDate": sent_date,
+        "type": InvitationType.DIRECTOR_SEARCH.value,
+        "membership": [{"membershipType": membership_type, "orgId": org_id}],
     }
 
 
-def factory_document_model(version_id, doc_type, content, content_type='text/html'):
+def factory_document_model(version_id, doc_type, content, content_type="text/html"):
     """Produce a Document model."""
-    document = DocumentsModel(version_id=version_id,
-                              type=doc_type,
-                              content=content,
-                              content_type=content_type)
+    document = DocumentsModel(version_id=version_id, type=doc_type, content=content, content_type=content_type)
 
     document.save()
     return document
 
 
-def factory_product_model(org_id: str,
-                          product_code: str = 'PPR', status_code=ProductSubscriptionStatus.ACTIVE.value):
+def factory_product_model(org_id: str, product_code: str = "PPR", status_code=ProductSubscriptionStatus.ACTIVE.value):
     """Produce a templated product model."""
-    subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code,
-                                            status_code=status_code)
+    subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code, status_code=status_code)
     subscription.save()
 
     return subscription
@@ -282,20 +287,22 @@ def factory_task_service(user_id: int = 1, org_id: int = 1):
     return service
 
 
-def factory_task_model(user_id: int = 1, org_id: int = 1,
-                       modified_by_id: int = None, date_submitted: datetime = datetime.datetime.now()):
+def factory_task_model(
+    user_id: int = 1, org_id: int = 1, modified_by_id: int = None, date_submitted: datetime = datetime.datetime.now()
+):
     """Produce a Task model."""
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
-    task = TaskModel(name='foo',
-                     date_submitted=date_submitted,
-                     relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=org_id,
-                     type=task_type,
-                     status=TaskStatus.OPEN.value,
-                     related_to=user_id,
-                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
-                     modified_by_id=modified_by_id
-                     )
+    task = TaskModel(
+        name="foo",
+        date_submitted=date_submitted,
+        relationship_type=TaskRelationshipType.ORG.value,
+        relationship_id=org_id,
+        type=task_type,
+        status=TaskStatus.OPEN.value,
+        related_to=user_id,
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        modified_by_id=modified_by_id,
+    )
     task.save()
     return task
 
@@ -304,19 +311,29 @@ def factory_task_models(count: int, user_id: int):
     """Produce a collection of Task models."""
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
     for i in range(0, count):
-        task = TaskModel(name='TEST {}'.format(i), date_submitted=datetime.datetime.now(),
-                         relationship_type=TaskRelationshipType.ORG.value,
-                         relationship_id=10, type=task_type,
-                         status=TaskStatus.OPEN.value,
-                         related_to=user_id,
-                         relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
+        task = TaskModel(
+            name="TEST {}".format(i),
+            date_submitted=datetime.datetime.now(),
+            relationship_type=TaskRelationshipType.ORG.value,
+            relationship_id=10,
+            type=task_type,
+            status=TaskStatus.OPEN.value,
+            related_to=user_id,
+            relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        )
         task.save()
 
 
-def factory_activity_log_model(actor: str, action: str, item_type: str = 'Account', item_name='Foo Bar', item_id=10,
-                               item_value: str = 'Val',
-                               org_id=10,
-                               remote_addr=''):
+def factory_activity_log_model(
+    actor: str,
+    action: str,
+    item_type: str = "Account",
+    item_name="Foo Bar",
+    item_id=10,
+    item_value: str = "Val",
+    org_id=10,
+    remote_addr="",
+):
     """Create a Log Model."""
     activity_log = ActivityLogModel(
         actor_id=actor,
@@ -326,7 +343,7 @@ def factory_activity_log_model(actor: str, action: str, item_type: str = 'Accoun
         item_type=item_type,
         item_value=item_value,
         remote_addr=remote_addr,
-        org_id=org_id
+        org_id=org_id,
     )
     activity_log.save()
 
@@ -338,21 +355,22 @@ def patch_token_info(claims, monkeypatch):
         """Return token info."""
         return claims
 
-    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
+    monkeypatch.setattr("auth_api.utils.user_context._get_token_info", token_info)
 
 
 def get_tos_latest_version():
     """Return latest tos version."""
-    return '5'
+    return "5"
 
 
 def get_tos_pad_latest_version():
     """Return latest tos pad version."""
-    return 'p1'
+    return "p1"
 
 
 def patch_pay_account_post(monkeypatch):
     """Patch pay account post success (200 or 201)."""
+
     class MockPayResponse:
         def __init__(self, json_data, status_code):
             self.json_data = json_data
@@ -365,12 +383,14 @@ def patch_pay_account_post(monkeypatch):
         def raise_for_status(self):
             pass
 
-    monkeypatch.setattr('auth_api.services.rest_service.RestService.post', lambda *args,
-                        **kwargs: MockPayResponse(None, 200))
+    monkeypatch.setattr(
+        "auth_api.services.rest_service.RestService.post", lambda *args, **kwargs: MockPayResponse(None, 200)
+    )
 
 
 def patch_pay_account_put(monkeypatch):
     """Patch pay account post success (200 or 201)."""
+
     class MockPayResponse:
         def __init__(self, json_data, status_code):
             self.json_data = json_data
@@ -383,12 +403,14 @@ def patch_pay_account_put(monkeypatch):
         def raise_for_status(self):
             pass
 
-    monkeypatch.setattr('auth_api.services.rest_service.RestService.put', lambda *args,
-                        **kwargs: MockPayResponse(None, 200))
+    monkeypatch.setattr(
+        "auth_api.services.rest_service.RestService.put", lambda *args, **kwargs: MockPayResponse(None, 200)
+    )
 
 
 def patch_pay_account_delete(monkeypatch):
     """Patch pay account delete success."""
+
     class MockPayResponse:
 
         @staticmethod
@@ -398,45 +420,41 @@ def patch_pay_account_delete(monkeypatch):
         def raise_for_status(self):
             pass
 
-    monkeypatch.setattr('auth_api.services.rest_service.RestService.delete', lambda *args, **kwargs: MockPayResponse())
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.delete", lambda *args, **kwargs: MockPayResponse())
 
 
 def patch_pay_account_delete_error(monkeypatch):
     """Patch pay account delete error."""
+
     class MockPayResponse:
 
         @staticmethod
         def json():
-            return {'type': 'OUTSTANDING_CREDIT', 'title': 'OUTSTANDING_CREDIT'}
+            return {"type": "OUTSTANDING_CREDIT", "title": "OUTSTANDING_CREDIT"}
 
         def raise_for_status(self):
-            raise HTTPError('TEST ERROR')
+            raise HTTPError("TEST ERROR")
 
-    monkeypatch.setattr('auth_api.services.rest_service.RestService.delete', lambda *args, **kwargs: MockPayResponse())
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.delete", lambda *args, **kwargs: MockPayResponse())
 
 
 def patch_get_firms_parties(monkeypatch):
     """Patch pay account delete success."""
+
     class MockPartiesResponse:
 
         @staticmethod
         def json():
             return {
-                'parties': [
+                "parties": [
                     {
-                        'officer': {
-                            'email': 'test@email.com',
-                            'firstName': 'Connor',
-                            'lastName': 'Horton',
-                            'partyType': 'person'
+                        "officer": {
+                            "email": "test@email.com",
+                            "firstName": "Connor",
+                            "lastName": "Horton",
+                            "partyType": "person",
                         },
-                        'roles': [
-                            {
-                                'appointmentDate': '2022-03-01',
-                                'cessationDate': 'None',
-                                'roleType': 'Partner'
-                            }
-                        ]
+                        "roles": [{"appointmentDate": "2022-03-01", "cessationDate": "None", "roleType": "Partner"}],
                     }
                 ]
             }
@@ -444,7 +462,7 @@ def patch_get_firms_parties(monkeypatch):
         def raise_for_status(self):
             pass
 
-    monkeypatch.setattr('auth_api.services.rest_service.RestService.get', lambda *args, **kwargs: MockPartiesResponse())
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.get", lambda *args, **kwargs: MockPartiesResponse())
 
 
 def convert_org_to_staff_org(org_id: int, type_code: OrgType):
@@ -454,5 +472,5 @@ def convert_org_to_staff_org(org_id: int, type_code: OrgType):
     org_db = OrgModel.find_by_id(org_id)
     org_db.type_code = type_code
     org_db.save()
-    event.listen(OrgModel, 'before_update', receive_before_update, raw=True)
-    event.listen(OrgModel, 'before_insert', receive_before_insert)
+    event.listen(OrgModel, "before_update", receive_before_update, raw=True)
+    event.listen(OrgModel, "before_insert", receive_before_insert)

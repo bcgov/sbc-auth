@@ -22,16 +22,16 @@ from auth_api.models import Contact as ContactModel
 def test_contact(session):
     """Assert that a Contact can be stored in the database."""
     contact = ContactModel(
-        street='123 Roundabout Lane',
-        street_additional='Unit 1',
-        city='Victoria',
-        region='British Columbia',
-        country='CA',
-        postal_code='V1A 1A1',
-        delivery_instructions='Ring buzzer 123',
-        phone='111-222-3333',
-        phone_extension='123',
-        email='abc123@mail.com'
+        street="123 Roundabout Lane",
+        street_additional="Unit 1",
+        city="Victoria",
+        region="British Columbia",
+        country="CA",
+        postal_code="V1A 1A1",
+        delivery_instructions="Ring buzzer 123",
+        phone="111-222-3333",
+        phone_extension="123",
+        email="abc123@mail.com",
     )
 
     session.add(contact)
