@@ -131,7 +131,8 @@ class Product:
 
     @staticmethod
     def create_product_subscription(org_id, subscription_data: Dict[str, Any],  # pylint: disable=too-many-locals
-                                    is_new_transaction: bool = True, skip_auth=False):
+                                    is_new_transaction: bool = True, skip_auth=False,
+                                    auto_approve=False):
         """Create product subscription for the user.
 
         create product subscription first
@@ -159,7 +160,7 @@ class Product:
                 if product_model.premium_only and org.type_code not in PREMIUM_ORG_TYPES:
                     continue
 
-                subscription_status = Product.find_subscription_status(org, product_model)
+                subscription_status = Product.find_subscription_status(org, product_model, auto_approve)
                 product_subscription = Product._subscribe_and_publish_activity(org_id,
                                                                                product_code,
                                                                                subscription_status,
@@ -285,11 +286,11 @@ class Product:
         TaskService.create_task(task_info, False)
 
     @staticmethod
-    def find_subscription_status(org, product_model):
+    def find_subscription_status(org, product_model, auto_approve=False):
         """Return the subscriptions status based on org type."""
         # GOVM accounts has default active subscriptions
         skip_review_types = [AccessType.GOVM.value]
-        if product_model.need_review:
+        if product_model.need_review and auto_approve is False:
             return ProductSubscriptionStatus.ACTIVE.value if (org.access_type in skip_review_types) \
                 else ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
         return ProductSubscriptionStatus.ACTIVE.value
