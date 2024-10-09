@@ -9,15 +9,6 @@
       @submit="updateDateRange($event)"
     />
 
-    <!-- Future effective date range picker -->
-    <DatePicker
-      v-show="showEffectiveDatePicker"
-      ref="effectiveDatePicker"
-      :reset="effectiveDateRangeReset"
-      class="mt-n4"
-      @submit="updateEffectiveDateRange($event)"
-    />
-
     <v-form class="fas-search continuation-review-search">
       <v-row
         dense
@@ -45,61 +36,15 @@
             >
               <!-- Displaying Status -->
               <template #[`item.status`]="{ item }">
-                <div>{{ displayStatus(item.status) }}</div>
+                <div>
+                  <span :class="['status-dot', item.status]" />
+                  {{ displayStatus(item.status) }}
+                </div>
               </template>
 
               <!-- Displaying Formatted Submission Date -->
               <template #[`item.submissionDate`]="{ item }">
                 <div>{{ formatDate(item.submissionDate) }}</div>
-              </template>
-
-              <!-- Displaying Formatted Future Effective Date and Tooltips-->
-              <template #[`item.futureEffectiveDate`]="{ item }">
-                <div>
-                  <v-tooltip bottom>
-                    <template #activator="{ on, attrs }">
-                      <span
-                        v-bind="attrs"
-                        style="border-bottom: 1px dotted"
-                        v-on="on"
-                      >
-                        {{ formatDate(item.futureEffectiveDate) }}
-                      </span>
-                    </template>
-                    <div class="bottom-tooltip">
-                      <span>{{ formatDate(item.futureEffectiveDate) }} at {{ formatTime(item.futureEffectiveDate) }} Pacific time</span>
-                    </div>
-                  </v-tooltip>
-                  <IconTooltip
-                    v-if="expiredDate(item.futureEffectiveDate)"
-                    icon="mdi-alert"
-                    maxWidth="300px"
-                    colour="#D3272C"
-                    :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
-                    :location="{top: true}"
-                  >
-                    <div>
-                      <strong>Alert:</strong><br>
-                      <span> The Future Effective Date for this filing has passed.</span>
-                    </div>
-                  </IconTooltip>
-                  <IconTooltip
-                    v-if="item.futureEffectiveDate && daysLeft(item.futureEffectiveDate) <= 3"
-                    icon="mdi-alert"
-                    maxWidth="300px"
-                    colour="#F8661A"
-                    :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
-                    :location="{top: true}"
-                  >
-                    <div>
-                      <strong>Alert:</strong><br>
-                      <span>
-                        The Future Effective Date for this filing is in
-                        {{ feDaysLeftText(item.futureEffectiveDate) }}.
-                      </span>
-                    </div>
-                  </IconTooltip>
-                </div>
               </template>
 
               <!-- Displaying NR Number and Tooltips-->
@@ -198,7 +143,7 @@
                       }"
                     >
                       <v-text-field
-                        v-if="!['action','status','submissionDate','futureEffectiveDate'].includes(header.value)"
+                        v-if="!['action','status','submissionDate'].includes(header.value)"
                         :id="header.value"
                         v-model.trim="reviewParams[header.value]"
                         input
@@ -260,46 +205,6 @@
                             </v-text-field>
                           </template>
                           {{ fullDateRange(reviewParams.startDate, reviewParams.endDate) }}
-                        </v-tooltip>
-                      </div>
-
-                      <!-- Date Picker to select effective date range -->
-                      <div v-else-if="['futureEffectiveDate'].includes(header.value)">
-                        <v-tooltip
-                          bottom
-                        >
-                          <template #activator="{ on, attrs }">
-                            <v-text-field
-                              v-bind="attrs"
-                              :value="truncatedDateRange(reviewParams.startEffectiveDate, reviewParams.endEffectiveDate)"
-                              filled
-                              :placeholder="'Future Effective Date'"
-                              readonly
-                              dense
-                              hide-details="auto"
-                              v-on="on"
-                              @click="showEffectiveDatePicker = true"
-                            >
-                              <template #append>
-                                <v-icon
-                                  v-if="reviewParams.startEffectiveDate"
-                                  color="primary"
-                                  :style="{ marginTop: '-2px' }"
-                                  @click="updateEffectiveDateRange({ startDate: '', endDate: '' })"
-                                >
-                                  mdi-close
-                                </v-icon>
-                                <v-icon
-                                  color="primary"
-                                  :style="{ marginTop: '-2px' }"
-                                  @click="showEffectiveDatePicker = true"
-                                >
-                                  mdi-calendar
-                                </v-icon>
-                              </template>
-                            </v-text-field>
-                          </template>
-                          {{ fullDateRange(reviewParams.startEffectiveDate, reviewParams.endEffectiveDate) }}
                         </v-tooltip>
                       </div>
 
@@ -470,17 +375,17 @@ export default defineComponent({
       RESUBMITTED: 'Resubmitted',
       REJECTED: 'Rejected',
       APPROVED: 'Approved',
-      ABANDONED: 'Abandoned'
+      ABANDONED: 'Abandoned',
+      CANCELLED: 'Cancelled'
     }
 
     const state = reactive({
       reviews: [] as Array<ContinuationReviewIF>,
       headers: [
         { text: 'Date Submitted', value: 'submissionDate' },
-        { text: 'Future Effective Date', value: 'futureEffectiveDate' },
         { text: 'NR Number', value: 'nrNumber' },
         { text: 'Identifying Number', value: 'identifier' },
-        { text: 'Completing Party', value: 'completingParty' },
+        { text: 'Registered Office', value: 'officeEmail' },
         { text: 'Status', value: 'status' },
         { text: 'Actions', value: 'action' }
       ],
@@ -490,7 +395,8 @@ export default defineComponent({
         { text: 'Resubmitted', value: 'RESUBMITTED' },
         { text: 'Rejected', value: 'REJECTED' },
         { text: 'Approved', value: 'APPROVED' },
-        { text: 'Abandoned', value: 'ABANDONED' }
+        { text: 'Abandoned', value: 'ABANDONED' },
+        { text: 'Cancelled', value: 'CANCELLED' }
       ],
       formatDate: CommonUtils.formatDisplayDate,
       totalItemsCount: 0,
@@ -500,16 +406,13 @@ export default defineComponent({
       sortBy: 'submissionDate',
       sortDesc: false,
       showDatePicker: false,
-      showEffectiveDatePicker: false,
       dropdown: [] as Array<boolean>,
       reviewParams: {
         startDate: '',
         endDate: '',
-        startEffectiveDate: '',
-        endEffectiveDate: '',
         nrNumber: '',
         identifier: '',
-        completingParty: '',
+        officeEmail: '',
         status: ['AWAITING_REVIEW', 'CHANGE_REQUESTED', 'RESUBMITTED'],
         sortBy: 'submissionDate',
         sortDesc: false
@@ -546,15 +449,7 @@ export default defineComponent({
       state.reviewParams.startDate = val.startDate
       state.reviewParams.endDate = val.endDate
     }
-    const effectiveDateRangeReset = ref(0)
-    const updateEffectiveDateRange = (val: { endDate?: string, startDate?: string }) => {
-      state.showEffectiveDatePicker = false
-      if (!(val.endDate && val.startDate)) {
-        val = { startDate: '', endDate: '' }
-      }
-      state.reviewParams.startEffectiveDate = val.startDate
-      state.reviewParams.endEffectiveDate = val.endDate
-    }
+
     const fullDateRange = (startDate, endDate) => {
       if (startDate && endDate) {
         return `${moment(startDate).format('MMMM D, YYYY')} - ${moment(endDate).format('MMMM D, YYYY')}`
@@ -604,16 +499,13 @@ export default defineComponent({
 
     function clearSearchParams () {
       dateRangeReset.value++
-      effectiveDateRangeReset.value++
       state.reviewParams = {
         ...state.reviewParams,
         startDate: '',
         endDate: '',
-        startEffectiveDate: '',
-        endEffectiveDate: '',
         nrNumber: '',
         identifier: '',
-        completingParty: '',
+        officeEmail: '',
         status: []
       }
     }
@@ -647,10 +539,9 @@ export default defineComponent({
 
     function doSearchParametersExist (params: ReviewFilterParams): boolean {
       return params.startDate.length > 0 ||
-                params.startEffectiveDate.length > 0 ||
                 params.nrNumber.length > 0 ||
                 params.identifier.length > 0 ||
-                params.completingParty.length > 0 ||
+                params.officeEmail.length > 0 ||
                 params.status.length > 0
     }
 
@@ -661,49 +552,32 @@ export default defineComponent({
     // Method to format dates
     const formatDate = (dateString) => {
       if (!dateString) {
-        return '' // when no FE date, return empty string
+        return '' // when no date, return empty string
       }
       return moment(dateString).format('MMMM D, YYYY') // Format like "May 5, 2024"
     }
-    const formatTime = (dateString) => {
-      if (!dateString) {
-        return '' // when no FE date, return empty string
-      }
-      return moment(dateString).format('h:mm a') // Format like "12:46 pm"
+    // Method to check if NR date has passed
+    const expiredDate = (nrDate: string): boolean => {
+      return nrDate && !moment(nrDate).isAfter(moment())
     }
-
-    // Method to check if FE date or NR date has passed
-    const expiredDate = (effectiveDate: string): boolean => {
-      return effectiveDate && !moment(effectiveDate).isAfter(moment())
-    }
-    // Method to check FE or NR days left
-    const daysLeft = (effectiveDate: string): number => {
-      const diffHours = moment(effectiveDate).diff(moment(), 'hours')
+    // Method to check NR days left
+    const daysLeft = (nrDate: string): number => {
+      const diffHours = moment(nrDate).diff(moment(), 'hours')
       if (diffHours > 0 && diffHours <= 24) {
         return 1
       } else {
-        const diffDays = moment(effectiveDate).diff(moment(), 'days')
+        const diffDays = moment(nrDate).diff(moment(), 'days')
         return diffDays > 0 ? diffDays : 50
       }
     }
-    // Method to display FE days left text
-    const feDaysLeftText = (effectiveDate: string): string => {
-      const diffHours = moment(effectiveDate).diff(moment(), 'hours')
-      if (diffHours > 0 && diffHours <= 24) {
-        return `${diffHours} hour${diffHours > 1 ? 's' : ''}`
-      } else {
-        const diffDays = moment(effectiveDate).diff(moment(), 'days')
-        return `${diffDays} days`
-      }
-    }
     // Method to display NR days left text
-    const nrDaysLeftText = (effectiveDate: string): string => {
-      const expiryDate = moment(effectiveDate).endOf('day')
+    const nrDaysLeftText = (nrDate: string): string => {
+      const expiryDate = moment(nrDate).endOf('day')
       const currentDate = moment().endOf('day')
       if (expiryDate.isSame(currentDate, 'day')) {
         return '<b>today</b>'
       } else {
-        const diffDays = moment(effectiveDate).diff(moment(), 'days')
+        const diffDays = moment(nrDate).diff(moment(), 'days')
         return `in ${diffDays} days`
       }
     }
@@ -734,16 +608,13 @@ export default defineComponent({
       ...toRefs(state),
       debouncedOrgSearch,
       dateRangeReset,
-      effectiveDateRangeReset,
       view,
       clearSearchParams,
       changeSort,
       daysLeft,
-      feDaysLeftText,
       nrDaysLeftText,
       displayStatus,
       formatDate,
-      formatTime,
       fullDateRange,
       getIndexedTag,
       getButtonLabel,
@@ -756,7 +627,6 @@ export default defineComponent({
       expiredDate,
       updateItemsPerPage,
       updateDateRange,
-      updateEffectiveDateRange,
       formattedStatuses,
       clearOneParam
     }
@@ -948,5 +818,21 @@ export default defineComponent({
   border-width: 10px 10px 10px 10px;
   border-style: solid;
   border-color: transparent transparent rgba(50, 50, 50, 0.7) transparent;
+}
+
+.status-dot {
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+
+  &.AWAITING_REVIEW { background-color: $app-alert-orange; }
+  &.CHANGE_REQUESTED { background-color: $app-blue; }
+  &.RESUBMITTED { background-color: $app-red; }
+  &.REJECTED,
+  &.APPROVED,
+  &.ABANDONED,
+  &.CANCELLED { background-color: $gray3; }
 }
 </style>
