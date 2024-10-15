@@ -94,13 +94,13 @@
       <template #item-slot-creditsRemaining="{ item }">
         <span class="pr-2">{{ formatAmount(item.creditsRemaining) }}</span>
         <v-chip
-            v-if="item.refundStatus === ShortNameRefundStatus.PENDING_REFUND"
+            v-if="item.refundStatus === ShortNameRefundStatus.PENDING_APPROVAL"
             small
             label
             text-color="white"
             class="primary pl-2 pr-2"
         >
-          {{ ShortNameRefundLabel.PENDING_REFUND }}
+          {{ ShortNameRefundLabel.PENDING_APPROVAL }}
         </v-chip>
       </template>
       <template #item-slot-linkedAccountsCount="{ item }">
