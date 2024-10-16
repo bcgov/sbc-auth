@@ -20,7 +20,6 @@ from http import HTTPStatus
 from auth_api.models import db
 from auth_api.models.pubsub_message_processing import PubSubMessageProcessing
 from auth_api.services.gcp_queue import queue
-from auth_api.services.gcp_queue.gcp_auth import ensure_authorized_queue_user
 from auth_api.services.rest_service import RestService
 from auth_api.utils.roles import ADMIN, COORDINATOR
 from flask import Blueprint, request
@@ -29,7 +28,7 @@ from structured_logging import StructuredLogging
 
 from account_mailer.auth_utils import get_login_url, get_member_emails
 from account_mailer.email_processors import (
-    account_unlock, common_mailer, ejv_failures, pad_confirmation, product_confirmation, refund_requested)
+    account_unlock, common_mailer, ejv_failures, pad_confirmation, product_confirmation, refund_requested,)
 from account_mailer.enums import Constants, SubjectType, TemplateType, TitleType
 from account_mailer.services import minio_service, notification_service
 from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
@@ -42,7 +41,6 @@ logger = StructuredLogging.get_logger()
 
 
 @bp.route('/', methods=('POST',))
-@ensure_authorized_queue_user
 def worker():
     """Worker to handle incoming queue pushes."""
     if not (event_message := queue.get_simple_cloud_event(request, wrapped=True)):
