@@ -133,6 +133,7 @@
           </template>
           <template v-if="showRefundDetailAction(item)">
             <v-btn
+              v-if="isEftRefundApprover"
               small
               color="primary"
               min-width="5rem"
@@ -151,8 +152,9 @@
   </div>
 </template>
 <script lang="ts">
-import { Ref, defineComponent, nextTick, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { Ref, computed, defineComponent, nextTick, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import {
+  Role,
   ShortNameHistoryType,
   ShortNameHistoryTypeDescription,
   ShortNamePaymentActions,
@@ -161,10 +163,10 @@ import {
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '../../datatable/resources'
-import { EFTTransactionState } from '@/models/eft-transaction'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentService from '@/services/payment.services'
 import _ from 'lodash'
+import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'ShortNamePaymentHistory',
@@ -178,6 +180,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit, root }) {
+    const userStore = useUserStore()
     const dateDisplayFormat = 'MMMM D, YYYY'
     const enum ConfirmationType {
       REVERSE_PAYMENT = 'reversePayment',
@@ -222,7 +225,8 @@ export default defineComponent({
       }
     ]
 
-    const state = reactive<EFTTransactionState>({
+    const state = reactive({
+      isEftRefundApprover: computed(() => userStore.currentUser.roles.includes(Role.EftRefundApprover)),
       errorDialogTitle: '',
       errorDialogText: '',
       confirmDialogTitle: '',

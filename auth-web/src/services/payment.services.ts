@@ -311,6 +311,11 @@ export default class PaymentService {
     return axios.get(url)
   }
 
+  static patchEFTRefund (eftRefundId: number, body: any): AxiosPromise<EFTShortnameResponse> {
+    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/shortname-refund/${eftRefundId}`
+    return axios.patch(url, body)
+  }
+
   static postShortNameLink (shortNameId: string, accountId: string): AxiosPromise<EFTShortnameResponse> {
     const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/links`
     const body = {

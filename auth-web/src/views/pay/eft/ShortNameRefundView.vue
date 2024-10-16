@@ -39,7 +39,7 @@
                   Unsettled Amount on Short Name
                 </v-col>
                 <v-col class="pl-0">
-                  {{ formatAmount(shortNameDetails.creditsRemaining) }}
+                  {{ formatCurrency(Number(shortNameDetails.creditsRemaining)) }}
                 </v-col>
               </v-row>
 
@@ -51,7 +51,7 @@
                   v-if="readOnly"
                   class="pl-0"
                 >
-                  {{ formatAmount(refundDetails.refundAmount) }}
+                  {{ formatCurrency(Number(refundDetails.refundAmount)) }}
                 </v-col>
                 <v-text-field
                   v-else
@@ -302,10 +302,6 @@ export default defineComponent({
       }
     }
 
-    function formatAmount (amount: number) {
-      return amount !== undefined ? CommonUtils.formatAmount(amount) : ''
-    }
-
     const refundForm = ref(null)
     const isFormValid = ref(false)
     const buttonText = ref('Submit Refund Request')
@@ -372,9 +368,9 @@ export default defineComponent({
       buttonText,
       buttonColor,
       handleCancelButton,
-      formatAmount,
       getShortNameTypeDescription: ShortNameUtils.getShortNameTypeDescription,
       getEFTRefundTypeDescription: ShortNameUtils.getEFTRefundTypeDescription,
+      formatCurrency: CommonUtils.formatAmount,
       formatDate: CommonUtils.formatUtcToPacificDate,
       dateDisplayFormat
     }

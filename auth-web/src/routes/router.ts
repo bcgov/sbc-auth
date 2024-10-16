@@ -899,7 +899,7 @@ export function getRoutes (): RouteConfig[] {
       },
       props: route => ({
         shortNameId: Number(route.params.shortNameId),
-        eftRefundId: route.params.eftRefundId ? Number(route.params.shortNameId) : undefined
+        eftRefundId: route.params.eftRefundId ? Number(route.params.eftRefundId) : undefined
       })
     },
     {
