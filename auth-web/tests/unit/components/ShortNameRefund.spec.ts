@@ -1,11 +1,11 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import { Role } from '@/util/constants'
-import { useUserStore } from '@/stores'
 import ShortNameRefund from '@/components/pay/eft/ShortNameRefund.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import sinon from 'sinon'
+import { useUserStore } from '@/stores'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
