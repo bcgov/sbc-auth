@@ -218,11 +218,6 @@ export default defineComponent({
       }
     ]
 
-    const hasInitiatedRefund = computed<boolean>(() => {
-      return true
-      // return state.totalResults > 0 || state.loading
-    })
-
     async function approveRefund (item) {
       const shortNameRefund = {
         status: EFTRefundType.APPROVED
@@ -315,7 +310,6 @@ export default defineComponent({
       state,
       headers,
       confirmationDialog,
-      hasInitiatedRefund,
       approveRefund,
       declineRefund,
       dialogDecline,
