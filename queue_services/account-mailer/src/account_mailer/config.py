@@ -102,11 +102,6 @@ class _Config():  # pylint: disable=too-few-public-methods
     REPORT_API_URL = REPORT_API_URL + REPORT_API_VERSION
     REPORT_API_BASE_URL = f'{REPORT_API_URL}/reports'
 
-    # PUB/SUB - SUB: account-mailer-dev
-    # If blank in PUB/SUB, this should match the https endpoint the subscription is pushing to.
-    AUTH_AUDIENCE_SUB = os.getenv('ACCOUNT_MAILER_AUDIENCE_SUB')
-    VERIFY_PUBSUB_EMAILS = os.getenv('AUTHPAY_SERVICE_ACCOUNT', 'email1,email2').split(',')
-
     # Minio configuration values
     MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
     MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY')
