@@ -345,10 +345,6 @@ export default defineComponent({
 }
 
 ::v-deep {
-  .base-table__item-cell {
-    // padding: 16px 0 16px 0
-  }
-
   // Remove border for rows that are expanded with additional information
   tr:has(+ tr.expanded-item-row) td {
     border-bottom: none !important;
