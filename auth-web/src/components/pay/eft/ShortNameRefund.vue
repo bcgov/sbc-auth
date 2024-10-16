@@ -188,7 +188,7 @@ export default defineComponent({
       options: _.cloneDeep(DEFAULT_DATA_OPTIONS),
       expanded: [],
       currentEftRefund: null,
-      isEftRefundApprover: computed(() => userStore.currentUser.roles.includes(Role.Staff))
+      isEftRefundApprover: computed(() => userStore.currentUser.roles.includes(Role.EftRefundApprover))
     })
     const confirmationDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const headers = [

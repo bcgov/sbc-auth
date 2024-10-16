@@ -1,4 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+import { Role } from '@/util/constants'
+import { useUserStore } from '@/stores'
 import ShortNameRefund from '@/components/pay/eft/ShortNameRefund.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -16,6 +18,12 @@ describe('ShortNameRefund.vue', () => {
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
+
+    const userStore = useUserStore()
+    userStore.currentUser = {
+      roles: [Role.EftRefundApprover]
+    } as any
+
     wrapper = mount(ShortNameRefund, {
       propsData: {
         shortNameDetails: { shortName: 'SHORTNAME', id: 1 },
