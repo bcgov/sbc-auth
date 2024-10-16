@@ -769,9 +769,9 @@ export enum OrgNameLabel {
 }
 
 export enum ShortNameRefundStatus {
-    PENDING_REFUND = 'PENDING_REFUND'
+    PENDING_APPROVAL = 'PENDING_APPROVAL'
 }
 
 export enum ShortNameRefundLabel {
-    PENDING_REFUND = 'REFUND REQUEST'
+    PENDING_APPROVAL = 'REFUND REQUEST'
 }
