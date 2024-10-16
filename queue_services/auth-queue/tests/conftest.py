@@ -147,12 +147,6 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
 
 
 @pytest.fixture(autouse=True)
-def mock_queue_auth(mocker):
-    """Mock queue authorization."""
-    mocker.patch('auth_api.services.gcp_queue.gcp_auth.verify_jwt', return_value='')
-
-
-@pytest.fixture(autouse=True)
 def mock_pub_sub_call(mocker):
     """Mock pub sub call."""
     class PublisherMock:
