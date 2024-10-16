@@ -24,7 +24,6 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import db
 from auth_api.models.pubsub_message_processing import PubSubMessageProcessing
 from auth_api.services.gcp_queue import queue
-from auth_api.services.gcp_queue.gcp_auth import ensure_authorized_queue_user
 from auth_api.services.rest_service import RestService
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.enums import AccessType, ActivityAction, CorpType, OrgStatus, QueueSources
@@ -41,7 +40,6 @@ logger = StructuredLogging.get_logger()
 
 
 @bp.route('/', methods=('POST',))
-@ensure_authorized_queue_user
 def worker():
     """Worker to handle incoming queue pushes."""
     if not (event_message := queue.get_simple_cloud_event(request, wrapped=True)):
