@@ -11,7 +11,7 @@
       Short Name Refund
     </v-card-title>
     <v-card-text
-      v-if="!hasInitiatedRefund"
+      v-if="!state.results.length"
       class="d-flex justify-space-between align-center card-content mt-4"
     >
       <span>No refund initiated. SBC Finance can initiate refund if a CAS supplier number is created for the short name.</span>
@@ -29,7 +29,7 @@
       </v-btn>
     </v-card-text>
     <v-card-text
-      v-if="hasInitiatedRefund"
+      v-if="state.results.length"
       class="pa-0 linked-text"
     >
       <BaseVDataTable
@@ -56,6 +56,7 @@
             class="mx-auto"
           >
             <v-btn
+              v-if="isEftRefundApprover"
               small
               outlined
               color="primary"
@@ -71,6 +72,7 @@
               Decline
             </v-btn>
             <v-btn
+              v-if="isEftRefundApprover"
               small
               color="primary"
               class="open-action-btn pr-4 pl-4"
@@ -110,7 +112,6 @@
       <template #actions>
         <div class="d-flex align-center justify-center w-100 h-100 ga-3">
           <v-btn
-            v-if="isEftRefundApprover"
             outlined
             large
             depressed
@@ -122,7 +123,6 @@
             Cancel
           </v-btn>
           <v-btn
-            v-if="isEftRefundApprover"
             large
             depressed
             class="font-weight-bold btn-dialog"
@@ -171,14 +171,7 @@ export default defineComponent({
       actionDropdown: [],
       isShortNameLinkingDialogOpen: false,
       eftShortNameSummary: {},
-      results: [
-        // {
-        //   eftRefundId: 1,
-        //   initiatedBy: 'SBC Finance',
-        //   supplierRecordNumber: '123456',
-        //   amount: '100'
-        // }
-      ],
+      results: [],
       totalResults: 1,
       filters: {
         pageNumber: 1,
