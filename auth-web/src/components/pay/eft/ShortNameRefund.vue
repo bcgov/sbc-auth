@@ -139,7 +139,7 @@
 </template>
 
 <script lang="ts">
-import { EFTRefundType, Role, ShortNameHistoryType } from '@/util/constants'
+import { EFTRefundType, Role } from '@/util/constants'
 import { Ref, computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
@@ -189,7 +189,7 @@ export default defineComponent({
         col: 'createdName',
         hasFilter: false,
         width: '300px',
-        value: 'Initiated by'
+        value: 'Initiated By'
       },
       {
         col: 'casSupplierNumber',
@@ -252,22 +252,9 @@ export default defineComponent({
     async function loadTransactions (shortnameId: string): Promise<void> {
       try {
         state.loading = true
-        const response = await PaymentService.getEFTShortnameHistory(shortnameId, state.filters)
-        if (response?.data) {
-          const filteredResults = response.data.items.filter(
-            (item) => item.transactionType === ShortNameHistoryType.SN_REFUND_PENDING_APPROVAL
-          )
-
-          for (const item of filteredResults) {
-            const eftRefundId = item.eftRefundId
-            const eftRefund = await PaymentService.getEFTRefund(eftRefundId)
-            state.results.push(eftRefund.data)
-          }
-
-          state.totalResults = filteredResults.length
-        } else {
-          throw new Error('No response from getEFTTransactions')
-        }
+        const { eftRefunds } = await PaymentService.getEFTShortnameHistoryAndRefunds(shortnameId, state.filters)
+        state.results = eftRefunds
+        state.totalResults = eftRefunds.length
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Failed to getEFTTransactions list.', error)
