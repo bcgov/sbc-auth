@@ -34,6 +34,16 @@ class ServiceUnavailableException(Exception):  # noqa: N818
         self.status_code = Error.SERVICE_UNAVAILABLE.name
 
 
+class BCOLException(Exception):  # noqa: N818
+    """Exception for BCOL API errors."""
+
+    def __init__(self, message, status_code):
+        """Return when error object is coming from BCOL API."""
+        self.message = message
+        self.status_code = status_code
+        self.name = "BCOL API Error"
+
+
 class CustomException:
     """A custom exception object to be used propagate errors."""
 
