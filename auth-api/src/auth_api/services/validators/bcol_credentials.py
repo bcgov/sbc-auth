@@ -17,7 +17,7 @@ from http import HTTPStatus
 
 from flask import current_app
 
-from auth_api.exceptions import BusinessException, Error
+from auth_api.exceptions import BCOLException, BusinessException, Error
 from auth_api.services.rest_service import RestService
 from auth_api.services.validators.validator_response import ValidatorResponse
 from auth_api.utils.user_context import UserContext, user_context
@@ -38,9 +38,9 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     )
     if bcol_response.status_code != HTTPStatus.OK:
         error = json.loads(bcol_response.text)
-        validator_response.add_error(BusinessException(error["detail"], bcol_response.status_code))
+        validator_response.add_error(BCOLException(error, bcol_response.status_code))
         if is_fatal:
-            raise BusinessException(error["detail"], bcol_response.status_code)
+            raise BCOLException(error, bcol_response.status_code)
     else:
         bcol_account_number = bcol_response.json().get("accountNumber")
         from auth_api.services.org import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
