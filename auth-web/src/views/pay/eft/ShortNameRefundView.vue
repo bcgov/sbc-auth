@@ -158,6 +158,22 @@
               {{ refundDetails.updatedBy }} {{ formatDate(refundDetails.updatedOn, dateDisplayFormat) }}
             </v-col>
           </v-row>
+          <v-row v-if="readOnly && isDeclined()">
+            <v-col class="col-6 col-sm-3 font-weight-bold">
+              Declined By Expense Authority
+            </v-col>
+            <v-col class="pl-0">
+              {{ refundDetails.updatedBy }} {{ formatDate(refundDetails.updatedOn, dateDisplayFormat) }}
+            </v-col>
+          </v-row>
+          <v-row v-if="readOnly && isDeclined()">
+            <v-col class="col-6 col-sm-3 font-weight-bold">
+              Reason for Declining
+            </v-col>
+            <v-col class="pl-0">
+              {{ refundDetails.declineReason }}
+            </v-col>
+          </v-row>
           <v-row v-if="readOnly">
             <v-col class="col-6 col-sm-3 font-weight-bold">
               Refund Status
@@ -265,6 +281,10 @@ export default defineComponent({
       return state.refundDetails?.status === EFTRefundType.APPROVED
     }
 
+    function isDeclined () {
+      return state.refundDetails?.status === EFTRefundType.DECLINED
+    }
+
     onMounted(async () => {
       await loadShortnameDetails()
       if (props.shortNameId && props.eftRefundId) {
@@ -360,6 +380,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       isApproved,
+      isDeclined,
       refundForm,
       isFormDisabled,
       isFormValid,
