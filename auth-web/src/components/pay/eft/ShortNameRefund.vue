@@ -242,7 +242,7 @@ export default defineComponent({
     async function dialogDecline () {
       const shortNameRefund = {
         status: EFTRefundType.DECLINED,
-        decline_reason: state.declineReason
+        declineReason: state.declineReason
       }
       try {
         await PaymentService.patchEFTRefund(state.currentEftRefund.id, shortNameRefund)
