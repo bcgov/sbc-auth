@@ -6,8 +6,8 @@ Create Date: 2024-09-20 11:19:42.551199
 
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
@@ -147,7 +147,7 @@ def upgrade():
         sa.Column("modified_by_id", sa.Integer(), autoincrement=False, nullable=True),
         sa.Column("version", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("changed", sa.DateTime(), nullable=True),
-        sa.PrimaryKeyConstraint("id", "version"),
+        sa.PrimaryKeyConstraint("id", "changed"),
         sqlite_autoincrement=True,
     )
     with op.batch_alter_table("memberships_history", schema=None) as batch_op:
