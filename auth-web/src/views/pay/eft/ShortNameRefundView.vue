@@ -229,6 +229,9 @@ export default defineComponent({
   setup (props, { root }) {
     const dateDisplayFormat = 'MMM DD, YYYY h:mm A [Pacific Time]'
     const state = reactive({
+      filters: {
+        shortNameId: props.shortNameId
+      },
       shortNameDetails: {} as ShortNameDetails,
       refundDetails: {} as EFTRefund,
       refundAmount: undefined,
@@ -268,9 +271,9 @@ export default defineComponent({
     onMounted(async () => {
       await loadShortnameDetails(props.shortNameId)
 
-      if (props.eftRefundId) {
+      if (props.shortNameId && props.eftRefundId) {
         state.readOnly = true
-        await loadShortnameRefund(props.eftRefundId)
+        await loadShortnameRefund()
       }
     })
 
@@ -288,11 +291,11 @@ export default defineComponent({
       }
     }
 
-    async function loadShortnameRefund (eftRefundId: number): Promise<void> {
+    async function loadShortnameRefund (): Promise<void> {
       try {
-        const response = await PaymentService.getEFTRefund(eftRefundId)
+        const response = await PaymentService.getEFTRefunds(state.filters)
         if (response?.data) {
-          state.refundDetails = response.data
+          state.refundDetails = response.data[0]
         } else {
           throw new Error('No response from getEFTRefund')
         }

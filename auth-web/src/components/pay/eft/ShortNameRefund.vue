@@ -11,7 +11,7 @@
       Short Name Refund
     </v-card-title>
     <v-card-text
-      v-if="!state.results.length"
+      v-if="!state.totalResults"
       class="d-flex justify-space-between align-center card-content mt-4"
     >
       <span>No refund initiated. SBC Finance can initiate refund if a CAS supplier number is created for the short name.</span>
@@ -29,7 +29,7 @@
       </v-btn>
     </v-card-text>
     <v-card-text
-      v-if="state.results.length"
+      v-if="state.totalResults"
       class="pa-0 linked-text"
     >
       <BaseVDataTable
@@ -56,7 +56,6 @@
             class="mx-auto"
           >
             <v-btn
-              v-if="isEftRefundApprover"
               small
               outlined
               color="primary"
@@ -72,7 +71,6 @@
               Decline
             </v-btn>
             <v-btn
-              v-if="isEftRefundApprover"
               small
               color="primary"
               class="open-action-btn pr-4 pl-4"
@@ -172,10 +170,12 @@ export default defineComponent({
       isShortNameLinkingDialogOpen: false,
       eftShortNameSummary: {},
       results: [],
-      totalResults: 1,
+      totalResults: 0,
       filters: {
         pageNumber: 1,
-        pageLimit: 5
+        pageLimit: 5,
+        statuses: [],
+        shortNameId: null
       },
       loading: false,
       options: _.cloneDeep(DEFAULT_DATA_OPTIONS),
@@ -252,9 +252,11 @@ export default defineComponent({
     async function loadTransactions (shortnameId: string): Promise<void> {
       try {
         state.loading = true
-        const { eftRefunds } = await PaymentService.getEFTShortnameHistoryAndRefunds(shortnameId, state.filters)
-        state.results = eftRefunds
-        state.totalResults = eftRefunds.length
+        state.filters.statuses = [EFTRefundType.PENDING_REFUND]
+        state.filters.shortNameId = shortnameId
+        const eftRefunds = await PaymentService.getEFTRefunds(state.filters)
+        state.results = eftRefunds.data
+        state.totalResults = eftRefunds.data.length
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Failed to getEFTTransactions list.', error)

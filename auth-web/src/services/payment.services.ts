@@ -1,11 +1,10 @@
-
-import { EFTRefundType, PaymentTypes, ShortNameHistoryType, ShortNameLinkStatus } from '@/util/constants'
 import { EFTShortnameResponse, EFTTransactionFilterParams, EFTTransactionListResponse } from '@/models/eft-transaction'
 import { EftRefundRequest, RefundRequest } from '@/models/refund'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
 import { LinkedShortNameFilterParams, ShortNameSummaryFilterParams } from '@/models/pay/short-name'
 import { PADInfo, PADInfoValidation } from '@/models/Organization'
+import { PaymentTypes, ShortNameLinkStatus } from '@/util/constants'
 import {
   StatementFilterParams,
   StatementListItem,
@@ -62,6 +61,9 @@ export default class PaymentService {
     const params = new URLSearchParams()
     if (filterParams.statuses) {
       params.append('statuses', filterParams.statuses.toString())
+    }
+    if (filterParams.shortNameId) {
+      params.append('shortNameId', filterParams.shortNameId.toString())
     }
     const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/shortname-refund`
     return axios.get(url, { params })
@@ -308,24 +310,6 @@ export default class PaymentService {
 
     const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/history`
     return axios.get(url, { params })
-  }
-
-  static async getEFTShortnameHistoryAndRefunds (shortNameId: string, filterParams: EFTTransactionFilterParams) {
-    const eftShortnameHistory = await PaymentService.getEFTShortnameHistory(shortNameId, filterParams)
-    if (eftShortnameHistory?.data) {
-      const filteredResults = eftShortnameHistory.data.items.filter(
-        (item) => item.transactionType === ShortNameHistoryType.SN_REFUND_PENDING_APPROVAL
-      )
-
-      const eftFilterParams = { statuses: [EFTRefundType.PENDING_REFUND] }
-      const eftRefunds = await PaymentService.getEFTRefunds(eftFilterParams)
-      const filteredEFTRefunds = eftRefunds.data.filter(
-        eftRefund => filteredResults.find(result => Number(result.eftRefundId) === Number(eftRefund.id))
-      )
-      return { eftShortnameHistory, eftRefunds: filteredEFTRefunds }
-    } else {
-      throw new Error('No response from getEFTTransactions')
-    }
   }
 
   static getEFTShortnameSummary (shortNameId: string | number): AxiosPromise<EFTShortnameResponse> {

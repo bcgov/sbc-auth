@@ -1,7 +1,7 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components'
-import { Role } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
+import { Role } from '@/util/constants'
 import ShortNameTransactions from '@/components/pay/eft/ShortNamePaymentHistory.vue'
 import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
