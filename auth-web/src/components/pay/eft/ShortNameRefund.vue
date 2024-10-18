@@ -194,9 +194,15 @@ export default defineComponent({
         value: 'Initiated By'
       },
       {
+        col: 'comment',
+        hasFilter: false,
+        width: '300px',
+        value: 'Comment'
+      },
+      {
         col: 'casSupplierNumber',
         hasFilter: false,
-        width: '210px',
+        width: '240px',
         value: 'Supplier Record Number'
       },
       {
@@ -209,7 +215,7 @@ export default defineComponent({
         col: 'actions',
         hasFilter: false,
         value: 'Actions',
-        width: '200px'
+        width: '300px'
       }
     ]
 

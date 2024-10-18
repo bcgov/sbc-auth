@@ -14,7 +14,7 @@ Vue.use(Vuetify)
 Vue.use(VueRouter)
 // Selectors
 const { header, headerTitles, itemRow, itemCell } = baseVdataTable
-const headers = ['Initiated By', 'Supplier Record Number', 'Refund Amount', 'Actions']
+const headers = ['Initiated By', 'Comment', 'Supplier Record Number', 'Refund Amount', 'Actions']
 
 describe('ShortNameRefund.vue', () => {
   let wrapper
@@ -92,21 +92,23 @@ describe('ShortNameRefund.vue', () => {
     const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
     expect(titles.length).toBe(headers.length)
     expect(titles.at(0).text()).toBe('Initiated By')
-    expect(titles.at(1).text()).toBe('Supplier Record Number')
-    expect(titles.at(2).text()).toBe('Refund Amount')
-    expect(titles.at(3).text()).toBe('Actions')
+    expect(titles.at(1).text()).toBe('Comment')
+    expect(titles.at(2).text()).toBe('Supplier Record Number')
+    expect(titles.at(3).text()).toBe('Refund Amount')
+    expect(titles.at(4).text()).toBe('Actions')
     // table items
     const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
     expect(itemRows.length).toBe(shortNameRefundResponse.length)
     // cells
     const row1Cells = itemRows.at(0).findAll(itemCell)
     expect(row1Cells.at(0).text()).toBe('John Doe')
-    expect(row1Cells.at(1).text()).toBe('123456789')
-    expect(row1Cells.at(2).findAll('span').at(0).text()).toBe('$10.00')
-    expect(row1Cells.at(2).findAll('span').at(1).text()).toBe('View Refund Detail')
-    expect(row1Cells.at(3).findAll('button').exists()).toBe(true)
-    expect(row1Cells.at(3).findAll('button').at(0).text()).toBe('Decline')
-    expect(row1Cells.at(3).findAll('button').at(1).text()).toBe('Approve')
+    expect(row1Cells.at(1).text()).toBe('A test')
+    expect(row1Cells.at(2).text()).toBe('123456789')
+    expect(row1Cells.at(3).findAll('span').at(0).text()).toBe('$10.00')
+    expect(row1Cells.at(3).findAll('span').at(1).text()).toBe('View Refund Detail')
+    expect(row1Cells.at(4).findAll('button').exists()).toBe(true)
+    expect(row1Cells.at(4).findAll('button').at(0).text()).toBe('Decline')
+    expect(row1Cells.at(4).findAll('button').at(1).text()).toBe('Approve')
     // without roles
     wrapper.destroy()
     wrapper = mountComponent([])
