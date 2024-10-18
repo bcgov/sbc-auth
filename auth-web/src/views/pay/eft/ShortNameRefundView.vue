@@ -39,7 +39,7 @@
                   Unsettled Amount on Short Name
                 </v-col>
                 <v-col class="pl-0">
-                  {{ formatAmount(shortNameDetails.creditsRemaining) }}
+                  {{ formatCurrency(Number(shortNameDetails.creditsRemaining)) }}
                 </v-col>
               </v-row>
 
@@ -51,7 +51,7 @@
                   v-if="readOnly"
                   class="pl-0"
                 >
-                  {{ formatAmount(refundDetails.refundAmount) }}
+                  {{ formatCurrency(Number(refundDetails.refundAmount)) }}
                 </v-col>
                 <v-text-field
                   v-else
@@ -156,6 +156,22 @@
             </v-col>
             <v-col class="pl-0">
               {{ refundDetails.updatedBy }} {{ formatDate(refundDetails.updatedOn, dateDisplayFormat) }}
+            </v-col>
+          </v-row>
+          <v-row v-if="readOnly && isDeclined()">
+            <v-col class="col-6 col-sm-3 font-weight-bold">
+              Declined By Expense Authority
+            </v-col>
+            <v-col class="pl-0">
+              {{ refundDetails.updatedBy }} {{ formatDate(refundDetails.updatedOn, dateDisplayFormat) }}
+            </v-col>
+          </v-row>
+          <v-row v-if="readOnly && isDeclined()">
+            <v-col class="col-6 col-sm-3 font-weight-bold">
+              Reason for Declining
+            </v-col>
+            <v-col class="pl-0">
+              {{ refundDetails.declineReason }}
             </v-col>
           </v-row>
           <v-row v-if="readOnly">
@@ -265,18 +281,21 @@ export default defineComponent({
       return state.refundDetails?.status === EFTRefundType.APPROVED
     }
 
-    onMounted(async () => {
-      await loadShortnameDetails(props.shortNameId)
+    function isDeclined () {
+      return state.refundDetails?.status === EFTRefundType.DECLINED
+    }
 
-      if (props.eftRefundId) {
+    onMounted(async () => {
+      await loadShortnameDetails()
+      if (props.shortNameId && props.eftRefundId) {
         state.readOnly = true
-        await loadShortnameRefund(props.eftRefundId)
+        await loadShortnameRefund()
       }
     })
 
-    async function loadShortnameDetails (shortnameId: number): Promise<void> {
+    async function loadShortnameDetails (): Promise<void> {
       try {
-        const response = await PaymentService.getEFTShortnameSummary(shortnameId)
+        const response = await PaymentService.getEFTShortnameSummary(props.shortNameId)
         if (response?.data) {
           state.shortNameDetails = response.data['items'][0]
         } else {
@@ -288,9 +307,9 @@ export default defineComponent({
       }
     }
 
-    async function loadShortnameRefund (eftRefundId: number): Promise<void> {
+    async function loadShortnameRefund (): Promise<void> {
       try {
-        const response = await PaymentService.getEFTRefund(eftRefundId)
+        const response = await PaymentService.getEFTRefund(props.eftRefundId)
         if (response?.data) {
           state.refundDetails = response.data
         } else {
@@ -300,10 +319,6 @@ export default defineComponent({
         // eslint-disable-next-line no-console
         console.error('Failed to getEFTRefund.', error)
       }
-    }
-
-    function formatAmount (amount: number) {
-      return amount !== undefined ? CommonUtils.formatAmount(amount) : ''
     }
 
     const refundForm = ref(null)
@@ -365,6 +380,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       isApproved,
+      isDeclined,
       refundForm,
       isFormDisabled,
       isFormValid,
@@ -372,9 +388,9 @@ export default defineComponent({
       buttonText,
       buttonColor,
       handleCancelButton,
-      formatAmount,
       getShortNameTypeDescription: ShortNameUtils.getShortNameTypeDescription,
       getEFTRefundTypeDescription: ShortNameUtils.getEFTRefundTypeDescription,
+      formatCurrency: CommonUtils.formatAmount,
       formatDate: CommonUtils.formatUtcToPacificDate,
       dateDisplayFormat
     }

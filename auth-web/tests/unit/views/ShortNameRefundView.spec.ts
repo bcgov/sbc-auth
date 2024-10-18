@@ -24,7 +24,7 @@ describe('ShortNameRefundView.vue', () => {
           'id': 2,
           'lastPaymentReceivedDate': '2023-11-24T13:47:47',
           'linkedAccountsCount': 0,
-          'refundStatus': 'PENDING_REFUND',
+          'refundStatus': 'PENDING_APPROVAL',
           'shortName': 'SNAME100',
           'shortNameType': 'EFT'
         }

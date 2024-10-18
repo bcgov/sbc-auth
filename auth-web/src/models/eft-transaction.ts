@@ -6,6 +6,8 @@ export interface EFTTransaction {
   depositAmount: number
   depositDate: string
   transactionDate: string
+  transactionType: string
+  eftRefundId: number
 }
 
 export interface EFTTransactionFilterParams {
