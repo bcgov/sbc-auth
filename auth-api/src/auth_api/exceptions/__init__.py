@@ -9,4 +9,9 @@ status_code - where possible use HTTP Error Codes
 
 from auth_api.exceptions.errors import Error  # noqa: I001, I003
 from auth_api.exceptions.exception_handler import ExceptionHandler
-from auth_api.exceptions.exceptions import BusinessException, CustomException, ServiceUnavailableException
+from auth_api.exceptions.exceptions import (
+    BCOLException,
+    BusinessException,
+    CustomException,
+    ServiceUnavailableException,
+)
