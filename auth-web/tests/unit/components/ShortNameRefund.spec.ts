@@ -14,7 +14,7 @@ Vue.use(Vuetify)
 Vue.use(VueRouter)
 // Selectors
 const { header, headerTitles, itemRow, itemCell } = baseVdataTable
-const headers = ['Initiated By', 'Comment', 'Supplier Record Number', 'Refund Amount', 'Actions']
+const headers = ['Initiated By', 'Comment', 'CAS Supplier Number', 'Refund Amount', 'Actions']
 
 describe('ShortNameRefund.vue', () => {
   let wrapper
@@ -93,7 +93,7 @@ describe('ShortNameRefund.vue', () => {
     expect(titles.length).toBe(headers.length)
     expect(titles.at(0).text()).toBe('Initiated By')
     expect(titles.at(1).text()).toBe('Comment')
-    expect(titles.at(2).text()).toBe('Supplier Record Number')
+    expect(titles.at(2).text()).toBe('CAS Supplier Number')
     expect(titles.at(3).text()).toBe('Refund Amount')
     expect(titles.at(4).text()).toBe('Actions')
     // table items

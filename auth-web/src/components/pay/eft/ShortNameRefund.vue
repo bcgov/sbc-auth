@@ -203,7 +203,7 @@ export default defineComponent({
         col: 'casSupplierNumber',
         hasFilter: false,
         width: '240px',
-        value: 'Supplier Record Number'
+        value: 'CAS Supplier Number'
       },
       {
         col: 'refundAmount',
