@@ -74,8 +74,8 @@ def worker():
 
         # Note if you're extending above, make sure to include the new type in handle_other_messages below.
         handle_other_messages(message_type, email_msg)
-    except Exception: # NOQA # pylint: disable=broad-except
-        logger.error('Error processing event:', exc_info=True)
+    except Exception as e: # NOQA # pylint: disable=broad-except
+        raise e
     return {}, HTTPStatus.OK
 
 
