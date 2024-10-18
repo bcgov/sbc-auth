@@ -164,7 +164,8 @@ export default defineComponent({
       default: ''
     }
   },
-  setup (props, { root }) {
+  emits: ['on-short-name-refund'],
+  setup (props, { emit, root }) {
     const userStore = useUserStore()
     const state = reactive({
       declineReason: '',
@@ -245,6 +246,7 @@ export default defineComponent({
       try {
         await PaymentService.patchEFTRefund(state.currentEftRefund.id, shortNameRefund)
         await loadTransactions(props.shortNameDetails.id)
+        emit('on-short-name-refund', state.currentEftRefund)
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Failed to decline refund.', error)

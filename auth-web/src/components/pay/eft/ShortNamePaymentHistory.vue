@@ -177,6 +177,10 @@ export default defineComponent({
       default: () => ({
         shortName: null
       })
+    },
+    lastRefundId: {
+      type: String,
+      default: ''
     }
   },
   setup (props, { emit, root }) {
@@ -243,6 +247,11 @@ export default defineComponent({
     })
 
     watch(() => props.shortNameDetails, () => {
+      state.filters.pageNumber = 1
+      return loadTransactions(props.shortNameDetails.id, false)
+    }, { deep: true })
+
+    watch(() => props.lastRefundId, () => {
       state.filters.pageNumber = 1
       return loadTransactions(props.shortNameDetails.id, false)
     }, { deep: true })
