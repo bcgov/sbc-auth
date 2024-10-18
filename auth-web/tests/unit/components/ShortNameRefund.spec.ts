@@ -36,7 +36,7 @@ describe('ShortNameRefund.vue', () => {
         'refundAmount': '10',
         'refundEmail': 'john.doe@gov.bc.ca',
         'shortNameId': '243',
-        'status': 'PENDING_REFUND'
+        'status': 'PENDING_APPROVAL'
       }
     ]
 

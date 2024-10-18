@@ -697,8 +697,7 @@ export enum EFTRefundType {
     PENDING_APPROVAL = 'PENDING_APPROVAL',
     DECLINED = 'DECLINED',
     COMPLETED = 'COMPLETED',
-    ERRORED = 'ERRORED',
-    PENDING_REFUND = 'PENDING_REFUND'
+    ERRORED = 'ERRORED'
 }
 
 export enum EFTRefundTypeDescription {

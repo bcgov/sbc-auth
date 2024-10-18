@@ -260,7 +260,7 @@ export default defineComponent({
     async function loadTransactions (shortnameId: string): Promise<void> {
       try {
         state.loading = true
-        state.filters.statuses = [EFTRefundType.PENDING_REFUND]
+        state.filters.statuses = [EFTRefundType.PENDING_APPROVAL]
         state.filters.shortNameId = shortnameId
         const eftRefunds = await PaymentService.getEFTRefunds(state.filters)
         state.results = eftRefunds.data
