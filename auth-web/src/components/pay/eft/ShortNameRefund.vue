@@ -264,7 +264,7 @@ export default defineComponent({
         state.filters.shortNameId = shortnameId
         const eftRefunds = await PaymentService.getEFTRefunds(state.filters)
         state.results = eftRefunds.data
-        state.totalResults = eftRefunds.data.length
+        state.totalResults = eftRefunds.data?.length || 0
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Failed to getEFTTransactions list.', error)
