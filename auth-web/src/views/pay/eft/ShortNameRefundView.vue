@@ -291,7 +291,7 @@ export default defineComponent({
       try {
         const response = await PaymentService.getEFTRefund(props.eftRefundId)
         if (response?.data) {
-          state.refundDetails = response.data[0]
+          state.refundDetails = response.data
         } else {
           throw new Error('No response from getEFTRefund')
         }
