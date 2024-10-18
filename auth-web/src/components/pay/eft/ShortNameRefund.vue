@@ -227,6 +227,7 @@ export default defineComponent({
       try {
         await PaymentService.patchEFTRefund(item.id, shortNameRefund)
         await loadTransactions(props.shortNameDetails.id)
+        emit('on-short-name-refund', item.id)
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Failed to approve refund.', error)

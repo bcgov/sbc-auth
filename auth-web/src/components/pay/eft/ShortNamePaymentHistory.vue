@@ -179,8 +179,8 @@ export default defineComponent({
       })
     },
     lastRefundId: {
-      type: String,
-      default: ''
+      type: Number,
+      default: null
     }
   },
   setup (props, { emit, root }) {

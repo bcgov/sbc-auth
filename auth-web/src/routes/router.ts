@@ -880,7 +880,7 @@ export function getRoutes (): RouteConfig[] {
         ],
         showNavBar: true
       },
-      props: (route) => ({ shortNameId: route.params.shortNameId })
+      props: (route) => ({ shortNameId: Number(route.params.shortNameId) })
     },
     {
       path: '/pay/shortname-details/:shortNameId/refund/:eftRefundId?',
