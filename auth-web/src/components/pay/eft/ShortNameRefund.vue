@@ -56,6 +56,7 @@
             class="mx-auto"
           >
             <v-btn
+              v-if="isEftRefundApprover"
               small
               outlined
               color="primary"
@@ -71,6 +72,7 @@
               Decline
             </v-btn>
             <v-btn
+              v-if="isEftRefundApprover"
               small
               color="primary"
               class="open-action-btn pr-4 pl-4"
