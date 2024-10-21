@@ -1,6 +1,7 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
+import { Role } from '@/util/constants'
 import ShortNameTransactions from '@/components/pay/eft/ShortNamePaymentHistory.vue'
 import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
@@ -8,6 +9,7 @@ import { axios } from '@/util/http-util'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
 import sinon from 'sinon'
+import { useUserStore } from '@/stores'
 
 sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
   AUTH_API_URL: 'https://localhost:8080/api/v1',
@@ -96,6 +98,11 @@ describe('ShortNamePaymentHistory.vue', () => {
     sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'get')
     get.returns(Promise.resolve({ data: historyResponse }))
+
+    const userStore = useUserStore()
+    userStore.currentUser = {
+      roles: [Role.EftRefundApprover]
+    } as any
 
     wrapper = mount(ShortNameTransactions, {
       propsData: {
