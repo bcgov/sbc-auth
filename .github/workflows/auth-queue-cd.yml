@@ -11,6 +11,7 @@ on:
       - "auth-api/src/auth_api/services/gcp_queue/*"
       - "auth-api/src/auth_api/services/activity_log_publisher.py"
       - "auth-api/src/auth_api/utils/enums.py"
+      - "build-deps/**"
   workflow_dispatch:
     inputs:
       target:
