@@ -81,7 +81,7 @@
 <script lang="ts">
 
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { InvoiceStatus, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -154,6 +154,11 @@ export default class PaymentView extends Vue {
             this.showOnlineBanking = true
             // if isOnlineBankingAllowed is true, allowed show CC as only payment type
             this.showPayWithOnlyCC = !invoice?.isOnlineBankingAllowed
+          }
+          else if (invoice.statusCode === InvoiceStatus.COMPLETED) {
+            // Skip PAYBC, take directly to the "clients redirect url", this avoids transaction already done error.
+            this.goToUrl(this.redirectUrlFixed)
+            return
           }
         } catch (error) {
           // eslint-disable-next-line no-console
