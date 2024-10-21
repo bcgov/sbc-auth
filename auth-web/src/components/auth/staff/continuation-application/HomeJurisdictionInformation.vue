@@ -140,7 +140,7 @@
       </v-row>
     </section>
 
-    <v-divider class="mx-6 mt-6 mb-3" />
+    <v-divider class="mx-6 mt-6" />
 
     <!-- Continuation Authorization -->
     <section class="section-container continuation-authorization">
@@ -176,30 +176,6 @@
               mdi-close
             </v-icon>
             <span class="pl-2">Missing Authorization File(s)</span>
-          </div>
-        </v-col>
-      </v-row>
-    </section>
-
-    <v-divider class="mx-6 mt-6 mb-3" />
-
-    <!-- Authorization Date -->
-    <section class="section-container">
-      <v-row no-gutters>
-        <v-col
-          cols="12"
-          sm="3"
-          class="pr-4"
-        >
-          <label>Authorization Date</label>
-        </v-col>
-        <v-col
-          cols="12"
-          sm="9"
-          class="pt-4 pt-sm-0"
-        >
-          <div id="authorization-date">
-            {{ authorizationDate || '[Unknown]' }}
           </div>
         </v-col>
       </v-row>
@@ -278,10 +254,6 @@ export default defineComponent({
 
       authorizationFiles: computed<Array<any>>(() => {
         return state.continuationIn?.authorization?.files
-      }),
-
-      authorizationDate: computed<string>(() => {
-        return strToPacificDate(state.continuationIn?.authorization?.date)
       })
     })
 
@@ -335,6 +307,11 @@ export default defineComponent({
   label {
     color: $gray9;
     font-weight: bold;
+  }
+
+  &.continuation-authorization {
+    // Adjusted padding specifically for continuation-authorization
+    padding: 1rem 1.5rem;
   }
 }
 
