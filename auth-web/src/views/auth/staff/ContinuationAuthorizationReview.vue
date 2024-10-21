@@ -79,7 +79,7 @@
       >
         <CardHeader
           icon="mdi-home-city-outline"
-          label="Home Jurisdiction Information"
+          label="Previous Jurisdiction Information"
         />
         <HomeJurisdictionInformation
           :review="review"

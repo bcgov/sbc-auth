@@ -30,7 +30,7 @@
       </template>
     </ModalDialog>
 
-    <!-- Home Jurisdiction -->
+    <!-- Previous Jurisdiction -->
     <section class="section-container">
       <v-row no-gutters>
         <v-col
@@ -38,7 +38,7 @@
           sm="3"
           class="pr-4"
         >
-          <label>Home Jurisdiction</label>
+          <label>Previous Jurisdiction</label>
         </v-col>
         <v-col
           cols="12"
@@ -52,7 +52,7 @@
       </v-row>
     </section>
 
-    <!-- Identifying Number in Home Jurisdiction -->
+    <!-- Identifying Number in Previous Jurisdiction -->
     <section class="section-container">
       <v-row no-gutters>
         <v-col
@@ -60,7 +60,7 @@
           sm="3"
           class="pr-4"
         >
-          <label>Identifying Number in Home Jurisdiction</label>
+          <label>Identifying Number</label>
         </v-col>
         <v-col
           cols="12"
@@ -74,7 +74,7 @@
       </v-row>
     </section>
 
-    <!-- Registered Name in Home Jurisdiction -->
+    <!-- Registered Name in Previous Jurisdiction -->
     <section class="section-container">
       <v-row no-gutters>
         <v-col
@@ -82,7 +82,7 @@
           sm="3"
           class="pr-4"
         >
-          <label>Registered Name in Home Jurisdiction</label>
+          <label>Registered Name</label>
         </v-col>
         <v-col
           cols="12"
@@ -118,7 +118,7 @@
       </v-row>
     </section>
 
-    <!-- Date of Incorporation, Continuation, or Amalgamation in Foreign Jurisdiction -->
+    <!-- Date of Incorporation, Continuation, or Amalgamation in Previous Jurisdiction -->
     <section class="section-container">
       <v-row no-gutters>
         <v-col
@@ -126,7 +126,7 @@
           sm="3"
           class="pr-4"
         >
-          <label>Date of Incorporation, Continuation, or Amalgamation in Foreign Jurisdiction</label>
+          <label>Date of Incorporation, Continuation, or Amalgamation</label>
         </v-col>
         <v-col
           cols="12"
