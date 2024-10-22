@@ -143,7 +143,7 @@
     <v-divider class="mx-6 mt-6" />
 
     <!-- Proof of Authorization -->
-    <section class="section-container continuation-authorization">
+    <section class="section-container file-section">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -166,7 +166,7 @@
             class="download-authorization-btn d-block ml-n4"
             :disabled="isDownloading"
             :loading="isDownloading"
-            @click="downloadAuthorizationDocument(item)"
+            @click="downloadDocument(item)"
           >
             <v-icon>mdi-file-pdf-outline</v-icon>
             <span>{{ item.fileName }}</span>
@@ -177,6 +177,46 @@
             </v-icon>
             <span class="pl-2">Missing Authorization File(s)</span>
           </div>
+        </v-col>
+      </v-row>
+    </section>
+
+    <v-divider
+      v-if="affidavitFileName"
+      class="mx-6"
+    />
+
+    <!-- Unlimited Liability Corporation Information -->
+    <section
+      v-if="affidavitFileName"
+      class="section-container file-section"
+    >
+      <v-row no-gutters>
+        <v-col
+          cols="12"
+          sm="3"
+          class="pr-4"
+        >
+          <label>Unlimited Liability Corporation Information</label>
+        </v-col>
+        <v-col
+          cols="12"
+          sm="9"
+          class="pt-4 pt-sm-0"
+        >
+          <!-- the Unlimited Liability Corporation affidavit file -->
+          <v-btn
+            :key="affidavitFileKey"
+            text
+            color="primary"
+            class="download-authorization-btn d-block ml-n4"
+            :disabled="isDownloading"
+            :loading="isDownloading"
+            @click="downloadDocument({ fileKey: affidavitFileKey, fileName: affidavitFileName })"
+          >
+            <v-icon>mdi-file-pdf-outline</v-icon>
+            <span>{{ affidavitFileName }}</span>
+          </v-btn>
         </v-col>
       </v-row>
     </section>
@@ -254,11 +294,19 @@ export default defineComponent({
 
       authorizationFiles: computed<Array<any>>(() => {
         return state.continuationIn?.authorization?.files
+      }),
+
+      affidavitFileName: computed<string>(() => {
+        return state.continuationIn?.foreignJurisdiction?.affidavitFileName
+      }),
+
+      affidavitFileKey: computed<string>(() => {
+        return state.continuationIn?.foreignJurisdiction?.affidavitFileKey
       })
     })
 
-    /** Downloads the specified authorization document. */
-    async function downloadAuthorizationDocument (item: { fileKey: string, fileName: string }): Promise<void> {
+    /** Downloads the specified document. */
+    async function downloadDocument (item: { fileKey: string, fileName: string }): Promise<void> {
       await download(item.fileKey, item.fileName)
     }
 
@@ -289,7 +337,7 @@ export default defineComponent({
 
     return {
       errorDialogComponent,
-      downloadAuthorizationDocument,
+      downloadDocument,
       ...toRefs(state)
     }
   }
@@ -309,8 +357,8 @@ export default defineComponent({
     font-weight: bold;
   }
 
-  &.continuation-authorization {
-    // Adjusted padding specifically for continuation-authorization
+  &.file-section {
+    // Adjusted padding specifically for file-section
     padding: 1rem 1.5rem;
   }
 }
@@ -325,7 +373,7 @@ section:not(:last-child) {
   padding-bottom: 0;
 }
 
-.continuation-authorization .col-sm-9 {
+.file-section .col-sm-9 {
   // adjust second column to vertically line up with first column
   margin-top: -6px;
 }
