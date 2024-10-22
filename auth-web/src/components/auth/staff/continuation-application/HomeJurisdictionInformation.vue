@@ -143,7 +143,7 @@
     <v-divider class="mx-6 mt-6" />
 
     <!-- Proof of Authorization -->
-    <section class="section-container file-section">
+    <section class="section-container file-section pb-4">
       <v-row no-gutters>
         <v-col
           cols="12"
@@ -155,7 +155,7 @@
         <v-col
           cols="12"
           sm="9"
-          class="pt-4 pt-sm-0"
+          class="pt-4 pt-sm-0 mt-n6px"
         >
           <!-- the proof of authorization file(s) -->
           <v-btn
@@ -182,7 +182,7 @@
     </section>
 
     <v-divider
-      v-if="affidavitFileName"
+      v-if="affidavitItem.fileKey"
       class="mx-6"
     />
 
@@ -202,7 +202,7 @@
         <v-col
           cols="12"
           sm="9"
-          class="pt-4 pt-sm-0"
+          class="pt-4 pt-sm-0 mt-n6px"
         >
           <!-- the Unlimited Liability Corporation affidavit file -->
           <v-btn
@@ -355,11 +355,6 @@ export default defineComponent({
     color: $gray9;
     font-weight: bold;
   }
-
-  &.file-section {
-    // Adjusted padding specifically for file-section
-    padding: 1rem 1.5rem;
-  }
 }
 
 // reduce top whitespace for all articles except first one
@@ -372,7 +367,7 @@ section:not(:last-child) {
   padding-bottom: 0;
 }
 
-.file-section .col-sm-9 {
+.mt-n6px {
   // adjust second column to vertically line up with first column
   margin-top: -6px;
 }
