@@ -1,4 +1,6 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import AuthorizationContactInformation
+  from '@/components/auth/staff/continuation-application/AuthorizationContactInformation.vue'
 import BusinessService from '@/services/business.services'
 import ContinuationAuthorizationReview from '@/views/auth/staff/ContinuationAuthorizationReview.vue'
 import ExtraprovincialRegistrationBc
@@ -46,6 +48,7 @@ describe('ExtraprovincialRegistrationBc component', () => {
       stubs: {
         ExtraprovincialRegistrationBc: true,
         HomeJurisdictionInformation: true,
+        AuthorizationContactInformation: true,
         PreviousCorrespondence: true,
         ReviewResult: true
       },
@@ -98,16 +101,23 @@ describe('ExtraprovincialRegistrationBc component', () => {
   })
 
   it('rendered the second v-card', () => {
-    const vcard2 = wrapper.find('#home-jurisdiction-information-vcard')
+    const vcard2 = wrapper.find('#previous-jurisdiction-information-vcard')
     expect(vcard2.exists()).toBe(true)
-    expect(vcard2.find('header').text()).toBe('Home Jurisdiction Information')
+    expect(vcard2.find('header').text()).toBe('Previous Jurisdiction Information')
     expect(vcard2.findComponent(HomeJurisdictionInformation).exists()).toBe(true)
   })
 
   it('rendered the third v-card', () => {
-    expect(wrapper.find('h2').text()).toBe('Continuation Authorization Review Result')
+    const vcard2 = wrapper.find('#authorization-contact-information-vcard')
+    expect(vcard2.exists()).toBe(true)
+    expect(vcard2.find('header').text()).toBe('Authorization Contact Information')
+    expect(vcard2.findComponent(AuthorizationContactInformation).exists()).toBe(true)
+  })
+
+  it('rendered the fourth v-card', () => {
     const vcard2 = wrapper.find('#continuation-authorization-review-result-vcard')
     expect(vcard2.exists()).toBe(true)
+    expect(vcard2.find('header').text()).toBe('Authorization Review')
     expect(vcard2.findComponent(PreviousCorrespondence).exists()).toBe(true)
     expect(vcard2.findComponent(ReviewResult).exists()).toBe(true)
   })

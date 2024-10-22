@@ -73,7 +73,7 @@
 
       <!-- Previous Jurisdiction Information -->
       <v-card
-        id="home-jurisdiction-information-vcard"
+        id="previous-jurisdiction-information-vcard"
         flat
         class="mt-8"
       >
