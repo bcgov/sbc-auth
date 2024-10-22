@@ -52,7 +52,7 @@
       </v-row>
     </section>
 
-    <!-- Identifying Number in Previous Jurisdiction -->
+    <!-- Identifying Number -->
     <section class="section-container">
       <v-row no-gutters>
         <v-col
@@ -74,7 +74,7 @@
       </v-row>
     </section>
 
-    <!-- Registered Name in Previous Jurisdiction -->
+    <!-- Registered Name -->
     <section class="section-container">
       <v-row no-gutters>
         <v-col
@@ -118,7 +118,7 @@
       </v-row>
     </section>
 
-    <!-- Date of Incorporation, Continuation, or Amalgamation in Previous Jurisdiction -->
+    <!-- Date of Incorporation, Continuation, or Amalgamation -->
     <section class="section-container">
       <v-row no-gutters>
         <v-col
@@ -188,7 +188,7 @@
 
     <!-- Unlimited Liability Corporation Information -->
     <section
-      v-if="affidavitFileName"
+      v-if="affidavitItem.fileKey"
       class="section-container file-section"
     >
       <v-row no-gutters>
@@ -206,16 +206,16 @@
         >
           <!-- the Unlimited Liability Corporation affidavit file -->
           <v-btn
-            :key="affidavitFileKey"
+            :key="affidavitItem.fileKey"
             text
             color="primary"
             class="download-authorization-btn d-block ml-n4"
             :disabled="isDownloading"
             :loading="isDownloading"
-            @click="downloadDocument({ fileKey: affidavitFileKey, fileName: affidavitFileName })"
+            @click="downloadDocument(affidavitItem)"
           >
             <v-icon>mdi-file-pdf-outline</v-icon>
-            <span>{{ affidavitFileName }}</span>
+            <span>{{ affidavitItem.fileName }}</span>
           </v-btn>
         </v-col>
       </v-row>
@@ -296,12 +296,11 @@ export default defineComponent({
         return state.continuationIn?.authorization?.files
       }),
 
-      affidavitFileName: computed<string>(() => {
-        return state.continuationIn?.foreignJurisdiction?.affidavitFileName
-      }),
-
-      affidavitFileKey: computed<string>(() => {
-        return state.continuationIn?.foreignJurisdiction?.affidavitFileKey
+      affidavitItem: computed(() => {
+        return {
+          fileKey: state.continuationIn?.foreignJurisdiction?.affidavitFileKey,
+          fileName: state.continuationIn?.foreignJurisdiction?.affidavitFileName
+        }
       })
     })
 
