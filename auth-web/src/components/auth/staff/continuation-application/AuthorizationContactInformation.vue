@@ -1,9 +1,9 @@
 <template>
   <div
     v-if="!!review && !!filing"
-    id="registered-office-contact"
+    id="authorization-contact-information"
   >
-    <!-- Registered Office Contact Information -->
+    <!-- Authorization Contact Information -->
     <section class="section-container">
       <v-row no-gutters>
         <!-- First Column: Contact Information Label -->
@@ -39,7 +39,7 @@ import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuatio
 import { computed, defineComponent, reactive } from '@vue/composition-api'
 
 export default defineComponent({
-  name: 'RegisteredOfficeContact',
+  name: 'AuthorizationContactInformation',
 
   props: {
     review: { type: Object as () => ContinuationReviewIF, required: true },

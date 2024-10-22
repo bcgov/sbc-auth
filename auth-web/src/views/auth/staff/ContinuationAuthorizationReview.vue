@@ -87,17 +87,17 @@
         />
       </v-card>
 
-      <!-- Registered Office Contact Information -->
+      <!-- Authorization Contact Information -->
       <v-card
-        id="registered-office-information-vcard"
+        id="authorization-contact-information-vcard"
         flat
         class="mt-8"
       >
         <CardHeader
           icon="mdi-phone"
-          label="Registered Office Contact Information"
+          label="Authorization Contact Information"
         />
-        <RegisteredOfficeContact
+        <AuthorizationContactInformation
           :review="review"
           :filing="filing"
         />
@@ -168,6 +168,8 @@
 <script lang="ts">
 import { ContinuationFilingIF, ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import AuthorizationContactInformation
+  from '@/components/auth/staff/continuation-application/AuthorizationContactInformation.vue'
 import BusinessService from '@/services/business.services'
 import CardHeader from '@/components/CardHeader.vue'
 import { EventBus } from '@/event-bus'
@@ -178,8 +180,6 @@ import HomeJurisdictionInformation
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Pages } from '@/util/constants'
 import PreviousCorrespondence from '@/components/auth/staff/continuation-application/PreviousCorrespondence.vue'
-import RegisteredOfficeContact
-  from '@/components/auth/staff/continuation-application/RegisteredOfficeContact.vue'
 import ReviewResult from '@/components/auth/staff/continuation-application/ReviewResult.vue'
 
 export default defineComponent({
@@ -189,7 +189,7 @@ export default defineComponent({
     CardHeader,
     ExtraprovincialRegistrationBc,
     HomeJurisdictionInformation,
-    RegisteredOfficeContact,
+    AuthorizationContactInformation,
     ModalDialog,
     PreviousCorrespondence,
     ReviewResult
