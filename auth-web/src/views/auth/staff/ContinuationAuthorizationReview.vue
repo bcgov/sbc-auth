@@ -104,14 +104,15 @@
       </v-card>
 
       <!-- Continuation Authorization Review Result -->
-      <h2 class="mt-8">
-        Authorization Review
-      </h2>
       <v-card
         id="continuation-authorization-review-result-vcard"
         flat
         class="mt-6"
       >
+        <CardHeader
+          icon="mdi-stamper"
+          label="Authorization Review"
+        />
         <PreviousCorrespondence
           class="pt-8 px-6"
           :class="{ 'pb-8' :! isActionable }"
