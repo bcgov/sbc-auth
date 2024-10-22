@@ -98,7 +98,6 @@
           label="Authorization Contact Information"
         />
         <AuthorizationContactInformation
-          :review="review"
           :filing="filing"
         />
       </v-card>

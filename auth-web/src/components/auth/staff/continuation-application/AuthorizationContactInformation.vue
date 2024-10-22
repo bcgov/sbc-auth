@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="!!review && !!filing"
+    v-if="!!filing"
     id="authorization-contact-information"
   >
     <!-- Authorization Contact Information -->
@@ -35,14 +35,13 @@
 </template>
 
 <script lang="ts">
-import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
 import { computed, defineComponent, reactive } from '@vue/composition-api'
+import { ContinuationFilingIF } from '@/models/continuation-review'
 
 export default defineComponent({
   name: 'AuthorizationContactInformation',
 
   props: {
-    review: { type: Object as () => ContinuationReviewIF, required: true },
     filing: { type: Object as () => ContinuationFilingIF, required: true }
   },
 
