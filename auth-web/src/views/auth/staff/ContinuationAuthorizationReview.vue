@@ -71,7 +71,7 @@
         />
       </v-card>
 
-      <!-- Home Jurisdiction Information -->
+      <!-- Previous Jurisdiction Information -->
       <v-card
         id="home-jurisdiction-information-vcard"
         flat
@@ -82,6 +82,22 @@
           label="Previous Jurisdiction Information"
         />
         <HomeJurisdictionInformation
+          :review="review"
+          :filing="filing"
+        />
+      </v-card>
+
+      <!-- Registered Office Contact Information -->
+      <v-card
+        id="registered-office-information-vcard"
+        flat
+        class="mt-8"
+      >
+        <CardHeader
+          icon="mdi-phone"
+          label="Registered Office Contact Information"
+        />
+        <RegisteredOfficeContact
           :review="review"
           :filing="filing"
         />
@@ -162,6 +178,8 @@ import HomeJurisdictionInformation
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Pages } from '@/util/constants'
 import PreviousCorrespondence from '@/components/auth/staff/continuation-application/PreviousCorrespondence.vue'
+import RegisteredOfficeContact
+  from '@/components/auth/staff/continuation-application/RegisteredOfficeContact.vue'
 import ReviewResult from '@/components/auth/staff/continuation-application/ReviewResult.vue'
 
 export default defineComponent({
@@ -171,6 +189,7 @@ export default defineComponent({
     CardHeader,
     ExtraprovincialRegistrationBc,
     HomeJurisdictionInformation,
+    RegisteredOfficeContact,
     ModalDialog,
     PreviousCorrespondence,
     ReviewResult
