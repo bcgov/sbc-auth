@@ -9,7 +9,7 @@
         <!-- First Column: Contact Information Label -->
         <v-col
           cols="12"
-          sm="4"
+          sm="3"
         >
           <label>Contact Information</label>
         </v-col>
@@ -49,15 +49,15 @@ export default defineComponent({
   setup (props) {
     const state = reactive({
       continuationIn: computed<any>(() => {
-        return props.filing?.continuationIn
+        return props.filing.continuationIn
       }),
 
       email: computed<string>(() => {
-        return state.continuationIn?.parties[0]?.officer?.email
+        return state.continuationIn?.contactPoint?.email
       }),
 
       phone: computed<string>(() => {
-        return state.continuationIn?.parties[0]?.officer?.phone
+        return state.continuationIn?.contactPoint?.phone
       })
     })
 
