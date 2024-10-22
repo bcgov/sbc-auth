@@ -142,7 +142,7 @@
 
     <v-divider class="mx-6 mt-6" />
 
-    <!-- Continuation Authorization -->
+    <!-- Proof of Authorization -->
     <section class="section-container continuation-authorization">
       <v-row no-gutters>
         <v-col
@@ -150,7 +150,7 @@
           sm="3"
           class="pr-4"
         >
-          <label>Continuation Authorization</label>
+          <label>Proof of Authorization</label>
         </v-col>
         <v-col
           cols="12"

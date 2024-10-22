@@ -105,7 +105,7 @@
 
       <!-- Continuation Authorization Review Result -->
       <h2 class="mt-8">
-        Continuation Authorization Review Result
+        Authorization Review
       </h2>
       <v-card
         id="continuation-authorization-review-result-vcard"
