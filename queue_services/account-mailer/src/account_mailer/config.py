@@ -73,7 +73,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     DB_HOST = os.getenv('DATABASE_HOST', '')
     DB_PORT = os.getenv('DATABASE_PORT', '5432')
     if DB_UNIX_SOCKET := os.getenv('DATABASE_UNIX_SOCKET', None):
-        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host={DB_UNIX_SOCKET}'  # noqa: E231, E501
+        SQLALCHEMY_DATABASE_URI = 'postgresql+pg8000://'
     else:
         SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'  # noqa: E231, E501
 
