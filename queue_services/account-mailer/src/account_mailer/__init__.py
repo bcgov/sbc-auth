@@ -94,7 +94,7 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
             unix_sock=app.config.get('DB_UNIX_SOCKET'),
             database=app.config.get('DB_NAME'),
             user=app.config.get('DB_USER'),
-            password=app.config.get('DATABASE_PASSWORD')
+            password=app.config.get('DB_PASSWORD')
         )
         app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
             'creator': lambda: getconn(connector, db_config)
