@@ -10,7 +10,7 @@
         sm="3"
         class="pr-4"
       >
-        <label class="font-weight-bold">Review Result</label>
+        <label class="font-weight-bold">Authorization Review</label>
       </v-col>
 
       <v-col
@@ -29,7 +29,7 @@
             :items="reviewResultItems"
             item-text="desc"
             item-value="code"
-            label="Review Result"
+            label="Authorization Decision"
             :rules="reviewResultRules"
             :menu-props="{ offsetY: true }"
             @change="$emit('review-result', reviewResult)"
