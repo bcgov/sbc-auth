@@ -2,10 +2,6 @@ name: ACCOUNT UI CD
 
 on:
   push:
-    branches:
-      - main
-      - feature*
-      - release*
     paths:
       - "auth-web/**"
   workflow_dispatch:
