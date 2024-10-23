@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - feature*
-      - releases*
+      - release*
     paths:
       - "auth-web/**"
   workflow_dispatch:
