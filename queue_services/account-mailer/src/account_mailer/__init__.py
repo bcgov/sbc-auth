@@ -62,7 +62,7 @@ def getconn(connector: Connector, db_config: DBConfig) -> object:
         password=db_config.password,
         db=db_config.database,
         driver='pg8000',
-        refresh_strategy="lazy"
+        refresh_strategy='lazy'
     )
 
 
