@@ -139,16 +139,8 @@ export default class PaymentView extends Vue {
         // get the invoice and check for OB
         try {
           const invoice = await this.getInvoice({ invoiceId: this.paymentId, accountId: accountSettings?.id })
-          if (invoice?.statusCode === InvoiceStatus.COMPLETED) {
-            // Skip PAYBC, take directly to the "clients redirect url", this avoids transaction already done error.
-            const isValid = await PaymentService.isValidRedirectUrl(this.redirectUrlFixed)
-            if (!isValid) {
-              throw new Error('Invalid redirect url: ' + this.redirectUrlFixed)
-            }
-            this.goToUrl(this.redirectUrlFixed)
-            return
-          }
-          else if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
+
+          if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
             // get account data to show in the UI
             const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
             this.paymentCardData = {
@@ -175,7 +167,7 @@ export default class PaymentView extends Vue {
         await this.doCreateTransaction()
       }
     } catch (error) {
-      this.doHandleError(error)
+      await this.doHandleError(error)
     }
   }
 
@@ -211,7 +203,7 @@ export default class PaymentView extends Vue {
       await this.updateInvoicePaymentMethodAsCreditCard({ paymentId: this.paymentId, accountId: accountSettings?.id })
       await this.doCreateTransaction()
     } catch (error) {
-      this.doHandleError(error)
+      await this.doHandleError(error)
     }
   }
 
@@ -248,11 +240,15 @@ export default class PaymentView extends Vue {
     this.goToUrl(this.returnUrl)
   }
 
-  private doHandleError (error) {
+  async doHandleError (error) {
     this.showLoading = false
     this.errorMessage = this.$t('payFailedMessage').toString()
-    if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') {
-      // Transaction is already completed. Show as a modal.
+    if (error.response.data && ['COMPLETED_PAYMENT', 'INVALID_TRANSACTION'].includes(error.response.data.type)) {
+      // Skip PAYBC, take directly to the "clients redirect url", this avoids transaction already done error.
+      const isValid = await PaymentService.isValidRedirectUrl(this.redirectUrlFixed)
+      if (!isValid) {
+        throw new Error('Invalid redirect url: ' + this.redirectUrlFixed)
+      }
       this.goToUrl(this.redirectUrlFixed)
     } else {
       this.showErrorModal = true
