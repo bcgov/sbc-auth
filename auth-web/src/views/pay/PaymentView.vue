@@ -91,6 +91,7 @@ import PaymentCard from '@/components/pay/PaymentCard.vue'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
 import { mapActions } from 'pinia'
 import { useOrgStore } from '@/stores/org'
+import PaymentService from '@/services/payment.services'
 
 @Component({
   components: {
@@ -137,8 +138,17 @@ export default class PaymentView extends Vue {
       if (this.isUserSignedIn && !!accountSettings) {
         // get the invoice and check for OB
         try {
-          const invoice: Invoice = await this.getInvoice({ invoiceId: this.paymentId, accountId: accountSettings?.id })
-          if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
+          const invoice = await this.getInvoice({ invoiceId: this.paymentId, accountId: accountSettings?.id })
+          if (invoice?.statusCode === InvoiceStatus.COMPLETED) {
+            // Skip PAYBC, take directly to the "clients redirect url", this avoids transaction already done error.
+            const isValid = await PaymentService.isValidRedirectUrl(this.redirectUrlFixed)
+            if (!isValid) {
+              throw new Error('Invalid redirect url: ' + this.redirectUrlFixed)
+            }
+            this.goToUrl(this.redirectUrlFixed)
+            return
+          }
+          else if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
             // get account data to show in the UI
             const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
             this.paymentCardData = {
@@ -154,11 +164,6 @@ export default class PaymentView extends Vue {
             this.showOnlineBanking = true
             // if isOnlineBankingAllowed is true, allowed show CC as only payment type
             this.showPayWithOnlyCC = !invoice?.isOnlineBankingAllowed
-          }
-          else if (invoice.statusCode === InvoiceStatus.COMPLETED) {
-            // Skip PAYBC, take directly to the "clients redirect url", this avoids transaction already done error.
-            this.goToUrl(this.redirectUrlFixed)
-            return
           }
         } catch (error) {
           // eslint-disable-next-line no-console
