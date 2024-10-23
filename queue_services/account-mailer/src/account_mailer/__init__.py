@@ -56,12 +56,13 @@ def getconn(connector: Connector, db_config: DBConfig) -> object:
     """
     return connector.connect(
         instance_connection_string=db_config.unix_sock.replace('/cloudsql/', ''),
-        ip_type='unix',
+        ip_type='PSC',
         socket_path=db_config.unix_sock,
         user=db_config.user,
         password=db_config.password,
         db=db_config.database,
-        driver='pg8000'
+        driver='pg8000',
+        refresh_strategy="lazy"
     )
 
 
