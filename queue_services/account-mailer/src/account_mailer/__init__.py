@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """The Events Listener service.
 
 This module is the service worker for applying filings to the Business Database structure.
@@ -18,6 +19,7 @@ This module is the service worker for applying filings to the Business Database 
 from __future__ import annotations
 
 import os
+from dataclasses import dataclass
 
 from auth_api.exceptions import ExceptionHandler
 from auth_api.models import db
@@ -32,29 +34,34 @@ from account_mailer import config
 from account_mailer.resources.worker import bp as worker_endpoint
 
 
-def getconn(connector: Connector, instance: str, unix_sock: str, database: str, user: str, password: str) -> object:
+@dataclass
+class DBConfig:
+    def __init__(self, unix_sock, database, user, password):
+        self.unix_sock = unix_sock
+        self.database = database
+        self.user = user
+        self.password = password
+
+
+def getconn(connector: Connector, config: DBConfig) -> object:
     """Create a database connection.
 
     Args:
-        unix_sock (str): The Unix socket path for the database connection.
-        database (str): The name of the database to connect to.
-        user (str): The username for the database.
-        password (str): The password for the database.
+        connector (Connector): The Google Cloud SQL connector instance.
+        config (DBConfig): The database configuration.
 
     Returns:
         object: A connection object to the database.
     """
-    conn = connector.connect(
-        instance_connection_string=instance,
+    return connector.connect(
+        instance_connection_string=config.unix_sock.replace('/cloudsql/', ''),
         ip_type='unix',
-        socket_path=unix_sock,
-        user=user,
-        password=password,
-        db=database,
+        socket_path=config.unix_sock,
+        user=config.user,
+        password=config.password,
+        db=config.database,
         driver='pg8000'
     )
-    return conn
-
 
 def register_endpoints(app: Flask) -> None:
     """Register endpoints with the Flask application.
@@ -62,15 +69,9 @@ def register_endpoints(app: Flask) -> None:
     Args:
         app (Flask): The Flask application instance.
     """
-    # Allow base route to match with, and without a trailing slash
     app.url_map.strict_slashes = False
-
-    app.register_blueprint(
-        url_prefix='/',
-        blueprint=worker_endpoint,
-    )
+    app.register_blueprint(worker_endpoint, url_prefix='/')
     app.register_blueprint(ops_bp)
-
 
 def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     """Return a configured Flask App using the Factory method.
@@ -87,15 +88,14 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
 
     if app.config.get('DB_UNIX_SOCKET'):
         connector = Connector()
+        db_config = DBConfig(
+            unix_sock=app.config.get('DB_UNIX_SOCKET'),
+            database=app.config.get('DB_NAME'),
+            user=app.config.get('DB_USER'),
+            password=app.config.get('DATABASE_PASSWORD')
+        )
         app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-            'creator': lambda: getconn(
-                connector,
-                app.config.get('DB_UNIX_SOCKET').replace('/cloudsql/', ''),
-                app.config.get('DB_UNIX_SOCKET'),
-                app.config.get('DB_NAME'),
-                app.config.get('DB_USER'),
-                app.config.get('DATABASE_PASSWORD')
-            )
+            'creator': lambda: getconn(connector, db_config)
         }
 
     db.init_app(app)
