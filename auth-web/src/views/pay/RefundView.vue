@@ -292,18 +292,27 @@ export default defineComponent({
       // Should resolve REG0031233 -> 31233 etc.
       return invoiceId.match(/\d+/)
     }
+
+    function updateInvoiceState(invoice: any) {
+      state.invoicePaid = invoice.paid
+      state.invoicePaymentMethod = invoice.paymentMethod
+      state.paymentLineItems = invoice.lineItems ? updateInvoiceLineItems(invoice.lineItems) : []
+    }
+
+    function updateInvoiceLineItems(lineItems: any) {
+      return lineItems.map(item => ({
+        ...item,
+        ...Object.fromEntries(
+          Object.entries(item).map(([key, value]) => [`${key}Original`, value])
+        ),
+        isEditable: true
+      }))
+    }
+
     function fetchInvoice () {
       const invoiceId = matchInvoiceId(state.invoiceId)
       state.orgStore.getInvoice({ invoiceId: invoiceId }).then((invoice: Invoice) => {
-        state.invoicePaid = invoice.paid
-        state.invoicePaymentMethod = invoice.paymentMethod
-        state.paymentLineItems = invoice.lineItems ? invoice.lineItems.map(item => ({
-          ...item,
-          ...Object.fromEntries(
-            Object.entries(item).map(([key, value]) => [`${key}Original`, value])
-          ),
-          isEditable: true
-        })) : []
+        updateInvoiceState(invoice)
       }).catch((error: Error) => console.error('Failed to fetch invoice:', error))
       clearRefundState()
     }
