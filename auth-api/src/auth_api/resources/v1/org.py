@@ -345,7 +345,13 @@ def get_organization_affiliations(org_id):
         # keep old response until UI is updated
         if (request.args.get("new", "false")).lower() != "true":
             return (
-                jsonify({"entities": AffiliationService.find_visible_affiliations_by_org_id(org_id, env)}),
+                current_app.response_class(
+                    response=orjson.dumps(
+                        {"entities": AffiliationService.find_visible_affiliations_by_org_id(org_id, env)}
+                    ),  # pylint: disable=maybe-no-member
+                    status=200,
+                    mimetype="application/json",
+                ),
                 HTTPStatus.OK,
             )
 
