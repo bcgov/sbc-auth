@@ -32,10 +32,7 @@ from account_mailer import config
 from account_mailer.resources.worker import bp as worker_endpoint
 
 
-connector = Connector()
-
-
-def getconn(instance, unix_sock: str, database: str, user: str, password: str) -> object:
+def getconn(connector: Connector, instance: str, unix_sock: str, database: str, user: str, password: str) -> object:
     """Create a database connection.
 
     Args:
@@ -89,8 +86,10 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     app.config['ENV'] = run_mode
 
     if app.config.get('DB_UNIX_SOCKET'):
+        connector = Connector()
         app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
             'creator': lambda: getconn(
+                connector,
                 app.config.get('DB_UNIX_SOCKET').replace('/cloudsql/', ''),
                 app.config.get('DB_UNIX_SOCKET'),
                 app.config.get('DB_NAME'),
