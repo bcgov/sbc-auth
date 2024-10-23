@@ -89,7 +89,7 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     app.config['ENV'] = run_mode
 
     if app.config.get('DB_UNIX_SOCKET'):
-        connector = Connector()
+        connector = Connector(refresh_strategy='lazy')
         db_config = DBConfig(
             unix_sock=app.config.get('DB_UNIX_SOCKET'),
             database=app.config.get('DB_NAME'),
