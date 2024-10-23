@@ -88,10 +88,10 @@ import ConfigHelper from '@/util/config-helper'
 import { Invoice } from '@/models/invoice'
 import { OrgPaymentDetails } from '@/models/Organization'
 import PaymentCard from '@/components/pay/PaymentCard.vue'
+import PaymentService from '@/services/payment.services'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
 import { mapActions } from 'pinia'
 import { useOrgStore } from '@/stores/org'
-import PaymentService from '@/services/payment.services'
 
 @Component({
   components: {
