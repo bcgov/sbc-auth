@@ -53,6 +53,7 @@
           <thead>
             <tr>
               <th
+                  :id="'header-items-' + index"
                   v-for="(item, index) in headers"
                   :key="index"
               >
@@ -143,6 +144,7 @@
         <thead>
         <tr>
           <th
+              :id="'header-summary-items-' + index"
               v-for="(item, index) in headers.slice(0, -1)"
               :key="index"
           >
