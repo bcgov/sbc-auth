@@ -79,19 +79,19 @@ describe('HomeJurisdictionInformation component', () => {
 
   it('rendered the first section', () => {
     const section = wrapper.findAll('section').at(0)
-    expect(section.find('label').text()).toBe('Home Jurisdiction')
+    expect(section.find('label').text()).toBe('Previous Jurisdiction')
     expect(section.find('#home-jurisdiction').text()).toBe('Alberta')
   })
 
   it('rendered the second section', () => {
     const section = wrapper.findAll('section').at(1)
-    expect(section.find('label').text()).toBe('Identifying Number in Home Jurisdiction')
+    expect(section.find('label').text()).toBe('Identifying Number')
     expect(section.find('#identifying-number-home').text()).toBe('AB-5444')
   })
 
   it('rendered the third section', () => {
     const section = wrapper.findAll('section').at(2)
-    expect(section.find('label').text()).toBe('Registered Name in Home Jurisdiction')
+    expect(section.find('label').text()).toBe('Registered Name')
     expect(section.find('#registered-name-home').text()).toBe('FIRST AWIQ SHOPPING CENTRES ALBERTA UNLIMITED')
   })
 
@@ -104,21 +104,19 @@ describe('HomeJurisdictionInformation component', () => {
   it('rendered the fifth section', () => {
     const section = wrapper.findAll('section').at(4)
     expect(section.find('label').text())
-      .toBe('Date of Incorporation, Continuation, or Amalgamation in Foreign Jurisdiction')
+      .toBe('Date of Incorporation, Continuation, or Amalgamation')
     // *** date conversions don't work in CI (says April 1, 2001)
     // expect(section.find('#incorporation-date-home').text()).toBe('April 2, 2001')
   })
 
   it('rendered the sixth section', () => {
     const section = wrapper.findAll('section').at(5)
-    expect(section.find('label').text()).toBe('Continuation Authorization')
+    expect(section.find('label').text()).toBe('Proof of Authorization')
   })
 
   it('rendered the seventh section', () => {
     const section = wrapper.findAll('section').at(6)
-    expect(section.find('label').text()).toBe('Authorization Date')
-    // *** date conversions don't work in CI (says June 30, 2024)
-    // expect(section.find('#authorization-date').text()).toBe('July 1, 2024')
+    expect(section.find('label').text()).toBe('Unlimited Liability Corporation Information')
   })
 
   it('rendered a functional authorization download button', () => {

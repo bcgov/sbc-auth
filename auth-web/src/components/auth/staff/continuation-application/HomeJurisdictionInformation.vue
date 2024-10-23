@@ -30,7 +30,7 @@
       </template>
     </ModalDialog>
 
-    <!-- Home Jurisdiction -->
+    <!-- Previous Jurisdiction -->
     <section class="section-container">
       <v-row no-gutters>
         <v-col
@@ -38,7 +38,7 @@
           sm="3"
           class="pr-4"
         >
-          <label>Home Jurisdiction</label>
+          <label>Previous Jurisdiction</label>
         </v-col>
         <v-col
           cols="12"
@@ -52,7 +52,7 @@
       </v-row>
     </section>
 
-    <!-- Identifying Number in Home Jurisdiction -->
+    <!-- Identifying Number -->
     <section class="section-container">
       <v-row no-gutters>
         <v-col
@@ -60,7 +60,7 @@
           sm="3"
           class="pr-4"
         >
-          <label>Identifying Number in Home Jurisdiction</label>
+          <label>Identifying Number</label>
         </v-col>
         <v-col
           cols="12"
@@ -74,7 +74,7 @@
       </v-row>
     </section>
 
-    <!-- Registered Name in Home Jurisdiction -->
+    <!-- Registered Name -->
     <section class="section-container">
       <v-row no-gutters>
         <v-col
@@ -82,7 +82,7 @@
           sm="3"
           class="pr-4"
         >
-          <label>Registered Name in Home Jurisdiction</label>
+          <label>Registered Name</label>
         </v-col>
         <v-col
           cols="12"
@@ -118,7 +118,7 @@
       </v-row>
     </section>
 
-    <!-- Date of Incorporation, Continuation, or Amalgamation in Foreign Jurisdiction -->
+    <!-- Date of Incorporation, Continuation, or Amalgamation -->
     <section class="section-container">
       <v-row no-gutters>
         <v-col
@@ -126,7 +126,7 @@
           sm="3"
           class="pr-4"
         >
-          <label>Date of Incorporation, Continuation, or Amalgamation in Foreign Jurisdiction</label>
+          <label>Date of Incorporation, Continuation, or Amalgamation</label>
         </v-col>
         <v-col
           cols="12"
@@ -140,22 +140,22 @@
       </v-row>
     </section>
 
-    <v-divider class="mx-6 mt-6 mb-3" />
+    <v-divider class="mx-6 mt-6" />
 
-    <!-- Continuation Authorization -->
-    <section class="section-container continuation-authorization">
+    <!-- Proof of Authorization -->
+    <section class="section-container file-section pb-4">
       <v-row no-gutters>
         <v-col
           cols="12"
           sm="3"
           class="pr-4"
         >
-          <label>Continuation Authorization</label>
+          <label>Proof of Authorization</label>
         </v-col>
         <v-col
           cols="12"
           sm="9"
-          class="pt-4 pt-sm-0"
+          class="pt-4 pt-sm-0 mt-n6px"
         >
           <!-- the proof of authorization file(s) -->
           <v-btn
@@ -166,7 +166,7 @@
             class="download-authorization-btn d-block ml-n4"
             :disabled="isDownloading"
             :loading="isDownloading"
-            @click="downloadAuthorizationDocument(item)"
+            @click="downloadDocument(item)"
           >
             <v-icon>mdi-file-pdf-outline</v-icon>
             <span>{{ item.fileName }}</span>
@@ -181,26 +181,42 @@
       </v-row>
     </section>
 
-    <v-divider class="mx-6 mt-6 mb-3" />
+    <v-divider
+      v-if="affidavitItem.fileKey"
+      class="mx-6"
+    />
 
-    <!-- Authorization Date -->
-    <section class="section-container">
+    <!-- Unlimited Liability Corporation Information -->
+    <section
+      v-if="affidavitItem.fileKey"
+      class="section-container file-section"
+    >
       <v-row no-gutters>
         <v-col
           cols="12"
           sm="3"
           class="pr-4"
         >
-          <label>Authorization Date</label>
+          <label>Unlimited Liability Corporation Information</label>
         </v-col>
         <v-col
           cols="12"
           sm="9"
-          class="pt-4 pt-sm-0"
+          class="pt-4 pt-sm-0 mt-n6px"
         >
-          <div id="authorization-date">
-            {{ authorizationDate || '[Unknown]' }}
-          </div>
+          <!-- the Unlimited Liability Corporation affidavit file -->
+          <v-btn
+            :key="affidavitItem.fileKey"
+            text
+            color="primary"
+            class="download-authorization-btn d-block ml-n4"
+            :disabled="isDownloading"
+            :loading="isDownloading"
+            @click="downloadDocument(affidavitItem)"
+          >
+            <v-icon>mdi-file-pdf-outline</v-icon>
+            <span>{{ affidavitItem.fileName }}</span>
+          </v-btn>
         </v-col>
       </v-row>
     </section>
@@ -280,13 +296,16 @@ export default defineComponent({
         return state.continuationIn?.authorization?.files
       }),
 
-      authorizationDate: computed<string>(() => {
-        return strToPacificDate(state.continuationIn?.authorization?.date)
+      affidavitItem: computed(() => {
+        return {
+          fileKey: state.continuationIn?.foreignJurisdiction?.affidavitFileKey,
+          fileName: state.continuationIn?.foreignJurisdiction?.affidavitFileName
+        }
       })
     })
 
-    /** Downloads the specified authorization document. */
-    async function downloadAuthorizationDocument (item: { fileKey: string, fileName: string }): Promise<void> {
+    /** Downloads the specified document. */
+    async function downloadDocument (item: { fileKey: string, fileName: string }): Promise<void> {
       await download(item.fileKey, item.fileName)
     }
 
@@ -317,7 +336,7 @@ export default defineComponent({
 
     return {
       errorDialogComponent,
-      downloadAuthorizationDocument,
+      downloadDocument,
       ...toRefs(state)
     }
   }
@@ -348,7 +367,7 @@ section:not(:last-child) {
   padding-bottom: 0;
 }
 
-.continuation-authorization .col-sm-9 {
+.mt-n6px {
   // adjust second column to vertically line up with first column
   margin-top: -6px;
 }

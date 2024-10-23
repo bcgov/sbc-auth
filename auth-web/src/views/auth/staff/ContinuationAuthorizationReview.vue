@@ -71,15 +71,15 @@
         />
       </v-card>
 
-      <!-- Home Jurisdiction Information -->
+      <!-- Previous Jurisdiction Information -->
       <v-card
-        id="home-jurisdiction-information-vcard"
+        id="previous-jurisdiction-information-vcard"
         flat
         class="mt-8"
       >
         <CardHeader
           icon="mdi-home-city-outline"
-          label="Home Jurisdiction Information"
+          label="Previous Jurisdiction Information"
         />
         <HomeJurisdictionInformation
           :review="review"
@@ -87,15 +87,31 @@
         />
       </v-card>
 
+      <!-- Authorization Contact Information -->
+      <v-card
+        id="authorization-contact-information-vcard"
+        flat
+        class="mt-8"
+      >
+        <CardHeader
+          icon="mdi-phone"
+          label="Authorization Contact Information"
+        />
+        <AuthorizationContactInformation
+          :filing="filing"
+        />
+      </v-card>
+
       <!-- Continuation Authorization Review Result -->
-      <h2 class="mt-8">
-        Continuation Authorization Review Result
-      </h2>
       <v-card
         id="continuation-authorization-review-result-vcard"
         flat
         class="mt-6"
       >
+        <CardHeader
+          icon="mdi-stamper"
+          label="Authorization Review"
+        />
         <PreviousCorrespondence
           class="pt-8 px-6"
           :class="{ 'pb-8' :! isActionable }"
@@ -152,6 +168,8 @@
 <script lang="ts">
 import { ContinuationFilingIF, ContinuationReviewIF, ReviewStatus } from '@/models/continuation-review'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import AuthorizationContactInformation
+  from '@/components/auth/staff/continuation-application/AuthorizationContactInformation.vue'
 import BusinessService from '@/services/business.services'
 import CardHeader from '@/components/CardHeader.vue'
 import { EventBus } from '@/event-bus'
@@ -171,6 +189,7 @@ export default defineComponent({
     CardHeader,
     ExtraprovincialRegistrationBc,
     HomeJurisdictionInformation,
+    AuthorizationContactInformation,
     ModalDialog,
     PreviousCorrespondence,
     ReviewResult
