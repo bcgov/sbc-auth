@@ -240,7 +240,7 @@ class User(BaseModel):
                 & (MembershipModel.membership_type_code.in_(roles)),
             )
             .join(OrgModel)
-            .filter(OrgModel.id == org_id)
+            .filter(OrgModel.id == int(org_id or -1))
             .all()
         )
 
