@@ -304,8 +304,7 @@ export default defineComponent({
         ...item,
         ...Object.fromEntries(
           Object.entries(item).map(([key, value]) => [`${key}Original`, value])
-        ),
-        isEditable: true
+        )
       }))
     }
 
@@ -359,13 +358,9 @@ export default defineComponent({
     function changeRefundPayload (item, index) {
       const isRefunded = state.refundItems.includes(index)
       if (!isRefunded) {
-        // Mark as refunded and make non-editable
-        item.isEditable = false
         state.refundItems.push(index)
         state.refundItems.sort()
       } else {
-        // If removing from refund, make editable again
-        item.isEditable = true
         const itemIndex = state.refundItems.indexOf(index)
         state.refundItems.splice(itemIndex, 1)
       }
