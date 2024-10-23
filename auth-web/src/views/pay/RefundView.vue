@@ -7,7 +7,6 @@
       <v-text-field
         v-model="invoiceId"
         label="Invoice Number EG. (REG00012343 or 12343)"
-        @keyup.enter="invoiceId.trim() && fetchInvoice()"
       />
       <v-btn
         :disabled="!invoiceId.trim()"
