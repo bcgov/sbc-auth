@@ -26,9 +26,24 @@ from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
 from auth_api.utils.cache import cache
 from flask import Flask
+from google.cloud.sql.connector import Connector
 
 from account_mailer import config
 from account_mailer.resources.worker import bp as worker_endpoint
+
+
+connector = Connector()
+
+def getconn(unix_sock, database, user, password):
+    conn = connector.connect(
+        ip_type="unix",
+        socket_path=unix_sock,
+        user=user,
+        password=password,
+        db=database,
+        driver="pg8000"
+    )
+    return conn
 
 
 def register_endpoints(app: Flask):
@@ -48,6 +63,15 @@ def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config.get_named_config(run_mode))
     app.config['ENV'] = run_mode
+
+    if app.config.get('DB_UNIX_SOCKET'):
+
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            "creator": getconn(app.config.get('DB_UNIX_SOCKET'),
+                            app.config.get('DB_NAME'),
+                            app.config.get('DB_USER'),
+                            app.config.get('DATABASE_PASSWORD'))
+        }
 
     db.init_app(app)
     flags.init_app(app)
