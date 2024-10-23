@@ -81,7 +81,7 @@
 <script lang="ts">
 
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { InvoiceStatus, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
