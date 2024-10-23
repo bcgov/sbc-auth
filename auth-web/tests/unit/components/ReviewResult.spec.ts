@@ -63,7 +63,7 @@ describe('ReviewResult component', () => {
 
   it('rendered the section', () => {
     const section = wrapper.find('section')
-    expect(section.find('label').text()).toBe('Review Result')
+    expect(section.find('label').text()).toBe('Authorization Review')
   })
 
   it('rendered a functional select component', () => {

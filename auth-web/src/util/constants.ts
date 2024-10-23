@@ -59,6 +59,7 @@ export enum Role {
     ViewAllTransactions = 'view_all_transactions',
     ManageEft = 'manage_eft',
     EftRefund = 'eft_refund',
+    EftRefundApprover = 'eft_refund_approver',
     CreateCredits = 'create_credits',
     FasRefund = 'fas_refund',
     BcolStaffAdmin = 'bcol_staff_admin'
@@ -694,13 +695,16 @@ export enum ShortNameResponseStatus {
 export enum EFTRefundType {
     APPROVED = 'APPROVED',
     PENDING_APPROVAL = 'PENDING_APPROVAL',
-    REJECTED = 'REJECTED'
+    DECLINED = 'DECLINED',
+    COMPLETED = 'COMPLETED',
+    ERRORED = 'ERRORED'
 }
 
 export enum EFTRefundTypeDescription {
     APPROVED = 'Approved',
     PENDING_APPROVAL = 'Requested',
-    REJECTED = 'Declined'
+    DECLINED = 'Declined',
+    PENDING_REFUND = 'Pending Refund',
 }
 
 export enum ShortNameType {

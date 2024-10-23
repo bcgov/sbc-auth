@@ -89,9 +89,10 @@
 
     <ShortNameRefund
       v-if="displayRefundAlert && canEFTRefund"
+      class="mb-12"
       :shortNameDetails="shortNameDetails"
       :unsettledAmount="unsettledAmount"
-      class="mb-12"
+      @on-short-name-refund="onRefund"
     />
 
     <ShortNameAccountLink
@@ -104,6 +105,7 @@
 
     <ShortNamePaymentHistory
       :shortNameDetails="shortNameDetails"
+      :lastRefundId="lastRefundId"
       @on-payment-action="onPaymentAction"
     />
   </v-container>
@@ -127,7 +129,7 @@ export default defineComponent({
   components: { ShortNameAccountLink, ShortNameFinancialDialog, ShortNamePaymentHistory, ShortNameRefund },
   props: {
     shortNameId: {
-      type: String as PropType<string>,
+      type: Number as PropType<number>,
       default: null
     }
   },
@@ -144,7 +146,8 @@ export default defineComponent({
       displayRefundAlert: false,
       canEFTRefund: computed((): boolean => currentUser.value?.roles?.includes(Role.EftRefund)),
       displayShortNameFinancialDialog: false,
-      shortNameFinancialDialogType: ''
+      shortNameFinancialDialogType: '',
+      lastRefundId: null
     })
 
     onMounted(async () => {
@@ -172,6 +175,10 @@ export default defineComponent({
 
     function closeShortNameLinkingDialog () {
       state.displayShortNameFinancialDialog = false
+    }
+
+    async function onRefund (refund: any) {
+      state.lastRefundId = Number(refund.id)
     }
 
     async function onLinkAccount (account: any, results: Array<any>) {
@@ -206,7 +213,7 @@ export default defineComponent({
       state.shortName = eftShortNameResponse.data
     }
 
-    async function loadShortname (shortnameId: string): Promise<void> {
+    async function loadShortname (shortnameId: number): Promise<void> {
       try {
         const response = await PaymentService.getEFTShortnameSummary(shortnameId)
         if (response?.data) {
@@ -224,6 +231,7 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
+      onRefund,
       onLinkAccount,
       onPaymentAction,
       onShortNamePatch,
