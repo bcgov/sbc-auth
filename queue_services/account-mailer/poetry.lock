@@ -266,7 +266,7 @@ tests-mypy = ["mypy (>=1.11.1)", "pytest-mypy-plugins"]
 
 [[package]]
 name = "auth-api"
-version = "3.0.5"
+version = "3.0.6"
 description = ""
 optional = false
 python-versions = "^3.12"
@@ -276,7 +276,7 @@ develop = false
 [package.dependencies]
 aiohttp = "^3.10.2"
 bcrypt = "^4.2.0"
-build-deps = {git = "https://github.com/bcgov/sbc-auth.git", rev = "feature-gcp-migration", subdirectory = "build-deps"}
+build-deps = {git = "https://github.com/bcgov/sbc-auth.git", rev = "main", subdirectory = "build-deps"}
 cachelib = "0.9.0"
 cattrs = "^23.2.3"
 flask-caching = "2.3.0"
@@ -300,8 +300,8 @@ sqlalchemy-utils = "^0.41.2"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
-reference = "feature-gcp-migration"
-resolved_reference = "450c8ee6f42aec444fc06e2b9fd39f60fa053d91"
+reference = "main"
+resolved_reference = "4b872da258b5f8e3c954c9b4422f3eab1efb4b70"
 subdirectory = "auth-api"
 
 [[package]]
@@ -378,15 +378,15 @@ launchdarkly-server-sdk = "9.5.0"
 MarkupSafe = "2.1.1"
 python-dotenv = "^1.0.1"
 requests = "2.32.3"
-sbc-common-components = {git = "https://github.com/bolyachevets/sbc-common-components.git", rev = "camel_case_empty_dict", subdirectory = "python"}
+sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", rev = "master", subdirectory = "python"}
 structured-logging = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/structured-logging"}
 Werkzeug = "3.0.0"
 
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
-reference = "feature-gcp-migration"
-resolved_reference = "450c8ee6f42aec444fc06e2b9fd39f60fa053d91"
+reference = "main"
+resolved_reference = "4b872da258b5f8e3c954c9b4422f3eab1efb4b70"
 subdirectory = "build-deps"
 
 [[package]]
@@ -2709,9 +2709,9 @@ jaeger-client = "*"
 
 [package.source]
 type = "git"
-url = "https://github.com/bolyachevets/sbc-common-components.git"
-reference = "camel_case_empty_dict"
-resolved_reference = "20ce13be6d59946583385c857a5aca1c4c517ad0"
+url = "https://github.com/bcgov/sbc-common-components.git"
+reference = "master"
+resolved_reference = "d640dc75ea51add2d611a30259d15d93d8654381"
 subdirectory = "python"
 
 [[package]]
@@ -3208,4 +3208,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "c3192e8be64d8db95f9785477ddb98a36f6e04aa12bcb45607a161fa7c59f60a"
+content-hash = "5a384f274583336fec10b899d71e1dd12f55878f10d42c407dcf9fd6d0442d64"
