@@ -27,7 +27,7 @@
           sm="4"
         >
           <label>Phone Number</label>
-          <div>{{ phone || '[Unknown]' }}</div>
+          <div>{{ phone || '(Not entered)' }}</div>
         </v-col>
       </v-row>
     </section>
