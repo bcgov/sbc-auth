@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature*
+      - hotfix*
     paths:
       - "queue_services/auth-queue/**"
       - "auth-api/src/auth_api/models/**"
