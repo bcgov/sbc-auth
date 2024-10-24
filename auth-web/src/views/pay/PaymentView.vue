@@ -242,15 +242,16 @@ export default class PaymentView extends Vue {
 
   async doHandleError (error) {
     this.showLoading = false
-    this.errorMessage = this.$t('payFailedMessage').toString()
     if (error.response.data && ['COMPLETED_PAYMENT', 'INVALID_TRANSACTION'].includes(error.response.data.type)) {
       // Skip PAYBC, take directly to the "clients redirect url", this avoids transaction already done error.
       const isValid = await PaymentService.isValidRedirectUrl(this.redirectUrlFixed)
       if (!isValid) {
+        this.errorMessage = this.$t('payFailedMessage').toString()
         throw new Error('Invalid redirect url: ' + this.redirectUrlFixed)
       }
       this.goToUrl(this.redirectUrlFixed)
     } else {
+      this.errorMessage = this.$t('payFailedMessage').toString()
       this.showErrorModal = true
     }
   }
