@@ -758,32 +758,37 @@ class Org:  # pylint: disable=too-many-public-methods
         orgs_result = {"orgs": [], "page": search.page, "limit": search.limit, "total": 0}
         include_invitations: bool = False
         search.access_type, is_staff_admin = Org.refine_access_type(search.access_type)
-        if search.statuses and OrgStatus.PENDING_ACTIVATION.value in search.statuses:
-            # only staff admin can see director search accounts
-            if not is_staff_admin:
-                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-            org_models, orgs_result["total"] = OrgModel.search_pending_activation_orgs(name=search.name)
-            include_invitations = True
-        else:
-            org_models, orgs_result["total"] = OrgModel.search_org(search, environment)
+        try:
+            if search.statuses and OrgStatus.PENDING_ACTIVATION.value in search.statuses:
+                # only staff admin can see director search accounts
+                if not is_staff_admin:
+                    raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+                org_models, orgs_result["total"] = OrgModel.search_pending_activation_orgs(name=search.name)
+                include_invitations = True
+            else:
+                org_models, orgs_result["total"] = OrgModel.search_org(search, environment)
 
-        for org in org_models:
-            orgs_result["orgs"].append(
-                {
-                    **Org(org).as_dict(),
-                    "contacts": (
-                        [ContactSchema(exclude=("links",)).dump(org.contacts[0].contact, many=False)]
-                        if org.contacts
-                        else []
-                    ),
-                    "invitations": (
-                        [InvitationSchema(exclude=("membership",)).dump(org.invitations[0].invitation, many=False)]
-                        if include_invitations and org.invitations
-                        else []
-                    ),
-                }
-            )
-        return orgs_result
+            for org in org_models:
+                orgs_result["orgs"].append(
+                    {
+                        **Org(org).as_dict(),
+                        "contacts": (
+                            [ContactSchema(exclude=("links",)).dump(org.contacts[0].contact, many=False)]
+                            if org.contacts
+                            else []
+                        ),
+                        "invitations": (
+                            [InvitationSchema(exclude=("membership",)).dump(org.invitations[0].invitation, many=False)]
+                            if include_invitations and org.invitations
+                            else []
+                        ),
+                    }
+                )
+        except Exception as e:  # noqa=B901
+            logger.warning(e)
+            raise e
+        finally:
+            return orgs_result
 
     @staticmethod
     def search_orgs_by_affiliation(business_identifier, environment, excluded_org_types):
