@@ -5,29 +5,35 @@
         MVP Refunds - OPS only for now.
       </h2>
       <v-text-field
-        v-model="invoiceId"
-        label="Invoice Number EG. (REG00012343 or 12343)"
+          id="invoice-id-input"
+          v-model="invoiceId"
+          label="Invoice Number EG. (REG00012343 or 12343)"
       />
       <v-btn
-        :disabled="!invoiceId.trim()"
-        @click="fetchInvoice"
+          id="fetch-invoice-btn"
+          :disabled="!invoiceId.trim()"
+          @click="fetchInvoice"
       >
         Fetch Invoice
       </v-btn>
       <v-radio-group
-        v-model="refundType"
-        row
+          id="refund-type-radio-group"
+          v-model="refundType"
+          row
       >
         <v-radio
-          label="Full refund"
-          :value="RefundType.FULL"
+            id="radio-full-refund"
+            label="Full refund"
+            :value="RefundType.FULL"
         />
         <v-radio
-          label="Partial Refund"
-          :value="RefundType.PARTIAL"
+            id="radio-partial-refund"
+            label="Partial Refund"
+            :value="RefundType.PARTIAL"
         />
       </v-radio-group>
       <v-alert
+          id="partial-refund-cc-warning"
           v-if="showRefundCreditCardError()"
           class="mt-4"
           border="left"
@@ -40,16 +46,18 @@
       >
         Partial Refunds can only be applied to credit card invoices.
       </v-alert>
-      <div v-if="refundType === RefundType.PARTIAL"
-           class="mb-4"
+      <div
+          id="partial-refund-add-refund-info"
+          v-if="refundType === RefundType.PARTIAL"
+          class="mb-4"
       >
         <h4>
           Specify the fee amounts to be refunded and click 'Add to Refund', the refund summary entries will be appear for review.
         </h4>
       </div>
       <v-form ref="form">
-        <v-simple-table>
-          <thead>
+        <v-simple-table id="invoice-line-items-table">
+          <thead id="invoice-line-items-headers">
             <tr>
               <th
                   :id="'header-items-' + index"
@@ -62,6 +70,7 @@
           </thead>
           <tbody>
             <tr
+              id="item-row"
               v-for="(item, index) in paymentLineItems"
               :key="index"
             >
@@ -117,9 +126,10 @@
               </td>
               <td v-if="showPartialRefundAction()">
                 <v-btn
-                  small
-                  :disabled="disablePartialRefundAction(item)"
-                  @click="changeRefundPayload(item, index)"
+                    id="partial-refund-action-btn"
+                    small
+                    :disabled="disablePartialRefundAction(item)"
+                    @click="changeRefundPayload(item, index)"
                 >
                   {{ isRefundItemAdded(index) ? 'Remove from Refund' : 'Add to Refund' }}
                 </v-btn>
@@ -132,15 +142,19 @@
       <h2 class="mb-4">
         Refund Summary:
       </h2>
-      <div v-if="refundType === RefundType.PARTIAL"
-           class="mb-4"
+      <div
+          id="partial-refund-summary-info"
+          v-if="refundType === RefundType.PARTIAL"
+          class="mb-4"
       >
         <h4>
           By pressing the refund action, the specified amounts in the summary below will be refunded.
         </h4>
       </div>
-      <v-simple-table v-if="refundType === RefundType.PARTIAL">
-        <thead>
+      <v-simple-table
+          id="refund-summary-table"
+          v-if="refundType === RefundType.PARTIAL">
+        <thead id="refund-summary-headers">
         <tr>
           <th
               :id="'header-summary-items-' + index"
@@ -179,8 +193,9 @@
       />
       <br>
       <v-btn
-        :disabled="isRefundSubmitDisabled"
-        @click="processRefund"
+          id="process-refund-btn"
+          :disabled="isRefundSubmitDisabled"
+          @click="processRefund"
       >
         REFUND
       </v-btn>
@@ -315,36 +330,39 @@ export default defineComponent({
       clearRefundState()
     }
 
+    function getRefundPayload() {
+      let refundPayload = {
+        reason: state.refundComment,
+        refundRevenue: []
+      }
+      if (state.refundType === RefundType.PARTIAL) {
+        state.refundItems.forEach(index => {
+          const item = state.paymentLineItems[index]
+          const feeTypes = [
+            { key: 'filingFees', type: RefundLineTypes.BASE_FEES },
+            { key: 'priorityFees', type: RefundLineTypes.PRIORITY_FEES },
+            { key: 'futureEffectiveFees', type: RefundLineTypes.FUTURE_EFFECTIVE_FEES },
+            { key: 'serviceFees', type: RefundLineTypes.SERVICE_FEES }
+          ]
+
+          feeTypes.forEach(fee => {
+            if (item[fee.key] > 0) {
+              refundPayload.refundRevenue.push({
+                paymentLineItemId: item.id,
+                refundAmount: parseFloat(item[fee.key]),
+                refundType: fee.type
+              })
+            }
+          })
+        })
+      }
+      return refundPayload
+    }
+
     async function processRefund () {
       try {
-        let refundPayload = {
-          reason: state.refundComment,
-          refundRevenue: []
-        }
-        if (state.refundType === RefundType.PARTIAL) {
-          state.refundItems.forEach(index => {
-            const item = state.paymentLineItems[index]
-            const feeTypes = [
-              { key: 'filingFees', type: RefundLineTypes.BASE_FEES },
-              { key: 'priorityFees', type: RefundLineTypes.PRIORITY_FEES },
-              { key: 'futureEffectiveFees', type: RefundLineTypes.FUTURE_EFFECTIVE_FEES },
-              { key: 'serviceFees', type: RefundLineTypes.SERVICE_FEES }
-            ]
-
-            feeTypes.forEach(fee => {
-              if (item[fee.key] > 0) {
-                refundPayload.refundRevenue.push({
-                  paymentLineItemId: item.id,
-                  refundAmount: parseFloat(item[fee.key]),
-                  refundType: fee.type
-                })
-              }
-            })
-          })
-        }
-
         const invoiceId = matchInvoiceId(state.invoiceId)
-        const response = await state.orgStore.refundInvoice(invoiceId, refundPayload)
+        const response = await state.orgStore.refundInvoice(invoiceId, getRefundPayload())
         state.refundResponse = 'Refund successful.'
         state.disableSubmit = true
         console.log('Refund successful:', response)
@@ -407,10 +425,12 @@ export default defineComponent({
       ...toRefs(state),
       fetchInvoice,
       processRefund,
+      getRefundPayload,
       changeRefundPayload,
       isRefundSubmitDisabled,
       isRefundItemAdded,
       RefundType,
+      RefundLineTypes,
       validateRefundComment,
       validateRefundFeeAmount,
       disableFeeInputs,
