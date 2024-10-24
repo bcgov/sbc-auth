@@ -72,7 +72,7 @@ describe('RefundView.vue', () => {
 
     sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'get')
-    get.returns(new Promise(resolve => resolve({ data: invoiceResponse })))
+    get.returns(Promise.resolve({ data: invoiceResponse }))
 
     wrapper = mount(RefundViewVue, {
       localVue,

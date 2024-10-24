@@ -414,7 +414,7 @@ export default defineComponent({
 
     const isRefundSubmitDisabled = computed(() => {
       return state.refundComment.trim().length === 0 || state.disableSubmit ||
-        (state.refundType === RefundType.PARTIAL && state.totalRefund.baseFee === 0 && state.totalRefund.serviceFee === 0)
+        (state.refundType === RefundType.PARTIAL && state.refundItems.length === 0)
     })
 
     watch(() => state.invoiceId, () => {
