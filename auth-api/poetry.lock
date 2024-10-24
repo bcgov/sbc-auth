@@ -395,15 +395,15 @@ launchdarkly-server-sdk = "9.5.0"
 MarkupSafe = "2.1.1"
 python-dotenv = "^1.0.1"
 requests = "2.32.3"
-sbc-common-components = {git = "https://github.com/bolyachevets/sbc-common-components.git", rev = "camel_case_empty_dict", subdirectory = "python"}
+sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", rev = "master", subdirectory = "python"}
 structured-logging = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/structured-logging"}
 Werkzeug = "3.0.0"
 
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
-reference = "feature-gcp-migration"
-resolved_reference = "289c7db2ceac0b4ccd9554a638c8fa6cfe3e8a75"
+reference = "main"
+resolved_reference = "22d93a4be1968dbe615548bed0c96e8446a0da00"
 subdirectory = "build-deps"
 
 [[package]]
@@ -1345,6 +1345,7 @@ files = [
     {file = "greenlet-3.1.1-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:d0028e725ee18175c6e422797c407874da24381ce0690d6b9396c204c7f7276e"},
     {file = "greenlet-3.1.1-cp39-cp39-win32.whl", hash = "sha256:5e06afd14cbaf9e00899fae69b24a32f2196c19de08fcb9f4779dd4f004e5e7c"},
     {file = "greenlet-3.1.1-cp39-cp39-win_amd64.whl", hash = "sha256:3319aa75e0e0639bc15ff54ca327e8dc7a6fe404003496e3c6925cd3142e0e22"},
+    {file = "greenlet-3.1.1.tar.gz", hash = "sha256:4ce3ac6cdb6adf7946475d7ef31777c26d94bccc377e070a7986bd2d5c515467"},
 ]
 
 [package.extras]
@@ -2753,9 +2754,9 @@ jaeger-client = "*"
 
 [package.source]
 type = "git"
-url = "https://github.com/bolyachevets/sbc-common-components.git"
-reference = "camel_case_empty_dict"
-resolved_reference = "20ce13be6d59946583385c857a5aca1c4c517ad0"
+url = "https://github.com/bcgov/sbc-common-components.git"
+reference = "master"
+resolved_reference = "d640dc75ea51add2d611a30259d15d93d8654381"
 subdirectory = "python"
 
 [[package]]
@@ -3318,4 +3319,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "825b0312c3e9765cc9fd00497d83cb481981a01fef671928ecdf00dd34c66a1a"
+content-hash = "8ce6ca94ca52623956d94232a80831d42d98a03911a066d8f325700089e8cc77"
