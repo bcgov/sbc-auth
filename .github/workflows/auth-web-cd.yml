@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature*
+      - hotfix*
     paths:
       - "auth-web/**"
   workflow_dispatch:
