@@ -31,6 +31,7 @@ from auth_queue.resources.worker import bp as worker_endpoint
 @dataclass
 class DBConfig:
     """Database configuration settings."""
+
     unix_sock: str
     database: str
     user: str
@@ -39,6 +40,7 @@ class DBConfig:
 
 def getconn(connector: Connector, db_config: DBConfig) -> object:
     """Create a database connection.
+
     Args:
         connector (Connector): The Google Cloud SQL connector instance.
         db_config (DBConfig): The database configuration.
