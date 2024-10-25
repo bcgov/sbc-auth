@@ -46,6 +46,7 @@ zipp = "3.19.1"
 auth-api = { git = "https://github.com/bcgov/sbc-auth.git", rev = "main", subdirectory = "auth-api" }
 simple-cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py.git" }
 build-deps = { git = "https://github.com/bcgov/sbc-auth.git", rev = "main", subdirectory = "build-deps" }
+cloud-sql-python-connector = "^1.13.0"
 
 [tool.poetry.group.dev.dependencies]
 psycopg2 = "^2.9.9"
