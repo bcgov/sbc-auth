@@ -84,11 +84,13 @@ export const useTransactions = () => {
             transactions.results.splice(i + 1, 0, newTransaction)
           }
         })
-        transactions.results.sort((transaction1: Transaction, transaction2: Transaction) => {
-          const idComparison = transaction2.id - transaction1.id
-          const dateComparison = new Date(transaction2.createdOn).getTime() - new Date(transaction1.createdOn).getTime()
-          return transaction1.id !== transaction2.id ? idComparison : dateComparison
-        })
+        if (transactions.results.some((transaction: Transaction) => transaction.refundDate)) {
+          transactions.results.sort((transaction1: Transaction, transaction2: Transaction) => {
+            const idComparison = transaction1.id - transaction2.id
+            const dateComparison = new Date(transaction1.createdOn).getTime() - new Date(transaction2.createdOn).getTime()
+            return transaction1.id !== transaction2.id ? idComparison : dateComparison
+          })
+        }
       } else throw new Error('No response from getTransactions')
     } catch (error) {
       // eslint-disable-next-line no-console
