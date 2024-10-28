@@ -12,5 +12,6 @@ export const paymentTypeDisplay = {
   [PaymentTypes.NO_FEE]: 'No Fee',
   [PaymentTypes.ONLINE_BANKING]: 'Online Banking',
   [PaymentTypes.PAD]: 'Pre-Authorized Debit',
-  [PaymentTypes.WIRE]: 'Wire Transfer'
+  [PaymentTypes.WIRE]: 'Wire Transfer',
+  [PaymentTypes.CREDIT]: 'Account Credit'
 }

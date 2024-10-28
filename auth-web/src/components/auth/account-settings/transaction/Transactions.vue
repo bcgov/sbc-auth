@@ -197,14 +197,6 @@ export default defineComponent({
       }
     }
 
-    onMounted(() => {
-      setAccountChangedHandler(initUser)
-      setViewAll(props.extended)
-      clearAllFilters()
-      loadTransactionList()
-    })
-    onBeforeUnmount(() => { beforeDestroy() })
-
     const exportCSV = async () => {
       isLoading.value = true
       // grab from composable**
@@ -219,6 +211,15 @@ export default defineComponent({
       }
       isLoading.value = false
     }
+
+    onMounted(() => {
+      initUser()
+      setAccountChangedHandler(initUser)
+      setViewAll(props.extended)
+      clearAllFilters()
+      loadTransactionList()
+    })
+    onBeforeUnmount(() => { beforeDestroy() })
 
     return {
       csvErrorDialog,
