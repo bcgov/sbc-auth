@@ -84,6 +84,7 @@ export const useTransactions = () => {
             newTransaction.paymentMethod = PaymentTypes.CREDIT
             newTransaction.total = newTransaction.refund
             newTransaction.createdOn = newTransaction.refundDate
+            transactions.totalResults++
             transactions.results.splice(i + 1, 0, newTransaction)
           }
         })
