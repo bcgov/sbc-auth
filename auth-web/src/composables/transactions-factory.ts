@@ -85,14 +85,12 @@ export const useTransactions = () => {
             newTransaction.total = newTransaction.refund
             newTransaction.createdOn = newTransaction.refundDate
             transactions.totalResults++
-            transactions.results.splice(i + 1, 0, newTransaction)
+            transactions.results.splice(i - 1, 0, newTransaction)
           }
         })
         if (transactions.results.some((transaction: Transaction) => transaction.refundDate)) {
           transactions.results.sort((transaction1: Transaction, transaction2: Transaction) => {
-            const idComparison = transaction1.id - transaction2.id
-            const dateComparison = new Date(transaction1.createdOn).getTime() - new Date(transaction2.createdOn).getTime()
-            return transaction1.id !== transaction2.id ? idComparison : dateComparison
+            return new Date(transaction2.createdOn).getTime() - new Date(transaction1.createdOn).getTime()
           })
         }
       } else throw new Error('No response from getTransactions')
