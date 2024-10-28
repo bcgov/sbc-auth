@@ -85,7 +85,7 @@ export const useTransactions = () => {
             newTransaction.total = newTransaction.refund
             newTransaction.createdOn = newTransaction.refundDate
             transactions.totalResults++
-            transactions.results.splice(i - 1, 0, newTransaction)
+            transactions.results.splice(i + 1, 0, newTransaction)
           }
         })
         if (transactions.results.some((transaction: Transaction) => transaction.refundDate)) {
