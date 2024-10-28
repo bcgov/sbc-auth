@@ -95,6 +95,7 @@
                     :clearOnEdit="isInitialTOSAccepted"
                     @is-pre-auth-debit-form-valid="isPADValid"
                     @emit-pre-auth-debit-info="getPADInfo"
+                    @is-pad-info-touched="isPadInfoTouched"
                   />
                 </div>
 
