@@ -73,9 +73,12 @@ export const useTransactions = () => {
       if (response?.data) {
         transactions.results = response.data.items || []
         transactions.totalResults = response.data.total
+
         const transactionClone = [...transactions.results]
+        const allowedRefundedStatuses = [InvoiceStatus.PAID, InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED]
         transactionClone.forEach((transaction: Transaction, i: number) => {
-          if (transaction.refundDate) {
+          if (transaction.refundDate && transaction.refund &&
+            allowedRefundedStatuses.includes(transaction.statusCode)) {
             const newTransaction = { ...transaction }
             newTransaction.statusCode = InvoiceStatus.PAID
             newTransaction.paymentMethod = PaymentTypes.CREDIT

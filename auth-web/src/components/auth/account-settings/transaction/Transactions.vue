@@ -191,7 +191,7 @@ export default defineComponent({
     const initUser = () => {
       if (isTransactionsAllowed.value) getPaymentDetails()
       else {
-        // if the account switing happening when the user is already in the transaction page,
+        // if the account switching happening when the user is already in the transaction page,
         // redirect to account info if its a basic account
         root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
       }
