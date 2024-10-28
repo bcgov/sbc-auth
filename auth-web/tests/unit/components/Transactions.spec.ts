@@ -32,7 +32,6 @@ describe('Transactions tests', () => {
     const orgStore = useOrgStore()
     orgStore.currentOrgPaymentDetails = { accountId: 123 } as any
     orgStore.currentOrganization = { id: 123, orgType: Account.PREMIUM } as any
-    orgStore.currentMembership = { membershipTypeCode: MembershipType.Admin } as any
     orgStore.getOrgPayments = vi.fn(() => { return { credit: 0 } }) as any
     orgStore.currentMembership = { membershipTypeCode: MembershipType.Admin } as any
 
