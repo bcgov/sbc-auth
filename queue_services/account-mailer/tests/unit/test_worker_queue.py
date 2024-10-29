@@ -224,9 +224,11 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
         # add an event to queue, these are provided by cfs_create_invoice_task.
         mail_details = {
             'accountId': id,
+            'credit_total': '20',
             'nsfFee': '30',
             'invoice_total': '100',
-            'invoice_process_date': f'{datetime.now()}'
+            'invoice_process_date': f'{datetime.now()}',
+            'withdraw_total': '80'
         }
         helper_add_event_to_queue(client,
                                   message_type=QueueMessageTypes.PAD_INVOICE_CREATED.value,
