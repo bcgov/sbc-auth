@@ -51,7 +51,7 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
         OrgType.STAFF: non_ejv_payment_methods,
     }
     if flags.is_on("remove-premium-restrictions", default=False) is True:
-        for k, _ in org_payment_method_mapping.items():
+        for k in org_payment_method_mapping:
             org_payment_method_mapping[k] = (
                 PaymentMethod.CREDIT_CARD.value,
                 PaymentMethod.DIRECT_PAY.value,
