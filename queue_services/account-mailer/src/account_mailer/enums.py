@@ -21,7 +21,7 @@ class SubjectType(Enum):
     NSF_LOCK_ACCOUNT_SUBJECT = '[BC Registries and Online Services] Your account has been suspended'
     NSF_UNLOCK_ACCOUNT_SUBJECT = 'Your Account Was Successfully Restored'
     ACCOUNT_CONF_OVER_SUBJECT = '[BC Registries and Online Services] Your account is now active'
-    PAD_INVOICE_CREATED = '[BC Registries and Online Services] Your accounts PAD transaction details'
+    PAD_INVOICE_CREATED = '[BC Registries and Online Services] Your PAD Transaction Details'
     ADMIN_REMOVED_SUBJECT = '[BC Registries and Online Services] You have been removed as an administrator'
     TEAM_MODIFIED_SUBJECT = '[BC Registries and Online Services] Change in Team members'
     ONLINE_BANKING_PAYMENT_SUBJECT = '[BC Registries and Online Services] Online Banking payment has been received'

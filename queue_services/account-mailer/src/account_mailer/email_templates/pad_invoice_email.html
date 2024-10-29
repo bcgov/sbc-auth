@@ -1,6 +1,6 @@
 # Your {{ account_number }}: {{ account_name_with_branch }} account completed ${{ invoice_total }} in transactions during business hours on {{ invoice_process_date }}.
 
-Transaction amount: $ {{ invoice_total}}
+Transaction amount: $ {{ invoice_total }}
 { % if credits_total > 0 % }Account credits: -$ {{ credits_total }}{ % endif % }
 Amount to be charged: {{ withdraw_total }}
 
