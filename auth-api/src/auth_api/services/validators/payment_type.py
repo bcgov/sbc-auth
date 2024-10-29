@@ -15,6 +15,7 @@
 from flask import current_app
 
 from auth_api.exceptions import BusinessException, Error
+from auth_api.services.flags import flags
 from auth_api.services.validators.validator_response import ValidatorResponse
 from auth_api.utils.enums import AccessType, OrgType, PaymentMethod
 from auth_api.utils.user_context import user_context
@@ -49,6 +50,16 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
         OrgType.SBC_STAFF: non_ejv_payment_methods,
         OrgType.STAFF: non_ejv_payment_methods,
     }
+    if flags.is_on("remove-premium-restrictions", default=False) is True:
+        for k in org_payment_method_mapping:
+            org_payment_method_mapping[k] = (
+                PaymentMethod.CREDIT_CARD.value,
+                PaymentMethod.DIRECT_PAY.value,
+                PaymentMethod.ONLINE_BANKING.value,
+                PaymentMethod.PAD.value,
+                PaymentMethod.BCOL.value,
+                PaymentMethod.EFT.value,
+            )
     payment_type = None
     if access_type == AccessType.GOVM.value:
         payment_type = PaymentMethod.EJV.value

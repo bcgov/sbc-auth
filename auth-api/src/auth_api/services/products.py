@@ -30,6 +30,7 @@ from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.models.dataclass import Activity, KeycloakGroupSubscription, ProductReviewTask
 from auth_api.schemas import ProductCodeSchema
+from auth_api.services.flags import flags
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
@@ -174,7 +175,11 @@ class Product:
                 if product_model.need_system_admin:
                     check_auth(system_required=True, org_id=org_id)
                 # Check if product needs premium account, if yes skip and continue.
-                if product_model.premium_only and org.type_code not in PREMIUM_ORG_TYPES:
+                if (
+                    flags.is_on("remove-premium-restrictions", default=False) is False
+                    and product_model.premium_only
+                    and org.type_code not in PREMIUM_ORG_TYPES
+                ):
                     continue
 
                 subscription_status = Product.find_subscription_status(org, product_model, auto_approve)
