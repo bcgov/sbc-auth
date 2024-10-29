@@ -184,7 +184,6 @@ export default defineComponent({
         const paymentDetails: OrgPaymentDetails = await orgStore.getOrgPayments(currentOrganization.value?.id)
         credit.value = Number(paymentDetails?.credit || 0)
       } else {
-        console.log('currentOrgPaymentDetails.value', currentOrgPaymentDetails.value)
         credit.value = Number(currentOrgPaymentDetails.value?.credit || 0)
       }
     }
