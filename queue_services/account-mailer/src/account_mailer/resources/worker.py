@@ -13,6 +13,7 @@
 # limitations under the License.
 """The unique worker functionality for this service is contained here."""
 import dataclasses
+from decimal import Decimal
 import json
 from datetime import datetime, timezone
 from http import HTTPStatus
@@ -210,10 +211,15 @@ def handle_pad_invoice_created(message_type, email_msg):
     admin_coordinator_emails = get_member_emails(org_id, (ADMIN,))
     subject = SubjectType.PAD_INVOICE_CREATED.value
     invoice_process_date = datetime.fromisoformat(email_msg.get('invoice_process_date'))
+    credit_total = email_msg.get('credit_total', 0)
+    invoice_total = email_msg.get('invoice_total', 0)
+    withdraw_total = Decimal(str(invoice_total)) - Decimal(str(credit_total))
     args = {
+        'credit_total': format_currency(credit_total),
         'nsf_fee': format_currency(email_msg.get('nsfFee')),
-        'invoice_total': format_currency(email_msg.get('invoice_total')),
-        'invoice_process_date': get_local_formatted_date(invoice_process_date, '%m-%d-%Y')
+        'invoice_total': format_currency(invoice_total),
+        'invoice_process_date': get_local_formatted_date(invoice_process_date, '%m-%d-%Y'),
+        'withdraw_total': format_currency(str(withdraw_total))
     }
     logo_url = email_msg.get('logo_url')
     email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
