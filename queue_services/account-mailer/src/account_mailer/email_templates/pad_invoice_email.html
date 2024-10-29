@@ -1,7 +1,7 @@
 # Your {{ account_number }}: {{ account_name_with_branch }} account completed ${{ invoice_total }} in transactions during business hours on {{ invoice_process_date }}.
 
 Transaction amount: $ {{ invoice_total }}
-{% if credit_total != '0' %}Account credits: -$ {{ credit_total }}{% endif %}
+{% if credit_total != '0.00' %}Account credits: -$ {{ credit_total }}{% endif %}
 Amount to be charged: {{ withdraw_total }}
 
 {{ withdraw_total }} will be debited from your financial institution in 2 business days. Please ensure you have sufficient funds in your financial institution account to cover this debit.
