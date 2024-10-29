@@ -13,9 +13,9 @@
 # limitations under the License.
 """The unique worker functionality for this service is contained here."""
 import dataclasses
-from decimal import Decimal
 import json
 from datetime import datetime, timezone
+from decimal import Decimal
 from http import HTTPStatus
 
 from auth_api.models import db
