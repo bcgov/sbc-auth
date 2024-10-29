@@ -178,18 +178,19 @@ export default defineComponent({
         [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
     })
 
-    const getPaymentDetails = async () => {
+    const getCredits = async () => {
       const accountId = currentOrgPaymentDetails.value?.accountId
       if (!accountId || Number(accountId) !== currentOrganization.value?.id) {
         const paymentDetails: OrgPaymentDetails = await orgStore.getOrgPayments(currentOrganization.value?.id)
         credit.value = Number(paymentDetails?.credit || 0)
       } else {
+        console.log('currentOrgPaymentDetails.value', currentOrgPaymentDetails.value)
         credit.value = Number(currentOrgPaymentDetails.value?.credit || 0)
       }
     }
 
     const initUser = () => {
-      if (isTransactionsAllowed.value) getPaymentDetails()
+      if (isTransactionsAllowed.value) getCredits()
       else {
         // if the account switching happening when the user is already in the transaction page,
         // redirect to account info if its a basic account
