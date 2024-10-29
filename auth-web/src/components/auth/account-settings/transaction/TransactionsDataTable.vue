@@ -127,7 +127,7 @@
             align-self="center"
           >
             <IconTooltip
-              v-if="[InvoiceStatus.OVERDUE, InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED].includes(item.statusCode)"
+              v-if="[InvoiceStatus.OVERDUE, InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED].includes(item.statusCode)"
               icon="mdi-information-outline"
               maxWidth="300px"
               :location="{top: true}"
@@ -229,6 +229,9 @@ export default defineComponent({
       }
       if (item?.statusCode === InvoiceStatus.REFUNDED) {
         return '$' + (item?.total?.toFixed(2) || '') + ' has been refunded to the account used for this transaction.'
+      }
+      if (item?.statusCode === InvoiceStatus.CREDITED) {
+        return '$' + (item?.total?.toFixed(2) || '') + ' has been credited to the account used for this transaction.'
       }
       if (item?.statusCode === InvoiceStatus.OVERDUE) {
         return 'Your monthly statement is overdue.<br/>Please make your payment as soon as possible.'
