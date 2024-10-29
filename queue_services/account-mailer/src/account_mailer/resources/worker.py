@@ -211,8 +211,8 @@ def handle_pad_invoice_created(message_type, email_msg):
     admin_coordinator_emails = get_member_emails(org_id, (ADMIN,))
     subject = SubjectType.PAD_INVOICE_CREATED.value
     invoice_process_date = datetime.fromisoformat(email_msg.get('invoice_process_date'))
-    credit_total = email_msg.get('credit_total', 0)
-    invoice_total = email_msg.get('invoice_total', 0)
+    credit_total = email_msg.get('credit_total', '0')
+    invoice_total = email_msg.get('invoice_total', '0')
     withdraw_total = Decimal(str(invoice_total)) - Decimal(str(credit_total))
     args = {
         'credit_total': format_currency(credit_total),
