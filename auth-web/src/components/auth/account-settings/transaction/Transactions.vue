@@ -173,7 +173,7 @@ export default defineComponent({
     const isLoading = ref(false)
 
     const isTransactionsAllowed = computed((): boolean => {
-      return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
+      return [Account.BASIC, Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
         .includes(currentOrganization.value.orgType as Account) &&
         [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
     })
@@ -188,12 +188,17 @@ export default defineComponent({
       }
     }
 
-    const initUser = () => {
-      if (isTransactionsAllowed.value) getCredits()
-      else {
+    const initialize = () => {
+      if (!isTransactionsAllowed.value) {
         // if the account switching happening when the user is already in the transaction page,
-        // redirect to account info if its a basic account
+        // redirect to account-info if account is not allowed to view transactions
         root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
+      } else {
+        setAccountChangedHandler(initialize)
+        setViewAll(props.extended)
+        clearAllFilters()
+        loadTransactionList()
+        getCredits()
       }
     }
 
@@ -213,11 +218,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      initUser()
-      setAccountChangedHandler(initUser)
-      setViewAll(props.extended)
-      clearAllFilters()
-      loadTransactionList()
+      initialize()
     })
     onBeforeUnmount(() => { beforeDestroy() })
 
