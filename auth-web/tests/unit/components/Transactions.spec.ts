@@ -1,5 +1,6 @@
 import '../test-utils/composition-api-setup' // important to import this first
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { Account } from '@/util/constants'
 import { MembershipType } from '@/models/Organization'
 import { Transactions } from '@/components/auth/account-settings/transaction'
 import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
@@ -30,9 +31,9 @@ describe('Transactions tests', () => {
     const localVue = createLocalVue()
     const orgStore = useOrgStore()
     orgStore.currentOrgPaymentDetails = { accountId: 123 } as any
-    orgStore.currentOrganization = { id: 123 } as any
-    orgStore.currentMembership = { membershipTypeCode: MembershipType.Admin } as any
+    orgStore.currentOrganization = { id: 123, orgType: Account.PREMIUM } as any
     orgStore.getOrgPayments = vi.fn(() => { return { credit: 0 } }) as any
+    orgStore.currentMembership = { membershipTypeCode: MembershipType.Admin } as any
 
     // stub get transactions get call
     sandbox = sinon.createSandbox()

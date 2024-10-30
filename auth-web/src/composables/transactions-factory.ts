@@ -1,4 +1,4 @@
-import { LDFlags, Role } from '@/util/constants'
+import { InvoiceStatus, LDFlags, PaymentTypes, Role } from '@/util/constants'
 import { Transaction, TransactionFilterParams, TransactionState } from '@/models/transaction'
 import { computed, reactive, ref } from '@vue/composition-api'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -73,6 +73,28 @@ export const useTransactions = () => {
       if (response?.data) {
         transactions.results = response.data.items || []
         transactions.totalResults = response.data.total
+
+        const transactionClone = [...transactions.results]
+        const allowedRefundedStatuses = [InvoiceStatus.PAID, InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED]
+        const allowedPaymentMethods = [PaymentTypes.PAD, PaymentTypes.ONLINE_BANKING]
+        transactionClone.forEach((transaction: Transaction, i: number) => {
+          if (transaction.refundDate && transaction.refund &&
+            allowedPaymentMethods.includes(transaction.paymentMethod) &&
+            allowedRefundedStatuses.includes(transaction.statusCode)) {
+            const newTransaction = { ...transaction }
+            newTransaction.statusCode = InvoiceStatus.PAID
+            newTransaction.paymentMethod = PaymentTypes.CREDIT
+            newTransaction.total = newTransaction.refund
+            newTransaction.createdOn = newTransaction.refundDate
+            transactions.totalResults++
+            transactions.results.splice(i + 1, 0, newTransaction)
+          }
+        })
+        if (transactions.results.some((transaction: Transaction) => transaction.refundDate)) {
+          transactions.results.sort((transaction1: Transaction, transaction2: Transaction) => {
+            return new Date(transaction2.createdOn).getTime() - new Date(transaction1.createdOn).getTime()
+          })
+        }
       } else throw new Error('No response from getTransactions')
     } catch (error) {
       // eslint-disable-next-line no-console
