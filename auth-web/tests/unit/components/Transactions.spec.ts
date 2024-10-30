@@ -19,7 +19,7 @@ document.body.setAttribute('data-app', 'true')
 
 const allowedAccountTypes = [Account.BASIC, Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
 
-async function beforeEachSetup(wrapper: any, sandbox: any, accountType: Account = Account.PREMIUM) {
+async function beforeEachSetup (wrapper: any, sandbox: any, accountType: Account = Account.PREMIUM) {
   const localVue = createLocalVue()
   const orgStore = useOrgStore()
   orgStore.currentOrgPaymentDetails = { accountId: 123 } as any
