@@ -22,6 +22,7 @@ export interface Transaction {
   statusCode: InvoiceStatus
   total: number
   updatedOn: string
+  refundDate: string
 }
 
 export interface TransactionFilter {

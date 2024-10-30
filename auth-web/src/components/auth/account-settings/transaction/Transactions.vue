@@ -178,7 +178,7 @@ export default defineComponent({
         [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
     })
 
-    const getPaymentDetails = async () => {
+    const getCredits = async () => {
       const accountId = currentOrgPaymentDetails.value?.accountId
       if (!accountId || Number(accountId) !== currentOrganization.value?.id) {
         const paymentDetails: OrgPaymentDetails = await orgStore.getOrgPayments(currentOrganization.value?.id)
@@ -189,21 +189,13 @@ export default defineComponent({
     }
 
     const initUser = () => {
-      if (isTransactionsAllowed.value) getPaymentDetails()
+      if (isTransactionsAllowed.value) getCredits()
       else {
-        // if the account switing happening when the user is already in the transaction page,
+        // if the account switching happening when the user is already in the transaction page,
         // redirect to account info if its a basic account
         root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
       }
     }
-
-    onMounted(() => {
-      setAccountChangedHandler(initUser)
-      setViewAll(props.extended)
-      clearAllFilters()
-      loadTransactionList()
-    })
-    onBeforeUnmount(() => { beforeDestroy() })
 
     const exportCSV = async () => {
       isLoading.value = true
@@ -219,6 +211,15 @@ export default defineComponent({
       }
       isLoading.value = false
     }
+
+    onMounted(() => {
+      initUser()
+      setAccountChangedHandler(initUser)
+      setViewAll(props.extended)
+      clearAllFilters()
+      loadTransactionList()
+    })
+    onBeforeUnmount(() => { beforeDestroy() })
 
     return {
       csvErrorDialog,

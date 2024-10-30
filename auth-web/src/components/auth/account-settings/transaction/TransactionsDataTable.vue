@@ -127,7 +127,7 @@
             align-self="center"
           >
             <IconTooltip
-              v-if="[InvoiceStatus.OVERDUE, InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED].includes(item.statusCode)"
+              v-if="[InvoiceStatus.OVERDUE, InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED].includes(item.statusCode)"
               icon="mdi-information-outline"
               maxWidth="300px"
               :location="{top: true}"
@@ -224,16 +224,18 @@ export default defineComponent({
       return `${text}<div class="mt-1">${statusCode.value} - ${statusCode.description}</div>`
     }, '')
     const getHelpText = (item: Transaction) => {
-      if (item?.statusCode === InvoiceStatus.REFUND_REQUESTED) {
-        return 'We are processing your refund request.<br/>It may take up to 7 business days to refund your total amount.'
+      switch (item?.statusCode) {
+        case InvoiceStatus.REFUND_REQUESTED:
+          return 'We are processing your refund request.<br/>It may take up to 7 business days to refund your total amount.'
+        case InvoiceStatus.REFUNDED:
+          return '$' + (item?.total?.toFixed(2) || '') + ' has been refunded to the account used for this transaction.'
+        case InvoiceStatus.CREDITED:
+          return '$' + (item?.total?.toFixed(2) || '') + ' has been credited to the account used for this transaction.'
+        case InvoiceStatus.OVERDUE:
+          return 'Your monthly statement is overdue.<br/>Please make your payment as soon as possible.'
+        default:
+          return ''
       }
-      if (item?.statusCode === InvoiceStatus.REFUNDED) {
-        return '$' + (item?.total?.toFixed(2) || '') + ' has been refunded to the account used for this transaction.'
-      }
-      if (item?.statusCode === InvoiceStatus.OVERDUE) {
-        return 'Your monthly statement is overdue.<br/>Please make your payment as soon as possible.'
-      }
-      return ''
     }
 
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)

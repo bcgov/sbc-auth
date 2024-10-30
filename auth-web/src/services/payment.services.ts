@@ -347,7 +347,7 @@ export default class PaymentService {
     const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/payment`
     return axios.post(url, bodyParams)
   }
-  
+
   static async isValidRedirectUrl (redirectUrl: string): AxiosPromise<boolean> {
     const body = {
       redirectUrl: redirectUrl

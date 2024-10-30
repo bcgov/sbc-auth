@@ -513,7 +513,8 @@ export enum PaymentTypes {
     ONLINE_BANKING = 'ONLINE_BANKING',
     PAD = 'PAD',
     EJV = 'EJV',
-    WIRE = 'WIRE'
+    WIRE = 'WIRE',
+    CREDIT = 'CREDIT'
 }
 
 export enum paymentErrorType {
