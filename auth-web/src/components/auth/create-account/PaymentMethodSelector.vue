@@ -159,7 +159,7 @@ export default defineComponent({
           case 409:
             break
           case 400:
-            errorMessage.value = err.response.data.message
+            errorMessage.value = err.response.data.message?.detail || err.response.data.message
             break
           default:
             errorMessage.value = 'An error occurred while attempting to create your account.'

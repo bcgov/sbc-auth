@@ -159,10 +159,10 @@ export default class BcolLogin extends Vue {
         this.isLoading = false
         switch (err.response.status) {
           case 409:
-            this.errorMessage = err.response.data.message
+            this.errorMessage = err.response.data.message?.detail || err.response.data.message
             break
           case 400:
-            this.errorMessage = err.response.data.message
+            this.errorMessage = err.response.data.message?.detail || err.response.data.message
             break
           default:
             this.errorMessage = 'An error occurred while attempting to create your account.'
