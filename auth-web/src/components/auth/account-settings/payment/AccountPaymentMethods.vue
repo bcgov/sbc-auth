@@ -373,10 +373,10 @@ export default defineComponent({
           state.paymentMethodChanged = false
           switch (error.response.status) {
             case 409:
-              state.errorMessage = error.response.data.message
+              state.errorMessage = error.response.data.message?.detail || error.response.data.message
               break
             case 400:
-              state.errorMessage = error.response.data.message
+              state.errorMessage = error.response.data.message?.detail || error.response.data.message
               break
             default:
               state.errorMessage = 'An error occurred while attempting to create your account.'
@@ -392,6 +392,7 @@ export default defineComponent({
     function setBcolInfo (bcolProfile: BcolProfile) {
       state.bcolInfo = bcolProfile
       emit('emit-bcol-info', state.bcolInfo)
+      state.paymentMethodChanged = true
     }
 
     onMounted(async () => {
