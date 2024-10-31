@@ -385,7 +385,7 @@ export default defineComponent({
         { text: 'Date Submitted', value: 'submissionDate' },
         { text: 'NR Number', value: 'nrNumber' },
         { text: 'Identifying Number', value: 'identifier' },
-        { text: 'Contact Email', value: 'officeEmail' },
+        { text: 'Contact Email', value: 'contactEmail' },
         { text: 'Status', value: 'status' },
         { text: 'Actions', value: 'action' }
       ],
@@ -412,7 +412,7 @@ export default defineComponent({
         endDate: '',
         nrNumber: '',
         identifier: '',
-        officeEmail: '',
+        contactEmail: '',
         status: ['AWAITING_REVIEW', 'CHANGE_REQUESTED', 'RESUBMITTED'],
         sortBy: 'submissionDate',
         sortDesc: false
@@ -505,7 +505,7 @@ export default defineComponent({
         endDate: '',
         nrNumber: '',
         identifier: '',
-        officeEmail: '',
+        contactEmail: '',
         status: []
       }
     }
@@ -541,7 +541,7 @@ export default defineComponent({
       return params.startDate.length > 0 ||
                 params.nrNumber.length > 0 ||
                 params.identifier.length > 0 ||
-                params.officeEmail.length > 0 ||
+                params.contactEmail.length > 0 ||
                 params.status.length > 0
     }
 
