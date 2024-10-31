@@ -19,7 +19,7 @@ export interface ContinuationReviewResultIF {
 
 /** The Continuation Review API response. */
 export interface ContinuationReviewIF {
-  officeEmail: string
+  contactEmail: string
   creationDate: string // 'YYYY-MM-DDTHH:MM.SS.000+00:00'
   filingId: number
   filingLink: string // URL for the continuation in filing
@@ -81,7 +81,7 @@ export interface ReviewFilterParams {
     limit?: number
     nrNumber?: string
     identifier?: string
-    officeEmail?: string
+    contactEmail?: string
     decisionMadeBy?: string
     status?: string[]
     sortBy?: string
