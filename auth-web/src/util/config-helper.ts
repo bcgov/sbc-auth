@@ -46,6 +46,10 @@ export default class ConfigHelper {
     return `${import.meta.env.VUE_APP_REGISTRY_HOME_URL}dashboard`
   }
 
+  static getBcrosDocumentsUiURL () {
+    return `${import.meta.env.VUE_APP_DOCUMENTS_UI_URL}`
+  }
+
   static getBcrosURL () {
     return `${ConfigHelper.getSelfURL()}/signin/bcros/`
   }

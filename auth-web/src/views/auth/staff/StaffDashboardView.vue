@@ -265,53 +265,30 @@
       </template>
     </BaseVExpansionPanel>
 
-    <!-- Involuntary Dissolution -->
-    <v-card
-      v-if="showInvoluntaryDissolutionTile"
-      class="mt-4 pa-8"
-    >
-      <v-row
-        align="center"
-        justify="space-between"
+    <!-- Feature Launch Tiles: ie Involuntary Dissolution, Document Record Service -->
+    <v-row>
+      <v-col
+        v-for="tile in launchTileConfig"
+        :key="tile.title"
+        cols="6"
       >
-        <v-col>
-          <header>
-            <h2 class="mb-0">
-              Involuntary Dissolution
-            </h2>
-            <p class="mt-3 mb-0">
-              Set up and manage automation for Involuntary Dissolution of businesses
-            </p>
-          </header>
-        </v-col>
-        <v-col cols="auto">
-          <v-btn
-            id="involuntary-dissolution-button"
-            class="mr-4"
-            color="primary"
-            outlined
-            dark
-            large
-            @click="goToInvoluntaryDissolution()"
-          >
-            <span>Manage Involuntary Dissolution</span>
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
+        <LaunchTile :tileConfig="tile" />
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
 <script lang="ts">
+import { BaseVExpansionPanel, LaunchTile } from '@/components'
 import { ComputedRef, Ref, computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
-import { BaseVExpansionPanel } from '@/components'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import ContinuationApplications from '@/components/auth/staff/continuation-application/ContinuationApplications.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { LaunchTileConfigIF } from '@/models/common'
 import { Organization } from '@/models/Organization'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import SafeEmailView from '@/views/auth/staff/SafeEmailView.vue'
@@ -337,11 +314,15 @@ interface StaffDashboardViewI {
   isFasDashboardEnabled: ComputedRef<boolean>
   showBusSearchlink: ComputedRef<boolean>
   registrySearchUrl: ComputedRef<string>
+  showDrsTile: ComputedRef<boolean>
+  documentsUiUrl: ComputedRef<string>
+  showInvoluntaryDissolutionTile: ComputedRef<boolean>
 }
 
 export default defineComponent({
   name: 'StaffDashboardView',
   components: {
+    LaunchTile,
     BaseVExpansionPanel,
     SafeEmailView,
     GLCodesListView,
@@ -378,10 +359,13 @@ export default defineComponent({
       errorMessage: '',
       isFasDashboardEnabled: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
       registrySearchUrl: computed((): string => ConfigHelper.getRegistrySearchUrl()),
+      documentsUiUrl: computed((): string => ConfigHelper.getBcrosDocumentsUiURL()),
       searchActive: false,
       searchedBusinessNumber: '',
       showBusSearchlink: computed((): boolean => true),
-      showInvoluntaryDissolutionTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableInvoluntaryDissolution) || false)
+      showInvoluntaryDissolutionTile: computed((): boolean =>
+        LaunchDarklyService.getFlag(LDFlags.EnableInvoluntaryDissolution) || false),
+      showDrsTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableDRSLookup) || false)
     }) as unknown) as StaffDashboardViewI
 
     const isFormValid = () => localVars.businessIdentifier && searchBusinessForm.value?.validate()
@@ -389,6 +373,26 @@ export default defineComponent({
     const goToInvoluntaryDissolution = () => root.$router.push(`/staff/involuntary-dissolution`)
 
     const goToManageBusiness = () => root.$router.push(`/account/${currentOrganization.value?.id}/business`)
+
+    const launchTileConfig: Array<LaunchTileConfigIF> = [
+      {
+        showTile: localVars.showInvoluntaryDissolutionTile,
+        image: 'icon-involuntary-dissolution.svg',
+        title: 'Involuntary Dissolution',
+        description: 'Set up and manage automation for Involuntary Dissolution of businesses',
+        action: () => { goToInvoluntaryDissolution() },
+        actionLabel: 'Manage Involuntary Dissolution'
+      },
+      {
+        showTile: localVars.showDrsTile,
+        image: 'icon-drs.svg',
+        title: 'Document Record Service',
+        description: 'Use our document record service to create a new record or search for existing ones. To edit a ' +
+          'record, simply search for and open the document record.',
+        href: localVars.documentsUiUrl,
+        actionLabel: 'Open'
+      }
+    ]
 
     const updateCurrentBusiness = async () => {
       try {
@@ -465,6 +469,7 @@ export default defineComponent({
       searchBusinessForm,
       emailToAdd,
       addEmail,
+      launchTileConfig,
       ...toRefs(localVars)
     }
   }
