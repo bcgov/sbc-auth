@@ -49,7 +49,7 @@ export default defineComponent({
           filled
           dark
           large
-          :href="tileConfig.href ? tileConfig.href : null"
+          :href="tileConfig.href || null"
           @click="!tileConfig.href ? tileConfig.action() : null"
         >
           <span>
