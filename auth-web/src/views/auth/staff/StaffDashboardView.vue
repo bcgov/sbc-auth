@@ -315,7 +315,7 @@ interface StaffDashboardViewI {
   showBusSearchlink: ComputedRef<boolean>
   registrySearchUrl: ComputedRef<string>
   showDrsTile: ComputedRef<boolean>
-  documentsUiUrl: ComputedRef<string>
+  documentsUiUrl: string
   showInvoluntaryDissolutionTile: ComputedRef<boolean>
 }
 

@@ -12,6 +12,9 @@ export default defineComponent({
   },
   setup (props) {
     const localVars = (reactive({
+      tileUrl: computed(() => {
+        return props.tileConfig?.href ? new URL(props.tileConfig.href, import.meta.url) : null
+      }),
       imgUrl: computed(() => new URL(`/src/assets/img/${props.tileConfig.image}`, import.meta.url))
     }))
 
@@ -49,7 +52,7 @@ export default defineComponent({
           filled
           dark
           large
-          :href="tileConfig.href || null"
+          :href="tileUrl"
           @click="!tileConfig.href ? tileConfig.action() : null"
         >
           <span>

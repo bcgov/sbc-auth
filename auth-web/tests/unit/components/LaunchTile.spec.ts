@@ -9,7 +9,7 @@ const mockTileConfig: LaunchTileConfigIF = {
   image: 'icon-drs.svg',
   title: 'Document Record Service',
   description: 'Use our document record service to create a new record or search for existing ones.',
-  href: 'http://example.com',
+  href: 'http://example.com/',
   actionLabel: 'Open',
   action: vi.fn(() => 'action called')
 }
@@ -46,9 +46,6 @@ describe('LaunchTile.vue', () => {
   })
 
   it('calls the action method when button is clicked and href is not provided', async () => {
-    // Reset the mock function
-    mockTileConfig.action.mockClear()
-
     // Update the props
     await wrapper.setProps({
       tileConfig: { ...mockTileConfig, href: null }

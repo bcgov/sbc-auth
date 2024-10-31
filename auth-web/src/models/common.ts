@@ -6,7 +6,7 @@ export interface LaunchTileConfigIF {
   image: string
   title: string
   description: string
-  href?: ComputedRef<string>
+  href?: string
   action?: () => void
   actionLabel: string
 }
