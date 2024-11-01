@@ -484,6 +484,7 @@ export enum LDFlags {
     EnableAffiliationDelegation = 'enable-affiliation-delegation',
     EnableCreditCardPremium = 'enable-credit-card-premium',
     EnableEFTBalanceByPAD = 'enable-eft-balance-by-pad',
+    EnableDRSLookup = 'enable-drs-lookup', // Document Record Services
 }
 
 export enum DateFilterCodes {
