@@ -44,7 +44,21 @@
         text
         :type="'error'"
       >
-        Partial Refunds can only be applied to credit card invoices.
+        Partial Refunds can only be applied to credit card(DIRECT_PAY) invoices.
+      </v-alert>
+      <v-alert
+        v-if="invoiceRefund > 0"
+        id="refunded-warning"
+        class="mt-4"
+        border="left"
+        dense
+        outlined
+        prominent
+        shaped
+        text
+        :type="'error'"
+      >
+        This invoice has already been refunded for an amount of {{ formatAmount(invoiceRefund) }} previously.
       </v-alert>
       <div
         v-if="refundType === RefundType.PARTIAL"
@@ -81,7 +95,7 @@
                   v-model.number="item.filingFees"
                   type="number"
                   prefix="$"
-                  :suffix="`/ $${item.filingFeesOriginal}`"
+                  :suffix="`/ ${formatAmount(item.filingFeesOriginal)}`"
                   :disabled="disableFeeInputs() || isRefundItemAdded(index)"
                   :rules="[validateRefundFeeAmount(item.filingFeesOriginal)]"
                   dense
@@ -93,7 +107,7 @@
                   v-model.number="item.priorityFees"
                   type="number"
                   prefix="$"
-                  :suffix="`/ $${item.priorityFeesOriginal}`"
+                  :suffix="`/ ${formatAmount(item.priorityFeesOriginal)}`"
                   :disabled="disableFeeInputs() || isRefundItemAdded(index)"
                   :rules="[validateRefundFeeAmount(item.priorityFeesOriginal)]"
                   dense
@@ -105,7 +119,7 @@
                   v-model.number="item.futureEffectiveFees"
                   type="number"
                   prefix="$"
-                  :suffix="`/ $${item.futureEffectiveFeesOriginal}`"
+                  :suffix="`/ ${formatAmount(item.futureEffectiveFeesOriginal)}`"
                   :disabled="disableFeeInputs() || isRefundItemAdded(index)"
                   :rules="[validateRefundFeeAmount(item.futureEffectiveFeesOriginal)]"
                   dense
@@ -117,7 +131,7 @@
                   v-model.number="item.serviceFees"
                   type="number"
                   prefix="$"
-                  :suffix="`/ $${item.serviceFeesOriginal}`"
+                  :suffix="`/ ${formatAmount(item.serviceFeesOriginal)}`"
                   :disabled="disableFeeInputs() || isRefundItemAdded(index)"
                   :rules="[validateRefundFeeAmount(item.serviceFeesOriginal)]"
                   dense
@@ -173,10 +187,10 @@
           >
             <td>{{ item + 1 }}</td>
             <td>{{ paymentLineItems[item].description }}</td>
-            <td>${{ paymentLineItems[item].filingFees }}</td>
-            <td>${{ paymentLineItems[item].priorityFees }}</td>
-            <td>${{ paymentLineItems[item].futureEffectiveFees }}</td>
-            <td>${{ paymentLineItems[item].serviceFees }}</td>
+            <td>{{ formatAmount(paymentLineItems[item].filingFees) }}</td>
+            <td>{{ formatAmount(paymentLineItems[item].priorityFees) }}</td>
+            <td>{{ formatAmount(paymentLineItems[item].futureEffectiveFees) }}</td>
+            <td>{{ formatAmount(paymentLineItems[item].serviceFees) }}</td>
           </tr>
         </tbody>
       </v-simple-table>
@@ -220,6 +234,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, nextTick, reactive, toRefs, watch } from '@vue/composition-api'
+import CommonUtils from '@/util/common-util'
 import { Invoice } from '@/models/invoice'
 import { PaymentTypes } from '@/util/constants'
 import { useOrgStore } from '@/stores/org'
@@ -254,6 +269,7 @@ export default defineComponent({
       invoiceId: '',
       invoicePaymentMethod: '',
       invoicePaid: 0,
+      invoiceRefund: 0,
       paymentLineItems: [],
       refundItems: [],
       orgStore: useOrgStore(),
@@ -275,7 +291,8 @@ export default defineComponent({
 
     const validateRefundFeeAmount = (maxAmount: number) => (value: number) => {
       if (!state.shouldValidate) return true
-      return (value <= maxAmount) || `Refund amount exceeds $${maxAmount}`
+      if (value > maxAmount) return `Refund amount exceeds $${maxAmount}`
+      return (value >= 0) || 'Refund amount cannot be negative.'
     }
 
     function showRefundCreditCardError () {
@@ -286,14 +303,14 @@ export default defineComponent({
     function disableFeeInputs () {
       return state.refundType === RefundType.FULL ||
           state.invoicePaymentMethod !== PaymentTypes.DIRECT_PAY ||
-          state.disableSubmit
+          state.disableSubmit || state.invoiceRefund > 0
     }
 
     function disablePartialRefundAction (item: any) {
-      return item.filingFees > item.filingFeesOriginal ||
-          item.priorityFees > item.priorityFeesOriginal ||
-          item.futureEffectiveFees > item.futureEffectiveFeesOriginal ||
-          item.serviceFees > item.serviceFeesOriginal
+      return item.filingFees > item.filingFeesOriginal || item.filingFees < 0 ||
+          item.priorityFees > item.priorityFeesOriginal || item.priorityFees < 0 ||
+          item.futureEffectiveFees > item.futureEffectiveFeesOriginal || item.futureEffectiveFees < 0 ||
+          item.serviceFees > item.serviceFeesOriginal || item.serviceFees < 0
     }
 
     function showPartialRefundAction () {
@@ -311,6 +328,7 @@ export default defineComponent({
 
     function updateInvoiceState (invoice: any) {
       state.invoicePaid = invoice.paid
+      state.invoiceRefund = invoice.refund
       state.invoicePaymentMethod = invoice.paymentMethod
       state.paymentLineItems = invoice.lineItems ? updateInvoiceLineItems(invoice.lineItems) : []
     }
@@ -416,7 +434,8 @@ export default defineComponent({
 
     const isRefundSubmitDisabled = computed(() => {
       return state.refundComment.trim().length === 0 || state.disableSubmit ||
-        (state.refundType === RefundType.PARTIAL && state.refundItems.length === 0)
+        (state.refundType === RefundType.PARTIAL && state.refundItems.length === 0) ||
+          state.invoiceRefund > 0
     })
 
     watch(() => state.invoiceId, () => {
@@ -439,7 +458,8 @@ export default defineComponent({
       showPartialRefundAction,
       disablePartialRefundAction,
       showRefundCreditCardError,
-      headers
+      headers,
+      formatAmount: CommonUtils.formatAmount
     }
   }
 })
