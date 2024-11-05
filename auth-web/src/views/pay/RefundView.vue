@@ -366,11 +366,13 @@ export default defineComponent({
           ]
 
           feeTypes.forEach(fee => {
-            refundPayload.refundRevenue.push({
-              paymentLineItemId: item.id,
-              refundAmount: parseFloat(item[fee.key]),
-              refundType: fee.type
-            })
+            if (item[fee.key] > 0) {
+              refundPayload.refundRevenue.push({
+                paymentLineItemId: item.id,
+                refundAmount: parseFloat(item[fee.key]),
+                refundType: fee.type
+              })
+            }
           })
         })
       }
