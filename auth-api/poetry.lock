@@ -1758,7 +1758,7 @@ packaging = ">=17.0"
 [package.extras]
 dev = ["marshmallow[tests]", "pre-commit (>=3.5,<4.0)", "tox"]
 docs = ["alabaster (==1.0.0)", "autodocsumm (==0.2.13)", "sphinx (==8.0.2)", "sphinx-issues (==4.1.0)", "sphinx-version-warning (==1.1.2)"]
-tests = ["pytest", "pytz", "simplejson"]
+tests = ["pytest", "simplejson"]
 
 [[package]]
 name = "marshmallow-sqlalchemy"
@@ -3319,4 +3319,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "8ce6ca94ca52623956d94232a80831d42d98a03911a066d8f325700089e8cc77"
+content-hash = "21d49a011acfb61caf6cda32417fd43bdc009f5e0516e381ccad01ae5fe32491"
