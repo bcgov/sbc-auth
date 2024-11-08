@@ -179,6 +179,8 @@ export default defineComponent({
 
     async function onRefund (refund: any) {
       state.lastRefundId = Number(refund.id)
+      await loadShortname(props.shortNameId)
+      updateState()
     }
 
     async function onLinkAccount (account: any, results: Array<any>) {
