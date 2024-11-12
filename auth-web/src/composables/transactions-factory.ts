@@ -69,7 +69,7 @@ export const useTransactions = () => {
 
     try {
       const response = await PaymentService.getTransactions(
-        currentOrganization.value.id, transactions.filters, viewAll.value)
+        currentOrganization.value.id, transactions.filters, viewAll.value, transactions.totalResults)
       if (response?.data) {
         transactions.results = response.data.items || []
         transactions.totalResults = response.data.total

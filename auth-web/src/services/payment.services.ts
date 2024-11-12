@@ -103,13 +103,17 @@ export default class PaymentService {
     })
   }
 
-  static getTransactions (accountId: number, filterParams: TransactionFilterParams, viewAll = false): AxiosPromise<TransactionListResponse> {
+  static getTransactions (accountId: number, filterParams: TransactionFilterParams,
+    viewAll = false, count = 0): AxiosPromise<TransactionListResponse> {
     const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
     }
     if (filterParams.pageLimit) {
       params.append('limit', filterParams.pageLimit.toString())
+    }
+    if (count !== 0) {
+      params.append('count', count.toString())
     }
     if (viewAll) params.append('viewAll', `${viewAll}`)
 
