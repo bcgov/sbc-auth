@@ -1,4 +1,4 @@
-@import '$assets/scss/theme.scss';
+@import '@/assets/scss/theme.scss';
 .fas-search {
   .text-input-style input {
     color: #212529!important;
@@ -20,11 +20,6 @@
   .header-bg-color {
     background-color: $BCgovBlue0;
   }
-
-  //@at-root
-  // .text-input-style {
-  //   height: 41px !important;
-  // }
 
   .clear-filter-button {
     padding: 7px !important;
@@ -48,7 +43,6 @@
     th {
       font-size: 14px;
       font-weight: bold !important;
-      // color: $BCgovBlack !important;
       min-width: 130px;
       padding: 18px 3px 18px 3px !important;
       border-bottom: thin solid rgba(0, 0, 0, 0.12);
