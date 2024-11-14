@@ -364,8 +364,8 @@ export default defineComponent({
       searchedBusinessNumber: '',
       showBusSearchlink: computed((): boolean => true),
       showInvoluntaryDissolutionTile: computed((): boolean =>
-        LaunchDarklyService.getFlag(LDFlags.EnableInvoluntaryDissolution) || true),
-      showDrsTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableDRSLookup) || true)
+        LaunchDarklyService.getFlag(LDFlags.EnableInvoluntaryDissolution) || false),
+      showDrsTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableDRSLookup) || false)
     }) as unknown) as StaffDashboardViewI
 
     const isFormValid = () => localVars.businessIdentifier && searchBusinessForm.value?.validate()
