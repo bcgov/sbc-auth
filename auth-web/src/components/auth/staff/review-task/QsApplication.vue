@@ -77,7 +77,7 @@
         </v-col>
       </v-row>
       <v-row
-        v-if="isManufacturerApplication"
+        v-if="isManufacturerApplication || isDealerApplication"
         data-test="qs-mf-location-row"
       >
         <v-col class="cols-12 col-sm-3 py-2">
@@ -85,10 +85,10 @@
         </v-col>
         <v-col class="py-2">
           <BaseAddressForm
-            v-if="qsApplicantData.mfLocation"
+            v-if="qsApplicantData.mfLocation || qsApplicantData.locationAddress"
             :schema="null"
             :editing="false"
-            :address="formatAddress(qsApplicantData.mfLocation)"
+            :address="formatAddress(qsApplicantData.mfLocation || qsApplicantData.locationAddress)"
             data-test="qs-mf-location"
           />
         </v-col>
@@ -273,7 +273,8 @@ export default defineComponent({
       }),
       taskUserContact: computed((): Contact => props.taskDetails?.user?.contacts[0]),
       isLawyerNotaryApplication: computed((): boolean => props.taskDetails?.type === TaskType.MHR_LAWYER_NOTARY),
-      isManufacturerApplication: computed((): boolean => props.taskDetails?.type === TaskType.MHR_MANUFACTURERS)
+      isManufacturerApplication: computed((): boolean => props.taskDetails?.type === TaskType.MHR_MANUFACTURERS),
+      isDealerApplication: computed((): boolean => props.taskDetails?.type === TaskType.MHR_DEALERS)
     })
 
     /**
