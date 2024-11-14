@@ -58,10 +58,8 @@ class ApiGateway:
         email = cls._get_email_id(org_id, env)
         if not cls._consumer_exists(email, env):  # If the account doesn't have api access, add it
             # If env is sandbox; then create a sandbox payment account.
-            if env == "sandbox":
-                cls._create_sandbox_payment_account(org)
-            elif env != "prod":
-                cls._create_payment_account(org)              
+            if env != "prod":
+                cls._create_payment_account(org)
             cls._create_consumer(name, org, env=env)
             org.has_api_access = True
             org.save()
@@ -215,43 +213,13 @@ class ApiGateway:
     @classmethod
     @user_context
     def _create_payment_account(cls, org: OrgModel, **kwargs):
-        """Create a payment account for environment.
-
-        Steps:
-        - Get the payment account details.
-        - Mask the details and call pay endpoint to create a account.
-        """
-        if not current_app.config.get("PAY_API_URL"):
-            logger.warning("URL not provided, skipping pay account creation")
-            return
-        user: UserContext = kwargs["user_context"]
-        pay_account = cls._get_pay_account(org, user)
-        pay_request = {
-            "accountId": org.id,
-            "accountName": f"{org.name}-{org.branch_name or ''}",
-            "padTosAcceptedBy": pay_account.get("padTosAcceptedBy", ""),
-            "bcolAccountNumber": org.bcol_account_id or "",
-            "bcolUserId": org.bcol_user_id or "",
-            "paymentInfo": {
-                "methodOfPayment": pay_account.get("futurePaymentMethod", None) or pay_account["paymentMethod"],
-                "bankInstitutionNumber": "000",  # Dummy values
-                "bankTransitNumber": "00000",  # Dummy values
-                "bankAccountNumber": "0000000",  # Dummy values
-            },
-            "contactInfo": {},
-        }
-
-        cls._create_pay_account(pay_request, user)
-
-    @classmethod
-    def _create_sandbox_payment_account(cls, org: OrgModel, **kwargs):
         """Create a payment account for sandbox environment.
 
         Steps:
         - Get the payment account details (non sandbox).
         - Mask the details and call pay sandbox endpoint to create a sandbox account.
         """
-        if not current_app.config.get("PAY_API_SANDBOX_URL"):
+        if not current_app.config.get("PAY_API_URL"):
             logger.warning("Sandbox URL not provided, skipping sandbox pay account creation")
             return
         user: UserContext = kwargs["user_context"]
@@ -272,19 +240,11 @@ class ApiGateway:
         }
 
         cls._create_sandbox_pay_account(pay_request, user)
-    
-    @classmethod
-    def _create_pay_account(cls, pay_request, user):
-        logger.info("Creating Payload %s", pay_request)
-        pay_accounts_endpoint = f"{current_app.config.get('PAY_API_URL')}/accounts"
-        RestService.post(
-            endpoint=pay_accounts_endpoint, token=user.bearer_token, data=pay_request, raise_for_status=True
-        )
 
     @classmethod
     def _create_sandbox_pay_account(cls, pay_request, user):
         logger.info("Creating Sandbox Payload %s", pay_request)
-        pay_sandbox_accounts_endpoint = f"{current_app.config.get('PAY_API_SANDBOX_URL')}/accounts?sandbox=true"
+        pay_sandbox_accounts_endpoint = f"{current_app.config.get('PAY_API_URL')}/accounts?sandbox=true"
         RestService.post(
             endpoint=pay_sandbox_accounts_endpoint, token=user.bearer_token, data=pay_request, raise_for_status=True
         )
