@@ -7,7 +7,7 @@
       :setStartDate="searchParams.startDate"
       @submit="updateDateRange($event)"
     />
-    <v-form class="fas-search account-pending-search">
+    <v-form class="datatable-search account-pending-search">
       <v-row
         dense
         class="row-margin"

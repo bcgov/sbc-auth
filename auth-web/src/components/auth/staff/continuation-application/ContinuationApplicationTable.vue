@@ -9,7 +9,7 @@
       @submit="updateDateRange($event)"
     />
 
-    <v-form class="fas-search continuation-review-search">
+    <v-form class="datatable-search continuation-review-search">
       <v-row
         dense
         class="row-margin"
@@ -636,7 +636,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
-// Note this uses .fas-search
+// Note this uses .datatable-search
 @import '@/assets/scss/search.scss';
 
 // Vuetify Override
