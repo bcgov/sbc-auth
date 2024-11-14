@@ -12,8 +12,8 @@ export default defineComponent({
   },
   setup (props) {
     const localVars = (reactive({
-      tileUrl: computed(() => {
-        return props.tileConfig?.href ? new URL(props.tileConfig.href, import.meta.url) : null
+      tileUrl: computed((): string => {
+        return props.tileConfig?.href ? new URL(props.tileConfig?.href, import.meta.url).toString() : null
       }),
       imgUrl: computed(() => new URL(`/src/assets/img/${props.tileConfig.image}`, import.meta.url))
     }))
@@ -30,24 +30,33 @@ export default defineComponent({
     v-if="tileConfig.showTile"
     class="launch-card"
   >
-    <v-row>
-      <v-col cols="auto">
+    <v-row
+      noGutters
+      class="tile-content"
+    >
+      <v-col cols="2">
         <img
           :src="imgUrl"
           alt=""
           class="launch-image"
         >
       </v-col>
-      <v-col>
-        <header>
-          <h2>{{ tileConfig.title }}</h2>
-          <p class="my-3">
-            {{ tileConfig.description }}
-          </p>
-        </header>
+      <v-col class="pl-0">
+        <h2>{{ tileConfig.title }}</h2>
+        <p class="my-3">
+          {{ tileConfig.description }}
+        </p>
+      </v-col>
+    </v-row>
+
+    <v-row
+      noGutters
+      class="mt-2"
+    >
+      <v-col cols="2" />
+      <v-col class="ml-0">
         <v-btn
           id="tile-btn"
-          class="mt-1"
           color="primary"
           filled
           dark
@@ -67,11 +76,14 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .launch-card {
-  height: 225px;
-  padding: 14px 26px;
+  height: 100%;
+  padding: 30px;
 }
 .launch-image {
   width: 50px;
   height: auto;
+}
+.tile-content  {
+  height: 70%;
 }
 </style>

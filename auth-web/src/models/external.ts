@@ -11,7 +11,8 @@ export interface QualifiedSupplierApplicant {
   phoneExtension?: string
   phoneNumber?: string
   termsAccepted: boolean
-  mfLocation?: Address
+  mfLocation?: Address // Qs Manufacturer Location Address
+  locationAddress?: Address // Qs Dealer Location Address
 }
 
 // Interface describing response from MHR api for Qualified Supplier applicant info
