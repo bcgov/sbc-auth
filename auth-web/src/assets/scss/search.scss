@@ -1,0 +1,147 @@
+@import '@/assets/scss/theme.scss';
+.datatable-search {
+  .text-input-style input {
+    color: #212529!important;
+  }
+
+  .button-search {
+    display: flex;
+    height: 62% !important;
+    width: 100%;
+  }
+  .advanced-search {
+    color: var(--v-primary-base) !important;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .row-margin {
+    margin: -5px !important;
+  }
+  .header-bg-color {
+    background-color: $BCgovBlue0;
+  }
+
+  .clear-filter-button {
+    padding: 7px !important;
+  }
+
+  .clear-filter {
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.5;
+  }
+
+  .header-action,
+  .action {
+    width: 100px !important;
+    position: sticky;
+    left: 0;
+    right: 0;
+    background-color: $BCgovInputBG;
+  }
+  .header-row-1 {
+    th {
+      font-size: 14px;
+      font-weight: bold !important;
+      min-width: 130px;
+      padding: 18px 3px 18px 3px !important;
+      border-bottom: thin solid rgba(0, 0, 0, 0.12);
+    }
+
+    th:first-child {
+      padding-left: 14px !important;
+    }
+
+    th:last-child {
+      padding-right: 20px !important;
+    }
+
+    // colum width
+    .header {
+      &-routing-slip {
+        min-width: 185px;
+      }
+      &-receiptNumber {
+        min-width: 147px;
+      }
+      &-date {
+        min-width: 150px;
+      }
+      &-status {
+        min-width: 135px;
+      }
+      &-businessIdentifier {
+        min-width: 153px;
+      }
+      &-accountName {
+        min-width: 171px;
+      }
+      &-total {
+        min-width: 130px;
+      }
+      &-cheque-receipt-number {
+        min-width: 185px;
+      }
+    }
+  }
+
+  .v-text-field--placeholder input::placeholder{
+    color: #495057!important;
+  }
+
+  .v-text-field--outlined > .v-input__control > .v-input__slot {
+    min-height: 41px !important;
+  }
+  .no-data {
+    border-bottom: thin solid rgba(0, 0, 0, 0.12);
+    margin: 0px -15px;
+  }
+
+  // style to match design, small inputs intable
+  .header-row-2 {
+    th {
+      padding: 18px 3px 18px 3px !important;
+      border-bottom: thin solid rgba(0, 0, 0, 0.12);
+    }
+    th:first-child {
+      padding-left: 14px !important;
+    }
+    .v-label,
+    .v-input {
+      font-size: 14px;
+      font-weight: normal;
+    }
+    .v-text-field .v-input__control .v-input__slot {
+      min-height: auto !important;
+      height: 40px !important;
+    }
+
+    .v-text-field--filled .v-label,
+    .v-text-field--full-width .v-label {
+      top: 10px !important;
+      font-weight: normal;
+    }
+    .v-text-field--enclosed .v-input__append-inner,
+    .v-text-field--enclosed .v-input__append-outer,
+    .v-text-field--enclosed .v-input__prepend-inner,
+    .v-text-field--enclosed .v-input__prepend-outer,
+    .v-text-field--full-width .v-input__append-inner,
+    .v-text-field--full-width .v-input__append-outer,
+    .v-text-field--full-width .v-input__prepend-inner,
+    .v-text-field--full-width .v-input__prepend-outer {
+      margin-top: 10px !important;
+    }
+  }
+  tr.rs-search-result > td {
+    padding: 20px 15px !important;
+  }
+
+  .v-data-table--fixed-header
+    > .v-data-table__wrapper
+    > table
+    > thead
+    > tr
+    > th {
+    z-index: 1 !important;
+  }
+}

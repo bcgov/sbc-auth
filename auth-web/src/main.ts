@@ -23,19 +23,13 @@ import store from '@/stores/vuex'
 import vuetify from './plugins/vuetify'
 
 // eslint-disable-next-line sort-imports
-import Search from 'fas-ui'
-// eslint-disable-next-line sort-imports
 import { LDFlags } from '@/util/constants'
 
-// Important to have this here again, otherwise toRefs gets a weird version from FAS, and doesn't expand .value.
-// Reproducable by taking this import out and clicking on the Manage Business button on the home page.
-// Ultimately when fas-ui, sbc-auth, sbc-common-components get upgraded to Vue 2.7 or Vue 3 this will go away.
 Vue.use(VueCompositionAPI)
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
 
 const i18n = initializeI18n(Vue)
-Vue.use(Search, { store, i18n })
 Vue.use(VueSanitize)
 
 /**
