@@ -213,18 +213,39 @@
       </v-row>
     </v-card>
 
-    <!-- FAS UI  -->
-    <BaseVExpansionPanel
+    <v-card
       v-if="canSearchFAS && isFasDashboardEnabled"
-      info="Search and manage routing slips"
-      title="Fee Accounting System"
-      style="z-index: 0;"
-      class="mb-4"
+      class="mb-4 pa-8"
     >
-      <template #content>
-        <fas-search-component :isLibraryMode="true" />
-      </template>
-    </BaseVExpansionPanel>
+      <v-row
+        align="center"
+        justify="space-between"
+      >
+        <v-col class="grow">
+          <header>
+            <h2 class="mb-0">
+              Fee Accounting System
+            </h2>
+            <p class="mt-3 mb-0">
+              Search and manage routing slips
+            </p>
+          </header>
+        </v-col>
+        <v-col cols="auto">
+          <v-btn
+            id="FAS-button"
+            class="mt-0 mr-4 font-weight-regular"
+            color="primary"
+            outlined
+            dark
+            large
+            @click="navigateToFasDashboard()"
+          >
+            <span>Manage Routing Slips</span>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-card>
 
     <!-- Email Safe List -->
     <BaseVExpansionPanel
@@ -457,6 +478,10 @@ export default defineComponent({
       }
     }
 
+    function navigateToFasDashboard () {
+      window.location.href = `${ConfigHelper.getFasWebUrl()}?openFromAuth=true`
+    }
+
     return {
       businessIdentifierRules,
       formatBusinessIdentifier,
@@ -470,6 +495,7 @@ export default defineComponent({
       emailToAdd,
       addEmail,
       launchTileConfig,
+      navigateToFasDashboard,
       ...toRefs(localVars)
     }
   }
@@ -478,7 +504,7 @@ export default defineComponent({
 
 <style lang="scss" >
 // importing FAS styles need no scope
-@import '~/fas-ui/src/assets/scss/search.scss';
+@import '@/assets/scss/search.scss';
 </style>
 
 <style lang="scss" scoped>

@@ -7,7 +7,7 @@
       :setStartDate="searchParams.startDate"
       @submit="updateDateRange($event)"
     />
-    <v-form class="fas-search account-rejected-search">
+    <v-form class="datatable-search account-rejected-search">
       <v-row
         dense
         class="row-margin"
@@ -364,7 +364,7 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
-@import '~/fas-ui/src/assets/scss/search.scss';
+@import '@/assets/scss/search.scss';
 
 #header-filter-row {
     th {
