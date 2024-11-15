@@ -1,6 +1,6 @@
 steps:
   # install / setup ci
-  - name: node:16.14.2
+  - name: node:20.5.1
     entrypoint: npm
     dir: "auth-web"
     args: ['install']
@@ -15,7 +15,7 @@ steps:
   #
   # Generate the static site
   #
-  - name: node:16.14.2
+  - name: node:20.5.1
     dir: "auth-web"
     entrypoint: npm
     env:
