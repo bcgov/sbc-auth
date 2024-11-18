@@ -38,7 +38,7 @@ from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
@@ -206,7 +206,7 @@ class Affiliation:
     @staticmethod
     def is_authorized(entity: Entity, pass_code: str) -> bool:
         """Return True if user is authorized to create an affiliation."""
-        if Affiliation.is_staff_or_sbc_staff():
+        if Affiliation.has_role_to_skip_auth():
             return True
         if entity.corp_type in ["SP", "GP"]:
             if not pass_code:
@@ -233,7 +233,7 @@ class Affiliation:
         certified_by_name = affiliation_data.certified_by_name
 
         logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
-        user_is_staff = Affiliation.is_staff_or_sbc_staff()
+        user_is_staff = Affiliation.has_role_to_skip_auth()
         if not user_is_staff and (not email and not phone):
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
@@ -580,12 +580,14 @@ class Affiliation:
 
     @staticmethod
     @user_context
-    def is_staff_or_sbc_staff(**kwargs):
+    def has_role_to_skip_auth(**kwargs):
         """Return True if user is staff or sbc staff."""
         user_from_context: UserContext = kwargs["user_context"]
         current_user: UserService = UserService.find_by_jwt_token(silent_mode=True)
-        if user_from_context.is_staff() or (
-            current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)
+        if (
+            user_from_context.has_role(Role.SKIP_AFFILIATION_AUTH.value)
+            or user_from_context.is_staff()
+            or (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier))
         ):
             return True
         return False

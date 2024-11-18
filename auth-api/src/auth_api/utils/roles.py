@@ -40,6 +40,9 @@ class Role(Enum):
     STAFF_MANAGE_BUSINESS = "manage_business"
     STAFF_SUSPEND_ACCOUNTS = "suspend_accounts"
 
+    # Used by Business-AR to create affiliations that may already have a passcode (bypass passcode check)
+    SKIP_AFFILIATION_AUTH = "skip_affiliation_auth"
+
 
 # Membership types
 STAFF = "STAFF"
