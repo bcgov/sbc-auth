@@ -402,7 +402,12 @@ def post_organization_affiliation(org_id):
         else:
             response, status = (
                 AffiliationService.create_affiliation(
-                    org_id, business_identifier, env, request_json.get("passCode"), request_json.get("certifiedByName")
+                    org_id,
+                    business_identifier,
+                    env,
+                    request_json.get("passCode"),
+                    request_json.get("certifiedByName"),
+                    skip_membership_check=_jwt.has_one_of_roles([Role.SKIP_AFFILIATION_AUTH.value]),
                 ).as_dict(),
                 HTTPStatus.CREATED,
             )

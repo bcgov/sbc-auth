@@ -163,14 +163,21 @@ class Affiliation:
         return Affiliation(affiliation).as_dict()
 
     @staticmethod
-    def create_affiliation(org_id, business_identifier, environment=None, pass_code=None, certified_by_name=None):
+    def create_affiliation(
+        org_id,
+        business_identifier,
+        environment=None,
+        pass_code=None,
+        certified_by_name=None,
+        skip_membership_check=False,
+    ):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
-        # Security check below.
-        org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES + (Role.SKIP_AFFILIATION_AUTH.value,))
-        if org is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        if skip_membership_check is False:
+            org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
+            if org is None:
+                raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         if entity is None:
