@@ -168,7 +168,7 @@ class Affiliation:
         # Validate if org_id is valid by calling Org Service.
         logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
         # Security check below.
-        org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
+        org = OrgService.find_by_org_id(org_id, allowed_roles=(*ALL_ALLOWED_ROLES, Role.SKIP_AFFILIATION_AUTH.value))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
