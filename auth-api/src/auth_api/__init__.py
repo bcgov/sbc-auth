@@ -16,6 +16,7 @@
 This module is the API for the Authroization system.
 """
 import os
+import traceback
 
 from flask import Flask
 from flask_cors import CORS
@@ -47,10 +48,10 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
 
     if run_mode == "migration":
         Migrate(app, db)
-        app.logger.info("Running migration upgrade.")
+        logger.info("Running migration upgrade.")
         with app.app_context():
             execute_migrations(app)
-        app.logger.info("Finished migration upgrade.")
+        logger.info("Finished migration upgrade.")
     else:
         flags.init_app(app)
         ma.init_app(app)
@@ -74,7 +75,8 @@ def execute_migrations(app):
         upgrade(directory="migrations", revision="head", sql=False, tag=None)
     except Exception as e:  # NOQA pylint: disable=broad-except
         app.logger.disabled = False
-        app.logger.error("Error processing migrations:", exc_info=True)
+        error_message = f"Error processing migrations: {e}\n{traceback.format_exc()}"
+        logger.error(error_message)
         raise e
 
 
