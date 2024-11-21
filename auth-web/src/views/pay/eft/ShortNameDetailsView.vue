@@ -88,7 +88,7 @@
     />
 
     <ShortNameRefund
-      v-if="displayRefundAlert && canEFTRefund"
+      v-if="canEFTRefund"
       class="mb-12"
       :shortNameDetails="shortNameDetails"
       :unsettledAmount="unsettledAmount"
