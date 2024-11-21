@@ -59,7 +59,7 @@ def worker():
                                     QueueMessageTypes.NSF_LOCK_ACCOUNT.value]:
             process_pay_lock_unlock_event(event_message)
     except Exception as e: # NOQA # pylint: disable=broad-except
-        logger.error('Error processing event: %', str(e))
+        raise e
     # Return a 200, so the event is removed from the Queue
     return {}, HTTPStatus.OK
 
