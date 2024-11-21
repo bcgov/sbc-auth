@@ -46,20 +46,18 @@ def worker():
         # Return a 200, so event is removed from the Queue
         return {}, HTTPStatus.OK
 
-    try:
-        logger.info('Event message received: %s', json.dumps(dataclasses.asdict(event_message)))
-        if is_message_processed(event_message):
-            logger.info('Event message already processed, skipping.')
-            return {}, HTTPStatus.OK
-        if event_message.type == QueueMessageTypes.NAMES_EVENT.value:
-            process_name_events(event_message)
-        elif event_message.type == QueueMessageTypes.ACTIVITY_LOG.value:
-            process_activity_log(event_message.data)
-        elif event_message.type in [QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value,
-                                    QueueMessageTypes.NSF_LOCK_ACCOUNT.value]:
-            process_pay_lock_unlock_event(event_message)
-    except Exception as e: # NOQA # pylint: disable=broad-except
-        raise e
+    logger.info('Event message received: %s', json.dumps(dataclasses.asdict(event_message)))
+    if is_message_processed(event_message):
+        logger.info('Event message already processed, skipping.')
+        return {}, HTTPStatus.OK
+    if event_message.type == QueueMessageTypes.NAMES_EVENT.value:
+        process_name_events(event_message)
+    elif event_message.type == QueueMessageTypes.ACTIVITY_LOG.value:
+        process_activity_log(event_message.data)
+    elif event_message.type in [QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value,
+                                QueueMessageTypes.NSF_LOCK_ACCOUNT.value]:
+        process_pay_lock_unlock_event(event_message)
+
     # Return a 200, so the event is removed from the Queue
     return {}, HTTPStatus.OK
 
