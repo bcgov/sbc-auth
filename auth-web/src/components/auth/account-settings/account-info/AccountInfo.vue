@@ -405,10 +405,7 @@ export default defineComponent({
       state.isBusinessAccount && !(state.accountDetails?.businessSize && state.accountDetails?.businessType)
     ))
 
-    const getWarningMessage = (condition: boolean) => condition
-      ? 'This account info is incomplete. You will not be able to proceed until an account administrator ' +
-          'entered the missing information for this account.'
-      : 'Your account info is incomplete. Please update any missing account details or address.'
+    const warningMessage = 'Your account info is incomplete. Please update any missing account details or address.'
 
     const setup = async () => {
       setAccountDetails()
@@ -417,7 +414,7 @@ export default defineComponent({
         state.originalAddress = currentOrgAddress.value
         if (isBusinessInfoIncomplete.value || state.isAddressInfoIncomplete) {
           state.isCompleteAccountInfo = false
-          state.warningMessage = getWarningMessage(isBusinessInfoIncomplete.value ? state.nameChangeNotAllowed : !state.isAddressEditable)
+          state.warningMessage = warningMessage
         } else {
           state.isCompleteAccountInfo = true
           state.warningMessage = ''

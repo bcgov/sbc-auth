@@ -172,7 +172,7 @@ def get_organization(org_id):
 @bp.route("/<int:org_id>", methods=["PUT"])
 @cross_origin(origins="*")
 @_jwt.has_one_of_roles(
-    [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value, Role.STAFF_MANAGE_ACCOUNTS.value]
+    [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.CHANGE_ADDRESS.value]
 )
 def put_organization(org_id):
     """Update the org specified by the provided id with the request body."""
@@ -182,7 +182,7 @@ def put_organization(org_id):
     if not valid_format:
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
     try:
-        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF, USER))
         if (
             org
             and org.as_dict().get("accessType", None) == AccessType.ANONYMOUS.value
