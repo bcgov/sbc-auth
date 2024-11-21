@@ -45,25 +45,25 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
     CORS(app, resources="*")
     db.init_app(app)
 
-    # if run_mode == "migration":
-    Migrate(app, db)
-    app.logger.info("Running migration upgrade.")
-    with app.app_context():
-        execute_migrations(app)
-    app.logger.info("Finished migration upgrade.")
-    # else:
-    #     flags.init_app(app)
-    #     ma.init_app(app)
-    #     queue.init_app(app)
-    #     mail.init_app(app)
-    #     endpoints.init_app(app)
+    if run_mode == "migration":
+        Migrate(app, db)
+        app.logger.info("Running migration upgrade.")
+        with app.app_context():
+            execute_migrations(app)
+        app.logger.info("Finished migration upgrade.")
+    else:
+        flags.init_app(app)
+        ma.init_app(app)
+        queue.init_app(app)
+        mail.init_app(app)
+        endpoints.init_app(app)
 
-    #     app.after_request(convert_to_camel)
+        app.after_request(convert_to_camel)
 
-    #     ExceptionHandler(app)
-    #     setup_jwt_manager(app, jwt)
-    #     register_shellcontext(app)
-    #     build_cache(app)
+        ExceptionHandler(app)
+        setup_jwt_manager(app, jwt)
+        register_shellcontext(app)
+        build_cache(app)
 
     return app
 
