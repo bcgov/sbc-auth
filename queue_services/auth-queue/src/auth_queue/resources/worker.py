@@ -58,8 +58,8 @@ def worker():
         elif event_message.type in [QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value,
                                     QueueMessageTypes.NSF_LOCK_ACCOUNT.value]:
             process_pay_lock_unlock_event(event_message)
-    except Exception: # NOQA # pylint: disable=broad-except
-        logger.error('Error processing event:', exc_info=True)
+    except Exception as e: # NOQA # pylint: disable=broad-except
+        logger.error('Error processing event: %', str(e))
     # Return a 200, so the event is removed from the Queue
     return {}, HTTPStatus.OK
 
@@ -188,7 +188,7 @@ def process_name_events(event_message: SimpleCloudEvent):
                 and str(auth_account_id).isnumeric():
             logger.info('Account ID received : %s', auth_account_id)
             # Auth account id can be service account value too, so doing a query lookup than find_by_id
-            org: OrgModel = db.session.query(OrgModel).filter(OrgModel.id == auth_account_id).one_or_none()
+            org: OrgModel = db.session.query(OrgModel).filter(OrgModel.id == int(auth_account_id or -1)).one_or_none()
             # If account is present and is not a gov account, then affiliate.
             if org and org.access_type != AccessType.GOVM.value:
                 nr_entity.pass_code_claimed = True
