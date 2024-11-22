@@ -167,7 +167,7 @@ export default defineComponent({
           (details.creditsRemaining > 0 && details.linkedAccountsCount <= 0 &&
               moment(details.lastPaymentReceivedDate).isBefore(moment().subtract(30, 'days')))
       )
-      state.displayRefund = state.displayRefundAlert || details.refundStatus == 'PENDING_APPROVAL'
+      state.displayRefund = state.displayRefundAlert || details.refundStatus === 'PENDING_APPROVAL'
     }
 
     const unsettledAmountHeader = computed<string>(() => {
