@@ -83,6 +83,7 @@ export interface ShortNameDetails {
   creditsRemaining?: number;
   linkedAccountsCount: number;
   lastPaymentReceivedDate: Date;
+  refundStatus: string
 }
 
 export interface EFTRefund {
