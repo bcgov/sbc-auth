@@ -445,9 +445,6 @@ export default defineComponent({
       const { branchName, businessSize, businessType, name, isBusinessAccount } = state.accountDetails
 
       let createRequestBody: CreateRequestBody = {}
-      if (state.baseAddress && state.addressChanged && JSON.stringify(state.originalAddress) !== JSON.stringify(currentOrgAddress.value)) {
-        createRequestBody.mailingAddress = { ...state.baseAddress }
-      }
       if (name !== currentOrganization.value.name) {
         createRequestBody.name = name
       }
@@ -473,13 +470,10 @@ export default defineComponent({
       try {
         await orgStore.updateOrg(createRequestBody)
         if (!(state.isStaff && !isStaffAccount.value)) root.$store.commit('updateHeader')
-        state.addressChanged = false
-        state.originalAddress = currentOrgAddress.value
         if (!isBusinessInfoIncomplete.value && !state.isAddressInfoIncomplete) {
           state.isCompleteAccountInfo = true
           state.warningMessage = ''
         }
-        viewOnlyMode({ component: 'address', mode: true })
         viewOnlyMode({ component: 'account', mode: true })
       } catch (err) {
         switch (err.response.status) {

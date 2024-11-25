@@ -620,7 +620,13 @@ def get_org_payment_info(org_id):
 @bp.route("/<int:org_id>/mailing_address", methods=["PUT"])
 @cross_origin(origins="*")
 @_jwt.has_one_of_roles(
-    [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.CHANGE_ADDRESS.value]
+    [
+        Role.SYSTEM.value,
+        Role.PUBLIC_USER.value,
+        Role.GOV_ACCOUNT_USER.value,
+        Role.STAFF_MANAGE_ACCOUNTS.value,
+        Role.CHANGE_ADDRESS.value,
+    ]
 )
 def put_mailing_address(org_id):
     """Update the mailing address specified by the provided id with the request body."""
