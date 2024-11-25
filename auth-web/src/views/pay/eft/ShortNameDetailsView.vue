@@ -88,7 +88,7 @@
     />
 
     <ShortNameRefund
-      v-if="displayRefundAlert && canEFTRefund"
+      v-if="displayRefund && canEFTRefund"
       class="mb-12"
       :shortNameDetails="shortNameDetails"
       :unsettledAmount="unsettledAmount"
@@ -144,6 +144,7 @@ export default defineComponent({
       snackbarText: '',
       unsettledAmount: '',
       displayRefundAlert: false,
+      displayRefund: false,
       canEFTRefund: computed((): boolean => currentUser.value?.roles?.includes(Role.EftRefund)),
       displayShortNameFinancialDialog: false,
       shortNameFinancialDialogType: '',
@@ -166,6 +167,7 @@ export default defineComponent({
           (details.creditsRemaining > 0 && details.linkedAccountsCount <= 0 &&
               moment(details.lastPaymentReceivedDate).isBefore(moment().subtract(30, 'days')))
       )
+      state.displayRefund = state.displayRefundAlert || details.refundStatus === 'PENDING_APPROVAL'
     }
 
     const unsettledAmountHeader = computed<string>(() => {
