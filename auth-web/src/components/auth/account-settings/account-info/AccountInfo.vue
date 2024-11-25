@@ -170,7 +170,7 @@
               :viewOnlyMode="isAddressViewOnly"
               @update:address="updateAddress"
               @valid="checkBaseAddressValidity"
-              @update:updateDetails="updateDetails"
+              @update:updateDetails="updateOrgMailingAddress"
               @update:resetAddress="resetAddress"
               @update:viewOnlyMode="viewOnlyMode"
             />
@@ -492,6 +492,32 @@ export default defineComponent({
       }
     }
 
+    async function updateOrgMailingAddress () {
+      state.errorMessage = ''
+
+      let createRequestBody: CreateRequestBody = {}
+      if (state.baseAddress && state.addressChanged && JSON.stringify(state.originalAddress) !== JSON.stringify(currentOrgAddress.value)) {
+        createRequestBody.mailingAddress = { ...state.baseAddress }
+      }
+
+      try {
+        await orgStore.updateOrgMailingAddress(createRequestBody)
+        if (!(state.isStaff && !isStaffAccount.value)) root.$store.commit('updateHeader')
+        state.addressChanged = false
+        state.originalAddress = currentOrgAddress.value
+        if (!isBusinessInfoIncomplete.value && !state.isAddressInfoIncomplete) {
+          state.isCompleteAccountInfo = true
+          state.warningMessage = ''
+        }
+        viewOnlyMode({ component: 'address', mode: true })
+      } catch (err) {
+        switch (err.response.status) {
+          default:
+            state.errorMessage = 'An error occurred while attempting to update your mailing address.'
+        }
+      }
+    }
+
     const resetAddress = () => {
       state.baseAddress = state.originalAddress
       viewOnlyMode('address')
@@ -621,7 +647,8 @@ export default defineComponent({
       closeSuspendAccountDialog,
       closeSuspensionCompleteDialog,
       checkBaseAddressValidity,
-      updateAddress
+      updateAddress,
+      updateOrgMailingAddress
     }
   }
 })

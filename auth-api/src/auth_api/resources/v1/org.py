@@ -172,7 +172,7 @@ def get_organization(org_id):
 @bp.route("/<int:org_id>", methods=["PUT"])
 @cross_origin(origins="*")
 @_jwt.has_one_of_roles(
-    [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.CHANGE_ADDRESS.value]
+    [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value, Role.STAFF_MANAGE_ACCOUNTS.value]
 )
 def put_organization(org_id):
     """Update the org specified by the provided id with the request body."""
@@ -612,6 +612,35 @@ def get_org_payment_info(org_id):
     try:
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
         response, status = org.get_payment_info(), HTTPStatus.OK
+    except BusinessException as exception:
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
+    return response, status
+
+
+@bp.route("/<int:org_id>/mailing_address", methods=["PUT"])
+@cross_origin(origins="*")
+@_jwt.has_one_of_roles(
+    [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.CHANGE_ADDRESS.value]
+)
+def put_mailing_address(org_id):
+    """Update the mailing address specified by the provided id with the request body."""
+    request_json = request.get_json()
+    valid_format, errors = schema_utils.validate(request_json, "org")
+    token_info = g.jwt_oidc_token_info
+    if not valid_format:
+        return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
+    try:
+        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF, USER))
+        if (
+            org
+            and org.as_dict().get("accessType", None) == AccessType.ANONYMOUS.value
+            and Role.STAFF_CREATE_ACCOUNTS.value not in token_info.get("realm_access").get("roles")
+        ):
+            return {"message": "The mailing address can only be updated by a staff admin."}, HTTPStatus.UNAUTHORIZED
+        if org:
+            response, status = org.update_org(org_info=request_json).as_dict(), HTTPStatus.OK
+        else:
+            response, status = {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status

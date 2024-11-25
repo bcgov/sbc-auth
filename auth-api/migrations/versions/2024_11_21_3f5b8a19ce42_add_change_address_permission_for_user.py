@@ -8,7 +8,6 @@ Create Date: 2024-11-21 08:19:42.551199
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy import text
 from sqlalchemy.sql import column, table
 
 # revision identifiers, used by Alembic.
@@ -25,14 +24,10 @@ def upgrade():
                               column('membership_type_code', sa.String(length=15)),
                               column('actions', sa.String(length=100)))
 
-    conn = op.get_bind()
-    res = conn.execute(text(f"select max(id) from permissions;"))
-    latest_id = res.fetchall()[0][0]
-    # Insert code values
     op.bulk_insert(
         permissions_table,
         [
-            {"id": (latest_id := latest_id + 1), 'membership_type_code': 'USER', 'actions': 'CHANGE_ADDRESS'}
+            {'membership_type_code': 'USER', 'actions': 'CHANGE_ADDRESS'}
         ]
     )
 
