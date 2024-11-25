@@ -18,7 +18,7 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Dict, List, Tuple
 
-from flask import current_app, g
+from flask import current_app, g, request
 from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -907,7 +907,8 @@ class Org:  # pylint: disable=too-many-public-methods
             task_relationship_type=task_relationship_type, relationship_id=relationship_id
         )
         context_path = f"review-account/{task.id}"
-        app_url = f"{g.get('origin_url', '')}/"
+        app_url = request.environ.get("HTTP_ORIGIN", "localhost")
+
         review_url = f"{app_url}/{context_path}"
         first_name = user.firstname
         last_name = user.lastname
