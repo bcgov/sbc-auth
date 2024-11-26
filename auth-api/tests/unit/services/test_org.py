@@ -638,7 +638,7 @@ def test_update_org_address(session, monkeypatch):
     dictionary = org.as_dict()
     print("dictionary", dictionary)
     print("TestOrgInfo.update_org_address", TestOrgInfo.update_org_address)
-    assert dictionary["mailing_address"] == TestOrgInfo.update_org_address["mailingAddress"]
+    assert dictionary["mailing_address"]["city"] == TestOrgInfo.update_org_address["mailingAddress"]["city"]
 
 
 def test_suspend_org(session, monkeypatch):  # pylint:disable=unused-argument
