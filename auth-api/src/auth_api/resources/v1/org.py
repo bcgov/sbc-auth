@@ -615,3 +615,30 @@ def get_org_payment_info(org_id):
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status
+
+
+@bp.route("/<int:org_id>/mailing-address", methods=["PUT"])
+@cross_origin(origins="*")
+@_jwt.has_one_of_roles(
+    [
+        Role.SYSTEM.value,
+        Role.PUBLIC_USER.value,
+        Role.GOV_ACCOUNT_USER.value,
+        Role.STAFF_MANAGE_ACCOUNTS.value,
+    ]
+)
+def put_mailing_address(org_id):
+    """Update the mailing address specified by the provided id with the request body."""
+    request_json = request.get_json()
+    valid_format, errors = schema_utils.validate(request_json, "org")
+    if not valid_format:
+        return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
+    try:
+        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF, USER))
+        if org:
+            response, status = org.update_org_address(org_info=request_json).as_dict(), HTTPStatus.OK
+        else:
+            response, status = {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
+    except BusinessException as exception:
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
+    return response, status

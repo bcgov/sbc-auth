@@ -170,7 +170,7 @@
               :viewOnlyMode="isAddressViewOnly"
               @update:address="updateAddress"
               @valid="checkBaseAddressValidity"
-              @update:updateDetails="updateDetails"
+              @update:updateDetails="updateOrgMailingAddress"
               @update:resetAddress="resetAddress"
               @update:viewOnlyMode="viewOnlyMode"
             />
@@ -405,10 +405,7 @@ export default defineComponent({
       state.isBusinessAccount && !(state.accountDetails?.businessSize && state.accountDetails?.businessType)
     ))
 
-    const getWarningMessage = (condition: boolean) => condition
-      ? 'This account info is incomplete. You will not be able to proceed until an account administrator ' +
-          'entered the missing information for this account.'
-      : 'Your account info is incomplete. Please update any missing account details or address.'
+    const warningMessage = 'Your account info is incomplete. Please update any missing account details or address.'
 
     const setup = async () => {
       setAccountDetails()
@@ -417,7 +414,7 @@ export default defineComponent({
         state.originalAddress = currentOrgAddress.value
         if (isBusinessInfoIncomplete.value || state.isAddressInfoIncomplete) {
           state.isCompleteAccountInfo = false
-          state.warningMessage = getWarningMessage(isBusinessInfoIncomplete.value ? state.nameChangeNotAllowed : !state.isAddressEditable)
+          state.warningMessage = warningMessage
         } else {
           state.isCompleteAccountInfo = true
           state.warningMessage = ''
@@ -448,9 +445,6 @@ export default defineComponent({
       const { branchName, businessSize, businessType, name, isBusinessAccount } = state.accountDetails
 
       let createRequestBody: CreateRequestBody = {}
-      if (state.baseAddress && state.addressChanged && JSON.stringify(state.originalAddress) !== JSON.stringify(currentOrgAddress.value)) {
-        createRequestBody.mailingAddress = { ...state.baseAddress }
-      }
       if (name !== currentOrganization.value.name) {
         createRequestBody.name = name
       }
@@ -476,13 +470,10 @@ export default defineComponent({
       try {
         await orgStore.updateOrg(createRequestBody)
         if (!(state.isStaff && !isStaffAccount.value)) root.$store.commit('updateHeader')
-        state.addressChanged = false
-        state.originalAddress = currentOrgAddress.value
         if (!isBusinessInfoIncomplete.value && !state.isAddressInfoIncomplete) {
           state.isCompleteAccountInfo = true
           state.warningMessage = ''
         }
-        viewOnlyMode({ component: 'address', mode: true })
         viewOnlyMode({ component: 'account', mode: true })
       } catch (err) {
         switch (err.response.status) {
@@ -491,6 +482,32 @@ export default defineComponent({
             break
           default:
             state.errorMessage = 'An error occurred while attempting to update your account.'
+        }
+      }
+    }
+
+    async function updateOrgMailingAddress () {
+      state.errorMessage = ''
+
+      let createRequestBody: CreateRequestBody = {}
+      if (state.baseAddress && state.addressChanged && JSON.stringify(state.originalAddress) !== JSON.stringify(currentOrgAddress.value)) {
+        createRequestBody.mailingAddress = { ...state.baseAddress }
+      }
+
+      try {
+        await orgStore.updateOrgMailingAddress(createRequestBody)
+        if (!(state.isStaff && !isStaffAccount.value)) root.$store.commit('updateHeader')
+        state.addressChanged = false
+        state.originalAddress = currentOrgAddress.value
+        if (!isBusinessInfoIncomplete.value && !state.isAddressInfoIncomplete) {
+          state.isCompleteAccountInfo = true
+          state.warningMessage = ''
+        }
+        viewOnlyMode({ component: 'address', mode: true })
+      } catch (err) {
+        switch (err.response.status) {
+          default:
+            state.errorMessage = 'An error occurred while attempting to update your mailing address.'
         }
       }
     }
@@ -624,7 +641,8 @@ export default defineComponent({
       closeSuspendAccountDialog,
       closeSuspensionCompleteDialog,
       checkBaseAddressValidity,
-      updateAddress
+      updateAddress,
+      updateOrgMailingAddress
     }
   }
 })

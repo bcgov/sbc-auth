@@ -28,6 +28,7 @@ class Role(Enum):
     ANONYMOUS_USER = "anonymous_user"
     ACCOUNT_IDENTITY = "account_identity"
     MANAGE_EFT = "manage_eft"
+    CHANGE_ADDRESS = "change_address"
 
     SYSTEM = "system"
     TESTER = "tester"

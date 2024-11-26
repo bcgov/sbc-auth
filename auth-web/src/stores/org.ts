@@ -514,6 +514,12 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data
   }
 
+  async function updateOrgMailingAddress (createRequestBody: CreateOrgRequestBody) {
+    const response = await OrgService.updateOrgMailingAddress(state.currentOrganization.id, createRequestBody)
+    setCurrentOrganization(response.data)
+    return response?.data
+  }
+
   async function createInvitation (invitation: CreateInvitationRequestBody) {
     try {
       const response = await InvitationService.createInvitation(invitation)
@@ -1161,6 +1167,7 @@ export const useOrgStore = defineStore('org', () => {
     removeOrgAccountFees,
     getNSFInvoices,
     downloadNSFInvoicesPDF,
-    isGovnGovmOrg
+    isGovnGovmOrg,
+    updateOrgMailingAddress
   }
 })
