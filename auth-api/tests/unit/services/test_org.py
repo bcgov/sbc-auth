@@ -636,9 +636,11 @@ def test_update_org_address(session, monkeypatch):
     org = factory_org_service()
     org.update_org_address(TestOrgInfo.update_org_address)
     dictionary = org.as_dict()
-    print("dictionary", dictionary)
-    print("TestOrgInfo.update_org_address", TestOrgInfo.update_org_address)
     assert dictionary["mailing_address"]["city"] == TestOrgInfo.update_org_address["mailingAddress"]["city"]
+    assert dictionary["mailing_address"]["street"] == TestOrgInfo.update_org_address["mailingAddress"]["street"]
+    assert dictionary["mailing_address"]["region"] == TestOrgInfo.update_org_address["mailingAddress"]["region"]
+    assert dictionary["mailing_address"]["country"] == TestOrgInfo.update_org_address["mailingAddress"]["country"]
+    assert dictionary["mailing_address"]["postal_code"] == TestOrgInfo.update_org_address["mailingAddress"]["postalCode"]
 
 
 def test_suspend_org(session, monkeypatch):  # pylint:disable=unused-argument
