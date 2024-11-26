@@ -430,13 +430,12 @@ class Org:  # pylint: disable=too-many-public-methods
         return self
 
     def update_org_address(self, org_info):
-        """Update the passed organization with the new info."""
+        """Update current ogganization with a new address."""
         logger.debug("<update_org_address ")
         org_model: OrgModel = self._model
         mailing_address = org_info.get("mailingAddress", None)
-        # Update mailing address or create a new one
+        # Update or Create a new mailing address
         if mailing_address:
-            has_org_updates = True
             contacts = self._model.contacts
             if len(contacts) > 0:
                 contact = self._model.contacts[0].contact
@@ -444,10 +443,9 @@ class Org:  # pylint: disable=too-many-public-methods
                 contact.save()
             else:
                 Org.add_contact_to_org(mailing_address, self._model)
-        if has_org_updates:
-            self._model.update_org_from_dict(camelback2snake(org_info), exclude=EXCLUDED_FIELDS)
 
-        Org._publish_activity_on_mailing_address_change(org_model.id, org_model.name, mailing_address)
+            self._model.update_org_from_dict(camelback2snake(org_info), exclude=EXCLUDED_FIELDS)
+            Org._publish_activity_on_mailing_address_change(org_model.id, org_model.name, mailing_address)
         logger.debug(">update_org_address ")
         return self
 
