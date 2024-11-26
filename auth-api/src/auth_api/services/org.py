@@ -431,7 +431,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return self
 
     def update_org_address(self, org_info):
-        """Update or Create current organization with a new address."""
+        """Update or Create a new address for organization."""
         logger.debug("<update_org_address ")
         org_model: OrgModel = self._model
         mailing_address = org_info.get("mailingAddress", None)
