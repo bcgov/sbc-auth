@@ -617,7 +617,7 @@ def get_org_payment_info(org_id):
     return response, status
 
 
-@bp.route("/<int:org_id>/mailing_address", methods=["PUT"])
+@bp.route("/<int:org_id>/mailing-address", methods=["PUT"])
 @cross_origin(origins="*")
 @_jwt.has_one_of_roles(
     [
