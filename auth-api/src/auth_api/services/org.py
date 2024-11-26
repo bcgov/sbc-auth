@@ -398,7 +398,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 self._model.id, subscription_data=subscription_data, skip_auth=True
             )
 
-        # Update mailing address Or create new one
+        # Depreciated (use update_org_address instead)
         if mailing_address:
             has_org_updates = True
             contacts = self._model.contacts
@@ -422,6 +422,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if name_updated or payment_info:
             Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
+        # Depreciated (use update_org_address instead)
         Org._publish_activity_on_mailing_address_change(org_model.id, current_org_name, mailing_address)
         Org._publish_activity_on_name_change(org_model.id, org_name)
 
@@ -430,22 +431,20 @@ class Org:  # pylint: disable=too-many-public-methods
         return self
 
     def update_org_address(self, org_info):
-        """Update current ogganization with a new address."""
+        """Update or Create current organization with a new address."""
         logger.debug("<update_org_address ")
         org_model: OrgModel = self._model
         mailing_address = org_info.get("mailingAddress", None)
-        # Update or Create a new mailing address
-        if mailing_address:
-            contacts = self._model.contacts
-            if len(contacts) > 0:
-                contact = self._model.contacts[0].contact
-                contact.update_from_dict(**camelback2snake(mailing_address))
-                contact.save()
-            else:
-                Org.add_contact_to_org(mailing_address, self._model)
+        contacts = self._model.contacts
+        if len(contacts) > 0:
+            contact = self._model.contacts[0].contact
+            contact.update_from_dict(**camelback2snake(mailing_address))
+            contact.save()
+        else:
+            Org.add_contact_to_org(mailing_address, self._model)
 
-            self._model.update_org_from_dict(camelback2snake(org_info), exclude=EXCLUDED_FIELDS)
-            Org._publish_activity_on_mailing_address_change(org_model.id, org_model.name, mailing_address)
+        self._model.update_org_from_dict(camelback2snake(org_info), exclude=EXCLUDED_FIELDS)
+        Org._publish_activity_on_mailing_address_change(org_model.id, org_model.name, mailing_address)
         logger.debug(">update_org_address ")
         return self
 
