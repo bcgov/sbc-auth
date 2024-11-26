@@ -99,6 +99,11 @@ export default class OrgService {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`, createRequestBody)
   }
 
+  static async updateOrgMailingAddress (orgId: number, createRequestBody: CreateOrganizationRequestBody):
+    Promise<AxiosResponse<Organization>> {
+    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/mailing-address`, createRequestBody)
+  }
+
   static async getAffiliatedEntities (orgIdentifier: number): Promise<AffiliationResponse[]> {
     try {
       const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, { params: { new: true } })
