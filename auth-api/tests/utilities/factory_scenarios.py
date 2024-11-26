@@ -450,14 +450,14 @@ class TestOrgInfo(dict, Enum):
     org_regular = {"name": "My Test Org", "accessType": AccessType.REGULAR.value}
 
     update_org_with_business_type = {"businessType": "LAW", "businessSize": "2-5", "isBusinessAccount": True}
-    
+
     update_org_address = {
         "mailingAddress": {
             "street": "1234 Abcd Street",
             "city": "Test",
             "region": "BC",
             "postalCode": "T1T1T1",
-            "country": "CA"
+            "country": "CA",
         }
     }
 
