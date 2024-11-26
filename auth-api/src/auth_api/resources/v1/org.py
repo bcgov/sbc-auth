@@ -182,7 +182,7 @@ def put_organization(org_id):
     if not valid_format:
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
     try:
-        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF, USER))
+        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
         if (
             org
             and org.as_dict().get("accessType", None) == AccessType.ANONYMOUS.value
@@ -625,7 +625,6 @@ def get_org_payment_info(org_id):
         Role.PUBLIC_USER.value,
         Role.GOV_ACCOUNT_USER.value,
         Role.STAFF_MANAGE_ACCOUNTS.value,
-        Role.CHANGE_ADDRESS.value,
     ]
 )
 def put_mailing_address(org_id):
