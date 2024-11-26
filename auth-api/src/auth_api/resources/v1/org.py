@@ -637,14 +637,8 @@ def put_mailing_address(org_id):
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
     try:
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF, USER))
-        if (
-            org
-            and org.as_dict().get("accessType", None) == AccessType.ANONYMOUS.value
-            and Role.STAFF_CREATE_ACCOUNTS.value not in token_info.get("realm_access").get("roles")
-        ):
-            return {"message": "The mailing address can only be updated by a staff admin."}, HTTPStatus.UNAUTHORIZED
         if org:
-            response, status = org.update_org(org_info=request_json).as_dict(), HTTPStatus.OK
+            response, status = org.update_org_address(org_info=request_json).as_dict(), HTTPStatus.OK
         else:
             response, status = {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
     except BusinessException as exception:
