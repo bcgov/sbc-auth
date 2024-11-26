@@ -629,6 +629,13 @@ def test_update_org(session, monkeypatch):  # pylint:disable=unused-argument
 
     dictionary = org.as_dict()
     assert dictionary["business_type"] == TestOrgInfo.update_org_with_business_type["businessType"]
+    
+def test_update_org_address(session, monkeypatch):
+    """Assert that an Org address can be updated."""
+    org = factory_org_service()
+    org.update_org(TestOrgInfo.update_org_address)
+    dictionary = org.as_dict()
+    assert dictionary["mailing_address"] == TestOrgInfo.update_org_address["mailingAddress"]
 
 
 def test_suspend_org(session, monkeypatch):  # pylint:disable=unused-argument
