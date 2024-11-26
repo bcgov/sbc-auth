@@ -640,7 +640,9 @@ def test_update_org_address(session, monkeypatch):
     assert dictionary["mailing_address"]["street"] == TestOrgInfo.update_org_address["mailingAddress"]["street"]
     assert dictionary["mailing_address"]["region"] == TestOrgInfo.update_org_address["mailingAddress"]["region"]
     assert dictionary["mailing_address"]["country"] == TestOrgInfo.update_org_address["mailingAddress"]["country"]
-    assert dictionary["mailing_address"]["postal_code"] == TestOrgInfo.update_org_address["mailingAddress"]["postalCode"]
+    assert (
+        dictionary["mailing_address"]["postal_code"] == TestOrgInfo.update_org_address["mailingAddress"]["postalCode"]
+    )
 
 
 def test_suspend_org(session, monkeypatch):  # pylint:disable=unused-argument
