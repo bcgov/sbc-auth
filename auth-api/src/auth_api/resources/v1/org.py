@@ -632,7 +632,6 @@ def put_mailing_address(org_id):
     """Update the mailing address specified by the provided id with the request body."""
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "org")
-    token_info = g.jwt_oidc_token_info
     if not valid_format:
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
     try:
