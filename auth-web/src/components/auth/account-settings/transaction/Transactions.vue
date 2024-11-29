@@ -135,7 +135,7 @@ export default defineComponent({
     const csvErrorDialogText = ref(csvErrorTextBasic)
 
     const { setAccountChangedHandler, beforeDestroy } = useAccountChangeHandler()
-    const { clearAllFilters, getTransactionReport, loadTransactionList, setViewAll,  defaultSearchToOneYear } = useTransactions()
+    const { clearAllFilters, getTransactionReport, loadTransactionList, setViewAll, defaultSearchToOneYear } = useTransactions()
 
     // FUTURE: vue3 we can set this fn explicitly in the resource instead of doing it here
     const headers = getTransactionTableHeaders(props.extended)
