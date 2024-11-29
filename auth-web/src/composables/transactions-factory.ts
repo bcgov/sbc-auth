@@ -103,7 +103,7 @@ export const useTransactions = () => {
       console.error('Failed to get transaction list.', error)
     }
     transactions.loading = false
-  }, 2000, { leading: true, trailing: true }) as (filterField?: string, value?: any, viewAll?: boolean) => Promise<void>
+  }, 1000, { leading: true, trailing: true }) as (filterField?: string, value?: any, viewAll?: boolean) => Promise<void>
 
   const getTransactionReport = async () => {
     try {
