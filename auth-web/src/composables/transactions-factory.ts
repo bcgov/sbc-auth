@@ -4,9 +4,9 @@ import { computed, reactive, ref } from '@vue/composition-api'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import PaymentService from '@/services/payment.services'
 import debounce from 'lodash/throttle'
+import moment from 'moment'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
-import moment from 'moment'
 
 const transactions = (reactive({
   filters: {
@@ -102,7 +102,7 @@ export const useTransactions = () => {
       console.error('Failed to get transaction list.', error)
     }
     transactions.loading = false
-  }, 2000, { leading: true, trailing: true } ) as (filterField?: string, value?: any, viewAll?: boolean) => Promise<void>
+  }, 2000, { leading: true, trailing: true }) as (filterField?: string, value?: any, viewAll?: boolean) => Promise<void>
 
   const getTransactionReport = async () => {
     try {
@@ -127,7 +127,12 @@ export const useTransactions = () => {
 
   // We need this specific function to set the default search to one year, otherwise too many rows and loss of performance.
   const defaultSearchToOneYear = () => {
-    transactions.filters.filterPayload = { dateFilter: { startDate: moment().subtract(1, 'year').format('YYYY-MM-DD'), endDate: moment().format('YYYY-MM-DD') } }
+    transactions.filters.filterPayload = {
+      dateFilter: {
+        startDate: moment().subtract(1, 'year').format('YYYY-MM-DD'),
+        endDate: moment().add(1, 'day').format('YYYY-MM-DD')
+      }
+    }
   }
 
   return {
