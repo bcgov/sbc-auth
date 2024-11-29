@@ -260,7 +260,7 @@ export default defineComponent({
     }
 
     const datePickerValue = computed(() => {
-      if (dateRangeSelected.value) { 
+      if (dateRangeSelected.value) {
         return 'Custom'
       }
       if (transactions.filters.filterPayload.dateFilter.isDefault) {
