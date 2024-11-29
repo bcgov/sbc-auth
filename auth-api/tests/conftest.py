@@ -47,6 +47,13 @@ def app_request():
     return _app
 
 
+@pytest.fixture(scope="function", autouse=True)
+def global_http_origin(app):
+    """Set a global HTTP_ORIGIN for all tests."""
+    with app.test_request_context("/", environ_base={"HTTP_ORIGIN": "https://test.com"}):
+        yield
+
+
 @pytest.fixture(scope="session")
 def client(app):  # pylint: disable=redefined-outer-name
     """Return a session-wide Flask test client."""
