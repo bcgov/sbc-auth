@@ -33,6 +33,7 @@ export interface TransactionFilter {
   dateFilter?: {
     startDate: string
     endDate: string
+    isDefault: boolean
   },
   details?: string,
   folioNumber?: string,

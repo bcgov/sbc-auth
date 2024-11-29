@@ -14,7 +14,8 @@ const transactions = (reactive({
     filterPayload: {
       dateFilter: {
         startDate: '',
-        endDate: ''
+        endDate: '',
+        isDefault: false
       }
     },
     pageLimit: 5,
@@ -117,7 +118,7 @@ export const useTransactions = () => {
   }
 
   const clearAllFilters = (skipLoadTransactions = false) => {
-    transactions.filters.filterPayload = { dateFilter: { startDate: '', endDate: '' } }
+    transactions.filters.filterPayload = { dateFilter: { startDate: '', endDate: '', isDefault: false } }
     transactions.filters.isActive = false
     transactions.filters.pageNumber = 1
     if (!skipLoadTransactions) {
@@ -130,9 +131,11 @@ export const useTransactions = () => {
     transactions.filters.filterPayload = {
       dateFilter: {
         startDate: moment().subtract(1, 'year').format('YYYY-MM-DD'),
-        endDate: moment().add(1, 'day').format('YYYY-MM-DD')
+        endDate: moment().add(1, 'day').format('YYYY-MM-DD'),
+        isDefault: true
       }
     }
+    transactions.filters.isActive = true
   }
 
   return {
