@@ -4,6 +4,8 @@
       v-show="showDatePicker"
       ref="datePicker"
       :reset="dateRangeReset"
+      :setStartDate="transactions.filters.filterPayload.dateFilter.startDate"
+      :setEndDate="transactions.filters.filterPayload.dateFilter.endDate"
       class="date-picker"
       @submit="updateDateRange($event)"
     />
@@ -73,7 +75,7 @@
             filled
             hide-details
             :placeholder="'Date'"
-            :value="dateRangeSelected ? 'Custom' : ''"
+            :value="dateRangeSelected ? 'Custom' : '1 Year'"
             @click:clear="dateRangeReset++"
           />
         </div>
