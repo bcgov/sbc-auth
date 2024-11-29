@@ -75,7 +75,7 @@
             filled
             hide-details
             :placeholder="'Date'"
-            :value="dateRangeSelected ? 'Custom' : '1 Year'"
+            :value="datePickerValue"
             @click:clear="dateRangeReset++"
           />
         </div>
@@ -183,7 +183,7 @@ export default defineComponent({
     }
 
     // date picker stuff
-    const dateRangeReset = ref(0)
+    const dateRangeReset = ref(1)
     const dateRangeSelected = ref(false)
     const showDatePicker = ref(false)
     const scrollToDatePicker = async () => {
@@ -259,6 +259,16 @@ export default defineComponent({
       return CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY')
     }
 
+    const datePickerValue = computed(() => {
+      if (dateRangeSelected.value) { 
+        return 'Custom'
+      }
+      if (transactions.filters.filterPayload.dateFilter.isDefault) {
+        return '1 Year'
+      }
+      return ''
+    })
+
     return {
       InvoiceStatus,
       clearFilters,
@@ -278,7 +288,8 @@ export default defineComponent({
       scrollToDatePicker,
       updateDateRange,
       loadTransactionList,
-      getInvoiceStatus
+      getInvoiceStatus,
+      datePickerValue
     }
   }
 })

@@ -130,9 +130,11 @@ export const useTransactions = () => {
     transactions.filters.filterPayload = {
       dateFilter: {
         startDate: moment().subtract(1, 'year').format('YYYY-MM-DD'),
-        endDate: moment().add(1, 'day').format('YYYY-MM-DD')
+        endDate: moment().add(1, 'day').format('YYYY-MM-DD'),
+        isDefault: true
       }
     }
+    transactions.filters.isActive = true
   }
 
   return {
