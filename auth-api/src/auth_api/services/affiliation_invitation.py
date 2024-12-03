@@ -478,11 +478,11 @@ class AffiliationInvitation:
     @staticmethod
     def _get_token_confirm_path(app_url, org_name, token, query_params=None):
         """Get the config for different email types."""
-        if flags.is_on('enable-new-magic-link-formatting-with-query-params', default=False):
+        if flags.is_on("enable-new-magic-link-formatting-with-query-params", default=False):
             # New query parameter based URL structure
             params = {
-                'token': token,
-                'orgName': escape_wam_friendly_url(org_name)
+                "token": token,
+                "orgName": escape_wam_friendly_url(org_name),
             }
 
             # Add any additional query params
