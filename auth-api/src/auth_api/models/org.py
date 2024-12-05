@@ -171,6 +171,20 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
             query = query.filter(Org.branch_name.ilike(f"%{search.branch_name}%"))
         if search.name:
             query = query.filter(Org.name.ilike(f"%{search.name}%"))
+        if search.member_search_text:
+            member_exists_subquery = text("""
+                EXISTS (
+                    SELECT 1
+                    FROM memberships
+                    JOIN users ON users.id = memberships.user_id
+                    WHERE memberships.org_id = orgs.id
+                    AND memberships.status = 1
+                    AND users.status = 1
+                    AND CONCAT(users.last_name, ' ', users.first_name, ' ', users.username) ILIKE :member_search_text
+                )
+                """).params(member_search_text=f"%{search.member_search_text}%")
+
+            query = query.filter(member_exists_subquery)
 
         query = cls._search_by_business_identifier(query, search.business_identifier, environment)
         query = cls._search_for_statuses(query, search.statuses)

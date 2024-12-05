@@ -2932,3 +2932,47 @@ def test_update_org_api_access(client, jwt, session, keycloak_mock):  # pylint:d
     assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
     assert dictionary["hasApiAccess"] is True
+
+
+def test_search_org_members(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a list of members for an org search can be retrieved."""
+    user_info = TestJwtClaims.public_user_role
+    headers = factory_auth_header(jwt=jwt, claims=user_info)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+    client.post("/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json")
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_view_accounts_role)
+    rv = client.get(f'/api/v1/orgs?status=ACTIVE&includeMembers=true&members={user_info['preferred_username']}',
+                    headers=headers,
+                    content_type="application/json")
+    assert rv.status_code == HTTPStatus.OK
+    dictionary = json.loads(rv.data)
+    assert dictionary["orgs"]
+    assert len(dictionary["orgs"][0]["members"]) == 1
+    member = dictionary["orgs"][0]["members"][0]
+    assert member["membershipTypeCode"] == "ADMIN"
+    assert member['user']
+    user = member['user']
+    assert user['username'] == user_info['preferred_username']
+
+    rv = client.get(
+        f'/api/v1/orgs?status=ACTIVE&includeMembers=true&members={user_info['lastname']} {user_info['firstname']}',
+        headers=headers,
+        content_type="application/json")
+
+    dictionary = json.loads(rv.data)
+    assert dictionary["orgs"]
+    assert len(dictionary["orgs"][0]["members"]) == 1
+    member = dictionary["orgs"][0]["members"][0]
+    assert member["membershipTypeCode"] == "ADMIN"
+    assert member['user']
+    user = member['user']
+    assert user['firstname'] == user_info['firstname']
+    assert user['lastname'] == user_info['lastname']
+
+    rv = client.get(
+        f'/api/v1/orgs?status=ACTIVE&includeMembers=true&members=NOTHING',
+        headers=headers,
+        content_type="application/json")
+    dictionary = json.loads(rv.data)
+    assert not dictionary["orgs"]
