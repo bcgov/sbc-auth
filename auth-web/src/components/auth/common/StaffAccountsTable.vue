@@ -8,6 +8,7 @@
         <v-col
           align-self="end"
           cols="auto"
+          class="pb-2"
         >
           <v-select
             v-model="headersSelected"
@@ -460,7 +461,7 @@ export default defineComponent({
 
     function hasMoreMembers (displayMembers: any) : boolean {
       if (!displayMembers ||
-          (displayMembers.adminMembers.length === 1 &&
+          (displayMembers.adminMembers.length <= 1 &&
           displayMembers.coordinatorMembers.length === 0 &&
           displayMembers.userMembers.length === 0)) {
         return false
@@ -480,12 +481,12 @@ export default defineComponent({
     }
 
     function getConcatenatedDisplayMembers (members: DisplayMember[]) {
-      return members.map((member) => member.memberDisplayName).join(',')
+      return members.map((member) => member.memberDisplayName).join(', ')
     }
 
     function buildDisplayMemberObject (member: Member) {
       const username = member.user?.loginSource === LoginSource.BCEID
-        ? `(BCeID: ${member.user.username.split('@')[0]})` : ''
+        ? ` (BCeID: ${member.user.username.split('@')[0]})` : ''
       const firstname = member.user.firstname || ''
       const lastname = member.user.lastname || ''
 
