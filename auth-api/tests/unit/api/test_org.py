@@ -2974,7 +2974,7 @@ def test_search_org_members(client, jwt, session, keycloak_mock):  # pylint:disa
     assert user["lastname"] == user_info["lastname"]
 
     rv = client.get(
-        f"/api/v1/orgs?status=ACTIVE&includeMembers=true&members=NOTHING",
+        "/api/v1/orgs?status=ACTIVE&includeMembers=true&members=NOTHING",
         headers=headers,
         content_type="application/json",
     )
