@@ -56,6 +56,7 @@ describe('ShortNameRefundView.vue', () => {
     expect(wrapper.find('.view-header__title').text()).toBe('Refund Information')
     expect(wrapper.find('[data-test="refundAmount"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="casSupplierNumber"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="casSupplierSite"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="email"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="staffComment"]').exists()).toBe(true)
   })

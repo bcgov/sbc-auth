@@ -18,6 +18,9 @@
         <p v-if="isDialogTypeCasSupplierNumber">
           Enter the supplier number created in CAS for this short name
         </p>
+        <p v-if="isDialogTypeCasSupplierSite">
+          Enter the supplier site created in CAS for this short name
+        </p>
         <v-text-field
           v-if="isDialogTypeEmail"
           v-model="email"
@@ -31,6 +34,13 @@
           v-model="casSupplierNumber"
           filled
           label="CAS Supplier Number"
+          persistent-hint
+        />
+        <v-text-field
+          v-if="isDialogTypeCasSupplierSite"
+          v-model="casSupplierSite"
+          filled
+          label="CAS Supplier Site"
           persistent-hint
         />
       </template>
@@ -90,8 +100,10 @@ export default defineComponent({
     const state = reactive<any>({
       email: '',
       casSupplierNumber: '',
+      casSupplierSite: '',
       isDialogTypeEmail: computed(() => props.shortNameFinancialDialogType === 'EMAIL'),
-      isDialogTypeCasSupplierNumber: computed(() => props.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER')
+      isDialogTypeCasSupplierNumber: computed(() => props.shortNameFinancialDialogType === 'CAS_SUPPLIER_NUMBER'),
+      isDialogTypeCasSupplierSite: computed(() => props.shortNameFinancialDialogType === 'CAS_SUPPLIER_SITE')
     })
 
     function isFormInvalid () {
@@ -99,6 +111,8 @@ export default defineComponent({
         return !state.email || emailAddressRules.some(rule => rule(state.email) !== true)
       } else if (state.isDialogTypeCasSupplierNumber) {
         return !state.casSupplierNumber
+      } else if (state.isDialogTypeCasSupplierSite) {
+        return !state.casSupplierSite
       }
       return true
     }
@@ -109,6 +123,8 @@ export default defineComponent({
         state.email = state.shortName.email
       } else if (dialogType === 'CAS_SUPPLIER_NUMBER') {
         state.casSupplierNumber = state.shortName.casSupplierNumber
+      } else if (dialogType === 'CAS_SUPPLIER_SITE') {
+        state.casSupplierSite = state.shortName.casSupplierSite
       }
       modalDialog.value.open()
     }
@@ -118,12 +134,15 @@ export default defineComponent({
         return 'Email'
       } else if (state.isDialogTypeCasSupplierNumber) {
         return 'CAS Supplier Number'
+      } else if (state.isDialogTypeCasSupplierSite) {
+        return 'CAS Supplier Site'
       }
     }
 
     function resetAccountLinkingDialog () {
       state.email = ''
       state.casSupplierNumber = ''
+      state.casSupplierSite = ''
       emit('close-short-name-email-dialog')
     }
 
@@ -137,6 +156,8 @@ export default defineComponent({
         await PaymentService.patchEFTShortName(state.shortName.id, { email: state.email })
       } else if (state.isDialogTypeCasSupplierNumber) {
         await PaymentService.patchEFTShortName(state.shortName.id, { casSupplierNumber: state.casSupplierNumber })
+      } else if (state.isDialogTypeCasSupplierSite) {
+        await PaymentService.patchEFTShortName(state.shortName.id, { casSupplierSite: state.casSupplierSite })
       }
       emit('on-patch')
       cancelAndResetAccountLinkingDialog()
