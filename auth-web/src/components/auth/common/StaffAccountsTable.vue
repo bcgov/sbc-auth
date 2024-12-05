@@ -619,12 +619,10 @@ export default defineComponent({
     }
 
     function getHeaderPlaceHolderText (header: any): string {
-      switch (header.text) {
-        case 'Team Member':
-          return 'Name or username'
-        default:
-          return header.text
+      if (header.text === 'Team Member') {
+        return 'Name or username'
       }
+      return header.text
     }
 
     const noDataMessage = computed(() => {
