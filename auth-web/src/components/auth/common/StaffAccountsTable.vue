@@ -644,7 +644,7 @@ export default defineComponent({
                 params.bcolAccountId.length > 0 ||
                 params.decisionMadeBy.length > 0 ||
                 (params.orgType.length > 0 && params.orgType !== OrgAccountTypes.ALL) ||
-                params.members.length > 0
+                params.members?.length > 0
     }
 
     const isActiveAccounts = computed(() => {
