@@ -207,6 +207,12 @@ export default defineComponent({
         value: 'CAS Supplier Number'
       },
       {
+        col: 'casSupplierSite',
+        hasFilter: false,
+        width: '240px',
+        value: 'CAS Supplier Site'
+      },
+      {
         col: 'refundAmount',
         hasFilter: false,
         width: '260px',

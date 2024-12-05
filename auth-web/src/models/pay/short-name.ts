@@ -89,6 +89,7 @@ export interface ShortNameDetails {
 export interface EFTRefund {
   id: number;
   casSupplierNumber?: string;
+  casSupplierSite?: string;
   comment?: string;
   createdBy?: string;
   createdName?: string;
