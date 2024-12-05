@@ -323,7 +323,7 @@ export default defineComponent({
       top: -20px;
       z-index: 0;
       width: 100%;
-      height: 180px;
+      height: 210px;
       background-color: white;
       margin-top: 20px;
     }
