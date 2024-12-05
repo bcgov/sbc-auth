@@ -172,7 +172,8 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         if search.name:
             query = query.filter(Org.name.ilike(f"%{search.name}%"))
         if search.member_search_text:
-            member_exists_subquery = text("""
+            member_exists_subquery = text(
+                """
                 EXISTS (
                     SELECT 1
                     FROM memberships
@@ -182,7 +183,8 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
                     AND users.status = 1
                     AND CONCAT(users.last_name, ' ', users.first_name, ' ', users.username) ILIKE :member_search_text
                 )
-                """).params(member_search_text=f"%{search.member_search_text}%")
+                """
+            ).params(member_search_text=f"%{search.member_search_text}%")
 
             query = query.filter(member_exists_subquery)
 
