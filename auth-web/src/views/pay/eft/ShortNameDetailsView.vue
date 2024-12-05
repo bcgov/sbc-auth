@@ -40,6 +40,21 @@
             Edit
           </span>
         </div>
+        <div class="mb-2 overflow-wrap">
+          <span class="font-weight-bold">CAS Supplier Site: </span>
+          {{ shortName.casSupplierSite || 'N/A' }}
+          <span
+            class="pl-4 primary--text cursor-pointer"
+            data-test="btn-edit"
+            @click="openShortNameSupplierSiteDialog()"
+          >
+            <v-icon
+              color="primary"
+              size="20"
+            > mdi-pencil-outline</v-icon>
+            Edit
+          </span>
+        </div>
         <div class="overflow-wrap">
           <span class="font-weight-bold">Email: </span>
           <span class="email">{{ shortName.email || 'N/A' }}</span>
@@ -207,6 +222,11 @@ export default defineComponent({
       state.displayShortNameFinancialDialog = true
     }
 
+    function openShortNameSupplierSiteDialog () {
+      state.shortNameFinancialDialogType = 'CAS_SUPPLIER_SITE'
+      state.displayShortNameFinancialDialog = true
+    }
+
     async function onPaymentAction () {
       await loadShortname(props.shortNameId)
       updateState()
@@ -241,6 +261,7 @@ export default defineComponent({
       onShortNamePatch,
       openShortNameEmailDialog,
       openShortNameSupplierNumberDialog,
+      openShortNameSupplierSiteDialog,
       formatCurrency: CommonUtils.formatAmount,
       unsettledAmountHeader,
       closeShortNameLinkingDialog,
