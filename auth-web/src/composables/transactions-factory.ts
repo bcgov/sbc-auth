@@ -4,6 +4,7 @@ import { computed, reactive, ref } from '@vue/composition-api'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import PaymentService from '@/services/payment.services'
 import debounce from 'lodash/throttle'
+import moment from 'moment'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -13,7 +14,8 @@ const transactions = (reactive({
     filterPayload: {
       dateFilter: {
         startDate: '',
-        endDate: ''
+        endDate: '',
+        isDefault: false
       }
     },
     pageLimit: 5,
@@ -101,7 +103,7 @@ export const useTransactions = () => {
       console.error('Failed to get transaction list.', error)
     }
     transactions.loading = false
-  }, 200) as (filterField?: string, value?: any, viewAll?: boolean) => Promise<void>
+  }, 1000, { leading: true, trailing: true }) as (filterField?: string, value?: any, viewAll?: boolean) => Promise<void>
 
   const getTransactionReport = async () => {
     try {
@@ -115,11 +117,25 @@ export const useTransactions = () => {
     }
   }
 
-  const clearAllFilters = () => {
-    transactions.filters.filterPayload = { dateFilter: { startDate: '', endDate: '' } }
+  const clearAllFilters = (skipLoadTransactions = false) => {
+    transactions.filters.filterPayload = { dateFilter: { startDate: '', endDate: '', isDefault: false } }
     transactions.filters.isActive = false
     transactions.filters.pageNumber = 1
-    loadTransactionList()
+    if (!skipLoadTransactions) {
+      loadTransactionList()
+    }
+  }
+
+  // We need this specific function to set the default search to one year, otherwise too many rows and loss of performance.
+  const defaultSearchToOneYear = () => {
+    transactions.filters.filterPayload = {
+      dateFilter: {
+        startDate: moment().subtract(1, 'year').format('YYYY-MM-DD'),
+        endDate: moment().add(1, 'day').format('YYYY-MM-DD'),
+        isDefault: true
+      }
+    }
+    transactions.filters.isActive = true
   }
 
   return {
@@ -127,6 +143,7 @@ export const useTransactions = () => {
     clearAllFilters,
     loadTransactionList,
     getTransactionReport,
-    setViewAll
+    setViewAll,
+    defaultSearchToOneYear
   }
 }

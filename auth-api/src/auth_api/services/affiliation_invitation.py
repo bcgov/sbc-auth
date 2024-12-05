@@ -38,6 +38,7 @@ from auth_api.models.entity import Entity as EntityModel  # noqa: I005
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.services.entity import Entity as EntityService
+from auth_api.services.flags import flags
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
@@ -477,12 +478,27 @@ class AffiliationInvitation:
     @staticmethod
     def _get_token_confirm_path(app_url, org_name, token, query_params=None):
         """Get the config for different email types."""
-        escape_url = escape_wam_friendly_url(org_name)
-        path = f"{escape_url}/affiliationInvitation/acceptToken"
-        token_confirm_url = f"{app_url}/{path}/{token}"
+        if flags.is_on("enable-new-magic-link-formatting-with-query-params", default=False):
+            # New query parameter based URL structure
+            params = {
+                "token": token,
+                "orgName": escape_wam_friendly_url(org_name),
+            }
 
-        if query_params:
-            token_confirm_url += f"?{urlencode(query_params)}"
+            # Add any additional query params
+            if query_params:
+                params.update(query_params)
+
+            # Build the URL with query parameters
+            token_confirm_url = f"{app_url}/affiliationInvitation/acceptToken?{urlencode(params)}"
+        else:
+            # Original URL structure
+            escape_url = escape_wam_friendly_url(org_name)
+            path = f"{escape_url}/affiliationInvitation/acceptToken"
+            token_confirm_url = f"{app_url}/{path}/{token}"
+
+            if query_params:
+                token_confirm_url += f"?{urlencode(query_params)}"
 
         return token_confirm_url
 
