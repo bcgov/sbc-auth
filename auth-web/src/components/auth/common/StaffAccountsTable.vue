@@ -1,5 +1,43 @@
 <template>
   <div>
+    <section>
+      <v-row
+        justify="end"
+        no-gutters
+      >
+        <v-col
+          align-self="end"
+          cols="auto"
+        >
+          <v-select
+            v-model="headersSelected"
+            class="column-selections"
+            dense
+            filled
+            hide-details
+            item-text="value"
+            :items="headersSelection"
+            :menu-props="{
+              bottom: true,
+              minWidth: '200px',
+              maxHeight: 'none',
+              offsetY: true
+            }"
+            multiple
+            return-object
+            style="width: 200px;"
+            @change="headersChanged"
+          >
+            <template #selection="{ index }">
+              <span
+                v-if="index === 0"
+                class="columns-to-show"
+              >Columns to show</span>
+            </template>
+          </v-select>
+        </v-col>
+      </v-row>
+    </section>
     <v-form class="datatable-search account-active-search">
       <v-row
         dense
@@ -11,7 +49,7 @@
         >
           <transition name="slide-fade">
             <v-data-table
-              :headers="headerAccounts"
+              :headers="filteredHeaders"
               :items="activeOrgs"
               :server-items-length="totalAccountsCount"
               :options.sync="tableDataOptions"
@@ -48,19 +86,26 @@
                   <!-- First row has titles. -->
                   <tr class="header-row-1">
                     <th
-                      v-for="(header, i) in headerAccounts"
+                      v-for="(header, i) in filteredHeaders"
                       :key="getIndexedTag('find-header-row', i)"
                       :scope="getIndexedTag('find-header-col', i)"
                       class="font-weight-bold"
                     >
                       {{ header.text }}
+                      <IconTooltip
+                        v-if="header.toolTip"
+                        :icon-styling="{ fontSize: '20px' }"
+                        icon="mdi-information-outline"
+                      >
+                        <div v-sanitize="header.toolTip" />
+                      </IconTooltip>
                     </th>
                   </tr>
 
                   <!-- Second row has search boxes. -->
                   <tr class="header-row-2 mt-2 px-2">
                     <th
-                      v-for="(header, i) in headerAccounts"
+                      v-for="(header, i) in filteredHeaders"
                       :key="getIndexedTag('find-header-row2', i)"
                       :scope="getIndexedTag('find-header-col2', i)"
                     >
@@ -73,7 +118,7 @@
                         autocomplete="off"
                         class="text-input-style"
                         filled
-                        :placeholder="header.text"
+                        :placeholder="getHeaderPlaceHolderText(header)"
                         dense
                         hide-details="auto"
                       />
@@ -119,6 +164,78 @@
               <template #[`item.orgType`]="{ item }">
                 {{ getAccountTypeFromOrgAndAccessType(item) }}
               </template>
+
+              <template #[`item.members`]="{ item }">
+                <div
+                  v-if="item.displayMembers.adminMembers.length > 0"
+                  class="members-layout pt-2"
+                >
+                  <v-icon class="member-type-icon mr-2">
+                    mdi-shield-account-outline
+                  </v-icon>
+                  <div class="members-text-layout">
+                    <span class="members-role-text">Admin</span>
+                    <div v-if="!item.showOnlyFirstAdmin">
+                      {{ getConcatenatedDisplayMembers(item.displayMembers.adminMembers) }}
+                    </div>
+                    <div v-else>
+                      {{ getFirstAdminDisplayMember(item) }}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  v-if="item.displayMembers.coordinatorMembers.length > 0 && !item.showOnlyFirstAdmin"
+                  class="members-layout"
+                >
+                  <v-icon class="member-type-icon mr-2">
+                    mdi-account-cog-outline
+                  </v-icon>
+                  <div class="members-text-layout">
+                    <span class="members-role-text">Coordinator</span>
+                    <div>
+                      {{ getConcatenatedDisplayMembers(item.displayMembers.coordinatorMembers) }}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  v-if="item.displayMembers.userMembers.length > 0 && !item.showOnlyFirstAdmin"
+                  class="members-layout"
+                >
+                  <v-icon class="member-type-icon mr-2">
+                    mdi-account-outline
+                  </v-icon>
+                  <div class="members-text-layout">
+                    <span class="members-role-text">User</span>
+                    <div>
+                      {{ getConcatenatedDisplayMembers(item.displayMembers.userMembers) }}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  v-if="hasMoreMembers(item.displayMembers)"
+                  class="member-view-link ml-6"
+                  @click="toggleMembersView(item)"
+                >
+                  <span>
+                    {{ item.showOnlyFirstAdmin ? 'View more' : 'View less' }}
+                  </span>
+                  <v-icon
+                    v-if="item.showOnlyFirstAdmin"
+                    color="primary"
+                    class="member-type-icon"
+                  >
+                    mdi-chevron-down
+                  </v-icon>
+                  <v-icon
+                    v-else
+                    color="primary"
+                    class="member-type-icon"
+                  >
+                    mdi-chevron-up
+                  </v-icon>
+                </div>
+              </template>
+
               <template #[`item.decisionMadeBy`]="{ item }">
                 {{ item.decisionMadeBy ? item.decisionMadeBy : 'N/A' }}
               </template>
@@ -183,7 +300,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, AccountStatus, LoginSource, SessionStorageKeys } from '@/util/constants'
 import {
   DEFAULT_DATA_OPTIONS,
   cachePageInfo,
@@ -191,12 +308,21 @@ import {
   getPaginationOptions,
   hasCachedPageInfo
 } from '@/components/datatable/resources'
-import { OrgAccountTypes, OrgFilterParams, OrgMap, Organization } from '@/models/Organization'
+import {
+  DisplayMember,
+  Member, MembershipStatus,
+  MembershipType,
+  OrgAccountTypes,
+  OrgFilterParams,
+  OrgMap,
+  Organization
+} from '@/models/Organization'
 import { PropType, computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import { EnumDictionary } from '@/models/util'
+import { IconTooltip } from '@/components'
 import debounce from '@/util/debounce'
 import { useI18n } from 'vue-i18n-composable'
 import { useOrgStore } from '@/stores/org'
@@ -204,6 +330,7 @@ import { useStaffStore } from '@/stores/staff'
 
 export default defineComponent({
   name: 'StaffAccountsTable',
+  components: { IconTooltip },
   props: {
     accountStatus: {
       type: String as PropType<AccountStatus>,
@@ -226,18 +353,31 @@ export default defineComponent({
     const { t } = useI18n()
     const orgStore = useOrgStore()
     const staffStore = useStaffStore()
+    const defaultHeaders = [
+      { text: 'Account Name', value: 'name', visible: true },
+      { text: 'Branch Name', value: 'branchName', visible: true },
+      { text: 'Account Number', value: 'id', visible: true },
+      { text: 'BCOL Account Number', value: 'bcolAccountId', visible: true },
+      { text: 'Team Member',
+        value: 'members',
+        visible: false,
+        toolTip: 'Search by entering last name [space] first name or username'
+      },
+      { text: 'Approved By', value: 'decisionMadeBy', visible: true },
+      { text: 'Account Type', value: 'orgType', visible: true },
+      { text: 'Actions', value: 'action', visible: true }
+    ]
 
     const state = reactive({
       activeOrgs: [] as Organization[],
-      headerAccounts: [
-        { text: 'Account Name', value: 'name' },
-        { text: 'Branch Name', value: 'branchName' },
-        { text: 'Account Number', value: 'id' },
-        { text: 'BCOL Account Number', value: 'bcolAccountId' },
-        { text: 'Approved By', value: 'decisionMadeBy' },
-        { text: 'Account Type', value: 'orgType' },
-        { text: 'Actions', value: 'action' }
-      ],
+      headers: defaultHeaders,
+      filteredHeaders: defaultHeaders.filter(item => item.visible),
+      headersSelected: defaultHeaders
+        .filter(item => item.value !== 'action' && item.visible)
+        .map(item => item.text),
+      headersSelection: defaultHeaders
+        .filter(item => item.value !== 'action')
+        .map(item => item.text),
       accountTypeMap: {
         [OrgAccountTypes.ALL]: {},
         [OrgAccountTypes.BASIC]: {
@@ -303,18 +443,88 @@ export default defineComponent({
           orgType: undefined,
           accessType: undefined,
           ...getOrgAndAccessTypeFromAccountType(state.searchParams.orgType),
+          includeMembers: true,
           page: page,
           limit: pageLimit
         }
         const activeAccountsResp = await staffStore.searchOrgs(completeSearchParams)
         state.activeOrgs = activeAccountsResp.orgs
         state.totalAccountsCount = activeAccountsResp?.total || 0
+        transformMemberDataStructure()
       } catch (error) {
         console.error(error)
       } finally {
         state.isTableLoading = false
       }
     })
+
+    function hasMoreMembers (displayMembers: any) : boolean {
+      if (!displayMembers ||
+          (displayMembers.adminMembers.length === 1 &&
+          displayMembers.coordinatorMembers.length === 0 &&
+          displayMembers.userMembers.length === 0)) {
+        return false
+      }
+      return true
+    }
+
+    function toggleMembersView (org: any): void {
+      org.showOnlyFirstAdmin = !org.showOnlyFirstAdmin
+      this.$forceUpdate()
+    }
+
+    function getFirstAdminDisplayMember (item: any) {
+      const displayName = item?.displayMembers?.adminMembers[0].memberDisplayName
+      if (!displayName) return ''
+      return displayName
+    }
+
+    function getConcatenatedDisplayMembers (members: DisplayMember[]) {
+      return members.map((member) => member.memberDisplayName).join(',')
+    }
+
+    function buildDisplayMemberObject (member: Member) {
+      const username = member.user?.loginSource === LoginSource.BCEID
+        ? `(BCeID: ${member.user.username.split('@')[0]})` : ''
+      const firstname = member.user.firstname || ''
+      const lastname = member.user.lastname || ''
+
+      return {
+        memberDisplayName: `${firstname} ${lastname}${username}`.trim(),
+        loginSource: member.user.loginSource
+      }
+    }
+
+    function filterMembersByType (members, membershipType: MembershipType) {
+      if (!members || members.length === 0) return []
+      return members.filter(member => {
+        return member.membershipTypeCode === membershipType &&
+            member.membershipStatus === MembershipStatus.Active
+      })
+    }
+
+    function transformMemberDataStructure () {
+      state.activeOrgs.forEach((org: Organization) => {
+        org.displayMembers = {
+          adminMembers: filterMembersByType(org.members, MembershipType.Admin)
+            .map(buildDisplayMemberObject),
+          coordinatorMembers: filterMembersByType(org.members, MembershipType.Coordinator)
+            .map(buildDisplayMemberObject),
+          userMembers: filterMembersByType(org.members, MembershipType.User)
+            .map(buildDisplayMemberObject)
+        }
+        org.showOnlyFirstAdmin = true
+      })
+    }
+
+    function headersChanged (selectedHeaders) {
+      state.headers.forEach(item => {
+        if (item.value !== 'action') {
+          item.visible = selectedHeaders.includes(item.text)
+        }
+      })
+      state.filteredHeaders = state.headers.filter(item => item.visible)
+    }
 
     function mounted () {
       state.tableDataOptions = DEFAULT_DATA_OPTIONS
@@ -360,7 +570,8 @@ export default defineComponent({
         bcolAccountId: '',
         orgType: OrgAccountTypes.ALL,
         accessType: [],
-        statuses: [props.accountStatus]
+        statuses: [props.accountStatus],
+        members: ''
       }
     }
 
@@ -407,6 +618,15 @@ export default defineComponent({
       return ''
     }
 
+    function getHeaderPlaceHolderText (header: any): string {
+      switch (header.text) {
+        case 'Team Member':
+          return 'Name or username'
+        default:
+          return header.text
+      }
+    }
+
     const noDataMessage = computed(() => {
       return t(
         state.searchParamsExist
@@ -425,7 +645,8 @@ export default defineComponent({
                 params.id.length > 0 ||
                 params.bcolAccountId.length > 0 ||
                 params.decisionMadeBy.length > 0 ||
-                (params.orgType.length > 0 && params.orgType !== OrgAccountTypes.ALL)
+                (params.orgType.length > 0 && params.orgType !== OrgAccountTypes.ALL) ||
+                params.members.length > 0
     }
 
     const isActiveAccounts = computed(() => {
@@ -449,7 +670,13 @@ export default defineComponent({
       doSearchParametersExist,
       paginationOptions,
       updateItemsPerPage,
-      isActiveAccounts
+      isActiveAccounts,
+      getHeaderPlaceHolderText,
+      hasMoreMembers,
+      getConcatenatedDisplayMembers,
+      getFirstAdminDisplayMember,
+      toggleMembersView,
+      headersChanged
     }
   }
 })
@@ -491,6 +718,11 @@ export default defineComponent({
   height: 14px;
   transform: rotate(0deg);
   display: inline-flex;
+}
+
+.columns-to-show {
+  color: $gray7;
+  font-size: 14px;
 }
 
 .account-active-search {
@@ -598,6 +830,7 @@ export default defineComponent({
     border: 0px;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
+    vertical-align: text-top;
   }
 
   ::v-deep table > tbody > tr > td:last-child:not([colspan]) {
@@ -605,5 +838,26 @@ export default defineComponent({
     padding-right: 3px !important;
   }
 
+  .member-view-link {
+    font-weight: bold;
+    color: $app-blue;
+  }
+  .members-layout {
+    display: flex;
+    align-items: flex-start;
+
+    .member-type-icon {
+      font-size: 16px;
+      color: $gray9;
+      margin-top: 2px;
+    }
+    .members-text-layout {
+      display: flex;
+      flex-direction: column;
+      .members-role-text {
+        font-weight: bold;
+      }
+    }
+  }
 }
 </style>

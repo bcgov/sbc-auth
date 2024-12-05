@@ -65,6 +65,19 @@ export interface Organization {
   businessSize?: string,
   mailingAddress?: Address,
   modified?: string
+  displayMembers?: DisplayMembers,
+  showOnlyFirstAdmin?: boolean
+}
+
+export interface DisplayMembers {
+  adminMembers: DisplayMember[],
+  coordinatorMembers: DisplayMember[],
+  userMembers: DisplayMember[]
+}
+
+export interface DisplayMember {
+  memberDisplayName: string,
+  loginSource: string
 }
 
 export interface PADInfo {
@@ -207,6 +220,8 @@ export interface OrgFilterParams {
   decisionMadeBy?: string
   orgType?: string
   accessType?: string[]
+  includeMembers?: boolean
+  members?: string
 }
 
 export interface OrgPaymentDetails {
