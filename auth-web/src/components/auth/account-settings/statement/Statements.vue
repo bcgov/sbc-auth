@@ -350,9 +350,9 @@ export default defineComponent({
         // redirect to account info if its a basic account
         root.$router.push(`/${Pages.MAIN}/${currentOrganization.id}/settings/account-info`)
       } else {
-        loadStatementsList()
+        await loadStatementsList()
         if (state.hasEFTPaymentMethod) {
-          getStatementsSummary()
+          await getStatementsSummary()
         }
       }
     }
