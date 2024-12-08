@@ -33,7 +33,7 @@
         Settings
       </v-btn>
     </header>
-    <template v-if="enableEFTPaymentMethod && hasEFTPaymentMethod">
+    <template v-if="enableEFTPaymentMethod && hasEFTPaymentMethod && paymentOwingAmount >= 0">
       <div
         class="statement-owing d-flex flex-wrap flex-row  mb-2"
       >
@@ -226,7 +226,7 @@ export default defineComponent({
       isDataLoading: false,
       statementsList: [],
       isLoading: false,
-      paymentOwingAmount: 0,
+      paymentOwingAmount: -1,
       paymentDueDate: null,
       shortNameLinksCount: 0,
       isEftUnderPayment: false,
@@ -350,9 +350,9 @@ export default defineComponent({
         // redirect to account info if its a basic account
         root.$router.push(`/${Pages.MAIN}/${currentOrganization.id}/settings/account-info`)
       } else {
-        await loadStatementsList()
+        loadStatementsList()
         if (state.hasEFTPaymentMethod) {
-          await getStatementsSummary()
+          getStatementsSummary()
         }
       }
     }
