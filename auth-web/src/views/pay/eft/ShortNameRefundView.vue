@@ -317,8 +317,16 @@ export default defineComponent({
       if (props.shortNameId && props.eftRefundId) {
         state.readOnly = true
         await loadShortnameRefund()
+      } else {
+        prepopulateRefund()
       }
     })
+
+    function prepopulateRefund() {
+      state.email = state.shortNameDetails.email
+      state.casSupplierNum = state.shortNameDetails.casSupplierNumber
+      state.casSupplierSite = state.shortNameDetails.casSupplierSite
+    }
 
     async function loadShortnameDetails (): Promise<void> {
       try {
