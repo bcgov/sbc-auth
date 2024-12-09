@@ -33,7 +33,7 @@
               <span
                 v-if="index === 0"
                 class="columns-to-show"
-              >Columns to show</span>
+              >Columns to Show</span>
             </template>
           </v-select>
         </v-col>
@@ -621,7 +621,7 @@ export default defineComponent({
 
     function getHeaderPlaceHolderText (header: any): string {
       if (header.text === 'Team Member') {
-        return 'Name or username'
+        return 'Name or Username'
       }
       return header.text
     }
