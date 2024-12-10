@@ -529,6 +529,10 @@ export enum paymentErrorType {
     VALIDATION_ERROR = 'VALIDATION_ERROR',
 }
 
+export enum PayDocumentTypes {
+    EFT_INSTRUCTIONS = 'eftInstructions'
+}
+
 export enum StaffCreateAccountsTypes {
     DIRECTOR_SEARCH = 'DIRECTOR_SEARCH',
     GOVM_BUSINESS = 'GOVM_BUSINESS'
