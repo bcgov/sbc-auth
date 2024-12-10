@@ -69,6 +69,14 @@ export default class PaymentService {
     return axios.get(url, { params })
   }
 
+  static getDocument (documentType: string): AxiosPromise<any> {
+    const headers = {
+      'Accept': 'application/pdf'
+    }
+    const url = `${ConfigHelper.getPayAPIURL()}/documents?documentType=${documentType}`
+    return axios.get(url, { headers, responseType: 'blob' as 'json' })
+  }
+
   static downloadOBInvoice (paymentId: string): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}/reports`
     const headers = {
