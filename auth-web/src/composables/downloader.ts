@@ -1,7 +1,7 @@
 import CommonUtils from '@/util/common-util'
+import { PayDocumentTypes } from '@/util/constants'
 import PaymentService from '@/services/payment.services'
 import { StatementListItem } from '@/models/statement'
-import { PayDocumentTypes } from '@/util/constants'
 
 export function useDownloader (orgStore, state) {
   async function downloadStatement (statement: StatementListItem) {
