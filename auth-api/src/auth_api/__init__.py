@@ -18,7 +18,7 @@ This module is the API for the Authroization system.
 import os
 import traceback
 
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from flask_migrate import Migrate, upgrade
 from sbc_common_components.utils.camel_case_response import convert_to_camel
@@ -33,6 +33,7 @@ from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
 from auth_api.utils.auth import jwt
 from auth_api.utils.cache import cache
+from auth_api.utils.user_context import _get_context
 
 logger = StructuredLogging.get_logger()
 
@@ -62,11 +63,29 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
         app.after_request(convert_to_camel)
 
         ExceptionHandler(app)
+        setup_403_logging(app)
         setup_jwt_manager(app, jwt)
         register_shellcontext(app)
         build_cache(app)
 
     return app
+
+
+def setup_403_logging(app):
+    """Log setup for forbidden."""
+    if app.config.get("ENABLE_403_LOGGING") is True:
+
+        @app.errorhandler(403)
+        def handle_403_error(error):
+            user_context = _get_context()
+
+            user_name = user_context.user_name[:5] + "..."
+            roles = user_context.roles
+            app.logger.error(f"403 Forbidden - {request.method} {request.url} - {user_name} - {roles}")
+
+            message = {"message": getattr(error, "message", error.description)}
+            headers = {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"}
+            return message, error.code, headers
 
 
 def execute_migrations(app):
