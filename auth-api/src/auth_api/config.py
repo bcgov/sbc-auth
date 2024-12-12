@@ -199,6 +199,7 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     # LaunchDarkly SDK key
     AUTH_LD_SDK_KEY = os.getenv("AUTH_LD_SDK_KEY", None)
+    ENABLE_403_LOGGING = os.getenv("ENABLE_403_LOGGING", "False").lower() == "true"
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
