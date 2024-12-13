@@ -148,7 +148,7 @@
       v-if="disableRowCount"
       #[`footer.page-text`]
     >
-      Page {{ tableDataOptions["page"] }}
+      Page {{ tableDataOptions.page }}
     </template>
   </v-data-table>
 </template>
