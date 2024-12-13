@@ -122,7 +122,7 @@ export default class PaymentService {
     if (viewAll) params.append('viewAll', `${viewAll}`)
 
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
-    return axios.post(url, filterParams.filterPayload, { params })
+    return axios.post(url, {...filterParams.filterPayload, excludeCounts: true}, { params })
   }
 
   static getTransactionReports (accountId: number, filterParams: TransactionFilter): AxiosPromise<any> {

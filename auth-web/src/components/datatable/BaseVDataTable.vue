@@ -142,6 +142,12 @@
         v-html="noDataText"
       />
     </template>
+  
+    <!-- Override pagination text -->
+    <template v-if="disableRowCount"  v-slot:[`footer.page-text`]> 
+      Page {{ tableDataOptions["page"] }}
+    </template>
+
   </v-data-table>
 </template>
 
@@ -189,7 +195,8 @@ export default defineComponent({
     useObserver: { type: Boolean, required: false },
     observerCallback: { type: Function as PropType<() => Promise<boolean>>, required: false, default: null },
     hideFilters: { type: Boolean, default: false },
-    setExpanded: { default: () => [] as object[] }
+    setExpanded: { default: () => [] as object[] },
+    disableRowCount: { type: Boolean, default: false }
   },
   emits: ['update-table-options'],
   setup (props, { emit }) {

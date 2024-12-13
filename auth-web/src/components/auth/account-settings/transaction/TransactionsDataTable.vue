@@ -27,7 +27,6 @@
           indeterminate
           size="20"
         />
-        <span v-else>({{ transactions.totalResults }})</span>
       </h3>
     </div>
     <BaseVDataTable
@@ -42,6 +41,7 @@
       :setTableDataOptions="tableDataOptions"
       :totalItems="transactions.totalResults"
       @update-table-options="tableDataOptions = $event"
+      :disableRowCount="true"
     >
       <template #header-filter-slot-actions>
         <v-btn
