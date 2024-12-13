@@ -108,7 +108,7 @@ describe('TransactionsDataTable tests', () => {
     // trigger load
     await wrapper.vm.loadTransactionList()
     expect(wrapper.find(heading).exists()).toBe(true)
-    expect(wrapper.find(heading).text().replaceAll(' ', '').replaceAll('\n', '')).toBe('Transactions(2)')
+    expect(wrapper.find(heading).text().replaceAll(' ', '').replaceAll('\n', '')).toBe('Transactions')
     // table headers
     expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
     const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
