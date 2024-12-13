@@ -40,8 +40,8 @@
       :setHeaders="headers"
       :setTableDataOptions="tableDataOptions"
       :totalItems="transactions.totalResults"
-      @update-table-options="tableDataOptions = $event"
       :disableRowCount="true"
+      @update-table-options="tableDataOptions = $event"
     >
       <template #header-filter-slot-actions>
         <v-btn

@@ -142,12 +142,14 @@
         v-html="noDataText"
       />
     </template>
-  
+
     <!-- Override pagination text -->
-    <template v-if="disableRowCount"  v-slot:[`footer.page-text`]> 
+    <template
+      v-if="disableRowCount"
+      #[`footer.page-text`]
+    >
       Page {{ tableDataOptions["page"] }}
     </template>
-
   </v-data-table>
 </template>
 
