@@ -74,8 +74,7 @@ export const useTransactions = () => {
         currentOrganization.value.id, transactions.filters, viewAll.value)
       if (response?.data) {
         transactions.results = response.data.items || []
-        transactions.totalResults = response.data.total
-
+        transactions.totalResults = transactions.results.length * response.data.page + (response.data.hasMore ? 1 : 0)
         const transactionClone = [...transactions.results]
         const allowedRefundedStatuses = [InvoiceStatus.PAID, InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED]
         const allowedPaymentMethods = [PaymentTypes.PAD, PaymentTypes.ONLINE_BANKING]
@@ -94,7 +93,7 @@ export const useTransactions = () => {
         })
         if (transactions.results.some((transaction: Transaction) => transaction.refundDate)) {
           transactions.results.sort((transaction1: Transaction, transaction2: Transaction) => {
-            return new Date(transaction2.createdOn).getTime() - new Date(transaction1.createdOn).getTime()
+            return moment(transaction2.createdOn).valueOf() - moment(transaction1.createdOn).valueOf()
           })
         }
       } else throw new Error('No response from getTransactions')

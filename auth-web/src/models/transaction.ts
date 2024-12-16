@@ -44,6 +44,7 @@ export interface TransactionFilter {
   paymentMethod?: PaymentTypes,
   product?: string,
   statusCode?: InvoiceStatus
+  excludeCount?: boolean
 }
 
 export interface TransactionFilterParams {
@@ -57,7 +58,7 @@ export interface TransactionListResponse {
   items: Transaction[]
   limit: number
   page: number
-  total: number
+  hasMore: boolean
 }
 
 export interface TransactionState {
