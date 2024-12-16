@@ -322,7 +322,7 @@ export default defineComponent({
       }
     })
 
-    function prepopulateRefund() {
+    function prepopulateRefund () {
       state.email = state.shortNameDetails.email
       state.casSupplierNum = state.shortNameDetails.casSupplierNumber
       state.casSupplierSite = state.shortNameDetails.casSupplierSite
