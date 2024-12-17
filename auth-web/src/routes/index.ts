@@ -16,7 +16,6 @@ import Router from 'vue-router'
 import { User } from '@/models/user'
 import Vue from 'vue'
 import { getRoutes } from './router'
-import { handleExternalLinkRedirect } from '@/util/navigation'
 import store from '@/stores/vuex'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
@@ -173,10 +172,6 @@ router.beforeEach(async (to, from, next) => {
       } else if (orgStore.needMissingBusinessDetailsRedirect) {
         return next({ path: `/${Pages.UPDATE_ACCOUNT}` })
       }
-    }
-
-    if (handleExternalLinkRedirect(to.fullPath)) {
-      return
     }
     next()
   }
