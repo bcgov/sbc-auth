@@ -55,12 +55,3 @@ export const goToFormPage = (entityType): void => {
 export const goToSocieties = (): void => {
   window.open(appendAccountId(ConfigHelper.getSocietiesUrl()), '_blank')
 }
-
-export const handleExternalLinkRedirect = (path: string): boolean => {
-  if (path.includes('/http')) {
-    const cleanPath = path.replace(/^\//, '')
-    window.location.href = cleanPath
-    return true
-  }
-  return false
-}
