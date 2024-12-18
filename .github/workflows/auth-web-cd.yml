@@ -6,6 +6,7 @@ on:
       - main
       - feature*
       - hotfix*
+      - release
     paths:
       - "auth-web/**"
   workflow_dispatch:
@@ -15,10 +16,17 @@ on:
         required: true
         type: choice
         options:
-        - dev
-        - test
-        - sandbox
-        - prod
+          - "dev"
+          - "test"
+          - "sandbox"
+          - "prod"
+      redeploy:
+        description: "Redeploy Application"
+        required: true
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 jobs:
   account-ui-cd:
@@ -27,6 +35,7 @@ jobs:
       target: ${{ inputs.target }}
       app_name: "account-ui"
       working_directory: "./auth-web"
+      redeploy: ${{ inputs.redeploy }}
     secrets:
       WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
