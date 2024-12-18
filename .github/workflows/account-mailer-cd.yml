@@ -6,6 +6,7 @@ on:
       - main
       - feature*
       - hotfix*
+      - release*
     paths:
       - "queue_services/account-mailer/**"
       - "auth-api/src/auth_api/models/**"
@@ -19,10 +20,17 @@ on:
         required: true
         type: choice
         options:
-        - dev
-        - test
-        - sandbox
-        - prod
+          - "dev"
+          - "test"
+          - "sandbox"
+          - "prod"
+      redeploy:
+        description: "Redeploy Application"
+        required: true
+        type: choice
+        options:
+          - "false"
+          - "true"
 jobs:
   account-mailer-cd:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-cd.yaml@main
@@ -30,6 +38,7 @@ jobs:
       target: ${{ inputs.target }}
       app_name: "account-mailer"
       working_directory: "./queue_services/account-mailer"
+      redeploy: ${{ inputs.redeploy }}
     secrets:
       WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
