@@ -15,7 +15,7 @@
 
 from http import HTTPStatus
 
-from flask import Blueprint, abort, g, jsonify, request
+from flask import Blueprint, abort, current_app, g, jsonify, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
@@ -29,6 +29,7 @@ from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.auth import jwt as _jwt
+from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import LoginSource, Status
 from auth_api.utils.roles import Role
@@ -107,6 +108,12 @@ def post_user():
             valid_format, errors = schema_utils.validate(request_json, "user")
             if not valid_format:
                 return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
+
+        # Ensure STAFF doesn't have GOV_ACCOUNT_USER, otherwise they get extra permissions they shouldn't have.
+        roles = token.get("realm_access", {}).get("roles", [])
+        if Role.STAFF.name in roles and Role.GOV_ACCOUNT_USER.value in roles:
+            current_app.logger.info("Removing GOV_ACCOUNT_USER group from STAFF user")
+            KeycloakService.remove_user_from_group(token.get("sub"), GROUP_GOV_ACCOUNT_USERS)
 
         user = UserService.save_from_jwt_token(request_json)
         response, status = user.as_dict(), HTTPStatus.CREATED
