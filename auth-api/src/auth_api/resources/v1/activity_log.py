@@ -29,7 +29,7 @@ bp = Blueprint("ACTIVITY_LOGS", __name__, url_prefix=f"{EndpointEnum.API_V1.valu
 
 @bp.route("", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods="GET")
-@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.ACCOUNT_HOLDER.value])
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.ACCOUNT_HOLDER.value, Role.VIEW_ACTIVITY_LOGS.value])
 def get_activities(org_id):
     """Fetch activities."""
     try:

@@ -81,7 +81,7 @@ def search_organizations():
 
         roles = token.get("realm_access").get("roles")
         # public user can only get status of orgs in search, unless they have special roles.
-        allowed_roles = [Role.STAFF.value, Role.SYSTEM.value, Role.ACCOUNT_IDENTITY]
+        allowed_roles = [Role.STAFF.value, Role.SYSTEM.value, Role.ACCOUNT_IDENTITY, Role.STAFF_VIEW_ACCOUNTS.value]
         if Role.PUBLIC_USER.value in roles and not set(roles).intersection(set(allowed_roles)):
             if response and response.get("orgs"):
                 status = HTTPStatus.OK

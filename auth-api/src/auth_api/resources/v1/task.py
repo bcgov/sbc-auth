@@ -34,7 +34,7 @@ bp = Blueprint("TASKS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/tasks
 
 @bp.route("", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["GET"])
-@_jwt.has_one_of_roles([Role.STAFF.value])
+@_jwt.has_one_of_roles([Role.STAFF.value, Role.STAFF_TASK_SEARCH.value])
 def get_tasks():
     """Fetch tasks."""
     try:
@@ -62,7 +62,7 @@ def get_tasks():
 
 @bp.route("/<int:task_id>", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["GET", "PUT"])
-@_jwt.has_one_of_roles([Role.STAFF.value])
+@_jwt.has_one_of_roles([Role.STAFF.value, Role.VIEW_TASK_DETAILS.value])
 def get_task(task_id):
     """Fetch task by id."""
     try:
