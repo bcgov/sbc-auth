@@ -361,7 +361,7 @@ export default defineComponent({
       isBusinessAccount: computed(() => orgStore.isBusinessAccount),
       baseAddress: computed(() => currentOrgAddress.value),
 
-      isStaff: computed(() => userStore.currentUser.roles.includes(Role.Staff)),
+      isStaff: computed(() => userStore.currentUser.roles.includes(Role.Staff) || userStore.currentUser.roles.includes(Role.ContactCentreStaff)),
       isSuspendButtonVisible: computed(() => (
         (currentOrganization.value.statusCode === AccountStatus.ACTIVE ||
         currentOrganization.value.statusCode === AccountStatus.SUSPENDED) &&

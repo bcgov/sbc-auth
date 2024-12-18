@@ -42,6 +42,7 @@ export enum Role {
     AdminEdit = 'admin_edit',
     BnEdit = 'bn_edit',
     Staff = 'staff',
+    ContactCentreStaff = 'contact_centre_staff',
     Public = 'public_user',
     Edit = 'edit',
     Basic = 'basic',

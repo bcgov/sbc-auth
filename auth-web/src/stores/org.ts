@@ -312,11 +312,12 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   async function syncMembership (orgId: number): Promise<Member> {
+    console.log('syncMembership')
     let permissions:string[] = []
     let response
     let membership:Member = null
     const kcUserProfile = KeyCloakService.getUserInfo()
-    if (!kcUserProfile.roles.includes(Role.Staff)) {
+    if (!kcUserProfile.roles.includes(Role.Staff) && !kcUserProfile.roles.includes(Role.ContactCentreStaff)) {
       response = await UserService.getMembership(orgId)
       membership = response?.data
       // const org: Organization = state.currentOrganization']
@@ -331,12 +332,17 @@ export const useOrgStore = defineStore('org', () => {
       // Create permissions to enable actions for staff
       if (kcUserProfile.roles.includes(Role.StaffManageAccounts)) {
         permissions = CommonUtils.getAdminPermissions()
+      } else if (kcUserProfile.roles.includes(Role.ContactCentreStaff)) {
+        permissions = CommonUtils.getAdminPermissions()
+        console.log('Contact Centre Staff permissions', permissions)
       } else if (kcUserProfile.roles.includes(Role.StaffViewAccounts)) {
         permissions = CommonUtils.getViewOnlyPermissions()
       }
       // Create an empty membership model for staff. Map view_account as User and manage_accounts as Admin
       let membershipTypeCode = null
       if (kcUserProfile.roles.includes(Role.StaffManageAccounts)) {
+        membershipTypeCode = MembershipType.Admin
+      } if (kcUserProfile.roles.includes(Role.ContactCentreStaff)) {
         membershipTypeCode = MembershipType.Admin
       } else if (kcUserProfile.roles.includes(Role.StaffViewAccounts)) {
         membershipTypeCode = MembershipType.User

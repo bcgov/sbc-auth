@@ -34,8 +34,10 @@ router.beforeEach(async (to, from, next) => {
   //    If there are allowed or disabled roles specified on the route check if the user has those roles else route to unauthorized
   // If the user is not authenticated
   //    Redirect the user to login page to login page
+  console.log('beforeEach')
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (sessionStorage.getItem(SessionStorageKeys.KeyCloakToken)) {
+      console.log(to.meta.allowedRoles)
       if (!KeyCloakService.verifyRoles(to.meta.allowedRoles, to.meta.disabledRoles)) {
         return next({
           path: '/unauthorized',
@@ -43,7 +45,7 @@ router.beforeEach(async (to, from, next) => {
         })
       }
     } else {
-      if (to.meta.allowedRoles?.length === 1 && to.meta.allowedRoles[0] === Role.Staff) {
+      if (to.meta.allowedRoles?.length === 1 && [Role.Staff, Role.ContactCentreStaff].includes(to.meta.allowedRoles[0])) {
         return next({
           path: `/signin/idir${to.path}`,
           query: { redirect: to.fullPath }

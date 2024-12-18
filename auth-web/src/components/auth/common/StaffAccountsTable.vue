@@ -553,8 +553,8 @@ export default defineComponent({
     }, { deep: true })
 
     async function viewInBusinessRegistryDashboard (org: Organization) {
-      await syncBeforeNavigate(org)
-      root.$router.push(`/account/${org.id}/business`)
+      // await syncBeforeNavigate(org)
+      // root.$router.push(`/account/${org.id}/business`)
     }
 
     async function view (org: Organization) {

@@ -231,11 +231,11 @@ export default class StaffAccountManagement extends Vue {
   }
 
   private get canManageAccounts () {
-    return this.currentUser?.roles?.includes(Role.StaffManageAccounts)
+    return this.currentUser?.roles?.includes(Role.StaffManageAccounts) || this.currentUser?.roles?.includes(Role.ContactCentreStaff)
   }
 
   private get canCreateAccounts () {
-    return this.currentUser?.roles?.includes(Role.StaffCreateAccounts)
+    return this.currentUser?.roles?.includes(Role.StaffCreateAccounts) || this.currentUser?.roles?.includes(Role.ContactCentreStaff)
   }
 
   private get canViewAccounts () {
