@@ -258,6 +258,8 @@ class User(BaseModel):
                 or user_from_context.login_source == LoginSource.BCROS.value
             ):
                 user_type = Role.ANONYMOUS_USER.name
+            elif user_from_context.is_staff():
+                user_type = Role.STAFF.name
             elif Role.GOV_ACCOUNT_USER.value in user_from_context.roles:
                 user_type = Role.GOV_ACCOUNT_USER.name
             elif Role.PUBLIC_USER.value in user_from_context.roles or user_from_context.login_source in [
@@ -265,8 +267,6 @@ class User(BaseModel):
                 LoginSource.BCSC.value,
             ]:
                 user_type = Role.PUBLIC_USER.name
-            elif user_from_context.is_staff():
-                user_type = Role.STAFF.name
             elif user_from_context.is_system():
                 user_type = Role.SYSTEM.name
 
