@@ -81,8 +81,8 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         return role_name in self._roles
 
     def is_staff(self) -> bool:
-        """Return True if the user is staff user."""
-        return Role.STAFF.value in self._roles if self._roles else False
+        """Return True if the user is staff user or contact centre staff."""
+        return self._roles and any(role in [Role.STAFF.value, Role.CONTACT_CENTRE_STAFF.value] for role in self._roles)
 
     def is_staff_admin(self) -> bool:
         """Return True if the user is staff user."""

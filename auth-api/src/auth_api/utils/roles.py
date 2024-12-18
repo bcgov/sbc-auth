@@ -44,6 +44,12 @@ class Role(Enum):
     # Used by Business-AR to create affiliations that may already have a passcode (bypass passcode check)
     SKIP_AFFILIATION_AUTH = "skip_affiliation_auth"
 
+    CONTACT_CENTRE_STAFF = "contact_centre_staff"
+    STAFF_TASK_SEARCH = "staff_task_search"
+    VIEW_TASK_DETAILS = "view_task_details"
+    VIEW_ACCOUNT_PENDING_INVITATIONS = "view_account_pending_invitations"
+    VIEW_ACTIVITY_LOGS = "view_activity_logs"
+
 
 # Membership types
 STAFF = "STAFF"
