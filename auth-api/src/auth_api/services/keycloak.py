@@ -228,7 +228,7 @@ class KeycloakService:
             keycloak_guid: Dict = user_from_context.sub
 
         if Role.ACCOUNT_HOLDER.value in user_from_context.roles:
-            KeycloakService._remove_user_from_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
+            KeycloakService.remove_user_from_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
 
     @staticmethod
     @user_context
@@ -339,7 +339,7 @@ class KeycloakService:
         response.raise_for_status()
 
     @staticmethod
-    def _remove_user_from_group(user_id: str, group_name: str):
+    def remove_user_from_group(user_id: str, group_name: str):
         """Remove user from the keycloak group."""
         config = current_app.config
         base_url = config.get("KEYCLOAK_BASE_URL")
