@@ -6,6 +6,7 @@ on:
       - main
       - feature*
       - hotfix*
+      - release*
     paths:
       - "queue_services/auth-queue/**"
       - "auth-api/src/auth_api/models/**"
@@ -19,10 +20,17 @@ on:
         required: true
         type: choice
         options:
-        - dev
-        - test
-        - sandbox
-        - prod
+          - "dev"
+          - "test"
+          - "sandbox"
+          - "prod"
+      redeploy:
+        description: "Redeploy Application"
+        required: true
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 jobs:
   auth-queue-cd:
@@ -31,6 +39,7 @@ jobs:
       target: ${{ inputs.target }}
       app_name: "auth-queue"
       working_directory: "./queue_services/auth-queue"
+      redeploy: ${{ inputs.redeploy }}
     secrets:
       WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
