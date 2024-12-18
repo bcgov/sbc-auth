@@ -772,14 +772,17 @@ class Org:  # pylint: disable=too-many-public-methods
         return MembershipModel.find_orgs_for_user(user_id, valid_statuses)
 
     @staticmethod
-    def search_orgs(search: OrgSearch, environment):  # pylint: disable=too-many-locals
+    @user_context
+    def search_orgs(search: OrgSearch, environment, **kwargs):  # pylint: disable=too-many-locals
         """Search for orgs based on input parameters."""
         orgs_result = {"orgs": [], "page": search.page, "limit": search.limit, "total": 0}
         include_invitations: bool = False
+        user_from_context: UserContext = kwargs["user_context"]
+        roles = user_from_context.roles
         search.access_type, is_staff_admin = Org.refine_access_type(search.access_type)
         if search.statuses and OrgStatus.PENDING_ACTIVATION.value in search.statuses:
             # only staff admin can see director search accounts
-            if not is_staff_admin:
+            if not is_staff_admin and Role.VIEW_ACCOUNT_PENDING_INVITATIONS.value not in roles:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
             org_models, orgs_result["total"] = OrgModel.search_pending_activation_orgs(name=search.name)
             include_invitations = True

@@ -52,8 +52,7 @@ class Authorization:
         auth = None
         token_roles = user_from_context.roles
 
-        # todo the service account level access has not been defined
-        if Role.STAFF.value in token_roles:
+        if Role.STAFF.value in token_roles or Role.CONTACT_CENTRE_STAFF.value in token_roles:
             if expanded:
                 # Query Authorization view by business identifier
                 auth = AuthorizationView.find_authorization_for_admin_by_org_id(account_id)
