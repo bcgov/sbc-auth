@@ -112,7 +112,7 @@ def post_user():
         # Ensure STAFF doesn't have GOV_ACCOUNT_USER, otherwise they get extra permissions they shouldn't have.
         roles = token.get("realm_access", {}).get("roles", [])
         if Role.STAFF.name in roles and Role.GOV_ACCOUNT_USER.value in roles:
-            current_app.logger.info("Removing GOV_ACCOUNT_USER role from STAFF user")
+            current_app.logger.info("Removing GOV_ACCOUNT_USER group from STAFF user")
             KeycloakService.remove_user_from_group(token.get("sub"), GROUP_GOV_ACCOUNT_USERS)
 
         user = UserService.save_from_jwt_token(request_json)
