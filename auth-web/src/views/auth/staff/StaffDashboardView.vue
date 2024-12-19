@@ -420,6 +420,11 @@ export default defineComponent({
       return /^\d+$/.test(identifier)
     }
 
+    const resetSearchState = () => {
+      businessStore.resetCurrentBusiness()
+      businessStore.resetFilingID()
+    }
+
     const updateCurrentBusiness = async () => {
       try {
         // Search for business, action will set session storage
@@ -471,11 +476,6 @@ export default defineComponent({
         }
       }
     }
-
-    const resetSearchState = () => {
-    businessStore.resetCurrentBusiness()
-    businessStore.resetFilingID()
-  }
 
     const isDevOrTest = computed(() =>
       window.location.href.includes('localhost') ||
