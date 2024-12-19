@@ -70,7 +70,7 @@
               </v-col>
             </v-row>
             <p class="mb-5 mt-4">
-              Find an existing business to manage:
+              Find a business or filing number:
             </p>
           </div>
 
@@ -81,28 +81,28 @@
                 icon="mdi-alert-circle"
                 class="mb-0"
               >
-                {{ errorMessage }} <strong>{{ searchedBusinessNumber }}</strong>
+                {{ errorMessage }} <strong>{{ searchedIdentifierNumber }}</strong>
               </v-alert>
             </div>
           </v-expand-transition>
 
           <v-form
-            ref="searchBusinessForm"
+            ref="searchIdentifierForm"
             @submit.prevent="search"
           >
             <v-row no-gutters>
               <v-col>
                 <v-text-field
-                  id="txtBusinessNumber"
-                  v-model="businessIdentifier"
+                  id="txtSearchIdentifier"
+                  v-model="searchIdentifier"
                   filled
                   dense
                   req
                   persistent-hint
-                  label="Incorporation Number or Registration Number"
-                  hint="Example: BC1234567, CP1234567 or FM1234567"
-                  :rules="businessIdentifierRules"
-                  @blur="formatBusinessIdentifier()"
+                  label="Incorporation, registration or filing number"
+                  hint="Example: “BC1234567”, “CP1234567”, “FM1234567” or “123456”"
+                  :rules="searchIdentifierRules"
+                  @blur="formatSearchIdentifier()"
                 />
               </v-col>
               <v-col cols="auto">
@@ -323,8 +323,8 @@ import { useUserStore } from '@/stores/user'
 
 // FUTURE: remove after vue 3 upgrade
 interface StaffDashboardViewI {
-  businessIdentifier: string
-  searchedBusinessNumber: string
+  searchIdentifier: string
+  searchedIdentifierNumber: string
   searchActive: boolean
   errorMessage: string
   canViewIncorporationSearchResult: boolean
@@ -354,7 +354,7 @@ export default defineComponent({
     Transactions
   },
   setup (props, { root }) {
-    const searchBusinessForm: Ref<HTMLFormElement> = ref(null)
+    const searchIdentifierForm: Ref<HTMLFormElement> = ref(null)
     const emailToAdd = ref(null)
     const safeEmailView = ref(null)
     const businessStore = useBusinessStore()
@@ -363,14 +363,14 @@ export default defineComponent({
     const currentOrganization = computed(() => orgStore.currentOrganization)
     const currentUser = computed(() => userStore.currentUser)
 
-    const businessIdentifierRules = [
-      v => !!v || 'Incorporation Number or Registration Number is required',
-      v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number or Registration Number is not valid'
+    const searchIdentifierRules = [
+      v => !!v || 'Incorporation, registration or filing number is required',
+      v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation, registration or filing number is not valid'
     ]
 
     const localVars = (reactive({
       affiliatedOrg: {},
-      businessIdentifier: '',
+      searchIdentifier: '',
       canSearchFAS: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
       canViewAccounts: computed((): boolean => currentUser.value?.roles?.includes(Role.StaffViewAccounts)),
       canViewAllTransactions: computed((): boolean => currentUser.value?.roles?.includes(Role.ViewAllTransactions)),
@@ -382,14 +382,14 @@ export default defineComponent({
       registrySearchUrl: computed((): string => ConfigHelper.getRegistrySearchUrl()),
       documentsUiUrl: computed((): string => ConfigHelper.getBcrosDocumentsUiURL()),
       searchActive: false,
-      searchedBusinessNumber: '',
+      searchedIdentifierNumber: '',
       showBusSearchlink: computed((): boolean => true),
       showInvoluntaryDissolutionTile: computed((): boolean =>
         LaunchDarklyService.getFlag(LDFlags.EnableInvoluntaryDissolution) || false),
       showDrsTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableDRSLookup) || false)
     }) as unknown) as StaffDashboardViewI
 
-    const isFormValid = () => localVars.businessIdentifier && searchBusinessForm.value?.validate()
+    const isFormValid = () => localVars.searchIdentifier && searchIdentifierForm.value?.validate()
 
     const goToInvoluntaryDissolution = () => root.$router.push(`/staff/involuntary-dissolution`)
 
@@ -415,6 +415,11 @@ export default defineComponent({
       }
     ]
 
+    const isFilingID = (identifier: string) => {
+    // Check if the identifier contains only numeric characters
+      return /^\d+$/.test(identifier)
+    }
+
     const updateCurrentBusiness = async () => {
       try {
         // Search for business, action will set session storage
@@ -428,20 +433,36 @@ export default defineComponent({
       }
     }
 
+    const fetchFiling = async () => {
+      try {
+        await businessStore.loadFiling()
+      } catch (exception) {
+        ConfigHelper.removeFromSession(SessionStorageKeys.FilingIdentifierKey)
+        localVars.errorMessage = exception?.message
+      }
+    }
+
     const search = async () => {
       if (isFormValid()) {
         localVars.searchActive = true
 
         try {
-          ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, localVars.businessIdentifier)
           localVars.errorMessage = ''
+
+          if (isFilingID(localVars.searchIdentifier)) {
+            ConfigHelper.addToSession(SessionStorageKeys.FilingIdentifierKey, localVars.searchIdentifier)
+            await fetchFiling()
+          } else {
+            ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, localVars.searchIdentifier)
+          }
+
           await updateCurrentBusiness()
         } catch (exception) {
-          localVars.searchedBusinessNumber = localVars.businessIdentifier
+          localVars.searchedIdentifierNumber = localVars.searchIdentifier
           businessStore.resetCurrentBusiness()
           // FUTURE: get this from t(noIncorporationNumberFound)
           // having trouble with composition version of $t in the build.
-          localVars.errorMessage = 'No match found for Incorporation Number'
+          localVars.errorMessage = 'No match found for business, registration or filing number'
           localVars.canViewIncorporationSearchResult = false
         } finally {
           localVars.searchActive = false
@@ -455,9 +476,10 @@ export default defineComponent({
       window.location.href.includes('test.account')
     )
 
-    const formatBusinessIdentifier = () => {
-      localVars.businessIdentifier =
-        CommonUtils.formatIncorporationNumber(localVars.businessIdentifier)
+    const formatSearchIdentifier = () => {
+      if (!isFilingID(localVars.searchIdentifier)) {
+        localVars.searchIdentifier = CommonUtils.formatIncorporationNumber(localVars.searchIdentifier)
+      }
     }
 
     async function addEmail () {
@@ -483,15 +505,16 @@ export default defineComponent({
     }
 
     return {
-      businessIdentifierRules,
-      formatBusinessIdentifier,
+      searchIdentifierRules,
+      formatSearchIdentifier,
       goToInvoluntaryDissolution,
       goToManageBusiness,
       isDevOrTest,
       safeEmailView,
       isFormValid,
+      isFilingID,
       search,
-      searchBusinessForm,
+      searchIdentifierForm,
       emailToAdd,
       addEmail,
       launchTileConfig,

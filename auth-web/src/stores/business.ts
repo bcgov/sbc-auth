@@ -268,6 +268,18 @@ export const useBusinessStore = defineStore('business', () => {
     }
   }
 
+  async function loadFiling () {
+    const filingID = ConfigHelper.getFromSession(SessionStorageKeys.FilingIdentifierKey)
+    const response = await BusinessService.searchFiling(filingID).catch(() => null)
+    if (response?.status === 200) {
+      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, response?.data.filing.business.identifier)
+    } else if (response?.status === 404) {
+      throw Error('No match found for Filing Number')
+    } else {
+      throw Error('Search failed')
+    }
+  }
+
   async function addBusiness (payload: LoginPayload) {
     const requestBody: CreateAffiliationRequestBody = {
       businessIdentifier: payload.businessIdentifier,
@@ -571,6 +583,7 @@ export const useBusinessStore = defineStore('business', () => {
     currentOrganization,
     syncBusinesses,
     loadBusiness,
+    loadFiling,
     addBusiness,
     addNameRequest,
     createNamedBusiness,

@@ -94,9 +94,9 @@ export default class IncorporationSearchResultView extends Vue {
   get actions (): object[] {
     if (this.isThereAnAffiliatedAccount) {
       return [
-        { title: 'Entity Dashboard',
+        { title: 'Manage Business',
           icon: 'mdi-view-dashboard',
-          event: this.entityDashboardEvent
+          event: this.manageBusinessEvent
         },
         { title: 'Manage Account',
           icon: 'mdi-domain',
@@ -105,9 +105,9 @@ export default class IncorporationSearchResultView extends Vue {
       ]
     } else {
       return [
-        { title: 'Entity Dashboard',
+        { title: 'Manage Business',
           icon: 'mdi-view-dashboard',
-          event: this.entityDashboardEvent
+          event: this.manageBusinessEvent
         },
         { title: 'Generate Passcode',
           icon: 'mdi-lock-outline',
@@ -137,7 +137,7 @@ export default class IncorporationSearchResultView extends Vue {
       width: '25%'
     },
     {
-      text: 'Entity#',
+      text: 'Number',
       align: 'left',
       sortable: false,
       value: 'businessIdentifier',
@@ -176,7 +176,7 @@ export default class IncorporationSearchResultView extends Vue {
     return orgTypeDisplay
   }
 
-  async entityDashboardEvent () {
+  async manageBusinessEvent () {
     window.location.href = `${ConfigHelper.getBusinessURL()}${this.currentBusiness.businessIdentifier}`
   }
 
@@ -188,7 +188,7 @@ export default class IncorporationSearchResultView extends Vue {
       this.$router.push(`/account/${this.currentOrganization.id}/business`)
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.log('Error during entity dashboard click event!')
+      console.log('Error during manage business click event!')
     }
   }
 
