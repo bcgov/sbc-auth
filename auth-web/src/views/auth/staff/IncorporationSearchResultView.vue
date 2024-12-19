@@ -178,7 +178,16 @@ export default class IncorporationSearchResultView extends Vue {
   }
 
   async manageBusinessEvent () {
-    window.location.href = `${ConfigHelper.getBusinessURL()}${this.currentBusiness.businessIdentifier}`
+    const businessIdentifier = this.currentBusiness.businessIdentifier
+    const filingId = this.filingID
+
+    let url = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
+
+    if (filingId) {
+      url += `?filingId=${filingId}`
+    }
+
+    window.location.href = url
   }
 
   async manageAccountEvent () {
