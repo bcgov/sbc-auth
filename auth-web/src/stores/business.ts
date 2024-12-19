@@ -37,7 +37,8 @@ export const useBusinessStore = defineStore('business', () => {
   const state = reactive({
     currentBusiness: undefined as Business,
     businesses: [] as Business[],
-    removeExistingAffiliationInvitation: false
+    removeExistingAffiliationInvitation: false,
+    filingID: ''
   })
 
   function $reset () {
@@ -270,6 +271,7 @@ export const useBusinessStore = defineStore('business', () => {
 
   async function loadFiling () {
     const filingID = ConfigHelper.getFromSession(SessionStorageKeys.FilingIdentifierKey)
+    state.filingID = filingID
     const response = await BusinessService.searchFiling(filingID).catch(() => null)
     if (response?.status === 200) {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, response?.data.filing.business.identifier)
@@ -570,6 +572,11 @@ export const useBusinessStore = defineStore('business', () => {
     ConfigHelper.removeFromSession(SessionStorageKeys.BusinessIdentifierKey)
   }
 
+  function resetFilingID (): void {
+    state.filingID = ''
+    ConfigHelper.removeFromSession(SessionStorageKeys.FilingIdentifierKey)
+  }
+
   async function resetBusinessPasscode (passCodeResetLoad: PasscodeResetLoad) {
     await BusinessService.resetBusinessPasscode(passCodeResetLoad)
   }
@@ -602,6 +609,7 @@ export const useBusinessStore = defineStore('business', () => {
     saveContact,
     updateFolioNumber,
     resetCurrentBusiness,
+    resetFilingID,
     resetBusinessPasscode,
     searchNRIndex,
     setRemoveExistingAffiliationInvitation,

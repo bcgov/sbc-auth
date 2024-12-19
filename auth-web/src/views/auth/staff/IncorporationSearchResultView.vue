@@ -83,6 +83,7 @@ export default class IncorporationSearchResultView extends Vue {
   @Action(useOrgStore) readonly syncMembership!: (affiliatedOrganizationId: number) => Promise<Member>
   @Action(useOrgStore) readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
   @State(useBusinessStore) currentBusiness!: Business
+  @State(useBusinessStore) filingID!: string
 
   @Prop({ default: false }) isVisible: boolean
   @Prop() affiliatedOrg: Organization
@@ -122,7 +123,7 @@ export default class IncorporationSearchResultView extends Vue {
       name: this.currentBusiness?.name,
       orgType: this.affiliatedOrg?.orgType,
       account: this.affiliatedOrg?.name || 'No Affiliation',
-      businessIdentifier: this.currentBusiness?.businessIdentifier,
+      businessIdentifier: this.filingID? this.filingID : this.currentBusiness?.businessIdentifier,
       businessNumber: this.currentBusiness?.businessNumber,
       accessType: this.affiliatedOrg?.accessType,
       statusCode: this.affiliatedOrg?.statusCode

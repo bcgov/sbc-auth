@@ -437,12 +437,14 @@ export default defineComponent({
       try {
         await businessStore.loadFiling()
       } catch (exception) {
-        ConfigHelper.removeFromSession(SessionStorageKeys.FilingIdentifierKey)
+        businessStore.resetFilingID()
         localVars.errorMessage = exception?.message
       }
     }
 
     const search = async () => {
+      resetSearchState()
+
       if (isFormValid()) {
         localVars.searchActive = true
 
@@ -469,6 +471,11 @@ export default defineComponent({
         }
       }
     }
+
+    const resetSearchState = () => {
+    businessStore.resetCurrentBusiness()
+    businessStore.resetFilingID()
+  }
 
     const isDevOrTest = computed(() =>
       window.location.href.includes('localhost') ||
