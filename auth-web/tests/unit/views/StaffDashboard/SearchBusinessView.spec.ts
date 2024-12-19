@@ -55,7 +55,7 @@ describe('StaffDashboardView.vue', () => {
       vuetify,
       mocks: { isFormValid }
     })
-    cmp.setData({ businessIdentifier: 'CP0000000' })
+    cmp.setData({ searchIdentifier: 'CP0000000' })
 
     vi.resetModules()
     vi.clearAllMocks()
@@ -66,7 +66,7 @@ describe('StaffDashboardView.vue', () => {
   })
 
   it('incorporation number is not empty', () => {
-    expect(cmp.vm.businessIdentifier).toBe('CP0000000')
+    expect(cmp.vm.searchIdentifier).toBe('CP0000000')
   })
 
   it('enter button click invokes isFormValid method', async () => {

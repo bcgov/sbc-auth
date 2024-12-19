@@ -48,6 +48,10 @@ export default class BusinessService {
     return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/businesses/${businessRegNumber}/filings`)
   }
 
+  static async searchFiling (filingID: string): Promise<AxiosResponse<any>> {
+    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/businesses/filings/search/${filingID}`)
+  }
+
   static async updateFolioNumber (folioNumber: FolioNumberload): Promise<AxiosResponse<any>> {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/entities/${folioNumber.businessIdentifier}`, folioNumber)
   }
