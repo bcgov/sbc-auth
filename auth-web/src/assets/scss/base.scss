@@ -193,3 +193,10 @@ legend {
   display: flex;
   align-items: flex-start;
 }
+
+// Product Card
+.product-card-contents{
+  hr{
+    border-top: 1px solid $gray4;
+  }
+}
