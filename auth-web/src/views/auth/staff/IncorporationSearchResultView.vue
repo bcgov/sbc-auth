@@ -83,6 +83,7 @@ export default class IncorporationSearchResultView extends Vue {
   @Action(useOrgStore) readonly syncMembership!: (affiliatedOrganizationId: number) => Promise<Member>
   @Action(useOrgStore) readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
   @State(useBusinessStore) currentBusiness!: Business
+  @State(useBusinessStore) filingID!: string
 
   @Prop({ default: false }) isVisible: boolean
   @Prop() affiliatedOrg: Organization
@@ -94,9 +95,9 @@ export default class IncorporationSearchResultView extends Vue {
   get actions (): object[] {
     if (this.isThereAnAffiliatedAccount) {
       return [
-        { title: 'Entity Dashboard',
+        { title: 'Manage Business',
           icon: 'mdi-view-dashboard',
-          event: this.entityDashboardEvent
+          event: this.manageBusinessEvent
         },
         { title: 'Manage Account',
           icon: 'mdi-domain',
@@ -105,9 +106,9 @@ export default class IncorporationSearchResultView extends Vue {
       ]
     } else {
       return [
-        { title: 'Entity Dashboard',
+        { title: 'Manage Business',
           icon: 'mdi-view-dashboard',
-          event: this.entityDashboardEvent
+          event: this.manageBusinessEvent
         },
         { title: 'Generate Passcode',
           icon: 'mdi-lock-outline',
@@ -122,7 +123,7 @@ export default class IncorporationSearchResultView extends Vue {
       name: this.currentBusiness?.name,
       orgType: this.affiliatedOrg?.orgType,
       account: this.affiliatedOrg?.name || 'No Affiliation',
-      businessIdentifier: this.currentBusiness?.businessIdentifier,
+      businessIdentifier: this.filingID || this.currentBusiness?.businessIdentifier,
       businessNumber: this.currentBusiness?.businessNumber,
       accessType: this.affiliatedOrg?.accessType,
       statusCode: this.affiliatedOrg?.statusCode
@@ -137,7 +138,7 @@ export default class IncorporationSearchResultView extends Vue {
       width: '25%'
     },
     {
-      text: 'Entity#',
+      text: 'Number',
       align: 'left',
       sortable: false,
       value: 'businessIdentifier',
@@ -176,8 +177,17 @@ export default class IncorporationSearchResultView extends Vue {
     return orgTypeDisplay
   }
 
-  async entityDashboardEvent () {
-    window.location.href = `${ConfigHelper.getBusinessURL()}${this.currentBusiness.businessIdentifier}`
+  async manageBusinessEvent () {
+    const businessIdentifier = this.currentBusiness.businessIdentifier
+    const filingId = this.filingID
+
+    let url = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
+
+    if (filingId) {
+      url += `?filing_id=${filingId}`
+    }
+
+    window.location.href = url
   }
 
   async manageAccountEvent () {
@@ -188,7 +198,7 @@ export default class IncorporationSearchResultView extends Vue {
       this.$router.push(`/account/${this.currentOrganization.id}/business`)
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.log('Error during entity dashboard click event!')
+      console.log('Error during manage business click event!')
     }
   }
 
