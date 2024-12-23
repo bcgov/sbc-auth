@@ -123,7 +123,7 @@ export default class IncorporationSearchResultView extends Vue {
       name: this.currentBusiness?.name,
       orgType: this.affiliatedOrg?.orgType,
       account: this.affiliatedOrg?.name || 'No Affiliation',
-      businessIdentifier: this.filingID ? this.filingID : this.currentBusiness?.businessIdentifier,
+      businessIdentifier: this.filingID || this.currentBusiness?.businessIdentifier,
       businessNumber: this.currentBusiness?.businessNumber,
       accessType: this.affiliatedOrg?.accessType,
       statusCode: this.affiliatedOrg?.statusCode
@@ -184,7 +184,7 @@ export default class IncorporationSearchResultView extends Vue {
     let url = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
 
     if (filingId) {
-      url += `?filingId=${filingId}`
+      url += `?filing_id=${filingId}`
     }
 
     window.location.href = url
