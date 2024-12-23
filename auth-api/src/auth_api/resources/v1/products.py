@@ -22,14 +22,12 @@ from flask_cors import cross_origin
 from auth_api.exceptions import BusinessException
 from auth_api.services import Product as ProductService
 from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.auth import jwt as _jwt
 
 bp = Blueprint("PRODUCTS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/products")
 
 
 @bp.route("", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["GET"])
-@_jwt.requires_auth
 def get_products():
     """Get a list of all products."""
     try:
