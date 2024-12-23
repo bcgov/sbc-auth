@@ -420,6 +420,10 @@ export default defineComponent({
       return /^\d+$/.test(identifier)
     }
 
+    const isTempBusiness = (identifier: string) => {
+      return identifier.charAt(0).toUpperCase() === 'T'
+    }
+
     const resetSearchState = () => {
       businessStore.resetCurrentBusiness()
       businessStore.resetFilingID()
@@ -441,9 +445,12 @@ export default defineComponent({
     const fetchFiling = async () => {
       try {
         await businessStore.loadFiling()
+        localVars.affiliatedOrg = await orgStore.getOrganizationForAffiliate()
+        localVars.canViewIncorporationSearchResult = true
       } catch (exception) {
-        businessStore.resetFilingID()
         localVars.errorMessage = exception?.message
+        localVars.canViewIncorporationSearchResult = false
+        businessStore.resetFilingID()
       }
     }
 
@@ -463,7 +470,10 @@ export default defineComponent({
             ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, localVars.searchIdentifier)
           }
 
-          await updateCurrentBusiness()
+          const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
+          if (!isTempBusiness(businessIdentifier)) {
+            await updateCurrentBusiness()
+          }
         } catch (exception) {
           localVars.searchedIdentifierNumber = localVars.searchIdentifier
           businessStore.resetCurrentBusiness()

@@ -274,7 +274,14 @@ export const useBusinessStore = defineStore('business', () => {
     state.filingID = filingID
     const response = await BusinessService.searchFiling(filingID).catch(() => null)
     if (response?.status === 200) {
-      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, response?.data.filing.business.identifier)
+      const businessIdentifier = response?.data.filing.business.identifier
+      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
+
+      if (!state.currentBusiness) {
+        state.currentBusiness = {} as Business
+      }
+
+      state.currentBusiness.businessIdentifier = businessIdentifier
     } else if (response?.status === 404) {
       throw Error('No match found for Filing Number')
     } else {
