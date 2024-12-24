@@ -33,6 +33,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
         { text: productDisplay[Product.PPR], value: Product.PPR },
         { text: productDisplay[Product.RPPR], value: Product.RPPR },
         { text: productDisplay[Product.RPT], value: Product.RPT },
+        { text: productDisplay[Product.STRR], value: Product.STRR },
         { text: productDisplay[Product.VS], value: Product.VS }
       ],
       label: 'Application Type',
