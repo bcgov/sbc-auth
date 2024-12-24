@@ -641,6 +641,7 @@ export enum Product {
     PPR = 'PPR',
     RPPR = 'RPPR',
     RPT = 'RPT',
+    STRR = 'STRR',
     VS = 'VS'
 }
 
