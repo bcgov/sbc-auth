@@ -142,7 +142,6 @@
             >mdi-chevron-down</v-icon></span>
           </v-btn>
         </header>
-
         <div class="product-card-contents ml-9">
           <!-- Product Content Slot -->
           <slot name="productContentSlot" />
@@ -182,6 +181,20 @@
                   @save:saveProductFee="saveProductFee"
                 />
               </div>
+              <v-label class="theme--light">
+                <P class="mt-2">
+                  Supported payment method:
+                </P>
+                <v-chip
+                  v-for="method in paymentMethods"
+                  :key="method"
+                  small
+                  label
+                  class="mr-2 font-weight-bold"
+                >
+                  <v-icon>{{ paymentTypeIcon[method] }}</v-icon>{{ paymentTypeLabel[method] }}
+                </v-chip>
+              </v-label>
             </div>
           </v-expand-transition>
         </div>
@@ -193,193 +206,196 @@
 
 <script lang="ts">
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
-import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { DisplayModeValues, Product as ProductEnum, ProductStatus } from '@/util/constants'
-import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import { PropType, computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
+import { paymentTypeIcon, paymentTypeLabel } from '@/resources/display-mappers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
 
 const TOS_NEEDED_PRODUCT = ['VS']
 
-@Component({
+export default defineComponent({
+  name: 'Product',
   components: {
     ProductTos,
     ProductFee
+  },
+  props: {
+    productDetails: { default: null as OrgProduct },
+    activeSubProduct: { default: null as OrgProduct },
+    orgProduct: { default: null as AccountFee },
+    orgProductFeeCodes: { type: Array as PropType<OrgProductFeeCode[]>, default: () => [] },
+    isProductActionLoading: { type: Boolean, default: false },
+    isProductActionCompleted: { type: Boolean, default: false },
+    userName: { type: String, default: '' },
+    orgName: { type: String, default: '' },
+    isSelected: { type: Boolean, default: false },
+    isexpandedView: { type: Boolean, default: false },
+    isAccountSettingsView: { type: Boolean, default: false },
+    isBasicAccount: { type: Boolean, default: false },
+    canManageProductFee: { type: Boolean, default: false },
+    paymentMethods: { type: Array as PropType<string[]>, default: () => [] }
+  },
+  setup (props, { emit }) {
+    const state = reactive({
+      count: 0,
+      termsAccepted: false,
+      productSelected: props.isSelected,
+      viewOnly: DisplayModeValues.VIEW_ONLY,
+      showProductFee: computed(() => {
+        return props.canManageProductFee && props.orgProduct && props.orgProduct.product
+      }),
+      isTOSNeeded: computed(() => {
+        return TOS_NEEDED_PRODUCT.includes(props.productDetails.code)
+      })
+    })
+
+    onMounted(() => {
+      state.productSelected = props.isSelected
+    })
+
+    watch(() => props.isSelected, (newValue) => {
+      state.productSelected = newValue
+    })
+
+    const isBasicAccountAndPremiumProduct = computed(() => {
+      return props.isBasicAccount && props.productDetails.premiumOnly
+    })
+
+    const productLabel = computed(() => {
+      let { code } = props.productDetails
+      let subTitle = `${code?.toLowerCase()}CodeSubtitle`
+      let details = `${code?.toLowerCase()}CodeDescription`
+      let note = `${code?.toLowerCase()}CodeNote`
+      let decisionMadeIcon = null
+      let decisionMadeColorCode = null
+
+      if (props.isAccountSettingsView) {
+        const status = props.productDetails.subscriptionStatus
+        switch (status) {
+          case ProductStatus.ACTIVE: {
+            subTitle = `${code?.toLowerCase()}CodeActiveSubtitle`
+            decisionMadeIcon = 'mdi-check-circle'
+            decisionMadeColorCode = 'success'
+            break
+          }
+          case ProductStatus.REJECTED: {
+            subTitle = `${code?.toLowerCase()}CodeRejectedSubtitle`
+            decisionMadeIcon = 'mdi-close-circle'
+            decisionMadeColorCode = 'error'
+            break
+          }
+          case ProductStatus.PENDING_STAFF_REVIEW: {
+            subTitle = 'productPendingSubtitle'
+            decisionMadeIcon = 'mdi-clock-outline'
+            break
+          }
+          default: {
+            break
+          }
+        }
+        if (isBasicAccountAndPremiumProduct.value) {
+          subTitle = `${code?.toLowerCase()}CodeUnselectableSubtitle`
+          decisionMadeIcon = 'mdi-minus-box'
+        }
+        // Swap subtitle and details for sub-product specific content
+        if (props.productDetails.code === ProductEnum.MHR && props.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
+          subTitle = `mhrQsCodeActiveSubtitle`
+          details = `${props.activeSubProduct.code?.toLowerCase()}CodeDescription`
+          note = ''
+        }
+      }
+      return { subTitle, details, decisionMadeIcon, decisionMadeColorCode, note }
+    })
+
+    const hasDecisionNotBeenMade = computed(() => {
+      // returns true if create account flow
+      if (!props.isAccountSettingsView) {
+        return true
+      }
+      if (([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(props.productDetails.subscriptionStatus)) {
+        return true
+      }
+      state.termsAccepted = true
+      return false
+    })
+
+    function expand () {
+      const productCode = props.isexpandedView ? '' : props.productDetails.code
+      // emit selected product code to controll expand all product
+      emit('toggle-product-details', productCode)
+      return productCode
+    }
+
+    function selecThisProduct (event, emitFromTos = false) {
+      let forceRemove = false
+      // expand if tos needed
+      // as per new requirment, show expanded when user tries to click checkbox and not accepted TOS.
+      // need to collapse on uncheck. Since both are using same function emitFromTos will be true when
+      // click happend from TOS check box. then no need to collapse
+      if (state.isTOSNeeded && !state.termsAccepted) {
+        if (!emitFromTos) { // expand and collapse on click if click is not coming from TOS
+          expand()
+        }
+        state.productSelected = false
+        // wait till user approve TOS or remove product selection from array if tos not accepted
+        forceRemove = true
+      }
+      emit('set-selected-product', { ...props.productDetails, forceRemove })
+    }
+
+    function saveProductFee (data) {
+      emit('save:saveProductFee', data)
+    }
+
+    function tosChanged (termsAccepted: boolean) {
+      state.count++
+      state.termsAccepted = termsAccepted
+      // force select when tos accept
+      selecThisProduct(undefined, true)// no need to collaps on TOS accept
+    }
+
+    // if TOS needed will inject component
+    // in future can use different components for different product
+    const productFooter = computed(() => {
+      return {
+        id: 'tos',
+        component: ProductTos,
+        props: {
+          userName: props.userName,
+          orgName: props.orgName,
+          isTOSAlreadyAccepted: state.termsAccepted
+        },
+        events: { 'tos-status-changed': tosChanged },
+        ref: 'tosForm'
+      }
+    })
+
+    function productBadge (code: string) {
+      return LaunchDarklyService.getFlag(`product-${code}-status`)
+    }
+
+    function productPremTooltipText (code: string) {
+      return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
+    }
+
+    return {
+      ...toRefs(state),
+      productLabel,
+      paymentTypeIcon,
+      isBasicAccountAndPremiumProduct,
+      expand,
+      selecThisProduct,
+      productBadge,
+      productPremTooltipText,
+      productFooter,
+      saveProductFee,
+      hasDecisionNotBeenMade,
+      paymentTypeLabel
+    }
   }
 })
-export default class Product extends Mixins(AccountMixin) {
-  @Prop({ default: undefined }) productDetails: OrgProduct
-  @Prop({ default: undefined }) activeSubProduct: OrgProduct
-  @Prop({ default: undefined }) orgProduct: AccountFee // product available for orgs
-  @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode // product
-  @Prop({ default: false }) isProductActionLoading: boolean // loading
-  @Prop({ default: false }) isProductActionCompleted: boolean // loading
-
-  @Prop({ default: '' }) userName: string
-  @Prop({ default: '' }) orgName: string
-  @Prop({ default: false }) isSelected: boolean
-  @Prop({ default: false }) isexpandedView: boolean
-  @Prop({ default: false }) isAccountSettingsView: boolean // to confirm if the rendering is from AccountSettings view
-  @Prop({ default: false }) isBasicAccount: boolean // to confirm if the current organization is basic and the product instance is premium only
-  @Prop({ default: false }) canManageProductFee: boolean
-
-  private termsAccepted: boolean = false
-  public productSelected:boolean = false
-  viewOnly = DisplayModeValues.VIEW_ONLY
-
-  $refs: {
-    tosForm: HTMLFormElement
-  }
-
-  @Watch('isSelected')
-  onisSelectedChange (newValue:boolean) {
-    // setting check box
-    this.productSelected = newValue
-  }
-  get showProductFee () {
-    return this.canManageProductFee && this.orgProduct && this.orgProduct.product
-  }
-
-  get productLabel () {
-    // this is mapping product code with lang file.
-    // lang file have subtitle and description with product code prefix.
-    // eg: pprCodeSubtitle, pprCodeDescription
-    // Also, returns check box icon and color if the product has been reviewed.
-    let { code } = this.productDetails
-    let subTitle = `${code?.toLowerCase()}CodeSubtitle`
-    let details = `${code?.toLowerCase()}CodeDescription`
-    let note = `${code?.toLowerCase()}CodeNote`
-    let decisionMadeIcon = null
-    let decisionMadeColorCode = null
-
-    if (this.isAccountSettingsView) {
-      const status = this.productDetails.subscriptionStatus
-      switch (status) {
-        case ProductStatus.ACTIVE: {
-          subTitle = `${code?.toLowerCase()}CodeActiveSubtitle`
-          decisionMadeIcon = 'mdi-check-circle'
-          decisionMadeColorCode = 'success'
-          break
-        }
-        case ProductStatus.REJECTED: {
-          subTitle = `${code?.toLowerCase()}CodeRejectedSubtitle`
-          decisionMadeIcon = 'mdi-close-circle'
-          decisionMadeColorCode = 'error'
-          break
-        }
-        case ProductStatus.PENDING_STAFF_REVIEW: {
-          subTitle = 'productPendingSubtitle'
-          decisionMadeIcon = 'mdi-clock-outline'
-          break
-        }
-        default: {
-          break
-        }
-      }
-      if (this.isBasicAccountAndPremiumProduct) {
-        subTitle = `${code?.toLowerCase()}CodeUnselectableSubtitle`
-        decisionMadeIcon = 'mdi-minus-box'
-      }
-      // Swap subtitle and details for sub-product specific content
-      if (this.productDetails.code === ProductEnum.MHR && this.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
-        subTitle = `mhrQsCodeActiveSubtitle`
-        details = `${this.activeSubProduct.code?.toLowerCase()}CodeDescription`
-        note = ''
-      }
-    }
-    return { subTitle, details, decisionMadeIcon, decisionMadeColorCode, note }
-  }
-
-  get isTOSNeeded () {
-    // check tos needed for product
-    return TOS_NEEDED_PRODUCT.includes(this.productDetails.code)
-  }
-
-  get isBasicAccountAndPremiumProduct () {
-    return this.isBasicAccount && this.productDetails.premiumOnly
-  }
-
-  get hasDecisionNotBeenMade () {
-    // returns true if create account flow
-    if (!this.isAccountSettingsView) {
-      return true
-    }
-    // returns true if product subscription status is unsubscribed and in account settings view
-    if (([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(this.productDetails.subscriptionStatus)) {
-      return true
-    }
-    this.termsAccepted = true
-    return false
-  }
-
-  public mounted () {
-    this.productSelected = this.isSelected
-  }
-
-  @Emit('toggle-product-details')
-  public expand () {
-    // emit selected product code to controll expand all product
-    return this.isexpandedView ? '' : this.productDetails.code
-  }
-
-  public tosChanged (termsAccepted:boolean) {
-    this.termsAccepted = termsAccepted
-    // force select when tos accept
-    this.selecThisProduct(undefined, true)// no need to collaps on TOS accept
-  }
-  // // this function will only used when we have to show TOS (in product and service dashboard)
-
-  // since event is first argument, we are using second to set emitFromTos
-  @Emit('set-selected-product')
-  // eslint-disable-next-line
-  public selecThisProduct (event, emitFromTos:boolean = false) {
-
-    let forceRemove = false
-    // expand if tos needed
-    // as per new requirment, show expanded when user tries to click checkbox and not accepted TOS.
-    // need to collapse on uncheck. Since both are using same function emitFromTos will be true when
-    // click happend from TOS check box. then no need to collapse
-    if (this.isTOSNeeded && !this.termsAccepted) {
-      if (!emitFromTos) { // expand and collapse on click if click is not coming from TOS
-        this.expand()
-      }
-      this.productSelected = false
-      // wait till user approve TOS or remove product selection from array if tos not accepted
-      forceRemove = true
-    }
-    return { ...this.productDetails, forceRemove }
-  }
-
-  // if TOS needed will inject component
-  // in future can use different components for different product
-  get productFooter () {
-    return {
-      id: 'tos',
-      component: ProductTos,
-      props: {
-        userName: this.userName,
-        orgName: this.orgName,
-        isTOSAlreadyAccepted: this.termsAccepted
-      },
-      events: { 'tos-status-changed': this.tosChanged },
-      ref: 'tosForm'
-    }
-  }
-
-  @Emit('save:saveProductFee')
-  saveProductFee (data) {
-    return data
-  }
-
-  public productBadge (code: string) {
-    return LaunchDarklyService.getFlag(`product-${code}-status`)
-  }
-
-  public productPremTooltipText (code: string) {
-    return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
-  }
-}
 </script>
 
 <style lang="scss" scoped>

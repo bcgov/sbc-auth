@@ -150,8 +150,8 @@ export default class NonBcscAccountSetupView extends Vue {
   private accountStepperConfig: Array<StepConfiguration> =
     [
       {
-        title: 'Select Product and Services',
-        stepName: 'Products and Services',
+        title: 'Select Products and Services',
+        stepName: 'Products and Payment',
         component: SelectProductService,
         componentProps: {
           isStepperView: true,
