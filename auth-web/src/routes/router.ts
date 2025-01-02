@@ -8,7 +8,7 @@ import {
   StaffBusinessRegistryBreadcrumb,
   StaffDashboardBreadcrumb
 } from '@/resources/BreadcrumbResources'
-import { Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { LDFlags, Pages, Role, SessionStorageKeys } from '@/util/constants'
 
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
@@ -46,6 +46,7 @@ import HomeView from '@/views/auth/home/HomeView.vue'
 import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
 import InvoluntaryDissolution from '@/views/auth/staff/InvoluntaryDissolution.vue'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
@@ -229,6 +230,13 @@ export function getRoutes (): RouteConfig[] {
     {
       path: '/account/:orgId',
       name: 'account',
+      beforeEnter: (to, from, next) => {
+        if (LaunchDarklyService.getFlag(LDFlags.EnableBusinessRegistryDashboard) && to.query.newbrd === 'true') {
+          window.location.href = 'https://business-registry-dev.web.app/en-CA/'
+        } else {
+          next()
+        }
+      },
       component: DashboardView,
       meta: { requiresAuth: true, requiresProfile: true },
       redirect: '/account/:orgId/business',
