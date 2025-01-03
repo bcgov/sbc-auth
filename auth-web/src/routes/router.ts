@@ -231,7 +231,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/account/:orgId',
       name: 'account',
       beforeEnter: (to, from, next) => {
-        if (LaunchDarklyService.getFlag(LDFlags.EnableBusinessRegistryDashboard) && to.query.noRedirect !== 'true') {
+        if (LaunchDarklyService.getFlag(LDFlags.EnableBusinessRegistryDashboard) && !to.query.noRedirect) {
           window.location.href = ConfigHelper.getNewBusinessRegistryDashboardUrl()
         } else {
           next()
