@@ -465,6 +465,7 @@ export enum LDFlags {
     BusSearchLink = 'bus-search-staff-link',
     EnableBcCccUlc = 'enable-bc-ccc-ulc',
     EnableBusinessNrSearch = 'enable-business-nr-search',
+    EnableBusinessRegistryDashboard = 'enable-business-registry-dashboard',
     EnableDetailsFilter = 'enable-transactions-detail-filter',
     EnableEFTPaymentMethod = 'enable-eft-payment-method',
     EnablePaymentChangeFromEFT = 'enable-payment-change-from-eft',
