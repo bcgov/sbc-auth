@@ -317,8 +317,14 @@ export default defineComponent({
       if (([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(props.productDetails.subscriptionStatus)) {
         return true
       }
-      state.termsAccepted = true
       return false
+    })
+
+    // Untested.
+    watch(() => hasDecisionNotBeenMade.value, (newValue) => {
+      if (!newValue) {
+        state.termsAccepted = true
+      }
     })
 
     function expand () {
