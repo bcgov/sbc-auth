@@ -183,7 +183,7 @@
               </div>
               <v-label class="theme--light">
                 <P class="mt-2">
-                  Supported payment methods:
+                  Supported payment method(s):
                 </P>
                 <v-chip
                   v-for="method in paymentMethods"
