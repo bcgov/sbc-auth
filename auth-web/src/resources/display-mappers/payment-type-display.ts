@@ -14,3 +14,33 @@ export const paymentTypeDisplay = {
   [PaymentTypes.PAD]: 'Pre-Authorized Debit',
   [PaymentTypes.CREDIT]: 'Account Credit'
 }
+
+export const paymentTypeLabel = {
+  [PaymentTypes.BCOL]: 'BC ONLINE',
+  [PaymentTypes.CASH]: 'CASH',
+  [PaymentTypes.CHEQUE]: 'CHEQUE',
+  [PaymentTypes.CREDIT_CARD]: 'CREDIT CARD',
+  [PaymentTypes.DIRECT_PAY]: 'DIRECT PAY',
+  [PaymentTypes.EFT]: 'ELECTRONIC FUNDS TRANSFER',
+  [PaymentTypes.EJV]: 'ELECTRONIC JOURNAL VOUCHER',
+  [PaymentTypes.INTERNAL]: 'ROUTING SLIP',
+  [PaymentTypes.NO_FEE]: 'NO FEE',
+  [PaymentTypes.ONLINE_BANKING]: 'ONLINE BANKING',
+  [PaymentTypes.PAD]: 'PRE-AUTHORIZED DEBIT',
+  [PaymentTypes.CREDIT]: 'ACCOUNT CREDIT'
+}
+
+export const paymentTypeIcon = {
+  [PaymentTypes.BCOL]: 'mdi-link-variant',
+  [PaymentTypes.CASH]: '',
+  [PaymentTypes.CHEQUE]: '',
+  [PaymentTypes.CREDIT_CARD]: 'mdi-credit-card-outline',
+  [PaymentTypes.DIRECT_PAY]: '',
+  [PaymentTypes.EFT]: 'mdi-arrow-right-circle-outline',
+  [PaymentTypes.EJV]: '',
+  [PaymentTypes.INTERNAL]: '',
+  [PaymentTypes.NO_FEE]: '',
+  [PaymentTypes.ONLINE_BANKING]: 'mdi-bank-outline',
+  [PaymentTypes.PAD]: 'mdi-bank-outline',
+  [PaymentTypes.CREDIT]: 'ACCOUNT CREDIT'
+}
