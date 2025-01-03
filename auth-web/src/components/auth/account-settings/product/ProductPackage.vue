@@ -10,12 +10,6 @@
       >
         Products and Services
       </h2>
-      <p class="mt-3 payment-page-sub">
-        Request additional products or services you wish to access through your account.
-      </p>
-      <h4 class="mt-3 payment-page-sub">
-        Select Additional Product(s)
-      </h4>
     </div>
     <template v-if="isLoading">
       <div
@@ -51,6 +45,7 @@
             :canManageProductFee="canManageAccounts"
             :isProductActionLoading="isProductActionLoading"
             :isProductActionCompleted="isProductActionCompleted"
+            :paymentMethods="productPaymentMethods[product.code]"
             @set-selected-product="setSelectedProduct"
             @toggle-product-details="toggleProductDetails"
             @save:saveProductFee="saveProductFee"
@@ -183,6 +178,7 @@ export default defineComponent({
       fetchOrgProductFeeCodes,
       updateAccountFees
     } = useOrgStore()
+    const orgStore = useOrgStore()
 
     const {
       currentOrganization,
@@ -225,7 +221,8 @@ export default defineComponent({
         ) || productList.value.find(product =>
           !!product.parentCode && product.subscriptionStatus === ProductStatus.REJECTED
         )
-      })
+      }),
+      productPaymentMethods: computed(() => orgStore.productPaymentMethods),
     })
 
     const setSelectedProduct = async (productDetails) => {
@@ -256,7 +253,7 @@ export default defineComponent({
         localState.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
         localState.orgProductFeeCodes = await fetchOrgProductFeeCodes()
       }
-
+      await orgStore.getProductPaymentMethods()
       localState.isLoading = false
     }
 

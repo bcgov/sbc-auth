@@ -895,6 +895,7 @@ export const useOrgStore = defineStore('org', () => {
     const response: any = await CodesService.getPaymentMethods(productCode || undefined)
     if (response?.data && response.status === 200) {
       const result = response.data
+      result.BUSINESS_SEARCH = result.BUSINESSSearch
       state.productPaymentMethods = result
       return result
     }

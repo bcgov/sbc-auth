@@ -26,7 +26,7 @@
             :productDetails="product"
             :isexpandedView="product.code === expandedProductCode"
             :isSelected="currentSelectedProducts.includes(product.code)"
-            :paymentMethods="productPaymentMethods[product.code === 'BUSINESS_SEARCH' ? 'BUSINESSSearch' : product.code] || []"
+            :paymentMethods="productPaymentMethods[product.code]"
             @set-selected-product="setSelectedProduct"
             @toggle-product-details="toggleProductDetails"
           />
