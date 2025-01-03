@@ -192,29 +192,10 @@
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
               <v-list-item
-                v-can:VIEW_PAYMENT_METHODS.hide
-                dense
-                class="py-1 px-4"
-                aria-label="Payment Methods"
-                role="listitem"
-                :to="getUrl('payment-option')"
-                data-test="user-auth-nav-item"
-              >
-                <v-list-item-icon>
-                  <v-icon
-                    color="link"
-                    left
-                  >
-                    mdi-currency-usd
-                  </v-icon>
-                </v-list-item-icon>
-                <v-list-item-title>Payment Methods</v-list-item-title>
-              </v-list-item>
-              <v-list-item
                 v-can:VIEW_REQUEST_PRODUCT_PACKAGE.hide
                 dense
                 class="py-1 px-4"
-                aria-label="Products and Services"
+                aria-label="Products and Payment"
                 role="listitem"
                 :to="getUrl('product-settings')"
                 data-test="user-auth-nav-item"
@@ -227,7 +208,7 @@
                     mdi-apps
                   </v-icon>
                 </v-list-item-icon>
-                <v-list-item-title>Products and Services</v-list-item-title>
+                <v-list-item-title>Products and Payment</v-list-item-title>
               </v-list-item>
             </v-list-item-group>
           </v-list>
