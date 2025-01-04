@@ -15,14 +15,14 @@ describe('Product.vue', () => {
 
   const productDetails = {
     'code': 'VS',
-    'description': 'test',
+    'description': 'Vital Statistics',
     'url': 'url',
     'type': 'PARTNER',
     'subscriptionStatus': ProductStatus.NOT_SUBSCRIBED
   }
   const pprProduct = {
     'code': 'PPR',
-    'description': 'ppr',
+    'description': 'Personal Property Registry',
     'url': 'url',
     'type': 'PARTNER',
     'subscriptionStatus': ProductStatus.NOT_SUBSCRIBED,
