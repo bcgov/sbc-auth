@@ -29,7 +29,7 @@
                     class="title font-weight-bold product-title mt-n1"
                     :data-test="productDetails.code"
                   >
-                    {{ productDetails.description }}
+                    {{ productDiscription(productDetails.code) }}
                     <v-tooltip
                       v-if="productPremTooltipText(productDetails.code)"
                       class="pa-2"
@@ -199,6 +199,7 @@ import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
+import { productDisplay } from '@/resources/display-mappers'
 
 const TOS_NEEDED_PRODUCT = ['VS']
 
@@ -378,6 +379,10 @@ export default class Product extends Mixins(AccountMixin) {
 
   public productPremTooltipText (code: string) {
     return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
+  }
+
+  public productDiscription (code: string) {
+    return productDisplay[code]
   }
 }
 </script>
