@@ -29,7 +29,7 @@
                     class="title font-weight-bold product-title mt-n1"
                     :data-test="productDetails.code"
                   >
-                    {{ productDiscription(productDetails.code) }}
+                    {{ productDiscription(productDetails.code, productDetails.description) }}
                     <v-tooltip
                       v-if="productPremTooltipText(productDetails.code)"
                       class="pa-2"
@@ -381,8 +381,8 @@ export default class Product extends Mixins(AccountMixin) {
     return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
   }
 
-  public productDiscription (code: string) {
-    return productDisplay[code]
+  public productDiscription (code: string, description: string) {
+    return productDisplay[code] || description
   }
 }
 </script>
