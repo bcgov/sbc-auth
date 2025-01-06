@@ -232,7 +232,7 @@ export function getRoutes (): RouteConfig[] {
       name: 'account',
       beforeEnter: (to, from, next) => {
         if (LaunchDarklyService.getFlag(LDFlags.EnableBusinessRegistryDashboard) && !to.query.noRedirect) {
-          window.location.href = ConfigHelper.getNewBusinessRegistryDashboardUrl()
+          window.location.href = ConfigHelper.getNewBusinessRegistryDashboardUrl() + '/' + to.params.orgId
         } else {
           next()
         }
