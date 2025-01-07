@@ -150,6 +150,7 @@
 
         <!-- Remove User -->
         <v-btn
+          v-can:REMOVE_TEAM_MEMBER.hide
           v-show="canRemove(item)"
           icon
           aria-label="Remove Team Member"
@@ -231,6 +232,7 @@
 </template>
 
 <script lang="ts">
+import { Role } from '@/util/constants'
 import { AccessType, LoginSource, Permission } from '@/util/constants'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
@@ -240,6 +242,7 @@ import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { useUserStore } from '@/stores/user'
 
 export interface ChangeRolePayload {
@@ -260,6 +263,7 @@ export interface ChangeRolePayload {
       'permissions'
     ]),
     ...mapState(useUserStore, [
+      'currentUser',
       'roleInfos'
     ])
   },
@@ -272,6 +276,7 @@ export interface ChangeRolePayload {
 })
 export default class MemberDataTable extends Vue {
   @Prop({ default: '' }) private userNamefilterText: string
+  protected readonly currentUser!: KCUserProfile
   private readonly businesses!: Business[]
   private activeOrgMembers!: Member[]
   private readonly currentMembership!: Member
@@ -401,16 +406,20 @@ export default class MemberDataTable extends Vue {
   }
 
   private canChangeRole (memberBeingChanged: Member): boolean {
+    if (this.currentUser.roles.includes(Role.ContactCentreStaff)) {
+      return false
+    }
+
     if (this.currentMembership.membershipStatus !== MembershipStatus.Active) {
       return false
     }
 
     switch (this.currentMembership.membershipTypeCode) {
       case MembershipType.Admin:
+        // if role = contact_centre_staff, then admin can't change the role of other users
+        // ...
         // Owners can change roles of other users who are not owners
-        if (
-          !this.isOwnMembership(memberBeingChanged)
-        ) {
+        if (!this.isOwnMembership(memberBeingChanged)) {
           return true
         }
         // And they can downgrade their own role if there is another owner on the team
@@ -439,6 +448,9 @@ export default class MemberDataTable extends Vue {
     if (this.currentMembership.membershipTypeCode === MembershipType.User) {
       return false
     }
+
+    // if role = contact_centre_staff, then admin can't remove the user
+    // ...
 
     // Coordinators can remove other coordinators.
     if (

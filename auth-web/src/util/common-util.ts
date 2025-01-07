@@ -229,6 +229,29 @@ export default class CommonUtils {
       Permission.VIEW_AUTH_OPTIONS,
       Permission.VIEW_PAYMENT_METHODS,
       Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
+      Permission.VIEW_USER_LOGINSOURCE,
+      Permission.REMOVE_TEAM_MEMBER
+    ]
+  }
+
+  static getAdminStaffPermissions (): string[] {
+    return [
+      Permission.CHANGE_ADDRESS,
+      Permission.CHANGE_ORG_NAME,
+      Permission.CHANGE_ROLE,
+      Permission.GENERATE_INVOICE,
+      Permission.MAKE_PAYMENT,
+      Permission.MANAGE_STATEMENTS,
+      Permission.REMOVE_BUSINESS,
+      Permission.RESET_OTP,
+      Permission.RESET_PASSWORD,
+      Permission.TRANSACTION_HISTORY,
+      Permission.VIEW_ACTIVITYLOG,
+      Permission.VIEW_ADDRESS,
+      Permission.VIEW_ADMIN_CONTACT,
+      Permission.VIEW_AUTH_OPTIONS,
+      Permission.VIEW_PAYMENT_METHODS,
+      Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
       Permission.VIEW_USER_LOGINSOURCE
     ]
   }

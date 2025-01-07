@@ -62,7 +62,7 @@
               />
             </template>
 
-            <template v-if="canSelect">
+            <template v-if="canSelect && canAccessBusinessRegistryDashboard">
               <v-divider class="mt-11 mb-8" />
               <div class="form-btns d-flex justify-end">
                 <div v-display-mode="!canEdit ? viewOnly : false ">
@@ -140,7 +140,7 @@
 
 <script lang="ts">
 import { AccessType, AffidavitStatus, DisplayModeValues, OnholdOrRejectCode, Pages,
-  TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
+  Role, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 import { Ref, computed, defineComponent, getCurrentInstance, onMounted, ref } from '@vue/composition-api'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
@@ -159,6 +159,7 @@ import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
 import { useStaffStore } from '@/stores/staff'
 import { useTaskStore } from '@/stores/task'
+import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'ReviewAccountView',
@@ -196,6 +197,7 @@ export default defineComponent({
     const orgStore = useOrgStore()
     const staffStore = useStaffStore()
     const taskStore = useTaskStore()
+    const { currentUser } = useUserStore()
 
     const accountUnderReview = computed(() => {
       return staffStore.accountUnderReview
@@ -259,6 +261,8 @@ export default defineComponent({
       return [TaskType.MHR_LAWYER_NOTARY, TaskType.MHR_MANUFACTURERS, TaskType.MHR_DEALERS]
         .includes(task.value?.type as TaskType)
     })
+
+    const canAccessBusinessRegistryDashboard = computed(() => !currentUser?.roles?.includes(Role.ContactCentreStaff))
 
     const title = computed(() => {
       let title = 'Review Account'
@@ -689,7 +693,8 @@ export default defineComponent({
       goBack,
       determinePage,
       onholdReasonCodes,
-      isMhrSubProductReview
+      isMhrSubProductReview,
+      canAccessBusinessRegistryDashboard
     }
   }
 })

@@ -275,7 +275,9 @@
                         </v-btn>
                       </template>
                       <v-list>
-                        <v-list-item @click="viewInBusinessRegistryDashboard(item)">
+                        <v-list-item
+                          v-if="canAccessBusinessRegistryDashboard"
+                          @click="viewInBusinessRegistryDashboard(item)">
                           <v-list-item-subtitle>
                             <v-icon style="font-size: 14px">mdi-view-dashboard</v-icon>
                             <span class="pl-2">Business Registry Dashboard</span>
@@ -301,6 +303,7 @@
 </template>
 
 <script lang="ts">
+import { Role } from '@/util/constants'
 import { AccessType, Account, AccountStatus, LoginSource, SessionStorageKeys } from '@/util/constants'
 import {
   DEFAULT_DATA_OPTIONS,
@@ -328,6 +331,7 @@ import debounce from '@/util/debounce'
 import { useI18n } from 'vue-i18n-composable'
 import { useOrgStore } from '@/stores/org'
 import { useStaffStore } from '@/stores/staff'
+import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'StaffAccountsTable',
@@ -354,6 +358,7 @@ export default defineComponent({
     const { t } = useI18n()
     const orgStore = useOrgStore()
     const staffStore = useStaffStore()
+    const { currentUser } = useUserStore()
     const defaultHeaders = [
       { text: 'Account Name', value: 'name', visible: true },
       { text: 'Branch Name', value: 'branchName', visible: true },
@@ -430,7 +435,8 @@ export default defineComponent({
         decisionMadeBy: '',
         orgType: OrgAccountTypes.ALL,
         statuses: [props.accountStatus]
-      } as OrgFilterParams
+      } as OrgFilterParams,
+      canAccessBusinessRegistryDashboard: computed(() => !currentUser?.roles?.includes(Role.ContactCentreStaff)),
     })
 
     state.accountTypes = Array.from(Object.keys(state.accountTypeMap))

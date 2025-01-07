@@ -36,7 +36,7 @@
         Active
       </v-tab>
 
-      <template v-if="canCreateAccounts">
+      <template v-if="canViewInvitations">
         <v-tab
           data-test="invitations-tab"
           :to="pagesEnum.STAFF_DASHBOARD_INVITATIONS"
@@ -115,10 +115,8 @@
 </template>
 
 <script lang="ts">
-import { Action, State } from 'pinia-class'
-import { Component, Vue } from 'vue-property-decorator'
+import { PropType, computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { Pages, Role } from '@/util/constants'
-import { mapActions, mapState } from 'pinia'
 import { Code } from '@/models/Code'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
@@ -142,7 +140,8 @@ enum TAB_CODE {
     Inactive = 'inactive-tab'
 }
 
-@Component({
+export default defineComponent({
+  name: 'StaffAccountManagement',
   components: {
     StaffActiveAccountsTable,
     StaffPendingAccountsTable,
@@ -151,106 +150,94 @@ enum TAB_CODE {
     StaffInactiveAccountsTable,
     StaffCreateAccountModal
   },
-  methods: {
-    ...mapActions(useStaffStore, [
-      'syncPendingInvitationOrgs',
-      'syncSuspendedStaffOrgs'
+  setup () {
+    const { currentUser } = useUserStore()
+    const { syncPendingInvitationOrgs, syncSuspendedStaffOrgs } = useStaffStore()
+    const { getCodes } = useCodesStore()
+    const { syncTasks } = useTaskStore()
+    const staffStore = useStaffStore()
+    const taskStore = useTaskStore()
+    const pendingInvitationsCount = computed(() => staffStore.pendingInvitationsCount)
+    const suspendedReviewCount = computed(() => staffStore.suspendedReviewCount)
+    const pendingTasksCount = computed(() => taskStore.pendingTasksCount)
+    const rejectedTasksCount = computed(() => taskStore.rejectedTasksCount)
+
+    const state = reactive({
+      tab: 0,
+      pagesEnum: Pages,
+      canManageAccounts: computed(() => currentUser?.roles?.includes(Role.StaffManageAccounts)),
+      canViewInvitations: computed(() => currentUser?.roles?.includes(Role.StaffCreateAccounts) ||
+        currentUser?.roles?.includes(Role.ContactCentreStaff)),
+      canCreateAccounts: computed(() => currentUser?.roles?.includes(Role.StaffCreateAccounts) &&
+      !currentUser?.roles?.includes(Role.ContactCentreStaff)),
+      canViewAccounts: computed(() => currentUser?.roles?.includes(Role.StaffViewAccounts)),
+      canSuspendAccounts: computed(() => currentUser?.roles?.includes(Role.StaffSuspendAccounts) ||
+        currentUser?.roles?.includes(Role.StaffViewAccounts)),
+    })
+
+    onMounted(async () => {
+      await getCodes()
+      await syncTasks()
+      await syncSuspendedStaffOrgs()
+      if (state.canCreateAccounts) {
+        await syncPendingInvitationOrgs()
+      }
+    })
+
+    const tabs = reactive([
+      {
+        id: 0,
+        tabName: 'Active',
+        code: TAB_CODE.Active
+      },
+      {
+        id: 1,
+        tabName: 'Invitations',
+        code: TAB_CODE.Invitations
+      },
+      {
+        id: 2,
+        tabName: 'Pending Review',
+        code: TAB_CODE.PendingReview
+      },
+      {
+        id: 3,
+        tabName: 'Rejected',
+        code: TAB_CODE.Rejected
+      },
+      {
+        id: 4,
+        tabName: 'Suspended',
+        code: TAB_CODE.Suspended
+      },
+      {
+        id: 5,
+        tabName: 'Inactive',
+        code: TAB_CODE.Inactive
+      }
     ])
-  },
-  computed: {
-    ...mapState(useUserStore, ['currentUser']),
-    ...mapState(useStaffStore, [
-      'pendingInvitationsCount',
-      'suspendedReviewCount'
-    ])
+
+    function openCreateAccount () {
+      this.$refs.staffCreateAccountDialog.open()
+    }
+
+    async function tabChange (tabIndex) {
+      const selected = this.tabs.filter((tab) => (tab.id === tabIndex))
+      if (selected[0]?.code === TAB_CODE.Invitations) {
+        await this.syncPendingInvitationOrgs()
+      }
+    }
+
+    return {
+      ...toRefs(state),
+      openCreateAccount,
+      tabChange,
+      tabs,
+      pendingInvitationsCount,
+      pendingTasksCount,
+      rejectedTasksCount,
+      suspendedReviewCount
+    }
   }
 })
-export default class StaffAccountManagement extends Vue {
-  private tab = 0
-  private readonly currentUser!: KCUserProfile
-  private readonly syncRejectedStaffOrgs!: () => Organization[]
-  private readonly syncPendingInvitationOrgs!: () => Organization[]
-  private readonly syncSuspendedStaffOrgs!: () => Organization[]
-  @Action(useCodesStore) readonly getCodes!: () => Promise<Code[]>
-  @Action(useTaskStore) readonly syncTasks!: () => Promise<void>
-  @State(useTaskStore) private pendingTasksCount: number
-  @State(useTaskStore) private rejectedTasksCount: number
-
-  private readonly pendingInvitationsCount!: number
-  private readonly suspendedReviewCount!: number
-  private pagesEnum = Pages
-
-  $refs: {
-      staffCreateAccountDialog: any
-  }
-
-  private tabs = [
-    {
-      id: 0,
-      tabName: 'Active',
-      code: TAB_CODE.Active
-    },
-    {
-      id: 1,
-      tabName: 'Invitations',
-      code: TAB_CODE.Invitations
-    },
-    {
-      id: 2,
-      tabName: 'Pending Review',
-      code: TAB_CODE.PendingReview
-    },
-    {
-      id: 3,
-      tabName: 'Rejected',
-      code: TAB_CODE.Rejected
-    },
-    {
-      id: 4,
-      tabName: 'Suspended',
-      code: TAB_CODE.Suspended
-    },
-    {
-      id: 5,
-      tabName: 'Inactive',
-      code: TAB_CODE.Inactive
-    }
-  ]
-
-  private async mounted () {
-    await this.getCodes()
-    await this.syncTasks()
-    await this.syncSuspendedStaffOrgs()
-    if (this.canCreateAccounts) {
-      await this.syncPendingInvitationOrgs()
-    }
-  }
-
-  openCreateAccount () {
-    this.$refs.staffCreateAccountDialog.open()
-  }
-
-  private get canManageAccounts () {
-    return this.currentUser?.roles?.includes(Role.StaffManageAccounts)
-  }
-
-  private get canCreateAccounts () {
-    return this.currentUser?.roles?.includes(Role.StaffCreateAccounts)
-  }
-
-  private get canViewAccounts () {
-    return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
-  }
-
-  private get canSuspendAccounts () {
-    return this.currentUser?.roles?.includes(Role.StaffSuspendAccounts) || this.currentUser?.roles?.includes(Role.StaffViewAccounts)
-  }
-
-  private async tabChange (tabIndex) {
-    const selected = this.tabs.filter((tab) => (tab.id === tabIndex))
-    if (selected[0]?.code === TAB_CODE.Invitations) {
-      await this.syncPendingInvitationOrgs()
-    }
-  }
-}
 </script>

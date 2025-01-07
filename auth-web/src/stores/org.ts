@@ -329,11 +329,14 @@ export const useOrgStore = defineStore('org', () => {
     } else {
       // Check for better approach
       // Create permissions to enable actions for staff
-      if (kcUserProfile.roles.includes(Role.StaffManageAccounts)) {
+      if (kcUserProfile.roles.includes(Role.ContactCentreStaff)) {
+        permissions = CommonUtils.getAdminStaffPermissions()
+      } else if (kcUserProfile.roles.includes(Role.StaffManageAccounts)) {
         permissions = CommonUtils.getAdminPermissions()
       } else if (kcUserProfile.roles.includes(Role.StaffViewAccounts)) {
         permissions = CommonUtils.getViewOnlyPermissions()
       }
+      console.log('permissions', permissions)
       // Create an empty membership model for staff. Map view_account as User and manage_accounts as Admin
       let membershipTypeCode = null
       if (kcUserProfile.roles.includes(Role.StaffManageAccounts)) {
