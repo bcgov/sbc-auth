@@ -40,6 +40,7 @@ from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRName
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
+from auth_api.utils.util import get_request_environment
 
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
@@ -560,7 +561,14 @@ class Affiliation:
 
     @staticmethod
     def _validate_firms_party(token, business_identifier, party_name_str: str):
-        legal_api_url = current_app.config.get("LEGAL_API_URL") + current_app.config.get("LEGAL_API_VERSION_2")
+        env = get_request_environment()
+        if env == "sandbox":
+            legal_api_url = current_app.config.get("LEGAL_SANDBOX_API_URL") + current_app.config.get(
+                "LEGAL_API_VERSION_2"
+            )
+        else:
+            legal_api_url = current_app.config.get("LEGAL_API_URL") + current_app.config.get("LEGAL_API_VERSION_2")
+
         parties_url = f"{legal_api_url}/businesses/{business_identifier}/parties"
         try:
             lear_response = RestService.get(parties_url, token=token, skip_404_logging=True)
