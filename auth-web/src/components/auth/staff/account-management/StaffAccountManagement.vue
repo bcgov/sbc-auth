@@ -115,17 +115,9 @@
 </template>
 
 <script lang="ts">
-import { PropType, computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { Pages, Role } from '@/util/constants'
-import { Code } from '@/models/Code'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import { Organization } from '@/models/Organization'
-import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
+import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import StaffCreateAccountModal from '@/components/auth/staff/account-management/StaffCreateAccountModal.vue'
-import StaffInactiveAccountsTable from '@/components/auth/staff/account-management/StaffInactiveAccountsTable.vue'
-import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account-management/StaffPendingAccountInvitationsTable.vue'
-import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
-import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
 import { useCodesStore } from '@/stores/codes'
 import { useStaffStore } from '@/stores/staff'
 import { useTaskStore } from '@/stores/task'
@@ -143,11 +135,6 @@ enum TAB_CODE {
 export default defineComponent({
   name: 'StaffAccountManagement',
   components: {
-    StaffActiveAccountsTable,
-    StaffPendingAccountsTable,
-    StaffRejectedAccountsTable,
-    StaffPendingAccountInvitationsTable,
-    StaffInactiveAccountsTable,
     StaffCreateAccountModal
   },
   setup () {

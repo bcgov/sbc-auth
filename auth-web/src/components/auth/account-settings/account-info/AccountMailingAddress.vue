@@ -80,9 +80,9 @@
 </template>
 
 <script lang="ts">
-import { Role } from '@/util/constants'
 import { computed, defineComponent, ref } from '@vue/composition-api'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
+import { Role } from '@/util/constants'
 import { addressSchema } from '@/schemas'
 import { useUserStore } from '@/stores/user'
 

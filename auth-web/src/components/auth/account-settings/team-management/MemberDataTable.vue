@@ -233,16 +233,15 @@
 
 <script lang="ts">
 import { AccessType, LoginSource, Permission, Role } from '@/util/constants'
-
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { useUserStore } from '@/stores/user'
 
 export interface ChangeRolePayload {

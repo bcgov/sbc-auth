@@ -291,7 +291,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, AccountStatus, Pages, Permission, Role, SuspensionReason } from '@/util/constants'
+import { AccessType, AccountStatus, Permission, Role, SuspensionReason } from '@/util/constants'
 import { CreateRequestBody, OrgBusinessType } from '@/models/Organization'
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { useAccount, useAccountChangeHandler } from '@/composables'
@@ -383,7 +383,8 @@ export default defineComponent({
       isAddressInfoIncomplete: computed(() => (
         currentOrgAddress.value ? Object.keys(currentOrgAddress.value).length === 0 : true
       )),
-      nameChangeNotAllowed: computed(() => (anonAccount.value || isGovmAccount.value)) && userStore.currentUser.roles.includes(Role.ContactCentreStaff)
+      nameChangeNotAllowed: computed(() => (anonAccount.value || isGovmAccount.value)) &&
+      userStore.currentUser.roles.includes(Role.ContactCentreStaff)
     })
 
     const suspensionSelectRules = [

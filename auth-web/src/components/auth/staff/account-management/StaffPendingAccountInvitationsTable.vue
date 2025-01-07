@@ -93,16 +93,15 @@
 </template>
 
 <script lang="ts">
-import { PropType, computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
-import { Role } from '@/util/constants'
+import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
-import { DataOptions } from 'vuetify'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import { Invitation } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
+import { Role } from '@/util/constants'
 import { useStaffStore } from '@/stores/staff'
 import { useUserStore } from '@/stores/user'
 
