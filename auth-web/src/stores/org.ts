@@ -161,6 +161,10 @@ export const useOrgStore = defineStore('org', () => {
     return [AccessType.GOVN, AccessType.GOVM].includes(state.originAccessType as AccessType)
   })
 
+  const isGovmOrg = computed<boolean>(() => {
+    return state.originAccessType === AccessType.GOVM
+  })
+
   // Note this will only work while the current organization is set for SBC_STAFF.
   // This should work for STAFF on any org.
   const isStaffOrSbcStaff = computed<boolean>(() => {
@@ -891,16 +895,10 @@ export const useOrgStore = defineStore('org', () => {
     return []
   }
 
-  async function getProductPaymentMethods (productCode?: string | undefined): Promise<any> {
-    const response: any = await CodesService.getPaymentMethods(productCode || undefined)
-    if (response?.data && response.status === 200) {
-      const result = response.data
-      result.BUSINESS_SEARCH = result.BUSINESSSearch
-      state.productPaymentMethods = result
-      return result
-    }
-    state.productPaymentMethods = {}
-    return {}
+  async function getProductPaymentMethods (productCode?: string): Promise<any> {
+    const data = await CodesService.getProductPaymentMethods(productCode)
+    data.BUSINESS_SEARCH = data.BUSINESSSearch // Force to match enum.
+    state.productPaymentMethods = data
   }
 
   async function addToCurrentSelectedProducts ({ productCode, forceRemove = false }): Promise<any> {
@@ -1183,6 +1181,7 @@ export const useOrgStore = defineStore('org', () => {
     getNSFInvoices,
     downloadNSFInvoicesPDF,
     isGovnGovmOrg,
+    isGovmOrg,
     updateOrgMailingAddress
   }
 })

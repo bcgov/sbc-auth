@@ -82,6 +82,7 @@
           </p>
         </div>
         <v-divider class="mb-5" />
+        Current Payment 
         <div class="align-right-container">
           <v-btn
             large

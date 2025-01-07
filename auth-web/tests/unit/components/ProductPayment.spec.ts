@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import ProductPackage from '@/components/auth/account-settings/product/ProductPackage.vue'
+import ProductPackage from '@/components/auth/account-settings/product/ProductPayment.vue'
 import Vuetify from 'vuetify'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'

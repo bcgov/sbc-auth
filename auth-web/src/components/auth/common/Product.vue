@@ -186,7 +186,7 @@
                   Supported payment method(s):
                 </P>
                 <v-chip
-                  v-for="method in paymentMethods"
+                  v-for="method in filteredPaymentMethods"
                   :key="method"
                   small
                   label
@@ -206,12 +206,13 @@
 
 <script lang="ts">
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
-import { DisplayModeValues, Product as ProductEnum, ProductStatus } from '@/util/constants'
+import { DisplayModeValues, PaymentTypes, Product as ProductEnum, ProductStatus } from '@/util/constants'
 import { PropType, computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import { paymentTypeIcon, paymentTypeLabel } from '@/resources/display-mappers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
+import { useOrgStore } from '@/stores'
 
 const TOS_NEEDED_PRODUCT = ['VS']
 
@@ -248,6 +249,12 @@ export default defineComponent({
       }),
       isTOSNeeded: computed(() => {
         return TOS_NEEDED_PRODUCT.includes(props.productDetails.code)
+      }),
+      filteredPaymentMethods: computed(() => {
+        if (useOrgStore().isGovmOrg) {
+          return props.paymentMethods.filter((method) => method == PaymentTypes.EJV)
+        }
+        return props.paymentMethods.filter((method) => ![PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV].includes(method as PaymentTypes))
       })
     })
 

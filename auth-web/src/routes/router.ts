@@ -143,7 +143,7 @@ export function getRoutes (): RouteConfig[] {
   const accountPaymentOption = () => import('../components/auth/account-settings/payment/AccountPaymentMethods.vue')
   const transaction = () => import('../components/auth/account-settings/transaction/Transactions.vue')
   const statements = () => import('../components/auth/account-settings/statement/Statements.vue')
-  const productPackage = () => import('../components/auth/account-settings/product/ProductPackage.vue')
+  const productPackage = () => import('../components/auth/account-settings/product/ProductPayment.vue')
   const activityLog = () => import('../components/auth/account-settings/activity-log/ActivityLog.vue')
   const developerAccess = () => import('../components/auth/account-settings/advance-settings/DeveloperAccess.vue')
 
