@@ -150,8 +150,8 @@
 
         <!-- Remove User -->
         <v-btn
-          v-can:REMOVE_TEAM_MEMBER.hide
           v-show="canRemove(item)"
+          v-can:REMOVE_TEAM_MEMBER.hide
           icon
           aria-label="Remove Team Member"
           title="Remove Team Member"
@@ -232,8 +232,8 @@
 </template>
 
 <script lang="ts">
-import { Role } from '@/util/constants'
-import { AccessType, LoginSource, Permission } from '@/util/constants'
+import { AccessType, LoginSource, Permission, Role } from '@/util/constants'
+
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
@@ -416,8 +416,6 @@ export default class MemberDataTable extends Vue {
 
     switch (this.currentMembership.membershipTypeCode) {
       case MembershipType.Admin:
-        // if role = contact_centre_staff, then admin can't change the role of other users
-        // ...
         // Owners can change roles of other users who are not owners
         if (!this.isOwnMembership(memberBeingChanged)) {
           return true
@@ -448,9 +446,6 @@ export default class MemberDataTable extends Vue {
     if (this.currentMembership.membershipTypeCode === MembershipType.User) {
       return false
     }
-
-    // if role = contact_centre_staff, then admin can't remove the user
-    // ...
 
     // Coordinators can remove other coordinators.
     if (

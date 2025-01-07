@@ -277,7 +277,8 @@
                       <v-list>
                         <v-list-item
                           v-if="canAccessBusinessRegistryDashboard"
-                          @click="viewInBusinessRegistryDashboard(item)">
+                          @click="viewInBusinessRegistryDashboard(item)"
+                        >
                           <v-list-item-subtitle>
                             <v-icon style="font-size: 14px">mdi-view-dashboard</v-icon>
                             <span class="pl-2">Business Registry Dashboard</span>
@@ -303,8 +304,8 @@
 </template>
 
 <script lang="ts">
-import { Role } from '@/util/constants'
-import { AccessType, Account, AccountStatus, LoginSource, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, AccountStatus, LoginSource, Role, SessionStorageKeys } from '@/util/constants'
+
 import {
   DEFAULT_DATA_OPTIONS,
   cachePageInfo,
@@ -436,7 +437,7 @@ export default defineComponent({
         orgType: OrgAccountTypes.ALL,
         statuses: [props.accountStatus]
       } as OrgFilterParams,
-      canAccessBusinessRegistryDashboard: computed(() => !currentUser?.roles?.includes(Role.ContactCentreStaff)),
+      canAccessBusinessRegistryDashboard: computed(() => !currentUser?.roles?.includes(Role.ContactCentreStaff))
     })
 
     state.accountTypes = Array.from(Object.keys(state.accountTypeMap))

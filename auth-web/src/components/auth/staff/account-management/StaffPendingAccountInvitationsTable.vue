@@ -108,17 +108,17 @@ import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'StaffPendingAccountInvitationsTable',
-  mixins: [PaginationMixin],
   components: {
     ModalDialog
   },
+  mixins: [PaginationMixin],
   setup () {
     const { currentUser } = useUserStore()
     const confirmActionDialog = ref<InstanceType<typeof ModalDialog>>()
     const state = reactive({
       orgToBeRemoved: null,
       tableDataOptions: {},
-      canManageInvitations: computed(() => !currentUser?.roles?.includes(Role.ContactCentreStaff)),
+      canManageInvitations: computed(() => !currentUser?.roles?.includes(Role.ContactCentreStaff))
     })
     const { pendingInvitationOrgs, resendPendingOrgInvitation, syncPendingInvitationOrgs, deleteOrg } = useStaffStore()
 

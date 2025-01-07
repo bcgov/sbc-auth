@@ -107,7 +107,7 @@ export default defineComponent({
     const baseAddressSchema = ref(addressSchema)
 
     const mailingAddress = ref<HTMLFormElement | null>(null)
-    
+
     const canChangeAddress = computed(() => !currentUser?.roles?.includes(Role.ContactCentreStaff))
 
     function updateAddress (address) {

@@ -172,7 +172,7 @@ export default defineComponent({
       !currentUser?.roles?.includes(Role.ContactCentreStaff)),
       canViewAccounts: computed(() => currentUser?.roles?.includes(Role.StaffViewAccounts)),
       canSuspendAccounts: computed(() => currentUser?.roles?.includes(Role.StaffSuspendAccounts) ||
-        currentUser?.roles?.includes(Role.StaffViewAccounts)),
+        currentUser?.roles?.includes(Role.StaffViewAccounts))
     })
 
     onMounted(async () => {
