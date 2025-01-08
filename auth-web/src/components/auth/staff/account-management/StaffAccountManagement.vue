@@ -167,7 +167,7 @@ export default defineComponent({
       await getCodes()
       await syncTasks()
       await syncSuspendedStaffOrgs()
-      if (state.canCreateAccounts) {
+      if (state.canManageAccounts) {
         await syncPendingInvitationOrgs()
       }
     })
