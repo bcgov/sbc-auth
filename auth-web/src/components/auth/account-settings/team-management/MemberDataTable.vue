@@ -151,7 +151,7 @@
         <!-- Remove User -->
         <v-btn
           v-show="canRemove(item)"
-          v-can:REMOVE_TEAM_MEMBER.hide
+          v-can:EDIT_USER.hide
           icon
           aria-label="Remove Team Member"
           title="Remove Team Member"

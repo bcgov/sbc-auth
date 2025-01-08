@@ -230,7 +230,6 @@ export default class CommonUtils {
       Permission.VIEW_PAYMENT_METHODS,
       Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
       Permission.VIEW_USER_LOGINSOURCE,
-      Permission.REMOVE_TEAM_MEMBER,
       Permission.EDIT_USER,
       Permission.VIEW_BUSINESS_REGISTRY_DASHBOARD,
       Permission.VIEW_LAUNCH_TITLES
