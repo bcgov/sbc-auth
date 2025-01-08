@@ -108,12 +108,12 @@ describe('Product.vue', () => {
     expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeTruthy()
   })
 
-  it('active product should not display checkbox', async () => {
+  it('active product should display checkbox', async () => {
     pprProduct.subscriptionStatus = ProductStatus.ACTIVE
     wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true })
 
-    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
-    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
+    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeFalsy()
+    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeTruthy()
 
     const getDecisionMadeSettings = wrapper.vm.productLabel
     expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-check-circle')

@@ -124,7 +124,7 @@
           class="font-weight-bold"
           @click="displayCancelOnDialog ? submitProductRequest() : closeError()"
         >
-          {{ displayCancelOnDialog ? 'Submit Request' : 'OK' }}
+          {{ cancelDialogText }}
         </v-btn>
       </template>
     </ModalDialog>
@@ -156,7 +156,6 @@ import { useAccountChangeHandler } from '@/composables'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 import { userAccessDisplayNames } from '@/resources/QualifiedSupplierAccessResource'
-import func from 'vue-temp/vue-editor-bridge'
 
 export default defineComponent({
   name: 'ProductPackage',
@@ -174,6 +173,7 @@ export default defineComponent({
       resetCurrentSelectedProducts,
       getOrgProducts,
       addOrgProducts,
+      removeOrgProducts,
       addToCurrentSelectedProducts,
       syncCurrentAccountFees,
       fetchOrgProductFeeCodes,
@@ -228,7 +228,12 @@ export default defineComponent({
         )
       }),
       productPaymentMethods: computed(() => orgStore.productPaymentMethods),
-      displayCancelOnDialog: computed(() => !localState.staffReviewClear || localState.displayRemoveProductDialog)
+      displayCancelOnDialog: computed(() => !localState.staffReviewClear || localState.displayRemoveProductDialog),
+      cancelDialogText: computed(() => {
+        return localState.displayCancelOnDialog
+          ? (!localState.addProductOnAccountAdmin ? 'Remove Product' : 'Submit Request')
+          : 'Close'
+      })
     })
 
     const loadProduct = async () => {
@@ -327,6 +332,7 @@ export default defineComponent({
 
     const submitProductRequest = async () => {
       try {
+        confirmDialog.value.close()
         if (currentSelectedProducts.value.length === 0) {
           localState.submitRequestValidationError = 'Select at least one product or service to submit request'
         } else {
@@ -339,21 +345,17 @@ export default defineComponent({
             subscriptions: productsSelected
           }
           if (localState.addProductOnAccountAdmin) {
-            // await addOrgProducts(addProductsRequestBody)
+            await addOrgProducts(addProductsRequestBody)
           } else {
-            // await removeOrgProducts(addProductsRequestBody)
+            await currentSelectedProducts.value.forEach(code => removeOrgProducts(code))
           }
           await setup()
-
           // show confirm modal
-          if (localState.addProductOnAccountAdmin) {
-            localState.dialogTitle = 'Access Requested'
-            localState.dialogText = 'Request has been submitted. Account will immediately have access to the requested ' +
-              'product and service unless staff review is required.'
+          if (localState.addProductOnAccountAdmin && localState.staffReviewClear) {
+            localState.dialogTitle = 'Product Added'
+            localState.dialogText = 'Your account now has access to the selected product.'
             localState.dialogIcon = 'mdi-check'
             confirmDialog.value.open()
-          } else {
-            confirmDialog.value.close()
           }
         }
       } catch (ex) {
@@ -389,24 +391,27 @@ export default defineComponent({
       // add/remove product from the currentselectedproducts store
       const productCode = productDetails.code
       const forceRemove = productDetails.forceRemove
+      if (!productDetails.termsAccepted && productDetails.termsAccepted !== undefined) {
+        return
+      }
 
       if (productCode) {
         addToCurrentSelectedProducts({ productCode: productCode, forceRemove })
       }
+
       localState.staffReviewClear = !needStaffReview(productCode)
       localState.addProductOnAccountAdmin = productDetails.addProductOnAccountAdmin
+
       if (!localState.staffReviewClear && localState.addProductOnAccountAdmin) {
         localState.dialogTitle = 'Staff Review Required'
         localState.dialogText = `This product needs a review by our staff before it's added to your account. 
           We'll notify you by email once it's approved.`
-        localState.dialogIcon = 'mdi-check'
         confirmDialog.value.open()
       } else if (!localState.addProductOnAccountAdmin) {
         localState.displayRemoveProductDialog = true
         localState.dialogTitle = 'Confirm Removing Product and Access'
         localState.dialogText = `If you remove this product, you'll lose access and need staff approval to add it back. ` +
-          `This process may take a few business days. Are you sure you want to remove this product?`
-        localState.dialogIcon = 'mdi-check'
+          `This process may take a few business days.<br> <br>Areyou sure you want to remove this product?`
         confirmDialog.value.open()
       } else {
         submitProductRequest()

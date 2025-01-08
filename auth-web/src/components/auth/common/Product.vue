@@ -11,7 +11,7 @@
       <div>
         <header class="d-flex align-center">
           <div
-            v-if="!isBasicAccountAndPremiumProduct"
+            v-if="!isBasicAccountAndPremiumProduct && !hideCheckbox"
             class="pr-8"
             data-test="div-decision-not-made-product"
           >
@@ -252,7 +252,7 @@ export default defineComponent({
       }),
       filteredPaymentMethods: computed(() => {
         if (useOrgStore().isGovmOrg) {
-          return props.paymentMethods.filter((method) => method == PaymentTypes.EJV)
+          return props.paymentMethods.filter((method) => method === PaymentTypes.EJV)
         }
         return props.paymentMethods.filter((method) => ![PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV].includes(method as PaymentTypes))
       })
@@ -264,6 +264,14 @@ export default defineComponent({
         return true
       }
       if (([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(props.productDetails.subscriptionStatus)) {
+        return true
+      }
+      return false
+    })
+
+    const hideCheckbox = computed(() => {
+      const decisionMadeStatus = [ProductStatus.PENDING_STAFF_REVIEW, ProductStatus.REJECTED]
+      if ((decisionMadeStatus as Array<string>).includes(props.productDetails.subscriptionStatus)) {
         return true
       }
       return false
@@ -358,12 +366,13 @@ export default defineComponent({
         forceRemove = true
       }
       const addProductOnAccountAdmin = props.isAccountSettingsView && TOS_NEEDED_PRODUCT.includes(props.productDetails.code)
-        ? !state.termsAccepted && !state.productSelected
+        ? state.termsAccepted && !state.productSelected
         : state.productSelected
       emit('set-selected-product', {
         ...props.productDetails,
         forceRemove,
-        addProductOnAccountAdmin: props.isAccountSettingsView ? addProductOnAccountAdmin : undefined
+        addProductOnAccountAdmin: props.isAccountSettingsView ? addProductOnAccountAdmin : undefined,
+        termsAccepted: TOS_NEEDED_PRODUCT.includes(props.productDetails.code) ? state.termsAccepted : undefined
       })
     }
 
@@ -414,6 +423,7 @@ export default defineComponent({
       productFooter,
       saveProductFee,
       hasDecisionNotBeenMade,
+      hideCheckbox,
       paymentTypeLabel
     }
   }
