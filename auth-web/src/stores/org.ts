@@ -153,6 +153,12 @@ export const useOrgStore = defineStore('org', () => {
       canEditBusinessInfo.value
   })
 
+  function needStaffReview (code) {
+    const skipReviewTypes = [AccessType.GOVM]
+    const product = state.productList.find(product => product.code === code)
+    return !skipReviewTypes.includes(state.currentOrganization?.accessType as AccessType) && product.needReview
+  }
+
   const isBusinessAccount = computed<boolean>(() => {
     return state.currentOrganization?.isBusinessAccount === true
   })
@@ -1182,6 +1188,7 @@ export const useOrgStore = defineStore('org', () => {
     downloadNSFInvoicesPDF,
     isGovnGovmOrg,
     isGovmOrg,
-    updateOrgMailingAddress
+    updateOrgMailingAddress,
+    needStaffReview
   }
 })

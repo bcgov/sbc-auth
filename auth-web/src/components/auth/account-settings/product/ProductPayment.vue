@@ -8,7 +8,7 @@
         class="view-header__title"
         data-test="account-settings-title"
       >
-        Products and Services
+        Products and Payment
       </h2>
     </div>
     <template v-if="isLoading">
@@ -26,6 +26,9 @@
     </template>
     <template v-else>
       <template v-if="productList && productList.length > 0">
+        <h4 class="mb-2">
+          Products and Services
+        </h4>
         <div
           v-for="product in productList"
           :key="product.code"
@@ -82,19 +85,6 @@
           </p>
         </div>
         <v-divider class="mb-5" />
-        Current Payment 
-        <div class="align-right-container">
-          <v-btn
-            large
-            class="submit-request-button"
-            color="primary"
-            aria-label="Submit Request"
-            data-test="btn-product-submit-request"
-            @click="submitProductRequest()"
-          >
-            <span>Submit Request</span>
-          </v-btn>
-        </div>
       </template>
       <template v-else>
         <div>No Products are available...</div>
@@ -112,20 +102,29 @@
       <template #icon>
         <v-icon
           large
-          color="primary
-        "
+          color="primary"
         >
           {{ dialogIcon }}
         </v-icon>
       </template>
       <template #actions>
         <v-btn
+          v-if="displayCancelOnDialog"
+          large
+          outlined
+          color="outlined"
+          data-test="dialog-ok-button"
+          @click="closeError()"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
           large
           color="primary"
           class="font-weight-bold"
-          @click="closeError"
+          @click="displayCancelOnDialog ? submitProductRequest() : closeError()"
         >
-          OK
+          {{ displayCancelOnDialog ? 'Submit Request' : 'OK' }}
         </v-btn>
       </template>
     </ModalDialog>
@@ -157,6 +156,7 @@ import { useAccountChangeHandler } from '@/composables'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 import { userAccessDisplayNames } from '@/resources/QualifiedSupplierAccessResource'
+import func from 'vue-temp/vue-editor-bridge'
 
 export default defineComponent({
   name: 'ProductPackage',
@@ -177,7 +177,8 @@ export default defineComponent({
       addToCurrentSelectedProducts,
       syncCurrentAccountFees,
       fetchOrgProductFeeCodes,
-      updateAccountFees
+      updateAccountFees,
+      needStaffReview
     } = useOrgStore()
     const orgStore = useOrgStore()
 
@@ -201,6 +202,9 @@ export default defineComponent({
       orgProductsFees: [],
       orgProductFeeCodes: [],
       isProductActionCompleted: false,
+      staffReviewClear: true,
+      displayRemoveProductDialog: false,
+      addProductOnAccountAdmin: undefined, // true if add product, false if remove product
       isVariableFeeAccount: computed(() => {
         const accessType:any = currentOrganization.value.accessType
         return ([AccessType.GOVM, AccessType.GOVN].includes(accessType)) || false
@@ -224,16 +228,8 @@ export default defineComponent({
         )
       }),
       productPaymentMethods: computed(() => orgStore.productPaymentMethods),
+      displayCancelOnDialog: computed(() => !localState.staffReviewClear || localState.displayRemoveProductDialog)
     })
-
-    const setSelectedProduct = async (productDetails) => {
-      // add/remove product from the currentselectedproducts store
-      const productCode = productDetails.code
-      const forceRemove = productDetails.forceRemove
-      if (productCode) {
-        addToCurrentSelectedProducts({ productCode: productCode, forceRemove })
-      }
-    }
 
     const loadProduct = async () => {
       // refactor on next ticket
@@ -256,6 +252,7 @@ export default defineComponent({
       }
       await orgStore.getProductPaymentMethods()
       localState.isLoading = false
+      localState.displayRemoveProductDialog = false
     }
 
     onMounted(async () => {
@@ -288,8 +285,9 @@ export default defineComponent({
       return productData || {}
     }
 
-    const closeError = () => {
+    const closeError = async () => {
       confirmDialog.value.close()
+      await setup()
     }
 
     /** Product status message content for CautionBox component */
@@ -340,15 +338,23 @@ export default defineComponent({
           const addProductsRequestBody: OrgProductsRequestBody = {
             subscriptions: productsSelected
           }
-          await addOrgProducts(addProductsRequestBody)
+          if (localState.addProductOnAccountAdmin) {
+            // await addOrgProducts(addProductsRequestBody)
+          } else {
+            // await removeOrgProducts(addProductsRequestBody)
+          }
           await setup()
 
           // show confirm modal
-          localState.dialogTitle = 'Access Requested'
-          localState.dialogText = 'Request has been submitted. Account will immediately have access to the requested ' +
+          if (localState.addProductOnAccountAdmin) {
+            localState.dialogTitle = 'Access Requested'
+            localState.dialogText = 'Request has been submitted. Account will immediately have access to the requested ' +
               'product and service unless staff review is required.'
-          localState.dialogIcon = 'mdi-check'
-          confirmDialog.value.open()
+            localState.dialogIcon = 'mdi-check'
+            confirmDialog.value.open()
+          } else {
+            confirmDialog.value.close()
+          }
         }
       } catch (ex) {
         // open when error
@@ -360,6 +366,7 @@ export default defineComponent({
         // eslint-disable-next-line no-console
         console.log('Error while trying to submit product request')
       }
+      localState.staffReviewClear = true
     }
 
     const saveProductFee = async (accountFees) => {
@@ -375,6 +382,34 @@ export default defineComponent({
       } finally {
         localState.isProductActionLoading = false
         localState.isProductActionCompleted = true
+      }
+    }
+
+    const setSelectedProduct = async (productDetails) => {
+      // add/remove product from the currentselectedproducts store
+      const productCode = productDetails.code
+      const forceRemove = productDetails.forceRemove
+
+      if (productCode) {
+        addToCurrentSelectedProducts({ productCode: productCode, forceRemove })
+      }
+      localState.staffReviewClear = !needStaffReview(productCode)
+      localState.addProductOnAccountAdmin = productDetails.addProductOnAccountAdmin
+      if (!localState.staffReviewClear && localState.addProductOnAccountAdmin) {
+        localState.dialogTitle = 'Staff Review Required'
+        localState.dialogText = `This product needs a review by our staff before it's added to your account. 
+          We'll notify you by email once it's approved.`
+        localState.dialogIcon = 'mdi-check'
+        confirmDialog.value.open()
+      } else if (!localState.addProductOnAccountAdmin) {
+        localState.displayRemoveProductDialog = true
+        localState.dialogTitle = 'Confirm Removing Product and Access'
+        localState.dialogText = `If you remove this product, you'll lose access and need staff approval to add it back. ` +
+          `This process may take a few business days. Are you sure you want to remove this product?`
+        localState.dialogIcon = 'mdi-check'
+        confirmDialog.value.open()
+      } else {
+        submitProductRequest()
       }
     }
 

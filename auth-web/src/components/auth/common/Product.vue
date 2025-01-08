@@ -11,7 +11,7 @@
       <div>
         <header class="d-flex align-center">
           <div
-            v-if="hasDecisionNotBeenMade && !isBasicAccountAndPremiumProduct"
+            v-if="!isBasicAccountAndPremiumProduct"
             class="pr-8"
             data-test="div-decision-not-made-product"
           >
@@ -258,12 +258,25 @@ export default defineComponent({
       })
     })
 
+    const hasDecisionNotBeenMade = computed(() => {
+      // returns true if create account flow
+      if (!props.isAccountSettingsView) {
+        return true
+      }
+      if (([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(props.productDetails.subscriptionStatus)) {
+        return true
+      }
+      return false
+    })
+
     onMounted(() => {
-      state.productSelected = props.isSelected
+      state.productSelected = props.isAccountSettingsView ? !hasDecisionNotBeenMade.value : props.isSelected
     })
 
     watch(() => props.isSelected, (newValue) => {
-      state.productSelected = newValue
+      if (TOS_NEEDED_PRODUCT.includes(props.productDetails.code)) {
+        state.productSelected = newValue
+      }
     })
 
     const isBasicAccountAndPremiumProduct = computed(() => {
@@ -316,17 +329,6 @@ export default defineComponent({
       return { subTitle, details, decisionMadeIcon, decisionMadeColorCode, note }
     })
 
-    const hasDecisionNotBeenMade = computed(() => {
-      // returns true if create account flow
-      if (!props.isAccountSettingsView) {
-        return true
-      }
-      if (([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(props.productDetails.subscriptionStatus)) {
-        return true
-      }
-      return false
-    })
-
     // Untested.
     watch(() => hasDecisionNotBeenMade.value, (newValue) => {
       if (!newValue) {
@@ -355,7 +357,14 @@ export default defineComponent({
         // wait till user approve TOS or remove product selection from array if tos not accepted
         forceRemove = true
       }
-      emit('set-selected-product', { ...props.productDetails, forceRemove })
+      const addProductOnAccountAdmin = props.isAccountSettingsView && TOS_NEEDED_PRODUCT.includes(props.productDetails.code)
+        ? !state.termsAccepted && !state.productSelected
+        : state.productSelected
+      emit('set-selected-product', {
+        ...props.productDetails,
+        forceRemove,
+        addProductOnAccountAdmin: props.isAccountSettingsView ? addProductOnAccountAdmin : undefined
+      })
     }
 
     function saveProductFee (data) {
