@@ -115,15 +115,14 @@ class Task(BaseModel):
 
     @classmethod
     def find_by_incomplete_task_relationship_id(
-            cls, relationship_id: int, task_relationship_type: str, relationship_status: str = None) -> Self:
+        cls, relationship_id: int, task_relationship_type: str, relationship_status: str = None
+    ) -> Self:
         """Find a task instance that related to the relationship id ( may be an ORG or a PRODUCT) that is incomplete."""
-        query = (
-            db.session.query(Task)
-            .filter(
-                Task.relationship_id == int(relationship_id or -1),
-                Task.relationship_type == task_relationship_type,
-                Task.status.in_((TaskStatus.OPEN.value, TaskStatus.HOLD.value))
-            ))
+        query = db.session.query(Task).filter(
+            Task.relationship_id == int(relationship_id or -1),
+            Task.relationship_type == task_relationship_type,
+            Task.status.in_((TaskStatus.OPEN.value, TaskStatus.HOLD.value)),
+        )
 
         if relationship_status is not None:
             query = query.filter(Task.relationship_status == relationship_status)

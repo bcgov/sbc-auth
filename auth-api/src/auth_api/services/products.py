@@ -146,30 +146,30 @@ class Product:
     @staticmethod
     def _is_previously_approved(org_id: int, product_code: str):
         """Check if this product has a task that was previously approved."""
-        inactive_sub = (ProductSubscriptionModel
-                        .find_by_org_id_product_code(org_id=org_id,
-                                                     product_code=product_code,
-                                                     valid_statuses=(ProductSubscriptionStatus.INACTIVE.value,)))
+        inactive_sub = ProductSubscriptionModel.find_by_org_id_product_code(
+            org_id=org_id, product_code=product_code, valid_statuses=(ProductSubscriptionStatus.INACTIVE.value,)
+        )
         if not inactive_sub:
             return False, None
 
         task = TaskModel.find_by_task_relationship_id(
             inactive_sub.id, TaskRelationshipType.PRODUCT.value, TaskStatus.COMPLETED.value
         )
-        if (task is None
-                or (task.relationship_status != TaskRelationshipStatus.ACTIVE.value
-                    and task.action == TaskAction.PRODUCT_REVIEW.value)):
+        if task is None or (
+            task.relationship_status != TaskRelationshipStatus.ACTIVE.value
+            and task.action == TaskAction.PRODUCT_REVIEW.value
+        ):
             return False, None
 
         return True, inactive_sub
 
     @staticmethod
     def create_product_subscription(
-            org_id,
-            subscription_data: Dict[str, Any],  # pylint: disable=too-many-locals
-            is_new_transaction: bool = True,
-            skip_auth=False,
-            auto_approve=False,
+        org_id,
+        subscription_data: Dict[str, Any],  # pylint: disable=too-many-locals
+        is_new_transaction: bool = True,
+        skip_auth=False,
+        auto_approve=False,
     ):
         """Create product subscription for the user.
 
@@ -196,9 +196,9 @@ class Product:
                     check_auth(system_required=True, org_id=org_id)
                 # Check if product needs premium account, if yes skip and continue.
                 if (
-                        flags.is_on("remove-premium-restrictions", default=False) is False
-                        and product_model.premium_only
-                        and org.type_code not in PREMIUM_ORG_TYPES
+                    flags.is_on("remove-premium-restrictions", default=False) is False
+                    and product_model.premium_only
+                    and org.type_code not in PREMIUM_ORG_TYPES
                 ):
                     continue
                 previously_approved, inactive_sub = Product._is_previously_approved(org_id, product_code)
@@ -271,7 +271,7 @@ class Product:
             pending_task = TaskModel.find_by_incomplete_task_relationship_id(
                 relationship_id=existing_sub.id,
                 task_relationship_type=TaskRelationshipType.PRODUCT.value,
-                relationship_status=ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
+                relationship_status=ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value,
             )
             if pending_task:
                 pending_task.delete()
@@ -305,8 +305,11 @@ class Product:
 
     @staticmethod
     def _subscribe_and_publish_activity(
-            org_id: int, product_code: str, status_code: str, product_model_description: str,
-            inactive_sub: ProductSubscriptionModel = None
+        org_id: int,
+        product_code: str,
+        status_code: str,
+        product_model_description: str,
+        inactive_sub: ProductSubscriptionModel = None,
     ):
         subscription = None
         if inactive_sub:
@@ -326,8 +329,7 @@ class Product:
 
     @staticmethod
     def _reset_subscription_and_review_task(
-            review_task: TaskModel, product_model: ProductCodeModel, subscription: ProductSubscriptionModel,
-            user_id: str
+        review_task: TaskModel, product_model: ProductCodeModel, subscription: ProductSubscriptionModel, user_id: str
     ):
         review_task.status = TaskStatus.OPEN.value
         review_task.related_to = user_id
@@ -400,8 +402,8 @@ class Product:
                         org_id=org_id, product_code=product_code, status_code=ProductSubscriptionStatus.ACTIVE.value
                     ).flush()
                 elif (
-                        subscription
-                        and (existing_sub := subscription).status_code != ProductSubscriptionStatus.ACTIVE.value
+                    subscription
+                    and (existing_sub := subscription).status_code != ProductSubscriptionStatus.ACTIVE.value
                 ):
                     existing_sub.status_code = ProductSubscriptionStatus.ACTIVE.value
                     existing_sub.flush()
@@ -433,9 +435,9 @@ class Product:
 
         # Include hidden products only for staff and SBC staff
         include_hidden = (
-                user_from_context.is_staff()
-                or org.type_code == OrgType.SBC_STAFF.value
-                or kwargs.get("include_hidden", False)
+            user_from_context.is_staff()
+            or org.type_code == OrgType.SBC_STAFF.value
+            or kwargs.get("include_hidden", False)
         )
 
         products = Product.get_products(include_hidden=include_hidden, staff_check=False)
@@ -505,7 +507,7 @@ class Product:
 
     @staticmethod
     def approve_reject_parent_subscription(
-            parent_product_code: int, is_approved: bool, is_hold: bool, org_id: int, is_new_transaction: bool = True
+        parent_product_code: int, is_approved: bool, is_hold: bool, org_id: int, is_new_transaction: bool = True
     ):
         """Approve or reject Parent Product Subscription."""
         logger.debug("<approve_reject_parent_subscription ")
@@ -568,9 +570,9 @@ class Product:
         2) in PENDING_STAFF_REVIEW, is_approved and is_resubmitted
         """
         return (product_sub_status == ProductSubscriptionStatus.REJECTED.value and is_approved) or (
-                product_sub_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
-                and is_approved
-                and is_resubmitted
+            product_sub_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
+            and is_approved
+            and is_resubmitted
         )
 
     @staticmethod
