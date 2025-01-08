@@ -22,7 +22,9 @@ from http import HTTPStatus
 
 import pytest
 
+from auth_api.models import Task as TaskModel
 from auth_api.schemas import utils as schema_utils
+from auth_api.utils.enums import ProductSubscriptionStatus, TaskRelationshipType, TaskAction, TaskStatus
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOrgProductsInfo
 from tests.utilities.factory_utils import factory_auth_header
 
@@ -821,3 +823,265 @@ def test_get_org_products_validation_error(client, jwt, session, keycloak_mock):
         content_type="application/json",
     )
     assert rv_products.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_remove_org_product_with_review(client, jwt, session, keycloak_mock):
+    """Assert that removing a product subscription with review works properly."""
+    staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=user_headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org_premium), headers=user_headers, content_type="application/json"
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+    dictionary = json.loads(rv.data)
+    org_id = dictionary.get('id')
+    product_info = TestOrgProductsInfo.org_products_vs
+    product_code = product_info['subscriptions'][0]['productCode']
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps(product_info),
+        headers=user_headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    assert schema_utils.validate(rv_products.json, "org_product_subscriptions_response")[0]
+
+    task = assert_task(client, jwt,
+                       ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value,
+                       TaskStatus.OPEN.value,
+                       TaskRelationshipType.PRODUCT.value,
+                       TaskAction.PRODUCT_REVIEW.value)
+    client.put(
+        "/api/v1/tasks/{}".format(task["id"]),
+        data=json.dumps({"relationshipStatus": ProductSubscriptionStatus.ACTIVE.value}),
+        headers=staff_headers,
+        content_type="application/json",
+    )
+
+    assert_task(client, jwt,
+                ProductSubscriptionStatus.ACTIVE.value,
+                TaskStatus.COMPLETED.value,
+                TaskRelationshipType.PRODUCT.value,
+                TaskAction.PRODUCT_REVIEW.value)
+
+    assert_product_subscription(client, jwt, org_id, product_code, ProductSubscriptionStatus.ACTIVE.value)
+
+    rv_products = client.delete(
+        f"/api/v1/orgs/{org_id}/products/{product_code}",
+        headers=user_headers,
+        content_type="application/json"
+    )
+    assert rv_products.status_code == HTTPStatus.OK
+    assert schema_utils.validate(rv_products.json, "org_product_subscriptions_response")[0]
+
+    assert_product_subscription(client, jwt, org_id, product_code, ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
+    assert_task(client, jwt,
+                ProductSubscriptionStatus.ACTIVE.value,
+                TaskStatus.COMPLETED.value,
+                TaskRelationshipType.PRODUCT.value,
+                TaskAction.PRODUCT_REVIEW.value)
+
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps(product_info),
+        headers=user_headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    assert schema_utils.validate(rv_products.json, "org_product_subscriptions_response")[0]
+
+    assert_product_subscription(client, jwt, org_id, product_code, ProductSubscriptionStatus.ACTIVE.value)
+
+    # Should not create another task as it was previously approved
+    assert_task(client, jwt,
+                ProductSubscriptionStatus.ACTIVE.value,
+                TaskStatus.COMPLETED.value,
+                TaskRelationshipType.PRODUCT.value,
+                TaskAction.PRODUCT_REVIEW.value)
+
+
+@pytest.mark.parametrize(
+    "task_status,relationship_status,should_remove_previous_task",
+    [
+        (TaskStatus.HOLD.value, ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value, True),
+        (TaskStatus.CLOSED.value, ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value, False),
+        (None, ProductSubscriptionStatus.REJECTED.value, False),
+    ])
+def test_remove_org_product_with_incomplete_review_state(client, jwt, session, keycloak_mock,
+                                                         task_status, relationship_status, should_remove_previous_task):
+    """Assert that removing a product subscription with incomplete review task works properly."""
+    staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=user_headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org_premium), headers=user_headers, content_type="application/json"
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+    dictionary = json.loads(rv.data)
+    org_id = dictionary.get('id')
+    product_info = TestOrgProductsInfo.org_products_vs
+    product_code = product_info['subscriptions'][0]['productCode']
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps(product_info),
+        headers=user_headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    assert schema_utils.validate(rv_products.json, "org_product_subscriptions_response")[0]
+
+    task = assert_task(client, jwt,
+                       ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value,
+                       TaskStatus.OPEN.value,
+                       TaskRelationshipType.PRODUCT.value,
+                       TaskAction.PRODUCT_REVIEW.value)
+    payload = {}
+    if task_status:
+        payload['status'] = task_status
+    if relationship_status:
+        payload['relationshipStatus'] = relationship_status
+
+    client.put(
+        "/api/v1/tasks/{}".format(task["id"]),
+        data=json.dumps(payload),
+        headers=staff_headers,
+        content_type="application/json",
+    )
+
+    task = assert_task(client, jwt,
+                       relationship_status
+                       if relationship_status else ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value,
+                       task_status
+                       if task_status else TaskStatus.COMPLETED.value,
+                       TaskRelationshipType.PRODUCT.value,
+                       TaskAction.PRODUCT_REVIEW.value)
+
+    rv_products = client.delete(
+        f"/api/v1/orgs/{org_id}/products/{product_code}",
+        headers=user_headers,
+        content_type="application/json"
+    )
+    assert rv_products.status_code == HTTPStatus.OK
+
+    assert_product_subscription(client, jwt, org_id, product_code,
+                                ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
+
+    task_model = TaskModel.find_by_task_id(task['id'])
+    if should_remove_previous_task:
+        assert task_model is None
+    else:
+        assert task_model.id == task['id']
+
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps(product_info),
+        headers=user_headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    assert schema_utils.validate(rv_products.json, "org_product_subscriptions_response")[0]
+
+    assert_product_subscription(client, jwt, org_id, product_code, ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value)
+
+    if should_remove_previous_task:
+        task = assert_task(client, jwt,
+                           ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value,
+                           TaskStatus.OPEN.value,
+                           TaskRelationshipType.PRODUCT.value,
+                           TaskAction.PRODUCT_REVIEW.value)
+    else:
+        task = assert_task(client, jwt,
+                           ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value,
+                           TaskStatus.OPEN.value,
+                           TaskRelationshipType.PRODUCT.value,
+                           TaskAction.PRODUCT_REVIEW.value, 2)
+
+    client.put(
+        "/api/v1/tasks/{}".format(task["id"]),
+        data=json.dumps({"relationshipStatus": ProductSubscriptionStatus.ACTIVE.value}),
+        headers=staff_headers,
+        content_type="application/json",
+    )
+
+    assert_product_subscription(client, jwt, org_id, product_code,
+                                ProductSubscriptionStatus.ACTIVE.value)
+
+
+def test_remove_org_product_without_review(client, jwt, session, keycloak_mock):
+    """Assert that removing a product subscription without works properly."""
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=user_headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org_premium), headers=user_headers, content_type="application/json"
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+    dictionary = json.loads(rv.data)
+    org_id = dictionary.get('id')
+    product_info = TestOrgProductsInfo.org_products_business
+    product_code = product_info['subscriptions'][0]['productCode']
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps(product_info),
+        headers=user_headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    assert schema_utils.validate(rv_products.json, "org_product_subscriptions_response")[0]
+
+    assert_product_subscription(client, jwt, org_id, product_code, ProductSubscriptionStatus.ACTIVE.value)
+
+    rv_products = client.delete(
+        f"/api/v1/orgs/{org_id}/products/{product_code}",
+        headers=user_headers,
+        content_type="application/json"
+    )
+    assert rv_products.status_code == HTTPStatus.OK
+    assert schema_utils.validate(rv_products.json, "org_product_subscriptions_response")[0]
+
+    assert_product_subscription(client, jwt, org_id, product_code, ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
+
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps(product_info),
+        headers=user_headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    assert schema_utils.validate(rv_products.json, "org_product_subscriptions_response")[0]
+
+    assert_product_subscription(client, jwt, org_id, product_code, ProductSubscriptionStatus.ACTIVE.value)
+
+
+def assert_product_subscription(client, jwt, org_id, product_code, expected_status):
+    staff_view_account_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_view_accounts_role)
+    rv_products = client.get(
+        f"/api/v1/orgs/{org_id}/products", headers=staff_view_account_headers, content_type="application/json"
+    )
+    list_products = json.loads(rv_products.data)
+    assert list_products
+
+    product = next(prod for prod in list_products if prod.get("code") == product_code)
+    assert product
+    assert product['subscriptionStatus'] == expected_status
+    assert product['code'] == product_code
+
+
+def assert_task(client, jwt, relationship_status, task_status, relationship_type, action,
+                expected_task_length=1):
+    staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get("/api/v1/tasks", headers=staff_headers, content_type="application/json")
+
+    item_list = rv.json
+    assert schema_utils.validate(item_list, "paged_response")[0]
+    assert rv.status_code == HTTPStatus.OK
+    assert len(item_list["tasks"]) == expected_task_length
+    tasks = item_list["tasks"]
+    task = next(task for task in tasks
+                if task.get("relationshipStatus") == relationship_status and task.get("status") == task_status)
+    assert task["relationshipStatus"] == relationship_status
+    assert task["relationshipType"] == relationship_type
+    assert task["status"] == task_status
+    assert task["action"] == action
+
+    return task
