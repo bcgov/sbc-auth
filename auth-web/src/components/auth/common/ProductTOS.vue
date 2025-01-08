@@ -10,7 +10,7 @@
     </div>
     <v-checkbox
       v-model="termsAccepted"
-      :disabled="canAcceptTerms"
+      v-can:EDIT_TERMS.disabled
       color="primary"
       class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
       hide-details
@@ -40,25 +40,15 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import { Role } from '@/util/constants'
-import { mapState } from 'pinia'
-import { useUserStore } from '@/stores/user'
 
-@Component({
-  computed: {
-    ...mapState(useUserStore, ['currentUser'])
-  }
-})
+@Component({})
 export default class ProductTOS extends Vue {
   @Prop({ default: '' }) userName: string
   @Prop({ default: '' }) orgName: string
   @Prop({ default: false }) isTOSAlreadyAccepted: boolean
   @Prop({ default: false }) isApprovalFlow: boolean
   termsAccepted: boolean = false
-  canAcceptTerms: boolean = false
   public istosTouched: boolean = false
-  readonly currentUser!: KCUserProfile
 
   @Watch('isTOSAlreadyAccepted')
   onisTOSALreadyAcceptedChange (newTos:boolean, oldTos:boolean) {
@@ -68,7 +58,6 @@ export default class ProductTOS extends Vue {
   }
 
   public mounted () {
-    this.canAcceptTerms = this.currentUser?.roles?.includes(Role.ContactCentreStaff)
     this.termsAccepted = this.isTOSAlreadyAccepted
   }
 

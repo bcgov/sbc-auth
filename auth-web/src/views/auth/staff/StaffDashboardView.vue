@@ -288,7 +288,7 @@
 
     <!-- Feature Launch Tiles: ie Involuntary Dissolution, Document Record Service -->
     <v-row
-      v-if="!isContactCentreStaff"
+      v-can:VIEW_LAUNCH_TITLES.hide
     >
       <v-col
         v-for="tile in launchTileConfig"

@@ -276,7 +276,7 @@
                       </template>
                       <v-list>
                         <v-list-item
-                          v-if="canAccessBusinessRegistryDashboard"
+                          v-can:VIEW_BUSINESS_REGISTRY_DASHBOARD
                           @click="viewInBusinessRegistryDashboard(item)"
                         >
                           <v-list-item-subtitle>
@@ -332,7 +332,6 @@ import debounce from '@/util/debounce'
 import { useI18n } from 'vue-i18n-composable'
 import { useOrgStore } from '@/stores/org'
 import { useStaffStore } from '@/stores/staff'
-import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'StaffAccountsTable',
@@ -359,7 +358,6 @@ export default defineComponent({
     const { t } = useI18n()
     const orgStore = useOrgStore()
     const staffStore = useStaffStore()
-    const { currentUser } = useUserStore()
     const defaultHeaders = [
       { text: 'Account Name', value: 'name', visible: true },
       { text: 'Branch Name', value: 'branchName', visible: true },
@@ -436,8 +434,7 @@ export default defineComponent({
         decisionMadeBy: '',
         orgType: OrgAccountTypes.ALL,
         statuses: [props.accountStatus]
-      } as OrgFilterParams,
-      canAccessBusinessRegistryDashboard: computed(() => !currentUser?.roles?.includes(Role.ContactCentreStaff))
+      } as OrgFilterParams
     })
 
     state.accountTypes = Array.from(Object.keys(state.accountTypeMap))

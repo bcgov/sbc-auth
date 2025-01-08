@@ -30,7 +30,7 @@
     <template #[`item.action`]="{ item }">
       <!-- Resend Invitation -->
       <v-btn
-        v-if="canDoActions"
+        v-can:EDIT_USER.hide
         icon
         class="mr-1"
         aria-label="Resend invitation"
@@ -43,7 +43,7 @@
 
       <!-- Remove Invitation -->
       <v-btn
-        v-if="canDoActions"
+        v-can:EDIT_USER.hide
         icon
         aria-label="Remove Invitation"
         title="Remove Invitation"
@@ -60,22 +60,16 @@
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import { Role } from '@/util/constants'
 import { mapState } from 'pinia'
 import { useOrgStore } from '@/stores/org'
-import { useUserStore } from '@/stores/user'
 
 @Component({
   computed: {
-    ...mapState(useOrgStore, ['pendingOrgInvitations']),
-    ...mapState(useUserStore, ['currentUser'])
+    ...mapState(useOrgStore, ['pendingOrgInvitations'])
   }
 })
 export default class InvitationsDataTable extends Vue {
   private readonly pendingOrgInvitations!: Invitation[]
-  readonly currentUser!: KCUserProfile
-  canDoActions: boolean = false
   readonly headerInvitations = [
     {
       text: 'Email',
@@ -102,10 +96,6 @@ export default class InvitationsDataTable extends Vue {
       sortable: false
     }
   ]
-
-  public mounted () {
-    this.canDoActions = !this.currentUser?.roles?.includes(Role.ContactCentreStaff)
-  }
 
   formatDate = CommonUtils.formatDisplayDate
 

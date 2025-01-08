@@ -29,7 +29,7 @@
       <template #[`item.action`]="{ item }">
         <div class="table-actions">
           <v-btn
-            v-if="canManageInvitations"
+            v-can:EDIT_USER.hide
             outlined
             color="primary"
             class="action-btn"
@@ -39,7 +39,7 @@
             Resend
           </v-btn>
           <v-btn
-            v-if="canManageInvitations"
+            v-can:EDIT_USER.hide
             outlined
             color="primary"
             class="action-btn"
@@ -93,7 +93,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
+import { defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
@@ -101,9 +101,7 @@ import { Invitation } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { Role } from '@/util/constants'
 import { useStaffStore } from '@/stores/staff'
-import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'StaffPendingAccountInvitationsTable',
@@ -112,12 +110,13 @@ export default defineComponent({
   },
   mixins: [PaginationMixin],
   setup () {
-    const { currentUser } = useUserStore()
+    const formatDate = CommonUtils.formatDisplayDate
+    const columnSort = CommonUtils.customSort
+    
     const confirmActionDialog = ref<InstanceType<typeof ModalDialog>>()
     const state = reactive({
       orgToBeRemoved: null,
-      tableDataOptions: {},
-      canManageInvitations: computed(() => !currentUser?.roles?.includes(Role.ContactCentreStaff))
+      tableDataOptions: {}
     })
     const { pendingInvitationOrgs, resendPendingOrgInvitation, syncPendingInvitationOrgs, deleteOrg } = useStaffStore()
 
@@ -155,9 +154,6 @@ export default defineComponent({
         width: '210'
       }
     ]
-
-    const formatDate = CommonUtils.formatDisplayDate
-    const columnSort = CommonUtils.customSort
 
     function getIndexedTag (tag, index): string {
       return `${tag}-${index}`

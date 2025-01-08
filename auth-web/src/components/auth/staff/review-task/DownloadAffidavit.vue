@@ -7,7 +7,7 @@
       {{ subTitle }}
     </p>
     <v-btn
-      v-if="canDownloadAffidavit"
+      v-can:VIEW_AFFIDAVIT.hide
       x-large=""
       outlined
       color="primary"
@@ -27,16 +27,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import { Role } from '@/util/constants'
-import { mapState } from 'pinia'
-import { useUserStore } from '@/stores/user'
 
-@Component({
-  computed: {
-    ...mapState(useUserStore, ['currentUser'])
-  }
-})
+@Component({})
 export default class DownloadAffidavit extends Vue {
   @Prop({ default: null }) tabNumber: number
   @Prop({ default: 'Download Affidavit' }) title: string
@@ -44,11 +36,6 @@ export default class DownloadAffidavit extends Vue {
     'identity and associated information.' }) subTitle: string
   @Prop({ default: '' }) affidavitName: string
   canDownloadAffidavit: boolean = false
-  readonly currentUser!: KCUserProfile
-
-  public mounted () {
-    this.canDownloadAffidavit = !this.currentUser?.roles?.includes(Role.ContactCentreStaff)
-  }
 }
 </script>
 

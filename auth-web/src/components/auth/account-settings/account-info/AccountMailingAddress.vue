@@ -31,7 +31,6 @@
               v-can:CHANGE_ADDRESS.hide
             >
               <span
-                v-if="canChangeAddress"
                 class="primary--text cursor-pointer"
                 data-test="btn-edit"
                 @click="$emit('update:viewOnlyMode', {component:'address',mode:false })"
@@ -80,11 +79,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api'
+import { defineComponent, ref } from '@vue/composition-api'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
-import { Role } from '@/util/constants'
 import { addressSchema } from '@/schemas'
-import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'AccountMailingAddress',
@@ -103,12 +100,9 @@ export default defineComponent({
   },
   emit: ['valid', 'update:address'],
   setup (props, { emit }) {
-    const { currentUser } = useUserStore()
     const baseAddressSchema = ref(addressSchema)
 
     const mailingAddress = ref<HTMLFormElement | null>(null)
-
-    const canChangeAddress = computed(() => !currentUser?.roles?.includes(Role.ContactCentreStaff))
 
     function updateAddress (address) {
       emit('update:address', address)
@@ -128,8 +122,7 @@ export default defineComponent({
       mailingAddress,
       updateAddress,
       checkBaseAddressValidity,
-      triggerValidate,
-      canChangeAddress
+      triggerValidate
     }
   }
 })

@@ -130,11 +130,10 @@ function mapPendingDetails (route: any) {
   }
 }
 
-function isStaff (): boolean {
-  const kcUserProfile = KeyCloakService.getUserInfo()
-  return kcUserProfile?.roles?.includes(Role.Staff) ||
-    kcUserProfile?.roles?.includes(Role.ContactCentreStaff) ||
-    false
+function isStaff(): boolean {
+  const userProfile = KeyCloakService.getUserInfo();
+  const roles = userProfile?.roles || [];
+  return roles.includes('Staff') || roles.includes('ContactCentreStaff');
 }
 
 export function getRoutes (): RouteConfig[] {
