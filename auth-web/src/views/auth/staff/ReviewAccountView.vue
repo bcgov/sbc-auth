@@ -62,13 +62,16 @@
               />
             </template>
 
-            <template>
+            <template
+              v-if="canSelect"
+            >
               <div
-                v-can:REVIEW_ACCOUNT.hide
-                v-if="canSelect">
+                v-can:EDIT_USER.hide
+              >
                 <v-divider class="mt-11 mb-8" />
                 <div
-                  class="form-btns d-flex justify-end">
+                  class="form-btns d-flex justify-end"
+                >
                   <div v-display-mode="!canEdit ? viewOnly : false ">
                     <v-btn
                       large
@@ -102,7 +105,7 @@
                     </v-btn>
                   </div>
                 </div>
-              </div> 
+              </div>
             </template>
           </v-col>
 
@@ -145,7 +148,7 @@
 
 <script lang="ts">
 import { AccessType, AffidavitStatus, DisplayModeValues, OnholdOrRejectCode, Pages,
-  Role, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
+  TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 import { Ref, computed, defineComponent, getCurrentInstance, onMounted, ref } from '@vue/composition-api'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'

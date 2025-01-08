@@ -10,7 +10,7 @@
     </div>
     <v-checkbox
       v-model="termsAccepted"
-      v-can:EDIT_TERMS.disabled
+      v-can:EDIT_USER.disabled
       color="primary"
       class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
       hide-details

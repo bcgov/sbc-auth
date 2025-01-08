@@ -7,7 +7,7 @@
       {{ subTitle }}
     </p>
     <v-btn
-      v-can:VIEW_AFFIDAVIT.hide
+      v-can:EDIT_USER.hide
       x-large=""
       outlined
       color="primary"

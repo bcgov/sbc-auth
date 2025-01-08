@@ -231,14 +231,8 @@ export default class CommonUtils {
       Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
       Permission.VIEW_USER_LOGINSOURCE,
       Permission.REMOVE_TEAM_MEMBER,
-
-      Permission.CHANGE_ACCESS_TYPE,
       Permission.EDIT_USER,
       Permission.VIEW_BUSINESS_REGISTRY_DASHBOARD,
-      Permission.VIEW_INVITATIONS,
-      Permission.VIEW_AFFIDAVIT,
-      Permission.EDIT_TERMS,
-      Permission.REVIEW_ACCOUNT,
       Permission.VIEW_LAUNCH_TITLES
     ]
   }
@@ -260,9 +254,7 @@ export default class CommonUtils {
       Permission.VIEW_AUTH_OPTIONS,
       Permission.VIEW_PAYMENT_METHODS,
       Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
-      Permission.VIEW_USER_LOGINSOURCE,
-
-      Permission.VIEW_INVITATIONS,
+      Permission.VIEW_USER_LOGINSOURCE
     ]
   }
 

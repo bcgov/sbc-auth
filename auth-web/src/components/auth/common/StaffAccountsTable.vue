@@ -304,7 +304,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, LoginSource, Role, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, AccountStatus, LoginSource, SessionStorageKeys } from '@/util/constants'
 
 import {
   DEFAULT_DATA_OPTIONS,

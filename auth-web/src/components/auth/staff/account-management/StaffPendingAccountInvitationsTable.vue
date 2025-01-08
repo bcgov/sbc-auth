@@ -112,7 +112,7 @@ export default defineComponent({
   setup () {
     const formatDate = CommonUtils.formatDisplayDate
     const columnSort = CommonUtils.customSort
-    
+
     const confirmActionDialog = ref<InstanceType<typeof ModalDialog>>()
     const state = reactive({
       orgToBeRemoved: null,
