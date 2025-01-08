@@ -231,8 +231,14 @@ export function getRoutes (): RouteConfig[] {
       path: '/account/:orgId',
       name: 'account',
       beforeEnter: (to, from, next) => {
+        // redirect to new business registry dashboard
         if (LaunchDarklyService.getFlag(LDFlags.EnableBusinessRegistryDashboard) && !to.query.noRedirect) {
-          window.location.href = ConfigHelper.getNewBusinessRegistryDashboardUrl()
+          const baseUrl = ConfigHelper.getNewBusinessRegistryDashboardUrl() + '/account/' + to.params.orgId
+          // Preserve query parameters when redirecting
+          const queryString = new URLSearchParams(to.query as Record<string, string>).toString()
+          const redirectUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl
+          
+          window.location.href = redirectUrl
         } else {
           next()
         }
