@@ -238,7 +238,7 @@ export function getRoutes (): RouteConfig[] {
           // Preserve query parameters when redirecting
           const queryString = new URLSearchParams(to.query as Record<string, string>).toString()
           const redirectUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl
-          
+
           window.location.href = redirectUrl
         } else {
           next()
