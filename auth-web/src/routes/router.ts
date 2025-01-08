@@ -130,7 +130,7 @@ function mapPendingDetails (route: any) {
   }
 }
 
-function isStaff(): boolean {
+function isStaff (): boolean {
   const kcUserProfile = KeyCloakService.getUserInfo()
   return kcUserProfile?.roles?.includes(Role.Staff) ||
     kcUserProfile?.roles?.includes(Role.ContactCentreStaff) ||
