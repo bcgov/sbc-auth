@@ -316,7 +316,7 @@ export const useOrgStore = defineStore('org', () => {
     let response
     let membership:Member = null
     const kcUserProfile = KeyCloakService.getUserInfo()
-    if (!kcUserProfile.roles.includes(Role.Staff)) {
+    if (!kcUserProfile.roles.includes(Role.Staff) && !kcUserProfile.roles.includes(Role.ContactCentreStaff)) {
       response = await UserService.getMembership(orgId)
       membership = response?.data
       // const org: Organization = state.currentOrganization']

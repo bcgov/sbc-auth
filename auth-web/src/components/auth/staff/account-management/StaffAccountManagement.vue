@@ -152,7 +152,8 @@ export default defineComponent({
     const state = reactive({
       tab: 0,
       pagesEnum: Pages,
-      canManageAccounts: computed(() => currentUser?.roles?.includes(Role.StaffManageAccounts)),
+      canManageAccounts: computed(() => currentUser?.roles?.includes(Role.StaffManageAccounts) ||
+      currentUser?.roles?.includes(Role.ContactCentreStaff)),
       canViewInvitations: computed(() => currentUser?.roles?.includes(Role.StaffCreateAccounts) ||
         currentUser?.roles?.includes(Role.ContactCentreStaff)),
       canCreateAccounts: computed(() => currentUser?.roles?.includes(Role.StaffCreateAccounts) &&
