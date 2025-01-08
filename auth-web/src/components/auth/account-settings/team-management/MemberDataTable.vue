@@ -405,7 +405,7 @@ export default class MemberDataTable extends Vue {
   }
 
   private canChangeRole (memberBeingChanged: Member): boolean {
-    if (this.currentUser.roles.includes(Role.ContactCentreStaff)) {
+    if (this.currentUser.roles?.includes(Role.ContactCentreStaff)) {
       return false
     }
 
