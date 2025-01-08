@@ -234,7 +234,7 @@ export default class CommonUtils {
     ]
   }
 
-  static getAdminStaffPermissions (): string[] {
+  static getContactCentreStaffPermissions (): string[] {
     return [
       Permission.CHANGE_ADDRESS,
       Permission.CHANGE_ORG_NAME,

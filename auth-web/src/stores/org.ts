@@ -330,7 +330,7 @@ export const useOrgStore = defineStore('org', () => {
       // Check for better approach
       // Create permissions to enable actions for staff
       if (kcUserProfile.roles.includes(Role.ContactCentreStaff)) {
-        permissions = CommonUtils.getAdminStaffPermissions()
+        permissions = CommonUtils.getContactCentreStaffPermissions()
       } else if (kcUserProfile.roles.includes(Role.StaffManageAccounts)) {
         permissions = CommonUtils.getAdminPermissions()
       } else if (kcUserProfile.roles.includes(Role.StaffViewAccounts)) {
