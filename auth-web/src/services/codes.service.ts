@@ -9,7 +9,7 @@ export default class CodesService {
   }
 
   public static async getProductPaymentMethods (productCode?: string): Promise<any> {
-    let url =  `${ConfigHelper.getPayAPIURL()}/codes/valid_payment_methods`
+    let url = `${ConfigHelper.getPayAPIURL()}/codes/valid_payment_methods`
     if (productCode) {
       url += `/${productCode}`
     }
