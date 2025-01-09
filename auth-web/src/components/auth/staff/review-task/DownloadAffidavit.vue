@@ -7,6 +7,7 @@
       {{ subTitle }}
     </p>
     <v-btn
+      v-can:EDIT_USER.hide
       x-large=""
       outlined
       color="primary"
@@ -34,6 +35,7 @@ export default class DownloadAffidavit extends Vue {
   @Prop({ default: 'Download the notarized affidavit associated with this account to verify the account creators ' +
     'identity and associated information.' }) subTitle: string
   @Prop({ default: '' }) affidavitName: string
+  canDownloadAffidavit: boolean = false
 }
 </script>
 

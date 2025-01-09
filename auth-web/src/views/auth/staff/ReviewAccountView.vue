@@ -62,40 +62,48 @@
               />
             </template>
 
-            <template v-if="canSelect">
-              <v-divider class="mt-11 mb-8" />
-              <div class="form-btns d-flex justify-end">
-                <div v-display-mode="!canEdit ? viewOnly : false ">
-                  <v-btn
-                    large
-                    color="primary"
-                    class="font-weight-bold mr-2 select-button"
-                    @click="openModal()"
-                  >
-                    <span v-if="isTaskRejected">Re-Approve</span>
-                    <span v-else>Approve</span>
-                  </v-btn>
-                  <v-btn
-                    v-if="!isTaskRejected"
-                    large
-                    outlined
-                    color="primary"
-                    class="font-weight-bold white--text select-button"
-                    @click="openModal(true)"
-                  >
-                    <span v-if="isAffidavitReview && !isTaskOnHold">Reject/On Hold</span>
-                    <span v-else>Reject</span>
-                  </v-btn>
-                  <v-btn
-                    v-else-if="!isMhrSubProductReview"
-                    large
-                    outlined
-                    color="primary"
-                    class="font-weight-bold white--text select-button"
-                    @click="openModal(false, false, false, true)"
-                  >
-                    <span>Move to pending</span>
-                  </v-btn>
+            <template
+              v-if="canSelect"
+            >
+              <div
+                v-can:EDIT_USER.hide
+              >
+                <v-divider class="mt-11 mb-8" />
+                <div
+                  class="form-btns d-flex justify-end"
+                >
+                  <div v-display-mode="!canEdit ? viewOnly : false ">
+                    <v-btn
+                      large
+                      color="primary"
+                      class="font-weight-bold mr-2 select-button"
+                      @click="openModal()"
+                    >
+                      <span v-if="isTaskRejected">Re-Approve</span>
+                      <span v-else>Approve</span>
+                    </v-btn>
+                    <v-btn
+                      v-if="!isTaskRejected"
+                      large
+                      outlined
+                      color="primary"
+                      class="font-weight-bold white--text select-button"
+                      @click="openModal(true)"
+                    >
+                      <span v-if="isAffidavitReview && !isTaskOnHold">Reject/On Hold</span>
+                      <span v-else>Reject</span>
+                    </v-btn>
+                    <v-btn
+                      v-else-if="!isMhrSubProductReview"
+                      large
+                      outlined
+                      color="primary"
+                      class="font-weight-bold white--text select-button"
+                      @click="openModal(false, false, false, true)"
+                    >
+                      <span>Move to pending</span>
+                    </v-btn>
+                  </div>
                 </div>
               </div>
             </template>
