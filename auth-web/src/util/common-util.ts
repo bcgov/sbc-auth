@@ -232,7 +232,8 @@ export default class CommonUtils {
       Permission.VIEW_USER_LOGINSOURCE,
       Permission.EDIT_USER,
       Permission.VIEW_BUSINESS_REGISTRY_DASHBOARD,
-      Permission.VIEW_LAUNCH_TITLES
+      Permission.VIEW_LAUNCH_TITLES,
+      Permission.VIEW_CONTINUATION_AUTHORIZATION_REVIEWS
     ]
   }
 

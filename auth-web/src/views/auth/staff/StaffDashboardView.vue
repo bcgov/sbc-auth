@@ -144,6 +144,7 @@
 
     <!-- Continuation Applications -->
     <v-card
+      v-can:VIEW_CONTINUATION_AUTHORIZATION_REVIEWS.hide
       flat
       class="mb-4 pa-8"
     >
