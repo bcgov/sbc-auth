@@ -167,7 +167,10 @@ export default class IncorporationSearchResultView extends Vue {
   ]
 
   formatType (org:BusinessSearchResultDto): string {
-    let orgTypeDisplay = org?.orgType ? org?.orgType === Account.BASIC ? 'Basic' : 'Premium' : 'N/A'
+    let orgTypeDisplay = 'N/A'
+    if (org?.orgType) {
+      orgTypeDisplay = org.orgType === Account.BASIC ? 'Basic' : 'Premium'
+    }
     if (org?.accessType === AccessType.ANONYMOUS) {
       return 'Director Search'
     }
