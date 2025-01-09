@@ -144,6 +144,7 @@
 
     <!-- Continuation Applications -->
     <v-card
+      v-can:VIEW_CONTINUATION_AUTHORIZATION_REVIEWS.hide
       flat
       class="mb-4 pa-8"
     >
@@ -287,7 +288,9 @@
     </BaseVExpansionPanel>
 
     <!-- Feature Launch Tiles: ie Involuntary Dissolution, Document Record Service -->
-    <v-row>
+    <v-row
+      v-can:VIEW_LAUNCH_TITLES.hide
+    >
       <v-col
         v-for="tile in launchTileConfig"
         :key="tile.title"
@@ -376,6 +379,7 @@ export default defineComponent({
       canViewAllTransactions: computed((): boolean => currentUser.value?.roles?.includes(Role.ViewAllTransactions)),
       canViewEFTPayments: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageEft)),
       canViewGLCodes: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageGlCodes)),
+      isContactCentreStaff: computed(() => currentUser.value?.roles?.includes(Role.ContactCentreStaff)),
       canViewIncorporationSearchResult: false,
       errorMessage: '',
       isFasDashboardEnabled: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
