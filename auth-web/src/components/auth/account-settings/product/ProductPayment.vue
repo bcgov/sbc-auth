@@ -124,7 +124,7 @@
           class="font-weight-bold"
           @click="displayCancelOnDialog ? submitProductRequest() : closeError()"
         >
-          {{ cancelDialogText }}
+          {{ submitDialogText }}
         </v-btn>
       </template>
     </ModalDialog>
@@ -167,13 +167,17 @@ export default defineComponent({
   setup () {
     const confirmDialog: InstanceType<typeof ModalDialog> = ref(null)
 
-    const { currentUser } = useUserStore()
+    const {
+      currentUser,
+      currentSelectedProductsforRemove,
+      setCurrentSelectedProductsforRemove,
+      removeOrgProducts
+    } = useUserStore()
     const { setAccountChangedHandler } = useAccountChangeHandler()
     const {
       resetCurrentSelectedProducts,
       getOrgProducts,
       addOrgProducts,
-      removeOrgProducts,
       addToCurrentSelectedProducts,
       syncCurrentAccountFees,
       fetchOrgProductFeeCodes,
@@ -188,7 +192,7 @@ export default defineComponent({
       currentSelectedProducts
     } = storeToRefs(useOrgStore())
 
-    const localState = reactive({
+    const state = reactive({
       isBtnSaved: false,
       disableSaveBtn: false,
       isLoading: false,
@@ -196,6 +200,7 @@ export default defineComponent({
       dialogTitle: '',
       dialogText: '',
       dialogIcon: '',
+      dislogError: false,
       submitRequestValidationError: '',
       expandedProductCode: '',
       AccountEnum: Account,
@@ -211,7 +216,7 @@ export default defineComponent({
       }),
       canManageAccounts: computed((): boolean => {
         // check for role and account can have service fee (GOVM and GOVN account)
-        return currentUser?.roles?.includes(Role.StaffManageAccounts) && localState.isVariableFeeAccount
+        return currentUser?.roles?.includes(Role.StaffManageAccounts) && state.isVariableFeeAccount
       }),
       /**
        * Return any sub-product that has a status indicating activity
@@ -228,11 +233,17 @@ export default defineComponent({
         )
       }),
       productPaymentMethods: computed(() => orgStore.productPaymentMethods),
-      displayCancelOnDialog: computed(() => !localState.staffReviewClear || localState.displayRemoveProductDialog),
-      cancelDialogText: computed(() => {
-        return localState.displayCancelOnDialog
-          ? (!localState.addProductOnAccountAdmin ? 'Remove Product' : 'Submit Request')
-          : 'Close'
+      displayCancelOnDialog: computed(() => !state.staffReviewClear || state.displayRemoveProductDialog),
+      submitDialogText: computed(() => {
+        if (state.displayCancelOnDialog && !state.dislogError) {
+          if (!state.addProductOnAccountAdmin) {
+            return 'Remove Product'
+          } else {
+            return 'Submit Request'
+          }
+        } else {
+          return 'Close'
+        }
       })
     })
 
@@ -247,17 +258,18 @@ export default defineComponent({
     }
 
     const setup = async () => {
-      localState.isLoading = true
+      state.isLoading = true
       resetCurrentSelectedProducts()
       await loadProduct()
       // if staff need to load product fee also
-      if (localState.canManageAccounts) {
-        localState.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
-        localState.orgProductFeeCodes = await fetchOrgProductFeeCodes()
+      if (state.canManageAccounts) {
+        state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
+        state.orgProductFeeCodes = await fetchOrgProductFeeCodes()
       }
       await orgStore.getProductPaymentMethods()
-      localState.isLoading = false
-      localState.displayRemoveProductDialog = false
+      state.isLoading = false
+      state.displayRemoveProductDialog = false
+      state.dislogError = false
     }
 
     onMounted(async () => {
@@ -267,14 +279,14 @@ export default defineComponent({
 
     const toggleProductDetails = (productCode:string) => {
       // control product expand here to collapse all other product
-      localState.expandedProductCode = productCode
+      state.expandedProductCode = productCode
     }
     const orgProductDetails = (product) => {
       const { code: productCode, subscriptionStatus } = product
 
       let productData
-      if (localState.orgProductsFees && localState.orgProductsFees.length > 0) {
-        const orgProd = localState.orgProductsFees.filter((orgProduct) => orgProduct.product === productCode)
+      if (state.orgProductsFees && state.orgProductsFees.length > 0) {
+        const orgProd = state.orgProductsFees.filter((orgProduct) => orgProduct.product === productCode)
         productData = (orgProd && orgProd[0])
       }
 
@@ -298,27 +310,27 @@ export default defineComponent({
     /** Product status message content for CautionBox component */
     const mhrSubProductMsgContent = (): ProductStatusMsgContentIF => {
       // Return when no sub-products in pending or rejected state
-      if (!localState.subProduct) return
+      if (!state.subProduct) return
 
-      const helpEmail = localState.subProduct.description === TaskType.MHR_LAWYER_NOTARY
+      const helpEmail = state.subProduct.description === TaskType.MHR_LAWYER_NOTARY
         ? 'bcolhelp@gov.bc.ca'
         : 'bcregistries@gov.bc.ca'
 
-      switch (localState.subProduct.subscriptionStatus) {
+      switch (state.subProduct.subscriptionStatus) {
         case ProductStatus.PENDING_STAFF_REVIEW:
           return {
-            status: localState.subProduct.subscriptionStatus,
+            status: state.subProduct.subscriptionStatus,
             icon: 'mdi-clock-outline',
             color: 'darkGray',
-            msg: `Your application for Qualified Supplier – ${userAccessDisplayNames[localState.subProduct.description]}
+            msg: `Your application for Qualified Supplier – ${userAccessDisplayNames[state.subProduct.description]}
           access is under review. You will receive email notification once your request has been reviewed.`
           }
         case ProductStatus.REJECTED:
           return {
-            status: localState.subProduct.subscriptionStatus,
+            status: state.subProduct.subscriptionStatus,
             icon: 'mdi-alert',
             color: 'error',
-            msg: `Your application for Qualified Supplier – ${userAccessDisplayNames[localState.subProduct.description]}
+            msg: `Your application for Qualified Supplier – ${userAccessDisplayNames[state.subProduct.description]}
                 access has been rejected. Refer to your notification email or contact
                 <a href="mailto:${helpEmail}">${helpEmail}</a> for details. You can submit a new Qualified Supplier
                 access request from your Manufactured Home Registry (or Asset Registries) page once you have all the
@@ -333,10 +345,10 @@ export default defineComponent({
     const submitProductRequest = async () => {
       try {
         confirmDialog.value.close()
-        if (currentSelectedProducts.value.length === 0) {
-          localState.submitRequestValidationError = 'Select at least one product or service to submit request'
+        if (currentSelectedProducts.value.length === 0 && currentSelectedProductsforRemove.value === '') {
+          state.submitRequestValidationError = 'Select at least one product or service to submit request'
         } else {
-          localState.submitRequestValidationError = ''
+          state.submitRequestValidationError = ''
           const productsSelected: OrgProductCode[] = currentSelectedProducts.value.map((code: any) => {
             return { productCode: code }
           })
@@ -344,46 +356,47 @@ export default defineComponent({
           const addProductsRequestBody: OrgProductsRequestBody = {
             subscriptions: productsSelected
           }
-          if (localState.addProductOnAccountAdmin) {
+          if (state.addProductOnAccountAdmin) {
             await addOrgProducts(addProductsRequestBody)
           } else {
-            await currentSelectedProducts.value.forEach(code => removeOrgProducts(code))
+            await removeOrgProducts(currentSelectedProductsforRemove)
           }
           await setup()
           // show confirm modal
-          if (localState.addProductOnAccountAdmin && localState.staffReviewClear) {
-            localState.dialogTitle = 'Product Added'
-            localState.dialogText = 'Your account now has access to the selected product.'
-            localState.dialogIcon = 'mdi-check'
+          if (state.addProductOnAccountAdmin && state.staffReviewClear) {
+            state.dialogTitle = 'Product Added'
+            state.dialogText = 'Your account now has access to the selected product.'
+            state.dialogIcon = 'mdi-check'
             confirmDialog.value.open()
           }
         }
       } catch (ex) {
         // open when error
-        localState.dialogTitle = 'Product Request Failed'
-        localState.dialogText = ''
-        localState.dialogIcon = 'mdi-alert-circle-outline'
+        state.dislogError = true
+        state.dialogTitle = 'Product Request Failed'
+        state.dialogText = ''
+        state.dialogIcon = 'mdi-alert-circle-outline'
         confirmDialog.value.open()
 
         // eslint-disable-next-line no-console
         console.log('Error while trying to submit product request')
       }
-      localState.staffReviewClear = true
+      state.staffReviewClear = true
     }
 
     const saveProductFee = async (accountFees) => {
       const accountFee = { accoundId: currentOrganization.value.id, accountFees }
-      localState.isProductActionLoading = true
-      localState.isProductActionCompleted = false
+      state.isProductActionLoading = true
+      state.isProductActionCompleted = false
       try {
         await updateAccountFees(accountFee)
-        localState.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
+        state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log('Error while updating product fee ', err)
       } finally {
-        localState.isProductActionLoading = false
-        localState.isProductActionCompleted = true
+        state.isProductActionLoading = false
+        state.isProductActionCompleted = true
       }
     }
 
@@ -391,7 +404,8 @@ export default defineComponent({
       // add/remove product from the currentselectedproducts store
       const productCode = productDetails.code
       const forceRemove = productDetails.forceRemove
-      if (!productDetails.termsAccepted && productDetails.termsAccepted !== undefined) {
+
+      if (productDetails.termsAccepted === false) {
         return
       }
 
@@ -399,18 +413,22 @@ export default defineComponent({
         addToCurrentSelectedProducts({ productCode: productCode, forceRemove })
       }
 
-      localState.staffReviewClear = !needStaffReview(productCode)
-      localState.addProductOnAccountAdmin = productDetails.addProductOnAccountAdmin
+      state.staffReviewClear = !needStaffReview(productCode)
+      state.addProductOnAccountAdmin = productDetails.addProductOnAccountAdmin
 
-      if (!localState.staffReviewClear && localState.addProductOnAccountAdmin) {
-        localState.dialogTitle = 'Staff Review Required'
-        localState.dialogText = `This product needs a review by our staff before it's added to your account. 
+      if (!state.addProductOnAccountAdmin && productCode) {
+        setCurrentSelectedProductsforRemove(productCode)
+      }
+
+      if (!state.staffReviewClear && state.addProductOnAccountAdmin) {
+        state.dialogTitle = 'Staff Review Required'
+        state.dialogText = `This product needs a review by our staff before it's added to your account. 
           We'll notify you by email once it's approved.`
         confirmDialog.value.open()
-      } else if (!localState.addProductOnAccountAdmin) {
-        localState.displayRemoveProductDialog = true
-        localState.dialogTitle = 'Confirm Removing Product and Access'
-        localState.dialogText = `If you remove this product, you'll lose access and need staff approval to add it back. ` +
+      } else if (!state.addProductOnAccountAdmin) {
+        state.displayRemoveProductDialog = true
+        state.dialogTitle = 'Confirm Removing Product and Access'
+        state.dialogText = `If you remove this product, you'll lose access and need staff approval to add it back. ` +
           `This process may take a few business days.<br> <br>Areyou sure you want to remove this product?`
         confirmDialog.value.open()
       } else {
@@ -435,7 +453,7 @@ export default defineComponent({
       AccountStatus,
       ProductStatus,
       ProductEnum,
-      ...toRefs(localState)
+      ...toRefs(state)
     }
   }
 })

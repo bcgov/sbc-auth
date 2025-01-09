@@ -1,5 +1,6 @@
 import { DocumentUpload, User, UserProfileData, UserSettings } from '@/models/user'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
+import { OrgProduct, Organization, RoleInfo } from '@/models/Organization'
 import { computed, reactive, toRefs } from '@vue/composition-api'
 
 import CommonUtils from '@/util/common-util'
@@ -7,10 +8,11 @@ import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
-import { RoleInfo } from '@/models/Organization'
+import OrgService from '@/services/org.services'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import UserService from '@/services/user.services'
 import { defineStore } from 'pinia'
+import { useOrgStore } from './org'
 
 export interface UserTerms {
   isTermsOfUseAccepted: boolean
@@ -31,7 +33,8 @@ export const useUserStore = defineStore('user', () => {
     userProfileData: undefined as UserProfileData,
     redirectAfterLoginUrl: '' as string,
     roleInfos: undefined as RoleInfo[],
-    currentUserAccountSettings: undefined as UserSettings[]
+    currentUserAccountSettings: undefined as UserSettings[],
+    currentSelectedProductsforRemove: '' as string
   })
 
   function $reset () {
@@ -48,7 +51,13 @@ export const useUserStore = defineStore('user', () => {
     state.redirectAfterLoginUrl = '' as string
     state.roleInfos = undefined as RoleInfo[]
     state.currentUserAccountSettings = undefined as UserSettings[]
+    state.currentSelectedProductsforRemove = '' as string
   }
+
+  // Grabs from Org store.
+  const currentOrganization = computed<Organization>(() => {
+    return useOrgStore().currentOrganization
+  })
 
   const termsOfUseVersion = computed(() => state.userProfile?.userTerms?.termsOfUseAcceptedVersion)
   const isTermsAccepted = computed(() => state.userProfile?.userTerms?.isTermsOfUseAccepted)
@@ -88,6 +97,10 @@ export const useUserStore = defineStore('user', () => {
 
   function setUserProfile (user: User) {
     state.userProfile = user
+  }
+
+  function setCurrentSelectedProductsforRemove (code: string) {
+    state.currentSelectedProductsforRemove = code
   }
 
   async function getUserProfile (identifier: string) {
@@ -163,6 +176,12 @@ export const useUserStore = defineStore('user', () => {
   function updateCurrentUserTerms (terms: UserTerms) {
     state.userProfile = { ...state.userProfile, userTerms: terms }
     return terms
+  }
+
+  async function removeOrgProducts (productCode: string): Promise<OrgProduct> {
+    const orgId = currentOrganization.value?.id
+    const response = await OrgService.removeProducts(orgId, productCode)
+    return response?.data
   }
 
   async function updateUserContact (contact?: Contact) {
@@ -247,6 +266,8 @@ export const useUserStore = defineStore('user', () => {
     setNotaryContact,
     setUserProfileData,
     setNotaryInformation,
+    setCurrentSelectedProductsforRemove,
+    removeOrgProducts,
     reset,
     resetOTPAuthenticator,
     saveUserTerms,

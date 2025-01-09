@@ -890,12 +890,6 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data
   }
 
-  async function removeOrgProducts (productCode: string): Promise<OrgProduct> {
-    const orgId = state.currentOrganization?.id
-    const response = await OrgService.removeProducts(orgId, productCode)
-    return response?.data
-  }
-
   async function getProductList (): Promise<OrgProduct[]> {
     const response:any = await OrgService.avialbelProducts()
     if (response?.data && response.status === 200) {
@@ -1168,7 +1162,6 @@ export const useOrgStore = defineStore('org', () => {
     getOrganizationForAffiliate,
     getOrgProducts,
     addOrgProducts,
-    removeOrgProducts,
     getProductList,
     getProductPaymentMethods,
     addToCurrentSelectedProducts,

@@ -263,18 +263,12 @@ export default defineComponent({
       if (!props.isAccountSettingsView) {
         return true
       }
-      if (([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(props.productDetails.subscriptionStatus)) {
-        return true
-      }
-      return false
+      return ([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(props.productDetails.subscriptionStatus)
     })
 
     const hideCheckbox = computed(() => {
       const decisionMadeStatus = [ProductStatus.PENDING_STAFF_REVIEW, ProductStatus.REJECTED]
-      if ((decisionMadeStatus as Array<string>).includes(props.productDetails.subscriptionStatus)) {
-        return true
-      }
-      return false
+      return (decisionMadeStatus as Array<string>).includes(props.productDetails.subscriptionStatus)
     })
 
     onMounted(() => {
@@ -282,6 +276,7 @@ export default defineComponent({
     })
 
     watch(() => props.isSelected, (newValue) => {
+      // Only products with TOS need to be watched, as it may cause a submit error if applied to other products
       if (TOS_NEEDED_PRODUCT.includes(props.productDetails.code)) {
         state.productSelected = newValue
       }
@@ -365,14 +360,22 @@ export default defineComponent({
         // wait till user approve TOS or remove product selection from array if tos not accepted
         forceRemove = true
       }
-      const addProductOnAccountAdmin = props.isAccountSettingsView && TOS_NEEDED_PRODUCT.includes(props.productDetails.code)
-        ? state.termsAccepted && !state.productSelected
-        : state.productSelected
+
+      let addorRemoveProduct // false is remove product
+      const productSubscribed = props.productDetails.subscriptionStatus === 'ACTIVE'
+      if (props.isAccountSettingsView && TOS_NEEDED_PRODUCT.includes(props.productDetails.code)) {
+        addorRemoveProduct = state.termsAccepted // not checking state.productSelected because it hasn't been updated yet
+      } else {
+        addorRemoveProduct = state.productSelected
+      }
+
+      const checkTerms = TOS_NEEDED_PRODUCT.includes(props.productDetails.code) && !productSubscribed
+
       emit('set-selected-product', {
         ...props.productDetails,
         forceRemove,
-        addProductOnAccountAdmin: props.isAccountSettingsView ? addProductOnAccountAdmin : undefined,
-        termsAccepted: TOS_NEEDED_PRODUCT.includes(props.productDetails.code) ? state.termsAccepted : undefined
+        addProductOnAccountAdmin: props.isAccountSettingsView ? addorRemoveProduct : undefined,
+        termsAccepted: checkTerms ? state.termsAccepted : undefined
       })
     }
 
