@@ -61,10 +61,10 @@
 </template>
 <script lang="ts">
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { onMounted, ref } from '@vue/composition-api'
-import BcolLogin from '@/components/BcolLogin.vue'
+import { defineComponent, onMounted, ref } from '@vue/composition-api'
+import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 
-export default {
+export default defineComponent({
   name: 'LinkedBCOLBanner',
   components: {
     BcolLogin
@@ -92,7 +92,7 @@ export default {
     }
   },
   setup (props, { emit }) {
-    const editMode = ref(false)
+    const editMode = ref<boolean>(false)
 
     // Set editMode based on props or details
     onMounted(() => {
@@ -118,7 +118,7 @@ export default {
       editAccount
     }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
