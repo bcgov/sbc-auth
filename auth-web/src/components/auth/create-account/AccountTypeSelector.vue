@@ -245,7 +245,8 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
     if (isGovNAccount) {
       return AccessType.GOVN
     }
-    return isBceidUser ? (isExtraProvice ? AccessType.EXTRA_PROVINCIAL : AccessType.REGULAR_BCEID) : AccessType.REGULAR
+    const accessType = (isExtraProvice ? AccessType.EXTRA_PROVINCIAL : AccessType.REGULAR_BCEID)
+    return isBceidUser ? accessType : AccessType.REGULAR
   }
 
   private goNext () {

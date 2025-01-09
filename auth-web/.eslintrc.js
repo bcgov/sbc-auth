@@ -23,6 +23,7 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-case-declarations': 'warn',
+    'no-nested-ternary': 'error',
     'sort-imports': 'error',
     'space-before-function-paren': 1,
     'no-use-before-define': 'off',

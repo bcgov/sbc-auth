@@ -85,6 +85,13 @@
           </p>
         </div>
         <v-divider class="mb-5" />
+        Current Payment
+        <span class="d-flex justify-end">
+          <v-icon
+            medium
+            color="primary"
+          >mdi-pencil</v-icon>Edit</span>
+        <AccountPaymentMethods />
       </template>
       <template v-else>
         <div>No Products are available...</div>
@@ -147,6 +154,7 @@ import {
   OrgProductsRequestBody
 } from '@/models/Organization'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
+import AccountPaymentMethods from '@/components/auth/account-settings/payment/AccountPaymentMethods.vue'
 import CautionBox from '@/components/auth/common/CautionBox.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Product from '@/components/auth/common/Product.vue'
@@ -162,7 +170,8 @@ export default defineComponent({
   components: {
     CautionBox,
     Product,
-    ModalDialog
+    ModalDialog,
+    AccountPaymentMethods
   },
   setup () {
     const confirmDialog: InstanceType<typeof ModalDialog> = ref(null)

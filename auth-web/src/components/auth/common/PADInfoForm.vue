@@ -191,12 +191,10 @@ export default defineComponent({
   },
   emits: ['emit-pre-auth-debit-info', 'is-pre-auth-debit-form-valid', 'is-pad-info-touched'],
   setup (props, { emit }) {
-    // refs
     const preAuthDebitForm = ref(null) as HTMLFormElement
     const orgStore = useOrgStore()
     const currentOrgPADInfo = computed(() => orgStore.currentOrgPADInfo)
 
-    // static vars
     const accountMask = CommonUtils.accountMask()
 
     const institutionNumberRules = [
@@ -245,7 +243,6 @@ export default defineComponent({
       })
     }) as unknown) as PADInfoFormState
 
-    // emits
     const emitIsPreAuthDebitFormValid = () => {
       const acknowledge = (props.isAcknowledgeNeeded) ? state.isAcknowledged : true
       const tosAccepted = (props.isTOSNeeded) ? state.isTOSAccepted : true
@@ -269,7 +266,6 @@ export default defineComponent({
       emit('emit-pre-auth-debit-info', padInfo)
     }
 
-    // watch bank info
     watch(() => [state.accountNumber, state.institutionNumber, state.transitNumber], () => {
       // only trigger after component has initialized (values are updated in mounted)
       if (state.ready) {
@@ -279,14 +275,12 @@ export default defineComponent({
       }
     }, { deep: true })
 
-    // methods
     const updateTermsAccepted = (isAccepted: boolean) => {
       state.isTOSAccepted = isAccepted
       state.isTouched = true
       emitPreAuthDebitInfo()
     }
 
-    // setup
     onMounted(async () => {
       const padInfo = (Object.keys(props.padInformation).length)
         ? props.padInformation : currentOrgPADInfo.value as PADInfo

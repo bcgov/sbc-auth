@@ -81,7 +81,7 @@
             class="link-account-btn"
             data-test="dialog-save-button"
             :loading="isLoading"
-            :disabled="!isFormValid() || isLoading"
+            :disabled="!isFormValid || isLoading"
             @click="linkAccounts()"
           >
             Link Account
@@ -94,96 +94,98 @@
 
 <script lang="ts">
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { Action } from 'pinia-class'
-import { useOrgStore } from '@/stores/org'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { useOrgStore } from '@/stores'
 
-@Component({
-  name: 'BcolLogin'
+export default defineComponent({
+  name: 'BcolLogin',
+  props: {
+    hideLinkBtn: {
+      type: Boolean,
+      default: false
+    }
+  },
+  setup (props, { emit }) {
+    const state = reactive({
+      username: '',
+      password: '',
+      errorMessage: '',
+      isLoading: false,
+      isFormValid: computed(() => !!state.username && !!state.password)
+    })
+
+    const usernameRules = [
+      v => !!v || 'Username is required'
+    ]
+    const passwordRules = [
+      value => !!value || 'Password is required',
+      value => (value?.trim().length <= 8) || 'Use only first 8 characters for password'
+    ]
+
+    const form = ref(null)
+
+    const emitBcolInfo = () => {
+      const bcolInfo: BcolProfile = {
+        userId: state.username,
+        password: state.password
+      }
+      emit('bcol-info', bcolInfo)
+    }
+
+    watch(() => [state.username, state.password], () => {
+      emitBcolInfo()
+    })
+
+    onMounted(() => {
+      state.password = ''
+    })
+
+    const resetForm = () => {
+      state.password = ''
+      state.errorMessage = ''
+      form.value?.resetValidation()
+    }
+
+    const linkAccounts = async () => {
+      state.isLoading = true
+      state.errorMessage = ''
+
+      if (state.isFormValid) {
+        const bcolProfile: BcolProfile = {
+          userId: state.username,
+          password: state.password
+        }
+        try {
+          const bcolAccountDetails: BcolAccountDetails = await useOrgStore().validateBcolAccount(bcolProfile)
+          state.isLoading = false
+          if (bcolAccountDetails) {
+            emit('account-link-successful', { bcolProfile, bcolAccountDetails })
+            resetForm()
+          }
+        } catch (err) {
+          state.isLoading = false
+          switch (err.response.status) {
+            case 409:
+            case 400:
+              state.errorMessage = err.response.data.message?.detail || err.response.data.message
+              break
+            default:
+              state.errorMessage = 'An error occurred while attempting to create your account.'
+          }
+        }
+      }
+    }
+
+    return {
+      ...toRefs(state),
+      usernameRules,
+      passwordRules,
+      form,
+      linkAccounts,
+      resetForm
+    }
+  }
 })
-export default class BcolLogin extends Vue {
-  username: string = ''
-  password: string = ''
-  errorMessage: string = ''
-  isLoading: boolean = false
-  @Prop({ default: false }) readonly hideLinkBtn: boolean
-  @Action(useOrgStore) readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
-
-  private async mounted () {
-    this.password = ''
-  }
-
-  @Watch('password')
-  onPasswordChange () {
-    this.emitBcolInfo()
-  }
-
-  @Watch('username')
-  onUsernameChange () {
-    this.emitBcolInfo()
-  }
-
-  isFormValid (): boolean {
-    return !!this.username && !!this.password
-  }
-  usernameRules = [
-    v => !!v || 'Username is required'
-  ]
-
-  passwordRules = [
-    value => !!value || 'Password is required',
-    value => (value?.trim().length <= 8) || 'Use only first 8 characters for password'
-  ]
-
-  $refs: {
-    form: HTMLFormElement
-  }
-
-  async linkAccounts () {
-    this.isLoading = true
-    this.errorMessage = ''
-    // Validate form, and then create an team with this user a member
-    if (this.isFormValid()) {
-      const bcolProfile: BcolProfile = {
-        userId: this.username,
-        password: this.password
-      }
-      try {
-        const bcolAccountDetails = await this.validateBcolAccount(bcolProfile)
-        this.isLoading = false
-        if (bcolAccountDetails) { // TODO whats the success status
-          this.$emit('account-link-successful', { bcolProfile, bcolAccountDetails })
-          this.resetForm()
-        }
-      } catch (err) {
-        this.isLoading = false
-        switch (err.response.status) {
-          case 409:
-            this.errorMessage = err.response.data.message?.detail || err.response.data.message
-            break
-          case 400:
-            this.errorMessage = err.response.data.message?.detail || err.response.data.message
-            break
-          default:
-            this.errorMessage = 'An error occurred while attempting to create your account.'
-        }
-      }
-    }
-  }
-  resetForm () {
-    this.password = this.errorMessage = ''
-    this.$refs.form.resetValidation()
-  }
-
-  @Emit()
-  private async emitBcolInfo () {
-    const bcolInfo: BcolProfile = {
-      userId: this.username,
-      password: this.password
-    }
-    return bcolInfo
-  }
-}
 </script>
 
 <style lang="scss" scoped>
