@@ -13,6 +13,7 @@
 # limitations under the License.
 """This model manages a Task item in the Auth Service."""
 import datetime as dt
+from typing import Self
 
 import pytz
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, text
@@ -93,14 +94,14 @@ class Task(BaseModel):
         return pagination.items, pagination.total
 
     @classmethod
-    def find_by_task_id(cls, task_id: int):
+    def find_by_task_id(cls, task_id: int) -> Self:
         """Find a task instance that matches the provided id."""
         return db.session.query(Task).filter_by(id=int(task_id or -1)).first()
 
     @classmethod
     def find_by_task_relationship_id(
         cls, relationship_id: int, task_relationship_type: str, task_status: str = TaskStatus.OPEN.value
-    ):
+    ) -> Self:
         """Find a task instance that related to the relationship id ( may be an ORG or a PRODUCT."""
         return (
             db.session.query(Task)
@@ -111,6 +112,22 @@ class Task(BaseModel):
             )
             .first()
         )
+
+    @classmethod
+    def find_by_incomplete_task_relationship_id(
+        cls, relationship_id: int, task_relationship_type: str, relationship_status: str = None
+    ) -> Self:
+        """Find a task instance that related to the relationship id ( may be an ORG or a PRODUCT) that is incomplete."""
+        query = db.session.query(Task).filter(
+            Task.relationship_id == int(relationship_id or -1),
+            Task.relationship_type == task_relationship_type,
+            Task.status.in_((TaskStatus.OPEN.value, TaskStatus.HOLD.value)),
+        )
+
+        if relationship_status is not None:
+            query = query.filter(Task.relationship_status == relationship_status)
+
+        return query.first()
 
     @classmethod
     def find_by_task_for_account(cls, org_id: int, status):

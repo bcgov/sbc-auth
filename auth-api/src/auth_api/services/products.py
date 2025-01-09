@@ -144,6 +144,26 @@ class Product:
         return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
 
     @staticmethod
+    def _is_previously_approved(org_id: int, product_code: str):
+        """Check if this product has a task that was previously approved."""
+        inactive_sub = ProductSubscriptionModel.find_by_org_id_product_code(
+            org_id=org_id, product_code=product_code, valid_statuses=(ProductSubscriptionStatus.INACTIVE.value,)
+        )
+        if not inactive_sub:
+            return False, None
+
+        task = TaskModel.find_by_task_relationship_id(
+            inactive_sub.id, TaskRelationshipType.PRODUCT.value, TaskStatus.COMPLETED.value
+        )
+        if task is None or (
+            task.relationship_status != TaskRelationshipStatus.ACTIVE.value
+            and task.action == TaskAction.PRODUCT_REVIEW.value
+        ):
+            return False, None
+
+        return True, inactive_sub
+
+    @staticmethod
     def create_product_subscription(
         org_id,
         subscription_data: Dict[str, Any],  # pylint: disable=too-many-locals
@@ -181,10 +201,13 @@ class Product:
                     and org.type_code not in PREMIUM_ORG_TYPES
                 ):
                     continue
+                previously_approved, inactive_sub = Product._is_previously_approved(org_id, product_code)
+                if previously_approved:
+                    auto_approve = True
 
                 subscription_status = Product.find_subscription_status(org, product_model, auto_approve)
                 product_subscription = Product._subscribe_and_publish_activity(
-                    org_id, product_code, subscription_status, product_model.description
+                    org_id, product_code, subscription_status, product_model.description, inactive_sub
                 )
 
                 # If there is a linked product, add subscription to that too.
@@ -230,6 +253,32 @@ class Product:
         return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
 
     @staticmethod
+    def remove_product_subscription(org_id: int, product_code: str, skip_auth=False):
+        """Deactivate org product subscription by code."""
+        org: OrgModel = OrgModel.find_by_org_id(org_id)
+        if not org:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        if not skip_auth:
+            check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
+
+        existing_sub = ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code)
+
+        if existing_sub:
+            existing_sub.status_code = ProductSubscriptionStatus.INACTIVE.value
+            existing_sub.save()
+
+            pending_task = TaskModel.find_by_incomplete_task_relationship_id(
+                relationship_id=existing_sub.id,
+                task_relationship_type=TaskRelationshipType.PRODUCT.value,
+                relationship_status=ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value,
+            )
+            if pending_task:
+                pending_task.delete()
+
+        return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
+
+    @staticmethod
     def _send_product_subscription_confirmation(product_notification_info: ProductNotificationInfo, org_id: int):
         admin_emails = UserService.get_admin_emails_for_org(org_id)
         product_notification_info.recipient_emails = admin_emails
@@ -256,11 +305,22 @@ class Product:
 
     @staticmethod
     def _subscribe_and_publish_activity(
-        org_id: int, product_code: str, status_code: str, product_model_description: str
+        org_id: int,
+        product_code: str,
+        status_code: str,
+        product_model_description: str,
+        inactive_sub: ProductSubscriptionModel = None,
     ):
-        subscription = ProductSubscriptionModel(
-            org_id=org_id, product_code=product_code, status_code=status_code
-        ).flush()
+        subscription = None
+        if inactive_sub:
+            subscription = inactive_sub
+            subscription.status_code = status_code
+            subscription.flush()
+        else:
+            subscription = ProductSubscriptionModel(
+                org_id=org_id, product_code=product_code, status_code=status_code
+            ).flush()
+
         if status_code == ProductSubscriptionStatus.ACTIVE.value:
             ActivityLogPublisher.publish_activity(
                 Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value, name=product_model_description)
