@@ -59,40 +59,64 @@
     />
   </div>
 </template>
-
 <script lang="ts">
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
+import { onMounted, ref } from '@vue/composition-api'
+import BcolLogin from '@/components/BcolLogin.vue'
 
-@Component({
+export default {
+  name: 'LinkedBCOLBanner',
   components: {
     BcolLogin
-  }
-})
-export default class LinkedBCOLBanner extends Vue {
-  @Prop({ default: false }) showUnlinkAccountBtn: boolean
-  @Prop({ default: false }) showEditBtn: boolean
-  @Prop({ default: false }) forceEditMode: boolean
-  @Prop({ default: '' }) bcolAccountName: string
-  @Prop({ default: () => ({} as BcolAccountDetails) }) bcolAccountDetails: BcolAccountDetails
-  editMode: boolean = false // user can edit the bcol details
+  },
+  props: {
+    showUnlinkAccountBtn: {
+      type: Boolean,
+      default: false
+    },
+    showEditBtn: {
+      type: Boolean,
+      default: false
+    },
+    forceEditMode: {
+      type: Boolean,
+      default: false
+    },
+    bcolAccountName: {
+      type: String,
+      default: ''
+    },
+    bcolAccountDetails: {
+      type: Object,
+      default: () => ({} as BcolAccountDetails)
+    }
+  },
+  setup (props, { emit }) {
+    const editMode = ref(false)
 
-  private async mounted () {
-    this.editMode = this.forceEditMode || Object.keys(this.bcolAccountDetails).length === 0 || false
-  }
+    // Set editMode based on props or details
+    onMounted(() => {
+      editMode.value = props.forceEditMode || Object.keys(props.bcolAccountDetails).length === 0 || false
+    })
 
-  @Emit()
-  unlinkAccount () {
-  }
+    const unlinkAccount = () => {
+      emit('unlink-account')
+    }
 
-  @Emit('emit-bcol-info')
-  emitBcolInfo (bcolProfile: BcolProfile) {
-    return bcolProfile
-  }
+    const emitBcolInfo = (bcolProfile: BcolProfile) => {
+      emit('emit-bcol-info', bcolProfile)
+    }
 
-  editAccount () {
-    this.editMode = true
+    const editAccount = () => {
+      editMode.value = true
+    }
+
+    return {
+      editMode,
+      unlinkAccount,
+      emitBcolInfo,
+      editAccount
+    }
   }
 }
 </script>
