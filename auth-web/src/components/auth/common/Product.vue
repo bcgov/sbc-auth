@@ -252,7 +252,7 @@ export default defineComponent({
       }),
       filteredPaymentMethods: computed(() => {
         if (useOrgStore().isGovmOrg) {
-          return props.paymentMethods.filter((method) => method == PaymentTypes.EJV)
+          return props.paymentMethods.filter((method) => method === PaymentTypes.EJV)
         }
         return props.paymentMethods.filter((method) => ![PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV].includes(method as PaymentTypes))
       })
