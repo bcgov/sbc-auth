@@ -193,11 +193,12 @@ export default defineComponent({
       addToCurrentSelectedProducts,
       syncCurrentAccountFees,
       fetchOrgProductFeeCodes,
+      getProductPaymentMethods,
       updateAccountFees,
       needStaffReview,
+      productPaymentMethods,
       removeOrgProduct
     } = useOrgStore()
-    const orgStore = useOrgStore()
 
     const {
       currentOrganization,
@@ -245,7 +246,7 @@ export default defineComponent({
           !!product.parentCode && product.subscriptionStatus === ProductStatus.REJECTED
         )
       }),
-      productPaymentMethods: computed(() => orgStore.productPaymentMethods),
+      productPaymentMethods: computed(() => productPaymentMethods),
       displayCancelOnDialog: computed(() => !state.staffReviewClear || state.displayRemoveProductDialog),
       submitDialogText: computed(() => {
         if (state.displayCancelOnDialog && !state.dialogError) {
@@ -280,7 +281,7 @@ export default defineComponent({
         state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
         state.orgProductFeeCodes = await fetchOrgProductFeeCodes()
       }
-      await orgStore.getProductPaymentMethods()
+      await getProductPaymentMethods()
       state.isLoading = false
       state.displayRemoveProductDialog = false
       state.dialogError = false
