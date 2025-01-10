@@ -11,7 +11,7 @@
         Products and Payment
       </h2>
     </div>
-    <v-overlay :value="isLoading" absolute class="loading-inner-container">
+    <v-overlay :value="isLoading" absolute class="loading-inner-container" opacity="0">
         <v-progress-circular
           size="50"
           width="5"
