@@ -347,7 +347,6 @@ export default defineComponent({
     const filteredPaymentMethods = computed(() => {
       const paymentMethods = []
       if (!props.isEditing && selectedPaymentMethod.value) {
-        console.log([PAYMENT_METHODS[selectedPaymentMethod.value]])
         return [PAYMENT_METHODS[selectedPaymentMethod.value]]
       }
       if (props.currentOrgType) {

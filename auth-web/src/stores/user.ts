@@ -99,11 +99,6 @@ export const useUserStore = defineStore('user', () => {
     state.userProfile = user
   }
 
-  // TODO move out
-  function setCurrentSelectedProductsforRemoval (code: string) {
-    state.currentSelectedProductsforRemoval = code
-  }
-
   async function getUserProfile (identifier: string) {
     const response = await UserService.getUserProfile(identifier)
     if (response?.data) {
@@ -179,11 +174,7 @@ export const useUserStore = defineStore('user', () => {
     return terms
   }
 
-  async function removeOrgProducts (productCode: string): Promise<OrgProduct> {
-    const orgId = currentOrganization.value?.id
-    const response = await OrgService.removeProducts(orgId, productCode)
-    return response?.data
-  }
+
 
   async function updateUserContact (contact?: Contact) {
     const userProfile = state.userProfileData
@@ -267,8 +258,6 @@ export const useUserStore = defineStore('user', () => {
     setNotaryContact,
     setUserProfileData,
     setNotaryInformation,
-    setCurrentSelectedProductsforRemoval,
-    removeOrgProducts,
     reset,
     resetOTPAuthenticator,
     saveUserTerms,

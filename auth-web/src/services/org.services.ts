@@ -176,7 +176,7 @@ export default class OrgService {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/products`, productsRequestBody)
   }
 
-  public static async removeProducts (orgIdentifier: number, productCode: string):
+  public static async removeProduct (orgIdentifier: number, productCode: string):
     Promise<AxiosResponse<OrgProduct>> {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/products/${productCode}`)
   }

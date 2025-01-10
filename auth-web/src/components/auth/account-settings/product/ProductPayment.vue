@@ -184,10 +184,6 @@ export default defineComponent({
 
     const {
       currentUser,
-      // TODO move out of this and back into Org Store or use product store
-      currentSelectedProductsforRemoval: currentSelectedProductsforRemoval,
-      setCurrentSelectedProductsforRemoval,
-      removeOrgProducts
     } = useUserStore()
     const { setAccountChangedHandler } = useAccountChangeHandler()
     const {
@@ -198,7 +194,8 @@ export default defineComponent({
       syncCurrentAccountFees,
       fetchOrgProductFeeCodes,
       updateAccountFees,
-      needStaffReview
+      needStaffReview,
+      removeOrgProduct
     } = useOrgStore()
     const orgStore = useOrgStore()
 
@@ -362,7 +359,7 @@ export default defineComponent({
     const submitProductRequest = async () => {
       try {
         confirmDialog.value.close()
-        if (currentSelectedProducts.value.length === 0 && currentSelectedProductsforRemoval === '') {
+        if (currentSelectedProducts.value.length === 0) {
           state.submitRequestValidationError = 'Select at least one product or service to submit request'
         } else {
           state.submitRequestValidationError = ''
@@ -376,7 +373,7 @@ export default defineComponent({
           if (state.addProductOnAccountAdmin) {
             await addOrgProducts(addProductsRequestBody)
           } else {
-            await removeOrgProducts(currentSelectedProductsforRemoval)
+            await removeOrgProduct(productsSelected[0]?.productCode)
           }
           await setup()
           // show confirm modal
@@ -432,10 +429,6 @@ export default defineComponent({
 
       state.staffReviewClear = !needStaffReview(productCode)
       state.addProductOnAccountAdmin = productDetails.addProductOnAccountAdmin
-
-      if (!state.addProductOnAccountAdmin && productCode) {
-        setCurrentSelectedProductsforRemoval(productCode)
-      }
 
       if (!state.staffReviewClear && state.addProductOnAccountAdmin) {
         state.dialogTitle = 'Staff Review Required'

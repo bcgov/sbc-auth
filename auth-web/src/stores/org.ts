@@ -1083,6 +1083,12 @@ export const useOrgStore = defineStore('org', () => {
     }
   }
 
+  async function removeOrgProduct (productCode: string): Promise<OrgProduct> {
+    const orgId = state.currentOrganization?.id
+    const response = await OrgService.removeProduct(orgId, productCode)
+    return response?.data
+  }
+
   return {
     ...toRefs(state),
     isPremiumAccount,
@@ -1189,6 +1195,7 @@ export const useOrgStore = defineStore('org', () => {
     isGovnGovmOrg,
     isGovmOrg,
     updateOrgMailingAddress,
-    needStaffReview
+    needStaffReview,
+    removeOrgProduct
   }
 })
