@@ -207,11 +207,10 @@ export default class BusinessService {
   }
 
   /**
-   * Downloads a document from Legal API and prompts browser to open/save it.
+   * Get download url from Document Record Service
    * @param documentServiceId the unique id on Document Record Service
-   * @param documentName the document filename
-   * @returns a promise to return the axios response or the error response
-   * @see CommonUtils.fileDownload() for a similar method
+   * @param documentClass the document class defined for the document service. e.g. 'CORP'
+   * @returns a promise to return the string of file download.
    */
   static async getDownloadUrl (documentKey: string, documentClass: string): Promise<string> {
     // safety checks
