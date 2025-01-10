@@ -20,10 +20,13 @@
       >
         <div>
           <header class="d-flex align-center flex-grow-1">
-            <div class="payment-icon-container mt-n2" style="display: inline-block">
+            <div
+              class="payment-icon-container mt-n2"
+              style="display: inline-block"
+            >
               <v-radio
-              v-if="isEditing"
-              :value="payment.type"
+                v-if="isEditing"
+                :value="payment.type"
               />
               <v-icon
                 x-large

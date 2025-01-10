@@ -183,7 +183,7 @@ export default defineComponent({
     const confirmDialog: InstanceType<typeof ModalDialog> = ref(null)
 
     const {
-      currentUser,
+      currentUser
     } = useUserStore()
     const { setAccountChangedHandler } = useAccountChangeHandler()
     const {

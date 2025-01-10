@@ -1,6 +1,6 @@
 import { DocumentUpload, User, UserProfileData, UserSettings } from '@/models/user'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
-import { OrgProduct, Organization, RoleInfo } from '@/models/Organization'
+import { RoleInfo } from '@/models/Organization'
 import { computed, reactive, toRefs } from '@vue/composition-api'
 
 import CommonUtils from '@/util/common-util'
@@ -8,11 +8,9 @@ import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
-import OrgService from '@/services/org.services'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import UserService from '@/services/user.services'
 import { defineStore } from 'pinia'
-import { useOrgStore } from './org'
 
 export interface UserTerms {
   isTermsOfUseAccepted: boolean
@@ -54,10 +52,6 @@ export const useUserStore = defineStore('user', () => {
     // TODO move out
     state.currentSelectedProductsforRemoval = '' as string
   }
-
-  const currentOrganization = computed<Organization>(() => {
-    return useOrgStore().currentOrganization
-  })
 
   const termsOfUseVersion = computed(() => state.userProfile?.userTerms?.termsOfUseAcceptedVersion)
   const isTermsAccepted = computed(() => state.userProfile?.userTerms?.isTermsOfUseAccepted)
@@ -173,8 +167,6 @@ export const useUserStore = defineStore('user', () => {
     state.userProfile = { ...state.userProfile, userTerms: terms }
     return terms
   }
-
-
 
   async function updateUserContact (contact?: Contact) {
     const userProfile = state.userProfileData
