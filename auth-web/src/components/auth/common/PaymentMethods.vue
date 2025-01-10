@@ -346,7 +346,8 @@ export default defineComponent({
 
     const filteredPaymentMethods = computed(() => {
       const paymentMethods = []
-      if (!props.isEditing) {
+      if (!props.isEditing && selectedPaymentMethod.value) {
+        console.log([PAYMENT_METHODS[selectedPaymentMethod.value]])
         return [PAYMENT_METHODS[selectedPaymentMethod.value]]
       }
       if (props.currentOrgType) {
@@ -480,6 +481,10 @@ export default defineComponent({
     // Purpose: reset the payment method without having to reload the component.
     watch(() => props.currentSelectedPaymentMethod, (newValue) => {
       selectedPaymentMethod.value = newValue
+    })
+
+    watch(() => filteredPaymentMethods, (newValue) => {
+      console.log(newValue)
     })
 
     onMounted(async () => {
