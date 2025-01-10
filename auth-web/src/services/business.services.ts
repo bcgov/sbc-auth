@@ -107,7 +107,7 @@ export default class BusinessService {
   static async fetchFiling (url: string): Promise<any> {
     // safety check
     if (!url) throw new Error('Invalid parameters')
-
+    
     return axios.get(url)
       .then(response => {
         const filing = response?.data?.filing
@@ -203,6 +203,29 @@ export default class BusinessService {
       }
 
       return response
+    })
+  }
+
+  /**
+   * Downloads a document from Legal API and prompts browser to open/save it.
+   * @param documentServiceId the unique id on Document Record Service
+   * @param documentName the document filename
+   * @returns a promise to return the axios response or the error response
+   * @see CommonUtils.fileDownload() for a similar method
+   */
+  static async getDownloadUrl (documentKey: string, documentClass: string): Promise<string> {
+    // safety checks
+    if (!documentKey || !documentClass) throw new Error('Invalid parameters')
+
+    const url = `${ConfigHelper.getLegalAPIV2Url()}/documents/drs/${documentClass}/${documentKey}`
+
+    return axios.get(url).then(response => {
+      if (!response) throw new Error('Null response')
+
+      return response.data.documentURL
+    }).catch(error => {
+      console.log(error)
+      return ''
     })
   }
 

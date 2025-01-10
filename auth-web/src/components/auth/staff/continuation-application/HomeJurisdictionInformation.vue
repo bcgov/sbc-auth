@@ -314,14 +314,28 @@ export default defineComponent({
       if (!documentKey || !documentName) return // safety check
 
       state.isDownloading = true
-      await BusinessService.downloadDocument(documentKey, documentName).catch(error => {
+      const documentClass = 'CORP'
+      try {
+        const docUrl: string = await BusinessService.getDownloadUrl(documentKey, documentClass)
+        const link = document.createElement('a')
+        link.href = docUrl
+        link.download = documentName
+        link.target = '_blank' // This opens the link in a new browser tab
+
+        // Append to the document and trigger the download
+        document.body.appendChild(link)
+        link.click()
+
+        // Remove the link after the download is triggered
+        document.body.removeChild(link)
+        state.isDownloading = false
+      } catch (error) {
         // eslint-disable-next-line no-console
         console.log('downloadDocument() error =', error)
         state.dialogTitle = 'Unable to download document'
         state.dialogText = 'An error occurred while downloading the document. Please try again.'
         const v = errorDialogComponent.value as any; v.open()
-      })
-      state.isDownloading = false
+      }
     }
 
     /**
