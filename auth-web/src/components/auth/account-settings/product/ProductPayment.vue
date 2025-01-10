@@ -11,20 +11,15 @@
         Products and Payment
       </h2>
     </div>
-    <template v-if="isLoading">
-      <div
-        v-if="isLoading"
-        class="loading-inner-container"
-      >
+    <v-overlay :value="isLoading" absolute class="loading-inner-container">
         <v-progress-circular
           size="50"
           width="5"
           color="primary"
           :indeterminate="isLoading"
         />
-      </div>
-    </template>
-    <template v-else>
+    </v-overlay>
+    <template>
       <template v-if="productList && productList.length > 0">
         <h4 class="mb-2">
           Products and Services
@@ -263,7 +258,6 @@ export default defineComponent({
     })
 
     const loadProduct = async () => {
-      // refactor on next ticket
       try {
         await getOrgProducts(currentOrganization.value.id)
       } catch (err) {
@@ -489,5 +483,12 @@ export default defineComponent({
 
 .text-submit-request-error-message {
   color: var(--v-error-base);
+}
+
+/* Optional: Styling to center content */
+.v-overlay__content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
