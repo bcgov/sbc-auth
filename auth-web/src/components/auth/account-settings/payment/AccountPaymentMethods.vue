@@ -1,16 +1,5 @@
 <template>
   <v-container class="view-container">
-    <div class="view-header flex-column mb-6">
-      <h2
-        class="view-header__title"
-        data-test="account-settings-title"
-      >
-        Payment Methods
-      </h2>
-      <p class="mt-3 payment-page-sub">
-        Manage your payment method for this account.
-      </p>
-    </div>
     <PaymentMethods
       v-if="selectedPaymentMethod"
       :currentOrgType="savedOrganizationType"
@@ -19,6 +8,7 @@
       :currentSelectedPaymentMethod="selectedPaymentMethod"
       :isChangeView="true"
       :isAcknowledgeNeeded="isAcknowledgeNeeded"
+      :isEditing="isEditing"
       isTouchedUpdate="true"
       :isInitialTOSAccepted="isTOSandAcknowledgeCompleted"
       :isInitialAcknowledged="isTOSandAcknowledgeCompleted"
@@ -46,7 +36,10 @@
       </div>
     </v-slide-y-transition>
     <v-divider class="my-10" />
-    <div class="form__btns d-flex">
+    <div
+      v-if="isEditing"
+      class="form__btns d-flex"
+    >
       <v-btn
         large
         class="save-btn"
@@ -125,6 +118,10 @@ export default defineComponent({
   },
   props: {
     hasPaymentChanged: {
+      type: Boolean,
+      default: false
+    },
+    isEditing: {
       type: Boolean,
       default: false
     }
@@ -243,7 +240,6 @@ export default defineComponent({
         ((currentOrganization.value?.orgType === Account.PREMIUM) &&
           !currentOrganization.value?.bcolAccountId && currentOrganization.value?.accessType !== AccessType.GOVM)
           ? Account.UNLINKED_PREMIUM : currentOrganization.value.orgType
-        state.selectedPaymentMethod = ''
         const orgPayments: OrgPaymentDetails = await orgStore.getOrgPayments()
         // setting flag for futurePaymentMethod and TOS to show content and TOS checkbox
         state.isFuturePaymentMethodAvailable = !!orgPayments.futurePaymentMethod || false
@@ -281,8 +277,9 @@ export default defineComponent({
       }
     }
 
-    function cancel () {
-      initialize()
+    async function cancel () {
+      await initialize()
+      emit('cancel-payment-method-changes')
     }
 
     async function getCreateRequestBody () {

@@ -85,13 +85,19 @@
           </p>
         </div>
         <v-divider class="mb-5" />
-        Current Payment
-        <span class="d-flex justify-end">
+        <strong>Current Payment Method</strong>
+        <span
+          class="d-flex justify-end"
+          @click="isEditing = true"
+        >
           <v-icon
             medium
             color="primary"
           >mdi-pencil</v-icon>Edit</span>
-        <AccountPaymentMethods />
+        <AccountPaymentMethods
+          :isEditing="isEditing"
+          @cancel-payment-method-changes="isEditing = false"
+        />
       </template>
       <template v-else>
         <div>No Products are available...</div>
@@ -178,8 +184,9 @@ export default defineComponent({
 
     const {
       currentUser,
-      currentSelectedProductsforRemove,
-      setCurrentSelectedProductsforRemove,
+      // TODO move out of this and back into Org Store or use product store
+      currentSelectedProductsforRemoval: currentSelectedProductsforRemoval,
+      setCurrentSelectedProductsforRemoval,
       removeOrgProducts
     } = useUserStore()
     const { setAccountChangedHandler } = useAccountChangeHandler()
@@ -209,7 +216,7 @@ export default defineComponent({
       dialogTitle: '',
       dialogText: '',
       dialogIcon: '',
-      dislogError: false,
+      dialogError: false,
       submitRequestValidationError: '',
       expandedProductCode: '',
       AccountEnum: Account,
@@ -244,7 +251,7 @@ export default defineComponent({
       productPaymentMethods: computed(() => orgStore.productPaymentMethods),
       displayCancelOnDialog: computed(() => !state.staffReviewClear || state.displayRemoveProductDialog),
       submitDialogText: computed(() => {
-        if (state.displayCancelOnDialog && !state.dislogError) {
+        if (state.displayCancelOnDialog && !state.dialogError) {
           if (!state.addProductOnAccountAdmin) {
             return 'Remove Product'
           } else {
@@ -253,7 +260,8 @@ export default defineComponent({
         } else {
           return 'Close'
         }
-      })
+      }),
+      isEditing: false
     })
 
     const loadProduct = async () => {
@@ -278,7 +286,7 @@ export default defineComponent({
       await orgStore.getProductPaymentMethods()
       state.isLoading = false
       state.displayRemoveProductDialog = false
-      state.dislogError = false
+      state.dialogError = false
     }
 
     onMounted(async () => {
@@ -354,7 +362,7 @@ export default defineComponent({
     const submitProductRequest = async () => {
       try {
         confirmDialog.value.close()
-        if (currentSelectedProducts.value.length === 0 && currentSelectedProductsforRemove.value === '') {
+        if (currentSelectedProducts.value.length === 0 && currentSelectedProductsforRemoval === '') {
           state.submitRequestValidationError = 'Select at least one product or service to submit request'
         } else {
           state.submitRequestValidationError = ''
@@ -368,7 +376,7 @@ export default defineComponent({
           if (state.addProductOnAccountAdmin) {
             await addOrgProducts(addProductsRequestBody)
           } else {
-            await removeOrgProducts(currentSelectedProductsforRemove)
+            await removeOrgProducts(currentSelectedProductsforRemoval)
           }
           await setup()
           // show confirm modal
@@ -381,7 +389,7 @@ export default defineComponent({
         }
       } catch (ex) {
         // open when error
-        state.dislogError = true
+        state.dialogError = true
         state.dialogTitle = 'Product Request Failed'
         state.dialogText = ''
         state.dialogIcon = 'mdi-alert-circle-outline'
@@ -426,7 +434,7 @@ export default defineComponent({
       state.addProductOnAccountAdmin = productDetails.addProductOnAccountAdmin
 
       if (!state.addProductOnAccountAdmin && productCode) {
-        setCurrentSelectedProductsforRemove(productCode)
+        setCurrentSelectedProductsforRemoval(productCode)
       }
 
       if (!state.staffReviewClear && state.addProductOnAccountAdmin) {

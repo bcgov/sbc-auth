@@ -8,7 +8,7 @@
     </template>
     <template v-else-if="!isPaymentEJV">
       <v-card
-        v-for="payment in allowedPaymentMethods"
+        v-for="payment in filteredPaymentMethods"
         :key="payment.type"
         v-can:CHANGE_PAYMENT_METHOD.disable.card
         outlined
@@ -20,7 +20,11 @@
       >
         <div>
           <header class="d-flex align-center flex-grow-1">
-            <div class="payment-icon-container mt-n2">
+            <div class="payment-icon-container mt-n2" style="display: inline-block">
+              <v-radio
+              v-if="isEditing"
+              :value="payment.type"
+              />
               <v-icon
                 x-large
                 color="primary"
@@ -30,7 +34,7 @@
             </div>
             <div class="pr-8 flex-grow-1">
               <h3 class="title font-weight-bold payment-title mt-n1">
-                {{ payment.title }}
+                {{ payment.title }}  {{ true ? ' is not supported for the selected products' : '' }}
               </h3>
               <div>{{ payment.subtitle }}</div>
             </div>
@@ -212,9 +216,8 @@
 
 <script lang="ts">
 import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
-import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
-import ConfigHelper from '@/util/config-helper'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
@@ -307,7 +310,8 @@ export default defineComponent({
     isTouchedUpdate: { default: false },
     isInitialTOSAccepted: { default: false },
     isInitialAcknowledged: { default: false },
-    isBcolAdmin: { default: false }
+    isBcolAdmin: { default: false },
+    isEditing: { default: false }
   },
   emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save'],
   setup (props, { emit, root }) {
@@ -340,13 +344,13 @@ export default defineComponent({
     const isTouched = ref(false)
     const ejvPaymentInformationTitle = 'General Ledger Information'
 
-    // this object can define the payment methods allowed for each account tyoes
-    const paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
-
-    const allowedPaymentMethods = computed(() => {
+    const filteredPaymentMethods = computed(() => {
       const paymentMethods = []
+      if (!props.isEditing) {
+        return [PAYMENT_METHODS[selectedPaymentMethod.value]]
+      }
       if (props.currentOrgType) {
-        const paymentTypes = paymentsPerAccountType[props.currentOrgType]
+        const paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL ]
         paymentTypes?.forEach((paymentType) => {
           if (PAYMENT_METHODS[paymentType]) {
             paymentMethods.push(PAYMENT_METHODS[paymentType])
@@ -356,6 +360,7 @@ export default defineComponent({
       if (currentOrgPaymentDetails?.eftEnable) {
         paymentMethods.push(PAYMENT_METHODS[PaymentTypes.EFT])
       }
+      // Determine which payment methods are supported by products or not.
       return paymentMethods
     })
 
@@ -472,6 +477,11 @@ export default defineComponent({
       }
     }
 
+    // Purpose: reset the payment method without having to reload the component.
+    watch(() => props.currentSelectedPaymentMethod, (newValue) => {
+      selectedPaymentMethod.value = newValue
+    })
+
     onMounted(async () => {
       paymentMethodSelected({ type: props.currentSelectedPaymentMethod }, false)
       if (isPaymentEJV.value) {
@@ -486,7 +496,7 @@ export default defineComponent({
       padInfo,
       isTouched,
       ejvPaymentInformationTitle,
-      allowedPaymentMethods,
+      filteredPaymentMethods,
       forceEditModeBCOL,
       isPaymentEJV,
       downloadEFTInstructions,

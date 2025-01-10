@@ -34,7 +34,7 @@ export const useUserStore = defineStore('user', () => {
     redirectAfterLoginUrl: '' as string,
     roleInfos: undefined as RoleInfo[],
     currentUserAccountSettings: undefined as UserSettings[],
-    currentSelectedProductsforRemove: '' as string
+    currentSelectedProductsforRemoval: '' as string
   })
 
   function $reset () {
@@ -51,10 +51,10 @@ export const useUserStore = defineStore('user', () => {
     state.redirectAfterLoginUrl = '' as string
     state.roleInfos = undefined as RoleInfo[]
     state.currentUserAccountSettings = undefined as UserSettings[]
-    state.currentSelectedProductsforRemove = '' as string
+    // TODO move out
+    state.currentSelectedProductsforRemoval = '' as string
   }
 
-  // Grabs from Org store.
   const currentOrganization = computed<Organization>(() => {
     return useOrgStore().currentOrganization
   })
@@ -99,8 +99,9 @@ export const useUserStore = defineStore('user', () => {
     state.userProfile = user
   }
 
-  function setCurrentSelectedProductsforRemove (code: string) {
-    state.currentSelectedProductsforRemove = code
+  // TODO move out
+  function setCurrentSelectedProductsforRemoval (code: string) {
+    state.currentSelectedProductsforRemoval = code
   }
 
   async function getUserProfile (identifier: string) {
@@ -266,7 +267,7 @@ export const useUserStore = defineStore('user', () => {
     setNotaryContact,
     setUserProfileData,
     setNotaryInformation,
-    setCurrentSelectedProductsforRemove,
+    setCurrentSelectedProductsforRemoval,
     removeOrgProducts,
     reset,
     resetOTPAuthenticator,
