@@ -483,10 +483,6 @@ export default defineComponent({
       selectedPaymentMethod.value = newValue
     })
 
-    watch(() => filteredPaymentMethods, (newValue) => {
-      console.log(newValue)
-    })
-
     onMounted(async () => {
       paymentMethodSelected({ type: props.currentSelectedPaymentMethod }, false)
       if (isPaymentEJV.value) {
