@@ -14,6 +14,7 @@
         outlined
         :ripple="false"
         hover
+        :disabled="!payment.supported"
         class="payment-card py-8 px-8 mb-4 elevation-1"
         :class="{'selected': isPaymentSelected(payment)}"
         :data-test="`div-payment-${payment.type}`"
@@ -42,7 +43,7 @@
                   is not supported for the selected products
                 </span>
               </h3>
-              <div>{{ payment.subtitle }}</div>
+              <div class="mt-4">{{ payment.subtitle }}</div>
             </div>
             <v-tooltip
               v-if="!isChangePaymentEnabled() && !isPaymentSelected(payment)"
@@ -96,7 +97,7 @@
                   v-if="(payment.type === paymentTypes.PAD)"
                   class="pad-form-container pt-7"
                 >
-                  <v-divider class="mb-7" />
+                  <v-divider class="mb-5" />
                   <PADInfoForm
                     :isChangeView="isChangeView"
                     :isAcknowledgeNeeded="isAcknowledgeNeeded"
@@ -375,7 +376,6 @@ export default defineComponent({
       Object.entries(paymentMethodProducts).forEach(([key, values]) => {
         paymentMethodSupported[key] = activeProductSubscriptions.every(subscription => (values as Array<string>).includes(subscription))
       })
-      debugger
       return paymentMethodSupported
     })
 
