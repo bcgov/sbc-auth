@@ -36,8 +36,11 @@
               </v-icon>
             </div>
             <div class="pr-8 flex-grow-1">
-              <h3 class="title font-weight-bold payment-title mt-n1">
-                {{ payment.title }}  {{ true ? ' is not supported for the selected products' : '' }}
+              <h3 :key="payment.supported" class="title font-weight-bold payment-title mt-n1">
+                {{ payment.title }}
+                <span v-if="!payment.supported">
+                  is not supported for the selected products
+                </span>
               </h3>
               <div>{{ payment.subtitle }}</div>
             </div>
@@ -218,6 +221,7 @@
 </template>
 
 <script lang="ts">
+import { storeToRefs } from 'pinia'
 import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
@@ -237,7 +241,8 @@ const PAYMENT_METHODS = {
     subtitle: 'Pay for transactions individually with your credit card.',
     description: `You don't need to provide any credit card information with your account. Credit card information will
                   be requested when you are ready to complete a transaction.`,
-    isSelected: false
+    isSelected: false,
+    supported: true
   },
   [PaymentTypes.EFT]: {
     type: PaymentTypes.EFT,
@@ -245,7 +250,8 @@ const PAYMENT_METHODS = {
     title: 'Electronic Funds Transfer',
     subtitle: 'Make payments from your bank account. Statement will be issued monthly.',
     description: ``,
-    isSelected: false
+    isSelected: false,
+    supported: true
   },
   [PaymentTypes.PAD]: {
     type: PaymentTypes.PAD,
@@ -253,7 +259,8 @@ const PAYMENT_METHODS = {
     title: 'Pre-authorized Debit',
     subtitle: 'Automatically debit a bank account when payments are due.',
     description: '',
-    isSelected: false
+    isSelected: false,
+    supported: true
   },
   [PaymentTypes.BCOL]: {
     type: PaymentTypes.BCOL,
@@ -261,7 +268,8 @@ const PAYMENT_METHODS = {
     title: 'BC Online',
     subtitle: 'Use your linked BC Online account for payment.',
     description: '',
-    isSelected: false
+    isSelected: false,
+    supported: true
   },
   [PaymentTypes.ONLINE_BANKING]: {
     type: PaymentTypes.ONLINE_BANKING,
@@ -291,7 +299,8 @@ const PAYMENT_METHODS = {
           Receipt of an online banking payment generally takes 3-4 days from when you make the payment with your 
           financial institution.
         </p>`,
-    isSelected: false
+    isSelected: false,
+    supported: true
   }
 }
 
@@ -347,23 +356,50 @@ export default defineComponent({
     const isTouched = ref(false)
     const ejvPaymentInformationTitle = 'General Ledger Information'
 
+    const paymentMethodSupportedForProducts = computed(() => {
+      const productPaymentMethods = orgStore.productPaymentMethods
+      const { productList } = storeToRefs(useOrgStore())
+
+      const activeProductSubscriptions = productList.value
+        .filter(item => item.subscriptionStatus === "ACTIVE")
+        .map(item => item.code)
+      
+      const paymentMethodProducts = {}
+      for (const [product, methods] of Object.entries(productPaymentMethods)) {
+        methods.forEach(method => {
+          (paymentMethodProducts[method] ??= []).push(product)
+        })
+      }
+
+      const paymentMethodSupported = {}
+      Object.entries(paymentMethodProducts).forEach(([key, values]) => {
+        paymentMethodSupported[key] = activeProductSubscriptions.every(subscription => (values as Array<string>).includes(subscription))
+      })
+      debugger
+      return paymentMethodSupported
+    })
+
     const filteredPaymentMethods = computed(() => {
       const paymentMethods = []
       if (!props.isEditing && selectedPaymentMethod.value) {
         return [PAYMENT_METHODS[selectedPaymentMethod.value]]
       }
+      const methodSupportPerProduct = paymentMethodSupportedForProducts.value
       if (props.currentOrgType) {
         const paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL ]
         paymentTypes?.forEach((paymentType) => {
           if (PAYMENT_METHODS[paymentType]) {
-            paymentMethods.push(PAYMENT_METHODS[paymentType])
+            const paymentMethod = PAYMENT_METHODS[paymentType]
+            paymentMethod.supported = methodSupportPerProduct[paymentType]
+            paymentMethods.push(paymentMethod)
           }
         })
       }
       if (currentOrgPaymentDetails?.eftEnable) {
-        paymentMethods.push(PAYMENT_METHODS[PaymentTypes.EFT])
+        const paymentMethod = PAYMENT_METHODS[PaymentTypes.EFT]
+        paymentMethod.supported = methodSupportPerProduct[PaymentTypes.EFT]
+        paymentMethods.push(paymentMethod)
       }
-      // Determine which payment methods are supported by products or not.
       return paymentMethods
     })
 
