@@ -17,37 +17,35 @@
         hover
         :disabled="!payment.supported"
         class="payment-card py-6 px-6 mb-4 elevation-1"
-        :class="{'selected': isPaymentSelected(payment)}"
+        :class="{'selected': isPaymentSelected(payment), 'mt-5': true}"
         :data-test="`div-payment-${payment.type}`"
         @click="paymentMethodSelected(payment)"
       >
         <div>
-          <header class="d-flex align-center flex-grow-1">
+          <header class="align-center flex-grow-1">
             <div
-              class="payment-icon-container mt-n2"
-              style="display: inline-block"
+              class="d-inline-flex"
             >
               <v-radio
                 v-if="isEditing"
                 :value="payment.type"
               />
               <v-icon
-                x-large
+                medium
                 color="primary"
+                class="mr-1"
               >
                 {{ payment.icon }}
               </v-icon>
-            </div>
-            <div class="pr-8 flex-grow-1">
-              <h3 class="title font-weight-bold payment-title mt-n1">
+              <h3 class="title font-weight-bold mt-n1">
                 {{ payment.title }}
                 <span v-if="!payment.supported">
                   is not supported for the selected products
                 </span>
               </h3>
-              <div class="mt-4">
-                {{ payment.subtitle }}
-              </div>
+            </div>
+            <div class="mt-4">
+              {{ payment.subtitle }}
             </div>
             <v-tooltip
               v-if="!isChangePaymentEnabled() && !isPaymentSelected(payment)"
@@ -366,6 +364,7 @@ export default defineComponent({
       Object.entries(paymentMethodProducts).forEach(([key, values]) => {
         paymentMethodSupported[key] = activeProductSubscriptions.every(subscription => (values as Array<string>).includes(subscription))
       })
+      paymentMethodSupported[PaymentTypes.CREDIT_CARD] = paymentMethodSupported[PaymentTypes.DIRECT_PAY]
       return paymentMethodSupported
     })
 

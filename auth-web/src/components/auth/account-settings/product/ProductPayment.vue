@@ -24,83 +24,88 @@
         :indeterminate="isLoading"
       />
     </v-overlay>
-      <template v-if="productList && productList.length > 0">
-        <h4 class="mb-2">
-          Products and Services
-        </h4>
-        <div
-          v-for="product in productList"
-          :key="product.code"
+    <template v-if="productList && productList.length > 0">
+      <h4 class="mb-2">
+        Products and Services
+      </h4>
+      <div
+        v-for="product in productList"
+        :key="product.code"
+      >
+        <Product
+          v-if="!product.parentCode"
+          :productDetails="product"
+          :activeSubProduct="subProduct"
+          :userName="currentUser.fullName"
+          :orgName="currentOrganization.name"
+          :isexpandedView="product.code === expandedProductCode"
+          :isSelected="currentSelectedProducts.includes(product.code)"
+          :isAccountSettingsView="true"
+          :isBasicAccount="currentOrganization.orgType === AccountEnum.BASIC"
+          :orgProduct="orgProductDetails(product)"
+          :orgProductFeeCodes="orgProductFeeCodes"
+          :canManageProductFee="canManageAccounts"
+          :isProductActionLoading="isProductActionLoading"
+          :isProductActionCompleted="isProductActionCompleted"
+          :paymentMethods="productPaymentMethods[product.code]"
+          @set-selected-product="setSelectedProduct"
+          @toggle-product-details="toggleProductDetails"
+          @save:saveProductFee="saveProductFee"
         >
-          <Product
-            v-if="!product.parentCode"
-            :productDetails="product"
-            :activeSubProduct="subProduct"
-            :userName="currentUser.fullName"
-            :orgName="currentOrganization.name"
-            :isexpandedView="product.code === expandedProductCode"
-            :isSelected="currentSelectedProducts.includes(product.code)"
-            :isAccountSettingsView="true"
-            :isBasicAccount="currentOrganization.orgType === AccountEnum.BASIC"
-            :orgProduct="orgProductDetails(product)"
-            :orgProductFeeCodes="orgProductFeeCodes"
-            :canManageProductFee="canManageAccounts"
-            :isProductActionLoading="isProductActionLoading"
-            :isProductActionCompleted="isProductActionCompleted"
-            :paymentMethods="productPaymentMethods[product.code]"
-            @set-selected-product="setSelectedProduct"
-            @toggle-product-details="toggleProductDetails"
-            @save:saveProductFee="saveProductFee"
+          <!-- Show product status message content for pending or rejected sub-product applications -->
+          <template
+            v-if="product.code === ProductEnum.MHR && mhrSubProductMsgContent()"
+            #productContentSlot
           >
-            <!-- Show product status message content for pending or rejected sub-product applications -->
-            <template
-              v-if="product.code === ProductEnum.MHR && mhrSubProductMsgContent()"
-              #productContentSlot
+            <CautionBox
+              setImportantWord="Note"
+              :setAlert="mhrSubProductMsgContent().status === ProductStatus.REJECTED"
+              :setMsg="mhrSubProductMsgContent().msg"
             >
-              <CautionBox
-                setImportantWord="Note"
-                :setAlert="mhrSubProductMsgContent().status === ProductStatus.REJECTED"
-                :setMsg="mhrSubProductMsgContent().msg"
-              >
-                <template #prependSLot>
-                  <v-icon
-                    class="mr-2"
-                    :color="mhrSubProductMsgContent().color"
-                  >
-                    {{ mhrSubProductMsgContent().icon }}
-                  </v-icon>
-                </template>
-              </CautionBox>
-            </template>
-          </Product>
-        </div>
-        <div class="align-right-container">
-          <p
-            v-show="submitRequestValidationError"
-            data-test="text-submit-request-error-message"
-            class="text-submit-request-error-message"
-          >
-            {{ submitRequestValidationError }}
-          </p>
-        </div>
-        <v-divider class="mb-5" />
+              <template #prependSLot>
+                <v-icon
+                  class="mr-2"
+                  :color="mhrSubProductMsgContent().color"
+                >
+                  {{ mhrSubProductMsgContent().icon }}
+                </v-icon>
+              </template>
+            </CautionBox>
+          </template>
+        </Product>
+      </div>
+      <div class="align-right-container">
+        <p
+          v-show="submitRequestValidationError"
+          data-test="text-submit-request-error-message"
+          class="text-submit-request-error-message"
+        >
+          {{ submitRequestValidationError }}
+        </p>
+      </div>
+      <v-divider class="mb-5" />
+      <div class="d-flex">
         <strong>Current Payment Method</strong>
         <span
-          class="d-flex justify-end"
+          class="d-flex ml-auto"
           @click="isEditing = true"
         >
           <v-icon
             medium
             color="primary"
-          >mdi-pencil</v-icon>Edit</span>
-        <AccountPaymentMethods
-          :isEditing="isEditing"
-          @cancel-payment-method-changes="isEditing = false"
-        />
-      </template>
-      <template v-else>
-        <div>No Products are available...</div>
-      </template>
+          >mdi-pencil
+          </v-icon>
+          Edit
+        </span>
+      </div>
+      <AccountPaymentMethods
+        :isEditing="isEditing"
+        @cancel-payment-method-changes="isEditing = false"
+      />
+    </template>
+    <template v-else>
+      <div>No Products are available...</div>
+    </template>
 
     <!-- Alert / Request Confirm Dialog -->
     <ModalDialog

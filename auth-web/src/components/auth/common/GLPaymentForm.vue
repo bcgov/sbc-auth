@@ -33,7 +33,7 @@
                 <span class="mt-2">
                   Use EJV for payment.
                 </span>
-                <v-divider/>
+                <v-divider />
                 <h4 class="mt-4 mb-4">
                   General Ledger Information
                 </h4>
@@ -41,7 +41,7 @@
             </header>
           </div>
           Client Code: {{ client }} | Responsbility Center : {{ responsibilityCentre }} |
-           Account Number: {{ serviceLine }} | Standard Object: {{ stob }} | Project: {{ projectCode }}
+          Account Number: {{ serviceLine }} | Standard Object: {{ stob }} | Project: {{ projectCode }}
         </v-card>
       </section>
       <section v-else>
