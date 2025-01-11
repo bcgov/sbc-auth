@@ -191,7 +191,6 @@ export default defineComponent({
       getProductPaymentMethods,
       updateAccountFees,
       needStaffReview,
-      productPaymentMethods,
       removeOrgProduct
     } = useOrgStore()
 
@@ -241,7 +240,8 @@ export default defineComponent({
           !!product.parentCode && product.subscriptionStatus === ProductStatus.REJECTED
         )
       }),
-      productPaymentMethods: computed(() => { return productPaymentMethods }),
+      // Not deconstructed otherwise name conflicts.
+      productPaymentMethods: computed(() => useOrgStore().productPaymentMethods ),
       displayCancelOnDialog: computed(() => !state.staffReviewClear || state.displayRemoveProductDialog),
       submitDialogText: computed(() => {
         if (state.displayCancelOnDialog && !state.dialogError) {
