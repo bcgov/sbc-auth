@@ -2,6 +2,7 @@
   <div>
     <template v-if="isPaymentEJV">
       <GLPaymentForm
+        :viewMode="!isEditing"
         :canSelect="isBcolAdmin"
         @is-gl-info-form-valid="isGLInfoValid"
       />
@@ -15,9 +16,10 @@
         :ripple="false"
         hover
         :disabled="!payment.supported"
-        class="payment-card py-8 px-8 mb-4 elevation-1"
+        class="payment-card py-6 px-6 mb-4 elevation-1"
         :class="{'selected': isPaymentSelected(payment)}"
         :data-test="`div-payment-${payment.type}`"
+        @click="paymentMethodSelected(payment)"
       >
         <div>
           <header class="d-flex align-center flex-grow-1">
@@ -37,13 +39,15 @@
               </v-icon>
             </div>
             <div class="pr-8 flex-grow-1">
-              <h3 :key="payment.supported" class="title font-weight-bold payment-title mt-n1">
+              <h3 class="title font-weight-bold payment-title mt-n1">
                 {{ payment.title }}
                 <span v-if="!payment.supported">
                   is not supported for the selected products
                 </span>
               </h3>
-              <div class="mt-4">{{ payment.subtitle }}</div>
+              <div class="mt-4">
+                {{ payment.subtitle }}
+              </div>
             </div>
             <v-tooltip
               v-if="!isChangePaymentEnabled() && !isPaymentSelected(payment)"
@@ -73,20 +77,6 @@
               </template>
               <span>This payment method is not available after EFT is selected.</span>
             </v-tooltip>
-            <v-btn
-              v-if="isPaymentSelected(payment) || isChangePaymentEnabled()"
-              large
-              depressed
-              color="primary"
-              width="120"
-              :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangePaymentEnabled() }]"
-              :outlined="!isPaymentSelected(payment) && isChangePaymentEnabled()"
-              :aria-label="'Select' + ' ' + payment.title"
-              :data-test="`btn-payment-${payment.type}`"
-              @click="paymentMethodSelected(payment)"
-            >
-              <span>{{ (isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT' }}</span>
-            </v-btn>
           </header>
 
           <div class="payment-card-contents">
@@ -95,7 +85,7 @@
                 <!-- PAD -->
                 <div
                   v-if="(payment.type === paymentTypes.PAD)"
-                  class="pad-form-container pt-7"
+                  class="pad-form-container pt-4"
                 >
                   <v-divider class="mb-5" />
                   <PADInfoForm
@@ -222,7 +212,6 @@
 </template>
 
 <script lang="ts">
-import { storeToRefs } from 'pinia'
 import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
@@ -231,6 +220,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
+import { storeToRefs } from 'pinia'
 import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
 
@@ -362,9 +352,9 @@ export default defineComponent({
       const { productList } = storeToRefs(useOrgStore())
 
       const activeProductSubscriptions = productList.value
-        .filter(item => item.subscriptionStatus === "ACTIVE")
+        .filter(item => item.subscriptionStatus === 'ACTIVE')
         .map(item => item.code)
-      
+
       const paymentMethodProducts = {}
       for (const [product, methods] of Object.entries(productPaymentMethods)) {
         methods.forEach(method => {
@@ -619,10 +609,6 @@ export default defineComponent({
   width: 4.5rem;
 }
 
-.payment-card-contents {
-  padding-left: 4.5rem;
-}
-
 .pad-form-container {
   max-width: 75ch;
 }
@@ -641,5 +627,10 @@ export default defineComponent({
 
 .flex-grow-1 {
   flex-grow: 1;
+}
+
+// TODO change
+.v-card--disabled {
+  opacity: 0.8 !important;
 }
 </style>
