@@ -241,7 +241,7 @@ export default defineComponent({
           !!product.parentCode && product.subscriptionStatus === ProductStatus.REJECTED
         )
       }),
-      productPaymentMethods: computed(() => productPaymentMethods),
+      productPaymentMethods: computed(() => { return productPaymentMethods }),
       displayCancelOnDialog: computed(() => !state.staffReviewClear || state.displayRemoveProductDialog),
       submitDialogText: computed(() => {
         if (state.displayCancelOnDialog && !state.dialogError) {

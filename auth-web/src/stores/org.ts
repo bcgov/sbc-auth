@@ -88,7 +88,7 @@ export const useOrgStore = defineStore('org', () => {
     memberLoginOption: '' as string,
     currentOrgGLInfo: undefined as GLInfo,
     productList: [] as OrgProduct[], // list of all products
-    productPaymentMethods: {} as {[key: string]: string[]},
+    productPaymentMethods: {} as {[key: string]: Array<string>},
     currentSelectedProducts: [] as any, // selected product list code in array
     currentStatementNotificationSettings: {} as StatementNotificationSettings,
     statementSettings: {} as StatementSettings,
