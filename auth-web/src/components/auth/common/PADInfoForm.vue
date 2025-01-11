@@ -1,13 +1,13 @@
 <template>
   <div v-can:CHANGE_PAD_INFO.disable.card>
     <template v-if="isAcknowledgeNeeded">
-      <p class="mb-6">
+      <p class="mb-4">
         The Canadian Payment Association requires a confirmation period
         of (3) days prior to your first pre-authorized debit deduction.
         The administrator of this account will receive a written confirmation
         of your pre-authorized debit agreement prior to the first deduction.
       </p>
-      <p class="mb-10 font-weight-bold">
+      <p class="mb-4 font-weight-bold">
         {{ padInfoSubtitle }}
       </p>
     </template>

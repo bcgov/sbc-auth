@@ -11,15 +11,19 @@
         Products and Payment
       </h2>
     </div>
-    <v-overlay :value="isLoading" absolute class="loading-inner-container" opacity="0">
-        <v-progress-circular
-          size="50"
-          width="5"
-          color="primary"
-          :indeterminate="isLoading"
-        />
+    <v-overlay
+      :value="isLoading"
+      absolute
+      class="loading-inner-container"
+      opacity="0"
+    >
+      <v-progress-circular
+        size="50"
+        width="5"
+        color="primary"
+        :indeterminate="isLoading"
+      />
     </v-overlay>
-    <template>
       <template v-if="productList && productList.length > 0">
         <h4 class="mb-2">
           Products and Services
@@ -97,7 +101,6 @@
       <template v-else>
         <div>No Products are available...</div>
       </template>
-    </template>
 
     <!-- Alert / Request Confirm Dialog -->
     <ModalDialog
@@ -241,7 +244,7 @@ export default defineComponent({
         )
       }),
       // Not deconstructed otherwise name conflicts.
-      productPaymentMethods: computed(() => useOrgStore().productPaymentMethods ),
+      productPaymentMethods: computed(() => useOrgStore().productPaymentMethods),
       displayCancelOnDialog: computed(() => !state.staffReviewClear || state.displayRemoveProductDialog),
       submitDialogText: computed(() => {
         if (state.displayCancelOnDialog && !state.dialogError) {

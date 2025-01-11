@@ -1,5 +1,5 @@
 <template>
-  <v-container class="view-container">
+  <div>
     <PaymentMethods
       v-if="selectedPaymentMethod"
       :currentOrgType="savedOrganizationType"
@@ -93,7 +93,7 @@
         </v-btn>
       </template>
     </ModalDialog>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
