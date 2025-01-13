@@ -58,16 +58,16 @@ import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Ste
 import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import { Address } from '@/models/address'
 import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInfoForm.vue'
-import GovmPaymentMethodSelector from '@/components/auth/create-account/GovmPaymentMethodSelector.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Pages } from '@/util/constants'
+import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
     SelectProductService,
-    GovmPaymentMethodSelector,
+    PaymentMethodSelector,
     Stepper,
     ModalDialog,
     GovmContactInfoForm
@@ -110,7 +110,7 @@ export default class GovmAccountSetupView extends Vue {
       {
         title: 'Payment Information',
         stepName: 'Payment Information',
-        component: GovmPaymentMethodSelector,
+        component: PaymentMethodSelector,
         componentProps: {
           isStepperView: true
         }
