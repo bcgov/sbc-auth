@@ -120,12 +120,13 @@ describe('HomeJurisdictionInformation component', () => {
   })
 
   it('rendered a functional authorization download button', () => {
-    BusinessService.getDownloadUrl = vi.fn().mockResolvedValue(null)
+    BusinessService.downloadDocument = vi.fn().mockResolvedValue(null)
 
     const button = wrapper.findAll('section').at(5).find('.download-authorization-btn')
     button.trigger('click')
-    expect(BusinessService.getDownloadUrl).toHaveBeenCalledWith(
+    expect(BusinessService.downloadDocument).toHaveBeenCalledWith(
       'DS01000000',
+      'My Authorization Document.pdf',
       documentClass
     )
 

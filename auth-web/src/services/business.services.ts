@@ -107,7 +107,7 @@ export default class BusinessService {
   static async fetchFiling (url: string): Promise<any> {
     // safety check
     if (!url) throw new Error('Invalid parameters')
-    
+
     return axios.get(url)
       .then(response => {
         const filing = response?.data?.filing
@@ -159,72 +159,33 @@ export default class BusinessService {
   }
 
   /**
-   * Downloads a Minio document from Legal API and prompts browser to open/save it.
-   * @param documentKey the document key
-   * @param documentName the document filename
-   * @returns a promise to return the axios response or the error response
-   * @see CommonUtils.fileDownload() for a similar method
-   */
-  static async downloadDocument (documentKey: string, documentName: string): Promise<AxiosResponse> {
-    // safety checks
-    if (!documentKey || !documentName) throw new Error('Invalid parameters')
-
-    const url = `${ConfigHelper.getLegalAPIV2Url()}/documents/${documentKey}`
-    const config = {
-      headers: { 'Accept': 'application/pdf' },
-      responseType: 'blob' as 'json'
-    }
-
-    return axios.get(url, config).then(response => {
-      if (!response) throw new Error('Null response')
-
-      /* solution below is from https://github.com/axios/axios/issues/1392 */
-
-      // it is necessary to create a new blob object with mime-type explicitly set
-      // otherwise only Chrome works like it should
-      const blob = new Blob([response.data], { type: 'application/pdf' })
-
-      // use Navigator.msSaveOrOpenBlob if available (possibly IE)
-      // warning: this is now deprecated
-      // ref: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/msSaveOrOpenBlob
-      if (window.navigator && window.navigator['msSaveOrOpenBlob']) {
-        window.navigator['msSaveOrOpenBlob'](blob, documentName)
-      } else {
-        // for other browsers, create a link pointing to the ObjectURL containing the blob
-        const url = window.URL.createObjectURL(blob)
-        const a = window.document.createElement('a')
-        window.document.body.appendChild(a)
-        a.setAttribute('style', 'display: none')
-        a.href = url
-        a.download = documentName
-        a.click()
-        window.URL.revokeObjectURL(url)
-        a.remove()
-      }
-
-      return response
-    })
-  }
-
-  /**
    * Get download url from Document Record Service
    * @param documentServiceId the unique id on Document Record Service
+   * @param documentName the file name to download.
    * @param documentClass the document class defined for the document service. e.g. 'CORP'
-   * @returns a promise to return the string of file download.
+   * @returns void
    */
-  static async getDownloadUrl (documentKey: string, documentClass: string): Promise<string> {
+  static async downloadDocument (documentServiceId: string, documentName: string, documentClass: string): Promise<void> {
     // safety checks
-    if (!documentKey || !documentClass) throw new Error('Invalid parameters')
+    if (!documentServiceId || !documentClass) throw new Error('Invalid parameters')
 
-    const url = `${ConfigHelper.getLegalAPIV2Url()}/documents/drs/${documentClass}/${documentKey}`
+    const url = `${ConfigHelper.getLegalAPIV2Url()}/documents/drs/${documentClass}/${documentServiceId}`
 
-    return axios.get(url).then(response => {
+    axios.get(url).then(response => {
       if (!response) throw new Error('Null response')
 
-      return response.data.documentURL
-    }).catch(error => {
-      console.log(error)
-      return ''
+      const docUrl: string = response.data.documentURL
+      const link = document.createElement('a')
+      link.href = docUrl
+      link.download = documentName
+      link.target = '_blank' // This opens the link in a new browser tab
+
+      // Append to the document and trigger the download
+      document.body.appendChild(link)
+      link.click()
+
+      // Remove the link after the download is triggered
+      document.body.removeChild(link)
     })
   }
 
