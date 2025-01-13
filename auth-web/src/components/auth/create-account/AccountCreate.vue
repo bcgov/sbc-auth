@@ -32,23 +32,6 @@
         />
       </fieldset>
 
-      <fieldset>
-        <legend>Authorization</legend>
-        <v-checkbox
-          v-model="grantAccess"
-          color="primary"
-          class="bcol-auth ml-2"
-          data-test="check-premium-auth"
-        >
-          <template #label>
-            <div
-              v-sanitize="grantAccessText"
-              class="bcol-auth__label"
-            />
-          </template>
-        </v-checkbox>
-      </fieldset>
-
       <v-alert
         v-show="errorMessage"
         type="error"
@@ -179,19 +162,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 
-  get grantAccessText () {
-    // https://github.com/bcgov/entity/issues/4178
-    // TODO once above ticket is in pace , remove the if checks
-    const username = this.isExtraProvUser ? '' : `, ${this.currentUser?.fullName},`
-    /* on re-upload we will not have currentOrganization?.bcolAccountDetails since we are not making
-       connection call which will be avaialble on saved deteails
-       so on re-upload check and set account name */
-    const accountName = this.readOnly
-      ? this.currentOrganization.bcolAccountName
-      : (this.currentOrganization?.bcolAccountDetails?.orgName ||
-        this.currentOrganization.bcolAccountName)
-    return `I ${username} confirm that I am authorized to grant access to the account ${accountName}`
-  }
 
   get grantAccess () {
     return this.readOnly ? true : this.currentOrganization?.grantAccess
