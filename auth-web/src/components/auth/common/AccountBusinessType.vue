@@ -209,7 +209,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountType, OrgNameLabel, SessionStorageKeys } from '@/util/constants'
+import { AccessType, AccountType, OrgNameLabel, SessionStorageKeys } from '@/util/constants'
 import { computed, defineComponent, nextTick, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import ConfigHelper from '@/util/config-helper'
 import { OrgBusinessType } from '@/models/Organization'

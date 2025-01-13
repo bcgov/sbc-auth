@@ -56,7 +56,6 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Business, BusinessSearchResultDto } from '@/models/business'
 import { Component, Prop, Vue } from 'vue-property-decorator'

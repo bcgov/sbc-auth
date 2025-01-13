@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, SuspensionReason, SuspensionReasonCode } from '@/util/constants'
+import { AccountStatus, SuspensionReason, SuspensionReasonCode } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
