@@ -174,16 +174,6 @@ export default class AccountSetupView extends Vue {
       }
     ]
 
-  private beforeMount () {
-    const paymentMethodStep = {
-      title: 'Payment Method',
-      stepName: 'Payment Method',
-      component: PaymentMethodSelector,
-      componentProps: {}
-    }
-    this.stepperConfig.push(paymentMethodStep)
-  }
-
   private async verifyAndCreateAccount () {
     this.isLoading = true
     let isProceedToCreateAccount = false
