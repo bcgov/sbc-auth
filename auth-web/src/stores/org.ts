@@ -186,12 +186,6 @@ export const useOrgStore = defineStore('org', () => {
     state.memberLoginOption = memberLoginOption
   }
 
-  function setGrantAccess (grantAccess: boolean) {
-    if (state.currentOrganization) {
-      state.currentOrganization = { ...state.currentOrganization, grantAccess }
-    }
-  }
-
   function resetCurrentOrganisation () {
     state.currentOrganization = { name: '' }
   }
@@ -812,7 +806,6 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   async function resetAccountSetupProgress (): Promise<void> {
-    setGrantAccess(false)
     setCurrentOrganization(undefined)
     setSelectedAccountType(undefined)
     setCurrentOrganizationType(undefined)
@@ -822,7 +815,6 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   async function resetAccountWhileSwitchingPremium (): Promise<void> {
-    setGrantAccess(false)
     // need to keep accesstype while resetting to know whenther the account is GOVM or not.
     setCurrentOrganization({ ...state.currentOrganization, ...{ name: '' } })
     setCurrentOrganizationAddress(undefined)
@@ -1097,7 +1089,6 @@ export const useOrgStore = defineStore('org', () => {
     isBusinessAccount,
     setAccessType,
     setMemberLoginOption,
-    setGrantAccess,
     resetCurrentOrganisation,
     resetBcolDetails,
     setSelectedAccountType,

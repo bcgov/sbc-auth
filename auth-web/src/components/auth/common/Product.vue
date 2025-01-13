@@ -11,7 +11,7 @@
       <div>
         <header class="d-flex align-center">
           <div
-            v-if="!isBasicAccountAndPremiumProduct && !hideCheckbox"
+            v-if="!hideCheckbox"
             class="pr-8"
             data-test="div-decision-not-made-product"
           >

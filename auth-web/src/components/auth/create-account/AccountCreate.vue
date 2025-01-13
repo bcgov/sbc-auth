@@ -70,7 +70,7 @@
           depressed
           color="primary"
           :loading="saving"
-          :disabled="!grantAccess || saving || !isFormValid()"
+          :disabled="saving || !isFormValid()"
           data-test="btn-stepper-premium-save"
           @click="save"
         >
@@ -141,7 +141,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   @Action(useOrgStore) readonly setCurrentOrganizationName!: (name: string) => void
   @Action(useOrgStore) readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
   @Action(useOrgStore) readonly resetBcolDetails!: () => void
-  @Action(useOrgStore) readonly setGrantAccess!: (grantAccess: boolean) => void
   @Action(useOrgStore) readonly setCurrentOrganizationBusinessType!: (orgBusinessType: OrgBusinessType) => void
 
   @Prop() cancelUrl: string
@@ -162,12 +161,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 
-  get grantAccess () {
-    return this.readOnly ? true : this.currentOrganization?.grantAccess
-  }
-  set grantAccess (grantAccess: boolean) {
-    this.setGrantAccess(grantAccess)
-  }
   $refs: {
     createAccountInfoForm: HTMLFormElement
   }

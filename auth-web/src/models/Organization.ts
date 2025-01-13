@@ -49,7 +49,6 @@ export interface Organization {
   bcolProfile?:BcolProfile
   bcolAccountDetails?:BcolAccountDetails
   bcolAccountName?: string,
-  grantAccess?:boolean
   statusCode?:string
   decisionMadeBy?: string,
   contactEmail?: string,

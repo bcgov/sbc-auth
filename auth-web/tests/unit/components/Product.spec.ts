@@ -164,7 +164,6 @@ describe('Product.vue', () => {
     expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-minus-box')
     expect(getDecisionMadeSettings.decisionMadeColorCode).toBeNull()
     expect(wrapper.vm.hasDecisionNotBeenMade).toBeTruthy()
-    expect(wrapper.vm.isBasicAccountAndPremiumProduct).toBeTruthy()
   })
 
   it('creation flow should display check box', async () => {
