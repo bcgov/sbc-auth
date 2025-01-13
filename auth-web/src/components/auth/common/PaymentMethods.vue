@@ -8,6 +8,7 @@
       />
     </template>
     <template v-else-if="!isPaymentEJV">
+      <!--<v-radio-group>-->
       <v-card
         v-for="payment in filteredPaymentMethods"
         :key="payment.type"
@@ -26,8 +27,10 @@
             <div
               class="d-inline-flex"
             >
+              <!-- TODO fix radio-->
               <v-radio
                 v-if="isEditing"
+                v-model="payment.isSelected"
                 :value="payment.type"
               />
               <v-icon
@@ -80,13 +83,21 @@
           <div class="payment-card-contents">
             <v-expand-transition>
               <div v-if="isPaymentSelected(payment)">
-                <!-- PAD -->
                 <div
                   v-if="(payment.type === paymentTypes.PAD)"
                   class="pad-form-container pt-4"
                 >
                   <v-divider class="mb-5" />
+                  <div v-if="!isEditing">
+                    <h4 class="mb-4">
+                      Banking Information
+                    </h4>
+                    <span> Transit Number: {{ currentOrgPADInfo.bankTransitNumber }} |
+                      Institution Number: {{ currentOrgPADInfo.bankInstitutionNumber }} |
+                      Account Number: {{ currentOrgPADInfo.bankAccountNumber }} </span>
+                  </div>
                   <PADInfoForm
+                    v-else
                     :isChangeView="isChangeView"
                     :isAcknowledgeNeeded="isAcknowledgeNeeded"
                     :isInitialAcknowledged="isInitialAcknowledged"
@@ -98,7 +109,6 @@
                   />
                 </div>
 
-                <!-- BCOL -->
                 <div
                   v-else-if="(payment.type === paymentTypes.BCOL)"
                   class="pt-7"
@@ -113,7 +123,6 @@
                   />
                 </div>
 
-                <!-- EFT -->
                 <div
                   v-else-if="(payment.type === paymentTypes.EFT)"
                   class="pt-7"
@@ -148,6 +157,7 @@
           </p>
         </div>
       </v-card>
+      <!--</v-radio-group>-->
     </template>
     <!-- showing PAD form without card selector for single payment types -->
     <v-row v-else>
@@ -262,7 +272,7 @@ const PAYMENT_METHODS = {
   },
   [PaymentTypes.ONLINE_BANKING]: {
     type: PaymentTypes.ONLINE_BANKING,
-    icon: 'mdi-bank-outline',
+    icon: 'mdi-currency-usd',
     title: 'Online Banking',
     subtitle: 'Pay for products and services through your financial institutions website.',
     description: `
@@ -312,11 +322,12 @@ export default defineComponent({
     isInitialTOSAccepted: { default: false },
     isInitialAcknowledged: { default: false },
     isBcolAdmin: { default: false },
-    isEditing: { default: false }
+    isEditing: { default: false },
+    isCreateAccount: { default: false }
   },
   emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save'],
   setup (props, { emit, root }) {
-    const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary } = useOrgStore()
+    const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary, currentOrgPADInfo } = useOrgStore()
     const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
 
     const orgStore = useOrgStore()
@@ -370,24 +381,22 @@ export default defineComponent({
 
     const filteredPaymentMethods = computed(() => {
       const paymentMethods = []
-      if (!props.isEditing && selectedPaymentMethod.value) {
+      if (!props.isEditing && selectedPaymentMethod.value && !props.isCreateAccount) {
         return [PAYMENT_METHODS[selectedPaymentMethod.value]]
       }
       const methodSupportPerProduct = paymentMethodSupportedForProducts.value
       if (props.currentOrgType) {
-        const paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL ]
+        const paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT ]
         paymentTypes?.forEach((paymentType) => {
+          if (paymentType === PaymentTypes.EFT && !currentOrgPaymentDetails?.eftEnable) {
+            return
+          }
           if (PAYMENT_METHODS[paymentType]) {
             const paymentMethod = PAYMENT_METHODS[paymentType]
             paymentMethod.supported = methodSupportPerProduct[paymentType]
             paymentMethods.push(paymentMethod)
           }
         })
-      }
-      if (currentOrgPaymentDetails?.eftEnable) {
-        const paymentMethod = PAYMENT_METHODS[PaymentTypes.EFT]
-        paymentMethod.supported = methodSupportPerProduct[PaymentTypes.EFT]
-        paymentMethods.push(paymentMethod)
       }
       return paymentMethods
     })
@@ -538,7 +547,8 @@ export default defineComponent({
       cancelModal,
       continueModal,
       isGLInfoValid,
-      isChangePaymentEnabled
+      isChangePaymentEnabled,
+      currentOrgPADInfo
     }
   }
 })

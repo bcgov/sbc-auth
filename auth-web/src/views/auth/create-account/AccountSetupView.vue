@@ -68,7 +68,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
-import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'pinia'
 import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
@@ -78,7 +78,7 @@ import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
-import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
+import SelectProductService from '@/components/auth/create-account/SelectProductPayment.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import { namespace } from 'vuex-class'
@@ -150,15 +150,6 @@ export default class AccountSetupView extends Vue {
   private stepperConfig: Array<StepConfiguration> =
     [
       {
-        title: 'Select Products and Payment',
-        stepName: 'Products and Payment',
-        component: SelectProductService,
-        componentProps: {
-          isStepperView: true,
-          noBackButton: true
-        }
-      },
-      {
         title: 'Account Information',
         stepName: 'Account Information',
         component: AccountCreate,
@@ -168,6 +159,14 @@ export default class AccountSetupView extends Vue {
         title: 'Account Administrator Information',
         stepName: 'Account Administrator Information',
         component: UserProfileForm,
+        componentProps: {
+          isStepperView: true
+        }
+      },
+      {
+        title: 'Select Products and Payment',
+        stepName: 'Products and Payment',
+        component: SelectProductService,
         componentProps: {
           isStepperView: true
         }
@@ -264,6 +263,11 @@ export default class AccountSetupView extends Vue {
 
   closeError () {
     this.$refs.errorDialog.close()
+  }
+
+  mounted () {
+    useOrgStore().setSelectedAccountType(Account.PREMIUM)
+    useOrgStore().setCurrentOrganizationType(Account.PREMIUM)
   }
 }
 </script>

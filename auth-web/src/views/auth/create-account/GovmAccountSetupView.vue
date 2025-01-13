@@ -59,9 +59,9 @@ import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import { Address } from '@/models/address'
 import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInfoForm.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { Pages } from '@/util/constants'
+import { Account, Pages } from '@/util/constants'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
-import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
+import SelectProductService from '@/components/auth/create-account/SelectProductPayment.vue'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
@@ -100,17 +100,9 @@ export default class GovmAccountSetupView extends Vue {
         }
       },
       {
-        title: 'Products and Payment',
+        title: 'Select Products and Payment',
         stepName: 'Products and Payment',
         component: SelectProductService,
-        componentProps: {
-          isStepperView: true
-        }
-      },
-      {
-        title: 'Payment Information',
-        stepName: 'Payment Information',
-        component: PaymentMethodSelector,
         componentProps: {
           isStepperView: true
         }
@@ -163,6 +155,10 @@ export default class GovmAccountSetupView extends Vue {
       }
       this.$refs.errorDialog.open()
     }
+  }
+  mounted () {
+    useOrgStore().setSelectedAccountType(Account.PREMIUM)
+    useOrgStore().setCurrentOrganizationType(Account.PREMIUM)
   }
   public closeError () {
     this.$refs.errorDialog.close()

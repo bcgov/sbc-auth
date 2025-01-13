@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, DisplayModeValues, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, DisplayModeValues, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
@@ -60,7 +60,7 @@ import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccoun
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
-import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
+import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
@@ -144,15 +144,6 @@ export default class NonBcscAccountSetupView extends Vue {
   private accountStepperConfig: Array<StepConfiguration> =
     [
       {
-        title: 'Select Products and Services',
-        stepName: 'Products and Payment',
-        component: SelectProductService,
-        componentProps: {
-          isStepperView: true,
-          noBackButton: true
-        }
-      },
-      {
         title: 'Upload your notarized affidavit',
         stepName: 'Upload Affidavit',
         component: UploadAffidavitStep,
@@ -163,6 +154,14 @@ export default class NonBcscAccountSetupView extends Vue {
         stepName: 'Account Information',
         component: AccountCreate,
         componentProps: {}
+      },
+      {
+        title: 'Select Products and Services',
+        stepName: 'Products and Payment',
+        component: SelectProductPayment,
+        componentProps: {
+          isStepperView: true
+        }
       },
       {
         title: 'Account Administrator Information',
@@ -176,13 +175,8 @@ export default class NonBcscAccountSetupView extends Vue {
     ]
 
   private async beforeMount () {
-    const paymentMethodStep = {
-      title: 'Payment Method',
-      stepName: 'Payment Method',
-      component: PaymentMethodSelector,
-      componentProps: {}
-    }
-    this.accountStepperConfig.push(paymentMethodStep)
+    useOrgStore().setSelectedAccountType(Account.PREMIUM)
+    useOrgStore().setCurrentOrganizationType(Account.PREMIUM)
     // Loading user details if not exist and check user already verified with affidavit
     if (!this.userProfile) {
       await this.getUserProfile('@me')
