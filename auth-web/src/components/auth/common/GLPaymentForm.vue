@@ -23,7 +23,7 @@
                   small
                   color="primary"
                 >
-                  EFT icon
+                  mdi-currency-usd
                 </v-icon>
               </div>
               <div class="pr-8 flex-grow-1">
