@@ -4,98 +4,6 @@
     lazy-validation
     data-test="form-stepper-premium-wrapper"
   >
-    <h3
-      v-display-mode
-      class="mt-n1 mb-5"
-    >
-      Link with an existing BC Online account
-    </h3>
-
-    <div
-      v-show="!linked"
-      v-display-mode
-    >
-      <p class="mb-4">
-        Linking accounts will import your organization’s contact and drawdown account information. Linking accounts
-        <strong>will not import</strong> your existing users or any businesses you manage. You can invite team members
-        and add businesses once your account is set up successfully.
-      </p>
-      <p class="mb-8">
-        You must be the <strong>Prime Contact</strong> to link this account with your existing BC Online account.
-      </p>
-      <BcolLogin @account-link-successful="onLink" />
-    </div>
-
-    <div
-      v-if="linked"
-      v-display-mode
-    >
-      <p class="mb-8">
-        The following information will be imported from your existing BC Online account. Review your account
-        <br> information below and update if needed.
-      </p>
-      <LinkedBCOLBanner
-        class="mb-9"
-        :bcolAccountName="currentOrganization.bcolAccountName"
-        :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-        :showUnlinkAccountBtn="true"
-        @unlink-account="unlinkAccount"
-      />
-
-      <fieldset class="org-business-type">
-        <account-business-type
-          :saving="saving"
-          :premiumLinkedAccount="true"
-          :bcolDuplicateNameErrorMessage="bcolDuplicateNameErrorMessage"
-          @update:org-business-type="updateOrgBusinessType"
-          @valid="checkOrgBusinessTypeValid"
-          @update:org-name-clear-errors="updateOrgNameAndClearErrors"
-        />
-      </fieldset>
-
-      <fieldset>
-        <legend class="mb-3">
-          Mailing Address
-        </legend>
-        <base-address-form
-          ref="mailingAddress"
-          :editing="true"
-          :schema="baseAddressSchema"
-          :address="address"
-          @update:address="updateAddress"
-          @valid="checkBaseAddressValidity"
-        />
-      </fieldset>
-
-      <fieldset>
-        <legend>Authorization</legend>
-        <v-checkbox
-          v-model="grantAccess"
-          color="primary"
-          class="bcol-auth ml-2"
-          data-test="check-premium-auth"
-        >
-          <template #label>
-            <div
-              v-sanitize="grantAccessText"
-              class="bcol-auth__label"
-            />
-          </template>
-        </v-checkbox>
-      </fieldset>
-
-      <v-alert
-        v-show="errorMessage"
-        type="error"
-        class="mb-6"
-        data-test="div-premium-error"
-      >
-        {{ errorMessage }}
-      </v-alert>
-    </div>
-
-    <v-divider class="mt-4 mb-10" />
-
     <v-row>
       <v-col
         cols="12"
@@ -135,7 +43,7 @@
           </span>
         </v-btn>
         <ConfirmCancelButton
-          :showConfirmPopup="linked"
+          :showConfirmPopup="false"
           :target-route="cancelUrl"
         />
       </v-col>
@@ -155,7 +63,6 @@ import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { User } from '@/models/user'
 import { addressSchema } from '@/schemas'
@@ -168,7 +75,7 @@ import { useUserStore } from '@/stores/user'
     BcolLogin,
     BaseAddressForm,
     ConfirmCancelButton,
-    LinkedBCOLBanner
+    
   }
 })
 export default class AccountCreatePremium extends Mixins(Steppable) {
@@ -255,10 +162,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     this.resetBcolDetails()
   }
 
-  get linked () {
-    return !!this.currentOrganization?.bcolAccountDetails
-  }
-
   updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
   }
@@ -271,29 +174,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   async save () {
     // TODO Handle edit mode as well here
     this.goNext()
-  }
-
-  async onLink (details: {
-    bcolProfile: BcolProfile
-    bcolAccountDetails: BcolAccountDetails
-  }) {
-    // sync local tracking object and update child AccountBusinessType with new org name
-    const orgName = details.bcolAccountDetails.orgName
-    this.orgBusinessTypeLocal.name = orgName
-    var org: Organization = {
-      id: this.currentOrganization.id,
-      name: details.bcolAccountDetails.orgName,
-      accessType: this.currentOrganization.accessType,
-      bcolProfile: details.bcolProfile,
-      bcolAccountDetails: details.bcolAccountDetails,
-      grantAccess: false,
-      orgType: Account.PREMIUM,
-      bcolAccountName: details.bcolAccountDetails.orgName
-    }
-    this.setCurrentOrganization(org)
-    this.setCurrentOrganizationPaymentType(PaymentTypes.BCOL)
-    this.setCurrentOrganizationAddress(details.bcolAccountDetails.address)
-    await this.validateAccountNameUnique()
   }
 
   async validateAccountNameUnique () {
