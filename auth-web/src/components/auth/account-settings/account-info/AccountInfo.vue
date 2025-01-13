@@ -112,23 +112,6 @@
             @update:viewOnlyMode="viewOnlyMode"
             @update:updateAndSaveAccessTypeDetails="updateAndSaveAccessTypeDetails"
           />
-          <div
-            v-if="currentOrganization.bcolAccountDetails"
-            class="nv-list-item mb-6"
-          >
-            <div
-              id="accountName"
-              class="name mt-3 font-weight-bold"
-            >
-              Linked BC Online Account Details
-            </div>
-            <div class="value">
-              <LinkedBCOLBanner
-                :bcolAccountName="currentOrganization.bcolAccountName"
-                :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-              />
-            </div>
-          </div>
           <v-divider class="my-6" />
         </div>
 
@@ -299,7 +282,6 @@ import AccountAccessType from '@/components/auth/account-settings/account-info/A
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
 import AccountMailingAddress from '@/components/auth/account-settings/account-info/AccountMailingAddress.vue'
 import { Address } from '@/models/address'
-import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
 import { useCodesStore } from '@/stores/codes'
@@ -309,7 +291,6 @@ import { useUserStore } from '@/stores/user'
 export default defineComponent({
   components: {
     OrgAdminContact,
-    LinkedBCOLBanner,
     ModalDialog,
     AccountDetails,
     AccountMailingAddress,
