@@ -277,13 +277,13 @@ export default defineComponent({
     const setup = async () => {
       state.isLoading = true
       resetCurrentSelectedProducts()
+      await getProductPaymentMethods()
       await loadProduct()
       // if staff need to load product fee also
       if (state.canManageAccounts) {
         state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
         state.orgProductFeeCodes = await fetchOrgProductFeeCodes()
       }
-      await getProductPaymentMethods()
       state.isLoading = false
       state.displayRemoveProductDialog = false
       state.dialogError = false
