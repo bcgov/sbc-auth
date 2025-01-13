@@ -87,22 +87,24 @@
             </div>
           </div>
           <div class="nv-list-item mb-0">
-            <div
-              id="accountType"
-              class="name font-weight-bold"
-            >
-              Account Type
-            </div>
-            <div class="value-column">
+            <template v-if="accountType !== 'Premium'">
               <div
-                class="value"
-                aria-labelledby="accountType"
+                id="accountType"
+                class="name font-weight-bold"
               >
-                <div class="value__title">
-                  {{ accountType }}
+                Account Type
+              </div>
+              <div class="value-column">
+                <div
+                  class="value"
+                  aria-labelledby="accountType"
+                >
+                  <div class="value__title">
+                    {{ accountType }}
+                  </div>
                 </div>
               </div>
-            </div>
+            </template>
           </div>
           <AccountAccessType
             :organization="currentOrganization"
@@ -274,7 +276,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, AccountStatus, Pages, Permission, Role, SuspensionReason } from '@/util/constants'
+import { AccessType, AccountStatus, AccountType, Pages, Permission, Role, SuspensionReason } from '@/util/constants'
 import { CreateRequestBody, OrgBusinessType } from '@/models/Organization'
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { useAccount, useAccountChangeHandler } from '@/composables'
