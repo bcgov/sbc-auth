@@ -234,7 +234,6 @@ export default defineComponent({
     isSelected: { type: Boolean, default: false },
     isexpandedView: { type: Boolean, default: false },
     isAccountSettingsView: { type: Boolean, default: false },
-    isBasicAccount: { type: Boolean, default: false },
     canManageProductFee: { type: Boolean, default: false },
     paymentMethods: { type: Array as PropType<string[]>, default: () => [] }
   },
@@ -282,10 +281,6 @@ export default defineComponent({
       }
     })
 
-    const isBasicAccountAndPremiumProduct = computed(() => {
-      return props.isBasicAccount && props.productDetails.premiumOnly
-    })
-
     const productLabel = computed(() => {
       let { code } = props.productDetails
       let subTitle = `${code?.toLowerCase()}CodeSubtitle`
@@ -317,10 +312,6 @@ export default defineComponent({
           default: {
             break
           }
-        }
-        if (isBasicAccountAndPremiumProduct.value) {
-          subTitle = `${code?.toLowerCase()}CodeUnselectableSubtitle`
-          decisionMadeIcon = 'mdi-minus-box'
         }
         // Swap subtitle and details for sub-product specific content
         if (props.productDetails.code === ProductEnum.MHR && props.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
@@ -418,7 +409,6 @@ export default defineComponent({
       ...toRefs(state),
       productLabel,
       paymentTypeIcon,
-      isBasicAccountAndPremiumProduct,
       expand,
       selecThisProduct,
       productBadge,
