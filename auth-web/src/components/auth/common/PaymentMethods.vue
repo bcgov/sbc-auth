@@ -88,7 +88,7 @@
                   class="pad-form-container pt-4"
                 >
                   <v-divider class="mb-5" />
-                  <div v-if="!isEditing">
+                  <div v-if="!isEditing && currentOrgPADInfo">
                     <h4 class="mb-4">
                       Banking Information
                     </h4>
