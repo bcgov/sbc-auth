@@ -286,7 +286,7 @@ export default {
         await orgStore.syncActiveOrgMembers()
         await orgStore.fetchStatementSettings()
         await orgStore.getStatementRecipients()
-        if (isEFT) {
+        if (isEFT()) {
           state.frequencySelected = state.statementSettings?.frequencies[2].frequency
         } else {
           state.frequencySelected = state.statementSettings?.currentFrequency?.frequency || state.statementSettings?.frequencies[0].frequency
