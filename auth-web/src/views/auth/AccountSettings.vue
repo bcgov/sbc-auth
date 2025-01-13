@@ -389,7 +389,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   }
 
   private get isStaff ():boolean {
-    return this.currentUser.roles.includes(Role.Staff)
+    return this.currentUser.roles.includes(Role.Staff) || this.currentUser.roles.includes(Role.ContactCentreStaff)
   }
 
   private get accountInfoUrl (): string {

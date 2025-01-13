@@ -80,6 +80,10 @@ export default class ConfigHelper {
     return `${import.meta.env.VUE_APP_NAMEX_WEB_URL}`
   }
 
+  static getNewBusinessRegistryDashboardUrl () {
+    return `${import.meta.env.VUE_APP_BUSINESS_REGISTRY_URL}`
+  }
+
   static getBceIdOsdLink () {
     return `${import.meta.env.VUE_APP_BCEID_OSD_LINK}`
   }

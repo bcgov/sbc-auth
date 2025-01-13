@@ -131,6 +131,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     PAY_API_URL = os.getenv("PAY_API_URL", "") + os.getenv("PAY_API_VERSION", "")
 
     LEGAL_API_URL = os.getenv("LEGAL_API_URL", "")
+    LEGAL_SANDBOX_API_URL = os.getenv("LEGAL_SANDBOX_API_URL", "")
     LEGAL_API_VERSION = os.getenv("LEGAL_API_VERSION")
     LEGAL_API_VERSION_2 = os.getenv("LEGAL_API_VERSION_2", "")
 
@@ -300,6 +301,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     ENTITY_SVC_CLIENT_SECRET = os.getenv("KEYCLOAK_TEST_ADMIN_SECRET")
 
     LEGAL_API_URL = "https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7"
+    LEGAL_SANDBOX_API_URL = "https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7"
     LEGAL_API_VERSION_2 = "/api/v1"
 
     NOTIFY_API_URL = "http://localhost:8080/notify-api/api/v1"

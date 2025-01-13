@@ -151,6 +151,7 @@
         <!-- Remove User -->
         <v-btn
           v-show="canRemove(item)"
+          v-can:EDIT_USER.hide
           icon
           aria-label="Remove Team Member"
           title="Remove Team Member"
@@ -231,12 +232,13 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LoginSource, Permission } from '@/util/constants'
+import { AccessType, LoginSource, Permission, Role } from '@/util/constants'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
@@ -260,6 +262,7 @@ export interface ChangeRolePayload {
       'permissions'
     ]),
     ...mapState(useUserStore, [
+      'currentUser',
       'roleInfos'
     ])
   },
@@ -272,6 +275,7 @@ export interface ChangeRolePayload {
 })
 export default class MemberDataTable extends Vue {
   @Prop({ default: '' }) private userNamefilterText: string
+  protected readonly currentUser!: KCUserProfile
   private readonly businesses!: Business[]
   private activeOrgMembers!: Member[]
   private readonly currentMembership!: Member
@@ -401,6 +405,10 @@ export default class MemberDataTable extends Vue {
   }
 
   private canChangeRole (memberBeingChanged: Member): boolean {
+    if (this.currentUser.roles?.includes(Role.ContactCentreStaff)) {
+      return false
+    }
+
     if (this.currentMembership.membershipStatus !== MembershipStatus.Active) {
       return false
     }
@@ -408,9 +416,7 @@ export default class MemberDataTable extends Vue {
     switch (this.currentMembership.membershipTypeCode) {
       case MembershipType.Admin:
         // Owners can change roles of other users who are not owners
-        if (
-          !this.isOwnMembership(memberBeingChanged)
-        ) {
+        if (!this.isOwnMembership(memberBeingChanged)) {
           return true
         }
         // And they can downgrade their own role if there is another owner on the team

@@ -1031,7 +1031,7 @@ six = "^1.16.0"
 type = "git"
 url = "https://github.com/seeker25/flask-jwt-oidc.git"
 reference = "main"
-resolved_reference = "d208d4643e3b17358f7295bee0f955e67ba6ac88"
+resolved_reference = "563f01ef6453eb0ea1cc0a2d71c6665350c853ff"
 
 [[package]]
 name = "flask-mail"

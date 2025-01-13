@@ -29,7 +29,7 @@
                     class="title font-weight-bold product-title mt-n1"
                     :data-test="productDetails.code"
                   >
-                    {{ productDetails.description }}
+                    {{ productDescription(productDetails.code, productDetails.description) }}
                     <v-tooltip
                       v-if="productPremTooltipText(productDetails.code)"
                       class="pa-2"
@@ -208,7 +208,7 @@
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { DisplayModeValues, PaymentTypes, Product as ProductEnum, ProductStatus } from '@/util/constants'
 import { PropType, computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
-import { paymentTypeIcon, paymentTypeLabel } from '@/resources/display-mappers'
+import { paymentTypeIcon, paymentTypeLabel, productDisplay } from '@/resources/display-mappers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
@@ -405,6 +405,10 @@ export default defineComponent({
       return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
     }
 
+    function productDescription (code: string, description: string) {
+      return productDisplay[code] || description
+    }
+
     return {
       ...toRefs(state),
       productLabel,
@@ -417,7 +421,8 @@ export default defineComponent({
       saveProductFee,
       hasDecisionNotBeenMade,
       hideCheckbox,
-      paymentTypeLabel
+      paymentTypeLabel,
+      productDescription
     }
   }
 })

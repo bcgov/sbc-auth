@@ -23,6 +23,7 @@ from http import HTTPStatus
 class Error(Enum):
     """Error Codes."""
 
+    INVALID_ORG = "The organization ID is in an incorrect format.", HTTPStatus.BAD_REQUEST
     INVALID_INPUT = "Invalid input, please check.", HTTPStatus.BAD_REQUEST
     DATA_NOT_FOUND = "No matching record found.", HTTPStatus.NOT_FOUND
     DATA_ALREADY_EXISTS = "The data you want to insert already exists.", HTTPStatus.BAD_REQUEST
