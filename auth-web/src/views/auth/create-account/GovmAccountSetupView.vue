@@ -51,6 +51,7 @@
 </template>
 
 <script lang="ts">
+import { Account, Pages } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
@@ -59,7 +60,6 @@ import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import { Address } from '@/models/address'
 import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInfoForm.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { Account, Pages } from '@/util/constants'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import SelectProductService from '@/components/auth/create-account/SelectProductPayment.vue'
 import { useOrgStore } from '@/stores/org'
