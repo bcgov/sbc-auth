@@ -384,7 +384,7 @@ export default defineComponent({
         await codesStore.getBusinessSizeCodes()
         await codesStore.getBusinessTypeCodes()
         if (!currentOrganization.value?.name) {
-          state.isBusinessAccount = currentOrganization.value.orgType !== Account.BASIC
+          state.isBusinessAccount = true
           if (state.isBusinessAccount) {
             state.accountType = AccountType.BUSINESS
           }

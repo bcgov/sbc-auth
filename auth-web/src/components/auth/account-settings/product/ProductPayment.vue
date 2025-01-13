@@ -41,7 +41,6 @@
           :isexpandedView="product.code === expandedProductCode"
           :isSelected="currentSelectedProducts.includes(product.code)"
           :isAccountSettingsView="true"
-          :isBasicAccount="currentOrganization.orgType === AccountEnum.BASIC"
           :orgProduct="orgProductDetails(product)"
           :orgProductFeeCodes="orgProductFeeCodes"
           :canManageProductFee="canManageAccounts"

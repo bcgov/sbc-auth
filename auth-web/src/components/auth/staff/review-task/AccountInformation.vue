@@ -3,16 +3,8 @@
     <h2 class="mb-3">
       {{ `${tabNumber !== null ? `${tabNumber}. ` : ''}${title}` }}
     </h2>
-    <v-row v-if="accountUnderReview.orgType === Account.BASIC">
-      <v-col class="col-12 col-sm-3">
-        Account Name
-      </v-col>
-      <v-col>
-        {{ accountUnderReview.name }}
-      </v-col>
-    </v-row>
     <!-- for GOVM account showing banch name  -->
-    <v-row v-else-if="accountUnderReview.orgType === Account.PREMIUM && accountUnderReview.accessType === AccessType.GOVM">
+    <v-row v-if="accountUnderReview.orgType === Account.PREMIUM && accountUnderReview.accessType === AccessType.GOVM">
       <v-col class="col-12 col-sm-3">
         <span> Account Name <br> &amp; Branch Details</span>
       </v-col>

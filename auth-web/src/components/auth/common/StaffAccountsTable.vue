@@ -381,14 +381,6 @@ export default defineComponent({
         .map(item => item.text),
       accountTypeMap: {
         [OrgAccountTypes.ALL]: {},
-        [OrgAccountTypes.BASIC]: {
-          accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
-          orgType: Account.BASIC
-        },
-        [OrgAccountTypes.BASIC_OUT_OF_PROVINCE]: {
-          accessType: [AccessType.EXTRA_PROVINCIAL],
-          orgType: Account.BASIC
-        },
         [OrgAccountTypes.PREMIUM]: {
           accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
           orgType: Account.PREMIUM

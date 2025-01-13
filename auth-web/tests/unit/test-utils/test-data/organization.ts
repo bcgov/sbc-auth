@@ -6,7 +6,6 @@ const organization: Organization = {
   'accessType': AccessType.REGULAR,
   'id': 1,
   'name': 'test org',
-  'orgType': OrgAccountTypes.BASIC,
   'statusCode': AccountStatus.ACTIVE
 }
 
