@@ -108,9 +108,7 @@
 </template>
 
 <script lang="ts">
-import { Account, LoginSource, PaymentTypes } from '@/util/constants'
 import { Action, State } from 'pinia-class'
-import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
@@ -119,6 +117,7 @@ import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { LoginSource } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { User } from '@/models/user'
 import { addressSchema } from '@/schemas'
@@ -130,8 +129,8 @@ import { useUserStore } from '@/stores/user'
     AccountBusinessType,
     BcolLogin,
     BaseAddressForm,
-    ConfirmCancelButton,
-    
+    ConfirmCancelButton
+
   }
 })
 export default class AccountCreatePremium extends Mixins(Steppable) {

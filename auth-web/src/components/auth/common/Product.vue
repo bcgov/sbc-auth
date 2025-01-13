@@ -181,24 +181,23 @@
                   @save:saveProductFee="saveProductFee"
                 />
               </div>
-
             </div>
           </v-expand-transition>
         </div>
-          <v-label class="theme--light">
-            <P class="mt-2">
-              Supported payment methods:
-            </P>
-            <v-chip
-              v-for="method in filteredPaymentMethods"
-              :key="method"
-              small
-              label
-              class="mr-2 font-weight-bold"
-            >
-              <v-icon>{{ paymentTypeIcon[method] }}</v-icon>{{ paymentTypeLabel[method] }}
-            </v-chip>
-          </v-label>
+        <v-label class="theme--light">
+          <P class="mt-2">
+            Supported payment methods:
+          </P>
+          <v-chip
+            v-for="method in filteredPaymentMethods"
+            :key="method"
+            small
+            label
+            class="mr-2 font-weight-bold"
+          >
+            <v-icon>{{ paymentTypeIcon[method] }}</v-icon>{{ paymentTypeLabel[method] }}
+          </v-chip>
+        </v-label>
         <div />
       </div>
     </v-card>

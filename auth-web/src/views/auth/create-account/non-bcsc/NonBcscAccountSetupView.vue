@@ -164,7 +164,7 @@ export default class NonBcscAccountSetupView extends Vue {
         title: 'Account Information',
         stepName: 'Account Information',
         component: AccountCreate,
-        componentProps: {},
+        componentProps: {}
       },
       {
         title: 'Account Administrator Information',

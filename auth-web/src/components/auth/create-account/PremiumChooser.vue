@@ -67,7 +67,6 @@
       data-test="modal-learn-more-dialog-content"
     >
       <v-card>
-
         <v-card-actions>
           <v-spacer />
           <v-btn
