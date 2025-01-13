@@ -78,7 +78,6 @@ import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
-import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
@@ -96,8 +95,7 @@ const AuthModule = namespace('auth')
     PaymentMethodSelector,
     SelectProductService,
     Stepper,
-    ModalDialog,
-    PremiumChooser
+    ModalDialog
   },
   computed: {
     ...mapState(useUserStore, [
@@ -184,8 +182,6 @@ export default class AccountSetupView extends Vue {
       componentProps: {}
     }
     this.stepperConfig.push(paymentMethodStep)
-    // use the new premium chooser account when flag is enabled
-    this.stepperConfig[2].alternate.component = PremiumChooser
   }
 
   private async verifyAndCreateAccount () {

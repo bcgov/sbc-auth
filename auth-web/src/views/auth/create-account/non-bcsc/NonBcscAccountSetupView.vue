@@ -60,7 +60,6 @@ import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccoun
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
-import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
@@ -75,8 +74,7 @@ import { useUserStore } from '@/stores/user'
     AccountCreate,
     PaymentMethodSelector,
     Stepper,
-    ModalDialog,
-    PremiumChooser
+    ModalDialog
   },
   computed: {
     ...mapState(useUserStore, [
@@ -185,8 +183,6 @@ export default class NonBcscAccountSetupView extends Vue {
       componentProps: {}
     }
     this.accountStepperConfig.push(paymentMethodStep)
-    // use the new premium chooser account when flag is enabled
-    this.accountStepperConfig[3].alternate.component = PremiumChooser
     // Loading user details if not exist and check user already verified with affidavit
     if (!this.userProfile) {
       await this.getUserProfile('@me')
