@@ -21,8 +21,7 @@ import { Component, Mixins } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import { Account } from '@/util/constants'
-import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
-import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
+import AccountCreatePremium from '@/components/auth/create-account/AccountCreate.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { useOrgStore } from '@/stores/org'
@@ -30,8 +29,7 @@ import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
-    AccountCreatePremium,
-    AccountCreateBasic
+    AccountCreatePremium
   },
   computed: {
     ...mapState(useOrgStore, ['currentOrganization']),

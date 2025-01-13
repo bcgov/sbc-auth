@@ -4,6 +4,62 @@
     lazy-validation
     data-test="form-stepper-premium-wrapper"
   >
+    <div
+      v-display-mode
+    >
+      <fieldset class="org-business-type">
+        <account-business-type
+          :saving="saving"
+          :premiumLinkedAccount="true"
+          :bcolDuplicateNameErrorMessage="bcolDuplicateNameErrorMessage"
+          @update:org-business-type="updateOrgBusinessType"
+          @valid="checkOrgBusinessTypeValid"
+          @update:org-name-clear-errors="updateOrgNameAndClearErrors"
+        />
+      </fieldset>
+
+      <fieldset>
+        <legend class="mb-3">
+          Mailing Address
+        </legend>
+        <base-address-form
+          ref="mailingAddress"
+          :editing="true"
+          :schema="baseAddressSchema"
+          :address="address"
+          @update:address="updateAddress"
+          @valid="checkBaseAddressValidity"
+        />
+      </fieldset>
+
+      <fieldset>
+        <legend>Authorization</legend>
+        <v-checkbox
+          v-model="grantAccess"
+          color="primary"
+          class="bcol-auth ml-2"
+          data-test="check-premium-auth"
+        >
+          <template #label>
+            <div
+              v-sanitize="grantAccessText"
+              class="bcol-auth__label"
+            />
+          </template>
+        </v-checkbox>
+      </fieldset>
+
+      <v-alert
+        v-show="errorMessage"
+        type="error"
+        class="mb-6"
+        data-test="div-premium-error"
+      >
+        {{ errorMessage }}
+      </v-alert>
+    </div>
+
+    <v-divider class="mt-4 mb-10" />
     <v-row>
       <v-col
         cols="12"

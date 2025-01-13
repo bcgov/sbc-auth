@@ -71,9 +71,7 @@ import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'pinia'
-import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
-import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
-import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
+import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import { Action } from 'pinia-class'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -94,9 +92,7 @@ const AuthModule = namespace('auth')
   components: {
     CreateAccountInfoForm,
     UserProfileForm,
-    AccountTypeSelector,
-    AccountCreateBasic,
-    AccountCreatePremium,
+    AccountCreate,
     PaymentMethodSelector,
     SelectProductService,
     Stepper,
@@ -165,22 +161,10 @@ export default class AccountSetupView extends Vue {
         }
       },
       {
-        title: 'Select Account Type',
-        stepName: 'Select Account Type',
-        component: AccountTypeSelector,
-        componentProps: {}
-      },
-      {
         title: 'Account Information',
         stepName: 'Account Information',
-        component: AccountCreateBasic,
-        componentProps: {},
-        alternate: {
-          title: 'Account Information',
-          stepName: 'Account Information',
-          component: AccountCreatePremium,
-          componentProps: {}
-        }
+        component: AccountCreate,
+        componentProps: {}
       },
       {
         title: 'Account Administrator Information',

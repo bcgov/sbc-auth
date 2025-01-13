@@ -55,7 +55,7 @@ import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
+import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import { Address } from '@/models/address'
 import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInfoForm.vue'
 import GovmPaymentMethodSelector from '@/components/auth/create-account/GovmPaymentMethodSelector.vue'
@@ -67,7 +67,6 @@ import { useOrgStore } from '@/stores/org'
 @Component({
   components: {
     SelectProductService,
-    AccountCreateBasic,
     GovmPaymentMethodSelector,
     Stepper,
     ModalDialog,
@@ -95,7 +94,7 @@ export default class GovmAccountSetupView extends Vue {
       {
         title: 'Account Information',
         stepName: 'Account Information',
-        component: AccountCreateBasic,
+        component: AccountCreate,
         componentProps: {
           govmAccount: true
         }

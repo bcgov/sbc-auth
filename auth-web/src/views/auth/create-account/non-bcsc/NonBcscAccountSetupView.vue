@@ -52,9 +52,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'pinia'
-import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
-import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
-import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
+import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import { Address } from '@/models/address'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -74,9 +72,7 @@ import { useUserStore } from '@/stores/user'
   components: {
     CreateAccountInfoForm,
     UserProfileForm,
-    AccountTypeSelector,
-    AccountCreateBasic,
-    AccountCreatePremium,
+    AccountCreate,
     PaymentMethodSelector,
     Stepper,
     ModalDialog,
@@ -159,12 +155,6 @@ export default class NonBcscAccountSetupView extends Vue {
         }
       },
       {
-        title: 'Select Account Type',
-        stepName: 'Select Account Type',
-        component: AccountTypeSelector,
-        componentProps: {}
-      },
-      {
         title: 'Upload your notarized affidavit',
         stepName: 'Upload Affidavit',
         component: UploadAffidavitStep,
@@ -173,14 +163,8 @@ export default class NonBcscAccountSetupView extends Vue {
       {
         title: 'Account Information',
         stepName: 'Account Information',
-        component: AccountCreateBasic,
+        component: AccountCreate,
         componentProps: {},
-        alternate: {
-          title: 'Account Information',
-          stepName: 'Account Information',
-          component: AccountCreatePremium,
-          componentProps: {}
-        }
       },
       {
         title: 'Account Administrator Information',
