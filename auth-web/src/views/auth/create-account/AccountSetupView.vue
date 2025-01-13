@@ -78,7 +78,7 @@ import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
-import SelectProductService from '@/components/auth/create-account/SelectProductPayment.vue'
+import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import { namespace } from 'vuex-class'
@@ -93,7 +93,7 @@ const AuthModule = namespace('auth')
     UserProfileForm,
     AccountCreate,
     PaymentMethodSelector,
-    SelectProductService,
+    SelectProductPayment,
     Stepper,
     ModalDialog
   },
@@ -166,7 +166,7 @@ export default class AccountSetupView extends Vue {
       {
         title: 'Select Products and Payment',
         stepName: 'Products and Payment',
-        component: SelectProductService,
+        component: SelectProductPayment,
         componentProps: {
           isStepperView: true
         }

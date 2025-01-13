@@ -153,13 +153,13 @@ export default defineComponent({
 
     async function setup () {
       state.isLoading = true
+      await orgStore.getProductPaymentMethods()
       if (props.readOnly) {
         await orgStore.getOrgProducts(props.orgId)
         orgStore.setSubscribedProducts()
       } else {
         await orgStore.getProductList()
       }
-      await orgStore.getProductPaymentMethods()
       state.isLoading = false
     }
 
