@@ -361,7 +361,7 @@ export default defineComponent({
         } else if (isSbcStaffAccount.value) {
           return 'SBC Staff'
         }
-        return isPremiumAccount.value ? 'Premium' : 'Basic'
+        return 'Premium'
       }),
       isAddressInfoIncomplete: computed(() => (
         currentOrgAddress.value ? Object.keys(currentOrgAddress.value).length === 0 : true
