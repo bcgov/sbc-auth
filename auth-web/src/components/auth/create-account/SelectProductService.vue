@@ -32,9 +32,6 @@
           />
         </div>
       </template>
-      <template v-else>
-        <div>No Products are available...</div>
-      </template>
     </template>
     <v-divider class="mt-7 mb-10" />
     <v-row>

@@ -102,9 +102,6 @@
         @cancel-payment-method-changes="isEditing = false"
       />
     </template>
-    <template v-else>
-      <div>No Products are available...</div>
-    </template>
 
     <!-- Alert / Request Confirm Dialog -->
     <ModalDialog
