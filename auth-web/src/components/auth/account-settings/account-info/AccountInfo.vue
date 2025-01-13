@@ -276,7 +276,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, AccountStatus, AccountType, Pages, Permission, Role, SuspensionReason } from '@/util/constants'
+import { AccessType, AccountStatus, Pages, Permission, Role, SuspensionReason } from '@/util/constants'
 import { CreateRequestBody, OrgBusinessType } from '@/models/Organization'
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { useAccount, useAccountChangeHandler } from '@/composables'
