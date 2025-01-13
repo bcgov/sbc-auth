@@ -162,7 +162,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 
-
   get grantAccess () {
     return this.readOnly ? true : this.currentOrganization?.grantAccess
   }
