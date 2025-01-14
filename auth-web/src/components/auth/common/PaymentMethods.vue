@@ -389,6 +389,7 @@ export default defineComponent({
         if (props.currentOrgType === AccessType.GOVM) {
           paymentTypes = [ PaymentTypes.EJV ]
         }
+        // paymentTypes = [ PaymentTypes.EJV ]
         paymentTypes?.forEach((paymentType) => {
           if (paymentType === PaymentTypes.EFT && !currentOrgPaymentDetails?.eftEnable) {
             return
@@ -526,7 +527,6 @@ export default defineComponent({
       if (isPaymentEJV.value) {
         await fetchCurrentOrganizationGLInfo(props.currentOrganization?.id)
       }
-      selectedPaymentMethod.value = 'EJV'
     })
 
     return {
