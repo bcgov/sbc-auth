@@ -66,9 +66,9 @@
 </template>
 
 <script lang="ts">
-import { Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
+import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'pinia'
 import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'

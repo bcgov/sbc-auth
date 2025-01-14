@@ -21,7 +21,7 @@
               class="product-check-box ma-0 pa-0"
               hide-details
               :data-test="`check-product-${productDetails.code}`"
-              @change="selecThisProduct"
+              @change="selectThisProduct"
             >
               <template #label>
                 <div class="ml-2">
@@ -155,20 +155,44 @@
             </div>
           </v-expand-transition>
         </div>
-        <v-label class="theme--light">
-          <P class="mt-2">
-            Supported payment methods:
-          </P>
-          <v-chip
-            v-for="method in filteredPaymentMethods"
-            :key="method"
-            small
-            label
-            class="mr-2 font-weight-bold"
-          >
-            <v-icon>{{ paymentTypeIcon[method] }}</v-icon>{{ paymentTypeLabel[method] }}
-          </v-chip>
-        </v-label>
+        <div>
+          <v-label class="theme--light">
+            <P class="mt-2">
+              Supported payment methods:
+            </P>
+            <v-chip
+              v-for="method in filteredPaymentMethods"
+              :key="method"
+              small
+              label
+              class="mr-2 font-weight-bold"
+            >
+              <v-icon>{{ paymentTypeIcon[method] }}</v-icon>{{ paymentTypeLabel[method] }}
+            </v-chip>
+          </v-label>
+          <div>
+            <v-alert
+              v-if="showPaymentMethodNotSupported"
+              class="mt-6 mb-4 alert-item alert-inner"
+              :icon="false"
+              prominent
+              outlined
+              type="warning"
+            >
+              <div class="alert-inner mb-0">
+                <v-icon
+                  medium
+                >
+                  mdi-alert
+                </v-icon>
+                <p class="alert__info mb-0 pl-3">
+                  <strong>Payment Method Not Supported:</strong> This product is not supported by your current payment
+                  method. Please choose a different payment type to use this product.
+                </p>
+              </div>
+            </v-alert>
+          </div>
+        </div>
         <div />
       </div>
     </v-card>
@@ -209,6 +233,7 @@ export default defineComponent({
     paymentMethods: { type: Array as PropType<string[]>, default: () => [] }
   },
   setup (props, { emit }) {
+    const orgStore = useOrgStore()
     const state = reactive({
       count: 0,
       termsAccepted: false,
@@ -221,11 +246,16 @@ export default defineComponent({
         return TOS_NEEDED_PRODUCT.includes(props.productDetails.code)
       }),
       filteredPaymentMethods: computed(() => {
-        if (useOrgStore().isGovmOrg) {
+        if (orgStore.isGovmOrg) {
           return props.paymentMethods.filter((method) => method === PaymentTypes.EJV)
         }
         return props.paymentMethods.filter((method) => ![PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV].includes(method as PaymentTypes))
-      })
+      }),
+      paymentMethodSupported: computed(() => {
+        const paymentMethod = orgStore.currentOrgPaymentType === PaymentTypes.CREDIT_CARD ? PaymentTypes.DIRECT_PAY : orgStore.currentOrgPaymentType
+        return state.filteredPaymentMethods?.includes(paymentMethod)
+      }),
+      showPaymentMethodNotSupported: false
     })
 
     const hasDecisionNotBeenMade = computed(() => {
@@ -308,7 +338,14 @@ export default defineComponent({
       return productCode
     }
 
-    function selecThisProduct (event, emitFromTos = false) {
+    function selectThisProduct (event, emitFromTos = false) {
+      const productSubscribed = props.productDetails.subscriptionStatus === 'ACTIVE'
+      if (!state.paymentMethodSupported && !productSubscribed) {
+        state.productSelected = false
+        state.showPaymentMethodNotSupported = true
+        return
+      }
+
       let forceRemove = false
       // expand if tos needed
       // as per new requirment, show expanded when user tries to click checkbox and not accepted TOS.
@@ -324,7 +361,7 @@ export default defineComponent({
       }
 
       let addorRemoveProduct // false is remove product
-      const productSubscribed = props.productDetails.subscriptionStatus === 'ACTIVE'
+
       if (props.isAccountSettingsView && TOS_NEEDED_PRODUCT.includes(props.productDetails.code)) {
         addorRemoveProduct = state.termsAccepted // not checking state.productSelected because it hasn't been updated yet
       } else {
@@ -349,7 +386,7 @@ export default defineComponent({
       state.count++
       state.termsAccepted = termsAccepted
       // force select when tos accept
-      selecThisProduct(undefined, true)// no need to collaps on TOS accept
+      selectThisProduct(undefined, true)// no need to collapse on TOS accept
     }
 
     // if TOS needed will inject component
@@ -385,7 +422,7 @@ export default defineComponent({
       productLabel,
       paymentTypeIcon,
       expand,
-      selecThisProduct,
+      selectThisProduct,
       productBadge,
       productPremTooltipText,
       productFooter,
@@ -458,4 +495,18 @@ export default defineComponent({
     border-color: var(--v-grey-darken4) transparent transparent transparent;
   }
 
+  .alert-inner {
+    .v-icon {
+      color: $app-alert-orange;
+    }
+    background-color: $BCgovGold0 !important;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    opacity: 1 !important;
+  }
+  .alert__info {
+    flex: 1 1 auto;
+    color: $TextColorGray;
+  }
 </style>

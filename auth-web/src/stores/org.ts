@@ -1086,7 +1086,7 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   // Called from three flows: Create GOVM, Premium and NON BCSC.
-  async function resetOrgInfoForCreateAccount() {
+  async function resetOrgInfoForCreateAccount () {
     setSelectedAccountType(Account.PREMIUM)
     setCurrentOrganizationType(Account.PREMIUM)
     setCurrentOrganizationPaymentType(null)

@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, DisplayModeValues, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { AccessType, DisplayModeValues, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'

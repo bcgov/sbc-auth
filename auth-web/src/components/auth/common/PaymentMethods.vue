@@ -337,7 +337,7 @@ export default defineComponent({
 
     const orgStore = useOrgStore()
     const {
-      currentSelectedProducts,
+      currentSelectedProducts
     } = storeToRefs(useOrgStore())
     const state = reactive({
       bcOnlineWarningMessage: 'This payment method will soon be retired.',
