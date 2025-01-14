@@ -7,44 +7,7 @@
       General Ledger codes for the account that is issued by the Finance department of the Ministry
     </p>
     <v-form ref="GlInfoForm">
-      <section v-if="viewMode">
-        <!-- todo needs more -->
-        <v-card>
-          <div>
-            <header class="d-flex align-center">
-              <div
-                class="mt-n2"
-              >
-                <v-radio
-                  v-if="isEditing"
-                  :value="'EJV'"
-                />
-                <v-icon
-                  small
-                  color="primary"
-                >
-                  mdi-currency-usd
-                </v-icon>
-              </div>
-              <div class="pr-8 flex-grow-1">
-                <h3 class="title font-weight-bold mt-8 mb-4">
-                  Electronic Journal Voucher
-                </h3>
-                <span class="mt-2">
-                  Use EJV for payment.
-                </span>
-                <v-divider />
-                <h4 class="mt-4 mb-4">
-                  General Ledger Information
-                </h4>
-              </div>
-            </header>
-          </div>
-          Client Code: {{ client }} | Responsbility Center : {{ responsibilityCentre }} |
-          Account Number: {{ serviceLine }} | Standard Object: {{ stob }} | Project: {{ projectCode }}
-        </v-card>
-      </section>
-      <section v-else>
+      <section>
         <header class="mb-4 d-flex align-content-center">
           <div
             data-test="pad-info-form-title"
@@ -164,10 +127,6 @@ export default defineComponent({
       type: Boolean,
       default: true
     },
-    viewMode: {
-      type: Boolean,
-      default: false
-    }
   },
   emits: ['is-gl-info-form-valid'],
   setup (props, { emit }) {

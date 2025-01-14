@@ -77,14 +77,18 @@
             <v-expand-transition>
               <div v-if="isPaymentSelected(payment)">
                 <div
-                  v-if="isPaymentEJV"
+                  v-if="(payment.type === paymentTypes.EJV)"
                   class="pt-7"
                 >
-                  <GLPaymentForm
-                    :viewMode="!isEditing"
+                  <GLPaymentForm v-if="isEditing"
                     :canSelect="isBcolAdmin"
                     @is-gl-info-form-valid="isGLInfoValid"
                   />
+                  <div v-if="!!glInfo">
+                    Client Code: {{ glInfo.client }} | Responsbility Center : {{ glInfo.responsibilityCentre }} |
+                    Account Number: {{ glInfo.serviceLine }} | Standard Object: {{ glInfo.stob }} |
+                    Project: {{ glInfo.projectCode }}
+                  </div>
                 </div>
 
                 <div
@@ -163,7 +167,6 @@
       </v-card>
       <!--</v-radio-group>-->
     </template>
-    <!-- showing PAD form without card selector for single payment types -->
     <ModalDialog
       ref="warningDialog"
       max-width="650"
@@ -346,7 +349,6 @@ export default defineComponent({
                 This action cannot be undone, and you will not be able to select a different payment method later.`
       warningDialog.value.open()
     }
-
     const selectedPaymentMethod = ref('')
     const paymentTypes = PaymentTypes
     const padInfo = ref({})
@@ -524,6 +526,7 @@ export default defineComponent({
       if (isPaymentEJV.value) {
         await fetchCurrentOrganizationGLInfo(props.currentOrganization?.id)
       }
+      selectedPaymentMethod.value = 'EJV'
     })
 
     return {
@@ -548,7 +551,8 @@ export default defineComponent({
       continueModal,
       isGLInfoValid,
       isChangePaymentEnabled,
-      currentOrgPADInfo
+      currentOrgPADInfo,
+      glInfo: orgStore.currentOrgGLInfo
     }
   }
 })
