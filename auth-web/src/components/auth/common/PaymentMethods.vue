@@ -383,7 +383,10 @@ export default defineComponent({
       }
       const methodSupportPerProduct = paymentMethodSupportedForProducts.value
       if (props.currentOrgType) {
-        const paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT, PaymentTypes.EJV ]
+        let paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT ]
+        if (props.currentOrgType === 'GOVM') {
+          paymentTypes = [ PaymentTypes.EJV ]
+        }
         paymentTypes?.forEach((paymentType) => {
           if (paymentType === PaymentTypes.EFT && !currentOrgPaymentDetails?.eftEnable) {
             return
