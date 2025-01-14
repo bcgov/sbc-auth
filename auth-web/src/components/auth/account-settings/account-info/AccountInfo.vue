@@ -87,7 +87,7 @@
             </div>
           </div>
           <div class="nv-list-item mb-0">
-            <template v-if="accountType !== 'Premium'">
+            <template v-if="accountType !== OrgAccountTypes.PREMIUM">
               <div
                 id="accountType"
                 class="name font-weight-bold"
@@ -625,7 +625,8 @@ export default defineComponent({
       closeSuspensionCompleteDialog,
       checkBaseAddressValidity,
       updateAddress,
-      updateOrgMailingAddress
+      updateOrgMailingAddress,
+      OrgAccountTypes
     }
   }
 })

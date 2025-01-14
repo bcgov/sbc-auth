@@ -206,7 +206,7 @@
 </template>
 
 <script lang="ts">
-import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
+import { AccessType, LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
@@ -384,7 +384,7 @@ export default defineComponent({
       const methodSupportPerProduct = paymentMethodSupportedForProducts.value
       if (props.currentOrgType) {
         let paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT ]
-        if (props.currentOrgType === 'GOVM') {
+        if (props.currentOrgType === AccessType.GOVM) {
           paymentTypes = [ PaymentTypes.EJV ]
         }
         paymentTypes?.forEach((paymentType) => {
