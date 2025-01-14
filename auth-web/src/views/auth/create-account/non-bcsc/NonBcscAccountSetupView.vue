@@ -175,8 +175,6 @@ export default class NonBcscAccountSetupView extends Vue {
     ]
 
   private async beforeMount () {
-    useOrgStore().setSelectedAccountType(Account.PREMIUM)
-    useOrgStore().setCurrentOrganizationType(Account.PREMIUM)
     // Loading user details if not exist and check user already verified with affidavit
     if (!this.userProfile) {
       await this.getUserProfile('@me')
@@ -189,6 +187,9 @@ export default class NonBcscAccountSetupView extends Vue {
     }
   }
   private async mounted () {
+    useOrgStore().setSelectedAccountType(Account.PREMIUM)
+    useOrgStore().setCurrentOrganizationType(Account.PREMIUM)
+    useOrgStore().setCurrentOrganizationPaymentType(null)
     // on re-upload need show some pages are in view only mode
     this.readOnly = !!this.orgId
     // this.isAffidavitAlreadyApproved = this.userProfile && this.userProfile.verified
@@ -203,6 +204,7 @@ export default class NonBcscAccountSetupView extends Vue {
 
       this.setCurrentOrganizationType(this.currentOrganization.orgType)
       // passing additional props for readonly
+      // TODO do these still apply?
       this.accountStepperConfig[4].componentProps = { ...this.accountStepperConfig[4].componentProps, clearForm: true }
       this.accountStepperConfig[0].componentProps = { ...this.accountStepperConfig[0].componentProps, readOnly: true, orgId }
 
