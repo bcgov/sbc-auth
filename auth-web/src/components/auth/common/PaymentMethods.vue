@@ -1,7 +1,6 @@
 <template>
   <div>
-    <template>
-      <!--<v-radio-group>-->
+    <v-radio-group v-model="selectedPaymentMethod">
       <v-card
         v-for="payment in filteredPaymentMethods"
         :key="payment.type"
@@ -20,10 +19,8 @@
             <div
               class="d-inline-flex"
             >
-              <!-- TODO fix radio-->
               <v-radio
                 v-if="isEditing"
-                v-model="payment.isSelected"
                 :value="payment.type"
               />
               <v-icon
@@ -77,14 +74,27 @@
             <v-expand-transition>
               <div v-if="isPaymentSelected(payment)">
                 <div
-                  v-if="isPaymentEJV"
+                  v-if="(payment.type === paymentTypes.EJV)"
                   class="pt-7"
-                  >
+                >
                   <GLPaymentForm
-                    :viewMode="!isEditing"
+                    v-if="isEditing"
                     :canSelect="isBcolAdmin"
                     @is-gl-info-form-valid="isGLInfoValid"
                   />
+                  <v-divider class="mb-4" />
+                  <div v-if="!isEditing">
+                    <h4 class="mb-2">
+                      General Ledger Information
+                    </h4>
+                    <div v-if="!!glInfo">
+                      <span class="d-flex"> Client Code: {{ glInfo.client }} </span>
+                      <span class="d-flex"> Responsbility Center : {{ glInfo.responsibilityCentre }} </span>
+                      <span class="d-flex"> Account Number: {{ glInfo.serviceLine }} </span>
+                      <span class="d-flex"> Standard Object: {{ glInfo.stob }} </span>
+                      <span class="d-flex"> Project: {{ glInfo.projectCode }} </span>
+                    </div>
+                  </div>
                 </div>
 
                 <div
@@ -96,9 +106,9 @@
                     <h4 class="mb-4">
                       Banking Information
                     </h4>
-                    <span> Transit Number: {{ currentOrgPADInfo.bankTransitNumber }} |
-                      Institution Number: {{ currentOrgPADInfo.bankInstitutionNumber }} |
-                      Account Number: {{ currentOrgPADInfo.bankAccountNumber }} </span>
+                    <span class="d-flex"> Transit Number: {{ currentOrgPADInfo.bankTransitNumber }} </span>
+                    <span class="d-flex"> Institution Number: {{ currentOrgPADInfo.bankInstitutionNumber }} </span>
+                    <span class="d-flex"> Account Number: {{ currentOrgPADInfo.bankAccountNumber }} </span>
                   </div>
                   <PADInfoForm
                     v-else
@@ -161,9 +171,7 @@
           </p>
         </div>
       </v-card>
-      <!--</v-radio-group>-->
-    </template>
-    <!-- showing PAD form without card selector for single payment types -->
+    </v-radio-group>
     <ModalDialog
       ref="warningDialog"
       max-width="650"
@@ -293,7 +301,7 @@ const PAYMENT_METHODS = {
     type: PaymentTypes.EJV,
     icon: 'mdi-currency-usd',
     title: 'Electronic Journal Voucher',
-    subtitle: 'Pay for transactions using your General Ledger account.',
+    subtitle: 'Pay for transactions using your General Ledger.',
     description: '',
     isSelected: false,
     supported: true
@@ -328,6 +336,9 @@ export default defineComponent({
     const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
 
     const orgStore = useOrgStore()
+    const {
+      currentSelectedProducts,
+    } = storeToRefs(useOrgStore())
     const state = reactive({
       bcOnlineWarningMessage: 'This payment method will soon be retired.',
       dialogTitle: '',
@@ -346,7 +357,6 @@ export default defineComponent({
                 This action cannot be undone, and you will not be able to select a different payment method later.`
       warningDialog.value.open()
     }
-
     const selectedPaymentMethod = ref('')
     const paymentTypes = PaymentTypes
     const padInfo = ref({})
@@ -394,6 +404,10 @@ export default defineComponent({
           if (PAYMENT_METHODS[paymentType]) {
             const paymentMethod = PAYMENT_METHODS[paymentType]
             paymentMethod.supported = methodSupportPerProduct[paymentType]
+            // Disable all payment methods if no products are selected.
+            if (props.isCreateAccount && currentSelectedProducts.value.length === 0) {
+              paymentMethod.supported = false
+            }
             paymentMethods.push(paymentMethod)
           }
         })
@@ -548,7 +562,8 @@ export default defineComponent({
       continueModal,
       isGLInfoValid,
       isChangePaymentEnabled,
-      currentOrgPADInfo
+      currentOrgPADInfo,
+      glInfo: orgStore.currentOrgGLInfo
     }
   }
 })
@@ -587,6 +602,9 @@ export default defineComponent({
   .v-btn.v-btn--outlined {
       border-color: var(--v-primary-base);
       color: var(--v-primary-base);
+  }
+  .v-input--radio-group__input {
+    display: block
   }
 }
 

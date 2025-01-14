@@ -266,9 +266,7 @@ export default class AccountSetupView extends Vue {
   }
 
   mounted () {
-    useOrgStore().setSelectedAccountType(Account.PREMIUM)
-    useOrgStore().setCurrentOrganizationType(Account.PREMIUM)
-    useOrgStore().setCurrentOrganizationPaymentType(null)
+    useOrgStore().resetOrgInfoForCreateAccount()
   }
 }
 </script>

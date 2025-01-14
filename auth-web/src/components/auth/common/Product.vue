@@ -30,27 +30,6 @@
                     :data-test="productDetails.code"
                   >
                     {{ productDescription(productDetails.code, productDetails.description) }}
-                    <v-tooltip
-                      v-if="productPremTooltipText(productDetails.code)"
-                      class="pa-2"
-                      content-class="tooltip"
-                      color="grey darken-4"
-                      max-width="350px"
-                      top
-                    >
-                      <template #activator="{ on }">
-                        <span
-                          v-if="productDetails.premiumOnly"
-                          class="product-title-info"
-                          v-on="on"
-                        >
-                          (<span class="underline-dotted">requires Premium Account</span>)
-                        </span>
-                      </template>
-                      <div class="py-3">
-                        <span>{{ productPremTooltipText(productDetails.code) }}</span>
-                      </div>
-                    </v-tooltip>
                     <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
                   </h3>
                   <p

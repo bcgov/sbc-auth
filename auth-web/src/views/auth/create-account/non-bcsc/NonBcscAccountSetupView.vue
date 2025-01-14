@@ -187,9 +187,7 @@ export default class NonBcscAccountSetupView extends Vue {
     }
   }
   private async mounted () {
-    useOrgStore().setSelectedAccountType(Account.PREMIUM)
-    useOrgStore().setCurrentOrganizationType(Account.PREMIUM)
-    useOrgStore().setCurrentOrganizationPaymentType(null)
+    useOrgStore().resetOrgInfoForCreateAccount()
     // on re-upload need show some pages are in view only mode
     this.readOnly = !!this.orgId
     // this.isAffidavitAlreadyApproved = this.userProfile && this.userProfile.verified

@@ -126,7 +126,7 @@ export default defineComponent({
       default: false
     }
   },
-  emits: ['emit-bcol-info'],
+  emits: ['emit-bcol-info', 'cancel-payment-method-changes'],
   setup (props, { emit, root }) {
     const orgStore = useOrgStore()
     const userStore = useUserStore()
