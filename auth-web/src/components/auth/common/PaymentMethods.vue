@@ -84,11 +84,17 @@
                     :canSelect="isBcolAdmin"
                     @is-gl-info-form-valid="isGLInfoValid"
                   />
+                  <v-divider class="mb-4" />
+                  <div v-if="!isEditing">
+                  <h4 class="mb-2">General Ledger Information</h4>
                   <div v-if="!!glInfo">
-                    Client Code: {{ glInfo.client }} | Responsbility Center : {{ glInfo.responsibilityCentre }} |
-                    Account Number: {{ glInfo.serviceLine }} | Standard Object: {{ glInfo.stob }} |
-                    Project: {{ glInfo.projectCode }}
+                    <span class="d-flex"> Client Code: {{ glInfo.client }} </span>
+                    <span class="d-flex"> Responsbility Center : {{ glInfo.responsibilityCentre }} </span>
+                    <span class="d-flex"> Account Number: {{ glInfo.serviceLine }} </span>
+                    <span class="d-flex"> Standard Object: {{ glInfo.stob }} </span> 
+                    <span class="d-flex"> Project: {{ glInfo.projectCode }} </span>
                   </div>
+                </div>
                 </div>
 
                 <div
@@ -100,9 +106,9 @@
                     <h4 class="mb-4">
                       Banking Information
                     </h4>
-                    <span> Transit Number: {{ currentOrgPADInfo.bankTransitNumber }} |
-                      Institution Number: {{ currentOrgPADInfo.bankInstitutionNumber }} |
-                      Account Number: {{ currentOrgPADInfo.bankAccountNumber }} </span>
+                    <span class="d-flex"> Transit Number: {{ currentOrgPADInfo.bankTransitNumber }} </span>
+                    <span class="d-flex"> Institution Number: {{ currentOrgPADInfo.bankInstitutionNumber }} </span>
+                    <span class="d-flex"> Account Number: {{ currentOrgPADInfo.bankAccountNumber }} </span>
                   </div>
                   <PADInfoForm
                     v-else
@@ -296,7 +302,7 @@ const PAYMENT_METHODS = {
     type: PaymentTypes.EJV,
     icon: 'mdi-currency-usd',
     title: 'Electronic Journal Voucher',
-    subtitle: 'Pay for transactions using your General Ledger account.',
+    subtitle: 'Pay for transactions using your General Ledger.',
     description: '',
     isSelected: false,
     supported: true
@@ -389,7 +395,6 @@ export default defineComponent({
         if (props.currentOrgType === AccessType.GOVM) {
           paymentTypes = [ PaymentTypes.EJV ]
         }
-        // paymentTypes = [ PaymentTypes.EJV ]
         paymentTypes?.forEach((paymentType) => {
           if (paymentType === PaymentTypes.EFT && !currentOrgPaymentDetails?.eftEnable) {
             return
