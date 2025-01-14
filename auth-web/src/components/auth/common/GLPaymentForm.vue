@@ -126,7 +126,7 @@ export default defineComponent({
     canSelect: {
       type: Boolean,
       default: true
-    },
+    }
   },
   emits: ['is-gl-info-form-valid'],
   setup (props, { emit }) {

@@ -1,178 +1,179 @@
 <template>
   <div>
-    <template>
-      <!--<v-radio-group>-->
-      <v-card
-        v-for="payment in filteredPaymentMethods"
-        :key="payment.type"
-        v-can:CHANGE_PAYMENT_METHOD.disable.card
-        outlined
-        :ripple="false"
-        hover
-        :disabled="!payment.supported"
-        class="payment-card py-6 px-6 mb-4 elevation-1"
-        :class="{'selected': isPaymentSelected(payment), 'mt-5': true}"
-        :data-test="`div-payment-${payment.type}`"
-        @click="paymentMethodSelected(payment)"
-      >
-        <div>
-          <header class="align-center flex-grow-1">
-            <div
-              class="d-inline-flex"
+    <!--<v-radio-group>-->
+    <v-card
+      v-for="payment in filteredPaymentMethods"
+      :key="payment.type"
+      v-can:CHANGE_PAYMENT_METHOD.disable.card
+      outlined
+      :ripple="false"
+      hover
+      :disabled="!payment.supported"
+      class="payment-card py-6 px-6 mb-4 elevation-1"
+      :class="{'selected': isPaymentSelected(payment), 'mt-5': true}"
+      :data-test="`div-payment-${payment.type}`"
+      @click="paymentMethodSelected(payment)"
+    >
+      <div>
+        <header class="align-center flex-grow-1">
+          <div
+            class="d-inline-flex"
+          >
+            <!-- TODO fix radio-->
+            <v-radio
+              v-if="isEditing"
+              v-model="payment.isSelected"
+              :value="payment.type"
+            />
+            <v-icon
+              medium
+              color="primary"
+              class="mr-1"
             >
-              <!-- TODO fix radio-->
-              <v-radio
-                v-if="isEditing"
-                v-model="payment.isSelected"
-                :value="payment.type"
-              />
-              <v-icon
-                medium
-                color="primary"
-                class="mr-1"
+              {{ payment.icon }}
+            </v-icon>
+            <h3 class="title font-weight-bold mt-n1">
+              {{ payment.title }}
+              <span v-if="!payment.supported">
+                is not supported for the selected products
+              </span>
+            </h3>
+          </div>
+          <div class="mt-4">
+            {{ payment.subtitle }}
+          </div>
+          <v-tooltip
+            v-if="!isChangePaymentEnabled() && !isPaymentSelected(payment)"
+            top
+            content-class="top-tooltip"
+            transition="fade-transition"
+          >
+            <template #activator="{ on, attrs }">
+              <div
+                v-bind="attrs"
+                class="btn-tooltip-wrap"
+                v-on="on"
               >
-                {{ payment.icon }}
-              </v-icon>
-              <h3 class="title font-weight-bold mt-n1">
-                {{ payment.title }}
-                <span v-if="!payment.supported">
-                  is not supported for the selected products
-                </span>
-              </h3>
-            </div>
-            <div class="mt-4">
-              {{ payment.subtitle }}
-            </div>
-            <v-tooltip
-              v-if="!isChangePaymentEnabled() && !isPaymentSelected(payment)"
-              top
-              content-class="top-tooltip"
-              transition="fade-transition"
-            >
-              <template #activator="{ on, attrs }">
-                <div
-                  v-bind="attrs"
-                  class="btn-tooltip-wrap"
-                  v-on="on"
+                <v-btn
+                  large
+                  depressed
+                  color="primary"
+                  width="120"
+                  :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangePaymentEnabled() }]"
+                  :aria-label="'Select' + ' ' + payment.title"
+                  :data-test="`btn-payment-${payment.type}`"
+                  disabled
                 >
-                  <v-btn
-                    large
-                    depressed
-                    color="primary"
-                    width="120"
-                    :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangePaymentEnabled() }]"
-                    :aria-label="'Select' + ' ' + payment.title"
-                    :data-test="`btn-payment-${payment.type}`"
-                    disabled
-                  >
-                    <span>{{ isPaymentSelected(payment) ? 'SELECTED' : 'SELECT' }}</span>
-                  </v-btn>
-                </div>
-              </template>
-              <span>This payment method is not available after EFT is selected.</span>
-            </v-tooltip>
-          </header>
+                  <span>{{ isPaymentSelected(payment) ? 'SELECTED' : 'SELECT' }}</span>
+                </v-btn>
+              </div>
+            </template>
+            <span>This payment method is not available after EFT is selected.</span>
+          </v-tooltip>
+        </header>
 
-          <div class="payment-card-contents">
-            <v-expand-transition>
-              <div v-if="isPaymentSelected(payment)">
-                <div
-                  v-if="(payment.type === paymentTypes.EJV)"
-                  class="pt-7"
-                >
-                  <GLPaymentForm v-if="isEditing"
-                    :canSelect="isBcolAdmin"
-                    @is-gl-info-form-valid="isGLInfoValid"
-                  />
-                  <v-divider class="mb-4" />
-                  <div v-if="!isEditing">
-                  <h4 class="mb-2">General Ledger Information</h4>
+        <div class="payment-card-contents">
+          <v-expand-transition>
+            <div v-if="isPaymentSelected(payment)">
+              <div
+                v-if="(payment.type === paymentTypes.EJV)"
+                class="pt-7"
+              >
+                <GLPaymentForm
+                  v-if="isEditing"
+                  :canSelect="isBcolAdmin"
+                  @is-gl-info-form-valid="isGLInfoValid"
+                />
+                <v-divider class="mb-4" />
+                <div v-if="!isEditing">
+                  <h4 class="mb-2">
+                    General Ledger Information
+                  </h4>
                   <div v-if="!!glInfo">
                     <span class="d-flex"> Client Code: {{ glInfo.client }} </span>
                     <span class="d-flex"> Responsbility Center : {{ glInfo.responsibilityCentre }} </span>
                     <span class="d-flex"> Account Number: {{ glInfo.serviceLine }} </span>
-                    <span class="d-flex"> Standard Object: {{ glInfo.stob }} </span> 
+                    <span class="d-flex"> Standard Object: {{ glInfo.stob }} </span>
                     <span class="d-flex"> Project: {{ glInfo.projectCode }} </span>
                   </div>
                 </div>
-                </div>
+              </div>
 
-                <div
-                  v-else-if="(payment.type === paymentTypes.PAD)"
-                  class="pad-form-container pt-4"
-                >
-                  <v-divider class="mb-5" />
-                  <div v-if="!isEditing && currentOrgPADInfo && currentOrgPADInfo.bankAccountNumber">
-                    <h4 class="mb-4">
-                      Banking Information
-                    </h4>
-                    <span class="d-flex"> Transit Number: {{ currentOrgPADInfo.bankTransitNumber }} </span>
-                    <span class="d-flex"> Institution Number: {{ currentOrgPADInfo.bankInstitutionNumber }} </span>
-                    <span class="d-flex"> Account Number: {{ currentOrgPADInfo.bankAccountNumber }} </span>
-                  </div>
-                  <PADInfoForm
-                    v-else
-                    :isChangeView="isChangeView"
-                    :isAcknowledgeNeeded="isAcknowledgeNeeded"
-                    :isInitialAcknowledged="isInitialAcknowledged"
-                    :isInitialTOSAccepted="isInitialTOSAccepted"
-                    :clearOnEdit="isInitialTOSAccepted"
-                    @is-pre-auth-debit-form-valid="isPADValid"
-                    @emit-pre-auth-debit-info="getPADInfo"
-                    @is-pad-info-touched="isPadInfoTouched"
-                  />
+              <div
+                v-else-if="(payment.type === paymentTypes.PAD)"
+                class="pad-form-container pt-4"
+              >
+                <v-divider class="mb-5" />
+                <div v-if="!isEditing && currentOrgPADInfo && currentOrgPADInfo.bankAccountNumber">
+                  <h4 class="mb-4">
+                    Banking Information
+                  </h4>
+                  <span class="d-flex"> Transit Number: {{ currentOrgPADInfo.bankTransitNumber }} </span>
+                  <span class="d-flex"> Institution Number: {{ currentOrgPADInfo.bankInstitutionNumber }} </span>
+                  <span class="d-flex"> Account Number: {{ currentOrgPADInfo.bankAccountNumber }} </span>
                 </div>
-
-                <div
-                  v-else-if="(payment.type === paymentTypes.BCOL)"
-                  class="pt-7"
-                >
-                  <!-- showing BCOL details banner -->
-                  <LinkedBCOLBanner
-                    :bcolAccountName="currentOrganization.bcolAccountName"
-                    :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-                    :show-edit-btn="true"
-                    :force-edit-mode="forceEditModeBCOL"
-                    @emit-bcol-info="setBcolInfo"
-                  />
-                </div>
-
-                <div
-                  v-else-if="(payment.type === paymentTypes.EFT)"
-                  class="pt-7"
-                >
-                  <v-divider class="mb-7" />
-                  <div class="mb-7">
-                    To send us a payment through electronic funds transfer (EFT), please read the
-                    <a
-                      class="text-decoration-underline"
-                      @click="downloadEFTInstructions"
-                    >Electronic Funds Transfer Payment Instructions</a>.
-                  </div>
-                </div>
-
-                <!-- Other Payment Types -->
-                <div
+                <PADInfoForm
                   v-else
-                  class="pt-7"
-                >
-                  <v-divider class="mb-7" />
-                  <div v-html="payment.description" />
+                  :isChangeView="isChangeView"
+                  :isAcknowledgeNeeded="isAcknowledgeNeeded"
+                  :isInitialAcknowledged="isInitialAcknowledged"
+                  :isInitialTOSAccepted="isInitialTOSAccepted"
+                  :clearOnEdit="isInitialTOSAccepted"
+                  @is-pre-auth-debit-form-valid="isPADValid"
+                  @emit-pre-auth-debit-info="getPADInfo"
+                  @is-pad-info-touched="isPadInfoTouched"
+                />
+              </div>
+
+              <div
+                v-else-if="(payment.type === paymentTypes.BCOL)"
+                class="pt-7"
+              >
+                <!-- showing BCOL details banner -->
+                <LinkedBCOLBanner
+                  :bcolAccountName="currentOrganization.bcolAccountName"
+                  :bcolAccountDetails="currentOrganization.bcolAccountDetails"
+                  :show-edit-btn="true"
+                  :force-edit-mode="forceEditModeBCOL"
+                  @emit-bcol-info="setBcolInfo"
+                />
+              </div>
+
+              <div
+                v-else-if="(payment.type === paymentTypes.EFT)"
+                class="pt-7"
+              >
+                <v-divider class="mb-7" />
+                <div class="mb-7">
+                  To send us a payment through electronic funds transfer (EFT), please read the
+                  <a
+                    class="text-decoration-underline"
+                    @click="downloadEFTInstructions"
+                  >Electronic Funds Transfer Payment Instructions</a>.
                 </div>
               </div>
-            </v-expand-transition>
-          </div>
 
-          <p
-            v-if="(payment.type === paymentTypes.BCOL)"
-            class="mt-4 py-4 px-6 important bcol-warning-text"
-          >
-            {{ bcOnlineWarningMessage }}
-          </p>
+              <!-- Other Payment Types -->
+              <div
+                v-else
+                class="pt-7"
+              >
+                <v-divider class="mb-7" />
+                <div v-html="payment.description" />
+              </div>
+            </div>
+          </v-expand-transition>
         </div>
-      </v-card>
-      <!--</v-radio-group>-->
-    </template>
+
+        <p
+          v-if="(payment.type === paymentTypes.BCOL)"
+          class="mt-4 py-4 px-6 important bcol-warning-text"
+        >
+          {{ bcOnlineWarningMessage }}
+        </p>
+      </div>
+    </v-card>
+    <!--</v-radio-group>-->
     <ModalDialog
       ref="warningDialog"
       max-width="650"

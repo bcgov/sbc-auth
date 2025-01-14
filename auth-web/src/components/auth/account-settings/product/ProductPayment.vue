@@ -33,8 +33,8 @@
         :key="product.code"
       >
         <Product
-          :key="productRenderKey"
           v-if="!product.parentCode"
+          :key="productRenderKey"
           :productDetails="product"
           :activeSubProduct="subProduct"
           :userName="currentUser.fullName"
