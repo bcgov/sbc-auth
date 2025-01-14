@@ -9,10 +9,6 @@ const vuetify = new Vuetify({})
 
 vi.mock('../../../src/services/user.services')
 
-// vi.mock('@/services/org.services', () => ({
-//   addProducts: vi.fn().mockResolvedValue({ data: null })
-// }))
-
 describe('Account settings ProductPackage.vue', () => {
   let wrapper: any
   let wrapperFactory: any

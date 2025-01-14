@@ -321,6 +321,7 @@ export default defineComponent({
 
     const closeError = async () => {
       confirmDialog.value.close()
+      await setup()
     }
 
     /** Product status message content for CautionBox component */
@@ -377,7 +378,7 @@ export default defineComponent({
           } else {
             await removeOrgProduct(productsSelected[0]?.productCode)
           }
-          // await setup()
+          await setup()
           // show confirm modal
           if (state.addProductOnAccountAdmin && state.staffReviewClear) {
             state.dialogTitle = 'Product Added'
