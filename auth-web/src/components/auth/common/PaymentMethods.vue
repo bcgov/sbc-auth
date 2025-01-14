@@ -336,6 +336,9 @@ export default defineComponent({
     const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
 
     const orgStore = useOrgStore()
+    const {
+      currentSelectedProducts,
+    } = storeToRefs(useOrgStore())
     const state = reactive({
       bcOnlineWarningMessage: 'This payment method will soon be retired.',
       dialogTitle: '',
@@ -401,6 +404,10 @@ export default defineComponent({
           if (PAYMENT_METHODS[paymentType]) {
             const paymentMethod = PAYMENT_METHODS[paymentType]
             paymentMethod.supported = methodSupportPerProduct[paymentType]
+            // Disable all payment methods if no products are selected.
+            if (props.isCreateAccount && currentSelectedProducts.value.length === 0) {
+              paymentMethod.supported = false
+            }
             paymentMethods.push(paymentMethod)
           }
         })
