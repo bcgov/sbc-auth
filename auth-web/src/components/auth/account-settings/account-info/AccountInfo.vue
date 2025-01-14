@@ -277,7 +277,7 @@
 
 <script lang="ts">
 import { AccessType, AccountStatus, Permission, Role, SuspensionReason } from '@/util/constants'
-import { CreateRequestBody, OrgBusinessType } from '@/models/Organization'
+import { CreateRequestBody, OrgAccountTypes, OrgBusinessType } from '@/models/Organization'
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { useAccount, useAccountChangeHandler } from '@/composables'
 import AccountAccessType from '@/components/auth/account-settings/account-info/AccountAccessType.vue'
