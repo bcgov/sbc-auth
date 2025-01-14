@@ -63,7 +63,8 @@ export enum Role {
     EftRefundApprover = 'eft_refund_approver',
     CreateCredits = 'create_credits',
     FasRefund = 'fas_refund',
-    BcolStaffAdmin = 'bcol_staff_admin'
+    BcolStaffAdmin = 'bcol_staff_admin',
+    ContactCentreStaff = 'contact_centre_staff'
 }
 
 export enum Pages {
@@ -118,7 +119,6 @@ export enum Account {
     // ANONYMOUS = 'ANONYMOUS',
     PREMIUM = 'PREMIUM',
     BASIC = 'BASIC',
-    UNLINKED_PREMIUM = 'UNLINKED_PREMIUM', // premium accounts without bcol linking
     STAFF = 'STAFF',
     SBC_STAFF = 'SBC_STAFF'
 }
@@ -456,6 +456,10 @@ export enum Permission {
     VIEW_USER_LOGINSOURCE='VIEW_USER_LOGINSOURCE',
     EDIT_BUSINESS_INFO = 'EDIT_BUSINESS_INFO',
     VIEW_DEVELOPER_ACCESS = 'VIEW_DEVELOPER_ACCESS',
+    EDIT_USER = 'EDIT_USER',
+    VIEW_BUSINESS_REGISTRY_DASHBOARD = 'VIEW_BUSINESS_REGISTRY_DASHBOARD',
+    VIEW_LAUNCH_TITLES = 'VIEW_LAUNCH_TITLES',
+    VIEW_CONTINUATION_AUTHORIZATION_REVIEWS = 'VIEW_CONTINUATION_AUTHORIZATION_REVIEWS'
 }
 
 export enum LDFlags {
@@ -465,6 +469,7 @@ export enum LDFlags {
     BusSearchLink = 'bus-search-staff-link',
     EnableBcCccUlc = 'enable-bc-ccc-ulc',
     EnableBusinessNrSearch = 'enable-business-nr-search',
+    EnableBusinessRegistryDashboard = 'enable-business-registry-dashboard',
     EnableDetailsFilter = 'enable-transactions-detail-filter',
     EnableEFTPaymentMethod = 'enable-eft-payment-method',
     EnablePaymentChangeFromEFT = 'enable-payment-change-from-eft',

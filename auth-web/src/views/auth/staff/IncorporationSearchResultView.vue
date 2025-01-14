@@ -9,9 +9,6 @@
     <template #loading>
       Loading...
     </template>
-    <template #[`item.orgType`]="{ item }">
-      {{ formatType(item) }}
-    </template>
     <template #[`item.account`]="{ item }">
       <span
         :class="{ 'account-color-empty': !isThereAnAffiliatedAccount }"
@@ -59,7 +56,6 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Business, BusinessSearchResultDto } from '@/models/business'
 import { Component, Prop, Vue } from 'vue-property-decorator'
@@ -165,20 +161,6 @@ export default class IncorporationSearchResultView extends Vue {
       width: '105'
     }
   ]
-
-  formatType (org:BusinessSearchResultDto): string {
-    let orgTypeDisplay = 'N/A'
-    if (org?.orgType) {
-      orgTypeDisplay = org.orgType === Account.BASIC ? 'Basic' : 'Premium'
-    }
-    if (org?.accessType === AccessType.ANONYMOUS) {
-      return 'Director Search'
-    }
-    if (org?.accessType === AccessType.EXTRA_PROVINCIAL) {
-      return orgTypeDisplay + ' (out-of-province)'
-    }
-    return orgTypeDisplay
-  }
 
   async manageBusinessEvent () {
     const businessIdentifier = this.currentBusiness.businessIdentifier

@@ -96,7 +96,7 @@ describe('PreviousCorrespondence component', () => {
   const tests = [
     {
       title: 'initial submission',
-      label: 'Jun 2, 2024 at 1:30 pm Pacific time — Application Submitted — Joe Enduser',
+      label: 'Jun 2, 2024 at 1:30 pm Pacific time — Application Submitted',
       textarea: null
     },
     {

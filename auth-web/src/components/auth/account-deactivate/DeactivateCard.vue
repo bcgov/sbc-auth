@@ -45,7 +45,7 @@ export default defineComponent({
   props: {
     type: {
       type: String as PropType<Account>,
-      default: Account.BASIC
+      default: Account.PREMIUM
     }
   },
   setup (props) {

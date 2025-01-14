@@ -24,7 +24,7 @@ describe('PaymentMethods.vue', () => {
       localVue,
       vuetify,
       propsData: {
-        currentOrgType: Account.BASIC
+        currentOrgType: Account.PREMIUM
       }
     })
 

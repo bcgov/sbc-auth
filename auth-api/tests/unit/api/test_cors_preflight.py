@@ -218,6 +218,10 @@ def test_preflight_org_products(app, client, jwt, session):
     assert rv.status_code == HTTPStatus.OK
     assert_access_control_headers(rv, "*", "GET, PATCH, POST")
 
+    rv = client.options("/api/v1/orgs/1/products/ABC", headers={"Access-Control-Request-Method": "DELETE"})
+    assert rv.status_code == HTTPStatus.OK
+    assert_access_control_headers(rv, "*", "DELETE")
+
 
 def test_preflight_org_permissions(app, client, jwt, session):
     """Assert preflight responses for org permissions are correct."""

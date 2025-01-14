@@ -222,7 +222,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function getUserAccountSettings () {
-    const response = await UserService.getUserAccountSettings(this.context.state['userProfile'].keycloakGuid)
+    const response = await UserService.getUserAccountSettings(state.userProfile?.keycloakGuid)
     if (response?.data) {
       // filter by account type and sort by name(label)
       const orgs = response.data.filter(userSettings =>

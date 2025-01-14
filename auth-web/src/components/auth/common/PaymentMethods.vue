@@ -1,12 +1,7 @@
 <template>
   <div>
-    <template v-if="isPaymentEJV">
-      <GLPaymentForm
-        :canSelect="isBcolAdmin"
-        @is-gl-info-form-valid="isGLInfoValid"
-      />
-    </template>
-    <template v-else-if="!isPaymentEJV">
+    <template>
+      <!--<v-radio-group>-->
       <v-card
         v-for="payment in filteredPaymentMethods"
         :key="payment.type"
@@ -14,32 +9,39 @@
         outlined
         :ripple="false"
         hover
-        class="payment-card py-8 px-8 mb-4 elevation-1"
-        :class="{'selected': isPaymentSelected(payment)}"
+        :disabled="!payment.supported"
+        class="payment-card py-6 px-6 mb-4 elevation-1"
+        :class="{'selected': isPaymentSelected(payment), 'mt-5': true}"
         :data-test="`div-payment-${payment.type}`"
+        @click="paymentMethodSelected(payment)"
       >
         <div>
-          <header class="d-flex align-center flex-grow-1">
+          <header class="align-center flex-grow-1">
             <div
-              class="payment-icon-container mt-n2"
-              style="display: inline-block"
+              class="d-inline-flex"
             >
+              <!-- TODO fix radio-->
               <v-radio
                 v-if="isEditing"
+                v-model="payment.isSelected"
                 :value="payment.type"
               />
               <v-icon
-                x-large
+                medium
                 color="primary"
+                class="mr-1"
               >
                 {{ payment.icon }}
               </v-icon>
-            </div>
-            <div class="pr-8 flex-grow-1">
-              <h3 class="title font-weight-bold payment-title mt-n1">
-                {{ payment.title }}  {{ true ? ' is not supported for the selected products' : '' }}
+              <h3 class="title font-weight-bold mt-n1">
+                {{ payment.title }}
+                <span v-if="!payment.supported">
+                  is not supported for the selected products
+                </span>
               </h3>
-              <div>{{ payment.subtitle }}</div>
+            </div>
+            <div class="mt-4">
+              {{ payment.subtitle }}
             </div>
             <v-tooltip
               v-if="!isChangePaymentEnabled() && !isPaymentSelected(payment)"
@@ -69,32 +71,37 @@
               </template>
               <span>This payment method is not available after EFT is selected.</span>
             </v-tooltip>
-            <v-btn
-              v-if="isPaymentSelected(payment) || isChangePaymentEnabled()"
-              large
-              depressed
-              color="primary"
-              width="120"
-              :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangePaymentEnabled() }]"
-              :outlined="!isPaymentSelected(payment) && isChangePaymentEnabled()"
-              :aria-label="'Select' + ' ' + payment.title"
-              :data-test="`btn-payment-${payment.type}`"
-              @click="paymentMethodSelected(payment)"
-            >
-              <span>{{ (isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT' }}</span>
-            </v-btn>
           </header>
 
           <div class="payment-card-contents">
             <v-expand-transition>
               <div v-if="isPaymentSelected(payment)">
-                <!-- PAD -->
                 <div
-                  v-if="(payment.type === paymentTypes.PAD)"
-                  class="pad-form-container pt-7"
+                  v-if="isPaymentEJV"
+                  class="pt-7"
+                  >
+                  <GLPaymentForm
+                    :viewMode="!isEditing"
+                    :canSelect="isBcolAdmin"
+                    @is-gl-info-form-valid="isGLInfoValid"
+                  />
+                </div>
+
+                <div
+                  v-else-if="(payment.type === paymentTypes.PAD)"
+                  class="pad-form-container pt-4"
                 >
-                  <v-divider class="mb-7" />
+                  <v-divider class="mb-5" />
+                  <div v-if="!isEditing && currentOrgPADInfo && currentOrgPADInfo.bankAccountNumber">
+                    <h4 class="mb-4">
+                      Banking Information
+                    </h4>
+                    <span> Transit Number: {{ currentOrgPADInfo.bankTransitNumber }} |
+                      Institution Number: {{ currentOrgPADInfo.bankInstitutionNumber }} |
+                      Account Number: {{ currentOrgPADInfo.bankAccountNumber }} </span>
+                  </div>
                   <PADInfoForm
+                    v-else
                     :isChangeView="isChangeView"
                     :isAcknowledgeNeeded="isAcknowledgeNeeded"
                     :isInitialAcknowledged="isInitialAcknowledged"
@@ -106,7 +113,6 @@
                   />
                 </div>
 
-                <!-- BCOL -->
                 <div
                   v-else-if="(payment.type === paymentTypes.BCOL)"
                   class="pt-7"
@@ -121,7 +127,6 @@
                   />
                 </div>
 
-                <!-- EFT -->
                 <div
                   v-else-if="(payment.type === paymentTypes.EFT)"
                   class="pt-7"
@@ -156,26 +161,9 @@
           </p>
         </div>
       </v-card>
+      <!--</v-radio-group>-->
     </template>
     <!-- showing PAD form without card selector for single payment types -->
-    <v-row v-else>
-      <v-col
-        cols="9"
-        class="py-0"
-      >
-        <PADInfoForm
-          :padInformation="{}"
-          :isChangeView="isChangeView"
-          :isAcknowledgeNeeded="isAcknowledgeNeeded"
-          :isInitialTOSAccepted="isInitialTOSAccepted"
-          :isInitialAcknowledged="isInitialAcknowledged"
-          :clearOnEdit="isInitialTOSAccepted"
-          @is-pre-auth-debit-form-valid="isPADValid($event)"
-          @emit-pre-auth-debit-info="getPADInfo($event)"
-          @is-pad-info-touched="isPadInfoTouched($event)"
-        />
-      </v-col>
-    </v-row>
     <ModalDialog
       ref="warningDialog"
       max-width="650"
@@ -218,7 +206,7 @@
 </template>
 
 <script lang="ts">
-import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
+import { AccessType, LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
@@ -226,6 +214,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
+import { storeToRefs } from 'pinia'
 import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
 
@@ -237,15 +226,18 @@ const PAYMENT_METHODS = {
     subtitle: 'Pay for transactions individually with your credit card.',
     description: `You don't need to provide any credit card information with your account. Credit card information will
                   be requested when you are ready to complete a transaction.`,
-    isSelected: false
+    isSelected: false,
+    supported: true
   },
+  // Only show on accounts that are EFT enabled.
   [PaymentTypes.EFT]: {
     type: PaymentTypes.EFT,
     icon: 'mdi-arrow-right-circle-outline',
     title: 'Electronic Funds Transfer',
     subtitle: 'Make payments from your bank account. Statement will be issued monthly.',
     description: ``,
-    isSelected: false
+    isSelected: false,
+    supported: true
   },
   [PaymentTypes.PAD]: {
     type: PaymentTypes.PAD,
@@ -253,7 +245,8 @@ const PAYMENT_METHODS = {
     title: 'Pre-authorized Debit',
     subtitle: 'Automatically debit a bank account when payments are due.',
     description: '',
-    isSelected: false
+    isSelected: false,
+    supported: true
   },
   [PaymentTypes.BCOL]: {
     type: PaymentTypes.BCOL,
@@ -261,11 +254,12 @@ const PAYMENT_METHODS = {
     title: 'BC Online',
     subtitle: 'Use your linked BC Online account for payment.',
     description: '',
-    isSelected: false
+    isSelected: false,
+    supported: true
   },
   [PaymentTypes.ONLINE_BANKING]: {
     type: PaymentTypes.ONLINE_BANKING,
-    icon: 'mdi-bank-outline',
+    icon: 'mdi-currency-usd',
     title: 'Online Banking',
     subtitle: 'Pay for products and services through your financial institutions website.',
     description: `
@@ -291,7 +285,18 @@ const PAYMENT_METHODS = {
           Receipt of an online banking payment generally takes 3-4 days from when you make the payment with your 
           financial institution.
         </p>`,
-    isSelected: false
+    isSelected: false,
+    supported: true
+  },
+  // Only for GOVM clients.
+  [PaymentTypes.EJV]: {
+    type: PaymentTypes.EJV,
+    icon: 'mdi-currency-usd',
+    title: 'Electronic Journal Voucher',
+    subtitle: 'Pay for transactions using your General Ledger account.',
+    description: '',
+    isSelected: false,
+    supported: true
   }
 }
 
@@ -314,11 +319,12 @@ export default defineComponent({
     isInitialTOSAccepted: { default: false },
     isInitialAcknowledged: { default: false },
     isBcolAdmin: { default: false },
-    isEditing: { default: false }
+    isEditing: { default: false },
+    isCreateAccount: { default: false }
   },
   emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save'],
   setup (props, { emit, root }) {
-    const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary } = useOrgStore()
+    const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary, currentOrgPADInfo } = useOrgStore()
     const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
 
     const orgStore = useOrgStore()
@@ -347,23 +353,51 @@ export default defineComponent({
     const isTouched = ref(false)
     const ejvPaymentInformationTitle = 'General Ledger Information'
 
+    const paymentMethodSupportedForProducts = computed(() => {
+      const productPaymentMethods = orgStore.productPaymentMethods
+      const { productList } = storeToRefs(useOrgStore())
+
+      const activeProductSubscriptions = productList.value
+        .filter(item => item.subscriptionStatus === 'ACTIVE')
+        .map(item => item.code)
+
+      const paymentMethodProducts = {}
+      for (const [product, methods] of Object.entries(productPaymentMethods)) {
+        methods.forEach(method => {
+          (paymentMethodProducts[method] ??= []).push(product)
+        })
+      }
+
+      const paymentMethodSupported = {}
+      Object.entries(paymentMethodProducts).forEach(([key, values]) => {
+        paymentMethodSupported[key] = activeProductSubscriptions.every(subscription => (values as Array<string>).includes(subscription))
+      })
+      paymentMethodSupported[PaymentTypes.CREDIT_CARD] = paymentMethodSupported[PaymentTypes.DIRECT_PAY]
+      return paymentMethodSupported
+    })
+
     const filteredPaymentMethods = computed(() => {
       const paymentMethods = []
-      if (!props.isEditing && selectedPaymentMethod.value) {
+      if (!props.isEditing && selectedPaymentMethod.value && !props.isCreateAccount) {
         return [PAYMENT_METHODS[selectedPaymentMethod.value]]
       }
+      const methodSupportPerProduct = paymentMethodSupportedForProducts.value
       if (props.currentOrgType) {
-        const paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL ]
+        let paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT ]
+        if (props.currentOrgType === AccessType.GOVM) {
+          paymentTypes = [ PaymentTypes.EJV ]
+        }
         paymentTypes?.forEach((paymentType) => {
+          if (paymentType === PaymentTypes.EFT && !currentOrgPaymentDetails?.eftEnable) {
+            return
+          }
           if (PAYMENT_METHODS[paymentType]) {
-            paymentMethods.push(PAYMENT_METHODS[paymentType])
+            const paymentMethod = PAYMENT_METHODS[paymentType]
+            paymentMethod.supported = methodSupportPerProduct[paymentType]
+            paymentMethods.push(paymentMethod)
           }
         })
       }
-      if (currentOrgPaymentDetails?.eftEnable) {
-        paymentMethods.push(PAYMENT_METHODS[PaymentTypes.EFT])
-      }
-      // Determine which payment methods are supported by products or not.
       return paymentMethods
     })
 
@@ -513,7 +547,8 @@ export default defineComponent({
       cancelModal,
       continueModal,
       isGLInfoValid,
-      isChangePaymentEnabled
+      isChangePaymentEnabled,
+      currentOrgPADInfo
     }
   }
 })
@@ -583,10 +618,6 @@ export default defineComponent({
   width: 4.5rem;
 }
 
-.payment-card-contents {
-  padding-left: 4.5rem;
-}
-
 .pad-form-container {
   max-width: 75ch;
 }
@@ -605,5 +636,10 @@ export default defineComponent({
 
 .flex-grow-1 {
   flex-grow: 1;
+}
+
+// TODO change
+.v-card--disabled {
+  opacity: 0.8 !important;
 }
 </style>

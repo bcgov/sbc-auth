@@ -15,14 +15,14 @@ describe('Product.vue', () => {
 
   const productDetails = {
     'code': 'VS',
-    'description': 'test',
+    'description': 'Vital Statistics',
     'url': 'url',
     'type': 'PARTNER',
     'subscriptionStatus': ProductStatus.NOT_SUBSCRIBED
   }
   const pprProduct = {
     'code': 'PPR',
-    'description': 'ppr',
+    'description': 'Personal Property Registry',
     'url': 'url',
     'type': 'PARTNER',
     'subscriptionStatus': ProductStatus.NOT_SUBSCRIBED,
@@ -164,7 +164,6 @@ describe('Product.vue', () => {
     expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-minus-box')
     expect(getDecisionMadeSettings.decisionMadeColorCode).toBeNull()
     expect(wrapper.vm.hasDecisionNotBeenMade).toBeTruthy()
-    expect(wrapper.vm.isBasicAccountAndPremiumProduct).toBeTruthy()
   })
 
   it('creation flow should display check box', async () => {

@@ -11,7 +11,7 @@
       <div>
         <header class="d-flex align-center">
           <div
-            v-if="!isBasicAccountAndPremiumProduct && !hideCheckbox"
+            v-if="!hideCheckbox"
             class="pr-8"
             data-test="div-decision-not-made-product"
           >
@@ -29,7 +29,7 @@
                     class="title font-weight-bold product-title mt-n1"
                     :data-test="productDetails.code"
                   >
-                    {{ productDetails.description }}
+                    {{ productDescription(productDetails.code, productDetails.description) }}
                     <v-tooltip
                       v-if="productPremTooltipText(productDetails.code)"
                       class="pa-2"
@@ -51,10 +51,6 @@
                         <span>{{ productPremTooltipText(productDetails.code) }}</span>
                       </div>
                     </v-tooltip>
-                    <span
-                      v-else-if="productDetails.premiumOnly"
-                      class="product-title-info"
-                    > (requires Premium Account)</span>
                     <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
                   </h3>
                   <p
@@ -103,10 +99,6 @@
                     <span>{{ productPremTooltipText(productDetails.code) }}</span>
                   </div>
                 </v-tooltip>
-                <span
-                  v-else-if="productDetails.premiumOnly"
-                  class="product-title-info"
-                > (requires Premium Account)</span>
                 <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
               </h3>
               <p
@@ -181,23 +173,23 @@
                   @save:saveProductFee="saveProductFee"
                 />
               </div>
-              <v-label class="theme--light">
-                <P class="mt-2">
-                  Supported payment method(s):
-                </P>
-                <v-chip
-                  v-for="method in filteredPaymentMethods"
-                  :key="method"
-                  small
-                  label
-                  class="mr-2 font-weight-bold"
-                >
-                  <v-icon>{{ paymentTypeIcon[method] }}</v-icon>{{ paymentTypeLabel[method] }}
-                </v-chip>
-              </v-label>
             </div>
           </v-expand-transition>
         </div>
+        <v-label class="theme--light">
+          <P class="mt-2">
+            Supported payment methods:
+          </P>
+          <v-chip
+            v-for="method in filteredPaymentMethods"
+            :key="method"
+            small
+            label
+            class="mr-2 font-weight-bold"
+          >
+            <v-icon>{{ paymentTypeIcon[method] }}</v-icon>{{ paymentTypeLabel[method] }}
+          </v-chip>
+        </v-label>
         <div />
       </div>
     </v-card>
@@ -208,7 +200,7 @@
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { DisplayModeValues, PaymentTypes, Product as ProductEnum, ProductStatus } from '@/util/constants'
 import { PropType, computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
-import { paymentTypeIcon, paymentTypeLabel } from '@/resources/display-mappers'
+import { paymentTypeIcon, paymentTypeLabel, productDisplay } from '@/resources/display-mappers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
@@ -234,7 +226,6 @@ export default defineComponent({
     isSelected: { type: Boolean, default: false },
     isexpandedView: { type: Boolean, default: false },
     isAccountSettingsView: { type: Boolean, default: false },
-    isBasicAccount: { type: Boolean, default: false },
     canManageProductFee: { type: Boolean, default: false },
     paymentMethods: { type: Array as PropType<string[]>, default: () => [] }
   },
@@ -282,10 +273,6 @@ export default defineComponent({
       }
     })
 
-    const isBasicAccountAndPremiumProduct = computed(() => {
-      return props.isBasicAccount && props.productDetails.premiumOnly
-    })
-
     const productLabel = computed(() => {
       let { code } = props.productDetails
       let subTitle = `${code?.toLowerCase()}CodeSubtitle`
@@ -317,10 +304,6 @@ export default defineComponent({
           default: {
             break
           }
-        }
-        if (isBasicAccountAndPremiumProduct.value) {
-          subTitle = `${code?.toLowerCase()}CodeUnselectableSubtitle`
-          decisionMadeIcon = 'mdi-minus-box'
         }
         // Swap subtitle and details for sub-product specific content
         if (props.productDetails.code === ProductEnum.MHR && props.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
@@ -414,11 +397,14 @@ export default defineComponent({
       return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
     }
 
+    function productDescription (code: string, description: string) {
+      return productDisplay[code] || description
+    }
+
     return {
       ...toRefs(state),
       productLabel,
       paymentTypeIcon,
-      isBasicAccountAndPremiumProduct,
       expand,
       selecThisProduct,
       productBadge,
@@ -427,7 +413,8 @@ export default defineComponent({
       saveProductFee,
       hasDecisionNotBeenMade,
       hideCheckbox,
-      paymentTypeLabel
+      paymentTypeLabel,
+      productDescription
     }
   }
 })

@@ -49,7 +49,6 @@ export interface Organization {
   bcolProfile?:BcolProfile
   bcolAccountDetails?:BcolAccountDetails
   bcolAccountName?: string,
-  grantAccess?:boolean
   statusCode?:string
   decisionMadeBy?: string,
   contactEmail?: string,
@@ -323,8 +322,6 @@ export interface OrgMap {
 
 export enum OrgAccountTypes {
   ALL = 'All',
-  BASIC = 'Basic',
-  BASIC_OUT_OF_PROVINCE = 'Basic (out-of-province)',
   PREMIUM = 'Premium',
   PREMIUM_OUT_OF_PROVINCE = 'Premium (out-of-province)',
   GOVM = 'GovM',

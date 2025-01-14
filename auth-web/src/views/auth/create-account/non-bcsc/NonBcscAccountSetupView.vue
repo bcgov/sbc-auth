@@ -47,14 +47,12 @@
 </template>
 
 <script lang="ts">
-import { AccessType, DisplayModeValues, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, DisplayModeValues, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'pinia'
-import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
-import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
-import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
+import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import { Address } from '@/models/address'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -62,8 +60,7 @@ import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccoun
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
-import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
-import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
+import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
@@ -74,13 +71,10 @@ import { useUserStore } from '@/stores/user'
   components: {
     CreateAccountInfoForm,
     UserProfileForm,
-    AccountTypeSelector,
-    AccountCreateBasic,
-    AccountCreatePremium,
+    AccountCreate,
     PaymentMethodSelector,
     Stepper,
-    ModalDialog,
-    PremiumChooser
+    ModalDialog
   },
   computed: {
     ...mapState(useUserStore, [
@@ -150,21 +144,6 @@ export default class NonBcscAccountSetupView extends Vue {
   private accountStepperConfig: Array<StepConfiguration> =
     [
       {
-        title: 'Select Products and Services',
-        stepName: 'Products and Payment',
-        component: SelectProductService,
-        componentProps: {
-          isStepperView: true,
-          noBackButton: true
-        }
-      },
-      {
-        title: 'Select Account Type',
-        stepName: 'Select Account Type',
-        component: AccountTypeSelector,
-        componentProps: {}
-      },
-      {
         title: 'Upload your notarized affidavit',
         stepName: 'Upload Affidavit',
         component: UploadAffidavitStep,
@@ -173,13 +152,15 @@ export default class NonBcscAccountSetupView extends Vue {
       {
         title: 'Account Information',
         stepName: 'Account Information',
-        component: AccountCreateBasic,
-        componentProps: {},
-        alternate: {
-          title: 'Account Information',
-          stepName: 'Account Information',
-          component: AccountCreatePremium,
-          componentProps: {}
+        component: AccountCreate,
+        componentProps: {}
+      },
+      {
+        title: 'Select Products and Services',
+        stepName: 'Products and Payment',
+        component: SelectProductPayment,
+        componentProps: {
+          isStepperView: true
         }
       },
       {
@@ -194,15 +175,6 @@ export default class NonBcscAccountSetupView extends Vue {
     ]
 
   private async beforeMount () {
-    const paymentMethodStep = {
-      title: 'Payment Method',
-      stepName: 'Payment Method',
-      component: PaymentMethodSelector,
-      componentProps: {}
-    }
-    this.accountStepperConfig.push(paymentMethodStep)
-    // use the new premium chooser account when flag is enabled
-    this.accountStepperConfig[3].alternate.component = PremiumChooser
     // Loading user details if not exist and check user already verified with affidavit
     if (!this.userProfile) {
       await this.getUserProfile('@me')
@@ -215,6 +187,9 @@ export default class NonBcscAccountSetupView extends Vue {
     }
   }
   private async mounted () {
+    useOrgStore().setSelectedAccountType(Account.PREMIUM)
+    useOrgStore().setCurrentOrganizationType(Account.PREMIUM)
+    useOrgStore().setCurrentOrganizationPaymentType(null)
     // on re-upload need show some pages are in view only mode
     this.readOnly = !!this.orgId
     // this.isAffidavitAlreadyApproved = this.userProfile && this.userProfile.verified
@@ -229,6 +204,7 @@ export default class NonBcscAccountSetupView extends Vue {
 
       this.setCurrentOrganizationType(this.currentOrganization.orgType)
       // passing additional props for readonly
+      // TODO do these still apply?
       this.accountStepperConfig[4].componentProps = { ...this.accountStepperConfig[4].componentProps, clearForm: true }
       this.accountStepperConfig[0].componentProps = { ...this.accountStepperConfig[0].componentProps, readOnly: true, orgId }
 

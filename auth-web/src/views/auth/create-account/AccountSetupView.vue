@@ -66,22 +66,19 @@
 </template>
 
 <script lang="ts">
+import { Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
-import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'pinia'
-import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
-import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
-import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
+import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import { Action } from 'pinia-class'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
-import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
-import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
+import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import { namespace } from 'vuex-class'
@@ -94,14 +91,11 @@ const AuthModule = namespace('auth')
   components: {
     CreateAccountInfoForm,
     UserProfileForm,
-    AccountTypeSelector,
-    AccountCreateBasic,
-    AccountCreatePremium,
+    AccountCreate,
     PaymentMethodSelector,
-    SelectProductService,
+    SelectProductPayment,
     Stepper,
-    ModalDialog,
-    PremiumChooser
+    ModalDialog
   },
   computed: {
     ...mapState(useUserStore, [
@@ -156,31 +150,10 @@ export default class AccountSetupView extends Vue {
   private stepperConfig: Array<StepConfiguration> =
     [
       {
-        title: 'Select Products and Payment',
-        stepName: 'Products and Payment',
-        component: SelectProductService,
-        componentProps: {
-          isStepperView: true,
-          noBackButton: true
-        }
-      },
-      {
-        title: 'Select Account Type',
-        stepName: 'Select Account Type',
-        component: AccountTypeSelector,
-        componentProps: {}
-      },
-      {
         title: 'Account Information',
         stepName: 'Account Information',
-        component: AccountCreateBasic,
-        componentProps: {},
-        alternate: {
-          title: 'Account Information',
-          stepName: 'Account Information',
-          component: AccountCreatePremium,
-          componentProps: {}
-        }
+        component: AccountCreate,
+        componentProps: {}
       },
       {
         title: 'Account Administrator Information',
@@ -189,20 +162,16 @@ export default class AccountSetupView extends Vue {
         componentProps: {
           isStepperView: true
         }
+      },
+      {
+        title: 'Select Products and Payment',
+        stepName: 'Products and Payment',
+        component: SelectProductPayment,
+        componentProps: {
+          isStepperView: true
+        }
       }
     ]
-
-  private beforeMount () {
-    const paymentMethodStep = {
-      title: 'Payment Method',
-      stepName: 'Payment Method',
-      component: PaymentMethodSelector,
-      componentProps: {}
-    }
-    this.stepperConfig.push(paymentMethodStep)
-    // use the new premium chooser account when flag is enabled
-    this.stepperConfig[2].alternate.component = PremiumChooser
-  }
 
   private async verifyAndCreateAccount () {
     this.isLoading = true
@@ -294,6 +263,12 @@ export default class AccountSetupView extends Vue {
 
   closeError () {
     this.$refs.errorDialog.close()
+  }
+
+  mounted () {
+    useOrgStore().setSelectedAccountType(Account.PREMIUM)
+    useOrgStore().setCurrentOrganizationType(Account.PREMIUM)
+    useOrgStore().setCurrentOrganizationPaymentType(null)
   }
 }
 </script>

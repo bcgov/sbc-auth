@@ -18,7 +18,7 @@ describe('PaymentMethodSelector.vue', () => {
 
     const vuetify = new Vuetify({})
     const orgStore = useOrgStore()
-    orgStore.currentOrganization = { orgType: Account.BASIC } as any
+    orgStore.currentOrganization = { orgType: Account.PREMIUM } as any
     wrapper = mount(PaymentMethodSelector, {
       localVue,
       vuetify

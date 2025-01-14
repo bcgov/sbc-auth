@@ -51,24 +51,23 @@
 </template>
 
 <script lang="ts">
+import { Account, Pages } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
+import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import { Address } from '@/models/address'
 import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInfoForm.vue'
-import GovmPaymentMethodSelector from '@/components/auth/create-account/GovmPaymentMethodSelector.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { Pages } from '@/util/constants'
-import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
+import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
+import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
-    SelectProductService,
-    AccountCreateBasic,
-    GovmPaymentMethodSelector,
+    SelectProductPayment,
+    PaymentMethodSelector,
     Stepper,
     ModalDialog,
     GovmContactInfoForm
@@ -95,23 +94,15 @@ export default class GovmAccountSetupView extends Vue {
       {
         title: 'Account Information',
         stepName: 'Account Information',
-        component: AccountCreateBasic,
+        component: AccountCreate,
         componentProps: {
           govmAccount: true
         }
       },
       {
-        title: 'Products and Payment',
+        title: 'Select Products and Payment',
         stepName: 'Products and Payment',
-        component: SelectProductService,
-        componentProps: {
-          isStepperView: true
-        }
-      },
-      {
-        title: 'Payment Information',
-        stepName: 'Payment Information',
-        component: GovmPaymentMethodSelector,
+        component: SelectProductPayment,
         componentProps: {
           isStepperView: true
         }
@@ -164,6 +155,11 @@ export default class GovmAccountSetupView extends Vue {
       }
       this.$refs.errorDialog.open()
     }
+  }
+  mounted () {
+    useOrgStore().setSelectedAccountType(Account.PREMIUM)
+    useOrgStore().setCurrentOrganizationType(Account.PREMIUM)
+    useOrgStore().setCurrentOrganizationPaymentType(null)
   }
   public closeError () {
     this.$refs.errorDialog.close()

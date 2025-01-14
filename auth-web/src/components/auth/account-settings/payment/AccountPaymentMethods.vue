@@ -1,5 +1,5 @@
 <template>
-  <v-container class="view-container">
+  <div>
     <PaymentMethods
       v-if="selectedPaymentMethod"
       :currentOrgType="savedOrganizationType"
@@ -93,7 +93,7 @@
         </v-btn>
       </template>
     </ModalDialog>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -239,7 +239,7 @@ export default defineComponent({
         state.savedOrganizationType =
         ((currentOrganization.value?.orgType === Account.PREMIUM) &&
           !currentOrganization.value?.bcolAccountId && currentOrganization.value?.accessType !== AccessType.GOVM)
-          ? Account.UNLINKED_PREMIUM : currentOrganization.value.orgType
+          ? Account.PREMIUM : currentOrganization.value.orgType
         const orgPayments: OrgPaymentDetails = await orgStore.getOrgPayments()
         // setting flag for futurePaymentMethod and TOS to show content and TOS checkbox
         state.isFuturePaymentMethodAvailable = !!orgPayments.futurePaymentMethod || false

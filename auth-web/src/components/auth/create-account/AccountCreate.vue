@@ -4,44 +4,9 @@
     lazy-validation
     data-test="form-stepper-premium-wrapper"
   >
-    <h3
-      v-display-mode
-      class="mt-n1 mb-5"
-    >
-      Link with an existing BC Online account
-    </h3>
-
     <div
-      v-show="!linked"
       v-display-mode
     >
-      <p class="mb-4">
-        Linking accounts will import your organization’s contact and drawdown account information. Linking accounts
-        <strong>will not import</strong> your existing users or any businesses you manage. You can invite team members
-        and add businesses once your account is set up successfully.
-      </p>
-      <p class="mb-8">
-        You must be the <strong>Prime Contact</strong> to link this account with your existing BC Online account.
-      </p>
-      <BcolLogin @account-link-successful="onLink" />
-    </div>
-
-    <div
-      v-if="linked"
-      v-display-mode
-    >
-      <p class="mb-8">
-        The following information will be imported from your existing BC Online account. Review your account
-        <br> information below and update if needed.
-      </p>
-      <LinkedBCOLBanner
-        class="mb-9"
-        :bcolAccountName="currentOrganization.bcolAccountName"
-        :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-        :showUnlinkAccountBtn="true"
-        @unlink-account="unlinkAccount"
-      />
-
       <fieldset class="org-business-type">
         <account-business-type
           :saving="saving"
@@ -67,23 +32,6 @@
         />
       </fieldset>
 
-      <fieldset>
-        <legend>Authorization</legend>
-        <v-checkbox
-          v-model="grantAccess"
-          color="primary"
-          class="bcol-auth ml-2"
-          data-test="check-premium-auth"
-        >
-          <template #label>
-            <div
-              v-sanitize="grantAccessText"
-              class="bcol-auth__label"
-            />
-          </template>
-        </v-checkbox>
-      </fieldset>
-
       <v-alert
         v-show="errorMessage"
         type="error"
@@ -95,7 +43,6 @@
     </div>
 
     <v-divider class="mt-4 mb-10" />
-
     <v-row>
       <v-col
         cols="12"
@@ -123,7 +70,7 @@
           depressed
           color="primary"
           :loading="saving"
-          :disabled="!grantAccess || saving || !isFormValid()"
+          :disabled="saving || !isFormValid()"
           data-test="btn-stepper-premium-save"
           @click="save"
         >
@@ -135,7 +82,7 @@
           </span>
         </v-btn>
         <ConfirmCancelButton
-          :showConfirmPopup="linked"
+          :showConfirmPopup="false"
           :target-route="cancelUrl"
         />
       </v-col>
@@ -144,9 +91,7 @@
 </template>
 
 <script lang="ts">
-import { Account, LoginSource, PaymentTypes } from '@/util/constants'
 import { Action, State } from 'pinia-class'
-import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
@@ -155,7 +100,7 @@ import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
+import { LoginSource } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { User } from '@/models/user'
 import { addressSchema } from '@/schemas'
@@ -167,8 +112,8 @@ import { useUserStore } from '@/stores/user'
     AccountBusinessType,
     BcolLogin,
     BaseAddressForm,
-    ConfirmCancelButton,
-    LinkedBCOLBanner
+    ConfirmCancelButton
+
   }
 })
 export default class AccountCreatePremium extends Mixins(Steppable) {
@@ -196,7 +141,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   @Action(useOrgStore) readonly setCurrentOrganizationName!: (name: string) => void
   @Action(useOrgStore) readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
   @Action(useOrgStore) readonly resetBcolDetails!: () => void
-  @Action(useOrgStore) readonly setGrantAccess!: (grantAccess: boolean) => void
   @Action(useOrgStore) readonly setCurrentOrganizationBusinessType!: (orgBusinessType: OrgBusinessType) => void
 
   @Prop() cancelUrl: string
@@ -217,26 +161,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 
-  get grantAccessText () {
-    // https://github.com/bcgov/entity/issues/4178
-    // TODO once above ticket is in pace , remove the if checks
-    const username = this.isExtraProvUser ? '' : `, ${this.currentUser?.fullName},`
-    /* on re-upload we will not have currentOrganization?.bcolAccountDetails since we are not making
-       connection call which will be avaialble on saved deteails
-       so on re-upload check and set account name */
-    const accountName = this.readOnly
-      ? this.currentOrganization.bcolAccountName
-      : (this.currentOrganization?.bcolAccountDetails?.orgName ||
-        this.currentOrganization.bcolAccountName)
-    return `I ${username} confirm that I am authorized to grant access to the account ${accountName}`
-  }
-
-  get grantAccess () {
-    return this.readOnly ? true : this.currentOrganization?.grantAccess
-  }
-  set grantAccess (grantAccess: boolean) {
-    this.setGrantAccess(grantAccess)
-  }
   $refs: {
     createAccountInfoForm: HTMLFormElement
   }
@@ -255,10 +179,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     this.resetBcolDetails()
   }
 
-  get linked () {
-    return !!this.currentOrganization?.bcolAccountDetails
-  }
-
   updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
   }
@@ -271,29 +191,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   async save () {
     // TODO Handle edit mode as well here
     this.goNext()
-  }
-
-  async onLink (details: {
-    bcolProfile: BcolProfile
-    bcolAccountDetails: BcolAccountDetails
-  }) {
-    // sync local tracking object and update child AccountBusinessType with new org name
-    const orgName = details.bcolAccountDetails.orgName
-    this.orgBusinessTypeLocal.name = orgName
-    var org: Organization = {
-      id: this.currentOrganization.id,
-      name: details.bcolAccountDetails.orgName,
-      accessType: this.currentOrganization.accessType,
-      bcolProfile: details.bcolProfile,
-      bcolAccountDetails: details.bcolAccountDetails,
-      grantAccess: false,
-      orgType: Account.PREMIUM,
-      bcolAccountName: details.bcolAccountDetails.orgName
-    }
-    this.setCurrentOrganization(org)
-    this.setCurrentOrganizationPaymentType(PaymentTypes.BCOL)
-    this.setCurrentOrganizationAddress(details.bcolAccountDetails.address)
-    await this.validateAccountNameUnique()
   }
 
   async validateAccountNameUnique () {

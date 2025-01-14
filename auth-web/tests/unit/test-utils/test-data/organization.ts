@@ -1,12 +1,11 @@
 import { AccessType, AccountStatus } from '@/util/constants'
-import { OrgAccountTypes, Organization } from '@/models/Organization'
+import { Organization } from '@/models/Organization'
 
 // default basic values
 const organization: Organization = {
   'accessType': AccessType.REGULAR,
   'id': 1,
   'name': 'test org',
-  'orgType': OrgAccountTypes.BASIC,
   'statusCode': AccountStatus.ACTIVE
 }
 

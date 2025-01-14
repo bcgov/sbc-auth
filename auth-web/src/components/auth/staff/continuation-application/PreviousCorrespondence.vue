@@ -77,7 +77,7 @@ export default defineComponent({
         // get date and user from review object
         list.push({
           label: `${strToPacificDateTime(props.review.creationDate)} &mdash; ` +
-            `Application Submitted &mdash; ${props.review.completingParty}`,
+            `Application Submitted`,
           body: ''
         })
 
