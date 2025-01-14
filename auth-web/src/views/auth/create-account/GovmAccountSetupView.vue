@@ -157,9 +157,7 @@ export default class GovmAccountSetupView extends Vue {
     }
   }
   mounted () {
-    useOrgStore().setSelectedAccountType(Account.PREMIUM)
-    useOrgStore().setCurrentOrganizationType(Account.PREMIUM)
-    useOrgStore().setCurrentOrganizationPaymentType(null)
+    useOrgStore().resetOrgInfoForCreateAccount()
   }
   public closeError () {
     this.$refs.errorDialog.close()
