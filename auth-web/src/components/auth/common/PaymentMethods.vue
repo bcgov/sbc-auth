@@ -229,6 +229,7 @@ const PAYMENT_METHODS = {
     isSelected: false,
     supported: true
   },
+  // Only show on accounts that are EFT enabled.
   [PaymentTypes.EFT]: {
     type: PaymentTypes.EFT,
     icon: 'mdi-arrow-right-circle-outline',
@@ -287,6 +288,7 @@ const PAYMENT_METHODS = {
     isSelected: false,
     supported: true
   },
+  // Only for GOVM clients.
   [PaymentTypes.EJV]: {
     type: PaymentTypes.EJV,
     icon: 'mdi-currency-usd',
