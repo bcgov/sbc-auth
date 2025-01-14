@@ -1,13 +1,6 @@
 <template>
   <div>
-    <template v-if="isPaymentEJV">
-      <GLPaymentForm
-        :viewMode="!isEditing"
-        :canSelect="isBcolAdmin"
-        @is-gl-info-form-valid="isGLInfoValid"
-      />
-    </template>
-    <template v-else-if="!isPaymentEJV">
+    <template>
       <!--<v-radio-group>-->
       <v-card
         v-for="payment in filteredPaymentMethods"
@@ -84,11 +77,22 @@
             <v-expand-transition>
               <div v-if="isPaymentSelected(payment)">
                 <div
-                  v-if="(payment.type === paymentTypes.PAD)"
+                  v-if="isPaymentEJV"
+                  class="pt-7"
+                  >
+                  <GLPaymentForm
+                    :viewMode="!isEditing"
+                    :canSelect="isBcolAdmin"
+                    @is-gl-info-form-valid="isGLInfoValid"
+                  />
+                </div>
+
+                <div
+                  v-else-if="(payment.type === paymentTypes.PAD)"
                   class="pad-form-container pt-4"
                 >
                   <v-divider class="mb-5" />
-                  <div v-if="!isEditing && currentOrgPADInfo">
+                  <div v-if="!isEditing && currentOrgPADInfo && currentOrgPADInfo.bankAccountNumber">
                     <h4 class="mb-4">
                       Banking Information
                     </h4>
@@ -160,24 +164,6 @@
       <!--</v-radio-group>-->
     </template>
     <!-- showing PAD form without card selector for single payment types -->
-    <v-row v-else>
-      <v-col
-        cols="9"
-        class="py-0"
-      >
-        <PADInfoForm
-          :padInformation="{}"
-          :isChangeView="isChangeView"
-          :isAcknowledgeNeeded="isAcknowledgeNeeded"
-          :isInitialTOSAccepted="isInitialTOSAccepted"
-          :isInitialAcknowledged="isInitialAcknowledged"
-          :clearOnEdit="isInitialTOSAccepted"
-          @is-pre-auth-debit-form-valid="isPADValid($event)"
-          @emit-pre-auth-debit-info="getPADInfo($event)"
-          @is-pad-info-touched="isPadInfoTouched($event)"
-        />
-      </v-col>
-    </v-row>
     <ModalDialog
       ref="warningDialog"
       max-width="650"
@@ -300,6 +286,15 @@ const PAYMENT_METHODS = {
         </p>`,
     isSelected: false,
     supported: true
+  },
+  [PaymentTypes.EJV]: {
+    type: PaymentTypes.EJV,
+    icon: 'mdi-currency-usd',
+    title: 'Electronic Journal Voucher',
+    subtitle: 'Pay for transactions using your General Ledger account.',
+    description: '',
+    isSelected: false,
+    supported: true
   }
 }
 
@@ -386,7 +381,7 @@ export default defineComponent({
       }
       const methodSupportPerProduct = paymentMethodSupportedForProducts.value
       if (props.currentOrgType) {
-        const paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT ]
+        const paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT, PaymentTypes.EJV ]
         paymentTypes?.forEach((paymentType) => {
           if (paymentType === PaymentTypes.EFT && !currentOrgPaymentDetails?.eftEnable) {
             return

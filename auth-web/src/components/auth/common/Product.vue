@@ -51,10 +51,6 @@
                         <span>{{ productPremTooltipText(productDetails.code) }}</span>
                       </div>
                     </v-tooltip>
-                    <span
-                      v-else-if="productDetails.premiumOnly"
-                      class="product-title-info"
-                    > (requires Premium Account)</span>
                     <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
                   </h3>
                   <p
@@ -103,10 +99,6 @@
                     <span>{{ productPremTooltipText(productDetails.code) }}</span>
                   </div>
                 </v-tooltip>
-                <span
-                  v-else-if="productDetails.premiumOnly"
-                  class="product-title-info"
-                > (requires Premium Account)</span>
                 <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
               </h3>
               <p
