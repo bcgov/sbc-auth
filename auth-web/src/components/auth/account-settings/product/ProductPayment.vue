@@ -438,7 +438,7 @@ export default defineComponent({
         state.displayRemoveProductDialog = true
         state.dialogTitle = 'Confirm Removing Product and Access'
         state.dialogText = `If you remove this product, you'll lose access and need staff approval to add it back. ` +
-          `This process may take a few business days.<br> <br>Areyou sure you want to remove this product?`
+          `This process may take a few business days.<br> <br>Are you sure you want to remove this product?`
         confirmDialog.value.open()
       } else {
         submitProductRequest()

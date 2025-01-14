@@ -310,7 +310,6 @@ export default defineComponent({
       currentOrgAddress,
       permissions,
       getAccountFromSession,
-      isPremiumAccount,
       anonAccount,
       isGovmAccount,
       isStaffAccount,

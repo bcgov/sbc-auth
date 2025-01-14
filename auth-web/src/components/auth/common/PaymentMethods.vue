@@ -79,7 +79,7 @@
                 <div
                   v-if="isPaymentEJV"
                   class="pt-7"
-                  >
+                >
                   <GLPaymentForm
                     :viewMode="!isEditing"
                     :canSelect="isBcolAdmin"
