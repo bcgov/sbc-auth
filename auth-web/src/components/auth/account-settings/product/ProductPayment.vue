@@ -33,6 +33,7 @@
         :key="product.code"
       >
         <Product
+          :key="productRenderKey"
           v-if="!product.parentCode"
           :productDetails="product"
           :activeSubProduct="subProduct"
@@ -258,7 +259,8 @@ export default defineComponent({
           return 'Close'
         }
       }),
-      isEditing: false
+      isEditing: false,
+      productRenderKey: 0
     })
 
     const loadProduct = async () => {
@@ -283,6 +285,7 @@ export default defineComponent({
       state.isLoading = false
       state.displayRemoveProductDialog = false
       state.dialogError = false
+      state.productRenderKey++
     }
 
     onMounted(async () => {
