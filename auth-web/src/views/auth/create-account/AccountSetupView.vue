@@ -140,7 +140,7 @@ export default defineComponent({
       }
 
       if (isProceedToCreateAccount) {
-        this.createAccount()
+        createAccount()
       }
     }
 
