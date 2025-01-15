@@ -9,6 +9,7 @@
     >
       <fieldset class="org-business-type">
         <AccountBusinessType
+          :govmAccount="govmAccount"
           :saving="saving"
           :premiumLinkedAccount="true"
           :bcolDuplicateNameErrorMessage="bcolDuplicateNameErrorMessage"
@@ -117,6 +118,10 @@ export default defineComponent({
       required: false
     },
     readOnly: {
+      type: Boolean,
+      default: false
+    },
+    govmAccount: {
       type: Boolean,
       default: false
     }

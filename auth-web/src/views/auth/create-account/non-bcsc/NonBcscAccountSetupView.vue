@@ -126,7 +126,7 @@ export default defineComponent({
       // if user affidavit is already approve no need to show upload affidavit stepper
       // so removing it from array
       if (state.isAffidavitAlreadyApproved) {
-        accountStepperConfig.splice(2, 1)
+        accountStepperConfig.splice(0, 1)
       }
     })
 
