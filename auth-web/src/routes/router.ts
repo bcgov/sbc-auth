@@ -380,7 +380,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/setup-account',
       name: 'setupaccount',
       component: AccountSetupLanding,
-      props: (route) => ({ redirectToUrl: route.query.redirectToUrl, skipConfirmation: route.query.skipConfirmation }),
+      props: (route) => ({ redirectToUrl: route.query.redirectToUrl, skipConfirmation: Boolean(route.query.skipConfirmation) }),
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
