@@ -467,7 +467,7 @@ export default defineComponent({
             query: { changePaymentType: payment.type }
           })
         }
-      } else if (payment.type === PaymentTypes.BCOL && isTouch && selectedPaymentMethod.value !== PaymentTypes.BCOL) {
+      } else if (payment.type === PaymentTypes.BCOL && isTouch && state.selectedPaymentMethod !== PaymentTypes.BCOL) {
         openBCOnlineDialog()
       } else {
         state.bcOnlineWarningMessage = 'This payment method will soon be retired.'
