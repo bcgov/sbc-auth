@@ -3,7 +3,7 @@
     ref="createAccountInfoForm"
     lazy-validation
   >
-    <AccountCreatePremium
+    <AccountCreate
       v-if="isPremium()"
       :stepForward="stepForward"
       :stepBack="stepBack"
@@ -14,7 +14,7 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import { Account } from '@/util/constants'
-import AccountCreatePremium from '@/components/auth/create-account/AccountCreate.vue'
+import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { useOrgStore } from '@/stores/org'
@@ -23,7 +23,7 @@ import { useUserStore } from '@/stores/user'
 export default defineComponent({
   name: 'CreateAccountInfoForm',
   components: {
-    AccountCreatePremium
+    AccountCreate
   },
   mixins: [Steppable],
   setup (props, { root }) {
