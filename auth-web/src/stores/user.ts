@@ -30,7 +30,7 @@ export const useUserStore = defineStore('user', () => {
     userProfileData: undefined as UserProfileData,
     redirectAfterLoginUrl: '' as string,
     roleInfos: undefined as RoleInfo[],
-    currentUserAccountSettings: undefined as UserSettings[],
+    currentUserAccountSettings: undefined as UserSettings[]
   })
 
   function $reset () {

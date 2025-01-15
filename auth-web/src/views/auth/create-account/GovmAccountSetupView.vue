@@ -51,46 +51,30 @@
 </template>
 
 <script lang="ts">
-import { Action, State } from 'pinia-class'
-import { Component, Vue } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
+import { defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
-import { Address } from '@/models/address'
 import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInfoForm.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Pages } from '@/util/constants'
-import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
 import { useOrgStore } from '@/stores/org'
 
-@Component({
+export default defineComponent({
+  name: 'GovmAccountSetupView',
   components: {
-    SelectProductPayment,
-    PaymentMethodSelector,
     Stepper,
-    ModalDialog,
-    GovmContactInfoForm
-  }
-})
-export default class GovmAccountSetupView extends Vue {
-  // private readonly createOrg!: () => Promise<Organization>
-  @Action(useOrgStore) private createGovmOrg!: () => void
-  @State(useOrgStore) private currentOrganization!: Organization
-  @State(useOrgStore) private currentOrgAddress!: Address
-  @Action(useOrgStore) private syncOrganization!: (orgId: number) => Promise<Organization>
-  @Action(useOrgStore) private syncMembership!: (orgId: number) => Promise<Member>
-
-  public errorTitle = 'Account creation failed'
-  public errorText = ''
-  public isLoading: boolean = false
-
-  $refs: {
-    errorDialog: InstanceType<typeof ModalDialog>
-  }
-
-  public stepperConfig: Array<StepConfiguration> =
-    [
+    ModalDialog
+  },
+  setup (props, { root }) {
+    const { createGovmOrg, syncOrganization, syncMembership } = useOrgStore()
+    const state = reactive({
+      isLoading: false,
+      errorTitle: 'Account creation failed',
+      errorText: ''
+    })
+    const errorDialog = ref<InstanceType<typeof ModalDialog>>()
+    const stepperConfig: Array<StepConfiguration> = [
       {
         title: 'Account Information',
         stepName: 'Account Information',
@@ -116,51 +100,61 @@ export default class GovmAccountSetupView extends Vue {
         }
       }
     ]
-  // TODO functionality for create account
-  public async createAccount () {
-    this.isLoading = true
-    try {
-      // save or from here
-      const organization: any = await this.createGovmOrg() // create govm account
-      await this.syncOrganization(organization.id)
-      await this.syncMembership(organization.id)
-      // Remove with Vue 3
-      this.$store.commit('updateHeader')
-      this.$router.push(Pages.SETUP_GOVM_ACCOUNT_SUCCESS)
-      this.isLoading = false
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err)
-      this.isLoading = false
-      switch (err?.response?.status) {
-        case 409:
-          this.errorText =
-                  'An account with this name already exists. Try a different account name.'
-          break
-        case 400:
-          switch (err.response.data?.code) {
-            case 'MAX_NUMBER_OF_ORGS_LIMIT':
-              this.errorText = 'Maximum number of accounts reached'
-              break
-            case 'ACTIVE_AFFIDAVIT_EXISTS':
-              this.errorText = err.response.data.message || 'Affidavit already exists'
-              break
-            default:
-              this.errorText = 'An error occurred while attempting to create your account.'
-          }
-          break
-        default:
-          this.errorText =
-                  'An error occurred while attempting to create your account.'
+
+    onMounted(() => {
+      useOrgStore().resetOrgInfoForCreateAccount()
+    })
+
+    async function createAccount () {
+      this.isLoading = true
+      try {
+        // save or from here
+        const organization: any = await createGovmOrg() // create govm account
+        await syncOrganization(organization.id)
+        await syncMembership(organization.id)
+        // Remove with Vue 3
+        root.$store.commit('updateHeader')
+        root.$router.push(Pages.SETUP_GOVM_ACCOUNT_SUCCESS)
+        state.isLoading = false
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err)
+        state.isLoading = false
+        switch (err?.response?.status) {
+          case 409:
+            state.errorText =
+                    'An account with this name already exists. Try a different account name.'
+            break
+          case 400:
+            switch (err.response.data?.code) {
+              case 'MAX_NUMBER_OF_ORGS_LIMIT':
+                state.errorText = 'Maximum number of accounts reached'
+                break
+              case 'ACTIVE_AFFIDAVIT_EXISTS':
+                state.errorText = err.response.data.message || 'Affidavit already exists'
+                break
+              default:
+                state.errorText = 'An error occurred while attempting to create your account.'
+            }
+            break
+          default:
+            state.errorText =
+                    'An error occurred while attempting to create your account.'
+        }
+        errorDialog.value.open()
       }
-      this.$refs.errorDialog.open()
+    }
+
+    function closeError () {
+      errorDialog.value.close()
+    }
+
+    return {
+      ...toRefs(state),
+      stepperConfig,
+      createAccount,
+      closeError
     }
   }
-  mounted () {
-    useOrgStore().resetOrgInfoForCreateAccount()
-  }
-  public closeError () {
-    this.$refs.errorDialog.close()
-  }
-}
+})
 </script>
