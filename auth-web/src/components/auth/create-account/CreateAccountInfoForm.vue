@@ -3,13 +3,8 @@
     ref="createAccountInfoForm"
     lazy-validation
   >
-    <account-create-premium
+    <AccountCreatePremium
       v-if="isPremium()"
-      :stepForward="stepForward"
-      :stepBack="stepBack"
-    />
-    <account-create-basic
-      v-if="!isPremium()"
       :stepForward="stepForward"
       :stepBack="stepBack"
     />
@@ -17,58 +12,63 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator'
-import { CreateRequestBody, Member, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'pinia'
+import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import { Account } from '@/util/constants'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreate.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
-@Component({
+export default defineComponent({
+  name: 'CreateAccountInfoForm',
   components: {
     AccountCreatePremium
   },
-  computed: {
-    ...mapState(useOrgStore, ['currentOrganization']),
-    ...mapState(useUserStore, ['userProfile', 'currentUser'])
-  },
-  methods: {
-    ...mapActions(useOrgStore, ['createOrg', 'syncMembership', 'syncOrganization'])
-  }
-})
-export default class CreateAccountInfoForm extends Mixins(Steppable) {
-  private username = ''
-  private password = ''
-  private errorMessage: string = ''
-  private saving = false
-  private readonly createOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
-  private readonly syncMembership!: (orgId: number) => Promise<Member>
-  private readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  private readonly currentOrganization!: Organization
-  private readonly currentUser!: KCUserProfile
+  mixins: [Steppable],
+  setup (props, { root }) {
+    const createAccountInfoForm = ref<HTMLFormElement>()
+    const state = reactive({
+      username: '',
+      password: '',
+      errorMessage: '',
+      saving: false,
+      currentOrganization: computed(() => useOrgStore().currentOrganization),
+      currentUser: computed(() => useUserStore().currentUser),
+      userProfile: computed(() => useUserStore().userProfile)
+    })
 
-  $refs: {
-      createAccountInfoForm: HTMLFormElement
+    const { createOrg, syncMembership, syncOrganization } = useOrgStore()
+
+    function isPremium (): boolean {
+      return state.currentOrganization.orgType === Account.PREMIUM
     }
 
-  private readonly teamNameRules = [
-    v => !!v || 'An account name is required']
+    function isFormValid (): boolean {
+      return !!state.username && !!state.password
+    }
 
-  private isFormValid (): boolean {
-    return !!this.username && !!this.password
-  }
+    function redirectToNext (organization?: Organization) {
+      root.$router.push({ path: `/account/${organization.id}/` })
+    }
 
-  isPremium () {
-    return this.currentOrganization.orgType === Account.PREMIUM
-  }
+    const teamNameRules = [
+      v => !!v || 'An account name is required'
+    ]
 
-  private redirectToNext (organization?: Organization) {
-    this.$router.push({ path: `/account/${organization.id}/` })
+    return {
+      ...toRefs(state),
+      isPremium,
+      isFormValid,
+      createOrg,
+      syncMembership,
+      syncOrganization,
+      createAccountInfoForm,
+      redirectToNext,
+      teamNameRules
+    }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
