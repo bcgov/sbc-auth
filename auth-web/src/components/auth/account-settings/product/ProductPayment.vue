@@ -424,7 +424,6 @@ export default defineComponent({
     }
 
     const setSelectedProduct = async (productDetails) => {
-      // add/remove product from the currentselectedproducts store
       const productCode = productDetails.code
       const forceRemove = productDetails.forceRemove
 
