@@ -468,7 +468,7 @@ export default defineComponent({
       state.isTouched = isTouch
       // Emit touched flag for the parent element
       if (props.isTouchedUpdate) {
-        emit('payment-method-selected', { selectedPaymentMethod: state.selectedPaymentMethod, isTouched: isTouched.value })
+        emit('payment-method-selected', { selectedPaymentMethod: state.selectedPaymentMethod, isTouched: state.isTouched })
       } else {
         emit('payment-method-selected', state.selectedPaymentMethod)
       }
