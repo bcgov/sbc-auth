@@ -259,24 +259,78 @@ export default defineComponent({
           ? PaymentTypes.DIRECT_PAY : orgStore.currentOrgPaymentType
         return !orgStore.currentOrgPaymentType || state.filteredPaymentMethods?.includes(paymentMethod)
       }),
+      hasDecisionNotBeenMade: computed(() => {
+        // returns true if create account flow
+        if (!props.isAccountSettingsView) {
+          return true
+        }
+        return ([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(props.productDetails.subscriptionStatus)
+      }),
+      hideCheckbox: computed(() => {
+        const decisionMadeStatus = [ProductStatus.PENDING_STAFF_REVIEW, ProductStatus.REJECTED]
+        return (decisionMadeStatus as Array<string>).includes(props.productDetails.subscriptionStatus)
+      }),
+      // if TOS needed will inject component
+      // in future can use different components for different product
+      productFooter: computed(() => {
+        return {
+          id: 'tos',
+          component: ProductTos,
+          props: {
+            userName: props.userName,
+            orgName: props.orgName,
+            isTOSAlreadyAccepted: state.termsAccepted
+          },
+          events: { 'tos-status-changed': tosChanged },
+          ref: 'tosForm'
+        }
+      }),
+      productLabel: computed(() => {
+        let { code } = props.productDetails
+        let subTitle = `${code?.toLowerCase()}CodeSubtitle`
+        let details = `${code?.toLowerCase()}CodeDescription`
+        let note = `${code?.toLowerCase()}CodeNote`
+        let decisionMadeIcon = null
+        let decisionMadeColorCode = null
+
+        if (props.isAccountSettingsView) {
+          const status = props.productDetails.subscriptionStatus
+          switch (status) {
+            case ProductStatus.ACTIVE: {
+              subTitle = `${code?.toLowerCase()}CodeActiveSubtitle`
+              decisionMadeIcon = 'mdi-check-circle'
+              decisionMadeColorCode = 'success'
+              break
+            }
+            case ProductStatus.REJECTED: {
+              subTitle = `${code?.toLowerCase()}CodeRejectedSubtitle`
+              decisionMadeIcon = 'mdi-close-circle'
+              decisionMadeColorCode = 'error'
+              break
+            }
+            case ProductStatus.PENDING_STAFF_REVIEW: {
+              subTitle = 'productPendingSubtitle'
+              decisionMadeIcon = 'mdi-clock-outline'
+              break
+            }
+            default: {
+              break
+            }
+          }
+          // Swap subtitle and details for sub-product specific content
+          if (props.productDetails.code === ProductEnum.MHR && props.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
+            subTitle = `mhrQsCodeActiveSubtitle`
+            details = `${props.activeSubProduct.code?.toLowerCase()}CodeDescription`
+            note = ''
+          }
+        }
+        return { subTitle, details, decisionMadeIcon, decisionMadeColorCode, note }
+      }),
       showPaymentMethodNotSupported: false
     })
 
-    const hasDecisionNotBeenMade = computed(() => {
-      // returns true if create account flow
-      if (!props.isAccountSettingsView) {
-        return true
-      }
-      return ([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(props.productDetails.subscriptionStatus)
-    })
-
-    const hideCheckbox = computed(() => {
-      const decisionMadeStatus = [ProductStatus.PENDING_STAFF_REVIEW, ProductStatus.REJECTED]
-      return (decisionMadeStatus as Array<string>).includes(props.productDetails.subscriptionStatus)
-    })
-
     onMounted(() => {
-      state.productSelected = props.isAccountSettingsView ? !hasDecisionNotBeenMade.value : props.isSelected
+      state.productSelected = props.isAccountSettingsView ? !state.hasDecisionNotBeenMade : props.isSelected
     })
 
     watch(() => props.isSelected, (newValue) => {
@@ -286,50 +340,8 @@ export default defineComponent({
       }
     })
 
-    const productLabel = computed(() => {
-      let { code } = props.productDetails
-      let subTitle = `${code?.toLowerCase()}CodeSubtitle`
-      let details = `${code?.toLowerCase()}CodeDescription`
-      let note = `${code?.toLowerCase()}CodeNote`
-      let decisionMadeIcon = null
-      let decisionMadeColorCode = null
-
-      if (props.isAccountSettingsView) {
-        const status = props.productDetails.subscriptionStatus
-        switch (status) {
-          case ProductStatus.ACTIVE: {
-            subTitle = `${code?.toLowerCase()}CodeActiveSubtitle`
-            decisionMadeIcon = 'mdi-check-circle'
-            decisionMadeColorCode = 'success'
-            break
-          }
-          case ProductStatus.REJECTED: {
-            subTitle = `${code?.toLowerCase()}CodeRejectedSubtitle`
-            decisionMadeIcon = 'mdi-close-circle'
-            decisionMadeColorCode = 'error'
-            break
-          }
-          case ProductStatus.PENDING_STAFF_REVIEW: {
-            subTitle = 'productPendingSubtitle'
-            decisionMadeIcon = 'mdi-clock-outline'
-            break
-          }
-          default: {
-            break
-          }
-        }
-        // Swap subtitle and details for sub-product specific content
-        if (props.productDetails.code === ProductEnum.MHR && props.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
-          subTitle = `mhrQsCodeActiveSubtitle`
-          details = `${props.activeSubProduct.code?.toLowerCase()}CodeDescription`
-          note = ''
-        }
-      }
-      return { subTitle, details, decisionMadeIcon, decisionMadeColorCode, note }
-    })
-
     // Untested.
-    watch(() => hasDecisionNotBeenMade.value, (newValue) => {
+    watch(() => state.hasDecisionNotBeenMade, (newValue) => {
       if (!newValue) {
         state.termsAccepted = true
       }
@@ -397,22 +409,6 @@ export default defineComponent({
       selectThisProduct(undefined, true)// no need to collapse on TOS accept
     }
 
-    // if TOS needed will inject component
-    // in future can use different components for different product
-    const productFooter = computed(() => {
-      return {
-        id: 'tos',
-        component: ProductTos,
-        props: {
-          userName: props.userName,
-          orgName: props.orgName,
-          isTOSAlreadyAccepted: state.termsAccepted
-        },
-        events: { 'tos-status-changed': tosChanged },
-        ref: 'tosForm'
-      }
-    })
-
     function productBadge (code: string) {
       return LaunchDarklyService.getFlag(`product-${code}-status`)
     }
@@ -427,16 +423,12 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
-      productLabel,
       paymentTypeIcon,
       expand,
       selectThisProduct,
       productBadge,
       productPremTooltipText,
-      productFooter,
       saveProductFee,
-      hasDecisionNotBeenMade,
-      hideCheckbox,
       paymentTypeLabel,
       productDescription
     }
