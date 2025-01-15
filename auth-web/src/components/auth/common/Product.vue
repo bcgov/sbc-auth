@@ -248,6 +248,7 @@ export default defineComponent({
         return TOS_NEEDED_PRODUCT.includes(props.productDetails.code)
       }),
       filteredPaymentMethods: computed(() => {
+        // TODO, this looks at the current org? not the org in creation?
         if (orgStore.isGovmOrg) {
           return props.paymentMethods.filter((method) => method === PaymentTypes.EJV)
         }
