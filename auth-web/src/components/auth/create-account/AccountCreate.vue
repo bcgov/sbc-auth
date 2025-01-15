@@ -116,7 +116,7 @@ import { useUserStore } from '@/stores/user'
 
   }
 })
-export default class AccountCreatePremium extends Mixins(Steppable) {
+export default class AccountCreate extends Mixins(Steppable) {
   username = ''
   password = ''
   errorMessage: string = ''
@@ -196,7 +196,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     const available = await this.isOrgNameAvailable(
       { 'name': this.orgBusinessTypeLocal.name, 'branchName': this.orgBusinessTypeLocal.branchName })
     if (!available) {
-      this.bcolDuplicateNameErrorMessage = AccountCreatePremium.DUPL_ERROR_MESSAGE
+      this.bcolDuplicateNameErrorMessage = AccountCreate.DUPL_ERROR_MESSAGE
       this.orgNameReadOnly = false
       return false
     } else {
@@ -222,7 +222,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     if (isValidName) {
       this.stepForward()
     } else {
-      this.errorMessage = AccountCreatePremium.DUPL_ERROR_MESSAGE
+      this.errorMessage = AccountCreate.DUPL_ERROR_MESSAGE
     }
   }
 
