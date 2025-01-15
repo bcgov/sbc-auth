@@ -161,7 +161,8 @@ export default defineComponent({
         } else {
           return !!state.selectedPaymentMethod
         }
-      })
+      }),
+      isPADValid: false
     })
 
     async function setup () {
