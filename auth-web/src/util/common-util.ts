@@ -227,8 +227,7 @@ export default class CommonUtils {
       Permission.VIEW_ADDRESS,
       Permission.VIEW_ADMIN_CONTACT,
       Permission.VIEW_AUTH_OPTIONS,
-      Permission.VIEW_PAYMENT_METHODS,
-      Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
+      Permission.VIEW_PRODUCT_AND_PAYMENTS,
       Permission.VIEW_USER_LOGINSOURCE,
       Permission.EDIT_USER,
       Permission.VIEW_BUSINESS_REGISTRY_DASHBOARD,
@@ -252,8 +251,7 @@ export default class CommonUtils {
       Permission.VIEW_ADDRESS,
       Permission.VIEW_ADMIN_CONTACT,
       Permission.VIEW_AUTH_OPTIONS,
-      Permission.VIEW_PAYMENT_METHODS,
-      Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
+      Permission.VIEW_PRODUCT_AND_PAYMENTS,
       Permission.VIEW_USER_LOGINSOURCE
     ]
   }
@@ -264,9 +262,8 @@ export default class CommonUtils {
       Permission.VIEW_ADDRESS,
       Permission.VIEW_ADMIN_CONTACT,
       Permission.RESET_OTP,
-      Permission.VIEW_PAYMENT_METHODS,
       Permission.VIEW_AUTH_OPTIONS,
-      Permission.VIEW_REQUEST_PRODUCT_PACKAGE
+      Permission.VIEW_PRODUCT_AND_PAYMENTS
     ]
   }
 

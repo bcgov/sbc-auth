@@ -192,7 +192,7 @@
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
               <v-list-item
-                v-can:VIEW_REQUEST_PRODUCT_PACKAGE.hide
+                v-can:VIEW_PRODUCT_AND_PAYMENTS.hide
                 dense
                 class="py-1 px-4"
                 aria-label="Products and Payment"
