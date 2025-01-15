@@ -136,6 +136,7 @@ export default defineComponent({
     readOnly: { type: Boolean, default: false },
     orgId: { type: Number, default: undefined }
   },
+  emits: ['final-step-action', 'emit-bcol-info'],
   setup (props, { root, emit }) {
     const form = ref(null)
     const orgStore = useOrgStore()
@@ -254,8 +255,6 @@ export default defineComponent({
       orgStore.setCurrentOrganizationBcolProfile(bcolProfile)
       emit('emit-bcol-info')
     }
-
-
 
     return {
       ...toRefs(state),
