@@ -149,7 +149,16 @@ export default defineComponent({
       selectedPaymentMethod: '',
       errorMessage: '',
       currentOrganizationType: computed(() => orgStore.currentOrganizationType),
-      currentOrgPaymentType: computed(() => orgStore.currentOrgPaymentType)
+      currentOrgPaymentType: computed(() => orgStore.currentOrgPaymentType),
+      isPaymentValid: computed(() => {
+        if (state.selectedPaymentMethod === PaymentTypes.PAD) {
+          return state.isPADValid
+        } else if (state.selectedPaymentMethod === PaymentTypes.BCOL) {
+          return state.currentOrganization.bcolProfile?.password
+        } else {
+          return !!state.selectedPaymentMethod
+        }
+      })
     })
 
     async function setup () {
@@ -246,15 +255,7 @@ export default defineComponent({
       emit('emit-bcol-info')
     }
 
-    const isPaymentValid = computed(() => {
-      if (state.selectedPaymentMethod === PaymentTypes.PAD) {
-        return state.isPADValid
-      } else if (state.selectedPaymentMethod === PaymentTypes.BCOL) {
-        return state.currentOrganization.bcolProfile?.password
-      } else {
-        return !!state.selectedPaymentMethod
-      }
-    })
+
 
     return {
       ...toRefs(state),
@@ -265,7 +266,6 @@ export default defineComponent({
       setBcolInfo,
       toggleProductDetails,
       goBack,
-      isPaymentValid,
       save,
       cancel
     }
