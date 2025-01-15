@@ -86,7 +86,6 @@
           <span>Back</span>
         </v-btn>
         <v-spacer />
-
         <v-btn
           v-if="isStepperView"
           large
@@ -247,7 +246,7 @@ export default defineComponent({
       emit('emit-bcol-info')
     }
 
-    function isPaymentValid () {
+    const isPaymentValid = computed(() => {
       if (state.selectedPaymentMethod === PaymentTypes.PAD) {
         return state.isPADValid
       } else if (state.selectedPaymentMethod === PaymentTypes.BCOL) {
@@ -255,7 +254,7 @@ export default defineComponent({
       } else {
         return !!state.selectedPaymentMethod
       }
-    }
+    })
 
     return {
       ...toRefs(state),

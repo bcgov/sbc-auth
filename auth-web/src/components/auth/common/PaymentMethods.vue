@@ -408,6 +408,7 @@ export default defineComponent({
             }
             if (paymentType === state.selectedPaymentMethod && !paymentMethod.supported) {
               state.selectedPaymentMethod = ''
+              emit('payment-method-selected', state.selectedPaymentMethod)
             }
           }
           paymentMethods.push(paymentMethod)
