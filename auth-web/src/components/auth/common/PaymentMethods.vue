@@ -373,7 +373,8 @@ export default defineComponent({
       const paymentMethodProducts = {}
       for (const [product, methods] of Object.entries(productPaymentMethods)) {
         methods.forEach(method => {
-          (paymentMethodProducts[method] ??= []).push(product)
+          paymentMethodProducts[method] ??= []
+          paymentMethodProducts[method].push(product)
         })
       }
 
