@@ -231,6 +231,7 @@ export default defineComponent({
     isAccountSettingsView: { type: Boolean, default: false },
     canManageProductFee: { type: Boolean, default: false },
     disableWhileEditingPayment: { type: Boolean, default: false },
+    isCreateAccount: { type: Boolean, default: false },
     paymentMethods: { type: Array as PropType<string[]>, default: () => [] }
   },
   setup (props, { emit }) {
@@ -256,7 +257,7 @@ export default defineComponent({
       paymentMethodSupported: computed(() => {
         const paymentMethod = orgStore.currentOrgPaymentType === PaymentTypes.CREDIT_CARD
           ? PaymentTypes.DIRECT_PAY : orgStore.currentOrgPaymentType
-        return state.filteredPaymentMethods?.includes(paymentMethod)
+        return !orgStore.currentOrgPaymentType || state.filteredPaymentMethods?.includes(paymentMethod)
       }),
       showPaymentMethodNotSupported: false
     })
@@ -347,7 +348,7 @@ export default defineComponent({
         return
       }
       const productSubscribed = props.productDetails.subscriptionStatus === 'ACTIVE'
-      if (!state.paymentMethodSupported && !productSubscribed) {
+      if (!props.isCreateAccount && !state.paymentMethodSupported && !productSubscribed) {
         state.productSelected = false
         state.showPaymentMethodNotSupported = true
         return

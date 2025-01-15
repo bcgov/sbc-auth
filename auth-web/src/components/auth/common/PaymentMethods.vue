@@ -20,7 +20,7 @@
               class="d-inline-flex"
             >
               <v-radio
-                v-show="isEditing"
+                v-show="isEditing || isCreateAccount"
                 :key="payment.type"
                 :value="payment.type"
               />
@@ -367,11 +367,9 @@ export default defineComponent({
     const paymentMethodSupportedForProducts = computed(() => {
       const productPaymentMethods = orgStore.productPaymentMethods
       const { productList } = storeToRefs(useOrgStore())
-
-      const activeProductSubscriptions = productList.value
+      const derivedProductList = props.isCreateAccount ? currentSelectedProducts.value : productList.value
         .filter(item => item.subscriptionStatus === 'ACTIVE')
         .map(item => item.code)
-
       const paymentMethodProducts = {}
       for (const [product, methods] of Object.entries(productPaymentMethods)) {
         methods.forEach(method => {
@@ -381,7 +379,7 @@ export default defineComponent({
 
       const paymentMethodSupported = {}
       Object.entries(paymentMethodProducts).forEach(([key, values]) => {
-        paymentMethodSupported[key] = activeProductSubscriptions.every(subscription => (values as Array<string>).includes(subscription))
+        paymentMethodSupported[key] = derivedProductList.every(subscription => (values as Array<string>).includes(subscription))
       })
       paymentMethodSupported[PaymentTypes.CREDIT_CARD] = paymentMethodSupported[PaymentTypes.DIRECT_PAY]
       return paymentMethodSupported
@@ -403,9 +401,13 @@ export default defineComponent({
         const paymentMethod = PAYMENT_METHODS[paymentType]
         if (paymentMethod) {
           paymentMethod.supported = methodSupportPerProduct[paymentType]
-          // Disable all payment methods if no products are selected when creating an account.
-          if (props.isCreateAccount && currentSelectedProducts.value.length === 0) {
-            paymentMethod.supported = false
+          if (props.isCreateAccount) {
+            if (currentSelectedProducts.value.length === 0) {
+              paymentMethod.supported = false
+            }
+            if (paymentType === state.selectedPaymentMethod && !paymentMethod.supported) {
+              state.selectedPaymentMethod = ''
+            }
           }
           paymentMethods.push(paymentMethod)
         }

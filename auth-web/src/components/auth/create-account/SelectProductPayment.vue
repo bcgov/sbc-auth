@@ -25,6 +25,8 @@
       >
         <Product
           v-if="!product.parentCode"
+          :disableWhileEditingPayment="false"
+          :isCreateAccount="true"
           :productDetails="product"
           :isexpandedView="product.code === expandedProductCode"
           :isSelected="currentSelectedProducts.includes(product.code)"
