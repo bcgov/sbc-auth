@@ -347,7 +347,7 @@ export default defineComponent({
         state.productSelected = !state.productSelected
         return
       }
-      const productSubscribed = props.productDetails.subscriptionStatus === 'ACTIVE'
+      const productSubscribed = props.productDetails.subscriptionStatus === ProductStatus.ACTIVE
       if (!props.isCreateAccount && !state.paymentMethodSupported && !productSubscribed) {
         state.productSelected = false
         state.showPaymentMethodNotSupported = true

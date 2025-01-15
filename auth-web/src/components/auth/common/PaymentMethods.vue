@@ -215,7 +215,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LDFlags, Pages, PaymentTypes } from '@/util/constants'
+import { AccessType, LDFlags, Pages, PaymentTypes, ProductStatus } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
@@ -235,7 +235,6 @@ const PAYMENT_METHODS = {
     subtitle: 'Pay for transactions individually with your credit card.',
     description: `You don't need to provide any credit card information with your account. Credit card information will
                   be requested when you are ready to complete a transaction.`,
-    isSelected: false,
     supported: true
   },
   // Only show on accounts that are EFT enabled.
@@ -245,7 +244,6 @@ const PAYMENT_METHODS = {
     title: 'Electronic Funds Transfer',
     subtitle: 'Make payments from your bank account. Statement will be issued monthly.',
     description: ``,
-    isSelected: false,
     supported: true
   },
   [PaymentTypes.PAD]: {
@@ -254,7 +252,6 @@ const PAYMENT_METHODS = {
     title: 'Pre-authorized Debit',
     subtitle: 'Automatically debit a bank account when payments are due.',
     description: '',
-    isSelected: false,
     supported: true
   },
   [PaymentTypes.BCOL]: {
@@ -263,7 +260,6 @@ const PAYMENT_METHODS = {
     title: 'BC Online',
     subtitle: 'Use your linked BC Online account for payment.',
     description: '',
-    isSelected: false,
     supported: true
   },
   [PaymentTypes.ONLINE_BANKING]: {
@@ -294,7 +290,6 @@ const PAYMENT_METHODS = {
           Receipt of an online banking payment generally takes 3-4 days from when you make the payment with your 
           financial institution.
         </p>`,
-    isSelected: false,
     supported: true
   },
   // Only for GOVM clients.
@@ -304,7 +299,6 @@ const PAYMENT_METHODS = {
     title: 'Electronic Journal Voucher',
     subtitle: 'Pay for transactions using your General Ledger.',
     description: '',
-    isSelected: false,
     supported: true
   }
 }
@@ -335,6 +329,7 @@ export default defineComponent({
   setup (props, { emit, root }) {
     const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary, currentOrgPADInfo } = useOrgStore()
     const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
+    const ejvPaymentInformationTitle = 'General Ledger Information'
 
     const orgStore = useOrgStore()
     const {
@@ -344,7 +339,66 @@ export default defineComponent({
       bcOnlineWarningMessage: 'This payment method will soon be retired.',
       dialogTitle: '',
       dialogText: '',
-      selectedPaymentMethod: ''
+      selectedPaymentMethod: '',
+      padInfo: {},
+      isTouched: false,
+      isPaymentEJV: computed(() => state.selectedPaymentMethod === PaymentTypes.EJV),
+      paymentMethodSupportedForProducts: computed(() => {
+        const productPaymentMethods = orgStore.productPaymentMethods
+        const { productList } = storeToRefs(useOrgStore())
+        const derivedProductList = props.isCreateAccount ? currentSelectedProducts.value : productList.value
+          .filter(item => item.subscriptionStatus === ProductStatus.ACTIVE)
+          .map(item => item.code)
+        const paymentMethodProducts = {}
+        for (const [product, methods] of Object.entries(productPaymentMethods)) {
+          methods.forEach(method => {
+            paymentMethodProducts[method] ??= []
+            paymentMethodProducts[method].push(product)
+          })
+        }
+
+        const paymentMethodSupported = {}
+        Object.entries(paymentMethodProducts).forEach(([key, values]) => {
+          paymentMethodSupported[key] = derivedProductList.every(subscription => (values as Array<string>).includes(subscription))
+        })
+        paymentMethodSupported[PaymentTypes.CREDIT_CARD] = paymentMethodSupported[PaymentTypes.DIRECT_PAY]
+        return paymentMethodSupported
+      }),
+      filteredPaymentMethods: computed(() => {
+        if (!props.isEditing && !props.isCreateAccount && state.selectedPaymentMethod) {
+          return [PAYMENT_METHODS[state.selectedPaymentMethod]]
+        }
+        const methodSupportPerProduct = state.paymentMethodSupportedForProducts
+        const paymentMethods = []
+        const isGovmOrg = props.currentOrgType === AccessType.GOVM
+        const paymentTypes = isGovmOrg ? [PaymentTypes.EJV] : [PaymentTypes.PAD, PaymentTypes.CREDIT_CARD,
+          PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT]
+        paymentTypes.forEach((paymentType) => {
+          if (paymentType === PaymentTypes.EFT && !currentOrgPaymentDetails?.eftEnable) {
+            return
+          }
+          const paymentMethod = PAYMENT_METHODS[paymentType]
+          if (paymentMethod) {
+            paymentMethod.supported = methodSupportPerProduct[paymentType]
+            if (props.isCreateAccount) {
+              if (currentSelectedProducts.value.length === 0) {
+                paymentMethod.supported = false
+              }
+              if (paymentType === state.selectedPaymentMethod && !paymentMethod.supported) {
+                state.selectedPaymentMethod = ''
+                emit('payment-method-selected', state.selectedPaymentMethod)
+              }
+            }
+            paymentMethods.push(paymentMethod)
+          }
+        })
+        return paymentMethods
+      }),
+      forceEditModeBCOL: computed(() =>
+        props.currentSelectedPaymentMethod === PaymentTypes.BCOL &&
+        props.currentOrgPaymentType !== undefined &&
+        props.currentOrgPaymentType !== PaymentTypes.BCOL
+      )
     })
 
     const openBCOnlineDialog = () => {
@@ -360,74 +414,10 @@ export default defineComponent({
       warningDialog.value.open()
     }
     const paymentTypes = PaymentTypes
-    const padInfo = ref({})
-    const isTouched = ref(false)
-    const ejvPaymentInformationTitle = 'General Ledger Information'
-
-    const paymentMethodSupportedForProducts = computed(() => {
-      const productPaymentMethods = orgStore.productPaymentMethods
-      const { productList } = storeToRefs(useOrgStore())
-      const derivedProductList = props.isCreateAccount ? currentSelectedProducts.value : productList.value
-        .filter(item => item.subscriptionStatus === 'ACTIVE')
-        .map(item => item.code)
-      const paymentMethodProducts = {}
-      for (const [product, methods] of Object.entries(productPaymentMethods)) {
-        methods.forEach(method => {
-          paymentMethodProducts[method] ??= []
-          paymentMethodProducts[method].push(product)
-        })
-      }
-
-      const paymentMethodSupported = {}
-      Object.entries(paymentMethodProducts).forEach(([key, values]) => {
-        paymentMethodSupported[key] = derivedProductList.every(subscription => (values as Array<string>).includes(subscription))
-      })
-      paymentMethodSupported[PaymentTypes.CREDIT_CARD] = paymentMethodSupported[PaymentTypes.DIRECT_PAY]
-      return paymentMethodSupported
-    })
-
-    const filteredPaymentMethods = computed(() => {
-      if (!props.isEditing && !props.isCreateAccount && state.selectedPaymentMethod) {
-        return [PAYMENT_METHODS[state.selectedPaymentMethod]]
-      }
-      const methodSupportPerProduct = paymentMethodSupportedForProducts.value
-      const paymentMethods = []
-      const isGovmOrg = props.currentOrgType === AccessType.GOVM
-      const paymentTypes = isGovmOrg ? [PaymentTypes.EJV] : [PaymentTypes.PAD, PaymentTypes.CREDIT_CARD,
-        PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT]
-      paymentTypes.forEach((paymentType) => {
-        if (paymentType === PaymentTypes.EFT && !currentOrgPaymentDetails?.eftEnable) {
-          return
-        }
-        const paymentMethod = PAYMENT_METHODS[paymentType]
-        if (paymentMethod) {
-          paymentMethod.supported = methodSupportPerProduct[paymentType]
-          if (props.isCreateAccount) {
-            if (currentSelectedProducts.value.length === 0) {
-              paymentMethod.supported = false
-            }
-            if (paymentType === state.selectedPaymentMethod && !paymentMethod.supported) {
-              state.selectedPaymentMethod = ''
-              emit('payment-method-selected', state.selectedPaymentMethod)
-            }
-          }
-          paymentMethods.push(paymentMethod)
-        }
-      })
-      return paymentMethods
-    })
-
-    const forceEditModeBCOL = computed(() =>
-      props.currentSelectedPaymentMethod === PaymentTypes.BCOL &&
-      props.currentOrgPaymentType !== undefined &&
-      props.currentOrgPaymentType !== PaymentTypes.BCOL
-    )
-
-    const isPaymentEJV = computed(() => state.selectedPaymentMethod === PaymentTypes.EJV)
 
     // set on change of input only for single allowed payments
     const isPadInfoTouched = (isTouch: boolean) => {
-      isTouched.value = isTouch
+      state.isTouched = isTouch
     }
 
     const isPaymentSelected = (payment) => {
@@ -473,7 +463,7 @@ export default defineComponent({
         state.bcOnlineWarningMessage = 'This payment method will soon be retired.'
       }
       state.selectedPaymentMethod = payment.type
-      isTouched.value = isTouch
+      state.isTouched = isTouch
       // Emit touched flag for the parent element
       if (props.isTouchedUpdate) {
         emit('payment-method-selected', { selectedPaymentMethod: state.selectedPaymentMethod, isTouched: isTouched.value })
@@ -483,7 +473,7 @@ export default defineComponent({
     }
 
     const getPADInfo = (padInfoValue) => {
-      padInfo.value = padInfoValue
+      state.padInfo = padInfoValue
       emit('get-PAD-info', padInfoValue)
     }
 
@@ -493,9 +483,9 @@ export default defineComponent({
 
     const isPADValid = (isValid) => {
       if (isValid) {
-        paymentMethodSelected({ type: PaymentTypes.PAD }, isTouched.value)
+        paymentMethodSelected({ type: PaymentTypes.PAD }, state.isTouched)
       }
-      emit('is-pad-valid', isValid && isTouched.value)
+      emit('is-pad-valid', isValid && state.isTouched)
     }
 
     const isGLInfoValid = (isValid) => {
@@ -537,7 +527,7 @@ export default defineComponent({
 
     onMounted(async () => {
       paymentMethodSelected({ type: props.currentSelectedPaymentMethod }, false)
-      if (isPaymentEJV.value) {
+      if (state.isPaymentEJV) {
         await fetchCurrentOrganizationGLInfo(props.currentOrganization?.id)
       }
     })
@@ -545,12 +535,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       paymentTypes,
-      padInfo,
-      isTouched,
       ejvPaymentInformationTitle,
-      filteredPaymentMethods,
-      forceEditModeBCOL,
-      isPaymentEJV,
       downloadEFTInstructions,
       paymentMethodSelected,
       getPADInfo,
