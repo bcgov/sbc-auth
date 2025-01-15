@@ -168,10 +168,6 @@ export const useOrgStore = defineStore('org', () => {
     return [AccessType.GOVN, AccessType.GOVM].includes(state.originAccessType as AccessType)
   })
 
-  const isGovmOrg = computed<boolean>(() => {
-    return state.originAccessType === AccessType.GOVM
-  })
-
   // Note this will only work while the current organization is set for SBC_STAFF.
   // This should work for STAFF on any org.
   const isStaffOrSbcStaff = computed<boolean>(() => {
@@ -1197,7 +1193,6 @@ export const useOrgStore = defineStore('org', () => {
     getNSFInvoices,
     downloadNSFInvoicesPDF,
     isGovnGovmOrg,
-    isGovmOrg,
     updateOrgMailingAddress,
     needStaffReview,
     removeOrgProduct,

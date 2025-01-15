@@ -248,10 +248,10 @@ export default defineComponent({
         return TOS_NEEDED_PRODUCT.includes(props.productDetails.code)
       }),
       filteredPaymentMethods: computed(() => {
-        // TODO - Needs EFT
-        if (orgStore.isGovmOrg) {
-          return props.paymentMethods.filter((method) => method === PaymentTypes.EJV)
-        }
+        // TODO - Needs EFT - EJV todo as well
+        //if (orgStore.isGovmOrg) {
+          //return props.paymentMethods.filter((method) => method === PaymentTypes.EJV)
+        //}
         return props.paymentMethods.filter((method) =>
           ![PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV].includes(method as PaymentTypes))
       }),
