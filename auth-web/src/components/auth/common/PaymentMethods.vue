@@ -20,7 +20,8 @@
               class="d-inline-flex"
             >
               <v-radio
-                v-if="isEditing"
+                v-show="isEditing"
+                :key="payment.type"
                 :value="payment.type"
               />
               <v-icon
@@ -342,7 +343,8 @@ export default defineComponent({
     const state = reactive({
       bcOnlineWarningMessage: 'This payment method will soon be retired.',
       dialogTitle: '',
-      dialogText: ''
+      dialogText: '',
+      selectedPaymentMethod: ''
     })
 
     const openBCOnlineDialog = () => {
@@ -357,7 +359,7 @@ export default defineComponent({
                 This action cannot be undone, and you will not be able to select a different payment method later.`
       warningDialog.value.open()
     }
-    const selectedPaymentMethod = ref('')
+    
     const paymentTypes = PaymentTypes
     const padInfo = ref({})
     const isTouched = ref(false)
@@ -387,31 +389,28 @@ export default defineComponent({
     })
 
     const filteredPaymentMethods = computed(() => {
-      const paymentMethods = []
-      if (!props.isEditing && selectedPaymentMethod.value && !props.isCreateAccount) {
-        return [PAYMENT_METHODS[selectedPaymentMethod.value]]
+      if (!props.isEditing && !props.isCreateAccount && state.selectedPaymentMethod) {
+        return [PAYMENT_METHODS[state.selectedPaymentMethod]]
       }
       const methodSupportPerProduct = paymentMethodSupportedForProducts.value
-      if (props.currentOrgType) {
-        let paymentTypes = [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT ]
-        if (props.currentOrgType === AccessType.GOVM) {
-          paymentTypes = [ PaymentTypes.EJV ]
+      const paymentMethods = []
+      const isGovmOrg = props.currentOrgType === AccessType.GOVM
+      const paymentTypes = isGovmOrg ? [PaymentTypes.EJV] : [PaymentTypes.PAD, PaymentTypes.CREDIT_CARD,
+        PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT]
+      paymentTypes.forEach((paymentType) => {
+        if (paymentType === PaymentTypes.EFT && !currentOrgPaymentDetails?.eftEnable) {
+          return
         }
-        paymentTypes?.forEach((paymentType) => {
-          if (paymentType === PaymentTypes.EFT && !currentOrgPaymentDetails?.eftEnable) {
-            return
+        const paymentMethod = PAYMENT_METHODS[paymentType]
+        if (paymentMethod) {
+          paymentMethod.supported = methodSupportPerProduct[paymentType]
+          // Disable all payment methods if no products are selected when creating an account.
+          if (props.isCreateAccount && currentSelectedProducts.value.length === 0) {
+            paymentMethod.supported = false
           }
-          if (PAYMENT_METHODS[paymentType]) {
-            const paymentMethod = PAYMENT_METHODS[paymentType]
-            paymentMethod.supported = methodSupportPerProduct[paymentType]
-            // Disable all payment methods if no products are selected.
-            if (props.isCreateAccount && currentSelectedProducts.value.length === 0) {
-              paymentMethod.supported = false
-            }
-            paymentMethods.push(paymentMethod)
-          }
-        })
-      }
+          paymentMethods.push(paymentMethod)
+        }
+      })
       return paymentMethods
     })
 
@@ -421,7 +420,7 @@ export default defineComponent({
       props.currentOrgPaymentType !== PaymentTypes.BCOL
     )
 
-    const isPaymentEJV = computed(() => selectedPaymentMethod.value === PaymentTypes.EJV)
+    const isPaymentEJV = computed(() => state.selectedPaymentMethod === PaymentTypes.EJV)
 
     // set on change of input only for single allowed payments
     const isPadInfoTouched = (isTouch: boolean) => {
@@ -429,7 +428,7 @@ export default defineComponent({
     }
 
     const isPaymentSelected = (payment) => {
-      return (selectedPaymentMethod.value === payment.type)
+      return (state.selectedPaymentMethod=== payment.type)
     }
 
     const { downloadEFTInstructions } = useDownloader(orgStore, state)
@@ -454,7 +453,7 @@ export default defineComponent({
 
     const paymentMethodSelected = async (payment, isTouch = true) => {
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
-      if (payment.type === PaymentTypes.EFT && isTouch && selectedPaymentMethod.value !== PaymentTypes.EFT && !enableEFTPaymentMethod()) {
+      if (payment.type === PaymentTypes.EFT && isTouch && state.selectedPaymentMethod !== PaymentTypes.EFT && !enableEFTPaymentMethod()) {
         openEFTWarningDialog()
       } else if (payment.type === PaymentTypes.PAD && isFromEFT) {
         const hasOutstandingBalance = await hasBalanceOwing()
@@ -470,13 +469,13 @@ export default defineComponent({
       } else {
         state.bcOnlineWarningMessage = 'This payment method will soon be retired.'
       }
-      selectedPaymentMethod.value = payment.type
+      state.selectedPaymentMethod = payment.type
       isTouched.value = isTouch
       // Emit touched flag for the parent element
       if (props.isTouchedUpdate) {
-        emit('payment-method-selected', { selectedPaymentMethod: selectedPaymentMethod.value, isTouched: isTouched.value })
+        emit('payment-method-selected', { selectedPaymentMethod: state.selectedPaymentMethod, isTouched: isTouched.value })
       } else {
-        emit('payment-method-selected', selectedPaymentMethod.value)
+        emit('payment-method-selected', state.selectedPaymentMethod)
       }
     }
 
@@ -502,14 +501,14 @@ export default defineComponent({
 
     const cancelModal = () => {
       warningDialog.value.close()
-      selectedPaymentMethod.value = ''
+      state.selectedPaymentMethod = ''
       emit('cancel')
     }
 
     const continueModal = async () => {
       const hasOutstandingBalance = await hasBalanceOwing()
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
-      const isEFTSelected = selectedPaymentMethod.value === PaymentTypes.EFT
+      const isEFTSelected = state.selectedPaymentMethod === PaymentTypes.EFT
 
       if (isEFTSelected) {
         warningDialog.value.close()
@@ -530,7 +529,7 @@ export default defineComponent({
 
     // Purpose: reset the payment method without having to reload the component.
     watch(() => props.currentSelectedPaymentMethod, (newValue) => {
-      selectedPaymentMethod.value = newValue
+      state.selectedPaymentMethod = newValue
     })
 
     onMounted(async () => {
@@ -542,7 +541,6 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
-      selectedPaymentMethod,
       paymentTypes,
       padInfo,
       isTouched,

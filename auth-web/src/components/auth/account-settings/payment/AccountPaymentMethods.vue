@@ -126,7 +126,7 @@ export default defineComponent({
       default: false
     }
   },
-  emits: ['emit-bcol-info', 'cancel-payment-method-changes'],
+  emits: ['emit-bcol-info', 'disable-editing'],
   setup (props, { emit, root }) {
     const orgStore = useOrgStore()
     const userStore = useUserStore()
@@ -279,7 +279,7 @@ export default defineComponent({
 
     async function cancel () {
       await initialize()
-      emit('cancel-payment-method-changes')
+      emit('disable-editing')
     }
 
     async function getCreateRequestBody () {
@@ -363,6 +363,7 @@ export default defineComponent({
             }
             await orgStore.updateStatementNotifications(statementNotification)
           }
+          emit('disable-editing')
         } catch (error) {
           console.error(error)
           state.isLoading = false

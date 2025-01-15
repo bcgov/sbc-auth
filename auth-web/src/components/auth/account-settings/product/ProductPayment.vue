@@ -47,6 +47,7 @@
           :canManageProductFee="canManageAccounts"
           :isProductActionLoading="isProductActionLoading"
           :isProductActionCompleted="isProductActionCompleted"
+          :disableWhileEditingPayment="isEditing"
           :paymentMethods="productPaymentMethods[product.code]"
           @set-selected-product="setSelectedProduct"
           @toggle-product-details="toggleProductDetails"
@@ -86,7 +87,7 @@
       <v-divider class="mb-5" />
       <div class="d-flex">
         <strong>Current Payment Method</strong>
-        <span
+        <span v-if="!isEditing"
           class="d-flex ml-auto"
           @click="isEditing = true"
         >
@@ -100,7 +101,7 @@
       </div>
       <AccountPaymentMethods
         :isEditing="isEditing"
-        @cancel-payment-method-changes="isEditing = false"
+        @disable-editing="isEditing = false"
       />
     </template>
 

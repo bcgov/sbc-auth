@@ -230,6 +230,7 @@ export default defineComponent({
     isexpandedView: { type: Boolean, default: false },
     isAccountSettingsView: { type: Boolean, default: false },
     canManageProductFee: { type: Boolean, default: false },
+    disableWhileEditingPayment: { type: Boolean, default: false },
     paymentMethods: { type: Array as PropType<string[]>, default: () => [] }
   },
   setup (props, { emit }) {
@@ -249,10 +250,12 @@ export default defineComponent({
         if (orgStore.isGovmOrg) {
           return props.paymentMethods.filter((method) => method === PaymentTypes.EJV)
         }
-        return props.paymentMethods.filter((method) => ![PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV].includes(method as PaymentTypes))
+        return props.paymentMethods.filter((method) => 
+          ![PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV].includes(method as PaymentTypes))
       }),
       paymentMethodSupported: computed(() => {
-        const paymentMethod = orgStore.currentOrgPaymentType === PaymentTypes.CREDIT_CARD ? PaymentTypes.DIRECT_PAY : orgStore.currentOrgPaymentType
+        const paymentMethod = orgStore.currentOrgPaymentType === PaymentTypes.CREDIT_CARD ?
+          PaymentTypes.DIRECT_PAY : orgStore.currentOrgPaymentType
         return state.filteredPaymentMethods?.includes(paymentMethod)
       }),
       showPaymentMethodNotSupported: false
@@ -339,6 +342,10 @@ export default defineComponent({
     }
 
     function selectThisProduct (event, emitFromTos = false) {
+      if (props.disableWhileEditingPayment) {
+        state.productSelected = !state.productSelected
+        return
+      }
       const productSubscribed = props.productDetails.subscriptionStatus === 'ACTIVE'
       if (!state.paymentMethodSupported && !productSubscribed) {
         state.productSelected = false
