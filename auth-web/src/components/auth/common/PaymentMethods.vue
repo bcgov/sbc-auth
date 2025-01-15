@@ -224,6 +224,7 @@ import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import { storeToRefs } from 'pinia'
+import { useCodesStore } from '@/stores'
 import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
 
@@ -332,6 +333,7 @@ export default defineComponent({
     const ejvPaymentInformationTitle = 'General Ledger Information'
 
     const orgStore = useOrgStore()
+    const codesStore = useCodesStore()
     const {
       currentSelectedProducts
     } = storeToRefs(useOrgStore())
@@ -344,7 +346,7 @@ export default defineComponent({
       isTouched: false,
       isPaymentEJV: computed(() => state.selectedPaymentMethod === PaymentTypes.EJV),
       paymentMethodSupportedForProducts: computed(() => {
-        const productPaymentMethods = orgStore.productPaymentMethods
+        const productPaymentMethods = codesStore.productPaymentMethods
         const { productList } = storeToRefs(useOrgStore())
         const derivedProductList = props.isCreateAccount ? currentSelectedProducts.value : productList.value
           .filter(item => item.subscriptionStatus === ProductStatus.ACTIVE)

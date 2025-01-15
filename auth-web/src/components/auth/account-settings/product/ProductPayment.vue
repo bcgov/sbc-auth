@@ -170,6 +170,7 @@ import Product from '@/components/auth/common/Product.vue'
 import { ProductStatusMsgContentIF } from '@/models/external'
 import { storeToRefs } from 'pinia'
 import { useAccountChangeHandler } from '@/composables'
+import { useCodesStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 import { userAccessDisplayNames } from '@/resources/QualifiedSupplierAccessResource'
@@ -196,11 +197,14 @@ export default defineComponent({
       addToCurrentSelectedProducts,
       syncCurrentAccountFees,
       fetchOrgProductFeeCodes,
-      getProductPaymentMethods,
       updateAccountFees,
       needStaffReview,
       removeOrgProduct
     } = useOrgStore()
+
+    const {
+      getProductPaymentMethods
+    } = useCodesStore()
 
     const {
       currentOrganization,
@@ -249,7 +253,7 @@ export default defineComponent({
         )
       }),
       // Not deconstructed otherwise name conflicts.
-      productPaymentMethods: computed(() => useOrgStore().productPaymentMethods),
+      productPaymentMethods: computed(() => useCodesStore().productPaymentMethods),
       displayCancelOnDialog: computed(() => !state.staffReviewClear || state.displayRemoveProductDialog),
       submitDialogText: computed(() => {
         if (state.displayCancelOnDialog && !state.dialogError) {

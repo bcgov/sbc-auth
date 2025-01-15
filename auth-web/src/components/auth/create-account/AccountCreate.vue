@@ -113,6 +113,7 @@ export default defineComponent({
   props: {
     cancelUrl: {
       type: String,
+      default: '/',
       required: false
     },
     readOnly: {

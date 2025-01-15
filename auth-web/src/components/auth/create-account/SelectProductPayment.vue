@@ -121,6 +121,7 @@ import NextPageMixin from '../mixins/NextPageMixin.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
 import Product from '@/components/auth/common/Product.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { useCodesStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -140,11 +141,12 @@ export default defineComponent({
   setup (props, { root, emit }) {
     const form = ref(null)
     const orgStore = useOrgStore()
+    const codesStore = useCodesStore()
     const state = reactive({
       isLoading: false,
       expandedProductCode: '',
       productList: computed(() => orgStore.productList),
-      productPaymentMethods: computed(() => orgStore.productPaymentMethods),
+      productPaymentMethods: computed(() => codesStore.productPaymentMethods),
       currentSelectedProducts: computed(() => orgStore.currentSelectedProducts),
       isFormValid: computed(() => state.currentSelectedProducts && state.currentSelectedProducts.length > 0),
       selectedPaymentMethod: '',
@@ -164,7 +166,7 @@ export default defineComponent({
 
     async function setup () {
       state.isLoading = true
-      await orgStore.getProductPaymentMethods()
+      await codesStore.getProductPaymentMethods()
       if (props.readOnly) {
         await orgStore.getOrgProducts(props.orgId)
         orgStore.setSubscribedProducts()

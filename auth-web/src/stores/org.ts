@@ -46,7 +46,6 @@ import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import { AutoCompleteResponse } from '@/models/AutoComplete'
 import BcolService from '@/services/bcol.services'
-import CodesService from '@/services/codes.service'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
@@ -89,7 +88,6 @@ export const useOrgStore = defineStore('org', () => {
     memberLoginOption: '' as string,
     currentOrgGLInfo: undefined as GLInfo,
     productList: [] as OrgProduct[], // list of all products
-    productPaymentMethods: {} as {[key: string]: Array<string>},
     currentSelectedProducts: [] as any, // selected product list code in array
     currentStatementNotificationSettings: {} as StatementNotificationSettings,
     statementSettings: {} as StatementSettings,
@@ -894,12 +892,6 @@ export const useOrgStore = defineStore('org', () => {
     return []
   }
 
-  async function getProductPaymentMethods (productCode?: string): Promise<any> {
-    const data = await CodesService.getProductPaymentMethods(productCode)
-    data.BUSINESS_SEARCH = data.BUSINESSSearch // Force to match enum.
-    state.productPaymentMethods = data
-  }
-
   async function addToCurrentSelectedProducts ({ productCode, forceRemove = false }): Promise<any> {
     const currentSelectedProducts = state.currentSelectedProducts
     const isAlreadySelected = currentSelectedProducts.includes(productCode)
@@ -1169,7 +1161,6 @@ export const useOrgStore = defineStore('org', () => {
     getOrgProducts,
     addOrgProducts,
     getProductList,
-    getProductPaymentMethods,
     addToCurrentSelectedProducts,
     resetoCurrentSelectedProducts,
     refundInvoice,

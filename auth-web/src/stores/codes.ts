@@ -15,7 +15,8 @@ export const useCodesStore = defineStore('codes', () => {
     businessTypeCodes: [] as Code[],
     governmentTypeCodes: [] as Code[],
     onholdReasonCodes: [] as Code[],
-    suspensionReasonCodes: [] as Code[]
+    suspensionReasonCodes: [] as Code[],
+    productPaymentMethods: {} as {[key: string]: Array<string>}
   })
 
   function $reset () {
@@ -25,6 +26,7 @@ export const useCodesStore = defineStore('codes', () => {
     state.governmentTypeCodes = []
     state.onholdReasonCodes = []
     state.suspensionReasonCodes = []
+    state.productPaymentMethods = {}
   }
 
   async function getBusinessSizeCodes (): Promise<Code[]> {
@@ -74,6 +76,12 @@ export const useCodesStore = defineStore('codes', () => {
     }
   }
 
+  async function getProductPaymentMethods (productCode?: string): Promise<any> {
+    const data = await CodesService.getProductPaymentMethods(productCode)
+    data.BUSINESS_SEARCH = data.BUSINESSSearch // Force to match enum.
+    state.productPaymentMethods = data
+  }
+
   return {
     ...toRefs(state),
     businessSizeCodeTable,
@@ -86,6 +94,7 @@ export const useCodesStore = defineStore('codes', () => {
     getOnholdReasonCodes,
     onholdReasonCodeTable,
     suspensionReasonCodeTable,
+    getProductPaymentMethods,
     $reset
   }
 })
