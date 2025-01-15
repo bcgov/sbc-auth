@@ -359,7 +359,6 @@ export default defineComponent({
                 This action cannot be undone, and you will not be able to select a different payment method later.`
       warningDialog.value.open()
     }
-    
     const paymentTypes = PaymentTypes
     const padInfo = ref({})
     const isTouched = ref(false)
@@ -428,7 +427,7 @@ export default defineComponent({
     }
 
     const isPaymentSelected = (payment) => {
-      return (state.selectedPaymentMethod=== payment.type)
+      return (state.selectedPaymentMethod === payment.type)
     }
 
     const { downloadEFTInstructions } = useDownloader(orgStore, state)

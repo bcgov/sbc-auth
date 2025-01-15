@@ -202,12 +202,9 @@ export default class NonBcscAccountSetupView extends Vue {
 
       this.setCurrentOrganizationType(this.currentOrganization.orgType)
       // passing additional props for readonly
-      // TODO do these still apply?
-      this.accountStepperConfig[4].componentProps = { ...this.accountStepperConfig[4].componentProps, clearForm: true }
-      this.accountStepperConfig[0].componentProps = { ...this.accountStepperConfig[0].componentProps, readOnly: true, orgId }
-
-      this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[3].componentProps, readOnly: true }
-      this.accountStepperConfig[5].componentProps = { ...this.accountStepperConfig[5].componentProps, readOnly: true }
+      this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[4].componentProps, clearForm: true }
+      this.accountStepperConfig[2].componentProps = { ...this.accountStepperConfig[2].componentProps, readOnly: true, orgId }
+      this.accountStepperConfig[1].componentProps = { ...this.accountStepperConfig[1].componentProps, readOnly: true }
     } else {
       this.setViewOnlyMode('')
     }

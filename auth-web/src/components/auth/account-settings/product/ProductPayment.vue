@@ -87,7 +87,8 @@
       <v-divider class="mb-5" />
       <div class="d-flex">
         <strong>Current Payment Method</strong>
-        <span v-if="!isEditing"
+        <span
+          v-if="!isEditing"
           class="d-flex ml-auto"
           @click="isEditing = true"
         >

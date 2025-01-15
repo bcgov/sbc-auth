@@ -48,8 +48,6 @@ export const useUserStore = defineStore('user', () => {
     state.redirectAfterLoginUrl = '' as string
     state.roleInfos = undefined as RoleInfo[]
     state.currentUserAccountSettings = undefined as UserSettings[]
-    // TODO move out
-    state.currentSelectedProductsforRemoval = '' as string
   }
 
   const termsOfUseVersion = computed(() => state.userProfile?.userTerms?.termsOfUseAcceptedVersion)

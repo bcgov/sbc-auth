@@ -250,12 +250,12 @@ export default defineComponent({
         if (orgStore.isGovmOrg) {
           return props.paymentMethods.filter((method) => method === PaymentTypes.EJV)
         }
-        return props.paymentMethods.filter((method) => 
+        return props.paymentMethods.filter((method) =>
           ![PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV].includes(method as PaymentTypes))
       }),
       paymentMethodSupported: computed(() => {
-        const paymentMethod = orgStore.currentOrgPaymentType === PaymentTypes.CREDIT_CARD ?
-          PaymentTypes.DIRECT_PAY : orgStore.currentOrgPaymentType
+        const paymentMethod = orgStore.currentOrgPaymentType === PaymentTypes.CREDIT_CARD
+          ? PaymentTypes.DIRECT_PAY : orgStore.currentOrgPaymentType
         return state.filteredPaymentMethods?.includes(paymentMethod)
       }),
       showPaymentMethodNotSupported: false
