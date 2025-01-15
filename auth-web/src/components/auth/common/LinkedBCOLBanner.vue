@@ -91,6 +91,7 @@ export default defineComponent({
       default: () => ({} as BcolAccountDetails)
     }
   },
+  emits: ['unlink-account', 'emit-bcol-info'],
   setup (props, { emit }) {
     const editMode = ref<boolean>(false)
 
