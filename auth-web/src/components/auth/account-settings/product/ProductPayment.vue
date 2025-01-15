@@ -134,6 +134,7 @@
           Cancel
         </v-btn>
         <v-btn
+          v-if="!dialogError"
           large
           color="primary"
           class="font-weight-bold"
