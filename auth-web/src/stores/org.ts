@@ -1,3 +1,4 @@
+// Before adding more to the store, please think about creating new stores to move logic into.
 import {
   AccessType,
   Account,
