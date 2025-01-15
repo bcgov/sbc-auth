@@ -231,7 +231,8 @@ export default defineComponent({
       stepperConfig,
       verifyAndCreateAccount,
       createAccount,
-      closeError
+      closeError,
+      errorDialog
     }
   }
 })
