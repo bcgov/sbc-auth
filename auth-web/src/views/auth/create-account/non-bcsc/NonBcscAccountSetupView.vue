@@ -264,7 +264,7 @@ export default class NonBcscAccountSetupView extends Vue {
         await this.getUserProfile('@me')
         await this.syncOrganization(organization.id)
         await this.syncMembership(organization.id)
-        // remove GOVN accoutn type from session
+        // remove GOVN account type from session
         ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
       } else {
         // re-upload final submission valeus here
