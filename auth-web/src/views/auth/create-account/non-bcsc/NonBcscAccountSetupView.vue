@@ -48,277 +48,228 @@
 
 <script lang="ts">
 import { AccessType, DisplayModeValues, PaymentTypes, SessionStorageKeys } from '@/util/constants'
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
-import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import { mapActions, mapState } from 'pinia'
+import { defineComponent, onBeforeMount, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
-import { Address } from '@/models/address'
 import ConfigHelper from '@/util/config-helper'
-import { Contact } from '@/models/contact'
-import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
+import { PADInfoValidation } from '@/models/Organization'
 import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
+import Stepper from '@/components/auth/common/stepper/Stepper.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
-import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
-@Component({
+export default defineComponent({
+  name: 'NonBcscAccountSetupView',
   components: {
-    CreateAccountInfoForm,
-    UserProfileForm,
-    AccountCreate,
-    PaymentMethodSelector,
     Stepper,
     ModalDialog
   },
-  computed: {
-    ...mapState(useUserStore, [
-      'userContact',
-      'userProfile'
-    ]),
-    ...mapState(useOrgStore, [
-      'currentOrgPaymentType',
-      'currentOrganization'
-    ])
-
+  props: {
+    orgId: {
+      type: Number,
+      default: undefined
+    }
   },
-  methods: {
-    ...mapActions(useUserStore,
+  setup (props, { root }) {
+    const errorDialog = ref<InstanceType<typeof ModalDialog>>()
+    const stepper = ref<HTMLFormElement>()
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
+    const state = reactive({
+      errorTitle: 'Account creation failed',
+      errorText: '',
+      isLoading: false,
+      readOnly: false,
+      isAffidavitAlreadyApproved: false
+    })
+    const accountStepperConfig =
       [
-        'createUserContact',
-        'updateUserContact',
-        'getUserProfile',
-        'createAffidavit',
-        'updateUserFirstAndLastName'
-      ]),
-    ...mapActions(useOrgStore,
-      [
-        'createOrg',
-        'validatePADInfo',
-        'syncMembership',
-        'syncOrganization',
-        'syncAddress',
-        'getOrgPayments',
-        'setCurrentOrganizationType',
-        'setViewOnlyMode'
-      ])
+        {
+          title: 'Upload your notarized affidavit',
+          stepName: 'Upload Affidavit',
+          component: UploadAffidavitStep,
+          componentProps: {}
+        },
+        {
+          title: 'Account Information',
+          stepName: 'Account Information',
+          component: AccountCreate,
+          componentProps: {}
+        },
+        {
+          title: 'Select Products and Services',
+          stepName: 'Products and Payment',
+          component: SelectProductPayment,
+          componentProps: {
+            isStepperView: true
+          }
+        },
+        {
+          title: 'Account Administrator Information',
+          stepName: 'Account Administrator Information',
+          component: UserProfileForm,
+          componentProps: {
+            isStepperView: true,
+            stepperSource: AccessType.EXTRA_PROVINCIAL
+          }
+        }
+      ]
+
+    onBeforeMount(async () => {
+    // Loading user details if not exist and check user already verified with affidavit
+      if (!userStore.userProfile) {
+        await userStore.getUserProfile('@me')
+      }
+      state.isAffidavitAlreadyApproved = userStore.userProfile && userStore.userProfile?.verified
+      // if user affidavit is already approve no need to show upload affidavit stepper
+      // so removing it from array
+      if (state.isAffidavitAlreadyApproved) {
+        accountStepperConfig.splice(2, 1)
+      }
+    })
+
+    onMounted(async () => {
+      useOrgStore().resetOrgInfoForCreateAccount()
+      // on re-upload need show some pages are in view only mode
+      state.readOnly = !!props.orgId
+      if (props.orgId) {
+        // setting view only mode for all other pages which not need to edit
+        orgStore.setViewOnlyMode(DisplayModeValues.VIEW_ONLY)
+        stepper.value.jumpToStep(3)
+        const orgId = props.orgId
+        await orgStore.syncOrganization(orgId)
+        orgStore.syncAddress()
+        orgStore.getOrgPayments()
+        orgStore.setCurrentOrganizationType(orgStore.currentOrganization.orgType)
+        // passing additional props for readonly
+        accountStepperConfig[3].componentProps = { ...accountStepperConfig[4].componentProps, clearForm: true }
+        accountStepperConfig[2].componentProps = { ...accountStepperConfig[2].componentProps, readOnly: true, orgId }
+        accountStepperConfig[1].componentProps = { ...accountStepperConfig[1].componentProps, readOnly: true }
+      } else {
+        orgStore.setViewOnlyMode('')
+      }
+    })
+
+    async function verifyAndCreateAccount () {
+      state.isLoading = true
+      let isProceedToCreateAccount = false
+      if (orgStore.currentOrgPaymentType === PaymentTypes.PAD) {
+        // no need to validate for readonly view
+        isProceedToCreateAccount = state.readOnly ? true : await verifyPAD()
+      } else {
+        isProceedToCreateAccount = true
+      }
+
+      if (isProceedToCreateAccount) {
+        createAccount()
+      }
+    }
+
+    async function verifyPAD () {
+      const verifyPad: PADInfoValidation = await orgStore.validatePADInfo()
+      if (!verifyPad) {
+        // proceed to create account even if the response is empty
+        return true
+      }
+      if (verifyPad?.isValid) {
+        // create account if PAD info is valid
+        return true
+      } else {
+        state.isLoading = false
+        state.errorText = 'Bank information validation failed'
+        if (verifyPad?.message?.length) {
+          let msgList = ''
+          verifyPad.message.forEach((msg) => {
+            msgList += `<li>${msg}</li>`
+          })
+          state.errorText = `<ul style="list-style-type: none;">${msgList}</ul>`
+        }
+        errorDialog.value.open()
+        return false
+      }
+    }
+
+    async function createAccount () {
+      state.isLoading = true
+      try {
+        // normal account flow
+        if (!state.readOnly) {
+          // if user affidavit is already approve no need to make creade affidavit call
+          if (!state.isAffidavitAlreadyApproved) {
+            await userStore.createAffidavit()
+          }
+          await userStore.updateUserFirstAndLastName()
+          const organization = await orgStore.createOrg()
+          await saveOrUpdateContact()
+          await userStore.getUserProfile('@me')
+          await orgStore.syncOrganization(organization.id)
+          await orgStore.syncMembership(organization.id)
+          // remove GOVN account type from session
+          ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
+        } else {
+          // re-upload final submission values
+          await userStore.updateUserFirstAndLastName()
+          await saveOrUpdateContact()
+          await userStore.createAffidavit()
+          await userStore.getUserProfile('@me')
+        }
+
+        // Remove with Vue 3
+        root.$store.commit('updateHeader')
+        const nextRoute = !state.isAffidavitAlreadyApproved ? '/setup-non-bcsc-account-success' : '/setup-account-success'
+        root.$router.push(nextRoute)
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err)
+        state.isLoading = false
+        switch (err?.response?.status) {
+          case 409:
+            state.errorText =
+                    'An account with this name already exists. Try a different account name.'
+            break
+          case 400:
+            switch (err.response.data?.code) {
+              case 'MAX_NUMBER_OF_ORGS_LIMIT':
+                state.errorText = 'Maximum number of accounts reached'
+                break
+              case 'ACTIVE_AFFIDAVIT_EXISTS':
+                state.errorText = err.response.data.message || 'Affidavit already exists'
+                break
+              default:
+                state.errorText = 'An error occurred while attempting to create your account.'
+            }
+            break
+          default:
+            state.errorText =
+                    'An error occurred while attempting to create your account.'
+        }
+        errorDialog.value.open()
+      }
+    }
+
+    function closeError () {
+      errorDialog.value.close()
+    }
+
+    async function saveOrUpdateContact () {
+      if (userStore.userContact) {
+        await userStore.updateUserContact()
+      } else {
+        await userStore.createUserContact()
+      }
+    }
+    return {
+      ...toRefs(state),
+      accountStepperConfig,
+      errorDialog,
+      stepper,
+      verifyAndCreateAccount,
+      closeError
+    }
   }
 })
-export default class NonBcscAccountSetupView extends Vue {
-  @Prop({ default: undefined }) private readonly orgId: number // org id used for bceid re-uplaod
-  private readonly currentUser!: KCUserProfile
-  private readonly currentOrgPaymentType!: string
-  protected readonly userContact!: Contact
-  private readonly createAffidavit!: () => Promise<User>
-  private readonly updateUserFirstAndLastName!: (user?: User) => Promise<Contact>
-  private readonly createOrg!: () => Promise<Organization>
-  private readonly validatePADInfo!: () => Promise<PADInfoValidation>
-  private readonly createUserContact!: (contact?: Contact) => Promise<Contact>
-  private readonly updateUserContact!: (contact?: Contact) => Promise<Contact>
-  private readonly getUserProfile!: (identifer: string) => Promise<User>
-  readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  readonly syncMembership!: (orgId: number) => Promise<Member>
-  private readonly syncAddress!: () => Promise<Address>
-  private readonly getOrgPayments!: () => Promise<OrgPaymentDetails>
-  private readonly setCurrentOrganizationType!: (orgType: string) => void
-  private readonly setViewOnlyMode!: (mode: string) => void
-  private readonly currentOrganization!: Organization
-  private readonly userProfile!: User
-
-  errorTitle = 'Account creation failed'
-  errorText = ''
-  private isLoading: boolean = false
-  private readOnly = false
-  private isAffidavitAlreadyApproved = false
-
-  $refs: {
-    errorDialog: InstanceType<typeof ModalDialog>,
-    stepper: HTMLFormElement,
-  }
-
-  private accountStepperConfig: Array<StepConfiguration> =
-    [
-      {
-        title: 'Upload your notarized affidavit',
-        stepName: 'Upload Affidavit',
-        component: UploadAffidavitStep,
-        componentProps: {}
-      },
-      {
-        title: 'Account Information',
-        stepName: 'Account Information',
-        component: AccountCreate,
-        componentProps: {}
-      },
-      {
-        title: 'Select Products and Services',
-        stepName: 'Products and Payment',
-        component: SelectProductPayment,
-        componentProps: {
-          isStepperView: true
-        }
-      },
-      {
-        title: 'Account Administrator Information',
-        stepName: 'Account Administrator Information',
-        component: UserProfileForm,
-        componentProps: {
-          isStepperView: true,
-          stepperSource: AccessType.EXTRA_PROVINCIAL
-        }
-      }
-    ]
-
-  private async beforeMount () {
-    // Loading user details if not exist and check user already verified with affidavit
-    if (!this.userProfile) {
-      await this.getUserProfile('@me')
-    }
-    this.isAffidavitAlreadyApproved = this.userProfile && this.userProfile?.verified
-    // if user affidavit is already approve no need to show upload affidavit stepper
-    // so removing it from array
-    if (this.isAffidavitAlreadyApproved) {
-      this.accountStepperConfig.splice(2, 1)
-    }
-  }
-  private async mounted () {
-    useOrgStore().resetOrgInfoForCreateAccount()
-    // on re-upload need show some pages are in view only mode
-    this.readOnly = !!this.orgId
-    // this.isAffidavitAlreadyApproved = this.userProfile && this.userProfile.verified
-    if (this.orgId) {
-      // setting view only mode for all other pages which not need to edit
-      this.setViewOnlyMode(DisplayModeValues.VIEW_ONLY)
-      this.$refs.stepper.jumpToStep(3)
-      const orgId = this.orgId
-      await this.syncOrganization(orgId)
-      this.syncAddress()
-      this.getOrgPayments()
-
-      this.setCurrentOrganizationType(this.currentOrganization.orgType)
-      // passing additional props for readonly
-      this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[4].componentProps, clearForm: true }
-      this.accountStepperConfig[2].componentProps = { ...this.accountStepperConfig[2].componentProps, readOnly: true, orgId }
-      this.accountStepperConfig[1].componentProps = { ...this.accountStepperConfig[1].componentProps, readOnly: true }
-    } else {
-      this.setViewOnlyMode('')
-    }
-  }
-
-  private async verifyAndCreateAccount () {
-    this.isLoading = true
-    let isProceedToCreateAccount = false
-    if (this.currentOrgPaymentType === PaymentTypes.PAD) {
-      // no need to validate for readonly view
-      isProceedToCreateAccount = this.readOnly ? true : await this.verifyPAD()
-    } else {
-      isProceedToCreateAccount = true
-    }
-
-    if (isProceedToCreateAccount) {
-      this.createAccount()
-    }
-  }
-
-  private async verifyPAD () {
-    const verifyPad: PADInfoValidation = await this.validatePADInfo()
-    if (!verifyPad) {
-      // proceed to create account even if the response is empty
-      return true
-    }
-    if (verifyPad?.isValid) {
-      // create account if PAD info is valid
-      return true
-    } else {
-      this.isLoading = false
-      this.errorText = 'Bank information validation failed'
-      if (verifyPad?.message?.length) {
-        let msgList = ''
-        verifyPad.message.forEach((msg) => {
-          msgList += `<li>${msg}</li>`
-        })
-        this.errorText = `<ul style="list-style-type: none;">${msgList}</ul>`
-      }
-      this.$refs.errorDialog.open()
-      return false
-    }
-  }
-
-  private async createAccount () {
-    this.isLoading = true
-    try {
-      // normal account flow
-      if (!this.readOnly) {
-        // if user affidavit is already approve no need to make creade affidavit call
-        if (!this.isAffidavitAlreadyApproved) {
-          await this.createAffidavit()
-        }
-        await this.updateUserFirstAndLastName()
-        const organization = await this.createOrg()
-        await this.saveOrUpdateContact()
-        await this.getUserProfile('@me')
-        await this.syncOrganization(organization.id)
-        await this.syncMembership(organization.id)
-        // remove GOVN account type from session
-        ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
-      } else {
-        // re-upload final submission valeus here
-        await this.updateUserFirstAndLastName()
-        await this.saveOrUpdateContact()
-        await this.createAffidavit()
-        await this.getUserProfile('@me')
-      }
-
-      // Remove with Vue 3
-      this.$store.commit('updateHeader')
-      const nextRoute = !this.isAffidavitAlreadyApproved ? '/setup-non-bcsc-account-success' : '/setup-account-success'
-      this.$router.push(nextRoute)
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err)
-      this.isLoading = false
-      switch (err?.response?.status) {
-        case 409:
-          this.errorText =
-                  'An account with this name already exists. Try a different account name.'
-          break
-        case 400:
-          switch (err.response.data?.code) {
-            case 'MAX_NUMBER_OF_ORGS_LIMIT':
-              this.errorText = 'Maximum number of accounts reached'
-              break
-            case 'ACTIVE_AFFIDAVIT_EXISTS':
-              this.errorText = err.response.data.message || 'Affidavit already exists'
-              break
-            default:
-              this.errorText = 'An error occurred while attempting to create your account.'
-          }
-          break
-        default:
-          this.errorText =
-                  'An error occurred while attempting to create your account.'
-      }
-      this.$refs.errorDialog.open()
-    }
-  }
-
-  private closeError () {
-    this.$refs.errorDialog.close()
-  }
-
-  private async saveOrUpdateContact () {
-    if (this.userContact) {
-      await this.updateUserContact()
-    } else {
-      await this.createUserContact()
-    }
-  }
-}
 </script>
 
 <style lang="scss" scoped>
