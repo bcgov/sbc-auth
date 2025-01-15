@@ -8,7 +8,7 @@
       v-display-mode
     >
       <fieldset class="org-business-type">
-        <account-business-type
+        <AccountBusinessType
           :saving="saving"
           :premiumLinkedAccount="true"
           :bcolDuplicateNameErrorMessage="bcolDuplicateNameErrorMessage"
@@ -22,7 +22,7 @@
         <legend class="mb-3">
           Mailing Address
         </legend>
-        <base-address-form
+        <BaseAddressForm
           ref="mailingAddress"
           :editing="true"
           :schema="baseAddressSchema"
@@ -70,7 +70,7 @@
           depressed
           color="primary"
           :loading="saving"
-          :disabled="saving || !isFormValid()"
+          :disabled="saving || !isFormValid"
           data-test="btn-stepper-premium-save"
           @click="save"
         >
@@ -91,158 +91,148 @@
 </template>
 
 <script lang="ts">
-import { Action, State } from 'pinia-class'
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
+import { OrgBusinessType, Organization } from '@/models/Organization'
+import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
-import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { LoginSource } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { User } from '@/models/user'
 import { addressSchema } from '@/schemas'
 import { useOrgStore } from '@/stores/org'
-import { useUserStore } from '@/stores/user'
 
-@Component({
+export default defineComponent({
+  name: 'AccountCreate',
   components: {
     AccountBusinessType,
-    BcolLogin,
     BaseAddressForm,
     ConfirmCancelButton
+  },
+  mixins: [Steppable],
+  props: {
+    cancelUrl: {
+      type: String,
+      required: false
+    },
+    readOnly: {
+      type: Boolean,
+      default: false
+    }
+  },
+  setup (props, { root }) {
+    const { currentOrgAddress, isOrgNameAvailable, setCurrentOrganizationAddress, resetBcolDetails,
+      setCurrentOrganizationBusinessType } = useOrgStore()
+    const DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
+    const createAccountInfoForm = ref<HTMLFormElement>()
+    const baseAddressSchema = addressSchema
+    const state = reactive({
+      username: '',
+      password: '',
+      errorMessage: '',
+      // New var since show as an error for text field errorMessage field is used for full form and network errors.
+      bcolDuplicateNameErrorMessage: '',
+      saving: false,
+      isBaseAddressValid: true,
+      orgNameReadOnly: true,
+      orgBusinessTypeLocal: {},
+      isOrgBusinessTypeValid: false,
+      isExtraProvUser: computed(() => {
+        // Remove Vuex with Vue 3
+        return root.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
+      }),
+      isFormValid: computed(() => {
+        return !!state.isOrgBusinessTypeValid && !state.errorMessage && !!state.isBaseAddressValid
+      }),
+      address: computed(() => currentOrgAddress)
+    })
 
+    function unlinkAccount () {
+      resetBcolDetails()
+    }
+
+    function updateAddress (address: Address) {
+      setCurrentOrganizationAddress(address)
+    }
+
+    function updateOrgNameAndClearErrors () {
+      state.bcolDuplicateNameErrorMessage = ''
+      state.errorMessage = ''
+    }
+
+    async function save () {
+      this.goNext() // Uses mixin, requires this.
+    }
+
+    async function validateAccountNameUnique () {
+      const available = await isOrgNameAvailable(
+        { 'name': state.orgBusinessTypeLocal.name, 'branchName': state.orgBusinessTypeLocal.branchName })
+      if (!available) {
+        state.bcolDuplicateNameErrorMessage = DUPL_ERROR_MESSAGE
+        state.orgNameReadOnly = false
+        return false
+      } else {
+        state.orgNameReadOnly = true
+        return true
+      }
+    }
+
+    function cancel () {
+      if (this.stepBack) {
+        this.stepBack() // Uses mixin, requires this.
+      } else {
+        root.$router.push({ path: '/home' })
+      }
+    }
+
+    function goBack () {
+      this.stepBack() // Uses mixin, requires this.
+    }
+
+    async function goNext () {
+      const isValidName = props.readOnly ? true : await validateAccountNameUnique()
+      if (isValidName) {
+        this.stepForward()
+      } else {
+        this.errorMessage = DUPL_ERROR_MESSAGE
+      }
+    }
+
+    function redirectToNext (organization?: Organization) {
+      root.$router.push({ path: `/account/${organization.id}/` })
+    }
+
+    function checkBaseAddressValidity (isValid) {
+      state.isBaseAddressValid = !!isValid
+    }
+
+    function updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
+      state.orgBusinessTypeLocal = orgBusinessType
+      setCurrentOrganizationBusinessType(state.orgBusinessTypeLocal)
+    }
+
+    function checkOrgBusinessTypeValid (isValid) {
+      state.isOrgBusinessTypeValid = !!isValid
+    }
+
+    return {
+      ...toRefs(state),
+      createAccountInfoForm,
+      baseAddressSchema,
+      save,
+      cancel,
+      goBack,
+      goNext,
+      updateAddress,
+      updateOrgBusinessType,
+      checkOrgBusinessTypeValid,
+      checkBaseAddressValidity,
+      redirectToNext,
+      unlinkAccount,
+      updateOrgNameAndClearErrors
+    }
   }
 })
-export default class AccountCreate extends Mixins(Steppable) {
-  username = ''
-  password = ''
-  errorMessage: string = ''
-  // hav to indroduce a new var since it shud show as an error for text field.
-  // the errorMessage field is used for full form and network errors.
-  bcolDuplicateNameErrorMessage = ''
-  saving = false
-  isBaseAddressValid: boolean = true
-
-  @State(useOrgStore) public currentOrganization!: Organization
-  @State(useOrgStore) public currentOrgAddress!: Address
-
-  @State(useUserStore) public userProfile!: User
-  @State(useUserStore) public currentUser!: KCUserProfile
-
-  @Action(useOrgStore) readonly syncMembership!: (orgId: number) => Promise<Member>
-  @Action(useOrgStore) readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  @Action(useOrgStore) readonly isOrgNameAvailable!: (requestBody: CreateRequestBody) => Promise<boolean>
-
-  @Action(useOrgStore) readonly setCurrentOrganization!: (organization: Organization) => void
-  @Action(useOrgStore) readonly setCurrentOrganizationAddress!: (address: Address) => void
-  @Action(useOrgStore) readonly setCurrentOrganizationName!: (name: string) => void
-  @Action(useOrgStore) readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
-  @Action(useOrgStore) readonly resetBcolDetails!: () => void
-  @Action(useOrgStore) readonly setCurrentOrganizationBusinessType!: (orgBusinessType: OrgBusinessType) => void
-
-  @Prop() cancelUrl: string
-  @Prop({ default: false }) readOnly: boolean
-
-  orgNameReadOnly = true
-  static readonly DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
-
-  baseAddressSchema = addressSchema
-
-  readonly orgNameRules = [v => !!v || 'An account name is required']
-
-  orgBusinessTypeLocal: OrgBusinessType = {}
-  isOrgBusinessTypeValid = false
-
-  get isExtraProvUser () {
-    // Remove Vuex with Vue 3
-    return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
-  }
-
-  $refs: {
-    createAccountInfoForm: HTMLFormElement
-  }
-
-  readonly teamNameRules = [v => !!v || 'An account name is required']
-
-  isFormValid (): boolean {
-    return !!this.isOrgBusinessTypeValid && !this.errorMessage && !!this.isBaseAddressValid
-  }
-
-  get address () {
-    return this.currentOrgAddress
-  }
-
-  unlinkAccount () {
-    this.resetBcolDetails()
-  }
-
-  updateAddress (address: Address) {
-    this.setCurrentOrganizationAddress(address)
-  }
-
-  updateOrgNameAndClearErrors () {
-    this.bcolDuplicateNameErrorMessage = ''
-    this.errorMessage = ''
-  }
-
-  async save () {
-    this.goNext()
-  }
-
-  async validateAccountNameUnique () {
-    const available = await this.isOrgNameAvailable(
-      { 'name': this.orgBusinessTypeLocal.name, 'branchName': this.orgBusinessTypeLocal.branchName })
-    if (!available) {
-      this.bcolDuplicateNameErrorMessage = AccountCreate.DUPL_ERROR_MESSAGE
-      this.orgNameReadOnly = false
-      return false
-    } else {
-      this.orgNameReadOnly = true
-      return true
-    }
-  }
-
-  private cancel () {
-    if (this.stepBack) {
-      this.stepBack()
-    } else {
-      this.$router.push({ path: '/home' })
-    }
-  }
-
-  goBack () {
-    this.stepBack()
-  }
-
-  private async goNext () {
-    const isValidName = this.readOnly ? true : await this.validateAccountNameUnique()
-    if (isValidName) {
-      this.stepForward()
-    } else {
-      this.errorMessage = AccountCreate.DUPL_ERROR_MESSAGE
-    }
-  }
-
-  private redirectToNext (organization?: Organization) {
-    this.$router.push({ path: `/account/${organization.id}/` })
-  }
-
-  checkBaseAddressValidity (isValid) {
-    this.isBaseAddressValid = !!isValid
-  }
-
-  updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
-    this.orgBusinessTypeLocal = orgBusinessType
-    this.setCurrentOrganizationBusinessType(this.orgBusinessTypeLocal)
-  }
-
-  checkOrgBusinessTypeValid (isValid) {
-    this.isOrgBusinessTypeValid = !!isValid
-  }
-}
 </script>
 
 <style lang="scss" scoped>
