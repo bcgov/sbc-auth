@@ -144,7 +144,7 @@ export default defineComponent({
         orgStore.getOrgPayments()
         orgStore.setCurrentOrganizationType(orgStore.currentOrganization.orgType)
         // passing additional props for readonly
-        accountStepperConfig[3].componentProps = { ...accountStepperConfig[4].componentProps, clearForm: true }
+        accountStepperConfig[3].componentProps = { ...accountStepperConfig[3].componentProps, clearForm: true }
         accountStepperConfig[2].componentProps = { ...accountStepperConfig[2].componentProps, readOnly: true, orgId }
         accountStepperConfig[1].componentProps = { ...accountStepperConfig[1].componentProps, readOnly: true }
       } else {
