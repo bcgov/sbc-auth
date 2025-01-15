@@ -105,6 +105,7 @@ export default defineComponent({
       default: false
     }
   },
+  emits: ['emit-bcol-info', 'account-link-successful'],
   setup (props, { emit }) {
     const state = reactive({
       username: '',
@@ -129,7 +130,7 @@ export default defineComponent({
         userId: state.username,
         password: state.password
       }
-      emit('bcol-info', bcolInfo)
+      emit('emit-bcol-info', bcolInfo)
     }
 
     watch(() => [state.username, state.password], () => {
