@@ -223,7 +223,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      useOrgStore().resetOrgInfoForCreateAccount()
+      useOrgStore().resetAccountSetupProgress()
       useOrgStore().setAccessType(AccessType.REGULAR)
     })
 

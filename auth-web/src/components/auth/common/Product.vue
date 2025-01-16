@@ -161,7 +161,7 @@
               Supported payment methods:
             </P>
             <v-chip
-              v-for="method in filteredPaymentMethods"
+              v-for="method in paymentMethods"
               :key="method"
               small
               label
@@ -247,18 +247,10 @@ export default defineComponent({
       isTOSNeeded: computed(() => {
         return TOS_NEEDED_PRODUCT.includes(props.productDetails.code)
       }),
-      filteredPaymentMethods: computed(() => {
-        // TODO - Needs EFT - EJV todo as well
-        // if (orgStore.isGovmOrg) {
-        // return props.paymentMethods.filter((method) => method === PaymentTypes.EJV)
-        // }
-        return props.paymentMethods.filter((method) =>
-          ![PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV].includes(method as PaymentTypes))
-      }),
       paymentMethodSupported: computed(() => {
         const paymentMethod = orgStore.currentOrgPaymentType === PaymentTypes.CREDIT_CARD
           ? PaymentTypes.DIRECT_PAY : orgStore.currentOrgPaymentType
-        return !orgStore.currentOrgPaymentType || state.filteredPaymentMethods?.includes(paymentMethod)
+        return !orgStore.currentOrgPaymentType || props.paymentMethods.includes(paymentMethod)
       }),
       hasDecisionNotBeenMade: computed(() => {
         // returns true if create account flow

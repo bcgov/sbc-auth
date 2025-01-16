@@ -152,6 +152,7 @@ import {
   AccessType,
   Account,
   AccountStatus,
+  PaymentTypes,
   Product as ProductEnum,
   ProductStatus,
   Role,
@@ -199,7 +200,9 @@ export default defineComponent({
       fetchOrgProductFeeCodes,
       updateAccountFees,
       needStaffReview,
-      removeOrgProduct
+      removeOrgProduct,
+      currentOrgPaymentDetails,
+      currentOrganization
     } = useOrgStore()
 
     const {
@@ -207,7 +210,6 @@ export default defineComponent({
     } = useCodesStore()
 
     const {
-      currentOrganization,
       productList,
       currentSelectedProducts
     } = storeToRefs(useOrgStore())
@@ -231,7 +233,7 @@ export default defineComponent({
       displayRemoveProductDialog: false,
       addProductOnAccountAdmin: undefined, // true if add product, false if remove product
       isVariableFeeAccount: computed(() => {
-        const accessType:any = currentOrganization.value.accessType
+        const accessType:any = currentOrganization.accessType
         return ([AccessType.GOVM, AccessType.GOVN].includes(accessType)) || false
       }),
       canManageAccounts: computed((): boolean => {
@@ -253,7 +255,30 @@ export default defineComponent({
         )
       }),
       // Not deconstructed otherwise name conflicts.
-      productPaymentMethods: computed(() => useCodesStore().productPaymentMethods),
+      productPaymentMethods: computed(() => {
+        const codesStore = useCodesStore()
+        const ppMethods = codesStore.productPaymentMethods
+
+        let exclusionSet = [PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV]
+        let inclusionSet = []
+
+        if (currentOrganization.accessType === AccessType.GOVM) {
+          inclusionSet = [PaymentTypes.EJV]
+        } else if (currentOrgPaymentDetails?.eftEnable) {
+          exclusionSet = [PaymentTypes.INTERNAL, PaymentTypes.EJV]
+        }
+
+        Object.keys(ppMethods).forEach((product) => {
+          ppMethods[product] = ppMethods[product].filter((method) => {
+            if (inclusionSet.length > 0) {
+              return inclusionSet.includes(method as PaymentTypes)
+            }
+            return !exclusionSet.includes(method as PaymentTypes)
+          })
+        })
+
+        return ppMethods
+      }),
       displayCancelOnDialog: computed(() => !state.staffReviewClear || state.displayRemoveProductDialog),
       submitDialogText: computed(() => {
         if (state.displayCancelOnDialog && !state.dialogError) {
@@ -272,7 +297,7 @@ export default defineComponent({
 
     const loadProduct = async () => {
       try {
-        await getOrgProducts(currentOrganization.value.id)
+        await getOrgProducts(currentOrganization.id)
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log('Error while loading products ', err)
@@ -286,7 +311,7 @@ export default defineComponent({
       await loadProduct()
       // if staff need to load product fee also
       if (state.canManageAccounts) {
-        state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
+        state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.id)
         state.orgProductFeeCodes = await fetchOrgProductFeeCodes()
       }
       state.isLoading = false
@@ -408,12 +433,12 @@ export default defineComponent({
     }
 
     const saveProductFee = async (accountFees) => {
-      const accountFee = { accoundId: currentOrganization.value.id, accountFees }
+      const accountFee = { accoundId: currentOrganization.id, accountFees }
       state.isProductActionLoading = true
       state.isProductActionCompleted = false
       try {
         await updateAccountFees(accountFee)
-        state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
+        state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.id)
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log('Error while updating product fee ', err)

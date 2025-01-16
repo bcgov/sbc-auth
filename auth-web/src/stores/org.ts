@@ -806,8 +806,8 @@ export const useOrgStore = defineStore('org', () => {
 
   async function resetAccountSetupProgress (): Promise<void> {
     setCurrentOrganization(undefined)
-    setSelectedAccountType(undefined)
-    setCurrentOrganizationType(undefined)
+    setSelectedAccountType(Account.PREMIUM)
+    setCurrentOrganizationType(Account.PREMIUM)
     setCurrentOrganizationPaymentType(undefined)
     setCurrentOrganizationPADInfo(undefined)
     await resetoCurrentSelectedProducts()
@@ -1074,14 +1074,6 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data
   }
 
-  // Called from three flows: Create GOVM, Premium and NON BCSC.
-  async function resetOrgInfoForCreateAccount () {
-    setSelectedAccountType(Account.PREMIUM)
-    setCurrentOrganizationType(Account.PREMIUM)
-    setCurrentOrganizationPaymentType(null)
-    setCurrentOrganizationPADInfo(null)
-  }
-
   return {
     ...toRefs(state),
     isPremiumAccount,
@@ -1186,7 +1178,6 @@ export const useOrgStore = defineStore('org', () => {
     isGovnGovmOrg,
     updateOrgMailingAddress,
     needStaffReview,
-    removeOrgProduct,
-    resetOrgInfoForCreateAccount
+    removeOrgProduct
   }
 })

@@ -112,12 +112,12 @@
 </template>
 
 <script lang="ts">
+import { AccessType, PaymentTypes } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import NextPageMixin from '../mixins/NextPageMixin.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
-import { PaymentTypes } from '@/util/constants'
 import Product from '@/components/auth/common/Product.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { useAccountCreate } from '@/composables/account-create-factory'
@@ -140,13 +140,37 @@ export default defineComponent({
   emits: ['final-step-action', 'emit-bcol-info'],
   setup (props, { root, emit }) {
     const form = ref(null)
+    const { currentOrganization, currentOrgPaymentDetails } = useOrgStore()
     const orgStore = useOrgStore()
     const codesStore = useCodesStore()
     const state = reactive({
       isLoading: false,
       expandedProductCode: '',
       productList: computed(() => orgStore.productList),
-      productPaymentMethods: computed(() => codesStore.productPaymentMethods),
+      productPaymentMethods: computed(() => {
+        const codesStore = useCodesStore()
+        const ppMethods = codesStore.productPaymentMethods
+
+        let exclusionSet = [PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV]
+        let inclusionSet = []
+
+        if (currentOrganization.accessType === AccessType.GOVM) {
+          inclusionSet = [PaymentTypes.EJV]
+        } else if (currentOrgPaymentDetails?.eftEnable) {
+          exclusionSet = [PaymentTypes.INTERNAL, PaymentTypes.EJV]
+        }
+
+        Object.keys(ppMethods).forEach((product) => {
+          ppMethods[product] = ppMethods[product].filter((method) => {
+            if (inclusionSet.length > 0) {
+              return inclusionSet.includes(method as PaymentTypes)
+            }
+            return !exclusionSet.includes(method as PaymentTypes)
+          })
+        })
+
+        return ppMethods
+      }),
       currentSelectedProducts: computed(() => orgStore.currentSelectedProducts),
       isFormValid: computed(() => state.currentSelectedProducts && state.currentSelectedProducts.length > 0),
       selectedPaymentMethod: '',
@@ -217,7 +241,7 @@ export default defineComponent({
 
     async function save () {
       orgStore.setResetAccountTypeOnSetupAccount(true)
-      useAccountCreate().save(state, createAccount)
+      await useAccountCreate().save(state, createAccount)
     }
 
     function createAccount () {
