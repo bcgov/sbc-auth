@@ -139,7 +139,7 @@ export const useProductPayment = (props, state) => {
     }
     const methodSupportPerProduct = paymentMethodSupportedForProducts.value
     const paymentMethods = []
-    const isGovmOrg = orgStore.currentOrganization.accessType === AccessType.GOVM
+    const isGovmOrg = orgStore.currentOrganization?.accessType === AccessType.GOVM
     const paymentTypes = isGovmOrg ? [PaymentTypes.EJV] : [PaymentTypes.PAD, PaymentTypes.CREDIT_CARD,
       PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT]
     paymentTypes.forEach((paymentType) => {
