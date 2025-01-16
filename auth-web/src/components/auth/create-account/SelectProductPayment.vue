@@ -37,7 +37,7 @@
       </div>
     </template>
     <v-divider class="mb-5" />
-    <strong>Select a default payment method for your account: </strong>
+    <strong>Select a payment method for your account: </strong>
     <PaymentMethods
       v-display-mode
       :currentOrgType="currentOrganizationType"

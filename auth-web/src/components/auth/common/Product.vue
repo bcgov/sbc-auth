@@ -9,7 +9,7 @@
       :data-test="`div-product-${productDetails.code}`"
     >
       <div>
-        <header class="d-flex align-center">
+        <header class="d-flex align-items-start">
           <div
             v-if="!hideCheckbox"
             class="pr-8"
@@ -18,7 +18,7 @@
             <v-checkbox
               :key="Math.random()"
               v-model="productSelected"
-              class="product-check-box ma-0 pa-0"
+              class="product-check-box ma-0 pa-0 align-top"
               hide-details
               :data-test="`check-product-${productDetails.code}`"
               @change="selectThisProduct"
@@ -35,6 +35,7 @@
                   <p
                     v-if="$te(productLabel.subTitle)"
                     v-sanitize="$t(productLabel.subTitle)"
+                    class="mt-2"
                   />
                 </div>
               </template>
@@ -83,6 +84,7 @@
               <p
                 v-if="$te(productLabel.subTitle)"
                 v-sanitize="$t(productLabel.subTitle)"
+                class="mt-2"
               />
             </div>
           </div>
@@ -91,7 +93,7 @@
             depressed
             color="primary"
             width="120"
-            class="font-weight-bold ml-auto"
+            class="font-weight-bold ml-auto mt-6"
             :aria-label="`Select  ${productDetails.description}`"
             :data-test="`btn-productDetails-${productDetails.code}`"
             text
@@ -184,7 +186,7 @@
               :key="method"
               x-small
               label
-              class="mr-2 font-weight-bold product-payment-icons py-4"
+              class="mr-2 font-weight-bold product-payment-icons py-4 my-2"
             >
               <v-icon class="mr-1">
                 {{ paymentTypeIcon[method] }}
@@ -472,7 +474,7 @@ export default defineComponent({
 }
 
 .theme--light.v-card.v-card--outlined.selected {
-  border-color: var(--v-primary-base);
+  top: 0;
 }
 
 .product-card-contents {
@@ -482,6 +484,7 @@ export default defineComponent({
 .product-payment-icons.v-chip.v-size--x-small.theme--light.v-chip:not(.v-chip--active){
   background-color: $app-lt-blue ;
   font-size: 12px;
+  color: #212529;
 }
 
 .label-color {
