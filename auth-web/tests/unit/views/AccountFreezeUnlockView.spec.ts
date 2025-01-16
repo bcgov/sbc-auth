@@ -68,7 +68,7 @@ describe('AccountFreezeUnlockView', () => {
     wrapper.vm.isAccountStatusNsfSuspended = true
     await wrapper.vm.$nextTick()
     expect(wrapper.find('h1').text()).toBe('Your Account is Suspended')
-    expect(wrapper.find('p').text()).toBe('To unlock your account, please complete the following steps.')
+    expect(wrapper.find('p').text()).toBe('Important:  Please complete the following steps to complete your payment.')
     expect(wrapper.find('.view-header__icon .v-icon').exists()).toBe(true)
   })
 
