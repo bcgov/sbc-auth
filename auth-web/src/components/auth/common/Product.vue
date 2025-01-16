@@ -184,7 +184,7 @@
               :key="method"
               small
               label
-              class="mr-2 font-weight-bold"
+              class="mr-2 font-weight-bold product-payment-icons"
             >
               <v-icon>{{ paymentTypeIcon[method] }}</v-icon>{{ paymentTypeLabel[method] }}
             </v-chip>
@@ -475,6 +475,10 @@ export default defineComponent({
 
 .product-card-contents {
   color: $gray7;
+}
+
+.v-chip.v-size--small.theme--light.v-chip:not(.v-chip--active){
+  background-color: $app-lt-blue ;
 }
 
 .label-color {
