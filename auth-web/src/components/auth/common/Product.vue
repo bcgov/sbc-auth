@@ -24,7 +24,7 @@
               @change="selectThisProduct"
             >
               <template #label>
-                <div class="ml-2">
+                <div class="ml-2 product-card-contents">
                   <h3
                     class="title font-weight-bold product-title mt-n1"
                     :data-test="productDetails.code"
@@ -113,7 +113,7 @@
             >mdi-chevron-down</v-icon></span>
           </v-btn>
         </header>
-        <div class="product-card-contents ml-9">
+        <div class="product-card-contents ml-10">
           <!-- Product Content Slot -->
           <slot name="productContentSlot" />
 
@@ -125,8 +125,24 @@
               <p
                 v-if="$te(productLabel.details)"
                 v-sanitize="$t(productLabel.details)"
-                class="mb-0"
               />
+              <p v-if="$te(productLabel.link)">
+                <v-btn
+                  large
+                  depressed
+                  color="primary"
+                  class="font-weight-bold pl-0"
+                  text
+                  :href="$t(productLabel.link)"
+                  target="_blank"
+                  rel="noopener"
+                  tag="a"
+                >
+                  <span>Visit Information Page</span>
+                  <span class="mdi mdi-open-in-new" />
+                </v-btn>
+              </p>
+
               <p
                 v-if="$te(productLabel.note)"
                 v-sanitize="$t(productLabel.note)"
@@ -155,9 +171,12 @@
             </div>
           </v-expand-transition>
         </div>
-        <div>
-          <v-label class="theme--light">
-            <P class="mt-2">
+        <div class="ml-10 mt-2">
+          <v-label>
+            <P
+              v-if="paymentMethods.length > 0"
+              class="product-card-contents"
+            >
               Supported payment methods:
             </P>
             <v-chip
@@ -282,6 +301,7 @@ export default defineComponent({
         let { code } = props.productDetails
         let subTitle = `${code?.toLowerCase()}CodeSubtitle`
         let details = `${code?.toLowerCase()}CodeDescription`
+        let link = `${code?.toLowerCase()}CodeDescriptionLink`
         let note = `${code?.toLowerCase()}CodeNote`
         let decisionMadeIcon = null
         let decisionMadeColorCode = null
@@ -317,7 +337,7 @@ export default defineComponent({
             note = ''
           }
         }
-        return { subTitle, details, decisionMadeIcon, decisionMadeColorCode, note }
+        return { subTitle, details, link, decisionMadeIcon, decisionMadeColorCode, note }
       }),
       showPaymentMethodNotSupported: false
     })
@@ -451,6 +471,10 @@ export default defineComponent({
 
 .theme--light.v-card.v-card--outlined.selected {
   border-color: var(--v-primary-base);
+}
+
+.product-card-contents {
+  color: $gray7;
 }
 
 .label-color {
