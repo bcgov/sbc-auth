@@ -152,7 +152,6 @@ import {
   AccessType,
   Account,
   AccountStatus,
-  PaymentTypes,
   Product as ProductEnum,
   ProductStatus,
   Role,
@@ -173,6 +172,7 @@ import { storeToRefs } from 'pinia'
 import { useAccountChangeHandler } from '@/composables'
 import { useCodesStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
+import { useProductPayment } from '@/composables/product-payment-factory'
 import { useUserStore } from '@/stores/user'
 import { userAccessDisplayNames } from '@/resources/QualifiedSupplierAccessResource'
 
@@ -201,7 +201,6 @@ export default defineComponent({
       updateAccountFees,
       needStaffReview,
       removeOrgProduct,
-      currentOrgPaymentDetails,
       currentOrganization
     } = useOrgStore()
 
@@ -255,30 +254,7 @@ export default defineComponent({
         )
       }),
       // Not deconstructed otherwise name conflicts.
-      productPaymentMethods: computed(() => {
-        const codesStore = useCodesStore()
-        const ppMethods = codesStore.productPaymentMethods
-
-        let exclusionSet = [PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV]
-        let inclusionSet = []
-
-        if (currentOrganization.accessType === AccessType.GOVM) {
-          inclusionSet = [PaymentTypes.EJV]
-        } else if (currentOrgPaymentDetails?.eftEnable) {
-          exclusionSet = [PaymentTypes.INTERNAL, PaymentTypes.EJV]
-        }
-
-        Object.keys(ppMethods).forEach((product) => {
-          ppMethods[product] = ppMethods[product].filter((method) => {
-            if (inclusionSet.length > 0) {
-              return inclusionSet.includes(method as PaymentTypes)
-            }
-            return !exclusionSet.includes(method as PaymentTypes)
-          })
-        })
-
-        return ppMethods
-      }),
+      productPaymentMethods: computed(() => useProductPayment().productPaymentMethods),
       displayCancelOnDialog: computed(() => !state.staffReviewClear || state.displayRemoveProductDialog),
       submitDialogText: computed(() => {
         if (state.displayCancelOnDialog && !state.dialogError) {

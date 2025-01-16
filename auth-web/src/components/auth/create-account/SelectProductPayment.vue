@@ -112,17 +112,18 @@
 </template>
 
 <script lang="ts">
-import { AccessType, PaymentTypes } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import NextPageMixin from '../mixins/NextPageMixin.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
+import { PaymentTypes } from '@/util/constants'
 import Product from '@/components/auth/common/Product.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { useAccountCreate } from '@/composables/account-create-factory'
 import { useCodesStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
+import { useProductPayment } from '@/composables/product-payment-factory'
 
 export default defineComponent({
   name: 'SelectProductPayment',
@@ -140,37 +141,13 @@ export default defineComponent({
   emits: ['final-step-action', 'emit-bcol-info'],
   setup (props, { root, emit }) {
     const form = ref(null)
-    const { currentOrganization, currentOrgPaymentDetails } = useOrgStore()
     const orgStore = useOrgStore()
     const codesStore = useCodesStore()
     const state = reactive({
       isLoading: false,
       expandedProductCode: '',
       productList: computed(() => orgStore.productList),
-      productPaymentMethods: computed(() => {
-        const codesStore = useCodesStore()
-        const ppMethods = codesStore.productPaymentMethods
-
-        let exclusionSet = [PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV]
-        let inclusionSet = []
-
-        if (currentOrganization.accessType === AccessType.GOVM) {
-          inclusionSet = [PaymentTypes.EJV]
-        } else if (currentOrgPaymentDetails?.eftEnable) {
-          exclusionSet = [PaymentTypes.INTERNAL, PaymentTypes.EJV]
-        }
-
-        Object.keys(ppMethods).forEach((product) => {
-          ppMethods[product] = ppMethods[product].filter((method) => {
-            if (inclusionSet.length > 0) {
-              return inclusionSet.includes(method as PaymentTypes)
-            }
-            return !exclusionSet.includes(method as PaymentTypes)
-          })
-        })
-
-        return ppMethods
-      }),
+      productPaymentMethods: computed(() => useProductPayment().productPaymentMethods),
       currentSelectedProducts: computed(() => orgStore.currentSelectedProducts),
       isFormValid: computed(() => state.currentSelectedProducts && state.currentSelectedProducts.length > 0),
       selectedPaymentMethod: '',
