@@ -101,8 +101,8 @@ export default defineComponent({
       }
     ]
 
-    onMounted(() => {
-      useOrgStore().resetAccountSetupProgress()
+    onMounted(async () => {
+      await useOrgStore().resetAccountSetupProgress()
       useOrgStore().setAccessType(AccessType.GOVM)
     })
 
