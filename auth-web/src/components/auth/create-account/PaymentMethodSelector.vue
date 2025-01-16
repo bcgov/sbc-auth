@@ -69,7 +69,7 @@
 
 <script lang="ts">
 import { AccessType, PaymentTypes, SessionStorageKeys } from '@/util/constants'
-import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import ConfigHelper from '@/util/config-helper'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
@@ -95,18 +95,18 @@ export default defineComponent({
   setup (props, { emit }) {
     const orgStore = useOrgStore()
 
-    const currentOrganization = computed(() => orgStore.currentOrganization)
-    const currentOrganizationType = computed(() => orgStore.currentOrganizationType)
-    const currentOrgPaymentType = computed(() => orgStore.currentOrgPaymentType)
-
-    const selectedPaymentMethod = ref('')
-    const isPADValid = ref(false)
-    const errorMessage = ref('')
-
-    const pageSubTitle = computed(() => 'Select the payment method for this account.')
+    const state = reactive({
+      selectedPaymentMethod: '',
+      isPADValid: false,
+      errorMessage: '',
+      currentOrganization: computed(() => orgStore.currentOrganization),
+      currentOrganizationType: computed(() => orgStore.currentOrganizationType),
+      currentOrgPaymentType: computed(() => orgStore.currentOrgPaymentType),
+      pageSubTitle: computed(() => 'Select the payment method for this account.')
+    })
 
     onMounted(() => {
-      selectedPaymentMethod.value = currentOrgPaymentType.value
+      state.selectedPaymentMethod = state.currentOrgPaymentType
     })
 
     function goBack () {
@@ -115,57 +115,57 @@ export default defineComponent({
     }
 
     function isEnableCreateBtn () {
-      if (selectedPaymentMethod.value === PaymentTypes.PAD) {
-        return isPADValid.value
-      } else if (selectedPaymentMethod.value === PaymentTypes.BCOL) {
-        return currentOrganization.value.bcolProfile?.password
+      if (state.selectedPaymentMethod === PaymentTypes.PAD) {
+        return state.isPADValid
+      } else if (state.selectedPaymentMethod === PaymentTypes.BCOL) {
+        return state.currentOrganization.bcolProfile?.password
       } else {
-        return !!selectedPaymentMethod.value
+        return !!state.selectedPaymentMethod
       }
     }
 
     function setSelectedPayment (payment) {
-      selectedPaymentMethod.value = payment
-      orgStore.setCurrentOrganizationPaymentType(selectedPaymentMethod.value)
-      if (selectedPaymentMethod.value !== PaymentTypes.BCOL) {
-        errorMessage.value = ''
+      state.selectedPaymentMethod = payment
+      orgStore.setCurrentOrganizationPaymentType(state.selectedPaymentMethod)
+      if (state.selectedPaymentMethod !== PaymentTypes.BCOL) {
+        state.errorMessage = ''
       }
     }
 
     function setPADValid (isValid) {
-      isPADValid.value = isValid
+      state.isPADValid = isValid
     }
 
     async function save () {
-      orgStore.setCurrentOrganizationPaymentType(selectedPaymentMethod.value)
+      orgStore.setCurrentOrganizationPaymentType(state.selectedPaymentMethod)
       // Update Access Type, in case user select GOVN
       const isGovNAccount = !!JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.GOVN_USER || 'false'))
       if (isGovNAccount) {
         orgStore.setAccessType(AccessType.GOVN)
-        orgStore.setCurrentOrganization({ ...currentOrganization.value, accessType: AccessType.GOVN })
+        orgStore.setCurrentOrganization({ ...state.currentOrganization, accessType: AccessType.GOVN })
       }
-      if (selectedPaymentMethod.value !== PaymentTypes.BCOL) {
+      if (state.selectedPaymentMethod !== PaymentTypes.BCOL) {
         // It's possible this is already set from being linked, so we need to empty it out.
         orgStore.setCurrentOrganizationBcolProfile(null)
         createAccount()
         return
       }
       try {
-        const bcolAccountDetails = await orgStore.validateBcolAccount(currentOrganization.value.bcolProfile)
-        errorMessage.value = bcolAccountDetails ? null : 'Error - No account details provided for this account.'
-        orgStore.setCurrentOrganizationBcolProfile(currentOrganization.value.bcolProfile)
+        const bcolAccountDetails = await orgStore.validateBcolAccount(state.currentOrganization.bcolProfile)
+        state.errorMessage = bcolAccountDetails ? null : 'Error - No account details provided for this account.'
+        orgStore.setCurrentOrganizationBcolProfile(state.currentOrganization.bcolProfile)
       } catch (err) {
         switch (err.response.status) {
           case 409:
             break
           case 400:
-            errorMessage.value = err.response.data.message?.detail || err.response.data.message
+            state.errorMessage = err.response.data.message?.detail || err.response.data.message
             break
           default:
-            errorMessage.value = 'An error occurred while attempting to create your account.'
+            state.errorMessage = 'An error occurred while attempting to create your account.'
         }
       }
-      if (!errorMessage.value) {
+      if (!state.errorMessage) {
         createAccount()
       }
     }
@@ -180,13 +180,7 @@ export default defineComponent({
     }
 
     return {
-      currentOrganization,
-      currentOrganizationType,
-      currentOrgPaymentType,
-      selectedPaymentMethod,
-      isPADValid,
-      errorMessage,
-      pageSubTitle,
+      ...toRefs(state),
       goBack,
       isEnableCreateBtn,
       setSelectedPayment,
