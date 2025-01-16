@@ -387,6 +387,7 @@ export default defineComponent({
                 paymentMethod.supported = false
               }
               if (paymentType === state.selectedPaymentMethod && !paymentMethod.supported) {
+                // TODO fix side effect
                 state.selectedPaymentMethod = ''
                 emit('payment-method-selected', state.selectedPaymentMethod)
               }
