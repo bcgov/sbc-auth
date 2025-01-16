@@ -133,7 +133,6 @@ export default defineComponent({
     onMounted(async () => {
       useOrgStore().resetOrgInfoForCreateAccount()
       useOrgStore().setAccessType(AccessType.REGULAR_BCEID)
-    
       // on re-upload need show some pages are in view only mode
       state.readOnly = !!props.orgId
       if (props.orgId) {

@@ -51,12 +51,12 @@
 </template>
 
 <script lang="ts">
+import { AccessType, Pages } from '@/util/constants'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInfoForm.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { AccessType, Pages } from '@/util/constants'
 import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
 import { useOrgStore } from '@/stores/org'
 
