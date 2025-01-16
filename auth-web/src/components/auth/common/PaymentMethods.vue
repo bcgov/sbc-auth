@@ -523,7 +523,7 @@ export default defineComponent({
       state.selectedPaymentMethod = newValue
     })
 
-    watch(() => [state.paymentMethodSupportedForProducts, state.filteredPaymentMethods], () => {
+    watch(() => [state.filteredPaymentMethods], () => {
       if (props.isCreateAccount && state.selectedPaymentMethod) {
         const paymentMethod = PAYMENT_METHODS[state.selectedPaymentMethod]
         if (!paymentMethod?.supported) {
