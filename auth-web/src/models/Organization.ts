@@ -235,7 +235,7 @@ export interface OrgPaymentDetails {
   padTosAcceptedBy:string
   padTosAcceptedDate:string
   futurePaymentMethod: string
-  revenueAccount: GLInfo
+  revenueAccount?: GLInfo
   eftEnable?: boolean
 }
 
