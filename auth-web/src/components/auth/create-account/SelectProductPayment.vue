@@ -152,6 +152,7 @@ export default defineComponent({
       isFormValid: computed(() => state.currentSelectedProducts && state.currentSelectedProducts.length > 0),
       selectedPaymentMethod: '',
       errorMessage: '',
+      currentOrganization: computed(() => orgStore.currentOrganization),
       currentOrganizationType: computed(() => orgStore.currentOrganizationType),
       currentOrgPaymentType: computed(() => orgStore.currentOrgPaymentType),
       isPaymentValid: computed(() => {

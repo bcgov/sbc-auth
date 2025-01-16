@@ -805,6 +805,10 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   async function resetAccountSetupProgress (): Promise<void> {
+    // Grab this so we can indicate if the user can use EFT or not.
+    if (state.currentOrganization?.id) {
+      await getOrgPayments(state.currentOrganization?.id)
+    }
     setCurrentOrganization(undefined)
     setSelectedAccountType(Account.PREMIUM)
     setCurrentOrganizationType(Account.PREMIUM)
