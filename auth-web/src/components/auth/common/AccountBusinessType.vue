@@ -156,7 +156,7 @@
         </v-expand-transition>
         <v-expand-transition class="business-account-type-details">
           <v-row
-            v-if="isGovnAccount || isBusinessAccount "
+            v-if="isGovnAccount || isBusinessAccount"
             justify="space-between"
             data-test="business-account-type-details"
             no-gutters
@@ -383,11 +383,9 @@ export default defineComponent({
         await codesStore.getGovernmentTypeCodes()
         await codesStore.getBusinessSizeCodes()
         await codesStore.getBusinessTypeCodes()
-        if (!currentOrganization.value?.name) {
+        if (!currentOrganization.value?.name && !props.govmAccount) {
           state.isBusinessAccount = true
-          if (state.isBusinessAccount) {
-            state.accountType = AccountType.BUSINESS
-          }
+          state.accountType = AccountType.BUSINESS
         }
         await onOrgBusinessTypeChange()
       } catch (ex) {

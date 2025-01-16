@@ -88,7 +88,7 @@
       <div class="d-flex">
         <strong>Current Payment Method</strong>
         <span
-          v-if="!isEditing"
+          v-if="!isEditing && isBcolAdmin"
           class="d-flex ml-auto"
           @click="isEditing = true"
         >
@@ -102,6 +102,7 @@
       </div>
       <AccountPaymentMethods
         :isEditing="isEditing"
+        :isBcolAdmin="isBcolAdmin"
         @disable-editing="isEditing = false"
       />
     </template>
@@ -184,7 +185,7 @@ export default defineComponent({
     ModalDialog,
     AccountPaymentMethods
   },
-  setup () {
+  setup (props) {
     const confirmDialog: InstanceType<typeof ModalDialog> = ref(null)
 
     const {
@@ -254,7 +255,7 @@ export default defineComponent({
         )
       }),
       // Not deconstructed otherwise name conflicts.
-      productPaymentMethods: computed(() => useProductPayment().productPaymentMethods),
+      productPaymentMethods: computed(() => useProductPayment(props, state).productPaymentMethods),
       displayCancelOnDialog: computed(() => !state.staffReviewClear || state.displayRemoveProductDialog),
       submitDialogText: computed(() => {
         if (state.displayCancelOnDialog && !state.dialogError) {
@@ -268,7 +269,8 @@ export default defineComponent({
         }
       }),
       isEditing: false,
-      productRenderKey: 0
+      productRenderKey: 0,
+      isBcolAdmin: currentUser?.roles?.includes(Role.BcolStaffAdmin)
     })
 
     const loadProduct = async () => {

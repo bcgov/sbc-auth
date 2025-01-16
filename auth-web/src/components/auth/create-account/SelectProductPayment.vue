@@ -147,7 +147,7 @@ export default defineComponent({
       isLoading: false,
       expandedProductCode: '',
       productList: computed(() => orgStore.productList),
-      productPaymentMethods: computed(() => useProductPayment().productPaymentMethods),
+      productPaymentMethods: computed(() => useProductPayment(props, state).productPaymentMethods),
       currentSelectedProducts: computed(() => orgStore.currentSelectedProducts),
       isFormValid: computed(() => state.currentSelectedProducts && state.currentSelectedProducts.length > 0),
       selectedPaymentMethod: '',

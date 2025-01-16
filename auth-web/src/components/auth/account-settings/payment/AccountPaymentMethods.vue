@@ -97,7 +97,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission, Role } from '@/util/constants'
+import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
 import {
   CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation
 } from '@/models/Organization'
@@ -122,6 +122,10 @@ export default defineComponent({
       default: false
     },
     isEditing: {
+      type: Boolean,
+      default: false
+    },
+    isBcolAdmin: {
       type: Boolean,
       default: false
     }
@@ -156,7 +160,6 @@ export default defineComponent({
     const { currentOrganization, currentOrgPaymentType, currentOrgAddress, currentMembership, permissions, currentOrgGLInfo } = useAccount()
 
     const currentUser = computed(() => userStore.currentUser)
-    const isBcolAdmin = currentUser.value.roles?.includes(Role.BcolStaffAdmin)
 
     function setSelectedPayment (payment) {
       state.errorMessage = ''
@@ -174,7 +177,7 @@ export default defineComponent({
     }
 
     function paymentMethodNotChangedAndNotEjv () {
-      return !isBcolAdmin && !state.paymentMethodChanged && state.selectedPaymentMethod !== PaymentTypes.EJV
+      return !props.isBcolAdmin && !state.paymentMethodChanged && state.selectedPaymentMethod !== PaymentTypes.EJV
     }
 
     const isDisableSaveBtn = computed(() => {
@@ -406,7 +409,6 @@ export default defineComponent({
     return {
       ...toRefs(state),
       setSelectedPayment,
-      isBcolAdmin,
       isDisableSaveBtn,
       getPADInfo,
       isPADValid,
