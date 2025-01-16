@@ -88,7 +88,7 @@
       <div class="d-flex">
         <strong>Current Payment Method</strong>
         <span
-          v-if="!isEditing && isBcolAdmin"
+          v-if="showEditButton"
           class="d-flex ml-auto"
           @click="isEditing = true"
         >
@@ -270,7 +270,11 @@ export default defineComponent({
       }),
       isEditing: false,
       productRenderKey: 0,
-      isBcolAdmin: currentUser?.roles?.includes(Role.BcolStaffAdmin)
+      isBcolAdmin: currentUser?.roles?.includes(Role.BcolStaffAdmin),
+      showEditButton: computed(() => {
+        const accessType:any = currentOrganization.accessType
+        return !state.isEditing && (![AccessType.GOVM].includes(accessType) || state.isBcolAdmin)
+      })
     })
 
     const loadProduct = async () => {
