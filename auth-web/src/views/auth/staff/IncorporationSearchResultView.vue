@@ -63,13 +63,13 @@ import { Action, State } from 'pinia-class'
 import { Business, BusinessSearchResultDto } from '@/models/business'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
+import { AccessType } from '@/util/constants'
 import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import GeneratePasscodeView from '@/views/auth/staff/GeneratePasscodeView.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
-import { AccessType, Account } from '@/util/constants'
 
 @Component({
   components: {
