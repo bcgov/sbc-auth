@@ -148,6 +148,11 @@ export default class CommonUtils {
   static formatDatePickerDate (date?: Date) {
     return moment(date || new Date()).format('YYYY-MM-DD')
   }
+
+  static formatDateToHumanReadable (date: Date | string | moment.Moment) {
+    return moment(date).format('MMMM DD, YYYY')
+  }
+
   // Formatting date in the desired format for vue date pickers
   static formatCurrentDate () {
     return moment(new Date()).format('MMMM DD, YYYY')

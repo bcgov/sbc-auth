@@ -8,7 +8,7 @@
         <h1 class="view-header__title">
           Your Account is Suspended
         </h1>
-        <p class="mt-3 mb-0 py-4 px-6 important">
+        <p class="mt-3 mb-0 py-6 px-6 important">
           <v-icon
             color="red"
             class="pr-1"
@@ -65,21 +65,20 @@
     class="view-container"
   >
     <div class="view-header">
-      <div class="view-header__icon">
-        <v-icon
-          large
-          color="error"
-          class="mt-1 mr-4"
-        >
-          mdi-alert-circle-outline
-        </v-icon>
-      </div>
-      <div>
+      <div class="w-100">
         <h1 class="view-header__title">
-          This account has been temporarily suspended
+          Your Account is Suspended
         </h1>
-        <p class="mt-3 mb-0">
-          To unlock your account, please complete the following steps.
+        <p class="mt-3 mb-0 py-6 px-6 important">
+          <v-icon
+            color="red"
+            class="pr-1"
+            small
+          >
+            mdi-alert
+          </v-icon>
+          <span class="font-weight-bold">Important: </span>
+          Please complete the following steps to complete your payment.
         </p>
       </div>
     </div>
@@ -88,7 +87,6 @@
         ref="stepper"
         :stepper-configuration="stepperConfig"
         :isLoading="isLoading"
-        :stepperColor="'error'"
         @final-step-action="unlockAccount"
         @step-forward="handleStepForward"
       />
@@ -315,9 +313,13 @@ export default defineComponent({
 
 .important {
   background-color: #fae9e9;
-  border: 2px solid #d3272c;
+  border: 1.5px solid #d3272c;
   color: #495057;
-  font-size: 12px;
+  font-size: 14px;
+}
+
+.w-100 {
+  width: 100%;
 }
 
 </style>
