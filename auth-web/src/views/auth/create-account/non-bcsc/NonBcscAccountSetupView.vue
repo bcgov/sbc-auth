@@ -99,20 +99,20 @@ export default defineComponent({
           componentProps: {}
         },
         {
-          title: 'Select Products and Services',
-          stepName: 'Products and Payment',
-          component: SelectProductPayment,
-          componentProps: {
-            isStepperView: true
-          }
-        },
-        {
           title: 'Account Administrator Information',
           stepName: 'Account Administrator Information',
           component: UserProfileForm,
           componentProps: {
             isStepperView: true,
             stepperSource: AccessType.EXTRA_PROVINCIAL
+          }
+        },
+        {
+          title: 'Select Products and Services',
+          stepName: 'Products and Payment',
+          component: SelectProductPayment,
+          componentProps: {
+            isStepperView: true
           }
         }
       ]
@@ -132,6 +132,8 @@ export default defineComponent({
 
     onMounted(async () => {
       useOrgStore().resetOrgInfoForCreateAccount()
+      useOrgStore().setAccessType(AccessType.REGULAR_BCEID)
+    
       // on re-upload need show some pages are in view only mode
       state.readOnly = !!props.orgId
       if (props.orgId) {
@@ -144,8 +146,8 @@ export default defineComponent({
         orgStore.getOrgPayments()
         orgStore.setCurrentOrganizationType(orgStore.currentOrganization.orgType)
         // passing additional props for readonly
-        accountStepperConfig[3].componentProps = { ...accountStepperConfig[3].componentProps, clearForm: true }
-        accountStepperConfig[2].componentProps = { ...accountStepperConfig[2].componentProps, readOnly: true, orgId }
+        accountStepperConfig[2].componentProps = { ...accountStepperConfig[2].componentProps, clearForm: true }
+        accountStepperConfig[3].componentProps = { ...accountStepperConfig[3].componentProps, readOnly: true, orgId }
         accountStepperConfig[1].componentProps = { ...accountStepperConfig[1].componentProps, readOnly: true }
       } else {
         orgStore.setViewOnlyMode('')

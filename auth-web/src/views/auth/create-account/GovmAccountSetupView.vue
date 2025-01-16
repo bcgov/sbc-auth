@@ -56,7 +56,7 @@ import { defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composit
 import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInfoForm.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { Pages } from '@/util/constants'
+import { AccessType, Pages } from '@/util/constants'
 import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
 import { useOrgStore } from '@/stores/org'
 
@@ -103,6 +103,7 @@ export default defineComponent({
 
     onMounted(() => {
       useOrgStore().resetOrgInfoForCreateAccount()
+      useOrgStore().setAccessType(AccessType.GOVM)
     })
 
     async function createAccount () {

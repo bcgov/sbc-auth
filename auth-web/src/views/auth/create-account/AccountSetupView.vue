@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts">
-import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { AccessType, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import ConfigHelper from '@/util/config-helper'
@@ -224,6 +224,7 @@ export default defineComponent({
 
     onMounted(() => {
       useOrgStore().resetOrgInfoForCreateAccount()
+      useOrgStore().setAccessType(AccessType.REGULAR)
     })
 
     return {
