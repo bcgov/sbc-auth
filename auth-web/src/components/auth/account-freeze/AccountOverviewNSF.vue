@@ -7,7 +7,7 @@
         mdi-alert
       </v-icon>
       We were unable to process the payment from your bank account, and as a result, your account has been suspended.
-      Returned system error message: {{ suspensionReason }}
+      Returned system error message: {{ reason }}.
     </p>
 
     <v-card
@@ -93,14 +93,12 @@
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
-import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'AccountOverviewNSFView',
   emits: ['step-forward'],
   setup (_, { emit }) {
-    const { getCodes } = useCodesStore()
     const orgStore = useOrgStore()
     const currentOrganization = computed(() => orgStore.currentOrganization)
     const currentMembership = computed(() => orgStore.currentMembership)
@@ -112,7 +110,7 @@ export default defineComponent({
       totalAmount: 0,
       totalAmountRemaining: 0,
       totalPaidAmount: 0,
-      suspensionReason: '',
+      reason: '',
       suspendedDate: currentOrganization.value?.suspendedOn
         ? CommonUtils.formatDateToHumanReadable(currentOrganization.value.suspendedOn) : ''
     })
@@ -122,14 +120,11 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      const suspensionReasonCodes = await getCodes()
-      state.suspensionReason = suspensionReasonCodes.find(
-        suspensionReasonCode => suspensionReasonCode?.code === currentOrganization.value?.suspensionReasonCode
-      )?.desc
       const failedInvoices: FailedInvoice = await calculateFailedInvoices()
       state.totalAmount = failedInvoices?.totalTransactionAmount || 0
       state.nsfAmount = failedInvoices?.nsfFee || 0
       state.totalAmountRemaining = failedInvoices?.totalAmountToPay || 0
+      state.reason = failedInvoices.reason || ''
     })
 
     return {

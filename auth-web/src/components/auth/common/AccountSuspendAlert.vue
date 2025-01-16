@@ -21,7 +21,7 @@
             Account Suspended
           </div>
           <div>
-            This acount has been suspended. Returned system error message: {{ suspensionReason }}.
+            This acount has been suspended. Returned system error message: {{ reason }}.
           </div>
           <div class="mt-6 title font-weight-bold">
             BALANCE DUE:  ${{ totalAmountToPay.toFixed(2) }}
@@ -68,11 +68,7 @@ export default defineComponent({
       totalTransactionAmount: 0,
       totalAmountToPay: 0,
       totalPaidAmount: 0,
-      suspensionReason: computed(() => {
-        return codesStore.suspensionReasonCodes?.find(
-          suspensionReasonCode => suspensionReasonCode?.code === currentOrganization.value?.suspensionReasonCode
-        )?.desc
-      }),
+      reason: '',
       suspendedDate: currentOrganization.value?.suspendedOn
         ? CommonUtils.formatDateToHumanReadable(currentOrganization.value.suspendedOn) : '',
       isSuspendedForNSF: computed(() => currentOrganization.value?.statusCode === AccountStatus.NSF_SUSPENDED),
@@ -89,6 +85,7 @@ export default defineComponent({
         const failedInvoices: FailedInvoice = await orgStore.calculateFailedInvoices()
         state.totalTransactionAmount = failedInvoices.totalTransactionAmount || 0
         state.totalAmountToPay = failedInvoices.totalAmountToPay || 0
+        state.reason = failedInvoices.reason || ''
       }
     })
     return {
