@@ -182,11 +182,13 @@
             <v-chip
               v-for="method in paymentMethods"
               :key="method"
-              small
+              x-small
               label
-              class="mr-2 font-weight-bold product-payment-icons"
+              class="mr-2 font-weight-bold product-payment-icons py-4"
             >
-              <v-icon>{{ paymentTypeIcon[method] }}</v-icon>{{ paymentTypeLabel[method] }}
+              <v-icon class="mr-1">
+                {{ paymentTypeIcon[method] }}
+              </v-icon>{{ paymentTypeLabel[method] }}
             </v-chip>
           </v-label>
           <div>
@@ -477,8 +479,9 @@ export default defineComponent({
   color: $gray7;
 }
 
-.v-chip.v-size--small.theme--light.v-chip:not(.v-chip--active){
+.product-payment-icons.v-chip.v-size--x-small.theme--light.v-chip:not(.v-chip--active){
   background-color: $app-lt-blue ;
+  font-size: 12px;
 }
 
 .label-color {
