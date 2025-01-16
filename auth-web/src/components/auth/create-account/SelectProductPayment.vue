@@ -112,18 +112,17 @@
 </template>
 
 <script lang="ts">
-import { AccessType, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
-import ConfigHelper from '@/util/config-helper'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import NextPageMixin from '../mixins/NextPageMixin.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
+import { PaymentTypes } from '@/util/constants'
 import Product from '@/components/auth/common/Product.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { useAccountCreate } from '@/composables/account-create-factory'
 import { useCodesStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
-import { useAccountCreate } from '@/composables/account-create-factory'
 
 export default defineComponent({
   name: 'SelectProductPayment',
