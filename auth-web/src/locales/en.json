@@ -151,7 +151,7 @@
   "rptCodeDescription": "<p><ul><li>Search a property's tax amounts over the last 10 years</li><li>Search a property's tax-paid status</li><li>Search a property's legal description</li></ul></p>",
   "csoCodeDescription": "<ul><li>View Provincial and Supreme civil court files; view and print electronic documents (if available); purchase documents; file summary reports using eSearch</li><li>Access daily court lists for Provincial Court small claims matters and Supreme Court Chambers</li><li>Electronically file civil court documents using eFiling</li></ul>",
   "businessCodeDescription": "<ul><li>Request a name for your business </li><li>File annual reports </li><li>View and change your current directors or address</li><li>See the history of your business' fillings</li></ul> <p></p>",
-  "businessCodeDescriptionLink": "https://www.account.bcregistry.gov.bc.ca",
+  "businessCodeDescriptionLink": "https://account.bcregistry.gov.bc.ca/decide-business",
   "business_searchCodeDescription": "<ul><li>View details about businesses and their filing history, </li><li>Download the Business Summary for businesses, including current status, registered addresses, directors, etc. </li><li>Download business filings, such as Annual Reports and more</li><li>Download other business documents including the Certificate of Good Standing, the Certificate of Status, and the Letter Under Seal.</li></ul> <p></p>",
   "business_searchCodeDescriptionLink": "https://www.bcregistry.gov.bc.ca/",
   "mhrStaffCodeDescription": "<p>Searches may be based on several different criteria. If more than one home meets the criteria submitted, then a list of matches is displayed.<br/>You may include a Personal Property Registry search (combined search) at an additional cost.</p>",
