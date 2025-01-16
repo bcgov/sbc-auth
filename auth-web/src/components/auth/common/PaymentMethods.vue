@@ -31,7 +31,7 @@
               >
                 {{ payment.icon }}
               </v-icon>
-              <h3 class="title font-weight-bold mt-n1">
+              <h3 class="title font-weight-bold mt-n1 payment-title">
                 {{ payment.title }}
                 <span v-if="!payment.supported">
                   is not supported for the selected products

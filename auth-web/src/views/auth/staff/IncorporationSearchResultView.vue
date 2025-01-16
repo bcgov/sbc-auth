@@ -9,6 +9,9 @@
     <template #loading>
       Loading...
     </template>
+    <template #[`item.orgType`]="{ item }">
+      {{ formatType(item) }}
+    </template>
     <template #[`item.account`]="{ item }">
       <span
         :class="{ 'account-color-empty': !isThereAnAffiliatedAccount }"
@@ -66,6 +69,7 @@ import GeneratePasscodeView from '@/views/auth/staff/GeneratePasscodeView.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
+import { AccessType, Account } from '@/util/constants'
 
 @Component({
   components: {
@@ -161,6 +165,22 @@ export default class IncorporationSearchResultView extends Vue {
       width: '105'
     }
   ]
+
+  formatType (org:BusinessSearchResultDto): string {
+    let orgTypeDisplay
+    if (org?.orgType) {
+      orgTypeDisplay = 'Premium'
+    } else {
+      orgTypeDisplay = 'N/A'
+    }
+    if (org?.accessType === AccessType.ANONYMOUS) {
+      return 'Director Search'
+    }
+    if (org?.accessType === AccessType.EXTRA_PROVINCIAL) {
+      return orgTypeDisplay + ' (out-of-province)'
+    }
+    return orgTypeDisplay
+  }
 
   async manageBusinessEvent () {
     const businessIdentifier = this.currentBusiness.businessIdentifier

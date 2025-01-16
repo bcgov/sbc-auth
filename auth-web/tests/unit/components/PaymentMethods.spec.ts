@@ -49,52 +49,49 @@ describe('PaymentMethods.vue', () => {
   })
 
   it('should render both payment card types', () => {
-    expect(wrapper.findAll('.payment-card').length).toBe(2)
-  })
-
-  it('should render both payment card types', () => {
-    expect(wrapper.findAll('.payment-card').length).toBe(2)
+    expect(wrapper.findAll('.payment-card').length).toBe(4)
   })
 
   it('should render payment card types correctly', () => {
-    const paymentMethods = wrapper.vm.allowedPaymentMethods
-    const paymentCards = wrapper.findAll('.payment-card')
-    expect(paymentCards.at(0).find('.payment-title').text()).toBe(paymentMethods[0].title)
-    expect(paymentCards.at(1).find('.payment-title').text()).toBe(paymentMethods[1].title)
+    const paymentMethods = wrapper.vm.filteredPaymentMethods
+    const paymentTitles = wrapper.findAll('.payment-title')
+    expect(paymentTitles.at(0).text()).toContain(paymentMethods[0].title)
+    expect(paymentTitles.at(1).text()).toContain(paymentMethods[1].title)
+    expect(paymentTitles.at(2).text()).toContain(paymentMethods[2].title)
+    expect(paymentTitles.at(3).text()).toContain(paymentMethods[3].title)
   })
 
   it('should select payment card types correctly', async () => {
     const paymentCard1 = wrapper.findAll('.payment-card').at(0)
-    const selectButton = paymentCard1.find('.v-btn')
-    expect(selectButton.text()).toBe('SELECT')
+    const selectButton = paymentCard1.find('.v-radio')
     selectButton.trigger('click')
     await wrapper.vm.$nextTick()
-    expect(selectButton.text()).toBe('SELECTED')
+    await wrapper.vm.$nextTick()
+    expect(selectButton.attributes()['class']).toContain('v-item--active')
   })
 
   it('should set selectedPaymentMethod correctly', async () => {
     const paymentCard1 = wrapper.findAll('.payment-card').at(0)
-    const selectButton = paymentCard1.find('.v-btn')
-    expect(selectButton.text()).toBe('SELECT')
+    const selectButton = paymentCard1.find('.v-radio')
     selectButton.trigger('click')
     await wrapper.vm.$nextTick()
-    expect(wrapper.vm.$data.selectedPaymentMethod).toBe(wrapper.vm.allowedPaymentMethods[0].type)
+    expect(wrapper.vm.$data.selectedPaymentMethod).toBe(wrapper.vm.filteredPaymentMethods[0].type)
   })
 
   it('should select payment method correctly', () => {
-    wrapper.vm.paymentMethodSelected(wrapper.vm.allowedPaymentMethods[0])
-    expect(wrapper.vm.$data.selectedPaymentMethod).toBe(wrapper.vm.allowedPaymentMethods[0].type)
+    wrapper.vm.paymentMethodSelected(wrapper.vm.filteredPaymentMethods[0])
+    expect(wrapper.vm.$data.selectedPaymentMethod).toBe(wrapper.vm.filteredPaymentMethods[0].type)
   })
 
   it('should return the payment selected correctly', () => {
-    const method1 = wrapper.vm.allowedPaymentMethods[0]
+    const method1 = wrapper.vm.filteredPaymentMethods[0]
     wrapper.vm.paymentMethodSelected(method1)
     expect(wrapper.vm.isPaymentSelected(method1)).toBe(true)
   })
 
   it('should return the payment selected correctly [negative]', () => {
-    const method1 = wrapper.vm.allowedPaymentMethods[0]
-    const method2 = wrapper.vm.allowedPaymentMethods[1]
+    const method1 = wrapper.vm.filteredPaymentMethods[0]
+    const method2 = wrapper.vm.filteredPaymentMethods[1]
     wrapper.vm.paymentMethodSelected(method1)
     expect(wrapper.vm.isPaymentSelected(method2)).toBe(false)
   })

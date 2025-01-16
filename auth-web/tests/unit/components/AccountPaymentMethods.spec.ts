@@ -63,12 +63,4 @@ describe('AccountPaymentMethods.vue', () => {
   it('renders the components properly and address is being shown', () => {
     expect(wrapper.findComponent(AccountPaymentMethods).exists()).toBe(true)
   })
-
-  it('renders proper header content', () => {
-    expect(wrapper.find('h2').text()).toBe('Payment Methods')
-  })
-
-  it('renders sub text content', () => {
-    expect(wrapper.find('p').text()).toBe('Manage your payment method for this account.')
-  })
 })

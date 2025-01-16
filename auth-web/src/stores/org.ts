@@ -170,7 +170,7 @@ export const useOrgStore = defineStore('org', () => {
   // This should work for STAFF on any org.
   const isStaffOrSbcStaff = computed<boolean>(() => {
     const currentOrgIsStaff = [Account.STAFF, Account.SBC_STAFF].includes(state.currentOrganization?.orgType as Account)
-    return currentOrgIsStaff || useUserStore().currentUser.roles.includes(Role.Staff)
+    return currentOrgIsStaff || useUserStore().currentUser?.roles.includes(Role.Staff)
   })
 
   function setAccessType (accessType:string) {

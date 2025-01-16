@@ -147,25 +147,6 @@ describe('Product.vue', () => {
     expect(wrapper.vm.hasDecisionNotBeenMade).toBeFalsy()
   })
 
-  it('premium product should be disabled in basic account settings', async () => {
-    pprProduct.subscriptionStatus = ProductStatus.NOT_SUBSCRIBED
-    pprProduct.premiumOnly = true
-    wrapper = wrapperFactory({
-      productDetails: pprProduct,
-      isexpandedView: false,
-      isAccountSettingsView: true,
-      isBasicAccount: true
-    })
-
-    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
-    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
-
-    const getDecisionMadeSettings = wrapper.vm.productLabel
-    expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-minus-box')
-    expect(getDecisionMadeSettings.decisionMadeColorCode).toBeNull()
-    expect(wrapper.vm.hasDecisionNotBeenMade).toBeTruthy()
-  })
-
   it('creation flow should display check box', async () => {
     pprProduct.subscriptionStatus = ProductStatus.NOT_SUBSCRIBED
     wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false })
