@@ -386,11 +386,6 @@ export default defineComponent({
               if (currentSelectedProducts.value.length === 0) {
                 paymentMethod.supported = false
               }
-              if (paymentType === state.selectedPaymentMethod && !paymentMethod.supported) {
-                // TODO fix side effect
-                state.selectedPaymentMethod = ''
-                emit('payment-method-selected', state.selectedPaymentMethod)
-              }
             }
             paymentMethods.push(paymentMethod)
           }
@@ -526,6 +521,16 @@ export default defineComponent({
     // Purpose: reset the payment method without having to reload the component.
     watch(() => props.currentSelectedPaymentMethod, (newValue) => {
       state.selectedPaymentMethod = newValue
+    })
+
+    watch(() => [state.paymentMethodSupportedForProducts, state.filteredPaymentMethods], () => {
+      if (props.isCreateAccount && state.selectedPaymentMethod) {
+        const paymentMethod = PAYMENT_METHODS[state.selectedPaymentMethod]
+        if (!paymentMethod?.supported) {
+          state.selectedPaymentMethod = ''
+          emit('payment-method-selected', state.selectedPaymentMethod)
+        }
+      }
     })
 
     onMounted(async () => {
