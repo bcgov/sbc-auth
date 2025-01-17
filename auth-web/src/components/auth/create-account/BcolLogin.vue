@@ -25,20 +25,6 @@
           </div>
         </v-tooltip>
       </legend>
-      <v-slide-y-transition>
-        <div
-          v-show="errorMessage"
-          class="pb-2"
-        >
-          <v-alert
-            type="error"
-            icon="mdi-alert-circle-outline"
-            data-test="alert-bcol-error"
-          >
-            {{ errorMessage }}
-          </v-alert>
-        </div>
-      </v-slide-y-transition>
       <v-row>
         <v-col
           :cols="hideLinkBtn ? 6 : 4 "
@@ -147,42 +133,11 @@ export default defineComponent({
       form.value?.resetValidation()
     }
 
-    const linkAccounts = async () => {
-      state.isLoading = true
-      state.errorMessage = ''
-
-      if (state.isFormValid) {
-        const bcolProfile: BcolProfile = {
-          userId: state.username,
-          password: state.password
-        }
-        try {
-          const bcolAccountDetails: BcolAccountDetails = await useOrgStore().validateBcolAccount(bcolProfile)
-          state.isLoading = false
-          if (bcolAccountDetails) {
-            emit('account-link-successful', { bcolProfile, bcolAccountDetails })
-            resetForm()
-          }
-        } catch (err) {
-          state.isLoading = false
-          switch (err.response.status) {
-            case 409:
-            case 400:
-              state.errorMessage = err.response.data.message?.detail || err.response.data.message
-              break
-            default:
-              state.errorMessage = 'An error occurred while attempting to create your account.'
-          }
-        }
-      }
-    }
-
     return {
       ...toRefs(state),
       usernameRules,
       passwordRules,
       form,
-      linkAccounts,
       resetForm
     }
   }
