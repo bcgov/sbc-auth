@@ -50,20 +50,6 @@
       @is-pad-valid="setPADValid"
       @emit-bcol-info="setBcolInfo"
     />
-    <v-slide-y-transition>
-      <div
-        v-show="errorMessage"
-        class="pb-2"
-      >
-        <v-alert
-          type="error"
-          icon="mdi-alert-circle-outline"
-          data-test="alert-bcol-error"
-        >
-          {{ errorMessage }}
-        </v-alert>
-      </div>
-    </v-slide-y-transition>
     <v-row>
       <v-col
         cols="12"
@@ -93,7 +79,7 @@
           class="save-continue-button mr-3"
           data-test="next-button"
           :disabled="!isFormValid || !isPaymentValid"
-          @click="save"
+          @click="saveAccount"
         >
           <span>
             {{ readOnly ? 'Submit' : 'Create Account' }}
@@ -108,6 +94,33 @@
         />
       </v-col>
     </v-row>
+    <!-- BC Online - Alert Dialog (Error) -->
+    <ModalDialog
+      ref="errorDialog"
+      :title="errorTitle"
+      :text="errorText"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
+      </template>
+      <template #actions>
+        <v-btn
+          large
+          color="primary"
+          class="font-weight-bold"
+          @click="closeError"
+        >
+          OK
+        </v-btn>
+      </template>
+    </ModalDialog>
   </v-form>
 </template>
 
@@ -115,6 +128,7 @@
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '../mixins/NextPageMixin.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
 import { PaymentTypes } from '@/util/constants'
@@ -128,6 +142,7 @@ import { useProductPayment } from '@/composables/product-payment-factory'
 export default defineComponent({
   name: 'SelectProductPayment',
   components: {
+    ModalDialog,
     PaymentMethods,
     ConfirmCancelButton,
     Product
@@ -143,6 +158,8 @@ export default defineComponent({
     const form = ref(null)
     const orgStore = useOrgStore()
     const codesStore = useCodesStore()
+    const errorDialog = ref(null)
+    const { save } = useAccountCreate()
     const state = reactive({
       isLoading: false,
       expandedProductCode: '',
@@ -151,7 +168,8 @@ export default defineComponent({
       currentSelectedProducts: computed(() => orgStore.currentSelectedProducts),
       isFormValid: computed(() => state.currentSelectedProducts && state.currentSelectedProducts.length > 0),
       selectedPaymentMethod: '',
-      errorMessage: '',
+      errorTitle: 'Error',
+      errorText: '',
       currentOrganization: computed(() => orgStore.currentOrganization),
       currentOrganizationType: computed(() => orgStore.currentOrganizationType),
       currentOrgPaymentType: computed(() => orgStore.currentOrgPaymentType),
@@ -200,6 +218,12 @@ export default defineComponent({
       root.$router.push('/')
     }
 
+    function closeError () {
+      state.errorText = ''
+      errorDialog.value.close()
+    }
+
+
     onMounted(async () => {
       await setup()
     })
@@ -217,9 +241,9 @@ export default defineComponent({
       state.isPADValid = isValid
     }
 
-    async function save () {
+    async function saveAccount () {
       orgStore.setResetAccountTypeOnSetupAccount(true)
-      await useAccountCreate().save(state, createAccount)
+      await save(state, createAccount, errorDialog)
     }
 
     function createAccount () {
@@ -240,8 +264,10 @@ export default defineComponent({
       setBcolInfo,
       toggleProductDetails,
       goBack,
-      save,
-      cancel
+      saveAccount,
+      cancel,
+      closeError,
+      errorDialog
     }
   }
 })
