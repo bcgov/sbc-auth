@@ -291,7 +291,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, AccountStatus, Permission, Role, SuspensionReason } from '@/util/constants'
+import { AccessType, AccountStatus, Pages, Permission, Role, SuspensionReason } from '@/util/constants'
 import { CreateRequestBody, OrgBusinessType } from '@/models/Organization'
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { useAccount, useAccountChangeHandler } from '@/composables'
@@ -361,15 +361,16 @@ export default defineComponent({
       isBusinessAccount: computed(() => orgStore.isBusinessAccount),
       baseAddress: computed(() => currentOrgAddress.value),
 
-      isStaff: computed(() => userStore.currentUser.roles.includes(Role.Staff)) || userStore.currentUser.roles.includes(Role.ContactCentreStaff),
+      isStaff: computed(() => userStore.currentUser.roles.includes(Role.Staff)),
       isSuspendButtonVisible: computed(() => (
         (currentOrganization.value.statusCode === AccountStatus.ACTIVE ||
         currentOrganization.value.statusCode === AccountStatus.SUSPENDED) &&
         userStore.currentUser.roles.includes(Role.StaffSuspendAccounts)
       )),
       isDeactivateButtonVisible: computed(() => currentOrganization.value?.statusCode !== AccountStatus.INACTIVE),
-      canChangeAccessType: computed(() => userStore.currentUser.roles.includes(Role.StaffManageAccounts)) &&
-      !userStore.currentUser.roles.includes(Role.ContactCentreStaff),
+      editAccountUrl: Pages.EDIT_ACCOUNT_TYPE,
+      canChangeAccessType: computed(() => userStore.currentUser.roles.includes(Role.StaffManageAccounts)),
+      isAddressEditable: computed(() => [Permission.CHANGE_ADDRESS].some(per => permissions.value.includes(per))),
       isAdminContactViewable: computed(() => [Permission.VIEW_ADMIN_CONTACT].some(per => permissions.value.includes(per))),
       isAccountStatusActive: computed(() => currentOrganization.value.statusCode === AccountStatus.ACTIVE),
       accountType: computed(() => {
@@ -383,8 +384,7 @@ export default defineComponent({
       isAddressInfoIncomplete: computed(() => (
         currentOrgAddress.value ? Object.keys(currentOrgAddress.value).length === 0 : true
       )),
-      nameChangeNotAllowed: computed(() => (anonAccount.value || isGovmAccount.value)) &&
-      userStore.currentUser.roles.includes(Role.ContactCentreStaff)
+      nameChangeNotAllowed: computed(() => (anonAccount.value || isGovmAccount.value))
     })
 
     const suspensionSelectRules = [

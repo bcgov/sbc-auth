@@ -131,9 +131,8 @@ function mapPendingDetails (route: any) {
 }
 
 function isStaff (): boolean {
-  const userProfile = KeyCloakService.getUserInfo()
-  const roles = userProfile?.roles || []
-  return roles.includes('Staff') || roles.includes('ContactCentreStaff')
+  const kcUserProfile = KeyCloakService.getUserInfo()
+  return kcUserProfile?.roles?.includes(Role.Staff) || false
 }
 
 export function getRoutes (): RouteConfig[] {
@@ -238,7 +237,7 @@ export function getRoutes (): RouteConfig[] {
           // Preserve query parameters when redirecting
           const queryString = new URLSearchParams(to.query as Record<string, string>).toString()
           const redirectUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl
-
+          
           window.location.href = redirectUrl
         } else {
           next()
@@ -468,7 +467,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/review-account/:orgId',
       name: 'review-account',
       component: ReviewAccountView,
-      meta: { requiresAuth: true, allowedRoles: [Role.StaffManageAccounts, Role.ContactCentreStaff] },
+      meta: { requiresAuth: true, allowedRoles: [Role.StaffManageAccounts] },
       props: true
     },
     {
@@ -645,7 +644,7 @@ export function getRoutes (): RouteConfig[] {
       path: Pages.STAFF_DASHBOARD,
       component: StaffDashboardView,
       props: true,
-      meta: { requiresAuth: true, allowedRoles: [Role.Staff, Role.ContactCentreStaff] },
+      meta: { requiresAuth: true, allowedRoles: [Role.Staff] },
       children: [
         {
           path: '',
@@ -658,7 +657,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffActiveAccountsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.Staff, Role.ContactCentreStaff],
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -674,7 +673,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffPendingAccountInvitationsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.Staff, Role.ContactCentreStaff],
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -690,7 +689,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffPendingAccountsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.Staff, Role.ContactCentreStaff],
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -706,7 +705,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffRejectedAccountsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.Staff, Role.ContactCentreStaff],
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -722,7 +721,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffSuspendedAccountsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.Staff, Role.ContactCentreStaff],
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -738,7 +737,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffInactiveAccountsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.Staff, Role.ContactCentreStaff],
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,

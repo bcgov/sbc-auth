@@ -18,18 +18,17 @@
         Loading...
       </template>
       <template #[`item.expires`]="{ item }">
-        {{ formatDate(item.invitations[0]?.expiresOn, 'MMM DD, YYYY') }}
+        {{ formatDate(item.invitations[0].expiresOn, 'MMM DD, YYYY') }}
       </template>
       <template #[`item.contactEmail`]="{ item }">
         <!-- {{item.invitations[0].recipientEmail}} -->
-        <a :href="'mailto:' + item.invitations[0]?.recipientEmail">
-          {{ item.invitations[0]?.recipientEmail }}
+        <a :href="'mailto:' + item.invitations[0].recipientEmail">
+          {{ item.invitations[0].recipientEmail }}
         </a>
       </template>
       <template #[`item.action`]="{ item }">
         <div class="table-actions">
           <v-btn
-            v-can:EDIT_USER.hide
             outlined
             color="primary"
             class="action-btn"
@@ -39,7 +38,6 @@
             Resend
           </v-btn>
           <v-btn
-            v-can:EDIT_USER.hide
             outlined
             color="primary"
             class="action-btn"
@@ -93,8 +91,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
+import { Component, Mixins } from 'vue-property-decorator'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
+import { DataOptions } from 'vuetify'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import { Invitation } from '@/models/Invitation'
@@ -103,115 +103,118 @@ import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { useStaffStore } from '@/stores/staff'
 
-export default defineComponent({
-  name: 'StaffPendingAccountInvitationsTable',
+@Component({
   components: {
     ModalDialog
   },
-  mixins: [PaginationMixin],
-  setup () {
-    const formatDate = CommonUtils.formatDisplayDate
-    const columnSort = CommonUtils.customSort
-
-    const confirmActionDialog = ref<InstanceType<typeof ModalDialog>>()
-    const state = reactive({
-      orgToBeRemoved: null,
-      tableDataOptions: {}
-    })
-    const { pendingInvitationOrgs, resendPendingOrgInvitation, syncPendingInvitationOrgs, deleteOrg } = useStaffStore()
-
-    const headerAccounts = [
-      {
-        text: 'Expiry Date',
-        align: 'left',
-        value: 'expires',
-        sortable: false,
-        width: '150'
-      },
-      {
-        text: 'Name',
-        align: 'left',
-        sortable: false,
-        value: 'name'
-      },
-      {
-        text: 'Contact Email',
-        align: 'left',
-        sortable: false,
-        value: 'contactEmail'
-      },
-      {
-        text: 'Created By',
-        align: 'left',
-        sortable: false,
-        value: 'createdBy'
-      },
-      {
-        text: 'Actions',
-        align: 'left',
-        value: 'action',
-        sortable: false,
-        width: '210'
-      }
-    ]
-
-    function getIndexedTag (tag, index): string {
-      return `${tag}-${index}`
-    }
-
-    async function resend (invitation: Invitation) {
-      try {
-        await resendPendingOrgInvitation(invitation)
-        const event:Event = { message: `Invitation resent to ${invitation.recipientEmail}`, type: 'success', timeout: 1000 }
-        EventBus.$emit('show-toast', event)
-      } catch (err) {
-        const event:Event = { message: 'Invitation resend failed', type: 'error', timeout: 1000 }
-        EventBus.$emit('show-toast', event)
-      }
-
-      await syncPendingInvitationOrgs()
-    }
-
-    async function deleteInvitation () {
-      try {
-        await deleteOrg(state.orgToBeRemoved)
-        close()
-        const event:Event = { message: 'Invitation removed', type: 'success', timeout: 1000 }
-        EventBus.$emit('show-toast', event)
-        await syncPendingInvitationOrgs()
-      } catch (err) {
-        const event:Event = { message: 'Invitation remove failed', type: 'error', timeout: 1000 }
-        EventBus.$emit('show-toast', event)
-      }
-    }
-
-    function showConfirmRemoveInviteModal (org: Organization) {
-      state.orgToBeRemoved = org
-      confirmActionDialog.value.open()
-    }
-
-    function close () {
-      confirmActionDialog.value.close()
-    }
-
-    return {
-      ...toRefs(state),
-      pendingInvitationOrgs,
-      resendPendingOrgInvitation,
-      syncPendingInvitationOrgs,
-      deleteOrg,
-      headerAccounts,
-      formatDate,
-      getIndexedTag,
-      resend,
-      deleteInvitation,
-      showConfirmRemoveInviteModal,
-      close,
-      columnSort,
-      confirmActionDialog
-    }
+  computed: {
+    ...mapState(useStaffStore, [
+      'pendingInvitationOrgs'
+    ])
+  },
+  methods: {
+    ...mapActions(useStaffStore, [
+      'resendPendingOrgInvitation',
+      'syncPendingInvitationOrgs',
+      'deleteOrg'
+    ])
   }
 })
+export default class StaffPendingAccountInvitationsTable extends Mixins(PaginationMixin) {
+  $refs: {
+    confirmActionDialog: InstanceType<typeof ModalDialog>
+  }
+
+  private readonly pendingInvitationOrgs!: Organization[]
+  private readonly resendPendingOrgInvitation!: (invitation: Invitation) => void
+  private readonly syncPendingInvitationOrgs!: () => Organization[]
+  private readonly deleteOrg!: (org: Organization) => void
+  private tableDataOptions : Partial<DataOptions> = {}
+
+  private orgToBeRemoved: Organization = null
+
+  private columnSort = CommonUtils.customSort
+
+  mounted () {
+    this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
+  }
+
+  private readonly headerAccounts = [
+    {
+      text: 'Expiry Date',
+      align: 'left',
+      value: 'expires',
+      sortable: false,
+      width: '150'
+    },
+    {
+      text: 'Name',
+      align: 'left',
+      sortable: false,
+      value: 'name'
+    },
+    {
+      text: 'Contact Email',
+      align: 'left',
+      sortable: false,
+      value: 'contactEmail'
+    },
+    {
+      text: 'Created By',
+      align: 'left',
+      sortable: false,
+      value: 'createdBy'
+    },
+    {
+      text: 'Actions',
+      align: 'left',
+      value: 'action',
+      sortable: false,
+      width: '210'
+    }
+  ]
+
+  private formatDate = CommonUtils.formatDisplayDate
+
+  private getIndexedTag (tag, index): string {
+    return `${tag}-${index}`
+  }
+
+  private async resend (invitation: Invitation) {
+    try {
+      await this.resendPendingOrgInvitation(invitation)
+      const event:Event = { message: `Invitation resent to ${invitation.recipientEmail}`, type: 'success', timeout: 1000 }
+      EventBus.$emit('show-toast', event)
+    } catch (err) {
+      const event:Event = { message: 'Invitation resend failed', type: 'error', timeout: 1000 }
+      EventBus.$emit('show-toast', event)
+    }
+
+    await this.syncPendingInvitationOrgs()
+  }
+
+  private async deleteInvitation () {
+    try {
+      await this.deleteOrg(this.orgToBeRemoved)
+      this.close()
+      const event:Event = { message: 'Invitation removed', type: 'success', timeout: 1000 }
+      EventBus.$emit('show-toast', event)
+      await this.syncPendingInvitationOrgs()
+    } catch (err) {
+      const event:Event = { message: 'Invitation remove failed', type: 'error', timeout: 1000 }
+      EventBus.$emit('show-toast', event)
+    }
+  }
+
+  private showConfirmRemoveInviteModal (org: Organization) {
+    this.orgToBeRemoved = org
+    this.$refs.confirmActionDialog.open()
+  }
+
+  private close () {
+    this.$refs.confirmActionDialog.close()
+  }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -16,7 +16,7 @@ export const DEFAULT_DATA_OPTIONS: DataOptions = {
   mustSort: false
 }
 
-export const getNumberOfItemsFromSessionStorage = (key: SessionStorageKeys): number | undefined => {
+const getNumberOfItemsFromSessionStorage = (key: SessionStorageKeys): number | undefined => {
   const items = +ConfigHelper.getFromSession(key)
   return !isNaN(items) ? items : undefined
 }
