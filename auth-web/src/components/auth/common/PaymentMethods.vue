@@ -299,8 +299,9 @@ export default defineComponent({
     const { downloadEFTInstructions } = useDownloader(orgStore, state)
 
     const hasBalanceOwing = async () => {
-      if (!props.currentOrganization.id)
+      if (!props.currentOrganization.id) {
         return null
+      }
       try {
         const responseData = await getStatementsSummary(props.currentOrganization.id)
         return responseData?.totalDue || responseData?.totalInvoiceDue

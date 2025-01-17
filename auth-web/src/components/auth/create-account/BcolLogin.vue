@@ -79,9 +79,8 @@
 </template>
 
 <script lang="ts">
-import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
-import { useOrgStore } from '@/stores'
+import { BcolProfile } from '@/models/bcol'
 
 export default defineComponent({
   name: 'BcolLogin',
