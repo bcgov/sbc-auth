@@ -9,8 +9,8 @@
       </p>
     </div>
     <v-checkbox
+      v-if="canAcceptTos"
       v-model="termsAccepted"
-      v-can:EDIT_USER.disabled
       color="primary"
       class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
       hide-details
@@ -39,34 +39,61 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
+import { Role } from '@/util/constants'
+import { useUserStore } from '@/stores/user'
 
-@Component({})
-export default class ProductTOS extends Vue {
-  @Prop({ default: '' }) userName: string
-  @Prop({ default: '' }) orgName: string
-  @Prop({ default: false }) isTOSAlreadyAccepted: boolean
-  @Prop({ default: false }) isApprovalFlow: boolean
-  termsAccepted: boolean = false
-  public istosTouched: boolean = false
+export default defineComponent({
+  name: 'ProductTOS',
+  props: {
+    userName: {
+      type: String,
+      default: ''
+    },
+    orgName: {
+      type: String,
+      default: ''
+    },
+    isTOSAlreadyAccepted: {
+      type: Boolean,
+      default: false
+    },
+    isApprovalFlow: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ['tos-status-changed'],
+  setup (props, { emit }) {
+    const userStore = useUserStore()
+    const state = reactive({
+      termsAccepted: false,
+      istosTouched: false,
+      canAcceptTos: computed(() => !userStore.currentUser.roles.includes(Role.ContactCentreStaff))
+    })
 
-  @Watch('isTOSAlreadyAccepted')
-  onisTOSALreadyAcceptedChange (newTos:boolean, oldTos:boolean) {
-    if (newTos !== oldTos) {
-      this.termsAccepted = newTos
+    watch(() => props.isTOSAlreadyAccepted, (newTos, oldTos) => {
+      if (newTos !== oldTos) {
+        state.termsAccepted = newTos
+      }
+    })
+
+    const tosChanged = () => {
+      state.istosTouched = true
+      emit('tos-status-changed', state.termsAccepted)
+      return state.termsAccepted
+    }
+
+    onMounted(() => {
+      state.termsAccepted = props.isTOSAlreadyAccepted
+    })
+
+    return {
+      ...toRefs(state),
+      tosChanged
     }
   }
-
-  public mounted () {
-    this.termsAccepted = this.isTOSAlreadyAccepted
-  }
-
-  @Emit('tos-status-changed')
-  public tosChanged () {
-    this.istosTouched = true
-    return this.termsAccepted
-  }
-}
+})
 </script>
 
 <style lang="scss" scoped>
