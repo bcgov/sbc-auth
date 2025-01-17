@@ -133,7 +133,7 @@
                   <LinkedBCOLBanner
                     :bcolAccountName="currentOrganization.bcolAccountName"
                     :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-                    :show-edit-btn="true"
+                    :isEditing="isEditing"
                     :force-edit-mode="forceEditModeBCOL"
                     @emit-bcol-info="setBcolInfo"
                   />
@@ -450,8 +450,6 @@ export default defineComponent({
   border: 2px solid #fcba19;
   color: #495057;
   font-size: 12px;
-  margin-left: 4.5rem;
-  margin-right: 120px;
 }
 
 .w-100 {
