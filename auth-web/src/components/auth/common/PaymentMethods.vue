@@ -26,7 +26,7 @@
               />
               <v-icon
                 medium
-                color="primary"
+                :color="payment.supported ? 'primary' : '#757575'"
                 class="mr-1"
               >
                 {{ payment.icon }}
@@ -166,7 +166,7 @@
 
           <p
             v-if="(payment.type === paymentTypes.BCOL)"
-            class="mt-4 py-4 px-6 important bcol-warning-text"
+            class="mt-4 py-4 px-6 important bcol-warning-text ml-0"
           >
             {{ bcOnlineWarningMessage }}
           </p>
