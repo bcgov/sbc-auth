@@ -39,6 +39,7 @@
         Active
       </v-tab>
       <v-tab
+        v-can:INVITE_MEMBERS.hide
         data-test="pending-approval-tab"
       >
         <v-badge
@@ -51,6 +52,7 @@
         </v-badge>
       </v-tab>
       <v-tab
+        v-can:INVITE_MEMBERS.hide
         data-test="invitations-tab"
       >
         Invitations

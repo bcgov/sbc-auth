@@ -43,7 +43,7 @@ router.beforeEach(async (to, from, next) => {
         })
       }
     } else {
-      if (to.meta.allowedRoles?.length === 1 && [Role.Staff, Role.ContactCentreStaff].includes(to.meta.allowedRoles[0])) {
+      if (to.meta.allowedRoles?.length === 1 && to.meta.allowedRoles[0] === Role.Staff) {
         return next({
           path: `/signin/idir${to.path}`,
           query: { redirect: to.fullPath }
