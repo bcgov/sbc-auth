@@ -133,7 +133,7 @@
                   <LinkedBCOLBanner
                     :bcolAccountName="currentOrganization.bcolAccountName"
                     :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-                    :isEditing="isEditing"
+                    :isEditing="isEditing || isCreateAccount"
                     :force-edit-mode="forceEditModeBCOL"
                     @emit-bcol-info="setBcolInfo"
                   />
