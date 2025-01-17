@@ -69,7 +69,7 @@ export default defineComponent({
     const state = reactive({
       termsAccepted: false,
       istosTouched: false,
-      canAcceptTos: computed(() => !userStore.currentUser.roles.includes(Role.ContactCentreStaff))
+      canAcceptTos: computed(() => !userStore?.currentUser?.roles.includes(Role.ContactCentreStaff))
     })
 
     watch(() => props.isTOSAlreadyAccepted, (newTos, oldTos) => {
