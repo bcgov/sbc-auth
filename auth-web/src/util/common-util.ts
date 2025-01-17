@@ -4,6 +4,8 @@ import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-component
 import { NrRequestTypeStrings, Permission } from '@/util/constants'
 import moment from 'moment'
 
+type DateLike = string | Date | moment.Moment
+
 /**
  * A class to put all the common utility methods.
  */
@@ -11,7 +13,7 @@ export default class CommonUtils {
   // formats two dates into a range string, takes in most date formats
   // eg1. formatDateRange('2021-01-01', new Date()) => 'January 01, 2021 - May 27, 2024'
   // eg2. formatDateRange('March 1 2024', moment()) => 'March 01 - May 27, 2024'
-  static formatDateRange (date1: string | Date | moment.Moment, date2: string | Date): string {
+  static formatDateRange (date1: DateLike, date2: DateLike): string {
     const dateObj1 = moment(date1)
     const dateObj2 = moment(date2)
     const year = (dateObj1.year() === dateObj2.year()) ? dateObj1.year() : ''
@@ -138,7 +140,7 @@ export default class CommonUtils {
   }
 
   // Formatting date in the desired format for displaying in the template
-  static formatDisplayDate (date: Date | string | moment.Moment, format?: string) {
+  static formatDisplayDate (date: DateLike, format?: string) {
     // not working in CI (getting UTC datetime)
     return (date) ? moment(date.toLocaleString('en-US', { timeZone: 'America/Vancouver' }))
       .format(format || 'YYYY-MM-DD') : ''
@@ -149,7 +151,7 @@ export default class CommonUtils {
     return moment(date || new Date()).format('YYYY-MM-DD')
   }
 
-  static formatDateToHumanReadable (date: Date | string | moment.Moment) {
+  static formatDateToHumanReadable (date: DateLike) {
     return moment(date).format('MMMM DD, YYYY')
   }
 
