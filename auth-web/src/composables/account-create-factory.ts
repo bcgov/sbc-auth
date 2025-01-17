@@ -27,7 +27,6 @@ export const useAccountCreate = () => {
         case 409:
           break
         case 400:
-          debugger
           state.errorText = err.response.data.message?.detail || err.response.data.message
           break
         default:
