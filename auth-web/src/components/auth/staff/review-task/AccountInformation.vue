@@ -104,6 +104,7 @@
             {{ accessTypeDesc }}
           </v-col>
           <v-col
+            v-can:EDIT_USER.hide
             v-if="accountUnderReview.accessType === AccessType.GOVN"
             cols="auto"
           >
