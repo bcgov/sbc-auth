@@ -380,9 +380,7 @@ export default defineComponent({
       searchIdentifier: '',
       canSearchFAS: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
       canViewAccounts: computed((): boolean => currentUser.value?.roles?.includes(Role.StaffViewAccounts)),
-      canViewAllTransactions: computed((): boolean => currentUser.value?.roles?.some(
-        role => role === Role.ViewAllTransactions || role === Role.ContactCentreStaff
-      )),
+      canViewAllTransactions: computed((): boolean => currentUser.value?.roles?.includes(Role.ViewAllTransactions)),
       canViewEFTPayments: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageEft)),
       canViewGLCodes: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageGlCodes)),
       isContactCentreStaff: computed(() => currentUser.value?.roles?.includes(Role.ContactCentreStaff)),
