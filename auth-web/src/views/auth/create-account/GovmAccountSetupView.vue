@@ -80,7 +80,8 @@ export default defineComponent({
         stepName: 'Account Information',
         component: AccountCreate,
         componentProps: {
-          govmAccount: true
+          govmAccount: true,
+          readOnly: true
         }
       },
       {
@@ -101,8 +102,7 @@ export default defineComponent({
       }
     ]
 
-    onMounted(() => {
-      useOrgStore().resetAccountSetupProgress()
+    onMounted(async () => {
       useOrgStore().setAccessType(AccessType.GOVM)
     })
 

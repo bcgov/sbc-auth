@@ -156,7 +156,7 @@
         </v-expand-transition>
         <v-expand-transition class="business-account-type-details">
           <v-row
-            v-if="isGovnAccount || isBusinessAccount "
+            v-if="isGovnAccount || isBusinessAccount"
             justify="space-between"
             data-test="business-account-type-details"
             no-gutters
@@ -272,11 +272,11 @@ export default defineComponent({
       autoCompleteIsActive: false,
       autoCompleteSearchValue: '',
       isLoading: false,
-      name: currentOrganization.value?.name || '',
-      businessType: currentOrganization.value?.businessType || '',
-      businessSize: currentOrganization.value?.businessSize || '',
-      governmentSize: currentOrganization.value?.businessSize || '',
-      branchName: currentOrganization.value?.branchName || '',
+      name: (props.isEditAccount && currentOrganization.value?.name) || '',
+      businessType: (props.isEditAccount && currentOrganization.value?.businessType) || '',
+      businessSize: (props.isEditAccount && currentOrganization.value?.businessSize) || '',
+      governmentSize: (props.isEditAccount && currentOrganization.value?.businessSize) || '',
+      branchName: (props.isEditAccount && currentOrganization.value?.branchName) || '',
       isBusinessAccount: currentOrganization.value?.isBusinessAccount || false,
       isGovnAccount: currentOrganization.value?.accessType === AccessType.GOVN,
       isIndividualAccount: !currentOrganization.value?.isBusinessAccount && !(currentOrganization.value?.accessType === AccessType.GOVN),
@@ -383,11 +383,9 @@ export default defineComponent({
         await codesStore.getGovernmentTypeCodes()
         await codesStore.getBusinessSizeCodes()
         await codesStore.getBusinessTypeCodes()
-        if (!currentOrganization.value?.name) {
+        if (!currentOrganization.value?.name && !props.govmAccount) {
           state.isBusinessAccount = true
-          if (state.isBusinessAccount) {
-            state.accountType = AccountType.BUSINESS
-          }
+          state.accountType = AccountType.BUSINESS
         }
         await onOrgBusinessTypeChange()
       } catch (ex) {

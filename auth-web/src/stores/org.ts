@@ -763,6 +763,10 @@ export const useOrgStore = defineStore('org', () => {
     // setting padinfo for showing details
     const padInfo = response?.data?.cfsAccount || {} as CFSAccountDetails
     setCurrentOrganizationPADInfo(padInfo)
+    // setting EJV for showing details
+    if (response?.data?.revenueAccount) {
+      setCurrentOrganizationGLInfo(response?.data?.revenueAccount)
+    }
     state.currentOrgPaymentDetails = response?.data
     return response?.data
   }

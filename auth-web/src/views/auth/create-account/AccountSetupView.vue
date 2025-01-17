@@ -222,8 +222,8 @@ export default defineComponent({
       errorDialog.value.close()
     }
 
-    onMounted(() => {
-      useOrgStore().resetAccountSetupProgress()
+    onMounted(async () => {
+      await useOrgStore().resetAccountSetupProgress()
       useOrgStore().setAccessType(AccessType.REGULAR)
     })
 

@@ -40,7 +40,7 @@ export const paymentTypeIcon = {
   [PaymentTypes.EJV]: '',
   [PaymentTypes.INTERNAL]: '',
   [PaymentTypes.NO_FEE]: '',
-  [PaymentTypes.ONLINE_BANKING]: 'mdi-bank-outline',
+  [PaymentTypes.ONLINE_BANKING]: 'mdi-currency-usd',
   [PaymentTypes.PAD]: 'mdi-bank-outline',
   [PaymentTypes.CREDIT]: 'ACCOUNT CREDIT'
 }

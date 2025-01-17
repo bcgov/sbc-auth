@@ -79,8 +79,9 @@
                   class="pt-7"
                 >
                   <GLPaymentForm
-                    v-if="isEditing"
-                    :canSelect="isBcolAdmin"
+                    v-if="isEditing || isCreateAccount"
+                    :canSelect="isBcolAdmin || isCreateAccount"
+                    :gl-information="glInfo"
                     @is-gl-info-form-valid="isGLInfoValid"
                   />
                   <v-divider class="mb-4" />
@@ -90,7 +91,7 @@
                     </h4>
                     <div v-if="!!glInfo">
                       <span class="d-flex"> Client Code: {{ glInfo.client }} </span>
-                      <span class="d-flex"> Responsbility Center : {{ glInfo.responsibilityCentre }} </span>
+                      <span class="d-flex"> Responsbility Center: {{ glInfo.responsibilityCentre }} </span>
                       <span class="d-flex"> Account Number: {{ glInfo.serviceLine }} </span>
                       <span class="d-flex"> Standard Object: {{ glInfo.stob }} </span>
                       <span class="d-flex"> Project: {{ glInfo.projectCode }} </span>
@@ -132,7 +133,7 @@
                   <LinkedBCOLBanner
                     :bcolAccountName="currentOrganization.bcolAccountName"
                     :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-                    :show-edit-btn="true"
+                    :isEditing="isEditing || isCreateAccount"
                     :force-edit-mode="forceEditModeBCOL"
                     @emit-bcol-info="setBcolInfo"
                   />
@@ -215,7 +216,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LDFlags, Pages, PaymentTypes, ProductStatus } from '@/util/constants'
+import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
@@ -223,86 +224,9 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
-import { storeToRefs } from 'pinia'
-import { useCodesStore } from '@/stores'
 import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
-
-const PAYMENT_METHODS = {
-  [PaymentTypes.CREDIT_CARD]: {
-    type: PaymentTypes.CREDIT_CARD,
-    icon: 'mdi-credit-card-outline',
-    title: 'Credit Card',
-    subtitle: 'Pay for transactions individually with your credit card.',
-    description: `You don't need to provide any credit card information with your account. Credit card information will
-                  be requested when you are ready to complete a transaction.`,
-    supported: true
-  },
-  // Only show on accounts that are EFT enabled.
-  [PaymentTypes.EFT]: {
-    type: PaymentTypes.EFT,
-    icon: 'mdi-arrow-right-circle-outline',
-    title: 'Electronic Funds Transfer',
-    subtitle: 'Make payments from your bank account. Statement will be issued monthly.',
-    description: ``,
-    supported: true
-  },
-  [PaymentTypes.PAD]: {
-    type: PaymentTypes.PAD,
-    icon: 'mdi-bank-outline',
-    title: 'Pre-authorized Debit',
-    subtitle: 'Automatically debit a bank account when payments are due.',
-    description: '',
-    supported: true
-  },
-  [PaymentTypes.BCOL]: {
-    type: PaymentTypes.BCOL,
-    icon: 'mdi-link-variant',
-    title: 'BC Online',
-    subtitle: 'Use your linked BC Online account for payment.',
-    description: '',
-    supported: true
-  },
-  [PaymentTypes.ONLINE_BANKING]: {
-    type: PaymentTypes.ONLINE_BANKING,
-    icon: 'mdi-currency-usd',
-    title: 'Online Banking',
-    subtitle: 'Pay for products and services through your financial institutions website.',
-    description: `
-        <p><strong>Online banking is currently limited to the following institutions:</strong></p>
-        <p>
-          <ul>
-            <li>Bank of Montreal</li>
-            <li>Central 1 Credit Union</li>
-            <li>Coast Capital Savings</li>
-            <li>HSBC</li>
-            <li>Royal Bank of Canada (RBC)</li>
-            <li>Scotiabank</li>
-            <li>TD Canada Trust (TD)</li>
-          </ul>
-        </p>
-        <p>
-          Once your account is created, you can use your account number to add BC Registries and Online Services as a
-          payee in your financial institution's online banking system to make payments.
-        </p>
-        <p class="mb-0">
-          BC Registries and Online Services <strong>must receive payment in full</strong> 
-          from your financial institution prior to the release of items purchased through this service. 
-          Receipt of an online banking payment generally takes 3-4 days from when you make the payment with your 
-          financial institution.
-        </p>`,
-    supported: true
-  },
-  // Only for GOVM clients.
-  [PaymentTypes.EJV]: {
-    type: PaymentTypes.EJV,
-    icon: 'mdi-currency-usd',
-    title: 'Electronic Journal Voucher',
-    subtitle: 'Pay for transactions using your General Ledger.',
-    description: '',
-    supported: true
-  }
-}
+import { useProductPayment } from '@/composables/product-payment-factory'
 
 export default defineComponent({
   name: 'PaymentMethods',
@@ -328,15 +252,11 @@ export default defineComponent({
   },
   emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save'],
   setup (props, { emit, root }) {
-    const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary, currentOrgPADInfo } = useOrgStore()
+    const { fetchCurrentOrganizationGLInfo, getStatementsSummary, currentOrgPADInfo } = useOrgStore()
     const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
     const ejvPaymentInformationTitle = 'General Ledger Information'
 
     const orgStore = useOrgStore()
-    const codesStore = useCodesStore()
-    const {
-      currentSelectedProducts
-    } = storeToRefs(useOrgStore())
     const state = reactive({
       bcOnlineWarningMessage: 'This payment method will soon be retired.',
       dialogTitle: '',
@@ -345,58 +265,12 @@ export default defineComponent({
       padInfo: {},
       isTouched: false,
       isPaymentEJV: computed(() => state.selectedPaymentMethod === PaymentTypes.EJV),
-      paymentMethodSupportedForProducts: computed(() => {
-        const productPaymentMethods = codesStore.productPaymentMethods
-        const { productList } = storeToRefs(useOrgStore())
-        const derivedProductList = props.isCreateAccount ? currentSelectedProducts.value : productList.value
-          .filter(item => item.subscriptionStatus === ProductStatus.ACTIVE)
-          .map(item => item.code)
-        const paymentMethodProducts = {}
-        for (const [product, methods] of Object.entries(productPaymentMethods)) {
-          methods.forEach(method => {
-            paymentMethodProducts[method] ??= []
-            paymentMethodProducts[method].push(product)
-          })
-        }
-
-        const paymentMethodSupported = {}
-        Object.entries(paymentMethodProducts).forEach(([key, values]) => {
-          paymentMethodSupported[key] = derivedProductList.every(subscription => (values as Array<string>).includes(subscription))
-        })
-        paymentMethodSupported[PaymentTypes.CREDIT_CARD] = paymentMethodSupported[PaymentTypes.DIRECT_PAY]
-        return paymentMethodSupported
-      }),
-      filteredPaymentMethods: computed(() => {
-        if (!props.isEditing && !props.isCreateAccount && state.selectedPaymentMethod) {
-          return [PAYMENT_METHODS[state.selectedPaymentMethod]]
-        }
-        const methodSupportPerProduct = state.paymentMethodSupportedForProducts
-        const paymentMethods = []
-        const isGovmOrg = props.currentOrgType === AccessType.GOVM
-        const paymentTypes = isGovmOrg ? [PaymentTypes.EJV] : [PaymentTypes.PAD, PaymentTypes.CREDIT_CARD,
-          PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT]
-        paymentTypes.forEach((paymentType) => {
-          if (paymentType === PaymentTypes.EFT && !currentOrgPaymentDetails?.eftEnable) {
-            return
-          }
-          const paymentMethod = PAYMENT_METHODS[paymentType]
-          if (paymentMethod) {
-            paymentMethod.supported = methodSupportPerProduct[paymentType]
-            if (props.isCreateAccount) {
-              if (currentSelectedProducts.value.length === 0) {
-                paymentMethod.supported = false
-              }
-            }
-            paymentMethods.push(paymentMethod)
-          }
-        })
-        return paymentMethods
-      }),
       forceEditModeBCOL: computed(() =>
         props.currentSelectedPaymentMethod === PaymentTypes.BCOL &&
         props.currentOrgPaymentType !== undefined &&
         props.currentOrgPaymentType !== PaymentTypes.BCOL
-      )
+      ),
+      glInfo: computed(() => orgStore.currentOrgGLInfo)
     })
 
     const openBCOnlineDialog = () => {
@@ -425,6 +299,9 @@ export default defineComponent({
     const { downloadEFTInstructions } = useDownloader(orgStore, state)
 
     const hasBalanceOwing = async () => {
+      if (!props.currentOrganization.id) {
+        return null
+      }
       try {
         const responseData = await getStatementsSummary(props.currentOrganization.id)
         return responseData?.totalDue || responseData?.totalInvoiceDue
@@ -523,7 +400,8 @@ export default defineComponent({
       state.selectedPaymentMethod = newValue
     })
 
-    watch(() => [state.filteredPaymentMethods], () => {
+    const { PAYMENT_METHODS, filteredPaymentMethods } = useProductPayment(props, state)
+    watch(() => [filteredPaymentMethods.value], () => {
       if (props.isCreateAccount && state.selectedPaymentMethod) {
         const paymentMethod = PAYMENT_METHODS[state.selectedPaymentMethod]
         if (!paymentMethod?.supported) {
@@ -539,7 +417,6 @@ export default defineComponent({
         await fetchCurrentOrganizationGLInfo(props.currentOrganization?.id)
       }
     })
-
     return {
       ...toRefs(state),
       paymentTypes,
@@ -557,7 +434,7 @@ export default defineComponent({
       isGLInfoValid,
       isChangePaymentEnabled,
       currentOrgPADInfo,
-      glInfo: orgStore.currentOrgGLInfo
+      filteredPaymentMethods
     }
   }
 })
@@ -576,8 +453,6 @@ export default defineComponent({
   border: 2px solid #fcba19;
   color: #495057;
   font-size: 12px;
-  margin-left: 4.5rem;
-  margin-right: 120px;
 }
 
 .w-100 {

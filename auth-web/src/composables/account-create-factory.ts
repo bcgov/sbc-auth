@@ -3,7 +3,7 @@ import ConfigHelper from '@/util/config-helper'
 import { useOrgStore } from '@/stores'
 
 export const useAccountCreate = () => {
-  async function save (state, createAccount) {
+  async function save (state, createAccount, errorDialog) {
     const orgStore = useOrgStore()
     orgStore.setCurrentOrganizationPaymentType(state.selectedPaymentMethod)
     // Update Access Type, in case user select GOVN
@@ -20,20 +20,21 @@ export const useAccountCreate = () => {
     }
     try {
       const bcolAccountDetails = await orgStore.validateBcolAccount(state.currentOrganization.bcolProfile)
-      state.errorMessage = bcolAccountDetails ? null : 'Error - No account details provided for this account.'
+      state.errorText = bcolAccountDetails ? null : 'Error - No account details provided for this account.'
       orgStore.setCurrentOrganizationBcolProfile(state.currentOrganization.bcolProfile)
     } catch (err) {
       switch (err.response.status) {
         case 409:
           break
         case 400:
-          state.errorMessage = err.response.data.message?.detail || err.response.data.message
+          state.errorText = err.response.data.message?.detail || err.response.data.message
           break
         default:
-          state.errorMessage = 'An error occurred while attempting to create your account.'
+          state.errorText = 'An error occurred while attempting to create your account.'
       }
+      errorDialog.value.open()
     }
-    if (!state.errorMessage) {
+    if (!state.errorText) {
       createAccount()
     }
   }

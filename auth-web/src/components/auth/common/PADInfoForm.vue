@@ -218,14 +218,14 @@ export default defineComponent({
       showPremiumPADInfo: computed((): boolean => props.isChangeView),
       acknowledgementLabel: computed((): string => {
         return (state.showPremiumPADInfo)
-          ? 'I understand that services will continue to be billed to the linked BC Online account until the mandatory' +
+          ? `I understand that services will continue to be billed to your other payment method until the mandatory` +
           ' (3) day confirmation period has ended.'
           : 'I understand that this account will not be able to perform any transactions until the mandatory' +
           ' (3) day confirmation period for pre-authorized debit has ended.'
       }),
       padInfoSubtitle: computed((): string => {
         return (state.showPremiumPADInfo)
-          ? 'Services will continue to be billed to the linked BC Online account until the mandatory' +
+          ? `Services will continue to be billed to your other payment method until the mandatory` +
           ' (3) day confirmation period has ended.'
           : 'This account will not be able to perform any transactions until the mandatory' +
           ' (3) day confirmation period has ended.'
