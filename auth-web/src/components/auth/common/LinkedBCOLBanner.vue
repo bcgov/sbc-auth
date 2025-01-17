@@ -29,8 +29,8 @@
 </template>
 <script lang="ts">
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { defineComponent } from '@vue/composition-api'
 import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
+import { defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
   name: 'LinkedBCOLBanner',
