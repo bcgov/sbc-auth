@@ -21,20 +21,6 @@
       @cancel="cancel"
       @save="save"
     />
-    <v-slide-y-transition>
-      <div
-        v-show="errorMessage"
-        class="pb-2"
-      >
-        <v-alert
-          type="error"
-          icon="mdi-alert-circle-outline"
-          data-test="alert-bcol-error"
-        >
-          {{ errorMessage }}
-        </v-alert>
-      </div>
-    </v-slide-y-transition>
     <v-divider class="my-10" />
     <div
       v-if="isEditing"
@@ -141,7 +127,6 @@ export default defineComponent({
       padInfo: {} as PADInfo,
       isBtnSaved: props.hasPaymentChanged,
       disableSaveBtn: false,
-      errorMessage: '',
       errorTitle: 'Payment Update Failed',
       bcolInfo: {} as BcolProfile,
       errorText: '',
@@ -162,7 +147,6 @@ export default defineComponent({
     const currentUser = computed(() => userStore.currentUser)
 
     function setSelectedPayment (payment) {
-      state.errorMessage = ''
       state.selectedPaymentMethod = payment.selectedPaymentMethod
       state.isBtnSaved = (state.isBtnSaved && !payment.isTouched) || false
       state.paymentMethodChanged = payment.isTouched || false
@@ -222,7 +206,7 @@ export default defineComponent({
     })
 
     async function initialize () {
-      state.errorMessage = ''
+      state.errorText = ''
       state.bcolInfo = {} as BcolProfile
       // check if address info is complete if not redirect user to address page
       const isNotAnonUser = currentUser.value?.loginSource !== LoginSource.BCROS
@@ -302,7 +286,9 @@ export default defineComponent({
       } else if (state.selectedPaymentMethod === PaymentTypes.BCOL) {
         isValid = !!(state.bcolInfo.userId && state.bcolInfo.password)
         if (!isValid) {
-          state.errorMessage = 'Missing User ID and Password for BC Online.'
+          state.errorTitle = 'BC Online Error'
+          state.errorText = 'Missing User ID and Password for BC Online.'
+          errorDialog.value.open()
           state.isLoading = false
         }
         createRequestBody = {
@@ -372,16 +358,18 @@ export default defineComponent({
           state.isLoading = false
           state.isBtnSaved = false
           state.paymentMethodChanged = false
+          state.errorTitle = 'Error'
           switch (error.response.status) {
             case 409:
-              state.errorMessage = error.response.data.message?.detail || error.response.data.message
+              state.errorText = error.response.data.message?.detail || error.response.data.message
               break
             case 400:
-              state.errorMessage = error.response.data.message?.detail || error.response.data.message
+              state.errorText = error.response.data.message?.detail || error.response.data.message
               break
             default:
-              state.errorMessage = 'An error occurred while attempting to create your account.'
+              state.errorText = 'An error occurred while attempting to create your account.'
           }
+          errorDialog.value.open()
         }
       }
     }
