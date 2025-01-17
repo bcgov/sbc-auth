@@ -253,8 +253,8 @@
 
     <!-- Email Safe List -->
     <BaseVExpansionPanel
-      v-can:VIEW_LAUNCH_TITLES.hide
       v-if="isDevOrTest"
+      v-can:VIEW_LAUNCH_TITLES.hide
       info="Please contact #registries-ops to add or remove email addresses from the safe list."
       title="Safe Email List (DEV/TEST)"
     >
@@ -380,7 +380,9 @@ export default defineComponent({
       searchIdentifier: '',
       canSearchFAS: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
       canViewAccounts: computed((): boolean => currentUser.value?.roles?.includes(Role.StaffViewAccounts)),
-      canViewAllTransactions: computed((): boolean => currentUser.value?.roles?.some(role => role === Role.ViewAllTransactions || role === Role.ContactCentreStaff)),
+      canViewAllTransactions: computed((): boolean => currentUser.value?.roles?.some(
+        role => role === Role.ViewAllTransactions || role === Role.ContactCentreStaff
+      )),
       canViewEFTPayments: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageEft)),
       canViewGLCodes: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageGlCodes)),
       isContactCentreStaff: computed(() => currentUser.value?.roles?.includes(Role.ContactCentreStaff)),
