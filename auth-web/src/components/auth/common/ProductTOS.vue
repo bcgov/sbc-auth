@@ -10,7 +10,6 @@
     </div>
     <v-checkbox
       v-model="termsAccepted"
-      v-can:EDIT_USER.disabled
       color="primary"
       class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
       hide-details
@@ -41,7 +40,7 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 
-@Component({})
+@Component
 export default class ProductTOS extends Vue {
   @Prop({ default: '' }) userName: string
   @Prop({ default: '' }) orgName: string

@@ -275,10 +275,7 @@
                         </v-btn>
                       </template>
                       <v-list>
-                        <v-list-item
-                          v-can:VIEW_BUSINESS_REGISTRY_DASHBOARD
-                          @click="viewInBusinessRegistryDashboard(item)"
-                        >
+                        <v-list-item @click="viewInBusinessRegistryDashboard(item)">
                           <v-list-item-subtitle>
                             <v-icon style="font-size: 14px">mdi-view-dashboard</v-icon>
                             <span class="pl-2">Business Registry Dashboard</span>
@@ -305,7 +302,6 @@
 
 <script lang="ts">
 import { AccessType, Account, AccountStatus, LoginSource, SessionStorageKeys } from '@/util/constants'
-
 import {
   DEFAULT_DATA_OPTIONS,
   cachePageInfo,
