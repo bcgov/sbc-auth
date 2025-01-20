@@ -95,7 +95,6 @@ export const useOrgStore = defineStore('org', () => {
     orgProductFeeCodes: [] as OrgProductFeeCode[],
     currentAccountFees: [] as AccountFee[],
     currentOrgPaymentDetails: null as OrgPaymentDetails,
-    isCurrentSelectedProductsPremiumOnly: false,
     resetAccountTypeOnSetupAccount: false, // this flag use to check need to reset accounttype select when moving back and forth in stepper
     vDisplayModeValue: '', // DisplayModeValues.VIEW_ONLY
     originAccessType: undefined as string
@@ -131,7 +130,6 @@ export const useOrgStore = defineStore('org', () => {
     state.orgProductFeeCodes = [] as OrgProductFeeCode[]
     state.currentAccountFees = [] as AccountFee[]
     state.currentOrgPaymentDetails = null as OrgPaymentDetails
-    state.isCurrentSelectedProductsPremiumOnly = false
     state.resetAccountTypeOnSetupAccount = false
     state.vDisplayModeValue = ''
     state.originAccessType = undefined as string
@@ -423,7 +421,6 @@ export const useOrgStore = defineStore('org', () => {
     const response = await OrgService.createOrg(createRequestBody)
     const organization = response?.data
     setCurrentOrganization(organization)
-    await resetoCurrentSelectedProducts()
     await addOrgSettings(organization)
     return response?.data
   }
@@ -815,6 +812,7 @@ export const useOrgStore = defineStore('org', () => {
     }
     setCurrentOrganization(undefined)
     setSelectedAccountType(Account.PREMIUM)
+    setCurrentOrganizationAddress(undefined)
     setCurrentOrganizationType(Account.PREMIUM)
     setCurrentOrganizationPaymentType(undefined)
     setCurrentOrganizationPADInfo(undefined)
@@ -914,12 +912,10 @@ export const useOrgStore = defineStore('org', () => {
       productList = [...currentSelectedProducts, productCode]
     }
     state.currentSelectedProducts = productList
-    await currentSelectedProductsPremiumOnly()
   }
 
   async function resetoCurrentSelectedProducts (): Promise<any> {
     state.currentSelectedProducts = []
-    await currentSelectedProductsPremiumOnly()
   }
 
   // set product with subscriptionStatus active to selected product
@@ -928,18 +924,6 @@ export const useOrgStore = defineStore('org', () => {
     let currentSelectedProducts = []
     currentSelectedProducts = productList.filter(product => product.subscriptionStatus === ProductStatus.ACTIVE).map((prod) => (prod.code))
     state.currentSelectedProducts = currentSelectedProducts
-  }
-
-  async function currentSelectedProductsPremiumOnly (): Promise<any> {
-    const currentSelectedProducts = state.currentSelectedProducts
-    const productList = state.productList
-
-    let isPremiumOnly = false
-    if (currentSelectedProducts.length > 0) {
-      isPremiumOnly = productList.some(product => product.premiumOnly && currentSelectedProducts.includes(product.code))
-    }
-    state.isCurrentSelectedProductsPremiumOnly = isPremiumOnly
-    return isPremiumOnly
   }
 
   async function fetchCurrentOrganizationGLInfo (accountId: number): Promise<any> {
@@ -1166,7 +1150,6 @@ export const useOrgStore = defineStore('org', () => {
     refundInvoice,
     refundEFT,
     setSubscribedProducts,
-    currentSelectedProductsPremiumOnly,
     fetchCurrentOrganizationGLInfo,
     fetchOrgProductFeeCodes,
     createAccountFees,
