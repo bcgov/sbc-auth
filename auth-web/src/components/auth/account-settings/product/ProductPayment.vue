@@ -242,8 +242,8 @@ export default defineComponent({
         // check for role and account can have service fee (GOVM and GOVN account)
         return currentUser?.roles?.includes(Role.StaffManageAccounts) && state.isVariableFeeAccount
       }),
-      canChangePayment: computed((): boolean => {
-        return currentMembership.membershipTypeCode !== MembershipType.Coordinator
+      isCoordinator: computed((): boolean => {
+        return currentMembership.membershipTypeCode === MembershipType.Coordinator
       }),
       /**
        * Return any sub-product that has a status indicating activity
@@ -277,8 +277,8 @@ export default defineComponent({
       productRenderKey: 0,
       isBcolAdmin: currentUser?.roles?.includes(Role.BcolStaffAdmin),
       showEditButton: computed(() => {
-        const accessType:any = currentOrganization.accessType
-        return !state.isEditing && (![AccessType.GOVM].includes(accessType) || state.isBcolAdmin)
+        const accessType: any = currentOrganization.accessType
+        return !state.isEditing && (![AccessType.GOVM].includes(accessType) || state.isBcolAdmin) && !state.isCoordinator
       })
     })
 
