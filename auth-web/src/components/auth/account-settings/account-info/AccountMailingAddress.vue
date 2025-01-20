@@ -27,7 +27,7 @@
               />
             </div>
             <div
-              v-if="viewOnlyMode"
+              v-if="viewOnlyMode && currentMembership.membershipTypeCode !== MembershipType.User"
               v-can:CHANGE_ADDRESS.hide
             >
               <span
@@ -81,7 +81,9 @@
 <script lang="ts">
 import { defineComponent, ref } from '@vue/composition-api'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
+import { MembershipType } from '@/models/Organization'
 import { addressSchema } from '@/schemas'
+import { useOrgStore } from '@/stores'
 
 export default defineComponent({
   name: 'AccountMailingAddress',
@@ -100,6 +102,9 @@ export default defineComponent({
   },
   emit: ['valid', 'update:address'],
   setup (props, { emit }) {
+    const {
+      currentMembership
+    } = useOrgStore()
     const baseAddressSchema = ref(addressSchema)
 
     const mailingAddress = ref<HTMLFormElement | null>(null)
@@ -122,7 +127,9 @@ export default defineComponent({
       mailingAddress,
       updateAddress,
       checkBaseAddressValidity,
-      triggerValidate
+      triggerValidate,
+      currentMembership,
+      MembershipType
     }
   }
 })

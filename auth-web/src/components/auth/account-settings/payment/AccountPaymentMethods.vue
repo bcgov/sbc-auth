@@ -79,6 +79,32 @@
         </v-btn>
       </template>
     </ModalDialog>
+    <ModalDialog
+      ref="unsavedChangesDialog"
+      title="Unsaved Changes"
+      text="You're about to leave the page, any information you've entered will not be saved."
+      dialog-class="notify-dialog"
+      max-width="640"
+      :showIcon="false"
+    >
+      <template #actions>
+        <v-btn
+          large
+          color="primary"
+          class="font-weight-bold"
+          @click="exitWithoutSaving"
+        >
+          Exit Without Saving
+        </v-btn>
+        <v-btn
+          large
+          class="font-weight-bold"
+          @click="closeUnsavedChangesDialog"
+        >
+          Return to Page
+        </v-btn>
+      </template>
+    </ModalDialog>
   </div>
 </template>
 
@@ -141,6 +167,7 @@ export default defineComponent({
     })
 
     const errorDialog = ref<InstanceType<typeof ModalDialog>>()
+    const unsavedChangesDialog = ref<InstanceType<typeof ModalDialog>>()
 
     const { currentOrganization, currentOrgPaymentType, currentOrgAddress, currentMembership, permissions, currentOrgGLInfo } = useAccount()
 
@@ -265,8 +292,22 @@ export default defineComponent({
     }
 
     async function cancel () {
+      if (state.paymentMethodChanged) {
+        unsavedChangesDialog.value.open()
+      } else {
+        await initialize()
+        emit('disable-editing')
+      }
+    }
+
+    async function exitWithoutSaving () {
+      unsavedChangesDialog.value.close()
       await initialize()
       emit('disable-editing')
+    }
+
+    function closeUnsavedChangesDialog() {
+      unsavedChangesDialog.value.close()
     }
 
     async function getCreateRequestBody () {
@@ -415,7 +456,10 @@ export default defineComponent({
       currentOrgAddress,
       permissions,
       currentUser,
-      setBcolInfo
+      setBcolInfo,
+      unsavedChangesDialog,
+      exitWithoutSaving,
+      closeUnsavedChangesDialog
     }
   }
 })
