@@ -90,7 +90,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
 import { useUserStore } from '@/stores/user'
 
@@ -116,11 +116,6 @@ export default defineComponent({
 
     const tooltipTxt = computed(() => 'Please read and agree to the Terms Of Use')
     const termsColor = computed(() => !termsAccepted.value && props.checkErrors ? 'error--text' : '')
-
-    watch(() => props.isAlreadyAccepted, (newVal) => {
-      termsAccepted.value = newVal
-      canCheckTerms.value = newVal
-    })
 
     onMounted(() => {
       termsDialog.value = false
