@@ -4,7 +4,6 @@
     lazy-validation
   >
     <AccountCreate
-      v-if="isPremium()"
       :stepForward="stepForward"
       :stepBack="stepBack"
     />
@@ -40,10 +39,6 @@ export default defineComponent({
 
     const { createOrg, syncMembership, syncOrganization } = useOrgStore()
 
-    function isPremium (): boolean {
-      return state.currentOrganization.orgType === Account.PREMIUM
-    }
-
     function isFormValid (): boolean {
       return !!state.username && !!state.password
     }
@@ -58,7 +53,6 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
-      isPremium,
       isFormValid,
       createOrg,
       syncMembership,

@@ -107,11 +107,8 @@ export default class AccountSetupLanding extends Vue {
       console.log('error while setting up account view')
     }
   }
-  async created () {
-    await this.duplicateCheck()
-  }
-
   async mounted () {
+    await this.duplicateCheck()
     this.displayComponent = await this.getComponent()
     this.isLoading = false
   }
