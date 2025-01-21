@@ -14,7 +14,7 @@ describe('StaffRejectedAccountsTable.vue', () => {
       {
         'modified': '2020-12-10T22:05:06.144977+00:00',
         'name': 'NEW BC ONLINE TECH TEAM',
-        'orgType': 'BASIC',
+        'orgType': 'PREMIUM',
         'orgStatus': 'ACTIVE',
         'products': [
           2341,

@@ -40,7 +40,7 @@ describe('DuplicateAccountWarningView.vue', () => {
     userStore.currentUserAccountSettings = [
       {
         accountStatus: 'ACTIVE',
-        accountType: 'BASIC',
+        accountType: 'PREMIUM',
         id: 2446,
         label: 'DEV SK OB1',
         productSettings: '/account/2446/settings/product-settings',
