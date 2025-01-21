@@ -30,6 +30,7 @@
     <template #[`item.action`]="{ item }">
       <!-- Resend Invitation -->
       <v-btn
+        v-can:EDIT_USER.hide
         icon
         class="mr-1"
         aria-label="Resend invitation"
@@ -42,6 +43,7 @@
 
       <!-- Remove Invitation -->
       <v-btn
+        v-can:EDIT_USER.hide
         icon
         aria-label="Remove Invitation"
         title="Remove Invitation"

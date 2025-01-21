@@ -28,6 +28,7 @@
     </template>
     <template #[`item.action`]="{ item }">
       <v-btn
+        v-can:EDIT_USER.hide
         icon
         class="mr-1"
         aria-label="Approve user access to this account"
@@ -38,6 +39,7 @@
         <v-icon>mdi-check-circle-outline</v-icon>
       </v-btn>
       <v-btn
+        v-can:EDIT_USER.hide
         icon
         aria-label="Deny access to this account"
         title="Deny access to this account"
