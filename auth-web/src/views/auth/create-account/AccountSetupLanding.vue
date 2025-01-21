@@ -31,12 +31,13 @@
 <script lang="ts">
 import { Action, State } from 'pinia-class'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import { LoginSource, Pages } from '@/util/constants'
+import { AccessType, LoginSource, Pages } from '@/util/constants'
 import AccountSetupView from '@/views/auth/create-account/AccountSetupView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NonBcscAccountSetupView from '@/views/auth/create-account/NonBcscAccountSetupView.vue'
 import { namespace } from 'vuex-class'
 import { useUserStore } from '@/stores/user'
+import { useOrgStore } from '@/stores/org'
 
 // Will be taken out with Vue 3.
 const AuthModule = namespace('auth')
@@ -67,6 +68,8 @@ export default class AccountSetupLanding extends Vue {
   // dynamically calculating which component o display
   // if bceid show bceid stepper else normal
   async getComponent ():Promise<any> {
+    await useOrgStore().resetAccountSetupProgress()
+    useOrgStore().setAccessType(AccessType.REGULAR)
     let comp: any = {
       id: 1,
       component: AccountSetupView,
@@ -78,6 +81,8 @@ export default class AccountSetupLanding extends Vue {
 
     const isBceidUser = this.currentUser?.loginSource === LoginSource.BCEID
     if (isBceidUser) {
+      await useOrgStore().resetAccountSetupProgress()
+      useOrgStore().setAccessType(AccessType.REGULAR_BCEID)
       comp = {
         id: 2,
         component: NonBcscAccountSetupView,

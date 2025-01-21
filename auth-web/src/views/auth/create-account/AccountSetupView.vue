@@ -222,11 +222,6 @@ export default defineComponent({
       errorDialog.value.close()
     }
 
-    onMounted(async () => {
-      await useOrgStore().resetAccountSetupProgress()
-      useOrgStore().setAccessType(AccessType.REGULAR)
-    })
-
     return {
       ...toRefs(state),
       stepperConfig,

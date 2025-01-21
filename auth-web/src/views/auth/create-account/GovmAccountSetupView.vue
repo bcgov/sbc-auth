@@ -102,9 +102,7 @@ export default defineComponent({
       }
     ]
 
-    onMounted(async () => {
-      useOrgStore().setAccessType(AccessType.GOVM)
-    })
+    useOrgStore().setAccessType(AccessType.GOVM)
 
     async function createAccount () {
       this.isLoading = true
