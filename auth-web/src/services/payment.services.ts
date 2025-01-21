@@ -205,7 +205,7 @@ export default class PaymentService {
   }
 
   static createOutstandingAccountPayment (accountId: string | number) :AxiosPromise<Payment> {
-    return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?retryFailedPayment=true&payOutstandingBalance=true`, {})
+    return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?retryFailedPayment=true&payOutstandingBalance=true&allInvoiceStatuses=true`, {})
   }
 
   static getRevenueAccountDetails (accountId: number): AxiosPromise<any> {
