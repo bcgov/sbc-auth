@@ -253,8 +253,6 @@ export default defineComponent({
       }),
       isCoordinator: computed((): boolean => {
         return currentMembership.membershipTypeCode === MembershipType.Coordinator
-      isCoordinator: computed((): boolean => {
-        return currentMembership.membershipTypeCode === MembershipType.Coordinator
       }),
       /**
        * Return any sub-product that has a status indicating activity

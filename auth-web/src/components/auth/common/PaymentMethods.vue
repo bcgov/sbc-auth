@@ -503,10 +503,6 @@ export default defineComponent({
     align-items: flex-start !important;
 }
 
-.payment-card ::v-deep .v-icon.v-icon {
-    align-items: flex-start !important;
-}
-
 .theme--light.v-card.v-card--outlined.selected {
   border-color: var(--v-primary-base);
 }
