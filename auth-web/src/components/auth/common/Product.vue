@@ -350,6 +350,8 @@ export default defineComponent({
     function selectThisProduct (event, emitFromTos = false) {
       if (props.disableWhileEditingPayment) {
         state.productSelected = !state.productSelected
+        // Triggers error message, state change is ignored.
+        emit('set-selected-product')
         return
       }
       const productSubscribed = props.productDetails.subscriptionStatus === ProductStatus.ACTIVE

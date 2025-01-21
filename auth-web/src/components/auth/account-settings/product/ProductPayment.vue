@@ -86,7 +86,7 @@
       </div>
       <v-divider class="mb-5" />
       <div class="d-flex">
-        <strong>Current Payment Method</strong>
+        <strong :class="{'text-red': displaySavePaymentMethodsFirst}">Current Payment Method</strong>
         <span
           v-if="showEditButton"
           class="d-flex ml-auto"
@@ -100,6 +100,9 @@
           Edit
         </span>
       </div>
+      <span v-if="displaySavePaymentMethodsFirst" class="d-block text-red">
+        Please save your payment settings before making any product changes
+      </span>
       <AccountPaymentMethods
         :isEditing="isEditing"
         :isBcolAdmin="isBcolAdmin"
@@ -163,7 +166,7 @@ import {
   OrgProductCode,
   OrgProductsRequestBody
 } from '@/models/Organization'
-import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import AccountPaymentMethods from '@/components/auth/account-settings/payment/AccountPaymentMethods.vue'
 import CautionBox from '@/components/auth/common/CautionBox.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -274,7 +277,8 @@ export default defineComponent({
       showEditButton: computed(() => {
         const accessType:any = currentOrganization.accessType
         return !state.isEditing && (![AccessType.GOVM].includes(accessType) || state.isBcolAdmin)
-      })
+      }),
+      displaySavePaymentMethodsFirst: false
     })
 
     const loadProduct = async () => {
@@ -431,6 +435,10 @@ export default defineComponent({
     }
 
     const setSelectedProduct = async (productDetails) => {
+      if (state.isEditing) {
+        state.displaySavePaymentMethodsFirst = true
+        return
+      }
       const productCode = productDetails.code
       const forceRemove = productDetails.forceRemove
 
@@ -461,6 +469,12 @@ export default defineComponent({
       }
     }
 
+    watch(() => state.isEditing, (newValue) => {
+      if (!newValue) {
+        state.displaySavePaymentMethodsFirst = false
+      }
+    })
+
     return {
       setup,
       closeError,
@@ -485,6 +499,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import '@/assets/scss/theme.scss';
+.text-red {
+  color: $app-red
+}
 .align-right-container {
   display: flex;
   flex-direction: row;
