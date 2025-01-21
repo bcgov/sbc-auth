@@ -11,7 +11,7 @@
           large
           class="mt-2"
         >
-          mdi-alert-circle-outline
+          mdi-alert
         </v-icon>
         <div
           v-if="isSuspendedForNSF"
@@ -21,7 +21,7 @@
             Account Suspended
           </div>
           <div>
-            Account has been suspended for {{ accountSuspendReason }}.
+            This account has been suspended. Returned system error message: {{ reason }}.
           </div>
           <div class="mt-6 title font-weight-bold">
             BALANCE DUE:  ${{ totalAmountToPay.toFixed(2) }}
@@ -38,7 +38,7 @@
           class="d-flex flex-column ml-7"
         >
           <div class="title font-weight-bold">
-            Account Suspended ({{ suspendedReason() }})
+            Account Suspended ({{ suspendedReason }})
           </div>
           <div class="d-flex">
             <span>Date Suspended: {{ suspendedDate }}<span class="vertical-line" /> Suspended by: {{ suspendedBy }}</span>
@@ -50,60 +50,49 @@
 </template>
 
 <script lang="ts">
-import { AccountStatus, SuspensionReasonCode } from '@/util/constants'
-import { Action, State } from 'pinia-class'
-import { Component, Vue } from 'vue-property-decorator'
-import { Code } from '@/models/Code'
+import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { AccountStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
-import { Organization } from '@/models/Organization'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
 
-@Component
-export default class AccountSuspendAlert extends Vue {
-  @Action(useOrgStore) private calculateFailedInvoices!: () => FailedInvoice
-  @State(useOrgStore) private currentOrganization!: Organization
-  @State(useCodesStore) private suspensionReasonCodes!: Code[]
-  private formatDate = CommonUtils.formatDisplayDate
+export default defineComponent({
+  name: 'AccountSuspendAlert',
+  setup () {
+    const orgStore = useOrgStore()
+    const codesStore = useCodesStore()
+    const currentOrganization = computed(() => orgStore.currentOrganization)
 
-  totalTransactionAmount = 0
-  totalAmountToPay = 0
-  totalPaidAmount = 0
+    const state = reactive({
+      totalTransactionAmount: 0,
+      totalAmountToPay: 0,
+      totalPaidAmount: 0,
+      reason: '',
+      suspendedDate: currentOrganization.value?.suspendedOn
+        ? CommonUtils.formatDateToHumanReadable(currentOrganization.value.suspendedOn) : '',
+      isSuspendedForNSF: computed(() => currentOrganization.value?.statusCode === AccountStatus.NSF_SUSPENDED),
+      suspendedBy: computed(() => currentOrganization.value?.decisionMadeBy),
+      suspendedReason: computed(() => {
+        return codesStore.suspensionReasonCodes?.find(
+          suspensionReasonCode => suspensionReasonCode?.code === currentOrganization.value?.suspensionReasonCode
+        )?.desc
+      })
+    })
 
-  get suspendedDate () {
-    return (this.currentOrganization?.suspendedOn)
-      ? this.formatDate(new Date(this.currentOrganization.suspendedOn)) : ''
-  }
-
-  get isSuspendedForNSF (): boolean {
-    return this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED
-  }
-
-  get suspendedBy (): string {
-    return this.currentOrganization?.decisionMadeBy
-  }
-
-  get accountSuspendReason (): string {
-    if (this.currentOrganization?.suspensionReasonCode === SuspensionReasonCode.OVERDUE_EFT) {
-      return 'overdue EFT payments'
-    }
-    return 'outstanding balance (NSF)'
-  }
-
-  suspendedReason (): string {
-    return this.suspensionReasonCodes?.find(suspensionReasonCode =>
-      suspensionReasonCode?.code === this.currentOrganization?.suspensionReasonCode)?.desc
-  }
-
-  async mounted () {
-    if (this.isSuspendedForNSF) {
-      const failedInvoices: FailedInvoice = await this.calculateFailedInvoices()
-      this.totalTransactionAmount = failedInvoices.totalTransactionAmount || 0
-      this.totalAmountToPay = failedInvoices.totalAmountToPay || 0
+    onMounted(async () => {
+      if (state.isSuspendedForNSF) {
+        const failedInvoices: FailedInvoice = await orgStore.calculateFailedInvoices()
+        state.totalTransactionAmount = failedInvoices.totalTransactionAmount || 0
+        state.totalAmountToPay = failedInvoices.totalAmountToPay || 0
+        state.reason = failedInvoices.reason || ''
+      }
+    })
+    return {
+      ...toRefs(state)
     }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>

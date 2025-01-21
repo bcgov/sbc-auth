@@ -789,13 +789,15 @@ export const useOrgStore = defineStore('org', () => {
     const totalAmount = nsfInvoices?.totalAmount || 0
     const totalAmountRemaining = nsfInvoices?.totalAmountRemaining || 0
     const nsfAmount = nsfInvoices?.nsfAmount || 0
+    const reason = nsfInvoices?.reason || ''
 
     return {
       invoices: invoices,
       statements: statements,
       nsfFee: nsfAmount,
       totalAmountToPay: totalAmountRemaining,
-      totalTransactionAmount: totalAmount
+      totalTransactionAmount: totalAmount,
+      reason: reason
     }
   }
 
