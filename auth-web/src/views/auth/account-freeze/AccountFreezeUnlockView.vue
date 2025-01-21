@@ -191,7 +191,7 @@ export default defineComponent({
       let payment
       try {
         if (state.hasEFTPaymentMethod) {
-          payment = await createOutstandingAccountPayment()
+          payment = await createOutstandingAccountPayment(false)
         } else {
           payment = await createAccountPayment()
         }
