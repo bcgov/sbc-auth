@@ -12,7 +12,6 @@
       v-model="termsAccepted"
       color="primary"
       class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
-      :disabled="!canCheckTerms"
       required
       data-test="check-termsAccepted"
       @change="emitTermsAcceptanceStatus"
@@ -210,6 +209,8 @@ h2 {
 
 .terms-checkbox {
   pointer-events: auto !important;
+  color: rgb(33,37,41) !important;
+  opacity: 1 !important;
 }
 
 .form__btns {

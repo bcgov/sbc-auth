@@ -475,11 +475,10 @@ export default defineComponent({
   .v-input--radio-group__input {
     display: block
   }
-  
 }
 
 .payment-card {
-  transition: all ease-out 0.2s;
+  transition: all ease-out 0.3s, opacity 0.3s ease, background-color 0.3 ease;
 
   &:hover {
     border-color: var(--v-primary-base) !important;
@@ -491,8 +490,12 @@ export default defineComponent({
                 0 2px 2px 0 rgba(0,0,0,.14),
                 0 1px 5px 0 rgba(0,0,0,.12) !important;
   }
-  &:focus {
-    outline: none;
+  &:active {
+    opacity: .85;
+    background-color: $gray1
+  }
+  &:focus:before {
+    opacity: 0;
   }
 }
 
