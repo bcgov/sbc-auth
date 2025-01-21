@@ -293,7 +293,7 @@ export default defineComponent({
 
     async function cancel () {
       if (state.paymentMethodChanged) {
-        unsavedChangesDialog.value.open()
+        // unsavedChangesDialog.value.open() TODO fix later
       } else {
         await initialize()
         emit('disable-editing')
