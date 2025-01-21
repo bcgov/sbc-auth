@@ -251,8 +251,8 @@ export default defineComponent({
         // check for role and account can have service fee (GOVM and GOVN account)
         return currentUser?.roles?.includes(Role.StaffManageAccounts) && state.isVariableFeeAccount
       }),
-      canChangePayment: computed((): boolean => {
-        return currentMembership.membershipTypeCode !== MembershipType.Coordinator
+      isCoordinator: computed((): boolean => {
+        return currentMembership.membershipTypeCode === MembershipType.Coordinator
       }),
       /**
        * Return any sub-product that has a status indicating activity
