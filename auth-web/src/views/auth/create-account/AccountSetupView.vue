@@ -66,8 +66,8 @@
 </template>
 
 <script lang="ts">
-import { AccessType, PaymentTypes, SessionStorageKeys } from '@/util/constants'
-import { defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
+import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import ConfigHelper from '@/util/config-helper'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'

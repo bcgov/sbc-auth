@@ -29,15 +29,15 @@
 </template>
 
 <script lang="ts">
+import { AccessType, LoginSource, Pages } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import { AccessType, LoginSource, Pages } from '@/util/constants'
 import AccountSetupView from '@/views/auth/create-account/AccountSetupView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NonBcscAccountSetupView from '@/views/auth/create-account/NonBcscAccountSetupView.vue'
 import { namespace } from 'vuex-class'
-import { useUserStore } from '@/stores/user'
 import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 // Will be taken out with Vue 3.
 const AuthModule = namespace('auth')
