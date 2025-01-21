@@ -21,7 +21,7 @@
             Account Suspended
           </div>
           <div>
-            This acount has been suspended. Returned system error message: {{ reason }}.
+            This account has been suspended. Returned system error message: {{ reason }}.
           </div>
           <div class="mt-6 title font-weight-bold">
             BALANCE DUE:  ${{ totalAmountToPay.toFixed(2) }}
