@@ -86,7 +86,7 @@
       </div>
       <v-divider class="mb-5" />
       <div class="d-flex">
-        <strong>Current Payment Method</strong>
+        <strong :class="{'text-red': displaySavePaymentMethodsFirst}">Current Payment Method</strong>
         <span
           v-if="showEditButton"
           class="d-flex ml-auto"
@@ -100,7 +100,11 @@
           Edit
         </span>
       </div>
+      <span v-if="displaySavePaymentMethodsFirst" class="d-block text-red">
+        Please save your payment settings before making any product changes
+      </span>
       <AccountPaymentMethods
+        ref="paymentMethodRef"
         :isEditing="isEditing"
         :isBcolAdmin="isBcolAdmin"
         @disable-editing="isEditing = false"
@@ -164,7 +168,7 @@ import {
   OrgProductCode,
   OrgProductsRequestBody
 } from '@/models/Organization'
-import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import AccountPaymentMethods from '@/components/auth/account-settings/payment/AccountPaymentMethods.vue'
 import CautionBox from '@/components/auth/common/CautionBox.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -215,6 +219,8 @@ export default defineComponent({
       productList,
       currentSelectedProducts
     } = storeToRefs(useOrgStore())
+
+    const paymentMethodRef = ref(null)
 
     const state = reactive({
       isBtnSaved: false,
@@ -277,9 +283,10 @@ export default defineComponent({
       productRenderKey: 0,
       isBcolAdmin: currentUser?.roles?.includes(Role.BcolStaffAdmin),
       showEditButton: computed(() => {
-        const accessType: any = currentOrganization.accessType
-        return !state.isEditing && (![AccessType.GOVM].includes(accessType) || state.isBcolAdmin) && !state.isCoordinator
-      })
+        const accessType:any = currentOrganization.accessType
+        return !state.isEditing && (![AccessType.GOVM].includes(accessType) || state.isBcolAdmin)
+      }),
+      displaySavePaymentMethodsFirst: false
     })
 
     const loadProduct = async () => {
@@ -436,6 +443,10 @@ export default defineComponent({
     }
 
     const setSelectedProduct = async (productDetails) => {
+      if (state.isEditing) {
+        state.displaySavePaymentMethodsFirst = true
+        return
+      }
       const productCode = productDetails.code
       const forceRemove = productDetails.forceRemove
 
@@ -466,6 +477,18 @@ export default defineComponent({
       }
     }
 
+    watch(() => state.isEditing, (newValue) => {
+      if (!newValue) {
+        state.displaySavePaymentMethodsFirst = false
+      }
+    })
+
+    watch(() => state.displaySavePaymentMethodsFirst, (newValue) => {
+      if (newValue) {
+        paymentMethodRef.value.$el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    })
+
     return {
       setup,
       closeError,
@@ -483,6 +506,7 @@ export default defineComponent({
       AccountStatus,
       ProductStatus,
       ProductEnum,
+      paymentMethodRef,
       ...toRefs(state)
     }
   }
@@ -490,6 +514,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import '@/assets/scss/theme.scss';
+.text-red {
+  color: $app-red
+}
 .align-right-container {
   display: flex;
   flex-direction: row;
