@@ -104,6 +104,7 @@
         Please save your payment settings before making any product changes
       </span>
       <AccountPaymentMethods
+        ref="paymentMethodRef"
         :isEditing="isEditing"
         :isBcolAdmin="isBcolAdmin"
         @disable-editing="isEditing = false"
@@ -218,6 +219,8 @@ export default defineComponent({
       productList,
       currentSelectedProducts
     } = storeToRefs(useOrgStore())
+
+    const paymentMethodRef = ref(null)
 
     const state = reactive({
       isBtnSaved: false,
@@ -480,6 +483,12 @@ export default defineComponent({
       }
     })
 
+    watch(() => state.displaySavePaymentMethodsFirst, (newValue) => {
+      if (newValue) {
+        paymentMethodRef.value.$el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    })
+
     return {
       setup,
       closeError,
@@ -497,6 +506,7 @@ export default defineComponent({
       AccountStatus,
       ProductStatus,
       ProductEnum,
+      paymentMethodRef,
       ...toRefs(state)
     }
   }
