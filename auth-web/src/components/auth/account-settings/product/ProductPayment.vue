@@ -162,6 +162,7 @@ import {
   TaskType
 } from '@/util/constants'
 import {
+  MembershipType,
   OrgProduct,
   OrgProductCode,
   OrgProductsRequestBody
@@ -205,7 +206,8 @@ export default defineComponent({
       updateAccountFees,
       needStaffReview,
       removeOrgProduct,
-      currentOrganization
+      currentOrganization,
+      currentMembership
     } = useOrgStore()
 
     const {
@@ -242,6 +244,9 @@ export default defineComponent({
       canManageAccounts: computed((): boolean => {
         // check for role and account can have service fee (GOVM and GOVN account)
         return currentUser?.roles?.includes(Role.StaffManageAccounts) && state.isVariableFeeAccount
+      }),
+      canChangePayment: computed((): boolean => {
+        return currentMembership.membershipTypeCode !== MembershipType.Coordinator
       }),
       /**
        * Return any sub-product that has a status indicating activity

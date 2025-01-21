@@ -192,6 +192,7 @@
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
               <v-list-item
+                v-if="isUserMembership"
                 v-can:VIEW_REQUEST_PRODUCT_PACKAGE.hide
                 dense
                 class="py-1 px-4"
@@ -340,7 +341,7 @@
 <script lang="ts">
 import { AccountStatus, LoginSource, Pages, Permission, Role } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
+import { Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import AccountInactiveAlert from '@/components/auth/common/AccountInactiveAlert.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
@@ -390,6 +391,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   private get isStaff ():boolean {
     return this.currentUser.roles.includes(Role.Staff) || this.currentUser.roles.includes(Role.ContactCentreStaff)
+  }
+
+  private get isUserMembership ():boolean {
+    return this.currentMembership.membershipTypeCode !== MembershipType.User
   }
 
   private get accountInfoUrl (): string {

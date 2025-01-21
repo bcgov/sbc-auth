@@ -350,8 +350,10 @@ export default defineComponent({
         userStore.currentUser.roles.includes(Role.StaffSuspendAccounts)
       )),
       isDeactivateButtonVisible: computed(() => currentOrganization.value?.statusCode !== AccountStatus.INACTIVE),
-      canChangeAccessType: computed(() => userStore.currentUser.roles.includes(Role.StaffManageAccounts)) &&
-      !userStore.currentUser.roles.includes(Role.ContactCentreStaff),
+      canChangeAccessType: computed(() => (
+        userStore.currentUser.roles.includes(Role.StaffManageAccounts) &&
+        !userStore.currentUser.roles.includes(Role.ContactCentreStaff)
+      )),
       isAdminContactViewable: computed(() => [Permission.VIEW_ADMIN_CONTACT].some(per => permissions.value.includes(per))),
       isAccountStatusActive: computed(() => currentOrganization.value.statusCode === AccountStatus.ACTIVE),
       accountType: computed(() => {

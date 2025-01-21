@@ -9,7 +9,7 @@
       :data-test="`div-product-${productDetails.code}`"
     >
       <div>
-        <header class="d-flex align-center">
+        <header class="d-flex align-items-start">
           <div
             v-if="!hideCheckbox"
             class="pr-8"
@@ -18,13 +18,13 @@
             <v-checkbox
               :key="Math.random()"
               v-model="productSelected"
-              class="product-check-box ma-0 pa-0"
+              class="product-check-box ma-0 pa-0 align-top"
               hide-details
               :data-test="`check-product-${productDetails.code}`"
               @change="selectThisProduct"
             >
               <template #label>
-                <div class="ml-2">
+                <div class="ml-2 product-card-contents">
                   <h3
                     class="title font-weight-bold product-title mt-n1"
                     :data-test="productDetails.code"
@@ -35,6 +35,7 @@
                   <p
                     v-if="$te(productLabel.subTitle)"
                     v-sanitize="$t(productLabel.subTitle)"
+                    class="mt-2"
                   />
                 </div>
               </template>
@@ -83,6 +84,7 @@
               <p
                 v-if="$te(productLabel.subTitle)"
                 v-sanitize="$t(productLabel.subTitle)"
+                class="mt-2"
               />
             </div>
           </div>
@@ -91,7 +93,7 @@
             depressed
             color="primary"
             width="120"
-            class="font-weight-bold ml-auto"
+            class="font-weight-bold ml-auto mt-6"
             :aria-label="`Select  ${productDetails.description}`"
             :data-test="`btn-productDetails-${productDetails.code}`"
             text
@@ -113,7 +115,7 @@
             >mdi-chevron-down</v-icon></span>
           </v-btn>
         </header>
-        <div class="product-card-contents ml-9">
+        <div class="product-card-contents ml-10">
           <!-- Product Content Slot -->
           <slot name="productContentSlot" />
 
@@ -125,8 +127,24 @@
               <p
                 v-if="$te(productLabel.details)"
                 v-sanitize="$t(productLabel.details)"
-                class="mb-0"
               />
+              <p v-if="$te(productLabel.link)">
+                <v-btn
+                  large
+                  depressed
+                  color="primary"
+                  class="font-weight-bold pl-0"
+                  text
+                  :href="$t(productLabel.link)"
+                  target="_blank"
+                  rel="noopener"
+                  tag="a"
+                >
+                  <span>Visit Information Page</span>
+                  <span class="mdi mdi-open-in-new" />
+                </v-btn>
+              </p>
+
               <p
                 v-if="$te(productLabel.note)"
                 v-sanitize="$t(productLabel.note)"
@@ -155,19 +173,24 @@
             </div>
           </v-expand-transition>
         </div>
-        <div>
-          <v-label class="theme--light">
-            <P class="mt-2">
+        <div class="ml-10 mt-2">
+          <v-label>
+            <P
+              v-if="paymentMethods.length > 0"
+              class="product-card-contents"
+            >
               Supported payment methods:
             </P>
             <v-chip
               v-for="method in paymentMethods"
               :key="method"
-              small
+              x-small
               label
-              class="mr-2 font-weight-bold"
+              class="mr-2 font-weight-bold product-payment-icons py-4 my-2"
             >
-              <v-icon>{{ paymentTypeIcon[method] }}</v-icon>{{ paymentTypeLabel[method] }}
+              <v-icon class="mr-1">
+                {{ paymentTypeIcon[method] }}
+              </v-icon>{{ paymentTypeLabel[method] }}
             </v-chip>
           </v-label>
           <div>
@@ -282,6 +305,7 @@ export default defineComponent({
         let { code } = props.productDetails
         let subTitle = `${code?.toLowerCase()}CodeSubtitle`
         let details = `${code?.toLowerCase()}CodeDescription`
+        let link = `${code?.toLowerCase()}CodeDescriptionLink`
         let note = `${code?.toLowerCase()}CodeNote`
         let decisionMadeIcon = null
         let decisionMadeColorCode = null
@@ -317,7 +341,7 @@ export default defineComponent({
             note = ''
           }
         }
-        return { subTitle, details, decisionMadeIcon, decisionMadeColorCode, note }
+        return { subTitle, details, link, decisionMadeIcon, decisionMadeColorCode, note }
       }),
       showPaymentMethodNotSupported: false
     })
@@ -452,7 +476,17 @@ export default defineComponent({
 }
 
 .theme--light.v-card.v-card--outlined.selected {
-  border-color: var(--v-primary-base);
+  top: 0;
+}
+
+.product-card-contents {
+  color: $gray7;
+}
+
+.product-payment-icons.v-chip.v-size--x-small.theme--light.v-chip:not(.v-chip--active){
+  background-color: $app-lt-blue ;
+  font-size: 12px;
+  color: #212529;
 }
 
 .label-color {
