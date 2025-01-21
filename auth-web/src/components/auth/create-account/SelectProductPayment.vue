@@ -151,7 +151,7 @@ export default defineComponent({
   props: {
     isStepperView: { type: Boolean, default: false },
     readOnly: { type: Boolean, default: false },
-    orgId: { type: Number, default: undefined },
+    orgId: { type: Number, default: undefined }
   },
   emits: ['final-step-action', 'emit-bcol-info'],
   setup (props, { root, emit }) {

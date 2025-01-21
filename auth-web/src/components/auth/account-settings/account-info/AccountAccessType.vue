@@ -158,8 +158,8 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account } from '@/util/constants'
 import { computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import { AccessType } from '@/util/constants'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
 export default defineComponent({

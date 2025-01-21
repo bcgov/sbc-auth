@@ -306,7 +306,7 @@ export default defineComponent({
       emit('disable-editing')
     }
 
-    function closeUnsavedChangesDialog() {
+    function closeUnsavedChangesDialog () {
       unsavedChangesDialog.value.close()
     }
 

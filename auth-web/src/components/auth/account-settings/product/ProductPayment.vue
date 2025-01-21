@@ -100,7 +100,10 @@
           Edit
         </span>
       </div>
-      <span v-if="displaySavePaymentMethodsFirst" class="d-block text-red">
+      <span
+        v-if="displaySavePaymentMethodsFirst"
+        class="d-block text-red"
+      >
         Please save your payment settings before making any product changes
       </span>
       <AccountPaymentMethods

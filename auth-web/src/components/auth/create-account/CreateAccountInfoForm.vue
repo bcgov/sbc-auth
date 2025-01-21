@@ -12,7 +12,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
-import { Account } from '@/util/constants'
 import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
