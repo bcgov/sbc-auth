@@ -46,6 +46,7 @@ export interface FailedInvoice {
   totalAmountToPay?: number
   invoices?: InvoiceList[]
   statements?: Statement[]
+  reason?: string
 }
 
 export interface NonSufficientFundsInvoiceListResponse {
@@ -55,4 +56,5 @@ export interface NonSufficientFundsInvoiceListResponse {
   totalAmount: number
   totalAmountRemaining: number
   nsfAmount: number
+  reason?: string
 }
