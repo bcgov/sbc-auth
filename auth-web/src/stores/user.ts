@@ -30,7 +30,8 @@ export const useUserStore = defineStore('user', () => {
     userProfileData: undefined as UserProfileData,
     redirectAfterLoginUrl: '' as string,
     roleInfos: undefined as RoleInfo[],
-    currentUserAccountSettings: undefined as UserSettings[]
+    currentUserAccountSettings: undefined as UserSettings[],
+    accountSettingWarning: false as boolean
   })
 
   function $reset () {
@@ -47,6 +48,7 @@ export const useUserStore = defineStore('user', () => {
     state.redirectAfterLoginUrl = '' as string
     state.roleInfos = undefined as RoleInfo[]
     state.currentUserAccountSettings = undefined as UserSettings[]
+    state.accountSettingWarning = false as boolean
   }
 
   const termsOfUseVersion = computed(() => state.userProfile?.userTerms?.termsOfUseAcceptedVersion)
@@ -71,6 +73,10 @@ export const useUserStore = defineStore('user', () => {
 
   function setUserProfileData (userProfile: UserProfileData | undefined) {
     state.userProfileData = userProfile
+  }
+
+  function setAccountSettingWarning (warningDialog: boolean) {
+    state.accountSettingWarning = warningDialog
   }
 
   function loadUserInfo () {
@@ -246,6 +252,7 @@ export const useUserStore = defineStore('user', () => {
     setNotaryContact,
     setUserProfileData,
     setNotaryInformation,
+    setAccountSettingWarning,
     reset,
     resetOTPAuthenticator,
     saveUserTerms,

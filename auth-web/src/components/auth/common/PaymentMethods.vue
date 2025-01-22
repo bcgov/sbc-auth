@@ -227,6 +227,7 @@ import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
 import { useProductPayment } from '@/composables/product-payment-factory'
+import { useUserStore } from '@/stores'
 
 export default defineComponent({
   name: 'PaymentMethods',
@@ -250,14 +251,14 @@ export default defineComponent({
     isEditing: { default: false },
     isCreateAccount: { default: false }
   },
-  emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save', 'show-warning-dialog'],
+  emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save'],
   setup (props, { emit, root }) {
     const { fetchCurrentOrganizationGLInfo, getStatementsSummary, currentOrgPADInfo } = useOrgStore()
+    const { setAccountSettingWarning } = useUserStore()
     const warningDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
 
     watch(() => warningDialog.value?.isOpen, (isOpen) => {
-      console.log(isOpen)
-      emit('show-warning-dialog', isOpen)
+      setAccountSettingWarning(isOpen)
     })
 
     const ejvPaymentInformationTitle = 'General Ledger Information'
@@ -327,6 +328,7 @@ export default defineComponent({
 
     const paymentMethodSelected = async (payment, isTouch = true) => {
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
+      console.log(payment.type, isTouch, state.selectedPaymentMethod)
       if (payment.type === PaymentTypes.EFT && isTouch && state.selectedPaymentMethod !== PaymentTypes.EFT && !enableEFTPaymentMethod()) {
         openEFTWarningDialog()
       } else if (payment.type === PaymentTypes.PAD && isFromEFT) {

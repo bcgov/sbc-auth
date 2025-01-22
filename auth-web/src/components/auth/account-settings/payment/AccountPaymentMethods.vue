@@ -20,7 +20,6 @@
       @is-ejv-valid="isEJVValid"
       @cancel="cancel"
       @save="save"
-      @show-warning-dialog="showWarningDialog"
     />
     <v-divider class="my-10" />
     <div
@@ -160,7 +159,6 @@ export default defineComponent({
       isLoading: false,
       padValid: false,
       ejvValid: false,
-      showWarningDialog: false,
       paymentMethodChanged: props.hasPaymentChanged,
       isFuturePaymentMethodAvailable: false, // set true if in between 3 days cooling period
       isTOSandAcknowledgeCompleted: false, // set true if TOS already accepted
@@ -294,7 +292,7 @@ export default defineComponent({
     }
 
     async function cancel () {
-      if (state.paymentMethodChanged && !state.showWarningDialog) {
+      if (state.paymentMethodChanged && !userStore.accountSettingWarning) {
         unsavedChangesDialog.value.open()
       } else {
         await initialize()
