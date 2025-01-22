@@ -347,5 +347,4 @@ export default defineComponent({
     opacity: 0.76 !important;
   }
 
-
 </style>

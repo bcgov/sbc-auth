@@ -228,8 +228,8 @@
           v-if="!isAffidavitUpload"
           :showConfirmPopup="isStepperView"
           :isEmit="true"
-          @click-confirm="cancel"
           :newStyleStepper="true"
+          @click-confirm="cancel"
         />
       </v-col>
     </v-row>

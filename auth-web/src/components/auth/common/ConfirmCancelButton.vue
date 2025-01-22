@@ -3,8 +3,8 @@
     large
     data-test="confirm-cancel-button"
     :disabled="disabled"
-    @click="openModalDialog"
     v-bind="buttonProps"
+    @click="openModalDialog"
   >
     Cancel
     <!-- Confirm Dialog Popup -->
@@ -111,7 +111,7 @@ export default class ConfirmCancelButton extends Vue {
   get buttonProps () {
     return {
       outlined: this.newStyleStepper,
-      color: this.newStyleStepper ? "primary" : "default",
+      color: this.newStyleStepper ? 'primary' : 'default',
       depressed: !this.newStyleStepper
     }
   }

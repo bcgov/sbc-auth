@@ -1,6 +1,9 @@
 <template>
   <div>
-    <v-radio-group v-model="selectedPaymentMethod" class="mt-0">
+    <v-radio-group
+      v-model="selectedPaymentMethod"
+      class="mt-0"
+    >
       <v-card
         v-for="payment in filteredPaymentMethods"
         :key="payment.type"

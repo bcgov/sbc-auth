@@ -96,8 +96,8 @@
         <ConfirmCancelButton
           :showConfirmPopup="true"
           :isEmit="true"
-          @click-confirm="cancel"
           :newStyleStepper="true"
+          @click-confirm="cancel"
         />
       </v-col>
     </v-row>
