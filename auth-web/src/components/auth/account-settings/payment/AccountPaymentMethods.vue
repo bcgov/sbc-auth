@@ -21,7 +21,6 @@
       @cancel="cancel"
       @save="save"
     />
-    <v-divider class="my-10" />
     <div
       v-if="isEditing"
       class="form__btns d-flex"

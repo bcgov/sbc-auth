@@ -25,7 +25,7 @@
       />
     </v-overlay>
     <template v-if="productList && productList.length > 0">
-      <h4 class="mb-2">
+      <h4 class="mb-4">
         Products and Services
       </h4>
       <div
