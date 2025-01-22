@@ -220,7 +220,7 @@
 
 <script lang="ts">
 import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
-import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { Ref, computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -230,6 +230,7 @@ import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
 import { useProductPayment } from '@/composables/product-payment-factory'
+import { useUserStore } from '@/stores'
 
 export default defineComponent({
   name: 'PaymentMethods',
@@ -256,7 +257,13 @@ export default defineComponent({
   emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save'],
   setup (props, { emit, root }) {
     const { fetchCurrentOrganizationGLInfo, getStatementsSummary, currentOrgPADInfo } = useOrgStore()
-    const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
+    const { setAccountSettingWarning } = useUserStore()
+    const warningDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+
+    watch(() => warningDialog.value?.isOpen, (isOpen) => {
+      setAccountSettingWarning(isOpen)
+    })
+
     const ejvPaymentInformationTitle = 'General Ledger Information'
 
     const orgStore = useOrgStore()
@@ -324,6 +331,7 @@ export default defineComponent({
 
     const paymentMethodSelected = async (payment, isTouch = true) => {
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
+      console.log(payment.type, isTouch, state.selectedPaymentMethod)
       if (payment.type === PaymentTypes.EFT && isTouch && state.selectedPaymentMethod !== PaymentTypes.EFT && !enableEFTPaymentMethod()) {
         openEFTWarningDialog()
       } else if (payment.type === PaymentTypes.PAD && isFromEFT) {
