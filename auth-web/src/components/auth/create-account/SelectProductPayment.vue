@@ -38,18 +38,34 @@
     </template>
     <v-divider class="mb-5" />
     <strong>Select a payment method for your account: </strong>
-    <PaymentMethods
-      v-display-mode
-      :currentOrgType="currentOrganizationType"
-      :currentOrganization="currentOrganization"
-      :currentSelectedPaymentMethod="currentOrgPaymentType"
-      :isInitialTOSAccepted="readOnly"
-      :isInitialAcknowledged="readOnly"
-      :isCreateAccount="true"
-      @payment-method-selected="setSelectedPayment"
-      @is-pad-valid="setPADValid"
-      @emit-bcol-info="setBcolInfo"
-    />
+    <v-tooltip
+      :disabled="!showSelectPaymentMethodTooltip"
+      class="pa-2 tooltip"
+      content-class="tooltip"
+      color="grey darken-4"
+      max-width="350px"
+      nudge-bottom="27"
+      top
+    >
+      <template #activator="{ on }">
+        <div v-on="on">
+          <PaymentMethods
+            v-display-mode
+            :currentOrgType="currentOrganizationType"
+            :currentOrganization="currentOrganization"
+            :currentSelectedPaymentMethod="currentOrgPaymentType"
+            :isInitialTOSAccepted="readOnly"
+            :isInitialAcknowledged="readOnly"
+            :isCreateAccount="true"
+            @payment-method-selected="setSelectedPayment"
+            @is-pad-valid="setPADValid"
+            @emit-bcol-info="setBcolInfo"
+          />
+        </div>
+      </template>
+      <span>To choose a payment method, please select a product first.</span>
+    </v-tooltip>
+
     <v-row>
       <v-col
         cols="12"
@@ -181,7 +197,8 @@ export default defineComponent({
           return !!state.selectedPaymentMethod
         }
       }),
-      isPADValid: false
+      isPADValid: false,
+      showSelectPaymentMethodTooltip: computed(() => !state.currentSelectedProducts || state.currentSelectedProducts.length === 0)
     })
 
     async function setup () {
@@ -300,4 +317,33 @@ export default defineComponent({
 .transparent-divider {
   border-color: transparent !important;
 }
+
+.v-tooltip__content:before {
+    content: ' ';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    margin-left: -10px;
+    font-size: 12px;
+    width: 20px;
+    height: 20px;
+    border-width: 10px 10px 10px 10px;
+    border-style: solid;
+    border-color: var(--v-grey-darken4) transparent transparent transparent;
+
+  }
+
+.v-tooltip__content {
+    background-color: RGBA(73, 80, 87, 0.95) !important;
+    color: white !important;
+    border-radius: 4px;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    padding: 15px !important;
+    letter-spacing: 0;
+    max-width: 270px !important;
+    opacity: 0.76 !important;
+  }
+
+
 </style>
