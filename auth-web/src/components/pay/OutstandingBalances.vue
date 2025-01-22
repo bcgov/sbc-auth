@@ -252,7 +252,7 @@ export default defineComponent({
 
     const handlePayment = async () => {
       state.handlingPayment = true
-      const payment: Payment = await orgStore.createOutstandingAccountPayment()
+      const payment: Payment = await orgStore.createOutstandingAccountPayment(true)
       const baseUrl = ConfigHelper.getAuthContextPath()
       const queryParams = `?paymentId=${payment?.id}&changePaymentType=${props.changePaymentType}`
       const returnUrl = `${baseUrl}/${Pages.MAIN}/${props.orgId}/${Pages.PAY_OUTSTANDING_BALANCE}${queryParams}`

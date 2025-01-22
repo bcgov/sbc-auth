@@ -15,7 +15,7 @@
         @click="paymentMethodSelected(payment)"
       >
         <div>
-          <header class="align-center flex-grow-1">
+          <header class="flex-grow-1">
             <div
               class="d-inline-flex"
             >
@@ -497,6 +497,10 @@ export default defineComponent({
   &:focus:before {
     opacity: 0;
   }
+}
+
+.payment-card ::v-deep .v-icon.v-icon {
+    align-items: flex-start !important;
 }
 
 .theme--light.v-card.v-card--outlined.selected {

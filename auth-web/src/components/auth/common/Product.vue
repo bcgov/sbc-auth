@@ -9,7 +9,7 @@
       :data-test="`div-product-${productDetails.code}`"
     >
       <div>
-        <header class="d-flex align-items-start">
+        <header class="d-flex">
           <div
             v-if="!hideCheckbox"
             class="pr-8"
@@ -18,7 +18,7 @@
             <v-checkbox
               :key="Math.random()"
               v-model="productSelected"
-              class="product-check-box ma-0 pa-0 align-top"
+              class="product-check-box ma-0 pa-0"
               hide-details
               :data-test="`check-product-${productDetails.code}`"
               @change="selectThisProduct"
@@ -460,6 +460,10 @@ export default defineComponent({
 
 .product-card-contents {
   color: $gray7;
+}
+
+.product-card ::v-deep .v-input__slot {
+    align-items: flex-start !important;
 }
 
 .product-payment-icons.v-chip.v-size--x-small.theme--light.v-chip:not(.v-chip--active){
