@@ -217,7 +217,7 @@
 
 <script lang="ts">
 import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
-import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { Ref, computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -250,10 +250,16 @@ export default defineComponent({
     isEditing: { default: false },
     isCreateAccount: { default: false }
   },
-  emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save'],
+  emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save', 'show-warning-dialog'],
   setup (props, { emit, root }) {
     const { fetchCurrentOrganizationGLInfo, getStatementsSummary, currentOrgPADInfo } = useOrgStore()
-    const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
+    const warningDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+
+    watch(() => warningDialog.value?.isOpen, (isOpen) => {
+      console.log(isOpen)
+      emit('show-warning-dialog', isOpen)
+    })
+
     const ejvPaymentInformationTitle = 'General Ledger Information'
 
     const orgStore = useOrgStore()
