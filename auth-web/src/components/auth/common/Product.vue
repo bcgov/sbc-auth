@@ -451,6 +451,7 @@ export default defineComponent({
   }
   &.processing-card{
     border-color: var(--v-primary-base) !important;
+    border-width: 2px !important;
   }
 }
 

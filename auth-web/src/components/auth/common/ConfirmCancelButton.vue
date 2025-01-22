@@ -1,11 +1,10 @@
 <template>
   <v-btn
     large
-    depressed
-    color="default"
     data-test="confirm-cancel-button"
     :disabled="disabled"
     @click="openModalDialog"
+    v-bind="buttonProps"
   >
     Cancel
     <!-- Confirm Dialog Popup -->
@@ -74,6 +73,7 @@ export default class ConfirmCancelButton extends Vue {
   @Prop({ default: '/' }) targetRoute: string
   // for not to clear current org values [for account change , while clicking on cancel , current org has to stay]
   @Prop({ default: true }) clearCurrentOrg: boolean
+  @Prop({ default: false }) newStyleStepper: boolean
 
   @Action(useOrgStore) private setCurrentOrganizationFromUserAccountSettings!: () => Promise<void>
   @Action(useOrgStore) private resetAccountSetupProgress!: () => Promise<void>
@@ -105,6 +105,14 @@ export default class ConfirmCancelButton extends Vue {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.log('Error while cancelling account creation flow', err)
+    }
+  }
+
+  get buttonProps () {
+    return {
+      outlined: this.newStyleStepper,
+      color: this.newStyleStepper ? "primary" : "default",
+      depressed: !this.newStyleStepper
     }
   }
 

@@ -43,8 +43,8 @@
         <v-btn
           v-if="!isAffidavitUpload"
           large
-          depressed
-          color="default"
+          outlined
+          color="primary"
           @click="goBack"
         >
           <v-icon
@@ -74,6 +74,7 @@
           :disabled="saving"
           :target-route="cancelUrl"
           :showConfirmPopup="true"
+          :newStyleStepper="true"
         />
       </v-col>
     </v-row>

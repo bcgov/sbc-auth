@@ -50,6 +50,7 @@
       <template #activator="{ on }">
         <div v-on="on">
           <PaymentMethods
+            v-if="productPaymentMethods"
             v-display-mode
             :currentOrgType="currentOrganizationType"
             :currentOrganization="currentOrganization"
@@ -74,8 +75,8 @@
         <v-btn
           v-if="isStepperView"
           large
-          depressed
-          color="default"
+          outlined
+          color="primary"
           data-test="btn-back"
           @click="stepBack"
         >
@@ -106,6 +107,7 @@
           v-if="!readOnly"
           :showConfirmPopup="true"
           :isEmit="true"
+          :newStyleStepper="true"
           @click-confirm="cancel"
         />
       </v-col>

@@ -66,8 +66,8 @@
       >
         <v-btn
           large
-          depressed
-          color="default"
+          outlined
+          color="primary"
           data-test="btn-back"
           @click="goBack"
         >
@@ -97,6 +97,7 @@
           :showConfirmPopup="true"
           :isEmit="true"
           @click-confirm="cancel"
+          :newStyleStepper="true"
         />
       </v-col>
     </v-row>

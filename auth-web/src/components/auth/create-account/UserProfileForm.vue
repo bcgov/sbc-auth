@@ -185,8 +185,8 @@
         <v-btn
           v-if="isStepperView || isAffidavitUpload"
           large
-          depressed
-          color="default"
+          outlined
+          color="primary"
           data-test="btn-back"
           @click="goBack"
         >
@@ -229,6 +229,7 @@
           :showConfirmPopup="isStepperView"
           :isEmit="true"
           @click-confirm="cancel"
+          :newStyleStepper="true"
         />
       </v-col>
     </v-row>

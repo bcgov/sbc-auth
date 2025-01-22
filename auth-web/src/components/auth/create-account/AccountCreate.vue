@@ -51,8 +51,8 @@
       >
         <v-btn
           large
-          depressed
-          color="default"
+          outlined
+          color="primary"
           data-test="btn-stepper-premium-back"
           @click="goBack"
         >
@@ -85,6 +85,7 @@
         <ConfirmCancelButton
           :showConfirmPopup="false"
           :target-route="cancelUrl"
+          :newStyleStepper="true"
         />
       </v-col>
     </v-row>
