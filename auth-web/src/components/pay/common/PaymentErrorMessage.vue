@@ -23,6 +23,7 @@
         />
         <div class="btns">
           <v-btn
+            v-if="error.showOkbtn"
             large
             link
             color="primary"
@@ -32,6 +33,29 @@
           >
             Ok
           </v-btn>
+          <v-btn
+            v-else
+            large
+            link
+            color="primary"
+            class="error-btn"
+            data-test="btn-pay-error-tryagain"
+            @click="tryAgain"
+          >
+            Try Again
+          </v-btn>
+          <v-btn
+            v-if="error.showCancelbtn"
+            large
+            outlined
+            link
+            color="primary"
+            class="ml-3 error-btn"
+            :href="backUrl"
+            data-test="btn-pay-error-cancel"
+          >
+            Go Back
+          </v-btn>
         </div>
       </v-col>
     </v-row>
@@ -40,19 +64,21 @@
 
 <script lang="ts">
 import { Component, Prop } from 'vue-property-decorator'
-import { StringChain } from 'lodash'
 import Vue from 'vue'
 import { paymentErrorType } from '@/util/constants'
 
 @Component
 export default class PaymentErrorMessage extends Vue {
   @Prop({ default: 'GENERIC_ERROR' }) errorType: string
-  @Prop({ default: '' }) backUrl: StringChain
+  @Prop({ default: '' }) backUrl: string
+  @Prop({ default: '' }) tryAgainURL: string
 
   public get error () {
     let errorTitle = ''
     let errorMessage = ''
     let errorIcon = 'mdi-alert-circle-outline'
+    let showOkbtn = false
+    let showCancelbtn = true
 
     switch (this.errorType) {
       case paymentErrorType.GENERIC_ERROR:
@@ -62,6 +88,8 @@ export default class PaymentErrorMessage extends Vue {
       case paymentErrorType.PAYMENT_CANCELLED:
         errorTitle = this.$t('paymentCancelTitle').toString()
         errorMessage = this.$t('paymentCancelSubText').toString()
+        showOkbtn = true
+        showCancelbtn = false
         break
       case paymentErrorType.DECLINED:
         errorTitle = this.$t('paymentDeclinedTitle').toString()
@@ -78,6 +106,8 @@ export default class PaymentErrorMessage extends Vue {
       case paymentErrorType.DUPLICATE_ORDER_NUMBER:
         errorTitle = this.$t('paymentDuplicateErrorTitle').toString()
         errorMessage = this.$t('paymentDuplicateErrorSubText').toString()
+        showOkbtn = true
+        showCancelbtn = false
         break
       case paymentErrorType.TRANSACTION_TIMEOUT_NO_DEVICE:
         errorTitle = this.$t('paymentTimeoutErrorTitle').toString()
@@ -94,12 +124,17 @@ export default class PaymentErrorMessage extends Vue {
         break
     }
 
-    return { errorTitle, errorMessage, errorIcon }
+    return { errorTitle, errorMessage, errorIcon, showOkbtn, showCancelbtn }
+  }
+
+  tryAgain () {
+    this.$router.push(this.tryAgainURL)
   }
 }
 </script>
 
 <style lang="scss" scoped>
+  @import "$assets/scss/theme.scss";
   .pay-error{
     .error-btn{
           min-width: 139px !important;
