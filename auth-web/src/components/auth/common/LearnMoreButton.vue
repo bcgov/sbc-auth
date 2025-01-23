@@ -24,8 +24,6 @@ export default class LearnMoreButton extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
   .learn-more-btn:hover {
     color: white !important;
     background: $BCgovBlue5;

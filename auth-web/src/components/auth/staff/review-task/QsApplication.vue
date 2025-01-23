@@ -342,8 +342,6 @@ export default defineComponent({
 })
 </script>
 <style lang="scss" scoped>
-@import "$assets/scss/theme.scss";
-
 ::v-deep {
   .address-block__info-row {
     color: $gray9;

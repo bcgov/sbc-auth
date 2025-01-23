@@ -465,7 +465,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
 .label {
   background: $app-blue;
   color: white;

@@ -238,8 +238,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
-
 .font-size-12 {
   font-size: 12px;
 }

@@ -644,7 +644,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
 .legal-name {
   font-size: 1.25rem !important;
   font-weight: 700;

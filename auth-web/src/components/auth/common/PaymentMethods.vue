@@ -451,7 +451,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
 @import '@/assets/scss/actions.scss';
 @import '@/assets/scss/tooltip.scss';
 .text-decoration-underline {

@@ -121,7 +121,6 @@ export default class NonBcscAdminInviteSetupView extends Mixins(NextPageMixin) {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
   .wrapper {
     padding: 3.125rem 2.5rem !important;
   }

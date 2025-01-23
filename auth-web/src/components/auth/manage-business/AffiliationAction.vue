@@ -655,8 +655,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
-
 .action-cell {
     max-width: 0;
     max-height: 30px !important;

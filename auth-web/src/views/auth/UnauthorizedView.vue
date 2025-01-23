@@ -71,5 +71,4 @@ export default class UnauthorizedView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
 </style>

@@ -138,7 +138,6 @@
                 v-display-mode="hasDecisionNotBeenMade ? false : viewOnly"
                 v-on="productFooter.events"
               />
-  
             </div>
           </v-expand-transition>
         </div>
@@ -163,16 +162,16 @@
             </v-chip>
           </v-label>
           <div v-if="showProductFee">
-                <v-divider class="my-4" />
-                <!-- This links to ProductFeeViewEdit. -->
-                <ProductFee
-                  :orgProduct="orgProduct"
-                  :orgProductFeeCodes="orgProductFeeCodes"
-                  :isProductActionLoading="isProductActionLoading"
-                  :isProductActionCompleted="isProductActionCompleted"
-                  @save:saveProductFee="saveProductFee"
-                />
-              </div>
+            <v-divider class="my-4" />
+            <!-- This links to ProductFeeViewEdit. -->
+            <ProductFee
+              :orgProduct="orgProduct"
+              :orgProductFeeCodes="orgProductFeeCodes"
+              :isProductActionLoading="isProductActionLoading"
+              :isProductActionCompleted="isProductActionCompleted"
+              @save:saveProductFee="saveProductFee"
+            />
+          </div>
           <div>
             <v-alert
               v-if="showPaymentMethodNotSupported"
@@ -436,7 +435,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
 .product-card {
   transition: all ease-out 0.2s;
 

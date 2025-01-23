@@ -209,8 +209,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
-
 .text-decoration-underline {
   text-decoration: underline;
 }

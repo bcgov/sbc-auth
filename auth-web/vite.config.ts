@@ -26,6 +26,13 @@ const generateAboutText = (aboutText1, aboutText2) => {
 }
 
 export default defineConfig({
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "./src/assets/scss/theme.scss";`
+      }
+    }
+  },
   define: {
     'import.meta.env.ABOUT_TEXT': generateAboutText(aboutText1, aboutText2)
   },

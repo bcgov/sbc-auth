@@ -85,16 +85,9 @@
         {{ currentOrganization.name }}
       </h1>
       <p
-        v-if="isPremiumAccount"
         class="mt-3 mb-0"
       >
-        Manage account information, and view account activity.
-      </p>
-      <p
-        v-else
-        class="mt-3 mb-0"
-      >
-        Manage account information, team members, and authentication settings.
+        Manage account settings, team members, and view transactions for this account
       </p>
     </div>
 
@@ -486,8 +479,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
-
   .account-settings-card {
     display: flex;
   }

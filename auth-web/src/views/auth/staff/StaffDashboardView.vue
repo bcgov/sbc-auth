@@ -14,6 +14,7 @@
       no-gutters
     >
       <v-col
+        v-can:VIEW_LAUNCH_TITLES.hide
         class="pr-2"
         cols="6"
       >
@@ -125,7 +126,9 @@
           />
         </v-card>
       </v-col>
+
       <v-col
+        v-can:VIEW_LAUNCH_TITLES.hide
         class="pl-2"
         cols="6"
       >
@@ -251,6 +254,7 @@
     <!-- Email Safe List -->
     <BaseVExpansionPanel
       v-if="isDevOrTest"
+      v-can:VIEW_LAUNCH_TITLES.hide
       info="Please contact #registries-ops to add or remove email addresses from the safe list."
       title="Safe Email List (DEV/TEST)"
     >
@@ -552,7 +556,6 @@ export default defineComponent({
 </style>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
 h2 {
   line-height: 1.5rem;
 }

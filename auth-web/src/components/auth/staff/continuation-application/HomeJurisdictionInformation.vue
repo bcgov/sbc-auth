@@ -344,8 +344,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
-
 .section-container {
   font-size: $px-16;
   color: $gray7;

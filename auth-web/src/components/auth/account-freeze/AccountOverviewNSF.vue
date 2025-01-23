@@ -1,7 +1,13 @@
 <template>
   <div>
-    <p class="mb-10">
-      This account has been suspended for a failed payment.
+    <p class="mb-10 subtitle">
+      <v-icon
+        color="#d3272c"
+      >
+        mdi-alert
+      </v-icon>
+      We were unable to process the payment from your bank account, and as a result, your account has been suspended.
+      Returned system error message: {{ reason }}.
     </p>
 
     <v-card
@@ -20,10 +26,10 @@
         </v-row>
         <v-divider class="my-2" />
         <v-row>
-          <v-col cols="9">
+          <v-col cols="10">
             <div>Dishonored Bank Instrument Fee</div>
             <div class="font-italic">
-              As per PAD terms, you are charged $30 dishonored bank fee for every failed payment
+              As per PAD agreement, you are charged $30 dishonored bank fee for every failed payment
             </div>
           </v-col>
           <v-col class="text-end">
@@ -31,7 +37,7 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="9">
+          <v-col cols="10">
             Total Transactions
           </v-col>
           <v-col class="text-end">
@@ -40,7 +46,7 @@
         </v-row>
         <v-divider class="my-2" />
         <v-row class="font-weight-bold">
-          <v-col cols="9">
+          <v-col cols="10">
             Total Amount Due
           </v-col>
           <v-col class="text-end">
@@ -87,7 +93,6 @@
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
-import moment from 'moment'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -99,14 +104,15 @@ export default defineComponent({
     const currentMembership = computed(() => orgStore.currentMembership)
     const calculateFailedInvoices: any = orgStore.calculateFailedInvoices
     const downloadNSFInvoicesPDF: any = orgStore.downloadNSFInvoicesPDF
-    const formatDate = CommonUtils.formatDisplayDate
-    const suspendedDate = (currentOrganization.value?.suspendedOn) ? formatDate(moment(currentOrganization.value.suspendedOn)) : ''
 
     const state = reactive({
       nsfAmount: 0,
       totalAmount: 0,
       totalAmountRemaining: 0,
-      totalPaidAmount: 0
+      totalPaidAmount: 0,
+      reason: '',
+      suspendedDate: currentOrganization.value?.suspendedOn
+        ? CommonUtils.formatDateToHumanReadable(currentOrganization.value.suspendedOn) : ''
     })
 
     const goNext = () => {
@@ -118,13 +124,13 @@ export default defineComponent({
       state.totalAmount = failedInvoices?.totalTransactionAmount || 0
       state.nsfAmount = failedInvoices?.nsfFee || 0
       state.totalAmountRemaining = failedInvoices?.totalAmountToPay || 0
+      state.reason = failedInvoices.reason || ''
     })
 
     return {
       ...toRefs(state),
       currentOrganization,
       currentMembership,
-      suspendedDate,
       downloadNSFInvoicesPDF,
       goNext
     }
@@ -134,7 +140,11 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "$assets/scss/theme.scss";
+.subtitle {
+  font-size: 1rem;
+  font-weight: 500;
+  color: $BCgovInputError;
+}
 
 .suspended-info-card {
   border-color: $BCgovInputError !important;

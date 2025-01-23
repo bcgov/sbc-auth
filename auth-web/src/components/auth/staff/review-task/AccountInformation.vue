@@ -97,6 +97,7 @@
           </v-col>
           <v-col
             v-if="accountUnderReview.accessType === AccessType.GOVN"
+            v-can:EDIT_USER.hide
             cols="auto"
           >
             <v-btn

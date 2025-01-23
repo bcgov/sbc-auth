@@ -160,7 +160,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
 .legal-name {
   font-size: 1.25rem !important;
   font-weight: 700;

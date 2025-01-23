@@ -678,7 +678,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
 // Note this uses .datatable-search
 @import '@/assets/scss/search.scss';
 

@@ -448,7 +448,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
 @import '@/assets/scss/tooltip.scss';
 .view-container {
     padding: 0 !important;

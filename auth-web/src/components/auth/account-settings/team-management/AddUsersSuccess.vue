@@ -171,8 +171,6 @@ export default class AddUsersSuccess extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
   .section-title {
     font-size: 1.125rem;
   }

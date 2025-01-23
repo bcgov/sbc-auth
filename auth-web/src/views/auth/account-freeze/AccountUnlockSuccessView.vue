@@ -135,8 +135,6 @@ export default class AccountUnlockSuccessView extends Mixins(AccountMixin) {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
-
   .action-btn {
     width: 8rem;
   }
