@@ -129,7 +129,12 @@ export const useProductPayment = (props, state) => {
     Object.entries(paymentMethodProducts).forEach(([key, values]) => {
       paymentMethodSupported[key] = derivedProductList.every(subscription => (values as Array<string>).includes(subscription))
     })
-    paymentMethodSupported[PaymentTypes.CREDIT_CARD] = paymentMethodSupported[PaymentTypes.DIRECT_PAY]
+    // Map direct pay to credit card, they are the same thing in the UI.
+    if (paymentMethodSupported[PaymentTypes.DIRECT_PAY]) {
+      paymentMethodSupported[PaymentTypes.CREDIT_CARD] = paymentMethodSupported[PaymentTypes.DIRECT_PAY]
+    }
+    // Support all products for EJV by default, might not be supported in practice, but this is similar to PAD.
+    paymentMethodSupported[PaymentTypes.EJV] = true
     return paymentMethodSupported
   })
 
