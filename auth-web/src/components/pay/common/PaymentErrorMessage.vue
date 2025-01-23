@@ -40,9 +40,9 @@
 
 <script lang="ts">
 import { Component, Prop } from 'vue-property-decorator'
+import { StringChain } from 'lodash'
 import Vue from 'vue'
 import { paymentErrorType } from '@/util/constants'
-import { StringChain } from 'lodash'
 
 @Component
 export default class PaymentErrorMessage extends Vue {
