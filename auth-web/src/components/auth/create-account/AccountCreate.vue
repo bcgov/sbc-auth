@@ -50,6 +50,7 @@
         class="form__btns py-0 d-inline-flex"
       >
         <v-btn
+          v-if="!govmAccount"
           large
           outlined
           color="primary"
