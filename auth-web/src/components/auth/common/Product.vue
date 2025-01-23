@@ -365,7 +365,7 @@ export default defineComponent({
         state.showPaymentMethodNotSupported = true
         setTimeout(() => {
           state.showPaymentMethodNotSupported = false
-        }, 4000)
+        }, 5000)
         return
       }
 
