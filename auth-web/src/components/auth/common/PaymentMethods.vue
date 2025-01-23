@@ -331,7 +331,6 @@ export default defineComponent({
 
     const paymentMethodSelected = async (payment, isTouch = true) => {
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
-      console.log(payment.type, isTouch, state.selectedPaymentMethod)
       if (payment.type === PaymentTypes.EFT && isTouch && state.selectedPaymentMethod !== PaymentTypes.EFT && !enableEFTPaymentMethod()) {
         openEFTWarningDialog()
       } else if (payment.type === PaymentTypes.PAD && isFromEFT) {
