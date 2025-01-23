@@ -300,7 +300,6 @@ export default class AccountDeactivate extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
 
 .back-btn {
   font-weight: 700;

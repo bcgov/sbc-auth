@@ -53,8 +53,6 @@ export default class PayWithCreditCard extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
 .bcol-payment-card {
   .heading-info {
     background: var(--v-primary-base);

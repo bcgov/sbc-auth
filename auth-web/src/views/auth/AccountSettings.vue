@@ -493,8 +493,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
-
   .account-settings-card {
     display: flex;
   }

@@ -44,8 +44,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
   #testimonials-container {
     background: #E2E8EE;
     min-height: 300px;

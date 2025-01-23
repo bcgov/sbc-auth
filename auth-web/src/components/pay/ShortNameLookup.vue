@@ -261,8 +261,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
-
 ::v-deep .v-input__slot {
   background: red;
 }

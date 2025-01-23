@@ -153,7 +153,6 @@ export default class GeneratePasscodeView extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
 .generate-passcode-input{
     display: inline-block;
     width: 30rem;

@@ -339,8 +339,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
 // add whitespace to the right of the container
 @media (min-width: 960px) {
   .view-container {

@@ -110,8 +110,6 @@ export default class ResubmitRequest extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
-
 ::v-deep .v-textarea textarea {
   line-height: 1.5rem !important;
   font-size: $px-14 !important;

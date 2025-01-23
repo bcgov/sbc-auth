@@ -78,8 +78,6 @@ export default class AccountLoginOptionsChooser extends Mixins(AccountChangeMixi
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
 .text-decoration-underline {
   text-decoration: underline;
 }

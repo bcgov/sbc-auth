@@ -886,8 +886,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
 .v-icon.v-icon {
   color: $app-dk-blue;
 }

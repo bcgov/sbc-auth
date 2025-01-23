@@ -435,7 +435,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
 .account-alert-inner {
   .v-icon {
     color: $app-alert-orange;

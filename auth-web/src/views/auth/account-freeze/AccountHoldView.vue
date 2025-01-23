@@ -121,7 +121,6 @@ export default defineComponent({
 })
 </script>
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
 .link {
     color: var(--v-primary-base) !important;
     text-decoration: underline;

@@ -272,7 +272,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
   .email {
     word-wrap: break-word;
     word-break: break-all;

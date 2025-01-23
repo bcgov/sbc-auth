@@ -426,7 +426,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
   .remove-user-btn {
     margin-right: -6px;
   }

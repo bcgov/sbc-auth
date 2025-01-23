@@ -649,8 +649,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
 .v-application p {
   margin-bottom: 3rem;
 }

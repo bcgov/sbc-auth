@@ -259,8 +259,6 @@ export default class PaymentView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
 .payment-view-content {
   margin: 0 auto;
   max-width: 48rem;
