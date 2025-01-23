@@ -31,7 +31,8 @@ export const useUserStore = defineStore('user', () => {
     redirectAfterLoginUrl: '' as string,
     roleInfos: undefined as RoleInfo[],
     currentUserAccountSettings: undefined as UserSettings[],
-    accountSettingWarning: false as boolean
+    accountSettingWarning: false as boolean,
+    hasPaymentMethodChanged: false as boolean
   })
 
   function $reset () {
@@ -49,6 +50,7 @@ export const useUserStore = defineStore('user', () => {
     state.roleInfos = undefined as RoleInfo[]
     state.currentUserAccountSettings = undefined as UserSettings[]
     state.accountSettingWarning = false as boolean
+    state.hasPaymentMethodChanged = false as boolean
   }
 
   const termsOfUseVersion = computed(() => state.userProfile?.userTerms?.termsOfUseAcceptedVersion)
@@ -77,6 +79,10 @@ export const useUserStore = defineStore('user', () => {
 
   function setAccountSettingWarning (warningDialog: boolean) {
     state.accountSettingWarning = warningDialog
+  }
+
+  function setHasPaymentMethodChanged (warningDialog: boolean) {
+    state.hasPaymentMethodChanged = warningDialog
   }
 
   function loadUserInfo () {
@@ -253,6 +259,7 @@ export const useUserStore = defineStore('user', () => {
     setUserProfileData,
     setNotaryInformation,
     setAccountSettingWarning,
+    setHasPaymentMethodChanged,
     reset,
     resetOTPAuthenticator,
     saveUserTerms,
