@@ -276,7 +276,7 @@ export default defineComponent({
       businessType: (props.isEditAccount && currentOrganization.value?.businessType) || '',
       businessSize: (props.isEditAccount && currentOrganization.value?.businessSize) || '',
       governmentSize: (props.isEditAccount && currentOrganization.value?.businessSize) || '',
-      branchName: (props.isEditAccount || props.govmAccount && currentOrganization.value?.branchName) || '',
+      branchName: ((props.isEditAccount || props.govmAccount) && currentOrganization.value?.branchName) || '',
       isBusinessAccount: currentOrganization.value?.isBusinessAccount || false,
       isGovnAccount: currentOrganization.value?.accessType === AccessType.GOVN,
       isIndividualAccount: !currentOrganization.value?.isBusinessAccount && !(currentOrganization.value?.accessType === AccessType.GOVN),

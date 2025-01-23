@@ -35,83 +35,84 @@
           @toggle-product-details="toggleProductDetails"
         />
       </div>
-    </template>
-    <v-divider class="mb-5" />
-    <strong>Select a payment method for your account: </strong>
-    <v-tooltip
-      :disabled="!showSelectPaymentMethodTooltip"
-      class="pa-2 tooltip"
-      content-class="tooltip"
-      color="grey darken-4"
-      max-width="350px"
-      nudge-bottom="27"
-      top
-    >
-      <template #activator="{ on }">
-        <div v-on="on">
-          <PaymentMethods
-            v-if="productPaymentMethods"
-            v-display-mode
-            :currentOrgType="currentOrganizationType"
-            :currentOrganization="currentOrganization"
-            :currentSelectedPaymentMethod="currentOrgPaymentType"
-            :isInitialTOSAccepted="readOnly"
-            :isInitialAcknowledged="readOnly"
-            :isCreateAccount="true"
-            @payment-method-selected="setSelectedPayment"
-            @is-pad-valid="setPADValid"
-            @emit-bcol-info="setBcolInfo"
-          />
-        </div>
-      </template>
-      <span>To choose a payment method, please select a product first.</span>
-    </v-tooltip>
-
-    <v-row>
-      <v-col
-        cols="12"
-        class="form__btns py-0 d-inline-flex"
+      <v-divider class="mb-5" />
+      <strong>Select a payment method for your account: </strong>
+      <v-tooltip
+        :disabled="!showSelectPaymentMethodTooltip"
+        class="pa-2 tooltip"
+        content-class="tooltip"
+        color="grey darken-4"
+        max-width="350px"
+        nudge-bottom="27"
+        top
       >
-        <v-btn
-          v-if="isStepperView"
-          large
-          outlined
-          color="primary"
-          data-test="btn-back"
-          @click="stepBack"
+        <template #activator="{ on }">
+          <div v-on="on">
+            <PaymentMethods
+              v-if="productPaymentMethods"
+              v-display-mode
+              :currentOrgType="currentOrganizationType"
+              :currentOrganization="currentOrganization"
+              :currentSelectedPaymentMethod="currentOrgPaymentType"
+              :isInitialTOSAccepted="readOnly"
+              :isInitialAcknowledged="readOnly"
+              :isCreateAccount="true"
+              @payment-method-selected="setSelectedPayment"
+              @is-pad-valid="setPADValid"
+              @emit-bcol-info="setBcolInfo"
+            />
+          </div>
+        </template>
+        <span>To choose a payment method, please select a product first.</span>
+      </v-tooltip>
+
+      <v-row>
+        <v-col
+          cols="12"
+          class="form__btns py-0 d-inline-flex"
         >
-          <v-icon
-            left
-            class="mr-2"
+          <v-btn
+            v-if="isStepperView"
+            large
+            outlined
+            color="primary"
+            data-test="btn-back"
+            @click="stepBack"
           >
-            mdi-arrow-left
-          </v-icon>
-          <span>Back</span>
-        </v-btn>
-        <v-spacer />
-        <v-btn
-          v-if="isStepperView"
-          large
-          color="primary"
-          class="save-continue-button mr-3"
-          data-test="next-button"
-          :disabled="!isFormValid || !isPaymentValid"
-          @click="saveAccount"
-        >
-          <span>
-            {{ readOnly ? 'Submit' : 'Create Account' }}
-            <v-icon class="ml-2">mdi-arrow-right</v-icon>
-          </span>
-        </v-btn>
-        <ConfirmCancelButton
-          v-if="!readOnly"
-          :showConfirmPopup="true"
-          :isEmit="true"
-          :newStyleStepper="true"
-          @click-confirm="cancel"
-        />
-      </v-col>
-    </v-row>
+            <v-icon
+              left
+              class="mr-2"
+            >
+              mdi-arrow-left
+            </v-icon>
+            <span>Back</span>
+          </v-btn>
+          <v-spacer />
+          <v-btn
+            v-if="isStepperView"
+            large
+            color="primary"
+            class="save-continue-button mr-3"
+            data-test="next-button"
+            :disabled="!isFormValid || !isPaymentValid"
+            @click="saveAccount"
+          >
+            <span>
+              {{ readOnly ? 'Submit' : 'Create Account' }}
+              <v-icon class="ml-2">mdi-arrow-right</v-icon>
+            </span>
+          </v-btn>
+          <ConfirmCancelButton
+            v-if="!readOnly"
+            :showConfirmPopup="true"
+            :isEmit="true"
+            :newStyleStepper="true"
+            @click-confirm="cancel"
+          />
+        </v-col>
+      </v-row>
+    </template>
+
     <!-- BC Online - Alert Dialog (Error) -->
     <ModalDialog
       ref="errorDialog"
