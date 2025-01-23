@@ -88,13 +88,13 @@
                     @is-gl-info-form-valid="isGLInfoValid"
                   />
                   <v-divider class="mb-4" />
-                  <div v-if="!isEditing">
+                  <div v-if="!isEditing && !isCreateAccount">
                     <h4 class="mb-2">
                       General Ledger Information
                     </h4>
                     <div v-if="!!glInfo">
                       <span class="d-flex"> Client Code: {{ glInfo.client }} </span>
-                      <span class="d-flex"> Responsbility Center: {{ glInfo.responsibilityCentre }} </span>
+                      <span class="d-flex"> Responsibility Center: {{ glInfo.responsibilityCentre }} </span>
                       <span class="d-flex"> Account Number: {{ glInfo.serviceLine }} </span>
                       <span class="d-flex"> Standard Object: {{ glInfo.stob }} </span>
                       <span class="d-flex"> Project: {{ glInfo.projectCode }} </span>
@@ -499,10 +499,6 @@ export default defineComponent({
                 0 3px 1px -2px rgba(0,0,0,.2),
                 0 2px 2px 0 rgba(0,0,0,.14),
                 0 1px 5px 0 rgba(0,0,0,.12) !important;
-  }
-  &:active {
-    opacity: .85;
-    background-color: $gray1
   }
   &:focus:before {
     opacity: 0;
