@@ -173,26 +173,28 @@
             />
           </div>
           <div>
-            <v-alert
-              v-if="showPaymentMethodNotSupported"
-              class="mt-6 mb-4 alert-item alert-inner"
-              :icon="false"
-              prominent
-              outlined
-              type="warning"
-            >
-              <div class="alert-inner mb-0">
-                <v-icon
-                  medium
-                >
-                  mdi-alert
-                </v-icon>
-                <p class="alert__info mb-0 pl-3">
-                  <strong>Payment Method Not Supported:</strong> This product is not supported by your current payment
-                  method. Please choose a different payment type to use this product.
-                </p>
-              </div>
-            </v-alert>
+            <v-expand-transition>
+              <v-alert
+                v-if="showPaymentMethodNotSupported"
+                class="mt-6 mb-4 alert-item alert-inner"
+                :icon="false"
+                prominent
+                outlined
+                type="warning"
+              >
+                <div class="alert-inner mb-0">
+                  <v-icon
+                    medium
+                  >
+                    mdi-alert
+                  </v-icon>
+                  <p class="alert__info mb-0 pl-3">
+                    <strong>Payment Method Not Supported:</strong> This product is not supported by your current payment
+                    method. Please choose a different payment type to use this product.
+                  </p>
+                </div>
+              </v-alert>
+            </v-expand-transition>
           </div>
         </div>
         <div />
