@@ -127,11 +127,11 @@
 import { CreateRequestBody, PADInfo, PADInfoValidation } from '@/models/Organization'
 import { Pages, PaymentTypes } from '@/util/constants'
 import { PropType, computed, defineComponent, reactive, toRefs } from '@vue/composition-api'
+import { useOrgStore, useUserStore } from '@/stores'
 import { BcolProfile } from '@/models/bcol'
 import CautionBox from '@/components/auth/common/CautionBox.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
-import { useOrgStore } from '@/stores'
 
 export default defineComponent({
   name: 'CompletePaymentDetails',
@@ -158,6 +158,8 @@ export default defineComponent({
   emits: ['step-forward'],
   setup (props, { root }) {
     const orgStore = useOrgStore()
+    const { setHasPaymentMethodChanged } = useUserStore()
+
     const paymentTypes = PaymentTypes
     const state = reactive({
       bcolInfo: {} as BcolProfile,
@@ -169,7 +171,6 @@ export default defineComponent({
       isInitialAcknowledged: false,
       checkErrors: false,
       padValid: false,
-      isPaymentChanged: false,
       isLoading: false,
       cancelButtonText: computed((): string => props.changePaymentType === PaymentTypes.PAD ? 'Back' : 'Cancel'),
       nextButtonText: computed((): string => props.changePaymentType === PaymentTypes.PAD ? 'Next' : 'Complete')
@@ -187,8 +188,7 @@ export default defineComponent({
 
     function goToPaymentOptions () {
       root.$router?.push({
-        name: Pages.PAYMENT_OPTION,
-        params: { hasPaymentChanged: state.isPaymentChanged }
+        name: Pages.PAYMENT_OPTION
       })
     }
 
@@ -271,7 +271,7 @@ export default defineComponent({
         try {
           await orgStore.updateOrg(createRequestBody)
           orgStore.setCurrentOrganizationPaymentType(props.changePaymentType)
-          state.isPaymentChanged = true
+          setHasPaymentMethodChanged(true)
           goToPaymentOptions()
         } catch (error) {
           switch (error.response.status) {
