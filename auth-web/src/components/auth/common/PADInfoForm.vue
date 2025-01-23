@@ -1,5 +1,5 @@
 <template>
-  <div v-can:CHANGE_PAD_INFO.disable.card>
+  <div v-can:CHANGE_PAD_INFO.disable.card="!isCreateAccount">
     <template v-if="isAcknowledgeNeeded">
       <p class="mb-4">
         The Canadian Payment Association requires a confirmation period
@@ -186,6 +186,7 @@ export default defineComponent({
     isInitialAcknowledged: { type: Boolean, default: false },
     isInitialTOSAccepted: { type: Boolean, default: false },
     isTOSNeeded: { type: Boolean, default: true },
+    isCreateAccount: { type: Boolean, default: false },
     padInformation: { default: () => { return {} as PADInfo } },
     checkErrors: { type: Boolean, default: false }
   },

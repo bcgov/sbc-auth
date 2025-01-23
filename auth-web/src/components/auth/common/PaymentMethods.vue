@@ -7,7 +7,7 @@
       <v-card
         v-for="payment in filteredPaymentMethods"
         :key="payment.type"
-        v-can:CHANGE_PAYMENT_METHOD.disable.card
+        v-can:CHANGE_PAYMENT_METHOD.disable.card="!isCreateAccount"
         outlined
         :ripple="false"
         hover
