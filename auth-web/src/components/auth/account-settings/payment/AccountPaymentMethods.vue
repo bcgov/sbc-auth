@@ -81,7 +81,7 @@
     <ModalDialog
       ref="unsavedChangesDialog"
       title="Unsaved Changes"
-      text="You're about to leave the page, any information you've entered will not be saved."
+      text="You have unsaved changes. Are you sure you want to leave?"
       dialog-class="notify-dialog"
       max-width="640"
       :showIcon="false"
@@ -93,14 +93,14 @@
           class="font-weight-bold"
           @click="exitWithoutSaving"
         >
-          Exit Without Saving
+          Leave Without Saving
         </v-btn>
         <v-btn
           large
           class="font-weight-bold"
           @click="closeUnsavedChangesDialog"
         >
-          Return to Page
+          Stay on Page
         </v-btn>
       </template>
     </ModalDialog>
@@ -112,7 +112,7 @@ import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission } fro
 import {
   CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation
 } from '@/models/Organization'
-import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
@@ -143,14 +143,16 @@ export default defineComponent({
   },
   emits: ['emit-bcol-info', 'disable-editing'],
   setup (props, { emit, root }) {
+    const router = root.$router
     const orgStore = useOrgStore()
     const userStore = useUserStore()
+    const { setHasPaymentMethodChanged } = userStore
 
     const state = reactive({
       savedOrganizationType: '',
       selectedPaymentMethod: '',
       padInfo: {} as PADInfo,
-      isBtnSaved: props.hasPaymentChanged,
+      isBtnSaved: userStore.hasPaymentMethodChanged,
       disableSaveBtn: false,
       errorTitle: 'Payment Update Failed',
       bcolInfo: {} as BcolProfile,
@@ -158,7 +160,7 @@ export default defineComponent({
       isLoading: false,
       padValid: false,
       ejvValid: false,
-      paymentMethodChanged: props.hasPaymentChanged,
+      paymentMethodChanged: userStore.hasPaymentMethodChanged,
       isFuturePaymentMethodAvailable: false, // set true if in between 3 days cooling period
       isTOSandAcknowledgeCompleted: false, // set true if TOS already accepted
       activeOrgMembers: computed<Member[]>(() => orgStore.activeOrgMembers),
@@ -175,7 +177,7 @@ export default defineComponent({
     function setSelectedPayment (payment) {
       state.selectedPaymentMethod = payment.selectedPaymentMethod
       state.isBtnSaved = (state.isBtnSaved && !payment.isTouched) || false
-      state.paymentMethodChanged = payment.isTouched || false
+      setHasPaymentMethodChanged(payment.isTouched || false)
     }
 
     function isPadSelectedAndInvalid () {
@@ -290,9 +292,19 @@ export default defineComponent({
       }
     }
 
+    const routerGuard = router.beforeEach((to, from, next) => {
+      console.log(userStore.hasPaymentMethodChanged, !userStore.accountSettingWarning)
+      if (userStore.hasPaymentMethodChanged && !userStore.accountSettingWarning) {
+        unsavedChangesDialog.value?.open()
+        next(false)
+      } else {
+        next()
+      }
+    })
+
     async function cancel () {
-      if (state.paymentMethodChanged && !userStore.accountSettingWarning) {
-        unsavedChangesDialog.value.open()
+      if (userStore.hasPaymentMethodChanged && !userStore.accountSettingWarning) {
+        unsavedChangesDialog.value?.open()
       } else {
         await initialize()
         emit('disable-editing')
@@ -300,13 +312,14 @@ export default defineComponent({
     }
 
     async function exitWithoutSaving () {
-      unsavedChangesDialog.value.close()
+      userStore.setHasPaymentMethodChanged(false)
+      unsavedChangesDialog.value?.close()
       await initialize()
       emit('disable-editing')
     }
 
     function closeUnsavedChangesDialog () {
-      unsavedChangesDialog.value.close()
+      unsavedChangesDialog.value?.close()
     }
 
     async function getCreateRequestBody () {
@@ -369,7 +382,7 @@ export default defineComponent({
           await orgStore.updateOrg(createRequestBody)
           state.isBtnSaved = true
           state.isLoading = false
-          state.paymentMethodChanged = false
+          setHasPaymentMethodChanged(false)
           initialize()
           orgStore.setCurrentOrganizationPaymentType(selectedPaymentMethod)
           if (selectedPaymentMethod === PaymentTypes.EFT) {
@@ -397,7 +410,7 @@ export default defineComponent({
           console.error(error)
           state.isLoading = false
           state.isBtnSaved = false
-          state.paymentMethodChanged = false
+          setHasPaymentMethodChanged(false)
           state.errorTitle = 'Error'
           switch (error.response.status) {
             case 409:
@@ -421,7 +434,7 @@ export default defineComponent({
     function setBcolInfo (bcolProfile: BcolProfile) {
       state.bcolInfo = bcolProfile
       emit('emit-bcol-info', state.bcolInfo)
-      state.paymentMethodChanged = true
+      setHasPaymentMethodChanged(true)
     }
 
     onMounted(async () => {
@@ -432,6 +445,16 @@ export default defineComponent({
         }
       )
       await initialize()
+    })
+
+    onBeforeUnmount(() => {
+      if (routerGuard) {
+        routerGuard()
+      }
+
+      if (!router.currentRoute.redirectedFrom) {
+        cancel()
+      }
     })
 
     return {
