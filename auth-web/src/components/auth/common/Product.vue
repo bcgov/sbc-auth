@@ -388,7 +388,6 @@ export default class Product extends Mixins(AccountMixin) {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
 .product-card {
   transition: all ease-out 0.2s;
 

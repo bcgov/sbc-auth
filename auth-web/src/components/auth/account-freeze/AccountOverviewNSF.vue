@@ -140,8 +140,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "$assets/scss/theme.scss";
-
 .subtitle {
   font-size: 1rem;
   font-weight: 500;

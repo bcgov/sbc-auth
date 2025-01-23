@@ -218,8 +218,6 @@ export default class BNRequestManager extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
-
 .table-header {
   background-color: $app-lt-blue;
   padding: .875rem;

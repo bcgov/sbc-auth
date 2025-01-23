@@ -127,7 +127,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
 .tab-item-inactive {
   color: white !important;
   background-color: $BCgovBlue5;

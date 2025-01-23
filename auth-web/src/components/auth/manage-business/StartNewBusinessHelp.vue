@@ -136,7 +136,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
 ol.bold li::marker {
   font-weight: bold;
   font-size: $px-16 !important;

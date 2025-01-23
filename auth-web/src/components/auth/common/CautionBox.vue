@@ -34,7 +34,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
 .caution-box {
   display: flex;
   align-items: flex-start;

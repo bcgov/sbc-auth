@@ -386,7 +386,6 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
 @import '@/assets/scss/search.scss';
 
  #header-filter-row {

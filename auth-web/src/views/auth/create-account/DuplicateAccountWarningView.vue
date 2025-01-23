@@ -173,8 +173,6 @@ export default class DuplicateAccountWarningView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
     .v-list-item__title {
       line-height: 1.5rem;
     }

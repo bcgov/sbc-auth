@@ -40,8 +40,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
-
 .v-card-header {
   display: flex;
   background-color: $BCgovBlue5O;

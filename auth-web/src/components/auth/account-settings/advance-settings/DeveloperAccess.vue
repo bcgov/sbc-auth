@@ -41,7 +41,6 @@ export default class DeveloperAccess extends Mixins(AccountChangeMixin) {
 </script>
 
 <style lang="scss" scoped>
-@import "$assets/scss/theme.scss";
   .view-header {
     display: flex;
     flex-direction: row;

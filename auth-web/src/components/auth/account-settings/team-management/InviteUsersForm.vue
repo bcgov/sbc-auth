@@ -218,7 +218,6 @@ export default class InviteUsersForm extends TeamManagementMixin {
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
   .invite-list {
     margin: 0;
     padding: 0;

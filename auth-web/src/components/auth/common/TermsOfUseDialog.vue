@@ -183,8 +183,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
 .terms-container {
   position: relative;
 }

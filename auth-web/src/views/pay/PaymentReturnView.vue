@@ -101,7 +101,6 @@ export default class PaymentReturnView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-    @import '../../assets/scss/theme.scss';
     article{
         .v-card{
             line-height: 1.2rem;

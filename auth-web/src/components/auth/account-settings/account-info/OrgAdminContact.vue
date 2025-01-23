@@ -68,8 +68,6 @@ export default class OrgAdminContact extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
 .v-list--dense {
   .v-list-item .v-list-item__title {
     margin-bottom: 0.25rem;

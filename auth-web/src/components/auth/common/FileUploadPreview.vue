@@ -95,8 +95,6 @@ export default class FileUploadPreview extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
 ::v-deep {
   .file-upload-preview {
     .v-input__append-outer {

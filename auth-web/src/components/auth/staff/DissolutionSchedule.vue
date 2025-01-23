@@ -202,7 +202,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
 .section-container {
   color: $gray9;
 

@@ -257,7 +257,6 @@ export default class SearchBusinessNameRequest extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
 ::v-deep {
   .v-radio .v-icon {
     color: var(--v-primary-base);

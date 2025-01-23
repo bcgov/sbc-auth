@@ -92,8 +92,6 @@ export default class CreateUserProfileView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-   @import '$assets/scss/theme.scss';
-
   .v-card__title {
     font-weight: 700;
     letter-spacing: -0.02rem;

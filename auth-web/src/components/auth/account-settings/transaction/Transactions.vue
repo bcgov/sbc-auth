@@ -239,7 +239,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "$assets/scss/theme.scss";
   .columns-to-show {
     color: $gray7;
     font-size: 0.825rem;

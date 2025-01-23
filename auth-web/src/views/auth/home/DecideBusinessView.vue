@@ -92,8 +92,6 @@ export default class DecideBusinessView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
   #decide-business-info-container {
     padding-top: 0 !important;
     flex-wrap: wrap;

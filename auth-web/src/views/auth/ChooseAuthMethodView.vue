@@ -467,8 +467,6 @@ export default class ChooseAuthMethodView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
 .service-container {
   border-left: 3px solid transparent;
   cursor: pointer;

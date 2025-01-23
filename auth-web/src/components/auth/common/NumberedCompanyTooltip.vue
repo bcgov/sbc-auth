@@ -54,8 +54,6 @@ export default class NumberedCompanyTooltip extends Vue {
 
 </script>
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
   a:hover {
     color: $BCgoveBueText2;
   }
