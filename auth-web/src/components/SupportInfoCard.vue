@@ -26,8 +26,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @import "../assets/scss/theme.scss";
-
   .v-card__title {
     padding-top: 1.25rem;
     padding-left: 1.5rem;

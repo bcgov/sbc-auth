@@ -51,7 +51,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "$assets/scss/theme.scss";
 .bottom-tooltip:before {
   content: ' ';
   position: absolute;
