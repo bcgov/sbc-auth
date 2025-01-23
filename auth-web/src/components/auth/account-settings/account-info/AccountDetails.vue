@@ -221,7 +221,6 @@ export default defineComponent({
 })
 </script>
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
 .business-radio {
   display: flex;
   width: 90%;
