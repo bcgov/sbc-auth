@@ -89,7 +89,9 @@
                   />
                   <v-divider class="mb-4" />
                   <div v-if="!isEditing && !isCreateAccount">
-                    <h4 class="mb-2">
+                    <h4
+                      class="mb-2 gl-ledger-info"
+                    >
                       General Ledger Information
                     </h4>
                     <div v-if="!!glInfo">
@@ -544,5 +546,9 @@ export default defineComponent({
 
 .v-card--disabled {
   opacity: 0.8 !important;
+}
+
+.gl-ledger-info {
+  color: $gray7
 }
 </style>
