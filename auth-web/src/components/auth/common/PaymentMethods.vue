@@ -7,7 +7,7 @@
       <v-card
         v-for="payment in filteredPaymentMethods"
         :key="payment.type"
-        v-can:CHANGE_PAYMENT_METHOD.disable.card
+        v-bind="getCanDirective()"
         outlined
         :ripple="false"
         hover
@@ -122,6 +122,7 @@
                     :isInitialAcknowledged="isInitialAcknowledged"
                     :isInitialTOSAccepted="isInitialTOSAccepted"
                     :clearOnEdit="isInitialTOSAccepted"
+                    :isCreateAccount="isCreateAccount"
                     @is-pre-auth-debit-form-valid="isPADValid"
                     @emit-pre-auth-debit-info="getPADInfo"
                     @is-pad-info-touched="isPadInfoTouched"
@@ -289,6 +290,12 @@ export default defineComponent({
       warningDialog.value.open()
     }
 
+    const getCanDirective = () => {
+      return props.isCreateAccount
+        ? {}
+        : { 'v-can:CHANGE_PAYMENT_METHOD.disable.card': true }
+    }
+
     const openEFTWarningDialog = () => {
       state.dialogTitle = 'Confirm Payment Method Change'
       state.dialogText = `Are you sure you want to change your payment method to Electronic Funds Transfer?
@@ -331,7 +338,6 @@ export default defineComponent({
 
     const paymentMethodSelected = async (payment, isTouch = true) => {
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
-      console.log(payment.type, isTouch, state.selectedPaymentMethod)
       if (payment.type === PaymentTypes.EFT && isTouch && state.selectedPaymentMethod !== PaymentTypes.EFT && !enableEFTPaymentMethod()) {
         openEFTWarningDialog()
       } else if (payment.type === PaymentTypes.PAD && isFromEFT) {
@@ -439,6 +445,7 @@ export default defineComponent({
       isPADValid,
       isPadInfoTouched,
       isPaymentSelected,
+      getCanDirective,
       warningDialog,
       cancelModal,
       continueModal,

@@ -1,5 +1,7 @@
 <template>
-  <div v-can:CHANGE_PAD_INFO.disable.card>
+  <div
+    v-bind="getCanDirective()"
+  >
     <template v-if="isAcknowledgeNeeded">
       <p class="mb-4">
         The Canadian Payment Association requires a confirmation period
@@ -186,6 +188,7 @@ export default defineComponent({
     isInitialAcknowledged: { type: Boolean, default: false },
     isInitialTOSAccepted: { type: Boolean, default: false },
     isTOSNeeded: { type: Boolean, default: true },
+    isCreateAccount: { type: Boolean, default: false },
     padInformation: { default: () => { return {} as PADInfo } },
     checkErrors: { type: Boolean, default: false }
   },
@@ -242,6 +245,12 @@ export default defineComponent({
         return rules
       })
     }) as unknown) as PADInfoFormState
+
+    const getCanDirective = () => {
+      return props.isCreateAccount
+        ? {}
+        : { 'v-can:CHANGE_PAYMENT_METHOD.disable.card': true }
+    }
 
     const emitIsPreAuthDebitFormValid = () => {
       const acknowledge = (props.isAcknowledgeNeeded) ? state.isAcknowledged : true
@@ -300,6 +309,7 @@ export default defineComponent({
       transitNumberRules,
       ...toRefs(state),
       preAuthDebitForm,
+      getCanDirective,
       updateTermsAccepted,
       emitPreAuthDebitInfo,
       emitIsPreAuthDebitFormValid,
