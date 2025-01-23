@@ -108,7 +108,7 @@
                 >
                   <v-divider class="mb-5" />
                   <div v-if="!isEditing && currentOrgPADInfo && currentOrgPADInfo.bankAccountNumber">
-                    <h4 class="mb-4">
+                    <h4 class="mb-4 banking-info">
                       Banking Information
                     </h4>
                     <span class="d-flex"> Transit Number: {{ currentOrgPADInfo.bankTransitNumber }} </span>
@@ -489,6 +489,7 @@ export default defineComponent({
 
 .payment-card {
   transition: all ease-out 0.3s, opacity 0.3s ease, background-color 0.3 ease;
+  color: $gray7 !important;
 
   &:hover {
     border-color: var(--v-primary-base) !important;
@@ -546,7 +547,6 @@ export default defineComponent({
   flex-grow: 1;
 }
 
-// TODO change
 .v-card--disabled {
   opacity: 0.8 !important;
 }

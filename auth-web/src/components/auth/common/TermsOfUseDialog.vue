@@ -216,8 +216,10 @@ h2 {
   pointer-events: auto !important;
   color: rgb(33,37,41) !important;
   opacity: 1 !important;
+  span {
+      color: $gray7 !important;
+  }
 }
-
 .form__btns {
   display: flex;
   justify-content: flex-end;
