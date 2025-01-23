@@ -40,8 +40,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
   .btn-name-request {
     font-weight: bold;
     min-height: 2.75rem;

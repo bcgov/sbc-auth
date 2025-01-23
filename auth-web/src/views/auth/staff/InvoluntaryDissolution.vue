@@ -104,7 +104,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
 h2 {
   font-size: $px-18;
 }

@@ -48,8 +48,6 @@ export default class ManagementMenu extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
   ul {
     list-style-type: none;
   }

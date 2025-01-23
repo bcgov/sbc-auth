@@ -120,8 +120,6 @@ export default class OrgNameAutoComplete extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '../../assets/scss/theme.scss';
-
 .auto-complete-close-btn {
   color: $gray5 !important;
   background-color: transparent !important;

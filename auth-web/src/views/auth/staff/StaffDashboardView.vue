@@ -556,7 +556,6 @@ export default defineComponent({
 </style>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
 h2 {
   line-height: 1.5rem;
 }

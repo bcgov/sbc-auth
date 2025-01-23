@@ -303,8 +303,6 @@ export default class IncorpOrRegisterView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
   #incorporate-info-container {
     padding-top: 0 !important;
     flex-wrap: wrap;

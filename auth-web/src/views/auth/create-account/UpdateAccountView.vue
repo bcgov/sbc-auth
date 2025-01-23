@@ -195,8 +195,6 @@ export default class UpdateAccountView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
 .view-container {
   padding: 0 !important;
 }

@@ -309,8 +309,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
-
 .important {
   background-color: #fae9e9;
   border: 1.5px solid #d3272c;

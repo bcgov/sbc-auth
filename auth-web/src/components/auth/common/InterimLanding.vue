@@ -55,8 +55,6 @@ export default class InterimLanding extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
-
   .container {
     padding-top: 3rem;
     padding-bottom: 3rem;

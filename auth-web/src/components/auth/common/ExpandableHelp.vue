@@ -42,8 +42,6 @@ export default class ExpandableHelp extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
-
 .help-label {
   cursor: pointer;
 }

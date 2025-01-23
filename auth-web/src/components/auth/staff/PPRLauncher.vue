@@ -81,7 +81,6 @@ export default class PPRLauncher extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
 h2 {
   line-height: 1.5rem;
 }

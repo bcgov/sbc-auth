@@ -102,8 +102,6 @@ export default class PaymentReview extends Mixins(Steppable) {
 </script>
 
 <style lang="scss" scoped>
-@import "$assets/scss/theme.scss";
-
   .payment-info-card {
     max-width: 55ch;
     border-color: var(--v-primary-base) !important;

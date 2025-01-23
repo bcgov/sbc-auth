@@ -163,8 +163,6 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
   .account-card {
     display: flex;
     flex-direction: column;

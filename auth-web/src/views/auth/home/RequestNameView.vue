@@ -133,8 +133,6 @@ export default class RequestNameView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
   #request-name-info-container {
     padding-top: 0 !important;
     flex-wrap: wrap;

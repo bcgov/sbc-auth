@@ -159,7 +159,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
 .date-selection {
   border-radius: 5px;
   z-index: 10;

@@ -256,8 +256,6 @@ export default class HomeView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
-
   .v-alert.covid-alert {
     margin-bottom: 0;
     padding: 0;
