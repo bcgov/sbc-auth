@@ -59,6 +59,7 @@
               :isCreateAccount="true"
               @payment-method-selected="setSelectedPayment"
               @is-pad-valid="setPADValid"
+              @is-ejv-valid="setEJVValid"
               @emit-bcol-info="setBcolInfo"
             />
           </div>
@@ -196,11 +197,14 @@ export default defineComponent({
           return state.isPADValid
         } else if (state.selectedPaymentMethod === PaymentTypes.BCOL) {
           return state.currentOrganization.bcolProfile?.password
+        } else if (state.selectedPaymentMethod === PaymentTypes.EJV) {
+          return state.isEJVValid
         } else {
           return !!state.selectedPaymentMethod
         }
       }),
       isPADValid: false,
+      isEJVValid: false,
       showSelectPaymentMethodTooltip: computed(() => !state.currentSelectedProducts || state.currentSelectedProducts.length === 0)
     })
 
@@ -259,6 +263,10 @@ export default defineComponent({
       state.isPADValid = isValid
     }
 
+    function setEJVValid (isValid) {
+      state.isEJVValid = isValid
+    }
+
     async function saveAccount () {
       orgStore.setResetAccountTypeOnSetupAccount(true)
       await save(state, createAccount, errorDialog)
@@ -278,6 +286,7 @@ export default defineComponent({
       form,
       setSelectedProduct,
       setSelectedPayment,
+      setEJVValid,
       setPADValid,
       setBcolInfo,
       toggleProductDetails,

@@ -31,7 +31,6 @@
               :rules="clientRules"
               data-test="input-client-code"
               :disabled="!canSelect"
-              @change="emitGLInfo"
             />
           </v-col>
           <v-col
@@ -48,7 +47,6 @@
               :rules="responsibilityCentreRules"
               data-test="input-responsibilityCentre"
               :disabled="!canSelect"
-              @change="emitGLInfo"
             />
           </v-col>
           <v-col
@@ -65,7 +63,6 @@
               :rules="serviceLineRules"
               data-test="input-serviceLine"
               :disabled="!canSelect"
-              @change="emitGLInfo"
             />
           </v-col>
           <v-col
@@ -82,7 +79,6 @@
               :rules="stobRules"
               data-test="input-stob"
               :disabled="!canSelect"
-              @change="emitGLInfo"
             />
           </v-col>
           <v-col
@@ -99,7 +95,6 @@
               :rules="projectCodeRules"
               data-test="input-projectCode"
               :disabled="!canSelect"
-              @change="emitGLInfo"
             />
           </v-col>
         </v-row>
@@ -191,6 +186,10 @@ export default defineComponent({
 
     watch(() => orgStore.currentOrgGLInfo, (newGlInfo) => {
       setGlInfo(newGlInfo)
+    })
+
+    watch(() => [state.client, state.responsibilityCentre, state.serviceLine, state.stob, state.projectCode], () => {
+      emitGLInfo()
     })
 
     onMounted(() => {
