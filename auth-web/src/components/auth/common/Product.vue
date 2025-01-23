@@ -361,6 +361,9 @@ export default defineComponent({
       if (!props.isCreateAccount && !state.paymentMethodSupported && !productSubscribed) {
         state.productSelected = false
         state.showPaymentMethodNotSupported = true
+        setTimeout(() => {
+          state.showPaymentMethodNotSupported = false
+        }, 4000)
         return
       }
 
