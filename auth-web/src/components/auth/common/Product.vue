@@ -138,17 +138,7 @@
                 v-display-mode="hasDecisionNotBeenMade ? false : viewOnly"
                 v-on="productFooter.events"
               />
-              <div v-if="showProductFee">
-                <v-divider class="my-6" />
-                <!-- This links to ProductFeeViewEdit. -->
-                <ProductFee
-                  :orgProduct="orgProduct"
-                  :orgProductFeeCodes="orgProductFeeCodes"
-                  :isProductActionLoading="isProductActionLoading"
-                  :isProductActionCompleted="isProductActionCompleted"
-                  @save:saveProductFee="saveProductFee"
-                />
-              </div>
+  
             </div>
           </v-expand-transition>
         </div>
@@ -165,13 +155,24 @@
               :key="method"
               x-small
               label
-              class="mr-2 font-weight-bold product-payment-icons py-4 my-2"
+              class="mr-2 font-weight-bold product-payment-icons py-3 my-1"
             >
               <v-icon class="mr-1">
                 {{ paymentTypeIcon[method] }}
               </v-icon>{{ paymentTypeLabel[method] }}
             </v-chip>
           </v-label>
+          <div v-if="showProductFee">
+                <v-divider class="my-4" />
+                <!-- This links to ProductFeeViewEdit. -->
+                <ProductFee
+                  :orgProduct="orgProduct"
+                  :orgProductFeeCodes="orgProductFeeCodes"
+                  :isProductActionLoading="isProductActionLoading"
+                  :isProductActionCompleted="isProductActionCompleted"
+                  @save:saveProductFee="saveProductFee"
+                />
+              </div>
           <div>
             <v-alert
               v-if="showPaymentMethodNotSupported"
