@@ -1,10 +1,9 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { useCodesStore, useOrgStore } from '@/stores'
 import AccountMailingAddress from '@/components/auth/account-settings/account-info/AccountMailingAddress.vue'
+import { MembershipType } from '@/models/Organization'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
-import { useCodesStore, useOrgStore } from '@/stores'
-import { MembershipType } from '@/models/Organization'
-import Vue from 'vue'
 
 const vuetify = new Vuetify({})
 
@@ -29,7 +28,6 @@ describe('AccountMailingAddress.vue', () => {
     orgStore.currentMembership = {
       membershipTypeCode: MembershipType.Admin
     } as any
-    
 
     wrapperFactory = propsData => {
       return shallowMount(AccountMailingAddress, {
