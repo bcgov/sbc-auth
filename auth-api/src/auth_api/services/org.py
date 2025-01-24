@@ -119,6 +119,7 @@ class Org:  # pylint: disable=too-many-public-methods
         access_type = response.get("access_type")
 
         # set premium for GOVM accounts..TODO remove if not needed this logic
+        # test
         if access_type == AccessType.GOVM.value:
             org_info.update({"typeCode": OrgType.PREMIUM.value})
 
