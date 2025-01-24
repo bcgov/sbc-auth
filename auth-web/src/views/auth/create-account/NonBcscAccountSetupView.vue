@@ -57,6 +57,7 @@ import SelectProductPayment from '@/components/auth/create-account/SelectProduct
 import Stepper from '@/components/auth/common/stepper/Stepper.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
+import { useAccountCreate } from '@/composables/account-create-factory'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -223,27 +224,7 @@ export default defineComponent({
         // eslint-disable-next-line no-console
         console.error(err)
         state.isLoading = false
-        switch (err?.response?.status) {
-          case 409:
-            state.errorText =
-                    'An account with this name already exists. Try a different account name.'
-            break
-          case 400:
-            switch (err.response.data?.code) {
-              case 'MAX_NUMBER_OF_ORGS_LIMIT':
-                state.errorText = 'Maximum number of accounts reached'
-                break
-              case 'ACTIVE_AFFIDAVIT_EXISTS':
-                state.errorText = err.response.data.message || 'Affidavit already exists'
-                break
-              default:
-                state.errorText = 'An error occurred while attempting to create your account.'
-            }
-            break
-          default:
-            state.errorText =
-                    'An error occurred while attempting to create your account.'
-        }
+        useAccountCreate().handleCreateAccountError(state, err)
         errorDialog.value.open()
       }
     }
