@@ -22,7 +22,7 @@ from auth_api.services import Flags
 app = None
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def setup():
     """Initialize app with dev env for testing."""
     global app
