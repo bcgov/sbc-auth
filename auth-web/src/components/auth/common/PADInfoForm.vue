@@ -219,16 +219,16 @@ export default defineComponent({
       showPremiumPADInfo: computed((): boolean => props.isChangeView),
       acknowledgementLabel: computed((): string => {
         return (state.showPremiumPADInfo)
-          ? `I understand that services will continue to be billed to your other payment method until the mandatory` +
+          ? 'I understand that services will not be billed to PAD until the mandatory' +
           ' (3) day confirmation period has ended.'
-          : 'I understand that this account will not be able to perform any transactions until the mandatory' +
+          : 'I understand that this account will not be able to perform any PAD transactions until the mandatory' +
           ' (3) day confirmation period for pre-authorized debit has ended.'
       }),
       padInfoSubtitle: computed((): string => {
         return (state.showPremiumPADInfo)
-          ? `Services will continue to be billed to your other payment method until the mandatory` +
+          ? 'Services will not be billed to PAD until the mandatory' +
           ' (3) day confirmation period has ended.'
-          : 'This account will not be able to perform any transactions until the mandatory' +
+          : 'This account will not be able to perform any PAD transactions until the mandatory' +
           ' (3) day confirmation period has ended.'
       }),
       acknowledgeColor: computed((): string => props.checkErrors && !state.isAcknowledged ? 'error--text' : ''),
