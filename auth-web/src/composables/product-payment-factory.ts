@@ -116,6 +116,7 @@ export const useProductPayment = (props, state) => {
     const { productList } = storeToRefs(useOrgStore())
     const derivedProductList = props.isCreateAccount ? currentSelectedProducts.value : productList.value
       .filter(item => item.subscriptionStatus === ProductStatus.ACTIVE)
+      .filter(item => !item.code.startsWith('MHR_'))
       .map(item => item.code)
     const paymentMethodProducts = {}
     for (const [product, methods] of Object.entries(productPaymentMethods)) {
@@ -135,6 +136,7 @@ export const useProductPayment = (props, state) => {
     }
     // Support all products for EJV by default, might not be supported in practice, but this is similar to PAD.
     paymentMethodSupported[PaymentTypes.EJV] = true
+    debugger
     return paymentMethodSupported
   })
 
