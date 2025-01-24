@@ -37,7 +37,7 @@ from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, MembershipSchema, OrgSchema
-from auth_api.services import flags
+from auth_api.services.flags import flags
 from auth_api.services.user import User as UserService
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
