@@ -11,5 +11,5 @@ export const productDisplay = {
   [Product.RPPR]: 'Restricted Personal Property Registry',
   [Product.RPT]: 'Rural Property Tax',
   [Product.STRR]: 'Short-Term Rental Registry',
-  [Product.VS]: 'Vital Statistics'
+  [Product.VS]: 'Wills Registry'
 }

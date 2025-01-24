@@ -15,7 +15,7 @@ describe('Product.vue', () => {
 
   const productDetails = {
     'code': 'VS',
-    'description': 'Vital Statistics',
+    'description': 'Wills Registry',
     'url': 'url',
     'type': 'PARTNER',
     'subscriptionStatus': ProductStatus.NOT_SUBSCRIBED
