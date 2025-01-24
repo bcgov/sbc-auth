@@ -293,7 +293,6 @@ export default defineComponent({
     }
 
     const routerGuard = router.beforeEach((to, from, next) => {
-      console.log(userStore.hasPaymentMethodChanged, !userStore.accountSettingWarning)
       if (userStore.hasPaymentMethodChanged && !userStore.accountSettingWarning) {
         unsavedChangesDialog.value?.open()
         next(false)

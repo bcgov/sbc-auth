@@ -208,8 +208,7 @@ export default defineComponent({
       fetchOrgProductFeeCodes,
       updateAccountFees,
       needStaffReview,
-      removeOrgProduct,
-      currentOrganization
+      removeOrgProduct
     } = useOrgStore()
 
     const {
@@ -218,7 +217,8 @@ export default defineComponent({
 
     const {
       productList,
-      currentSelectedProducts
+      currentSelectedProducts,
+      currentOrganization // Needs to be here otherwise it won't be reactive.
     } = storeToRefs(useOrgStore())
 
     const paymentMethodRef = ref(null)
@@ -242,7 +242,7 @@ export default defineComponent({
       displayRemoveProductDialog: false,
       addProductOnAccountAdmin: undefined, // true if add product, false if remove product
       isVariableFeeAccount: computed(() => {
-        const accessType:any = currentOrganization.accessType
+        const accessType:any = currentOrganization.value.accessType
         return ([AccessType.GOVM, AccessType.GOVN].includes(accessType)) || false
       }),
       canManageAccounts: computed((): boolean => {
@@ -281,7 +281,7 @@ export default defineComponent({
       productRenderKey: 0,
       isBcolAdmin: currentUser?.roles?.includes(Role.BcolStaffAdmin),
       showEditButton: computed(() => {
-        const accessType:any = currentOrganization.accessType
+        const accessType:any = currentOrganization.value.accessType
         return !state.isEditing && (![AccessType.GOVM].includes(accessType) || state.isBcolAdmin)
       }),
       displaySavePaymentMethodsFirst: false
@@ -289,7 +289,7 @@ export default defineComponent({
 
     const loadProduct = async () => {
       try {
-        await getOrgProducts(currentOrganization.id)
+        await getOrgProducts(currentOrganization.value.id)
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log('Error while loading products ', err)
@@ -303,7 +303,7 @@ export default defineComponent({
       await loadProduct()
       // if staff need to load product fee also
       if (state.canManageAccounts) {
-        state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.id)
+        state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
         state.orgProductFeeCodes = await fetchOrgProductFeeCodes()
       }
       state.isLoading = false
@@ -425,12 +425,12 @@ export default defineComponent({
     }
 
     const saveProductFee = async (accountFees) => {
-      const accountFee = { accoundId: currentOrganization.id, accountFees }
+      const accountFee = { accoundId: currentOrganization.value.id, accountFees }
       state.isProductActionLoading = true
       state.isProductActionCompleted = false
       try {
         await updateAccountFees(accountFee)
-        state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.id)
+        state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log('Error while updating product fee ', err)
@@ -474,6 +474,11 @@ export default defineComponent({
         submitProductRequest()
       }
     }
+
+    // Reload product list when organization changes
+    watch(() => currentOrganization.value.id, async () => {
+      await setup()
+    })
 
     watch(() => state.isEditing, (newValue) => {
       if (!newValue) {
