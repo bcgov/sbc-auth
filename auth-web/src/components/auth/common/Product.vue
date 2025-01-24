@@ -378,9 +378,9 @@ export default defineComponent({
         if (!emitFromTos) { // expand and collapse on click if click is not coming from TOS
           expand()
         }
-        state.productSelected = false
         // wait till user approve TOS or remove product selection from array if tos not accepted
-        forceRemove = true
+        forceRemove = state.productSelected
+        state.productSelected = false
       }
 
       let addorRemoveProduct // false is remove product
