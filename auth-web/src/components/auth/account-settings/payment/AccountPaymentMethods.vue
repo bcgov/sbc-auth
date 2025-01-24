@@ -160,7 +160,7 @@ export default defineComponent({
       isLoading: false,
       padValid: false,
       ejvValid: false,
-      paymentMethodChanged: userStore.hasPaymentMethodChanged,
+      paymentMethodChanged: computed(() => userStore.hasPaymentMethodChanged),
       isFuturePaymentMethodAvailable: false, // set true if in between 3 days cooling period
       isTOSandAcknowledgeCompleted: false, // set true if TOS already accepted
       activeOrgMembers: computed<Member[]>(() => orgStore.activeOrgMembers),
