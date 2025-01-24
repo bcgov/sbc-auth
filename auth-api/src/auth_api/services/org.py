@@ -37,6 +37,7 @@ from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, MembershipSchema, OrgSchema
+from auth_api.services.flags import flags
 from auth_api.services.user import User as UserService
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
@@ -107,6 +108,7 @@ class Org:  # pylint: disable=too-many-public-methods
         mailing_address = org_info.pop("mailingAddress", None)
         payment_info = org_info.pop("paymentInfo", {})
         product_subscriptions = org_info.pop("productSubscriptions", None)
+        type_code = org_info.get("typeCode", None)
 
         bcol_profile_flags = None
         response = Org._validate_and_raise_error(org_info)
@@ -119,7 +121,10 @@ class Org:  # pylint: disable=too-many-public-methods
         access_type = response.get("access_type")
 
         # set premium for GOVM accounts..TODO remove if not needed this logic
-        if access_type == AccessType.GOVM.value:
+        # we are depreciating BASIC accounts
+        if access_type == AccessType.GOVM.value or (
+            type_code == OrgType.BASIC.value and flags.is_on("remove-premium-restrictions", default=False) is True
+        ):
             org_info.update({"typeCode": OrgType.PREMIUM.value})
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
