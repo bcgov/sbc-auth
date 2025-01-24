@@ -488,7 +488,6 @@ export enum LDFlags {
     AllowableBusinessSearchTypes = 'allowable-business-search-types',
     AllowableBusinessPasscodeTypes = 'allowable-business-passcode-types',
     EnableAffiliationDelegation = 'enable-affiliation-delegation',
-    EnableCreditCardPremium = 'enable-credit-card-premium',
     EnableEFTBalanceByPAD = 'enable-eft-balance-by-pad',
     EnableDRSLookup = 'enable-drs-lookup', // Document Record Services
 }
