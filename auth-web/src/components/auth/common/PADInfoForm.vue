@@ -336,4 +336,9 @@ export default defineComponent({
   .error--text ::v-deep .v-icon {
     color: var(--v-error-base) !important;
   }
+  .acknowledge-needed {
+    span {
+      color: $gray7 !important;
+    }
+  }
 </style>

@@ -381,6 +381,7 @@ export const useOrgStore = defineStore('org', () => {
     const address = state.currentOrgAddress
     const paymentMethod = state.currentOrgPaymentType
     const padInfo: PADInfo = state.currentOrgPADInfo
+    const orgType = state.currentOrganizationType
 
     const currentSelectedProducts = state.currentSelectedProducts
     // setting product subscriptions in required format
@@ -389,11 +390,10 @@ export const useOrgStore = defineStore('org', () => {
         productCode: code
       }
     })
-
     const createRequestBody: CreateRequestBody = {
       name: org.name,
       accessType: state.accessType,
-      typeCode: org.orgType,
+      typeCode: orgType,
       productSubscriptions: productsSelected,
       isBusinessAccount: org.isBusinessAccount
     }

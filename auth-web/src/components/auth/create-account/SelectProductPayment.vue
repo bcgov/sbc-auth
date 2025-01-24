@@ -56,6 +56,7 @@
               :currentSelectedPaymentMethod="currentOrgPaymentType"
               :isInitialTOSAccepted="readOnly"
               :isInitialAcknowledged="readOnly"
+              :isAcknowledgeNeeded="true"
               :isCreateAccount="true"
               @payment-method-selected="setSelectedPayment"
               @is-pad-valid="setPADValid"
