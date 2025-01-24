@@ -117,7 +117,7 @@ export const useProductPayment = (props, state) => {
     const derivedProductList = props.isCreateAccount ? currentSelectedProducts.value : productList.value
       .filter(item => item.subscriptionStatus === ProductStatus.ACTIVE)
       // Remove MHR sub products.
-      .filter(item => !item.code.startsWith('MHR_'))
+      .filter(item => !item.parentCode)
       .map(item => item.code)
     const paymentMethodProducts = {}
     for (const [product, methods] of Object.entries(productPaymentMethods)) {
