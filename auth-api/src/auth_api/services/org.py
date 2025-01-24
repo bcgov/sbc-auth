@@ -108,7 +108,7 @@ class Org:  # pylint: disable=too-many-public-methods
         mailing_address = org_info.pop("mailingAddress", None)
         payment_info = org_info.pop("paymentInfo", {})
         product_subscriptions = org_info.pop("productSubscriptions", None)
-        type_code = org_info.pop("typeCode", None)
+        # type_code = org_info.pop("typeCode", None)
 
         bcol_profile_flags = None
         response = Org._validate_and_raise_error(org_info)
