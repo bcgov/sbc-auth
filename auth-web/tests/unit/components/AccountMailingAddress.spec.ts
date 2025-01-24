@@ -2,7 +2,9 @@ import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountMailingAddress from '@/components/auth/account-settings/account-info/AccountMailingAddress.vue'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
-import { useCodesStore } from '@/stores'
+import { useCodesStore, useOrgStore } from '@/stores'
+import { MembershipType } from '@/models/Organization'
+import Vue from 'vue'
 
 const vuetify = new Vuetify({})
 
@@ -22,6 +24,12 @@ describe('AccountMailingAddress.vue', () => {
     codesStore.businessTypeCodes = [
       { code: 'BIZ', default: false, desc: 'GENERAL BUSINESS' }
     ]
+
+    const orgStore = useOrgStore()
+    orgStore.currentMembership = {
+      membershipTypeCode: MembershipType.Admin
+    } as any
+    
 
     wrapperFactory = propsData => {
       return shallowMount(AccountMailingAddress, {
@@ -62,9 +70,26 @@ describe('AccountMailingAddress.vue', () => {
     expect(wrapper.find('[data-test="title"]').text()).toBe('Mailing Address')
   })
 
-  it('Show edit icon when passing props', async () => {
+  it('Show edit icon when passing props non user', async () => {
     expect(wrapper.find('[data-test="btn-edit"]').exists()).toBe(false)
     await wrapper.setProps({ viewOnlyMode: true })
     expect(wrapper.find('[data-test="btn-edit"]').exists()).toBe(true)
+  })
+
+  it('Hide edit icon when passing props and user', async () => {
+    useOrgStore().currentMembership = {
+      membershipTypeCode: MembershipType.User
+    } as any
+    expect(wrapper.find('[data-test="btn-edit"]').exists()).toBe(false)
+    wrapperFactory({ baseAddress: {
+      city: 'Dunnville',
+      country: 'CA',
+      region: 'ON',
+      postalCode: 'N1A 2Y5',
+      street: '111-503 Main St E',
+      streetAdditional: ''
+    },
+    viewOnlyMode: true })
+    expect(wrapper.find('[data-test="btn-edit"]').exists()).toBe(false)
   })
 })
