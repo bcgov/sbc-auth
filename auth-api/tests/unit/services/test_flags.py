@@ -22,7 +22,7 @@ from auth_api.services import Flags
 app = None
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def setup():
     """Initialize app with dev env for testing."""
     global app
@@ -131,6 +131,7 @@ def test_flags_read_from_json_missing_flag(setup):
         ("boolean flag", "bool-flag", True),
         ("string flag", "string-flag", "a string value"),
         ("integer flag", "integer-flag", 10),
+        ("remove premium restrictions flag", "remove-premium-restrictions", False),
     ],
 )
 def test_flags_read_flag_values_from_json(setup, test_name, flag_name, expected):
