@@ -122,9 +122,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         # set premium for GOVM accounts..TODO remove if not needed this logic
         # we are depreciating BASIC accounts
-        if access_type == AccessType.GOVM.value or (
-            flags.is_on("remove-premium-restrictions", default=False) and type_code == OrgType.BASIC.value
-        ):
+        if access_type == AccessType.GOVM.value:
             org_info.update({"typeCode": OrgType.PREMIUM.value})
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
