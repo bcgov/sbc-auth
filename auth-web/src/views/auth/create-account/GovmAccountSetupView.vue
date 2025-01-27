@@ -109,8 +109,7 @@ export default defineComponent({
     async function createAccount () {
       this.isLoading = true
       try {
-        // save or from here
-        const organization: any = await createGovmOrg() // create govm account
+        const organization: any = await createGovmOrg()
         await syncOrganization(organization.id)
         await syncMembership(organization.id)
         // Remove with Vue 3
