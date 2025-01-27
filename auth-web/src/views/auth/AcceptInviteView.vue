@@ -52,7 +52,7 @@ export default defineComponent({
    * User profile[contact] not filled out: -> Redirect him to user profile url
    * Else invitation flow
    */
-   async function accept () {
+    async function accept () {
       try {
       // affidavit need for admin users only if not verified before
         const affidavitNeeded = !!root.$route.query.affidavit && !userStore.userProfile?.verified
@@ -100,7 +100,6 @@ export default defineComponent({
         state.inviteError = true
       }
     }
-    
 
     onMounted(async () => {
       await userStore.getUserProfile('@me')

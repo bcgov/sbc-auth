@@ -132,8 +132,8 @@ export const useOrgStore = defineStore('org', () => {
     state.currentAccountFees = [] as AccountFee[]
     state.currentOrgPaymentDetails = null as OrgPaymentDetails
     state.resetAccountTypeOnSetupAccount = false
-    state.vDisplayModeValue = '',
-    state.originAccessType = undefined as string,
+    state.vDisplayModeValue = ''
+    state.originAccessType = undefined as string
     state.createGovmOrgId = -1
   }
 
