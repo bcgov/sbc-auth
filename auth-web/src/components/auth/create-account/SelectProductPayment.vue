@@ -100,7 +100,7 @@
             @click="saveAccount"
           >
             <span>
-              {{ readOnly ? 'Submit' : 'Create Account' }}
+              {{ finishButtonText }}
               <v-icon class="ml-2">mdi-arrow-right</v-icon>
             </span>
           </v-btn>
@@ -172,7 +172,8 @@ export default defineComponent({
   props: {
     isStepperView: { type: Boolean, default: false },
     readOnly: { type: Boolean, default: false },
-    orgId: { type: Number, default: undefined }
+    orgId: { type: Number, default: undefined },
+    govmAccount: { type: Boolean, default: false }
   },
   emits: ['final-step-action', 'emit-bcol-info'],
   setup (props, { root, emit }) {
@@ -206,7 +207,13 @@ export default defineComponent({
       }),
       isPADValid: false,
       isEJVValid: false,
-      showSelectPaymentMethodTooltip: computed(() => !state.currentSelectedProducts || state.currentSelectedProducts.length === 0)
+      showSelectPaymentMethodTooltip: computed(() => !state.currentSelectedProducts || state.currentSelectedProducts.length === 0),
+      finishButtonText: computed(() => {
+        if (props.govmAccount) {
+          return 'Next'
+        }
+        return props.readOnly ? 'Submit' : 'Create Account'
+      })
     })
 
     async function setup () {
@@ -274,7 +281,11 @@ export default defineComponent({
     }
 
     function createAccount () {
-      emit('final-step-action')
+      if (props.govmAccount) {
+        (props as any).stepForward()
+      } else {
+        emit('final-step-action')
+      }
     }
 
     function setBcolInfo (bcolProfile: BcolProfile) {

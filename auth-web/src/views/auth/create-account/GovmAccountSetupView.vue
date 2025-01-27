@@ -90,7 +90,8 @@ export default defineComponent({
         stepName: 'Products and Payment',
         component: SelectProductPayment,
         componentProps: {
-          isStepperView: true
+          isStepperView: true,
+          govmAccount: true
         }
       },
       {
