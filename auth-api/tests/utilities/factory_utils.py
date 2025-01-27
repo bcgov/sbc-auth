@@ -66,7 +66,7 @@ CONFIG = get_named_config("testing")
 
 def factory_auth_header(jwt, claims):
     """Produce JWT tokens for use in tests."""
-    claims['aud'] = CONFIG.JWT_OIDC_TEST_AUDIENCE
+    claims["aud"] = CONFIG.JWT_OIDC_TEST_AUDIENCE
     return {"Authorization": "Bearer " + jwt.create_jwt(claims=claims, header=JWT_HEADER)}
 
 
