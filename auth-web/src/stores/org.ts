@@ -97,7 +97,8 @@ export const useOrgStore = defineStore('org', () => {
     currentOrgPaymentDetails: null as OrgPaymentDetails,
     resetAccountTypeOnSetupAccount: false, // this flag use to check need to reset accounttype select when moving back and forth in stepper
     vDisplayModeValue: '', // DisplayModeValues.VIEW_ONLY
-    originAccessType: undefined as string
+    originAccessType: undefined as string,
+    createGovmOrgId: -1
   })
 
   function $reset () {
@@ -131,8 +132,9 @@ export const useOrgStore = defineStore('org', () => {
     state.currentAccountFees = [] as AccountFee[]
     state.currentOrgPaymentDetails = null as OrgPaymentDetails
     state.resetAccountTypeOnSetupAccount = false
-    state.vDisplayModeValue = ''
-    state.originAccessType = undefined as string
+    state.vDisplayModeValue = '',
+    state.originAccessType = undefined as string,
+    state.createGovmOrgId = -1
   }
 
   /** Is True if the current account is premium. */
@@ -426,7 +428,7 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   async function createGovmOrg (): Promise<Organization> {
-    const org: Organization = state.currentOrganization
+    const orgId = state.createGovmOrgId
     const address = state.currentOrgAddress
     const revenueAccount: GLInfo = state.currentOrgGLInfo
     const currentSelectedProducts = state.currentSelectedProducts
@@ -451,7 +453,7 @@ export const useOrgStore = defineStore('org', () => {
     }
 
     // need to get org id from state
-    const response = await OrgService.updateOrg(org.id, createRequestBody)
+    const response = await OrgService.updateOrg(orgId, createRequestBody)
     const organization = response?.data
     setCurrentOrganization(organization)
     await addOrgSettings(organization)
