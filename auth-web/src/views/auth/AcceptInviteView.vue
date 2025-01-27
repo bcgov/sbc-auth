@@ -94,7 +94,6 @@ export default defineComponent({
           }
           // Remove Vuex with Vue 3
           root.$store.commit('updateHeader')
-          debugger
           root.$router.push((instance?.proxy as any).getNextPageUrl()) // This for the mixin.
         }
       } catch (exception) {
