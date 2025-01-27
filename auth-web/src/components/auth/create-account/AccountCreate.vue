@@ -152,7 +152,7 @@ export default defineComponent({
     }
 
     async function save () {
-      this.goNext() // Uses mixin, requires this.
+      goNext() // Uses mixin, requires this.
     }
 
     async function validateAccountNameUnique () {
@@ -170,22 +170,22 @@ export default defineComponent({
 
     function cancel () {
       if (this.stepBack) {
-        this.stepBack() // Uses mixin, requires this.
+        (props as any).stepBack() // Uses mixin, requires this.
       } else {
         root.$router.push({ path: '/home' })
       }
     }
 
     function goBack () {
-      this.stepBack() // Uses mixin, requires this.
+      (props as any).stepBack() // Uses mixin, requires this.
     }
 
     async function goNext () {
       const isValidName = props.readOnly ? true : await validateAccountNameUnique()
       if (isValidName) {
-        this.stepForward()
+        (props as any).stepForward()
       } else {
-        this.errorMessage = DUPL_ERROR_MESSAGE
+        state.errorMessage = DUPL_ERROR_MESSAGE
       }
     }
 
