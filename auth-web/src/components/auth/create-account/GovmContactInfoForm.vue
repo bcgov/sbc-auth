@@ -105,7 +105,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
+import { defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { useUserStore } from '@/stores/user'
