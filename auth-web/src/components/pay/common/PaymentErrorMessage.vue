@@ -134,7 +134,6 @@ export default class PaymentErrorMessage extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
   .pay-error{
     .error-btn{
           min-width: 139px !important;
