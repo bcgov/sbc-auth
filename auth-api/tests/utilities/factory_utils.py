@@ -20,6 +20,7 @@ import datetime
 from requests.exceptions import HTTPError
 from sqlalchemy import event
 
+from auth_api.config import get_named_config
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
@@ -60,9 +61,12 @@ from tests.utilities.factory_scenarios import (
 )
 from tests.utilities.sqlalchemy import clear_event_listeners
 
+CONFIG = get_named_config("testing")
+
 
 def factory_auth_header(jwt, claims):
     """Produce JWT tokens for use in tests."""
+    claims["aud"] = CONFIG.JWT_OIDC_TEST_AUDIENCE
     return {"Authorization": "Bearer " + jwt.create_jwt(claims=claims, header=JWT_HEADER)}
 
 
