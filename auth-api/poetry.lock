@@ -387,8 +387,8 @@ Werkzeug = "^3.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
-reference = "dependency_upgrades"
-resolved_reference = "72db1e9e1e806e85be7c7d58da585facb023fd1e"
+reference = "dependency_upgrades_p2"
+resolved_reference = "c4b9d33e0124ac78ea36c9005fa944a291592479"
 subdirectory = "build-deps"
 
 [[package]]
@@ -3474,4 +3474,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "c603341dfed953c3c56608ad19160cd25916cc27eb69d93f60186a9d0b8592e6"
+content-hash = "87d09f9c4b2c86a5ab9b176aff394930c3f413d385dab6bbb12dfdeb1d7377f8"
