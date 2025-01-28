@@ -10,7 +10,7 @@ export const useAccountCreate = () => {
     const isGovNAccount = !!JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.GOVN_USER || 'false'))
     if (isGovNAccount) {
       orgStore.setAccessType(AccessType.GOVN)
-      orgStore.setCurrentOrganization({ ...state.currentOrganization, accessType: AccessType.GOVN })
+      orgStore.setCurrentOrganization({ ...orgStore.currentOrganization, accessType: AccessType.GOVN })
     }
     if (state.selectedPaymentMethod !== PaymentTypes.BCOL) {
       // It's possible this is already set from being linked, so we need to empty it out.
