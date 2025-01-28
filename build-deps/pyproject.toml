@@ -11,18 +11,19 @@ cachetools = "5.5.0"
 certifi = "2024.8.30"
 flask = "3.0.2"
 itsdangerous = "2.1.2"
-jinja2 = "3.1.3"
+jinja2 = "^3.1.5"
 jsonschema = "4.17.3"
 launchdarkly-server-sdk = "9.5.0"
 MarkupSafe = "2.1.1"
 python = "^3.12"
 python-dotenv = "^1.0.1"
 requests = "2.32.3"
-Werkzeug = "3.0.0"
+Werkzeug = "^3.0.0"
 
 sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", rev = "master", subdirectory = "python" }
 gcp-queue = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/gcp-queue", branch = "main" }
 structured-logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging", branch = "main" }
+flask-jwt-oidc = { git = "https://github.com/seeker25/flask-jwt-oidc.git", branch = "main" }
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

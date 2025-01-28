@@ -53,6 +53,9 @@ def send_email(note_book, emailtype, errormessage):
     if not Config.ENVIRONMENT == 'prod':
         ext = ' on ' + Config.ENVIRONMENT
 
+    subject = None
+    filename = None
+    recipients = None
     if emailtype == 'ERROR':
         subject = "Jupyter Notebook Error Notification from sbc-auth for processing '" \
             + note_book + "' on " + date_str + ext
@@ -60,7 +63,6 @@ def send_email(note_book, emailtype, errormessage):
         message.attach(MIMEText('ERROR!!! \n' + errormessage, 'plain'))
     else:
         file_processing = note_book.split('.ipynb')[0]
-
         if file_processing == 'auth':
             subject = 'SBC-AUTH Weekly Stats till ' + datetime.strftime(datetime.now()-timedelta(1), '%Y-%m-%d') + ext
             filename = 'auth_weekly_stats_till_' + datetime.strftime(datetime.now()-timedelta(1), '%Y-%m-%d') + '.csv'
