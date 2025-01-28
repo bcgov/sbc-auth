@@ -34,5 +34,5 @@ pylint
 pylint-flask
 pep8
 autopep8
-certifi==2020.4.5.1
-urllib3==1.21.1
+certifi
+urllib3
