@@ -100,7 +100,7 @@
   "paymentErrorTitle": "Payment Error",
   "paymentErrorSubText": "Looks like we encountered an error. Your payment could not be processed.<br />Please try again or your transaction state will change to \"pending\" and saved as draft.",
   "paymentCancelTitle": "Payment Cancelled",
-  "paymentCancelSubText": "You have cancelled your payment with credit card. Please try again or your <br />transaction state will change to \"pending\" ",
+  "paymentCancelSubText": "Your payment has been cancelled. No charges have been applied to <br />your credit card.",
   "paymentDeclinedTitle": "Payment Declined",
   "paymentDeclinedSubText": "Sorry, your payment has failed. The payment was declined.<br />Please review your payment information and try again.",
   "paymentInvalidErrorTitle": "Payment Error",

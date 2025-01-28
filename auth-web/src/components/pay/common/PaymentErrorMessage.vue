@@ -88,6 +88,8 @@ export default class PaymentErrorMessage extends Vue {
       case paymentErrorType.PAYMENT_CANCELLED:
         errorTitle = this.$t('paymentCancelTitle').toString()
         errorMessage = this.$t('paymentCancelSubText').toString()
+        showOkbtn = true
+        showCancelbtn = false
         break
       case paymentErrorType.DECLINED:
         errorTitle = this.$t('paymentDeclinedTitle').toString()

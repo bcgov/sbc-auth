@@ -131,7 +131,7 @@ def test_flags_read_from_json_missing_flag(setup):
         ("boolean flag", "bool-flag", True),
         ("string flag", "string-flag", "a string value"),
         ("integer flag", "integer-flag", 10),
-        ("remove premium restrictions flag", "remove-premium-restrictions", False),
+        ("convert basic to premium flag", "convert-basic-to-premium", False),
     ],
 )
 def test_flags_read_flag_values_from_json(setup, test_name, flag_name, expected):

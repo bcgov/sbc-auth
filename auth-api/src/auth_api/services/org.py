@@ -121,9 +121,9 @@ class Org:  # pylint: disable=too-many-public-methods
         access_type = response.get("access_type")
 
         # set premium for GOVM accounts..TODO remove if not needed this logic
-        # we are depreciating BASIC accounts
+        # Depreciating BASIC accounts with backwards compatibility
         if access_type == AccessType.GOVM.value or (
-            type_code == OrgType.BASIC.value and flags.is_on("remove-premium-restrictions", default=False) is True
+            type_code == OrgType.BASIC.value and flags.is_on("convert-basic-to-premium", default=False) is True
         ):
             org_info.update({"typeCode": OrgType.PREMIUM.value})
 
