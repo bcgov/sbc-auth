@@ -262,7 +262,7 @@ develop = false
 [package.dependencies]
 aiohttp = "^3.10.2"
 bcrypt = "^4.2.0"
-build-deps = {git = "https://github.com/bcgov/sbc-auth.git", rev = "dependency_upgrades", subdirectory = "build-deps"}
+build-deps = {git = "https://github.com/bcgov/sbc-auth.git", rev = "dependency_upgrades_p2", subdirectory = "build-deps"}
 cachelib = "^0.13.0"
 cattrs = "^23.2.3"
 flask-caching = {git = "https://github.com/pallets-eco/flask-caching.git", branch = "master"}
@@ -287,8 +287,8 @@ sqlalchemy-utils = "^0.41.2"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
-reference = "dependency_upgrades"
-resolved_reference = "a202363e5dd2e3b4770b1666ce43960eb02f8e4d"
+reference = "dependency_upgrades_p2"
+resolved_reference = "b6e525630b83878263c1486aa54dfb1f231bc01e"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3316,4 +3316,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "e3c22e85ebd3bff2d9de4d7bb7089cf97951d8fb4cbcea241ce614f15958d5bd"
+content-hash = "bff1167417fd5efe916a2b51d0192567faf2bcdd3d23a9609cbc263437c63bf8"
