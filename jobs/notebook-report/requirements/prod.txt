@@ -5,7 +5,6 @@ ipython-sql
 simplejson
 pandas
 matplotlib
-spacy
 papermill
 schedule
 attrs==19.2.0
