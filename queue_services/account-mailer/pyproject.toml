@@ -40,7 +40,6 @@ zipp = "3.19.1"
 # VCS dependencies
 auth-api = { git = "https://github.com/bcgov/sbc-auth.git", rev = "dependency_upgrades", subdirectory = "auth-api" }
 simple-cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py.git" }
-build-deps = { git = "https://github.com/bcgov/sbc-auth.git", rev = "dependency_upgrades", subdirectory = "build-deps" }
 cloud-sql-python-connector = "^1.13.0"
 
 [tool.poetry.group.dev.dependencies]
