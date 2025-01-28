@@ -258,7 +258,7 @@ export default defineComponent({
   },
   emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save'],
   setup (props, { emit, root }) {
-    const { fetchCurrentOrganizationGLInfo, getStatementsSummary, currentOrgPADInfo } = useOrgStore()
+    const { fetchCurrentOrganizationGLInfo, getStatementsSummary } = useOrgStore()
     const { setAccountSettingWarning } = useUserStore()
     const warningDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
 
@@ -282,7 +282,8 @@ export default defineComponent({
         props.currentOrgPaymentType !== undefined &&
         props.currentOrgPaymentType !== PaymentTypes.BCOL
       ),
-      glInfo: computed(() => orgStore.currentOrgGLInfo)
+      glInfo: computed(() => orgStore.currentOrgGLInfo),
+      currentOrgPADInfo: computed(() => orgStore.currentOrgPADInfo)
     })
 
     const openBCOnlineDialog = () => {
@@ -445,7 +446,6 @@ export default defineComponent({
       continueModal,
       isGLInfoValid,
       isChangePaymentEnabled,
-      currentOrgPADInfo,
       filteredPaymentMethods
     }
   }
