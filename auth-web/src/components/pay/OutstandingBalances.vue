@@ -238,7 +238,7 @@ export default defineComponent({
       handlingPayment: false,
       statementOwingError: false,
       selectedPaymentMethod: 'cc',
-      statementsSummary: computed(() => orgStore.statementsSummary),
+      statementsSummary: computed(() => orgStore.statementsSummary)
     })
     const { downloadStatement } = useDownloader(orgStore, state)
 

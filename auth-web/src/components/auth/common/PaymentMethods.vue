@@ -332,18 +332,17 @@ export default defineComponent({
         return
       }
       const hasOutstandingBalance = await hasEFTBalanceOwing()
-        if (hasOutstandingBalance) {
-          await root.$router.push({
-            name: Pages.PAY_OUTSTANDING_BALANCE,
-            params: { orgId: props.currentOrganization.id }
-          })
-        }
+      if (hasOutstandingBalance) {
+        await root.$router.push({
+          name: Pages.PAY_OUTSTANDING_BALANCE,
+          params: { orgId: props.currentOrganization.id }
+        })
+      }
     }
     const paymentMethodSelected = async (payment, isTouch = true) => {
       if (payment.type == PaymentTypes.BCOL && isTouch && state.selectedPaymentMethod !== PaymentTypes.BCOL) {
         openBCOnlineDialog()
-      }
-      else if (payment.type !== PaymentTypes.EFT) {
+      } else if (payment.type !== PaymentTypes.EFT) {
         await dealWithEFTOutstandingBalance(payment)
       }
       state.selectedPaymentMethod = payment.type
@@ -384,11 +383,11 @@ export default defineComponent({
 
     const continueModal = async () => {
       const hasOutstandingEFTBalance = await hasEFTBalanceOwing()
-        if (!hasOutstandingEFTBalance) {
-          warningDialog.value.close()
-        } else {
-          await dealWithEFTOutstandingBalance()
-        }
+      if (!hasOutstandingEFTBalance) {
+        warningDialog.value.close()
+      } else {
+        await dealWithEFTOutstandingBalance()
+      }
     }
 
     // Purpose: reset the payment method without having to reload the component.

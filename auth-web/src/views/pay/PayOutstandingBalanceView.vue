@@ -29,7 +29,7 @@ export default defineComponent({
   components: {
     Stepper,
     // eslint-disable-next-line vue/no-unused-components
-    OutstandingBalances,
+    OutstandingBalances
   },
   props: {
     orgId: {
