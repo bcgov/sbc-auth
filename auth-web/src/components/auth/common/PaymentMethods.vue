@@ -317,13 +317,13 @@ export default defineComponent({
       }
     }
 
-    const enableEFTPaymentMethod = () => {
+    const canChangeFromEFT = () => {
       const enableEFTPayment: boolean = LaunchDarklyService.getFlag(LDFlags.EnablePaymentChangeFromEFT, false)
       return enableEFTPayment
     }
 
     const isChangePaymentEnabled = () => {
-      return props.currentOrgPaymentType !== PaymentTypes.EFT || enableEFTPaymentMethod()
+      return props.currentOrgPaymentType !== PaymentTypes.EFT || canChangeFromEFT()
     }
 
     const dealWithEFTOutstandingBalance = async (paymentType = null) => {
