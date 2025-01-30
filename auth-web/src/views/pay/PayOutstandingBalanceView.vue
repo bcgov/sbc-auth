@@ -17,9 +17,9 @@
 </template>
 
 <script lang="ts">
-import { LDFlags, PaymentTypes } from '@/util/constants'
 import { PropType, computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
+import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OutstandingBalances from '@/components/pay/OutstandingBalances.vue'
 import { useOrgStore } from '@/stores'

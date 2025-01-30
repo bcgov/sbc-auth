@@ -326,7 +326,7 @@ export default defineComponent({
       return props.currentOrgPaymentType !== PaymentTypes.EFT || canChangeFromEFT()
     }
 
-    const dealWithEFTOutstandingBalance = async (paymentType = null) => {
+    const dealWithEFTOutstandingBalance = async () => {
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
       if (!isFromEFT) {
         return
@@ -340,10 +340,10 @@ export default defineComponent({
       }
     }
     const paymentMethodSelected = async (payment, isTouch = true) => {
-      if (payment.type == PaymentTypes.BCOL && isTouch && state.selectedPaymentMethod !== PaymentTypes.BCOL) {
+      if (payment.type === PaymentTypes.BCOL && isTouch && state.selectedPaymentMethod !== PaymentTypes.BCOL) {
         openBCOnlineDialog()
       } else if (payment.type !== PaymentTypes.EFT) {
-        await dealWithEFTOutstandingBalance(payment)
+        await dealWithEFTOutstandingBalance()
       }
       state.selectedPaymentMethod = payment.type
       state.isTouched = isTouch
