@@ -75,20 +75,7 @@ export default defineComponent({
         componentProps: {
           orgId: props.orgId,
           changePaymentType: props.changePaymentType,
-          statementSummary: statementSummary,
           stepForward: handleStepForward,
-          enableEFTBalanceByPADFeature: enableEFTBalanceByPADFeature.value
-        }
-      },
-      {
-        title: 'Payment Method Detail',
-        stepName: 'Payment Method Detail',
-        component: CompletePaymentDetails,
-        componentProps: {
-          orgId: props.orgId,
-          paymentId: props.paymentId,
-          changePaymentType: props.changePaymentType,
-          stepJumpTo: handleStepJumpTo,
           enableEFTBalanceByPADFeature: enableEFTBalanceByPADFeature.value
         }
       }
