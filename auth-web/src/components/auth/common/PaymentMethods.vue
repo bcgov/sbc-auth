@@ -270,7 +270,7 @@ export default defineComponent({
 
     const orgStore = useOrgStore()
     const state = reactive({
-      bcOnlineWarningMessage: 'This payment method will soon be retired.',
+      bcOnlineWarningMessage: 'This payment method will soon be retired.  It is recommended to select a different payment method.',
       dialogTitle: '',
       dialogText: '',
       selectedPaymentMethod: '',
@@ -292,12 +292,6 @@ export default defineComponent({
       warningDialog.value.open()
     }
 
-    const openEFTWarningDialog = () => {
-      state.dialogTitle = 'Confirm Payment Method Change'
-      state.dialogText = `Are you sure you want to change your payment method to Electronic Funds Transfer?
-                This action cannot be undone, and you will not be able to select a different payment method later.`
-      warningDialog.value.open()
-    }
     const paymentTypes = PaymentTypes
 
     // set on change of input only for single allowed payments
@@ -311,7 +305,7 @@ export default defineComponent({
 
     const { downloadEFTInstructions } = useDownloader(orgStore, state)
 
-    const hasBalanceOwing = async () => {
+    const hasEFTBalanceOwing = async () => {
       if (!props.currentOrganization.id) {
         return null
       }
@@ -332,23 +326,26 @@ export default defineComponent({
       return props.currentOrgPaymentType !== PaymentTypes.EFT || enableEFTPaymentMethod()
     }
 
-    const paymentMethodSelected = async (payment, isTouch = true) => {
+    const dealWithEFTOutstandingBalance = async (paymentType = null) => {
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
-      if (payment.type === PaymentTypes.EFT && isTouch && state.selectedPaymentMethod !== PaymentTypes.EFT && !enableEFTPaymentMethod()) {
-        openEFTWarningDialog()
-      } else if (payment.type === PaymentTypes.PAD && isFromEFT) {
-        const hasOutstandingBalance = await hasBalanceOwing()
+      if (!isFromEFT) {
+        return
+      }
+      const hasOutstandingBalance = await hasEFTBalanceOwing()
         if (hasOutstandingBalance) {
           await root.$router.push({
             name: Pages.PAY_OUTSTANDING_BALANCE,
             params: { orgId: props.currentOrganization.id },
-            query: { changePaymentType: payment.type }
+            query: { changePaymentType: paymentType || props.currentSelectedPaymentMethod }
           })
         }
-      } else if (payment.type === PaymentTypes.BCOL && isTouch && state.selectedPaymentMethod !== PaymentTypes.BCOL) {
+    }
+    const paymentMethodSelected = async (payment, isTouch = true) => {
+      if (payment.type == PaymentTypes.BCOL && isTouch && state.selectedPaymentMethod !== PaymentTypes.BCOL) {
         openBCOnlineDialog()
-      } else {
-        state.bcOnlineWarningMessage = 'This payment method will soon be retired.'
+      }
+      else if (payment.type !== PaymentTypes.EFT) {
+        await dealWithEFTOutstandingBalance(payment)
       }
       state.selectedPaymentMethod = payment.type
       state.isTouched = isTouch
@@ -387,25 +384,12 @@ export default defineComponent({
     }
 
     const continueModal = async () => {
-      const hasOutstandingBalance = await hasBalanceOwing()
-      const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
-      const isEFTSelected = state.selectedPaymentMethod === PaymentTypes.EFT
-
-      if (isEFTSelected) {
-        warningDialog.value.close()
-        emit('save')
-      } else {
-        if (!hasOutstandingBalance) {
+      const hasOutstandingEFTBalance = await hasEFTBalanceOwing()
+        if (!hasOutstandingEFTBalance) {
           warningDialog.value.close()
-        } else if (isFromEFT) {
-          await root.$router.push({
-            name: Pages.PAY_OUTSTANDING_BALANCE,
-            params: { orgId: props.currentOrganization.id },
-            query: { changePaymentType: props.currentSelectedPaymentMethod }
-          })
+        } else {
+          await dealWithEFTOutstandingBalance()
         }
-        state.bcOnlineWarningMessage = 'This payment method will soon be retired. It is recommended to select a different payment method.'
-      }
     }
 
     // Purpose: reset the payment method without having to reload the component.
