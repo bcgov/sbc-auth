@@ -218,7 +218,7 @@ export default defineComponent({
   components: { CautionBox },
   props: {
     orgId: {
-      type: Number as PropType<number>,
+      type: String as PropType<string>,
       default: ''
     },
     changePaymentType: {

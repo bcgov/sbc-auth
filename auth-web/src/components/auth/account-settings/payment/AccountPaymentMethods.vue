@@ -255,7 +255,7 @@ export default defineComponent({
         ((currentOrganization.value?.orgType === Account.PREMIUM) &&
           !currentOrganization.value?.bcolAccountId && currentOrganization.value?.accessType !== AccessType.GOVM)
           ? Account.PREMIUM : currentOrganization.value.orgType
-        const orgPayments: OrgPaymentDetails = await orgStore.getOrgPayments()
+        const orgPayments: OrgPaymentDetails = orgStore.currentOrgPaymentDetails
         // setting flag for futurePaymentMethod and TOS to show content and TOS checkbox
         state.isFuturePaymentMethodAvailable = !!orgPayments.futurePaymentMethod || false
         state.isTOSandAcknowledgeCompleted = orgPayments.padTosAcceptedBy !== null || false
@@ -443,6 +443,7 @@ export default defineComponent({
           await initialize()
         }
       )
+      debugger
       await initialize()
     })
 
