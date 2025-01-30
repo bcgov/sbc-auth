@@ -218,16 +218,12 @@ export default defineComponent({
   components: { CautionBox },
   props: {
     orgId: {
-      type: String as PropType<string>,
+      type: Number as PropType<number>,
       default: ''
     },
     changePaymentType: {
       type: String as PropType<string>,
       default: ''
-    },
-    statementSummary: {
-      type: Object,
-      default: () => ({})
     },
     stepForward: {
       type: Function as PropType<() => void>,
@@ -238,7 +234,6 @@ export default defineComponent({
   },
   emits: ['step-forward'],
   setup (props, { root }) {
-    const { statementSummary } = toRefs(props)
     const orgStore = useOrgStore()
     const state = reactive({
       statementsOwing: [],
@@ -246,7 +241,8 @@ export default defineComponent({
       loading: false,
       handlingPayment: false,
       statementOwingError: false,
-      selectedPaymentMethod: 'cc'
+      selectedPaymentMethod: 'cc',
+      statementsSummary: computed(() => orgStore.statementsSummary),
     })
     const { downloadStatement } = useDownloader(orgStore, state)
 
@@ -291,8 +287,8 @@ export default defineComponent({
       state.loading = true
       state.statementOwingError = false
       try {
-        await getStatementsOwing()
-        state.invoicesOwing = statementSummary.value.totalInvoiceDue
+        await Promise.all([getStatementsOwing(), orgStore.getStatementsSummary()])
+        state.invoicesOwing = state.statementsSummary.totalInvoiceDue
       } catch (error) {
         state.statementOwingError = true
         console.error('Error fetching statements owing.', error)
