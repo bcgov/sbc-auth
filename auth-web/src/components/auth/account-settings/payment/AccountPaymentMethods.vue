@@ -27,16 +27,7 @@
     >
       <v-btn
         large
-        depressed
-        data-test="cancel-button"
-        class="cancel-button"
-        @click="cancel"
-      >
-        Cancel
-      </v-btn>
-      <v-btn
-        large
-        class="save-btn ml-2"
+        class="save-btn"
         :class="{ 'disabled': isBtnSaved }"
         :color="isBtnSaved ? 'success' : 'primary'"
         :disabled="isDisableSaveBtn"
@@ -49,6 +40,15 @@
           </v-icon>
         </v-expand-x-transition>
         <span class="save-btn__label">{{ (isBtnSaved) ? 'Saved' : 'Save' }}</span>
+      </v-btn>
+      <v-btn
+        large
+        depressed
+        data-test="cancel-button"
+        class="cancel-button ml-2"
+        @click="cancel"
+      >
+        Cancel
       </v-btn>
     </div>
     <!-- Alert Dialog (Error) -->
