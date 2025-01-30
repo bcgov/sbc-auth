@@ -443,7 +443,6 @@ export default defineComponent({
           await initialize()
         }
       )
-      debugger
       await initialize()
     })
 
