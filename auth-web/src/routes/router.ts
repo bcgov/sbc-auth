@@ -584,8 +584,7 @@ export function getRoutes (): RouteConfig[] {
       component: PayOutstandingBalanceView,
       props: (route) => (
         { orgId: route.params.orgId.toString(),
-          paymentId: route.query.paymentId,
-          changePaymentType: route.query.changePaymentType
+          paymentId: route.query.paymentId
         }),
       meta: { requiresAuth: true, requiresProfile: true }
     },

@@ -335,8 +335,7 @@ export default defineComponent({
         if (hasOutstandingBalance) {
           await root.$router.push({
             name: Pages.PAY_OUTSTANDING_BALANCE,
-            params: { orgId: props.currentOrganization.id },
-            query: { changePaymentType: paymentType?.type || props.currentSelectedPaymentMethod }
+            params: { orgId: props.currentOrganization.id }
           })
         }
     }

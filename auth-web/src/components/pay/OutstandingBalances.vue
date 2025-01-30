@@ -221,10 +221,6 @@ export default defineComponent({
       type: String as PropType<string>,
       default: ''
     },
-    changePaymentType: {
-      type: String as PropType<string>,
-      default: ''
-    },
     stepForward: {
       type: Function as PropType<() => void>,
       required: false,
@@ -250,7 +246,7 @@ export default defineComponent({
       state.handlingPayment = true
       const payment: Payment = await orgStore.createOutstandingAccountPayment(true)
       const baseUrl = ConfigHelper.getAuthContextPath()
-      const queryParams = `?paymentId=${payment?.id}&changePaymentType=${props.changePaymentType}`
+      const queryParams = `?paymentId=${payment?.id}`
       const returnUrl = `${baseUrl}/${Pages.MAIN}/${props.orgId}/${Pages.PAY_OUTSTANDING_BALANCE}${queryParams}`
       const encodedUrl = encodeURIComponent(returnUrl)
 
@@ -264,11 +260,7 @@ export default defineComponent({
     }
 
     function goNext () {
-      if (state.selectedPaymentMethod === 'pad') {
-        props.stepForward()
-      } else {
-        handlePayment()
-      }
+      handlePayment()
     }
 
     async function getStatementsOwing () {
@@ -289,6 +281,9 @@ export default defineComponent({
       try {
         await Promise.all([getStatementsOwing(), orgStore.getStatementsSummary()])
         state.invoicesOwing = state.statementsSummary.totalInvoiceDue
+        if (state.invoicesOwing === 0) {
+          goBack()
+        }
       } catch (error) {
         state.statementOwingError = true
         console.error('Error fetching statements owing.', error)
