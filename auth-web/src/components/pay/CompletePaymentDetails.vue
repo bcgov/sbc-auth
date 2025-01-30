@@ -188,7 +188,7 @@ export default defineComponent({
 
     function goToPaymentOptions () {
       root.$router?.push({
-        name: Pages.PAYMENT_OPTION
+        name: Pages.PRODUCT_SETTINGS
       })
     }
 

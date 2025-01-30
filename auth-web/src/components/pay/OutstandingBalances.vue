@@ -264,7 +264,7 @@ export default defineComponent({
     }
 
     function goBack () {
-      this.$router.push(`${Pages.ACCOUNT_SETTINGS}/${Pages.PAYMENT_OPTION}`)
+      this.$router.push(`${Pages.ACCOUNT_SETTINGS}/${Pages.PRODUCT_SETTINGS}`)
     }
 
     function goNext () {
