@@ -93,14 +93,14 @@
           class="font-weight-bold"
           @click="exitWithoutSaving"
         >
-          Leave Without Saving
+          Cancel Without Saving
         </v-btn>
         <v-btn
           large
           class="font-weight-bold"
           @click="closeUnsavedChangesDialog"
         >
-          Stay on Page
+          Return to Page
         </v-btn>
       </template>
     </ModalDialog>
@@ -160,6 +160,7 @@ export default defineComponent({
       isLoading: false,
       padValid: false,
       ejvValid: false,
+      pendingRoute: null,
       paymentMethodChanged: computed(() => userStore.hasPaymentMethodChanged),
       isFuturePaymentMethodAvailable: false, // set true if in between 3 days cooling period
       isTOSandAcknowledgeCompleted: false, // set true if TOS already accepted
@@ -294,6 +295,7 @@ export default defineComponent({
 
     const routerGuard = router.beforeEach((to, from, next) => {
       if (userStore.hasPaymentMethodChanged && !userStore.accountSettingWarning) {
+        state.pendingRoute = to
         unsavedChangesDialog.value?.open()
         next(false)
       } else {
@@ -315,6 +317,12 @@ export default defineComponent({
       unsavedChangesDialog.value?.close()
       await initialize()
       emit('disable-editing')
+
+      if (state.pendingRoute) {
+        const targetRoute = state.pendingRoute
+        state.pendingRoute = null
+        router.push(targetRoute.fullPath)
+      }
     }
 
     function closeUnsavedChangesDialog () {
