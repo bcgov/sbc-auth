@@ -31,7 +31,6 @@
 import { LDFlags, PaymentTypes } from '@/util/constants'
 import { PropType, computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import CompletePaymentDetails from '@/components/pay/CompletePaymentDetails.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OutstandingBalances from '@/components/pay/OutstandingBalances.vue'
 import { useOrgStore } from '@/stores'
@@ -42,8 +41,6 @@ export default defineComponent({
     Stepper,
     // eslint-disable-next-line vue/no-unused-components
     OutstandingBalances,
-    // eslint-disable-next-line vue/no-unused-components
-    CompletePaymentDetails
   },
   props: {
     orgId: {
