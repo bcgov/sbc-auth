@@ -18,60 +18,60 @@ from enum import Enum
 class SubjectType(Enum):
     """Event Types."""
 
-    NSF_LOCK_ACCOUNT_SUBJECT = '[BC Registries and Online Services] Your account has been suspended'
+    NSF_LOCK_ACCOUNT_SUBJECT = '[Service BC Connect] Your account has been suspended'
     NSF_UNLOCK_ACCOUNT_SUBJECT = 'Your Account Was Successfully Restored'
-    ACCOUNT_CONF_OVER_SUBJECT = '[BC Registries and Online Services] Your account is now active'
-    PAD_INVOICE_CREATED = '[BC Registries and Online Services] Your PAD Transaction Details'
-    ADMIN_REMOVED_SUBJECT = '[BC Registries and Online Services] You have been removed as an administrator'
-    TEAM_MODIFIED_SUBJECT = '[BC Registries and Online Services] Change in Team members'
-    ONLINE_BANKING_PAYMENT_SUBJECT = '[BC Registries and Online Services] Online Banking payment has been received'
-    PAD_SETUP_FAILED = '[BC Registries and Online Services] Your Account is Temporarily Suspended'
-    PAYMENT_PENDING = '[BC Registries and Online Services] Payment is now due for pending transaction on your account'
+    ACCOUNT_CONF_OVER_SUBJECT = '[Service BC Connect] Your account is now active'
+    PAD_INVOICE_CREATED = '[Service BC Connect] Your PAD Transaction Details'
+    ADMIN_REMOVED_SUBJECT = '[Service BC Connect] You have been removed as an administrator'
+    TEAM_MODIFIED_SUBJECT = '[Service BC Connect] Change in Team members'
+    ONLINE_BANKING_PAYMENT_SUBJECT = '[Service BC Connect] Online Banking payment has been received'
+    PAD_SETUP_FAILED = '[Service BC Connect] Your Account is Temporarily Suspended'
+    PAYMENT_PENDING = '[Service BC Connect] Payment is now due for pending transaction on your account'
     EJV_FAILED = 'GL disbursement failure for EJV'
-    RESET_PASSCODE = 'BC Registries Account Passcode Reset'
-    ADMIN_NOTIFICATION = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
+    RESET_PASSCODE = 'Service BC Connect Account Passcode Reset'
+    ADMIN_NOTIFICATION = '[Service BC Connect] {user_first_name} {user_last_name} ' \
                          'has responded for the invitation to join the account {account_name}'
-    AFFILIATION_INVITATION = '[BC Registries and Online Services] Authorise Access to Manage Your Business'
-    BUSINESS_INVITATION = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
+    AFFILIATION_INVITATION = '[Service BC Connect] Authorise Access to Manage Your Business'
+    BUSINESS_INVITATION = '[Service BC Connect] {user_first_name} {user_last_name} ' \
                           'has invited you to join an account'
-    BUSINESS_INVITATION_FOR_BCEID = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
+    BUSINESS_INVITATION_FOR_BCEID = '[Service BC Connect] {user_first_name} {user_last_name} ' \
                                     'has invited you to join an account'
-    DIRSEARCH_BUSINESS_INVITATION = 'Your BC Registries Account has been created'
-    GOVM_BUSINESS_INVITATION = '[BC Registries and Online Services] ' \
-                               'You’ve been invited to create a BC Registries account'
-    GOVM_MEMBER_INVITATION = '[BC Registries and Online Services] You have been added as a team member'
-    MEMBERSHIP_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Welcome to the account {account_name}'
-    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = '[BC Registries and Online Services] Welcome to the account ' \
+    DIRSEARCH_BUSINESS_INVITATION = 'Your Service BC Connect Account has been created'
+    GOVM_BUSINESS_INVITATION = '[Service BC Connect] ' \
+                               'You’ve been invited to create a Service BC Connect account'
+    GOVM_MEMBER_INVITATION = '[Service BC Connect] You have been added as a team member'
+    MEMBERSHIP_APPROVED_NOTIFICATION = '[Service BC Connect] Welcome to the account {account_name}'
+    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = '[Service BC Connect] Welcome to the account ' \
                                                  '{account_name}'
-    NON_BCSC_ORG_APPROVED_NOTIFICATION = '[BC Registries and Online Services] APPROVED Business Registry Account'
-    NON_BCSC_ORG_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
+    NON_BCSC_ORG_APPROVED_NOTIFICATION = '[Service BC Connect] APPROVED Business Registry Account'
+    NON_BCSC_ORG_REJECTED_NOTIFICATION = '[Service BC Connect] YOUR ACTION REQUIRED: ' \
                                          'Business Registry Account cannot be approved'
-    OTP_AUTHENTICATOR_RESET_NOTIFICATION = '[BC Registries and Online Services] Authenticator Has Been Reset'
-    ROLE_CHANGED_NOTIFICATION = '[BC Registries and Online Services] Your Role Has Been Changed'
-    STAFF_REVIEW_ACCOUNT = '[BC Registries and Online Services] An out of province account needs to be approved.'
-    GOVM_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your BC Registries Account Has Been Approved'
-    GOVM_REJECTED_NOTIFICATION = '[BC Registries and Online Services] Your BC Registries Account {account_name} ' \
+    OTP_AUTHENTICATOR_RESET_NOTIFICATION = '[Service BC Connect] Authenticator Has Been Reset'
+    ROLE_CHANGED_NOTIFICATION = '[Service BC Connect] Your Role Has Been Changed'
+    STAFF_REVIEW_ACCOUNT = '[Service BC Connect] An out of province account needs to be approved.'
+    GOVM_APPROVED_NOTIFICATION = '[Service BC Connect] Your Service BC Connect Account Has Been Approved'
+    GOVM_REJECTED_NOTIFICATION = '[Service BC Connect] Your Service BC Connect Account {account_name} ' \
                                  'Has Been Rejected'
-    PROD_PACKAGE_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your Product Request ' \
+    PROD_PACKAGE_APPROVED_NOTIFICATION = '[Service BC Connect] Your Product Request ' \
                                          '{product_name} Has Been Approved'
-    PROD_PACKAGE_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
+    PROD_PACKAGE_REJECTED_NOTIFICATION = '[Service BC Connect] YOUR ACTION REQUIRED: ' \
                                          'Your Product Request {product_name} Has Been Rejected'
-    PRODUCT_APPROVED_NOTIFICATION_DETAILED = '[BC Registries and Online Services] Your {subject_descriptor} ' \
+    PRODUCT_APPROVED_NOTIFICATION_DETAILED = '[Service BC Connect] Your {subject_descriptor} ' \
                                              'Access Has Been Approved'
-    PRODUCT_REJECTED_NOTIFICATION_DETAILED = '[BC Registries and Online Services] Your {subject_descriptor} ' \
+    PRODUCT_REJECTED_NOTIFICATION_DETAILED = '[Service BC Connect] Your {subject_descriptor} ' \
                                              'Access Has Been Rejected'
-    PRODUCT_CONFIRMATION_NOTIFICATION = '[BC Registries and Online Services] {subject_descriptor} ' \
+    PRODUCT_CONFIRMATION_NOTIFICATION = '[Service BC Connect] {subject_descriptor} ' \
                                         'Application Confirmation'
-    RESUBMIT_BCEID_ORG_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
+    RESUBMIT_BCEID_ORG_NOTIFICATION = '[Service BC Connect] YOUR ACTION REQUIRED: ' \
                                       'Update your information.'
-    RESUBMIT_BCEID_ADMIN_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
+    RESUBMIT_BCEID_ADMIN_NOTIFICATION = '[Service BC Connect] YOUR ACTION REQUIRED: ' \
                                         'Update your information.'
-    AFFILIATION_INVITATION_REQUEST = '[BC Registries and Online Services] Request to manage {business_name}'
-    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = '[BC Registries and Online Services] ' \
+    AFFILIATION_INVITATION_REQUEST = '[Service BC Connect] Request to manage {business_name}'
+    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = '[Service BC Connect] ' \
                                                    'Request to manage {business_name}'
-    STATEMENT_NOTIFICATION = 'Your BC Registries statement is available'
-    PAYMENT_REMINDER_NOTIFICATION = 'Your BC Registries payment reminder'
-    PAYMENT_DUE_NOTIFICATION = 'Your BC Registries payment is due'
+    STATEMENT_NOTIFICATION = 'Your Service BC Connect statement is available'
+    PAYMENT_REMINDER_NOTIFICATION = 'Your Service BC Connect payment reminder'
+    PAYMENT_DUE_NOTIFICATION = 'Your Service BC Connect payment is due'
     EFT_AVAILABLE_NOTIFICATION = 'New Payment Method Available'
 
 
@@ -91,8 +91,8 @@ class TitleType(Enum):
     OTP_AUTHENTICATOR_RESET_NOTIFICATION = 'Your Authenticator Has Been Reset'
     ROLE_CHANGED_NOTIFICATION = 'Your Role Has Been Changed'
     STAFF_REVIEW_ACCOUNT = 'Notification from Business Registry'
-    GOVM_APPROVED_NOTIFICATION = 'Your BC Registries Account Has Been Approved'
-    GOVM_REJECTED_NOTIFICATION = 'Your BC Registries Account Has Been Rejected'
+    GOVM_APPROVED_NOTIFICATION = 'Your Service BC Connect Account Has Been Approved'
+    GOVM_REJECTED_NOTIFICATION = 'Your Service BC Connect Account Has Been Rejected'
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'Your Product Request Has Been Approved'
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'Your Product Request Has Been Rejected'
     PRODUCT_APPROVED_NOTIFICATION_DETAILED = 'Your Product Request Has Been Approved'
@@ -155,7 +155,7 @@ class TemplateType(Enum):
 class Constants(Enum):
     """Constants."""
 
-    RESET_PASSCODE_HEADER = 'BC Registries have generated a new passcode for your business.'
+    RESET_PASSCODE_HEADER = 'Service BC Connect have generated a new passcode for your business.'
 
 
 class AttachmentTypes(Enum):

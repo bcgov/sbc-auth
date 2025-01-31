@@ -62,12 +62,12 @@
             :redirect-url="learnMoreUrl"
           />
           <div class="d-flex mt-8">
-            <span class="body-1">New to BC Registries?</span>
+            <span class="body-1">New to Service BC Connect?</span>
             <router-link
               class="ml-2 body-1 font-weight-bold"
               to="/choose-authentication-method"
             >
-              Create a BC Registries Account
+              Create a Service BC Connect Account
             </router-link>
           </div>
           <p
@@ -102,7 +102,7 @@
                   <v-list-item>
                     <v-list-item-content>
                       <v-list-item-subtitle>
-                        If you have not received your Access Letter from BC Registries,<br>
+                        If you have not received your Access Letter from Service BC Connect,<br>
                         or have lost your Passcode, please contact us at:
                       </v-list-item-subtitle>
                     </v-list-item-content>
@@ -213,7 +213,7 @@ export default class MaintainBusinessView extends Vue {
   readonly bulletPointsIA: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your ' +
       'business up to date with the Registry.' },
-    { text: 'You can manage your business information using your BC Registries account:',
+    { text: 'You can manage your business information using your Service BC Connect account:',
       subText: [
         { text: 'See which Annual Reports are due for your corporation and file each year.' },
         { text: 'View and change your current directors or owners and addresses.' },

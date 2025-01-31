@@ -2,7 +2,7 @@
 name = "auth-api"
 version = "3.0.6"
 description = ""
-authors = ["\"BC Registries and Online Services\""]
+authors = ["\"Service BC Connect\""]
 readme = "README.md"
 
 [tool.poetry.dependencies]

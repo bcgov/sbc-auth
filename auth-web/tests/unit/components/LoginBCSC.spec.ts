@@ -39,7 +39,7 @@ describe('LoginBCSC.vue', () => {
   })
 
   it('it renders correctly with default slot', () => {
-    expect(wrapper.find('.v-card__title').text()).toBe('Create a BC Registries Account')
+    expect(wrapper.find('.v-card__title').text()).toBe('Create a Service BC Connect Account')
     expect(wrapper.find('.font-weight-bold').text()).toBe('Log in')
   })
 

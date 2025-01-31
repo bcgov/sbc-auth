@@ -2,7 +2,7 @@
 name = "build-deps"
 version = "1.0.0"
 description = "common dependencies for all auth tools"
-authors = ["BC Registries and Online Services"]
+authors = ["Service BC Connect"]
 
 [tool.poetry.dependencies]
 attrs = "24.2.0"

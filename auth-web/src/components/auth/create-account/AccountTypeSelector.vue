@@ -1,7 +1,7 @@
 <template>
   <div data-test="div-stepper-container">
     <p class="mb-7">
-      There is no cost to create a BC Registries account. You only pay for the services and products you purchase.
+      There is no cost to create a Service BC Connect account. You only pay for the services and products you purchase.
     </p>
     <v-row v-display-mode>
       <v-col

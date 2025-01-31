@@ -61,7 +61,7 @@
             </li>
             <li>
               If you do not see your Name Request in your table (e.g. if you submitted your Name Request without
-              being logged into your BC Registries account), you can add your Name Request manually by looking up
+              being logged into your Service BC Connect account), you can add your Name Request manually by looking up
               your business name or your NR number.
             </li>
             <li>

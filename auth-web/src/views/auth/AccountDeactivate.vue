@@ -22,8 +22,7 @@
         Deactivate Account
       </h1>
       <p class="mt-3 mb-0">
-        Please review the information below before deactivating your BC
-        Registries and Online Services account.
+        Please review the information below before deactivating your Service BC Connect account.
       </p>
     </div>
 

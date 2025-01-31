@@ -83,7 +83,7 @@
           class="cta-btn font-weight-bold white--text mr-2 px-7"
           to="/choose-authentication-method"
         >
-          Create a BC Registries Account
+          Create a Service BC Connect Account
         </v-btn>
       </template>
       <LearnMoreButton :redirect-url="learnMoreUrl" />

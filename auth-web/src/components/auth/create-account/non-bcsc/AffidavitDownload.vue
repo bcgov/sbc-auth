@@ -19,7 +19,7 @@
         <ol>
           <li>One piece of government-issued photo identification</li>
           <li>
-            Bring a printed copy of the BC Registries and Online Services affidavit template.
+            Bring a printed copy of the Service BC Connect affidavit template.
             You must use this template and fill out all fields.
             Failure to do so may result in a rejection of your account request.
           </li>

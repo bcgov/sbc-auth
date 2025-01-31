@@ -221,7 +221,7 @@
               </v-img>
               <div class="step-line mt-2" />
               <div class="step-text body-2 mt-3">
-                Continue to BC Registries.
+                Continue to Service BC Connect.
               </div>
             </div>
           </li>

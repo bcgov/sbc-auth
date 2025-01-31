@@ -132,7 +132,7 @@ describe('TransactionsDataTable tests', () => {
     expect(itemRows.length).toBe(transactionResponse.items.length)
     // test cell data
     const row1Cells = itemRows.at(0).findAll(itemCell)
-    expect(row1Cells.at(0).text()).toBe("Ministry of Citizens' Services-BC Registries and Online Services Staff")
+    expect(row1Cells.at(0).text()).toBe("Ministry of Citizens' Services-Service BC Connect Staff")
     expect(row1Cells.at(1).text()).toBe('Personal Property Registry')
     expect(row1Cells.at(2).text()).toBe('Statement of Registration')
     expect(row1Cells.at(3).text()).toBe('label1 value1')

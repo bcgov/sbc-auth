@@ -5,7 +5,7 @@
         Staff Dashboard
       </h1>
       <p class="mt-3 mb-0">
-        Search for businesses and manage BC Registries accounts
+        Search for businesses and manage Service BC Connect accounts
       </p>
     </div>
 

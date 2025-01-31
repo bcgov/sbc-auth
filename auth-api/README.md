@@ -2,7 +2,7 @@
 
 # AUTH API
 
-BC Registries authentication and authorization services.
+Service BC Connect authentication and authorization services.
 
 
 ## Development Environment

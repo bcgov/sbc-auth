@@ -4,7 +4,7 @@
 
 # Application Name
 
-BC Registries Auth Queue
+Service BC Connect Auth Queue
 
 ## Technology Stack Used
 * Python, Flask

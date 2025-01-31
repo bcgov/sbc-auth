@@ -516,7 +516,7 @@ export default defineComponent({
 
     const helpDialogBlurb = computed(() => {
       if (isCooperative.value) {
-        return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
+        return 'If you have not received your Access Letter from Service BC Connect, or have lost your Passcode, ' +
           'please contact us at:'
       } else {
         const url = 'www.corporateonline.gov.bc.ca'

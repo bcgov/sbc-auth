@@ -4,7 +4,7 @@
 
 # Application Name
 
-BC Registries Names Examination, research and approval system API
+Service BC Connect Names Examination, research and approval system API
 
 ## Technology Stack Used
 * Python, Flask

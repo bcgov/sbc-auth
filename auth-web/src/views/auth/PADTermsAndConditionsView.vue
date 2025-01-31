@@ -1,7 +1,7 @@
 <template>
   <v-container class="terms-of-use-container view-container">
     <h1 class="mb-10">
-      Business Pre-Authorized Debit Terms and Conditions Agreement BC Registries and Online Services
+      Business Pre-Authorized Debit Terms and Conditions Agreement Service BC Connect
     </h1>
     <v-card flat>
       <v-card-text class="pa-8">

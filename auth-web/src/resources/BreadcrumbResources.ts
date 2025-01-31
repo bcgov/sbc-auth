@@ -1,12 +1,12 @@
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
 
 export const RegistryHomeBreadcrumb: BreadcrumbIF = {
-  text: 'BC Registries and Online Services',
+  text: 'Service BC Connect',
   href: `${sessionStorage.getItem('REGISTRY_HOME_URL')}`
 }
 
 export const RegistryDashboardBreadcrumb: BreadcrumbIF = {
-  text: 'BC Registries Dashboard',
+  text: 'Service BC Connect Dashboard',
   href: `${sessionStorage.getItem('REGISTRY_HOME_URL')}dashboard`
 }
 
