@@ -153,6 +153,7 @@ def post_organization():
             response, status = {"message": "Not authorized to perform this action"}, HTTPStatus.UNAUTHORIZED
             return response, status
         response, status = OrgService.create_org(request_json, user.identifier).as_dict(), HTTPStatus.CREATED
+
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status
