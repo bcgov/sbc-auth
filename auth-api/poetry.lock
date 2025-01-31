@@ -428,13 +428,13 @@ redis = ["redis (>=2.10.5)"]
 
 [[package]]
 name = "cachelib"
-version = "0.9.0"
+version = "0.13.0"
 description = "A collection of cache libraries in the same API interface."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "cachelib-0.9.0-py3-none-any.whl", hash = "sha256:811ceeb1209d2fe51cd2b62810bd1eccf70feba5c52641532498be5c675493b3"},
-    {file = "cachelib-0.9.0.tar.gz", hash = "sha256:38222cc7c1b79a23606de5c2607f4925779e37cdcea1c2ad21b8bae94b5425a5"},
+    {file = "cachelib-0.13.0-py3-none-any.whl", hash = "sha256:8c8019e53b6302967d4e8329a504acf75e7bc46130291d30188a6e4e58162516"},
+    {file = "cachelib-0.13.0.tar.gz", hash = "sha256:209d8996e3c57595bee274ff97116d1d73c4980b2fd9a34c7846cd07fd2e1a48"},
 ]
 
 [[package]]
@@ -933,19 +933,23 @@ async = ["asgiref (>=3.2)"]
 dotenv = ["python-dotenv"]
 
 [[package]]
-name = "flask-caching"
+name = "Flask-Caching"
 version = "2.3.0"
 description = "Adds caching support to Flask applications."
 optional = false
 python-versions = ">=3.8"
-files = [
-    {file = "Flask_Caching-2.3.0-py3-none-any.whl", hash = "sha256:51771c75682e5abc1483b78b96d9131d7941dc669b073852edfa319dd4e29b6e"},
-    {file = "flask_caching-2.3.0.tar.gz", hash = "sha256:d7e4ca64a33b49feb339fcdd17e6ba25f5e01168cf885e53790e885f83a4d2cf"},
-]
+files = []
+develop = false
 
 [package.dependencies]
-cachelib = ">=0.9.0,<0.10.0"
+cachelib = ">=0.9.0"
 Flask = "*"
+
+[package.source]
+type = "git"
+url = "https://github.com/pallets-eco/flask-caching.git"
+reference = "master"
+resolved_reference = "494d49882537a6cbcfe3cb41c4df05ae8acf60ce"
 
 [[package]]
 name = "flask-cors"
@@ -3347,4 +3351,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "21d49a011acfb61caf6cda32417fd43bdc009f5e0516e381ccad01ae5fe32491"
+content-hash = "3f8959db83533c3af865eb97c3cf24c4142f1396a7d7e00404357a4503bb9a5b"
