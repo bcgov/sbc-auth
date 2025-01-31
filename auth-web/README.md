@@ -6,7 +6,7 @@
 
 # AUTH WEB (auth-web)
 
-BC Registries authentication and authorization interface.
+Service BC Connect authentication and authorization interface.
 
 ## Prerequisites
 - Node.js (> v20.5.x)

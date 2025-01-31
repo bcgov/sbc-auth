@@ -188,12 +188,12 @@
           :redirect-url="learnMoreUrl"
         />
         <div class="d-flex mt-8">
-          <span class="body-1">New to BC Registries?</span>
+          <span class="body-1">New to Service BC Connect?</span>
           <router-link
             class="ml-2 body-1 font-weight-bold"
             to="/choose-authentication-method"
           >
-            Create a BC Registries Account
+            Create a Service BC Connect Account
           </router-link>
         </div>
       </v-col>

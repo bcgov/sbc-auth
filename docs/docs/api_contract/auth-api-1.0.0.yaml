@@ -1,10 +1,10 @@
 openapi: 3.0.0
 info:
-  title: BC Registries Accounts API
-  description: <p>BC Registries Accounts system is used to manage the BC Registries accounts. The system manages the authorizations related data and does integration with keycloak. </p>
+  title: Service BC Connect Accounts API
+  description: <p>Service BC Connect Accounts system is used to manage the Service BC Connect accounts. The system manages the authorizations related data and does integration with keycloak. </p>
   version: 1.0.1
   contact:
-    name: BC Registries
+    name: Service BC Connect
   license:
     name: Apache 2.0
 paths:

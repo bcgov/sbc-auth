@@ -5,11 +5,10 @@
         class="view-header__title"
         data-test="account-settings-title"
       >
-        Create a BC Registries and Online Services
-        Account
+        Create a Service BC Connect Account
       </h1>
       <div class="mt-4 view-header__subtitle">
-        You can create your BC Registries account by using:
+        You can create your Service BC Connect account by using:
       </div>
     </div>
     <div class="mb-9">
@@ -114,7 +113,7 @@
               Service BC agent, or submission of a video recording to Service BC.
             </li>
             <li>
-              The only personal information shared with BC Registries is your first and last name which
+              The only personal information shared with Service BC Connect is your first and last name which
               is used for digital signatures when you submit filings.
             </li>
             <li>
@@ -262,7 +261,7 @@
                 </div>
                 <ul class="mt-4">
                   <li>
-                    You can sign up for a BCeID when creating your BC Registries account or use an existing BCeID if you
+                    You can sign up for a BCeID when creating your Service BC Connect account or use an existing BCeID if you
                     already have one.
                   </li>
                   <li>
@@ -270,7 +269,7 @@
                     you can access BC Registry services. Note: Most notaries and lawyers charge a fee for this service; fees will
                     vary.
                   </li>
-                  <li>The affidavit will need to be reviewed by BC Registries staff before it can be used.</li>
+                  <li>The affidavit will need to be reviewed by Service BC Connect staff before it can be used.</li>
                   <li>
                     Logging in with a BCeID will require the use of a 3rd party application for 2-factor authentication (2FA) on a
                     mobile device or on a desktop computer.

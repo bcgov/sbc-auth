@@ -33,7 +33,7 @@
             link
             color="primary"
             class="ml-1"
-            href="mailto:SBC_ITOperationsSupport@gov.bc.ca?subject=BC Registries Application Support Request"
+            href="mailto:SBC_ITOperationsSupport@gov.bc.ca?subject=Service BC Connect Application Support Request"
           >
             Contact Support
           </v-btn>

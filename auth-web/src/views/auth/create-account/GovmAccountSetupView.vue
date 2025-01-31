@@ -9,7 +9,7 @@
         Create a Ministry Account
       </h1>
       <p class="mt-3 mb-0">
-        Create an account to access products and services offered by BC Registries and Online Services
+        Create an account to access products and services offered by Service BC Connect
       </p>
     </div>
     <v-card flat>
