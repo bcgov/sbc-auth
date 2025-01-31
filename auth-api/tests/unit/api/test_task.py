@@ -130,6 +130,7 @@ def test_fetch_tasks_with_many_params(test_name, client, jwt, endpoint, session)
 def test_fetch_tasks_end_of_day(client, jwt, session):
     """Assert that task is only fetched on end of end_date."""
     user = factory_user_model(TestUserInfo.user1)
+
     user_2 = factory_user_model(TestUserInfo.user2)
 
     date_submitted_1 = dt.datetime(2022, 7, 10, 15, 59, 59)
