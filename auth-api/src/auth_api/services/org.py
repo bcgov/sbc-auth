@@ -280,7 +280,9 @@ class Org:  # pylint: disable=too-many-public-methods
 
             if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
                 payment_method_description = (
-                    PaymentMethod(payment_method).name if payment_method in [item.value for item in PaymentMethod] else ""
+                    PaymentMethod(payment_method).name
+                    if payment_method in [item.value for item in PaymentMethod]
+                    else ""
                 )
                 ActivityLogPublisher.publish_activity(
                     Activity(
@@ -297,7 +299,6 @@ class Org:  # pylint: disable=too-many-public-methods
             error_code = error_payload.get("code")
             error_message = error_payload.get("message")
             raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, error_message)
-
 
     @staticmethod
     def _validate_and_raise_error(org_info: dict):
