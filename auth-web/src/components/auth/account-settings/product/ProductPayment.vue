@@ -24,7 +24,7 @@
         :indeterminate="isLoading"
       />
     </v-overlay>
-    <template v-if="productList && productList.length > 0">
+    <template v-if="productPaymentReady">
       <h4 class="mb-4">
         Products and Services
       </h4>
@@ -208,7 +208,8 @@ export default defineComponent({
       fetchOrgProductFeeCodes,
       updateAccountFees,
       needStaffReview,
-      removeOrgProduct
+      removeOrgProduct,
+      getOrgPayments
     } = useOrgStore()
 
     const {
@@ -284,7 +285,8 @@ export default defineComponent({
         const accessType:any = currentOrganization.value.accessType
         return !state.isEditing && (![AccessType.GOVM].includes(accessType) || state.isBcolAdmin)
       }),
-      displaySavePaymentMethodsFirst: false
+      displaySavePaymentMethodsFirst: false,
+      productPaymentReady: false
     })
 
     const loadProduct = async () => {
@@ -299,13 +301,13 @@ export default defineComponent({
     const setup = async () => {
       state.isLoading = true
       resetCurrentSelectedProducts()
-      await getProductPaymentMethods()
-      await loadProduct()
+      Promise.all([getOrgPayments(), getProductPaymentMethods(), loadProduct()])
       // if staff need to load product fee also
       if (state.canManageAccounts) {
         state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
         state.orgProductFeeCodes = await fetchOrgProductFeeCodes()
       }
+      state.productPaymentReady = true
       state.isLoading = false
       state.displayRemoveProductDialog = false
       state.dialogError = false

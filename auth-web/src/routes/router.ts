@@ -142,7 +142,6 @@ export function getRoutes (): RouteConfig[] {
   const teamManagement = () => import('../components/auth/account-settings/team-management/TeamManagement.vue')
   const accountLoginOption = () =>
     import('../components/auth/account-settings/login-options/AccountSettingsLoginOption.vue')
-  const accountPaymentOption = () => import('../components/auth/account-settings/payment/AccountPaymentMethods.vue')
   const transaction = () => import('../components/auth/account-settings/transaction/Transactions.vue')
   const statements = () => import('../components/auth/account-settings/statement/Statements.vue')
   const productPackage = () => import('../components/auth/account-settings/product/ProductPayment.vue')
@@ -584,8 +583,7 @@ export function getRoutes (): RouteConfig[] {
       component: PayOutstandingBalanceView,
       props: (route) => (
         { orgId: route.params.orgId.toString(),
-          paymentId: route.query.paymentId,
-          changePaymentType: route.query.changePaymentType
+          paymentId: route.query.paymentId
         }),
       meta: { requiresAuth: true, requiresProfile: true }
     },

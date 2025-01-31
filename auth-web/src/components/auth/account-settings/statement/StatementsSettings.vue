@@ -218,12 +218,11 @@
 </template>
 
 <script lang="ts">
-import { LDFlags, PaymentTypes } from '@/util/constants'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { StatementListItem, StatementNotificationSettings, StatementRecipient, StatementSettings } from '@/models/statement'
 import { computed, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { PaymentTypes } from '@/util/constants'
 import { useOrgStore } from '@/stores/org'
 
 export default {

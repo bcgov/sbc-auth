@@ -326,26 +326,24 @@ export default defineComponent({
       return props.currentOrgPaymentType !== PaymentTypes.EFT || canChangeFromEFT()
     }
 
-    const dealWithEFTOutstandingBalance = async (paymentType = null) => {
+    const dealWithEFTOutstandingBalance = async () => {
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
       if (!isFromEFT) {
         return
       }
       const hasOutstandingBalance = await hasEFTBalanceOwing()
-        if (hasOutstandingBalance) {
-          await root.$router.push({
-            name: Pages.PAY_OUTSTANDING_BALANCE,
-            params: { orgId: props.currentOrganization.id },
-            query: { changePaymentType: paymentType?.type || props.currentSelectedPaymentMethod }
-          })
-        }
+      if (hasOutstandingBalance) {
+        await root.$router.push({
+          name: Pages.PAY_OUTSTANDING_BALANCE,
+          params: { orgId: props.currentOrganization.id }
+        })
+      }
     }
     const paymentMethodSelected = async (payment, isTouch = true) => {
-      if (payment.type == PaymentTypes.BCOL && isTouch && state.selectedPaymentMethod !== PaymentTypes.BCOL) {
+      if (payment.type === PaymentTypes.BCOL && isTouch && state.selectedPaymentMethod !== PaymentTypes.BCOL) {
         openBCOnlineDialog()
-      }
-      else if (payment.type !== PaymentTypes.EFT) {
-        await dealWithEFTOutstandingBalance(payment)
+      } else if (payment.type !== PaymentTypes.EFT) {
+        await dealWithEFTOutstandingBalance()
       }
       state.selectedPaymentMethod = payment.type
       state.isTouched = isTouch
@@ -385,11 +383,11 @@ export default defineComponent({
 
     const continueModal = async () => {
       const hasOutstandingEFTBalance = await hasEFTBalanceOwing()
-        if (!hasOutstandingEFTBalance) {
-          warningDialog.value.close()
-        } else {
-          await dealWithEFTOutstandingBalance()
-        }
+      if (!hasOutstandingEFTBalance) {
+        warningDialog.value.close()
+      } else {
+        await dealWithEFTOutstandingBalance()
+      }
     }
 
     // Purpose: reset the payment method without having to reload the component.

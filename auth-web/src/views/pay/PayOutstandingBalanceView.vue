@@ -2,17 +2,6 @@
   <v-container
     class="view-container"
   >
-    <div
-      v-if="changePaymentType !== ''"
-      class="view-header flex-column"
-    >
-      <h1
-        class="view-header__title"
-        data-test="account-settings-title"
-      >
-        Changing Payment Method to {{ getPaymentTypeText }}
-      </h1>
-    </div>
     <v-card flat>
       <Stepper
         ref="stepper"
@@ -28,9 +17,9 @@
 </template>
 
 <script lang="ts">
-import { LDFlags, PaymentTypes } from '@/util/constants'
 import { PropType, computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
+import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OutstandingBalances from '@/components/pay/OutstandingBalances.vue'
 import { useOrgStore } from '@/stores'
@@ -40,7 +29,7 @@ export default defineComponent({
   components: {
     Stepper,
     // eslint-disable-next-line vue/no-unused-components
-    OutstandingBalances,
+    OutstandingBalances
   },
   props: {
     orgId: {
@@ -48,10 +37,6 @@ export default defineComponent({
       default: ''
     },
     paymentId: {
-      type: String as PropType<string>,
-      default: ''
-    },
-    changePaymentType: {
       type: String as PropType<string>,
       default: ''
     }
@@ -71,7 +56,6 @@ export default defineComponent({
         component: OutstandingBalances,
         componentProps: {
           orgId: props.orgId,
-          changePaymentType: props.changePaymentType,
           stepForward: handleStepForward,
           enableEFTBalanceByPADFeature: enableEFTBalanceByPADFeature.value
         }
@@ -90,11 +74,6 @@ export default defineComponent({
     onMounted(async () => {
       try {
         await getStatementSummary()
-        const isOwing = (statementSummary.value?.totalDue + statementSummary.value?.totalInvoiceDue) > 0
-        // Go to step two on the redirect back and payment has been completed
-        if (props.paymentId && props.changePaymentType && !isOwing) {
-          stepper.value.jumpToStep(2)
-        }
       } catch (error) {
         // Failed to retrieve statement summary, so we should stay step 1
         console.error('Failed getting statement summary', error)
@@ -109,26 +88,12 @@ export default defineComponent({
       stepper.value.stepBack()
     }
 
-    function handleStepJumpTo (num) {
-      stepper.value.jumpToStep(num)
-    }
-
-    const getPaymentTypeText = computed(() => {
-      if (props.changePaymentType === PaymentTypes.BCOL) {
-        return 'BC Online'
-      } else if (props.changePaymentType === PaymentTypes.PAD) {
-        return 'Pre-authorized Debit'
-      }
-      return ''
-    })
-
     return {
       isLoading,
       stepper,
       stepperConfig,
       handleStepForward,
       handleStepBack,
-      getPaymentTypeText,
       enableEFTBalanceByPADFeature
     }
   }
