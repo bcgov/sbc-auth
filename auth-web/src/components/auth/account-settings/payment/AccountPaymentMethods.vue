@@ -294,7 +294,9 @@ export default defineComponent({
     }
 
     const routerGuard = router.beforeEach((to, from, next) => {
-      if (userStore.hasPaymentMethodChanged && !userStore.accountSettingWarning) {
+      // Check if route paths match the expected pattern
+      const accountPathPattern = /^\/account\/\d+\/settings\/product-settings$/
+      if (!accountPathPattern.test(to.path) && userStore.hasPaymentMethodChanged && !userStore.accountSettingWarning) {
         state.pendingRoute = to
         unsavedChangesDialog.value?.open()
         next(false)
