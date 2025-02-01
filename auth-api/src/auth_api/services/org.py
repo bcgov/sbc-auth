@@ -273,9 +273,10 @@ class Org:  # pylint: disable=too-many-public-methods
                 payment_account_status = PaymentAccountStatus.PENDING
             else:
                 payment_account_status = PaymentAccountStatus.FAILED
-                error_payload = response.json()
-                error_code = error_payload.get("type")
-                raise BusinessException(error_code, Error.ACCOUNT_CREATION_FAILED_IN_PAY)
+                error_payload = http_error.response.json()
+                error_code = error_payload.get("error", "UNKNOWN_ERROR")
+                error_message = error_payload.get("error_description", "")
+                raise BusinessException(error_code, error_message)
 
             if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
                 payment_method_description = (
@@ -295,8 +296,9 @@ class Org:  # pylint: disable=too-many-public-methods
 
         except HTTPError as http_error:
             error_payload = http_error.response.json()
-            error_code = error_payload.get("type")
-            raise BusinessException(error_code, Error.ACCOUNT_CREATION_FAILED_IN_PAY)
+            error_code = error_payload.get("error", "UNKNOWN_ERROR")
+            error_message = error_payload.get("error_description", "")
+            raise BusinessException(error_code, error_message)
 
     @staticmethod
     def _validate_and_raise_error(org_info: dict):
