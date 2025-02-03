@@ -267,7 +267,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 endpoint=f"{pay_url}/accounts/{org_model.id}", data=pay_request, token=token, raise_for_status=True
             )
 
-        if response.status_code in (HTTPStatus.OK):
+        if response.status_code == HTTPStatus.OK:
             payment_account_status = PaymentAccountStatus.CREATED
         elif response.status_code == HTTPStatus.ACCEPTED:
             payment_account_status = PaymentAccountStatus.PENDING
@@ -278,9 +278,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
             payment_method_description = (
-                PaymentMethod(payment_method).name
-                if payment_method in [item.value for item in PaymentMethod]
-                else ""
+                PaymentMethod(payment_method).name if payment_method in [item.value for item in PaymentMethod] else ""
             )
             ActivityLogPublisher.publish_activity(
                 Activity(
