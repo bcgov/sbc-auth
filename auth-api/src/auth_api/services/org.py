@@ -276,8 +276,12 @@ class Org:  # pylint: disable=too-many-public-methods
                 payment_account_status = PaymentAccountStatus.FAILED
             else:
                 payment_account_status = PaymentAccountStatus.FAILED
-                error_payload = response.json()
-                error_code = error_payload.get("error", "UNKNOWN_ERROR")
+                if response.json:
+                    error_payload = response.json()
+                    error_code = error_payload.get("error", "UNKNOWN_ERROR")
+                else:
+                    error_code = "UNKNOWN_ERROR"
+                logger.error(f"Account create payment Error: {response.text}")
 
             if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
                 payment_method_description = (
@@ -299,6 +303,7 @@ class Org:  # pylint: disable=too-many-public-methods
             error_payload = http_error.response.json()
             error_code = error_payload.get("error", Error.ACCOUNT_CREATION_FAILED_IN_PAY)
             error_message = error_payload.get("error_description", "")
+            logger.error(f"Account create payment Error: {http_error}")
             raise BusinessException(error_code, error_message)
 
     @staticmethod
@@ -440,7 +445,9 @@ class Org:  # pylint: disable=too-many-public-methods
                 Org.send_staff_review_account_reminder(relationship_id=self._model.id)
 
         if name_updated or payment_info:
-            Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
+            payment_account_status, error = Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
+            if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
+                raise BusinessException(Error.ACCOUNT_UPDATE_FAILED_IN_PAY, error)
         # Depreciated (use update_org_address instead)
         Org._publish_activity_on_mailing_address_change(org_model.id, current_org_name, mailing_address)
         Org._publish_activity_on_name_change(org_model.id, org_name)

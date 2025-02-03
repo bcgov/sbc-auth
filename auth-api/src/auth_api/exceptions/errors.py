@@ -113,6 +113,7 @@ class Error(Enum):
     )
     BCEID_USERS_CANT_BE_OWNERS = "BCEID Users cant be owners", HTTPStatus.BAD_REQUEST
     ACCOUNT_CREATION_FAILED_IN_PAY = "Account creation failed in Pay", HTTPStatus.INTERNAL_SERVER_ERROR
+    ACCOUNT_UPDATE_FAILED_IN_PAY = "Account update failed in Pay", HTTPStatus.INTERNAL_SERVER_ERROR
     GOVM_ACCOUNT_DATA_MISSING = (
         "GOVM account creation needs payment info , gl code and mailing address",
         HTTPStatus.BAD_REQUEST,
