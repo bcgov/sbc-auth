@@ -1,13 +1,16 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import OrgService from '@/services/org.services'
 import ProductPackage from '@/components/auth/account-settings/product/ProductPayment.vue'
+import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
+import { LoginSource, Permission } from '@/util/constants'
 
 const vuetify = new Vuetify({})
 
 vi.mock('../../../src/services/user.services')
+vi.mock('../../../src/services/org.services')
 
 describe('Account settings ProductPackage.vue', () => {
   let wrapper: any
@@ -22,20 +25,34 @@ describe('Account settings ProductPackage.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
+    localVue.use(VueRouter)
+    const router = new VueRouter()
 
     const userStore = useUserStore()
     userStore.currentUser = {
       fullName: 'user2',
-      roles: []
+      roles: [],
+      loginSource: LoginSource.BCROS
     } as any
     const orgStore = useOrgStore()
+    orgStore.permissions = [Permission.VIEW_REQUEST_PRODUCT_PACKAGE, Permission.MAKE_PAYMENT]
     orgStore.currentOrganization = {
       name: 'test org'
+    }
+    orgStore.syncAddress = () => {
+      return Promise.resolve()
+    }
+    orgStore.getOrgProducts = () => {
+      return Promise.resolve([])
+    }
+    orgStore.getOrgPayments = (_) => {
+      return Promise.resolve([]) as any
     }
 
     wrapperFactory = (propsData) => {
       return mount(ProductPackage, {
         localVue,
+        router,
         vuetify,
         propsData: {
           ...propsData
