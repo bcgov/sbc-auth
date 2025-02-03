@@ -445,7 +445,9 @@ class Org:  # pylint: disable=too-many-public-methods
                 Org.send_staff_review_account_reminder(relationship_id=self._model.id)
 
         if name_updated or payment_info:
-            payment_account_status, error = Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
+            payment_account_status, error = Org._create_payment_for_org(
+                mailing_address, self._model, payment_info, False
+            )
             if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
                 raise BusinessException(Error.ACCOUNT_UPDATE_FAILED_IN_PAY, error)
         # Depreciated (use update_org_address instead)
