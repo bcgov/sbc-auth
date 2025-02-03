@@ -227,70 +227,77 @@ class Org:  # pylint: disable=too-many-public-methods
         **kwargs,
     ):
         """Add payment settings for the org."""
-        pay_url = current_app.config.get("PAY_API_URL")
-        org_name_for_pay = f"{org_model.name}-{org_model.branch_name}" if org_model.branch_name else org_model.name
-        pay_request = {
-            "accountId": org_model.id,
-            # pay needs the most unique idenitfier.So combine name and branch name
-            "accountName": org_name_for_pay,
-            "branchName": org_model.branch_name or "",
-        }
-        error_code = None
+        try:
+            pay_url = current_app.config.get("PAY_API_URL")
+            org_name_for_pay = f"{org_model.name}-{org_model.branch_name}" if org_model.branch_name else org_model.name
+            pay_request = {
+                "accountId": org_model.id,
+                # pay needs the most unique idenitfier.So combine name and branch name
+                "accountName": org_name_for_pay,
+                "branchName": org_model.branch_name or "",
+            }
+            error_code = None
 
-        if payment_method:
-            pay_request["paymentInfo"] = {"methodOfPayment": payment_method}
+            if payment_method:
+                pay_request["paymentInfo"] = {"methodOfPayment": payment_method}
 
-        if mailing_address:
-            pay_request["contactInfo"] = mailing_address
+            if mailing_address:
+                pay_request["contactInfo"] = mailing_address
 
-        if payment_method and org_model.bcol_account_id:
-            pay_request["bcolAccountNumber"] = org_model.bcol_account_id
-            pay_request["bcolUserId"] = org_model.bcol_user_id
+            if payment_method and org_model.bcol_account_id:
+                pay_request["bcolAccountNumber"] = org_model.bcol_account_id
+                pay_request["bcolUserId"] = org_model.bcol_user_id
 
-        if (revenue_account := payment_info.get("revenueAccount")) is not None:
-            pay_request.setdefault("paymentInfo", {})
-            pay_request["paymentInfo"]["revenueAccount"] = revenue_account
+            if (revenue_account := payment_info.get("revenueAccount")) is not None:
+                pay_request.setdefault("paymentInfo", {})
+                pay_request["paymentInfo"]["revenueAccount"] = revenue_account
 
-        if payment_method == PaymentMethod.PAD.value:  # PAD has bank related details
-            pay_request["paymentInfo"]["bankTransitNumber"] = payment_info.get("bankTransitNumber", None)
-            pay_request["paymentInfo"]["bankInstitutionNumber"] = payment_info.get("bankInstitutionNumber", None)
-            pay_request["paymentInfo"]["bankAccountNumber"] = payment_info.get("bankAccountNumber", None)
-            pay_request["padTosAcceptedBy"] = kwargs["user_context"].user_name
-        # invoke pay-api
-        token = RestService.get_service_account_token()
-        if is_new_org:
-            response = RestService.post(
-                endpoint=f"{pay_url}/accounts", data=pay_request, token=token, raise_for_status=True
-            )
-        else:
-            response = RestService.put(
-                endpoint=f"{pay_url}/accounts/{org_model.id}", data=pay_request, token=token, raise_for_status=True
-            )
-
-        if response.status_code == HTTPStatus.OK:
-            payment_account_status = PaymentAccountStatus.CREATED
-        elif response.status_code == HTTPStatus.ACCEPTED:
-            payment_account_status = PaymentAccountStatus.PENDING
-        elif response.status_code == HTTPStatus.CREATED:
-            payment_account_status = PaymentAccountStatus.FAILED
-        else:
-            payment_account_status = PaymentAccountStatus.FAILED
-            error_payload = response.json()
-            error_code = error_payload.get("error", "UNKNOWN_ERROR")
-
-        if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
-            payment_method_description = (
-                PaymentMethod(payment_method).name if payment_method in [item.value for item in PaymentMethod] else ""
-            )
-            ActivityLogPublisher.publish_activity(
-                Activity(
-                    org_model.id,
-                    ActivityAction.PAYMENT_INFO_CHANGE.value,
-                    name=org_model.name,
-                    value=payment_method_description,
+            if payment_method == PaymentMethod.PAD.value:  # PAD has bank related details
+                pay_request["paymentInfo"]["bankTransitNumber"] = payment_info.get("bankTransitNumber", None)
+                pay_request["paymentInfo"]["bankInstitutionNumber"] = payment_info.get("bankInstitutionNumber", None)
+                pay_request["paymentInfo"]["bankAccountNumber"] = payment_info.get("bankAccountNumber", None)
+                pay_request["padTosAcceptedBy"] = kwargs["user_context"].user_name
+            # invoke pay-api
+            token = RestService.get_service_account_token()
+            if is_new_org:
+                response = RestService.post(
+                    endpoint=f"{pay_url}/accounts", data=pay_request, token=token, raise_for_status=True
                 )
-            )
-        return payment_account_status, error_code
+            else:
+                response = RestService.put(
+                    endpoint=f"{pay_url}/accounts/{org_model.id}", data=pay_request, token=token, raise_for_status=True
+                )
+
+            if response.status_code == HTTPStatus.OK:
+                payment_account_status = PaymentAccountStatus.CREATED
+            elif response.status_code == HTTPStatus.ACCEPTED:
+                payment_account_status = PaymentAccountStatus.PENDING
+            elif response.status_code == HTTPStatus.CREATED:
+                payment_account_status = PaymentAccountStatus.FAILED
+            else:
+                payment_account_status = PaymentAccountStatus.FAILED
+                error_payload = response.json()
+                error_code = error_payload.get("error", "UNKNOWN_ERROR")
+
+            if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
+                payment_method_description = (
+                    PaymentMethod(payment_method).name if payment_method in [item.value for item in PaymentMethod] else ""
+                )
+                ActivityLogPublisher.publish_activity(
+                    Activity(
+                        org_model.id,
+                        ActivityAction.PAYMENT_INFO_CHANGE.value,
+                        name=org_model.name,
+                        value=payment_method_description,
+                    )
+                )
+            return payment_account_status, error_code
+
+        except HTTPError as http_error:
+            error_payload = http_error.response.json()
+            error_code = error_payload.get("error", Error.ACCOUNT_CREATION_FAILED_IN_PAY)
+            error_message = error_payload.get("error_description", "")
+            raise BusinessException(error_code, error_message)
 
     @staticmethod
     def _validate_and_raise_error(org_info: dict):
