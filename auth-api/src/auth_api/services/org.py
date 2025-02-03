@@ -152,7 +152,7 @@ class Org:  # pylint: disable=too-many-public-methods
         payment_account_status, error = Org._create_payment_for_org(mailing_address, org, payment_info, True)
 
         # TODO do we have to check anything like this below?
-        if payment_account_status == PaymentAccountStatus.FAILED:
+        if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
             raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, error)
 
         # Send an email to staff to remind review the pending account
@@ -271,6 +271,8 @@ class Org:  # pylint: disable=too-many-public-methods
             payment_account_status = PaymentAccountStatus.CREATED
         elif response.status_code == HTTPStatus.ACCEPTED:
             payment_account_status = PaymentAccountStatus.PENDING
+        elif response.status_code == HTTPStatus.CREATED:
+            payment_account_status = PaymentAccountStatus.FAILED
         else:
             payment_account_status = PaymentAccountStatus.FAILED
             error_payload = response.json()
