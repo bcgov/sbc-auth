@@ -223,5 +223,12 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
     minWidth: '164px',
     value: '',
     width: '164px'
-  }
+  },
+  {
+    col: 'downloads',
+    hasFilter: false,
+    itemClass: 'line-item',
+    width: '164px',
+    value: 'Downloads'
+  },
 ]

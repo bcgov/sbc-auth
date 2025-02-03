@@ -52,6 +52,15 @@ export default class PaymentService {
     return axios.post(url, refundPayload)
   }
 
+  static postReceipt (invoiceId: string | number): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}/receipts`
+    const headers = { 'Accept': 'application/pdf' }
+    const body = {
+      filingDateTime: new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
+    }
+    return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
+  }
+
   static refundEFT (refundPayload: EftRefundRequest): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/shortname-refund`
     return axios.post(url, refundPayload)
