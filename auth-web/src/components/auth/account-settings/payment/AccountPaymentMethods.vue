@@ -426,6 +426,7 @@ export default defineComponent({
               break
             case 400:
               state.errorText = error.response.data.message?.detail || error.response.data.message
+              state.errorTitle = error.response.data.message?.title || 'Error'
               break
             default:
               state.errorText = 'An error occurred while attempting to create your account.'
