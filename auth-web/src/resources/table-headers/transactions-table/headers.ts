@@ -230,5 +230,5 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
     itemClass: 'line-item',
     width: '164px',
     value: 'Downloads'
-  },
+  }
 ]
