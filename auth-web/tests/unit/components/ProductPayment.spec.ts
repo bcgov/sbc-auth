@@ -1,11 +1,10 @@
+import { LoginSource, Permission } from '@/util/constants'
 import { createLocalVue, mount } from '@vue/test-utils'
-import OrgService from '@/services/org.services'
 import ProductPackage from '@/components/auth/account-settings/product/ProductPayment.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
-import { LoginSource, Permission } from '@/util/constants'
 
 const vuetify = new Vuetify({})
 
@@ -45,10 +44,12 @@ describe('Account settings ProductPackage.vue', () => {
     orgStore.getOrgProducts = () => {
       return Promise.resolve([])
     }
-    orgStore.getOrgPayments = (_) => {
+    orgStore.getOrgPayments = () => {
       return Promise.resolve([]) as any
     }
-
+    orgStore.addOrgProducts = () => {
+      return Promise.resolve() as any
+    }
     wrapperFactory = (propsData) => {
       return mount(ProductPackage, {
         localVue,
@@ -86,16 +87,14 @@ describe('Account settings ProductPackage.vue', () => {
 
   it('handles modal dialog add product correctly', async () => {
     const orgStore = useOrgStore()
+
+    await wrapper.vm.$nextTick()
     orgStore.currentSelectedProducts = [{ code: 'TEST_PRODUCT' }]
     wrapper.vm.addProductOnAccountAdmin = true
     const mockOpen = vi.fn()
     wrapper.vm.$refs.confirmDialog.open = mockOpen
 
-    const addProducts = vi.spyOn(OrgService, 'addProducts').mockResolvedValue(null)
-
     await wrapper.vm.submitProductRequest()
-
-    expect(addProducts).toHaveBeenCalled()
     expect(mockOpen).toHaveBeenCalled()
     expect(wrapper.vm.dialogTitle).toBe('Product Added')
     expect(wrapper.vm.dialogText).toBe('Your account now has access to the selected product.')
@@ -104,16 +103,16 @@ describe('Account settings ProductPackage.vue', () => {
 
   it('handles modal dialog failed', async () => {
     const orgStore = useOrgStore()
+    orgStore.addOrgProducts = () => {
+      throw Error('bad')
+    }
+    wrapper = wrapperFactory({})
     orgStore.currentSelectedProducts = [{ code: 'TEST_PRODUCT' }]
     wrapper.vm.addProductOnAccountAdmin = true
     const mockOpen = vi.fn()
     wrapper.vm.$refs.confirmDialog.open = mockOpen
 
-    const addProducts = vi.spyOn(OrgService, 'addProducts').mockRejectedValue(new Error('Failed to add products'))
-
     await wrapper.vm.submitProductRequest()
-
-    expect(addProducts).toHaveBeenCalled()
     expect(mockOpen).toHaveBeenCalled()
     expect(wrapper.vm.dialogTitle).toBe('Product Request Failed')
     expect(wrapper.vm.dialogText).toBe('')

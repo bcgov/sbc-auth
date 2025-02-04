@@ -78,21 +78,24 @@ describe('PaymentMethods.vue', () => {
     expect(wrapper.vm.$data.selectedPaymentMethod).toBe(wrapper.vm.filteredPaymentMethods[0].type)
   })
 
-  it('should select payment method correctly', () => {
+  it('should select payment method correctly', async () => {
     wrapper.vm.paymentMethodSelected(wrapper.vm.filteredPaymentMethods[0])
+    await wrapper.vm.$nextTick()
     expect(wrapper.vm.$data.selectedPaymentMethod).toBe(wrapper.vm.filteredPaymentMethods[0].type)
   })
 
-  it('should return the payment selected correctly', () => {
+  it('should return the payment selected correctly', async () => {
     const method1 = wrapper.vm.filteredPaymentMethods[0]
     wrapper.vm.paymentMethodSelected(method1)
+    await wrapper.vm.$nextTick()
     expect(wrapper.vm.isPaymentSelected(method1)).toBe(true)
   })
 
-  it('should return the payment selected correctly [negative]', () => {
+  it('should return the payment selected correctly [negative]', async () => {
     const method1 = wrapper.vm.filteredPaymentMethods[0]
     const method2 = wrapper.vm.filteredPaymentMethods[1]
     wrapper.vm.paymentMethodSelected(method1)
+    await wrapper.vm.$nextTick()
     expect(wrapper.vm.isPaymentSelected(method2)).toBe(false)
   })
 })

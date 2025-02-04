@@ -6,7 +6,6 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
 import { useOrgStore } from '@/stores'
-import { StatementListResponse, StatementsSummary } from '@/models/statement'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -18,7 +17,6 @@ describe('OutstandingBalances.vue', () => {
   localVue.directive('can', can)
   const vuetify = new Vuetify({})
   let statementsResponse: any
-
 
   beforeEach(async () => {
     statementsResponse = {
@@ -55,12 +53,12 @@ describe('OutstandingBalances.vue', () => {
       'limit': 100,
       'page': 1,
       'total': 1
-      }
-    orgStore.getStatementsList = async (_, __) => {
+    }
+    orgStore.getStatementsList = async () => {
       return Promise.resolve(statementsResponse as any)
     }
 
-    orgStore.getStatementsSummary = async (orgId) => {
+    orgStore.getStatementsSummary = async () => {
       return Promise.resolve({
         oldestDueDate: '2025-01-01',
         totalDue: 50,
