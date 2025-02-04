@@ -52,9 +52,12 @@ export default class PaymentService {
     return axios.post(url, refundPayload)
   }
 
-  static postReceipt (invoiceId: string | number): AxiosPromise<any> {
+  static postReceipt (invoiceId: string | number, accountId: string): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}/receipts`
-    const headers = { 'Accept': 'application/pdf' }
+    const headers = { 
+      'Accept': 'application/pdf',
+      'Account-Id': accountId
+    }
     const body = {
       filingDateTime: new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
     }

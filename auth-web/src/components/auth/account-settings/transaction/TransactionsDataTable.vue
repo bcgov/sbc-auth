@@ -141,8 +141,8 @@
       </template>
       <template #item-slot-downloads="{ item }">
         <div
-          v-if="item.statusCode === InvoiceStatus.COMPLETED"
           class="receipt"
+          v-if="item.statusCode === InvoiceStatus.COMPLETED || item.statusCode === InvoiceStatus.PAID"
           @click="downloadReceipt(item)"
         >
           <v-icon
@@ -161,9 +161,10 @@
 
 <script lang="ts">
 import { BaseVDataTable, DatePicker, IconTooltip } from '@/components'
-import { InvoiceStatus, PaymentTypes } from '@/util/constants'
+import { InvoiceStatus, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Ref, computed, defineComponent, nextTick, ref, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
+import ConfigHelper from '@/util/config-helper'
 import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import { DataOptions } from 'vuetify'
@@ -271,8 +272,11 @@ export default defineComponent({
       }
     })
 
+
     async function downloadReceipt (item: Transaction) {
-      const receipt = await PaymentService.postReceipt(item.id)
+      const currentAccount = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
+      console.log(currentAccount)
+      const receipt = await PaymentService.postReceipt(item.id, currentAccount.id)
       const filename = `bcregistry-receipts-${item.id}.pdf`
       CommonUtils.fileDownload(receipt.data, filename, 'application/pdf')
     }
