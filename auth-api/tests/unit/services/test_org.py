@@ -134,6 +134,50 @@ def test_create_org_products(session, keycloak_mock, monkeypatch):
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
+def test_create_basic_org_assert_pay_request_is_correct(
+    session, keycloak_mock, monkeypatch
+):  # pylint:disable=unused-argument
+    """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
+    user = factory_user_model()
+    with patch.object(RestService, "post") as mock_post:
+        patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
+        org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary["name"] == TestOrgInfo.org1["name"]
+        mock_post.assert_called()
+        actual_data = mock_post.call_args.kwargs.get("data")
+        expected_data = {
+            "accountId": dictionary.get("id"),
+            "accountName": dictionary.get("name"),
+            "branchName": "",
+            "paymentInfo": {"methodOfPayment": OrgService._get_default_payment_method_for_creditcard()},
+        }
+        assert expected_data == actual_data
+
+
+@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
+def test_pay_request_is_correct_with_branch_name(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
+    user = factory_user_model()
+    with patch.object(RestService, "post") as mock_post:
+        patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
+        org = OrgService.create_org(TestOrgInfo.org_branch_name, user_id=user.id)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary["name"] == TestOrgInfo.org_branch_name["name"]
+        mock_post.assert_called()
+        actual_data = mock_post.call_args.kwargs.get("data")
+        expected_data = {
+            "accountId": dictionary.get("id"),
+            "accountName": f"{dictionary.get('name')}-{TestOrgInfo.org_branch_name['branchName']}",
+            "branchName": TestOrgInfo.org_branch_name["branchName"],
+            "paymentInfo": {"methodOfPayment": OrgService._get_default_payment_method_for_creditcard()},
+        }
+        assert expected_data == actual_data
+
+
+@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_update_basic_org_assert_pay_request_activity(session, keycloak_mock, monkeypatch):
     """Assert that while org payment update touches activity log."""
     user_with_token = TestUserInfo.user_test
@@ -202,6 +246,55 @@ def test_update_basic_org_assert_pay_request_is_correct(
             "paymentInfo": {"methodOfPayment": PaymentMethod.DIRECT_PAY.value},
         }
         assert expected_data == actual_data, "updating bank  to Credit Card works."
+
+
+@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
+def test_create_basic_org_assert_pay_request_is_correct_online_banking(
+    session, keycloak_mock, monkeypatch
+):  # pylint:disable=unused-argument
+    """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
+    user = factory_user_model()
+    with patch.object(RestService, "post") as mock_post:
+        patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
+        org = OrgService.create_org(TestOrgInfo.org_onlinebanking, user_id=user.id)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary["name"] == TestOrgInfo.org1["name"]
+        mock_post.assert_called()
+        actual_data = mock_post.call_args.kwargs.get("data")
+        expected_data = {
+            "accountId": dictionary.get("id"),
+            "accountName": dictionary.get("name"),
+            "branchName": "",
+            "paymentInfo": {"methodOfPayment": PaymentMethod.ONLINE_BANKING.value},
+        }
+        assert expected_data == actual_data
+
+
+@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
+def test_create_basic_org_assert_pay_request_is_govm(
+    session, keycloak_mock, staff_user_mock, monkeypatch
+):  # pylint:disable=unused-argument
+    """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.STAFF.value, roles=["create_accounts"]
+    )
+    with patch.object(RestService, "post") as mock_post:
+        patch_token_info(token_info, monkeypatch)
+        org = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary["name"] == TestOrgInfo.org_govm["name"]
+        mock_post.assert_called()
+        actual_data = mock_post.call_args.kwargs.get("data")
+        expected_data = {
+            "accountId": dictionary.get("id"),
+            "accountName": dictionary.get("name") + "-" + dictionary.get("branch_name"),
+            "branchName": dictionary.get("branch_name"),
+            "paymentInfo": {"methodOfPayment": PaymentMethod.EJV.value},
+        }
+        assert expected_data == actual_data
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
