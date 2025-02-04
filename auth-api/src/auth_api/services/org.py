@@ -449,7 +449,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 mailing_address, self._model, payment_info, False
             )
             if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
-                raise BusinessException(Error.ACCOUNT_UPDATE_FAILED_IN_PAY, error)
+                logger.error(f"Account update payment Error: {error}")
         # Depreciated (use update_org_address instead)
         Org._publish_activity_on_mailing_address_change(org_model.id, current_org_name, mailing_address)
         Org._publish_activity_on_name_change(org_model.id, org_name)
