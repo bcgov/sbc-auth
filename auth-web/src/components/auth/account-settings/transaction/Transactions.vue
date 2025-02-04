@@ -146,8 +146,8 @@ export default defineComponent({
     })
 
     // dynamic header selection stuff
-    let preSelectedHeaders = ['createdOn', 'total', 'paymentMethod', 'statusCode', 'actions']
-    if (props.extended) preSelectedHeaders = ['accountName', 'appType', 'lineItems', ...preSelectedHeaders]
+    let preSelectedHeaders = ['createdOn', 'total', 'paymentMethod', 'statusCode', 'downloads', 'actions']
+    if (props.extended) preSelectedHeaders = ['accountName', 'appType', 'lineItems', 'downloads', ...preSelectedHeaders]
     else preSelectedHeaders = ['lineItemsAndDetails', ...preSelectedHeaders]
 
     const headerSelections: BaseTableHeaderI[] = [] // what the user sees in the dropdown
