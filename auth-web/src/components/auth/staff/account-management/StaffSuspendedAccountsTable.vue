@@ -26,9 +26,6 @@
       <template #[`item.decisionMadeBy`]="{ item }">
         {{ item.decisionMadeBy ? item.decisionMadeBy : 'N/A' }}
       </template>
-      <template #[`item.orgType`]="{ item }">
-        {{ formatType(item) }}
-      </template>
       <template #[`item.action`]="{ item }">
         <v-btn
           outlined
@@ -45,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, SuspensionReason, SuspensionReasonCode } from '@/util/constants'
+import { AccountStatus, SuspensionReason, SuspensionReasonCode } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
@@ -161,17 +158,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     await this.addOrgSettings(org)
     await this.syncMembership(orgId)
     this.$router.push(`/account/${orgId}/settings`)
-  }
-
-  formatType (org:Organization):string {
-    let orgTypeDisplay = org.orgType === Account.BASIC ? 'Basic' : 'Premium'
-    if (org.accessType === AccessType.ANONYMOUS) {
-      return 'Director Search'
-    }
-    if (org.accessType === AccessType.EXTRA_PROVINCIAL) {
-      return orgTypeDisplay + ' (out-of-province)'
-    }
-    return orgTypeDisplay
   }
 
   getStatusText (org: Organization) {

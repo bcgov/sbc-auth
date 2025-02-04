@@ -1,38 +1,48 @@
 <template>
   <div>
-    <template v-if="isPaymentEJV">
-      <GLPaymentForm
-        :canSelect="isBcolAdmin"
-        @is-gl-info-form-valid="isGLInfoValid"
-      />
-    </template>
-    <template v-else-if="!isPaymentEJV">
+    <v-radio-group
+      v-model="selectedPaymentMethod"
+      class="mt-0"
+    >
       <v-card
-        v-for="payment in allowedPaymentMethods"
+        v-for="payment in filteredPaymentMethods"
         :key="payment.type"
-        v-can:CHANGE_PAYMENT_METHOD.disable.card
+        v-can:CHANGE_PAYMENT_METHOD.disable.card="!isCreateAccount && !isBcolAdmin"
         outlined
         :ripple="false"
         hover
-        class="payment-card py-8 px-8 mb-4 elevation-1"
-        :class="{'selected': isPaymentSelected(payment)}"
+        :disabled="!payment.supported"
+        class="payment-card py-6 px-6 mb-4 elevation-1"
+        :class="{'selected': isPaymentSelected(payment), 'mt-5': true}"
         :data-test="`div-payment-${payment.type}`"
+        @click="paymentMethodSelected(payment)"
       >
         <div>
-          <header class="d-flex align-center flex-grow-1">
-            <div class="payment-icon-container mt-n2">
+          <header class="flex-grow-1">
+            <div
+              class="d-inline-flex"
+            >
+              <v-radio
+                v-show="isEditing || isCreateAccount"
+                :key="payment.type"
+                :value="payment.type"
+              />
               <v-icon
-                x-large
-                color="primary"
+                medium
+                :color="payment.supported ? 'primary' : '#757575'"
+                class="mr-1"
               >
                 {{ payment.icon }}
               </v-icon>
-            </div>
-            <div class="pr-8 flex-grow-1">
-              <h3 class="title font-weight-bold payment-title mt-n1">
+              <h3 class="title font-weight-bold mt-n1 payment-title">
                 {{ payment.title }}
+                <span v-if="!payment.supported">
+                  is not supported for the selected products
+                </span>
               </h3>
-              <div>{{ payment.subtitle }}</div>
+            </div>
+            <div class="mt-4">
+              {{ payment.subtitle }}
             </div>
             <v-tooltip
               v-if="!isChangePaymentEnabled() && !isPaymentSelected(payment)"
@@ -62,32 +72,53 @@
               </template>
               <span>This payment method is not available after EFT is selected.</span>
             </v-tooltip>
-            <v-btn
-              v-if="isPaymentSelected(payment) || isChangePaymentEnabled()"
-              large
-              depressed
-              color="primary"
-              width="120"
-              :class="['font-weight-bold', 'ml-auto', { 'disabled': !isChangePaymentEnabled() }]"
-              :outlined="!isPaymentSelected(payment) && isChangePaymentEnabled()"
-              :aria-label="'Select' + ' ' + payment.title"
-              :data-test="`btn-payment-${payment.type}`"
-              @click="paymentMethodSelected(payment)"
-            >
-              <span>{{ (isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT' }}</span>
-            </v-btn>
           </header>
 
           <div class="payment-card-contents">
             <v-expand-transition>
               <div v-if="isPaymentSelected(payment)">
-                <!-- PAD -->
                 <div
-                  v-if="(payment.type === paymentTypes.PAD)"
-                  class="pad-form-container pt-7"
+                  v-if="(payment.type === paymentTypes.EJV)"
+                  class="pt-7"
                 >
-                  <v-divider class="mb-7" />
+                  <GLPaymentForm
+                    v-if="isEditing || isCreateAccount"
+                    :canSelect="isBcolAdmin || isCreateAccount"
+                    :gl-information="glInfo"
+                    @is-gl-info-form-valid="isGLInfoValid"
+                  />
+                  <v-divider class="mb-4" />
+                  <div v-if="!isEditing && !isCreateAccount">
+                    <h4
+                      class="mb-2 gl-ledger-info"
+                    >
+                      General Ledger Information
+                    </h4>
+                    <div v-if="!!glInfo">
+                      <span class="d-flex"> Client Code: {{ glInfo.client }} </span>
+                      <span class="d-flex"> Responsibility Center: {{ glInfo.responsibilityCentre }} </span>
+                      <span class="d-flex"> Account Number: {{ glInfo.serviceLine }} </span>
+                      <span class="d-flex"> Standard Object: {{ glInfo.stob }} </span>
+                      <span class="d-flex"> Project: {{ glInfo.projectCode }} </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  v-else-if="(payment.type === paymentTypes.PAD)"
+                  class="pad-form-container pt-4"
+                >
+                  <v-divider class="mb-5" />
+                  <div v-if="!isEditing && currentOrgPADInfo && currentOrgPADInfo.bankAccountNumber">
+                    <h4 class="mb-4 banking-info">
+                      Banking Information
+                    </h4>
+                    <span class="d-flex"> Transit Number: {{ currentOrgPADInfo.bankTransitNumber }} </span>
+                    <span class="d-flex"> Institution Number: {{ currentOrgPADInfo.bankInstitutionNumber }} </span>
+                    <span class="d-flex"> Account Number: {{ currentOrgPADInfo.bankAccountNumber }} </span>
+                  </div>
                   <PADInfoForm
+                    v-else
                     :isChangeView="isChangeView"
                     :isAcknowledgeNeeded="isAcknowledgeNeeded"
                     :isInitialAcknowledged="isInitialAcknowledged"
@@ -99,7 +130,6 @@
                   />
                 </div>
 
-                <!-- BCOL -->
                 <div
                   v-else-if="(payment.type === paymentTypes.BCOL)"
                   class="pt-7"
@@ -108,13 +138,12 @@
                   <LinkedBCOLBanner
                     :bcolAccountName="currentOrganization.bcolAccountName"
                     :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-                    :show-edit-btn="true"
+                    :isEditing="isEditing || isCreateAccount"
                     :force-edit-mode="forceEditModeBCOL"
                     @emit-bcol-info="setBcolInfo"
                   />
                 </div>
 
-                <!-- EFT -->
                 <div
                   v-else-if="(payment.type === paymentTypes.EFT)"
                   class="pt-7"
@@ -143,32 +172,13 @@
 
           <p
             v-if="(payment.type === paymentTypes.BCOL)"
-            class="mt-4 py-4 px-6 important bcol-warning-text"
+            class="mt-4 py-4 px-6 important bcol-warning-text ml-0"
           >
             {{ bcOnlineWarningMessage }}
           </p>
         </div>
       </v-card>
-    </template>
-    <!-- showing PAD form without card selector for single payment types -->
-    <v-row v-else>
-      <v-col
-        cols="9"
-        class="py-0"
-      >
-        <PADInfoForm
-          :padInformation="{}"
-          :isChangeView="isChangeView"
-          :isAcknowledgeNeeded="isAcknowledgeNeeded"
-          :isInitialTOSAccepted="isInitialTOSAccepted"
-          :isInitialAcknowledged="isInitialAcknowledged"
-          :clearOnEdit="isInitialTOSAccepted"
-          @is-pre-auth-debit-form-valid="isPADValid($event)"
-          @emit-pre-auth-debit-info="getPADInfo($event)"
-          @is-pad-info-touched="isPadInfoTouched($event)"
-        />
-      </v-col>
-    </v-row>
+    </v-radio-group>
     <ModalDialog
       ref="warningDialog"
       max-width="650"
@@ -212,9 +222,8 @@
 
 <script lang="ts">
 import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
-import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
+import { Ref, computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
-import ConfigHelper from '@/util/config-helper'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
@@ -222,72 +231,8 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import { useDownloader } from '@/composables/downloader'
 import { useOrgStore } from '@/stores/org'
-
-const PAYMENT_METHODS = {
-  [PaymentTypes.CREDIT_CARD]: {
-    type: PaymentTypes.CREDIT_CARD,
-    icon: 'mdi-credit-card-outline',
-    title: 'Credit Card',
-    subtitle: 'Pay for transactions individually with your credit card.',
-    description: `You don't need to provide any credit card information with your account. Credit card information will
-                  be requested when you are ready to complete a transaction.`,
-    isSelected: false
-  },
-  [PaymentTypes.EFT]: {
-    type: PaymentTypes.EFT,
-    icon: 'mdi-arrow-right-circle-outline',
-    title: 'Electronic Funds Transfer',
-    subtitle: 'Make payments from your bank account. Statement will be issued monthly.',
-    description: ``,
-    isSelected: false
-  },
-  [PaymentTypes.PAD]: {
-    type: PaymentTypes.PAD,
-    icon: 'mdi-bank-outline',
-    title: 'Pre-authorized Debit',
-    subtitle: 'Automatically debit a bank account when payments are due.',
-    description: '',
-    isSelected: false
-  },
-  [PaymentTypes.BCOL]: {
-    type: PaymentTypes.BCOL,
-    icon: 'mdi-link-variant',
-    title: 'BC Online',
-    subtitle: 'Use your linked BC Online account for payment.',
-    description: '',
-    isSelected: false
-  },
-  [PaymentTypes.ONLINE_BANKING]: {
-    type: PaymentTypes.ONLINE_BANKING,
-    icon: 'mdi-bank-outline',
-    title: 'Online Banking',
-    subtitle: 'Pay for products and services through your financial institutions website.',
-    description: `
-        <p><strong>Online banking is currently limited to the following institutions:</strong></p>
-        <p>
-          <ul>
-            <li>Bank of Montreal</li>
-            <li>Central 1 Credit Union</li>
-            <li>Coast Capital Savings</li>
-            <li>HSBC</li>
-            <li>Royal Bank of Canada (RBC)</li>
-            <li>Scotiabank</li>
-            <li>TD Canada Trust (TD)</li>
-          </ul>
-        </p>
-        <p>
-          Once your account is created, you can use your account number to add BC Registries and Online Services as a
-          payee in your financial institution's online banking system to make payments.
-        </p>
-        <p class="mb-0">
-          BC Registries and Online Services <strong>must receive payment in full</strong> 
-          from your financial institution prior to the release of items purchased through this service. 
-          Receipt of an online banking payment generally takes 3-4 days from when you make the payment with your 
-          financial institution.
-        </p>`,
-    isSelected: false
-  }
-}
+import { useProductPayment } from '@/composables/product-payment-factory'
+import { useUserStore } from '@/stores'
 
 export default defineComponent({
   name: 'PaymentMethods',
@@ -307,18 +252,38 @@ export default defineComponent({
     isTouchedUpdate: { default: false },
     isInitialTOSAccepted: { default: false },
     isInitialAcknowledged: { default: false },
-    isBcolAdmin: { default: false }
+    isBcolAdmin: { default: false },
+    isEditing: { default: false },
+    isCreateAccount: { default: false }
   },
   emits: ['cancel', 'get-PAD-info', 'emit-bcol-info', 'is-pad-valid', 'is-ejv-valid', 'payment-method-selected', 'save'],
   setup (props, { emit, root }) {
-    const { fetchCurrentOrganizationGLInfo, currentOrgPaymentDetails, getStatementsSummary } = useOrgStore()
-    const warningDialog: InstanceType<typeof ModalDialog> = ref(null)
+    const { fetchCurrentOrganizationGLInfo, getStatementsSummary } = useOrgStore()
+    const { setAccountSettingWarning } = useUserStore()
+    const warningDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+
+    watch(() => warningDialog.value?.isOpen, (isOpen) => {
+      setAccountSettingWarning(isOpen)
+    })
+
+    const ejvPaymentInformationTitle = 'General Ledger Information'
 
     const orgStore = useOrgStore()
     const state = reactive({
-      bcOnlineWarningMessage: 'This payment method will soon be retired.',
+      bcOnlineWarningMessage: 'This payment method will soon be retired.  It is recommended to select a different payment method.',
       dialogTitle: '',
-      dialogText: ''
+      dialogText: '',
+      selectedPaymentMethod: '',
+      padInfo: {},
+      isTouched: false,
+      isPaymentEJV: computed(() => state.selectedPaymentMethod === PaymentTypes.EJV),
+      forceEditModeBCOL: computed(() =>
+        props.currentSelectedPaymentMethod === PaymentTypes.BCOL &&
+        props.currentOrgPaymentType !== undefined &&
+        props.currentOrgPaymentType !== PaymentTypes.BCOL
+      ),
+      glInfo: computed(() => orgStore.currentOrgGLInfo),
+      currentOrgPADInfo: computed(() => orgStore.currentOrgPADInfo)
     })
 
     const openBCOnlineDialog = () => {
@@ -327,58 +292,23 @@ export default defineComponent({
       warningDialog.value.open()
     }
 
-    const openEFTWarningDialog = () => {
-      state.dialogTitle = 'Confirm Payment Method Change'
-      state.dialogText = `Are you sure you want to change your payment method to Electronic Funds Transfer?
-                This action cannot be undone, and you will not be able to select a different payment method later.`
-      warningDialog.value.open()
-    }
-
-    const selectedPaymentMethod = ref('')
     const paymentTypes = PaymentTypes
-    const padInfo = ref({})
-    const isTouched = ref(false)
-    const ejvPaymentInformationTitle = 'General Ledger Information'
-
-    // this object can define the payment methods allowed for each account tyoes
-    const paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
-
-    const allowedPaymentMethods = computed(() => {
-      const paymentMethods = []
-      if (props.currentOrgType) {
-        const paymentTypes = paymentsPerAccountType[props.currentOrgType]
-        paymentTypes?.forEach((paymentType) => {
-          if (PAYMENT_METHODS[paymentType]) {
-            paymentMethods.push(PAYMENT_METHODS[paymentType])
-          }
-        })
-      }
-      if (currentOrgPaymentDetails?.eftEnable) {
-        paymentMethods.push(PAYMENT_METHODS[PaymentTypes.EFT])
-      }
-      return paymentMethods
-    })
-
-    const forceEditModeBCOL = computed(() =>
-      props.currentSelectedPaymentMethod === PaymentTypes.BCOL &&
-      props.currentOrgPaymentType !== undefined &&
-      props.currentOrgPaymentType !== PaymentTypes.BCOL
-    )
-
-    const isPaymentEJV = computed(() => selectedPaymentMethod.value === PaymentTypes.EJV)
 
     // set on change of input only for single allowed payments
     const isPadInfoTouched = (isTouch: boolean) => {
-      isTouched.value = isTouch
+      state.isTouched = isTouch
     }
 
     const isPaymentSelected = (payment) => {
-      return (selectedPaymentMethod.value === payment.type)
+      return (state.selectedPaymentMethod === payment.type)
     }
 
     const { downloadEFTInstructions } = useDownloader(orgStore, state)
 
-    const hasBalanceOwing = async () => {
+    const hasEFTBalanceOwing = async () => {
+      if (!props.currentOrganization.id) {
+        return null
+      }
       try {
         const responseData = await getStatementsSummary(props.currentOrganization.id)
         return responseData?.totalDue || responseData?.totalInvoiceDue
@@ -387,45 +317,46 @@ export default defineComponent({
       }
     }
 
-    const enableEFTPaymentMethod = () => {
+    const canChangeFromEFT = () => {
       const enableEFTPayment: boolean = LaunchDarklyService.getFlag(LDFlags.EnablePaymentChangeFromEFT, false)
       return enableEFTPayment
     }
 
     const isChangePaymentEnabled = () => {
-      return props.currentOrgPaymentType !== PaymentTypes.EFT || enableEFTPaymentMethod()
+      return props.currentOrgPaymentType !== PaymentTypes.EFT || canChangeFromEFT()
     }
 
-    const paymentMethodSelected = async (payment, isTouch = true) => {
+    const dealWithEFTOutstandingBalance = async () => {
       const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
-      if (payment.type === PaymentTypes.EFT && isTouch && selectedPaymentMethod.value !== PaymentTypes.EFT && !enableEFTPaymentMethod()) {
-        openEFTWarningDialog()
-      } else if (payment.type === PaymentTypes.PAD && isFromEFT) {
-        const hasOutstandingBalance = await hasBalanceOwing()
-        if (hasOutstandingBalance) {
-          await root.$router.push({
-            name: Pages.PAY_OUTSTANDING_BALANCE,
-            params: { orgId: props.currentOrganization.id },
-            query: { changePaymentType: payment.type }
-          })
-        }
-      } else if (payment.type === PaymentTypes.BCOL && isTouch && selectedPaymentMethod.value !== PaymentTypes.BCOL) {
-        openBCOnlineDialog()
-      } else {
-        state.bcOnlineWarningMessage = 'This payment method will soon be retired.'
+      if (!isFromEFT) {
+        return
       }
-      selectedPaymentMethod.value = payment.type
-      isTouched.value = isTouch
+      const hasOutstandingBalance = await hasEFTBalanceOwing()
+      if (hasOutstandingBalance) {
+        await root.$router.push({
+          name: Pages.PAY_OUTSTANDING_BALANCE,
+          params: { orgId: props.currentOrganization.id }
+        })
+      }
+    }
+    const paymentMethodSelected = async (payment, isTouch = true) => {
+      if (payment.type === PaymentTypes.BCOL && isTouch && state.selectedPaymentMethod !== PaymentTypes.BCOL) {
+        openBCOnlineDialog()
+      } else if (payment.type !== PaymentTypes.EFT) {
+        await dealWithEFTOutstandingBalance()
+      }
+      state.selectedPaymentMethod = payment.type
+      state.isTouched = isTouch
       // Emit touched flag for the parent element
       if (props.isTouchedUpdate) {
-        emit('payment-method-selected', { selectedPaymentMethod: selectedPaymentMethod.value, isTouched: isTouched.value })
+        emit('payment-method-selected', { selectedPaymentMethod: state.selectedPaymentMethod, isTouched: state.isTouched })
       } else {
-        emit('payment-method-selected', selectedPaymentMethod.value)
+        emit('payment-method-selected', state.selectedPaymentMethod)
       }
     }
 
     const getPADInfo = (padInfoValue) => {
-      padInfo.value = padInfoValue
+      state.padInfo = padInfoValue
       emit('get-PAD-info', padInfoValue)
     }
 
@@ -435,9 +366,9 @@ export default defineComponent({
 
     const isPADValid = (isValid) => {
       if (isValid) {
-        paymentMethodSelected({ type: PaymentTypes.PAD }, isTouched.value)
+        paymentMethodSelected({ type: PaymentTypes.PAD }, state.isTouched)
       }
-      emit('is-pad-valid', isValid && isTouched.value)
+      emit('is-pad-valid', isValid && state.isTouched)
     }
 
     const isGLInfoValid = (isValid) => {
@@ -446,49 +377,45 @@ export default defineComponent({
 
     const cancelModal = () => {
       warningDialog.value.close()
-      selectedPaymentMethod.value = ''
+      state.selectedPaymentMethod = ''
       emit('cancel')
     }
 
     const continueModal = async () => {
-      const hasOutstandingBalance = await hasBalanceOwing()
-      const isFromEFT = props.currentOrgPaymentType === PaymentTypes.EFT
-      const isEFTSelected = selectedPaymentMethod.value === PaymentTypes.EFT
-
-      if (isEFTSelected) {
+      const hasOutstandingEFTBalance = await hasEFTBalanceOwing()
+      if (!hasOutstandingEFTBalance) {
         warningDialog.value.close()
-        emit('save')
       } else {
-        if (!hasOutstandingBalance) {
-          warningDialog.value.close()
-        } else if (isFromEFT) {
-          await root.$router.push({
-            name: Pages.PAY_OUTSTANDING_BALANCE,
-            params: { orgId: props.currentOrganization.id },
-            query: { changePaymentType: props.currentSelectedPaymentMethod }
-          })
-        }
-        state.bcOnlineWarningMessage = 'This payment method will soon be retired. It is recommended to select a different payment method.'
+        await dealWithEFTOutstandingBalance()
       }
     }
 
-    onMounted(async () => {
-      paymentMethodSelected({ type: props.currentSelectedPaymentMethod }, false)
-      if (isPaymentEJV.value) {
-        await fetchCurrentOrganizationGLInfo(props.currentOrganization?.id)
+    // Purpose: reset the payment method without having to reload the component.
+    watch(() => props.currentSelectedPaymentMethod, (newValue) => {
+      state.selectedPaymentMethod = newValue
+    })
+
+    const { PAYMENT_METHODS, filteredPaymentMethods } = useProductPayment(props, state)
+    watch(() => [filteredPaymentMethods.value], () => {
+      if (props.isCreateAccount && state.selectedPaymentMethod) {
+        const paymentMethod = PAYMENT_METHODS[state.selectedPaymentMethod]
+        if (!paymentMethod?.supported) {
+          state.selectedPaymentMethod = ''
+          emit('payment-method-selected', state.selectedPaymentMethod)
+        }
       }
     })
 
+    onMounted(async () => {
+      paymentMethodSelected({ type: props.currentSelectedPaymentMethod }, false)
+      if (state.isPaymentEJV) {
+        await fetchCurrentOrganizationGLInfo(props.currentOrganization?.id)
+      }
+    })
     return {
       ...toRefs(state),
-      selectedPaymentMethod,
       paymentTypes,
-      padInfo,
-      isTouched,
       ejvPaymentInformationTitle,
-      allowedPaymentMethods,
-      forceEditModeBCOL,
-      isPaymentEJV,
       downloadEFTInstructions,
       paymentMethodSelected,
       getPADInfo,
@@ -500,7 +427,8 @@ export default defineComponent({
       cancelModal,
       continueModal,
       isGLInfoValid,
-      isChangePaymentEnabled
+      isChangePaymentEnabled,
+      filteredPaymentMethods
     }
   }
 })
@@ -518,8 +446,6 @@ export default defineComponent({
   border: 2px solid #fcba19;
   color: #495057;
   font-size: 12px;
-  margin-left: 4.5rem;
-  margin-right: 120px;
 }
 
 .w-100 {
@@ -539,10 +465,14 @@ export default defineComponent({
       border-color: var(--v-primary-base);
       color: var(--v-primary-base);
   }
+  .v-input--radio-group__input {
+    display: block
+  }
 }
 
 .payment-card {
-  transition: all ease-out 0.2s;
+  transition: all ease-out 0.3s, opacity 0.3s ease, background-color 0.3 ease;
+  color: $gray7 !important;
 
   &:hover {
     border-color: var(--v-primary-base) !important;
@@ -554,6 +484,13 @@ export default defineComponent({
                 0 2px 2px 0 rgba(0,0,0,.14),
                 0 1px 5px 0 rgba(0,0,0,.12) !important;
   }
+  &:focus:before {
+    opacity: 0;
+  }
+}
+
+.payment-card ::v-deep .v-icon.v-icon {
+    align-items: flex-start !important;
 }
 
 .theme--light.v-card.v-card--outlined.selected {
@@ -567,10 +504,6 @@ export default defineComponent({
 .payment-icon-container {
   flex: 0 0 auto;
   width: 4.5rem;
-}
-
-.payment-card-contents {
-  padding-left: 4.5rem;
 }
 
 .pad-form-container {
@@ -591,5 +524,13 @@ export default defineComponent({
 
 .flex-grow-1 {
   flex-grow: 1;
+}
+
+.v-card--disabled {
+  opacity: 0.8 !important;
+}
+
+.gl-ledger-info {
+  color: $gray7
 }
 </style>

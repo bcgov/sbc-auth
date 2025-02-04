@@ -1,3 +1,4 @@
+// Before adding more to the store, please think about creating new stores to move logic into.
 import {
   AccessType,
   Account,
@@ -94,10 +95,10 @@ export const useOrgStore = defineStore('org', () => {
     orgProductFeeCodes: [] as OrgProductFeeCode[],
     currentAccountFees: [] as AccountFee[],
     currentOrgPaymentDetails: null as OrgPaymentDetails,
-    isCurrentSelectedProductsPremiumOnly: false,
     resetAccountTypeOnSetupAccount: false, // this flag use to check need to reset accounttype select when moving back and forth in stepper
     vDisplayModeValue: '', // DisplayModeValues.VIEW_ONLY
-    originAccessType: undefined as string
+    originAccessType: undefined as string,
+    createGovmOrgId: -1
   })
 
   function $reset () {
@@ -130,10 +131,10 @@ export const useOrgStore = defineStore('org', () => {
     state.orgProductFeeCodes = [] as OrgProductFeeCode[]
     state.currentAccountFees = [] as AccountFee[]
     state.currentOrgPaymentDetails = null as OrgPaymentDetails
-    state.isCurrentSelectedProductsPremiumOnly = false
     state.resetAccountTypeOnSetupAccount = false
     state.vDisplayModeValue = ''
     state.originAccessType = undefined as string
+    state.createGovmOrgId = -1
   }
 
   /** Is True if the current account is premium. */
@@ -151,6 +152,12 @@ export const useOrgStore = defineStore('org', () => {
       canEditBusinessInfo.value
   })
 
+  function needStaffReview (code) {
+    const skipReviewTypes = [AccessType.GOVM]
+    const product = state.productList.find(product => product.code === code)
+    return !skipReviewTypes.includes(state.currentOrganization?.accessType as AccessType) && product.needReview
+  }
+
   const isBusinessAccount = computed<boolean>(() => {
     return state.currentOrganization?.isBusinessAccount === true
   })
@@ -163,7 +170,7 @@ export const useOrgStore = defineStore('org', () => {
   // This should work for STAFF on any org.
   const isStaffOrSbcStaff = computed<boolean>(() => {
     const currentOrgIsStaff = [Account.STAFF, Account.SBC_STAFF].includes(state.currentOrganization?.orgType as Account)
-    return currentOrgIsStaff || useUserStore().currentUser.roles.includes(Role.Staff)
+    return currentOrgIsStaff || useUserStore().currentUser?.roles.includes(Role.Staff)
   })
 
   function setAccessType (accessType:string) {
@@ -172,12 +179,6 @@ export const useOrgStore = defineStore('org', () => {
 
   function setMemberLoginOption (memberLoginOption:string) {
     state.memberLoginOption = memberLoginOption
-  }
-
-  function setGrantAccess (grantAccess: boolean) {
-    if (state.currentOrganization) {
-      state.currentOrganization = { ...state.currentOrganization, grantAccess }
-    }
   }
 
   function resetCurrentOrganisation () {
@@ -382,6 +383,7 @@ export const useOrgStore = defineStore('org', () => {
     const address = state.currentOrgAddress
     const paymentMethod = state.currentOrgPaymentType
     const padInfo: PADInfo = state.currentOrgPADInfo
+    const orgType = state.currentOrganizationType
 
     const currentSelectedProducts = state.currentSelectedProducts
     // setting product subscriptions in required format
@@ -390,11 +392,10 @@ export const useOrgStore = defineStore('org', () => {
         productCode: code
       }
     })
-
     const createRequestBody: CreateRequestBody = {
       name: org.name,
       accessType: state.accessType,
-      typeCode: org.orgType,
+      typeCode: orgType,
       productSubscriptions: productsSelected,
       isBusinessAccount: org.isBusinessAccount
     }
@@ -422,13 +423,12 @@ export const useOrgStore = defineStore('org', () => {
     const response = await OrgService.createOrg(createRequestBody)
     const organization = response?.data
     setCurrentOrganization(organization)
-    await resetoCurrentSelectedProducts()
     await addOrgSettings(organization)
     return response?.data
   }
 
   async function createGovmOrg (): Promise<Organization> {
-    const org: Organization = state.currentOrganization
+    const orgId = state.createGovmOrgId
     const address = state.currentOrgAddress
     const revenueAccount: GLInfo = state.currentOrgGLInfo
     const currentSelectedProducts = state.currentSelectedProducts
@@ -453,7 +453,7 @@ export const useOrgStore = defineStore('org', () => {
     }
 
     // need to get org id from state
-    const response = await OrgService.updateOrg(org.id, createRequestBody)
+    const response = await OrgService.updateOrg(orgId, createRequestBody)
     const organization = response?.data
     setCurrentOrganization(organization)
     await addOrgSettings(organization)
@@ -762,6 +762,10 @@ export const useOrgStore = defineStore('org', () => {
     // setting padinfo for showing details
     const padInfo = response?.data?.cfsAccount || {} as CFSAccountDetails
     setCurrentOrganizationPADInfo(padInfo)
+    // setting EJV for showing details
+    if (response?.data?.revenueAccount) {
+      setCurrentOrganizationGLInfo(response?.data?.revenueAccount)
+    }
     state.currentOrgPaymentDetails = response?.data
     return response?.data
   }
@@ -806,17 +810,20 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   async function resetAccountSetupProgress (): Promise<void> {
-    setGrantAccess(false)
+    // Grab this so we can indicate if the user can use EFT or not.
+    if (state.currentOrganization?.id) {
+      await getOrgPayments(state.currentOrganization?.id)
+    }
     setCurrentOrganization(undefined)
-    setSelectedAccountType(undefined)
-    setCurrentOrganizationType(undefined)
+    setSelectedAccountType(Account.PREMIUM)
+    setCurrentOrganizationAddress(undefined)
+    setCurrentOrganizationType(Account.PREMIUM)
     setCurrentOrganizationPaymentType(undefined)
     setCurrentOrganizationPADInfo(undefined)
     await resetoCurrentSelectedProducts()
   }
 
   async function resetAccountWhileSwitchingPremium (): Promise<void> {
-    setGrantAccess(false)
     // need to keep accesstype while resetting to know whenther the account is GOVM or not.
     setCurrentOrganization({ ...state.currentOrganization, ...{ name: '' } })
     setCurrentOrganizationAddress(undefined)
@@ -909,12 +916,10 @@ export const useOrgStore = defineStore('org', () => {
       productList = [...currentSelectedProducts, productCode]
     }
     state.currentSelectedProducts = productList
-    await currentSelectedProductsPremiumOnly()
   }
 
   async function resetoCurrentSelectedProducts (): Promise<any> {
     state.currentSelectedProducts = []
-    await currentSelectedProductsPremiumOnly()
   }
 
   // set product with subscriptionStatus active to selected product
@@ -923,18 +928,6 @@ export const useOrgStore = defineStore('org', () => {
     let currentSelectedProducts = []
     currentSelectedProducts = productList.filter(product => product.subscriptionStatus === ProductStatus.ACTIVE).map((prod) => (prod.code))
     state.currentSelectedProducts = currentSelectedProducts
-  }
-
-  async function currentSelectedProductsPremiumOnly (): Promise<any> {
-    const currentSelectedProducts = state.currentSelectedProducts
-    const productList = state.productList
-
-    let isPremiumOnly = false
-    if (currentSelectedProducts.length > 0) {
-      isPremiumOnly = productList.some(product => product.premiumOnly && currentSelectedProducts.includes(product.code))
-    }
-    state.isCurrentSelectedProductsPremiumOnly = isPremiumOnly
-    return isPremiumOnly
   }
 
   async function fetchCurrentOrganizationGLInfo (accountId: number): Promise<any> {
@@ -1071,6 +1064,12 @@ export const useOrgStore = defineStore('org', () => {
     }
   }
 
+  async function removeOrgProduct (productCode: string): Promise<OrgProduct> {
+    const orgId = state.currentOrganization?.id
+    const response = await OrgService.removeProduct(orgId, productCode)
+    return response?.data
+  }
+
   return {
     ...toRefs(state),
     isPremiumAccount,
@@ -1079,7 +1078,6 @@ export const useOrgStore = defineStore('org', () => {
     isBusinessAccount,
     setAccessType,
     setMemberLoginOption,
-    setGrantAccess,
     resetCurrentOrganisation,
     resetBcolDetails,
     setSelectedAccountType,
@@ -1156,7 +1154,6 @@ export const useOrgStore = defineStore('org', () => {
     refundInvoice,
     refundEFT,
     setSubscribedProducts,
-    currentSelectedProductsPremiumOnly,
     fetchCurrentOrganizationGLInfo,
     fetchOrgProductFeeCodes,
     createAccountFees,
@@ -1174,6 +1171,8 @@ export const useOrgStore = defineStore('org', () => {
     getNSFInvoices,
     downloadNSFInvoicesPDF,
     isGovnGovmOrg,
-    updateOrgMailingAddress
+    updateOrgMailingAddress,
+    needStaffReview,
+    removeOrgProduct
   }
 })

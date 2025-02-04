@@ -9,9 +9,9 @@
       :data-test="`div-product-${productDetails.code}`"
     >
       <div>
-        <header class="d-flex align-center">
+        <header class="d-flex">
           <div
-            v-if="hasDecisionNotBeenMade && !isBasicAccountAndPremiumProduct"
+            v-if="!hideCheckbox"
             class="pr-8"
             data-test="div-decision-not-made-product"
           >
@@ -21,45 +21,21 @@
               class="product-check-box ma-0 pa-0"
               hide-details
               :data-test="`check-product-${productDetails.code}`"
-              @change="selecThisProduct"
+              @change="selectThisProduct"
             >
               <template #label>
-                <div class="ml-2">
+                <div class="ml-2 product-card-contents">
                   <h3
                     class="title font-weight-bold product-title mt-n1"
                     :data-test="productDetails.code"
                   >
                     {{ productDescription(productDetails.code, productDetails.description) }}
-                    <v-tooltip
-                      v-if="productPremTooltipText(productDetails.code)"
-                      class="pa-2"
-                      content-class="tooltip"
-                      color="grey darken-4"
-                      max-width="350px"
-                      top
-                    >
-                      <template #activator="{ on }">
-                        <span
-                          v-if="productDetails.premiumOnly"
-                          class="product-title-info"
-                          v-on="on"
-                        >
-                          (<span class="underline-dotted">requires Premium Account</span>)
-                        </span>
-                      </template>
-                      <div class="py-3">
-                        <span>{{ productPremTooltipText(productDetails.code) }}</span>
-                      </div>
-                    </v-tooltip>
-                    <span
-                      v-else-if="productDetails.premiumOnly"
-                      class="product-title-info"
-                    > (requires Premium Account)</span>
                     <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
                   </h3>
                   <p
                     v-if="$te(productLabel.subTitle)"
                     v-sanitize="$t(productLabel.subTitle)"
+                    class="mt-2"
                   />
                 </div>
               </template>
@@ -82,36 +58,12 @@
                 :data-test="productDetails.code"
               >
                 {{ productDetails.description }}
-                <v-tooltip
-                  v-if="productPremTooltipText(productDetails.code)"
-                  class="pa-2"
-                  content-class="tooltip"
-                  color="grey darken-4"
-                  max-width="350px"
-                  top
-                >
-                  <template #activator="{ on }">
-                    <span
-                      v-if="productDetails.premiumOnly"
-                      class="product-title-info"
-                      v-on="on"
-                    >
-                      (<span class="underline-dotted">requires Premium Account</span>)
-                    </span>
-                  </template>
-                  <div class="py-3">
-                    <span>{{ productPremTooltipText(productDetails.code) }}</span>
-                  </div>
-                </v-tooltip>
-                <span
-                  v-else-if="productDetails.premiumOnly"
-                  class="product-title-info"
-                > (requires Premium Account)</span>
                 <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
               </h3>
               <p
                 v-if="$te(productLabel.subTitle)"
                 v-sanitize="$t(productLabel.subTitle)"
+                class="mt-2"
               />
             </div>
           </div>
@@ -120,7 +72,7 @@
             depressed
             color="primary"
             width="120"
-            class="font-weight-bold ml-auto"
+            class="font-weight-bold ml-auto mt-6"
             :aria-label="`Select  ${productDetails.description}`"
             :data-test="`btn-productDetails-${productDetails.code}`"
             text
@@ -142,8 +94,7 @@
             >mdi-chevron-down</v-icon></span>
           </v-btn>
         </header>
-
-        <div class="product-card-contents ml-9">
+        <div class="product-card-contents ml-10">
           <!-- Product Content Slot -->
           <slot name="productContentSlot" />
 
@@ -155,8 +106,24 @@
               <p
                 v-if="$te(productLabel.details)"
                 v-sanitize="$t(productLabel.details)"
-                class="mb-0"
               />
+              <p v-if="$te(productLabel.link)">
+                <v-btn
+                  large
+                  depressed
+                  color="primary"
+                  class="font-weight-bold pl-0"
+                  text
+                  :href="$t(productLabel.link)"
+                  target="_blank"
+                  rel="noopener"
+                  tag="a"
+                >
+                  <span>Visit Information Page</span>
+                  <span class="mdi mdi-open-in-new" />
+                </v-btn>
+              </p>
+
               <p
                 v-if="$te(productLabel.note)"
                 v-sanitize="$t(productLabel.note)"
@@ -171,19 +138,64 @@
                 v-display-mode="hasDecisionNotBeenMade ? false : viewOnly"
                 v-on="productFooter.events"
               />
-              <div v-if="showProductFee">
-                <v-divider class="my-6" />
-                <!-- This links to ProductFeeViewEdit. -->
-                <ProductFee
-                  :orgProduct="orgProduct"
-                  :orgProductFeeCodes="orgProductFeeCodes"
-                  :isProductActionLoading="isProductActionLoading"
-                  :isProductActionCompleted="isProductActionCompleted"
-                  @save:saveProductFee="saveProductFee"
-                />
-              </div>
             </div>
           </v-expand-transition>
+        </div>
+        <div class="ml-10 mt-2">
+          <v-label>
+            <P
+              v-if="paymentMethods.length > 0"
+              class="product-card-contents"
+            >
+              Supported payment methods:
+            </P>
+            <v-chip
+              v-for="method in paymentMethods"
+              :key="method"
+              x-small
+              label
+              class="mr-2 font-weight-bold product-payment-icons py-3 my-1"
+            >
+              <v-icon class="mr-1">
+                {{ paymentTypeIcon[method] }}
+              </v-icon>{{ paymentTypeLabel[method] }}
+            </v-chip>
+          </v-label>
+          <div v-if="showProductFee">
+            <v-divider class="my-4" />
+            <!-- This links to ProductFeeViewEdit. -->
+            <ProductFee
+              :orgProduct="orgProduct"
+              :orgProductFeeCodes="orgProductFeeCodes"
+              :isProductActionLoading="isProductActionLoading"
+              :isProductActionCompleted="isProductActionCompleted"
+              @save:saveProductFee="saveProductFee"
+            />
+          </div>
+          <div>
+            <v-expand-transition>
+              <v-alert
+                v-if="showPaymentMethodNotSupported"
+                class="mt-6 mb-4 alert-item alert-inner"
+                :icon="false"
+                prominent
+                outlined
+                type="warning"
+              >
+                <div class="alert-inner mb-0">
+                  <v-icon
+                    medium
+                  >
+                    mdi-alert
+                  </v-icon>
+                  <p class="alert__info mb-0 pl-3">
+                    <strong>Payment Method Not Supported:</strong> This product is not supported by your current payment
+                    method. Please choose a different payment type to use this product.
+                  </p>
+                </div>
+              </v-alert>
+            </v-expand-transition>
+          </div>
         </div>
         <div />
       </div>
@@ -193,198 +205,238 @@
 
 <script lang="ts">
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
-import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
-import { DisplayModeValues, Product as ProductEnum, ProductStatus } from '@/util/constants'
-import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import { DisplayModeValues, PaymentTypes, Product as ProductEnum, ProductStatus } from '@/util/constants'
+import { PropType, computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
+import { paymentTypeIcon, paymentTypeLabel, productDisplay } from '@/resources/display-mappers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
-import { productDisplay } from '@/resources/display-mappers'
+import { useOrgStore } from '@/stores'
 
 const TOS_NEEDED_PRODUCT = ['VS']
 
-@Component({
+export default defineComponent({
+  name: 'Product',
   components: {
     ProductTos,
     ProductFee
+  },
+  props: {
+    productDetails: { default: null as OrgProduct },
+    activeSubProduct: { default: null as OrgProduct },
+    orgProduct: { default: null as AccountFee },
+    orgProductFeeCodes: { type: Array as PropType<OrgProductFeeCode[]>, default: () => [] },
+    isProductActionLoading: { type: Boolean, default: false },
+    isProductActionCompleted: { type: Boolean, default: false },
+    userName: { type: String, default: '' },
+    orgName: { type: String, default: '' },
+    isSelected: { type: Boolean, default: false },
+    isexpandedView: { type: Boolean, default: false },
+    isAccountSettingsView: { type: Boolean, default: false },
+    canManageProductFee: { type: Boolean, default: false },
+    disableWhileEditingPayment: { type: Boolean, default: false },
+    isCreateAccount: { type: Boolean, default: false },
+    paymentMethods: { type: Array as PropType<string[]>, default: () => [] }
+  },
+  setup (props, { emit }) {
+    const orgStore = useOrgStore()
+    const state = reactive({
+      count: 0,
+      termsAccepted: false,
+      productSelected: props.isSelected,
+      viewOnly: DisplayModeValues.VIEW_ONLY,
+      showProductFee: computed(() => {
+        return props.canManageProductFee && props.orgProduct && props.orgProduct.product
+      }),
+      isTOSNeeded: computed(() => {
+        return TOS_NEEDED_PRODUCT.includes(props.productDetails.code)
+      }),
+      paymentMethodSupported: computed(() => {
+        const paymentMethod = orgStore.currentOrgPaymentType === PaymentTypes.CREDIT_CARD
+          ? PaymentTypes.DIRECT_PAY : orgStore.currentOrgPaymentType
+        return !orgStore.currentOrgPaymentType || props.paymentMethods.includes(paymentMethod)
+      }),
+      hasDecisionNotBeenMade: computed(() => {
+        // returns true if create account flow
+        if (!props.isAccountSettingsView) {
+          return true
+        }
+        return ([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(props.productDetails.subscriptionStatus)
+      }),
+      hideCheckbox: computed(() => {
+        const decisionMadeStatus = [ProductStatus.PENDING_STAFF_REVIEW, ProductStatus.REJECTED]
+        return (decisionMadeStatus as Array<string>).includes(props.productDetails.subscriptionStatus)
+      }),
+      // if TOS needed will inject component
+      // in future can use different components for different product
+      productFooter: computed(() => {
+        return {
+          id: 'tos',
+          component: ProductTos,
+          props: {
+            userName: props.userName,
+            orgName: props.orgName,
+            isTOSAlreadyAccepted: state.termsAccepted
+          },
+          events: { 'tos-status-changed': tosChanged },
+          ref: 'tosForm'
+        }
+      }),
+      productLabel: computed(() => {
+        let { code } = props.productDetails
+        let subTitle = `${code?.toLowerCase()}CodeSubtitle`
+        let details = `${code?.toLowerCase()}CodeDescription`
+        let link = `${code?.toLowerCase()}CodeDescriptionLink`
+        let note = `${code?.toLowerCase()}CodeNote`
+        let decisionMadeIcon = null
+        let decisionMadeColorCode = null
+
+        if (props.isAccountSettingsView) {
+          const status = props.productDetails.subscriptionStatus
+          switch (status) {
+            case ProductStatus.ACTIVE: {
+              subTitle = `${code?.toLowerCase()}CodeActiveSubtitle`
+              decisionMadeIcon = 'mdi-check-circle'
+              decisionMadeColorCode = 'success'
+              break
+            }
+            case ProductStatus.REJECTED: {
+              subTitle = `${code?.toLowerCase()}CodeRejectedSubtitle`
+              decisionMadeIcon = 'mdi-close-circle'
+              decisionMadeColorCode = 'error'
+              break
+            }
+            case ProductStatus.PENDING_STAFF_REVIEW: {
+              subTitle = 'productPendingSubtitle'
+              decisionMadeIcon = 'mdi-clock-outline'
+              break
+            }
+            default: {
+              break
+            }
+          }
+          // Swap subtitle and details for sub-product specific content
+          if (props.productDetails.code === ProductEnum.MHR && props.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
+            subTitle = `mhrQsCodeActiveSubtitle`
+            details = `${props.activeSubProduct.code?.toLowerCase()}CodeDescription`
+            note = ''
+          }
+        }
+        return { subTitle, details, link, decisionMadeIcon, decisionMadeColorCode, note }
+      }),
+      showPaymentMethodNotSupported: false
+    })
+
+    onMounted(() => {
+      state.productSelected = props.isAccountSettingsView ? !state.hasDecisionNotBeenMade : props.isSelected
+    })
+
+    watch(() => props.isSelected, (newValue) => {
+      // Only products with TOS need to be watched, as it may cause a submit error if applied to other products
+      if (TOS_NEEDED_PRODUCT.includes(props.productDetails.code)) {
+        state.productSelected = newValue
+      }
+    })
+
+    // Untested.
+    watch(() => state.hasDecisionNotBeenMade, (newValue) => {
+      if (!newValue) {
+        state.termsAccepted = true
+      }
+    })
+
+    function expand () {
+      const productCode = props.isexpandedView ? '' : props.productDetails.code
+      // emit selected product code to controll expand all product
+      emit('toggle-product-details', productCode)
+      return productCode
+    }
+
+    function selectThisProduct (event, emitFromTos = false) {
+      if (props.disableWhileEditingPayment) {
+        state.productSelected = !state.productSelected
+        // Triggers error message, state change is ignored.
+        emit('set-selected-product')
+        return
+      }
+      const productSubscribed = props.productDetails.subscriptionStatus === ProductStatus.ACTIVE
+      if (!props.isCreateAccount && !state.paymentMethodSupported && !productSubscribed) {
+        state.productSelected = false
+        state.showPaymentMethodNotSupported = true
+        setTimeout(() => {
+          state.showPaymentMethodNotSupported = false
+        }, 5000)
+        return
+      }
+
+      let forceRemove = false
+      // expand if tos needed
+      // as per new requirment, show expanded when user tries to click checkbox and not accepted TOS.
+      // need to collapse on uncheck. Since both are using same function emitFromTos will be true when
+      // click happend from TOS check box. then no need to collapse
+      if (state.isTOSNeeded && !state.termsAccepted) {
+        if (!emitFromTos) { // expand and collapse on click if click is not coming from TOS
+          expand()
+        }
+        // wait till user approve TOS or remove product selection from array if tos not accepted
+        forceRemove = state.productSelected
+        state.productSelected = false
+      }
+
+      let addorRemoveProduct // false is remove product
+
+      if (props.isAccountSettingsView && TOS_NEEDED_PRODUCT.includes(props.productDetails.code)) {
+        addorRemoveProduct = state.termsAccepted // not checking state.productSelected because it hasn't been updated yet
+      } else {
+        addorRemoveProduct = state.productSelected
+      }
+
+      const checkTerms = TOS_NEEDED_PRODUCT.includes(props.productDetails.code) && !productSubscribed
+
+      emit('set-selected-product', {
+        ...props.productDetails,
+        forceRemove,
+        addProductOnAccountAdmin: props.isAccountSettingsView ? addorRemoveProduct : undefined,
+        termsAccepted: checkTerms ? state.termsAccepted : undefined
+      })
+    }
+
+    function saveProductFee (data) {
+      emit('save:saveProductFee', data)
+    }
+
+    function tosChanged (termsAccepted: boolean) {
+      state.count++
+      state.termsAccepted = termsAccepted
+      // force select when tos accept
+      selectThisProduct(undefined, true)// no need to collapse on TOS accept
+    }
+
+    function productBadge (code: string) {
+      return LaunchDarklyService.getFlag(`product-${code}-status`)
+    }
+
+    function productPremTooltipText (code: string) {
+      return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
+    }
+
+    function productDescription (code: string, description: string) {
+      return productDisplay[code] || description
+    }
+
+    return {
+      ...toRefs(state),
+      paymentTypeIcon,
+      expand,
+      selectThisProduct,
+      productBadge,
+      productPremTooltipText,
+      saveProductFee,
+      paymentTypeLabel,
+      productDescription
+    }
   }
 })
-export default class Product extends Mixins(AccountMixin) {
-  @Prop({ default: undefined }) productDetails: OrgProduct
-  @Prop({ default: undefined }) activeSubProduct: OrgProduct
-  @Prop({ default: undefined }) orgProduct: AccountFee // product available for orgs
-  @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode // product
-  @Prop({ default: false }) isProductActionLoading: boolean // loading
-  @Prop({ default: false }) isProductActionCompleted: boolean // loading
-
-  @Prop({ default: '' }) userName: string
-  @Prop({ default: '' }) orgName: string
-  @Prop({ default: false }) isSelected: boolean
-  @Prop({ default: false }) isexpandedView: boolean
-  @Prop({ default: false }) isAccountSettingsView: boolean // to confirm if the rendering is from AccountSettings view
-  @Prop({ default: false }) isBasicAccount: boolean // to confirm if the current organization is basic and the product instance is premium only
-  @Prop({ default: false }) canManageProductFee: boolean
-
-  private termsAccepted: boolean = false
-  public productSelected:boolean = false
-  viewOnly = DisplayModeValues.VIEW_ONLY
-
-  $refs: {
-    tosForm: HTMLFormElement
-  }
-
-  @Watch('isSelected')
-  onisSelectedChange (newValue:boolean) {
-    // setting check box
-    this.productSelected = newValue
-  }
-  get showProductFee () {
-    return this.canManageProductFee && this.orgProduct && this.orgProduct.product
-  }
-
-  get productLabel () {
-    // this is mapping product code with lang file.
-    // lang file have subtitle and description with product code prefix.
-    // eg: pprCodeSubtitle, pprCodeDescription
-    // Also, returns check box icon and color if the product has been reviewed.
-    let { code } = this.productDetails
-    let subTitle = `${code?.toLowerCase()}CodeSubtitle`
-    let details = `${code?.toLowerCase()}CodeDescription`
-    let note = `${code?.toLowerCase()}CodeNote`
-    let decisionMadeIcon = null
-    let decisionMadeColorCode = null
-
-    if (this.isAccountSettingsView) {
-      const status = this.productDetails.subscriptionStatus
-      switch (status) {
-        case ProductStatus.ACTIVE: {
-          subTitle = `${code?.toLowerCase()}CodeActiveSubtitle`
-          decisionMadeIcon = 'mdi-check-circle'
-          decisionMadeColorCode = 'success'
-          break
-        }
-        case ProductStatus.REJECTED: {
-          subTitle = `${code?.toLowerCase()}CodeRejectedSubtitle`
-          decisionMadeIcon = 'mdi-close-circle'
-          decisionMadeColorCode = 'error'
-          break
-        }
-        case ProductStatus.PENDING_STAFF_REVIEW: {
-          subTitle = 'productPendingSubtitle'
-          decisionMadeIcon = 'mdi-clock-outline'
-          break
-        }
-        default: {
-          break
-        }
-      }
-      if (this.isBasicAccountAndPremiumProduct) {
-        subTitle = `${code?.toLowerCase()}CodeUnselectableSubtitle`
-        decisionMadeIcon = 'mdi-minus-box'
-      }
-      // Swap subtitle and details for sub-product specific content
-      if (this.productDetails.code === ProductEnum.MHR && this.activeSubProduct?.subscriptionStatus === ProductStatus.ACTIVE) {
-        subTitle = `mhrQsCodeActiveSubtitle`
-        details = `${this.activeSubProduct.code?.toLowerCase()}CodeDescription`
-        note = ''
-      }
-    }
-    return { subTitle, details, decisionMadeIcon, decisionMadeColorCode, note }
-  }
-
-  get isTOSNeeded () {
-    // check tos needed for product
-    return TOS_NEEDED_PRODUCT.includes(this.productDetails.code)
-  }
-
-  get isBasicAccountAndPremiumProduct () {
-    return this.isBasicAccount && this.productDetails.premiumOnly
-  }
-
-  get hasDecisionNotBeenMade () {
-    // returns true if create account flow
-    if (!this.isAccountSettingsView) {
-      return true
-    }
-    // returns true if product subscription status is unsubscribed and in account settings view
-    if (([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(this.productDetails.subscriptionStatus)) {
-      return true
-    }
-    this.termsAccepted = true
-    return false
-  }
-
-  public mounted () {
-    this.productSelected = this.isSelected
-  }
-
-  @Emit('toggle-product-details')
-  public expand () {
-    // emit selected product code to controll expand all product
-    return this.isexpandedView ? '' : this.productDetails.code
-  }
-
-  public tosChanged (termsAccepted:boolean) {
-    this.termsAccepted = termsAccepted
-    // force select when tos accept
-    this.selecThisProduct(undefined, true)// no need to collaps on TOS accept
-  }
-  // // this function will only used when we have to show TOS (in product and service dashboard)
-
-  // since event is first argument, we are using second to set emitFromTos
-  @Emit('set-selected-product')
-  // eslint-disable-next-line
-  public selecThisProduct (event, emitFromTos:boolean = false) {
-
-    let forceRemove = false
-    // expand if tos needed
-    // as per new requirment, show expanded when user tries to click checkbox and not accepted TOS.
-    // need to collapse on uncheck. Since both are using same function emitFromTos will be true when
-    // click happend from TOS check box. then no need to collapse
-    if (this.isTOSNeeded && !this.termsAccepted) {
-      if (!emitFromTos) { // expand and collapse on click if click is not coming from TOS
-        this.expand()
-      }
-      this.productSelected = false
-      // wait till user approve TOS or remove product selection from array if tos not accepted
-      forceRemove = true
-    }
-    return { ...this.productDetails, forceRemove }
-  }
-
-  // if TOS needed will inject component
-  // in future can use different components for different product
-  get productFooter () {
-    return {
-      id: 'tos',
-      component: ProductTos,
-      props: {
-        userName: this.userName,
-        orgName: this.orgName,
-        isTOSAlreadyAccepted: this.termsAccepted
-      },
-      events: { 'tos-status-changed': this.tosChanged },
-      ref: 'tosForm'
-    }
-  }
-
-  @Emit('save:saveProductFee')
-  saveProductFee (data) {
-    return data
-  }
-
-  public productBadge (code: string) {
-    return LaunchDarklyService.getFlag(`product-${code}-status`)
-  }
-
-  public productPremTooltipText (code: string) {
-    return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
-  }
-
-  public productDescription (code: string, description: string) {
-    return productDisplay[code] || description
-  }
-}
 </script>
 
 <style lang="scss" scoped>
@@ -403,11 +455,26 @@ export default class Product extends Mixins(AccountMixin) {
   }
   &.processing-card{
     border-color: var(--v-primary-base) !important;
+    border-width: 2px !important;
   }
 }
 
 .theme--light.v-card.v-card--outlined.selected {
-  border-color: var(--v-primary-base);
+  top: 0;
+}
+
+.product-card-contents {
+  color: $gray7;
+}
+
+.product-card ::v-deep .v-input__slot {
+    align-items: flex-start !important;
+}
+
+.product-payment-icons.v-chip.v-size--x-small.theme--light.v-chip:not(.v-chip--active){
+  background-color: $app-lt-blue ;
+  font-size: 12px;
+  color: #212529;
 }
 
 .label-color {
@@ -445,4 +512,18 @@ export default class Product extends Mixins(AccountMixin) {
     border-color: var(--v-grey-darken4) transparent transparent transparent;
   }
 
+  .alert-inner {
+    .v-icon {
+      color: $app-alert-orange;
+    }
+    background-color: $BCgovGold0 !important;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    opacity: 1 !important;
+  }
+  .alert__info {
+    flex: 1 1 auto;
+    color: $TextColorGray;
+  }
 </style>

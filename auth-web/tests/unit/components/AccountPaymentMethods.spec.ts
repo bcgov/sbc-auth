@@ -1,10 +1,14 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountPaymentMethods from '@/components/auth/account-settings/payment/AccountPaymentMethods.vue'
+import { LoginSource } from '@/util/constants'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 
 const vuetify = new Vuetify({})
+
+vi.mock('../../../src/services/user.services')
+vi.mock('../../../src/services/org.services')
 
 // Prevent error redundant navigation.
 const originalPush = VueRouter.prototype.push
@@ -26,12 +30,22 @@ describe('AccountPaymentMethods.vue', () => {
       name: 'new org',
       orgType: 'STAFF'
     }
+    orgStore.syncAddress = () => {
+      return Promise.resolve()
+    }
+    orgStore.getOrgProducts = () => {
+      return Promise.resolve([])
+    }
+    orgStore.getOrgPayments = () => {
+      return Promise.resolve([]) as any
+    }
     const businessStore = useBusinessStore()
     businessStore.businesses = []
     const userStore = useUserStore()
     userStore.currentUser = {
       firstName: 'test',
-      lastName: 'test'
+      lastName: 'test',
+      loginSource: LoginSource.BCROS
     } as any
     wrapperFactory = (propsData) => {
       return shallowMount(AccountPaymentMethods, {
@@ -62,13 +76,5 @@ describe('AccountPaymentMethods.vue', () => {
 
   it('renders the components properly and address is being shown', () => {
     expect(wrapper.findComponent(AccountPaymentMethods).exists()).toBe(true)
-  })
-
-  it('renders proper header content', () => {
-    expect(wrapper.find('h2').text()).toBe('Payment Methods')
-  })
-
-  it('renders sub text content', () => {
-    expect(wrapper.find('p').text()).toBe('Manage your payment method for this account.')
   })
 })

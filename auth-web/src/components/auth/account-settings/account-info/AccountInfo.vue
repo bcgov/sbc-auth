@@ -87,22 +87,24 @@
             </div>
           </div>
           <div class="nv-list-item mb-0">
-            <div
-              id="accountType"
-              class="name font-weight-bold"
-            >
-              Account Type
-            </div>
-            <div class="value-column">
+            <template v-if="accountType !== OrgAccountTypes.PREMIUM">
               <div
-                class="value"
-                aria-labelledby="accountType"
+                id="accountType"
+                class="name font-weight-bold"
               >
-                <div class="value__title">
-                  {{ accountType }}
+                Account Type
+              </div>
+              <div class="value-column">
+                <div
+                  class="value"
+                  aria-labelledby="accountType"
+                >
+                  <div class="value__title">
+                    {{ accountType }}
+                  </div>
                 </div>
               </div>
-            </div>
+            </template>
           </div>
           <AccountAccessType
             :organization="currentOrganization"
@@ -112,23 +114,6 @@
             @update:viewOnlyMode="viewOnlyMode"
             @update:updateAndSaveAccessTypeDetails="updateAndSaveAccessTypeDetails"
           />
-          <div
-            v-if="currentOrganization.bcolAccountDetails"
-            class="nv-list-item mb-6"
-          >
-            <div
-              id="accountName"
-              class="name mt-3 font-weight-bold"
-            >
-              Linked BC Online Account Details
-            </div>
-            <div class="value">
-              <LinkedBCOLBanner
-                :bcolAccountName="currentOrganization.bcolAccountName"
-                :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-              />
-            </div>
-          </div>
           <v-divider class="my-6" />
         </div>
 
@@ -292,14 +277,13 @@
 
 <script lang="ts">
 import { AccessType, AccountStatus, Permission, Role, SuspensionReason } from '@/util/constants'
-import { CreateRequestBody, OrgBusinessType } from '@/models/Organization'
+import { CreateRequestBody, OrgAccountTypes, OrgBusinessType } from '@/models/Organization'
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { useAccount, useAccountChangeHandler } from '@/composables'
 import AccountAccessType from '@/components/auth/account-settings/account-info/AccountAccessType.vue'
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
 import AccountMailingAddress from '@/components/auth/account-settings/account-info/AccountMailingAddress.vue'
 import { Address } from '@/models/address'
-import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
 import { useCodesStore } from '@/stores/codes'
@@ -309,7 +293,6 @@ import { useUserStore } from '@/stores/user'
 export default defineComponent({
   components: {
     OrgAdminContact,
-    LinkedBCOLBanner,
     ModalDialog,
     AccountDetails,
     AccountMailingAddress,
@@ -327,7 +310,6 @@ export default defineComponent({
       currentOrgAddress,
       permissions,
       getAccountFromSession,
-      isPremiumAccount,
       anonAccount,
       isGovmAccount,
       isStaffAccount,
@@ -368,8 +350,10 @@ export default defineComponent({
         userStore.currentUser.roles.includes(Role.StaffSuspendAccounts)
       )),
       isDeactivateButtonVisible: computed(() => currentOrganization.value?.statusCode !== AccountStatus.INACTIVE),
-      canChangeAccessType: computed(() => userStore.currentUser.roles.includes(Role.StaffManageAccounts)) &&
-      !userStore.currentUser.roles.includes(Role.ContactCentreStaff),
+      canChangeAccessType: computed(() => (
+        userStore.currentUser.roles.includes(Role.StaffManageAccounts) &&
+        !userStore.currentUser.roles.includes(Role.ContactCentreStaff)
+      )),
       isAdminContactViewable: computed(() => [Permission.VIEW_ADMIN_CONTACT].some(per => permissions.value.includes(per))),
       isAccountStatusActive: computed(() => currentOrganization.value.statusCode === AccountStatus.ACTIVE),
       accountType: computed(() => {
@@ -378,7 +362,7 @@ export default defineComponent({
         } else if (isSbcStaffAccount.value) {
           return 'SBC Staff'
         }
-        return isPremiumAccount.value ? 'Premium' : 'Basic'
+        return 'Premium'
       }),
       isAddressInfoIncomplete: computed(() => (
         currentOrgAddress.value ? Object.keys(currentOrgAddress.value).length === 0 : true
@@ -642,7 +626,8 @@ export default defineComponent({
       closeSuspensionCompleteDialog,
       checkBaseAddressValidity,
       updateAddress,
-      updateOrgMailingAddress
+      updateOrgMailingAddress,
+      OrgAccountTypes
     }
   }
 })

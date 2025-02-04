@@ -1,8 +1,6 @@
-import { Account, LDFlags, PaymentTypes, SessionStorageKeys } from '@/util/constants'
-
 import CommonUtils from './common-util'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { NameRequest } from '@/models/business'
+import { SessionStorageKeys } from '@/util/constants'
 
 export default class ConfigHelper {
   static async fetchConfig () {
@@ -241,22 +239,6 @@ export default class ConfigHelper {
   static accountSettingsRoute () {
     const currentAccountJson = ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}'
     return `/account/${JSON.parse(currentAccountJson).id || 0}/settings`
-  }
-
-  static paymentsAllowedPerAccountType () {
-    if (LaunchDarklyService.getFlag(LDFlags.EnableCreditCardPremium, false)) {
-      return {
-        [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
-        [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.CREDIT_CARD, PaymentTypes.BCOL ],
-        [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ]
-      }
-    }
-
-    return {
-      [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
-      [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ],
-      [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ]
-    }
   }
 
   static async setNrCredentials (nameRequest: NameRequest) {

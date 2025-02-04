@@ -38,24 +38,14 @@ describe('Deactivated card.vue', () => {
       router,
       i18n,
       propsData: {
-        type: Account.BASIC
+        type: Account.PREMIUM
       }
     })
 
     expect(wrapper.vm).toBeTruthy()
-    expect(wrapper.props('type')).toBe(Account.BASIC)
+    expect(wrapper.props('type')).toBe(Account.PREMIUM)
   })
 
-  it('assert subtitle for a default org', () => {
-    wrapper = mount(DeactivateCard, {
-      vuetify,
-      router,
-      i18n
-    })
-
-    expect(wrapper.props('type')).not.toBe(Account.PREMIUM)
-    expect(wrapper.text()).not.toContain('The Pre-Authorized Debit Agreement') // this is only for premium orgs
-  })
   it('assert subtitle for a premium org', async () => {
     wrapper = mount(DeactivateCard, {
       vuetify,
@@ -68,18 +58,5 @@ describe('Deactivated card.vue', () => {
 
     expect(wrapper.props('type')).toBe(Account.PREMIUM)
     expect(wrapper.text()).toContain('The Pre-Authorized Debit Agreement') // this is only for premium orgs
-  })
-  it('assert subtitle for a basic org', async () => {
-    wrapper = mount(DeactivateCard, {
-      vuetify,
-      router,
-      i18n,
-      propsData: {
-        type: Account.BASIC
-      }
-    })
-
-    expect(wrapper.props('type')).toBe(Account.BASIC)
-    expect(wrapper.text()).not.toContain('The Pre-Authorized Debit Agreement') // this is only for premium orgs
   })
 })

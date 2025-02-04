@@ -221,14 +221,6 @@ export default defineComponent({
       type: String as PropType<string>,
       default: ''
     },
-    changePaymentType: {
-      type: String as PropType<string>,
-      default: ''
-    },
-    statementSummary: {
-      type: Object,
-      default: () => ({})
-    },
     stepForward: {
       type: Function as PropType<() => void>,
       required: false,
@@ -238,15 +230,15 @@ export default defineComponent({
   },
   emits: ['step-forward'],
   setup (props, { root }) {
-    const { statementSummary } = toRefs(props)
     const orgStore = useOrgStore()
     const state = reactive({
       statementsOwing: [],
       invoicesOwing: 0,
-      loading: false,
+      loading: true,
       handlingPayment: false,
       statementOwingError: false,
-      selectedPaymentMethod: 'cc'
+      selectedPaymentMethod: 'cc',
+      statementsSummary: computed(() => orgStore.statementsSummary)
     })
     const { downloadStatement } = useDownloader(orgStore, state)
 
@@ -254,7 +246,7 @@ export default defineComponent({
       state.handlingPayment = true
       const payment: Payment = await orgStore.createOutstandingAccountPayment(true)
       const baseUrl = ConfigHelper.getAuthContextPath()
-      const queryParams = `?paymentId=${payment?.id}&changePaymentType=${props.changePaymentType}`
+      const queryParams = `?paymentId=${payment?.id}`
       const returnUrl = `${baseUrl}/${Pages.MAIN}/${props.orgId}/${Pages.PAY_OUTSTANDING_BALANCE}${queryParams}`
       const encodedUrl = encodeURIComponent(returnUrl)
 
@@ -264,15 +256,11 @@ export default defineComponent({
     }
 
     function goBack () {
-      this.$router.push(`${Pages.ACCOUNT_SETTINGS}/${Pages.PAYMENT_OPTION}`)
+      root.$router.push(`${Pages.ACCOUNT_SETTINGS}/${Pages.PRODUCT_SETTINGS}`)
     }
 
     function goNext () {
-      if (state.selectedPaymentMethod === 'pad') {
-        props.stepForward()
-      } else {
-        handlePayment()
-      }
+      handlePayment()
     }
 
     async function getStatementsOwing () {
@@ -291,8 +279,11 @@ export default defineComponent({
       state.loading = true
       state.statementOwingError = false
       try {
-        await getStatementsOwing()
-        state.invoicesOwing = statementSummary.value.totalInvoiceDue
+        await Promise.all([getStatementsOwing(), orgStore.getStatementsSummary()])
+        state.invoicesOwing = state.statementsSummary.totalInvoiceDue
+        if (state.invoicesOwing === 0) {
+          goBack()
+        }
       } catch (error) {
         state.statementOwingError = true
         console.error('Error fetching statements owing.', error)
