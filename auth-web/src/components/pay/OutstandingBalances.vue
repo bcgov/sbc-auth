@@ -234,7 +234,7 @@ export default defineComponent({
     const state = reactive({
       statementsOwing: [],
       invoicesOwing: 0,
-      loading: false,
+      loading: true,
       handlingPayment: false,
       statementOwingError: false,
       selectedPaymentMethod: 'cc',

@@ -4,9 +4,9 @@ import OutstandingBalances from '@/components/pay/OutstandingBalances.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import { axios } from '@/util/http-util'
 import can from '@/directives/can'
-import sinon from 'sinon'
+import { useOrgStore } from '@/stores'
+import { StatementListResponse, StatementsSummary } from '@/models/statement'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -14,10 +14,11 @@ Vue.use(VueRouter)
 describe('OutstandingBalances.vue', () => {
   let wrapper: any
   const localVue = createLocalVue()
+  const orgStore = useOrgStore()
   localVue.directive('can', can)
   const vuetify = new Vuetify({})
-  let sandbox: any
   let statementsResponse: any
+
 
   beforeEach(async () => {
     statementsResponse = {
@@ -54,11 +55,20 @@ describe('OutstandingBalances.vue', () => {
       'limit': 100,
       'page': 1,
       'total': 1
+      }
+    orgStore.getStatementsList = async (_, __) => {
+      return Promise.resolve(statementsResponse as any)
     }
 
-    sandbox = sinon.createSandbox()
-    const get = sandbox.stub(axios, 'get')
-    get.returns(new Promise(resolve => resolve({ data: statementsResponse })))
+    orgStore.getStatementsSummary = async (orgId) => {
+      return Promise.resolve({
+        oldestDueDate: '2025-01-01',
+        totalDue: 50,
+        totalInvoiceDue: 50
+      })
+    }
+
+    orgStore.statementsSummary.totalInvoiceDue = 50
 
     wrapper = mount(OutstandingBalances, {
       propsData: {
@@ -73,7 +83,6 @@ describe('OutstandingBalances.vue', () => {
   afterEach(() => {
     wrapper.destroy()
     sessionStorage.clear()
-    sandbox.restore()
 
     vi.resetModules()
     vi.clearAllMocks()
