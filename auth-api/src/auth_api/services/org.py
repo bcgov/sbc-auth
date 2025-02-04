@@ -151,9 +151,10 @@ class Org:  # pylint: disable=too-many-public-methods
 
         payment_account_status, error = Org._create_payment_for_org(mailing_address, org, payment_info, True)
 
-        # TODO do we have to check anything like this below?
         if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
-            raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, error)
+            logger.error(f"Account update payment Error: {error}")
+            # TODO do we have to check anything like this below?
+            # raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, error)
 
         # Send an email to staff to remind review the pending account
         is_staff_review_needed = access_type == AccessType.GOVN.value or (
