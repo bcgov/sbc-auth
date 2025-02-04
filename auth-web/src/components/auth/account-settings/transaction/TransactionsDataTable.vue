@@ -139,18 +139,36 @@
           </v-col>
         </v-row>
       </template>
+      <template #item-slot-downloads="{ item }">
+        <div
+          v-if="item.statusCode === InvoiceStatus.COMPLETED || item.statusCode === InvoiceStatus.PAID"
+          class="receipt"
+          @click="downloadReceipt(item)"
+        >
+          <v-icon
+            color="primary"
+          >
+            mdi-file-pdf-outline
+          </v-icon>
+          <span>
+            Receipt
+          </span>
+        </div>
+      </template>
     </BaseVDataTable>
   </div>
 </template>
 
 <script lang="ts">
 import { BaseVDataTable, DatePicker, IconTooltip } from '@/components'
-import { InvoiceStatus, PaymentTypes } from '@/util/constants'
+import { InvoiceStatus, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Ref, computed, defineComponent, nextTick, ref, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import { DataOptions } from 'vuetify'
+import PaymentService from '@/services/payment.services'
 import { Transaction } from '@/models'
 import _ from 'lodash'
 import { invoiceStatusDisplay } from '@/resources/display-mappers'
@@ -254,6 +272,13 @@ export default defineComponent({
       }
     })
 
+    async function downloadReceipt (item: Transaction) {
+      const currentAccount = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
+      const receipt = await PaymentService.postReceipt(item, currentAccount.id)
+      const filename = `bcregistry-receipts-${item.id}.pdf`
+      CommonUtils.fileDownload(receipt.data, filename, 'application/pdf')
+    }
+
     const displayDate = (val: string) => {
       const date = moment.utc(val).toDate()
       return CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY')
@@ -289,13 +314,18 @@ export default defineComponent({
       updateDateRange,
       loadTransactionList,
       getInvoiceStatus,
-      datePickerValue
+      datePickerValue,
+      downloadReceipt
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.receipt {
+  cursor: pointer;
+  color: var(--v-primary-base);
+}
 .section-heading {
   background-color: $app-background-blue;
   border-radius: 5px 5px 0 0;

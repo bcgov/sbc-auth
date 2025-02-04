@@ -16,6 +16,7 @@ import {
 import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 
 import { AxiosPromise } from 'axios'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Payment } from '@/models/Payment'
 import { axios } from '@/util/http-util'
@@ -50,6 +51,18 @@ export default class PaymentService {
   static refundInvoice (invoiceId: string, refundPayload: RefundRequest): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}/refunds`
     return axios.post(url, refundPayload)
+  }
+
+  static postReceipt (invoice: any, accountId: string): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${invoice.id}/receipts`
+    const headers = {
+      'Accept': 'application/pdf',
+      'Account-Id': accountId
+    }
+    const body = {
+      filingDateTime: CommonUtils.formatDateToHumanReadable(invoice.createdOn)
+    }
+    return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
   }
 
   static refundEFT (refundPayload: EftRefundRequest): AxiosPromise<any> {

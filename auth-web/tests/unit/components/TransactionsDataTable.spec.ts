@@ -81,7 +81,8 @@ describe('TransactionsDataTable tests', () => {
     expect(titles.at(6).text()).toBe('Invoice Reference Number')
     expect(titles.at(7).text()).toBe('Payment Method')
     expect(titles.at(8).text()).toBe('Payment Status')
-    expect(titles.at(9).text()).toBe('')
+    expect(titles.at(9).text()).toBe('Downloads')
+    expect(titles.at(10).text()).toBe('')
     // table items
     const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
     expect(itemRows.length).toBe(transactionResponse.items.length)
@@ -98,7 +99,8 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(6).text()).toBe('REG000123442')
     expect(row1Cells.at(7).text()).toBe('No Fee')
     expect(row1Cells.at(8).text()).toBe('CompletedJanuary 24, 2023')
-    expect(row1Cells.at(9).text()).toBe('')
+    expect(row1Cells.at(9).text()).toBe('Receipt')
+    expect(row1Cells.at(10).text()).toBe('')
     // clear filters is hidden
     expect(wrapper.find('.clear-btn').exists()).toBe(false)
   })
@@ -126,7 +128,8 @@ describe('TransactionsDataTable tests', () => {
     expect(titles.at(10).text()).toBe('Invoice Reference Number')
     expect(titles.at(11).text()).toBe('Payment Method')
     expect(titles.at(12).text()).toBe('Payment Status')
-    expect(titles.at(13).text()).toBe('')
+    expect(titles.at(13).text()).toBe('Downloads')
+    expect(titles.at(14).text()).toBe('')
     // table items
     const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
     expect(itemRows.length).toBe(transactionResponse.items.length)
@@ -146,7 +149,8 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(10).text()).toBe('REG000123442')
     expect(row1Cells.at(11).text()).toBe('No Fee')
     expect(row1Cells.at(12).text()).toBe('CompletedJanuary 24, 2023')
-    expect(row1Cells.at(13).text()).toBe('')
+    expect(row1Cells.at(13).text()).toBe('Receipt')
+    expect(row1Cells.at(14).text()).toBe('')
   })
 
   it('shows date picker when date filter clicked', async () => {
