@@ -62,16 +62,6 @@
     >
       <v-spacer />
       <v-btn
-        large
-        class="save-btn px-9"
-        color="primary"
-        :loading="isProductActionLoading"
-        aria-label="Save product fee"
-        @click="saveProductFee()"
-      >
-        <span class="save-btn__label">Save</span>
-      </v-btn>
-      <v-btn
         outlined
         large
         depressed
@@ -82,6 +72,16 @@
         @click="updateViewOnlyMode(true)"
       >
         Cancel
+      </v-btn>
+      <v-btn
+        large
+        class="save-btn px-9"
+        color="primary"
+        :loading="isProductActionLoading"
+        aria-label="Save product fee"
+        @click="saveProductFee()"
+      >
+        <span class="save-btn__label">Save</span>
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -197,10 +197,22 @@ export default defineComponent({
 })
 </script>
 <style lang="scss" scoped>
+@import '@/assets/scss/theme.scss';
 .w-100 {
   width: 100%;
 }
 .prod-fee-label {
   width: 13%;
+}
+::v-deep {
+  .v-select__selections {
+    padding-top: 32px !important;
+  }
+  .v-select__selection {
+    color: $gray7 !important;
+  }
+  .v-input__slot {
+    color: $gray7 !important;
+  }
 }
 </style>

@@ -1,100 +1,66 @@
 <template>
   <div>
-    <v-alert
-      v-if="!editMode"
+    <v-divider class="my-2" />
+    <div
+      v-if="!isEditing"
       dark
       color="primary"
-      class="ma-0 py-3 px-5"
+      class="ma-0"
     >
-      <div class="bcol-acc d-flex justify-space-between align-center">
-        <div v-if="bcolAccountDetails">
-          <div class="bcol-acc__name font-weight-bold">
+      <div class="d-flex">
+        <div
+          v-if="bcolAccountDetails"
+          class="d-block"
+        >
+          <div class="font-weight-bold">
             {{ bcolAccountName }}
           </div>
-          <ul class="bcol-acc__meta">
-            <li>
-              Account No: <strong>{{ bcolAccountDetails.accountNumber }}</strong>
-            </li>
-            <li>
-              Prime Contact ID: <strong>{{ bcolAccountDetails.userId }}</strong>
-            </li>
-          </ul>
-        </div>
-        <div v-if="showUnlinkAccountBtn">
-          <v-btn
-            v-can:CHANGE_PAYMENT_METHOD.disable
-            outlined
-            class="font-weight-bold"
-            data-test="unlink-bcol-button"
-            @click="unlinkAccount"
-          >
-            Remove
-          </v-btn>
-        </div>
-
-        <div>
-          <v-btn
-            v-if="showEditBtn"
-            v-can:CHANGE_PAYMENT_METHOD.disable
-            color="primary"
-            plain
-            depressed
-            x-large
-            class="font-weight-bold"
-            data-test="edit-bcol-button"
-            @click="editAccount"
-          >
-            <v-icon class="ml-2">
-              mdi-pencil
-            </v-icon>
-            Edit
-          </v-btn>
+          <div>Account No: <strong>{{ bcolAccountDetails.accountNumber }}</strong></div>
+          <div>Prime Contact ID: <strong>{{ bcolAccountDetails.userId }}</strong></div>
         </div>
       </div>
-    </v-alert>
+    </div>
     <BcolLogin
-      v-if="editMode"
+      v-if="isEditing"
       :hideLinkBtn="true"
       @emit-bcol-info="emitBcolInfo"
     />
   </div>
 </template>
-
 <script lang="ts">
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({
+export default defineComponent({
+  name: 'LinkedBCOLBanner',
   components: {
     BcolLogin
+  },
+  props: {
+    bcolAccountName: {
+      type: String,
+      default: ''
+    },
+    bcolAccountDetails: {
+      type: Object,
+      default: () => ({} as BcolAccountDetails)
+    },
+    isEditing: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ['unlink-account', 'emit-bcol-info'],
+  setup (props, { emit }) {
+    const emitBcolInfo = (bcolProfile: BcolProfile) => {
+      emit('emit-bcol-info', bcolProfile)
+    }
+    return {
+      emitBcolInfo
+    }
   }
 })
-export default class LinkedBCOLBanner extends Vue {
-  @Prop({ default: false }) showUnlinkAccountBtn: boolean
-  @Prop({ default: false }) showEditBtn: boolean
-  @Prop({ default: false }) forceEditMode: boolean
-  @Prop({ default: '' }) bcolAccountName: string
-  @Prop({ default: () => ({} as BcolAccountDetails) }) bcolAccountDetails: BcolAccountDetails
-  editMode: boolean = false // user can edit the bcol details
-
-  private async mounted () {
-    this.editMode = this.forceEditMode || Object.keys(this.bcolAccountDetails).length === 0 || false
-  }
-
-  @Emit()
-  unlinkAccount () {
-  }
-
-  @Emit('emit-bcol-info')
-  emitBcolInfo (bcolProfile: BcolProfile) {
-    return bcolProfile
-  }
-
-  editAccount () {
-    this.editMode = true
-  }
-}
 </script>
 
 <style lang="scss" scoped>

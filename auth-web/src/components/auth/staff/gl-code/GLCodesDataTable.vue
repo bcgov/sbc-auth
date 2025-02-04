@@ -134,7 +134,8 @@ export default class GLCodesDataTable extends Vue {
   private customSortActive (items, index, isDescending) {
     const isDesc = isDescending.length > 0 && isDescending[0]
     items.sort((a, b) => {
-      return (isDesc) ? (a[index[0]] < b[index[0]] ? -1 : 1) : (b[index[0]] < a[index[0]] ? -1 : 1)
+      const comparison = a[index[0]] - b[index[0]]
+      return isDesc ? -comparison : comparison
     })
     return items
   }

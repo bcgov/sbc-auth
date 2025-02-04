@@ -33,8 +33,9 @@ function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
   const permissions:string[] = useOrgStore().permissions
   const customeEl = el as CustomHTMLElement
   const okayToAccess = permissions.indexOf(requestedAction) >= 0
+  const conditional = binding.value === true || binding.value === undefined
   // if not okay , hide or disable
-  if (!okayToAccess) {
+  if (conditional && !okayToAccess) {
     if (behaviour === 'hide') {
       commentNode(el, node)
     } else if (behaviour === 'disable' && isCard === false) {

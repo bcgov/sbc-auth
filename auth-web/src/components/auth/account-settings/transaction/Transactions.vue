@@ -173,7 +173,7 @@ export default defineComponent({
     const isLoading = ref(false)
 
     const isTransactionsAllowed = computed((): boolean => {
-      return [Account.BASIC, Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
+      return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
         .includes(currentOrganization.value.orgType as Account) &&
         [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
     })

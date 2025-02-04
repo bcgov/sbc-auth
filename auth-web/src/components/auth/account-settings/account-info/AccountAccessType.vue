@@ -34,7 +34,7 @@
                   <span data-test="txt-selected-access-type">{{ getAccessTypeText }}</span>
                 </div>
                 <div
-                  v-if="isChangeButtonEnabled"
+                  v-if="isAccessTypeChangeButtonEnabled"
                 >
                   <span
                     class="primary--text cursor-pointer"
@@ -158,8 +158,8 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account } from '@/util/constants'
 import { computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import { AccessType } from '@/util/constants'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
 export default defineComponent({
@@ -192,12 +192,9 @@ export default defineComponent({
       changeAccessTypeToRegularDialog: null,
       selectedAccessType: undefined,
       isLoading: false,
-      // Only allow PREMIUM -> GOVN and GOVN -> PREMIUM
-      isChangeButtonEnabled: computed<boolean>(() => {
-        // Check access type and orgtype must be premium
+      isAccessTypeChangeButtonEnabled: computed<boolean>(() => {
         const accessType: any = props.organization.accessType
-        const isAllowedAccessType = props.organization.orgType === Account.PREMIUM &&
-            [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID, AccessType.GOVN].includes(accessType)
+        const isAllowedAccessType = [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID, AccessType.GOVN].includes(accessType)
         return isAllowedAccessType && props.canChangeAccessType // canChangeAccessType is the role based access passed as a property
       }),
       getAccessTypeText: computed<string>(() => {

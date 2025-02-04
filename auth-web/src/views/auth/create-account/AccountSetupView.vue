@@ -66,121 +66,52 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
-import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import { mapActions, mapState } from 'pinia'
-import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
-import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
-import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
-import { Action } from 'pinia-class'
+import { defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
+import AccountCreate from '@/components/auth/create-account/AccountCreate.vue'
 import ConfigHelper from '@/util/config-helper'
-import { Contact } from '@/models/contact'
-import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
-import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
-import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
-import { User } from '@/models/user'
+import { PADInfoValidation } from '@/models/Organization'
+import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
+import Stepper from '@/components/auth/common/stepper/Stepper.vue'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
-import { namespace } from 'vuex-class'
+import { useAccountCreate } from '@/composables/account-create-factory'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
-// This will be taken out with Vue3.
-const AuthModule = namespace('auth')
 
-@Component({
+export default defineComponent({
+  name: 'AccountSetupView',
   components: {
-    CreateAccountInfoForm,
-    UserProfileForm,
-    AccountTypeSelector,
-    AccountCreateBasic,
-    AccountCreatePremium,
-    PaymentMethodSelector,
-    SelectProductService,
     Stepper,
-    ModalDialog,
-    PremiumChooser
+    ModalDialog
   },
-  computed: {
-    ...mapState(useUserStore, [
-      'userContact'
-    ]),
-    ...mapState(useOrgStore, [
-      'currentOrgPaymentType'
-    ])
+  props: {
+    redirectToUrl: {
+      type: String,
+      default: ''
+    },
+    skipConfirmation: {
+      type: Boolean,
+      default: false
+    }
   },
-  methods: {
-    ...mapActions(useUserStore,
-      [
-        'createUserContact',
-        'updateUserContact',
-        'getUserProfile',
-        'createAffidavit',
-        'updateUserFirstAndLastName'
-      ]),
-    ...mapActions(useOrgStore,
-      [
-        'createOrg',
-        'validatePADInfo',
-        'syncMembership',
-        'syncOrganization'
-      ])
-  }
-})
-export default class AccountSetupView extends Vue {
-  private readonly currentOrgPaymentType!: string
-  protected readonly userContact!: Contact
-  private readonly createOrg!: () => Promise<Organization>
-  private readonly validatePADInfo!: () => Promise<PADInfoValidation>
-  private readonly createUserContact!: (contact?: Contact) => Contact
-  private readonly updateUserContact!: (contact?: Contact) => Contact
-  private readonly getUserProfile!: (identifer: string) => User
-  readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  readonly syncMembership!: (orgId: number) => Promise<Member>
-  private errorTitle = 'Account creation failed'
-  private errorText = ''
-  private isLoading: boolean = false
-  private isCurrentUserSettingLoading: boolean = false
-  @Prop({ default: '' }) redirectToUrl !: string
-  @Prop({ default: false }) skipConfirmation !: boolean
-
-  @AuthModule.Getter('isAuthenticated') readonly isAuthenticated!: boolean
-  @Action(useUserStore) readonly getUserAccountSettings!: () => Promise<any>
-
-  $refs: {
-    errorDialog: InstanceType<typeof ModalDialog>
-  }
-
-  private stepperConfig: Array<StepConfiguration> =
+  setup (props, { root }) {
+    const errorDialog = ref<InstanceType<typeof ModalDialog>>()
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
+    const state = reactive({
+      errorTitle: 'Account creation failed',
+      errorText: '',
+      isLoading: false,
+      isCurrentUserSettingLoading: false
+    })
+    const stepperConfig =
     [
-      {
-        title: 'Select Product and Services',
-        stepName: 'Products and Services',
-        component: SelectProductService,
-        componentProps: {
-          isStepperView: true,
-          noBackButton: true
-        }
-      },
-      {
-        title: 'Select Account Type',
-        stepName: 'Select Account Type',
-        component: AccountTypeSelector,
-        componentProps: {}
-      },
       {
         title: 'Account Information',
         stepName: 'Account Information',
-        component: AccountCreateBasic,
-        componentProps: {},
-        alternate: {
-          title: 'Account Information',
-          stepName: 'Account Information',
-          component: AccountCreatePremium,
-          componentProps: {}
-        }
+        component: AccountCreate,
+        componentProps: {}
       },
       {
         title: 'Account Administrator Information',
@@ -189,111 +120,97 @@ export default class AccountSetupView extends Vue {
         componentProps: {
           isStepperView: true
         }
+      },
+      {
+        title: 'Select Products and Payment',
+        stepName: 'Products and Payment',
+        component: SelectProductPayment,
+        componentProps: {
+          isStepperView: true
+        }
       }
     ]
 
-  private beforeMount () {
-    const paymentMethodStep = {
-      title: 'Payment Method',
-      stepName: 'Payment Method',
-      component: PaymentMethodSelector,
-      componentProps: {}
-    }
-    this.stepperConfig.push(paymentMethodStep)
-    // use the new premium chooser account when flag is enabled
-    this.stepperConfig[2].alternate.component = PremiumChooser
-  }
+    async function verifyAndCreateAccount () {
+      state.isLoading = true
+      let isProceedToCreateAccount = false
+      if (orgStore.currentOrgPaymentType === PaymentTypes.PAD) {
+        isProceedToCreateAccount = await verifyPAD()
+      } else {
+        isProceedToCreateAccount = true
+      }
 
-  private async verifyAndCreateAccount () {
-    this.isLoading = true
-    let isProceedToCreateAccount = false
-    if (this.currentOrgPaymentType === PaymentTypes.PAD) {
-      isProceedToCreateAccount = await this.verifyPAD()
-    } else {
-      isProceedToCreateAccount = true
+      if (isProceedToCreateAccount) {
+        createAccount()
+      }
     }
 
-    if (isProceedToCreateAccount) {
-      this.createAccount()
-    }
-  }
-
-  private async verifyPAD () {
-    const verifyPad: PADInfoValidation = await this.validatePADInfo()
-    if (!verifyPad) {
+    async function verifyPAD () {
+      const verifyPad: PADInfoValidation = await orgStore.validatePADInfo()
+      if (!verifyPad) {
       // proceed to create account even if the response is empty
-      return true
-    }
-    if (verifyPad?.isValid) {
+        return true
+      }
+      if (verifyPad?.isValid) {
       // create account if PAD info is valid
-      return true
-    } else {
-      this.isLoading = false
-      this.errorText = 'Bank information validation failed'
-      if (verifyPad?.message?.length) {
-        let msgList = ''
-        verifyPad.message.forEach((msg) => {
-          msgList += `<li>${msg}</li>`
-        })
-        this.errorText = `<ul style="list-style-type: none;">${msgList}</ul>`
+        return true
+      } else {
+        state.isLoading = false
+        state.errorText = 'Bank information validation failed'
+        if (verifyPad?.message?.length) {
+          let msgList = ''
+          verifyPad.message.forEach((msg) => {
+            msgList += `<li>${msg}</li>`
+          })
+          state.errorText = `<ul style="list-style-type: none;">${msgList}</ul>`
+        }
+        errorDialog.value.open()
+        return false
       }
-      this.$refs.errorDialog.open()
-      return false
     }
-  }
 
-  private async createAccount () {
-    this.isLoading = true
-    try {
-      const organization = await this.createOrg()
-      await this.saveOrUpdateContact()
-      await this.getUserProfile('@me')
-      await this.syncOrganization(organization.id)
-      await this.syncMembership(organization.id)
-      // remove GOVN accoutn type from session
-      ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
-      // Remove with Vue 3
-      this.$store.commit('updateHeader')
-      this.$router.push('/setup-account-success')
-    } catch (err) {
+    async function createAccount () {
+      state.isLoading = true
+      try {
+        const organization = await orgStore.createOrg()
+        await saveOrUpdateContact()
+        await userStore.getUserProfile('@me')
+        await orgStore.syncOrganization(organization.id)
+        await orgStore.syncMembership(organization.id)
+        // remove GOVN account type from session
+        ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
+        // Remove with Vue 3
+        root.$store.commit('updateHeader')
+        root.$router.push('/setup-account-success')
+      } catch (err) {
       // eslint-disable-next-line no-console
-      console.error(err)
-      this.isLoading = false
-      switch (err?.response?.status) {
-        case 409:
-          this.errorText =
-                  'An account with this name already exists. Try a different account name.'
-          break
-        case 400:
-          switch (err.response.data?.code) {
-            case 'MAX_NUMBER_OF_ORGS_LIMIT':
-              this.errorText = 'Maximum number of accounts reached'
-              break
-            case 'ACTIVE_AFFIDAVIT_EXISTS':
-              this.errorText = err.response.data.message || 'Affidavit already exists'
-              break
-            default:
-              this.errorText = 'An error occurred while attempting to create your account.'
-          }
-          break
-        default:
-          this.errorText =
-                  'An error occurred while attempting to create your account.'
+        console.error(err)
+        state.isLoading = false
+        useAccountCreate().handleCreateAccountError(state, err)
+        errorDialog.value.open()
       }
-      this.$refs.errorDialog.open()
+    }
+
+    async function saveOrUpdateContact () {
+      if (userStore.userContact) {
+        await userStore.updateUserContact()
+      } else {
+        await userStore.createUserContact()
+      }
+    }
+
+    function closeError () {
+      errorDialog.value.close()
+    }
+
+    return {
+      ...toRefs(state),
+      stepperConfig,
+      verifyAndCreateAccount,
+      createAccount,
+      closeError,
+      errorDialog
     }
   }
-
-  private async saveOrUpdateContact () {
-    if (this.userContact) {
-      await this.updateUserContact()
-    } else {
-      await this.createUserContact()
-    }
-  }
-
-  closeError () {
-    this.$refs.errorDialog.close()
-  }
-}
+})
 </script>

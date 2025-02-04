@@ -108,12 +108,12 @@ describe('Product.vue', () => {
     expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeTruthy()
   })
 
-  it('active product should not display checkbox', async () => {
+  it('active product should display checkbox', async () => {
     pprProduct.subscriptionStatus = ProductStatus.ACTIVE
     wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true })
 
-    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
-    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
+    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeFalsy()
+    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeTruthy()
 
     const getDecisionMadeSettings = wrapper.vm.productLabel
     expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-check-circle')
@@ -145,26 +145,6 @@ describe('Product.vue', () => {
     expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-close-circle')
     expect(getDecisionMadeSettings.decisionMadeColorCode).toBe('error')
     expect(wrapper.vm.hasDecisionNotBeenMade).toBeFalsy()
-  })
-
-  it('premium product should be disabled in basic account settings', async () => {
-    pprProduct.subscriptionStatus = ProductStatus.NOT_SUBSCRIBED
-    pprProduct.premiumOnly = true
-    wrapper = wrapperFactory({
-      productDetails: pprProduct,
-      isexpandedView: false,
-      isAccountSettingsView: true,
-      isBasicAccount: true
-    })
-
-    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
-    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
-
-    const getDecisionMadeSettings = wrapper.vm.productLabel
-    expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-minus-box')
-    expect(getDecisionMadeSettings.decisionMadeColorCode).toBeNull()
-    expect(wrapper.vm.hasDecisionNotBeenMade).toBeTruthy()
-    expect(wrapper.vm.isBasicAccountAndPremiumProduct).toBeTruthy()
   })
 
   it('creation flow should display check box', async () => {

@@ -1,7 +1,7 @@
 
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import { useOrgStore, useUserStore } from '@/stores'
-import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
+import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 
@@ -10,7 +10,7 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-describe('SelectProductService.vue', () => {
+describe('SelectProductPayment.vue', () => {
   let wrapper: any
   let wrapperFactory: any
 
@@ -46,7 +46,7 @@ describe('SelectProductService.vue', () => {
     const router = new VueRouter()
 
     wrapperFactory = (propsData) => {
-      return shallowMount(SelectProductService, {
+      return shallowMount(SelectProductPayment, {
         localVue,
         router,
         vuetify,
@@ -70,6 +70,6 @@ describe('SelectProductService.vue', () => {
   })
 
   it('renders the components properly and address is being shown', () => {
-    expect(wrapper.find(SelectProductService).exists()).toBe(true)
+    expect(wrapper.find(SelectProductPayment).exists()).toBe(true)
   })
 })

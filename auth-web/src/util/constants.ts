@@ -111,15 +111,14 @@ export enum Pages {
     AFFIDAVIT_COMPLETE = 'upload-affidavit',
     LOGIN = 'login',
     PAY_OUTSTANDING_BALANCE = 'pay-outstanding-balance',
-    PAYMENT_OPTION = 'payment-option',
-    ACCOUNT_HOLD = 'account-hold'
+    ACCOUNT_HOLD = 'account-hold',
+    PRODUCT_SETTINGS = 'product-settings'
 }
 
 export enum Account {
     // ANONYMOUS = 'ANONYMOUS',
     PREMIUM = 'PREMIUM',
     BASIC = 'BASIC',
-    UNLINKED_PREMIUM = 'UNLINKED_PREMIUM', // premium accounts without bcol linking
     STAFF = 'STAFF',
     SBC_STAFF = 'SBC_STAFF'
 }
@@ -443,7 +442,6 @@ export enum Permission {
     VIEW_ACCOUNT = 'VIEW_ACCOUNT',
     TRANSACTION_HISTORY = 'TRANSACTION_HISTORY',
     MANAGE_STATEMENTS = 'MANAGE_STATEMENTS',
-    VIEW_PAYMENT_METHODS = 'VIEW_PAYMENT_METHODS',
     VIEW_ADMIN_CONTACT = 'VIEW_ADMIN_CONTACT',
     RESET_OTP = 'RESET_OTP',
     MAKE_PAYMENT = 'MAKE_PAYMENT',
@@ -460,7 +458,8 @@ export enum Permission {
     EDIT_USER = 'EDIT_USER',
     VIEW_BUSINESS_REGISTRY_DASHBOARD = 'VIEW_BUSINESS_REGISTRY_DASHBOARD',
     VIEW_LAUNCH_TITLES = 'VIEW_LAUNCH_TITLES',
-    VIEW_CONTINUATION_AUTHORIZATION_REVIEWS = 'VIEW_CONTINUATION_AUTHORIZATION_REVIEWS'
+    VIEW_CONTINUATION_AUTHORIZATION_REVIEWS = 'VIEW_CONTINUATION_AUTHORIZATION_REVIEWS',
+    CHANGE_PAYMENT_METHOD = 'CHANGE_PAYMENT_METHOD'
 }
 
 export enum LDFlags {
@@ -472,7 +471,6 @@ export enum LDFlags {
     EnableBusinessNrSearch = 'enable-business-nr-search',
     EnableBusinessRegistryDashboard = 'enable-business-registry-dashboard',
     EnableDetailsFilter = 'enable-transactions-detail-filter',
-    EnableEFTPaymentMethod = 'enable-eft-payment-method',
     EnablePaymentChangeFromEFT = 'enable-payment-change-from-eft',
     EnableInvoluntaryDissolution = 'enable-involuntary-dissolution',
     IaSupportedEntities = 'ia-supported-entities',
@@ -489,7 +487,6 @@ export enum LDFlags {
     AllowableBusinessSearchTypes = 'allowable-business-search-types',
     AllowableBusinessPasscodeTypes = 'allowable-business-passcode-types',
     EnableAffiliationDelegation = 'enable-affiliation-delegation',
-    EnableCreditCardPremium = 'enable-credit-card-premium',
     EnableEFTBalanceByPAD = 'enable-eft-balance-by-pad',
     EnableDRSLookup = 'enable-drs-lookup', // Document Record Services
 }

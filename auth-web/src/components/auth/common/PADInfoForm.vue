@@ -1,13 +1,13 @@
 <template>
-  <div v-can:CHANGE_PAD_INFO.disable.card>
+  <div v-can:CHANGE_PAD_INFO.disable.card="!isCreateAccount">
     <template v-if="isAcknowledgeNeeded">
-      <p class="mb-6">
+      <p class="mb-4">
         The Canadian Payment Association requires a confirmation period
         of (3) days prior to your first pre-authorized debit deduction.
         The administrator of this account will receive a written confirmation
         of your pre-authorized debit agreement prior to the first deduction.
       </p>
-      <p class="mb-10 font-weight-bold">
+      <p class="mb-4 font-weight-bold">
         {{ padInfoSubtitle }}
       </p>
     </template>
@@ -186,17 +186,16 @@ export default defineComponent({
     isInitialAcknowledged: { type: Boolean, default: false },
     isInitialTOSAccepted: { type: Boolean, default: false },
     isTOSNeeded: { type: Boolean, default: true },
+    isCreateAccount: { type: Boolean, default: false },
     padInformation: { default: () => { return {} as PADInfo } },
     checkErrors: { type: Boolean, default: false }
   },
   emits: ['emit-pre-auth-debit-info', 'is-pre-auth-debit-form-valid', 'is-pad-info-touched'],
   setup (props, { emit }) {
-    // refs
     const preAuthDebitForm = ref(null) as HTMLFormElement
     const orgStore = useOrgStore()
     const currentOrgPADInfo = computed(() => orgStore.currentOrgPADInfo)
 
-    // static vars
     const accountMask = CommonUtils.accountMask()
 
     const institutionNumberRules = [
@@ -220,16 +219,16 @@ export default defineComponent({
       showPremiumPADInfo: computed((): boolean => props.isChangeView),
       acknowledgementLabel: computed((): string => {
         return (state.showPremiumPADInfo)
-          ? 'I understand that services will continue to be billed to the linked BC Online account until the mandatory' +
+          ? 'I understand that services will not be billed to PAD until the mandatory' +
           ' (3) day confirmation period has ended.'
-          : 'I understand that this account will not be able to perform any transactions until the mandatory' +
+          : 'I understand that this account will not be able to perform any PAD transactions until the mandatory' +
           ' (3) day confirmation period for pre-authorized debit has ended.'
       }),
       padInfoSubtitle: computed((): string => {
         return (state.showPremiumPADInfo)
-          ? 'Services will continue to be billed to the linked BC Online account until the mandatory' +
+          ? 'Services will not be billed to PAD until the mandatory' +
           ' (3) day confirmation period has ended.'
-          : 'This account will not be able to perform any transactions until the mandatory' +
+          : 'This account will not be able to perform any PAD transactions until the mandatory' +
           ' (3) day confirmation period has ended.'
       }),
       acknowledgeColor: computed((): string => props.checkErrors && !state.isAcknowledged ? 'error--text' : ''),
@@ -245,7 +244,6 @@ export default defineComponent({
       })
     }) as unknown) as PADInfoFormState
 
-    // emits
     const emitIsPreAuthDebitFormValid = () => {
       const acknowledge = (props.isAcknowledgeNeeded) ? state.isAcknowledged : true
       const tosAccepted = (props.isTOSNeeded) ? state.isTOSAccepted : true
@@ -269,7 +267,6 @@ export default defineComponent({
       emit('emit-pre-auth-debit-info', padInfo)
     }
 
-    // watch bank info
     watch(() => [state.accountNumber, state.institutionNumber, state.transitNumber], () => {
       // only trigger after component has initialized (values are updated in mounted)
       if (state.ready) {
@@ -279,14 +276,12 @@ export default defineComponent({
       }
     }, { deep: true })
 
-    // methods
     const updateTermsAccepted = (isAccepted: boolean) => {
       state.isTOSAccepted = isAccepted
       state.isTouched = true
       emitPreAuthDebitInfo()
     }
 
-    // setup
     onMounted(async () => {
       const padInfo = (Object.keys(props.padInformation).length)
         ? props.padInformation : currentOrgPADInfo.value as PADInfo
@@ -340,5 +335,10 @@ export default defineComponent({
 
   .error--text ::v-deep .v-icon {
     color: var(--v-error-base) !important;
+  }
+  .acknowledge-needed {
+    span {
+      color: $gray7 !important;
+    }
   }
 </style>

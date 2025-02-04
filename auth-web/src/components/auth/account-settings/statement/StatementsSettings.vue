@@ -39,7 +39,7 @@
           <fieldset class="mb-5">
             <legend>Statement Period</legend>
             <div
-              v-if="isEFT()"
+              v-if="isEFTPaymentMethod"
               class="mt-2"
             >
               Statement for electronic funds transfer will be issued monthly.
@@ -218,12 +218,11 @@
 </template>
 
 <script lang="ts">
-import { LDFlags, PaymentTypes } from '@/util/constants'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { StatementListItem, StatementNotificationSettings, StatementRecipient, StatementSettings } from '@/models/statement'
 import { computed, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { PaymentTypes } from '@/util/constants'
 import { useOrgStore } from '@/stores/org'
 
 export default {
@@ -253,12 +252,8 @@ export default {
       isEFTPaymentMethod: computed<boolean>(() => orgStore.currentOrgPaymentDetails?.paymentMethod === PaymentTypes.EFT)
     })
 
-    const isEFT = () => {
-      const enableEFTPaymentMethod: boolean = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod, false)
-      return enableEFTPaymentMethod && state.isEFTPaymentMethod
-    }
     const isFrequencyLocked = (frequency: StatementListItem) => {
-      return isEFT() && frequency.frequency !== state.frequencySelected
+      return state.isEFTPaymentMethod && frequency.frequency !== state.frequencySelected
     }
 
     const prepareAutoCompleteList = async () => {
@@ -286,7 +281,7 @@ export default {
         await orgStore.syncActiveOrgMembers()
         await orgStore.fetchStatementSettings()
         await orgStore.getStatementRecipients()
-        if (isEFT()) {
+        if (state.isEFTPaymentMethod) {
           state.frequencySelected = state.statementSettings?.frequencies[2].frequency
         } else {
           state.frequencySelected = state.statementSettings?.currentFrequency?.frequency || state.statementSettings?.frequencies[0].frequency
@@ -363,7 +358,7 @@ export default {
     }
 
     const showFrequencyChangeDate = (frequency: StatementListItem) => {
-      if (!isEFT()) {
+      if (!state.isEFTPaymentMethod) {
         return (frequency.frequency === state.frequencySelected) && (frequency.frequency !== state.statementSettings?.currentFrequency?.frequency)
       }
     }
@@ -405,7 +400,6 @@ export default {
     return {
       ...toRefs(state),
       isFrequencyLocked,
-      isEFT,
       prepareAutoCompleteList,
       openSettings,
       closeSettings,

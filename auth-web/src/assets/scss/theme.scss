@@ -10,15 +10,17 @@
 
 // Gray Palette
 $gray0: #f8f9fa;
-$gray1: #f1f3f5;
+$gray1: #f1f3f5; // Primary Background and Form Fields
 $gray2: #e9ecef;
 $gray3: #dee2e6;
 $gray4: #ced4da;
 $gray5: #adb5bd;
 $gray6: #868e96;
-$gray7: #495057;
+$gray7: #495057; //Text Mid Gray
 $gray8: #343a40;
-$gray9: #212529;
+$gray9: #212529; //Text Dark Gray
+$grayLight: #757575; //Text/Light Gray
+
 
 // BC GOV BLUE PALETTE
 $BCgovBlue0: #e0e7ed;
@@ -48,7 +50,7 @@ $BCgovABlue3: #0846ff;
 $BCgovABlue4: #003bee;
 
 // BC GOV GOLD PALETTE
-$BCgovGold0: #fff7e3;
+$BCgovGold0: #fff7e3; // Caution Background
 $BCgovGold1: #feeaba;
 $BCgovGold2: #fedd8c;
 $BCgovGold3: #fdcf5e;
@@ -77,21 +79,21 @@ $BCgovInputBG: #ffffff;
 // Font Colors
 $BCgovFontColorInverted: #ffffff;
 $BCgovBlack: #000000;
-$bcgovBorderblue:#38598a;
+$bcgovBorderblue:#38598a; // Non-clickable icon, helpful hint specialty text and special graphics
 // Warning Colors
 $BCgovOrangeWarning: #EF6A01;
 
 // App Colors
-$app-blue: #1669bb; // same as the Vuetify theme primary
-$app-lt-blue: #E2E8EE; // LOW OPACITY PRIMARY BLUE
-$app-background-blue: #E4EDF7; // Hover Background Blue
+$app-blue: #1669bb; // same as the Vuetify theme primary Link / Button / Active Icons
+$app-lt-blue: #E2E8EE; // LOW OPACITY PRIMARY BLUE - BG/Gray2
+$app-background-blue: #E4EDF7; // Hover Background Blue - Specialty Highlights
 $app-dk-blue: #38598a;
 $app-green: #2E8540;
 $app-red: #D3272C;
-$app-background-error: #FAE9E9;
+$app-background-error: #FAE9E9; // Important or warning background
 $app-alert-orange: #F8661A;
 
-$table-green: #E8F5E9;
+$table-green: #E8F5E9; // New Registration etc
 
 // p, span tag text color incase needs to be same as vuetify component text
 $TextColorGray: #00000099;
@@ -108,3 +110,5 @@ $px-20: 1.2500rem;
 $px-22: 1.3750rem;
 $px-24: 1.5000rem;
 $px-32: 2.0000rem;
+
+
