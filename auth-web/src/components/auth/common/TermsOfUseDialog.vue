@@ -12,7 +12,6 @@
       v-model="termsAccepted"
       color="primary"
       class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
-      :disabled="!canCheckTerms"
       required
       data-test="check-termsAccepted"
       @change="emitTermsAcceptanceStatus"
@@ -91,7 +90,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, ref, watch } from '@vue/composition-api'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
 import { useUserStore } from '@/stores/user'
 
@@ -117,6 +116,11 @@ export default defineComponent({
 
     const tooltipTxt = computed(() => 'Please read and agree to the Terms Of Use')
     const termsColor = computed(() => !termsAccepted.value && props.checkErrors ? 'error--text' : '')
+
+    watch(() => props.isAlreadyAccepted, (newVal) => {
+      termsAccepted.value = newVal
+      canCheckTerms.value = newVal
+    })
 
     onMounted(() => {
       termsDialog.value = false
@@ -208,8 +212,12 @@ h2 {
 
 .terms-checkbox {
   pointer-events: auto !important;
+  color: rgb(33,37,41) !important;
+  opacity: 1 !important;
+  span {
+      color: $gray7 !important;
+  }
 }
-
 .form__btns {
   display: flex;
   justify-content: flex-end;

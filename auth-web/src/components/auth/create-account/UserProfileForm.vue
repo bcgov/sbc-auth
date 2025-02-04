@@ -6,13 +6,13 @@
   >
     <p
       v-if="isStepperView"
-      class="mb-9"
+      class="mb-9 profile-subtitle"
     >
       Enter your contact information. Once your account is created, you may add additional users and assign roles.
     </p>
     <p
       v-if="isAffidavitUpload"
-      class="mb-7"
+      class="mb-7 profile-subtitle"
     >
       This will be reviewed by Registries staff and the account will be approved
       when authenticated.
@@ -77,7 +77,7 @@
         </h4>
         <div
           v-if="!isBCEIDUser"
-          class="mb-2"
+          class="mb-2 profile-subtitle"
         >
           This is your legal name as it appears on your BC Services Card.
         </div>
@@ -185,8 +185,8 @@
         <v-btn
           v-if="isStepperView || isAffidavitUpload"
           large
-          depressed
-          color="default"
+          outlined
+          color="primary"
           data-test="btn-back"
           @click="goBack"
         >
@@ -228,6 +228,7 @@
           v-if="!isAffidavitUpload"
           :showConfirmPopup="isStepperView"
           :isEmit="true"
+          :newStyleStepper="true"
           @click-confirm="cancel"
         />
       </v-col>
@@ -647,5 +648,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
   font-size: 1.25rem !important;
   font-weight: 700;
   letter-spacing: -0.02rem;
+}
+.profile-subtitle {
+  color: $gray7;
 }
 </style>

@@ -17,7 +17,7 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-const allowedAccountTypes = [Account.BASIC, Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
+const allowedAccountTypes = [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
 
 async function beforeEachSetup (wrapper: any, sandbox: any, accountType: Account = Account.PREMIUM) {
   const localVue = createLocalVue()

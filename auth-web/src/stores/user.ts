@@ -1,7 +1,6 @@
 import { DocumentUpload, User, UserProfileData, UserSettings } from '@/models/user'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
 import { computed, reactive, toRefs } from '@vue/composition-api'
-
 import CommonUtils from '@/util/common-util'
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
@@ -31,7 +30,9 @@ export const useUserStore = defineStore('user', () => {
     userProfileData: undefined as UserProfileData,
     redirectAfterLoginUrl: '' as string,
     roleInfos: undefined as RoleInfo[],
-    currentUserAccountSettings: undefined as UserSettings[]
+    currentUserAccountSettings: undefined as UserSettings[],
+    accountSettingWarning: false as boolean,
+    hasPaymentMethodChanged: false as boolean
   })
 
   function $reset () {
@@ -48,6 +49,8 @@ export const useUserStore = defineStore('user', () => {
     state.redirectAfterLoginUrl = '' as string
     state.roleInfos = undefined as RoleInfo[]
     state.currentUserAccountSettings = undefined as UserSettings[]
+    state.accountSettingWarning = false as boolean
+    state.hasPaymentMethodChanged = false as boolean
   }
 
   const termsOfUseVersion = computed(() => state.userProfile?.userTerms?.termsOfUseAcceptedVersion)
@@ -72,6 +75,14 @@ export const useUserStore = defineStore('user', () => {
 
   function setUserProfileData (userProfile: UserProfileData | undefined) {
     state.userProfileData = userProfile
+  }
+
+  function setAccountSettingWarning (warningDialog: boolean) {
+    state.accountSettingWarning = warningDialog
+  }
+
+  function setHasPaymentMethodChanged (warningDialog: boolean) {
+    state.hasPaymentMethodChanged = warningDialog
   }
 
   function loadUserInfo () {
@@ -220,7 +231,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function getUserAccountSettings () {
-    const response = await UserService.getUserAccountSettings(this.context.state['userProfile'].keycloakGuid)
+    const response = await UserService.getUserAccountSettings(state.userProfile?.keycloakGuid)
     if (response?.data) {
       // filter by account type and sort by name(label)
       const orgs = response.data.filter(userSettings =>
@@ -247,6 +258,8 @@ export const useUserStore = defineStore('user', () => {
     setNotaryContact,
     setUserProfileData,
     setNotaryInformation,
+    setAccountSettingWarning,
+    setHasPaymentMethodChanged,
     reset,
     resetOTPAuthenticator,
     saveUserTerms,

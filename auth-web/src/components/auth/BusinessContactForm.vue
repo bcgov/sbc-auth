@@ -208,8 +208,6 @@ export default class BusinessContactForm extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
   // Tighten up some of the spacing between rows
   [class^="col"] {
     padding-top: 0;

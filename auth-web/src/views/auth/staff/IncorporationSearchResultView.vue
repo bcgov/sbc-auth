@@ -59,11 +59,11 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account } from '@/util/constants'
 import { Action, State } from 'pinia-class'
 import { Business, BusinessSearchResultDto } from '@/models/business'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
+import { AccessType } from '@/util/constants'
 import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import GeneratePasscodeView from '@/views/auth/staff/GeneratePasscodeView.vue'
@@ -167,7 +167,12 @@ export default class IncorporationSearchResultView extends Vue {
   ]
 
   formatType (org:BusinessSearchResultDto): string {
-    let orgTypeDisplay = org?.orgType ? org?.orgType === Account.BASIC ? 'Basic' : 'Premium' : 'N/A'
+    let orgTypeDisplay
+    if (org?.orgType) {
+      orgTypeDisplay = 'Premium'
+    } else {
+      orgTypeDisplay = 'N/A'
+    }
     if (org?.accessType === AccessType.ANONYMOUS) {
       return 'Director Search'
     }

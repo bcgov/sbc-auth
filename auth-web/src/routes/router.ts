@@ -51,7 +51,7 @@ import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
 import NonBcscAccountCreationSuccessView from '@/views/auth/create-account/non-bcsc/NonBcscAccountCreationSuccessView.vue'
-import NonBcscAccountSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAccountSetupView.vue'
+import NonBcscAccountSetupView from '@/views/auth/create-account/NonBcscAccountSetupView.vue'
 import NonBcscAdminInviteSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAdminInviteSetupView.vue'
 import NonBcscInfoView from '@/views/auth/create-account/non-bcsc/NonBcscInfoView.vue'
 import PADTermsAndConditionsView from '@/views/auth/PADTermsAndConditionsView.vue'
@@ -142,10 +142,9 @@ export function getRoutes (): RouteConfig[] {
   const teamManagement = () => import('../components/auth/account-settings/team-management/TeamManagement.vue')
   const accountLoginOption = () =>
     import('../components/auth/account-settings/login-options/AccountSettingsLoginOption.vue')
-  const accountPaymentOption = () => import('../components/auth/account-settings/payment/AccountPaymentMethods.vue')
   const transaction = () => import('../components/auth/account-settings/transaction/Transactions.vue')
   const statements = () => import('../components/auth/account-settings/statement/Statements.vue')
-  const productPackage = () => import('../components/auth/account-settings/product/ProductPackage.vue')
+  const productPackage = () => import('../components/auth/account-settings/product/ProductPayment.vue')
   const activityLog = () => import('../components/auth/account-settings/activity-log/ActivityLog.vue')
   const developerAccess = () => import('../components/auth/account-settings/advance-settings/DeveloperAccess.vue')
 
@@ -327,12 +326,6 @@ export function getRoutes (): RouteConfig[] {
           component: accountLoginOption
         },
         {
-          path: 'payment-option',
-          name: 'payment-option',
-          component: accountPaymentOption,
-          props: true
-        },
-        {
           path: 'transactions',
           name: 'transactions',
           component: transaction,
@@ -380,7 +373,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/setup-account',
       name: 'setupaccount',
       component: AccountSetupLanding,
-      props: (route) => ({ redirectToUrl: route.query.redirectToUrl, skipConfirmation: route.query.skipConfirmation }),
+      props: (route) => ({ redirectToUrl: route.query.redirectToUrl, skipConfirmation: Boolean(route.query.skipConfirmation) }),
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
@@ -590,8 +583,7 @@ export function getRoutes (): RouteConfig[] {
       component: PayOutstandingBalanceView,
       props: (route) => (
         { orgId: route.params.orgId.toString(),
-          paymentId: route.query.paymentId,
-          changePaymentType: route.query.changePaymentType
+          paymentId: route.query.paymentId
         }),
       meta: { requiresAuth: true, requiresProfile: true }
     },

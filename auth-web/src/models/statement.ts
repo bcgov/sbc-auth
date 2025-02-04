@@ -26,6 +26,7 @@ export interface StatementSettings {
 export interface StatementsSummary {
   oldestDueDate?: string
   totalDue: number
+  totalInvoiceDue: number
 }
 
 export interface Frequencies {

@@ -46,7 +46,6 @@ export const useBusinessStore = defineStore('business', () => {
     state.businesses = []
   }
 
-  // Grabs from Org store.
   const currentOrganization = computed<Organization>(() => {
     return useOrgStore().currentOrganization
   })

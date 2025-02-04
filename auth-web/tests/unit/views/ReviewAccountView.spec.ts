@@ -56,7 +56,7 @@ describe('ReviewAccountView.vue', () => {
       'modified': '2020-10-13T16:52:24.905410+00:00',
       'modifiedBy': 'user test',
       'name': 'dsafa dsfasd',
-      'orgType': 'BASIC',
+      'orgType': 'PREMIUM',
       'orgStatus': 'ACTIVE',
       'products': [
         753,

@@ -33,7 +33,7 @@
         Settings
       </v-btn>
     </header>
-    <template v-if="enableEFTPaymentMethod && hasEFTPaymentMethod && paymentOwingAmount >= 0">
+    <template v-if="hasEFTPaymentMethod && paymentOwingAmount >= 0">
       <div
         class="statement-owing d-flex flex-wrap flex-row  mb-2"
       >
@@ -119,7 +119,7 @@
           </div>
         </template>
         <template
-          v-if="enableEFTPaymentMethod && hasEFTPaymentMethod"
+          v-if="hasEFTPaymentMethod"
           #[`item.frequency`]="{ item }"
         >
           <div>
@@ -127,7 +127,7 @@
           </div>
         </template>
         <template
-          v-if="enableEFTPaymentMethod && hasEFTPaymentMethod"
+          v-if="hasEFTPaymentMethod"
           #[`item.paymentMethods`]="{ item }"
         >
           <div>
@@ -181,13 +181,12 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { Account, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { PropType, computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import { StatementFilterParams, StatementListItem } from '@/models/statement'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 
 import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
 import moment from 'moment'
@@ -214,11 +213,6 @@ export default defineComponent({
     const currentMembership: Member = orgStore.currentMembership
     const getStatement: any = orgStore.getStatement
     const { setAccountChangedHandler } = useAccountChangeHandler()
-
-    const enableEFTPaymentMethod = async () => {
-      const enableEFTPaymentMethod: string | boolean = LaunchDarklyService.getFlag(LDFlags.EnableEFTPaymentMethod, false)
-      return enableEFTPaymentMethod
-    }
 
     const state = reactive({
       totalStatementsCount: 0,
@@ -259,7 +253,7 @@ export default defineComponent({
             value: 'action'
           }
         ]
-        if (state.hasEFTPaymentMethod && enableEFTPaymentMethod()) {
+        if (state.hasEFTPaymentMethod) {
           headers.splice(2, 0, { text: 'Payment Methods', align: 'left', sortable: false, value: 'paymentMethods' })
         }
         return headers
@@ -365,7 +359,8 @@ export default defineComponent({
     const customSortActive = (items, index, isDescending) => {
       const isDesc = isDescending.length > 0 && isDescending[0]
       items.sort((a, b) => {
-        return (isDesc) ? (a[index[0]] < b[index[0]] ? -1 : 1) : (b[index[0]] < a[index[0]] ? -1 : 1)
+        const comparison = a[index[0]] - b[index[0]]
+        return isDesc ? -comparison : comparison
       })
       return items
     }
@@ -448,7 +443,6 @@ export default defineComponent({
       formatAmount,
       downloadStatement,
       downloadEFTInstructions,
-      enableEFTPaymentMethod,
       isStatementNew,
       isStatementOverdue,
       getPaginationOptions,

@@ -185,29 +185,11 @@
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
               <v-list-item
-                v-can:VIEW_PAYMENT_METHODS.hide
-                dense
-                class="py-1 px-4"
-                aria-label="Payment Methods"
-                role="listitem"
-                :to="getUrl('payment-option')"
-                data-test="user-auth-nav-item"
-              >
-                <v-list-item-icon>
-                  <v-icon
-                    color="link"
-                    left
-                  >
-                    mdi-currency-usd
-                  </v-icon>
-                </v-list-item-icon>
-                <v-list-item-title>Payment Methods</v-list-item-title>
-              </v-list-item>
-              <v-list-item
+                v-if="isUserMembership"
                 v-can:VIEW_REQUEST_PRODUCT_PACKAGE.hide
                 dense
                 class="py-1 px-4"
-                aria-label="Products and Services"
+                aria-label="Products and Payment"
                 role="listitem"
                 :to="getUrl('product-settings')"
                 data-test="user-auth-nav-item"
@@ -220,7 +202,7 @@
                     mdi-apps
                   </v-icon>
                 </v-list-item-icon>
-                <v-list-item-title>Products and Services</v-list-item-title>
+                <v-list-item-title>Products and Payment</v-list-item-title>
               </v-list-item>
             </v-list-item-group>
           </v-list>
@@ -352,7 +334,7 @@
 <script lang="ts">
 import { AccountStatus, LoginSource, Pages, Permission, Role } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
+import { Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import AccountInactiveAlert from '@/components/auth/common/AccountInactiveAlert.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
@@ -402,6 +384,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   private get isStaff ():boolean {
     return this.currentUser.roles.includes(Role.Staff) || this.currentUser.roles.includes(Role.ContactCentreStaff)
+  }
+
+  private get isUserMembership ():boolean {
+    return this.currentMembership.membershipTypeCode !== MembershipType.User
   }
 
   private get accountInfoUrl (): string {
