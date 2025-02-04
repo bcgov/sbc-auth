@@ -141,8 +141,8 @@
       </template>
       <template #item-slot-downloads="{ item }">
         <div
-          class="receipt"
           v-if="item.statusCode === InvoiceStatus.COMPLETED || item.statusCode === InvoiceStatus.PAID"
+          class="receipt"
           @click="downloadReceipt(item)"
         >
           <v-icon
@@ -164,8 +164,8 @@ import { BaseVDataTable, DatePicker, IconTooltip } from '@/components'
 import { InvoiceStatus, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Ref, computed, defineComponent, nextTick, ref, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
-import ConfigHelper from '@/util/config-helper'
 import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import { DataOptions } from 'vuetify'
 import PaymentService from '@/services/payment.services'
@@ -271,7 +271,6 @@ export default defineComponent({
         loadTransactionList()
       }
     })
-
 
     async function downloadReceipt (item: Transaction) {
       const currentAccount = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))

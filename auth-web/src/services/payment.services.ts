@@ -54,7 +54,7 @@ export default class PaymentService {
 
   static postReceipt (invoiceId: string | number, accountId: string): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}/receipts`
-    const headers = { 
+    const headers = {
       'Accept': 'application/pdf',
       'Account-Id': accountId
     }
