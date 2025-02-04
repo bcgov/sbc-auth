@@ -55,7 +55,7 @@ describe('OutstandingBalances.vue', () => {
       'total': 1
     }
     orgStore.getStatementsList = async () => {
-      return Promise.resolve(statementsResponse as any)
+      return Promise.resolve(statementsResponse)
     }
 
     orgStore.getStatementsSummary = async () => {
