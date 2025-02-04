@@ -274,8 +274,7 @@ export default defineComponent({
 
     async function downloadReceipt (item: Transaction) {
       const currentAccount = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
-      console.log(currentAccount)
-      const receipt = await PaymentService.postReceipt(item.id, currentAccount.id)
+      const receipt = await PaymentService.postReceipt(item, currentAccount.id)
       const filename = `bcregistry-receipts-${item.id}.pdf`
       CommonUtils.fileDownload(receipt.data, filename, 'application/pdf')
     }
