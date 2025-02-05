@@ -301,7 +301,9 @@ export default defineComponent({
     const setup = async () => {
       state.isLoading = true
       resetCurrentSelectedProducts()
-      Promise.all([getOrgPayments(), getProductPaymentMethods(), loadProduct()])
+      await getOrgPayments()
+      await getProductPaymentMethods()
+      await loadProduct()
       // if staff need to load product fee also
       if (state.canManageAccounts) {
         state.orgProductsFees = await syncCurrentAccountFees(currentOrganization.value.id)
