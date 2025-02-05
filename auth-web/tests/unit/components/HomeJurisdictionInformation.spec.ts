@@ -19,13 +19,13 @@ const filing = {
       date: '2024-07-01',
       files: [
         {
-          fileKey: 'DS01000000',
+          fileKey: 'DS0100000000',
           fileName: 'My Authorization Document.pdf'
         }
       ]
     },
     foreignJurisdiction: {
-      affidavitFileKey: 'DS99999999',
+      affidavitFileKey: 'DS9999999999',
       affidavitFileName: 'My Director Affidavit.pdf',
       country: 'CA',
       identifier: 'AB-5444',
@@ -120,12 +120,12 @@ describe('HomeJurisdictionInformation component', () => {
   })
 
   it('rendered a functional authorization download button', () => {
-    BusinessService.downloadDocument = vi.fn().mockResolvedValue(null)
+    BusinessService.downloadDocumentfromDRS = vi.fn().mockResolvedValue(null)
 
     const button = wrapper.findAll('section').at(5).find('.download-authorization-btn')
     button.trigger('click')
-    expect(BusinessService.downloadDocument).toHaveBeenCalledWith(
-      'DS01000000',
+    expect(BusinessService.downloadDocumentfromDRS).toHaveBeenCalledWith(
+      'DS0100000000',
       'My Authorization Document.pdf',
       documentClass
     )
