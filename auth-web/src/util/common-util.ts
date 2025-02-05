@@ -259,11 +259,7 @@ export default class CommonUtils {
       Permission.VIEW_ADMIN_CONTACT,
       Permission.VIEW_AUTH_OPTIONS,
       Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
-      Permission.VIEW_USER_LOGINSOURCE,
-      Permission.EDIT_USER,
-      Permission.VIEW_BUSINESS_REGISTRY_DASHBOARD,
-      Permission.VIEW_LAUNCH_TITLES,
-      Permission.VIEW_CONTINUATION_AUTHORIZATION_REVIEWS
+      Permission.VIEW_USER_LOGINSOURCE
     ]
   }
 
