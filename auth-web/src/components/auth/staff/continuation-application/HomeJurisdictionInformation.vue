@@ -232,6 +232,9 @@ import { JurisdictionLocation } from '@bcrs-shared-components/enums'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import moment from 'moment-timezone'
 
+// eslint-disable-next-line sort-imports
+import { DocumentClassEnum, DRS_ID_PATTERN } from '@/util/constants'
+
 export default defineComponent({
   name: 'HomeJurisdictionInformation',
 
@@ -314,14 +317,23 @@ export default defineComponent({
       if (!documentKey || !documentName) return // safety check
 
       state.isDownloading = true
-      const documentClass = 'CORP'
-      await BusinessService.downloadDocument(documentKey, documentName, documentClass).catch(error => {
+      try {
+        if (DRS_ID_PATTERN.test(documentKey)) {
+          await BusinessService.downloadDocumentfromDRS(
+            documentKey,
+            documentName,
+            DocumentClassEnum.CORP
+          )
+        } else {
+          await BusinessService.downloadDocument(documentKey, documentName)
+        }
+      } catch (error) {
         // eslint-disable-next-line no-console
         console.log('downloadDocument() error =', error)
         state.dialogTitle = 'Unable to download document'
         state.dialogText = 'An error occurred while downloading the document. Please try again.'
         const v = errorDialogComponent.value as any; v.open()
-      })
+      }
       state.isDownloading = false
     }
 

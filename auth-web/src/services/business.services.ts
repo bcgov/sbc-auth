@@ -159,13 +159,13 @@ export default class BusinessService {
   }
 
   /**
-   * Get download url from Document Record Service
+   * Download document from Document Record Service or Mino
    * @param documentServiceId the unique id on Document Record Service
    * @param documentName the file name to download.
    * @param documentClass the document class defined for the document service. e.g. 'CORP'
    * @returns void
    */
-  static async downloadDocument (documentServiceId: string, documentName: string, documentClass: string): Promise<void> {
+  static async downloadDocumentfromDRS (documentServiceId: string, documentName: string, documentClass: string): Promise<void> {
     // safety checks
     if (!documentServiceId || !documentClass) throw new Error('Invalid parameters')
 
@@ -186,6 +186,54 @@ export default class BusinessService {
 
       // Remove the link after the download is triggered
       document.body.removeChild(link)
+    })
+  }
+
+  /**
+   * Downloads a Minio document from Legal API and prompts browser to open/save it.
+   * @param documentKey the document key
+   * @param documentName the document filename
+   * @returns a promise to return the axios response or the error response
+   * @see CommonUtils.fileDownload() for a similar method
+   */
+  static async downloadDocument (documentKey: string, documentName: string): Promise<AxiosResponse> {
+    // safety checks
+    if (!documentKey || !documentName) throw new Error('Invalid parameters')
+
+    const url = `${ConfigHelper.getLegalAPIV2Url()}/documents/${documentKey}`
+    const config = {
+      headers: { 'Accept': 'application/pdf' },
+      responseType: 'blob' as 'json'
+    }
+
+    return axios.get(url, config).then(response => {
+      if (!response) throw new Error('Null response')
+
+      /* solution below is from https://github.com/axios/axios/issues/1392 */
+
+      // it is necessary to create a new blob object with mime-type explicitly set
+      // otherwise only Chrome works like it should
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+
+      // use Navigator.msSaveOrOpenBlob if available (possibly IE)
+      // warning: this is now deprecated
+      // ref: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/msSaveOrOpenBlob
+      if (window.navigator && window.navigator['msSaveOrOpenBlob']) {
+        window.navigator['msSaveOrOpenBlob'](blob, documentName)
+      } else {
+        // for other browsers, create a link pointing to the ObjectURL containing the blob
+        const url = window.URL.createObjectURL(blob)
+        const a = window.document.createElement('a')
+        window.document.body.appendChild(a)
+        a.setAttribute('style', 'display: none')
+        a.href = url
+        a.download = documentName
+        a.click()
+        window.URL.revokeObjectURL(url)
+        a.remove()
+      }
+
+      return response
     })
   }
 
