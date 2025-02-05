@@ -247,8 +247,6 @@ class Org:  # pylint: disable=too-many-public-methods
                     payment_account_status = PaymentAccountStatus.CREATED
                 case HTTPStatus.ACCEPTED:
                     payment_account_status = PaymentAccountStatus.PENDING
-                case HTTPStatus.CREATED:
-                    payment_account_status = PaymentAccountStatus.FAILED
                 case _:
                     payment_account_status = PaymentAccountStatus.FAILED
                     if response.json:
