@@ -12,20 +12,20 @@ const localVue = createLocalVue()
 const vuetify = new Vuetify({})
 
 const review = {}
-const documentClass = 'CORP'
+
 const filing = {
   continuationIn: {
     authorization: {
       date: '2024-07-01',
       files: [
         {
-          fileKey: 'DS0100000000',
+          fileKey: '0071dbd6-6095-46f6-b5e4-cc859b0ebf27.pdf',
           fileName: 'My Authorization Document.pdf'
         }
       ]
     },
     foreignJurisdiction: {
-      affidavitFileKey: 'DS9999999999',
+      affidavitFileKey: '007bd7bd-d421-49a9-9925-03ce561d044f.pdf',
       affidavitFileName: 'My Director Affidavit.pdf',
       country: 'CA',
       identifier: 'AB-5444',
@@ -120,15 +120,12 @@ describe('HomeJurisdictionInformation component', () => {
   })
 
   it('rendered a functional authorization download button', () => {
-    BusinessService.downloadDocumentfromDRS = vi.fn().mockResolvedValue(null)
+    BusinessService.downloadDocument = vi.fn().mockResolvedValue(null)
 
     const button = wrapper.findAll('section').at(5).find('.download-authorization-btn')
     button.trigger('click')
-    expect(BusinessService.downloadDocumentfromDRS).toHaveBeenCalledWith(
-      'DS0100000000',
-      'My Authorization Document.pdf',
-      documentClass
-    )
+    expect(BusinessService.downloadDocument).toHaveBeenCalledWith('0071dbd6-6095-46f6-b5e4-cc859b0ebf27.pdf',
+      'My Authorization Document.pdf')
 
     vi.clearAllMocks()
   })
