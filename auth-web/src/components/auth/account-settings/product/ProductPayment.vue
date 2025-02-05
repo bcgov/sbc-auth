@@ -289,6 +289,10 @@ export default defineComponent({
       productPaymentReady: false
     })
 
+    const {
+      hasProductOrPaymentBackendChanges
+    } = useProductPayment()
+
     const loadProduct = async () => {
       try {
         await getOrgProducts(currentOrganization.value.id)
@@ -400,6 +404,15 @@ export default defineComponent({
           const addProductsRequestBody: OrgProductsRequestBody = {
             subscriptions: productsSelected
           }
+          if (await hasProductOrPaymentBackendChanges(currentOrganization.value.id)) {
+            state.dialogTitle = 'Conflict Detected'
+            state.dialogText = 'Your product/payment has been updated by another user. Please try again.'
+            state.dialogIcon = 'mdi-alert-circle-outline'
+            state.displayRemoveProductDialog = false
+            confirmDialog.value.open()
+            await setup()
+            return
+          }
           if (state.addProductOnAccountAdmin) {
             await addOrgProducts(addProductsRequestBody)
           } else {
@@ -429,7 +442,7 @@ export default defineComponent({
     }
 
     const saveProductFee = async (accountFees) => {
-      const accountFee = { accoundId: currentOrganization.value.id, accountFees }
+      const accountFee = { accountId: currentOrganization.value.id, accountFees }
       state.isProductActionLoading = true
       state.isProductActionCompleted = false
       try {
@@ -514,6 +527,7 @@ export default defineComponent({
       ProductStatus,
       ProductEnum,
       paymentMethodRef,
+      hasProductOrPaymentBackendChanges,
       ...toRefs(state)
     }
   }

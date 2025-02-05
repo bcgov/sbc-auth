@@ -119,6 +119,7 @@ import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
 import { StatementNotificationSettings } from '@/models/statement'
 import { useAccount } from '@/composables/account-factory'
 import { useOrgStore } from '@/stores/org'
+import { useProductPayment } from '@/composables/product-payment-factory'
 import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
@@ -146,13 +147,13 @@ export default defineComponent({
     const router = root.$router
     const orgStore = useOrgStore()
     const userStore = useUserStore()
-    const { setHasPaymentMethodChanged } = userStore
+    const { setHasPaymentMethodChanged } = orgStore
 
     const state = reactive({
       savedOrganizationType: '',
       selectedPaymentMethod: '',
       padInfo: {} as PADInfo,
-      isBtnSaved: userStore.hasPaymentMethodChanged,
+      isBtnSaved: orgStore.hasPaymentMethodChanged,
       disableSaveBtn: false,
       errorTitle: 'Payment Update Failed',
       bcolInfo: {} as BcolProfile,
@@ -161,7 +162,7 @@ export default defineComponent({
       padValid: false,
       ejvValid: false,
       pendingRoute: null,
-      paymentMethodChanged: computed(() => userStore.hasPaymentMethodChanged),
+      paymentMethodChanged: computed(() => orgStore.hasPaymentMethodChanged),
       isFuturePaymentMethodAvailable: false, // set true if in between 3 days cooling period
       isTOSandAcknowledgeCompleted: false, // set true if TOS already accepted
       activeOrgMembers: computed<Member[]>(() => orgStore.activeOrgMembers),
@@ -172,6 +173,7 @@ export default defineComponent({
     const unsavedChangesDialog = ref<InstanceType<typeof ModalDialog>>()
 
     const { currentOrganization, currentOrgPaymentType, currentOrgAddress, currentMembership, permissions, currentOrgGLInfo } = useAccount()
+    const { hasProductOrPaymentBackendChanges } = useProductPayment()
 
     const currentUser = computed(() => userStore.currentUser)
 
@@ -234,8 +236,10 @@ export default defineComponent({
       return [Permission.VIEW_REQUEST_PRODUCT_PACKAGE, Permission.MAKE_PAYMENT].some(per => permissions.value.includes(per))
     })
 
-    async function initialize () {
-      state.errorText = ''
+    async function initialize (clearErrorText = true) {
+      if (clearErrorText) {
+        state.errorText = ''
+      }
       state.bcolInfo = {} as BcolProfile
       // check if address info is complete if not redirect user to address page
       const isNotAnonUser = currentUser.value?.loginSource !== LoginSource.BCROS
@@ -295,7 +299,7 @@ export default defineComponent({
 
     const routerGuard = router.beforeEach((to, from, next) => {
       const accountPathPattern = /^\/account\/\d+\/settings\/product-settings$/
-      if (!accountPathPattern.test(to.path) && userStore.hasPaymentMethodChanged && !userStore.accountSettingWarning) {
+      if (!accountPathPattern.test(to.path) && orgStore.hasPaymentMethodChanged && !userStore.accountSettingWarning) {
         state.pendingRoute = to
         unsavedChangesDialog.value?.open()
         next(false)
@@ -305,7 +309,7 @@ export default defineComponent({
     })
 
     async function cancel () {
-      if (userStore.hasPaymentMethodChanged && !userStore.accountSettingWarning) {
+      if (orgStore.hasPaymentMethodChanged && !userStore.accountSettingWarning) {
         unsavedChangesDialog.value?.open()
       } else {
         await initialize()
@@ -314,7 +318,7 @@ export default defineComponent({
     }
 
     async function exitWithoutSaving () {
-      userStore.setHasPaymentMethodChanged(false)
+      orgStore.setHasPaymentMethodChanged(false)
       unsavedChangesDialog.value?.close()
       await initialize()
       emit('disable-editing')
@@ -387,6 +391,15 @@ export default defineComponent({
 
       if (isValid) {
         try {
+          if (await hasProductOrPaymentBackendChanges(state.currentOrganization.id)) {
+            state.errorTitle = 'Conflict Detected'
+            state.errorText = 'Your product/payment has been updated by another user. Please try again.'
+            errorDialog.value.open()
+            state.isLoading = false
+            await initialize(false)
+            emit('disable-editing')
+            return
+          }
           await orgStore.updateOrg(createRequestBody)
           state.isBtnSaved = true
           state.isLoading = false

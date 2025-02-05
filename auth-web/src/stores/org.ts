@@ -98,7 +98,9 @@ export const useOrgStore = defineStore('org', () => {
     resetAccountTypeOnSetupAccount: false, // this flag use to check need to reset accounttype select when moving back and forth in stepper
     vDisplayModeValue: '', // DisplayModeValues.VIEW_ONLY
     originAccessType: undefined as string,
-    createGovmOrgId: -1
+    createGovmOrgId: -1,
+    hasPaymentMethodChanged: false,
+    selectedPaymentMethod: null
   })
 
   function $reset () {
@@ -135,6 +137,7 @@ export const useOrgStore = defineStore('org', () => {
     state.vDisplayModeValue = ''
     state.originAccessType = undefined as string
     state.createGovmOrgId = -1
+    state.hasPaymentMethodChanged = false
   }
 
   /** Is True if the current account is premium. */
@@ -892,7 +895,7 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   async function getProductList (): Promise<OrgProduct[]> {
-    const response:any = await OrgService.avialbelProducts()
+    const response:any = await OrgService.availableProducts()
     if (response?.data && response.status === 200) {
       const result = response.data
       state.productList = result
@@ -972,8 +975,8 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   async function updateAccountFees (accountFee): Promise<any> {
-    const { accoundId, accountFees } = accountFee
-    const response = await PaymentService.updateAccountFees(accoundId.toString(), accountFees)
+    const { accountId, accountFees } = accountFee
+    const response = await PaymentService.updateAccountFees(accountId.toString(), accountFees)
     if (response?.data && response.status === 200) {
       return response.data
     }
@@ -1068,6 +1071,10 @@ export const useOrgStore = defineStore('org', () => {
     const orgId = state.currentOrganization?.id
     const response = await OrgService.removeProduct(orgId, productCode)
     return response?.data
+  }
+
+  function setHasPaymentMethodChanged (warningDialog: boolean) {
+    state.hasPaymentMethodChanged = warningDialog
   }
 
   return {
@@ -1173,6 +1180,7 @@ export const useOrgStore = defineStore('org', () => {
     isGovnGovmOrg,
     updateOrgMailingAddress,
     needStaffReview,
-    removeOrgProduct
+    removeOrgProduct,
+    setHasPaymentMethodChanged
   }
 })

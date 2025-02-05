@@ -3,7 +3,7 @@ import { useCodesStore, useOrgStore } from '@/stores'
 import { computed } from '@vue/composition-api'
 import { storeToRefs } from 'pinia'
 
-export const useProductPayment = (props, state) => {
+export const useProductPayment = (props = null, state = null) => {
   const codesStore = useCodesStore()
   const orgStore = useOrgStore()
 
@@ -109,6 +109,9 @@ export const useProductPayment = (props, state) => {
 
   // These two functions control the payment method selector.
   const paymentMethodSupportedForProducts = computed(() => {
+    if (!props) {
+      throw Error('props is required')
+    }
     const {
       currentSelectedProducts
     } = storeToRefs(useOrgStore())
@@ -141,6 +144,9 @@ export const useProductPayment = (props, state) => {
   })
 
   const filteredPaymentMethods = computed(() => {
+    if (!props || !state) {
+      throw Error('props + state is required')
+    }
     if (!props.isEditing && !props.isCreateAccount && state.selectedPaymentMethod) {
       return [PAYMENT_METHODS[state.selectedPaymentMethod]]
     }
@@ -167,10 +173,26 @@ export const useProductPayment = (props, state) => {
     return paymentMethods
   })
 
+  const hasProductOrPaymentBackendChanges = async (orgId) => {
+    const clientProducts = JSON.stringify(orgStore.productList.map(p => [p.code, p.subscriptionStatus]).sort())
+    await orgStore.getOrgProducts(orgId)
+    const serverProducts = JSON.stringify(orgStore.productList.map(p => [p.code, p.subscriptionStatus]).sort())
+    if (clientProducts !== serverProducts) {
+      return true
+    }
+    const clientPaymentMethod = orgStore.currentOrgPaymentType
+    await orgStore.getOrgPayments(orgId)
+    if (clientPaymentMethod !== orgStore.currentOrgPaymentType) {
+      return true
+    }
+    return false
+  }
+
   return {
     productPaymentMethods,
     filteredPaymentMethods,
     paymentMethodSupportedForProducts,
+    hasProductOrPaymentBackendChanges,
     PAYMENT_METHODS
   }
 }

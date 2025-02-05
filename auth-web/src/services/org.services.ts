@@ -181,7 +181,7 @@ export default class OrgService {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/products/${productCode}`)
   }
 
-  public static async avialbelProducts (): Promise<AxiosResponse<OrgProduct>> {
+  public static async availableProducts (): Promise<AxiosResponse<OrgProduct>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/products`)
   }
 
