@@ -8,13 +8,3 @@ export interface RefundRevenueType {
   refundAmount: number
   refundType: string
 }
-
-export interface EftRefundRequest {
-  shortNameId: number
-  refundAmount: number
-  casSupplierNum: string
-  casSupplierSite: string
-  refundEmail: string
-  comment?: string
-  shortName?: string
-}
