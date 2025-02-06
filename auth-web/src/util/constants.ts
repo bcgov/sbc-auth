@@ -18,10 +18,6 @@ export enum SessionStorageKeys {
     OrgSearchFilter = 'ORG_SEARCH_FILTER',
     ReviewSearchFilter = 'REV_SEARCH_FILTER',
     InactiveSearchFilter = 'INACTIVE_SEARCH_FILTER',
-    ShortNamesSummaryFilter = 'SHORT_NAMES_SUMMARY_FILTER',
-    LinkedShortNamesFilter = 'LINKED_SHORT_NAMES_FILTER',
-    ShortNamesTabIndex = 'SHORT_NAMES_TAB_INDEX',
-    LinkedAccount = 'LINKED_ACCOUNT',
     PendingAccountsSearchFilter = 'PENDING_ACCOUNTS_SEARCH_FILTER',
     RejectedAccountsSearchFilter = 'REJECTED_ACCOUNTS_SEARCH_FILTER',
     InactiveAccountsSearchFilter = 'INACTIVE_ACCOUNTS_SEARCH_FILTER',
@@ -30,6 +26,7 @@ export enum SessionStorageKeys {
     RegistryHomeUrl = 'REGISTRY_HOME_URL',
     StatusApiUrl = 'STATUS_API_URL',
     FasWebUrl = 'FAS_WEB_URL',
+    PayWebUrl = 'PAY_WEB_URL',
     AffidavitNeeded = 'AFFIDAVIT_NEEDED',
     GOVN_USER='AUTH_GOVN_USER',
     NameRequestUrl = 'NAME_REQUEST_URL',
@@ -59,8 +56,6 @@ export enum Role {
     FasSearch = 'fas_search',
     ViewAllTransactions = 'view_all_transactions',
     ManageEft = 'manage_eft',
-    EftRefund = 'eft_refund',
-    EftRefundApprover = 'eft_refund_approver',
     CreateCredits = 'create_credits',
     FasRefund = 'fas_refund',
     BcolStaffAdmin = 'bcol_staff_admin',
@@ -674,80 +669,6 @@ export enum AffiliationInvitationType {
   EMAIL = 'EMAIL'
 }
 
-export enum ShortNameStatus {
-    LINKED = 'LINKED',
-    UNLINKED = 'UNLINKED',
-    PENDING = 'PENDING'
-}
-
-export enum ShortNamePaymentActions {
-    APPLY_CREDITS = 'APPLY_CREDITS',
-    CANCEL = 'CANCEL',
-    REVERSE = 'REVERSE'
-}
-
-export enum ShortNameReversePaymentErrors {
-    INVALID_STATE = 'EFT_PAYMENT_ACTION_CREDIT_LINK_STATUS_INVALID',
-    UNPAID_STATEMENT = 'EFT_PAYMENT_ACTION_UNPAID_STATEMENT',
-    UNPAID_STATEMENT_INVOICE = 'EFT_PAYMENT_INVOICE_REVERSE_UNEXPECTED_STATUS',
-    EXCEEDS_SIXTY_DAYS = 'EFT_PAYMENT_ACTION_REVERSAL_EXCEEDS_SIXTY_DAYS'
-}
-
-export enum ShortNameLinkStatus {
-    PENDING = 'PENDING',
-    LINKED = 'LINKED',
-    INACTIVE = 'INACTIVE'
-}
-
-export enum ShortNameResponseStatus {
-    EFT_SHORT_NAME_ALREADY_MAPPED = 'EFT_SHORT_NAME_ALREADY_MAPPED'
-}
-
-export enum EFTRefundType {
-    APPROVED = 'APPROVED',
-    PENDING_APPROVAL = 'PENDING_APPROVAL',
-    DECLINED = 'DECLINED',
-    COMPLETED = 'COMPLETED',
-    ERRORED = 'ERRORED'
-}
-
-export enum EFTRefundTypeDescription {
-    APPROVED = 'Approved',
-    PENDING_APPROVAL = 'Requested',
-    DECLINED = 'Declined',
-    PENDING_REFUND = 'Pending Refund',
-}
-
-export enum ShortNameType {
-    EFT = 'EFT',
-    WIRE = 'WIRE'
-}
-
-export enum ShortNameTypeDescription {
-    EFT = 'EFT',
-    WIRE = 'Wire Transfer'
-}
-
-export enum ShortNameHistoryType {
-    FUNDS_RECEIVED = 'FUNDS_RECEIVED',
-    INVOICE_REFUND = 'INVOICE_REFUND',
-    STATEMENT_PAID = 'STATEMENT_PAID',
-    STATEMENT_REVERSE = 'STATEMENT_REVERSE',
-    SN_REFUND_PENDING_APPROVAL = 'SN_REFUND_PENDING_APPROVAL',
-    SN_REFUND_APPROVED = 'SN_REFUND_APPROVED',
-    SN_REFUND_DECLINED = 'SN_REFUND_DECLINED'
-}
-
-export enum ShortNameHistoryTypeDescription {
-    FUNDS_RECEIVED = 'Funds Received',
-    INVOICE_REFUND = 'Invoice Refund',
-    STATEMENT_PAID = 'Statement Paid',
-    STATEMENT_REVERSE = 'Payment Reversed',
-    SN_REFUND_PENDING_APPROVAL = 'Short Name Refund Request',
-    SN_REFUND_APPROVED = 'Short Name Refund Request',
-    SN_REFUND_DECLINED = 'Short Name Refund Request'
-}
-
 export enum CfsAccountStatus {
     PENDING = 'PENDING',
     PENDING_PAD_ACTIVATION = 'PENDING_PAD_ACTIVATION',
@@ -777,12 +698,4 @@ export enum OrgNameLabel {
     GOVN = 'Government Agency Name',
     BUSINESS = 'Legal Business Name',
     REGULAR = 'Account Name'
-}
-
-export enum ShortNameRefundStatus {
-    PENDING_APPROVAL = 'PENDING_APPROVAL'
-}
-
-export enum ShortNameRefundLabel {
-    PENDING_APPROVAL = 'REFUND REQUEST'
 }
