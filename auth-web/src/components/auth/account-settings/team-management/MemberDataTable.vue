@@ -151,7 +151,6 @@
         <!-- Remove User -->
         <v-btn
           v-show="canRemove(item)"
-          v-can:EDIT_USER.hide
           icon
           aria-label="Remove Team Member"
           title="Remove Team Member"
@@ -436,6 +435,11 @@ export default class MemberDataTable extends Vue {
   }
 
   private canRemove (memberToRemove: Member): boolean {
+    // Contact Centre Staff can't remove anyone
+    if (this.currentUser.roles?.includes(Role.ContactCentreStaff)) {
+      return false
+    }
+
     // Can't remove yourself
     if (this.currentMembership.user?.username === memberToRemove.user.username) {
       return false
