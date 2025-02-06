@@ -3,8 +3,7 @@ import {
   InvoluntaryDissolutionBreadcrumb,
   MyBusinessRegistryBreadcrumb,
   RegistryDashboardBreadcrumb,
-  RegistryHomeBreadcrumb, ShortNameDetailsBreadcrumb, ShortNameMappingBreadcrumb,
-  ShortNameRefundBreadcrumb,
+  RegistryHomeBreadcrumb,
   StaffBusinessRegistryBreadcrumb,
   StaffDashboardBreadcrumb
 } from '@/resources/BreadcrumbResources'
@@ -70,9 +69,6 @@ import { RouteConfig } from 'vue-router'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
 import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SetupGovmAccountView from '@/views/auth/staff/SetupGovmAccountView.vue'
-import ShortNameDetailsView from '@/views/pay/eft/ShortNameDetailsView.vue'
-import ShortNameMappingView from '@/views/pay/ShortNameMappingView.vue'
-import ShortNameRefundView from '@/views/pay/eft/ShortNameRefundView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
@@ -856,58 +852,6 @@ export function getRoutes (): RouteConfig[] {
       component: ViewAllTransactions,
       props: true,
       meta: { requiresAuth: true }
-    },
-    {
-      path: '/pay/manage-shortnames',
-      name: 'manage-shortnames',
-      component: ShortNameMappingView,
-      meta: {
-        requiresAuth: true,
-        allowedRoles: [Role.ManageEft],
-        breadcrumb:
-          [
-            StaffDashboardBreadcrumb,
-            ShortNameMappingBreadcrumb
-          ],
-        showNavBar: true
-      },
-      props: true
-    },
-    {
-      path: '/pay/shortname-details/:shortNameId',
-      name: 'shortnamedetails',
-      component: ShortNameDetailsView,
-      meta: {
-        requiresAuth: true,
-        allowedRoles: [Role.ManageEft],
-        breadcrumb: [
-          StaffDashboardBreadcrumb,
-          ShortNameMappingBreadcrumb,
-          ShortNameDetailsBreadcrumb
-        ],
-        showNavBar: true
-      },
-      props: (route) => ({ shortNameId: Number(route.params.shortNameId) })
-    },
-    {
-      path: '/pay/shortname-details/:shortNameId/refund/:eftRefundId?',
-      name: 'shortnamerefund',
-      component: ShortNameRefundView,
-      meta: {
-        requiresAuth: true,
-        allowedRoles: [Role.EftRefund],
-        breadcrumb: [
-          StaffDashboardBreadcrumb,
-          ShortNameMappingBreadcrumb,
-          ShortNameDetailsBreadcrumb,
-          ShortNameRefundBreadcrumb
-        ],
-        showNavBar: true
-      },
-      props: route => ({
-        shortNameId: Number(route.params.shortNameId),
-        eftRefundId: route.params.eftRefundId ? Number(route.params.eftRefundId) : undefined
-      })
     },
     {
       path: '/pay/refund',

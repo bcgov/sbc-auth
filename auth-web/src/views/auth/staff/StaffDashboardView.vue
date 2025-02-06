@@ -209,7 +209,7 @@
             outlined
             dark
             large
-            @click="$router.push({ name: 'manage-shortnames' })"
+            @click="navigateToManageEFT()"
           >
             <span>Manage EFT Payments</span>
           </v-btn>
@@ -526,7 +526,11 @@ export default defineComponent({
     }
 
     function navigateToFasDashboard () {
-      window.location.href = `${ConfigHelper.getFasWebUrl()}?openFromAuth=true`
+      window.location.href = `${ConfigHelper.getPayWebUrl()}?openFromAuth=true`
+    }
+
+    function navigateToManageEFT () {
+      window.location.href = `${ConfigHelper.getPayWebUrl()}eft`
     }
 
     return {
@@ -544,6 +548,7 @@ export default defineComponent({
       addEmail,
       launchTileConfig,
       navigateToFasDashboard,
+      navigateToManageEFT,
       ...toRefs(localVars)
     }
   }
