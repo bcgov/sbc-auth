@@ -248,7 +248,7 @@ class Org:  # pylint: disable=too-many-public-methods
                     payment_account_status = PaymentAccountStatus.PENDING
                 case _:
                     payment_account_status = PaymentAccountStatus.FAILED
-                    error_payload = getattr(response, 'json', lambda: {})()
+                    error_payload = getattr(response, "json", lambda: {})()
                     error_code = error_payload.get("error", "UNKNOWN_ERROR")
                     logger.error(f"Account create payment Error: {response.text}")
 
