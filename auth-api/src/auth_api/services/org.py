@@ -231,7 +231,6 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request = Org._build_payment_request(org_model, payment_info, payment_method, mailing_address, **kwargs)
             error_code = None
 
-            # invoke pay-api
             token = RestService.get_service_account_token()
             if is_new_org:
                 response = RestService.post(
@@ -249,11 +248,8 @@ class Org:  # pylint: disable=too-many-public-methods
                     payment_account_status = PaymentAccountStatus.PENDING
                 case _:
                     payment_account_status = PaymentAccountStatus.FAILED
-                    if response.json:
-                        error_payload = response.json()
-                        error_code = error_payload.get("error", "UNKNOWN_ERROR")
-                    else:
-                        error_code = "UNKNOWN_ERROR"
+                    error_payload = getattr(response, 'json', lambda: {})()
+                    error_code = error_payload.get("error", "UNKNOWN_ERROR")
                     logger.error(f"Account create payment Error: {response.text}")
 
             if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
