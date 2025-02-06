@@ -56,10 +56,10 @@
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Member } from '@/models/Organization'
+import { Role } from '@/util/constants'
 import { mapState } from 'pinia'
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import moment from 'moment'
-import { Role } from '@/util/constants'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -89,7 +89,7 @@ export default class PendingMemberDataTable extends Vue {
   ]
 
   private canApproveOrDeny (): boolean {
-    return !this.currentUser.roles?.includes(Role.ContactCentreStaff);
+    return !this.currentUser.roles?.includes(Role.ContactCentreStaff)
   }
 
   getIndexedTag (tag, index): string {

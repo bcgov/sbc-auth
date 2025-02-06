@@ -60,8 +60,8 @@
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
-import { mapState } from 'pinia'
 import { Role } from '@/util/constants'
+import { mapState } from 'pinia'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -101,7 +101,7 @@ export default class InvitationsDataTable extends Vue {
   ]
 
   private canApproveOrDeny (): boolean {
-    return !this.currentUser.roles?.includes(Role.ContactCentreStaff);
+    return !this.currentUser.roles?.includes(Role.ContactCentreStaff)
   }
 
   formatDate = CommonUtils.formatDisplayDate
