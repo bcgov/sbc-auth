@@ -26,7 +26,7 @@ export enum SessionStorageKeys {
     RegistryHomeUrl = 'REGISTRY_HOME_URL',
     StatusApiUrl = 'STATUS_API_URL',
     FasWebUrl = 'FAS_WEB_URL',
-    PayWebUrl = PAY_WEB_URL',
+    PayWebUrl = 'PAY_WEB_URL',
     AffidavitNeeded = 'AFFIDAVIT_NEEDED',
     GOVN_USER='AUTH_GOVN_USER',
     NameRequestUrl = 'NAME_REQUEST_URL',
