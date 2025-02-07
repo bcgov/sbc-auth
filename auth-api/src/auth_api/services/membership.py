@@ -18,6 +18,7 @@ This module manages the Membership Information between an org and a user.
 
 import json
 
+from flask import abort
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.utils.enums import QueueMessageTypes
 from structured_logging import StructuredLogging
@@ -32,6 +33,7 @@ from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Activity
 from auth_api.schemas import MembershipSchema
+from auth_api.utils.constants import GROUP_STAFF
 from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, OrgType, Status
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
@@ -285,14 +287,18 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         """Mark this membership as inactive."""
         logger.debug("<deactivate_membership")
         user_from_context: UserContext = kwargs["user_context"]
-
-        # if this is a member removing another member, check that they admin or owner
-        if self._model.user.username != user_from_context.user_name:
-            check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN))
-
-        # check to ensure that owner isn't removed by anyone but an owner
-        if self._model.membership_type_code == ADMIN:
-            check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN))  # pylint: disable=superfluous-parens
+        # This is done so we don't need to change check_auth which can impact many other functions.
+        if user_from_context.is_staff() and self._model.org.type_code == OrgType.STAFF.value:
+            membership = MembershipModel.find_membership_by_user_and_org(self._model.user.id, self._model.org.id)
+            if not membership or membership.status != Status.ACTIVE.value or membership.membership_type.code != ADMIN:
+                abort(403)
+        else:
+            # if this is a member removing another member, check that they admin or owner
+            if self._model.user.username != user_from_context.user_name:
+                check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN))
+            # check to ensure that owner isn't removed by anyone but an owner
+            if self._model.membership_type_code == ADMIN:
+                check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN))  # pylint: disable=superfluous-parens
 
         self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code("INACTIVE")
         logger.info(f"<deactivate_membership for {self._model.user.username}")
@@ -321,7 +327,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 # Check if the user has any other active org membership, if none remove from the group
                 KeycloakService.remove_from_account_holders_group(model.user.keycloak_guid)
             if model.org.type_code == OrgType.STAFF.value:
-                KeycloakService.remove_user_from_group(model.user.keycloak_guid, "staff")  # no enum, group not role.
+                KeycloakService.remove_user_from_group(model.user.keycloak_guid, GROUP_STAFF)
         ProductService.update_users_products_keycloak_groups([model.user.id])
 
     @staticmethod

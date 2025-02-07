@@ -438,6 +438,16 @@
       ],
       "clientRoles": {},
       "subGroups": []
+    },
+    {
+      "name": "staff",
+      "path": "/staff",
+      "attributes": {},
+      "realmRoles": [
+        "staff"
+      ],
+      "clientRoles": {},
+      "subGroups": []
     }
   ],
   "defaultRoles": [
