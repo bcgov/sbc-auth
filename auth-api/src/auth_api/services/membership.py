@@ -32,7 +32,7 @@ from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Activity
 from auth_api.schemas import MembershipSchema
-from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, Status
+from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, OrgType, Status
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -318,10 +318,12 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             KeycloakService.join_account_holders_group(model.user.keycloak_guid)
         elif (
             model.membership_status.id == Status.INACTIVE.value
-            and len(MembershipModel.find_orgs_for_user(model.user.id)) == 0
         ):
-            # Check if the user has any other active org membership, if none remove from the group
-            KeycloakService.remove_from_account_holders_group(model.user.keycloak_guid)
+            if len(MembershipModel.find_orgs_for_user(model.user.id)) == 0:
+                # Check if the user has any other active org membership, if none remove from the group
+                KeycloakService.remove_from_account_holders_group(model.user.keycloak_guid)
+            if model.org.type_code == OrgType.STAFF.value:
+                KeycloakService.remove_user_from_group(model.user.keycloak_guid, 'staff')  # no enum, group not role.
         ProductService.update_users_products_keycloak_groups([model.user.id])
 
     @staticmethod

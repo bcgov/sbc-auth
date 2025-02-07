@@ -350,7 +350,7 @@ class KeycloakService:
         # Get the '$group_name' group
         group_id = KeycloakService._get_group_id(admin_token, group_name)
 
-        # Add user to the keycloak group '$group_name'
+        # Remove user from the keycloak group '$group_name'
         headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
         remove_group_url = f"{base_url}/auth/admin/realms/{realm}/users/{user_id}/groups/{group_id}"
         response = requests.delete(remove_group_url, headers=headers, timeout=timeout)
