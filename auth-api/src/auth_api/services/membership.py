@@ -316,14 +316,12 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         """Add or remove the user from/to account holders / product keycloak group."""
         if model.membership_status.id == Status.ACTIVE.value:
             KeycloakService.join_account_holders_group(model.user.keycloak_guid)
-        elif (
-            model.membership_status.id == Status.INACTIVE.value
-        ):
+        elif model.membership_status.id == Status.INACTIVE.value:
             if len(MembershipModel.find_orgs_for_user(model.user.id)) == 0:
                 # Check if the user has any other active org membership, if none remove from the group
                 KeycloakService.remove_from_account_holders_group(model.user.keycloak_guid)
             if model.org.type_code == OrgType.STAFF.value:
-                KeycloakService.remove_user_from_group(model.user.keycloak_guid, 'staff')  # no enum, group not role.
+                KeycloakService.remove_user_from_group(model.user.keycloak_guid, "staff")  # no enum, group not role.
         ProductService.update_users_products_keycloak_groups([model.user.id])
 
     @staticmethod
