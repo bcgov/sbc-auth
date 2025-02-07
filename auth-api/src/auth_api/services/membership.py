@@ -287,18 +287,12 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         """Mark this membership as inactive."""
         logger.debug("<deactivate_membership")
         user_from_context: UserContext = kwargs["user_context"]
-        # This is done so we don't need to change check_auth which can impact many other functions.
-        if user_from_context.is_staff() and self._model.org.type_code == OrgType.STAFF.value:
-            membership = MembershipModel.find_membership_by_user_and_org(self._model.user.id, self._model.org.id)
-            if not membership or membership.status != Status.ACTIVE.value or membership.membership_type.code != ADMIN:
-                abort(403)
-        else:
-            # if this is a member removing another member, check that they admin or owner
-            if self._model.user.username != user_from_context.user_name:
-                check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN))
-            # check to ensure that owner isn't removed by anyone but an owner
-            if self._model.membership_type_code == ADMIN:
-                check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN))  # pylint: disable=superfluous-parens
+        # if this is a member removing another member, check that they admin or owner
+        if self._model.user.username != user_from_context.user_name:
+            check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN, STAFF))
+        # check to ensure that owner isn't removed by anyone but an owner
+        if self._model.membership_type_code == ADMIN:
+            check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN, STAFF))  # pylint: disable=superfluous-parens
 
         self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code("INACTIVE")
         logger.info(f"<deactivate_membership for {self._model.user.username}")
