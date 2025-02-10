@@ -185,7 +185,7 @@
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
               <v-list-item
-                v-if="isUserMembership"
+                v-if="isAdmin"
                 v-can:VIEW_REQUEST_PRODUCT_PACKAGE.hide
                 dense
                 class="py-1 px-4"
@@ -386,8 +386,8 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     return this.currentUser.roles.includes(Role.Staff) || this.currentUser.roles.includes(Role.ContactCentreStaff)
   }
 
-  private get isUserMembership ():boolean {
-    return this.currentMembership.membershipTypeCode !== MembershipType.User
+  private get isAdmin ():boolean {
+    return this.currentMembership.membershipTypeCode === MembershipType.Admin
   }
 
   private get accountInfoUrl (): string {
