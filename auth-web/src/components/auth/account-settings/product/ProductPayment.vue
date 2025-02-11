@@ -1,5 +1,6 @@
 <template>
   <v-container
+    :key="accountChangeKey"
     v-can:EDIT_REQUEST_PRODUCT_PACKAGE.disable.card
     class="view-container"
   >
@@ -289,7 +290,8 @@ export default defineComponent({
         return !state.isEditing && (![AccessType.GOVM].includes(accessType) || state.isBcolAdmin)
       }),
       displaySavePaymentMethodsFirst: false,
-      productPaymentReady: false
+      productPaymentReady: false,
+      accountChangeKey: 0
     })
 
     const {
@@ -499,6 +501,8 @@ export default defineComponent({
     // Reload product list when organization changes
     watch(() => currentOrganization.value.id, async () => {
       await setup()
+      // Required otherwise changing from USER -> ADMIN will leave it disabled
+      state.accountChangeKey++
     })
 
     watch(() => state.isEditing, (newValue) => {

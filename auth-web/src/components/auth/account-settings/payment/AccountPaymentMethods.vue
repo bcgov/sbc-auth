@@ -51,6 +51,36 @@
         Cancel
       </v-btn>
     </div>
+    <!-- Warning Dialog BCOL -->
+    <ModalDialog
+      ref="bcolWarningDialog"
+      title="BC Online Payment Option Alert"
+      text="After saving your updated payment method, BC Online will no longer be available as a payment option."
+      max-width="640"
+      :showIcon="false"
+      dialog-class="notify-dialog"
+    >
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
+      </template>
+      <template #actions>
+        <div class="d-flex align-center justify-center w-100 h-100 ga-3">
+          <v-btn
+            large
+            color="primary"
+            class="font-weight-bold"
+            @click="closeBcolWarningDialog"
+          >
+            OK
+          </v-btn>
+        </div>
+      </template>
+    </ModalDialog>
     <!-- Alert Dialog (Error) -->
     <ModalDialog
       ref="errorDialog"
@@ -108,12 +138,13 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
+import { AccessType, Account, LDFlags, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
 import {
   CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation
 } from '@/models/Organization'
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
 import { StatementNotificationSettings } from '@/models/statement'
@@ -171,6 +202,7 @@ export default defineComponent({
 
     const errorDialog = ref<InstanceType<typeof ModalDialog>>()
     const unsavedChangesDialog = ref<InstanceType<typeof ModalDialog>>()
+    const bcolWarningDialog = ref<InstanceType<typeof ModalDialog>>()
 
     const { currentOrganization, currentOrgPaymentType, currentOrgAddress, currentMembership, permissions, currentOrgGLInfo } = useAccount()
     const { hasProductOrPaymentBackendChanges } = useProductPayment()
@@ -178,6 +210,11 @@ export default defineComponent({
     const currentUser = computed(() => userStore.currentUser)
 
     function setSelectedPayment (payment) {
+      if (LaunchDarklyService.getFlag(LDFlags.HideBCOLProductSettings, false) &&
+          state.selectedPaymentMethod === PaymentTypes.BCOL &&
+          payment.selectedPaymentMethod !== PaymentTypes.BCOL) {
+        bcolWarningDialog.value.open()
+      }
       state.selectedPaymentMethod = payment.selectedPaymentMethod
       state.isBtnSaved = (state.isBtnSaved && !payment.isTouched) || false
       setHasPaymentMethodChanged(payment.isTouched || false)
@@ -233,7 +270,7 @@ export default defineComponent({
 
     const isPaymentViewAllowed = computed(() => {
       // checking permission instead of roles to give access for staff
-      return [Permission.VIEW_REQUEST_PRODUCT_PACKAGE, Permission.MAKE_PAYMENT].some(per => permissions.value.includes(per))
+      return [Permission.VIEW_REQUEST_PRODUCT_PACKAGE].some(per => permissions.value.includes(per))
     })
 
     async function initialize (clearErrorText = true) {
@@ -454,6 +491,10 @@ export default defineComponent({
       errorDialog.value.close()
     }
 
+    function closeBcolWarningDialog () {
+      bcolWarningDialog.value.close()
+    }
+
     function setBcolInfo (bcolProfile: BcolProfile) {
       state.bcolInfo = bcolProfile
       emit('emit-bcol-info', state.bcolInfo)
@@ -493,7 +534,9 @@ export default defineComponent({
       verifyPAD,
       cancel,
       save,
+      bcolWarningDialog,
       closeError,
+      closeBcolWarningDialog,
       errorDialog,
       currentOrganization,
       currentOrgPaymentType,
