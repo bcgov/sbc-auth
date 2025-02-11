@@ -1,5 +1,18 @@
 <template>
   <v-container class="transaction-container">
+    <v-fade-transition>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
+      </div>
+    </v-fade-transition>
     <header
       v-if="title"
       class="view-header align-center mb-5 ml-4"
@@ -69,6 +82,7 @@
         class="mt-4"
         :extended="extended"
         :headers="sortedHeaders"
+        @isDownloadingReceipt="isLoading = $event"
       />
     </section>
     <!-- export csv error -->
@@ -103,7 +117,7 @@
 <script lang="ts">
 import { Account, Pages } from '@/util/constants'
 import { MembershipType, OrgPaymentDetails } from '@/models/Organization'
-import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from '@vue/composition-api'
+import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, ref, reactive, toRefs, watch } from '@vue/composition-api'
 import { useAccountChangeHandler, useTransactions } from '@/composables'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
@@ -136,6 +150,10 @@ export default defineComponent({
 
     const { setAccountChangedHandler, beforeDestroy } = useAccountChangeHandler()
     const { clearAllFilters, getTransactionReport, loadTransactionList, setViewAll, defaultSearchToOneYear } = useTransactions()
+
+    const state = reactive({
+      isLoading: false
+    })
 
     // FUTURE: vue3 we can set this fn explicitly in the resource instead of doing it here
     const headers = getTransactionTableHeaders(props.extended)
@@ -170,7 +188,6 @@ export default defineComponent({
     })
 
     const credit = ref(0)
-    const isLoading = ref(false)
 
     const isTransactionsAllowed = computed((): boolean => {
       return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
@@ -204,7 +221,7 @@ export default defineComponent({
     }
 
     const exportCSV = async () => {
-      isLoading.value = true
+      state.isLoading = true
       // grab from composable**
       const downloadData = await getTransactionReport()
       if (!downloadData || downloadData.error) {
@@ -215,7 +232,7 @@ export default defineComponent({
       } else {
         CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
       }
-      isLoading.value = false
+      state.isLoading = false
     }
 
     onMounted(() => {
@@ -224,6 +241,7 @@ export default defineComponent({
     onBeforeUnmount(() => { beforeDestroy() })
 
     return {
+      ...toRefs(state),
       csvErrorDialog,
       csvErrorDialogText,
       headers,
@@ -231,7 +249,6 @@ export default defineComponent({
       headersSelected,
       sortedHeaders,
       credit,
-      isLoading,
       exportCSV
     }
   }
@@ -322,5 +339,9 @@ export default defineComponent({
   }
   .credit-details {
      color: $gray7;
+  }
+
+  .loading-container {
+    background: rgba(255,255,255, 0.8);
   }
 </style>
