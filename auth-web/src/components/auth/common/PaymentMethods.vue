@@ -183,7 +183,6 @@
       ref="warningDialog"
       max-width="650"
       :show-icon="false"
-      :showCloseIcon="true"
       :title="dialogTitle"
       :text="dialogText"
       dialog-class="warning-dialog"
@@ -339,6 +338,7 @@ export default defineComponent({
         })
       }
     }
+
     const paymentMethodSelected = async (payment, isTouch = true) => {
       if (payment.type === PaymentTypes.BCOL && isTouch && state.selectedPaymentMethod !== PaymentTypes.BCOL) {
         openBCOnlineDialog()
