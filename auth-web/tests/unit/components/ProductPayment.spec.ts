@@ -34,7 +34,7 @@ describe('Account settings ProductPackage.vue', () => {
       loginSource: LoginSource.BCROS
     } as any
     const orgStore = useOrgStore()
-    orgStore.permissions = [Permission.VIEW_REQUEST_PRODUCT_PACKAGE, Permission.MAKE_PAYMENT]
+    orgStore.permissions = [Permission.VIEW_REQUEST_PRODUCT_PACKAGE]
     orgStore.currentOrganization = {
       name: 'test org'
     }
