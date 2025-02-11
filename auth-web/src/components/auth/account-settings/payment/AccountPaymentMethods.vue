@@ -231,7 +231,7 @@ export default defineComponent({
 
     const isPaymentViewAllowed = computed(() => {
       // checking permission instead of roles to give access for staff
-      return [Permission.VIEW_REQUEST_PRODUCT_PACKAGE, Permission.MAKE_PAYMENT].some(per => permissions.value.includes(per))
+      return [Permission.VIEW_REQUEST_PRODUCT_PACKAGE].some(per => permissions.value.includes(per))
     })
 
     async function initialize () {
