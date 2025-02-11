@@ -149,11 +149,10 @@ class Org:  # pylint: disable=too-many-public-methods
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
 
-        Org._create_payment_for_org(mailing_address, org, payment_info, True)
+        payment_account_status, error = Org._create_payment_for_org(mailing_address, org, payment_info, True)
 
-        # TODO do we have to check anything like this below?
-        # if payment_account_status == PaymentAccountStatus.FAILED:
-        # raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, None)
+        if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
+            logger.warning(f"Account update payment Error: {error}")
 
         # Send an email to staff to remind review the pending account
         is_staff_review_needed = access_type == AccessType.GOVN.value or (
@@ -227,7 +226,58 @@ class Org:  # pylint: disable=too-many-public-methods
         **kwargs,
     ):
         """Add payment settings for the org."""
-        pay_url = current_app.config.get("PAY_API_URL")
+        try:
+            pay_url = current_app.config.get("PAY_API_URL")
+            pay_request = Org._build_payment_request(org_model, payment_info, payment_method, mailing_address, **kwargs)
+            error_code = None
+
+            token = RestService.get_service_account_token()
+            if is_new_org:
+                response = RestService.post(
+                    endpoint=f"{pay_url}/accounts", data=pay_request, token=token, raise_for_status=True
+                )
+            else:
+                response = RestService.put(
+                    endpoint=f"{pay_url}/accounts/{org_model.id}", data=pay_request, token=token, raise_for_status=True
+                )
+
+            match response.status_code:
+                case HTTPStatus.OK:
+                    payment_account_status = PaymentAccountStatus.CREATED
+                case HTTPStatus.ACCEPTED:
+                    payment_account_status = PaymentAccountStatus.PENDING
+                case _:
+                    payment_account_status = PaymentAccountStatus.FAILED
+                    error_payload = getattr(response, "json", lambda: {})()
+                    error_code = error_payload.get("error", "UNKNOWN_ERROR")
+                    logger.error(f"Account create payment Error: {response.text}")
+
+            if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
+                payment_method_description = (
+                    PaymentMethod(payment_method).name
+                    if payment_method in [item.value for item in PaymentMethod]
+                    else ""
+                )
+                ActivityLogPublisher.publish_activity(
+                    Activity(
+                        org_model.id,
+                        ActivityAction.PAYMENT_INFO_CHANGE.value,
+                        name=org_model.name,
+                        value=payment_method_description,
+                    )
+                )
+            return payment_account_status, error_code
+
+        except HTTPError as http_error:
+            error_payload = http_error.response.json()
+            error_code = error_payload.get("error", Error.PAYMENT_ACCOUNT_UPSERT_FAILED)
+            error_message = error_payload.get("error_description", "")
+            logger.error(f"Account create payment Error: {http_error}")
+            raise BusinessException(error_code, error_message)
+
+    @staticmethod
+    def _build_payment_request(org_model: OrgModel, payment_info: dict, payment_method: str, mailing_address, **kwargs):
+        """Build the payment request payload."""
         org_name_for_pay = f"{org_model.name}-{org_model.branch_name}" if org_model.branch_name else org_model.name
         pay_request = {
             "accountId": org_model.id,
@@ -250,42 +300,17 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request.setdefault("paymentInfo", {})
             pay_request["paymentInfo"]["revenueAccount"] = revenue_account
 
-        if payment_method == PaymentMethod.PAD.value:  # PAD has bank related details
-            pay_request["paymentInfo"]["bankTransitNumber"] = payment_info.get("bankTransitNumber", None)
-            pay_request["paymentInfo"]["bankInstitutionNumber"] = payment_info.get("bankInstitutionNumber", None)
-            pay_request["paymentInfo"]["bankAccountNumber"] = payment_info.get("bankAccountNumber", None)
+        if payment_method == PaymentMethod.PAD.value:  # PAD has bank-related details
+            pay_request["paymentInfo"].update(
+                {
+                    "bankTransitNumber": payment_info.get("bankTransitNumber"),
+                    "bankInstitutionNumber": payment_info.get("bankInstitutionNumber"),
+                    "bankAccountNumber": payment_info.get("bankAccountNumber"),
+                }
+            )
             pay_request["padTosAcceptedBy"] = kwargs["user_context"].user_name
-        # invoke pay-api
-        token = RestService.get_service_account_token()
-        if is_new_org:
-            response = RestService.post(
-                endpoint=f"{pay_url}/accounts", data=pay_request, token=token, raise_for_status=True
-            )
-        else:
-            response = RestService.put(
-                endpoint=f"{pay_url}/accounts/{org_model.id}", data=pay_request, token=token, raise_for_status=True
-            )
 
-        if response.status_code == HTTPStatus.OK:
-            payment_account_status = PaymentAccountStatus.CREATED
-        elif response.status_code == HTTPStatus.ACCEPTED:
-            payment_account_status = PaymentAccountStatus.PENDING
-        else:
-            payment_account_status = PaymentAccountStatus.FAILED
-
-        if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
-            payment_method_description = (
-                PaymentMethod(payment_method).name if payment_method in [item.value for item in PaymentMethod] else ""
-            )
-            ActivityLogPublisher.publish_activity(
-                Activity(
-                    org_model.id,
-                    ActivityAction.PAYMENT_INFO_CHANGE.value,
-                    name=org_model.name,
-                    value=payment_method_description,
-                )
-            )
-        return payment_account_status
+        return pay_request
 
     @staticmethod
     def _validate_and_raise_error(org_info: dict):
@@ -426,7 +451,11 @@ class Org:  # pylint: disable=too-many-public-methods
                 Org.send_staff_review_account_reminder(relationship_id=self._model.id)
 
         if name_updated or payment_info:
-            Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
+            payment_account_status, error = Org._create_payment_for_org(
+                mailing_address, self._model, payment_info, False
+            )
+            if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
+                logger.warning(f"Account update payment Error: {error}")
         # Depreciated (use update_org_address instead)
         Org._publish_activity_on_mailing_address_change(org_model.id, current_org_name, mailing_address)
         Org._publish_activity_on_name_change(org_model.id, org_name)
@@ -478,7 +507,7 @@ class Org:  # pylint: disable=too-many-public-methods
             )
 
     @staticmethod
-    def _create_payment_for_org(mailing_address, org, payment_info, is_new_org: bool = True) -> PaymentAccountStatus:
+    def _create_payment_for_org(mailing_address, org, payment_info, is_new_org: bool = True):
         """Create Or update payment info for org."""
         selected_payment_method = payment_info.get("paymentMethod", None)
         payment_method = None
@@ -490,7 +519,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if is_new_org or selected_payment_method:
             validator_obj = payment_type_validate(is_fatal=True, **arg_dict)
             payment_method = validator_obj.info.get("payment_type")
-        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org)
+        return Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org)
 
     @staticmethod
     def _create_gov_account_task(org_model: OrgModel):

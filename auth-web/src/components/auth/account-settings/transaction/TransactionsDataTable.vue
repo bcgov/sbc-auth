@@ -182,7 +182,8 @@ export default defineComponent({
     extended: { default: false },
     headers: { default: [] as BaseTableHeaderI[] }
   },
-  setup (props) {
+  emit: ['isDownloadingReceipt'],
+  setup (props, { emit }) {
     // refs
     const datePicker = ref(null)
     // composables
@@ -273,10 +274,12 @@ export default defineComponent({
     })
 
     async function downloadReceipt (item: Transaction) {
+      emit('isDownloadingReceipt', true)
       const currentAccount = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
       const receipt = await PaymentService.postReceipt(item, currentAccount.id)
       const filename = `bcregistry-receipts-${item.id}.pdf`
       CommonUtils.fileDownload(receipt.data, filename, 'application/pdf')
+      emit('isDownloadingReceipt', false)
     }
 
     const displayDate = (val: string) => {
