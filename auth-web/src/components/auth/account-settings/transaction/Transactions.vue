@@ -117,7 +117,7 @@
 <script lang="ts">
 import { Account, Pages } from '@/util/constants'
 import { MembershipType, OrgPaymentDetails } from '@/models/Organization'
-import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, ref, reactive, toRefs, watch } from '@vue/composition-api'
+import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { useAccountChangeHandler, useTransactions } from '@/composables'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
