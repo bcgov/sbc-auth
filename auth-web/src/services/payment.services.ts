@@ -1,10 +1,6 @@
-import { EFTShortnameResponse, EFTTransactionFilterParams, EFTTransactionListResponse } from '@/models/eft-transaction'
-import { EftRefundRequest, RefundRequest } from '@/models/refund'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
-import { LinkedShortNameFilterParams, ShortNameSummaryFilterParams } from '@/models/pay/short-name'
 import { PADInfo, PADInfoValidation } from '@/models/Organization'
-import { PaymentTypes, ShortNameLinkStatus } from '@/util/constants'
 import {
   StatementFilterParams,
   StatementListItem,
@@ -12,13 +8,14 @@ import {
   StatementNotificationSettings,
   StatementSettings
 } from '@/models/statement'
-
 import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 
 import { AxiosPromise } from 'axios'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Payment } from '@/models/Payment'
+import { PaymentTypes } from '@/util/constants'
+import { RefundRequest } from '@/models/refund'
 import { axios } from '@/util/http-util'
 
 export default class PaymentService {
@@ -63,23 +60,6 @@ export default class PaymentService {
       filingDateTime: CommonUtils.formatDateToHumanReadable(invoice.createdOn)
     }
     return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
-  }
-
-  static refundEFT (refundPayload: EftRefundRequest): AxiosPromise<any> {
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/shortname-refund`
-    return axios.post(url, refundPayload)
-  }
-
-  static getEFTRefunds (filterParams): AxiosPromise<any> {
-    const params = new URLSearchParams()
-    if (filterParams.statuses) {
-      params.append('statuses', filterParams.statuses.toString())
-    }
-    if (filterParams.shortNameId) {
-      params.append('shortNameId', filterParams.shortNameId.toString())
-    }
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/shortname-refund`
-    return axios.get(url, { params })
   }
 
   static getDocument (documentType: string): AxiosPromise<any> {
@@ -261,55 +241,6 @@ export default class PaymentService {
     return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
   }
 
-  static searchEFTAccounts (searchText: string): AxiosPromise<any> {
-    const params = new URLSearchParams({
-      'searchText': searchText
-    })
-
-    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/search/eft?${params.toString()}`)
-  }
-
-  static getEFTShortNames (filterParams: LinkedShortNameFilterParams | ShortNameSummaryFilterParams, viewAll = false): AxiosPromise<any> {
-    const params = new URLSearchParams()
-    if (filterParams.pageNumber) {
-      params.append('page', filterParams.pageNumber.toString())
-    }
-    if (filterParams.pageLimit) {
-      params.append('limit', filterParams.pageLimit.toString())
-    }
-    if (viewAll) {
-      params.append('viewAll', `${viewAll}`)
-    }
-    this.appendFilterPayloadParams(params, filterParams)
-
-    return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames?${params.toString()}`)
-  }
-
-  static getEFTShortName (shortNameId: string): AxiosPromise<EFTShortnameResponse> {
-    return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`)
-  }
-
-  static patchEFTShortName (shortNameId: string, body: any): AxiosPromise<EFTShortnameResponse> {
-    return axios.patch(`${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}`, body)
-  }
-
-  static getEFTShortNameSummaries (filterParams: ShortNameSummaryFilterParams, viewAll = false): AxiosPromise<any> {
-    const params = new URLSearchParams()
-    if (filterParams.pageNumber) {
-      params.append('page', filterParams.pageNumber.toString())
-    }
-    if (filterParams.pageLimit) {
-      params.append('limit', filterParams.pageLimit.toString())
-    }
-    if (viewAll) {
-      params.append('viewAll', `${viewAll}`)
-    }
-
-    this.appendFilterPayloadParams(params, filterParams)
-
-    return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames/summaries?${params.toString()}`)
-  }
-
   static appendFilterPayloadParams (params: URLSearchParams, filterParams: any) {
     if (filterParams.filterPayload) {
       for (const [key, value] of Object.entries(filterParams.filterPayload)) {
@@ -318,59 +249,6 @@ export default class PaymentService {
         }
       }
     }
-  }
-
-  static getEFTShortNameLinks (shortNameId: number): AxiosPromise<any> {
-    return axios.get(`${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/links`)
-  }
-
-  static getEFTShortnameHistory (shortNameId: string, filterParams: EFTTransactionFilterParams): AxiosPromise<EFTTransactionListResponse> {
-    const params = new URLSearchParams()
-    if (filterParams.pageNumber) {
-      params.append('page', filterParams.pageNumber.toString())
-    }
-    if (filterParams.pageLimit) {
-      params.append('limit', filterParams.pageLimit.toString())
-    }
-
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/history`
-    return axios.get(url, { params })
-  }
-
-  static getEFTShortnameSummary (shortNameId: string | number): AxiosPromise<EFTShortnameResponse> {
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/summaries?shortNameId=${shortNameId}`
-    return axios.get(url)
-  }
-
-  static getEFTRefund (eftRefundId: number): AxiosPromise<EFTShortnameResponse> {
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/shortname-refund/${eftRefundId}`
-    return axios.get(url)
-  }
-
-  static patchEFTRefund (eftRefundId: number, body: any): AxiosPromise<EFTShortnameResponse> {
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/shortname-refund/${eftRefundId}`
-    return axios.patch(url, body)
-  }
-
-  static postShortNameLink (shortNameId: string, accountId: string): AxiosPromise<EFTShortnameResponse> {
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/links`
-    const body = {
-      accountId: accountId
-    }
-    return axios.post(url, body)
-  }
-
-  static unlinkShortNameAccount (shortNameId: string, shortNameLinkId: string): AxiosPromise<EFTShortnameResponse> {
-    const body = {
-      statusCode: ShortNameLinkStatus.INACTIVE
-    }
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/links/${shortNameLinkId}`
-    return axios.patch(url, body)
-  }
-
-  static async postShortnamePaymentAction (shortNameId: string, bodyParams: any): AxiosPromise<void> {
-    const url = `${ConfigHelper.getPayAPIURL()}/eft-shortnames/${shortNameId}/payment`
-    return axios.post(url, bodyParams)
   }
 
   static async isValidRedirectUrl (redirectUrl: string): AxiosPromise<boolean> {

@@ -9,6 +9,7 @@ export default class ConfigHelper {
     sessionStorage.setItem(SessionStorageKeys.StatusApiUrl, ConfigHelper.getStatusAPIUrl())
     sessionStorage.setItem(SessionStorageKeys.AuthWebUrl, ConfigHelper.getSelfURL())
     sessionStorage.setItem(SessionStorageKeys.FasWebUrl, ConfigHelper.getFasWebUrl())
+    sessionStorage.setItem(SessionStorageKeys.PayWebUrl, ConfigHelper.getPayWebUrl())
     sessionStorage.setItem(SessionStorageKeys.RegistryHomeUrl, ConfigHelper.getRegistryHomeURL())
     sessionStorage.setItem(SessionStorageKeys.NameRequestUrl, ConfigHelper.getNameRequestUrl())
     sessionStorage.setItem(SessionStorageKeys.PprWebUrl, ConfigHelper.getPPRWebUrl())
@@ -158,6 +159,10 @@ export default class ConfigHelper {
 
   static getFasWebUrl () {
     return `${import.meta.env.VUE_APP_FAS_WEB_URL}`
+  }
+
+  static getPayWebUrl () {
+    return `${import.meta.env.VUE_APP_PAY_WEB_URL}`
   }
 
   static getPPRWebUrl () {
