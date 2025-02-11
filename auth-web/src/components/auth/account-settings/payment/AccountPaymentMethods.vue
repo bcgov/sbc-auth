@@ -142,7 +142,7 @@ export default defineComponent({
       default: false
     }
   },
-  emits: ['emit-bcol-info', 'disable-editing'],
+  emits: ['emit-bcol-info', 'disable-editing', 'reload-products'],
   setup (props, { emit, root }) {
     const router = root.$router
     const orgStore = useOrgStore()
@@ -398,13 +398,14 @@ export default defineComponent({
             state.isLoading = false
             await initialize(false)
             emit('disable-editing')
+            emit('reload-products')
             return
           }
           await orgStore.updateOrg(createRequestBody)
           state.isBtnSaved = true
           state.isLoading = false
           setHasPaymentMethodChanged(false)
-          initialize()
+          await initialize()
           orgStore.setCurrentOrganizationPaymentType(selectedPaymentMethod)
           if (selectedPaymentMethod === PaymentTypes.EFT) {
             const recipientList = []

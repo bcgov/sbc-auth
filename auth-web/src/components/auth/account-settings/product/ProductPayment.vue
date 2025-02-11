@@ -107,10 +107,12 @@
         Please save your payment settings before making any product changes
       </span>
       <AccountPaymentMethods
+        :key="paymentRenderKey"
         ref="paymentMethodRef"
         :isEditing="isEditing"
         :isBcolAdmin="isBcolAdmin"
         @disable-editing="isEditing = false"
+        @reload-products="setup"
       />
     </template>
 
@@ -280,6 +282,7 @@ export default defineComponent({
       }),
       isEditing: false,
       productRenderKey: 0,
+      paymentRenderKey: 0,
       isBcolAdmin: currentUser?.roles?.includes(Role.BcolStaffAdmin),
       showEditButton: computed(() => {
         const accessType:any = currentOrganization.value.accessType
@@ -410,6 +413,7 @@ export default defineComponent({
             state.dialogIcon = 'mdi-alert-circle-outline'
             state.displayRemoveProductDialog = false
             confirmDialog.value.open()
+            state.paymentRenderKey++
             await setup()
             return
           }
