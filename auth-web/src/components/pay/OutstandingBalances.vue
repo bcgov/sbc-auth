@@ -280,7 +280,7 @@ export default defineComponent({
       state.statementOwingError = false
       try {
         await Promise.all([getStatementsOwing(), orgStore.getStatementsSummary()])
-        state.invoicesOwing = state.statementsSummary.totalInvoiceDue
+        state.invoicesOwing = state.statementsSummary.totalDue
         if (state.invoicesOwing === 0) {
           goBack()
         }
