@@ -238,7 +238,11 @@ export default defineComponent({
       handlingPayment: false,
       statementOwingError: false,
       selectedPaymentMethod: 'cc',
-      statementsSummary: computed(() => orgStore.statementsSummary)
+      statementsSummary: computed(() => orgStore.statementsSummary),
+      totalAmountDue: computed<number>(() => {
+        const totalStatementOwing = state.statementsOwing.reduce((sum, statement) => sum + statement.amountOwing, 0)
+        return totalStatementOwing + state.invoicesOwing
+      })
     })
     const { downloadStatement } = useDownloader(orgStore, state)
 
@@ -281,7 +285,7 @@ export default defineComponent({
       try {
         await Promise.all([getStatementsOwing(), orgStore.getStatementsSummary()])
         state.invoicesOwing = state.statementsSummary.totalInvoiceDue
-        if (totalAmountDue.value === 0) {
+        if (state.totalAmountDue === 0) {
           goBack()
         }
       } catch (error) {
@@ -289,11 +293,6 @@ export default defineComponent({
         console.error('Error fetching statements owing.', error)
       }
       state.loading = false
-    })
-
-    const totalAmountDue = computed<number>(() => {
-      const totalStatementOwing = state.statementsOwing.reduce((sum, statement) => sum + statement.amountOwing, 0)
-      return totalStatementOwing + state.invoicesOwing
     })
 
     function currentDateString () {
@@ -313,8 +312,7 @@ export default defineComponent({
       currentDateString,
       formatStatementString: CommonUtils.formatStatementString,
       formatCurrency: CommonUtils.formatAmount,
-      downloadStatement,
-      totalAmountDue
+      downloadStatement
     }
   }
 })
