@@ -108,10 +108,12 @@
         Please save your payment settings before making any product changes
       </span>
       <AccountPaymentMethods
+        :key="paymentRenderKey"
         ref="paymentMethodRef"
         :isEditing="isEditing"
         :isBcolAdmin="isBcolAdmin"
         @disable-editing="isEditing = false"
+        @reload-products="setup"
       />
     </template>
 
@@ -281,6 +283,7 @@ export default defineComponent({
       }),
       isEditing: false,
       productRenderKey: 0,
+      paymentRenderKey: 0,
       isBcolAdmin: currentUser?.roles?.includes(Role.BcolStaffAdmin),
       showEditButton: computed(() => {
         const accessType:any = currentOrganization.value.accessType
@@ -290,6 +293,10 @@ export default defineComponent({
       productPaymentReady: false,
       accountChangeKey: 0
     })
+
+    const {
+      hasProductOrPaymentBackendChanges
+    } = useProductPayment()
 
     const loadProduct = async () => {
       try {
@@ -402,6 +409,16 @@ export default defineComponent({
           const addProductsRequestBody: OrgProductsRequestBody = {
             subscriptions: productsSelected
           }
+          if (await hasProductOrPaymentBackendChanges(currentOrganization.value.id)) {
+            state.dialogTitle = 'Conflict Detected'
+            state.dialogText = 'Your product/payment has been updated by another user. Please try again.'
+            state.dialogIcon = 'mdi-alert-circle-outline'
+            state.displayRemoveProductDialog = false
+            confirmDialog.value.open()
+            state.paymentRenderKey++
+            await setup()
+            return
+          }
           if (state.addProductOnAccountAdmin) {
             await addOrgProducts(addProductsRequestBody)
           } else {
@@ -431,7 +448,7 @@ export default defineComponent({
     }
 
     const saveProductFee = async (accountFees) => {
-      const accountFee = { accoundId: currentOrganization.value.id, accountFees }
+      const accountFee = { accountId: currentOrganization.value.id, accountFees }
       state.isProductActionLoading = true
       state.isProductActionCompleted = false
       try {
@@ -518,6 +535,7 @@ export default defineComponent({
       ProductStatus,
       ProductEnum,
       paymentMethodRef,
+      hasProductOrPaymentBackendChanges,
       ...toRefs(state)
     }
   }
