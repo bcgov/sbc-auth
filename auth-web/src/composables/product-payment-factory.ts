@@ -1,5 +1,6 @@
-import { AccessType, PaymentTypes, ProductStatus } from '@/util/constants'
+import { AccessType, LDFlags, PaymentTypes, ProductStatus } from '@/util/constants'
 import { useCodesStore, useOrgStore } from '@/stores'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { computed } from '@vue/composition-api'
 import { storeToRefs } from 'pinia'
 
@@ -96,6 +97,11 @@ export const useProductPayment = (props, state) => {
       exclusionSet = [PaymentTypes.INTERNAL, PaymentTypes.EJV]
     }
 
+    if (LaunchDarklyService.getFlag(LDFlags.HideBCOLProductSettings, false) &&
+        orgStore.currentOrgPaymentType !== PaymentTypes.BCOL) {
+      exclusionSet.push(PaymentTypes.BCOL)
+    }
+
     Object.keys(ppMethods).forEach((product) => {
       ppMethods[product] = ppMethods[product].filter((method) => {
         if (inclusionSet.length > 0) {
@@ -145,7 +151,7 @@ export const useProductPayment = (props, state) => {
       return [PAYMENT_METHODS[state.selectedPaymentMethod]]
     }
     const methodSupportPerProduct = paymentMethodSupportedForProducts.value
-    const paymentMethods = []
+    let paymentMethods = []
     const isGovmOrg = orgStore.currentOrganization?.accessType === AccessType.GOVM
     const paymentTypes = isGovmOrg ? [PaymentTypes.EJV] : [PaymentTypes.PAD, PaymentTypes.CREDIT_CARD,
       PaymentTypes.ONLINE_BANKING, PaymentTypes.BCOL, PaymentTypes.EFT]
@@ -164,6 +170,10 @@ export const useProductPayment = (props, state) => {
         paymentMethods.push(paymentMethod)
       }
     })
+    if (LaunchDarklyService.getFlag(LDFlags.HideBCOLProductSettings, false) &&
+        orgStore.currentOrgPaymentType !== PaymentTypes.BCOL) {
+      paymentMethods = paymentMethods.filter(item => item.type !== PaymentTypes.BCOL)
+    }
     return paymentMethods
   })
 
