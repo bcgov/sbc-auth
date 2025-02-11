@@ -103,7 +103,7 @@ export const useProductPayment = (props = null, state = null) => {
     }
 
     Object.keys(ppMethods).forEach((product) => {
-      ppMethods[product] = ppMethods[product].filter((method) => {
+      ppMethods[product] = ppMethods[product]?.filter((method) => {
         if (inclusionSet.length > 0) {
           return inclusionSet.includes(method as PaymentTypes)
         }
