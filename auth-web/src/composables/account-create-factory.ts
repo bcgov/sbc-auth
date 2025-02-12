@@ -30,7 +30,7 @@ export const useAccountCreate = () => {
           state.errorText = err.response.data.message?.detail || err.response.data.message
           break
         default:
-          state.errorText = 'An error occurred while attempting to create your account.'
+          state.errorText = 'An error occurred while attempting to create/update your account.'
       }
       errorDialog.value.open()
     }
@@ -54,12 +54,12 @@ export const useAccountCreate = () => {
             state.errorText = err.response.data.message || 'Affidavit already exists'
             break
           default:
-            state.errorText = 'An error occurred while attempting to create your account.'
+            state.errorText = 'An error occurred while attempting to create/update your account.'
         }
         break
       default:
         state.errorText =
-                'An error occurred while attempting to create your account.'
+                'An error occurred while attempting to create/update your account.'
     }
   }
 

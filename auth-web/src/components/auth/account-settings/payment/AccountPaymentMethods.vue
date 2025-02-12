@@ -480,7 +480,7 @@ export default defineComponent({
               state.errorTitle = error.response.data.message?.title || 'Error'
               break
             default:
-              state.errorText = 'An error occurred while attempting to create your account.'
+              state.errorText = 'An error occurred while attempting to create/update your account.'
           }
           errorDialog.value.open()
         }
