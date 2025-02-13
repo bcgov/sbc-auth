@@ -501,6 +501,7 @@ export default defineComponent({
     // Reload product list when organization changes
     watch(() => currentOrganization.value.id, async () => {
       await setup()
+      state.isEditing = false
       // Required otherwise changing from USER -> ADMIN will leave it disabled
       state.accountChangeKey++
     })
