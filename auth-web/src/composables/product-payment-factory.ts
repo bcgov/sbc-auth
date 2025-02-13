@@ -91,7 +91,7 @@ export const useProductPayment = (props = null, state = null) => {
     let exclusionSet = [PaymentTypes.INTERNAL, PaymentTypes.EFT, PaymentTypes.EJV]
     let inclusionSet = []
 
-    if (orgStore.currentOrganization.accessType === AccessType.GOVM) {
+    if (orgStore.currentOrganization?.accessType === AccessType.GOVM) {
       inclusionSet = [PaymentTypes.EJV]
     } else if (orgStore.currentOrgPaymentDetails?.eftEnable) {
       exclusionSet = [PaymentTypes.INTERNAL, PaymentTypes.EJV]
