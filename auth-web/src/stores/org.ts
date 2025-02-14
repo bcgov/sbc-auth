@@ -315,52 +315,47 @@ export const useOrgStore = defineStore('org', () => {
     return response
   }
 
-  async function syncMembership (orgId: number): Promise<Member> {
-    let permissions:string[] = []
-    let response
-    let membership:Member = null
-    const kcUserProfile = KeyCloakService.getUserInfo()
-    if (!kcUserProfile.roles.includes(Role.Staff) && !kcUserProfile.roles.includes(Role.ContactCentreStaff)) {
-      response = await UserService.getMembership(orgId)
-      membership = response?.data
-      // const org: Organization = state.currentOrganization']
-      const currentAccountSettings = state.currentAccountSettings
-      // const statusCode = org && org.statusCode ? org?.statusCode : currentAccountSettings.accountStatus
-      const statusCode = currentAccountSettings.accountStatus
-      // to fix permission issue. take status from currentAccountSettings
-      const res = await PermissionService.getPermissions(statusCode, membership?.membershipTypeCode)
-      permissions = res?.data
-    } else {
-      // Check for better approach
-      // Create permissions to enable actions for staff
-      if (kcUserProfile.roles.includes(Role.ContactCentreStaff)) {
-        permissions = CommonUtils.getContactCentreStaffPermissions()
-      } else if (kcUserProfile.roles.includes(Role.StaffManageAccounts)) {
-        permissions = CommonUtils.getAdminPermissions()
-      } else if (kcUserProfile.roles.includes(Role.StaffViewAccounts)) {
-        permissions = CommonUtils.getViewOnlyPermissions()
-      }
-      // Create an empty membership model for staff. Map view_account as User and manage_accounts as Admin
-      let membershipTypeCode = null
-      if (kcUserProfile.roles.includes(Role.ContactCentreStaff)) {
-        membershipTypeCode = MembershipType.Admin
-      } else if (kcUserProfile.roles.includes(Role.StaffManageAccounts)) {
-        membershipTypeCode = MembershipType.Admin
-      } else if (kcUserProfile.roles.includes(Role.StaffViewAccounts)) {
-        membershipTypeCode = MembershipType.User
-      }
-
-      membership = {
-        membershipTypeCode: membershipTypeCode,
+  const rolesMapping = {
+    [Role.ContactCentreStaff]: {
+      permissions: CommonUtils.getContactCentreStaffPermissions(),
+      membershipType: MembershipType.Admin
+    },
+    [Role.StaffManageAccounts]: {
+      permissions: CommonUtils.getAdminPermissions(),
+      membershipType: MembershipType.Admin
+    },
+    [Role.StaffViewAccounts]: {
+      permissions: CommonUtils.getViewOnlyPermissions(),
+      membershipType: MembershipType.User
+    }
+  };
+  
+  async function syncMembership(orgId: number): Promise<Member> {
+    const { roles } = KeyCloakService.getUserInfo();
+    
+    // If user has any of the roles in the mapping, assign the permissions and membership type
+    const assignedRole = roles.find(role => rolesMapping.hasOwnProperty(role));
+    
+    if (assignedRole) {
+      state.permissions = rolesMapping[assignedRole].permissions;
+      state.currentMembership = {
+        membershipTypeCode: rolesMapping[assignedRole].membershipType,
         id: null,
         membershipStatus: MembershipStatus.Active,
         user: null
-      }
+      };
+      return state.currentMembership;
     }
-    permissions = permissions || []
-    state.currentMembership = membership
-    state.permissions = permissions
-    return response?.data
+  
+    // If user doesn't have any of the roles in the mapping, get the membership from the API
+    const { data: membership } = await UserService.getMembership(orgId);
+    const { accountStatus: statusCode } = state.currentAccountSettings;
+    const { data: permissions } = await PermissionService.getPermissions(statusCode, membership?.membershipTypeCode);
+    
+    state.permissions = permissions || [];
+    state.currentMembership = membership;
+  
+    return membership;
   }
 
   /*
