@@ -332,10 +332,10 @@ export const useOrgStore = defineStore('org', () => {
   
   async function syncMembership(orgId: number): Promise<Member> {
     const { roles } = KeyCloakService.getUserInfo();
-    
+
     // If user has any of the roles in the mapping, assign the permissions and membership type
-    const assignedRole = roles.find(role => rolesMapping.hasOwnProperty(role));
-    
+    const assignedRole = roles.find(role => Object.prototype.hasOwnProperty.call(rolesMapping, role));
+
     if (assignedRole) {
       state.permissions = rolesMapping[assignedRole].permissions;
       state.currentMembership = {
@@ -346,7 +346,7 @@ export const useOrgStore = defineStore('org', () => {
       };
       return state.currentMembership;
     }
-  
+
     // If user doesn't have any of the roles in the mapping, get the membership from the API
     const { data: membership } = await UserService.getMembership(orgId);
     const { accountStatus: statusCode } = state.currentAccountSettings;
