@@ -270,10 +270,10 @@ class Org:  # pylint: disable=too-many-public-methods
 
         except HTTPError as http_error:
             error_payload = http_error.response.json()
-            error_code = error_payload.get("error", Error.PAYMENT_ACCOUNT_UPSERT_FAILED)
-            error_message = error_payload.get("error_description", "")
+            error_code = next((error_payload[key] for key in ["error", "code"] if key in error_payload), Error.PAYMENT_ACCOUNT_UPSERT_FAILED)
+            error_details = next((error_payload[key] for key in ["error_description", "message", "description", "type"] if key in error_payload), "")
             logger.error(f"Account create payment Error: {http_error}")
-            raise BusinessException(error_code, error_message)
+            raise BusinessException(error_code, error_details)
 
     @staticmethod
     def _build_payment_request(org_model: OrgModel, payment_info: dict, payment_method: str, mailing_address, **kwargs):
