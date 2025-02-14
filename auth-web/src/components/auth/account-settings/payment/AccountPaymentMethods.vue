@@ -474,7 +474,7 @@ export default defineComponent({
           switch (error.response.status) {
             case 409:
             case 400:
-              state.errorText = `${error.response.data.code}\n${error.response.data.message?.detail || ''}`.trim()
+              state.errorText = `${error.response.data.code}<br>${error.response.data.message?.detail || error.response.data.detail || ''}`.trim()
               state.errorTitle = error.response.data.message?.title || error.response.data.message || 'Error'
               break
             default:
