@@ -154,7 +154,11 @@ def post_organization():
             return response, status
         response, status = OrgService.create_org(request_json, user.identifier).as_dict(), HTTPStatus.CREATED
     except BusinessException as exception:
-        response, status = {"code": exception.code, "message": exception.message, "detail": exception.detail}, exception.status_code
+        response, status = {
+            "code": exception.code,
+            "message": exception.message,
+            "detail": exception.detail,
+        }, exception.status_code
     return response, status
 
 
@@ -196,7 +200,11 @@ def put_organization(org_id):
         else:
             response, status = {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
     except BusinessException as exception:
-        response, status = {"code": exception.code, "message": exception.message, "detail": exception.detail}, exception.status_code
+        response, status = {
+            "code": exception.code,
+            "message": exception.message,
+            "detail": exception.detail,
+        }, exception.status_code
     return response, status
 
 

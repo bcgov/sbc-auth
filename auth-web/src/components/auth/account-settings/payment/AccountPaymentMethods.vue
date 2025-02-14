@@ -473,11 +473,9 @@ export default defineComponent({
           state.errorTitle = 'Error'
           switch (error.response.status) {
             case 409:
-              state.errorText = error.response.data.message?.detail || error.response.data.message
-              break
             case 400:
-              state.errorText = error.response.data.message?.detail || error.response.data.message
-              state.errorTitle = error.response.data.message?.title || 'Error'
+              state.errorText = `${error.response.data.code}\n${error.response.data.message?.detail || ''}`.trim()
+              state.errorTitle = error.response.data.message?.title || error.response.data.message || 'Error'
               break
             default:
               state.errorText = 'An error occurred while attempting to create/update your account.'
