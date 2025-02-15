@@ -383,4 +383,13 @@ export default class CommonUtils {
       arrayToSearch.length > 0 ? arrayToSearch[0] : undefined
     )
   }
+
+  static formatSnakeCaseToTitle (text: string): string {
+    if (!text) return ''
+    if (!text.includes('_')) return text
+    return text
+      .toLowerCase()
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase())
+  }
 }
