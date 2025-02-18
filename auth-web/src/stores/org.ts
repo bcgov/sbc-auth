@@ -328,34 +328,34 @@ export const useOrgStore = defineStore('org', () => {
       permissions: CommonUtils.getViewOnlyPermissions(),
       membershipType: MembershipType.User
     }
-  };
+  }
   
   async function syncMembership(orgId: number): Promise<Member> {
-    const { roles } = KeyCloakService.getUserInfo();
+    const { roles } = KeyCloakService.getUserInfo()
 
     // If user has any of the roles in the mapping, assign the permissions and membership type
-    const assignedRole = roles.find(role => Object.prototype.hasOwnProperty.call(rolesMapping, role));
+    const assignedRole = roles.find(role => Object.prototype.hasOwnProperty.call(rolesMapping, role))
 
     if (assignedRole) {
-      state.permissions = rolesMapping[assignedRole].permissions;
+      state.permissions = rolesMapping[assignedRole].permissions
       state.currentMembership = {
         membershipTypeCode: rolesMapping[assignedRole].membershipType,
         id: null,
         membershipStatus: MembershipStatus.Active,
         user: null
-      };
-      return state.currentMembership;
+      }
+      return state.currentMembership
     }
 
     // If user doesn't have any of the roles in the mapping, get the membership from the API
-    const { data: membership } = await UserService.getMembership(orgId);
-    const { accountStatus: statusCode } = state.currentAccountSettings;
-    const { data: permissions } = await PermissionService.getPermissions(statusCode, membership?.membershipTypeCode);
+    const { data: membership } = await UserService.getMembership(orgId)
+    const { accountStatus: statusCode } = state.currentAccountSettings
+    const { data: permissions } = await PermissionService.getPermissions(statusCode, membership?.membershipTypeCode)
     
-    state.permissions = permissions || [];
-    state.currentMembership = membership;
+    state.permissions = permissions || []
+    state.currentMembership = membership
   
-    return membership;
+    return membership
   }
 
   /*
