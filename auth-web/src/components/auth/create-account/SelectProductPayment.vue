@@ -192,6 +192,7 @@ export default defineComponent({
       selectedPaymentMethod: '',
       errorTitle: 'Error',
       errorText: '',
+      currentOrganization: computed(() => orgStore.currentOrganization),
       currentOrganizationType: computed(() => orgStore.currentOrganizationType),
       currentOrgPaymentType: computed(() => orgStore.currentOrgPaymentType),
       isPaymentValid: computed(() => {
