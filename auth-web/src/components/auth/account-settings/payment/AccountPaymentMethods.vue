@@ -144,6 +144,7 @@ import {
 } from '@/models/Organization'
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BcolProfile } from '@/models/bcol'
+import CommonUtils from '@/util/common-util'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
@@ -419,6 +420,8 @@ export default defineComponent({
       return { isValid, createRequestBody }
     }
 
+    const formatText = CommonUtils.formatSnakeCaseToTitle
+
     async function save () {
       state.isBtnSaved = false
       state.isLoading = true
@@ -473,11 +476,13 @@ export default defineComponent({
           state.errorTitle = 'Error'
           switch (error.response.status) {
             case 409:
-              state.errorText = error.response.data.message?.detail || error.response.data.message
-              break
             case 400:
-              state.errorText = error.response.data.message?.detail || error.response.data.message
-              state.errorTitle = error.response.data.message?.title || 'Error'
+              state.errorText = `${formatText(error.response.data.code)}<br>` +
+                  `${formatText(error.response.data.message?.detail) || formatText(error.response.data.detail) || ''}`.trim()
+
+              state.errorTitle = formatText(error.response.data.message?.title) ||
+                  formatText(error.response.data.message) ||
+                  'Error'
               break
             default:
               state.errorText = 'An error occurred while attempting to create/update your account.'
