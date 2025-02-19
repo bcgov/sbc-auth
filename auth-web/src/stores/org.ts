@@ -329,8 +329,8 @@ export const useOrgStore = defineStore('org', () => {
       membershipType: MembershipType.User
     }
   }
-  
-  async function syncMembership(orgId: number): Promise<Member> {
+
+  async function syncMembership (orgId: number): Promise<Member> {
     const { roles } = KeyCloakService.getUserInfo()
 
     // If user has any of the roles in the mapping, assign the permissions and membership type
@@ -351,10 +351,10 @@ export const useOrgStore = defineStore('org', () => {
     const { data: membership } = await UserService.getMembership(orgId)
     const { accountStatus: statusCode } = state.currentAccountSettings
     const { data: permissions } = await PermissionService.getPermissions(statusCode, membership?.membershipTypeCode)
-    
+
     state.permissions = permissions || []
     state.currentMembership = membership
-  
+
     return membership
   }
 
