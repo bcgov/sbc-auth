@@ -1,10 +1,10 @@
-import { createLocalVue, mount } from '@vue/test-utils'
 import { Account, PaymentTypes } from '@/util/constants'
+import { createLocalVue, mount } from '@vue/test-utils'
 import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
+import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
 import { useOrgStore } from '@/stores'
-import VueRouter from 'vue-router'
 
 describe('SelectProductPayment.vue', () => {
   let wrapper: any
@@ -29,7 +29,7 @@ describe('SelectProductPayment.vue', () => {
     })
 
     const router = new VueRouter()
-    
+
     wrapperFactory = (propsData) => {
       return mount(SelectProductPayment, {
         localVue,
@@ -64,7 +64,7 @@ describe('SelectProductPayment.vue', () => {
     expect(wrapper.vm.currentOrganization).toBeTruthy()
   })
 
-  it('correct isPaymentValid', async() => {
+  it('correct isPaymentValid', async () => {
     wrapper.setData({ selectedPaymentMethod: PaymentTypes.PAD })
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.isPaymentValid).toBe(wrapper.vm.isPADValid)

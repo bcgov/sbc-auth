@@ -1,10 +1,9 @@
+import { Account, PaymentTypes } from '@/util/constants'
 import { createLocalVue, mount } from '@vue/test-utils'
-
-import { Account } from '@/util/constants'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
+import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
-import VueRouter from 'vue-router'
 import { useOrgStore } from '@/stores'
 
 describe('PaymentMethods.vue', () => {
@@ -111,18 +110,20 @@ describe('PaymentMethods.vue', () => {
   })
 
   it('should not go into PAD view mode if createAccount is true ', async () => {
-    useOrgStore().currentOrgPADInfo = {"bankAccountNumber": '123456'}
-    wrapper = wrapperFactory({ isCreateAccount: false, currentSelectedPaymentMethod: 'PAD' })
+    useOrgStore().currentOrgPADInfo = { 'bankAccountNumber': '123456' }
+    wrapper = wrapperFactory({ isCreateAccount: false, currentSelectedPaymentMethod: PaymentTypes.PAD })
     await wrapper.vm.$nextTick()
     wrapper.find('.payment-card-contents')
     expect(wrapper.find('.banking-info').text('Banking Information')).toBeTruthy()
-    wrapper = wrapperFactory({ isCreateAccount: true, currentSelectedPaymentMethod: 'PAD' })
+    wrapper = wrapperFactory({ isCreateAccount: true, currentSelectedPaymentMethod: PaymentTypes.PAD })
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.banking-info').exists()).toBeFalsy()
   })
 
   it('Entering BCOL info should enable button create account button', async () => {
-    wrapper = wrapperFactory({ currentOrganization: { id: 123 } as any, isCreateAccount: true, currentSelectedPaymentMethod: 'DRAWDOWN' })
+    wrapper = wrapperFactory({ currentOrganization: { id: 123 } as any,
+      isCreateAccount: true,
+      currentSelectedPaymentMethod: PaymentTypes.BCOL })
     await wrapper.vm.$nextTick()
     wrapper.find('[data-test="input-user-id"]').setValue('123456789')
     wrapper.find('[data-test="input-user-password"]').setValue('123456789')

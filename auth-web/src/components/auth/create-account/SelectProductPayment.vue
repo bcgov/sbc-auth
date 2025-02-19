@@ -295,6 +295,8 @@ export default defineComponent({
     }
 
     // Exclude currentOrganization, it's already included in NextPageMixin, but we need it (not on template)
+    // Will remove this when we refactor NextPageMixin.
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     const { currentOrganization, ...refs } = toRefs(state)
 
     return {
