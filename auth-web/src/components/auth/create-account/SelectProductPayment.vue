@@ -294,8 +294,13 @@ export default defineComponent({
       emit('emit-bcol-info')
     }
 
+    // Exclude currentOrganization, it's already included in NextPageMixin, but we need it (not on template)
+    // Will remove this when we refactor NextPageMixin.
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    const { currentOrganization, ...refs } = toRefs(state)
+
     return {
-      ...toRefs(state),
+      ...refs,
       form,
       setSelectedProduct,
       setSelectedPayment,
