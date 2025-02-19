@@ -60,7 +60,6 @@ describe('SelectProductPayment.vue', () => {
   })
 
   it('currentOrganization should be on state, used for BCOL and PAD', async () => {
-    console.log(wrapper.vm.currentOrganization)
     expect(wrapper.vm.currentOrganization).toBeTruthy()
   })
 
