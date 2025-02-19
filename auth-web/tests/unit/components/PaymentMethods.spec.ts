@@ -4,9 +4,12 @@ import { Account } from '@/util/constants'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
+import VueRouter from 'vue-router'
+import { useOrgStore } from '@/stores'
 
 describe('PaymentMethods.vue', () => {
   let wrapper: any
+  let wrapperFactory: any
   const config = {
     'AUTH_API_URL': 'https://localhost:8080/api/v1/11',
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
@@ -16,17 +19,25 @@ describe('PaymentMethods.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = { id: 123 } as any
     const vuetify = new Vuetify({})
     localVue.directive('can', can)
 
-    wrapper = mount(PaymentMethods, {
-      localVue,
-      vuetify,
-      propsData: {
-        currentOrgType: Account.PREMIUM
-      }
-    })
+    const router = new VueRouter()
+
+    wrapperFactory = (propsData) => {
+      return mount(PaymentMethods, {
+        localVue,
+        router,
+        vuetify,
+        propsData: {
+          ...propsData
+        }
+      })
+    }
+
+    wrapper = wrapperFactory({ currentOrgType: Account.PREMIUM })
 
     vi.resetModules()
     vi.clearAllMocks()
@@ -97,5 +108,25 @@ describe('PaymentMethods.vue', () => {
     wrapper.vm.paymentMethodSelected(method1)
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.isPaymentSelected(method2)).toBe(false)
+  })
+
+  it('should not go into PAD view mode if createAccount is true ', async () => {
+    useOrgStore().currentOrgPADInfo = {"bankAccountNumber": '123456'}
+    wrapper = wrapperFactory({ isCreateAccount: false, currentSelectedPaymentMethod: 'PAD' })
+    await wrapper.vm.$nextTick()
+    wrapper.find('.payment-card-contents')
+    expect(wrapper.find('.banking-info').text('Banking Information')).toBeTruthy()
+    wrapper = wrapperFactory({ isCreateAccount: true, currentSelectedPaymentMethod: 'PAD' })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.banking-info').exists()).toBeFalsy()
+  })
+
+  it('Entering BCOL info should enable button create account button', async () => {
+    wrapper = wrapperFactory({ currentOrganization: { id: 123 } as any, isCreateAccount: true, currentSelectedPaymentMethod: 'DRAWDOWN' })
+    await wrapper.vm.$nextTick()
+    wrapper.find('[data-test="input-user-id"]').setValue('123456789')
+    wrapper.find('[data-test="input-user-password"]').setValue('123456789')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted()).toHaveProperty('emit-bcol-info')
   })
 })

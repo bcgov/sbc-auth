@@ -294,8 +294,11 @@ export default defineComponent({
       emit('emit-bcol-info')
     }
 
+    // Exclude currentOrganization, it's already included in NextPageMixin, but we need it (not on template)
+    const { currentOrganization, ...refs } = toRefs(state)
+
     return {
-      ...toRefs(state),
+      ...refs,
       form,
       setSelectedProduct,
       setSelectedPayment,
