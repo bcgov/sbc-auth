@@ -17,6 +17,7 @@ Test suite to ensure that the Org model routines are working as expected.
 """
 
 import pytest
+
 from auth_api.exceptions.errors import Error
 from auth_api.exceptions.exceptions import BusinessException
 from auth_api.models import Org as OrgModel
