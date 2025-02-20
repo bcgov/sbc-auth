@@ -25,7 +25,7 @@ class Error(Enum):
 
     INVALID_ORG = "The organization ID is in an incorrect format.", HTTPStatus.BAD_REQUEST
     INVALID_INPUT = "Invalid input, please check.", HTTPStatus.BAD_REQUEST
-    INSUFFICIENT_PERMISSION = 'Insufficient permissions.', HTTPStatus.BAD_REQUEST
+    INSUFFICIENT_PERMISSION = "Insufficient permissions.", HTTPStatus.BAD_REQUEST
     DATA_NOT_FOUND = "No matching record found.", HTTPStatus.NOT_FOUND
     DATA_ALREADY_EXISTS = "The data you want to insert already exists.", HTTPStatus.BAD_REQUEST
     INVALID_USER_CREDENTIALS = "Invalid user credentials.", HTTPStatus.UNAUTHORIZED
