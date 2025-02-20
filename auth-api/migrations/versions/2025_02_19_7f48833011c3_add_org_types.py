@@ -19,7 +19,7 @@ depends_on = None
 
 def upgrade():
     op.execute(
-        "INSERT INTO org_types (code, description, default) VALUES ('STAFF_READ_ONLY', 'BC Registries Read Only Staff', false)"
+        "INSERT INTO org_types (code, description, \"default\") VALUES ('STAFF_READ_ONLY', 'BC Registries Read Only Staff', false)"
     )
 
 def downgrade():
