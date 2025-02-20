@@ -18,6 +18,8 @@ depends_on = None
 
 
 def upgrade():
+    op.alter_column('org_types', 'code', type_=String(30))
+
     org_type_table = table('org_types',
                         column('code', String),
                         column('description', String),
