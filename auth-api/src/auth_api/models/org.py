@@ -348,8 +348,8 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
 def receive_before_insert(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     """Rejects invalid type_codes on insert."""
     org = target
-    if org.type_code in (OrgTypeEnum.SBC_STAFF.value, OrgTypeEnum.STAFF.value):
-        raise BusinessException(Error.INVALID_INPUT, None)
+    if org.type_code in (OrgTypeEnum.SBC_STAFF.value, OrgTypeEnum.STAFF.value, OrgType.STAFF_READ_ONLY.value):
+        raise BusinessException(Error.INSUFFICIENT_PERMISSION, None)
 
 
 @event.listens_for(Org, "before_update", raw=True)
