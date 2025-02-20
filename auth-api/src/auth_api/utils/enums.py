@@ -97,10 +97,12 @@ class PaymentAccountStatus(Enum):
 class OrgType(Enum):
     """Org types."""
 
+    PUBLIC = "PUBLIC"
     PREMIUM = "PREMIUM"
     BASIC = "BASIC"
     STAFF = "STAFF"
     SBC_STAFF = "SBC_STAFF"
+    STAFF_READ_ONLY = "STAFF_READ_ONLY"
 
 
 class DocumentType(Enum):
