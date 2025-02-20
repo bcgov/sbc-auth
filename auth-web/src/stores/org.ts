@@ -315,31 +315,35 @@ export const useOrgStore = defineStore('org', () => {
     return response
   }
 
-  const rolesMapping = {
-    [Role.ContactCentreStaff]: {
+  const rolesMapping = [
+    {
+      role: Role.ContactCentreStaff,
       permissions: CommonUtils.getContactCentreStaffPermissions(),
       membershipType: MembershipType.Admin
     },
-    [Role.StaffManageAccounts]: {
+    {
+      role: Role.StaffManageAccounts,
       permissions: CommonUtils.getAdminPermissions(),
       membershipType: MembershipType.Admin
     },
-    [Role.StaffViewAccounts]: {
+    {
+      role: Role.StaffViewAccounts,
       permissions: CommonUtils.getViewOnlyPermissions(),
       membershipType: MembershipType.User
     }
-  }
+  ]
 
   async function syncMembership (orgId: number): Promise<Member> {
     const { roles } = KeyCloakService.getUserInfo()
 
-    // If user has any of the roles in the mapping, assign the permissions and membership type
-    const assignedRole = roles.find(role => Object.prototype.hasOwnProperty.call(rolesMapping, role))
+    // In the sequential order of the rolesMapping array, check if user has any of the roles in the mapping
+    // and assign the permissions and membership type
+    const assignedRole = rolesMapping.find((role) => roles.includes(role.role))
 
     if (assignedRole) {
-      state.permissions = rolesMapping[assignedRole].permissions
+      state.permissions = assignedRole.permissions
       state.currentMembership = {
-        membershipTypeCode: rolesMapping[assignedRole].membershipType,
+        membershipTypeCode: assignedRole.membershipType,
         id: null,
         membershipStatus: MembershipStatus.Active,
         user: null
