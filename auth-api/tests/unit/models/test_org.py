@@ -24,7 +24,8 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
-from auth_api.utils.enums import OrgStatus as OrgStatusEnum, OrgType as OrgTypeEnum
+from auth_api.utils.enums import OrgStatus as OrgStatusEnum
+from auth_api.utils.enums import OrgType as OrgTypeEnum
 from tests.utilities.factory_utils import factory_user_model
 
 
