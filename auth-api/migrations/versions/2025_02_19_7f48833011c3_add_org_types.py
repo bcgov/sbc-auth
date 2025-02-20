@@ -18,9 +18,21 @@ depends_on = None
 
 
 def upgrade():
-    op.execute(
-        "INSERT INTO org_types (code, description, \"default\") VALUES ('STAFF_READ_ONLY', 'BC Registries Read Only Staff', false)"
+    org_type_table = table('org_types',
+                        column('code', String),
+                        column('description', String),
+                        column('default', Boolean)
+                    )
+
+    op.bulk_insert(
+        org_type_table,
+        [
+            {'code': 'MAXIMUS_STAFF', 'description': 'Maximus Staff', 'default': False},
+            {'code': 'CONTACT_CENTRE_STAFF', 'description': 'Contact Centre Staff', 'default': False},
+        ]
     )
 
+
 def downgrade():
-    op.execute("DELETE FROM org_types WHERE code = 'STAFF_READ_ONLY'")
+    op.execute('delete from org_types where code=\'MAXIMUS_STAFF\'')
+    op.execute('delete from org_types where code=\'CONTACT_CENTRE_STAFF\'')

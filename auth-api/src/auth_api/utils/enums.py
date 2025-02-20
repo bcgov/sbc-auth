@@ -102,7 +102,8 @@ class OrgType(Enum):
     BASIC = "BASIC"
     STAFF = "STAFF"
     SBC_STAFF = "SBC_STAFF"
-    STAFF_READ_ONLY = "STAFF_READ_ONLY"
+    MAXIMUS_STAFF = "MAXIMUS_STAFF"
+    CONTACT_CENTRE_STAFF = "CONTACT_CENTRE_STAFF"
 
 
 class DocumentType(Enum):
