@@ -205,4 +205,4 @@ def test_invalid_org_create_type_code(session):
         session.add(org)
         session.commit()
 
-    assert excinfo.value.code == Error.INSUFFICIENT_PERMISSION
+    assert excinfo.value.code == Error.INSUFFICIENT_PERMISSION.name
