@@ -226,6 +226,7 @@
 <script lang="ts">
 import { CanJurisdictions, IntlJurisdictions, UsaJurisdiction } from '@bcrs-shared-components/jurisdiction/list-data'
 import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
+import { DRS_ID_PATTERN, DocumentClassEnum } from '@/util/constants'
 import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
 import { JurisdictionLocation } from '@bcrs-shared-components/enums'
@@ -314,13 +315,23 @@ export default defineComponent({
       if (!documentKey || !documentName) return // safety check
 
       state.isDownloading = true
-      await BusinessService.downloadDocument(documentKey, documentName).catch(error => {
+      try {
+        if (DRS_ID_PATTERN.test(documentKey)) {
+          await BusinessService.downloadDocumentfromDRS(
+            documentKey,
+            documentName,
+            DocumentClassEnum.CORP
+          )
+        } else {
+          await BusinessService.downloadDocument(documentKey, documentName)
+        }
+      } catch (error) {
         // eslint-disable-next-line no-console
         console.log('downloadDocument() error =', error)
         state.dialogTitle = 'Unable to download document'
         state.dialogText = 'An error occurred while downloading the document. Please try again.'
         const v = errorDialogComponent.value as any; v.open()
-      })
+      }
       state.isDownloading = false
     }
 

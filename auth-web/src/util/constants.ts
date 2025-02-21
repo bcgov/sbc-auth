@@ -789,3 +789,9 @@ export enum ShortNameRefundStatus {
 export enum ShortNameRefundLabel {
     PENDING_APPROVAL = 'REFUND REQUEST'
 }
+
+export enum DocumentClassEnum {
+    CORP = 'CORP'
+}
+
+export const DRS_ID_PATTERN = /^DS\d{10}$/
