@@ -228,7 +228,10 @@ class KeycloakService:
             keycloak_guid: Dict = user_from_context.sub
 
         if Role.ACCOUNT_HOLDER.value in user_from_context.roles:
-            KeycloakService.remove_user_from_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
+            try:
+                KeycloakService.remove_user_from_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
+            except Exception as err:
+                logger.error(f"Error removing user {user_from_context.sub} from account holders group: {err}")
 
     @staticmethod
     @user_context
