@@ -826,7 +826,7 @@ def test_create_staff_org_failure(session, keycloak_mock, staff_org, monkeypatch
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
     with pytest.raises(BusinessException) as exception:
         OrgService.create_org(TestOrgInfo.staff_org, user.id)
-    assert exception.value.code == Error.INVALID_INPUT.name
+    assert exception.value.code == Error.INSUFFICIENT_PERMISSION.name
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
