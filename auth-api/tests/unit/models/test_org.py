@@ -16,11 +16,16 @@
 Test suite to ensure that the Org model routines are working as expected.
 """
 
+import pytest
+
+from auth_api.exceptions.errors import Error
+from auth_api.exceptions.exceptions import BusinessException
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
+from auth_api.utils.enums import OrgType as OrgTypeEnum
 from tests.utilities.factory_utils import factory_user_model
 
 
@@ -187,3 +192,17 @@ def test_delete(session):  # pylint:disable=unused-argument
     org.delete()
     assert org
     assert org.status_code == OrgStatusEnum.INACTIVE.value
+
+
+def test_invalid_org_create_type_code(session):
+    """Test that creating an Org with an invalid type code is rejected."""
+    invalid_type_code = OrgTypeEnum.CONTACT_CENTRE_STAFF.value
+
+    org_info = {"name": "Invalid Org", "type_code": invalid_type_code}
+
+    with pytest.raises(BusinessException) as excinfo:
+        org = OrgModel.create_from_dict(org_info)
+        session.add(org)
+        session.commit()
+
+    assert excinfo.value.code == Error.INSUFFICIENT_PERMISSION.name

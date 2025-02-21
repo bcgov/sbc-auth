@@ -30,7 +30,7 @@ from auth_api.models.dataclass import OrgSearch
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.enums import OrgType as OrgTypeEnum
-from auth_api.utils.roles import EXCLUDED_FIELDS, VALID_STATUSES
+from auth_api.utils.roles import EXCLUDED_FIELDS, INVALID_ORG_CREATE_TYPE_CODES, VALID_STATUSES
 
 from .base_model import BaseModel
 from .contact import Contact
@@ -348,8 +348,8 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
 def receive_before_insert(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
     """Rejects invalid type_codes on insert."""
     org = target
-    if org.type_code in (OrgTypeEnum.SBC_STAFF.value, OrgTypeEnum.STAFF.value):
-        raise BusinessException(Error.INVALID_INPUT, None)
+    if org.type_code in INVALID_ORG_CREATE_TYPE_CODES:
+        raise BusinessException(Error.INSUFFICIENT_PERMISSION, None)
 
 
 @event.listens_for(Org, "before_update", raw=True)
