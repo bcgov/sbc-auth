@@ -49,12 +49,7 @@ export default defineComponent({
     const businessURL = computed(() => ConfigHelper.getBusinessURL())
 
     function getImgUrl (imgName: string) {
-      try {
-        return new URL(`/src/assets/img/${imgName}`, import.meta.url).href
-      } catch {
-        // Fallback for unit test
-        return `/src/assets/img/${imgName}`
-      }
+      return new URL(`/src/assets/img/${imgName}`, import.meta.url).href
     }
 
     return {
