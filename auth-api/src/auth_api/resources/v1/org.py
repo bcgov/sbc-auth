@@ -361,7 +361,7 @@ def get_organization_affiliations(org_id):
 
         # get affiliation identifiers and the urls for the source data
         affiliations = AffiliationModel.find_affiliations_by_org_id(org_id, env)
-        affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations))
+        affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations, org_id))
         # Use orjson serializer here, it's quite a bit faster.
         response, status = (
             current_app.response_class(
