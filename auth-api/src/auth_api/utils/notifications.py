@@ -50,7 +50,7 @@ class ProductNotificationInfo:
     is_confirmation: Optional[bool] = False
 
 
-# e.g [BC Registries and Online Services] Your {{MHR_QUALIFIED_SUPPLIER}} Access Has Been Approved
+# e.g [Service BC Connect] Your {{MHR_QUALIFIED_SUPPLIER}} Access Has Been Approved
 class ProductSubjectDescriptor(Enum):
     """Notification product subject descriptor."""
 

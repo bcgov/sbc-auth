@@ -46,7 +46,7 @@
                       aria-label="log in"
                       v-on="on"
                     >
-                      <span>Log in to my BC Registries Account</span>
+                      <span>Log in to my Service BC Connect Account</span>
                       <v-icon class="mr-n1 ml-2">
                         mdi-menu-down
                       </v-icon>
@@ -57,12 +57,12 @@
                 <name-request-button />
               </div>
               <div class="d-flex mt-8">
-                <span class="body-1">New to BC Registries?</span>
+                <span class="body-1">New to Service BC Connect?</span>
                 <router-link
                   class="ml-2 body-1 font-weight-bold"
                   to="/choose-authentication-method"
                 >
-                  Create a BC Registries Account
+                  Create a Service BC Connect Account
                 </router-link>
               </div>
             </div>

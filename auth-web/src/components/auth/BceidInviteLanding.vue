@@ -21,10 +21,10 @@
       >
         <div class="view-header flex-column mb-10">
           <h1 class="view-header__title">
-            Log in to BC Registries using BCeID
+            Log in to Service BC Connect using BCeID
           </h1>
           <p class="my-3">
-            There are a couple of things you'll need to do before logging into BC Registries using BCeID.
+            There are a couple of things you'll need to do before logging into Service BC Connect using BCeID.
           </p>
         </div>
         <v-card
@@ -113,7 +113,7 @@ export default class BceidInviteLanding extends Vue {
       number: 1,
       stepTitle: 'Register or use an existing BCeID account',
       stepDescription: '<p>A BCeID account provides secure access to online government services in British Columbia.\n' +
-              'You can register a new BCeID or use an existing BCeID account to log into BC Registries.</p>',
+              'You can register a new BCeID or use an existing BCeID account to log into Service BC Connect.</p>',
       icon: 'mdi-account-plus-outline'
     },
     {

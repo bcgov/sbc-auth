@@ -5,7 +5,7 @@
         Before you get started
       </h1>
       <p class="mt-3 mb-3">
-        It's important to understand the basic rules for users on your BC Registries account.
+        It's important to understand the basic rules for users on your Service BC Connect account.
       </p>
     </div>
     <v-card

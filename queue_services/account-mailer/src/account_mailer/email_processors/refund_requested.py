@@ -31,7 +31,7 @@ def process(email_msg: dict) -> dict:
     template_name = 'bcol_refund_request_email'
     recepients = current_app.config.get('REFUND_REQUEST').get('bcol').get('recipients')
     refund_date = datetime.strptime(email_msg.get('refundDate'), '%Y%m%d').strftime('%Y-%m-%d')
-    subject = f'BC Registries and Online Services Refunds for {refund_date}'
+    subject = f'Service BC Connect Refunds for {refund_date}'
 
     # fill in template
     filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), template_name)

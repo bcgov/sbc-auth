@@ -78,12 +78,12 @@ describe('HomeView.vue', () => {
     const createAccountLink = wrapper.find('.cta-btn')
 
     expect(loginBtn.exists()).toBe(true)
-    expect(loginBtn.text()).toContain('Create a BC Registries Account')
+    expect(loginBtn.text()).toContain('Create a Service BC Connect Account')
 
     expect(nameRequestBtn.exists()).toBe(true)
     expect(nameRequestBtn.text()).toContain('Request a Name')
 
     expect(createAccountLink.exists()).toBe(true)
-    expect(createAccountLink.text()).toContain('Create a BC Registries Account')
+    expect(createAccountLink.text()).toContain('Create a Service BC Connect Account')
   })
 })

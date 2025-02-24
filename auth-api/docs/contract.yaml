@@ -6,7 +6,7 @@ info:
     name: Apache 2.0
   description: Auth API Specs
   contact:
-    name: BC Registries
+    name: Service BC Connect
 paths:
   '/entities/{businessIdentifier}/authorizations':
     get:
