@@ -266,7 +266,7 @@ class RestService:
         }
 
     @staticmethod
-    async def call_posts_in_parallel(call_info: dict, token: str):
+    async def call_posts_in_parallel(call_info: dict, token: str, org_id):
         """Call the services in parallel and return the responses."""
         headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
         responses = []
@@ -281,11 +281,11 @@ class RestService:
             for task in tasks:
                 if isinstance(task, ClientConnectorError):
                     # if no response from task we will go in here (i.e. namex-api is down)
-                    error_msg = f"---Error in _call_urls_in_parallel: no response from {task.os_error} ---"
+                    error_msg = f"Error for ({str(org_id)}) in _call_urls_in_parallel: no response from {task.os_error}"
                     logger.error(error_msg)
                     raise ServiceUnavailableException(f"No response from {task.os_error}")
                 if task.status != HTTPStatus.OK:
-                    error_msg = f"---Error in _call_urls_in_parallel: error response from {task.url} ---"
+                    error_msg = f"Error for ({str(org_id)}) in _call_urls_in_parallel: error response from {task.url}"
                     logger.error(error_msg)
                     raise ServiceUnavailableException(f"Error response from {task.url}")
                 task_json = await task.json()

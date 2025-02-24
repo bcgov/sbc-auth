@@ -451,7 +451,7 @@ class Affiliation:
         return current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
 
     @staticmethod
-    async def get_affiliation_details(affiliations: List[AffiliationModel]) -> List:
+    async def get_affiliation_details(affiliations: List[AffiliationModel], org_id) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
         for affiliation in affiliations:
@@ -468,7 +468,7 @@ class Affiliation:
             config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
         )
         try:
-            responses = await RestService.call_posts_in_parallel(call_info, token)
+            responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
             combined = Affiliation._combine_affiliation_details(responses)
             # Should provide us with ascending order
             affiliations_sorted = sorted(affiliations, key=lambda x: x.created, reverse=True)
