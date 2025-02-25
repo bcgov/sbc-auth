@@ -23,12 +23,12 @@ export default class ConfigHelper {
   /**
  * this will run everytime when vue is being loaded..so do the call only when session storage doesnt have the values
  */
-  static async saveConfigToSessionStorage () {
+  static saveConfigToSessionStorage () {
     // Commenting the cache code to initiate the value on every load.
     // if (sessionStorage.getItem(SessionStorageKeys.ApiConfigKey)) {
     //   return Promise.resolve()
     // } else {
-    return await this.fetchConfig()
+    return this.fetchConfig()
     // }
   }
 
