@@ -4,6 +4,7 @@ import { SessionStorageKeys } from '@/util/constants'
 
 export default class ConfigHelper {
   static async fetchConfig () {
+    console.log('Loading in session storage.')
     // sbc common components need the following keys
     sessionStorage.setItem(SessionStorageKeys.AuthApiUrl, ConfigHelper.getAuthAPIUrl())
     sessionStorage.setItem(SessionStorageKeys.StatusApiUrl, ConfigHelper.getStatusAPIUrl())
@@ -16,6 +17,7 @@ export default class ConfigHelper {
     if (ConfigHelper.getSiteminderLogoutUrl()) {
       sessionStorage.setItem(SessionStorageKeys.SiteminderLogoutUrl, ConfigHelper.getSiteminderLogoutUrl())
     }
+    return Promise.resolve()
   }
 
   /**
