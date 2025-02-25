@@ -9,6 +9,7 @@
     >
       <v-col cols="auto">
         <img
+          alt="product"
           class="product-img"
           :src="getImgUrl(img)"
         >
