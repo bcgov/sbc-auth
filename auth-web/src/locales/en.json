@@ -225,6 +225,8 @@
   "developerAccessSubtitle": "Enabling developer access would allow you to integrate the BC Registries API services to your system.<br />Learn more in the  <a href=\"{url}\">API documentation</a>.",
   "assetLauncherText": "Register or search for manufactured homes and register or search for legal claims on personal property.",
   "assetLauncherTitle": "Staff Asset Registries",
+  "viewAllProductsLauncherTitle": "View All Products",
+  "viewAllProductsLauncherText": "Access various products and services available to your account.",
   "pprLauncherText": "Register or search for legal claims on personal property.",
   "pprLauncherTitle": "Staff Personal Property Registry",
   "mhrLauncherText": "Register or search for legal claims on manufactured homes.",
