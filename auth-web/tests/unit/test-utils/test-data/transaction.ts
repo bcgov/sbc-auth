@@ -27,7 +27,7 @@ export const transactionResponse: TransactionListResponse = {
       paid: 0,
       paymentAccount: {
         accountId: '3040',
-        accountName: "Ministry of Citizens' Services-BC Registries and Online Services Staff",
+        accountName: "Ministry of Citizens' Services-Service BC Connect Staff",
         billable: true
       },
       paymentMethod: PaymentTypes.INTERNAL,
@@ -61,7 +61,7 @@ export const transactionResponse: TransactionListResponse = {
       paid: 0,
       paymentAccount: {
         accountId: '3040',
-        accountName: "Ministry of Citizens' Services-BC Registries and Online Services Staff",
+        accountName: "Ministry of Citizens' Services-Service BC Connect Staff",
         billable: true
       },
       paymentMethod: PaymentTypes.CREDIT_CARD,

@@ -23,7 +23,7 @@
           {{ $t('createBCRegistriesAccount') }}
         </h1>
         <p class="mt-3 mb-0">
-          Create an account to access BC Registries products and services.
+          Create an account to access Service BC Connect products and services.
         </p>
       </div>
       <v-card flat>

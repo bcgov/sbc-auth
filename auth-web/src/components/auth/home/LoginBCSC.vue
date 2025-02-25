@@ -1,11 +1,11 @@
 <template>
   <v-card>
-    <v-card-title>Create a BC Registries Account</v-card-title>
+    <v-card-title>Create a Service BC Connect Account</v-card-title>
     <v-card-text>
       <p class="mb-7">
         To access this service, you must securely log in with your BC Services Card, government’s trusted way to access
         online services. It typically takes five minutes or less to set up your mobile card, and the only information
-        BC Registries can access from your card is your legal name.
+        Service BC Connect can access from your card is your legal name.
       </p>
       <a
         :href="bcscRedirectUrl"

@@ -139,7 +139,7 @@
                 :checkErrors="checkErrors"
                 :tosText="'terms and conditions'"
                 :tosType="'termsofuse_pad'"
-                :tosHeading="'Business Pre-Authorized Debit Terms and Conditions Agreement BC Registries and Online Services'"
+                :tosHeading="'Business Pre-Authorized Debit Terms and Conditions Agreement Service BC Connect'"
                 :tosCheckBoxLabelAppend="'of the Business Pre-Authorized Debit Terms and Conditions for BC Registry Services'"
                 @terms-acceptance-status="updateTermsAccepted($event)"
               />

@@ -25,7 +25,7 @@
             color="primary"
             @click="goTo('home')"
           >
-            <strong>BC Registries Home</strong>
+            <strong>Service BC Connect Home</strong>
           </v-btn>
         </div>
       </v-col>

@@ -133,7 +133,7 @@
                 contain
                 class="step-img"
                 src="@/assets/img/learn-more/log-in.jpg"
-                alt="Log in to BC Registries"
+                alt="Log in to Service BC Connect"
               >
                 <template #placeholder>
                   <v-row
@@ -150,7 +150,7 @@
               </v-img>
               <div class="step-line mt-2" />
               <div class="step-text body-2 mt-3 mb-8">
-                Log in to BC Registries using the BC Services Card option, and select "Use a Mobile Card".
+                Log in to Service BC Connect using the BC Services Card option, and select "Use a Mobile Card".
               </div>
             </div>
           </li>
@@ -230,7 +230,7 @@
               </v-img>
               <div class="step-line mt-2" />
               <div class="step-text body-2 mt-3">
-                Continue to BC Registries.
+                Continue to Service BC Connect.
               </div>
             </div>
           </li>
@@ -275,7 +275,7 @@
                 contain
                 class="step-img"
                 src="@/assets/img/learn-more/log-in.jpg"
-                alt="Log in to BC Registries"
+                alt="Log in to Service BC Connect"
               >
                 <template #placeholder>
                   <v-row
@@ -292,7 +292,7 @@
               </v-img>
               <div class="step-line mt-2" />
               <div class="step-text body-2 mt-3 mb-8">
-                Log in to BC Registries using the BC Services Card option.
+                Log in to Service BC Connect using the BC Services Card option.
               </div>
             </div>
           </li>
@@ -453,7 +453,7 @@
               </v-img>
               <div class="step-line mt-2" />
               <div class="step-text body-2 mt-3">
-                Continue to BC Registries.
+                Continue to Service BC Connect.
               </div>
             </div>
           </li>

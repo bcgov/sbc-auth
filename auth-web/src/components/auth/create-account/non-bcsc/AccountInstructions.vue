@@ -5,7 +5,7 @@
         How to verify your identity by a notary
       </h1>
       <p class="mt-5 mb-3">
-        There are three steps to verifying and protecting your identity when creating a BC Registries account.
+        There are three steps to verifying and protecting your identity when creating a Service BC Connect account.
       </p>
     </div>
     <v-card

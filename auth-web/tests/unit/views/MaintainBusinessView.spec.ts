@@ -93,8 +93,8 @@ describe('MaintainBusinessView.vue', () => {
 
     expect(bulletListItems[0].textContent).toContain('Once your business is incorporated or registered you are ' +
       'required to keep information about your business up to date with the Registry.')
-    expect(bulletListItems[1].textContent).toContain('You can manage your business information using your BC ' +
-      'Registries account:')
+    expect(bulletListItems[1].textContent).toContain('You can manage your business information using your Service ' +
+      'BC Connect account:')
 
     expect(bulletListSubItems[0].textContent).toContain('See which Annual Reports are due for your corporation and ' +
       'file each year.')

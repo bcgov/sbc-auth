@@ -40,7 +40,7 @@
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-snackbar>
-      <BreadCrumb
+      <Breadcrumb
         v-if="showNavigationBar"
         :breadcrumbs="breadcrumbs"
       />
@@ -68,7 +68,7 @@ import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constant
 import { mapActions, mapState } from 'pinia'
 import { useOrgStore, useUserStore } from '@/stores'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
-import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
+import { Breadcrumb } from '@bcrs-shared-components/breadcrumb'
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -87,7 +87,7 @@ import { mapGetters } from 'vuex'
 
 @Component({
   components: {
-    BreadCrumb,
+    Breadcrumb,
     SbcHeader,
     SbcFooter,
     SbcLoader
