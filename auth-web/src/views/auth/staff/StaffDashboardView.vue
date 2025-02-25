@@ -139,7 +139,7 @@
         class="pr-2"
         cols="6"
       >
-        <ALLProductsLauncher />
+        <AllProductsLauncher />
       </v-col>
     </v-row>
 
@@ -317,7 +317,7 @@
 import { BaseVExpansionPanel, LaunchTile } from '@/components'
 import { ComputedRef, Ref, computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
-import ALLProductsLauncher from '@/components/auth/staff/ALLProductsLauncher.vue'
+import AllProductsLauncher from '@/components/auth/staff/AllProductsLauncher.vue'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import ContinuationApplications from '@/components/auth/staff/continuation-application/ContinuationApplications.vue'
@@ -364,7 +364,7 @@ export default defineComponent({
     GLCodesListView,
     IncorporationSearchResultView,
     PPRLauncher,
-    ALLProductsLauncher,
+    AllProductsLauncher,
     StaffAccountManagement,
     ContinuationApplications,
     Transactions

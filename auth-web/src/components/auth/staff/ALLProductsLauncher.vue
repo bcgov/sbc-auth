@@ -11,7 +11,6 @@
         <img
           class="product-img"
           :src="getImgUrl(img)"
-          alt="Product Image"
         >
       </v-col>
       <v-col
@@ -46,7 +45,7 @@ export default defineComponent({
       text: t('viewAllProductsLauncherText').toString()
     })
 
-    const businessURL = computed(() => ConfigHelper.getBusinessURL())
+    const businessURL = computed(() => ConfigHelper.getBcrosDashboardURL())
 
     function getImgUrl (imgName: string) {
       return new URL(`/src/assets/img/${imgName}`, import.meta.url).href
