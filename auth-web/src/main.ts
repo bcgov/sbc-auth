@@ -25,6 +25,8 @@ import vuetify from './plugins/vuetify'
 // eslint-disable-next-line sort-imports
 import { LDFlags } from '@/util/constants'
 
+ConfigHelper.saveConfigToSessionStorage()
+
 Vue.use(VueCompositionAPI)
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
