@@ -78,13 +78,13 @@ describe('BcscPanel.vue', () => {
     const createAccountLink = wrapper.find('.cta-btn')
 
     expect(authenticatedBtns[0]).toBeDefined()
-    expect(authenticatedBtns[0].textContent).toContain('Create a BC Registries Account')
+    expect(authenticatedBtns[0].textContent).toContain('Create a Service BC Connect Account')
 
     expect(mobileCardLink.exists()).toBe(true)
     expect(mobileCardLink.text()).toContain('set up a mobile card')
 
     expect(createAccountLink.exists()).toBe(true)
-    expect(createAccountLink.text()).toContain('Create a BC Registries Account')
+    expect(createAccountLink.text()).toContain('Create a Service BC Connect Account')
 
     expect(authenticatedBtns[1]).toBeDefined()
     expect(authenticatedBtns[1].textContent).toContain('Learn More')
