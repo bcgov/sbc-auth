@@ -32,9 +32,9 @@ from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Activity
 from auth_api.schemas import MembershipSchema
-from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
+from auth_api.utils.constants import GROUP_CONTACT_CENTRE, GROUP_MAXIMUS_STAFF
 from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, OrgType, Status
-from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, GOV_ACCOUNT_USER
+from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, GOV_ACCOUNT_USER, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
@@ -214,7 +214,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         # Ensure that this user is an COORDINATOR or ADMIN on the org associated with this membership
         logger.debug("<update_membership")
         user_from_context: UserContext = kwargs["user_context"]
-        check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN, GOV_ACCOUNT_USER))
+        check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN, STAFF, GOV_ACCOUNT_USER))
 
         # bceid Members cant be ADMIN's.Unless they have an affidavit approved.
         # TODO when multiple teams for bceid are present , do if the user has affidavit present check
@@ -224,7 +224,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         # Ensure that a member does not upgrade a member to ADMIN from COORDINATOR unless they are an ADMIN themselves
         if self._model.membership_type.code == COORDINATOR and updated_fields.get("membership_type", None) == ADMIN:
-            check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN, GOV_ACCOUNT_USER))
+            check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN))
 
         updated_membership_status = updated_fields.get("membership_status")
         admin_getting_removed: bool = False
@@ -319,13 +319,17 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         if model.membership_status.id == Status.ACTIVE.value:
             KeycloakService.join_account_holders_group(model.user.keycloak_guid)
             if model.org.type_code == OrgType.MAXIMUS_STAFF.value:
-                KeycloakService.add_user_to_group(model.user.keycloak_guid, GROUP_GOV_ACCOUNT_USERS)
+                KeycloakService.add_user_to_group(model.user.keycloak_guid, GROUP_MAXIMUS_STAFF)
+            if model.org.type_code == OrgType.CONTACT_CENTRE_STAFF.value:
+                KeycloakService.add_user_to_group(model.user.keycloak_guid, GROUP_CONTACT_CENTRE)
         elif model.membership_status.id == Status.INACTIVE.value:
             # Check if the user has any other active org membership, if none remove from the group
             if len(MembershipModel.find_orgs_for_user(model.user.id)) == 0:
                 KeycloakService.remove_from_account_holders_group(model.user.keycloak_guid)
             if model.org.type_code == OrgType.MAXIMUS_STAFF.value:
-                KeycloakService.remove_user_from_group(model.user.keycloak_guid, GROUP_GOV_ACCOUNT_USERS)
+                KeycloakService.remove_user_from_group(model.user.keycloak_guid, GROUP_MAXIMUS_STAFF)
+            if model.org.type_code == OrgType.CONTACT_CENTRE_STAFF.value:
+                KeycloakService.remove_user_from_group(model.user.keycloak_guid, GROUP_CONTACT_CENTRE)
         ProductService.update_users_products_keycloak_groups([model.user.id])
 
     @staticmethod
