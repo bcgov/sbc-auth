@@ -36,12 +36,6 @@
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
-
-        <!-- Panel Btns -->
-        <learn-more-button
-          class="mt-3"
-          :redirectUrl="learnMoreUrl"
-        />
       </v-col>
       <!-- Image Column -->
       <v-col
@@ -66,16 +60,9 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
-import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 
-@Component({
-  components: {
-    LearnMoreButton
-  }
-})
+@Component({})
 export default class DecideBusinessView extends Vue {
-  readonly learnMoreUrl = 'https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-' +
-    'small-business/'
   readonly selectorWizardUrl = ConfigHelper.getEntitySelectorUrl()
   readonly bulletPoints: Array<any> = [
     {
