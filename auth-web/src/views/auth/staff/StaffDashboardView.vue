@@ -134,6 +134,13 @@
       >
         <PPRLauncher />
       </v-col>
+      <v-col
+        v-if="isContactCentreStaff"
+        class="pr-2"
+        cols="6"
+      >
+        <AllProductsLauncher />
+      </v-col>
     </v-row>
 
     <!-- Director search -->
@@ -310,6 +317,7 @@
 import { BaseVExpansionPanel, LaunchTile } from '@/components'
 import { ComputedRef, Ref, computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
+import AllProductsLauncher from '@/components/auth/staff/AllProductsLauncher.vue'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import ContinuationApplications from '@/components/auth/staff/continuation-application/ContinuationApplications.vue'
@@ -356,6 +364,7 @@ export default defineComponent({
     GLCodesListView,
     IncorporationSearchResultView,
     PPRLauncher,
+    AllProductsLauncher,
     StaffAccountManagement,
     ContinuationApplications,
     Transactions
