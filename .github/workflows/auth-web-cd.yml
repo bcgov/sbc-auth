@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-      - feature*
-      - hotfix*
-      - release*
     paths:
       - "auth-web/**"
   workflow_dispatch:
