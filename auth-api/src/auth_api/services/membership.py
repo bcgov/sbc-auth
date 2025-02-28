@@ -318,20 +318,27 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         """Add or remove the user from/to account holders / product keycloak group."""
         org_type_to_group_mapping = {
             OrgType.MAXIMUS_STAFF.value: GROUP_MAXIMUS_STAFF,
-            OrgType.CONTACT_CENTRE_STAFF.value: GROUP_CONTACT_CENTRE_STAFF
+            OrgType.CONTACT_CENTRE_STAFF.value: GROUP_CONTACT_CENTRE_STAFF,
         }
         if model.membership_status.id == Status.ACTIVE.value:
             KeycloakService.join_account_holders_group(model.user.keycloak_guid)
             if model.org.type_code in org_type_to_group_mapping:
-                KeycloakService.add_user_to_group(model.user.keycloak_guid, org_type_to_group_mapping[model.org.type_code])
-                # remove staff group I'll need
+                KeycloakService.add_user_to_group(
+                    model.user.keycloak_guid, org_type_to_group_mapping[model.org.type_code]
+                )
         elif model.membership_status.id == Status.INACTIVE.value:
             # Check if the user has any other active org membership, if none remove from the group
             if len(MembershipModel.find_orgs_for_user(model.user.id)) == 0:
                 KeycloakService.remove_from_account_holders_group(model.user.keycloak_guid)
             if model.org.type_code in org_type_to_group_mapping:
-                KeycloakService.remove_user_from_group(model.user.keycloak_guid, org_type_to_group_mapping[model.org.type_code])
-                # check what happens if removing from group they are not part of
+                KeycloakService.remove_user_from_group(
+                    model.user.keycloak_guid, org_type_to_group_mapping[model.org.type_code]
+                )
+                try:
+                    membership = Membership.get_membership_for_org_and_user(model.org.id, model.user.id)
+                    membership.deactivate_membership()
+                except BusinessException as e:
+                    logger.error(f"Error deactivating membership: {e}")
         ProductService.update_users_products_keycloak_groups([model.user.id])
 
     @staticmethod
