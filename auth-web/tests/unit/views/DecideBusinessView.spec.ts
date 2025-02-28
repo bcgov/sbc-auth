@@ -1,6 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
-import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
@@ -42,7 +41,6 @@ describe('DecideBusinessView.vue', () => {
 
   it('renders the components properly', () => {
     expect(wrapper.findComponent(DecideBusinessView).exists()).toBe(true)
-    expect(wrapper.findComponent(LearnMoreButton).exists()).toBe(true)
   })
 
   it('renders the correct text and number of bullet points', async () => {
