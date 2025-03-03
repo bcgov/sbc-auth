@@ -128,6 +128,7 @@
           large
           :color="primaryActionType"
           class="font-weight-bold"
+          :loading="isLoading"
           @click="confirmHandler()"
         >
           {{ primaryActionText }}
@@ -387,6 +388,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   }
 
   private async approve () {
+    this.isLoading = true
     try {
       await this.updateMember({
         memberId: this.memberToBeApproved.id,
@@ -399,6 +401,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
       this.$refs.errorDialog.open()
     }
     this.$refs.confirmActionDialog.close()
+    this.isLoading = false
   }
 
   private setAppliedFilterValue (filter: SearchFilterParam[]) {
