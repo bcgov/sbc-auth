@@ -220,6 +220,10 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         logger.debug("<update_membership")
         user_from_context: UserContext = kwargs["user_context"]
         check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN, STAFF))
+        updated_membership_status = updated_fields.get("membership_status")
+
+        # When adding to organization, check if user is already in an ACTIVE STAFF org, if so raise exception
+        Membership._check_if_add_user_has_active_staff_org(updated_membership_status, self._model.user.id)
 
         # bceid Members cant be ADMIN's.Unless they have an affidavit approved.
         # TODO when multiple teams for bceid are present , do if the user has affidavit present check
@@ -231,18 +235,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         if self._model.membership_type.code == COORDINATOR and updated_fields.get("membership_type", None) == ADMIN:
             check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN, STAFF))
 
-        updated_membership_status = updated_fields.get("membership_status")
         admin_getting_removed: bool = False
-
-        # Check if user is already in an ACTIVE STAFF org, if so raise exception
-        staff_org_types = list(org_type_to_group_mapping.keys())
-        memberships = MembershipModel.find_memberships_by_user_id_and_status(self._model.user.id, Status.ACTIVE.value)
-        staff_orgs = OrgModel.find_by_org_ids_and_org_types(
-            org_ids=[membership.org_id for membership in memberships], org_types=staff_org_types
-        )
-
-        if updated_membership_status and updated_membership_status.id == Status.ACTIVE.value and len(staff_orgs) > 0:
-            raise BusinessException(Error.MAX_NUMBER_OF_STAFF_ORGS_LIMIT, None)
 
         # Admin can be removed by other admin or staff. #4909
         if (
@@ -356,6 +349,18 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             KeycloakService.add_user_to_group(model.user.keycloak_guid, mapping_group)
         elif model.membership_status.id == Status.INACTIVE.value and is_in_group:
             KeycloakService.remove_user_from_group(model.user.keycloak_guid, mapping_group)
+
+    @staticmethod
+    def _check_if_add_user_has_active_staff_org(updated_membership_status, user_id):
+        """Check if user is already associated with an active STAFF org."""
+        staff_org_types = list(org_type_to_group_mapping.keys())
+        memberships = MembershipModel.find_memberships_by_user_id_and_status(user_id, Status.ACTIVE.value)
+        staff_orgs = OrgModel.find_by_org_ids_and_org_types(
+            org_ids=[membership.org_id for membership in memberships], org_types=staff_org_types
+        )
+
+        if updated_membership_status and updated_membership_status.id == Status.ACTIVE.value and len(staff_orgs) > 0:
+            raise BusinessException(Error.MAX_NUMBER_OF_STAFF_ORGS_LIMIT, None)
 
     @staticmethod
     def get_membership_for_org_and_user(org_id, user_id):
