@@ -388,7 +388,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
 
   private async approve () {
     try {
-      const updateMemberReponse = await this.updateMember({
+      await this.updateMember({
         memberId: this.memberToBeApproved.id,
         status: MembershipStatus.Active
       })
