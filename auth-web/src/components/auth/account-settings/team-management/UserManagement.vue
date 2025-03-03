@@ -392,11 +392,10 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
         memberId: this.memberToBeApproved.id,
         status: MembershipStatus.Active
       })
-      // Remove Vuex with Vue 3
       this.$store.commit('updateHeader')
-    } catch (e) {
+    } catch ({ response }) {
       this.errorTitle = 'Error Approving Access'
-      this.errorText = e.response.data.message
+      this.errorText = response?.data?.message || 'An unexpected error occurred.'
       this.$refs.errorDialog.open()
     }
     this.$refs.confirmActionDialog.close()
