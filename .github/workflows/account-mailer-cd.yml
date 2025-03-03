@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      - hotfix*
-      - release*
     paths:
       - "queue_services/account-mailer/**"
       - "auth-api/src/auth_api/models/**"
