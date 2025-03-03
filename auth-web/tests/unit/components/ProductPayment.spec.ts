@@ -1,5 +1,6 @@
 import { LoginSource, Permission } from '@/util/constants'
 import { createLocalVue, mount } from '@vue/test-utils'
+import flushPromises from 'flush-promises'
 import ProductPackage from '@/components/auth/account-settings/product/ProductPayment.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -87,15 +88,18 @@ describe('Account settings ProductPackage.vue', () => {
 
   it('handles modal dialog add product correctly', async () => {
     const orgStore = useOrgStore()
-
-    await wrapper.vm.$nextTick()
+  
+    orgStore.addOrgProducts = vi.fn().mockResolvedValue({})
+  
+    wrapper.vm.$refs.confirmDialog = { open: vi.fn() }
+  
     orgStore.currentSelectedProducts = [{ code: 'TEST_PRODUCT' }]
     wrapper.vm.addProductOnAccountAdmin = true
-    const mockOpen = vi.fn()
-    wrapper.vm.$refs.confirmDialog.open = mockOpen
-
+  
     await wrapper.vm.submitProductRequest()
-    expect(mockOpen).toHaveBeenCalled()
+    await flushPromises()
+  
+    expect(wrapper.vm.$refs.confirmDialog.open).toHaveBeenCalled()
     expect(wrapper.vm.dialogTitle).toBe('Product Added')
     expect(wrapper.vm.dialogText).toBe('Your account now has access to the selected product.')
     expect(wrapper.vm.dialogError).toBe(false)
