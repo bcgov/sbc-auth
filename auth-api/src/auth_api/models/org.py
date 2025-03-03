@@ -125,6 +125,11 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         return cls.query.filter_by(id=int(org_id or -1)).first()
 
     @classmethod
+    def find_by_org_ids_and_org_types(cls, org_ids: List[int], org_types: List[str]):
+        """Find all Org instances that match the provided ids and org types."""
+        return cls.query.filter(Org.id.in_(org_ids), Org.type_code.in_(org_types)).all()
+
+    @classmethod
     def find_by_bcol_id(cls, bcol_account_id):
         """Find an Org instance that matches the provided id and not in INACTIVE status."""
         return (
