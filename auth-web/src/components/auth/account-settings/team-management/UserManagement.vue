@@ -387,12 +387,18 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   }
 
   private async approve () {
-    await this.updateMember({
-      memberId: this.memberToBeApproved.id,
-      status: MembershipStatus.Active
-    })
-    // Remove Vuex with Vue 3
-    this.$store.commit('updateHeader')
+    try {
+      const updateMemberReponse = await this.updateMember({
+        memberId: this.memberToBeApproved.id,
+        status: MembershipStatus.Active
+      })
+      // Remove Vuex with Vue 3
+      this.$store.commit('updateHeader')
+    } catch (e) {
+      this.errorTitle = 'Error Approving Access'
+      this.errorText = e.response.data.message
+      this.$refs.errorDialog.open()
+    }
     this.$refs.confirmActionDialog.close()
   }
 
