@@ -33,7 +33,9 @@ export enum SessionStorageKeys {
     PprWebUrl = 'PPR_WEB_URL',
     SiteminderLogoutUrl = 'SITEMINDER_LOGOUT_URL',
     PayApiUrl = 'PAY_API_URL',
-    StatementsDownloaded = 'STATEMENTS_DOWNLOADED'
+    StatementsDownloaded = 'STATEMENTS_DOWNLOADED',
+    DocApiUrl = 'DOC_API_URL',
+    DocApiKey = 'DOC_API_KEY'
 }
 
 export enum Role {
@@ -720,10 +722,6 @@ export enum ShortNameRefundStatus {
 
 export enum ShortNameRefundLabel {
     PENDING_APPROVAL = 'REFUND REQUEST'
-}
-
-export enum DocumentClassEnum {
-    CORP = 'CORP'
 }
 
 export const DRS_ID_PATTERN = /^DS\d{10}$/

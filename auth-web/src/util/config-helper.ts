@@ -14,6 +14,8 @@ export default class ConfigHelper {
     sessionStorage.setItem(SessionStorageKeys.RegistryHomeUrl, ConfigHelper.getRegistryHomeURL())
     sessionStorage.setItem(SessionStorageKeys.NameRequestUrl, ConfigHelper.getNameRequestUrl())
     sessionStorage.setItem(SessionStorageKeys.PprWebUrl, ConfigHelper.getPPRWebUrl())
+    sessionStorage.setItem(SessionStorageKeys.DocApiUrl, ConfigHelper.getDocApiUrl())
+    sessionStorage.setItem(SessionStorageKeys.DocApiKey, ConfigHelper.getDocApiKey())
     if (ConfigHelper.getSiteminderLogoutUrl()) {
       sessionStorage.setItem(SessionStorageKeys.SiteminderLogoutUrl, ConfigHelper.getSiteminderLogoutUrl())
     }
@@ -262,5 +264,13 @@ export default class ConfigHelper {
       CommonUtils.trimTrailingSlashURL(ConfigHelper.getNameRequestUrl()),
       CommonUtils.trimTrailingSlashURL(ConfigHelper.getPPRWebUrl())
     ]
+  }
+
+  static getDocApiUrl () {
+    return `${import.meta.env.VUE_APP_DOC_API_URL}` + `${import.meta.env.VUE_APP_DOC_API_VERSION}`
+  }
+
+  static getDocApiKey () {
+    return `${import.meta.env.VUE_APP_DOC_API_KEY}`
   }
 }

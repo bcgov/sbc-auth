@@ -159,37 +159,6 @@ export default class BusinessService {
   }
 
   /**
-   * Download document from Document Record Service or Mino
-   * @param documentServiceId the unique id on Document Record Service
-   * @param documentName the file name to download.
-   * @param documentClass the document class defined for the document service. e.g. 'CORP'
-   * @returns void
-   */
-  static async downloadDocumentfromDRS (documentServiceId: string, documentName: string, documentClass: string): Promise<void> {
-    // safety checks
-    if (!documentServiceId || !documentClass) throw new Error('Invalid parameters')
-
-    const url = `${ConfigHelper.getLegalAPIV2Url()}/documents/drs/${documentClass}/${documentServiceId}`
-
-    axios.get(url).then(response => {
-      if (!response) throw new Error('Null response')
-
-      const docUrl: string = response.data.documentURL
-      const link = document.createElement('a')
-      link.href = docUrl
-      link.download = documentName
-      link.target = '_blank' // This opens the link in a new browser tab
-
-      // Append to the document and trigger the download
-      document.body.appendChild(link)
-      link.click()
-
-      // Remove the link after the download is triggered
-      document.body.removeChild(link)
-    })
-  }
-
-  /**
    * Downloads a Minio document from Legal API and prompts browser to open/save it.
    * @param documentKey the document key
    * @param documentName the document filename
