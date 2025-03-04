@@ -16,7 +16,7 @@
 
 A simple decorator to add the options method to a Request Class.
 """
-
+import ast
 import base64
 import os
 import re
@@ -90,3 +90,13 @@ def extract_numbers(input_string: str):
     if input_string is None:
         return None
     return "".join([char for char in input_string if char.isdigit()])
+
+
+def string_to_bool(val: str):
+    """Return bool from string."""
+    if val is None:
+        return None
+    if val.lower() not in ("true", "false"):
+        raise ValueError(f"Invalid string value for bool: {val}")
+
+    return ast.literal_eval(val.capitalize())

@@ -33,6 +33,7 @@ class Role(Enum):
     SYSTEM = "system"
     TESTER = "tester"
 
+    EXTERNAL_STAFF_READONLY = "external_staff_readonly"
     STAFF = "staff"
     STAFF_VIEW_ACCOUNTS = "view_accounts"
     STAFF_MANAGE_ACCOUNTS = "manage_accounts"
@@ -44,7 +45,6 @@ class Role(Enum):
     # Used by Business-AR to create affiliations that may already have a passcode (bypass passcode check)
     SKIP_AFFILIATION_AUTH = "skip_affiliation_auth"
 
-    CONTACT_CENTRE_STAFF = "contact_centre_staff"
     STAFF_TASK_SEARCH = "staff_task_search"
     VIEW_TASK_DETAILS = "view_task_details"
     VIEW_ACCOUNT_PENDING_INVITATIONS = "view_account_pending_invitations"

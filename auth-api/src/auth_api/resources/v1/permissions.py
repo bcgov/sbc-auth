@@ -21,8 +21,10 @@ from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
 from auth_api.services import Permissions as PermissionsService
+from auth_api.services.user import User as UserService
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
+from auth_api.utils.util import string_to_bool
 
 bp = Blueprint("MEMBER_PERMISSIONS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/permissions")
 
@@ -33,8 +35,15 @@ bp = Blueprint("MEMBER_PERMISSIONS", __name__, url_prefix=f"{EndpointEnum.API_V1
 def get_membership_permissions(org_status, membership_type):
     """Get a list of all permissions for the membership."""
     try:
-        case = request.args.get("case")
-        permissions = PermissionsService.get_permissions_for_membership(org_status.upper(), membership_type.upper())
+        case: str = request.args.get("case")
+        include_all_permissions: bool = string_to_bool(request.args.get("includeAllPermissions", "False"))
+        user = None
+        if include_all_permissions:
+            user = UserService.find_by_jwt_token()
+
+        permissions = PermissionsService.get_permissions_for_membership(
+            org_status.upper(), membership_type.upper(), user, include_all_permissions
+        )
         if case == "lower":
             permissions = [x.lower() for x in permissions]
         elif case == "upper":
