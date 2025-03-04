@@ -134,7 +134,7 @@ def test_create_org_products(session, keycloak_mock, monkeypatch):
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_create_basic_org_assert_pay_request_is_correct(
+def test_create_org_assert_pay_request_is_correct(
     session, keycloak_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
@@ -151,7 +151,7 @@ def test_create_basic_org_assert_pay_request_is_correct(
             "accountId": dictionary.get("id"),
             "accountName": dictionary.get("name"),
             "branchName": "",
-            "paymentInfo": {"methodOfPayment": OrgService._get_default_payment_method_for_creditcard()},
+            "paymentInfo": {"methodOfPayment": "DRAWDOWN"},
         }
         assert expected_data == actual_data
 
@@ -172,7 +172,7 @@ def test_pay_request_is_correct_with_branch_name(session, keycloak_mock, monkeyp
             "accountId": dictionary.get("id"),
             "accountName": f"{dictionary.get('name')}-{TestOrgInfo.org_branch_name['branchName']}",
             "branchName": TestOrgInfo.org_branch_name["branchName"],
-            "paymentInfo": {"methodOfPayment": OrgService._get_default_payment_method_for_creditcard()},
+            "paymentInfo": {"methodOfPayment": "DRAWDOWN"},
         }
         assert expected_data == actual_data
 

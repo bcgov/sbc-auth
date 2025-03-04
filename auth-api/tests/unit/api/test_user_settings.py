@@ -56,7 +56,7 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     rv = client.get(f"/api/v1/users/{kc_id}/settings", headers=headers, content_type="application/json")
     item_list = rv.json
     account = next(obj for obj in item_list if obj["type"] == "ACCOUNT")
-    assert account["accountType"] == "BASIC"
+    assert account["accountType"] == "PREMIUM"
     assert account["additionalLabel"] == TestOrgInfo.org_branch_name.get("branchName")
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(item_list, "user_settings_response")[0]

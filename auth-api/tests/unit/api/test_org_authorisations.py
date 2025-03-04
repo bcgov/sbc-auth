@@ -59,31 +59,7 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
 def test_ppr_auth(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that accounts get PPR authorization."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    # Create a basic account
     rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
-    rv = client.post(
-        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json"
-    )
-    assert rv.status_code == HTTPStatus.CREATED
-    orgs = json.loads(rv.data)
-    id = orgs.get("id")
-
-    # Try to add PPR as a product which doesn't add product as account is BASIC.
-    client.post(
-        f"/api/v1/orgs/{id}/products",
-        data=json.dumps(TestOrgProductsInfo.org_products1),
-        headers=headers,
-        content_type="application/json",
-    )
-    # Check PPR access and assert no roles are returned.
-    rv = client.get(
-        f"/api/v1/accounts/{id}/products/PPR/authorizations", headers=headers, content_type="application/json"
-    )
-    assert rv.status_code == HTTPStatus.OK
-
-    org_authorisations = json.loads(rv.data)
-    assert len(org_authorisations.get("roles")) == 0
-
     # Create a PREMIUM account
     rv = client.post(
         "/api/v1/orgs", data=json.dumps(TestOrgInfo.bcol_linked()), headers=headers, content_type="application/json"
