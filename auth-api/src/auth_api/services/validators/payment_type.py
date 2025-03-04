@@ -36,30 +36,16 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     non_ejv_payment_methods = (
         PaymentMethod.CREDIT_CARD.value,
         PaymentMethod.DIRECT_PAY.value,
+        PaymentMethod.ONLINE_BANKING.value,
         PaymentMethod.PAD.value,
         PaymentMethod.BCOL.value,
         PaymentMethod.EFT.value,
     )
     org_payment_method_mapping = {
-        OrgType.BASIC: (
-            PaymentMethod.CREDIT_CARD.value,
-            PaymentMethod.DIRECT_PAY.value,
-            PaymentMethod.ONLINE_BANKING.value,
-        ),
         OrgType.PREMIUM: non_ejv_payment_methods,
         OrgType.SBC_STAFF: non_ejv_payment_methods,
         OrgType.STAFF: non_ejv_payment_methods,
     }
-    if flags.is_on("remove-premium-restrictions", default=False) is True:
-        for k in org_payment_method_mapping:
-            org_payment_method_mapping[k] = (
-                PaymentMethod.CREDIT_CARD.value,
-                PaymentMethod.DIRECT_PAY.value,
-                PaymentMethod.ONLINE_BANKING.value,
-                PaymentMethod.PAD.value,
-                PaymentMethod.BCOL.value,
-                PaymentMethod.EFT.value,
-            )
     payment_type = None
     if access_type == AccessType.GOVM.value:
         payment_type = PaymentMethod.EJV.value

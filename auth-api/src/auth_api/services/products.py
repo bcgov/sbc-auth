@@ -194,13 +194,6 @@ class Product:
                 # Check if product requires system admin, if yes abort
                 if product_model.need_system_admin:
                     check_auth(system_required=True, org_id=org_id)
-                # Check if product needs premium account, if yes skip and continue.
-                if (
-                    flags.is_on("remove-premium-restrictions", default=False) is False
-                    and product_model.premium_only
-                    and org.type_code not in PREMIUM_ORG_TYPES
-                ):
-                    continue
                 previously_approved, inactive_sub = Product._is_previously_approved(org_id, product_code)
                 if previously_approved:
                     auto_approve = True
