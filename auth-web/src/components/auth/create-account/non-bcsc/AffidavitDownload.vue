@@ -125,7 +125,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { IdpHint, Pages, SessionStorageKeys } from '@/util/constants'
-import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import DocumentService from '@/services/document.services'
@@ -141,7 +140,6 @@ import { mapGetters } from 'vuex'
   }
 })
 export default class AffidavitDownload extends Vue {
-  private authModule = getModule(AuthModule, this.$store)
   private readonly isAuthenticated!: boolean
   private downloadFailedMsg = 'Failed download'
   private isDownloadFailed = false
