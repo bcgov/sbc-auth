@@ -2,7 +2,7 @@
 
 Revision ID: 2ef3f0be3759
 Revises: 7f48833011c3
-Create Date: 2025-02-27 07:39:21.022247
+Create Date: 2025-03-04 07:39:21.022247
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '2ef3f0be3759'
-down_revision = '7f48833011c3'
+down_revision = '0ac9ab145061'
 branch_labels = None
 depends_on = None
 
