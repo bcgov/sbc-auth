@@ -17,10 +17,10 @@ depends_on = None
 
 
 def upgrade():
-    op.execute("update org_types set default = 't' where type_code = 'PREMIUM'")
-    op.execute("update org_types set default = 'f' where type_code = 'BASIC'")
+    op.execute("update org_types set default = true where type_code = 'PREMIUM'")
+    op.execute("update org_types set default = false where type_code = 'BASIC'")
 
 def downgrade():
-    op.execute("update org_types set default = 'f' where type_code = 'PREMIUM'")
-    op.execute("update org_types set default = 't' where type_code = 'BASIC'")
+    op.execute("update org_types set default = false where type_code = 'PREMIUM'")
+    op.execute("update org_types set default = true where type_code = 'BASIC'")
         
