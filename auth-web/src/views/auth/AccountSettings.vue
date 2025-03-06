@@ -332,7 +332,7 @@
 <script lang="ts">
 import { AccountStatus, LoginSource, Pages, Permission, Role } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { Member, MembershipType, Organization } from '@/models/Organization'
+import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import AccountInactiveAlert from '@/components/auth/common/AccountInactiveAlert.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'

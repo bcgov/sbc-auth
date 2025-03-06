@@ -231,7 +231,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LoginSource, Permission, Role } from '@/util/constants'
+import { AccessType, LoginSource, Permission } from '@/util/constants'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'

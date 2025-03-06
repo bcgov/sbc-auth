@@ -57,23 +57,18 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
-import { storeToRefs } from 'pinia'
+import { computed, defineComponent, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
+import { storeToRefs } from 'pinia'
 import { useOrgStore } from '@/stores/org'
-import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'InvitationsDataTable',
   emits: ['confirmRemoveInvite', 'resend'],
   setup (props, { emit }) {
     const orgStore = useOrgStore()
-    const userStore = useUserStore()
-
-    const { pendingOrgInvitations, currentMembership } = storeToRefs(orgStore)
-    const { currentUser } = storeToRefs(userStore)
-
+    const { pendingOrgInvitations } = storeToRefs(orgStore)
     const headerInvitations = [
       {
         text: 'Email',

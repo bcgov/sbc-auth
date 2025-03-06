@@ -131,7 +131,7 @@
             class="value"
             aria-labelledby="adminContact"
           >
-            <OrgAdminContact :orgId="orgId"/>
+            <OrgAdminContact :orgId="orgId" />
           </div>
         </div>
 

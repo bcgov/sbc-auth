@@ -1,7 +1,7 @@
 import 'moment-timezone'
 import { Address, BaseAddressModel } from '@/models/address'
 import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
-import { NrRequestTypeStrings, Permission } from '@/util/constants'
+import { NrRequestTypeStrings } from '@/util/constants'
 import moment from 'moment'
 
 type DateLike = string | Date | moment.Moment

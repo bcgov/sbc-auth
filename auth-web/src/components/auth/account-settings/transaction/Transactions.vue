@@ -115,13 +115,12 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages } from '@/util/constants'
-import { MembershipType, OrgPaymentDetails } from '@/models/Organization'
 import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { useAccountChangeHandler, useTransactions } from '@/composables'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { OrgPaymentDetails } from '@/models/Organization'
 import { StatusCodes } from 'http-status-codes'
 import TransactionsDataTable from './TransactionsDataTable.vue'
 import { getTransactionTableHeaders } from '@/resources/table-headers'
@@ -137,11 +136,10 @@ export default defineComponent({
     showExport: { default: true },
     title: { default: '' }
   },
-  setup (props, { root }) {
+  setup (props) {
     const orgStore = useOrgStore()
     const currentOrgPaymentDetails = computed(() => orgStore.currentOrgPaymentDetails)
     const currentOrganization = computed(() => orgStore.currentOrganization)
-    const currentMembership = computed(() => orgStore.currentMembership)
 
     const csvErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const csvErrorTextBasic = 'We were unable to process your CSV export. Please try again later.'

@@ -22,35 +22,33 @@
       </div>
     </header>
     <!-- Tab Navigation -->
-    <template>
-      <v-tabs
-        v-model="tab"
-        background-color="transparent"
-        class="mb-9"
-        @change="tabChange"
+    <v-tabs
+      v-model="tab"
+      background-color="transparent"
+      class="mb-9"
+      @change="tabChange"
+    >
+      <v-tab
+        v-for="tab in tabs"
+        :key="tab.code"
+        :data-test="tab.code"
+        :to="tab.page"
       >
-        <v-tab
-          v-for="tab in tabs"
-          :key="tab.code"
-          :data-test="tab.code"
-          :to="tab.page"
-        >
-          <template v-if="tab.hasBadge">
-            <v-badge
-              inline
-              color="primary"
-              :content="tab.count.value"
-              :value="tab.count.value"
-            >
-              {{ tab.tabName}}
-            </v-badge>
-          </template>
-          <template v-else>
+        <template v-if="tab.hasBadge">
+          <v-badge
+            inline
+            color="primary"
+            :content="tab.count.value"
+            :value="tab.count.value"
+          >
             {{ tab.tabName }}
-          </template>
-        </v-tab>
-      </v-tabs>
-    </template>
+          </v-badge>
+        </template>
+        <template v-else>
+          {{ tab.tabName }}
+        </template>
+      </v-tab>
+    </v-tabs>
 
     <!-- Tab Contents -->
     <v-tabs-items v-model="tab">
@@ -64,12 +62,12 @@
 import { Pages, Permission, Role } from '@/util/constants'
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import StaffCreateAccountModal from '@/components/auth/staff/account-management/StaffCreateAccountModal.vue'
+import { storeToRefs } from 'pinia'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores'
 import { useStaffStore } from '@/stores/staff'
 import { useTaskStore } from '@/stores/task'
 import { useUserStore } from '@/stores/user'
-import { storeToRefs } from 'pinia'
 
 enum TAB_CODE {
     Active = 'active-tab',
