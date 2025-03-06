@@ -1,5 +1,4 @@
 import CommonUtil from '@/util/common-util'
-import { Permission } from '@/util/constants'
 
 const dateStr = new Date('2020-10-22 00:00:00 PDT')
 
