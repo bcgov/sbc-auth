@@ -1,3 +1,4 @@
+import OrgService from '@/services/org.services'
 import { AccountStatus, Role } from '@/util/constants'
 import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
 
@@ -34,6 +35,12 @@ describe('AccountInfo.vue', () => {
     } as any
     orgStore.currentMembership = {} as any
     orgStore.permissions = ['CHANGE_ADDRESS', 'CHANGE_ORG_NAME', 'VIEW_ADDRESS', 'VIEW_ADMIN_CONTACT']
+
+    OrgService.getContactForOrg = vi.fn().mockResolvedValue({
+      data: {
+        contacts: []
+      }
+    })
 
     userStore.currentUser = {
       roles: [Role.Staff, Role.StaffSuspendAccounts]
