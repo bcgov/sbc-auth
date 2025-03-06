@@ -358,8 +358,6 @@ export const useOrgStore = defineStore('org', () => {
 
   async function syncStaffPermissions (): Promise<string[]> {
     const { roles } = KeyCloakService.getUserInfo()
-    const { accountStatus: statusCode } = state.currentAccountSettings
-    console.log('statusCode', statusCode)
     const { data: permissions } = await PermissionService.getPermissions('ACTIVE',
       getMembershipType(undefined, roles), true)
 
