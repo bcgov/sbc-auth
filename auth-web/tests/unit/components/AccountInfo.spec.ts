@@ -1,8 +1,8 @@
-import OrgService from '@/services/org.services'
 import { AccountStatus, Role } from '@/util/constants'
 import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
 
 import AccountInfo from '@/components/auth/account-settings/account-info/AccountInfo.vue'
+import OrgService from '@/services/org.services'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
