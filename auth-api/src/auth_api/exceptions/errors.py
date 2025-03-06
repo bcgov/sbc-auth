@@ -65,6 +65,10 @@ class Error(Enum):
     DELETE_FAILED_INACTIVE_USER = "User is already inactive", HTTPStatus.BAD_REQUEST
     CHANGE_ROLE_FAILED_ONLY_OWNER = "User is only Account Administrator in org", HTTPStatus.BAD_REQUEST
     OWNER_CANNOT_BE_REMOVED = "Account Administrator cannot be removed by anyone", HTTPStatus.BAD_REQUEST
+    MAX_NUMBER_OF_STAFF_ORGS_LIMIT = (
+        "Maximum number of staff organizations reached for this user",
+        HTTPStatus.BAD_REQUEST,
+    )
     MAX_NUMBER_OF_ORGS_LIMIT = "Maximum number of organisations reached", HTTPStatus.BAD_REQUEST
     ALREADY_CLAIMED_PASSCODE = "Passcode you entered has already been claimed", HTTPStatus.NOT_ACCEPTABLE
     ORG_CANNOT_BE_DISSOLVED = "Organization cannot be dissolved", HTTPStatus.NOT_ACCEPTABLE
