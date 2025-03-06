@@ -127,6 +127,8 @@ export const useProductPayment = (props = null, state = null) => {
       .filter(item => item.subscriptionStatus === ProductStatus.ACTIVE)
       // Remove MHR sub products.
       .filter(item => !item.parentCode)
+      // Remove hidden products which show up for staff.
+      .filter(item => !item.hidden)
       .map(item => item.code)
     const paymentMethodProducts = {}
     for (const [product, methods] of Object.entries(productPaymentMethods)) {
@@ -167,6 +169,7 @@ export const useProductPayment = (props = null, state = null) => {
       }
       const paymentMethod = PAYMENT_METHODS[paymentType]
       if (paymentMethod && methodSupportPerProduct) {
+        debugger
         paymentMethod.supported = methodSupportPerProduct[paymentType]
         if (props.isCreateAccount) {
           if (orgStore.currentSelectedProducts?.length === 0) {
