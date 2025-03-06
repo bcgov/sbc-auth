@@ -59,8 +59,8 @@
 </template>
 
 <script lang="ts">
+import { ComputedRef, computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { Pages, Permission, Role } from '@/util/constants'
-import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import StaffCreateAccountModal from '@/components/auth/staff/account-management/StaffCreateAccountModal.vue'
 import { storeToRefs } from 'pinia'
 import { useCodesStore } from '@/stores/codes'
@@ -116,14 +116,14 @@ export default defineComponent({
         tabName: 'Invitations',
         code: TAB_CODE.Invitations,
         hasBadge: true,
-        count: pendingInvitationsCount.value,
+        count: pendingInvitationsCount,
         page: Pages.STAFF_DASHBOARD_INVITATIONS
       },
       { permission: Permission.VIEW_PENDING_TASKS,
         tabName: 'Pending Review',
         code: TAB_CODE.PendingReview,
         hasBadge: true,
-        count: pendingTasksCount.value,
+        count: pendingTasksCount,
         page: Pages.STAFF_DASHBOARD_REVIEW
       },
       { permission: Permission.VIEW_REJECTED_TASKS,
@@ -137,7 +137,7 @@ export default defineComponent({
         tabName: 'Suspended',
         code: TAB_CODE.Suspended,
         hasBadge: true,
-        count: suspendedReviewCount.value,
+        count: suspendedReviewCount,
         page: Pages.STAFF_DASHBOARD_SUSPENDED
       },
       { permission: Permission.VIEW_INACTIVE_ACCOUNTS,
