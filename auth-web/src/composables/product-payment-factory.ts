@@ -169,7 +169,6 @@ export const useProductPayment = (props = null, state = null) => {
       }
       const paymentMethod = PAYMENT_METHODS[paymentType]
       if (paymentMethod && methodSupportPerProduct) {
-        debugger
         paymentMethod.supported = methodSupportPerProduct[paymentType]
         if (props.isCreateAccount) {
           if (orgStore.currentSelectedProducts?.length === 0) {
