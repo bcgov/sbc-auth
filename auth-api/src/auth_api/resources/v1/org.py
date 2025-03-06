@@ -41,7 +41,7 @@ from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import AccessType, NotificationType, OrgStatus, OrgType, PatchActions, Status
 from auth_api.utils.role_validator import validate_roles
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role  # noqa: I005
-from auth_api.utils.util import extract_numbers, get_request_environment
+from auth_api.utils.util import extract_numbers, get_request_environment, string_to_bool
 
 bp = Blueprint("ORGS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs")
 logger = StructuredLogging.get_logger()
@@ -63,7 +63,7 @@ def search_organizations():
         extract_numbers(request.args.get("id", None)),
         request.args.get("decisionMadeBy", None),
         request.args.get("orgType", None),
-        bool(request.args.get("includeMembers", False)),
+        string_to_bool(request.args.get("includeMembers", "False")),
         request.args.get("members", None),
         int(request.args.get("page", 1)),
         int(request.args.get("limit", 10)),
