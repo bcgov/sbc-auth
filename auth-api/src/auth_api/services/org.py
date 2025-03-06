@@ -635,7 +635,14 @@ class Org:  # pylint: disable=too-many-public-methods
         return response.json()
 
     @staticmethod
-    def find_by_org_id(org_id, allowed_roles: Tuple = None):
+    @user_context
+    def is_staff_or_external_staff(**kwargs):
+        """Check is user is staff or external staff."""
+        user_from_context: UserContext = kwargs["user_context"]
+        return user_from_context.is_staff() or user_from_context.is_external_staff()
+
+    @staticmethod
+    def find_by_org_id(org_id, allowed_roles: Tuple = None, **kwargs):
         """Find and return an existing organization with the provided id."""
         if org_id is None:
             return None
@@ -644,8 +651,9 @@ class Org:  # pylint: disable=too-many-public-methods
         if not org_model:
             return None
 
-        # Check authorization for the user
-        check_auth(one_of_roles=allowed_roles, org_id=org_id)
+        if not Org.is_staff_or_external_staff():
+            # Check authorization for the user
+            check_auth(one_of_roles=allowed_roles, org_id=org_id)
 
         return Org(org_model)
 
@@ -673,9 +681,9 @@ class Org:  # pylint: disable=too-many-public-methods
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-
-        # Check authorization for the user
-        check_auth(one_of_roles=allowed_roles, org_id=org_id)
+        if not Org.is_staff_or_external_staff():
+            # Check authorization for the user
+            check_auth(one_of_roles=allowed_roles, org_id=org_id)
         return AccountLoginOptionsModel.find_active_by_org_id(org_id)
 
     @staticmethod

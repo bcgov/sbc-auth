@@ -33,7 +33,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Activity
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, Status
-from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
+from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF, ALLOWED_READ_ROLES
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
@@ -99,7 +99,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
     def get_members_for_org(
         org_id,
         status=Status.ACTIVE.name,  # pylint:disable=too-many-return-statements
-        membership_roles=ALL_ALLOWED_ROLES,
+        membership_roles=ALLOWED_READ_ROLES,
         **kwargs,
     ):
         """Get members of org.Fetches using status and roles."""
@@ -109,9 +109,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         user_from_context: UserContext = kwargs["user_context"]
         status = Status.ACTIVE.value if status is None else Status[status].value
-        membership_roles = ALL_ALLOWED_ROLES if membership_roles is None else membership_roles
-        # If staff return full list
-        if user_from_context.is_staff():
+        membership_roles = ALLOWED_READ_ROLES if membership_roles is None else membership_roles
+        # If staff or external staff viewer return full list
+        if user_from_context.is_staff() or user_from_context.is_external_staff():
             return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)
 
         current_user: UserService = UserService.find_by_jwt_token()
