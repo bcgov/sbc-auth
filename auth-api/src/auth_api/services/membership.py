@@ -33,7 +33,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Activity
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, Status
-from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF, ALLOWED_READ_ROLES
+from auth_api.utils.roles import ADMIN, ALLOWED_READ_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
