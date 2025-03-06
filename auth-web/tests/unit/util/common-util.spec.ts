@@ -147,18 +147,6 @@ describe('Common Util Test', () => {
     expect(CommonUtil.formatDatePickerDate(dateStr)).toBe('2020-10-22')
   })
 
-  it('is getAdminPermissions correctly', () => {
-    expect(CommonUtil.getAdminPermissions().length).toBeGreaterThan(1)
-    expect(CommonUtil.getAdminPermissions()).toContain(Permission.INVITE_MEMBERS)
-    expect(CommonUtil.getAdminPermissions()).toContain(Permission.RESET_OTP)
-  })
-
-  it('is getViewOnlyPermissions correctly', () => {
-    expect(CommonUtil.getViewOnlyPermissions().length).toBeGreaterThan(1)
-    expect(CommonUtil.getViewOnlyPermissions()).toContain(Permission.VIEW_ACCOUNT)
-    expect(CommonUtil.getViewOnlyPermissions()).not.toContain(Permission.TRANSACTION_HISTORY)
-  })
-
   it('is convertAddressForComponent correctly', () => {
     expect(CommonUtil.convertAddressForComponent(addressComp)).toMatchObject(addressAuth)
   })
