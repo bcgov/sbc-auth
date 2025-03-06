@@ -22,7 +22,6 @@ import {
   CreateRequestBody,
   GLInfo,
   Member,
-  MembershipStatus,
   MembershipType,
   OrgBusinessType,
   OrgPaymentDetails,
@@ -317,49 +316,59 @@ export const useOrgStore = defineStore('org', () => {
 
   const rolesMapping = [
     {
-      role: Role.ContactCentreStaff,
-      permissions: CommonUtils.getContactCentreStaffPermissions(),
-      membershipType: MembershipType.Admin
+      role: Role.ExternalStaffReadonly,
+      membershipType: MembershipType.ExternalStaff
     },
     {
       role: Role.StaffManageAccounts,
-      permissions: CommonUtils.getAdminPermissions(),
-      membershipType: MembershipType.Admin
-    },
-    {
-      role: Role.StaffViewAccounts,
-      permissions: CommonUtils.getViewOnlyPermissions(),
-      membershipType: MembershipType.User
+      membershipType: MembershipType.Staff
     }
   ]
 
-  async function syncMembership (orgId: number): Promise<Member> {
-    const { roles } = KeyCloakService.getUserInfo()
+  function getMembershipType (membership: Member, roles: string[]) {
+    if (membership?.membershipTypeCode) {
+      return membership.membershipTypeCode
+    }
 
     // In the sequential order of the rolesMapping array, check if user has any of the roles in the mapping
     // and assign the permissions and membership type
     const assignedRole = rolesMapping.find((role) => roles.includes(role.role))
-
     if (assignedRole) {
-      state.permissions = assignedRole.permissions
-      state.currentMembership = {
-        membershipTypeCode: assignedRole.membershipType,
-        id: null,
-        membershipStatus: MembershipStatus.Active,
-        user: null
-      }
-      return state.currentMembership
+      return assignedRole.membershipType
     }
+  }
 
-    // If user doesn't have any of the roles in the mapping, get the membership from the API
+  async function syncMembership (orgId: number): Promise<Member> {
+    const { roles } = KeyCloakService.getUserInfo()
     const { data: membership } = await UserService.getMembership(orgId)
     const { accountStatus: statusCode } = state.currentAccountSettings
-    const { data: permissions } = await PermissionService.getPermissions(statusCode, membership?.membershipTypeCode)
+
+    let includeAllPermissions = false
+    if (roles.includes(Role.Staff) || (roles.includes(Role.ExternalStaffReadonly) && !membership?.id)) {
+      includeAllPermissions = true
+    }
+
+    const { data: permissions } = await PermissionService.getPermissions(statusCode,
+      getMembershipType(membership, roles), includeAllPermissions)
 
     state.permissions = permissions || []
     state.currentMembership = membership
-
     return membership
+  }
+
+  async function syncStaffPermissions (): Promise<string[]> {
+    const { roles } = KeyCloakService.getUserInfo()
+    const { accountStatus: statusCode } = state.currentAccountSettings
+    console.log('statusCode', statusCode)
+    const { data: permissions } = await PermissionService.getPermissions('ACTIVE',
+      getMembershipType(undefined, roles), true)
+
+    state.permissions = permissions || []
+    return permissions
+  }
+
+  function hasPermission (permission: string) {
+    return state.permissions.indexOf(permission) > 0
   }
 
   /*
@@ -635,8 +644,9 @@ export const useOrgStore = defineStore('org', () => {
     return result
   }
 
-  async function syncActiveOrgMembers () {
-    const response = await OrgService.getOrgMembers(state.currentOrganization.id, 'ACTIVE')
+  async function syncActiveOrgMembers (orgId?: number) {
+    const organizationId = orgId || state.currentOrganization.id
+    const response = await OrgService.getOrgMembers(organizationId, 'ACTIVE')
     const result = response?.data?.members || []
     state.activeOrgMembers = result
     return result
@@ -1077,6 +1087,7 @@ export const useOrgStore = defineStore('org', () => {
     needMissingBusinessDetailsRedirect,
     canEditBusinessInfo,
     isBusinessAccount,
+    hasPermission,
     setAccessType,
     setMemberLoginOption,
     resetCurrentOrganisation,
@@ -1103,6 +1114,7 @@ export const useOrgStore = defineStore('org', () => {
     suspendOrganization,
     syncMemberLoginOption,
     syncMembership,
+    syncStaffPermissions,
     createOrgByStaff,
     updateLoginOption,
     createOrg,

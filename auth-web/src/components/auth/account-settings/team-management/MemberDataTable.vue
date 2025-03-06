@@ -404,10 +404,6 @@ export default class MemberDataTable extends Vue {
   }
 
   private canChangeRole (memberBeingChanged: Member): boolean {
-    if (this.currentUser.roles?.includes(Role.ContactCentreStaff)) {
-      return false
-    }
-
     if (this.currentMembership.membershipStatus !== MembershipStatus.Active) {
       return false
     }
@@ -435,11 +431,6 @@ export default class MemberDataTable extends Vue {
   }
 
   private canRemove (memberToRemove: Member): boolean {
-    // Contact Centre Staff can't remove anyone
-    if (this.currentUser.roles?.includes(Role.ContactCentreStaff)) {
-      return false
-    }
-
     // Can't remove yourself
     if (this.currentMembership.user?.username === memberToRemove.user.username) {
       return false

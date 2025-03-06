@@ -30,7 +30,7 @@
     <template #[`item.action`]="{ item }">
       <!-- Resend Invitation -->
       <v-btn
-        v-if="canApproveOrDeny()"
+        v-can:EDIT_USER.hide
         icon
         class="mr-1"
         aria-label="Resend invitation"
@@ -43,7 +43,7 @@
 
       <!-- Remove Invitation -->
       <v-btn
-        v-if="canApproveOrDeny()"
+        v-can:EDIT_USER.hide
         icon
         aria-label="Remove Invitation"
         title="Remove Invitation"
@@ -57,72 +57,80 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Vue } from 'vue-property-decorator'
+import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
+import { storeToRefs } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
-import { Role } from '@/util/constants'
-import { mapState } from 'pinia'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
-@Component({
-  computed: {
-    ...mapState(useOrgStore, ['pendingOrgInvitations']),
-    ...mapState(useUserStore, ['currentUser'])
+export default defineComponent({
+  name: 'InvitationsDataTable',
+  emits: ['confirmRemoveInvite', 'resend'],
+  setup (props, { emit }) {
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
+
+    const { pendingOrgInvitations, currentMembership } = storeToRefs(orgStore)
+    const { currentUser } = storeToRefs(userStore)
+
+    const headerInvitations = [
+      {
+        text: 'Email',
+        align: 'left',
+        sortable: true,
+        value: 'recipientEmail'
+      },
+      {
+        text: 'Invitation Sent',
+        align: 'left',
+        sortable: true,
+        value: 'sentDate'
+      },
+      {
+        text: 'Expires',
+        align: 'left',
+        sortable: true,
+        value: 'expiresOn'
+      },
+      {
+        text: 'Actions',
+        align: 'right',
+        value: 'action',
+        sortable: false
+      }
+    ]
+
+    const state = reactive({
+      indexedInvitations: computed(() =>
+        pendingOrgInvitations.value.map((item: Invitation, index: number) => ({
+          index,
+          ...item
+        })))
+    })
+
+    function getIndexedTag (tag: string, index: number): string {
+      return `${tag}-${index}`
+    }
+
+    function confirmRemoveInvite (invitation) {
+      emit('confirm-remove-invite', invitation)
+    }
+
+    function resend (invitation) {
+      emit('resend', invitation)
+    }
+
+    return {
+      headerInvitations,
+      ...toRefs(state),
+      formatDate: CommonUtils.formatDisplayDate,
+      getIndexedTag,
+      confirmRemoveInvite,
+      resend
+    }
   }
 })
-export default class InvitationsDataTable extends Vue {
-  private readonly pendingOrgInvitations!: Invitation[]
-  readonly headerInvitations = [
-    {
-      text: 'Email',
-      align: 'left',
-      sortable: true,
-      value: 'recipientEmail'
-    },
-    {
-      text: 'Invitation Sent',
-      align: 'left',
-      sortable: true,
-      value: 'sentDate'
-    },
-    {
-      text: 'Expires',
-      align: 'left',
-      sortable: true,
-      value: 'expiresOn'
-    },
-    {
-      text: 'Actions',
-      align: 'right',
-      value: 'action',
-      sortable: false
-    }
-  ]
-
-  private canApproveOrDeny (): boolean {
-    return !this.currentUser.roles?.includes(Role.ContactCentreStaff)
-  }
-
-  formatDate = CommonUtils.formatDisplayDate
-
-  getIndexedTag (tag, index): string {
-    return `${tag}-${index}`
-  }
-
-  get indexedInvitations () {
-    return this.pendingOrgInvitations.map((item, index) => ({
-      index,
-      ...item
-    }))
-  }
-
-  @Emit()
-  confirmRemoveInvite () {}
-
-  @Emit()
-  resend () {}
-}
 </script>
 
 <style lang="scss" scoped>

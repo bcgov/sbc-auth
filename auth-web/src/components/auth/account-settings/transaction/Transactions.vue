@@ -188,13 +188,6 @@ export default defineComponent({
     })
 
     const credit = ref(0)
-
-    const isTransactionsAllowed = computed((): boolean => {
-      return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
-        .includes(currentOrganization.value.orgType as Account) &&
-        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
-    })
-
     const getCredits = async () => {
       const accountId = currentOrgPaymentDetails.value?.accountId
       if (!accountId || Number(accountId) !== currentOrganization.value?.id) {
@@ -206,18 +199,12 @@ export default defineComponent({
     }
 
     const initialize = () => {
-      if (!isTransactionsAllowed.value) {
-        // if the account switching happening when the user is already in the transaction page,
-        // redirect to account-info if account is not allowed to view transactions
-        root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
-      } else {
-        setAccountChangedHandler(initialize)
-        setViewAll(props.extended)
-        clearAllFilters(true)
-        defaultSearchToOneYear()
-        loadTransactionList()
-        getCredits()
-      }
+      setAccountChangedHandler(initialize)
+      setViewAll(props.extended)
+      clearAllFilters(true)
+      defaultSearchToOneYear()
+      loadTransactionList()
+      getCredits()
     }
 
     const exportCSV = async () => {
