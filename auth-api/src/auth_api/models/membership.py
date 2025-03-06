@@ -175,6 +175,18 @@ class Membership(
         return records
 
     @classmethod
+    def find_memberships_by_user_id_and_status(cls, user_id: int, status: str) -> List[Membership]:
+        """Get the memberships for the specified user ids."""
+        records = (
+            cls.query.filter(cls.user_id == int(user_id or -1))
+            .filter(cls.status == status)
+            .order_by(desc(Membership.created))
+            .all()
+        )
+
+        return records
+
+    @classmethod
     def find_membership_by_user_and_org_all_status(cls, user_id: int, org_id: int) -> Membership:
         """Get the membership for the specified user and org with all membership statuses."""
         records = (

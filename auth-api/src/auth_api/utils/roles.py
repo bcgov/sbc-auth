@@ -48,6 +48,7 @@ class Role(Enum):
     STAFF_TASK_SEARCH = "staff_task_search"
     VIEW_TASK_DETAILS = "view_task_details"
     VIEW_ACCOUNT_PENDING_INVITATIONS = "view_account_pending_invitations"
+    VIEW_MEMBERS_PENDING_INVITATIONS = "view_members_pending_invitations"
     VIEW_ACTIVITY_LOGS = "view_activity_logs"
 
 
