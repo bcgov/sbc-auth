@@ -115,13 +115,12 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages } from '@/util/constants'
-import { MembershipType, OrgPaymentDetails } from '@/models/Organization'
 import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { useAccountChangeHandler, useTransactions } from '@/composables'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { OrgPaymentDetails } from '@/models/Organization'
 import { StatusCodes } from 'http-status-codes'
 import TransactionsDataTable from './TransactionsDataTable.vue'
 import { getTransactionTableHeaders } from '@/resources/table-headers'
@@ -137,11 +136,10 @@ export default defineComponent({
     showExport: { default: true },
     title: { default: '' }
   },
-  setup (props, { root }) {
+  setup (props) {
     const orgStore = useOrgStore()
     const currentOrgPaymentDetails = computed(() => orgStore.currentOrgPaymentDetails)
     const currentOrganization = computed(() => orgStore.currentOrganization)
-    const currentMembership = computed(() => orgStore.currentMembership)
 
     const csvErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const csvErrorTextBasic = 'We were unable to process your CSV export. Please try again later.'
@@ -188,13 +186,6 @@ export default defineComponent({
     })
 
     const credit = ref(0)
-
-    const isTransactionsAllowed = computed((): boolean => {
-      return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
-        .includes(currentOrganization.value.orgType as Account) &&
-        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
-    })
-
     const getCredits = async () => {
       const accountId = currentOrgPaymentDetails.value?.accountId
       if (!accountId || Number(accountId) !== currentOrganization.value?.id) {
@@ -206,18 +197,12 @@ export default defineComponent({
     }
 
     const initialize = () => {
-      if (!isTransactionsAllowed.value) {
-        // if the account switching happening when the user is already in the transaction page,
-        // redirect to account-info if account is not allowed to view transactions
-        root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
-      } else {
-        setAccountChangedHandler(initialize)
-        setViewAll(props.extended)
-        clearAllFilters(true)
-        defaultSearchToOneYear()
-        loadTransactionList()
-        getCredits()
-      }
+      setAccountChangedHandler(initialize)
+      setViewAll(props.extended)
+      clearAllFilters(true)
+      defaultSearchToOneYear()
+      loadTransactionList()
+      getCredits()
     }
 
     const exportCSV = async () => {

@@ -150,7 +150,9 @@ export enum MembershipStatus {
 export enum MembershipType {
   'Admin' = 'ADMIN',
   'Coordinator' = 'COORDINATOR',
-  'User' = 'USER'
+  'User' = 'USER',
+  'Staff' = 'STAFF',
+  'ExternalStaff' = 'EXTERNAL_STAFF'
 }
 
 export interface Permissions {
