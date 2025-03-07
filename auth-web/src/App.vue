@@ -81,7 +81,6 @@ import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
-import { getModule } from 'vuex-module-decorators'
 import { mapGetters } from 'vuex'
 
 @Component({

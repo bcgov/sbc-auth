@@ -129,7 +129,6 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import DocumentService from '@/services/document.services'
 // Will be removing these two lines with Vue 3 upgrade.
-import { getModule } from 'vuex-module-decorators'
 import { mapGetters } from 'vuex'
 
 @Component({
