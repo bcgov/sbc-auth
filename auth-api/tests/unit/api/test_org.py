@@ -809,7 +809,7 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     assert rv.json.get("isBusinessAccount") == all_org_info["isBusinessAccount"]
 
 
-def test_update_org_payment_method_for_basic_org(client, jwt, session, keycloak_mock):
+def test_update_org_payment_method_for_org(client, jwt, session, keycloak_mock):
     """Assert that an orgs payment details can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     client.post("/api/v1/users", headers=headers, content_type="application/json")
@@ -829,7 +829,7 @@ def test_update_org_payment_method_for_basic_org(client, jwt, session, keycloak_
     rv = client.put(
         f"/api/v1/orgs/{org_id}", data=json.dumps(new_payment_method), headers=headers, content_type="application/json"
     )
-    assert rv.status_code == HTTPStatus.BAD_REQUEST, "Assert BCOL cant be used for Basic Account"
+    assert rv.status_code == HTTPStatus.OK
 
 
 def test_upgrade_anon_org_fail(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -842,14 +842,14 @@ def test_upgrade_anon_org_fail(client, jwt, session, keycloak_mock):  # pylint:d
 
     dictionary = json.loads(rv.data)
     assert rv.status_code == HTTPStatus.CREATED
-    assert rv.json.get("orgType") == OrgType.BASIC.value
+    assert rv.json.get("orgType") == OrgType.PREMIUM.value
     assert rv.json.get("name") == TestOrgInfo.org_anonymous.get("name")
 
     org_id = dictionary["id"]
     # upgrade with same data
 
     premium_info = TestOrgInfo.bcol_linked()
-    premium_info["typeCode"] = OrgType.PREMIUM.value
+    premium_info["typeCode"] = OrgType.STAFF.value
 
     rv = client.put(
         "/api/v1/orgs/{}?action=UPGRADE".format(org_id),

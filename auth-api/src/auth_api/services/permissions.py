@@ -14,13 +14,20 @@
 """Service to invoke Rest services."""
 from typing import Dict, List, Tuple
 
+from sqlalchemy import and_, select
 from sqlalchemy.exc import SQLAlchemyError
 from structured_logging import StructuredLogging
 
+from auth_api.models import db
+from auth_api.models.membership import Membership as MembershipModel
+from auth_api.models.org import Org as OrgModel
 from auth_api.models.permissions import Permissions as PermissionsModel
+from auth_api.models.user import User as UserModel
 
 from ..utils.cache import cache
-from ..utils.enums import OrgStatus
+from ..utils.enums import OrgStatus, Status
+from ..utils.roles import VALID_ORG_STATUSES
+from ..utils.user_context import UserContext, user_context
 
 logger = StructuredLogging.get_logger()
 
@@ -54,7 +61,9 @@ class Permissions:  # pylint: disable=too-few-public-methods
             logger.info("Error on building cache %s", e)
 
     @staticmethod
-    def get_permissions_for_membership(org_status, membership_type):
+    def get_permissions_for_membership(
+        org_status, membership_type, user_model: UserModel = None, include_all_permissions: bool = False
+    ):
         """Get the permissions for the membership type."""
         # Just a tweak til we get all org status to DB
         # TODO fix this logic
@@ -66,11 +75,40 @@ class Permissions:  # pylint: disable=too-few-public-methods
             org_status = None
         key_tuple = (org_status, membership_type)
         actions_from_cache = cache.get(key_tuple)
+
+        additional_permissions = []
+        if include_all_permissions:
+            additional_permissions = Permissions.get_additional_user_permissions(user_model)
         if actions_from_cache:
-            actions = actions_from_cache
+            actions = actions_from_cache + additional_permissions
         else:
             permissions = PermissionsModel.get_permissions_by_membership(org_status, membership_type)
             actions = []
             for permission in permissions:
                 actions.append(permission.actions)
-        return actions
+        return actions + additional_permissions
+
+    @staticmethod
+    @user_context
+    def get_additional_user_permissions(user_model: UserModel, **kwargs):
+        """Check for and append additional permissions based on user type."""
+        user_from_context: UserContext = kwargs["user_context"]
+        additional_permissions = []
+        if user_from_context.is_staff() or user_from_context.is_external_staff():
+            additional_permissions = Permissions.get_permissions_by_org_type_membership(user_model.identifier)
+
+        return additional_permissions
+
+    @staticmethod
+    def get_permissions_by_org_type_membership(user_id: int):
+        """Retrieve permissions based on membership and org type."""
+        permissions_query = (
+            select(PermissionsModel.actions)
+            .select_from(MembershipModel)
+            .join(OrgModel, OrgModel.id == MembershipModel.org_id)
+            .join(PermissionsModel, PermissionsModel.membership_type_code == OrgModel.type_code)
+            .filter(OrgModel.status_code.in_(VALID_ORG_STATUSES))
+            .filter(and_(MembershipModel.user_id == user_id, MembershipModel.status == Status.ACTIVE.value))
+        )
+
+        return db.session.scalars(permissions_query).all()

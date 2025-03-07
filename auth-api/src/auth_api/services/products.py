@@ -194,13 +194,6 @@ class Product:
                 # Check if product requires system admin, if yes abort
                 if product_model.need_system_admin:
                     check_auth(system_required=True, org_id=org_id)
-                # Check if product needs premium account, if yes skip and continue.
-                if (
-                    flags.is_on("remove-premium-restrictions", default=False) is False
-                    and product_model.premium_only
-                    and org.type_code not in PREMIUM_ORG_TYPES
-                ):
-                    continue
                 previously_approved, inactive_sub = Product._is_previously_approved(org_id, product_code)
                 if previously_approved:
                     auto_approve = True
@@ -427,7 +420,7 @@ class Product:
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user
-        if not skip_auth:
+        if not skip_auth and not user_from_context.is_external_staff():
             check_auth(one_of_roles=(*CLIENT_AUTH_ROLES, STAFF), org_id=org_id)
 
         product_subscriptions: List[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_ids([org_id])
@@ -436,6 +429,7 @@ class Product:
         # Include hidden products only for staff and SBC staff
         include_hidden = (
             user_from_context.is_staff()
+            or user_from_context.is_external_staff()
             or org.type_code == OrgType.SBC_STAFF.value
             or kwargs.get("include_hidden", False)
         )

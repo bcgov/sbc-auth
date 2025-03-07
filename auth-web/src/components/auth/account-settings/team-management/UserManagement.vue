@@ -128,6 +128,7 @@
           large
           :color="primaryActionType"
           class="font-weight-bold"
+          :loading="isLoading"
           @click="confirmHandler()"
         >
           {{ primaryActionText }}
@@ -387,13 +388,20 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   }
 
   private async approve () {
-    await this.updateMember({
-      memberId: this.memberToBeApproved.id,
-      status: MembershipStatus.Active
-    })
-    // Remove Vuex with Vue 3
-    this.$store.commit('updateHeader')
+    this.isLoading = true
+    try {
+      await this.updateMember({
+        memberId: this.memberToBeApproved.id,
+        status: MembershipStatus.Active
+      })
+      this.$store.commit('updateHeader')
+    } catch ({ response }) {
+      this.errorTitle = 'Error Approving Access'
+      this.errorText = response?.data?.message || 'An unexpected error occurred.'
+      this.$refs.errorDialog.open()
+    }
     this.$refs.confirmActionDialog.close()
+    this.isLoading = false
   }
 
   private setAppliedFilterValue (filter: SearchFilterParam[]) {
