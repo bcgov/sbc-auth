@@ -167,7 +167,7 @@
   "esraCodeDescription": "Search by the following:<ul><li>Parcel ID (PID)</li><li>Crown Lands PIN</li><li>Crown Lands File Number</li><li>Site ID</li><li>Address</li><li>Area</li></ul>",
   "accountBusinessTypeText": "Select a user type for your BC Registries and Online Service Account:",
   "businessCodeActiveSubtitle": "This account has access to Business Registry & Name Request.",
-  "business_searchCodeActiveSubtitle": "This Account has access to Business and Person Search.",
+  "business_searchCodeActiveSubtitle": "This account has access to Business and Person Search.",
   "mhrStaffCodeActiveSubtitle": "This account has search access to Manufactured Home Registry",
   "mhrCodeActiveSubtitle": "This account has search access to Manufactured Home Registry",
   "strrStaffCodeActiveSubtitle": "This account has search access to Short Term Rental Registry",
