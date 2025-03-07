@@ -634,7 +634,7 @@ export function getRoutes (): RouteConfig[] {
       path: Pages.STAFF_DASHBOARD,
       component: StaffDashboardView,
       props: true,
-      meta: { requiresAuth: true, allowedRoles: [Role.ViewStaffDashboard] },
+      meta: { requiresAuth: true, allowedRoles: [Role.Staff, Role.ViewStaffDashboard] },
       children: [
         {
           path: '',
@@ -647,7 +647,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffActiveAccountsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.ViewStaffDashboard],
+            allowedRoles: [Role.Staff, Role.ViewStaffDashboard],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -663,7 +663,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffPendingAccountInvitationsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.ViewStaffDashboard],
+            allowedRoles: [Role.Staff, Role.ViewStaffDashboard],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -679,7 +679,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffPendingAccountsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.ViewStaffDashboard],
+            allowedRoles: [Role.Staff, Role.ViewStaffDashboard],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -695,7 +695,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffRejectedAccountsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.ViewStaffDashboard],
+            allowedRoles: [Role.Staff, Role.ViewStaffDashboard],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -711,7 +711,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffSuspendedAccountsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.ViewStaffDashboard],
+            allowedRoles: [Role.Staff, Role.ViewStaffDashboard],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -727,7 +727,7 @@ export function getRoutes (): RouteConfig[] {
           component: StaffInactiveAccountsTable,
           meta: {
             requiresAuth: true,
-            allowedRoles: [Role.ViewStaffDashboard],
+            allowedRoles: [Role.Staff, Role.ViewStaffDashboard],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
