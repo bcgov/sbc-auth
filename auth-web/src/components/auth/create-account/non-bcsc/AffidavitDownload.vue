@@ -125,12 +125,10 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { IdpHint, Pages, SessionStorageKeys } from '@/util/constants'
-import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import DocumentService from '@/services/document.services'
 // Will be removing these two lines with Vue 3 upgrade.
-import { getModule } from 'vuex-module-decorators'
 import { mapGetters } from 'vuex'
 
 @Component({
@@ -141,7 +139,6 @@ import { mapGetters } from 'vuex'
   }
 })
 export default class AffidavitDownload extends Vue {
-  private authModule = getModule(AuthModule, this.$store)
   private readonly isAuthenticated!: boolean
   private downloadFailedMsg = 'Failed download'
   private isDownloadFailed = false

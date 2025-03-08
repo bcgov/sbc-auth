@@ -67,7 +67,6 @@ import { Component, Mixins } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapState } from 'pinia'
 import { useOrgStore, useUserStore } from '@/stores'
-import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
 import CommonUtils from '@/util/common-util'
@@ -82,7 +81,6 @@ import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
-import { getModule } from 'vuex-module-decorators'
 import { mapGetters } from 'vuex'
 
 @Component({
@@ -106,8 +104,6 @@ import { mapGetters } from 'vuex'
   }
 })
 export default class App extends Mixins(NextPageMixin) {
-  // Remove these with sbc-common-components and Vue3 upgrade.
-  private authModule = getModule(AuthModule, this.$store)
   private readonly loadUserInfo!: () => KCUserProfile
   showNotification = false
   notificationText = ''
