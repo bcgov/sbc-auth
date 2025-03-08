@@ -254,8 +254,7 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   async function loadBusiness () {
-    let businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
-
+    const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
     // Need to look at LEAR, because it has the up-to-date names.
     const learBusiness = await searchBusiness(businessIdentifier)
     const response = await BusinessService.getBusiness(businessIdentifier)
