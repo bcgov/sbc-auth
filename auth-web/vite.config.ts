@@ -78,6 +78,8 @@ export default defineConfig({
       // Fix for bcrs-shared-components unit tests fail
       '@bcrs-shared-components/mixins': path.resolve(__dirname, './node_modules/@bcrs-shared-components/mixins/index.ts'),
       '@bcrs-shared-components/enums': path.resolve(__dirname, './node_modules/@bcrs-shared-components/enums/index.ts'),
+      // Fix for module decorator unit tests fail
+      'vuex-module-decorators': path.resolve(__dirname, './node_modules/vuex-module-decorators/dist/esm/index.js'),
       'vue': path.resolve(__dirname, './node_modules/vue/dist/vue.runtime.js')
     },
     extensions: ['.js', '.ts', '.vue', '.json', '.css']
@@ -106,6 +108,5 @@ export default defineConfig({
     // Otherwise FAS complains about not having Vue.use(VueCompositionAPI)
     // sbc-common-components will fail at login.
     // Remove with Vue 3 for most of these.
-
   }
 })

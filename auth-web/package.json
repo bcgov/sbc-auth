@@ -91,6 +91,7 @@
     "vue-cli-plugin-vuetify": "^2.0.3",
     "vue-template-compiler": "2.6.14",
     "vue-test-utils-helpers": "git+https://github.com/AmpleOrganics/vue-test-utils-helpers.git",
-    "vuelidate-property-decorators": "^1.0.28"
+    "vuelidate-property-decorators": "^1.0.28",
+    "vuex-module-decorators": "^1.2.0"
   }
 }
