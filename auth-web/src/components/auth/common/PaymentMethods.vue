@@ -119,6 +119,7 @@
                   </div>
                   <PADInfoForm
                     v-else
+                    :isCreateAccount="isCreateAccount"
                     :isChangeView="isChangeView"
                     :isAcknowledgeNeeded="isAcknowledgeNeeded"
                     :isInitialAcknowledged="isInitialAcknowledged"
