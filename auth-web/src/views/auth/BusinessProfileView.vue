@@ -92,13 +92,13 @@ import { useBusinessStore } from '@/stores/business'
     ...mapActions(useBusinessStore, ['loadBusiness'])
   }
 })
+
 export default class BusinessProfileView extends Mixins(AccountChangeMixin, NextPageMixin) {
   private businessType = 'cooperative'
   private editing = false
   private isLoading = true
   private readonly currentBusiness!: Business
-  private readonly loadBusiness!: () => Business
-
+  private readonly loadBusiness!: (businessId) => Business
   private navigateBack (): void {
     if (this.$route.query.redirect) {
       if (this.currentOrganization) {
@@ -113,8 +113,9 @@ export default class BusinessProfileView extends Mixins(AccountChangeMixin, Next
 
   async mounted () {
     this.isLoading = true
+    // Include businessid from query string in case session is empty.
+    await this.loadBusiness(this.$attrs.businessid)
     // Check if there is already contact info so that we display the appropriate copy
-    await this.loadBusiness()
     if ((this.currentBusiness?.contacts?.length || 0) > 0) {
       this.editing = true
     }
