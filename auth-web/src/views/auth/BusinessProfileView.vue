@@ -77,7 +77,6 @@ import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
 
 import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import { SessionStorageKeys } from '@/util/constants'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import { useBusinessStore } from '@/stores/business'
 
@@ -95,17 +94,11 @@ import { useBusinessStore } from '@/stores/business'
 })
 
 export default class BusinessProfileView extends Mixins(AccountChangeMixin, NextPageMixin) {
-  private businessCheck (): void {
-    // If we don't have a business id, check if there is one in the URL
-    if (ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey) === null && this.$route?.query?.businessid) {
-      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, this.$route.query.businessid)
-    }
-  }
   private businessType = 'cooperative'
   private editing = false
   private isLoading = true
   private readonly currentBusiness!: Business
-  private readonly loadBusiness!: () => Business
+  private readonly loadBusiness!: (businessId) => Business
   private navigateBack (): void {
     if (this.$route.query.redirect) {
       if (this.currentOrganization) {
@@ -119,10 +112,10 @@ export default class BusinessProfileView extends Mixins(AccountChangeMixin, Next
   }
 
   async mounted () {
-    this.businessCheck()
     this.isLoading = true
+    // Include businessid from query string in case session is empty.
+    await this.loadBusiness(this.$attrs.businessid)
     // Check if there is already contact info so that we display the appropriate copy
-    await this.loadBusiness()
     if ((this.currentBusiness?.contacts?.length || 0) > 0) {
       this.editing = true
     }

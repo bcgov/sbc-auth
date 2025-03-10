@@ -248,13 +248,14 @@ export const useBusinessStore = defineStore('business', () => {
     })
 
     affiliatedEntities = await handleAffiliationInvitations(affiliatedEntities)
-
+ 
     // update store with initial results
     state.businesses = [...affiliatedEntities]
   }
 
-  async function loadBusiness () {
-    const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
+  async function loadBusiness (businessQueryIdentifier = '') {
+    // Check session first or use query string if available.
+    const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey) || businessQueryIdentifier
     // Need to look at LEAR, because it has the up-to-date names.
     const learBusiness = await searchBusiness(businessIdentifier)
     const response = await BusinessService.getBusiness(businessIdentifier)
