@@ -1,5 +1,7 @@
 import { PiniaVuePlugin, createPinia } from 'pinia'
+import { useAuthStore, useNotificationStore, useProductsStore, useStatusStore } from 'sbc-common-components/src/stores'
 import Vue from 'vue'
+import { useAccountStore } from 'sbc-common-components/src/stores/account'
 import { useActivityStore } from './activityLog'
 import { useBusinessStore } from './business'
 import { useCodesStore } from './codes'
@@ -30,8 +32,20 @@ export * from 'sbc-common-components/src/stores' // TODO JIA maybe put other sto
 /* Resets all values for a store, eg on Logout */
 // TODO JIA do we need to reset the other stores from sbc-common above?
 export function resetAllStores () {
-  [useActivityStore(), useBusinessStore(), useCodesStore(), useOrgStore(),
-    useStaffStore(), useTaskStore(), useUserStore()].forEach((store) => {
+  [
+    useActivityStore(),
+    useBusinessStore(),
+    useCodesStore(),
+    useOrgStore(),
+    useStaffStore(),
+    useTaskStore(),
+    useUserStore(),
+    useAccountStore(),
+    useAuthStore(),
+    useNotificationStore(),
+    useProductsStore(),
+    useStatusStore()
+  ].forEach((store) => {
     store.$reset()
   })
 }
