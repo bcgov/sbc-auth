@@ -27,10 +27,9 @@ export * from './org'
 export * from './staff'
 export * from './task'
 export * from './user'
-export * from 'sbc-common-components/src/stores' // TODO JIA maybe put other stores in here?
+export * from 'sbc-common-components/src/stores'
 
 /* Resets all values for a store, eg on Logout */
-// TODO JIA do we need to reset the other stores from sbc-common above?
 export function resetAllStores () {
   [
     useActivityStore(),
