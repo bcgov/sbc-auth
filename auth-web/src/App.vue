@@ -82,6 +82,7 @@ import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { mapGetters } from 'vuex'
+import { useAuthStore } from 'sbc-common-components/src/stores'
 
 @Component({
   components: {
@@ -205,7 +206,8 @@ export default class App extends Mixins(NextPageMixin) {
   private setLogOutUrl () {
     // Auth store, still exists in sbc-common-components v2, uses pinia in Vue 3 version.
     // Remove Vuex with Vue 3
-    this.logoutUrl = (this.$store.getters['auth/currentLoginSource'] === LoginSource.BCROS) ? ConfigHelper.getBcrosURL() : ''
+    const authStore = useAuthStore()
+    this.logoutUrl = (authStore.currentLoginSource === LoginSource.BCROS) ? ConfigHelper.getBcrosURL() : ''
   }
 
   private destroyed () {
@@ -215,10 +217,11 @@ export default class App extends Mixins(NextPageMixin) {
   async setup (isSigninComplete?: boolean) {
     // Header added modules to store so can access mapped actions now
     // Remove Vuex with Vue 3
-    if (this.$store.getters['auth/isAuthenticated']) {
+    const authStore = useAuthStore()
+    if (authStore.isAuthenticated) {
       try {
         if (!isSigninComplete) {
-          await KeyCloakService.initializeToken(this.$store)
+          await KeyCloakService.initializeToken()
         }
         this.loadUserInfo()
         await this.syncUser()
