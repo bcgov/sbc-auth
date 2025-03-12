@@ -1,9 +1,9 @@
 import { LoginSource, Permission } from '@/util/constants'
 import { createLocalVue, mount } from '@vue/test-utils'
+import CodesService from '@/services/codes.service'
 import ProductPackage from '@/components/auth/account-settings/product/ProductPayment.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import CodesService from '@/services/codes.service'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 

@@ -248,7 +248,7 @@ export const useBusinessStore = defineStore('business', () => {
     })
 
     affiliatedEntities = await handleAffiliationInvitations(affiliatedEntities)
- 
+
     // update store with initial results
     state.businesses = [...affiliatedEntities]
   }
