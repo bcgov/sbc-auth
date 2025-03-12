@@ -34,7 +34,8 @@ export default defineConfig({
     }
   },
   define: {
-    'import.meta.env.ABOUT_TEXT': generateAboutText(aboutText1, aboutText2)
+    'import.meta.env.ABOUT_TEXT': generateAboutText(aboutText1, aboutText2),
+    'import.meta.env.APP_NAME': JSON.stringify(appName)
   },
   esbuild: {
     minifySyntax: false,
