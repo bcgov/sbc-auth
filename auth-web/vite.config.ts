@@ -63,11 +63,7 @@ export default defineConfig({
     EnvironmentPlugin({
       BUILD: 'web' // Fix for Vuelidate, allows process.env with Vite.
     }),
-    {
-      name: 'postcss-nesting',
-      enforce: 'post',
-      ...postcssNesting()
-    },
+    postcssNesting,
     pluginRewriteAll()
   ],
   resolve: {

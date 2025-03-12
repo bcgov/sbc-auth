@@ -82,7 +82,7 @@
         class="view-header__title"
         data-test="account-settings-title"
       >
-        {{ currentOrganization?.name }}
+        {{ currentOrganization.name }}
       </h1>
       <p
         class="mt-3 mb-0"
