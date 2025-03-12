@@ -74,6 +74,7 @@ export default defineConfig({
       // Fix for bcrs-shared-components unit tests fail
       '@bcrs-shared-components/mixins': path.resolve(__dirname, './node_modules/@bcrs-shared-components/mixins/index.ts'),
       '@bcrs-shared-components/enums': path.resolve(__dirname, './node_modules/@bcrs-shared-components/enums/index.ts'),
+      'sbc-common-components': path.resolve(__dirname, 'node_modules/sbc-common-components'),
       // Fix for module decorator unit tests fail
       'vuex-module-decorators': path.resolve(__dirname, './node_modules/vuex-module-decorators/dist/esm/index.js'),
       'vue': path.resolve(__dirname, './node_modules/vue/dist/vue.runtime.js')
