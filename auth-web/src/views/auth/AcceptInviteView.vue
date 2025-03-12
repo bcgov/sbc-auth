@@ -16,6 +16,7 @@ import { Member, MembershipStatus } from '@/models/Organization'
 import { defineComponent, getCurrentInstance, onMounted, reactive, toRefs } from '@vue/composition-api'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
+import { useAppStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -92,8 +93,7 @@ export default defineComponent({
           } else {
             await orgStore.syncMembership(invitation?.membership[0]?.org?.id)
           }
-          // Remove Vuex with Vue 3
-          root.$store.commit('updateHeader')
+          useAppStore().updateHeader()
           root.$router.push((instance?.proxy as any).getNextPageUrl()) // This for the mixin.
         }
       } catch (exception) {

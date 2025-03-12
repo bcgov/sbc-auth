@@ -35,12 +35,9 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import AccountSetupView from '@/views/auth/create-account/AccountSetupView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NonBcscAccountSetupView from '@/views/auth/create-account/NonBcscAccountSetupView.vue'
-import { namespace } from 'vuex-class'
+import { useAuthStore } from 'sbc-common-components/src/stores'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
-
-// Will be taken out with Vue 3.
-const AuthModule = namespace('auth')
 
 @Component
 export default class AccountSetupLanding extends Vue {
@@ -53,7 +50,10 @@ export default class AccountSetupLanding extends Vue {
   @State(useUserStore) private currentUser!: KCUserProfile
   @Action(useUserStore) private getUserAccountSettings!: () => Promise<any>
 
-  @AuthModule.Getter('isAuthenticated') private isAuthenticated!: boolean
+  authStore = useAuthStore()
+  get isAuthenticated (): boolean {
+    return this.authStore.isAuthenticated
+  }
 
   // Watch property access type and update model
   @Watch('skipConfirmation')

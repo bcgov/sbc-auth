@@ -21,17 +21,34 @@ headache in the long term. Depending on the circumstances, there are various alt
 */
 export const useAppStore = defineStore('app', () => {
   const state = reactive({
-    errorMessage: '', // Unused for now
-    refreshKey: 0, // Unused for now
-    loading: true // Unused for now
+    errorMessage: '',
+    refreshKey: 0,
+    loading: true
   })
+
+  function updateHeader () {
+    state.refreshKey++
+  }
+
+  function loadComplete () {
+    state.loading = false
+  }
 
   function dismissError () {
     state.errorMessage = ''
   }
 
+  function $reset () {
+    state.errorMessage = ''
+    state.refreshKey = 0
+    state.loading = true
+  }
+
   return {
     ...toRefs(state),
-    dismissError
+    updateHeader,
+    loadComplete,
+    dismissError,
+    $reset
   }
 })

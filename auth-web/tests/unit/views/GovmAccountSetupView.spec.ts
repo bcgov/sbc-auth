@@ -1,3 +1,4 @@
+import '@/composition-api-setup'
 import { createLocalVue, mount } from '@vue/test-utils'
 import GovmAccountSetupView from '@/views/auth/create-account/GovmAccountSetupView.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -5,7 +6,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuelidate from 'vuelidate'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import { createTestingPinia } from '@pinia/testing'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -17,30 +18,21 @@ document.body.setAttribute('data-app', 'true')
 
 describe('GovmAccountSetupView.vue', () => {
   let wrapper: any
+  const localVue = createLocalVue()
 
   beforeEach(async () => {
-    const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(Vuelidate)
 
-    const orgModule = {
-      namespaced: true,
-      state: {
-      }
-    }
-
-    // Remove with Vue 3 upgrade
-    // We need a store for this one it calls auth/currentLoginSource - which is in sbc-common-components for now.
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
+    const pinia = createTestingPinia({
+      initialState: {
+        auth: {
+          loginSource: 'BCEID'
+        }
       }
     })
 
     wrapper = mount(GovmAccountSetupView, {
-      store,
+      pinia,
       localVue,
       router,
       vuetify,
