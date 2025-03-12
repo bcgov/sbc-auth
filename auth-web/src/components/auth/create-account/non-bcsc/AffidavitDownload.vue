@@ -128,18 +128,17 @@ import { IdpHint, Pages, SessionStorageKeys } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import DocumentService from '@/services/document.services'
-// Will be removing these two lines with Vue 3 upgrade.
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useAuthStore } from 'sbc-common-components/src/stores'
 
 @Component({
   computed: {
-    ...mapGetters('auth', [
+    ...mapState(useAuthStore, [
       'isAuthenticated'
     ])
   }
 })
 export default class AffidavitDownload extends Vue {
-  private readonly isAuthenticated!: boolean
   private downloadFailedMsg = 'Failed download'
   private isDownloadFailed = false
   private affidavitSize = ConfigHelper.getAffidavitSize() || ''

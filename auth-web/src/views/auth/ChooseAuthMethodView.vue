@@ -382,15 +382,15 @@ import { Component, Vue } from 'vue-property-decorator'
 import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import ConfigHelper from '@/util/config-helper'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-// Remove with Vue3 upgrade.
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useAuthStore } from 'sbc-common-components/src/stores/auth'
 
 @Component({
   components: {
     ModalDialog
   },
   computed: {
-    ...mapGetters('auth', [
+    ...mapState(useAuthStore, [
       'isAuthenticated',
       'currentLoginSource'
     ]),

@@ -1,8 +1,7 @@
 import { PiniaVuePlugin, createPinia } from 'pinia'
-import { useAuthStore, useNotificationStore, useProductsStore, useStatusStore } from 'sbc-common-components/src/stores'
 import Vue from 'vue'
-import { useAccountStore } from 'sbc-common-components/src/stores/account'
 import { useActivityStore } from './activityLog'
+import { useAppStore } from './app'
 import { useBusinessStore } from './business'
 import { useCodesStore } from './codes'
 import { useOrgStore } from './org'
@@ -39,11 +38,7 @@ export function resetAllStores () {
     useStaffStore(),
     useTaskStore(),
     useUserStore(),
-    useAccountStore(),
-    useAuthStore(),
-    useNotificationStore(),
-    useProductsStore(),
-    useStatusStore()
+    useAppStore()
   ].forEach((store) => {
     store.$reset()
   })
