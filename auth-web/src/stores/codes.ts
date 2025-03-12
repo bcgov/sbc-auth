@@ -78,9 +78,7 @@ export const useCodesStore = defineStore('codes', () => {
 
   async function getProductPaymentMethods (productCode?: string): Promise<any> {
     const data = await CodesService.getProductPaymentMethods(productCode)
-    if (data?.BUSINESSSearch) {
-      data.BUSINESS_SEARCH = data.BUSINESSSearch // Force to match enum.
-    }
+    data.BUSINESS_SEARCH = data?.BUSINESSSearch // Force to match enum.
     state.productPaymentMethods = data
   }
 
