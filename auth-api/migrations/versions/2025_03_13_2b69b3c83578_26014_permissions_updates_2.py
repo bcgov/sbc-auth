@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade():
-    op.execute("""INSERT INTO public.permissions (membership_type_code, actions) VALUES ('COORDINATOR', 'edit_user');""")
+    op.execute("""INSERT INTO permissions (membership_type_code, actions) VALUES ('COORDINATOR', 'edit_user');""")
 
 
 def downgrade():
