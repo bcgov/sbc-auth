@@ -12,6 +12,7 @@ axios.interceptors.request.use(
       return request
     }
 
+    request.headers['App-Name'] = import.meta.env.APP_NAME
     const token = ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
     if (token) {
       request.headers.Authorization = `Bearer ${token}`

@@ -61,7 +61,10 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         item_name = kwargs.get("item_name")
         item_type = kwargs.get("item_type")
         action = kwargs.get("action")
-        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
+
+        if not user_from_context.is_staff() and not user_from_context.is_external_staff():
+            check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
+
         logs = {"activity_logs": []}
         page: int = int(kwargs.get("page"))
         limit: int = int(kwargs.get("limit"))
@@ -69,7 +72,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
 
         logger.debug("<fetch_activity logs ")
         results, count = ActivityLogModel.fetch_activity_logs_for_account(org_id, *search_args)
-        is_staff_access = user_from_context.is_staff()
+        is_staff_access = user_from_context.is_staff() or user_from_context.is_external_staff()
         for result in results:
             activity_log: ActivityLogModel = result[0]
             log_dict = ActivityLogSchema(exclude=("actor_id",)).dump(activity_log)

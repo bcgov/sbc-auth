@@ -572,6 +572,9 @@ export function getRoutes (): RouteConfig[] {
       path: '/businessprofile',
       name: 'businessprofile',
       component: BusinessProfileView,
+      props: (route) => (
+        { businessid: route.query.businessid }
+      ),
       meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true }
     },
     {

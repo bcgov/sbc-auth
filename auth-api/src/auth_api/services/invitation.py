@@ -45,7 +45,7 @@ from auth_api.utils.enums import (
     TaskStatus,
     TaskTypePrefix,
 )
-from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
+from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER, Role
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
@@ -212,8 +212,8 @@ class Invitation:
         if status:
             status = InvitationStatus[status]
 
-        # If staff return full list
-        if user_from_context.is_staff():
+        # If staff or external staff viewer return full list
+        if user_from_context.is_staff() or user_from_context.has_role(Role.VIEW_MEMBERS_PENDING_INVITATIONS.value):
             return InvitationModel.find_pending_invitations_by_org(org_id)
 
         current_user: UserService = UserService.find_by_jwt_token()
@@ -450,6 +450,9 @@ class Invitation:
                 membership_model.save()
 
                 Invitation._publish_activity_if_active(membership_model, user_from_context)
+
+                if org_model.access_type == AccessType.GOVM.value:
+                    MembershipService.add_or_remove_group_for_staff(membership_model)
 
                 # Create staff review task.
                 Invitation._create_affidavit_review_task(org_model, membership_model)

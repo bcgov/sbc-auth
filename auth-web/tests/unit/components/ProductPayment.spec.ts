@@ -1,5 +1,6 @@
 import { LoginSource, Permission } from '@/util/constants'
 import { createLocalVue, mount } from '@vue/test-utils'
+import CodesService from '@/services/codes.service'
 import ProductPackage from '@/components/auth/account-settings/product/ProductPayment.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -50,6 +51,9 @@ describe('Account settings ProductPackage.vue', () => {
     orgStore.addOrgProducts = () => {
       return Promise.resolve() as any
     }
+    CodesService.getProductPaymentMethods = vi.fn().mockResolvedValue({
+      data: []
+    })
     wrapperFactory = (propsData) => {
       return mount(ProductPackage, {
         localVue,
@@ -87,7 +91,9 @@ describe('Account settings ProductPackage.vue', () => {
 
   it('handles modal dialog add product correctly', async () => {
     const orgStore = useOrgStore()
-
+    orgStore.addOrgProducts = () => {
+      return Promise.resolve() as any
+    }
     await wrapper.vm.$nextTick()
     orgStore.currentSelectedProducts = [{ code: 'TEST_PRODUCT' }]
     wrapper.vm.addProductOnAccountAdmin = true
