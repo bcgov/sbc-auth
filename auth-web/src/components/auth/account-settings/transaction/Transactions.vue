@@ -115,6 +115,7 @@
 </template>
 
 <script lang="ts">
+import { Pages, Permission } from '@/util/constants'
 import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { useAccountChangeHandler, useTransactions } from '@/composables'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
@@ -136,7 +137,7 @@ export default defineComponent({
     showExport: { default: true },
     title: { default: '' }
   },
-  setup (props) {
+  setup (props, { root }) {
     const orgStore = useOrgStore()
     const currentOrgPaymentDetails = computed(() => orgStore.currentOrgPaymentDetails)
     const currentOrganization = computed(() => orgStore.currentOrganization)
@@ -186,6 +187,11 @@ export default defineComponent({
     })
 
     const credit = ref(0)
+
+    const isTransactionsAllowed = computed((): boolean => {
+      return orgStore.hasPermission(Permission.TRANSACTION_HISTORY)
+    })
+
     const getCredits = async () => {
       const accountId = currentOrgPaymentDetails.value?.accountId
       if (!accountId || Number(accountId) !== currentOrganization.value?.id) {
@@ -197,12 +203,18 @@ export default defineComponent({
     }
 
     const initialize = () => {
-      setAccountChangedHandler(initialize)
-      setViewAll(props.extended)
-      clearAllFilters(true)
-      defaultSearchToOneYear()
-      loadTransactionList()
-      getCredits()
+      if (!isTransactionsAllowed.value) {
+        // if the account switching happening when the user is already in the transaction page,
+        // redirect to account-info if account is not allowed to view transactions
+        root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
+      } else {
+        setAccountChangedHandler(initialize)
+        setViewAll(props.extended)
+        clearAllFilters(true)
+        defaultSearchToOneYear()
+        loadTransactionList()
+        getCredits()
+      }
     }
 
     const exportCSV = async () => {
