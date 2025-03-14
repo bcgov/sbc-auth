@@ -29,80 +29,24 @@
       @change="tabChange"
     >
       <v-tab
-        v-if="canViewAccounts"
-        data-test="active-tab"
-        :to="pagesEnum.STAFF_DASHBOARD_ACTIVE"
+        v-for="tab in tabs"
+        :key="tab.code"
+        :data-test="tab.code"
+        :to="tab.page"
       >
-        Active
-      </v-tab>
-
-      <template v-if="canViewInvitations">
-        <v-tab
-          data-test="invitations-tab"
-          :to="pagesEnum.STAFF_DASHBOARD_INVITATIONS"
-        >
+        <template v-if="tab.hasBadge">
           <v-badge
             inline
             color="primary"
-            :content="pendingInvitationsCount"
-            :value="pendingInvitationsCount"
+            :content="tab.count.value"
+            :value="tab.count.value"
           >
-            Invitations
+            {{ tab.tabName }}
           </v-badge>
-        </v-tab>
-      </template>
-
-      <template v-if="canManageAccounts">
-        <v-tab
-          data-test="pending-review-tab"
-          :to="pagesEnum.STAFF_DASHBOARD_REVIEW"
-        >
-          <v-badge
-            inline
-            color="primary"
-            :content="pendingTasksCount"
-            :value="pendingTasksCount"
-          >
-            Pending Review
-          </v-badge>
-        </v-tab>
-        <v-tab
-          data-test="rejected-tab"
-          :to="pagesEnum.STAFF_DASHBOARD_REJECTED"
-        >
-          <v-badge
-            inline
-            color="primary"
-            :content="rejectedTasksCount"
-            :value="rejectedTasksCount"
-          >
-            Rejected
-          </v-badge>
-        </v-tab>
-      </template>
-
-      <template v-if="canSuspendAccounts">
-        <v-tab
-          data-test="suspended-tab"
-          :to="pagesEnum.STAFF_DASHBOARD_SUSPENDED"
-        >
-          <v-badge
-            inline
-            color="primary"
-            :content="suspendedReviewCount"
-            :value="suspendedReviewCount"
-          >
-            Suspended
-          </v-badge>
-        </v-tab>
-      </template>
-
-      <v-tab
-        v-if="canViewAccounts"
-        data-test="inactive-tab"
-        :to="pagesEnum.STAFF_DASHBOARD_INACTIVE"
-      >
-        Inactive
+        </template>
+        <template v-else>
+          {{ tab.tabName }}
+        </template>
       </v-tab>
     </v-tabs>
 
@@ -115,10 +59,12 @@
 </template>
 
 <script lang="ts">
-import { Pages, Role } from '@/util/constants'
-import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { ComputedRef, computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { Pages, Permission, Role } from '@/util/constants'
 import StaffCreateAccountModal from '@/components/auth/staff/account-management/StaffCreateAccountModal.vue'
+import { storeToRefs } from 'pinia'
 import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores'
 import { useStaffStore } from '@/stores/staff'
 import { useTaskStore } from '@/stores/task'
 import { useUserStore } from '@/stores/user'
@@ -138,6 +84,8 @@ export default defineComponent({
     StaffCreateAccountModal
   },
   setup () {
+    const orgStore = useOrgStore()
+    const { permissions } = storeToRefs(orgStore)
     const { currentUser } = useUserStore()
     const { syncPendingInvitationOrgs, syncSuspendedStaffOrgs } = useStaffStore()
     const { getCodes } = useCodesStore()
@@ -149,18 +97,76 @@ export default defineComponent({
     const pendingTasksCount = computed(() => taskStore.pendingTasksCount)
     const rejectedTasksCount = computed(() => taskStore.rejectedTasksCount)
 
+    interface TabConfig {
+      permission: Permission;
+      tabName: string;
+      code: string;
+      page: string;
+      hasBadge?: boolean;
+      count?: ComputedRef<number>;
+    }
+
+    const TAB_CONFIGS: TabConfig[] = [
+      { permission: Permission.VIEW_ACTIVE_ACCOUNTS,
+        tabName: 'Active',
+        code: TAB_CODE.Active,
+        page: Pages.STAFF_DASHBOARD_ACTIVE
+      },
+      { permission: Permission.VIEW_ACCOUNT_INVITATIONS,
+        tabName: 'Invitations',
+        code: TAB_CODE.Invitations,
+        hasBadge: true,
+        count: pendingInvitationsCount,
+        page: Pages.STAFF_DASHBOARD_INVITATIONS
+      },
+      { permission: Permission.VIEW_PENDING_TASKS,
+        tabName: 'Pending Review',
+        code: TAB_CODE.PendingReview,
+        hasBadge: true,
+        count: pendingTasksCount,
+        page: Pages.STAFF_DASHBOARD_REVIEW
+      },
+      { permission: Permission.VIEW_REJECTED_TASKS,
+        tabName: 'Rejected',
+        code: TAB_CODE.Rejected,
+        hasBadge: true,
+        count: rejectedTasksCount,
+        page: Pages.STAFF_DASHBOARD_REJECTED
+      },
+      { permission: Permission.VIEW_SUSPENDED_ACCOUNTS,
+        tabName: 'Suspended',
+        code: TAB_CODE.Suspended,
+        hasBadge: true,
+        count: suspendedReviewCount,
+        page: Pages.STAFF_DASHBOARD_SUSPENDED
+      },
+      { permission: Permission.VIEW_INACTIVE_ACCOUNTS,
+        tabName: 'Inactive',
+        code: TAB_CODE.Inactive,
+        page: Pages.STAFF_DASHBOARD_INACTIVE
+      }
+    ]
+
     const state = reactive({
       tab: 0,
-      pagesEnum: Pages,
       canManageAccounts: computed(() => currentUser?.roles?.includes(Role.StaffManageAccounts) ||
-      currentUser?.roles?.includes(Role.ContactCentreStaff)),
+      currentUser?.roles?.includes(Role.ExternalStaffReadonly)),
       canViewInvitations: computed(() => currentUser?.roles?.includes(Role.StaffCreateAccounts) ||
-        currentUser?.roles?.includes(Role.ContactCentreStaff)),
+        currentUser?.roles?.includes(Role.ExternalStaffReadonly)),
       canCreateAccounts: computed(() => currentUser?.roles?.includes(Role.StaffCreateAccounts) &&
-      !currentUser?.roles?.includes(Role.ContactCentreStaff)),
+      !currentUser?.roles?.includes(Role.ExternalStaffReadonly)),
       canViewAccounts: computed(() => currentUser?.roles?.includes(Role.StaffViewAccounts)),
       canSuspendAccounts: computed(() => currentUser?.roles?.includes(Role.StaffSuspendAccounts) ||
-        currentUser?.roles?.includes(Role.StaffViewAccounts))
+        currentUser?.roles?.includes(Role.StaffViewAccounts)),
+      tabs: computed(() => {
+        return TAB_CONFIGS
+          .filter(({ permission }) => permissions.value.some(code => code === permission))
+          .map((tabConfig, index) => ({
+            id: index,
+            hasBadge: false,
+            ...tabConfig
+          }))
+      })
     })
 
     onMounted(async () => {
@@ -171,39 +177,6 @@ export default defineComponent({
         await syncPendingInvitationOrgs()
       }
     })
-
-    const tabs = reactive([
-      {
-        id: 0,
-        tabName: 'Active',
-        code: TAB_CODE.Active
-      },
-      {
-        id: 1,
-        tabName: 'Invitations',
-        code: TAB_CODE.Invitations
-      },
-      {
-        id: 2,
-        tabName: 'Pending Review',
-        code: TAB_CODE.PendingReview
-      },
-      {
-        id: 3,
-        tabName: 'Rejected',
-        code: TAB_CODE.Rejected
-      },
-      {
-        id: 4,
-        tabName: 'Suspended',
-        code: TAB_CODE.Suspended
-      },
-      {
-        id: 5,
-        tabName: 'Inactive',
-        code: TAB_CODE.Inactive
-      }
-    ])
 
     function openCreateAccount () {
       this.$refs.staffCreateAccountDialog.open()
@@ -220,7 +193,6 @@ export default defineComponent({
       ...toRefs(state),
       openCreateAccount,
       tabChange,
-      tabs,
       pendingInvitationsCount,
       pendingTasksCount,
       rejectedTasksCount,

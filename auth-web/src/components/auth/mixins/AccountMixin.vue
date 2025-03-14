@@ -54,5 +54,9 @@ export default class AccountMixin extends Vue {
   get isSbcStaffAccount (): boolean {
     return this.currentOrganization?.orgType === Account.SBC_STAFF
   }
+
+  get isExternalStaffAccount (): boolean {
+    return [Account.CONTACT_CENTRE_STAFF, Account.MAXIMUS_STAFF].includes(this.currentOrganization?.orgType)
+  }
 }
 </script>
