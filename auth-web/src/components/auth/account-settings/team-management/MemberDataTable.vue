@@ -432,7 +432,7 @@ export default class MemberDataTable extends Vue {
 
   private canRemove (memberToRemove: Member): boolean {
     // External Staff cannot remove members from orgs they do not belong
-    if (!this.currentMembership.id && this.currentUser && this.currentUser.roles.includes(Role.ExternalStaffReadonly)) {
+    if (!this.currentMembership.id && this.currentUser && this.currentUser.roles?.includes(Role.ExternalStaffReadonly)) {
       return false
     }
 
