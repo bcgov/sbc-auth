@@ -366,7 +366,7 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   function hasPermission (permission: string) {
-    return state.permissions.indexOf(permission) > 0
+    return state.permissions.indexOf(permission) > -1
   }
 
   /*
