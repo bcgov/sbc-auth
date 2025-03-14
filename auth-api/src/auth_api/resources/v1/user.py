@@ -137,7 +137,8 @@ def post_user():
 
 @bp.route("/<path:username>/otp", methods=["DELETE", "OPTIONS"])
 @cross_origin(origins="*", methods=["DELETE"])
-@_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value])
+@_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value,
+                        Role.MANAGE_RESET_OTP.value])
 def delete_user_otp(username):
     """Delete/Reset the OTP of user profile associated with the provided username."""
     try:
