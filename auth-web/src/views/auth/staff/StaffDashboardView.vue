@@ -135,7 +135,7 @@
         <PPRLauncher />
       </v-col>
       <v-col
-        v-can:VIEW_ALL_PRODUCTS_LAUNCHER.hide
+        v-if="canViewAllProductsLauncher"
         class="pr-2"
         cols="6"
       >
@@ -413,7 +413,8 @@ export default defineComponent({
       showBusSearchlink: computed((): boolean => true),
       showInvoluntaryDissolutionTile: computed((): boolean =>
         LaunchDarklyService.getFlag(LDFlags.EnableInvoluntaryDissolution) || false),
-      showDrsTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableDRSLookup) || false)
+      showDrsTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableDRSLookup) || false),
+      canViewAllProductsLauncher: computed((): boolean => currentUser.value?.roles?.includes(Role.Staff))
     }) as unknown) as StaffDashboardViewI
 
     const isFormValid = () => localVars.searchIdentifier && searchIdentifierForm.value?.validate()
