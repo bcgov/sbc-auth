@@ -115,13 +115,13 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages } from '@/util/constants'
-import { MembershipType, OrgPaymentDetails } from '@/models/Organization'
+import { Pages, Permission } from '@/util/constants'
 import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { useAccountChangeHandler, useTransactions } from '@/composables'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { OrgPaymentDetails } from '@/models/Organization'
 import { StatusCodes } from 'http-status-codes'
 import TransactionsDataTable from './TransactionsDataTable.vue'
 import { getTransactionTableHeaders } from '@/resources/table-headers'
@@ -141,7 +141,6 @@ export default defineComponent({
     const orgStore = useOrgStore()
     const currentOrgPaymentDetails = computed(() => orgStore.currentOrgPaymentDetails)
     const currentOrganization = computed(() => orgStore.currentOrganization)
-    const currentMembership = computed(() => orgStore.currentMembership)
 
     const csvErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const csvErrorTextBasic = 'We were unable to process your CSV export. Please try again later.'
@@ -190,9 +189,7 @@ export default defineComponent({
     const credit = ref(0)
 
     const isTransactionsAllowed = computed((): boolean => {
-      return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
-        .includes(currentOrganization.value.orgType as Account) &&
-        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
+      return orgStore.hasPermission(Permission.TRANSACTION_HISTORY)
     })
 
     const getCredits = async () => {
