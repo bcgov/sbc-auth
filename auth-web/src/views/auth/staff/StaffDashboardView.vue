@@ -326,7 +326,7 @@ import {
   ref,
   toRefs
 } from '@vue/composition-api'
-import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
+import { LDFlags, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import AllProductsLauncher from '@/components/auth/staff/AllProductsLauncher.vue'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -414,7 +414,10 @@ export default defineComponent({
       showInvoluntaryDissolutionTile: computed((): boolean =>
         LaunchDarklyService.getFlag(LDFlags.EnableInvoluntaryDissolution) || false),
       showDrsTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableDRSLookup) || false),
-      canViewAllProductsLauncher: computed((): boolean => currentUser.value?.roles?.includes(Role.Staff))
+      canViewAllProductsLauncher: computed(() => {
+        const hasPermission = orgStore.permissions.includes(Permission.VIEW_ALL_PRODUCTS_LAUNCHER)
+        return hasPermission
+      })
     }) as unknown) as StaffDashboardViewI
 
     const isFormValid = () => localVars.searchIdentifier && searchIdentifierForm.value?.validate()
