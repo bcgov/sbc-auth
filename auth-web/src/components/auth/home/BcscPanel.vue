@@ -48,7 +48,7 @@
             <v-list-item-subtitle class="list-item-text">
               It normally takes about 5 minutes to
               <a
-                :href="cardSetUpUrl"
+                :href="learnMoreUrl"
                 class="link"
                 target="_blank"
               >set up a mobile card</a>
@@ -108,7 +108,6 @@ export default defineComponent({
     }
   },
   setup () {
-    const cardSetUpUrl = 'https://www.id.gov.bc.ca'
     const learnMoreUrl = 'https://www.id.gov.bc.ca'
     const secureBulletPoints = [
       { text: `A mobile card is a representation of your BC Services Card on your mobile device. ` +
@@ -122,7 +121,6 @@ export default defineComponent({
     ]
 
     return {
-      cardSetUpUrl,
       learnMoreUrl,
       secureBulletPoints,
       easeBulletPoints
