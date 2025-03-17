@@ -131,7 +131,7 @@
             class="value"
             aria-labelledby="adminContact"
           >
-            <OrgAdminContact />
+            <OrgAdminContact :orgId="orgId" />
           </div>
         </div>
 
@@ -298,6 +298,7 @@ export default defineComponent({
     AccountMailingAddress,
     AccountAccessType
   },
+  props: ['orgId'],
   setup (props, { root }) {
     const codesStore = useCodesStore()
     const orgStore = useOrgStore()
@@ -309,7 +310,6 @@ export default defineComponent({
       currentOrgPaymentType,
       currentOrgAddress,
       permissions,
-      getAccountFromSession,
       anonAccount,
       isGovmAccount,
       isStaffAccount,
@@ -343,7 +343,7 @@ export default defineComponent({
       isBusinessAccount: computed(() => orgStore.isBusinessAccount),
       baseAddress: computed(() => currentOrgAddress.value),
 
-      isStaff: computed(() => userStore.currentUser.roles.includes(Role.Staff)) || userStore.currentUser.roles.includes(Role.ContactCentreStaff),
+      isStaff: computed(() => userStore.currentUser.roles.includes(Role.Staff)) || userStore.currentUser.roles.includes(Role.ExternalStaffReadonly),
       isSuspendButtonVisible: computed(() => (
         (currentOrganization.value.statusCode === AccountStatus.ACTIVE ||
         currentOrganization.value.statusCode === AccountStatus.SUSPENDED) &&
@@ -351,8 +351,7 @@ export default defineComponent({
       )),
       isDeactivateButtonVisible: computed(() => currentOrganization.value?.statusCode !== AccountStatus.INACTIVE),
       canChangeAccessType: computed(() => (
-        userStore.currentUser.roles.includes(Role.StaffManageAccounts) &&
-        !userStore.currentUser.roles.includes(Role.ContactCentreStaff)
+        userStore.currentUser.roles.includes(Role.StaffManageAccounts)
       )),
       isAdminContactViewable: computed(() => [Permission.VIEW_ADMIN_CONTACT].some(per => permissions.value.includes(per))),
       isAccountStatusActive: computed(() => currentOrganization.value.statusCode === AccountStatus.ACTIVE),
@@ -368,7 +367,7 @@ export default defineComponent({
         currentOrgAddress.value ? Object.keys(currentOrgAddress.value).length === 0 : true
       )),
       nameChangeNotAllowed: computed(() => (anonAccount.value || isGovmAccount.value)) &&
-      userStore.currentUser.roles.includes(Role.ContactCentreStaff)
+      userStore.currentUser.roles.includes(Role.ExternalStaffReadonly)
     })
 
     const suspensionSelectRules = [
@@ -591,8 +590,6 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      const accountSettings = getAccountFromSession()
-      await orgStore.syncOrganization(accountSettings?.id)
       setAccountChangedHandler(setup)
       await setup()
     })

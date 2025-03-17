@@ -43,7 +43,7 @@ router.beforeEach(async (to, from, next) => {
         })
       }
     } else {
-      if (to.meta.allowedRoles?.length === 1 && [Role.Staff, Role.ContactCentreStaff].includes(to.meta.allowedRoles[0])) {
+      if (to.meta.allowedRoles?.length === 1 && [Role.Staff, Role.ExternalStaffReadonly].includes(to.meta.allowedRoles[0])) {
         return next({
           path: `/signin/idir${to.path}`,
           query: { redirect: to.fullPath }
@@ -138,8 +138,8 @@ router.beforeEach(async (to, from, next) => {
     }
     // need to check for govm account also. so we are checking roles
     if (to.matched.some(record => record.meta.requiresActiveAccount) &&
-        (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID ||
-          currentUser.roles.includes(Role.GOVMAccountUser))) {
+        ((currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID ||
+          currentUser.roles.includes(Role.GOVMAccountUser)) && !currentUser.roles.includes(Role.ExternalStaffReadonly))) {
       // if (currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
       if ([AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED].some(status => status === currentOrganization?.statusCode)) {
         console.log('[NG] Redirecting user to Account Freeze message since the account is temporarly suspended.')
