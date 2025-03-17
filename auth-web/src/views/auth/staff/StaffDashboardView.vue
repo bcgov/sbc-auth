@@ -414,10 +414,9 @@ export default defineComponent({
       showInvoluntaryDissolutionTile: computed((): boolean =>
         LaunchDarklyService.getFlag(LDFlags.EnableInvoluntaryDissolution) || false),
       showDrsTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableDRSLookup) || false),
-      canViewAllProductsLauncher: computed(() => {
-        const hasPermission = orgStore.permissions.includes(Permission.VIEW_ALL_PRODUCTS_LAUNCHER)
-        return hasPermission
-      })
+      canViewAllProductsLauncher: computed((): boolean =>
+        orgStore.permissions.includes(Permission.VIEW_ALL_PRODUCTS_LAUNCHER) || false
+      )
     }) as unknown) as StaffDashboardViewI
 
     const isFormValid = () => localVars.searchIdentifier && searchIdentifierForm.value?.validate()
