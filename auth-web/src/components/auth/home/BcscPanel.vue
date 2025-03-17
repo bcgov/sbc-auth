@@ -108,8 +108,8 @@ export default defineComponent({
     }
   },
   setup () {
-    const cardSetUpUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
-    const learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
+    const cardSetUpUrl = 'https://www.id.gov.bc.ca'
+    const learnMoreUrl = 'https://www.id.gov.bc.ca'
     const secureBulletPoints = [
       { text: `A mobile card is a representation of your BC Services Card on your mobile device. ` +
         `It's used to prove who you are when you log in to access government services online.` },
