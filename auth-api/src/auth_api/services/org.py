@@ -240,7 +240,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 )
 
             match response.status_code:
-                case HTTPStatus.OK:
+                case HTTPStatus.OK | HTTPStatus.CREATED:
                     payment_account_status = PaymentAccountStatus.CREATED
                 case HTTPStatus.ACCEPTED:
                     payment_account_status = PaymentAccountStatus.PENDING
