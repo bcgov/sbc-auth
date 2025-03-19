@@ -31,7 +31,7 @@ from account_mailer.auth_utils import get_login_url, get_member_emails
 from account_mailer.email_processors import (
     account_unlock, common_mailer, ejv_failures, pad_confirmation, product_confirmation, refund_requested)
 from account_mailer.enums import Constants, SubjectType, TemplateType, TitleType
-from account_mailer.services import minio_service, notification_service
+from account_mailer.services import google_store, notification_service
 from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
 
 
@@ -54,7 +54,7 @@ def worker():
             logger.info('Event message already processed, skipping.')
             return {}, HTTPStatus.OK
         message_type, email_msg = event_message.type, event_message.data
-        email_msg['logo_url'] = minio_service.MinioService.get_minio_public_url('bc_logo_for_email.png')
+        email_msg['logo_url'] = google_store.GoogleStoreService.get_static_resource_url('bc_logo_for_email.png')
 
         handle_drawdown_request(message_type, email_msg)
         handle_pad_account_create(message_type, email_msg)
@@ -105,7 +105,7 @@ def handle_pad_account_create(message_type, email_msg):
     """Handle the pad account create message."""
     if message_type != QueueMessageTypes.PAD_ACCOUNT_CREATE.value:
         return
-    email_msg['registry_logo_url'] = minio_service.MinioService.get_minio_public_url('bc_registry_logo_pdf.svg')
+    email_msg['registry_logo_url'] = google_store.GoogleStoreService.get_static_resource_url('bc_registry_logo_pdf.svg')
     token = RestService.get_service_account_token()
     email_dict = pad_confirmation.process(email_msg, token)
     process_email(email_dict, token)

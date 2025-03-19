@@ -18,7 +18,7 @@ import base64
 from flask import current_app
 
 from account_mailer.enums import AttachmentTypes
-from account_mailer.services import minio_service
+from account_mailer.services import google_store
 
 
 def process_attachment(email_dict: dict, attachment_type: str) -> dict:
@@ -51,11 +51,11 @@ def _get_attachment_name(attachment_type: str) -> str:
     return None
 
 
-def _get_pdf(file_name: str):
+def _get_pdf(pad_tos_file_name: str):
+
     read_pdf = None
-    mino_object = minio_service.MinioService.get_minio_file(current_app.config['MINIO_BUCKET'],
-                                                            file_name)
-    if mino_object:
-        read_pdf = base64.b64encode(mino_object.data)
+    store_blob = google_store.GoogleStoreService.download_file_from_bucket(current_app.config['ACCOUNT_MAILER_BUCKET'], pad_tos_file_name)
+    if store_blob:
+        read_pdf = base64.b64encode(store_blob.data)
 
     return read_pdf

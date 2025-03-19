@@ -14,14 +14,14 @@
 """Test Suite to ensure the worker routines are working as expected."""
 import types
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from auth_api.services.rest_service import RestService
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 from account_mailer.enums import SubjectType
-from account_mailer.services import notification_service
-from account_mailer.services.minio_service import MinioService
+from account_mailer.services import google_store, notification_service
+from account_mailer.services.google_store import GoogleStoreService
 from account_mailer.utils import get_local_formatted_date
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
@@ -390,32 +390,45 @@ def test_payment_pending_emails(app, session, client):
                                   mail_details=mail_details)
 
 
+from unittest.mock import MagicMock, patch
+
+
 def test_ejv_failure_emails(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        minio_file_name = 'FEEDBACK.1234567890'
-        minio_bucket = 'cgi-ejv'
+        # Mock the GoogleStoreService.upload_file_to_bucket method
+        with patch(google_store, 'upload_file_to_bucket') as mock_upload:
+            gcs_file_name = 'FEEDBACK.1234567890'
+            gcs_bucket = 'cgi-ejv'
 
-        with open(minio_file_name, 'a+') as jv_file:
-            jv_file.write('TEST')
-            jv_file.close()
+            # Create a temporary file for testing
+            with open(gcs_file_name, 'a+') as jv_file:
+                jv_file.write('TEST')
+                jv_file.close()
 
-        # Now upload the ACK file to minio and publish message.
-        with open(minio_file_name, 'rb') as f:
-            MinioService.put_minio_file(minio_bucket, minio_file_name, f.read())
+            # Mock the upload_file_to_bucket method to do nothing (since we're testing the email, not the upload)
+            mock_upload.return_value = None
 
-        # add an event to queue
-        mail_details = {
-            'fileName': minio_file_name,
-            'minioLocation': minio_bucket
-        }
-        helper_add_event_to_queue(client,
-                                  message_type=QueueMessageTypes.EJV_FAILED.value,
-                                  mail_details=mail_details)
+            # Simulate uploading the file to GCS
+            with open(gcs_file_name, 'rb') as f:
+                GoogleStoreService.upload_file_to_bucket(gcs_bucket, gcs_file_name, f.read())
 
-        mock_send.assert_called
-        assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
-        assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.EJV_FAILED.value
+            # Verify the upload method was called
+            mock_upload.assert_called_once_with(gcs_bucket, gcs_file_name, b'TEST')
+
+            # Add an event to the queue
+            mail_details = {
+                'fileName': gcs_file_name,
+                'minioLocation': gcs_bucket     # TODO update minioLocation
+            }
+            helper_add_event_to_queue(client,
+                                      message_type=QueueMessageTypes.EJV_FAILED.value,
+                                      mail_details=mail_details)
+
+            # Verify the email was sent
+            mock_send.assert_called()
+            assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
+            assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.EJV_FAILED.value
 
 
 def test_passcode_reset_email(app, session, client):

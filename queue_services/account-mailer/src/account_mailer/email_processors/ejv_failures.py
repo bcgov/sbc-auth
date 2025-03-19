@@ -21,7 +21,7 @@ from structured_logging import StructuredLogging
 
 from account_mailer.email_processors import generate_template
 from account_mailer.enums import SubjectType, TemplateType
-from account_mailer.services import minio_service
+from account_mailer.services import google_store
 
 
 logger = StructuredLogging.get_logger()
@@ -32,6 +32,7 @@ def process(email_msg: dict) -> dict:
     logger.debug('ejv_failures: %s', email_msg)
     # fill in template
     failed_jv_file_name = email_msg.get('fileName')
+    # TODO update minioLocation
     file_location = email_msg.get('minioLocation')
     bcol_admin_email = current_app.config['BCOL_ADMIN_EMAIL']
     feedback_attachment = _get_jv_file(file_location, failed_jv_file_name)
@@ -66,8 +67,8 @@ def _get_body(email_msg: dict):
 
 def _get_jv_file(file_location: str, file_name: str):
     file = None
-    mino_object = minio_service.MinioService.get_minio_file(file_location, file_name)
-    if mino_object:
-        file = base64.b64encode(mino_object.data)
+    store_blob = google_store.GoogleStoreService.download_file_from_bucket(file_location, file_name)
+    if store_blob:
+        file = base64.b64encode(store_blob.data)
 
     return file

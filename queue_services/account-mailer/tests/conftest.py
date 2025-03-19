@@ -173,7 +173,6 @@ def auto(docker_services, app):
 
     if app.config['USE_DOCKER_MOCK']:
         docker_services.start('notify')
-        docker_services.start('minio')
         time.sleep(10)
 
 

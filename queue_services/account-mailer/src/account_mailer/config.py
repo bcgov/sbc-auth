@@ -102,12 +102,9 @@ class _Config():  # pylint: disable=too-few-public-methods
     REPORT_API_URL = REPORT_API_URL + REPORT_API_VERSION
     REPORT_API_BASE_URL = f'{REPORT_API_URL}/reports'
 
-    # Minio configuration values
-    MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
-    MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY')
-    MINIO_ACCESS_SECRET = os.getenv('MINIO_ACCESS_SECRET')
-    MINIO_BUCKET = os.getenv('MINIO_BUCKET', 'account-mailer')
-    MINIO_SECURE = os.getenv('MINIO_SECURE', 'true').lower() == 'true'
+    # GCP Cloud Storage configuration values
+    ACCOUNT_MAILER_BUCKET = os.getenv('ACCOUNT_MAILER_BUCKET', 'auth-account-mailer-dev')
+    STATIC_RESOURCES_BUCKET_URL = os.getenv('STATIC_RESOURCES_BUCKET_URL', 'https://storage.googleapis.com/auth-static-resources-dev/')
 
     REFUND_REQUEST = {
         'creditcard': {
@@ -171,13 +168,6 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
     BCOL_ADMIN_EMAIL = 'test@test.com'
-
-    # Minio variables
-    MINIO_ENDPOINT = 'localhost:9000'
-    MINIO_ACCESS_KEY = 'minio'
-    MINIO_ACCESS_SECRET = 'minio123'
-    MINIO_BUCKET_NAME = 'cgi-ejv'
-    MINIO_SECURE = False
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
