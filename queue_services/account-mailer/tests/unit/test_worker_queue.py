@@ -21,7 +21,6 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 
 from account_mailer.enums import SubjectType
 from account_mailer.services import google_store, notification_service
-from account_mailer.services.google_store import GoogleStoreService
 from account_mailer.utils import get_local_formatted_date
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
@@ -394,7 +393,7 @@ def test_ejv_failure_emails(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
     with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
         # Mock the GoogleStoreService.upload_file_to_bucket method
-        with patch(google_store, 'upload_file_to_bucket') as mock_upload:
+        with patch('account_mailer.services.google_store.GoogleStoreService.upload_file_to_bucket') as mock_upload:
             gcs_file_name = 'FEEDBACK.1234567890'
             gcs_bucket = 'cgi-ejv'
 
@@ -408,7 +407,7 @@ def test_ejv_failure_emails(app, session, client):
 
             # Simulate uploading the file to GCS
             with open(gcs_file_name, 'rb') as f:
-                GoogleStoreService.upload_file_to_bucket(gcs_bucket, gcs_file_name, f.read())
+                google_store.GoogleStoreService.upload_file_to_bucket(gcs_bucket, gcs_file_name, f.read())
 
             # Verify the upload method was called
             mock_upload.assert_called_once_with(gcs_bucket, gcs_file_name, b'TEST')
@@ -416,7 +415,7 @@ def test_ejv_failure_emails(app, session, client):
             # Add an event to the queue
             mail_details = {
                 'fileName': gcs_file_name,
-                'minioLocation': gcs_bucket     # TODO update minioLocation
+                'minioLocation': gcs_bucket  # TODO: Update minioLocation to gcsLocation
             }
             helper_add_event_to_queue(client,
                                       message_type=QueueMessageTypes.EJV_FAILED.value,
