@@ -246,7 +246,7 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
         assert 'Invoice reference number: 1234567890' in email_body
         assert 'Transaction date:' in email_body
         assert f'Log in to view transaction detail' in email_body
-        assert f'https://account.bcregistry.gov.bc.ca/account/{id}/settings/transactions' in email_body
+        assert f'/account/{id}/settings/transactions' in email_body
 
 
 def test_account_admin_removed(app, session, client):

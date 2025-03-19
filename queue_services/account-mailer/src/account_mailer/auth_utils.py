@@ -37,7 +37,7 @@ def get_login_url():
 def get_transaction_url(org_id: str) -> str:
     """Get transaction url."""
     web_app_url = current_app.config.get('WEB_APP_URL')
-    transaction_url = f"{web_app_url}account/{org_id}/settings/transactions"
+    transaction_url = f"{web_app_url}/account/{org_id}/settings/transactions"
     return transaction_url
 
 
