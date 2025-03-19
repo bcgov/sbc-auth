@@ -228,7 +228,8 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
             'nsfFee': '30',
             'invoice_total': '100',
             'invoice_process_date': f'{datetime.now()}',
-            'withdraw_total': '80'
+            'withdraw_total': '80',
+            'invoice_number': '1234567890'
         }
         helper_add_event_to_queue(client,
                                   message_type=QueueMessageTypes.PAD_INVOICE_CREATED.value,
@@ -238,9 +239,14 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.PAD_INVOICE_CREATED.value
         assert mock_send.call_args.args[0].get('attachments') is None
-        assert mock_send.call_args.args[0].get('content').get('body') is not None
-        assert f'hours on {get_local_formatted_date(datetime.now(), "%m-%d-%Y")}' \
-            in mock_send.call_args.args[0].get('content').get('body')
+        
+        email_body = mock_send.call_args.args[0].get('content').get('body')
+        assert email_body is not None
+        assert 'This email confirms a recent transaction on you account' in email_body
+        assert 'Invoice reference number: 1234567890' in email_body
+        assert 'Transaction date:' in email_body
+        assert f'Log in to view transaction detail' in email_body
+        assert f'https://account.bcregistry.gov.bc.ca/account/{id}/settings/transactions' in email_body
 
 
 def test_account_admin_removed(app, session, client):
