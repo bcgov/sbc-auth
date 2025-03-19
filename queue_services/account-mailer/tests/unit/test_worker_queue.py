@@ -14,7 +14,7 @@
 """Test Suite to ensure the worker routines are working as expected."""
 import types
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from auth_api.services.rest_service import RestService
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -388,9 +388,6 @@ def test_payment_pending_emails(app, session, client):
         helper_add_event_to_queue(client,
                                   message_type=QueueMessageTypes.PAYMENT_PENDING.value,
                                   mail_details=mail_details)
-
-
-from unittest.mock import MagicMock, patch
 
 
 def test_ejv_failure_emails(app, session, client):

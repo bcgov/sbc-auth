@@ -134,7 +134,8 @@ def _get_pad_confirmation_report_pdf(email_msg, token):
 def _get_pdf(pad_tos_file_name: str):
 
     read_pdf = None
-    store_blob = google_store.GoogleStoreService.download_file_from_bucket(current_app.config['ACCOUNT_MAILER_BUCKET'], pad_tos_file_name)
+    store_blob = google_store.GoogleStoreService.download_file_from_bucket(current_app.config['ACCOUNT_MAILER_BUCKET'],
+                                                                           pad_tos_file_name)
     if store_blob:
         read_pdf = base64.b64encode(store_blob.data)
 

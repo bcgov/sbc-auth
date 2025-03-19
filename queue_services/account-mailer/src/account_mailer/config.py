@@ -104,7 +104,8 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     # GCP Cloud Storage configuration values
     ACCOUNT_MAILER_BUCKET = os.getenv('ACCOUNT_MAILER_BUCKET', 'auth-account-mailer-dev')
-    STATIC_RESOURCES_BUCKET_URL = os.getenv('STATIC_RESOURCES_BUCKET_URL', 'https://storage.googleapis.com/auth-static-resources-dev/')
+    STATIC_RESOURCES_BUCKET_URL = os.getenv('STATIC_RESOURCES_BUCKET_URL',
+                                            'https://storage.googleapis.com/auth-static-resources-dev/')
 
     REFUND_REQUEST = {
         'creditcard': {
