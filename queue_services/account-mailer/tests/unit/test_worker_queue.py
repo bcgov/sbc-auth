@@ -22,7 +22,6 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 from account_mailer.enums import SubjectType
 from account_mailer.services import notification_service
 from account_mailer.services.minio_service import MinioService
-from account_mailer.utils import get_local_formatted_date
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
 from .utils import helper_add_event_to_queue
@@ -239,14 +238,14 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.PAD_INVOICE_CREATED.value
         assert mock_send.call_args.args[0].get('attachments') is None
-        
+
         email_body = mock_send.call_args.args[0].get('content').get('body')
         assert email_body is not None
         assert 'This email confirms a recent transaction on you account' in email_body
         assert 'Invoice reference number: 1234567890' in email_body
         assert 'Transaction date:' in email_body
         assert f'Log in to view transaction detail' in email_body
-        assert f'/account/{id}/settings/transactions' in email_body
+        assert '/account/{}/settings/transactions'.format(id) in email_body
 
 
 def test_account_admin_removed(app, session, client):
