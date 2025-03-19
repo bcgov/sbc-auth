@@ -417,14 +417,19 @@ def test_ejv_failure_emails(app, session, client):
                 'fileName': gcs_file_name,
                 'minioLocation': gcs_bucket  # TODO: Update minioLocation to gcsLocation
             }
-            helper_add_event_to_queue(client,
-                                      message_type=QueueMessageTypes.EJV_FAILED.value,
-                                      mail_details=mail_details)
 
-            # Verify the email was sent
-            mock_send.assert_called()
-            assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
-            assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.EJV_FAILED.value
+            # Mock the post_to_queue function to return a 200 status code
+            with patch('account_mailer.tests.unit.utils.post_to_queue') as mock_post:
+                mock_post.return_value.status_code = 200
+
+                helper_add_event_to_queue(client,
+                                          message_type=QueueMessageTypes.EJV_FAILED.value,
+                                          mail_details=mail_details)
+
+                # Verify the email was sent
+                mock_send.assert_called()
+                assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
+                assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.EJV_FAILED.value
 
 
 def test_passcode_reset_email(app, session, client):
