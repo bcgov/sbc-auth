@@ -56,35 +56,18 @@ jobs:
   testing:
     needs: setup-job
     env:
-      DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+      DATABASE_TEST_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
       USE_TEST_KEYCLOAK_DOCKER: "YES"
       USE_DOCKER_MOCK: "YES"
       JWT_OIDC_ISSUER: "http://localhost:8081/auth/realms/demo"
       SBC_AUTH_ADMIN_CLIENT_ID: "sbc-auth-admin"
       SBC_AUTH_ADMIN_CLIENT_SECRET: "2222222222"
-      MINIO_ENDPOINT: "localhost:9000"
-      MINIO_ACCESS_KEY: "minio"
-      MINIO_ACCESS_SECRET: "minio123"
-      MINIO_BUCKET_NAME: "payment-sftp"
-      MINIO_SECURE: False
       BCOL_ADMIN_EMAIL: "test@test.com"
 
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         python-version: [3.12]
-
-    services:
-      postgres:
-        image: postgres:12
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
-        ports:
-          - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
