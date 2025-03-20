@@ -20,7 +20,6 @@ from structured_logging import StructuredLogging
 from account_mailer.auth_utils import get_dashboard_url, get_login_url, get_payment_statements_url
 from account_mailer.email_processors import generate_template
 
-
 logger = StructuredLogging.get_logger()
 
 
@@ -38,9 +37,7 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
             account_name_with_branch = f"{org.name} - {org.branch_name}"
 
     # fill in template
-    filled_template = generate_template(
-        current_app.config.get("TEMPLATE_PATH"), template_name
-    )
+    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), template_name)
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     jinja_kwargs = {

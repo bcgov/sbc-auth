@@ -16,7 +16,6 @@ from auth_api.services.rest_service import RestService
 from flask import current_app
 from structured_logging import StructuredLogging
 
-
 logger = StructuredLogging.get_logger()
 
 

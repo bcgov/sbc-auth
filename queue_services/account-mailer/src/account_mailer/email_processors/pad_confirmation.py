@@ -27,7 +27,6 @@ from structured_logging import StructuredLogging
 from account_mailer.email_processors import generate_template
 from account_mailer.services import google_store
 
-
 logger = StructuredLogging.get_logger()
 
 
@@ -80,14 +79,10 @@ def _get_admin_emails(username):
 
 
 def _get_pad_confirmation_email_body(email_msg, admin_name):
-    filled_template = generate_template(
-        current_app.config.get("TEMPLATE_PATH"), "pad_confirmation_email"
-    )
+    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), "pad_confirmation_email")
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
-    html_out = jnja_template.render(
-        request=email_msg, admin_name=admin_name, logo_url=email_msg.get("logo_url")
-    )
+    html_out = jnja_template.render(request=email_msg, admin_name=admin_name, logo_url=email_msg.get("logo_url"))
     return html_out
 
 
@@ -106,12 +101,8 @@ def _get_pad_confirmation_report_pdf(email_msg, token):
         "logo_url": email_msg.get("logo_url"),
         "registry_logo_url": email_msg.get("registry_logo_url"),
     }
-    filled_template = generate_template(
-        current_app.config.get("PDF_TEMPLATE_PATH"), "pad_confirmation"
-    )
-    template_b64 = (
-        "'" + base64.b64encode(bytes(filled_template, "utf-8")).decode() + "'"
-    )
+    filled_template = generate_template(current_app.config.get("PDF_TEMPLATE_PATH"), "pad_confirmation")
+    template_b64 = "'" + base64.b64encode(bytes(filled_template, "utf-8")).decode() + "'"
 
     pdf_payload = {
         "reportName": "PAD_Confirmation_Letter",

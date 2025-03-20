@@ -23,12 +23,8 @@ from flask import current_app
 
 def get_member_emails(org_id, roles):
     """Get emails for the user role passed in."""
-    member_list = UserModel.find_users_by_org_id_by_status_by_roles(
-        org_id, roles, Status.ACTIVE.value
-    )
-    member_emails = ",".join(
-        [str(x.contacts[0].contact.email) for x in member_list if x.contacts]
-    )
+    member_list = UserModel.find_users_by_org_id_by_status_by_roles(org_id, roles, Status.ACTIVE.value)
+    member_emails = ",".join([str(x.contacts[0].contact.email) for x in member_list if x.contacts])
     return member_emails
 
 
@@ -59,9 +55,7 @@ def get_payment_statements_url(org_id: str) -> str:
     web_app_url = current_app.config.get("WEB_APP_URL")
     web_app_statement_path_url = current_app.config.get("WEB_APP_STATEMENT_PATH_URL")
 
-    web_app_statement_path_url = web_app_statement_path_url.replace(
-        "orgId", str(org_id)
-    )
+    web_app_statement_path_url = web_app_statement_path_url.replace("orgId", str(org_id))
     statement_path_url = web_app_url + web_app_statement_path_url
 
     return statement_path_url

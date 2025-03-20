@@ -17,7 +17,6 @@ from flask import current_app
 from google.cloud import storage
 from structured_logging import StructuredLogging
 
-
 logger = StructuredLogging.get_logger()
 
 

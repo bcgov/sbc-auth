@@ -23,7 +23,6 @@ import os
 
 from dotenv import find_dotenv, load_dotenv
 
-
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
@@ -75,7 +74,9 @@ class _Config:  # pylint: disable=too-few-public-methods
     if DB_UNIX_SOCKET := os.getenv("DATABASE_UNIX_SOCKET", None):
         SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://"
     else:
-        SQLALCHEMY_DATABASE_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"  # noqa: E231, E501
+        SQLALCHEMY_DATABASE_URI = (
+            f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"  # noqa: E231, E501
+        )
 
     # Keycloak & Jwt
     JWT_OIDC_ISSUER = os.getenv("JWT_OIDC_ISSUER")
@@ -103,9 +104,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     REPORT_API_BASE_URL = f"{REPORT_API_URL}/reports"
 
     # GCP Cloud Storage configuration values
-    ACCOUNT_MAILER_BUCKET = os.getenv(
-        "ACCOUNT_MAILER_BUCKET", "auth-account-mailer-dev"
-    )
+    ACCOUNT_MAILER_BUCKET = os.getenv("ACCOUNT_MAILER_BUCKET", "auth-account-mailer-dev")
     STATIC_RESOURCES_BUCKET_URL = os.getenv(
         "STATIC_RESOURCES_BUCKET_URL",
         "https://storage.googleapis.com/auth-static-resources-dev/",
@@ -117,24 +116,16 @@ class _Config:  # pylint: disable=too-few-public-methods
     }
 
     # application setting
-    PDF_TEMPLATE_PATH = os.getenv(
-        "PDF_TEMPLATE_PATH", "src/account_mailer/pdf_templates"
-    )
+    PDF_TEMPLATE_PATH = os.getenv("PDF_TEMPLATE_PATH", "src/account_mailer/pdf_templates")
     TEMPLATE_PATH = os.getenv("TEMPLATE_PATH", "src/account_mailer/email_templates")
     HTTP_ORIGIN = os.getenv("HTTP_ORIGIN", "localhost")
     WEB_APP_URL = os.getenv("WEB_APP_URL", "localhost")
-    WEB_APP_STATEMENT_PATH_URL = os.getenv(
-        "WEB_APP_STATEMENT_PATH_URL", "account/orgId/settings/statements"
-    )
+    WEB_APP_STATEMENT_PATH_URL = os.getenv("WEB_APP_STATEMENT_PATH_URL", "account/orgId/settings/statements")
     DASHBOARD_URL = os.getenv("DASHBOARD_URL", "localhost")
     # PAD TOS PDF file name.
-    PAD_TOS_FILE = os.getenv(
-        "PAD_TOS_FILE", "BCROS-Business-Pre-Authorized-Debit-Agreement.pdf"
-    )
+    PAD_TOS_FILE = os.getenv("PAD_TOS_FILE", "BCROS-Business-Pre-Authorized-Debit-Agreement.pdf")
     # MHR QUALIFIED SUPPLIER PDF File name
-    MHR_QS_AGREEMENT_FILE = os.getenv(
-        "MHR_QS_AGREEMENT_FILE", "MHR_QualifiedSuppliersAgreement.pdf"
-    )
+    MHR_QS_AGREEMENT_FILE = os.getenv("MHR_QS_AGREEMENT_FILE", "MHR_QualifiedSuppliersAgreement.pdf")
 
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv("USE_TEST_KEYCLOAK_DOCKER", None)

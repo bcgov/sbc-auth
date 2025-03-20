@@ -29,11 +29,16 @@ from structured_logging import StructuredLogging
 
 from account_mailer.auth_utils import get_login_url, get_member_emails, get_transaction_url
 from account_mailer.email_processors import (
-    account_unlock, common_mailer, ejv_failures, pad_confirmation, product_confirmation, refund_requested)
+    account_unlock,
+    common_mailer,
+    ejv_failures,
+    pad_confirmation,
+    product_confirmation,
+    refund_requested,
+)
 from account_mailer.enums import Constants, SubjectType, TemplateType, TitleType
 from account_mailer.services import google_store, notification_service
 from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
-
 
 bp = Blueprint("worker", __name__)
 
@@ -49,16 +54,12 @@ def worker():
         return {}, HTTPStatus.OK
 
     try:
-        logger.info(
-            "Event message received: %s", json.dumps(dataclasses.asdict(event_message))
-        )
+        logger.info("Event message received: %s", json.dumps(dataclasses.asdict(event_message)))
         if is_message_processed(event_message):
             logger.info("Event message already processed, skipping.")
             return {}, HTTPStatus.OK
         message_type, email_msg = event_message.type, event_message.data
-        email_msg["logo_url"] = google_store.GoogleStoreService.get_static_resource_url(
-            "bc_logo_for_email.png"
-        )
+        email_msg["logo_url"] = google_store.GoogleStoreService.get_static_resource_url("bc_logo_for_email.png")
 
         handle_drawdown_request(message_type, email_msg)
         handle_pad_account_create(message_type, email_msg)
@@ -86,9 +87,7 @@ def worker():
 
 def is_message_processed(event_message):
     """Check if the queue message is processed."""
-    if PubSubMessageProcessing.find_by_cloud_event_id_and_type(
-        event_message.id, event_message.type
-    ):
+    if PubSubMessageProcessing.find_by_cloud_event_id_and_type(event_message.id, event_message.type):
         return True
     pubsub_message_processing = PubSubMessageProcessing()
     pubsub_message_processing.cloud_event_id = event_message.id
@@ -111,11 +110,7 @@ def handle_pad_account_create(message_type, email_msg):
     """Handle the pad account create message."""
     if message_type != QueueMessageTypes.PAD_ACCOUNT_CREATE.value:
         return
-    email_msg["registry_logo_url"] = (
-        google_store.GoogleStoreService.get_static_resource_url(
-            "bc_registry_logo_pdf.svg"
-        )
-    )
+    email_msg["registry_logo_url"] = google_store.GoogleStoreService.get_static_resource_url("bc_registry_logo_pdf.svg")
     token = RestService.get_service_account_token()
     email_dict = pad_confirmation.process(email_msg, token)
     process_email(email_dict, token)
@@ -153,9 +148,7 @@ def handle_nsf_lock_unlock_account(message_type, email_msg):
             emails += "," + additional_emails
         subject = SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
         logo_url = email_msg.get("logo_url")
-        email_dict = common_mailer.process(
-            org_id, emails, template_name, subject, logo_url=logo_url
-        )
+        email_dict = common_mailer.process(org_id, emails, template_name, subject, logo_url=logo_url)
         process_email(email_dict)
     elif message_type == QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value:
         logger.debug("Unlock account message received")
@@ -213,9 +206,7 @@ def handle_team_actions(message_type, email_msg):
         admin_coordinator_emails = get_member_emails(org_id, (ADMIN,))
         subject = SubjectType.TEAM_MODIFIED_SUBJECT.value
         logo_url = email_msg.get("logo_url")
-        email_dict = common_mailer.process(
-            org_id, admin_coordinator_emails, template_name, subject, logo_url=logo_url
-        )
+        email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject, logo_url=logo_url)
         process_email(email_dict)
     elif message_type == QueueMessageTypes.ADMIN_REMOVED.value:
         logger.debug("ADMIN_REMOVED message received")
@@ -224,9 +215,7 @@ def handle_team_actions(message_type, email_msg):
         recipient_email = email_msg.get("recipientEmail")
         subject = SubjectType.ADMIN_REMOVED_SUBJECT.value
         logo_url = email_msg.get("logo_url")
-        email_dict = common_mailer.process(
-            org_id, recipient_email, template_name, subject, logo_url=logo_url
-        )
+        email_dict = common_mailer.process(org_id, recipient_email, template_name, subject, logo_url=logo_url)
         process_email(email_dict)
 
 
@@ -246,9 +235,7 @@ def handle_pad_invoice_created(message_type, email_msg):
         "credit_total": format_currency(credit_total),
         "nsf_fee": format_currency(email_msg.get("nsfFee")),
         "invoice_total": format_currency(invoice_total),
-        "invoice_process_date": get_local_formatted_date(
-            invoice_process_date, "%m-%d-%Y"
-        ),
+        "invoice_process_date": get_local_formatted_date(invoice_process_date, "%m-%d-%Y"),
         "withdraw_total": format_currency(str(withdraw_total)),
         "invoice_number": email_msg.get("invoice_number", None),
         "transaction_url": get_transaction_url(org_id),
@@ -290,9 +277,7 @@ def handle_online_banking(message_type, email_msg):
         "credit_amount": format_currency(email_msg.get("creditAmount")),
     }
     logo_url = email_msg.get("logo_url")
-    email_dict = common_mailer.process(
-        org_id, admin_emails, template_name, subject, logo_url=logo_url, **args
-    )
+    email_dict = common_mailer.process(org_id, admin_emails, template_name, subject, logo_url=logo_url, **args)
     process_email(email_dict)
 
 
@@ -392,12 +377,8 @@ def handle_affiliation_invitation(message_type, email_msg):
         **{
             "org_id": None,
             "recipients": email_msg.get("emailAddresses"),
-            "template_name": TemplateType[
-                f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"
-            ].value,
-            "subject": SubjectType[QueueMessageTypes(message_type).name].value.format(
-                business_name=business_name
-            ),
+            "template_name": TemplateType[f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"].value,
+            "subject": SubjectType[QueueMessageTypes(message_type).name].value.format(business_name=business_name),
             "logo_url": logo_url,
             "business_name": business_name,
             "requesting_account": requesting_account,
@@ -425,9 +406,7 @@ def handle_product_actions(message_type, email_msg):
         **{
             "org_id": None,
             "recipients": email_msg.get("emailAddresses"),
-            "template_name": TemplateType[
-                f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"
-            ].value,
+            "template_name": TemplateType[f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"].value,
             "subject": subject_type.format(subject_descriptor=subject_descriptor),
             "logo_url": logo_url,
             "product_access_descriptor": email_msg.get("productAccessDescriptor"),
@@ -457,13 +436,10 @@ def handle_statement_notification(message_type, email_msg):
         **{
             "org_id": email_msg.get("accountId"),
             "recipients": email_msg.get("emailAddresses"),
-            "template_name": TemplateType[
-                f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"
-            ].value,
+            "template_name": TemplateType[f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"].value,
             "subject": SubjectType[QueueMessageTypes(message_type).name].value,
             "logo_url": logo_url,
-            "from_date": from_date.strftime("%B ")
-            + format_day_with_suffix(from_date.day),
+            "from_date": from_date.strftime("%B ") + format_day_with_suffix(from_date.day),
             "to_date": to_date.strftime("%B ") + format_day_with_suffix(to_date.day),
             "total_amount_owing": format_currency(email_msg.get("totalAmountOwing")),
             "statement_frequency": email_msg.get("statementFrequency").lower(),
@@ -485,14 +461,10 @@ def handle_payment_reminder_or_due(message_type, email_msg):
         **{
             "org_id": email_msg.get("accountId"),
             "recipients": email_msg.get("emailAddresses"),
-            "template_name": TemplateType[
-                f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"
-            ].value,
+            "template_name": TemplateType[f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"].value,
             "subject": SubjectType[QueueMessageTypes(message_type).name].value,
             "logo_url": logo_url,
-            "due_date": due_date.strftime("%B ")
-            + format_day_with_suffix(due_date.day)
-            + f" {due_date.year}",
+            "due_date": due_date.strftime("%B ") + format_day_with_suffix(due_date.day) + f" {due_date.year}",
             "total_amount_owing": format_currency(email_msg.get("totalAmountOwing")),
             "statement_frequency": email_msg.get("statementFrequency").lower(),
             "statement_month": email_msg.get("statementMonth"),
@@ -544,9 +516,7 @@ def handle_other_messages(message_type, email_msg):
             account_name=email_msg.get("orgName"),
             business_name=email_msg.get("businessName"),
         )
-        template_name = TemplateType[
-            f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"
-        ].value
+        template_name = TemplateType[f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"].value
     else:
         logger.error("Unknown message type: %s", message_type)
         return
@@ -577,9 +547,7 @@ def handle_other_messages(message_type, email_msg):
     process_email(email_dict)
 
 
-def process_email(
-    email_dict: dict, token: str = None
-):  # pylint: disable=too-many-branches
+def process_email(email_dict: dict, token: str = None):  # pylint: disable=too-many-branches
     """Process the email contained in the message."""
     logger.debug("Attempting to process email: %s", email_dict.get("recipients", ""))
     if email_dict:

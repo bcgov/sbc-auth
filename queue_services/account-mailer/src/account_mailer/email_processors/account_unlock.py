@@ -23,7 +23,6 @@ from structured_logging import StructuredLogging
 
 from account_mailer.email_processors import generate_template
 
-
 logger = StructuredLogging.get_logger()
 
 
@@ -50,13 +49,9 @@ def process(data: dict, token: str) -> dict:
 
 
 def _get_account_unlock_email(email_msg):
-    filled_template = generate_template(
-        current_app.config.get("TEMPLATE_PATH"), email_msg.get("template_name")
-    )
+    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), email_msg.get("template_name"))
     jnja_template = Template(filled_template, autoescape=True)
-    html_out = jnja_template.render(
-        account_name=email_msg.get("account_name"), logo_url=email_msg.get("logo_url")
-    )
+    html_out = jnja_template.render(account_name=email_msg.get("account_name"), logo_url=email_msg.get("logo_url"))
     return html_out
 
 

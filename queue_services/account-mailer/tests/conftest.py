@@ -85,9 +85,7 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         import sys
 
         venv_src_path = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__), os.pardir, ".venv/src/sbc-auth/auth-api"
-            )
+            os.path.join(os.path.dirname(__file__), os.pardir, ".venv/src/sbc-auth/auth-api")
         )
         if venv_src_path not in sys.path:
             sys.path.insert(0, venv_src_path)
@@ -146,9 +144,7 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         @event.listens_for(sess(), "after_transaction_end")
         def restart_savepoint(sess2, trans):  # pylint: disable=unused-variable
             # Detecting whether this is indeed the nested transaction of the test
-            if (
-                trans.nested and not trans._parent.nested
-            ):  # pylint: disable=protected-access
+            if trans.nested and not trans._parent.nested:  # pylint: disable=protected-access
                 # Handle where test DOESN'T session.commit(),
                 sess2.expire_all()
                 sess.begin_nested()
@@ -186,39 +182,27 @@ def docker_compose_files(pytestconfig):
     """Get the docker-compose.yml absolute path."""
     import os
 
-    return [
-        os.path.join(str(pytestconfig.rootdir), "tests/docker", "docker-compose.yml")
-    ]
+    return [os.path.join(str(pytestconfig.rootdir), "tests/docker", "docker-compose.yml")]
 
 
 @pytest.fixture()
 def auth_mock(monkeypatch):
     """Mock check_auth."""
-    monkeypatch.setattr(
-        "auth_api.services.entity.check_auth", lambda *args, **kwargs: None
-    )
-    monkeypatch.setattr(
-        "auth_api.services.org.check_auth", lambda *args, **kwargs: None
-    )
-    monkeypatch.setattr(
-        "auth_api.services.invitation.check_auth", lambda *args, **kwargs: None
-    )
+    monkeypatch.setattr("auth_api.services.entity.check_auth", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.org.check_auth", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.invitation.check_auth", lambda *args, **kwargs: None)
 
 
 @pytest.fixture()
 def notify_mock(monkeypatch):
     """Mock send_email."""
-    monkeypatch.setattr(
-        "auth_api.services.invitation.send_email", lambda *args, **kwargs: None
-    )
+    monkeypatch.setattr("auth_api.services.invitation.send_email", lambda *args, **kwargs: None)
 
 
 @pytest.fixture()
 def notify_org_mock(monkeypatch):
     """Mock send_email."""
-    monkeypatch.setattr(
-        "auth_api.services.org.send_email", lambda *args, **kwargs: None
-    )
+    monkeypatch.setattr("auth_api.services.org.send_email", lambda *args, **kwargs: None)
 
 
 @pytest.fixture()

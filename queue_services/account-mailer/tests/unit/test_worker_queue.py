@@ -86,9 +86,7 @@ def test_refund_request(app, session, client):
         "bcolAccount": "12345",
         "bcolUser": "009900",
     }
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         helper_add_event_to_queue(
             client,
             QueueMessageTypes.REFUND_DRAWDOWN_REQUEST.value,
@@ -105,9 +103,7 @@ def test_duplicate_messages(app, session, client):
     id = org.id
     mail_details = {"accountId": id, "accountName": org.name}
 
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         helper_add_event_to_queue(
             client,
             message_type=QueueMessageTypes.NSF_LOCK_ACCOUNT.value,
@@ -116,16 +112,11 @@ def test_duplicate_messages(app, session, client):
         )
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
         assert mock_send.call_args.args[0].get("attachments") is None
         assert True
 
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         helper_add_event_to_queue(
             client,
             message_type=QueueMessageTypes.NSF_LOCK_ACCOUNT.value,
@@ -142,9 +133,7 @@ def test_lock_account_mailer_queue(app, session, client):
     factory_membership_model(user.id, org.id)
     id = org.id
     mail_details = {"accountId": id, "accountName": org.name}
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         helper_add_event_to_queue(
             client,
             message_type=QueueMessageTypes.NSF_LOCK_ACCOUNT.value,
@@ -152,10 +141,7 @@ def test_lock_account_mailer_queue(app, session, client):
         )
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
         assert mock_send.call_args.args[0].get("attachments") is None
         assert True
 
@@ -170,9 +156,7 @@ def test_unlock_account_mailer_queue(app, session, client):
     response = types.SimpleNamespace()
     response.status_code = 200
     response.content = bytes("foo", "utf-8")
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         with patch.object(RestService, "post", return_value=response):
             # Note: This payload should work with report-api.
             mail_details = {
@@ -275,9 +259,7 @@ def test_account_conf_mailer_queue(app, session, client):
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         # add an event to queue
         mail_details = {"accountId": id, "nsfFee": "30"}
         helper_add_event_to_queue(
@@ -288,10 +270,7 @@ def test_account_conf_mailer_queue(app, session, client):
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.ACCOUNT_CONF_OVER_SUBJECT.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.ACCOUNT_CONF_OVER_SUBJECT.value
         assert mock_send.call_args.args[0].get("attachments") is None
         assert mock_send.call_args.args[0].get("content").get("body") is not None
 
@@ -303,9 +282,7 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         # add an event to queue, these are provided by cfs_create_invoice_task.
         mail_details = {
             "accountId": id,
@@ -324,10 +301,7 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.PAD_INVOICE_CREATED.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.PAD_INVOICE_CREATED.value
         assert mock_send.call_args.args[0].get("attachments") is None
 
         email_body = mock_send.call_args.args[0].get("content").get("body")
@@ -336,10 +310,7 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
         assert "Invoice reference number: 1234567890" in email_body
         assert "Transaction date:" in email_body
         assert "Log in to view transaction details" in email_body
-        assert (
-            "/account/{org_id}/settings/transactions".format(org_id=org.id)
-            in email_body
-        )
+        assert "/account/{org_id}/settings/transactions".format(org_id=org.id) in email_body
 
 
 def test_account_admin_removed(app, session, client):
@@ -349,9 +320,7 @@ def test_account_admin_removed(app, session, client):
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         email = "foo@testbar.com"
         mail_details = {"accountId": id, "recipientEmail": email}
         helper_add_event_to_queue(
@@ -362,10 +331,7 @@ def test_account_admin_removed(app, session, client):
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == email
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.ADMIN_REMOVED_SUBJECT.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.ADMIN_REMOVED_SUBJECT.value
         assert mock_send.call_args.args[0].get("attachments") is None
         assert mock_send.call_args.args[0].get("content").get("body") is not None
 
@@ -377,9 +343,7 @@ def test_account_team_modified(app, session, client):
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         mail_details = {
             "accountId": id,
         }
@@ -391,10 +355,7 @@ def test_account_team_modified(app, session, client):
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.TEAM_MODIFIED_SUBJECT.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.TEAM_MODIFIED_SUBJECT.value
         assert mock_send.call_args.args[0].get("attachments") is None
         assert mock_send.call_args.args[0].get("content").get("body") is not None
 
@@ -406,9 +367,7 @@ def test_online_banking_emails(app, session, client):
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         mail_details = {"amount": "100.00", "creditAmount": "10.00", "accountId": id}
         helper_add_event_to_queue(
             client,
@@ -463,9 +422,7 @@ def test_pad_failed_emails(app, session, client):
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         mail_details = {"accountId": id}
         helper_add_event_to_queue(
             client,
@@ -475,10 +432,7 @@ def test_pad_failed_emails(app, session, client):
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.PAD_SETUP_FAILED.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.PAD_SETUP_FAILED.value
         assert mock_send.call_args.args[0].get("attachments") is None
         assert mock_send.call_args.args[0].get("content").get("body") is not None
 
@@ -496,9 +450,7 @@ def test_payment_pending_emails(app, session, client):
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         mail_details = {
             "accountId": id,
             "cfsAccountId": "12345678",
@@ -512,10 +464,7 @@ def test_payment_pending_emails(app, session, client):
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.PAYMENT_PENDING.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.PAYMENT_PENDING.value
         assert mock_send.call_args.args[0].get("attachments") is None
         assert mock_send.call_args.args[0].get("content").get("body") is not None
 
@@ -531,15 +480,11 @@ def test_ejv_failure_emails(app, session, client):
     gcs_file_name = "FEEDBACK.1234567890"
     gcs_bucket = "cgi-ejv"
     try:
-        with patch.object(
-            notification_service, "send_email", return_value=None
-        ) as mock_send:
+        with patch.object(notification_service, "send_email", return_value=None) as mock_send:
 
             # Set the environment variable for the GCS emulator
             os.environ["CLOUD_STORAGE_EMULATOR_HOST"] = "http://localhost:4443"
-            os.environ["STORAGE_EMULATOR_HOST"] = (
-                "http://localhost:4443"  # Add this if needed
-            )
+            os.environ["STORAGE_EMULATOR_HOST"] = "http://localhost:4443"  # Add this if needed
 
             # Create the bucket in the GCS emulator
             create_bucket(gcs_bucket)
@@ -547,13 +492,9 @@ def test_ejv_failure_emails(app, session, client):
             with open(gcs_file_name, "w") as jv_file:
                 jv_file.write("TEST")
             # Upload the file to the GCS emulator
-            google_store.GoogleStoreService.upload_file_to_bucket(
-                gcs_bucket, gcs_file_name, gcs_file_name
-            )
+            google_store.GoogleStoreService.upload_file_to_bucket(gcs_bucket, gcs_file_name, gcs_file_name)
 
-            file_content = google_store.GoogleStoreService.download_file_from_bucket(
-                gcs_bucket, gcs_file_name
-            )
+            file_content = google_store.GoogleStoreService.download_file_from_bucket(gcs_bucket, gcs_file_name)
             assert file_content == b"TEST", f"File content mismatch: {file_content}"
 
             # Add an event to the queue
@@ -572,19 +513,14 @@ def test_ejv_failure_emails(app, session, client):
             # Verify the email was sent
             mock_send.assert_called()
             assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
-            assert (
-                mock_send.call_args.args[0].get("content").get("subject")
-                == SubjectType.EJV_FAILED.value
-            )
+            assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.EJV_FAILED.value
     finally:
         delete_bucket(gcs_bucket)
 
 
 def test_passcode_reset_email(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         msg_payload = {
             "emailAddresses": "test@test.com",
             "passCode": "1234",
@@ -600,10 +536,7 @@ def test_passcode_reset_email(app, session, client):
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.RESET_PASSCODE.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.RESET_PASSCODE.value
 
         # add an event to queue - staff initiated reset
         msg_payload = {
@@ -621,10 +554,7 @@ def test_passcode_reset_email(app, session, client):
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.RESET_PASSCODE.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.RESET_PASSCODE.value
 
 
 def test_statement_notification_email(app, session, client):
@@ -634,9 +564,7 @@ def test_statement_notification_email(app, session, client):
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         msg_payload = {
             "accountId": id,
             "fromDate": "2023-09-15 00:00:00",
@@ -653,10 +581,7 @@ def test_statement_notification_email(app, session, client):
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.STATEMENT_NOTIFICATION.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.STATEMENT_NOTIFICATION.value
 
 
 def test_payment_reminder_notification_email(app, session, client):
@@ -666,9 +591,7 @@ def test_payment_reminder_notification_email(app, session, client):
     factory_membership_model(user.id, org.id)
     id = org.id
 
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         msg_payload = {
             "accountId": id,
             "dueDate": "2023-09-15 00:00:00",
@@ -688,8 +611,7 @@ def test_payment_reminder_notification_email(app, session, client):
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
         assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.PAYMENT_REMINDER_NOTIFICATION.value
+            mock_send.call_args.args[0].get("content").get("subject") == SubjectType.PAYMENT_REMINDER_NOTIFICATION.value
         )
 
 
@@ -699,9 +621,7 @@ def test_payment_due_notification_email(app, session, client):
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
     id = org.id
-    with patch.object(
-        notification_service, "send_email", return_value=None
-    ) as mock_send:
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         msg_payload = {
             "accountId": id,
             "dueDate": "2023-09-15 00:00:00",
@@ -720,7 +640,4 @@ def test_payment_due_notification_email(app, session, client):
 
         mock_send.assert_called
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.PAYMENT_DUE_NOTIFICATION.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.PAYMENT_DUE_NOTIFICATION.value

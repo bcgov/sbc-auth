@@ -49,9 +49,7 @@ def post_to_queue(client, request_payload):
     assert response.status_code == 200
 
 
-def helper_add_event_to_queue(
-    client, message_type: str, mail_details: dict, message_id=None
-):
+def helper_add_event_to_queue(client, message_type: str, mail_details: dict, message_id=None):
     """Add event to the Queue."""
     if not mail_details:
         mail_details = {}
