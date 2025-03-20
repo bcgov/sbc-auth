@@ -179,6 +179,9 @@ def auto(docker_services, app):
         docker_services.start('postgres')
         time.sleep(30)
 
+    if app.config['USE_GCS_EMULATOR']:
+        docker_services.start('gcs-emulator')
+        time.sleep(20)
 
 @pytest.fixture(scope='session')
 def docker_compose_files(pytestconfig):
