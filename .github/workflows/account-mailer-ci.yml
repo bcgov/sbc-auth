@@ -12,96 +12,17 @@ on:
       - "auth-api/src/auth_api/utils/enums.py"
       - "build-deps/**"
 
+  workflow_dispatch:
+
 defaults:
   run:
     shell: bash
     working-directory: ./queue_services/account-mailer
 
 jobs:
-  setup-job:
-    runs-on: ubuntu-24.04
-
-    if: github.repository == 'bcgov/sbc-auth'
-
-    steps:
-      - uses: actions/checkout@v4
-      - run: "true"
-
-  linting:
-    needs: setup-job
-    runs-on: ubuntu-24.04
-
-    strategy:
-      matrix:
-        python-version: [3.12]
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          make setup
-      - name: Lint with pylint
-        id: pylint
-        run: |
-          make pylint
-      - name: Lint with flake8
-        id: flake8
-        run: |
-          make flake8
-
-  testing:
-    needs: setup-job
-    env:
-      DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
-      USE_TEST_KEYCLOAK_DOCKER: "YES"
-      USE_DOCKER_MOCK: "YES"
-      JWT_OIDC_ISSUER: "http://localhost:8081/auth/realms/demo"
-      SBC_AUTH_ADMIN_CLIENT_ID: "sbc-auth-admin"
-      SBC_AUTH_ADMIN_CLIENT_SECRET: "2222222222"
-      BCOL_ADMIN_EMAIL: "test@test.com"
-
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        python-version: [3.12]
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install docker-compose
-        run: |
-          sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose version
-      - name: Install dependencies
-        run: |
-          make setup
-      - name: Test with pytest
-        id: test
-        run: |
-          make test
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./queue_services/account-mailer/coverage.xml
-          flags: accountmailerqueue
-          name: codecov-account-mailer
-          fail_ci_if_error: false
-
-  build-check:
-    needs: setup-job
-    runs-on: ubuntu-24.04
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: build to check strictness
-        id: build
-        run: |
-          make build-nc
+  auth-api-ci:
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
+    with:
+      app_name: "account-mailer"
+      working_directory: "./queue_services/account-mailer"
+      codecov_flag: "accountmailerqueue"
