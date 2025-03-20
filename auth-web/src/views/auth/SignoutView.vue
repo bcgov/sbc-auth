@@ -29,8 +29,6 @@ export default class SignoutView extends Vue {
   }
 
   async mounted () {
-    // Remove with Vue 3
-    this.$store.replaceState({})
     resetAllStores()
   }
 }

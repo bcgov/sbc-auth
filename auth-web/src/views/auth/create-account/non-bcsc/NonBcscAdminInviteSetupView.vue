@@ -56,6 +56,7 @@ import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
+import { useAppStore } from '@/stores'
 import { useUserStore } from '@/stores/user'
 
 @Component({
@@ -84,8 +85,7 @@ export default class NonBcscAdminInviteSetupView extends Mixins(NextPageMixin) {
       if (this.token) {
         this.$router.push('/confirmtoken/' + this.token)
       } else if (this.orgId) {
-        // Remove with Vue 3
-        this.$store.commit('updateHeader')
+        useAppStore().updateHeader()
         this.$router.push(this.getNextPageUrl())
       }
     }

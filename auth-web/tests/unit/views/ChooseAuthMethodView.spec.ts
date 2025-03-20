@@ -1,9 +1,10 @@
+import '@/composition-api-setup'
 import { createLocalVue, mount } from '@vue/test-utils'
 import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import { LoginSource } from '@/util/constants'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import { createPinia } from 'pinia'
 
 document.body.setAttribute('data-app', true)
 
@@ -13,23 +14,15 @@ describe('ChooseAuthMethodView.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(VueRouter)
-    localVue.use(Vuex)
 
     const router = new VueRouter()
     const vuetify = new Vuetify({})
-
-    const store = new Vuex.Store({
-      state: {},
-      getters: {
-        isAuthenticated: () => false
-      }
-    })
-
+    const pinia = createPinia()
     wrapper = mount(ChooseAuthMethodView, {
       localVue,
       router,
       vuetify,
-      store,
+      pinia,
       mocks: {
         $t: (mock) => mock
       }

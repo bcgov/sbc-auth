@@ -1,7 +1,7 @@
-
 import './composition-api-setup' // ensure this happens before any imports trigger use of composition-api
 import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://materialdesignicons.com/)
 import * as Sentry from '@sentry/vue'
+import { PiniaVuePlugin, createPinia, setActivePinia } from 'pinia'
 import App from './App.vue'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -16,21 +16,22 @@ import VueSanitize from 'vue-sanitize-directive'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
 import displayMode from '@/directives/displayMode'
-import { getPiniaStore } from '@/stores'
 import initializeI18n from './plugins/i18n'
 import router from './routes/index'
-import store from '@/stores/vuex'
 import vuetify from './plugins/vuetify'
 
 // eslint-disable-next-line sort-imports
 import { LDFlags } from '@/util/constants'
 
 Vue.use(VueCompositionAPI)
+Vue.use(PiniaVuePlugin)
+const pinia = createPinia()
+setActivePinia(pinia)
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
+Vue.use(VueSanitize)
 
 const i18n = initializeI18n(Vue)
-Vue.use(VueSanitize)
 
 /**
  * The server side configs are necessary for app to work , since they are reference in templates and all
@@ -81,13 +82,10 @@ async function syncSession () {
     })
   }
 }
-
 function renderVue () {
   new Vue({
+    pinia,
     router,
-    // We still need Vuex for sbc-common-components.
-    store,
-    pinia: getPiniaStore(),
     vuetify,
     i18n,
     render: (h) => h(App)

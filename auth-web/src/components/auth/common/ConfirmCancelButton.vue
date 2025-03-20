@@ -54,6 +54,7 @@ import { Component, Emit, Prop } from 'vue-property-decorator'
 import { Action } from 'pinia-class'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
+import { useAppStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
@@ -94,8 +95,7 @@ export default class ConfirmCancelButton extends Vue {
       if (this.clearCurrentOrg) {
         await this.resetAccountSetupProgress()
         await this.setCurrentOrganizationFromUserAccountSettings()
-        // Remove in Vue 3
-        await this.$store.commit('updateHeader')
+        await useAppStore().updateHeader()
       }
       if (this.isEmit) {
         this.emitClickConfirm()

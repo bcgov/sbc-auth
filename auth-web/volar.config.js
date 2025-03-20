@@ -1,6 +1,6 @@
-const vetur = require('@volar-plugins/vetur')
+import vetur from '@volar-plugins/vetur'
 
-module.exports = {
+export default {
   plugins: [
     vetur()
   ]
