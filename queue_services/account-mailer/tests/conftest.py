@@ -177,7 +177,7 @@ def auto(docker_services, app):
 
     if app.config['USE_POSTGRES_MOCK']:
         docker_services.start('postgres')
-        docker_services.wait_for_service('postgres', 5432)
+        time.sleep(30)
 
 
 @pytest.fixture(scope='session')
