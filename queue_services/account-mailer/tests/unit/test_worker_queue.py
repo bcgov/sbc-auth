@@ -244,8 +244,8 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
         assert 'This email confirms a recent transaction on you account' in email_body
         assert 'Invoice reference number: 1234567890' in email_body
         assert 'Transaction date:' in email_body
-        assert f'Log in to view transaction detail' in email_body
-        assert '/account/{}/settings/transactions'.format(id) in email_body
+        assert 'Log in to view transaction detail' in email_body
+        assert '/account/{org_id}/settings/transactions'.format(org_id=org.id) in email_body
 
 
 def test_account_admin_removed(app, session, client):
