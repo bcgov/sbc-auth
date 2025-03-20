@@ -17,9 +17,6 @@ google-cloud-core = "2.4.3"
 google-cloud-pubsub = "2.20.2"
 google-cloud-storage = "2.14.0"
 googleapis-common-protos = "1.63.0"
-grpc-google-iam-v1 = "0.13.0"
-grpcio-status = "1.48.2"
-grpcio = "1.64.0"
 idna = "3.7"
 importlib-resources = "5.13.0"
 jaeger-client = "4.8.0"
@@ -43,6 +40,7 @@ zipp = "3.19.1"
 auth-api = { git = "https://github.com/bcgov/sbc-auth.git", rev = "dependency_upgrades_p2", subdirectory = "auth-api" }
 simple-cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py.git" }
 cloud-sql-python-connector = "^1.13.0"
+pkginfo = "^1.12.1.2"
 
 [tool.poetry.group.dev.dependencies]
 psycopg2 = "2.9.9"
