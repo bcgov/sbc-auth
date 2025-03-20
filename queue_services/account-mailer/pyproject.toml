@@ -101,7 +101,7 @@ exclude_dirs = [".venv","tests"]
 skips = ["B104"]
 
 [tool.flake8]
-ignore = ["F401","E402", "Q000", "E203", "W503"]
+ignore = Q000
 exclude = [
     ".venv",
     "./venv",
@@ -117,3 +117,26 @@ per-file-ignores = [
 max-line-length = 120
 docstring-min-length=10
 count = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+minversion = "2.0"
+testpaths = [
+   "tests",
+]
+addopts = "--verbose --strict -p no:warnings --cov=src --cov-report html:htmlcov --cov-report xml:coverage.xml"
+python_files = [
+   "test*.py"
+]
+norecursedirs = [
+   ".git", ".tox", "venv*", "requirements*", "build",
+]
+log_cli = true
+log_cli_level = "1"
+filterwarnings = [
+   "ignore::UserWarning"
+]
+markers = [
+   "slow",
+   "serial",
+]
