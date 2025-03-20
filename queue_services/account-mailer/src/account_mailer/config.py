@@ -131,8 +131,6 @@ class _Config():  # pylint: disable=too-few-public-methods
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
     USE_DOCKER_MOCK = os.getenv('USE_DOCKER_MOCK', None)
-    USE_POSTGRES_MOCK = os.getenv('USE_POSTGRES_MOCK', None)
-    USE_GCS_EMULATOR = os.getenv('USE_GCS_EMULATOR', None)
 
     # BC online admin email
     BCOL_ADMIN_EMAIL = os.getenv('BCOL_ADMIN_EMAIL', 'test@test.com')
