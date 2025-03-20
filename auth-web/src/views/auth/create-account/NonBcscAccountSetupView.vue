@@ -58,6 +58,7 @@ import Stepper from '@/components/auth/common/stepper/Stepper.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import { useAccountCreate } from '@/composables/account-create-factory'
+import { useAppStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -216,8 +217,7 @@ export default defineComponent({
           await userStore.getUserProfile('@me')
         }
 
-        // Remove with Vue 3
-        root.$store.commit('updateHeader')
+        useAppStore().updateHeader()
         const nextRoute = !state.isAffidavitAlreadyApproved ? '/setup-non-bcsc-account-success' : '/setup-account-success'
         root.$router.push(nextRoute)
       } catch (err) {
