@@ -22,7 +22,7 @@ import Vue from 'vue'
   methods: {
     ...mapActions(useUserStore, ['loadUserInfo', 'syncUserProfile', 'getUserProfile']),
     ...mapActions(useOrgStore, ['syncOrganization', 'syncMembership', 'resetCurrentOrganization',
-      'setCurrentAccountSettings'])
+      'setCurrentAccountSettings', 'syncStaffPermissions'])
   }
 })
 export default class NextPageMixin extends Vue {
@@ -38,6 +38,7 @@ export default class NextPageMixin extends Vue {
   protected readonly syncUserProfile!: () => void
   protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
   protected readonly syncMembership!: (currentAccount: number) => Promise<Member>
+  protected readonly syncStaffPermissions!: () => Promise<string[]>
   protected readonly resetCurrentOrganization!: () => Promise<void>
   private readonly needMissingBusinessDetailsRedirect!: boolean
   // its used to determine if any pending redirect like NFS or account pending page
@@ -191,6 +192,11 @@ export default class NextPageMixin extends Vue {
         // Set current org to blank state if not active in the current org
         await this.resetCurrentOrganization()
       }
+    }
+
+    // This occurs on account switching, if we are on the dashboard, we want to resync staff permissions
+    if (this.$route.fullPath.includes(Pages.STAFF_DASHBOARD)) {
+      await this.syncStaffPermissions()
     }
   }
 

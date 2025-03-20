@@ -3,7 +3,7 @@ import { Product } from '@/util/constants'
 export const productDisplay = {
   [Product.BCA]: 'BC Assessment',
   [Product.BUSINESS]: 'Business Registry & Name Request',
-  [Product.BUSINESS_SEARCH]: 'Business Search',
+  [Product.BUSINESS_SEARCH]: 'Business and Person Search',
   [Product.CSO]: 'Court Services Online',
   [Product.ESRA]: 'Site Registry',
   [Product.MHR]: 'Manufactured Home Registry',

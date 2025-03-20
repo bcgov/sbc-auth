@@ -1,7 +1,7 @@
 import 'moment-timezone'
 import { Address, BaseAddressModel } from '@/models/address'
 import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
-import { NrRequestTypeStrings, Permission } from '@/util/constants'
+import { NrRequestTypeStrings } from '@/util/constants'
 import moment from 'moment'
 
 type DateLike = string | Date | moment.Moment
@@ -213,65 +213,6 @@ export default class CommonUtils {
   static isSigningOut ():boolean {
     const path = window.location.pathname
     return path.includes('/signout')
-  }
-
-  static getAdminPermissions (): string[] {
-    return [
-      Permission.CHANGE_ADDRESS,
-      Permission.CHANGE_ORG_NAME,
-      Permission.CHANGE_ROLE,
-      Permission.EDIT_REQUEST_PRODUCT_PACKAGE,
-      Permission.DEACTIVATE_ACCOUNT,
-      Permission.GENERATE_INVOICE,
-      Permission.INVITE_MEMBERS,
-      Permission.MAKE_PAYMENT,
-      Permission.MANAGE_STATEMENTS,
-      Permission.REMOVE_BUSINESS,
-      Permission.RESET_OTP,
-      Permission.RESET_PASSWORD,
-      Permission.TRANSACTION_HISTORY,
-      Permission.VIEW_ACTIVITYLOG,
-      Permission.VIEW_ADDRESS,
-      Permission.VIEW_ADMIN_CONTACT,
-      Permission.VIEW_AUTH_OPTIONS,
-      Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
-      Permission.VIEW_USER_LOGINSOURCE,
-      Permission.EDIT_USER,
-      Permission.VIEW_BUSINESS_REGISTRY_DASHBOARD,
-      Permission.VIEW_LAUNCH_TITLES,
-      Permission.VIEW_CONTINUATION_AUTHORIZATION_REVIEWS
-    ]
-  }
-
-  static getContactCentreStaffPermissions (): string[] {
-    return [
-      Permission.CHANGE_ORG_NAME,
-      Permission.CHANGE_ROLE,
-      Permission.GENERATE_INVOICE,
-      Permission.MAKE_PAYMENT,
-      Permission.MANAGE_STATEMENTS,
-      Permission.REMOVE_BUSINESS,
-      Permission.RESET_OTP,
-      Permission.RESET_PASSWORD,
-      Permission.TRANSACTION_HISTORY,
-      Permission.VIEW_ACTIVITYLOG,
-      Permission.VIEW_ADDRESS,
-      Permission.VIEW_ADMIN_CONTACT,
-      Permission.VIEW_AUTH_OPTIONS,
-      Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
-      Permission.VIEW_USER_LOGINSOURCE
-    ]
-  }
-
-  static getViewOnlyPermissions (): string[] {
-    return [
-      Permission.VIEW_ACCOUNT,
-      Permission.VIEW_ADDRESS,
-      Permission.VIEW_ADMIN_CONTACT,
-      Permission.RESET_OTP,
-      Permission.VIEW_AUTH_OPTIONS,
-      Permission.VIEW_REQUEST_PRODUCT_PACKAGE
-    ]
   }
 
   // for converting address object of sbc-auth to as needed for BaseAddress component

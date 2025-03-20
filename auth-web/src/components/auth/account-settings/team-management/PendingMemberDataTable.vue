@@ -28,7 +28,7 @@
     </template>
     <template #[`item.action`]="{ item }">
       <v-btn
-        v-if="canApproveOrDeny()"
+        v-can:EDIT_USER.hide
         icon
         class="mr-1"
         aria-label="Approve user access to this account"
@@ -39,7 +39,7 @@
         <v-icon>mdi-check-circle-outline</v-icon>
       </v-btn>
       <v-btn
-        v-if="canApproveOrDeny()"
+        v-can:EDIT_USER.hide
         icon
         aria-label="Deny access to this account"
         title="Deny access to this account"
@@ -56,7 +56,6 @@
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Member } from '@/models/Organization'
-import { Role } from '@/util/constants'
 import { mapState } from 'pinia'
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import moment from 'moment'
@@ -87,10 +86,6 @@ export default class PendingMemberDataTable extends Vue {
       sortable: false
     }
   ]
-
-  private canApproveOrDeny (): boolean {
-    return !this.currentUser.roles?.includes(Role.ContactCentreStaff)
-  }
 
   getIndexedTag (tag, index): string {
     return `${tag}-${index}`

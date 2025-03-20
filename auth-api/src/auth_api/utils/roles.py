@@ -50,6 +50,7 @@ class Role(Enum):
     VIEW_ACCOUNT_PENDING_INVITATIONS = "view_account_pending_invitations"
     VIEW_MEMBERS_PENDING_INVITATIONS = "view_members_pending_invitations"
     VIEW_ACTIVITY_LOGS = "view_activity_logs"
+    MANAGE_RESET_OTP = "manage_reset_otp"
 
 
 # Membership types
