@@ -22,34 +22,38 @@ from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
 def build_request_for_queue_push(message_type, payload, message_id=None):
     """Build request for queue message."""
-    queue_message_bytes = to_queue_message(SimpleCloudEvent(
-        id=str(message_id if message_id else uuid.uuid4()),
-        source='account-mailer',
-        subject=None,
-        time=datetime.now(tz=timezone.utc).isoformat(),
-        type=message_type,
-        data=payload
-    ))
+    queue_message_bytes = to_queue_message(
+        SimpleCloudEvent(
+            id=str(message_id if message_id else uuid.uuid4()),
+            source="account-mailer",
+            subject=None,
+            time=datetime.now(tz=timezone.utc).isoformat(),
+            type=message_type,
+            data=payload,
+        )
+    )
 
     return {
-        'message': {
-            'data': base64.b64encode(queue_message_bytes).decode('utf-8')
-        },
-        'subscription': 'foobar'
+        "message": {"data": base64.b64encode(queue_message_bytes).decode("utf-8")},
+        "subscription": "foobar",
     }
 
 
 def post_to_queue(client, request_payload):
     """Post request to worker using an http request on our wrapped flask instance."""
-    response = client.post('/', data=json.dumps(request_payload),
-                           headers={'Content-Type': 'application/json'})
+    response = client.post(
+        "/",
+        data=json.dumps(request_payload),
+        headers={"Content-Type": "application/json"},
+    )
     assert response.status_code == 200
 
 
-def helper_add_event_to_queue(client, message_type: str, mail_details: dict, message_id=None):
+def helper_add_event_to_queue(
+    client, message_type: str, mail_details: dict, message_id=None
+):
     """Add event to the Queue."""
     if not mail_details:
-        mail_details = {
-        }
+        mail_details = {}
     payload = build_request_for_queue_push(message_type, mail_details, message_id)
     post_to_queue(client, payload)

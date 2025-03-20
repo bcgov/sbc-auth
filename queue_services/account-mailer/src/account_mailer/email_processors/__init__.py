@@ -30,26 +30,33 @@ def generate_template(template_path: str, template_file_name: str) -> str:
     parts. There is no recursive search and replace.
     """
     template_parts = [
-        'business-dashboard-link',
-        'footer',
-        'header',
-        'initiative-notice',
-        'logo',
-        'style',
-        'fonts',
-        'bc_logo_img',
-        'bc_registry_logo_img',
-        'whitespace-16px',
-        'whitespace-24px'
+        "business-dashboard-link",
+        "footer",
+        "header",
+        "initiative-notice",
+        "logo",
+        "style",
+        "fonts",
+        "bc_logo_img",
+        "bc_registry_logo_img",
+        "whitespace-16px",
+        "whitespace-24px",
     ]
 
-    template_code = Path(f'{template_path}/{template_file_name}.html').read_text()  # pylint: disable=W1514
+    template_code = Path(
+        f"{template_path}/{template_file_name}.html"
+    ).read_text()  # pylint: disable=W1514
 
     # substitute template parts - marked up by [[filename]]
     for template_part in template_parts:
-        template_part_path = Path(f'{template_path}/common/{template_part}.html')
-        if os.path.exists(template_part_path) and os.path.getsize(template_part_path) > 0:
+        template_part_path = Path(f"{template_path}/common/{template_part}.html")
+        if (
+            os.path.exists(template_part_path)
+            and os.path.getsize(template_part_path) > 0
+        ):
             template_part_code = template_part_path.read_text()  # pylint: disable=W1514
-            template_code = template_code.replace(f'[[{template_part}.html]]', template_part_code)
+            template_code = template_code.replace(
+                f"[[{template_part}.html]]", template_part_code
+            )
 
     return template_code

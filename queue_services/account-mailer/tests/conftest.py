@@ -35,35 +35,38 @@ def not_raises(exception):
     try:
         yield
     except exception:
-        raise pytest.fail(f'DID RAISE {exception}')
+        raise pytest.fail(f"DID RAISE {exception}")
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def app():
     """Return a session-wide application configured in TEST mode."""
-    _app = create_app('testing')
+    _app = create_app("testing")
 
     # Bypass caching.
     def get_service_token():
         pass
+
     RestService.get_service_account_token = get_service_token
 
     return _app
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a session-wide initialised database.
 
     Drops all existing tables - Meta follows Postgres FKs
     """
     with app.app_context():
-        drop_schema_sql = text("""
+        drop_schema_sql = text(
+            """
             DROP SCHEMA public CASCADE;
             CREATE SCHEMA public;
             GRANT ALL ON SCHEMA public TO postgres;
             GRANT ALL ON SCHEMA public TO public;
-        """)
+        """
+        )
 
         sess = _db.session()
         sess.execute(drop_schema_sql)
@@ -83,16 +86,14 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
 
         venv_src_path = os.path.abspath(
             os.path.join(
-                os.path.dirname(__file__),
-                os.pardir,
-                '.venv/src/sbc-auth/auth-api'
+                os.path.dirname(__file__), os.pardir, ".venv/src/sbc-auth/auth-api"
             )
         )
         if venv_src_path not in sys.path:
             sys.path.insert(0, venv_src_path)
 
-        auth_api_folder = [folder for folder in sys.path if 'auth-api' in folder][0]
-        migration_path = auth_api_folder.replace('/auth-api', '/auth-api/migrations')
+        auth_api_folder = [folder for folder in sys.path if "auth-api" in folder][0]
+        migration_path = auth_api_folder.replace("/auth-api", "/auth-api/migrations")
 
         Migrate(app, _db, directory=migration_path)
         upgrade()
@@ -106,29 +107,29 @@ def config(app):
     return app.config
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def client(app):  # pylint: disable=redefined-outer-name
     """Return a session-wide Flask test client."""
     return app.test_client()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def client_ctx(app):  # pylint: disable=redefined-outer-name
     """Return session-wide Flask test client."""
     with app.test_client() as _client:
         yield _client
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def client_id():
     """Return a unique client_id that can be used in tests."""
     _id = random.SystemRandom().getrandbits(0x58)
     #     _id = (base64.urlsafe_b64encode(uuid.uuid4().bytes)).replace('=', '')
 
-    return f'client-{_id}'
+    return f"client-{_id}"
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a function-scoped session."""
     with app.app_context():
@@ -142,17 +143,19 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
         sess.begin_nested()
 
-        @event.listens_for(sess(), 'after_transaction_end')
+        @event.listens_for(sess(), "after_transaction_end")
         def restart_savepoint(sess2, trans):  # pylint: disable=unused-variable
             # Detecting whether this is indeed the nested transaction of the test
-            if trans.nested and not trans._parent.nested:  # pylint: disable=protected-access
+            if (
+                trans.nested and not trans._parent.nested
+            ):  # pylint: disable=protected-access
                 # Handle where test DOESN'T session.commit(),
                 sess2.expire_all()
                 sess.begin_nested()
 
         db.session = sess
 
-        sql = text('select 1')
+        sql = text("select 1")
         sess.execute(sql)
 
         yield sess
@@ -164,61 +167,77 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         conn.close()
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def auto(docker_services, app):
     """Spin up a keycloak instance and initialize jwt."""
-    if app.config['USE_TEST_KEYCLOAK_DOCKER']:
-        docker_services.start('keycloak')
-        docker_services.wait_for_service('keycloak', 8081)
+    if app.config["USE_TEST_KEYCLOAK_DOCKER"]:
+        docker_services.start("keycloak")
+        docker_services.wait_for_service("keycloak", 8081)
 
-    if app.config['USE_DOCKER_MOCK']:
-        docker_services.start('postgres')
-        docker_services.start('notify')
-        docker_services.start('gcs-emulator')
+    if app.config["USE_DOCKER_MOCK"]:
+        docker_services.start("postgres")
+        docker_services.start("notify")
+        docker_services.start("gcs-emulator")
         time.sleep(10)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def docker_compose_files(pytestconfig):
     """Get the docker-compose.yml absolute path."""
     import os
+
     return [
-        os.path.join(str(pytestconfig.rootdir), 'tests/docker', 'docker-compose.yml')
+        os.path.join(str(pytestconfig.rootdir), "tests/docker", "docker-compose.yml")
     ]
 
 
 @pytest.fixture()
 def auth_mock(monkeypatch):
     """Mock check_auth."""
-    monkeypatch.setattr('auth_api.services.entity.check_auth', lambda *args, **kwargs: None)
-    monkeypatch.setattr('auth_api.services.org.check_auth', lambda *args, **kwargs: None)
-    monkeypatch.setattr('auth_api.services.invitation.check_auth', lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        "auth_api.services.entity.check_auth", lambda *args, **kwargs: None
+    )
+    monkeypatch.setattr(
+        "auth_api.services.org.check_auth", lambda *args, **kwargs: None
+    )
+    monkeypatch.setattr(
+        "auth_api.services.invitation.check_auth", lambda *args, **kwargs: None
+    )
 
 
 @pytest.fixture()
 def notify_mock(monkeypatch):
     """Mock send_email."""
-    monkeypatch.setattr('auth_api.services.invitation.send_email', lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        "auth_api.services.invitation.send_email", lambda *args, **kwargs: None
+    )
 
 
 @pytest.fixture()
 def notify_org_mock(monkeypatch):
     """Mock send_email."""
-    monkeypatch.setattr('auth_api.services.org.send_email', lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        "auth_api.services.org.send_email", lambda *args, **kwargs: None
+    )
 
 
 @pytest.fixture()
 def keycloak_mock(monkeypatch):
     """Mock keycloak services."""
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.join_account_holders_group',
-                        lambda *args, **kwargs: None)
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group',
-                        lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        "auth_api.services.keycloak.KeycloakService.join_account_holders_group",
+        lambda *args, **kwargs: None,
+    )
+    monkeypatch.setattr(
+        "auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group",
+        lambda *args, **kwargs: None,
+    )
 
 
 @pytest.fixture(autouse=True)
 def mock_pub_sub_call(mocker):
     """Mock pub sub call."""
+
     class PublisherMock:
         """Publisher Mock."""
 
@@ -227,6 +246,6 @@ def mock_pub_sub_call(mocker):
 
         def publish(self, *args, **kwargs):
             """Publish mock."""
-            raise CancelledError('This is a mock')
+            raise CancelledError("This is a mock")
 
-    mocker.patch('google.cloud.pubsub_v1.PublisherClient', PublisherMock)
+    mocker.patch("google.cloud.pubsub_v1.PublisherClient", PublisherMock)

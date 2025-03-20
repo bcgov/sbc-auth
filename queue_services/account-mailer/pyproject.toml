@@ -69,3 +69,9 @@ astroid = "^3.2.3"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pylint.main]
+fail-under = 10
+max-line-length = 120
+ignore = [ "migrations", "devops", "tests"]
+disable = ["invalid-name"]

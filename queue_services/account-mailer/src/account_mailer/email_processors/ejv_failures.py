@@ -29,45 +29,47 @@ logger = StructuredLogging.get_logger()
 
 def process(email_msg: dict) -> dict:
     """Build the email for JV failures."""
-    logger.debug('ejv_failures: %s', email_msg)
+    logger.debug("ejv_failures: %s", email_msg)
     # fill in template
-    failed_jv_file_name = email_msg.get('fileName')
+    failed_jv_file_name = email_msg.get("fileName")
     # TODO update minioLocation
-    file_location = email_msg.get('minioLocation')
-    bcol_admin_email = current_app.config['BCOL_ADMIN_EMAIL']
+    file_location = email_msg.get("minioLocation")
+    bcol_admin_email = current_app.config["BCOL_ADMIN_EMAIL"]
     feedback_attachment = _get_jv_file(file_location, failed_jv_file_name)
     html_body = _get_body(email_msg)
     return {
-        'recipients': bcol_admin_email,
-        'content': {
-            'subject': SubjectType.EJV_FAILED.value,
-            'body': f'{html_body}',
-            'attachments': [
+        "recipients": bcol_admin_email,
+        "content": {
+            "subject": SubjectType.EJV_FAILED.value,
+            "body": f"{html_body}",
+            "attachments": [
                 {
-                    'fileName': failed_jv_file_name,
-                    'fileBytes': feedback_attachment.decode('utf-8'),
-                    'fileUrl': '',
-                    'attachOrder': '1'
+                    "fileName": failed_jv_file_name,
+                    "fileBytes": feedback_attachment.decode("utf-8"),
+                    "fileUrl": "",
+                    "attachOrder": "1",
                 }
-            ]
-        }
+            ],
+        },
     }
 
 
 def _get_body(email_msg: dict):
-    filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'),
-                                        TemplateType.EJV_FAILED_TEMPLATE_NAME.value)
+    filled_template = generate_template(
+        current_app.config.get("TEMPLATE_PATH"),
+        TemplateType.EJV_FAILED_TEMPLATE_NAME.value,
+    )
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
-    html_out = jnja_template.render(
-        logo_url=email_msg.get('logo_url')
-    )
+    html_out = jnja_template.render(logo_url=email_msg.get("logo_url"))
     return html_out
 
 
 def _get_jv_file(file_location: str, file_name: str):
     file = None
-    store_blob = google_store.GoogleStoreService.download_file_from_bucket(file_location, file_name)
+    store_blob = google_store.GoogleStoreService.download_file_from_bucket(
+        file_location, file_name
+    )
     if store_blob:
         file = base64.b64encode(store_blob)
 

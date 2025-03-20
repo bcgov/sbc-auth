@@ -25,8 +25,7 @@ from auth_api.models.user import User as UserModel
 from auth_api.utils.enums import AccessType
 
 
-def factory_org_model(org_name: str = 'Test ORg',
-                      user_id=None):
+def factory_org_model(org_name: str = "Test ORg", user_id=None):
     """Produce a templated org model."""
     org_type = OrgTypeModel.get_default_type()
     org_status = OrgStatusModel.get_default_status()
@@ -43,18 +42,19 @@ def factory_org_model(org_name: str = 'Test ORg',
 def factory_user_model_with_contact():
     """Produce a user model."""
     user_info = {
-        'username': 'foo',
-        'firstname': 'bar',
-        'lastname': 'User',
-        'keycloak_guid': uuid.uuid4()
+        "username": "foo",
+        "firstname": "bar",
+        "lastname": "User",
+        "keycloak_guid": uuid.uuid4(),
     }
 
-    user = UserModel(username=user_info['username'],
-                     firstname=user_info['firstname'],
-                     lastname=user_info['lastname'],
-                     keycloak_guid=user_info.get('keycloak_guid', None),
-                     type=user_info.get('access_type', None),
-                     )
+    user = UserModel(
+        username=user_info["username"],
+        firstname=user_info["firstname"],
+        lastname=user_info["lastname"],
+        keycloak_guid=user_info.get("keycloak_guid", None),
+        type=user_info.get("access_type", None),
+    )
 
     user.save()
 
@@ -68,12 +68,14 @@ def factory_user_model_with_contact():
     return user
 
 
-def factory_membership_model(user_id, org_id, member_type='ADMIN', member_status=1):
+def factory_membership_model(user_id, org_id, member_type="ADMIN", member_status=1):
     """Produce a Membership model."""
-    membership = MembershipModel(user_id=user_id,
-                                 org_id=org_id,
-                                 membership_type_code=member_type,
-                                 membership_type_status=member_status)
+    membership = MembershipModel(
+        user_id=user_id,
+        org_id=org_id,
+        membership_type_code=member_type,
+        membership_type_status=member_status,
+    )
 
     membership.created_by_id = user_id
     membership.save()
@@ -83,11 +85,11 @@ def factory_membership_model(user_id, org_id, member_type='ADMIN', member_status
 def factory_contact_model():
     """Return a valid contact object with the provided fields."""
     contact_info = {
-        'email': 'foo@bar.com',
-        'phone': '(555) 555-5555',
-        'phoneExtension': '123'
+        "email": "foo@bar.com",
+        "phone": "(555) 555-5555",
+        "phoneExtension": "123",
     }
-    contact = ContactModel(email=contact_info['email'])
+    contact = ContactModel(email=contact_info["email"])
     contact.save()
     return contact
 
@@ -96,8 +98,8 @@ class TestUserInfo(dict, Enum):
     """Test scenarios of user."""
 
     user1 = {
-        'username': 'foo',
-        'firstname': 'bar',
-        'lastname': 'User',
-        'keycloak_guid': uuid.uuid4()
+        "username": "foo",
+        "firstname": "bar",
+        "lastname": "User",
+        "keycloak_guid": uuid.uuid4(),
     }

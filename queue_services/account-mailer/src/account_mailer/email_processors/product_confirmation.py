@@ -32,12 +32,12 @@ def process_attachment(email_dict: dict, attachment_type: str) -> dict:
         return email_dict
 
     pdf_attachment = _get_pdf(attachment_name)
-    email_dict['content']['attachments'] = [
+    email_dict["content"]["attachments"] = [
         {
-            'fileName': attachment_name,
-            'fileBytes': pdf_attachment.decode('utf-8'),
-            'fileUrl': '',
-            'attachOrder': '1'
+            "fileName": attachment_name,
+            "fileBytes": pdf_attachment.decode("utf-8"),
+            "fileUrl": "",
+            "attachOrder": "1",
         }
     ]
 
@@ -46,7 +46,7 @@ def process_attachment(email_dict: dict, attachment_type: str) -> dict:
 
 def _get_attachment_name(attachment_type: str) -> str:
     if attachment_type == AttachmentTypes.QUALIFIED_SUPPLIER.value:
-        return current_app.config['MHR_QS_AGREEMENT_FILE']
+        return current_app.config["MHR_QS_AGREEMENT_FILE"]
 
     return None
 
@@ -54,8 +54,9 @@ def _get_attachment_name(attachment_type: str) -> str:
 def _get_pdf(pad_tos_file_name: str):
 
     read_pdf = None
-    store_blob = google_store.GoogleStoreService.download_file_from_bucket(current_app.config['ACCOUNT_MAILER_BUCKET'],
-                                                                           pad_tos_file_name)
+    store_blob = google_store.GoogleStoreService.download_file_from_bucket(
+        current_app.config["ACCOUNT_MAILER_BUCKET"], pad_tos_file_name
+    )
     if store_blob:
         read_pdf = base64.b64encode(store_blob)
 
