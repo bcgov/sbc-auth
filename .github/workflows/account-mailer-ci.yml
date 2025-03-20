@@ -20,7 +20,7 @@ defaults:
     working-directory: ./queue_services/account-mailer
 
 jobs:
-  auth-api-ci:
+  account-mailer-ci:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-ci.yaml@main
     with:
       app_name: "account-mailer"
