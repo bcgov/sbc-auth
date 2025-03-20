@@ -56,9 +56,10 @@ jobs:
   testing:
     needs: setup-job
     env:
-      DATABASE_TEST_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
+      DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
       USE_TEST_KEYCLOAK_DOCKER: "YES"
       USE_DOCKER_MOCK: "YES"
+      USE_POSTGRES_MOCK: "YES"
       JWT_OIDC_ISSUER: "http://localhost:8081/auth/realms/demo"
       SBC_AUTH_ADMIN_CLIENT_ID: "sbc-auth-admin"
       SBC_AUTH_ADMIN_CLIENT_SECRET: "2222222222"
