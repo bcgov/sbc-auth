@@ -22,7 +22,7 @@
 
     <!-- Staff - Breadcrumbs / Back Navigation -->
     <nav
-      v-if="isStaff"
+      v-if="isStaff || isExternalStaff"
       class="crumbs py-6"
       aria-label="breadcrumb"
     >
@@ -42,7 +42,7 @@
 
     <!-- Back Button -->
     <nav
-      v-if="!isDirSearchUser && !isStaff"
+      v-if="!isDirSearchUser && !isStaff && !isExternalStaff"
       class="crumbs py-6"
       aria-label="breadcrumb"
     >
@@ -185,7 +185,6 @@
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
               <v-list-item
-                v-if="isAdmin"
                 v-can:VIEW_REQUEST_PRODUCT_PACKAGE.hide
                 dense
                 class="py-1 px-4"
@@ -221,7 +220,6 @@
                 ACCOUNT ACTIVITY
               </v-subheader>
               <v-list-item
-                v-if="isPremiumAccount || isSbcStaffAccount || isStaffAccount"
                 v-can:MANAGE_STATEMENTS.hide
                 dense
                 class="py-1 px-4"
@@ -241,7 +239,7 @@
                 <v-list-item-title>Statements</v-list-item-title>
               </v-list-item>
               <v-list-item
-                v-can:MANAGE_STATEMENTS.hide
+                v-can:TRANSACTION_HISTORY.hide
                 dense
                 class="py-1 px-4"
                 aria-label="Account Transactions"
@@ -334,7 +332,7 @@
 <script lang="ts">
 import { AccountStatus, LoginSource, Pages, Permission, Role } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { Member, MembershipType, Organization } from '@/models/Organization'
+import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import AccountInactiveAlert from '@/components/auth/common/AccountInactiveAlert.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
@@ -361,15 +359,17 @@ import { useUserStore } from '@/stores/user'
     },
     methods: {
       ...mapActions(useOrgStore, [
-        'syncOrganization'
+        'syncOrganization',
+        'syncMembership'
       ])
     }
   })
 export default class AccountSettings extends Mixins(AccountMixin) {
-  @Prop({ default: '' }) private orgId: string
+  @Prop({ default: -1 }) private orgId: number
   private readonly currentMembership!: Member
   private readonly currentUser!: KCUserProfile
   protected readonly syncOrganization!: (orgId: number) => Promise<Organization>
+  protected readonly syncMembership!: (orgId: number) => Promise<Member>
   private isLoading = true
   private isDirSearchUser: boolean = false
   private dirSearchUrl = ConfigHelper.getDirectorSearchURL()
@@ -377,17 +377,17 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private readonly permissions!: string[]
 
   private handleBackButton (): void {
-    this.isStaff
+    this.isStaff || this.isExternalStaff
       ? this.$router.push(Pages.STAFF_DASHBOARD)
       : window.location.assign(ConfigHelper.getBcrosDashboardURL())
   }
 
   private get isStaff ():boolean {
-    return this.currentUser.roles.includes(Role.Staff) || this.currentUser.roles.includes(Role.ContactCentreStaff)
+    return this.currentUser.roles.includes(Role.Staff)
   }
 
-  private get isAdmin ():boolean {
-    return this.currentMembership.membershipTypeCode === MembershipType.Admin
+  private get isExternalStaff ():boolean {
+    return this.currentUser.roles.includes(Role.ExternalStaffReadonly)
   }
 
   private get accountInfoUrl (): string {
@@ -436,7 +436,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   // show baner for staff user and account suspended
   private get showAccountFreezeBanner () {
-    return this.isStaff && (
+    return (this.isStaff || this.isExternalStaff) && (
       this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED ||
       this.currentOrganization?.statusCode === AccountStatus.SUSPENDED
     )
@@ -444,36 +444,16 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   // show baner for staff user and account inactive
   private get showInactiveFreezeBanner () {
-    return this.isStaff && (
+    return (this.isStaff || this.isExternalStaff) && (
       this.currentOrganization?.statusCode === AccountStatus.INACTIVE
     )
   }
 
   private async mounted () {
+    await this.syncOrganization(this.orgId)
+    await this.syncMembership(this.orgId)
     this.isLoading = false
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
-    if (this.$route.query?.tryOrgRefresh === 'true') {
-      this.isLoading = true
-      let count = 0
-      let timerId = setInterval(async () => {
-        // eslint-disable-next-line no-console
-        console.log(`[OrgRefreshTimer] Org refresh ${++count}`)
-        if (this.currentOrganization?.statusCode !== AccountStatus.ACTIVE) {
-          await this.syncOrganization(this.currentOrganization?.id)
-        } else {
-          // eslint-disable-next-line no-console
-          console.log('[OrgRefreshTimer] Org refresh stopped (ACTIVE)')
-          clearInterval(timerId)
-          this.isLoading = false
-        }
-      }, 3000)
-      setTimeout(() => {
-        // eslint-disable-next-line no-console
-        console.log('[OrgRefreshTimer] Org refresh stopped')
-        clearInterval(timerId)
-        this.isLoading = false
-      }, 10000)
-    }
   }
 }
 </script>

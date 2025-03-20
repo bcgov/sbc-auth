@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import {
   Member,
   MembershipType,
@@ -49,12 +49,13 @@ import { useOrgStore } from '@/stores/org'
 
 })
 export default class OrgAdminContact extends Vue {
+  @Prop() private orgId: number
   private activeOrgMembers!: Member[]
-  private readonly syncActiveOrgMembers!: () => Member[]
+  private readonly syncActiveOrgMembers!: (orgId: number) => Member[]
   private readonly currentOrganization!: Organization
 
   private async mounted () {
-    this.syncActiveOrgMembers()
+    this.syncActiveOrgMembers(this.orgId)
   }
 
   private get getActiveAdmins (): Member[] {

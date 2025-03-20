@@ -333,11 +333,11 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 KeycloakService.remove_from_account_holders_group(model.user.keycloak_guid)
 
         # Add or Remove from STAFF group in keycloak
-        Membership._add_or_remove_group_for_staff(model)
+        Membership.add_or_remove_group_for_staff(model)
         ProductService.update_users_products_keycloak_groups([model.user.id])
 
     @staticmethod
-    def _add_or_remove_group_for_staff(model: MembershipModel):
+    def add_or_remove_group_for_staff(model: MembershipModel):
         mapping_group = org_type_to_group_mapping.get(model.org.type_code)
         if not mapping_group:
             return
