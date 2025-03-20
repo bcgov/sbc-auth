@@ -43,7 +43,6 @@ def delete_all_objects(bucket_name):
     # Delete all objects in the bucket
     for blob in bucket.list_blobs():
         blob.delete()
-        print(f"Deleted object: {blob.name}")
 
 
 def create_bucket(bucket_name):
@@ -55,13 +54,10 @@ def create_bucket(bucket_name):
     storage_client = storage.Client()
 
     # Create the bucket
-    try:
-        bucket = storage_client.create_bucket(bucket_name)
-        print(f"Bucket '{bucket_name}' created successfully.")
-    except Exception as e:
-        print(f"Bucket creation failed: {e}")
-        bucket = storage_client.bucket(bucket_name)
+    bucket = storage_client.create_bucket(bucket_name)
+
     return bucket
+
 
 def delete_bucket(bucket_name):
     """Delete a bucket from the Fake GCS Server."""
@@ -75,12 +71,7 @@ def delete_bucket(bucket_name):
     # Get the bucket
     bucket = storage_client.bucket(bucket_name)
 
-    # Delete the bucket
-    try:
-        bucket.delete()
-        print(f"Bucket '{bucket_name}' deleted successfully.")
-    except Exception as e:
-        print(f"Failed to delete bucket '{bucket_name}': {e}")
+    bucket.delete()
 
 
 def test_refund_request(app, session, client):
@@ -458,25 +449,14 @@ def test_ejv_failure_emails(app, session, client):
 
             # Create the bucket in the GCS emulator
             create_bucket(gcs_bucket)
-            x=''
             # Create a temporary file for testing
             with open(gcs_file_name, 'w') as jv_file:
                 jv_file.write('TEST')
-           
             # Upload the file to the GCS emulator
-            with open(gcs_file_name, 'rb') as f:
-                x = google_store.GoogleStoreService.upload_file_to_bucket(gcs_bucket, gcs_file_name, gcs_file_name)
-
-            storage_client = storage.Client()
-
-            # Get the bucket
-            bucket = storage_client.bucket(gcs_bucket)
-            # Verify the file was uploaded to the GCS emulator
-            blobs = list(bucket.list_blobs())
-            print(f"Files in bucket: {[blob.name for blob in blobs]}")  # Debugging: List files in the bucket
+            google_store.GoogleStoreService.upload_file_to_bucket(gcs_bucket, gcs_file_name, gcs_file_name)
 
             file_content = google_store.GoogleStoreService.download_file_from_bucket(gcs_bucket, gcs_file_name)
-            assert file_content == b'TEST', f"File content mismatch: {file_content}"
+            assert file_content == b'TEST', f'File content mismatch: {file_content}'
 
             # Add an event to the queue
             mail_details = {
@@ -486,18 +466,16 @@ def test_ejv_failure_emails(app, session, client):
 
             # Ensure Pub/Sub emulator is correctly set up
             helper_add_event_to_queue(client,
-                                    message_type=QueueMessageTypes.EJV_FAILED.value,
-                                    mail_details=mail_details)
+                                      message_type=QueueMessageTypes.EJV_FAILED.value,
+                                      mail_details=mail_details)
 
             # Verify the email was sent
             mock_send.assert_called()
             assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
             assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.EJV_FAILED.value
-    except Exception as e:
-        print(e)
     finally:
         delete_bucket(gcs_bucket)
-        
+
 
 def test_passcode_reset_email(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
