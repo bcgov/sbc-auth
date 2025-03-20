@@ -451,6 +451,9 @@ class Invitation:
 
                 Invitation._publish_activity_if_active(membership_model, user_from_context)
 
+                if org_model.access_type == AccessType.GOVM.value:
+                    MembershipService.add_or_remove_group_for_staff(membership_model)
+
                 # Create staff review task.
                 Invitation._create_affidavit_review_task(org_model, membership_model)
                 try:

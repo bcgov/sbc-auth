@@ -12,6 +12,8 @@ import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import { Transactions } from '@/components/auth/account-settings/transaction'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
+import { createI18n } from 'vue-i18n-composable'
+import { staffPermissions } from '../../test-utils/test-data/permissions'
 
 const vuetify = new Vuetify({})
 
@@ -30,6 +32,7 @@ describe('StaffDashboardView tests', () => {
     orgStore.currentOrgPaymentDetails = { accountId: 123 } as any
     orgStore.currentOrganization = { id: 123 } as any
     orgStore.currentMembership = { membershipTypeCode: MembershipType.Admin } as any
+    orgStore.syncStaffPermissions = vi.fn().mockResolvedValue(staffPermissions)
 
     const userStore = useUserStore()
     userStore.currentUser = {
@@ -47,9 +50,20 @@ describe('StaffDashboardView tests', () => {
     staffStore.pendingInvitationOrgs = []
     staffStore.suspendedStaffOrgs = []
 
+    const i18n = createI18n({
+      locale: 'en',
+      messages: {
+        en: {
+          viewAllProductsLauncherTitle: 'View All Products',
+          viewAllProductsLauncherText: 'Click here to view all products'
+        }
+      }
+    })
+
     wrapper = mount(StaffDashboardView, {
       localVue,
       vuetify,
+      i18n,
       stubs: ['Transactions', 'StaffAccountManagement', 'ContinuationApplications', 'PPRLauncher', 'GLCodesListView']
     })
   })

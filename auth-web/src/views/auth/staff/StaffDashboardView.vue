@@ -135,7 +135,7 @@
         <PPRLauncher />
       </v-col>
       <v-col
-        v-if="isContactCentreStaff"
+        v-if="canViewAllProductsLauncher"
         class="pr-2"
         cols="6"
       >
@@ -154,7 +154,8 @@
 
     <!-- Continuation Applications -->
     <v-card
-      v-can:VIEW_CONTINUATION_AUTHORIZATION_REVIEWS.hide
+      v-if="canViewContinuationAuthorization"
+      v-can:VIEW_CONTINUATION_AUTHORIZATION_REVIEWS.card
       flat
       class="mb-4 pa-8"
     >
@@ -315,8 +316,17 @@
 
 <script lang="ts">
 import { BaseVExpansionPanel, LaunchTile } from '@/components'
-import { ComputedRef, Ref, computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
-import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
+import {
+  ComputedRef,
+  Ref,
+  computed,
+  defineComponent,
+  onBeforeMount,
+  reactive,
+  ref,
+  toRefs
+} from '@vue/composition-api'
+import { LDFlags, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import AllProductsLauncher from '@/components/auth/staff/AllProductsLauncher.vue'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -392,7 +402,7 @@ export default defineComponent({
       canViewAllTransactions: computed((): boolean => currentUser.value?.roles?.includes(Role.ViewAllTransactions)),
       canViewEFTPayments: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageEft)),
       canViewGLCodes: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageGlCodes)),
-      isContactCentreStaff: computed(() => currentUser.value?.roles?.includes(Role.ContactCentreStaff)),
+      canViewContinuationAuthorization: computed((): boolean => currentUser.value?.roles?.includes(Role.Staff)),
       canViewIncorporationSearchResult: false,
       errorMessage: '',
       isFasDashboardEnabled: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
@@ -403,7 +413,10 @@ export default defineComponent({
       showBusSearchlink: computed((): boolean => true),
       showInvoluntaryDissolutionTile: computed((): boolean =>
         LaunchDarklyService.getFlag(LDFlags.EnableInvoluntaryDissolution) || false),
-      showDrsTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableDRSLookup) || false)
+      showDrsTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableDRSLookup) || false),
+      canViewAllProductsLauncher: computed((): boolean =>
+        orgStore.permissions.includes(Permission.VIEW_ALL_PRODUCTS_LAUNCHER) || false
+      )
     }) as unknown) as StaffDashboardViewI
 
     const isFormValid = () => localVars.searchIdentifier && searchIdentifierForm.value?.validate()
@@ -431,6 +444,10 @@ export default defineComponent({
         actionLabel: 'Open'
       }
     ]
+
+    onBeforeMount(async () => {
+      await orgStore.syncStaffPermissions()
+    })
 
     const isFilingID = (identifier: string) => {
     // Check if the identifier contains only numeric characters
