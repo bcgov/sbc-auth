@@ -1,6 +1,6 @@
 import '../test-utils/composition-api-setup' // important to import this first
+import { Account, Permission } from '@/util/constants'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import { Account } from '@/util/constants'
 import { MembershipType } from '@/models/Organization'
 import { Transactions } from '@/components/auth/account-settings/transaction'
 import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
@@ -26,6 +26,7 @@ async function beforeEachSetup (wrapper: any, sandbox: any, accountType: Account
   orgStore.currentOrganization = { id: 123, orgType: accountType } as any
   orgStore.getOrgPayments = vi.fn(() => { return { credit: 0 } }) as any
   orgStore.currentMembership = { membershipTypeCode: MembershipType.Admin } as any
+  orgStore.permissions = [Permission.TRANSACTION_HISTORY]
 
   // stub get transactions get call
   sandbox = sinon.createSandbox()
