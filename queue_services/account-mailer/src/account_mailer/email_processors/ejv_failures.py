@@ -69,6 +69,6 @@ def _get_jv_file(file_location: str, file_name: str):
     file = None
     store_blob = google_store.GoogleStoreService.download_file_from_bucket(file_location, file_name)
     if store_blob:
-        file = base64.b64encode(store_blob.data)
+        file = base64.b64encode(store_blob)
 
     return file

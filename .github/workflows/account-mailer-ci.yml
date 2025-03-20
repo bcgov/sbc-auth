@@ -62,11 +62,6 @@ jobs:
       JWT_OIDC_ISSUER: "http://localhost:8081/auth/realms/demo"
       SBC_AUTH_ADMIN_CLIENT_ID: "sbc-auth-admin"
       SBC_AUTH_ADMIN_CLIENT_SECRET: "2222222222"
-      MINIO_ENDPOINT: "localhost:9000"
-      MINIO_ACCESS_KEY: "minio"
-      MINIO_ACCESS_SECRET: "minio123"
-      MINIO_BUCKET_NAME: "payment-sftp"
-      MINIO_SECURE: False
       BCOL_ADMIN_EMAIL: "test@test.com"
 
     runs-on: ubuntu-24.04
@@ -76,7 +71,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:12
+        image: postgres:15
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres

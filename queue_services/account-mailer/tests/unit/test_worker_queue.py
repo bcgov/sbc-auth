@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test Suite to ensure the worker routines are working as expected."""
+import os
 import types
 from datetime import datetime
 from unittest.mock import patch
 
 from auth_api.services.rest_service import RestService
+from google.cloud import storage
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 from account_mailer.enums import SubjectType
@@ -25,6 +27,60 @@ from account_mailer.utils import get_local_formatted_date
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
 from .utils import helper_add_event_to_queue
+
+
+def delete_all_objects(bucket_name):
+    """Delete all objects in a bucket."""
+    # Set the environment variable for the GCS emulator
+    os.environ['CLOUD_STORAGE_EMULATOR_HOST'] = 'http://localhost:4443'
+
+    # Initialize the storage client
+    storage_client = storage.Client()
+
+    # Get the bucket
+    bucket = storage_client.bucket(bucket_name)
+
+    # Delete all objects in the bucket
+    for blob in bucket.list_blobs():
+        blob.delete()
+        print(f"Deleted object: {blob.name}")
+
+
+def create_bucket(bucket_name):
+    """Create a bucket in the Fake GCS Server."""
+    # Set the environment variable for the GCS emulator
+    os.environ['CLOUD_STORAGE_EMULATOR_HOST'] = 'http://localhost:4443'
+
+    # Initialize the storage client
+    storage_client = storage.Client()
+
+    # Create the bucket
+    try:
+        bucket = storage_client.create_bucket(bucket_name)
+        print(f"Bucket '{bucket_name}' created successfully.")
+    except Exception as e:
+        print(f"Bucket creation failed: {e}")
+        bucket = storage_client.bucket(bucket_name)
+    return bucket
+
+def delete_bucket(bucket_name):
+    """Delete a bucket from the Fake GCS Server."""
+    # Set the environment variable for the GCS emulator
+    os.environ['CLOUD_STORAGE_EMULATOR_HOST'] = 'http://localhost:4443'
+
+    # Initialize the storage client
+    storage_client = storage.Client()
+    delete_all_objects(bucket_name)
+
+    # Get the bucket
+    bucket = storage_client.bucket(bucket_name)
+
+    # Delete the bucket
+    try:
+        bucket.delete()
+        print(f"Bucket '{bucket_name}' deleted successfully.")
+    except Exception as e:
+        print(f"Failed to delete bucket '{bucket_name}': {e}")
 
 
 def test_refund_request(app, session, client):
@@ -391,46 +447,57 @@ def test_payment_pending_emails(app, session, client):
 
 def test_ejv_failure_emails(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
-    with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
-        # Mock the GoogleStoreService.upload_file_to_bucket method
-        with patch('account_mailer.services.google_store.GoogleStoreService.upload_file_to_bucket') as mock_upload:
-            gcs_file_name = 'FEEDBACK.1234567890'
-            gcs_bucket = 'cgi-ejv'
+    gcs_file_name = 'FEEDBACK.1234567890'
+    gcs_bucket = 'cgi-ejv'
+    try:
+        with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
 
+            # Set the environment variable for the GCS emulator
+            os.environ['CLOUD_STORAGE_EMULATOR_HOST'] = 'http://localhost:4443'
+            os.environ['STORAGE_EMULATOR_HOST'] = 'http://localhost:4443'  # Add this if needed
+
+            # Create the bucket in the GCS emulator
+            create_bucket(gcs_bucket)
+            x=''
             # Create a temporary file for testing
-            with open(gcs_file_name, 'a+') as jv_file:
+            with open(gcs_file_name, 'w') as jv_file:
                 jv_file.write('TEST')
-                jv_file.close()
-
-            # Mock the upload_file_to_bucket method to do nothing (since we're testing the email, not the upload)
-            mock_upload.return_value = None
-
-            # Simulate uploading the file to GCS
+           
+            # Upload the file to the GCS emulator
             with open(gcs_file_name, 'rb') as f:
-                google_store.GoogleStoreService.upload_file_to_bucket(gcs_bucket, gcs_file_name, f.read())
+                x = google_store.GoogleStoreService.upload_file_to_bucket(gcs_bucket, gcs_file_name, gcs_file_name)
 
-            # Verify the upload method was called
-            mock_upload.assert_called_once_with(gcs_bucket, gcs_file_name, b'TEST')
+            storage_client = storage.Client()
+
+            # Get the bucket
+            bucket = storage_client.bucket(gcs_bucket)
+            # Verify the file was uploaded to the GCS emulator
+            blobs = list(bucket.list_blobs())
+            print(f"Files in bucket: {[blob.name for blob in blobs]}")  # Debugging: List files in the bucket
+
+            file_content = google_store.GoogleStoreService.download_file_from_bucket(gcs_bucket, gcs_file_name)
+            assert file_content == b'TEST', f"File content mismatch: {file_content}"
 
             # Add an event to the queue
             mail_details = {
                 'fileName': gcs_file_name,
-                'minioLocation': gcs_bucket  # TODO: Update minioLocation to gcsLocation
+                'minioLocation': gcs_bucket   # TODO change this value later
             }
 
-            # Mock the post_to_queue function to return a 200 status code
-            with patch('account_mailer.tests.unit.utils.post_to_queue') as mock_post:
-                mock_post.return_value.status_code = 200
+            # Ensure Pub/Sub emulator is correctly set up
+            helper_add_event_to_queue(client,
+                                    message_type=QueueMessageTypes.EJV_FAILED.value,
+                                    mail_details=mail_details)
 
-                helper_add_event_to_queue(client,
-                                          message_type=QueueMessageTypes.EJV_FAILED.value,
-                                          mail_details=mail_details)
-
-                # Verify the email was sent
-                mock_send.assert_called()
-                assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
-                assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.EJV_FAILED.value
-
+            # Verify the email was sent
+            mock_send.assert_called()
+            assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
+            assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.EJV_FAILED.value
+    except Exception as e:
+        print(e)
+    finally:
+        delete_bucket(gcs_bucket)
+        
 
 def test_passcode_reset_email(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""

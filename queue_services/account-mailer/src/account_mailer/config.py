@@ -146,24 +146,25 @@ class DevConfig(_Config):  # pylint: disable=too-few-public-methods
 
 
 class TestConfig(_Config):  # pylint: disable=too-few-public-methods
-    """In support of testing only.
+    """In support of unit testing only.
 
     Used by the py.test suite
     """
 
     DEBUG = True
     TESTING = True
-    # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
-    DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
+    DB_USER = os.getenv('DATABASE_TEST_USERNAME', 'postgres')
+    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', 'postgres')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME', 'postgres')
+    DB_HOST = os.getenv('DATABASE_TEST_HOST', 'localhost')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
+    os.environ['CLOUD_STORAGE_EMULATOR_HOST'] = 'http://localhost:4443'
+    os.environ['PUBSUB_EMULATOR_HOST'] = 'localhost:8085'
+
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_TEST_URL',
         default=f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}',  # noqa: E231
     )
-
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_TEST_ISSUER')
     # Service account details
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')

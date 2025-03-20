@@ -57,6 +57,6 @@ def _get_pdf(pad_tos_file_name: str):
     store_blob = google_store.GoogleStoreService.download_file_from_bucket(current_app.config['ACCOUNT_MAILER_BUCKET'],
                                                                            pad_tos_file_name)
     if store_blob:
-        read_pdf = base64.b64encode(store_blob.data)
+        read_pdf = base64.b64encode(store_blob)
 
     return read_pdf
