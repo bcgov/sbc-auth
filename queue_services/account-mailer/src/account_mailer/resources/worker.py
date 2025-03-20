@@ -27,26 +27,12 @@ from flask import Blueprint, request
 from sbc_common_components.utils.enums import QueueMessageTypes
 from structured_logging import StructuredLogging
 
-from account_mailer.auth_utils import (
-    get_login_url,
-    get_member_emails,
-    get_transaction_url,
-)
+from account_mailer.auth_utils import get_login_url, get_member_emails, get_transaction_url
 from account_mailer.email_processors import (
-    account_unlock,
-    common_mailer,
-    ejv_failures,
-    pad_confirmation,
-    product_confirmation,
-    refund_requested,
-)
+    account_unlock, common_mailer, ejv_failures, pad_confirmation, product_confirmation, refund_requested)
 from account_mailer.enums import Constants, SubjectType, TemplateType, TitleType
 from account_mailer.services import google_store, notification_service
-from account_mailer.utils import (
-    format_currency,
-    format_day_with_suffix,
-    get_local_formatted_date,
-)
+from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
 
 
 bp = Blueprint("worker", __name__)

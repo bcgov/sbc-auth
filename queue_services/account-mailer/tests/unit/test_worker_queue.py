@@ -25,11 +25,7 @@ from account_mailer.enums import SubjectType
 from account_mailer.services import google_store, notification_service
 from account_mailer.utils import get_local_formatted_date
 
-from . import (
-    factory_membership_model,
-    factory_org_model,
-    factory_user_model_with_contact,
-)
+from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
 from .utils import helper_add_event_to_queue
 
 

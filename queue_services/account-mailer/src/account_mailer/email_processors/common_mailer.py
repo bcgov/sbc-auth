@@ -17,11 +17,7 @@ from flask import current_app
 from jinja2 import Template
 from structured_logging import StructuredLogging
 
-from account_mailer.auth_utils import (
-    get_dashboard_url,
-    get_login_url,
-    get_payment_statements_url,
-)
+from account_mailer.auth_utils import get_dashboard_url, get_login_url, get_payment_statements_url
 from account_mailer.email_processors import generate_template
 
 
