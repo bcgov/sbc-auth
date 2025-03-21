@@ -23,60 +23,58 @@ from structured_logging import StructuredLogging
 
 from account_mailer.email_processors import generate_template
 
-
 logger = StructuredLogging.get_logger()
 
 
 def process(data: dict, token: str) -> dict:
     """Build the email for Account Unlocked notification."""
-    logger.debug('email_msg notification: %s', data)
+    logger.debug("email_msg notification: %s", data)
     pdf_attachment = _get_account_unlock_pdf(data, token)
     html_body = _get_account_unlock_email(data)
     return {
-        'recipients': data.get('admin_coordinator_emails'),
-        'content': {
-            'subject': data.get('subject'),
-            'body': f'{html_body}',
-            'attachments': [
+        "recipients": data.get("admin_coordinator_emails"),
+        "content": {
+            "subject": data.get("subject"),
+            "body": f"{html_body}",
+            "attachments": [
                 {
-                    'fileName': 'Account_Unlock_Receipt.pdf',
-                    'fileBytes': pdf_attachment.decode('utf-8'),
-                    'fileUrl': '',
-                    'attachOrder': '1'
+                    "fileName": "Account_Unlock_Receipt.pdf",
+                    "fileBytes": pdf_attachment.decode("utf-8"),
+                    "fileUrl": "",
+                    "attachOrder": "1",
                 }
-            ]
-        }
+            ],
+        },
     }
 
 
 def _get_account_unlock_email(email_msg):
-    filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), email_msg.get('template_name'))
+    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), email_msg.get("template_name"))
     jnja_template = Template(filled_template, autoescape=True)
-    html_out = jnja_template.render(
-        account_name=email_msg.get('account_name'),
-        logo_url=email_msg.get('logo_url')
-    )
+    html_out = jnja_template.render(account_name=email_msg.get("account_name"), logo_url=email_msg.get("logo_url"))
     return html_out
 
 
 def _get_account_unlock_pdf(data, token):
     pdf_payload = {
-        'reportName': 'NSF_Fee_Receipt',
-        'templateVars': data['template_vars'],
-        'populatePageNumber': True,
-        'templateName': 'payment_receipt',
+        "reportName": "NSF_Fee_Receipt",
+        "templateVars": data["template_vars"],
+        "populatePageNumber": True,
+        "templateName": "payment_receipt",
     }
 
-    report_response = RestService.post(endpoint=current_app.config.get('REPORT_API_BASE_URL'),
-                                       token=token,
-                                       auth_header_type=AuthHeaderType.BEARER,
-                                       content_type=ContentType.JSON,
-                                       data=pdf_payload,
-                                       raise_for_status=True,
-                                       additional_headers={'Accept': 'application/pdf'})
+    report_response = RestService.post(
+        endpoint=current_app.config.get("REPORT_API_BASE_URL"),
+        token=token,
+        auth_header_type=AuthHeaderType.BEARER,
+        content_type=ContentType.JSON,
+        data=pdf_payload,
+        raise_for_status=True,
+        additional_headers={"Accept": "application/pdf"},
+    )
     pdf_attachment = None
     if report_response.status_code != 200:
-        logger.error('Failed to get pdf')
+        logger.error("Failed to get pdf")
     else:
         pdf_attachment = base64.b64encode(report_response.content)
 

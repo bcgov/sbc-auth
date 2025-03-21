@@ -20,7 +20,6 @@ from flask import current_app
 from minio import Minio
 from structured_logging import StructuredLogging
 
-
 logger = StructuredLogging.get_logger()
 
 

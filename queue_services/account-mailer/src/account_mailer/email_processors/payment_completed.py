@@ -19,10 +19,10 @@ def process(email_msg: dict) -> dict:
     # TODO Replace this file
 
     return {
-        'recipients': '',
-        'content': {
-            'subject': 'Payment Complete',
-            'body': email_msg.get('body'),
-            'attachments': []
-        }
+        "recipients": "",
+        "content": {
+            "subject": "Payment Complete",
+            "body": email_msg.get("body"),
+            "attachments": [],
+        },
     }

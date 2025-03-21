@@ -25,40 +25,40 @@ from account_mailer.version import __version__
 
 
 def _get_build_openshift_commit_hash():
-    return os.getenv('OPENSHIFT_BUILD_COMMIT', None)
+    return os.getenv("OPENSHIFT_BUILD_COMMIT", None)
 
 
 def get_run_version():
     """Return a formatted version string for this service."""
     commit_hash = _get_build_openshift_commit_hash()
     if commit_hash:
-        return f'{__version__}-{commit_hash}'
+        return f"{__version__}-{commit_hash}"
     return __version__
 
 
 def get_local_time(date_val: datetime):
     """Return local time value."""
-    tz_name = current_app.config['LEGISLATIVE_TIMEZONE']
+    tz_name = current_app.config["LEGISLATIVE_TIMEZONE"]
     tz_local = pytz.timezone(tz_name)
     date_val = date_val.astimezone(tz_local)
     return date_val
 
 
-def get_local_formatted_date(date_val: datetime, dt_format: str = '%Y-%m-%d'):
+def get_local_formatted_date(date_val: datetime, dt_format: str = "%Y-%m-%d"):
     """Return formatted local time."""
     return get_local_time(date_val).strftime(dt_format)
 
 
 def format_currency(amount: str):
     """Format currency to two decimal places."""
-    return f'{float(amount):0,.2f}'   # noqa: E231
+    return f"{float(amount):0,.2f}"  # noqa: E231
 
 
 def format_day_with_suffix(day: int) -> str:
     """Format a day with its suffix."""
     # e.g 15 --> 15th
     if 11 <= day <= 13:
-        suffix = 'th'
+        suffix = "th"
     else:
-        suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
-    return f'{day}{suffix}'
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+    return f"{day}{suffix}"
