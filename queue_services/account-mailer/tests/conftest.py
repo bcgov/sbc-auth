@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
+import os
 import random
 import time
 from concurrent.futures import CancelledError
@@ -24,6 +25,13 @@ from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 
 from account_mailer import create_app
+
+
+def find_subpath(root_dir, target_subpath):
+    for root, dirs, files in os.walk(root_dir):
+        if target_subpath in os.path.join(root, "").replace("\\", "/"):  # Ensure cross-platform compatibility
+            return os.path.join(root, "")
+    return None
 
 
 @contextmanager
@@ -81,12 +89,17 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         # This is the path we'll use in legal_api!!
 
         # even though this isn't referenced directly, it sets up the internal configs that upgrade
-        import os
 
-        auth_api_dir = os.path.abspath(".").replace("account-mailer", "auth-api")
-        auth_api_dir = os.path.join(auth_api_dir, "migrations")
+        root_directory = os.pardir
+        target_subpath = "auth-api/migrations"
 
-        Migrate(app, _db, directory=auth_api_dir)
+        result = find_subpath(root_directory, target_subpath)
+        if result:
+            print(f"Found: {result}")
+        else:
+            print("Subpath not found")
+
+        Migrate(app, _db, directory=result)
         upgrade()
 
         return _db
