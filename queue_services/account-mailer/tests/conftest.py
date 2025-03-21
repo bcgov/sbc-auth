@@ -91,14 +91,14 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
 
         # even though this isn't referenced directly, it sets up the internal configs that upgrade
 
-        root_directory = '/home/runner'
+        root_directory = os.pardir
         target_subpath = "auth-api/migrations"
 
         result = find_subpath(root_directory, target_subpath)
-        if result:
-            print(f"Found: {result}")
-        else:
-            print("Subpath not found")
+        
+        if not result:
+            root_directory = '/home/runner'
+            result = find_subpath(root_directory, target_subpath)
 
         Migrate(app, _db, directory=result)
         upgrade()
