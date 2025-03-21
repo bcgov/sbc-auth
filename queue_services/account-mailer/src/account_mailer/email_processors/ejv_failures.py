@@ -21,7 +21,9 @@ from structured_logging import StructuredLogging
 
 from account_mailer.email_processors import generate_template
 from account_mailer.enums import SubjectType, TemplateType
-from account_mailer.services import google_store
+# from account_mailer.services import google_store
+from account_mailer.services import minio_service
+
 
 logger = StructuredLogging.get_logger()
 
@@ -66,8 +68,11 @@ def _get_body(email_msg: dict):
 
 def _get_jv_file(file_location: str, file_name: str):
     file = None
-    store_blob = google_store.GoogleStoreService.download_file_from_bucket(file_location, file_name)
-    if store_blob:
-        file = base64.b64encode(store_blob)
+    # store_blob = google_store.GoogleStoreService.download_file_from_bucket(file_location, file_name)
+    # if store_blob:
+    #     file = base64.b64encode(store_blob)
+    minio_object = minio_service.MinioService.get_minio_file(file_location, file_name)
+    if minio_object:
+        file = base64.b64encode(minio_object.data)
 
     return file

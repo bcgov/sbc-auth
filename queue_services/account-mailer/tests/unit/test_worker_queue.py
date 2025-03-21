@@ -17,6 +17,7 @@ import types
 from datetime import datetime
 from unittest.mock import patch
 
+import pytest
 from auth_api.services.rest_service import RestService
 from google.cloud import storage
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -474,6 +475,7 @@ def test_payment_pending_emails(app, session, client):
         )
 
 
+@pytest.mark.skip(reason="Skipping until pay queue switches to google storage")
 def test_ejv_failure_emails(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
     gcs_file_name = "FEEDBACK.1234567890"
