@@ -28,6 +28,7 @@ from account_mailer import create_app
 
 
 def find_subpath(root_dir, target_subpath):
+    """Auxiliary subpath search function."""
     for root, dirs, files in os.walk(root_dir):
         if target_subpath in os.path.join(root, "").replace("\\", "/"):  # Ensure cross-platform compatibility
             return os.path.join(root, "")
