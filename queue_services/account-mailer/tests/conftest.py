@@ -171,7 +171,7 @@ def auto(docker_services, app):
         docker_services.wait_for_service("keycloak", 8081)
 
     if app.config["USE_DOCKER_MOCK"]:
-        docker_services.start("postgres")
+        # docker_services.start("postgres")
         docker_services.start("notify")
         docker_services.start("gcs-emulator")
         time.sleep(10)
