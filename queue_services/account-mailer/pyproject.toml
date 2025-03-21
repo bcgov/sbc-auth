@@ -65,6 +65,7 @@ isort = "^5.13.2"
 lovely-pytest-docker = "^1.0.0"
 pytest-asyncio = "0.18.3"
 astroid = "^3.2.3"
+flake8-pyproject = "^1.2.3"
 
 [build-system]
 requires = ["poetry-core"]
@@ -101,14 +102,14 @@ exclude_dirs = [".venv","tests"]
 skips = ["B104"]
 
 [tool.flake8]
-ignore = ["F401","E402", "Q000", "E203", "W503"]
+ignore = "F401,E402,Q000,E203,W503,I004"
 exclude = [
     ".venv",
     "./venv",
     ".git",
     ".history",
     "devops",
-    "*migrations*",
+    "*migrations*"
 ]
 per-file-ignores = [
     "__init__.py:F401",
