@@ -91,7 +91,7 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
 
         # even though this isn't referenced directly, it sets up the internal configs that upgrade
 
-        root_directory = os.pardir
+        root_directory = '/home/runner'
         target_subpath = "auth-api/migrations"
 
         result = find_subpath(root_directory, target_subpath)
