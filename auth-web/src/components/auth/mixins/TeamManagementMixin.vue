@@ -10,6 +10,7 @@ import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { useAppStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -162,8 +163,7 @@ export default class TeamManagementMixin extends Vue {
       memberId: this.memberToBeRemoved.id,
       status: MembershipStatus.Rejected
     })
-    // Remove Vuex with Vue 3
-    this.$store.commit('updateHeader')
+    useAppStore().updateHeader()
     this.modal.close()
   }
 
@@ -174,16 +174,14 @@ export default class TeamManagementMixin extends Vue {
       await this.leaveTeam(this.currentMembership.id)
     }
     this.modal.close()
-    // Remove Vuex with Vue 3
-    this.$store.commit('updateHeader')
+    useAppStore().updateHeader()
     this.$router.push('/leaveteam')
   }
 
   protected async dissolve () {
     await this.leaveTeam(this.currentMembership.id)
     this.modal.close()
-    // Remove Vuex with Vue 3
-    this.$store.commit('updateHeader')
+    useAppStore().updateHeader()
     const event:Event = { message: 'Dissolved the account', type: 'error', timeout: 1000 }
     EventBus.$emit('show-toast', event)
     // remove this account from the current account session storage.Header will automatically get the next valid account

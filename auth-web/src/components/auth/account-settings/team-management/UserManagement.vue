@@ -233,6 +233,7 @@ import PendingMemberDataTable from '@/components/auth/account-settings/team-mana
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { SearchFilterParam } from '@/models/searchfilter'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
+import { useAppStore } from '@/stores'
 import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
@@ -394,7 +395,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
         memberId: this.memberToBeApproved.id,
         status: MembershipStatus.Active
       })
-      this.$store.commit('updateHeader')
+      useAppStore().updateHeader()
     } catch ({ response }) {
       this.errorTitle = 'Error Approving Access'
       this.errorText = response?.data?.message || 'An unexpected error occurred.'

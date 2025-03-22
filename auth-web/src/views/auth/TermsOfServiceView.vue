@@ -67,6 +67,7 @@ import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
+import { useAppStore } from '@/stores'
 import { useUserStore } from '@/stores/user'
 
 @Component({
@@ -102,8 +103,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   }
 
   mounted () {
-    // Remove with Vue 3
-    this.$store.commit('updateHeader')
+    useAppStore().updateHeader()
     this.isGovmUser = this.isGovmUserLoggedin()
   }
 

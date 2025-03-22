@@ -105,6 +105,7 @@ import { OrgWithAddress, Organization } from '@/models/Organization'
 import { Address } from '@/models/address'
 import { Pages } from '@/util/constants'
 import { UserSettings } from '@/models/user'
+import { useAppStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -157,8 +158,7 @@ export default class DuplicateAccountWarningView extends Vue {
     private async navigateToRedirectUrl (accountId: number): Promise<void> {
       await this.syncOrganization(accountId)
       await this.addOrgSettings(this.currentOrganization)
-      // Remove with Vue 3
-      this.$store.commit('updateHeader')
+      useAppStore().updateHeader()
       if (this.redirectToUrl) {
         window.location.assign(this.redirectToUrl.toString())
       } else {
