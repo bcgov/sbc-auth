@@ -235,7 +235,7 @@ def handle_pad_invoice_created(message_type, email_msg):
         "credit_total": format_currency(credit_total),
         "nsf_fee": format_currency(email_msg.get("nsfFee")),
         "invoice_total": format_currency(invoice_total),
-        "invoice_process_date": get_local_formatted_date(invoice_process_date, "%m-%d-%Y"),
+        "invoice_process_date": get_local_formatted_date(invoice_process_date, "%B %d, %Y"),
         "withdraw_total": format_currency(str(withdraw_total)),
         "invoice_number": email_msg.get("invoice_number", None),
         "transaction_url": get_transaction_url(org_id),
