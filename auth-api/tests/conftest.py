@@ -82,19 +82,6 @@ def client_ctx(app):  # pylint: disable=redefined-outer-name
         yield _client
 
 
-# @pytest.fixture(scope="session", autouse=True)
-# def db(app):  # pylint: disable=redefined-outer-name, invalid-name
-#     """Return a session-wide initialised database."""
-#     with app.app_context():
-#         if database_exists(_db.engine.url):
-#             drop_database(_db.engine.url)
-#         create_database(_db.engine.url)
-#         _db.session().execute(text('SET TIME ZONE "UTC";'))
-#         Migrate(app, _db)
-#         upgrade()
-#         return _db
-
-
 @pytest.fixture(scope="session")
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a session-wide initialised database.
