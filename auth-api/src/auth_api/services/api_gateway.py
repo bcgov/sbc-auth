@@ -88,7 +88,7 @@ class ApiGateway:
     @classmethod
     def _create_user_and_membership_for_api_user(cls, org_id: int, env: str):
         if flags.is_on("enable-api-gw-user-membership-creation", False) is True:
-            client_name = ApiGateway.get_client_id(org_id, env)
+            client_name = ApiGateway.get_api_client_id(org_id, env)
             client = KeycloakService.get_service_account_by_client_name(client_name)
             if (api_user := UserService.find_by_username(client_name)) is None:
                 api_user = UserService.create_user_for_api_user(client_name, client)
@@ -101,7 +101,7 @@ class ApiGateway:
         return current_app.config.get("API_GW_KEY") if env == "prod" else current_app.config.get("API_GW_NON_PROD_KEY")
 
     @staticmethod
-    def get_client_id(org_id, env):
+    def get_api_client_id(org_id, env):
         """Get the client id for the org."""
         client_id_pattern = current_app.config.get("API_GW_KC_CLIENT_ID_PATTERN")
         suffix = "-sandbox" if env != "prod" else ""
@@ -114,7 +114,7 @@ class ApiGateway:
         consumer_endpoint: str = cls._get_api_consumer_endpoint(env)
         gw_api_key = cls._get_api_gw_key(env)
         email = cls._get_email_id(org.id, env)
-        client_rep = generate_client_representation(org.id, ApiGateway.get_client_id(org.id, env))
+        client_rep = generate_client_representation(org.id, ApiGateway.get_api_client_id(org.id, env))
         KeycloakService.create_client(client_rep)
         service_account = KeycloakService.get_service_account_user(client_rep.get("id"))
 

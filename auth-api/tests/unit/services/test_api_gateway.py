@@ -14,6 +14,6 @@ def test_keycloak_test_environment():
     current_app.config["KEYCLOAK_ADMIN_USERNAME"] = os.getenv("SBC_AUTH_ADMIN_CLIENT_ID")
     current_app.config["KEYCLOAK_ADMIN_SECRET"] = os.getenv("SBC_AUTH_ADMIN_CLIENT_SECRET")
     current_app.config["API_GW_KC_CLIENT_ID_PATTERN"] = os.getenv("API_GW_KC_CLIENT_ID_PATTERN")
-    KeycloakService.get_service_account_by_client_name(ApiGateway.get_client_id(2758, "sandbox"))
+    KeycloakService.get_service_account_by_client_name(ApiGateway.get_api_client_id(2758, "sandbox"))
     ApiGateway._create_user_and_membership_for_api_user(2758, "sandbox")
     assert True
