@@ -1,6 +1,19 @@
 version: "3"
 
 services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   keycloak:
     image: quay.io/keycloak/keycloak:12.0.2
     ports:
@@ -22,19 +35,28 @@ services:
       retries: 10
     volumes:
       - ./setup:/tmp/keycloak/test/
-  nats:
-    image: nats-streaming
-    restart: always
-    expose:
-      - 4222
-      - 8222
-    labels:
-      - entity.services=nats
+  gcs-emulator:
+    image: fsouza/fake-gcs-server:latest
     ports:
-      - 4222:4222
-      - 8222:8222
-    tty: true
+      - "4443:4443"  # HTTP port for GCS emulator
+    environment:
+      - FAKE_GCS_EXTERNAL_URL=http://localhost:4443  # Use HTTP
+    command: -scheme http  # Force HTTP
+    volumes:
+      - gcs-data:/storage
 
+  pubsub-emulator:
+    image: google/cloud-sdk:latest
+    ports:
+      - "8085:8085"  # Pub/Sub emulator port
+    command: |
+      bash -c "
+      gcloud beta emulators pubsub start --host-port=0.0.0.0:8085 --project=test-project
+      "
+    environment:
+      - PUBSUB_PROJECT_ID=test-project
+    volumes:
+      - pubsub-data:/var/pubsub
   proxy:
     image: nginx:alpine
     volumes:
@@ -64,17 +86,6 @@ services:
       mock -p 4010 --host 0.0.0.0
       https://raw.githubusercontent.com/bcgov/sbc-pay/main/docs/docs/api_contract/pay-api.yaml
 
-  minio:
-    image: 'bitnami/minio:2022.2.5'
-    ports:
-      - '9000:9000'
-    networks:
-      - minio-tier
-    environment:
-      - MINIO_ACCESS_KEY=minio
-      - MINIO_SECRET_KEY=minio123
-      - MINIO_DEFAULT_BUCKETS=accounts
-
-networks:
-  minio-tier:
-    driver: bridge
+volumes:
+  gcs-data:
+  pubsub-data:

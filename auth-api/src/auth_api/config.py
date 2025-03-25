@@ -144,12 +144,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     AUTH_EVENT_TOPIC = os.getenv("AUTH_EVENT_TOPIC", "auth-event-dev")
     GCP_AUTH_KEY = os.getenv("AUTHPAY_GCP_AUTH_KEY", None)
 
-    # Minio configuration values
-    MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
-    MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
-    MINIO_ACCESS_SECRET = os.getenv("MINIO_ACCESS_SECRET")
-    MINIO_BUCKET_ACCOUNTS = os.getenv("MINIO_BUCKET_ACCOUNTS", "accounts")
-    MINIO_SECURE = True
+    ACCOUNT_MAILER_BUCKET = os.getenv("ACCOUNTS_BUCKET", "auth-accounts-dev")
 
     # email
     MAIL_FROM_ID = os.getenv("MAIL_FROM_ID")
@@ -211,7 +206,7 @@ class DevConfig(_Config):  # pylint: disable=too-few-public-methods
 
 
 class TestConfig(_Config):  # pylint: disable=too-few-public-methods
-    """In support of testing only.used by the py.test suite."""
+    """In support of unit testing only. Used by the pytest suite."""
 
     DEBUG = True
     TESTING = True
@@ -224,11 +219,13 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_TEST_URL", f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"
     )
+    os.environ["CLOUD_STORAGE_EMULATOR_HOST"] = "http://localhost:4443"
+    os.environ["PUBSUB_EMULATOR_HOST"] = "localhost:8085"
 
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use
     JWT_OIDC_TEST_MODE = True
-    JWT_OIDC_TEST_AUDIENCE = os.getenv("JWT_OIDC_TEST_AUDIENCE")
+    JWT_OIDC_TEST_AUDIENCE = os.getenv("JWT_OIDC_TEST_AUDIENCE", "")
     JWT_OIDC_TEST_CLIENT_SECRET = os.getenv("JWT_OIDC_TEST_CLIENT_SECRET")
     JWT_OIDC_TEST_ISSUER = os.getenv("JWT_OIDC_TEST_ISSUER")
     JWT_OIDC_TEST_ALGORITHMS = os.getenv("JWT_OIDC_TEST_ALGORITHMS")
@@ -315,13 +312,6 @@ NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
     MAX_NUMBER_OF_ORGS = 3
 
     BCOL_ACCOUNT_LINK_CHECK = True
-
-    # Minio variables
-    MINIO_ENDPOINT = "localhost:9000"
-    MINIO_ACCESS_KEY = "minio"
-    MINIO_ACCESS_SECRET = "minio123"
-    MINIO_BUCKET_ACCOUNTS = "accounts"
-    MINIO_SECURE = False
 
     STAFF_ADMIN_EMAIL = "test@test.com"
     ACCOUNT_MAILER_TOPIC = os.getenv("ACCOUNT_MAILER_TOPIC", "account-mailer-dev")

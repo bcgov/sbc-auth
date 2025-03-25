@@ -23,9 +23,9 @@ from .contact import Contact
 from .documents import Documents
 from .entity import Entity
 from .flags import Flags
+from .google_store import GoogleStoreService
 from .invitation import Invitation
 from .membership import Membership
-from .minio import MinioService
 from .org import Org
 from .permissions import Permissions
 from .products import Product

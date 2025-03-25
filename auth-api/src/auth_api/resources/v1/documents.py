@@ -20,7 +20,7 @@ from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
 from auth_api.services import Documents as DocumentService
-from auth_api.services.minio import MinioService
+from auth_api.services.google_store import GoogleStoreService
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import AccessType, DocumentType, LoginSource
@@ -71,7 +71,7 @@ def _replace_current_date(doc):
 def get_document_signature_by_name(file_name: str):
     """Return the latest terms of use."""
     try:
-        response, status = jsonify(MinioService.create_signed_put_url(file_name)), HTTPStatus.OK
+        response, status = jsonify(GoogleStoreService.create_signed_put_url(file_name)), HTTPStatus.OK
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status

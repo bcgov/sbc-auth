@@ -111,6 +111,8 @@ def test_simple_org_search(client, jwt, session, keycloak_mock):  # pylint:disab
     assert_simple_org(result["items"][2], org_no_branch_1)
     assert_simple_org(result["items"][3], org_no_branch_2)
 
+    # TODO need to fix this ...
+
     rv = client.get(f"/api/v1/orgs/simple?id={org_no_branch_1.id}", headers=headers, content_type="application/json")
 
     result = rv.json

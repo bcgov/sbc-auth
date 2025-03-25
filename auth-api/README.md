@@ -12,7 +12,7 @@ to setup your local development environment.
 
 ## Technology Stack Used
 * Python, Flask
-* Postgres -  SQLAlchemy, psycopg2-binary & alembic
+* Postgres -  SQLAlchemy, pg8000 & alembic
 
 ### setup
 Fork the repo and submitted a PR with accompanning tests.

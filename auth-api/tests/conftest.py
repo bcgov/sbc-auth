@@ -12,18 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
+import os
 import time
 from concurrent.futures import CancelledError
+from unittest.mock import MagicMock, patch
 
 import pytest
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
-from sqlalchemy_utils import create_database, database_exists, drop_database
 
 from auth_api import create_app, setup_jwt_manager
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models import db as _db
 from auth_api.utils.auth import jwt as _jwt
+
+
+def find_subpath(root_dir, target_subpath):
+    """Auxiliary subpath search function."""
+    for root, dirs, files in os.walk(root_dir):
+        if target_subpath in os.path.join(root, "").replace("\\", "/"):  # Ensure cross-platform compatibility
+            return os.path.join(root, "")
+    return None
 
 
 def mock_token(config_id="", config_secret=""):
@@ -73,16 +82,61 @@ def client_ctx(app):  # pylint: disable=redefined-outer-name
         yield _client
 
 
-@pytest.fixture(scope="session", autouse=True)
+# @pytest.fixture(scope="session", autouse=True)
+# def db(app):  # pylint: disable=redefined-outer-name, invalid-name
+#     """Return a session-wide initialised database."""
+#     with app.app_context():
+#         if database_exists(_db.engine.url):
+#             drop_database(_db.engine.url)
+#         create_database(_db.engine.url)
+#         _db.session().execute(text('SET TIME ZONE "UTC";'))
+#         Migrate(app, _db)
+#         upgrade()
+#         return _db
+
+
+@pytest.fixture(scope="session")
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
-    """Return a session-wide initialised database."""
+    """Return a session-wide initialised database.
+
+    Drops all existing tables - Meta follows Postgres FKs
+    """
     with app.app_context():
-        if database_exists(_db.engine.url):
-            drop_database(_db.engine.url)
-        create_database(_db.engine.url)
-        _db.session().execute(text('SET TIME ZONE "UTC";'))
-        Migrate(app, _db)
+        drop_schema_sql = text(
+            """
+            DROP SCHEMA public CASCADE;
+            CREATE SCHEMA public;
+            GRANT ALL ON SCHEMA public TO postgres;
+            GRANT ALL ON SCHEMA public TO public;
+        """
+        )
+
+        sess = _db.session()
+        sess.execute(drop_schema_sql)
+        sess.commit()
+
+        # ############################################
+        # There are 2 approaches, an empty database, or the same one that the app will use
+        #     create the tables
+        #     _db.create_all()
+        # or
+        # Use Alembic to load all of the DB revisions including supporting lookup data
+        # This is the path we'll use in legal_api!!
+
+        # even though this isn't referenced directly, it sets up the internal configs that upgrade
+
+        root_directory = os.pardir
+        target_subpath = "auth-api/migrations"
+
+        result = find_subpath(root_directory, target_subpath)
+
+        if not result:
+            root_directory = "/home/runner"
+            result = find_subpath(root_directory, target_subpath)
+
+        Migrate(app, _db, directory=result)
         upgrade()
+
         return _db
 
 
@@ -135,12 +189,12 @@ def auto(docker_services, app):
     setup_jwt_manager(app, _jwt)
 
     if app.config["USE_DOCKER_MOCK"]:
-        docker_services.start("minio")
+        docker_services.start("gcs-emulator")
         docker_services.start("notify")
         docker_services.start("bcol")
         docker_services.start("pay")
         docker_services.start("proxy")
-        docker_services.wait_for_service("minio", 9000, timeout=60.0)
+        time.sleep(10)
 
 
 @pytest.fixture(scope="session")
@@ -248,17 +302,25 @@ def nr_mock(monkeypatch):
 
 
 @pytest.fixture()
-def minio_mock(monkeypatch):
-    """Mock minio calls."""
+def gcs_mock(monkeypatch):
+    """Mock Google Cloud Storage client and blob using monkeypatch."""
+    mock_client = MagicMock()
+    mock_bucket = MagicMock()
+    mock_blob = MagicMock()
 
-    def get_nr(business_identifier):
-        return {
-            "applicants": {"emailAddress": "test@test.com", "phoneNumber": "1112223333"},
-            "names": [{"name": "TEST INC..", "state": "APPROVED"}],
-            "state": "APPROVED",
-        }
+    # Set up the mock chain
+    mock_client.bucket.return_value = mock_bucket
+    mock_bucket.blob.return_value = mock_blob
+    mock_blob.generate_signed_url.return_value = "http://mocked.url"
 
-    monkeypatch.setattr("auth_api.services.minio.MinioService._get_client", get_nr)
+    # Monkeypatch the storage.Client to return the mock client
+    monkeypatch.setattr("auth_api.services.google_store.storage.Client", lambda: mock_client)
+
+    yield {
+        "mock_client": mock_client,
+        "mock_bucket": mock_bucket,
+        "mock_blob": mock_blob,
+    }
 
 
 @pytest.fixture()

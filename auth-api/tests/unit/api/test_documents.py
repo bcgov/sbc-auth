@@ -114,7 +114,7 @@ def test_documents_returns_latest_always(client, jwt, session):  # pylint:disabl
     assert rv.json.get("versionId") == version_id_4
 
 
-def test_document_signature_get_returns_200(client, jwt, session):  # pylint:disable=unused-argument
+def test_document_signature_get_returns_200(client, jwt, session, gcs_mock):  # pylint:disable=unused-argument
     """Assert get documents/filename/signatures endpoint returns 200."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
     file_name = "test_file.jpeg"
