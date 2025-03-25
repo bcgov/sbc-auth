@@ -22,7 +22,6 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 from account_mailer.enums import SubjectType
 from account_mailer.services import notification_service
 from account_mailer.services.minio_service import MinioService
-from account_mailer.utils import get_local_formatted_date
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
 from .utils import helper_add_event_to_queue
@@ -228,7 +227,8 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
             'nsfFee': '30',
             'invoice_total': '100',
             'invoice_process_date': f'{datetime.now()}',
-            'withdraw_total': '80'
+            'withdraw_total': '80',
+            'invoice_number': '1234567890'
         }
         helper_add_event_to_queue(client,
                                   message_type=QueueMessageTypes.PAD_INVOICE_CREATED.value,
@@ -238,9 +238,14 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
         assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.PAD_INVOICE_CREATED.value
         assert mock_send.call_args.args[0].get('attachments') is None
-        assert mock_send.call_args.args[0].get('content').get('body') is not None
-        assert f'hours on {get_local_formatted_date(datetime.now(), "%m-%d-%Y")}' \
-            in mock_send.call_args.args[0].get('content').get('body')
+
+        email_body = mock_send.call_args.args[0].get('content').get('body')
+        assert email_body is not None
+        assert 'This email confirms recent transaction(s) on you account' in email_body
+        assert 'Invoice reference number: 1234567890' in email_body
+        assert 'Transaction date:' in email_body
+        assert 'Log in to view transaction details' in email_body
+        assert '/account/{org_id}/settings/transactions'.format(org_id=org.id) in email_body
 
 
 def test_account_admin_removed(app, session, client):

@@ -1,4 +1,7 @@
-# Your {{ account_number }}: {{ account_name_with_branch }} account completed ${{ invoice_total }} in transactions during business hours on {{ invoice_process_date }}.
+# This email confirms recent transaction(s) on you account {{ account_number }}: {{ account_name_with_branch }}.
+
+Transaction date: {{ invoice_process_date }}
+Invoice reference number: {{ invoice_number }}
 
 Transaction amount: ${{ invoice_total }}
 {% if credit_total != '0.00' %}Account credits: -${{ credit_total }}{% endif %}
@@ -8,6 +11,10 @@ ${{ withdraw_total }} will be debited from your financial institution in 2 busin
 
 Your account will be suspended and charged a ${{ nsf_fee }} dishonoured bank instrument fee for every failed payment.
 
-Log in to BC Registries and Online Services.
+[Log in to view transaction details]({{ transaction_url }})
 
-[Log in]({{ url }})
+**Business Registry**
+BC Registries and Online services
+Toll Free: [1-877-526-1526](1-877-526-1526)
+Victoria Office: [250-387-7848](250-387-7848)
+Email: [BCRegistries@gov.bc.ca](BCRegistries@gov.bc.ca)

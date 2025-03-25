@@ -27,7 +27,7 @@ from flask import Blueprint, request
 from sbc_common_components.utils.enums import QueueMessageTypes
 from structured_logging import StructuredLogging
 
-from account_mailer.auth_utils import get_login_url, get_member_emails
+from account_mailer.auth_utils import get_login_url, get_member_emails, get_transaction_url
 from account_mailer.email_processors import (
     account_unlock, common_mailer, ejv_failures, pad_confirmation, product_confirmation, refund_requested)
 from account_mailer.enums import Constants, SubjectType, TemplateType, TitleType
@@ -218,8 +218,10 @@ def handle_pad_invoice_created(message_type, email_msg):
         'credit_total': format_currency(credit_total),
         'nsf_fee': format_currency(email_msg.get('nsfFee')),
         'invoice_total': format_currency(invoice_total),
-        'invoice_process_date': get_local_formatted_date(invoice_process_date, '%m-%d-%Y'),
-        'withdraw_total': format_currency(str(withdraw_total))
+        'invoice_process_date': get_local_formatted_date(invoice_process_date, '%B %d, %Y'),
+        'withdraw_total': format_currency(str(withdraw_total)),
+        'invoice_number': email_msg.get('invoice_number', None),
+        'transaction_url': get_transaction_url(org_id)
     }
     logo_url = email_msg.get('logo_url')
     email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
