@@ -216,9 +216,8 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DB_NAME = os.getenv("DATABASE_TEST_NAME", "postgres")
     DB_HOST = os.getenv("DATABASE_TEST_HOST", "localhost")
     DB_PORT = os.getenv("DATABASE_TEST_PORT", "5432")
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_TEST_URL", f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"
-    )
+    SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"
+
     os.environ["CLOUD_STORAGE_EMULATOR_HOST"] = "http://localhost:4443"
     os.environ["PUBSUB_EMULATOR_HOST"] = "localhost:8085"
 
