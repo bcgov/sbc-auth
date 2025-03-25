@@ -447,6 +447,29 @@ class KeycloakService:
         response.raise_for_status()
 
     @staticmethod
+    def delete_client(client_name):
+        """Create a client in keycloak."""
+        config = current_app.config
+        base_url = config.get("KEYCLOAK_BASE_URL")
+        realm = config.get("KEYCLOAK_REALMNAME")
+        timeout = config.get("CONNECT_TIMEOUT", 60)
+        admin_token = KeycloakService._get_admin_token()
+
+        headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
+
+        response = requests.get(
+            f"{base_url}/auth/admin/realms/{realm}/clients?clientId={client_name}",
+            headers=headers,
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        client_id = response.json()[0]["id"]
+
+        create_client_url = f"{base_url}/auth/admin/realms/{realm}/clients/{client_id}"
+        response = requests.delete(create_client_url, headers=headers, timeout=timeout)
+        response.raise_for_status()
+
+    @staticmethod
     def get_service_account_by_client_name(client_name: str):
         """Get client by name."""
         config = current_app.config
