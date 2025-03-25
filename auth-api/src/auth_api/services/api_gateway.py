@@ -87,6 +87,7 @@ class ApiGateway:
 
     @classmethod
     def _create_user_and_membership_for_api_user(cls, org_id: int, env: str):
+        """Create a user and membership for the api user."""
         if flags.is_on("enable-api-gw-user-membership-creation", False) is True:
             client_name = ApiGateway.get_api_client_id(org_id, env)
             client = KeycloakService.get_service_account_by_client_name(client_name)
@@ -97,6 +98,7 @@ class ApiGateway:
 
     @classmethod
     def _get_api_gw_key(cls, env):
+        """Get the api gateway key."""
         logger.info("_get_api_gw_key %s", env)
         return current_app.config.get("API_GW_KEY") if env == "prod" else current_app.config.get("API_GW_NON_PROD_KEY")
 
@@ -211,6 +213,7 @@ class ApiGateway:
 
     @classmethod
     def _get_email_id(cls, org_id, env) -> str:
+        """Get the email id for the org."""
         if current_app.config.get("API_GW_CONSUMER_EMAIL", None) is not None:
             return current_app.config.get("API_GW_CONSUMER_EMAIL")
 
@@ -270,6 +273,7 @@ class ApiGateway:
 
     @classmethod
     def _create_sandbox_pay_account(cls, pay_request, user):
+        """Create a sandbox payment account."""
         logger.info("Creating Sandbox Payload %s", pay_request)
         pay_sandbox_accounts_endpoint = f"{current_app.config.get('PAY_API_SANDBOX_URL')}/accounts?sandbox=true"
         RestService.post(
@@ -278,12 +282,14 @@ class ApiGateway:
 
     @classmethod
     def _get_pay_account(cls, org, user):
+        """Get the payment account for the org."""
         pay_accounts_endpoint = f"{current_app.config.get('PAY_API_URL')}/accounts/{org.id}"
         pay_account = RestService.get(endpoint=pay_accounts_endpoint, token=user.bearer_token).json()
         return pay_account
 
     @classmethod
     def _get_api_consumer_endpoint(cls, env):
+        """Get the consumer endpoint for the environment."""
         logger.info("_get_api_consumer_endpoint %s", env)
         return (
             current_app.config.get("API_GW_CONSUMERS_API_URL")
