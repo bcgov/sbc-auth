@@ -68,6 +68,8 @@ def _get_body(email_msg: dict):
 
 def _get_jv_file(file_location: str, file_name: str):
     file = None
+    # use this version once cgi-ejv moves to gcs,
+    # then will also need update name of payload attribute in pay-queue, i.e. minioLocation
     # store_blob = google_store.GoogleStoreService.download_file_from_bucket(file_location, file_name)
     # if store_blob:
     #     file = base64.b64encode(store_blob)
