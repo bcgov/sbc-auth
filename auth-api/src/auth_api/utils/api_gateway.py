@@ -16,7 +16,7 @@ import secrets
 import uuid
 
 
-def generate_client_representation(account_id: int, client_id: str, env: str) -> dict:
+def generate_client_representation(account_id: int, client_id: str) -> dict:
     """Return dictionary for api gateway client user."""
     _id = str(uuid.uuid4())
     _secret = secrets.token_urlsafe(36)
