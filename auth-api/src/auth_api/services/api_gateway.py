@@ -114,7 +114,7 @@ class ApiGateway:
         consumer_endpoint: str = cls._get_api_consumer_endpoint(env)
         gw_api_key = cls._get_api_gw_key(env)
         email = cls._get_email_id(org.id, env)
-        client_rep = generate_client_representation(org.id, ApiGateway.get_client_id(org.id, env), env)
+        client_rep = generate_client_representation(org.id, ApiGateway.get_client_id(org.id, env))
         KeycloakService.create_client(client_rep)
         service_account = KeycloakService.get_service_account_user(client_rep.get("id"))
 
