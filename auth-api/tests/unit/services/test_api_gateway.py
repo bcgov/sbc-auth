@@ -1,6 +1,7 @@
-from flask import current_app
 import os
+
 import pytest
+from flask import current_app
 
 from auth_api.services.api_gateway import ApiGateway
 from auth_api.services.keycloak import KeycloakService

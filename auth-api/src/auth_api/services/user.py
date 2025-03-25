@@ -16,8 +16,8 @@
 This module manages the User Information.
 """
 
-from datetime import datetime, timezone
 import json
+from datetime import datetime, timezone
 from http import HTTPStatus
 from typing import Dict, List
 
@@ -35,8 +35,8 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
-from auth_api.models.user import UserStatusCode
 from auth_api.models.dataclass import Activity
+from auth_api.models.user import UserStatusCode
 from auth_api.schemas import UserSchema
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser

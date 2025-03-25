@@ -21,15 +21,15 @@ from requests.exceptions import HTTPError
 from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, Error
-from auth_api.models.org import Org as OrgModel
 from auth_api.models.membership import Membership as MembershipModel
+from auth_api.models.org import Org as OrgModel
 from auth_api.models.user_status_code import UserStatusCode
 from auth_api.services import flags
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak import KeycloakService
+from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.rest_service import RestService
 from auth_api.services.user import User as UserService
-from auth_api.services.membership import Membership as MembershipService
 from auth_api.utils.api_gateway import generate_client_representation
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_API_GW_SANDBOX_USERS, GROUP_API_GW_USERS
 from auth_api.utils.enums import Status

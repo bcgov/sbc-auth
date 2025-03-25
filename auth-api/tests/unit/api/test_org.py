@@ -67,7 +67,7 @@ from tests.utilities.factory_scenarios import (
     TestJwtClaims,
     TestOrgInfo,
     TestPaymentMethodInfo,
-    TestUserInfo
+    TestUserInfo,
 )
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
