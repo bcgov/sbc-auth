@@ -24,7 +24,7 @@ from sql_versioning import Versioned
 from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.enums import OrgType, Status
+from auth_api.utils.enums import LoginSource, OrgType, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_ORG_STATUSES, VALID_STATUSES
 
 from .base_model import BaseModel
@@ -101,6 +101,7 @@ class Membership(
             .filter(and_(Membership.status == status, Membership.membership_type_code.in_(roles)))
             .join(OrgModel)
             .filter(OrgModel.id == int(org_id or -1))
+            .filter(~Membership.user.has(login_source=LoginSource.API_GW.value))
             .all()
         )
 

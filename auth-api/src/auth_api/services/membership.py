@@ -18,6 +18,7 @@ This module manages the Membership Information between an org and a user.
 
 import json
 
+from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.utils.enums import QueueMessageTypes
 from structured_logging import StructuredLogging
@@ -338,6 +339,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
     @staticmethod
     def add_or_remove_group_for_staff(model: MembershipModel):
+        """Add or remove the user from/to various staff keycloak groups."""
         mapping_group = org_type_to_group_mapping.get(model.org.type_code)
         if not mapping_group:
             return
@@ -383,3 +385,11 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
     def remove_staff_membership(user_id):
         """Remove staff membership for the specified user."""
         MembershipModel.remove_membership_for_staff(user_id)
+
+    @staticmethod
+    def create_admin_membership_for_api_user(org_id, user_id):
+        """Create a membership for an api user."""
+        current_app.logging.info("Creating membership in {org_id} for API user {user_id}")
+        return MembershipModel(
+            org_id=org_id, user_id=user_id, membership_type_code=ADMIN, status=Status.ACTIVE.value
+        ).save()

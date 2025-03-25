@@ -16,10 +16,12 @@
 This module manages the User Information.
 """
 
+from datetime import datetime, timezone
 import json
 from http import HTTPStatus
 from typing import Dict, List
 
+from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from requests import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -33,6 +35,7 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
+from auth_api.models.user import UserStatusCode
 from auth_api.models.dataclass import Activity
 from auth_api.schemas import UserSchema
 from auth_api.services.authorization import check_auth
@@ -695,3 +698,25 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             return False
 
         return current_user_membership.membership_type_code in CLIENT_ADMIN_ROLES
+
+    @staticmethod
+    def create_user_for_api_user(username, data: dict):
+        """Create user for API user."""
+        keycloak_guid = data.get("id")
+        current_app.logger.info(f"Creating user for API user - {username} with id {id}")
+        api_user = UserModel(
+            username=username,
+            firstname=None,
+            lastname=username,
+            email=None,
+            keycloak_guid=keycloak_guid,
+            created=datetime.now(tz=timezone.utc),
+            login_source=LoginSource.API_GW.value,
+            status=UserStatusCode.get_default_type(),
+            idp_userid=username,
+            login_time=datetime.now(tz=timezone.utc),
+            type=Role.PUBLIC_USER.name,
+            verified=True,
+            is_terms_of_use_accepted=True,
+        ).save()
+        return api_user

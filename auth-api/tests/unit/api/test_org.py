@@ -43,6 +43,7 @@ from auth_api.utils.enums import (
     AccessType,
     AffidavitStatus,
     CorpType,
+    LoginSource,
     NRActionCodes,
     NRStatus,
     OrgStatus,
@@ -66,6 +67,7 @@ from tests.utilities.factory_scenarios import (
     TestJwtClaims,
     TestOrgInfo,
     TestPaymentMethodInfo,
+    TestUserInfo
 )
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
@@ -1276,6 +1278,11 @@ def test_get_members(client, jwt, session, keycloak_mock):  # pylint:disable=unu
     )
     dictionary = json.loads(rv.data)
     org_id = dictionary["id"]
+    # Create API_GW user, this shouldn't show up in the users list
+    user_dict = TestUserInfo.user1
+    user_dict["login_source"] = LoginSource.API_GW.value
+    api_user = factory_user_model(user_dict)
+    factory_membership_model(api_user.id, org_id=org_id)
 
     rv = client.get("/api/v1/orgs/{}/members".format(org_id), headers=headers, content_type="application/json")
 
