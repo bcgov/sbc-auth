@@ -90,7 +90,7 @@ def test_token_user_context(session, auth_mock, monkeypatch):
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_change_authentication_subsequent_invites(session, auth_mock, keycloak_mock, monkeypatch):
     """Assert that changing org authentication method changes new invitation required login source."""
-    user_with_token = TestUserInfo.user_tester
+    user_with_token = dict(TestUserInfo.user_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.tester_role["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.tester_role["idp_userid"]
     inviter_user = factory_user_model(user_info=user_with_token)
@@ -176,7 +176,7 @@ def test_change_authentication_non_govm(session, auth_mock, keycloak_mock, monke
     invitee_bcsc_user = factory_user_model(TestUserInfo.user1)
     invitee_bceid_user = factory_user_model(TestUserInfo.user2)
 
-    patch_token_info(TestJwtClaims.tester_role, monkeypatch)
+    patch_token_info(TestJwtClaims.user_test, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=inviter_user.id)
     org_dictionary = org.as_dict()
 
@@ -219,14 +219,14 @@ def test_change_authentication_non_govm(session, auth_mock, keycloak_mock, monke
             assert invitation_model.login_source == LoginSource.BCSC.value
             assert invitation_model.invitation_status_code == InvitationStatus.ACCEPTED.value
 
-            patch_token_info(TestJwtClaims.tester_role, monkeypatch)
+            patch_token_info(TestJwtClaims.user_test, monkeypatch)
             members = MembershipService.get_members_for_org(org_dictionary["id"], "PENDING_APPROVAL")
             assert members
             assert len(members) == 1
 
     # Confirm that an invitation with BCSC login source can be accepted as another user login source and
     # updates the invitation login source based on the accepting user login source
-    patch_token_info(TestJwtClaims.tester_role, monkeypatch)
+    patch_token_info(TestJwtClaims.user_test, monkeypatch)
     with patch.object(InvitationService, "send_invitation", return_value=None):
         # Create invitation with BCSC login source
         with patch.object(ActivityLogPublisher, "publish_activity", return_value=None) as mock_alp:
@@ -265,7 +265,7 @@ def test_change_authentication_non_govm(session, auth_mock, keycloak_mock, monke
             assert invitation_model.login_source == LoginSource.BCEID.value
             assert invitation_model.invitation_status_code == InvitationStatus.ACCEPTED.value
 
-            patch_token_info(TestJwtClaims.tester_role, monkeypatch)
+            patch_token_info(TestJwtClaims.user_test, monkeypatch)
             members = MembershipService.get_members_for_org(org_dictionary["id"], "PENDING_APPROVAL")
             assert members
             assert len(members) == 2
@@ -362,7 +362,7 @@ def test_invitation_anonymous(session, auth_mock, keycloak_mock, monkeypatch):
     inviter_user = factory_user_model(TestUserInfo.user_tester)
     invitee_bcsc_user = factory_user_model(TestUserInfo.user1)
 
-    patch_token_info(TestJwtClaims.tester_role, monkeypatch)
+    patch_token_info(TestJwtClaims.user_test, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=inviter_user.id)
     org_dictionary = org.as_dict()
 
@@ -400,7 +400,7 @@ def test_invitation_anonymous(session, auth_mock, keycloak_mock, monkeypatch):
             assert invitation_model.login_source is None
             assert invitation_model.invitation_status_code == InvitationStatus.ACCEPTED.value
 
-            patch_token_info(TestJwtClaims.tester_role, monkeypatch)
+            patch_token_info(TestJwtClaims.user_test, monkeypatch)
             members = MembershipService.get_members_for_org(org_dictionary["id"], "PENDING_APPROVAL")
             assert members
             assert len(members) == 1

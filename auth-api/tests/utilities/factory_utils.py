@@ -85,7 +85,7 @@ def factory_entity_service(entity_info: dict = TestEntityInfo.entity1):
     return entity_service
 
 
-def factory_user_model(user_info: dict = TestUserInfo.user1):
+def factory_user_model(user_info: dict = dict(TestUserInfo.user1)):
     """Produce a user model."""
     roles = user_info.get("roles", None)
     if user_info.get("access_type", None) == AccessType.ANONYMOUS.value:
@@ -110,7 +110,7 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
     return user
 
 
-def factory_user_model_with_contact(user_info: dict = TestUserInfo.user1, keycloak_guid=None):
+def factory_user_model_with_contact(user_info: dict = dict(TestUserInfo.user1), keycloak_guid=None):
     """Produce a user model."""
     user_type = Role.ANONYMOUS_USER.name if user_info.get("access_type", None) == AccessType.ANONYMOUS.value else None
     user = UserModel(
