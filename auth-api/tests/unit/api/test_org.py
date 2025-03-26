@@ -43,6 +43,7 @@ from auth_api.utils.enums import (
     AccessType,
     AffidavitStatus,
     CorpType,
+    LoginSource,
     NRActionCodes,
     NRStatus,
     OrgStatus,
@@ -66,6 +67,7 @@ from tests.utilities.factory_scenarios import (
     TestJwtClaims,
     TestOrgInfo,
     TestPaymentMethodInfo,
+    TestUserInfo,
 )
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
@@ -1276,6 +1278,11 @@ def test_get_members(client, jwt, session, keycloak_mock):  # pylint:disable=unu
     )
     dictionary = json.loads(rv.data)
     org_id = dictionary["id"]
+    # Create API_GW user, this shouldn't show up in the users list
+    user_dict = dict(TestUserInfo.user1)
+    user_dict["login_source"] = LoginSource.API_GW.value
+    api_user = factory_user_model(user_dict)
+    factory_membership_model(api_user.id, org_id=org_id)
 
     rv = client.get("/api/v1/orgs/{}/members".format(org_id), headers=headers, content_type="application/json")
 
@@ -2936,7 +2943,7 @@ def test_update_org_api_access(client, jwt, session, keycloak_mock):  # pylint:d
 
 def test_search_org_members(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a list of members for an org search can be retrieved."""
-    user_info = TestJwtClaims.public_user_role
+    user_info = dict(TestJwtClaims.public_user_role)
     headers = factory_auth_header(jwt=jwt, claims=user_info)
     client.post("/api/v1/users", headers=headers, content_type="application/json")
     client.post("/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json")
