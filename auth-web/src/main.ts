@@ -12,6 +12,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import './routes/componentHooks'
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
+import VueGtag from 'vue-gtag'
 import VueSanitize from 'vue-sanitize-directive'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
@@ -31,6 +32,17 @@ Vue.use(Vuelidate)
 
 const i18n = initializeI18n(Vue)
 Vue.use(VueSanitize)
+
+if (import.meta.env.VUE_APP_GTAG_ID) {
+  Vue.use(VueGtag, {
+      config: {
+          id: import.meta.env.VUE_APP_GTAG_ID,
+          params: {
+              send_page_view: false
+          }
+      }
+  }, router)
+}
 
 /**
  * The server side configs are necessary for app to work , since they are reference in templates and all
