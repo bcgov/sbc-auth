@@ -35,9 +35,9 @@ Vue.use(VueSanitize)
 
 if (import.meta.env.VUE_APP_GTAG_ID) {
   Vue.use(VueGtag, {
-      config: {
-          id: import.meta.env.VUE_APP_GTAG_ID
-      }
+    config: {
+      id: import.meta.env.VUE_APP_GTAG_ID
+    }
   }, router)
 }
 
