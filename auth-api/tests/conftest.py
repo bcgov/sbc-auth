@@ -15,11 +15,12 @@
 import os
 import time
 from concurrent.futures import CancelledError
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
+from sqlalchemy_utils import create_database, database_exists, drop_database
 
 from auth_api import create_app, setup_jwt_manager
 from auth_api.exceptions import BusinessException, Error
@@ -82,48 +83,16 @@ def client_ctx(app):  # pylint: disable=redefined-outer-name
         yield _client
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
-    """Return a session-wide initialised database.
-
-    Drops all existing tables - Meta follows Postgres FKs
-    """
+    """Return a session-wide initialised database."""
     with app.app_context():
-        drop_schema_sql = text(
-            """
-            DROP SCHEMA public CASCADE;
-            CREATE SCHEMA public;
-            GRANT ALL ON SCHEMA public TO postgres;
-            GRANT ALL ON SCHEMA public TO public;
-        """
-        )
-
-        sess = _db.session()
-        sess.execute(drop_schema_sql)
-        sess.commit()
-
-        # ############################################
-        # There are 2 approaches, an empty database, or the same one that the app will use
-        #     create the tables
-        #     _db.create_all()
-        # or
-        # Use Alembic to load all of the DB revisions including supporting lookup data
-        # This is the path we'll use in legal_api!!
-
-        # even though this isn't referenced directly, it sets up the internal configs that upgrade
-
-        root_directory = os.pardir
-        target_subpath = "auth-api/migrations"
-
-        result = find_subpath(root_directory, target_subpath)
-
-        if not result:
-            root_directory = "/home/runner"
-            result = find_subpath(root_directory, target_subpath)
-
-        Migrate(app, _db, directory=result)
+        if database_exists(_db.engine.url):
+            drop_database(_db.engine.url)
+        create_database(_db.engine.url)
+        _db.session().execute(text('SET TIME ZONE "UTC";'))
+        Migrate(app, _db)
         upgrade()
-
         return _db
 
 
