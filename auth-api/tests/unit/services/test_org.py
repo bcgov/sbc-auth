@@ -829,7 +829,7 @@ def test_get_owner_count_one_owner(session, keycloak_mock, monkeypatch):  # pyli
 @pytest.mark.parametrize("staff_org", [(TestOrgInfo.staff_org), (TestOrgInfo.sbc_staff_org)])
 def test_create_staff_org_failure(session, keycloak_mock, staff_org, monkeypatch):  # pylint:disable=unused-argument
     """Assert that staff org cannot be created."""
-    user_with_token = dict(TestUserInfo.user_test)_test)
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user = factory_user_model(user_info=user_with_token)
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
