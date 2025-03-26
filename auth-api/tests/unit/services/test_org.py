@@ -189,7 +189,7 @@ def test_pay_request_is_correct_with_branch_name(session, keycloak_mock, monkeyp
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_update_basic_org_assert_pay_request_activity(session, keycloak_mock, monkeypatch):
     """Assert that while org payment update touches activity log."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user = factory_user_model(user_info=user_with_token)
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
@@ -220,7 +220,7 @@ def test_update_basic_org_assert_pay_request_is_correct(
     session, keycloak_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Assert that while org updation , pay-api gets called with proper data for basic accounts."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user = factory_user_model(user_info=user_with_token)
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
@@ -402,7 +402,7 @@ def test_create_org_assert_payment_types(session, keycloak_mock, monkeypatch):  
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_create_product_single_subscription(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user = factory_user_model(user_with_token)
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
@@ -426,7 +426,7 @@ def test_create_product_single_subscription_duplicate_error(
     session, keycloak_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user = factory_user_model(user_with_token)
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
@@ -455,7 +455,7 @@ def test_create_product_single_subscription_duplicate_error(
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_create_product_multiple_subscription(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     user = factory_user_model(user_with_token)
@@ -776,7 +776,7 @@ def test_update_contact_no_contact(session):  # pylint:disable=unused-argument
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_get_members(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that members for an org can be retrieved."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_user_role["idp_userid"]
     user = factory_user_model(user_info=user_with_token)
@@ -795,7 +795,7 @@ def test_get_members(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
 def test_get_invitations(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that invitations for an org can be retrieved."""
     with patch.object(InvitationService, "send_invitation", return_value=None):
-        user_with_token = TestUserInfo.user_test
+        user_with_token = dict(TestUserInfo.user_test)
         user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
         user_with_token["idp_userid"] = TestJwtClaims.public_user_role["idp_userid"]
         user = factory_user_model(user_info=user_with_token)
@@ -818,7 +818,7 @@ def test_get_invitations(session, auth_mock, keycloak_mock, monkeypatch):  # pyl
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_get_owner_count_one_owner(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that count of owners is correct."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user = factory_user_model(user_info=user_with_token)
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
@@ -829,7 +829,7 @@ def test_get_owner_count_one_owner(session, keycloak_mock, monkeypatch):  # pyli
 @pytest.mark.parametrize("staff_org", [(TestOrgInfo.staff_org), (TestOrgInfo.sbc_staff_org)])
 def test_create_staff_org_failure(session, keycloak_mock, staff_org, monkeypatch):  # pylint:disable=unused-argument
     """Assert that staff org cannot be created."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user = factory_user_model(user_info=user_with_token)
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
@@ -841,7 +841,7 @@ def test_create_staff_org_failure(session, keycloak_mock, staff_org, monkeypatch
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_get_owner_count_two_owner_with_admins(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert wrong org cannot be created."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user = factory_user_model(user_info=user_with_token)
 
@@ -858,7 +858,7 @@ def test_get_owner_count_two_owner_with_admins(session, keycloak_mock, monkeypat
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_delete_org_with_members(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an org can be deleted."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_user_role["idp_userid"]
     user = factory_user_model(user_info=user_with_token)
@@ -881,7 +881,7 @@ def test_delete_org_with_members(session, auth_mock, keycloak_mock, monkeypatch)
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_delete_org_with_affiliation(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an org cannot be deleted."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user = factory_user_model(user_info=user_with_token)
 
@@ -908,7 +908,7 @@ def test_delete_org_with_members_success(
     session, auth_mock, keycloak_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Assert that an org can be deleted."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_user_role["idp_userid"]
     user = factory_user_model(user_info=user_with_token)

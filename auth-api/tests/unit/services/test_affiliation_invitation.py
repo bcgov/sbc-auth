@@ -350,7 +350,7 @@ def test_accept_affiliation_invitation(
     """Accept the affiliation invitation and add the affiliation from the invitation."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         with patch.object(auth, "check_auth", return_value=True):
-            user_with_token = TestUserInfo.user_test
+            user_with_token = dict(TestUserInfo.user_test)
             user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
             user_with_token["idp_userid"] = TestJwtClaims.public_user_role["idp_userid"]
             user = factory_user_model(user_with_token)
@@ -364,7 +364,7 @@ def test_accept_affiliation_invitation(
                 business_identifier=entity_dictionary["business_identifier"],
             )
 
-            user_with_token_invitee = TestUserInfo.user1
+            user_with_token_invitee = dict(TestUserInfo.user1)
             user_with_token_invitee["keycloak_guid"] = TestJwtClaims.edit_role_2["sub"]
             user_invitee = factory_user_model(user_with_token_invitee)
 
@@ -447,7 +447,7 @@ def test_get_invitations_by_from_org_id(
     """Find an existing invitation with the provided from org id."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
-        user_with_token = TestUserInfo.user_test
+        user_with_token = dict(TestUserInfo.user_test)
         user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
         user = factory_user_model(user_with_token)
         patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
@@ -478,7 +478,7 @@ def test_get_invitations_by_to_org_id(
     """Find an existing invitation with the provided to org id."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
-        user_with_token = TestUserInfo.user_test
+        user_with_token = dict(TestUserInfo.user_test)
         user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
         user = factory_user_model(user_with_token)
         patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
