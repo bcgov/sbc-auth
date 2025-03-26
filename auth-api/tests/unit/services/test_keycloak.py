@@ -271,3 +271,11 @@ def test_add_remove_group_bulk(session):
     user2_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user2.id)
     assert "ppr" in ["ppr" for user_group in user1_groups if user_group.get("name") == "ppr"]
     assert "bca" not in ["bca" for user_group in user2_groups if user_group.get("name") == "bca"]
+
+
+def test_service_account_by_client_name(session):
+    """Test keycloak service account by client name."""
+    result = KeycloakService.get_service_account_by_client_name("sbc-auth-admin")
+    assert result is not None
+    assert result.get("username") == "service-account-sbc-auth-admin"
+    assert result.get("id") is not None

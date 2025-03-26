@@ -13,7 +13,8 @@
 # limitations under the License.
 """Test Utils.
 
-Test Utility for creating test scenarios.
+Test Utility for creating test scenarios. NOTE IF USING THIS, MAKE SURE YOU CLONE (EG. wrap it with DICT)
+THE OBJECTS OTHERWISE THEY WILL BLEED BETWEEN UNIT TESTS.
 """
 import uuid
 from enum import Enum
