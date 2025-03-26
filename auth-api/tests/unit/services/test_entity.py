@@ -106,7 +106,7 @@ def test_update_entity_existing_success(session, monkeypatch):  # pylint:disable
         "name": TestEntityInfo.bc_entity_passcode4["name"],
         "corpTypeCode": TestEntityInfo.bc_entity_passcode4["corpTypeCode"],
     }
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
 
     patch_token_info({"loginSource": "", "realm_access": {"roles": ["system"]}, "corp_type": "BC"}, monkeypatch)
@@ -138,7 +138,7 @@ def test_update_entity_existing_failures(session, monkeypatch):  # pylint:disabl
         "name": TestEntityInfo.bc_entity_passcode4["name"],
         "corpTypeCode": TestEntityInfo.bc_entity_passcode4["corpTypeCode"],
     }
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
 
     with pytest.raises(BusinessException) as exception:
