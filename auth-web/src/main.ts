@@ -36,10 +36,7 @@ Vue.use(VueSanitize)
 if (import.meta.env.VUE_APP_GTAG_ID) {
   Vue.use(VueGtag, {
       config: {
-          id: import.meta.env.VUE_APP_GTAG_ID,
-          params: {
-              send_page_view: false
-          }
+          id: import.meta.env.VUE_APP_GTAG_ID
       }
   }, router)
 }
