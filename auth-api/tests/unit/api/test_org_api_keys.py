@@ -40,10 +40,6 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, monkeypatch):  # p
     assert not rv.json.get("hasApiAccess")
     org_id = rv.json.get("id")
 
-    # Ensure we don't already have a client created.
-    with suppress(Exception):
-        KeycloakService.delete_client(ApiGateway.get_api_client_id(org_id, "sandbox"))
-
     # Create a system token and create an API key for this account.
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     # Patch to return has_consumer as False, so that it would create a new consumer.
