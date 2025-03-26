@@ -110,7 +110,7 @@ def test_add_user_staff_org(client, jwt, session, keycloak_mock, monkeypatch):
 
 def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock, monkeypatch):
     """Assert different conditions of user deletion."""
-    admin_user = TestUserInfo.user_bcros_active
+    admin_user = dict(TestUserInfo.user_bcros_active)
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
     factory_membership_model(user.id, org.id)

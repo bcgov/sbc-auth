@@ -216,7 +216,7 @@ def test_accept_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
     with patch.object(InvitationService, "send_invitation", return_value=None):
         with patch.object(auth, "check_auth", return_value=True):
             with patch.object(InvitationService, "notify_admin", return_value=None):
-                user_with_token = TestUserInfo.user_test
+                user_with_token = dict(TestUserInfo.user_test)
                 user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
                 user_with_token["idp_userid"] = TestJwtClaims.public_user_role["idp_userid"]
                 user = factory_user_model(user_with_token)
@@ -225,7 +225,7 @@ def test_accept_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
                 org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
                 org_dictionary = org.as_dict()
                 invitation_info = factory_invitation(org_dictionary["id"])
-                user_with_token_invitee = TestUserInfo.user1
+                user_with_token_invitee = dict(TestUserInfo.user1)
                 user_with_token_invitee["keycloak_guid"] = TestJwtClaims.edit_role_2["sub"]
                 user_invitee = factory_user_model(user_with_token_invitee)
                 new_invitation = InvitationService.create_invitation(invitation_info, User(user_invitee), "")
@@ -243,7 +243,7 @@ def test_accept_invitation_for_govm(session, auth_mock, keycloak_mock, monkeypat
     with patch.object(InvitationService, "send_invitation", return_value=None):
         with patch.object(auth, "check_auth", return_value=True):
             with patch.object(InvitationService, "notify_admin", return_value=None):
-                user_with_token = TestUserInfo.user_staff_admin
+                user_with_token = dict(TestUserInfo.user_staff_admin)
                 user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
                 user = factory_user_model(user_with_token)
 
@@ -252,7 +252,7 @@ def test_accept_invitation_for_govm(session, auth_mock, keycloak_mock, monkeypat
                 org = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id)
                 org_dictionary = org.as_dict()
                 invitation_info = factory_invitation(org_dictionary["id"])
-                user_with_token_invitee = TestUserInfo.user1
+                user_with_token_invitee = dict(TestUserInfo.user1)
                 user_with_token_invitee["keycloak_guid"] = TestJwtClaims.edit_role_2["sub"]
                 user_invitee = factory_user_model(user_with_token_invitee)
                 new_invitation = InvitationService.create_invitation(invitation_info, User(user_invitee), "")
@@ -314,7 +314,7 @@ def test_get_invitations_by_org_id(session, auth_mock, keycloak_mock, monkeypatc
     """Find an existing invitation with the provided org id."""
     with patch.object(InvitationService, "send_invitation", return_value=None):
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
-        user_with_token = TestUserInfo.user_test
+        user_with_token = dict(TestUserInfo.user_test)
         user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
         user = factory_user_model(user_with_token)
         patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)

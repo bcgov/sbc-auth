@@ -47,7 +47,7 @@ from tests.utilities.factory_utils import factory_user_model_with_contact, patch
 @patch.object(auth_api.services.products, "publish_to_mailer")
 def test_default_approved_notification(mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info):
     """Assert product approved notification default is created."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)
@@ -108,7 +108,7 @@ def test_default_approved_notification(mock_mailer, session, auth_mock, keycloak
 @patch.object(auth_api.services.products, "publish_to_mailer")
 def test_default_rejected_notification(mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info):
     """Assert product rejected notification default is created."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)
@@ -176,7 +176,7 @@ def test_default_rejected_notification(mock_mailer, session, auth_mock, keycloak
 @patch.object(auth_api.services.products, "publish_to_mailer")
 def test_detailed_approved_notification(mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info):
     """Assert product approved notification with details is created."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)
@@ -264,7 +264,7 @@ def test_detailed_rejected_notification(
     mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info, contact_type
 ):
     """Assert product rejected notification with details is created."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)
@@ -353,7 +353,7 @@ def test_detailed_rejected_notification(
 @patch.object(auth_api.services.products, "publish_to_mailer")
 def test_hold_notification(mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info):
     """Assert product notification is not created for on hold state."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)
@@ -431,7 +431,7 @@ def test_confirmation_notification(
     mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info, contact_type
 ):
     """Assert product confirmation notification is properly created."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)
@@ -479,7 +479,7 @@ def test_confirmation_notification(
 @patch.object(auth_api.services.products, "publish_to_mailer")
 def test_no_confirmation_notification(mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info):
     """Assert product confirmation notification not created."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)
@@ -524,7 +524,7 @@ def test_resubmission_notification(
     mock_mailer, session, auth_mock, keycloak_mock, monkeypatch, org_product_info, contact_type
 ):
     """Assert product resubmission notifications are created."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)

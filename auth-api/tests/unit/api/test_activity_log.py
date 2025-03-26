@@ -83,7 +83,7 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
 
     factory_activity_log_model(actor=user.id, action=ActivityAction.CREATE_AFFILIATION.value, org_id=org.id)
 
-    user_with_token = TestUserInfo.user_staff_admin
+    user_with_token = dict(TestUserInfo.user_staff_admin)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     staff_user = factory_user_model(TestUserInfo.user_staff_admin)
     factory_activity_log_model(actor=staff_user.id, action=ActivityAction.REMOVE_AFFILIATION.value, org_id=org.id)
