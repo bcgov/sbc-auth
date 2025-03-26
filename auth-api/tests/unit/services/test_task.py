@@ -132,7 +132,7 @@ def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-a
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_update_task(session, keycloak_mock, monkeypatch, test_name, rmv_contact):  # pylint:disable=unused-argument
     """Assert that a task can be updated."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)
@@ -174,7 +174,7 @@ def test_update_task(session, keycloak_mock, monkeypatch, test_name, rmv_contact
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a task can be updated."""
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)
