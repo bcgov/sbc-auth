@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
-import os
 import time
 from concurrent.futures import CancelledError
 from unittest.mock import MagicMock
@@ -26,14 +25,6 @@ from auth_api import create_app, setup_jwt_manager
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models import db as _db
 from auth_api.utils.auth import jwt as _jwt
-
-
-def find_subpath(root_dir, target_subpath):
-    """Auxiliary subpath search function."""
-    for root, dirs, files in os.walk(root_dir):
-        if target_subpath in os.path.join(root, "").replace("\\", "/"):  # Ensure cross-platform compatibility
-            return os.path.join(root, "")
-    return None
 
 
 def mock_token(config_id="", config_secret=""):
