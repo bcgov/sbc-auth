@@ -389,7 +389,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
     @staticmethod
     def create_admin_membership_for_api_user(org_id, user_id):
         """Create a membership for an api user."""
-        current_app.logging.info("Creating membership in {org_id} for API user {user_id}")
+        current_app.logging.info(f"Creating membership in {org_id} for API user {user_id}")
         return MembershipModel(
             org_id=org_id, user_id=user_id, membership_type_code=ADMIN, status=Status.ACTIVE.value
         ).save()
