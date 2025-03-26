@@ -21,12 +21,17 @@ from requests.exceptions import HTTPError
 from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, Error
+from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
+from auth_api.models.user import User as UserModel
 from auth_api.services.authorization import check_auth
+from auth_api.services.flags import flags
 from auth_api.services.keycloak import KeycloakService
+from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.api_gateway import generate_client_representation
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_API_GW_SANDBOX_USERS, GROUP_API_GW_USERS
+from auth_api.utils.enums import Status
 from auth_api.utils.roles import ADMIN, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -60,6 +65,8 @@ class ApiGateway:
             # If env is sandbox; then create a sandbox payment account.
             if env != "prod":
                 cls._create_payment_account(org)
+                # Future - if PROD and target is SANDBOX - Call into AUTH-API to create an org, this will call PAY-API
+                # to create payment account
             cls._create_consumer(name, org, env=env)
             org.has_api_access = True
             org.save()
@@ -74,12 +81,33 @@ class ApiGateway:
             )
             response = api_key_response.json()
 
+        cls._create_user_and_membership_for_api_user(org_id, env)
         return response
 
     @classmethod
+    def _create_user_and_membership_for_api_user(cls, org_id: int, env: str):
+        """Create a user and membership for the api user."""
+        if flags.is_on("enable-api-gw-user-membership-creation", False) is True:
+            client_name = ApiGateway.get_api_client_id(org_id, env)
+            client = KeycloakService.get_service_account_by_client_name(client_name)
+            if (api_user := UserModel.find_by_username(client_name)) is None:
+                api_user = UserModel.create_user_for_api_user(client_name, client.get("id"))
+            if MembershipModel.find_membership_by_user_and_org(api_user.id, org_id) is None:
+                MembershipService.create_admin_membership_for_api_user(org_id, api_user.id)
+
+    @classmethod
     def _get_api_gw_key(cls, env):
+        """Get the api gateway key."""
         logger.info("_get_api_gw_key %s", env)
         return current_app.config.get("API_GW_KEY") if env == "prod" else current_app.config.get("API_GW_NON_PROD_KEY")
+
+    @staticmethod
+    def get_api_client_id(org_id, env):
+        """Get the client id for the org."""
+        client_id_pattern = current_app.config.get("API_GW_KC_CLIENT_ID_PATTERN")
+        suffix = "-sandbox" if env != "prod" else ""
+        client_id = f"{client_id_pattern}{suffix}".format(account_id=org_id)
+        return client_id
 
     @classmethod
     def _create_consumer(cls, name, org, env):
@@ -87,7 +115,7 @@ class ApiGateway:
         consumer_endpoint: str = cls._get_api_consumer_endpoint(env)
         gw_api_key = cls._get_api_gw_key(env)
         email = cls._get_email_id(org.id, env)
-        client_rep = generate_client_representation(org.id, current_app.config.get("API_GW_KC_CLIENT_ID_PATTERN"), env)
+        client_rep = generate_client_representation(org.id, ApiGateway.get_api_client_id(org.id, env))
         KeycloakService.create_client(client_rep)
         service_account = KeycloakService.get_service_account_user(client_rep.get("id"))
 
@@ -184,6 +212,7 @@ class ApiGateway:
 
     @classmethod
     def _get_email_id(cls, org_id, env) -> str:
+        """Get the email id for the org."""
         if current_app.config.get("API_GW_CONSUMER_EMAIL", None) is not None:
             return current_app.config.get("API_GW_CONSUMER_EMAIL")
 
@@ -243,6 +272,7 @@ class ApiGateway:
 
     @classmethod
     def _create_sandbox_pay_account(cls, pay_request, user):
+        """Create a sandbox payment account."""
         logger.info("Creating Sandbox Payload %s", pay_request)
         pay_sandbox_accounts_endpoint = f"{current_app.config.get('PAY_API_SANDBOX_URL')}/accounts?sandbox=true"
         RestService.post(
@@ -251,12 +281,14 @@ class ApiGateway:
 
     @classmethod
     def _get_pay_account(cls, org, user):
+        """Get the payment account for the org."""
         pay_accounts_endpoint = f"{current_app.config.get('PAY_API_URL')}/accounts/{org.id}"
         pay_account = RestService.get(endpoint=pay_accounts_endpoint, token=user.bearer_token).json()
         return pay_account
 
     @classmethod
     def _get_api_consumer_endpoint(cls, env):
+        """Get the consumer endpoint for the environment."""
         logger.info("_get_api_consumer_endpoint %s", env)
         return (
             current_app.config.get("API_GW_CONSUMERS_API_URL")

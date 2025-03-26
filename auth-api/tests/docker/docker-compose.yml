@@ -2,13 +2,15 @@ version: "3"
 
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:12.0.2
+    image: quay.io/keycloak/keycloak:26.0
     ports:
       - "8081:8081"
     environment:
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=admin
-    command: -b 0.0.0.0 -Djboss.http.port=8081 -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/tmp/keycloak/test -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    volumes:
+      - ./setup:/opt/keycloak/data/import
+    command:  ["start-dev", "--import-realm",  "--http-port=8081", "--http-relative-path=/auth"]
     healthcheck:
       test:
         [
@@ -20,18 +22,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
-    volumes:
-      - ./setup:/tmp/keycloak/test/
-  gcs-emulator:
-    image: fsouza/fake-gcs-server:latest
-    ports:
-      - "4443:4443"  # HTTP port for GCS emulator
-    environment:
-      - FAKE_GCS_EXTERNAL_URL=http://localhost:4443  # Use HTTP
-    command: -scheme http  # Force HTTP
-    volumes:
-      - gcs-data:/storage
-
   pubsub-emulator:
     image: google/cloud-sdk:latest
     ports:
@@ -44,6 +34,15 @@ services:
       - PUBSUB_PROJECT_ID=test-project
     volumes:
       - pubsub-data:/var/pubsub
+  gcs-emulator:
+    image: fsouza/fake-gcs-server:latest
+    ports:
+      - "4443:4443"  # HTTP port for GCS emulator
+    environment:
+      - FAKE_GCS_EXTERNAL_URL=http://localhost:4443  # Use HTTP
+    command: -scheme http  # Force HTTP
+    volumes:
+      - gcs-data:/storage
   proxy:
     image: nginx:alpine
     volumes:
@@ -72,6 +71,10 @@ services:
     command: >
       mock -p 4010 --host 0.0.0.0
       https://raw.githubusercontent.com/bcgov/sbc-pay/main/docs/docs/api_contract/pay-api.yaml
+
+networks:
+  minio-tier:
+    driver: bridge
 
 volumes:
   gcs-data:
