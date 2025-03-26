@@ -144,6 +144,25 @@ class User(BaseModel):
             return user
         return None
 
+    @staticmethod
+    def create_user_for_api_user(username, keycloak_guid):
+        """Create user for API user."""
+        api_user = User(
+            username=username,
+            firstname=None,
+            lastname=username,
+            email=None,
+            keycloak_guid=keycloak_guid,
+            created=datetime.datetime.now(tz=datetime.timezone.utc),
+            login_source=LoginSource.API_GW.value,
+            status=UserStatusCode.get_default_type(),
+            idp_userid=username,
+            login_time=datetime.datetime.now(tz=datetime.timezone.utc),
+            type=Role.PUBLIC_USER.name,
+            verified=True,
+        ).save()
+        return api_user
+
     @classmethod
     @user_context
     def update_from_jwt_token(

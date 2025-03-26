@@ -698,25 +698,3 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             return False
 
         return current_user_membership.membership_type_code in CLIENT_ADMIN_ROLES
-
-    @staticmethod
-    def create_user_for_api_user(username, data: dict):
-        """Create user for API user."""
-        keycloak_guid = data.get("id")
-        current_app.logger.info(f"Creating user for API user - {username} with id {id}")
-        api_user = UserModel(
-            username=username,
-            firstname=None,
-            lastname=username,
-            email=None,
-            keycloak_guid=keycloak_guid,
-            created=datetime.now(tz=timezone.utc),
-            login_source=LoginSource.API_GW.value,
-            status=UserStatusCode.get_default_type(),
-            idp_userid=username,
-            login_time=datetime.now(tz=timezone.utc),
-            type=Role.PUBLIC_USER.name,
-            verified=True,
-            is_terms_of_use_accepted=True,
-        ).save()
-        return api_user

@@ -23,12 +23,12 @@ from structured_logging import StructuredLogging
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
+from auth_api.models.user import User as UserModel
 from auth_api.services.authorization import check_auth
 from auth_api.services.flags import flags
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.rest_service import RestService
-from auth_api.services.user import User as UserService
 from auth_api.utils.api_gateway import generate_client_representation
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_API_GW_SANDBOX_USERS, GROUP_API_GW_USERS
 from auth_api.utils.enums import Status
@@ -87,11 +87,11 @@ class ApiGateway:
     @classmethod
     def _create_user_and_membership_for_api_user(cls, org_id: int, env: str):
         """Create a user and membership for the api user."""
-        if flags.is_on("enable-api-gw-user-membership-creation", False) is True:
+        if flags.is_on("enable-api-gw-user-membership-creation", True) is True:
             client_name = ApiGateway.get_api_client_id(org_id, env)
             client = KeycloakService.get_service_account_by_client_name(client_name)
-            if (api_user := UserService.find_by_username(client_name)) is None:
-                api_user = UserService.create_user_for_api_user(client_name, client)
+            if (api_user := UserModel.find_by_username(client_name)) is None:
+                api_user = UserModel.create_user_for_api_user(client_name, client.get("id"))
             if MembershipModel.find_membership_by_user_and_org(api_user.id, org_id) is None:
                 MembershipService.create_admin_membership_for_api_user(org_id, api_user.id)
 
