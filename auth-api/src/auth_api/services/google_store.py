@@ -16,8 +16,9 @@
 import uuid
 from datetime import timedelta
 
+import google.auth
 from flask import current_app
-from google.auth import compute_engine
+from google.auth.compute_engine import Credentials
 from google.auth.transport import requests
 from google.cloud import storage
 from structured_logging import StructuredLogging
@@ -32,17 +33,27 @@ class GoogleStoreService:
 
     @staticmethod
     def _get_signing_credentials():
-        """Get credentials with explicit token refresh."""
-        creds = compute_engine.Credentials()
-        auth_request = requests.Request()
+        """Get credentials with explicit token refresh.
+        Works in both production (GCE) and local development.
+        """
+        try:
+            creds, project = google.auth.default()
 
-        logger.info(f"Initial credentials: {creds.service_account_email}")
-        if not creds.token:
-            logger.info("Refreshing stale credentials")
-            creds.refresh(auth_request)
+            if isinstance(creds, Credentials):
+                auth_request = requests.Request()
+                logger.info(f"Initial credentials: {creds.service_account_email}")
+                if not creds.token:
+                    logger.info("Refreshing stale credentials")
+                    creds.refresh(auth_request)
+            else:
+                logger.info("Using local service account credentials")
 
-        logger.info(f"Using token expiring at: {creds.expiry}")
-        return creds
+            logger.info(f"Using token expiring at: {creds.expiry}")
+            return creds
+
+        except Exception as e:
+            logger.error(f"Error getting credentials: {str(e)}")
+            raise
 
     @staticmethod
     def create_signed_put_url(file_name: str, prefix_key: str = AFFIDAVIT_FOLDER_NAME) -> dict:
@@ -79,7 +90,7 @@ class GoogleStoreService:
             )
 
             signed_url_details = {
-                "signedUrl": signed_url,
+                "preSignedUrl": signed_url,
                 "key": key,
             }
 

@@ -25,7 +25,7 @@ def test_create_signed_put_url(session, gcs_mock):  # pylint:disable=unused-argu
 
     # Assert the results
     assert signed_url
-    assert signed_url["signedUrl"] == "http://mocked.url"  # From fixture
+    assert signed_url["preSignedUrl"] == "http://mocked.url"  # From fixture
     assert signed_url["key"].startswith("Test/")
     assert signed_url["key"].endswith(".pdf")
 
