@@ -13,12 +13,12 @@
 # limitations under the License.
 """Module for interacting with Google Cloud Storage (GCS)."""
 
-import os
 import uuid
 from datetime import timedelta
 
+import google.auth
 from flask import current_app
-from google.auth import compute_engine, default
+from google.auth.compute_engine import Credentials
 from google.auth.transport import requests
 from google.cloud import storage
 from structured_logging import StructuredLogging
@@ -37,9 +37,9 @@ class GoogleStoreService:
         Works in both production (GCE) and local development.
         """
         try:
-            creds, project = default()
+            creds, project = google.auth.default()
 
-            if isinstance(creds, compute_engine.Credentials):
+            if isinstance(creds, Credentials):
                 auth_request = requests.Request()
                 logger.info(f"Initial credentials: {creds.service_account_email}")
                 if not creds.token:

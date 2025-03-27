@@ -14,7 +14,7 @@
 """Common setup and fixtures for the pytest suite used by this service."""
 import time
 from concurrent.futures import CancelledError
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from flask_migrate import Migrate, upgrade
@@ -250,32 +250,32 @@ def nr_mock(monkeypatch):
 
 @pytest.fixture()
 def gcs_mock(monkeypatch):
-    """Mock Google Cloud Storage client and blob using monkeypatch."""
+    """Mock Google Cloud Storage client, blob, and authentication credentials."""
     mock_client = MagicMock()
     mock_bucket = MagicMock()
     mock_blob = MagicMock()
 
-    # Set up the mock chain
+    # Set up the mock chain for GCS
     mock_client.bucket.return_value = mock_bucket
     mock_bucket.blob.return_value = mock_blob
-
     mock_blob.generate_signed_url.return_value = "http://mocked.url"
 
     # Monkeypatch the storage.Client to return the mock client
     monkeypatch.setattr("google.cloud.storage.Client", lambda: mock_client)
 
-    # Mock credentials if needed
+    # Mock credentials
     mock_credentials = MagicMock()
     mock_credentials.service_account_email = "test@project.iam.gserviceaccount.com"
     mock_credentials.token = "mock-token"
-    monkeypatch.setattr("google.auth.compute_engine.Credentials", lambda: mock_credentials)
+    mock_credentials.expiry = "2025-01-01T00:00:00Z"
 
-    yield {
-        "mock_client": mock_client,
-        "mock_bucket": mock_bucket,
-        "mock_blob": mock_blob,
-        "mock_credentials": mock_credentials,
-    }
+    with patch("google.auth.default", return_value=(mock_credentials, "mock-project")):
+        yield {
+            "mock_client": mock_client,
+            "mock_bucket": mock_bucket,
+            "mock_blob": mock_blob,
+            "mock_credentials": mock_credentials,
+        }
 
 
 @pytest.fixture()
