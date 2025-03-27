@@ -97,7 +97,8 @@ export default defineConfig({
       }
     },
     deps: {
-      inline: ['vuetify']
+      // Need sbc-common-components in there otherwise vue error
+      inline: ['vuetify', 'sbc-common-components']
     }
   },
   // Needs to be in here so there aren't two instances of sbc-common-components created.

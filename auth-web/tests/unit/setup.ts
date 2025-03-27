@@ -18,16 +18,6 @@ Vue.use(VueRouter)
 Vue.use(VueSanitize)
 Vue.directive('can', can)
 
-// mock fix Error: Using the export keyword between a decorator and a class is not allowed. Please use `export @dec class` instead.
-// remove this once when vuex-module-decorators removed from bcrs-shared-components
-vi.mock('@bcrs-shared-components/base-address/BaseAddress.vue', () => ({
-  default: {
-    name: 'BaseAddress',
-    template: '<div class="base-address-mock" />',
-    props: ['editing', 'schema', 'address']
-  }
-}))
-
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
