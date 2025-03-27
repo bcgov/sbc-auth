@@ -1,4 +1,4 @@
-FROM python:3.12.5-bullseye as development_build
+FROM python:3.12.9-bullseye as development_build
 USER root
 
 ARG VCS_REF="missing"
