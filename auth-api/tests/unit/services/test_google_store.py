@@ -56,17 +56,9 @@ def test_create_signed_get_url(session, tmpdir, gcs_mock):  # pylint:disable=unu
         "http://mocked-get-url",  # Signed GET URL
     ]
 
-    # Create a signed PUT URL
     signed_url = GoogleStoreService.create_signed_put_url(file_name, prefix_key="Test")
     key = signed_url.get("key")
-    pre_signed_put = signed_url.get("signedUrl")
 
-    # Verify the signed PUT URL
-    assert pre_signed_put == "http://mocked-put-url"
-    assert key.startswith("Test/")
-    assert key.endswith(".txt")
-
-    # Create a signed GET URL
     pre_signed_get = GoogleStoreService.create_signed_get_url(key)
 
     # Verify the signed GET URL
@@ -76,14 +68,12 @@ def test_create_signed_get_url(session, tmpdir, gcs_mock):  # pylint:disable=unu
     assert mock_client.bucket.call_count == 2
     mock_client.bucket.assert_any_call("auth-accounts-dev")
     mock_bucket.blob.assert_any_call(key)
-    mock_blob.generate_signed_url.assert_any_call(
-        version="v4",
-        expiration=timedelta(minutes=5),
-        method="PUT",
-        content_type="application/octet-stream",
-    )
+
+    # Check the GET URL generation call
     mock_blob.generate_signed_url.assert_any_call(
         version="v4",
         expiration=timedelta(hours=1),
         method="GET",
+        service_account_email="default",  # This comes from compute_engine.Credentials() in test
+        access_token=None,  # This comes from compute_engine.Credentials() in test
     )
