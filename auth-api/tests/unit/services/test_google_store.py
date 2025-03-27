@@ -20,31 +20,26 @@ from auth_api.services import GoogleStoreService
 
 def test_create_signed_put_url(session, gcs_mock):  # pylint:disable=unused-argument
     """Assert that a PUT URL can be pre-signed."""
-    # Setup mock credentials
-    mock_credentials = MagicMock()
-    mock_credentials.service_account_email = "test@project.iam.gserviceaccount.com"
-    mock_credentials.token = "mock-token"
+    file_name = "affidavit-test.pdf"
+    signed_url = GoogleStoreService.create_signed_put_url(file_name, prefix_key="Test")
 
-    with patch("google.auth.compute_engine.Credentials", return_value=mock_credentials):
-        file_name = "affidavit-test.pdf"
-        signed_url = GoogleStoreService.create_signed_put_url(file_name, prefix_key="Test")
+    # Assert the results
+    assert signed_url
+    assert signed_url["signedUrl"] == "http://mocked.url"  # From fixture
+    assert signed_url["key"].startswith("Test/")
+    assert signed_url["key"].endswith(".pdf")
 
-        # Assert the results
-        assert signed_url
-        assert signed_url.get("key").startswith("Test/")
-        assert signed_url.get("key").endswith(".pdf")
-
-        # Verify the mocks were called as expected
-        gcs_mock["mock_client"].bucket.assert_called_once()
-        gcs_mock["mock_bucket"].blob.assert_called_once()
-        gcs_mock["mock_blob"].generate_signed_url.assert_called_once_with(
-            version="v4",
-            expiration=timedelta(minutes=5),
-            method="PUT",
-            content_type="application/octet-stream",
-            service_account_email="test@project.iam.gserviceaccount.com",
-            access_token="mock-token",
-        )
+    # Verify the mocks were called as expected
+    gcs_mock["mock_client"].bucket.assert_called_once()
+    gcs_mock["mock_bucket"].blob.assert_called_once()
+    gcs_mock["mock_blob"].generate_signed_url.assert_called_once_with(
+        version="v4",
+        expiration=timedelta(minutes=5),  # Keep your expected expiration
+        method="PUT",
+        content_type="application/octet-stream",
+        service_account_email="test@project.iam.gserviceaccount.com",  # From fixture
+        access_token="mock-token",  # From fixture
+    )
 
 
 def test_create_signed_get_url(session, tmpdir, gcs_mock):  # pylint:disable=unused-argument
