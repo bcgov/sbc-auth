@@ -258,15 +258,23 @@ def gcs_mock(monkeypatch):
     # Set up the mock chain
     mock_client.bucket.return_value = mock_bucket
     mock_bucket.blob.return_value = mock_blob
+
     mock_blob.generate_signed_url.return_value = "http://mocked.url"
 
     # Monkeypatch the storage.Client to return the mock client
-    monkeypatch.setattr("auth_api.services.google_store.storage.Client", lambda: mock_client)
+    monkeypatch.setattr("google.cloud.storage.Client", lambda: mock_client)
+
+    # Mock credentials if needed
+    mock_credentials = MagicMock()
+    mock_credentials.service_account_email = "test@project.iam.gserviceaccount.com"
+    mock_credentials.token = "mock-token"
+    monkeypatch.setattr("google.auth.compute_engine.Credentials", lambda: mock_credentials)
 
     yield {
         "mock_client": mock_client,
         "mock_bucket": mock_bucket,
         "mock_blob": mock_blob,
+        "mock_credentials": mock_credentials,
     }
 
 
