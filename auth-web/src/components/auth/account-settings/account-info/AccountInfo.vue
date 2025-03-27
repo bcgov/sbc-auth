@@ -300,7 +300,7 @@ export default defineComponent({
     AccountAccessType
   },
   props: ['orgId'],
-  setup (props, { root }) {
+  setup () {
     const codesStore = useCodesStore()
     const orgStore = useOrgStore()
     const userStore = useUserStore()
