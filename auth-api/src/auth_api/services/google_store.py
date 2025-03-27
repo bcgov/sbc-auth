@@ -18,6 +18,7 @@ from datetime import timedelta
 
 from flask import current_app
 from google.auth import compute_engine
+from google.auth.transport import requests
 from google.cloud import storage
 from structured_logging import StructuredLogging
 
@@ -28,6 +29,20 @@ logger = StructuredLogging.get_logger()
 
 class GoogleStoreService:
     """Document Storage class."""
+
+    @staticmethod
+    def _get_signing_credentials():
+        """Get credentials with explicit token refresh."""
+        creds = compute_engine.Credentials()
+        auth_request = requests.Request()
+
+        logger.info(f"Initial credentials: {creds.service_account_email}")
+        if not creds.token:
+            logger.info("Refreshing stale credentials")
+            creds.refresh(auth_request)
+
+        logger.info(f"Using token expiring at: {creds.expiry}")
+        return creds
 
     @staticmethod
     def create_signed_put_url(file_name: str, prefix_key: str = AFFIDAVIT_FOLDER_NAME) -> dict:
@@ -42,7 +57,7 @@ class GoogleStoreService:
             dict: A dictionary containing the signed URL and the object key.
         """
         logger.debug("Creating signed URL for upload.")
-        credentials = compute_engine.Credentials()
+        credentials = GoogleStoreService._get_signing_credentials()
 
         client = storage.Client()
         bucket_name = current_app.config["ACCOUNT_MAILER_BUCKET"]
@@ -52,21 +67,28 @@ class GoogleStoreService:
         key = f"{prefix_key}/{str(uuid.uuid4())}.{file_extension}"
 
         blob = bucket.blob(key)
-        signed_url = blob.generate_signed_url(
-            version="v4",
-            expiration=timedelta(minutes=5),
-            method="PUT",
-            content_type="application/octet-stream",
-            service_account_email=credentials.service_account_email,
-            access_token=credentials.token,
-        )
 
-        signed_url_details = {
-            "signedUrl": signed_url,
-            "key": key,
-        }
+        try:
+            signed_url = blob.generate_signed_url(
+                version="v4",
+                expiration=timedelta(minutes=5),
+                method="PUT",
+                service_account_email=credentials.service_account_email,
+                access_token=credentials.token,
+                content_type="application/octet-stream",
+            )
 
-        return signed_url_details
+            signed_url_details = {
+                "signedUrl": signed_url,
+                "key": key,
+            }
+
+            return signed_url_details
+        except Exception as e:
+            logger.error(f"Signing failed: {str(e)}")
+            logger.error(f"Service Account: {credentials.service_account_email}")
+            logger.error(f"Token valid: {credentials.valid}")
+            raise
 
     @staticmethod
     def create_signed_get_url(key: str) -> str:
@@ -80,19 +102,27 @@ class GoogleStoreService:
             str: A signed URL for downloading the file.
         """
         logger.debug("Creating signed URL for download.")
-        credentials = compute_engine.Credentials()
+        credentials = GoogleStoreService._get_signing_credentials()
 
         client = storage.Client()
         bucket_name = current_app.config["ACCOUNT_MAILER_BUCKET"]
         bucket = client.bucket(bucket_name)
 
         blob = bucket.blob(key)
-        signed_url = blob.generate_signed_url(
-            version="v4",
-            expiration=timedelta(hours=1),
-            method="GET",
-            service_account_email=credentials.service_account_email,
-            access_token=credentials.token,
-        )
 
-        return signed_url
+        try:
+            signed_url = blob.generate_signed_url(
+                version="v4",
+                expiration=timedelta(hours=1),
+                method="GET",
+                service_account_email=credentials.service_account_email,
+                access_token=credentials.token,
+            )
+
+            return signed_url
+
+        except Exception as e:
+            logger.error(f"Signing failed: {str(e)}")
+            logger.error(f"Service Account: {credentials.service_account_email}")
+            logger.error(f"Token valid: {credentials.valid}")
+            raise
