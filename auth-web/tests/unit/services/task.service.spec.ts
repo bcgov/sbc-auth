@@ -30,8 +30,8 @@ const mocks = vi.hoisted(() => ({
 
 describe('Task service', () => {
   beforeEach(() => {
-    TaskService.getTaskById = vi.fn().mockResolvedValue(mockTask)
-    TaskService.fetchTasks = vi.fn().mockResolvedValue(mockTask)
+    TaskService.getTaskById = vi.fn().mockResolvedValue(mockTask.data)
+    TaskService.fetchTasks = vi.fn().mockResolvedValue(mockTask.data)
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
     vi.doMock('axios', () => {
       return {

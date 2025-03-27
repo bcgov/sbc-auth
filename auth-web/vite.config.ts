@@ -99,5 +99,9 @@ export default defineConfig({
     deps: {
       inline: ['vuetify']
     }
+  },
+  // Needs to be in here so there aren't two instances of sbc-common-components created.
+  optimizeDeps: {
+    exclude: ['@vue/composition-api', 'sbc-common-components']
   }
 })
