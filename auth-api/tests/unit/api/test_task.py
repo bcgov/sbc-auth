@@ -161,7 +161,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     # 4. Create Org
     # 5. Update the created task and the relationship
     monkeypatch.setattr("auth_api.utils.user_context._get_token_info", lambda: TestJwtClaims.public_bceid_user)
-    user_with_token = TestUserInfo.user_staff_admin
+    user_with_token = dict(TestUserInfo.user_staff_admin)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_user_role["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)
@@ -217,7 +217,7 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     # 4. Create Org
     # 5. Update the created task and the relationship
     monkeypatch.setattr("auth_api.utils.user_context._get_token_info", lambda: TestJwtClaims.public_bceid_user)
-    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_user_role["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)
@@ -275,7 +275,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
 
     # Post user, org and product subscription
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
-    user_with_token = TestUserInfo.user_staff_admin
+    user_with_token = dict(TestUserInfo.user_staff_admin)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_user_role["idp_userid"]
     user = factory_user_model_with_contact(user_with_token)

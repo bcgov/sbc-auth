@@ -18,8 +18,12 @@ Test-Suite to ensure that the /orgs/api-keys endpoint is working as expected.
 """
 
 import json
+from contextlib import suppress
 from http import HTTPStatus
 
+from auth_api.services.api_gateway import ApiGateway
+from auth_api.services.keycloak import KeycloakService
+from auth_api.utils.api_gateway import generate_client_representation
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header
 

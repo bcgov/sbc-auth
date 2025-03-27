@@ -63,7 +63,7 @@ def test_as_dict(session):  # pylint: disable=unused-argument
     user = UserService(user_model)
 
     dictionary = user.as_dict()
-    assert dictionary["username"] == TestUserInfo.user1["username"]
+    assert dictionary["username"] == dict(TestUserInfo.user1)["username"]
 
 
 def test_user_save_by_token(session, monkeypatch):  # pylint: disable=unused-argument
@@ -444,7 +444,7 @@ def test_user_save_by_token_fail(session, monkeypatch):  # pylint: disable=unuse
 
 def test_add_contact_to_user(session, monkeypatch):  # pylint: disable=unused-argument
     """Assert that a contact can be added to a user."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.user_test["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.user_test["idp_userid"]
     factory_user_model(user_info=user_with_token)
@@ -467,7 +467,7 @@ def test_add_contact_user_no_user(session, monkeypatch):  # pylint: disable=unus
 
 def test_add_contact_to_user_already_exists(session, monkeypatch):  # pylint: disable=unused-argument
     """Assert that a contact cannot be added to a user that already has a contact."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.user_test["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.user_test["idp_userid"]
     factory_user_model(user_info=user_with_token)
@@ -482,7 +482,7 @@ def test_add_contact_to_user_already_exists(session, monkeypatch):  # pylint: di
 
 def test_update_contact_for_user(session, monkeypatch):  # pylint: disable=unused-argument
     """Assert that a contact can be updated for a user."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.user_test["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.user_test["idp_userid"]
     factory_user_model(user_info=user_with_token)
@@ -555,7 +555,7 @@ def test_update_contact_for_user_no_contact(session, monkeypatch):  # pylint: di
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_delete_contact_for_user(session, monkeypatch):  # pylint: disable=unused-argument
     """Assert that a contact can be deleted for a user."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.user_test["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.user_test["idp_userid"]
     factory_user_model(user_info=user_with_token)
@@ -604,7 +604,7 @@ def test_find_users(session):  # pylint: disable=unused-argument
 
 def test_user_find_by_token(session, monkeypatch):  # pylint: disable=unused-argument
     """Assert that a user can be found by token."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.user_test["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.user_test["idp_userid"]
     factory_user_model(user_info=user_with_token)
@@ -640,12 +640,12 @@ def test_user_find_by_username(session):  # pylint: disable=unused-argument
     user = UserService.find_by_username(TestUserInfo.user1["username"])
     assert user is not None
     dictionary = user.as_dict()
-    assert dictionary["username"] == TestUserInfo.user1["username"]
+    assert dictionary["username"] == dict(TestUserInfo.user1)["username"]
 
 
 def test_user_find_by_username_no_model_object(session):  # pylint: disable=unused-argument
     """Assert that the business can't be found with no model."""
-    username = TestUserInfo.user_test["username"]
+    username = dict(TestUserInfo.user_test)["username"]
 
     user = UserService.find_by_username(username)
 
@@ -665,7 +665,7 @@ def test_user_find_by_username_missing_username(session):  # pylint: disable=unu
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_delete_contact_user_link(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a contact can not be deleted if contact link exists."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_user_role["idp_userid"]
     user_model = factory_user_model(user_info=user_with_token)
@@ -700,7 +700,7 @@ def test_delete_contact_user_link(session, auth_mock, keycloak_mock, monkeypatch
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_delete_user(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
-    user_with_token = TestUserInfo.user_test
+    user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.user_test["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.user_test["idp_userid"]
     user_model = factory_user_model(user_info=user_with_token)

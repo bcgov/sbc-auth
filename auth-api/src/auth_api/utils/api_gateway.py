@@ -16,17 +16,13 @@ import secrets
 import uuid
 
 
-def generate_client_representation(account_id: int, client_id_pattern: str, env: str) -> dict:
+def generate_client_representation(account_id: int, client_id: str) -> dict:
     """Return dictionary for api gateway client user."""
     _id = str(uuid.uuid4())
     _secret = secrets.token_urlsafe(36)
-    if env != "prod":
-        client_id_pattern += "-sandbox"
-    _client_id = client_id_pattern.format(account_id=account_id)
-
     client_json: dict = {
         "id": _id,
-        "clientId": _client_id,
+        "clientId": client_id,
         "rootUrl": "",
         "adminUrl": "",
         "baseUrl": "",
@@ -86,7 +82,7 @@ def generate_client_representation(account_id: int, client_id_pattern: str, env:
                 "protocolMapper": "oidc-hardcoded-claim-mapper",
                 "consentRequired": False,
                 "config": {
-                    "claim.value": _client_id,
+                    "claim.value": client_id,
                     "userinfo.token.claim": "true",
                     "id.token.claim": "true",
                     "access.token.claim": "true",
@@ -114,7 +110,7 @@ def generate_client_representation(account_id: int, client_id_pattern: str, env:
                 "protocolMapper": "oidc-hardcoded-claim-mapper",
                 "consentRequired": False,
                 "config": {
-                    "claim.value": _client_id,
+                    "claim.value": client_id,
                     "userinfo.token.claim": "true",
                     "id.token.claim": "true",
                     "access.token.claim": "true",
@@ -128,7 +124,7 @@ def generate_client_representation(account_id: int, client_id_pattern: str, env:
                 "protocolMapper": "oidc-hardcoded-claim-mapper",
                 "consentRequired": False,
                 "config": {
-                    "claim.value": _client_id,
+                    "claim.value": client_id,
                     "userinfo.token.claim": "true",
                     "id.token.claim": "true",
                     "access.token.claim": "true",
@@ -142,7 +138,7 @@ def generate_client_representation(account_id: int, client_id_pattern: str, env:
                 "protocolMapper": "oidc-hardcoded-claim-mapper",
                 "consentRequired": False,
                 "config": {
-                    "claim.value": _client_id,
+                    "claim.value": client_id,
                     "userinfo.token.claim": "true",
                     "id.token.claim": "true",
                     "access.token.claim": "true",
@@ -156,7 +152,7 @@ def generate_client_representation(account_id: int, client_id_pattern: str, env:
                 "protocolMapper": "oidc-hardcoded-claim-mapper",
                 "consentRequired": False,
                 "config": {
-                    "claim.value": _client_id,
+                    "claim.value": client_id,
                     "userinfo.token.claim": "true",
                     "id.token.claim": "true",
                     "access.token.claim": "true",
@@ -215,7 +211,7 @@ def generate_client_representation(account_id: int, client_id_pattern: str, env:
                 "protocolMapper": "oidc-hardcoded-claim-mapper",
                 "consentRequired": False,
                 "config": {
-                    "claim.value": _client_id,
+                    "claim.value": client_id,
                     "userinfo.token.claim": "true",
                     "id.token.claim": "true",
                     "access.token.claim": "true",
