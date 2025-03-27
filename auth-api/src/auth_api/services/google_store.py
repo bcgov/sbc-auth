@@ -17,6 +17,7 @@ import uuid
 from datetime import timedelta
 
 from flask import current_app
+from google.auth import compute_engine
 from google.cloud import storage
 from structured_logging import StructuredLogging
 
@@ -41,6 +42,8 @@ class GoogleStoreService:
             dict: A dictionary containing the signed URL and the object key.
         """
         logger.debug("Creating signed URL for upload.")
+        credentials = compute_engine.Credentials()
+
         client = storage.Client()
         bucket_name = current_app.config["ACCOUNT_MAILER_BUCKET"]
         bucket = client.bucket(bucket_name)
@@ -54,6 +57,8 @@ class GoogleStoreService:
             expiration=timedelta(minutes=5),
             method="PUT",
             content_type="application/octet-stream",
+            service_account_email=credentials.service_account_email,
+            access_token=credentials.token,
         )
 
         signed_url_details = {
@@ -75,6 +80,8 @@ class GoogleStoreService:
             str: A signed URL for downloading the file.
         """
         logger.debug("Creating signed URL for download.")
+        credentials = compute_engine.Credentials()
+
         client = storage.Client()
         bucket_name = current_app.config["ACCOUNT_MAILER_BUCKET"]
         bucket = client.bucket(bucket_name)
@@ -84,6 +91,8 @@ class GoogleStoreService:
             version="v4",
             expiration=timedelta(hours=1),
             method="GET",
+            service_account_email=credentials.service_account_email,
+            access_token=credentials.token,
         )
 
         return signed_url
