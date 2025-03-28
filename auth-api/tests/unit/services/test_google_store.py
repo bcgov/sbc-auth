@@ -36,7 +36,7 @@ def test_create_signed_put_url(session, gcs_mock):  # pylint:disable=unused-argu
         version="v4",
         expiration=timedelta(minutes=5),  # Keep your expected expiration
         method="PUT",
-        content_type="application/octet-stream",
+        content_type="application/pdf",
         service_account_email="test@project.iam.gserviceaccount.com",  # From fixture
         access_token="mock-token",  # From fixture
     )
