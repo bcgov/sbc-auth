@@ -76,6 +76,7 @@ import SelectProductPayment from '@/components/auth/create-account/SelectProduct
 import Stepper from '@/components/auth/common/stepper/Stepper.vue'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import { useAccountCreate } from '@/composables/account-create-factory'
+import { useAppStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -179,8 +180,7 @@ export default defineComponent({
         await orgStore.syncMembership(organization.id)
         // remove GOVN account type from session
         ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
-        // Remove with Vue 3
-        root.$store.commit('updateHeader')
+        useAppStore().updateHeader()
         root.$router.push('/setup-account-success')
       } catch (err) {
       // eslint-disable-next-line no-console

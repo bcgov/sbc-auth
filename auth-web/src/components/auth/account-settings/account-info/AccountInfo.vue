@@ -286,6 +286,7 @@ import AccountMailingAddress from '@/components/auth/account-settings/account-in
 import { Address } from '@/models/address'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
+import { useAppStore } from '@/stores/app'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
@@ -299,7 +300,7 @@ export default defineComponent({
     AccountAccessType
   },
   props: ['orgId'],
-  setup (props, { root }) {
+  setup () {
     const codesStore = useCodesStore()
     const orgStore = useOrgStore()
     const userStore = useUserStore()
@@ -452,7 +453,7 @@ export default defineComponent({
 
       try {
         await orgStore.updateOrg(createRequestBody)
-        if (!(state.isStaff && !isStaffAccount.value)) root.$store.commit('updateHeader')
+        if (!(state.isStaff && !isStaffAccount.value)) useAppStore().updateHeader()
         if (!isBusinessInfoIncomplete.value && !state.isAddressInfoIncomplete) {
           state.isCompleteAccountInfo = true
           state.warningMessage = ''
@@ -479,7 +480,7 @@ export default defineComponent({
 
       try {
         await orgStore.updateOrgMailingAddress(createRequestBody)
-        if (!(state.isStaff && !isStaffAccount.value)) root.$store.commit('updateHeader')
+        if (!(state.isStaff && !isStaffAccount.value)) useAppStore().updateHeader()
         state.addressChanged = false
         state.originalAddress = currentOrgAddress.value
         if (!isBusinessInfoIncomplete.value && !state.isAddressInfoIncomplete) {

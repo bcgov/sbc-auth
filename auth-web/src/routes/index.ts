@@ -16,9 +16,10 @@ import Router from 'vue-router'
 import { User } from '@/models/user'
 import Vue from 'vue'
 import { getRoutes } from './router'
-import store from '@/stores/vuex'
+import { useAppStore } from '@/stores/app'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
+import { watch } from '@vue/composition-api'
 
 Vue.use(Router)
 
@@ -57,18 +58,21 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Enforce navigation guards are checked before navigating anywhere else
-  // Remove Vuex with Vue3 upgrade. - Will be replaced by Pinia onAction.
-  if (store.getters.loading) {
-    await new Promise(resolve => {
-      const unsubscribeFn = store.subscribe(mutation => {
-        if (mutation.type === 'loadComplete') {
+  const appStore = useAppStore()
+  if (appStore.loading) {
+    new Promise(resolve => {
+      const unsubscribeFn = watch(() => appStore.loading, (newLoading) => {
+        if (!newLoading) {
           unsubscribeFn()
           resolve(null)
         }
       })
+    }).then(() => {
+      proceed()
     })
+  } else {
+    proceed()
   }
-  proceed()
 
   function proceed () {
     const orgStore = useOrgStore()
