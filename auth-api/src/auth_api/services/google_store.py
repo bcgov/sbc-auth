@@ -79,14 +79,9 @@ class GoogleStoreService:
 
         blob = bucket.blob(key)
 
-        EXTENSION_TO_TYPE = {
-            'pdf': 'application/pdf',
-            'jpg': 'image/jpeg',
-            'jpeg': 'image/jpeg',
-            'png': 'image/png'
-        }
+        EXTENSION_TO_TYPE = {"pdf": "application/pdf", "jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png"}
 
-        content_type = EXTENSION_TO_TYPE.get(file_extension, 'application/octet-stream')
+        content_type = EXTENSION_TO_TYPE.get(file_extension, "application/octet-stream")
 
         try:
             signed_url = blob.generate_signed_url(
