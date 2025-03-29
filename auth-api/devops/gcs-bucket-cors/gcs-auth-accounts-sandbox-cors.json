@@ -1,0 +1,14 @@
+[
+    {
+      "maxAgeSeconds": 3600,
+      "method": ["PUT", "GET", "OPTIONS"],
+      "origin": [
+        "https://sandbox.account.bcregistry.gov.bc.ca"
+      ],
+      "responseHeader": [
+        "Content-Type",
+        "Origin"
+      ]
+    }
+  ]
+  

@@ -980,7 +980,7 @@ def test_user_post_during_login(client, jwt, session):  # pylint:disable=unused-
     assert login_time != rv.json.get("loginTime")
 
 
-def test_get_affidavit(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_get_affidavit(client, jwt, session, keycloak_mock, gcs_mock):  # pylint:disable=unused-argument
     """Assert get affidavit."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
     client.post("/api/v1/users", headers=headers, content_type="application/json")
@@ -1006,7 +1006,7 @@ def test_get_affidavit(client, jwt, session, keycloak_mock):  # pylint:disable=u
     assert rv.status_code == HTTPStatus.OK
 
 
-def test_get_rejected_affidavit(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_get_rejected_affidavit(client, jwt, session, keycloak_mock, gcs_mock):  # pylint:disable=unused-argument
     """Assert get affidavit."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
     client.post("/api/v1/users", headers=headers, content_type="application/json")

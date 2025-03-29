@@ -128,8 +128,7 @@ export const useUserStore = defineStore('user', () => {
       const response = await DocumentService.getPresignedUrl(file.name)
       const doc:DocumentUpload = response?.data
       state.affidavitDocId = doc.key // need this while creating org
-      const userId = state.currentUser.keycloakGuid // was from auth/keycloakGuid
-      await DocumentService.uploadToUrl(doc.preSignedUrl, file, doc.key, userId)
+      await DocumentService.uploadToUrl(doc.preSignedUrl, file)
     }
   }
 

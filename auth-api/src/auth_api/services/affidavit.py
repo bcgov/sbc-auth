@@ -30,7 +30,7 @@ from auth_api.models import Task as TaskModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.user import User as UserModel
 from auth_api.schemas import AffidavitSchema
-from auth_api.services.minio import MinioService
+from auth_api.services.google_store import GoogleStoreService
 from auth_api.services.task import Task as TaskService
 from auth_api.utils.enums import AffidavitStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from auth_api.utils.util import camelback2snake
@@ -144,7 +144,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         logger.debug("<find_affidavit_by_org_id ")
         affidavit = AffidavitModel.find_by_org_id(org_id, filtered_affidavit_statuses)
         affidavit_dict = Affidavit(affidavit).as_dict()
-        affidavit_dict["documentUrl"] = MinioService.create_signed_get_url(affidavit.document_id)
+        affidavit_dict["documentUrl"] = GoogleStoreService.create_signed_get_url(affidavit.document_id)
         logger.debug(">find_affidavit_by_org_id ")
         return affidavit_dict
 
@@ -154,7 +154,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         logger.debug("<find_affidavit_by_user_guid ")
         affidavit = AffidavitModel.find_effective_by_user_guid(user_guid, status)
         affidavit_dict = Affidavit(affidavit).as_dict()
-        affidavit_dict["documentUrl"] = MinioService.create_signed_get_url(affidavit.document_id)
+        affidavit_dict["documentUrl"] = GoogleStoreService.create_signed_get_url(affidavit.document_id)
         logger.debug(">find_affidavit_by_user_guid ")
         return affidavit_dict
 

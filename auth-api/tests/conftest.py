@@ -14,6 +14,7 @@
 """Common setup and fixtures for the pytest suite used by this service."""
 import time
 from concurrent.futures import CancelledError
+from unittest.mock import MagicMock, patch
 
 import pytest
 from flask_migrate import Migrate, upgrade
@@ -135,12 +136,12 @@ def auto(docker_services, app):
     setup_jwt_manager(app, _jwt)
 
     if app.config["USE_DOCKER_MOCK"]:
-        docker_services.start("minio")
+        docker_services.start("gcs-emulator")
         docker_services.start("notify")
         docker_services.start("bcol")
         docker_services.start("pay")
         docker_services.start("proxy")
-        docker_services.wait_for_service("minio", 9000, timeout=60.0)
+        time.sleep(10)
 
 
 @pytest.fixture(scope="session")
@@ -248,17 +249,33 @@ def nr_mock(monkeypatch):
 
 
 @pytest.fixture()
-def minio_mock(monkeypatch):
-    """Mock minio calls."""
+def gcs_mock(monkeypatch):
+    """Mock Google Cloud Storage client, blob, and authentication credentials."""
+    mock_client = MagicMock()
+    mock_bucket = MagicMock()
+    mock_blob = MagicMock()
 
-    def get_nr(business_identifier):
-        return {
-            "applicants": {"emailAddress": "test@test.com", "phoneNumber": "1112223333"},
-            "names": [{"name": "TEST INC..", "state": "APPROVED"}],
-            "state": "APPROVED",
+    # Set up the mock chain for GCS
+    mock_client.bucket.return_value = mock_bucket
+    mock_bucket.blob.return_value = mock_blob
+    mock_blob.generate_signed_url.return_value = "http://mocked.url"
+
+    # Monkeypatch the storage.Client to return the mock client
+    monkeypatch.setattr("google.cloud.storage.Client", lambda: mock_client)
+
+    # Mock credentials
+    mock_credentials = MagicMock()
+    mock_credentials.service_account_email = "test@project.iam.gserviceaccount.com"
+    mock_credentials.token = "mock-token"
+    mock_credentials.expiry = "2025-01-01T00:00:00Z"
+
+    with patch("google.auth.default", return_value=(mock_credentials, "mock-project")):
+        yield {
+            "mock_client": mock_client,
+            "mock_bucket": mock_bucket,
+            "mock_blob": mock_blob,
+            "mock_credentials": mock_credentials,
         }
-
-    monkeypatch.setattr("auth_api.services.minio.MinioService._get_client", get_nr)
 
 
 @pytest.fixture()

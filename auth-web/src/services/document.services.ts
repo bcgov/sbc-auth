@@ -35,13 +35,10 @@ export default class DocumentService {
     )
   }
 
-  static async uploadToUrl (url: string, file:File, key:string, userId: string): Promise<AxiosResponse> {
+  static async uploadToUrl (url: string, file:File): Promise<AxiosResponse> {
     const options = {
       headers: {
-        'Content-Type': file.type,
-        'x-amz-meta-userid': `${userId}`,
-        'x-amz-meta-key': `${key}`,
-        'Content-Disposition': `attachment; filename=${file.name}`
+        'Content-Type': file.type
       }
     }
     const response = await axios.put(

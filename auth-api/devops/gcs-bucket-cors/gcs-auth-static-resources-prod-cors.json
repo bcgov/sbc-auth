@@ -1,0 +1,16 @@
+[
+    {
+      "origin": [
+        "https://account.bcregistry.gov.bc.ca",
+        "https://sandbox.account.bcregistry.gov.bc.ca"
+      ],
+      "method": ["GET", "OPTIONS"],
+      "responseHeader": [
+        "Content-Type",
+        "Content-Disposition",
+        "Cache-Control"
+      ],
+      "maxAgeSeconds": 3600
+    }
+  ]
+  
