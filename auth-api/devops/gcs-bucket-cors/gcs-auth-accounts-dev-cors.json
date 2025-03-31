@@ -1,0 +1,15 @@
+[
+  {
+    "maxAgeSeconds": 3600,
+    "method": ["PUT", "GET", "OPTIONS"],
+    "origin": [
+      "https://dev.account.bcregistry.gov.bc.ca",
+      "http://localhost:8082",
+      "http://127.0.0.1:8082"
+    ],
+    "responseHeader": [
+      "Content-Type",
+      "Origin"
+    ]
+  }
+]
