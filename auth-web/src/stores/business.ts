@@ -254,8 +254,10 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   async function loadBusiness (businessQueryIdentifier = '') {
-    // Check session first or use query string if available.
-    const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey) || businessQueryIdentifier
+    // Check query string first, if provided, otherwise fall back to business id in session storage.
+    // Note: session storage might contain business id from last time.
+    const businessIdentifier = businessQueryIdentifier || ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
+
     // Need to look at LEAR, because it has the up-to-date names.
     const learBusiness = await searchBusiness(businessIdentifier)
     const response = await BusinessService.getBusiness(businessIdentifier)

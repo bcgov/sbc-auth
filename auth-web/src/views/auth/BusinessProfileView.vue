@@ -98,7 +98,7 @@ export default class BusinessProfileView extends Mixins(AccountChangeMixin, Next
   private editing = false
   private isLoading = true
   private readonly currentBusiness!: Business
-  private readonly loadBusiness!: (businessId) => Business
+  private readonly loadBusiness!: (businessId: string) => Promise<Business>
   private navigateBack (): void {
     if (this.$route.query.redirect) {
       if (this.currentOrganization) {
@@ -113,7 +113,8 @@ export default class BusinessProfileView extends Mixins(AccountChangeMixin, Next
 
   async mounted () {
     this.isLoading = true
-    // Include businessid from query string in case session is empty.
+    // Pass in business id from URL query string.
+    // Note: action will set session storage.
     await this.loadBusiness(this.$attrs.businessid)
     // Check if there is already contact info so that we display the appropriate copy
     if ((this.currentBusiness?.contacts?.length || 0) > 0) {
