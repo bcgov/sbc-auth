@@ -8,7 +8,9 @@ const axios = Axios.create()
 axios.interceptors.request.use(
   request => {
     // Bypass adding auth header for googcle cloud store
-    if (request.url?.includes('storage.googleapis.com')) {
+    const url = new URL(request.url);
+    const allowedHosts = ['storage.googleapis.com'];
+    if (allowedHosts.includes(url.host)) {
       return request
     }
 
