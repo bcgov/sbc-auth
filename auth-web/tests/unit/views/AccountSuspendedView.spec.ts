@@ -28,6 +28,11 @@ describe('AccountSuspendedView.vue', () => {
       name: 'testOrg',
       suspendedOn: 'January 12, 2021'
     }
+    orgStore.getAccountAdministrator = vi.fn().mockResolvedValue({ 'user': { 'contacts': [
+      {
+        'email': 'heyhey@haha.com'
+      }
+    ] } })
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
     wrapper = shallowMount(AccountSuspendedView, {
