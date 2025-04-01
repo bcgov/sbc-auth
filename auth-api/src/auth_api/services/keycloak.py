@@ -461,6 +461,8 @@ class KeycloakService:
             timeout=timeout,
         )
         response.raise_for_status()
+        if len(response.json()) == 0:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
         client_id = response.json()[0]["id"]
         return KeycloakService.get_service_account_user(client_id)
 
