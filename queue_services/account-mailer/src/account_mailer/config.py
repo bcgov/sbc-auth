@@ -75,7 +75,7 @@ class _Config:  # pylint: disable=too-few-public-methods
         SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://"
     else:
         SQLALCHEMY_DATABASE_URI = (
-            f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"  # noqa: E231, E501
+            f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"  # noqa: E231, E501
         )
 
     # Keycloak & Jwt
