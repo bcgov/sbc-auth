@@ -37,6 +37,7 @@ auth-api = { git = "https://github.com/bcgov/sbc-auth.git", rev = "main", subdir
 simple-cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py.git" }
 cloud-sql-python-connector = "^1.13.0"
 pkginfo = "^1.12.1.2"
+minio = "^7.2.7"
 
 [tool.poetry.group.dev.dependencies]
 psycopg2 = "2.9.9"
