@@ -40,7 +40,6 @@ cloud-sql-python-connector = "^1.13.0"
 pkginfo = "^1.12.1.2"
 
 [tool.poetry.group.dev.dependencies]
-psycopg2 = "2.9.9"
 pytest = "^8.3.2"
 pytest-mock = "^3.14.0"
 pyhamcrest = "^2.1.0"
