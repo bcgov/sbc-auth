@@ -22,3 +22,12 @@ Vue.directive('can', can)
 document.body.setAttribute('data-app', 'true')
 
 setActivePinia(createPinia())
+
+// Mock BaseAddress component to avoid decorator issues in tests
+vi.mock('@bcrs-shared-components/base-address/BaseAddress.vue', () => ({
+  default: {
+    name: 'BaseAddress',
+    template: '<div class="base-address-mock" />',
+    props: ['editing', 'schema', 'address']
+  }
+}))

@@ -203,6 +203,7 @@ import { DEACTIVATE_ACCOUNT_MESSAGE } from '@/util/constants'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
+import { useAppStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
@@ -272,8 +273,7 @@ export default class AccountDeactivate extends Vue {
     this.$refs.successModal.close()
     await this.setCurrentOrganizationFromUserAccountSettings()
     // Update header
-    // Remove with Vue 3
-    await this.$store.commit('updateHeader')
+    await useAppStore().updateHeader()
     this.$router.push(`/home`)
   }
 

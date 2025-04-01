@@ -13,6 +13,7 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import SbcSignin from 'sbc-common-components/src/components/SbcSignin.vue'
 import { mapActions } from 'pinia'
+import { useAuthStore } from 'sbc-common-components/src/stores'
 import { useUserStore } from '@/stores/user'
 
 @Component({
@@ -36,7 +37,8 @@ export default class Signin extends Mixins(NextPageMixin) {
     // Check if user is authenticated, and redirect according to specified redirect
     // or fallback to default route for their login source
     // Remove with Vue 3
-    if (this.$store.getters['auth/isAuthenticated']) {
+    const authStore = useAuthStore()
+    if (authStore.isAuthenticated) {
       this.$root.$emit('signin-complete', () => {
         if (this.redirectUrl) {
           if (this.redirectUrl.startsWith('/')) {

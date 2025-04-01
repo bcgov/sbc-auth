@@ -86,6 +86,8 @@ import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vu
 import { LoginSource } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
+import { getActivePinia } from 'pinia'
+import { useAuthStore } from 'sbc-common-components/src/stores'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -130,7 +132,8 @@ export default defineComponent({
       isOrgBusinessTypeValid: false,
       isExtraProvUser: computed(() => {
         // Remove Vuex with Vue 3
-        return root.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
+        const authStore = useAuthStore(getActivePinia())
+        return authStore.currentLoginSource === LoginSource.BCEID
       }),
       isFormValid: computed(() => {
         return !!state.isOrgBusinessTypeValid && !state.errorMessage && !!state.isBaseAddressValid
