@@ -142,7 +142,6 @@ class _Config:  # pylint: disable=too-few-public-methods
     # PUB/SUB - PUB: account-mailer-dev, auth-event-dev
     ACCOUNT_MAILER_TOPIC = os.getenv("ACCOUNT_MAILER_TOPIC", "account-mailer-dev")
     AUTH_EVENT_TOPIC = os.getenv("AUTH_EVENT_TOPIC", "auth-event-dev")
-    GCP_AUTH_KEY = os.getenv("AUTHPAY_GCP_AUTH_KEY", None)
 
     ACCOUNT_MAILER_BUCKET = os.getenv("ACCOUNTS_BUCKET", "auth-accounts-dev")
 
