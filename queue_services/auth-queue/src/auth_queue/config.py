@@ -77,8 +77,6 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     # PUB/SUB - PUB: account-mailer-dev, SUB: auth-event-dev and namex-nr-state-dev
     ACCOUNT_MAILER_TOPIC = os.getenv('ACCOUNT_MAILER_TOPIC', 'account-mailer-dev')
-    # If blank in PUB/SUB, this should match the https endpoint the subscription is pushing to.
-    GCP_AUTH_KEY = os.getenv('AUTHPAY_GCP_AUTH_KEY', None)
 
     PAY_API_URL = os.getenv('PAY_API_URL') + os.getenv('PAY_API_VERSION')
 
