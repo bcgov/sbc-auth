@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
-import time
 import os
+import time
 from concurrent.futures import CancelledError
 from unittest.mock import MagicMock, patch
 
