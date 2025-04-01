@@ -1231,7 +1231,6 @@ paths:
                     type: boolean
                     title: The Passcodeclaimed Schema
                     default: false
-                    example: false
                 required:
                   - businessIdentifier
                   - businessNumber
@@ -2687,6 +2686,271 @@ paths:
                       urlpath: /setup-account
       operationId: get-users-user-guid-settings
       description: Get user settings
+  '/affiliationInvitations':
+    parameters:
+      - name: businessDetails
+        in: query
+        schema:
+          type: string
+          default: 'false'
+        description: Flag to indicate if business details should be included
+      - name: orgId
+        in: query
+        schema:
+          type: string
+        description: Organization identifier
+      - name: businessIdentifier
+        in: query
+        schema:
+          type: string
+        description: Business identifier
+      - name: fromOrgId
+        in: query
+        schema:
+          type: string
+        description: Source organization identifier
+      - name: toOrgId
+        in: query
+        schema:
+          type: string
+        description: Target organization identifier
+      - name: statuses
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Status codes to filter invitations
+        explode: true
+      - name: types
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+        description: Invitation types to filter
+        explode: true
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  affiliationInvitations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/affiliation_invitation'
+        '401':
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+      operationId: get_affiliation_invitations
+      tags:
+        - affiliationInvitations
+      summary: Get affiliation invitations.
+      description: Get affiliation invitations.
+    post:
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/affiliation_invitation'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+      operationId: post_affiliation_invitation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/affiliation_invitation_request'
+      tags:
+        - affiliationInvitations
+      summary: Send a new affiliation invitation and save it.
+      description: Send a new affiliation invitation using the details in request and saves the affiliation invitation.
+  '/affiliationInvitations/{affiliation_invitation_id}':
+    parameters:
+      - name: affiliation_invitation_id
+        in: path
+        description: Affiliation invitation identifier
+        required: true
+        schema:
+          type: string
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/affiliation_invitation'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Description of the error.
+      operationId: get_affiliation_invitation
+      tags:
+        - affiliationInvitations
+      summary: Get the affiliation invitation by id.
+      description: Get the affiliation invitation specified by the provided id.
+    patch:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/affiliation_invitation'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Description of the error.
+      operationId: patch_affiliation_invitation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      tags:
+        - affiliationInvitations
+      summary: Update the affiliation invitation.
+      description: Update the affiliation invitation specified by the provided id.
+    delete:
+      responses:
+        '200':
+          description: Success
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+      operationId: delete_affiliation_invitation
+      tags:
+        - affiliationInvitations
+      summary: Delete the affiliation invitation.
+      description: Delete the specified affiliation invitation.
+  '/affiliationInvitations/{affiliation_invitation_id}/token/{affiliation_invitation_token}':
+    parameters:
+      - name: affiliation_invitation_id
+        in: path
+        description: Affiliation invitation identifier
+        required: true
+        schema:
+          type: string
+      - name: affiliation_invitation_token
+        in: path
+        description: Affiliation invitation token
+        required: true
+        schema:
+          type: string
+    put:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/affiliation_invitation'
+        '401':
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Description of the error.
+      operationId: accept_affiliation_invitation_token
+      tags:
+        - affiliationInvitations
+      summary: Accept an affiliation invitation using a token.
+      description: Check whether the passed token is valid and add affiliation from the affiliation invitation.
+  '/affiliationInvitations/{affiliation_invitation_id}/authorization/{authorize_action}':
+    parameters:
+      - name: affiliation_invitation_id
+        in: path
+        description: Affiliation invitation identifier
+        required: true
+        schema:
+          type: string
+      - name: authorize_action
+        in: path
+        description: Authorization action (accept or refuse)
+        required: true
+        schema:
+          type: string
+          enum: [accept, refuse]
+    patch:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/affiliation_invitation'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+      operationId: patch_affiliation_invitation_authorization
+      tags:
+        - affiliationInvitations
+      summary: Authorize or refuse an affiliation invitation.
+      description: Check if user is active part of the Org. Authorize/Refuse Authorization invite if he is.
 servers:
   - url: 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/'
     description: Dev
@@ -2699,6 +2963,7 @@ tags:
   - name: documents
   - name: entities
   - name: invitations
+  - name: affiliationInvitations
   - name: Meta
   - name: orgs
   - name: token
@@ -3623,6 +3888,104 @@ components:
             minLength: 1
         required:
           - type
+    affiliation_invitation_request:
+      title: affiliation_invitation_request
+      type: object
+      properties:
+        fromOrgId:
+          type: string
+          description: The ID of the organization sending the invitation
+        toOrgId:
+          type: string
+          description: The ID of the organization receiving the invitation
+        toOrgUuid:
+          type: string
+          description: The UUID of the organization receiving the invitation
+        businessIdentifier:
+          type: string
+          description: The business identifier for the entity
+        recipientEmail:
+          type: string
+          description: The email of the recipient
+        type:
+          type: string
+          description: The type of affiliation invitation
+          enum: [EMAIL, REQUEST]
+        additionalMessage:
+          type: string
+          description: Additional message for the invitation
+      required:
+        - fromOrgId
+        - businessIdentifier
+    affiliation_invitation:
+      title: affiliation_invitation
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the affiliation invitation
+        fromOrg:
+          type: object
+          properties:
+            id:
+              type: string
+              description: The ID of the organization sending the invitation
+            name:
+              type: string
+              description: The name of the organization sending the invitation
+        toOrg:
+          type: object
+          properties:
+            id:
+              type: string
+              description: The ID of the organization receiving the invitation
+            name:
+              type: string
+              description: The name of the organization receiving the invitation
+        entity:
+          type: object
+          properties:
+            business_identifier:
+              type: string
+              description: The business identifier
+            name:
+              type: string
+              description: The name of the business
+            corp_type:
+              type: string
+              description: The corporation type
+            state:
+              type: string
+              description: The state of the business
+        recipientEmail:
+          type: string
+          description: The email of the recipient
+        type:
+          type: string
+          description: The type of affiliation invitation
+          enum: [EMAIL, REQUEST]
+        status:
+          type: string
+          description: The status of the invitation
+          enum: [PENDING, ACCEPTED, EXPIRED]
+        additionalMessage:
+          type: string
+          description: Additional message for the invitation
+        sentDate:
+          type: string
+          format: date-time
+          description: The date the invitation was sent
+        acceptedDate:
+          type: string
+          format: date-time
+          description: The date the invitation was accepted
+        token:
+          type: string
+          description: The token for the invitation
+        expiresOn:
+          type: string
+          format: date-time
+          description: The date the invitation expires
   securitySchemes:
     JWT:
       type: http
