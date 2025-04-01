@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for interacting with Google Cloud Storage (GCS)."""
+"""Module for interacting with Google Cloud Storage (GCS) with file validation."""
 
 import uuid
 from datetime import timedelta
@@ -29,7 +29,19 @@ logger = StructuredLogging.get_logger()
 
 
 class GoogleStoreService:
-    """Document Storage class."""
+    """Document Storage class with file validation."""
+
+    EXTENSION_TO_MIME = {
+        "pdf": "application/pdf",
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png",
+        "tiff": "image/tiff",
+        "bmp": "image/bmp",
+        "webp": "image/webp",
+        "heic": "image/heic",
+        "heif": "image/heif",
+    }
 
     @staticmethod
     def _get_signing_credentials():
@@ -56,32 +68,44 @@ class GoogleStoreService:
             raise
 
     @staticmethod
+    def _validate_file_extension(file_name: str) -> str:
+        """Validate and return lowercase file extension."""
+        file_extension = file_name.split(".")[-1].lower()
+        if file_extension not in GoogleStoreService.EXTENSION_TO_MIME:
+            raise ValueError(
+                f"Unsupported file extension '{file_extension}'. "
+                f"Allowed: {list(GoogleStoreService.EXTENSION_TO_MIME.keys())}"
+            )
+        return file_extension
+
+    @staticmethod
     def create_signed_put_url(file_name: str, prefix_key: str = AFFIDAVIT_FOLDER_NAME) -> dict:
         """
-        Return a signed URL for uploading a new file to Google Cloud Storage.
+        Return a signed URL for uploading a file to GCS with validation.
 
         Args:
-            file_name (str): The name of the file to be uploaded.
-            prefix_key (str): The prefix to be used in the GCS object key.
+            file_name: The name of the file to be uploaded.
+            prefix_key: The prefix for the GCS object key.
 
         Returns:
-            dict: A dictionary containing the signed URL and the object key.
+            dict: {"preSignedUrl": str, "key": str}
+
+        Raises:
+            ValueError: For invalid extensions or content mismatch.
         """
-        logger.debug("Creating signed URL for upload.")
+        logger.debug(f"Creating signed URL for {file_name}")
+
+        # Validate extension
+        file_extension = GoogleStoreService._validate_file_extension(file_name)
+        content_type = GoogleStoreService.EXTENSION_TO_MIME[file_extension]
+
+        # Generate signed URL
         credentials = GoogleStoreService._get_signing_credentials()
-
         client = storage.Client()
-        bucket_name = current_app.config["ACCOUNT_MAILER_BUCKET"]
-        bucket = client.bucket(bucket_name)
+        bucket = client.bucket(current_app.config["ACCOUNT_MAILER_BUCKET"])
 
-        file_extension = file_name.split(".")[-1]
-        key = f"{prefix_key}/{str(uuid.uuid4())}.{file_extension}"
-
+        key = f"{prefix_key}/{uuid.uuid4()}.{file_extension}"
         blob = bucket.blob(key)
-
-        EXTENSION_TO_TYPE = {"pdf": "application/pdf", "jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png"}
-
-        content_type = EXTENSION_TO_TYPE.get(file_extension, "application/octet-stream")
 
         try:
             signed_url = blob.generate_signed_url(
@@ -93,12 +117,8 @@ class GoogleStoreService:
                 content_type=content_type,
             )
 
-            signed_url_details = {
-                "preSignedUrl": signed_url,
-                "key": key,
-            }
+            return {"preSignedUrl": signed_url, "key": key}
 
-            return signed_url_details
         except Exception as e:
             logger.error(f"Signing failed: {str(e)}")
             logger.error(f"Service Account: {credentials.service_account_email}")
