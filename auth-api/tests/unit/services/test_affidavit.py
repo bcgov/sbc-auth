@@ -59,7 +59,7 @@ def test_create_affidavit_duplicate(session, keycloak_mock, monkeypatch):  # pyl
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_approve_org(session, keycloak_mock, monkeypatch, gcs_mock):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be approved."""
     user = factory_user_model_with_contact(user_info=TestUserInfo.user_bceid_tester)
     token_info = TestJwtClaims.get_test_user(
@@ -109,29 +109,41 @@ def test_task_creation(session, keycloak_mock, monkeypatch):  # pylint:disable=u
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_reject_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_reject_org(session, keycloak_mock, monkeypatch, gcs_mock):
     """Assert that an Affidavit can be rejected."""
+    # Setup mock for GCS
+    gcs_mock["mock_blob"].generate_signed_url.return_value = "http://mocked.url/document.pdf"
+
+    # Create test user
     user = factory_user_model_with_contact(user_info=TestUserInfo.user_bceid_tester)
     token_info = TestJwtClaims.get_test_user(
         sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid
     )
     patch_token_info(token_info, monkeypatch)
 
+    # Create test affidavits with proper contact information
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    affidavit1 = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
+    # Ensure contact information exists
+    assert "contact" in affidavit_info, "Test affidavit data must include contact information"
 
-    affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    affidavit = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
+    affidavit1 = AffidavitService.create_affidavit(affidavit_info=affidavit_info.copy())
+    affidavit = AffidavitService.create_affidavit(affidavit_info=affidavit_info.copy())
 
-    assert affidavit1.as_dict().get("status_code", None) == AffidavitStatus.INACTIVE.value
-    assert affidavit.as_dict().get("status_code", None) == AffidavitStatus.PENDING.value
+    # Verify initial status
+    assert affidavit1.as_dict().get("status_code") == AffidavitStatus.INACTIVE.value
+    assert affidavit.as_dict().get("status_code") == AffidavitStatus.PENDING.value
 
+    # Create org
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
     assert org_dict["status_code"] == OrgStatus.PENDING_STAFF_REVIEW.value
+
+    # Find and update task
     task_model = TaskModel.find_by_task_for_account(org_dict["id"], status=TaskStatus.OPEN.value)
     assert task_model.relationship_id == org_dict["id"]
     assert task_model.action == TaskAction.AFFIDAVIT_REVIEW.value
+
+    # Update task to rejected status
     task_info = {
         "status": TaskStatus.OPEN.value,
         "relationshipStatus": TaskRelationshipStatus.REJECTED.value,
@@ -139,5 +151,10 @@ def test_reject_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unus
     }
     task = TaskService.update_task(TaskService(task_model), task_info)
     task_dict = task.as_dict()
+
+    # Verify affidavit was rejected
     affidavit = AffidavitService.find_affidavit_by_org_id(task_dict["relationship_id"])
     assert affidavit["status_code"] == AffidavitStatus.REJECTED.value
+
+    # Verify GCS mock was called
+    assert gcs_mock["mock_blob"].generate_signed_url.called

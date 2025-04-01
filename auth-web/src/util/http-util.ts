@@ -7,8 +7,10 @@ const axios = Axios.create()
 
 axios.interceptors.request.use(
   request => {
-    // Bypass adding auth header for minio
-    if (request.url?.includes('minio')) {
+    // Bypass adding auth header for googcle cloud store
+    const url = new URL(request.url);
+    const allowedHosts = ['storage.googleapis.com'];
+    if (allowedHosts.includes(url.host)) {
       return request
     }
 

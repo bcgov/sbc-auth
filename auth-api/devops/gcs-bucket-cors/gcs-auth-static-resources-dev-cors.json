@@ -1,0 +1,16 @@
+[
+  {
+    "origin": [
+      "https://dev.account.bcregistry.gov.bc.ca",
+      "http://localhost:8080",
+      "http://127.0.0.1:8080"
+    ],
+    "method": ["GET", "OPTIONS"],
+    "responseHeader": [
+      "Content-Type",
+      "Content-Disposition",
+      "Cache-Control"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]
