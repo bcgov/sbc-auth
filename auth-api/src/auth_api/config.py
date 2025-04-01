@@ -218,9 +218,6 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DB_PORT = os.getenv("DATABASE_TEST_PORT", "5432")
     SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"
 
-    os.environ["CLOUD_STORAGE_EMULATOR_HOST"] = "http://localhost:4443"
-    os.environ["PUBSUB_EMULATOR_HOST"] = "localhost:8085"
-
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use
     JWT_OIDC_TEST_MODE = True
