@@ -59,6 +59,7 @@ import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInf
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import SelectProductPayment from '@/components/auth/create-account/SelectProductPayment.vue'
 import { useAccountCreate } from '@/composables/account-create-factory'
+import { useAppStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -69,6 +70,7 @@ export default defineComponent({
   },
   setup (props, { root }) {
     const { createGovmOrg, syncOrganization, syncMembership } = useOrgStore()
+    const appStore = useAppStore()
     const state = reactive({
       isLoading: false,
       errorTitle: 'Account creation failed',
@@ -112,8 +114,7 @@ export default defineComponent({
         const organization: any = await createGovmOrg()
         await syncOrganization(organization.id)
         await syncMembership(organization.id)
-        // Remove with Vue 3
-        root.$store.commit('updateHeader')
+        appStore.updateHeader()
         root.$router.push(Pages.SETUP_GOVM_ACCOUNT_SUCCESS)
         state.isLoading = false
       } catch (err) {

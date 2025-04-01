@@ -95,13 +95,14 @@ export default defineConfig({
       if (log.includes('Download the Vue Devtools extension')) {
         return false
       }
+    },
+    deps: {
+      // Need sbc-common-components in there otherwise vue error
+      inline: ['vuetify', 'sbc-common-components']
     }
   },
+  // Needs to be in here so there aren't two instances of sbc-common-components created.
   optimizeDeps: {
-    // This needs to be done for sbc-common-components to work.
-    // Otherwise FAS complains about not having Vue.use(VueCompositionAPI)
-    // sbc-common-components will fail at login.
-    // Remove with Vue 3 for most of these.
     exclude: ['@vue/composition-api', 'sbc-common-components']
   }
 })

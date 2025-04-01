@@ -300,7 +300,7 @@ import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CorpTypes, LoginSource, MagicLinkInvitationStatus, Pages } from '@/util/constants'
 import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
-import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
+import { useAppStore, useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { Action } from 'pinia-class'
@@ -446,7 +446,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         await this.syncOrganization(this.currentAccountSettings.id)
         await this.addOrgSettings(this.currentOrganization)
         await this.syncBusinessesAndToggleLoading()
-        this.$store.commit('updateHeader')
+        useAppStore().updateHeader()
         this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
         return
       } catch (error) {

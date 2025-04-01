@@ -6,7 +6,7 @@
     >
       <sbc-loader :show="showLoading" />
       <sbc-header
-        :key="$store.state.refreshKey"
+        :key="refreshKey"
         ref="header"
         class="flex-column"
         :in-auth="true"
@@ -66,8 +66,7 @@
 import { Component, Mixins } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapState } from 'pinia'
-import { useOrgStore, useUserStore } from '@/stores'
-import AuthModule from 'sbc-common-components/src/store/modules/auth'
+import { useAppStore, useOrgStore, useUserStore } from '@/stores'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
 import CommonUtils from '@/util/common-util'
@@ -82,8 +81,7 @@ import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
-import { getModule } from 'vuex-module-decorators'
-import { mapGetters } from 'vuex'
+import { useAuthStore } from 'sbc-common-components/src/stores'
 
 @Component({
   components: {
@@ -97,17 +95,17 @@ import { mapGetters } from 'vuex'
       'currentAccountSettings',
       'permissions'
     ]),
-    ...mapState(useUserStore, ['currentUser']),
-    ...mapGetters('auth', ['isAuthenticated'])
+    ...mapState(useUserStore, ['currentUser'])
   },
   methods: {
     ...mapActions(useOrgStore, ['setCurrentOrganization']),
-    ...mapActions(useUserStore, ['loadUserInfo'])
+    ...mapActions(useUserStore, ['loadUserInfo']),
+    ...mapActions(useAppStore, ['updateHeader', 'loadComplete'])
   }
 })
 export default class App extends Mixins(NextPageMixin) {
-  // Remove these with sbc-common-components and Vue3 upgrade.
-  private authModule = getModule(AuthModule, this.$store)
+  private appStore = useAppStore()
+  authStore = useAuthStore()
   private readonly loadUserInfo!: () => KCUserProfile
   showNotification = false
   notificationText = ''
@@ -156,6 +154,14 @@ export default class App extends Mixins(NextPageMixin) {
     return import.meta.env.ABOUT_TEXT
   }
 
+  get refreshKey () {
+    return this.appStore.refreshKey
+  }
+
+  get isAuthenticated (): boolean {
+    return this.authStore.isAuthenticated
+  }
+
   startAccountSwitch () {
     this.showLoading = true
   }
@@ -167,8 +173,7 @@ export default class App extends Mixins(NextPageMixin) {
     this.notificationText = `Switched to account '${this.currentAccountSettings.label}'`
     this.showNotification = true
 
-    // Remove Vuex with Vue 3
-    this.$store.commit('updateHeader')
+    this.appStore.updateHeader()
 
     this.accountFreezeRedirect()
     this.accountPendingRedirect()
@@ -179,8 +184,7 @@ export default class App extends Mixins(NextPageMixin) {
     if (ConfigHelper.getFromSession(SessionStorageKeys.SessionSynced) === 'true' && !CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
       this.loadUserInfo()
       await this.syncUser()
-      // Remove Vuex with Vue 3
-      this.$store.commit('loadComplete')
+      this.appStore.loadComplete()
     }
   }
 
@@ -207,9 +211,8 @@ export default class App extends Mixins(NextPageMixin) {
   }
 
   private setLogOutUrl () {
-    // Auth store, still exists in sbc-common-components v2, uses pinia in Vue 3 version.
-    // Remove Vuex with Vue 3
-    this.logoutUrl = (this.$store.getters['auth/currentLoginSource'] === LoginSource.BCROS) ? ConfigHelper.getBcrosURL() : ''
+    const authStore = useAuthStore()
+    this.logoutUrl = (authStore.currentLoginSource === LoginSource.BCROS) ? ConfigHelper.getBcrosURL() : ''
   }
 
   private destroyed () {
@@ -217,12 +220,11 @@ export default class App extends Mixins(NextPageMixin) {
   }
 
   async setup (isSigninComplete?: boolean) {
-    // Header added modules to store so can access mapped actions now
-    // Remove Vuex with Vue 3
-    if (this.$store.getters['auth/isAuthenticated']) {
+    const authStore = useAuthStore()
+    if (authStore.isAuthenticated) {
       try {
         if (!isSigninComplete) {
-          await KeyCloakService.initializeToken(this.$store)
+          await KeyCloakService.initializeToken()
         }
         this.loadUserInfo()
         await this.syncUser()
@@ -231,13 +233,11 @@ export default class App extends Mixins(NextPageMixin) {
         console.log('App.vue.setup Error: ' + e)
         const userStore = useUserStore()
         await userStore.reset()
-        // Remove Vuex with Vue 3
-        this.$store.commit('loadComplete')
+        this.appStore.loadComplete()
         this.$router.push('/home')
       }
     }
-    // Remove Vuex with Vue 3
-    this.$store.commit('loadComplete')
+    this.appStore.loadComplete()
   }
 }
 </script>
