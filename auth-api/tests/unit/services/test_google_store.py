@@ -52,7 +52,7 @@ def test_create_signed_get_url(session, tmpdir, gcs_mock):  # pylint:disable=unu
     with patch("google.auth.compute_engine.Credentials", return_value=mock_credentials):
         # Set up test file
         d = tmpdir.mkdir("subdir")
-        fh = d.join("test-file.txt")
+        fh = d.join("test-file.pdf")
         fh.write("Test File")
         file_name = fh.basename
 
