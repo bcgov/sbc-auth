@@ -169,7 +169,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
 
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_TEST_URL",
-        default=f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}",  # noqa: E231
+        default=f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}",  # noqa: E231
     )
     JWT_OIDC_ISSUER = os.getenv("JWT_OIDC_TEST_ISSUER")
     # Service account details
