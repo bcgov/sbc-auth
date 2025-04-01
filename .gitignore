@@ -119,3 +119,6 @@ node_modules/
 
 auth-api/tests/docker/somefolder/.minio.sys
 queue_services/account-mailer/FEEDBACK.*
+
+# GCP service account keys
+gtksf3-*.json
