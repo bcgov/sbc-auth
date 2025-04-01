@@ -75,7 +75,7 @@ class _Config:  # pylint: disable=too-few-public-methods
         SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://"
     else:
         SQLALCHEMY_DATABASE_URI = (
-            f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"  # noqa: E231, E501
+            f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"  # noqa: E231, E501
         )
 
     # Keycloak & Jwt
@@ -166,10 +166,9 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DB_PORT = os.getenv("DATABASE_TEST_PORT", "5432")
     os.environ["CLOUD_STORAGE_EMULATOR_HOST"] = "http://localhost:4443"
     os.environ["PUBSUB_EMULATOR_HOST"] = "localhost:8085"
-
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_TEST_URL",
-        default=f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}",  # noqa: E231
+    SQLALCHEMY_DATABASE_URI = (
+        f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@"  # noqa: E231
+        f"{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"  # noqa: E231
     )
     JWT_OIDC_ISSUER = os.getenv("JWT_OIDC_TEST_ISSUER")
     # Service account details
