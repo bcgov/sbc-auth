@@ -279,10 +279,6 @@ class Affiliation:
             if not (invoices and invoices["invoices"] and invoices["invoices"][0].get("statusCode") == "COMPLETED"):
                 raise BusinessException(Error.NR_NOT_PAID, None)
 
-        # If consentFlag is not R, N or Null for a CONDITIONAL NR throw error
-        if status == NRStatus.CONDITIONAL.value and nr_json.get("consentFlag", None) not in (None, "R", "N"):
-            raise BusinessException(Error.NR_NOT_APPROVED, None)
-
         if not user_is_staff and (
             (phone and re.sub(r"\D", "", phone) != re.sub(r"\D", "", nr_phone))
             or (email and email.casefold() != nr_email.casefold())
