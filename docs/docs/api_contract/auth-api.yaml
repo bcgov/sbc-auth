@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: BC Registries Accounts API
   description: <p>BC Registries Accounts system is used to manage the BC Registries accounts. The system manages the authorizations related data and does integration with keycloak. </p>
-  version: 1.0.1
+  version: 1.0.2
   contact:
     name: BC Registries
   license:
