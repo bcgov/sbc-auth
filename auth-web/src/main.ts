@@ -42,14 +42,6 @@ if (import.meta.env.VUE_APP_GTAG_ID) {
   }, router)
 }
 
-if (import.meta.env.VUE_APP_GTAG_ID) {
-  Vue.use(VueGtag, {
-    config: {
-      id: import.meta.env.VUE_APP_GTAG_ID
-    }
-  }, router)
-}
-
 /**
  * The server side configs are necessary for app to work , since they are reference in templates and all
  *  Two ways , either reload Vue after we get the settings or load vue after we get the configs..going for second
