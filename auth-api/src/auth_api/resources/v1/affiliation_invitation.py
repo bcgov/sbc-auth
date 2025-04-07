@@ -48,6 +48,8 @@ def get_affiliation_invitations():
         search_filter.to_org_id = request.args.get("toOrgId", None)
         search_filter.status_codes = request.args.getlist("statuses")
         search_filter.invitation_types = request.args.getlist("types")
+        if (org_id or search_filter.from_org_id or search_filter.to_org_id) is None:
+            raise BusinessException(Error.INVALID_INPUT, None)
         if business_identifier:
             business = EntityService.find_by_business_identifier(
                 business_identifier=business_identifier, skip_auth=True
