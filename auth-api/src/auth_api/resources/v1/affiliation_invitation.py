@@ -48,8 +48,6 @@ def get_affiliation_invitations():
         search_filter.to_org_id = request.args.get("toOrgId", None)
         search_filter.status_codes = request.args.getlist("statuses")
         search_filter.invitation_types = request.args.getlist("types")
-        if (org_id or search_filter.from_org_id or search_filter.to_org_id) is None:
-            raise BusinessException(Error.INVALID_INPUT, None)
         if business_identifier:
             business = EntityService.find_by_business_identifier(
                 business_identifier=business_identifier, skip_auth=True
@@ -57,6 +55,8 @@ def get_affiliation_invitations():
             search_filter.entity_id = business.identifier if business else None
 
         auth_check_org_id = org_id or search_filter.from_org_id or search_filter.to_org_id
+        if auth_check_org_id is None:
+            raise BusinessException(Error.INVALID_INPUT, None)
         if not UserService.is_context_user_staff() and check_auth(org_id=auth_check_org_id, disabled_roles=[None]):
             raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
 
