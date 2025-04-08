@@ -196,6 +196,9 @@ class _Config:  # pylint: disable=too-few-public-methods
     AUTH_LD_SDK_KEY = os.getenv("AUTH_LD_SDK_KEY", None)
     ENABLE_403_LOGGING = os.getenv("ENABLE_403_LOGGING", "False").lower() == "true"
 
+    # SANDBOX ONLY - needs to be env variable, beacuse PROD and SANDBOX share the same LD. Untested.
+    SKIP_STAFF_APPROVAL_BCEID = os.getenv("SKIP_STAFF_APPROVAL_BCEID", "False").lower() == "true"
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Dev Config."""

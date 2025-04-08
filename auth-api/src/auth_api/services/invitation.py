@@ -17,6 +17,7 @@ from datetime import datetime
 from typing import Dict
 from urllib.parse import urlencode
 
+from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -491,7 +492,12 @@ class Invitation:
     ) -> str:
         if org_model.access_type == AccessType.GOVM.value:
             return Status.ACTIVE.value
-        if login_source == LoginSource.BCEID.value and membership_model.membership_type.code == ADMIN and not verified:
+        if (
+            login_source == LoginSource.BCEID.value
+            and membership_model.membership_type.code == ADMIN
+            and not verified
+            and current_app.config.get("SKIP_STAFF_APPROVAL_BCEID") is False
+        ):
             return Status.PENDING_STAFF_REVIEW.value
         return Status.PENDING_APPROVAL.value
 
