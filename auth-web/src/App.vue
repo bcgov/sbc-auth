@@ -64,12 +64,11 @@
 
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
-import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { LDFlags, LoginSource, Pages } from '@/util/constants'
 import { mapActions, mapState } from 'pinia'
 import { useAppStore, useOrgStore, useUserStore } from '@/stores'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
-import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
@@ -177,15 +176,6 @@ export default class App extends Mixins(NextPageMixin) {
 
     this.accountFreezeRedirect()
     this.accountPendingRedirect()
-  }
-
-  private async created () {
-    // If session is synced, then sync user details
-    if (ConfigHelper.getFromSession(SessionStorageKeys.SessionSynced) === 'true' && !CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
-      this.loadUserInfo()
-      await this.syncUser()
-      this.appStore.loadComplete()
-    }
   }
 
   private async mounted (): Promise<void> {
