@@ -6,11 +6,9 @@ import VueRouter from 'vue-router'
 import VueSanitize from 'vue-sanitize-directive'
 import VueTheMask from 'vue-the-mask'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import can from '@/directives/can'
 
 Vue.use(VueTheMask)
-Vue.use(Vuex)
 Vue.use(VueRouter)
 Vue.use(Vuetify)
 Vue.use(VueI18n)

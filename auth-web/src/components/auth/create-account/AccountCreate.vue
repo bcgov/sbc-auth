@@ -131,7 +131,6 @@ export default defineComponent({
       orgBusinessTypeLocal: {},
       isOrgBusinessTypeValid: false,
       isExtraProvUser: computed(() => {
-        // Remove Vuex with Vue 3
         const authStore = useAuthStore(getActivePinia())
         return authStore.currentLoginSource === LoginSource.BCEID
       }),
