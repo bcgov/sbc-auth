@@ -1079,6 +1079,17 @@ export const useOrgStore = defineStore('org', () => {
     state.hasPaymentMethodChanged = warningDialog
   }
 
+  // This method will sync organization and membership based on current SessionStorage
+  async function syncCurrentOrganizationFromSession (): Promise<boolean> {
+    const currentAccountSettings = JSON.parse(sessionStorage.getItem(SessionStorageKeys.CurrentAccount) || '{}')
+    if (currentAccountSettings && currentAccountSettings.id) {
+      await syncOrganization(+currentAccountSettings.id)
+      await syncMembership(+currentAccountSettings.id)
+      return true
+    }
+    return false
+  }
+
   return {
     ...toRefs(state),
     isPremiumAccount,
@@ -1184,6 +1195,7 @@ export const useOrgStore = defineStore('org', () => {
     updateOrgMailingAddress,
     needStaffReview,
     removeOrgProduct,
-    setHasPaymentMethodChanged
+    setHasPaymentMethodChanged,
+    syncCurrentOrganizationFromSession
   }
 })
