@@ -179,15 +179,6 @@ export default class App extends Mixins(NextPageMixin) {
     this.accountPendingRedirect()
   }
 
-  private async created () {
-    // If session is synced, then sync user details
-    if (ConfigHelper.getFromSession(SessionStorageKeys.SessionSynced) === 'true' && !CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
-      this.loadUserInfo()
-      await this.syncUser()
-      this.appStore.loadComplete()
-    }
-  }
-
   private async mounted (): Promise<void> {
     this.showLoading = false
 
