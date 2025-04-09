@@ -15,7 +15,7 @@
 
 from http import HTTPStatus
 
-from flask import Blueprint, request
+from flask import Blueprint, current_app, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException, Error
@@ -85,7 +85,7 @@ def get_affiliation_invitations():
 def post_affiliation_invitation():
     """Send a new affiliation invitation using the details in request and saves the affiliation invitation."""
     environment = get_request_environment()
-    origin = request.environ.get("HTTP_ORIGIN", "localhost")
+    origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "affiliation_invitation")
     if not valid_format:
