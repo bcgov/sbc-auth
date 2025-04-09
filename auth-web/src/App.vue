@@ -15,7 +15,7 @@
         :redirect-on-logout="logoutUrl"
         @account-switch-started="startAccountSwitch"
         @account-switch-completed="completeAccountSwitch"
-        @hook:mounted="setup"
+        @account-data-loaded="setup"
       >
         <template #login-button-text>
           Log in with BC Services Card
