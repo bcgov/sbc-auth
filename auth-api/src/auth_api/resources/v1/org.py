@@ -352,7 +352,12 @@ def get_organization_affiliations(org_id):
     """Get all affiliated entities for the given org."""
     try:
         env = get_request_environment()
-        # keep old response until UI is updated
+        search_filter_status = request.args.get("status", None)
+        search_filter_name = request.args.get("name", None)
+        search_filter_type = request.args.get("type", None)
+        search_filter_identifier = request.args.get("identifier", None)
+        page = int(request.args.get("page", 1))
+        limit = int(request.args.get("limit", 50))
         if (request.args.get("new", "false")).lower() != "true":
             return (
                 jsonify({"entities": AffiliationService.find_visible_affiliations_by_org_id(org_id, env)}),
@@ -362,10 +367,56 @@ def get_organization_affiliations(org_id):
         # get affiliation identifiers and the urls for the source data
         affiliations = AffiliationModel.find_affiliations_by_org_id(org_id, env)
         affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations, org_id))
+        start_index = (page - 1) * limit
+        end_index = start_index + limit
+        filtered_affiliations = affiliations_details_list
+        conditions = []
+        if search_filter_status:
+            conditions.append(
+                lambda affiliation: (
+                    (affiliation.get('state', '').upper()) == (search_filter_status.upper())
+                    or (affiliation.get('draftStatus', '').upper()) == (search_filter_status.upper())
+                )
+            )
+        if search_filter_name:
+            # Ensure the status filter
+            conditions.append(lambda affiliation: affiliation.get('legalName')
+                              and affiliation.get('legalName').casefold().startswith(search_filter_name.casefold()))
+        if search_filter_type:
+            # Ensure the legaltype filter
+            conditions.append(
+                lambda affiliation: (
+                    (affiliation.get('draftType', '').casefold() == search_filter_type.casefold())
+                    or (not affiliation.get('draftType') and affiliation.get('legalType')
+                        and affiliation.get('legalType').casefold() == search_filter_type.casefold())
+                )
+            )
+        if search_filter_identifier:  # Check if the search_filter_identifier is provided
+            normalized_identifier = search_filter_identifier.replace(" ", "").lower()
+            # Check if the search_filter_identifier starts with 'nr'
+            if normalized_identifier.startswith('n'):
+                print(normalized_identifier)
+                # Filter by nrNum  or nrNumber(case-insensitive)
+                conditions.append(lambda affiliation: (
+                    (affiliation.get('nrNumber')
+                        and affiliation.get('nrNumber').replace(" ", "").lower().startswith(normalized_identifier))
+                ))
+            else:
+                # Filter by identifier (case-insensitive)
+                conditions.append(lambda affiliation: affiliation.get('identifier')
+                                  and affiliation.get('identifier').strip().lower().startswith(normalized_identifier))
+
+        filtered_affiliations = [
+            affiliation for affiliation in filtered_affiliations
+            if all(condition(affiliation) for condition in conditions)
+        ]
+        total_results = len(filtered_affiliations)
+        paginated_affiliations = filtered_affiliations[start_index:end_index]
         # Use orjson serializer here, it's quite a bit faster.
         response, status = (
             current_app.response_class(
-                response=orjson.dumps({"entities": affiliations_details_list}),  # pylint: disable=maybe-no-member
+                response=orjson.dumps({"entities": paginated_affiliations,
+                                       "totalResults": total_results}),  # pylint: disable=maybe-no-member
                 status=200,
                 mimetype="application/json",
             ),
@@ -376,7 +427,6 @@ def get_organization_affiliations(org_id):
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     except ServiceUnavailableException as exception:
         response, status = {"message": exception.error}, exception.status_code
-
     return response, status
 
 
