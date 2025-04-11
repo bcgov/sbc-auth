@@ -112,6 +112,16 @@
         "HISTORICAL"
       ],
       "pattern": "^(.*)$"
+    },
+    "nrNumber": {
+      "$id": "#/properties/nrNumber",
+      "type": "string",
+      "title": "nrNumber",
+      "default": "",
+      "examples": [
+        "NR 1234567"
+      ],
+      "pattern": "^(.*)$"
     }
   }
 }
