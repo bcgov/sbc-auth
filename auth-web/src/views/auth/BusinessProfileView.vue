@@ -29,8 +29,8 @@
         >
           <h1>Edit Business Profile</h1>
           <p class="mb-0">
-            There is no contact information for this {{ businessType }}.
-            You will need to provide the contact information for this {{ businessType }} before you continue.
+            There is no contact information for this business.
+            You will need to provide the contact information for this business before you continue.
           </p>
         </div>
         <div
@@ -49,7 +49,7 @@
           <div>
             <h1>Edit Business Profile</h1>
             <p class="mb-0">
-              Edit contact information an manage folio/reference numbers for this {{ businessType }}.
+              Edit contact information and manage folio/reference numbers for this business.
             </p>
           </div>
         </div>
@@ -94,7 +94,6 @@ import { useBusinessStore } from '@/stores/business'
 })
 
 export default class BusinessProfileView extends Mixins(AccountChangeMixin, NextPageMixin) {
-  private businessType = 'cooperative'
   private editing = false
   private isLoading = true
   private readonly currentBusiness!: Business
