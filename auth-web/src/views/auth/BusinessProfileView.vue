@@ -29,8 +29,8 @@
         >
           <h1>Edit Business Profile</h1>
           <p class="mb-0">
-            There is no contact information for this {{ businessType }}.
-            You will need to provide the contact information for this {{ businessType }} before you continue.
+            There is no contact information for this business.
+            You will need to provide the contact information for this business before you continue.
           </p>
         </div>
         <div
