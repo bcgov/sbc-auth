@@ -94,7 +94,6 @@ import { useBusinessStore } from '@/stores/business'
 })
 
 export default class BusinessProfileView extends Mixins(AccountChangeMixin, NextPageMixin) {
-  private businessType = 'cooperative'
   private editing = false
   private isLoading = true
   private readonly currentBusiness!: Business
