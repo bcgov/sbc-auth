@@ -49,7 +49,7 @@
           <div>
             <h1>Edit Business Profile</h1>
             <p class="mb-0">
-              Edit contact information an manage folio/reference numbers for this {{ businessType }}.
+              Edit contact information and manage folio/reference numbers for this business.
             </p>
           </div>
         </div>
