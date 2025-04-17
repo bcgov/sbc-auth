@@ -220,7 +220,7 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, showNavBar: true },
       beforeEnter: () => {
         // Get the account ID
-        const orgId = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0
+        const orgId = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) ?? '{}').id ?? 0
         // Use the redirect function with a mock route object
         return redirectToBusinessDashboard({ params: { orgId }, query: {} })
       }
