@@ -22,6 +22,7 @@ from structured_logging import StructuredLogging
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.services.permissions import Permissions as PermissionsService
+from auth_api.utils.cache import cache as auth_cache
 from auth_api.utils.enums import LoginSource
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
@@ -208,6 +209,20 @@ class Authorization:
         return check_product_based_auth
 
 
+def cache_on_account_id(account_id: str):
+    """Return the cache key for the given args."""
+    return f'check_{account_id}_has_competent_authority'
+
+@auth_cache.cached(query_string=True, make_cache_key=cache_on_account_id)
+def is_component_authority(account_id: str) -> bool:
+    """Check if the account has a competent authority ('CA_SEARCH') product subscription."""
+    # pylint:disable=cyclic-import, import-outside-toplevel
+    from auth_api.services.products import Product as ProductService
+
+    subscriptions = ProductService.get_all_product_subscription(org_id=int(account_id), include_hidden=False)
+    return 'CA_SEARCH' in subscriptions
+
+
 @user_context
 def check_auth(**kwargs):
     """Check if user is authorized to perform action on the service."""
@@ -244,6 +259,8 @@ def check_auth(**kwargs):
                 "org_id", None
             ):
                 auth_record = AuthorizationView.find_authorization_for_admin_by_org_id(user_from_context.account_id)
+            elif is_component_authority(user_from_context.account_id):
+                pass
             else:
                 auth_record = AuthorizationView.find_user_authorization_by_org_id(user_from_context.sub, org_identifier)
             auth = Authorization(auth_record).as_dict() if auth_record else None
