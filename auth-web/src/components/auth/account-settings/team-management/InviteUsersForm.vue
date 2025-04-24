@@ -130,8 +130,8 @@ export default class InviteUsersForm extends TeamManagementMixin {
   }
 
   private get availableRoles () {
-    const isBcolAdmin = this.currentUser?.roles?.includes(Role.BcolStaffAdmin)
-    if ((this.currentMembership.membershipTypeCode !== MembershipType.Admin) && !isBcolAdmin) {
+    const isStaffManageAccounts = this.currentUser?.roles?.includes(Role.StaffManageAccounts)
+    if ((this.currentMembership.membershipTypeCode !== MembershipType.Admin) && !isStaffManageAccounts) {
       return this.roles.filter(role => role.name !== MembershipType.Admin)
     }
     return this.roles
