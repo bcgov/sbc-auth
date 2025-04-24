@@ -552,7 +552,6 @@ class Affiliation:
         except (HTTPError, ServiceUnavailableException) as e:
             logger.info(e)
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
-        print("here getting nrs", get_nr_response.json())
         return get_nr_response.json()
 
     @staticmethod
