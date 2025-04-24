@@ -14,7 +14,7 @@
 """Service for managing Affiliation data."""
 import datetime
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from flask import current_app
 from requests.exceptions import HTTPError
@@ -447,7 +447,7 @@ class Affiliation:
         return current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
 
     @staticmethod
-    async def get_affiliation_details(affiliations: List[AffiliationModel], org_id) -> List:
+    async def get_affiliation_details(affiliations: List[AffiliationModel], org_id, search_filter_status:Optional[str], search_filter_name:Optional[str], search_filter_type:Optional[str]) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
         for affiliation in affiliations:
@@ -457,7 +457,7 @@ class Affiliation:
             )
 
         call_info = [
-            {"url": url, "payload": {"identifiers": identifiers}} for url, identifiers in url_identifiers.items()
+            {"url": url, "payload": {"identifiers": identifiers, "state":search_filter_status, "name":search_filter_name,"type":search_filter_type}} for url, identifiers in url_identifiers.items()
         ]
 
         token = RestService.get_service_account_token(
@@ -482,7 +482,7 @@ class Affiliation:
             return combined
         except ServiceUnavailableException as err:
             logger.debug(err)
-            logger.debug("Failed to get affiliations details: %s", affiliations)
+            logger.debug("Failed to get affiliations details: %s")
             raise ServiceUnavailableException("Failed to get affiliation details") from err
 
     @staticmethod
@@ -552,7 +552,7 @@ class Affiliation:
         except (HTTPError, ServiceUnavailableException) as e:
             logger.info(e)
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
-
+        print("here getting nrs", get_nr_response.json())
         return get_nr_response.json()
 
     @staticmethod
