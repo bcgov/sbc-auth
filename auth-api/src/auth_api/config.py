@@ -196,6 +196,9 @@ class _Config:  # pylint: disable=too-few-public-methods
     AUTH_LD_SDK_KEY = os.getenv("AUTH_LD_SDK_KEY", None)
     ENABLE_403_LOGGING = os.getenv("ENABLE_403_LOGGING", "False").lower() == "true"
 
+    # SANDBOX ONLY - needs to be env variable, beacuse PROD and SANDBOX share the same LD. Untested.
+    SKIP_STAFF_APPROVAL_BCEID = os.getenv("SKIP_STAFF_APPROVAL_BCEID", "False").lower() == "true"
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Dev Config."""
@@ -314,6 +317,7 @@ NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
     API_GW_CONSUMERS_API_URL = "https://bcregistry-bcregistry-mock.apigee.net/mockTarget"
     API_GW_CONSUMERS_SANDBOX_API_URL = "https://bcregistry-bcregistry-mock.apigee.net/mockTarget"
     API_GW_CONSUMER_EMAIL = "test.all.mc@gov.bc.ca"
+    WEB_APP_URL = "https://localhost.com/"
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

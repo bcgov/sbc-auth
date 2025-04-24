@@ -15,7 +15,7 @@
 
 from http import HTTPStatus
 
-from flask import Blueprint, request
+from flask import Blueprint, current_app, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException, Error
@@ -55,6 +55,8 @@ def get_affiliation_invitations():
             search_filter.entity_id = business.identifier if business else None
 
         auth_check_org_id = org_id or search_filter.from_org_id or search_filter.to_org_id
+        if auth_check_org_id is None:
+            raise BusinessException(Error.INVALID_INPUT, None)
         if not UserService.is_context_user_staff() and check_auth(org_id=auth_check_org_id, disabled_roles=[None]):
             raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
 
@@ -83,7 +85,7 @@ def get_affiliation_invitations():
 def post_affiliation_invitation():
     """Send a new affiliation invitation using the details in request and saves the affiliation invitation."""
     environment = get_request_environment()
-    origin = request.environ.get("HTTP_ORIGIN", "localhost")
+    origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "affiliation_invitation")
     if not valid_format:
@@ -121,7 +123,7 @@ def get_affiliation_invitation(affiliation_invitation_id):
 @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def patch_affiliation_invitation(affiliation_invitation_id):
     """Update the affiliation invitation specified by the provided id."""
-    origin = request.environ.get("HTTP_ORIGIN", "localhost")
+    origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
     request_json = request.get_json()
     try:
         affiliation_invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(
@@ -164,7 +166,7 @@ def delete_affiliation_invitation(affiliation_invitation_id):
 @_jwt.requires_auth
 def accept_affiliation_invitation_token(affiliation_invitation_id, affiliation_invitation_token):
     """Check whether the passed token is valid and add affiliation from the affiliation invitation."""
-    origin = request.environ.get("HTTP_ORIGIN", "localhost")
+    origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
     environment = get_request_environment()
 
     try:
@@ -194,7 +196,7 @@ def accept_affiliation_invitation_token(affiliation_invitation_id, affiliation_i
 @_jwt.requires_auth
 def patch_affiliation_invitation_authorization(affiliation_invitation_id, authorize_action):
     """Check if user is active part of the Org. Authorize/Refuse Authorization invite if he is."""
-    origin = request.environ.get("HTTP_ORIGIN", "localhost")
+    origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
     env = get_request_environment()
 
     try:
