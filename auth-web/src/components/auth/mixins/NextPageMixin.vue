@@ -57,6 +57,8 @@ export default class NextPageMixin extends Vue {
         orgName = encodeURIComponent(btoa(this.currentAccountSettings?.label))
         if (this.currentUser.roles.includes(Role.Staff)) {
           return `/${Pages.SEARCH_BUSINESS}`
+        } else if (this.currentUser.roles.includes(Role.ExternalStaffReadonly)) {
+          return `/${Pages.STAFF_DASHBOARD_ACTIVE}`
         } else if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           return `/${Pages.USER_PROFILE_TERMS}`
         } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_INVITE_ACCEPT) {
