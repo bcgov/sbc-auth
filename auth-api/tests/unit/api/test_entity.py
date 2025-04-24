@@ -115,6 +115,7 @@ def test_add_entity_invalid_returns_exception(client, jwt, session):  # pylint:d
         )
         assert rv.status_code == 400
 
+
 @mock.patch("auth_api.services.entity.check_auth")
 def test_get_entity(check_auth, client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an entity can be retrieved via GET."""
@@ -141,10 +142,12 @@ def test_get_entity(check_auth, client, jwt, session):  # pylint:disable=unused-
     dictionary = json.loads(rv.data)
     assert dictionary["businessIdentifier"] == TestEntityInfo.entity1["businessIdentifier"]
 
+
 @mock.patch("auth_api.services.entity.check_auth")
 @mock.patch("auth_api.services.products.Product")
-def test_get_entity_as_competent_authority(mock_product, check_auth,
-                                           client, jwt, session):  # pylint:disable=unused-argument
+def test_get_entity_as_competent_authority(
+    mock_product, check_auth, client, jwt, session
+):  # pylint:disable=unused-argument
     """Assert that an entity can be retrieved via GET."""
     mock_product.get_all_product_subscription.return_value = ["CA_SEARCH", "OTHER_PRODUCT"]
     headers_system = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
@@ -167,7 +170,7 @@ def test_get_entity_as_competent_authority(mock_product, check_auth,
     # this verifies that `is_competent_authority()` was called and it fetched account id from context, then called
     # `get_all_product_subscription` with correct values
     mock_product.get_all_product_subscription.assert_called_once_with(
-        org_id=int(headers["Account-Id"]),include_hidden=False
+        org_id=int(headers["Account-Id"]), include_hidden=False
     )
     # make sure check_auth is not called, as it is a competent authority (skip auth)
     check_auth.assert_not_called()

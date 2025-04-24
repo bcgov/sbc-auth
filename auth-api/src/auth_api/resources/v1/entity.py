@@ -20,7 +20,8 @@ from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
 from auth_api.schemas import utils as schema_utils
-from auth_api.services.authorization import Authorization as AuthorizationService, is_competent_authority
+from auth_api.services.authorization import Authorization as AuthorizationService
+from auth_api.services.authorization import is_competent_authority
 from auth_api.services.contact import Contact as ContactService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.utils.auth import jwt as _jwt
@@ -66,7 +67,7 @@ def get_entity(business_identifier):
         entity = EntityService.find_by_business_identifier(
             business_identifier=business_identifier,
             allowed_roles=ALL_ALLOWED_ROLES,
-            skip_auth=is_competent_authority() # skip auth check for fetching data when competent authority
+            skip_auth=is_competent_authority(),  # skip auth check for fetching data when competent authority
         )
         if entity is not None:
             response, status = entity.as_dict(), HTTPStatus.OK

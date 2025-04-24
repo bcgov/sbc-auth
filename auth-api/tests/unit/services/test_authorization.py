@@ -293,6 +293,7 @@ def test_check_auth_staff_path(session, monkeypatch, test_desc, test_expect, add
     with test_expect:
         check_auth(**additional_kwargs)
 
+
 @pytest.mark.parametrize(
     "test_desc,test_expect,additional_kwargs,is_org_member,is_entity_affiliated,product_code_in_jwt",
     [

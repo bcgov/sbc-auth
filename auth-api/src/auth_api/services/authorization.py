@@ -220,6 +220,7 @@ def is_competent_authority(**kwargs) -> bool:
     account_id = user_from_context.account_id
     # pylint:disable=cyclic-import, import-outside-toplevel
     from auth_api.services.products import Product
+
     if account_id:
         subscriptions = Product.get_all_product_subscription(org_id=int(account_id), include_hidden=False)
         return ProductCode.CA_SEARCH.value in subscriptions
