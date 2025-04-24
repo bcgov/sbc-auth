@@ -18,12 +18,11 @@ Test suite to ensure that the Authorization service routines are working as expe
 
 import uuid
 from contextlib import nullcontext as does_not_raise
-from unittest import mock
 
 import pytest
 from werkzeug.exceptions import Forbidden, HTTPException
 
-from auth_api.services.authorization import Authorization, auth_cache, check_auth, is_component_authority
+from auth_api.services.authorization import Authorization, check_auth
 from auth_api.utils.enums import ProductCode
 from auth_api.utils.roles import ADMIN, STAFF, USER
 from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestUserInfo
@@ -293,58 +292,6 @@ def test_check_auth_staff_path(session, monkeypatch, test_desc, test_expect, add
     patch_token_info(jwt_claims, monkeypatch)
     with test_expect:
         check_auth(**additional_kwargs)
-
-
-@pytest.mark.parametrize(
-    "test_desc,test_expect,product_subscriptions",
-    [
-        ("Test has comp auth.", True, ["CA_SEARCH", "OTHER_PRODUCT"]),
-        ("Test doesnt have comp auth.", False, ["NOT_CA_SEARCH", "OTHER_PRODUCT"]),
-    ],
-)
-@mock.patch("auth_api.services.products.Product.get_all_product_subscription")
-def test_is_component_authority(mock_get_all_product_subscription, test_desc, test_expect, product_subscriptions):
-    """Test is_component_authority returns True for valid 'CA_SEARCH' subscription and False otherwise."""
-    auth_cache.clear()
-    mock_get_all_product_subscription.return_value = product_subscriptions
-    result = is_component_authority("1")
-    assert result is test_expect
-
-
-@mock.patch("auth_api.services.products.Product.get_all_product_subscription")
-def test_is_component_authority_caching(mock_get_all_product_subscription):
-    """Test is_component_authority caching is working of off the id."""
-    mock_get_all_product_subscription.return_value = ["CA_SEARCH", "OTHER_PRODUCT"]
-    result = is_component_authority("1")
-    assert result is True
-    assert mock_get_all_product_subscription.call_count == 1
-
-    result = is_component_authority("1")
-    assert result is True
-    assert mock_get_all_product_subscription.call_count == 1
-
-    result = is_component_authority("2")
-    assert result is True
-    assert mock_get_all_product_subscription.call_count == 2
-
-    mock_get_all_product_subscription.return_value = ["OTHER_PRODUCT"]
-
-    result = is_component_authority("1")
-    assert result is True
-    assert mock_get_all_product_subscription.call_count == 2
-
-    result = is_component_authority("3")
-    assert result is False
-    assert mock_get_all_product_subscription.call_count == 3
-
-    result = is_component_authority("1")
-    assert result is True
-    assert mock_get_all_product_subscription.call_count == 3
-
-    result = is_component_authority("2")
-    assert result is True
-    assert mock_get_all_product_subscription.call_count == 3
-
 
 @pytest.mark.parametrize(
     "test_desc,test_expect,additional_kwargs,is_org_member,is_entity_affiliated,product_code_in_jwt",

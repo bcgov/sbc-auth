@@ -22,8 +22,7 @@ from structured_logging import StructuredLogging
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.services.permissions import Permissions as PermissionsService
-from auth_api.utils.cache import cache as auth_cache
-from auth_api.utils.enums import LoginSource
+from auth_api.utils.enums import LoginSource, ProductCode
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
@@ -214,14 +213,18 @@ def cache_on_account_id(account_id: str):
     return f"check_{account_id}_has_competent_authority"
 
 
-@auth_cache.cached(query_string=True, make_cache_key=cache_on_account_id)
-def is_component_authority(account_id: str) -> bool:
+@user_context
+def is_competent_authority(**kwargs) -> bool:
     """Check if the account has a competent authority ('CA_SEARCH') product subscription."""
+    user_from_context: UserContext = kwargs["user_context"]
+    account_id = user_from_context.account_id
     # pylint:disable=cyclic-import, import-outside-toplevel
-    from auth_api.services.products import Product as ProductService
+    from auth_api.services.products import Product
+    if account_id:
+        subscriptions = Product.get_all_product_subscription(org_id=int(account_id), include_hidden=False)
+        return ProductCode.CA_SEARCH.value in subscriptions
 
-    subscriptions = ProductService.get_all_product_subscription(org_id=int(account_id), include_hidden=False)
-    return "CA_SEARCH" in subscriptions
+    return False
 
 
 @user_context
@@ -260,8 +263,6 @@ def check_auth(**kwargs):
                 "org_id", None
             ):
                 auth_record = AuthorizationView.find_authorization_for_admin_by_org_id(user_from_context.account_id)
-            elif is_component_authority(user_from_context.account_id):
-                pass
             else:
                 auth_record = AuthorizationView.find_user_authorization_by_org_id(user_from_context.sub, org_identifier)
             auth = Authorization(auth_record).as_dict() if auth_record else None

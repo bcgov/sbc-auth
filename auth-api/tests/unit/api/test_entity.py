@@ -20,6 +20,7 @@ Test-Suite to ensure that the /entities endpoint is working as expected.
 import copy
 import json
 from http import HTTPStatus
+from unittest import mock
 from unittest.mock import patch
 
 import pytest
@@ -114,8 +115,8 @@ def test_add_entity_invalid_returns_exception(client, jwt, session):  # pylint:d
         )
         assert rv.status_code == 400
 
-
-def test_get_entity(client, jwt, session):  # pylint:disable=unused-argument
+@mock.patch("auth_api.services.entity.check_auth")
+def test_get_entity(check_auth, client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an entity can be retrieved via GET."""
     headers_system = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv_create = client.post(
@@ -134,6 +135,42 @@ def test_get_entity(client, jwt, session):  # pylint:disable=unused-argument
         content_type="application/json",
     )
 
+    check_auth.assert_called_once()
+    assert rv.status_code == HTTPStatus.OK
+    assert schema_utils.validate(rv.json, "business")[0]
+    dictionary = json.loads(rv.data)
+    assert dictionary["businessIdentifier"] == TestEntityInfo.entity1["businessIdentifier"]
+
+@mock.patch("auth_api.services.entity.check_auth")
+@mock.patch("auth_api.services.products.Product")
+def test_get_entity_as_competent_authority(mock_product, check_auth,
+                                           client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an entity can be retrieved via GET."""
+    mock_product.get_all_product_subscription.return_value = ["CA_SEARCH", "OTHER_PRODUCT"]
+    headers_system = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv_create = client.post(
+        "/api/v1/entities",
+        data=json.dumps(TestEntityInfo.entity1),
+        headers=headers_system,
+        content_type="application/json",
+    )
+    assert rv_create.status_code == HTTPStatus.CREATED
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    headers["Account-Id"] = "3117"
+
+    rv = client.get(
+        "/api/v1/entities/{}".format(TestEntityInfo.entity1["businessIdentifier"]),
+        headers=headers,
+        content_type="application/json",
+    )
+    # this verifies that `is_competent_authority()` was called and it fetched account id from context, then called
+    # `get_all_product_subscription` with correct values
+    mock_product.get_all_product_subscription.assert_called_once_with(
+        org_id=int(headers["Account-Id"]),include_hidden=False
+    )
+    # make sure check_auth is not called, as it is a competent authority (skip auth)
+    check_auth.assert_not_called()
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "business")[0]
     dictionary = json.loads(rv.data)

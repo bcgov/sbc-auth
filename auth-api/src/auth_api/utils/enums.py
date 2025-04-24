@@ -259,6 +259,7 @@ class ProductCode(Enum):
 
     BUSINESS = "BUSINESS"
     BUSINESS_SEARCH = "BUSINESS_SEARCH"
+    CA_SEARCH = "CA_SEARCH"
     VS = "VS"
     BCA = "BCA"
     PPR = "PPR"
