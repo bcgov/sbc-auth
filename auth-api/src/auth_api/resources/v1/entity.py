@@ -65,7 +65,7 @@ def get_entity(business_identifier):
     """Get an existing entity by it's business number."""
     try:
         entity = EntityService.find_by_business_identifier(
-            business_identifier=business_identifier,
+            business_identifier,
             allowed_roles=ALL_ALLOWED_ROLES,
             skip_auth=is_competent_authority(),  # skip auth check for fetching data when competent authority
         )

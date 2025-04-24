@@ -29,6 +29,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Entity as EntityService
+from auth_api.utils.enums import ProductCode, ProductSubscriptionStatus, ProductTypeCode
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims
 from tests.utilities.factory_utils import (
     factory_affiliation_model,
@@ -149,7 +150,18 @@ def test_get_entity_as_competent_authority(
     mock_product, check_auth, client, jwt, session
 ):  # pylint:disable=unused-argument
     """Assert that an entity can be retrieved via GET."""
-    mock_product.get_all_product_subscription.return_value = ["CA_SEARCH", "OTHER_PRODUCT"]
+    mock_product.get_all_product_subscription.return_value = [
+        {
+            "type": ProductTypeCode.INTERNAL.value,
+            "parentCode": None,
+            "premiumOnly": False,
+            "need_system_admin": True,
+            "hidden": True,
+            "code": ProductCode.CA_SEARCH.value,
+            "description": "Competent Authority Search",
+            "subscriptionStatus": ProductSubscriptionStatus.ACTIVE.value,
+        }
+    ]
     headers_system = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv_create = client.post(
         "/api/v1/entities",
@@ -170,7 +182,7 @@ def test_get_entity_as_competent_authority(
     # this verifies that `is_competent_authority()` was called and it fetched account id from context, then called
     # `get_all_product_subscription` with correct values
     mock_product.get_all_product_subscription.assert_called_once_with(
-        org_id=int(headers["Account-Id"]), include_hidden=False
+        org_id=int(headers["Account-Id"]), include_hidden=True
     )
     # make sure check_auth is not called, as it is a competent authority (skip auth)
     check_auth.assert_not_called()

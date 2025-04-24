@@ -22,7 +22,7 @@ from structured_logging import StructuredLogging
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.services.permissions import Permissions as PermissionsService
-from auth_api.utils.enums import LoginSource, ProductCode
+from auth_api.utils.enums import LoginSource, ProductCode, ProductSubscriptionStatus
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
@@ -208,11 +208,6 @@ class Authorization:
         return check_product_based_auth
 
 
-def cache_on_account_id(account_id: str):
-    """Return the cache key for the given args."""
-    return f"check_{account_id}_has_competent_authority"
-
-
 @user_context
 def is_competent_authority(**kwargs) -> bool:
     """Check if the account has a competent authority ('CA_SEARCH') product subscription."""
@@ -222,8 +217,13 @@ def is_competent_authority(**kwargs) -> bool:
     from auth_api.services.products import Product
 
     if account_id:
-        subscriptions = Product.get_all_product_subscription(org_id=int(account_id), include_hidden=False)
-        return ProductCode.CA_SEARCH.value in subscriptions
+        subscriptions = Product.get_all_product_subscription(org_id=int(account_id), include_hidden=True)
+        for subscription in subscriptions:
+            if (
+                subscription.get("code", None) == ProductCode.CA_SEARCH.value
+                and subscription.get("subscriptionStatus", None) == ProductSubscriptionStatus.ACTIVE.value
+            ):
+                return True
 
     return False
 
