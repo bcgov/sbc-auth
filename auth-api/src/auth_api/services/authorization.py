@@ -211,7 +211,8 @@ class Authorization:
 
 def cache_on_account_id(account_id: str):
     """Return the cache key for the given args."""
-    return f'check_{account_id}_has_competent_authority'
+    return f"check_{account_id}_has_competent_authority"
+
 
 @auth_cache.cached(query_string=True, make_cache_key=cache_on_account_id)
 def is_component_authority(account_id: str) -> bool:
@@ -220,7 +221,7 @@ def is_component_authority(account_id: str) -> bool:
     from auth_api.services.products import Product as ProductService
 
     subscriptions = ProductService.get_all_product_subscription(org_id=int(account_id), include_hidden=False)
-    return 'CA_SEARCH' in subscriptions
+    return "CA_SEARCH" in subscriptions
 
 
 @user_context

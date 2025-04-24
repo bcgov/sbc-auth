@@ -18,12 +18,12 @@ Test suite to ensure that the Authorization service routines are working as expe
 
 import uuid
 from contextlib import nullcontext as does_not_raise
+from unittest import mock
 
 import pytest
 from werkzeug.exceptions import Forbidden, HTTPException
-from unittest import mock
 
-from auth_api.services.authorization import Authorization, check_auth,is_component_authority, auth_cache
+from auth_api.services.authorization import Authorization, auth_cache, check_auth, is_component_authority
 from auth_api.utils.enums import ProductCode
 from auth_api.utils.roles import ADMIN, STAFF, USER
 from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestUserInfo
@@ -294,11 +294,12 @@ def test_check_auth_staff_path(session, monkeypatch, test_desc, test_expect, add
     with test_expect:
         check_auth(**additional_kwargs)
 
+
 @pytest.mark.parametrize(
     "test_desc,test_expect,product_subscriptions",
     [
-        ("Test has comp auth.",True,["CA_SEARCH", "OTHER_PRODUCT"]),
-        ("Test has comp auth.",False,["NOT_CA_SEARCH", "OTHER_PRODUCT"]),
+        ("Test has comp auth.", True, ["CA_SEARCH", "OTHER_PRODUCT"]),
+        ("Test doesnt have comp auth.", False, ["NOT_CA_SEARCH", "OTHER_PRODUCT"]),
     ],
 )
 @mock.patch("auth_api.services.products.Product.get_all_product_subscription")
@@ -308,6 +309,7 @@ def test_is_component_authority(mock_get_all_product_subscription, test_desc, te
     mock_get_all_product_subscription.return_value = product_subscriptions
     result = is_component_authority("1")
     assert result is test_expect
+
 
 @mock.patch("auth_api.services.products.Product.get_all_product_subscription")
 def test_is_component_authority_caching(mock_get_all_product_subscription):
@@ -342,6 +344,7 @@ def test_is_component_authority_caching(mock_get_all_product_subscription):
     result = is_component_authority("2")
     assert result is True
     assert mock_get_all_product_subscription.call_count == 3
+
 
 @pytest.mark.parametrize(
     "test_desc,test_expect,additional_kwargs,is_org_member,is_entity_affiliated,product_code_in_jwt",
