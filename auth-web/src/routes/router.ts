@@ -1,13 +1,10 @@
 import {
   CreatAccountBreadcrumb,
   InvoluntaryDissolutionBreadcrumb,
-  MyBusinessRegistryBreadcrumb,
-  RegistryDashboardBreadcrumb,
   RegistryHomeBreadcrumb,
-  StaffBusinessRegistryBreadcrumb,
   StaffDashboardBreadcrumb
 } from '@/resources/BreadcrumbResources'
-import { LDFlags, Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { Pages, Role, SessionStorageKeys } from '@/util/constants'
 
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
@@ -25,7 +22,6 @@ import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockS
 import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
-import { Base64 } from 'js-base64'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
 import CcPaymentView from '@/views/pay/CcPaymentView.vue'
@@ -33,19 +29,15 @@ import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import ConfigHelper from '@/util/config-helper'
 import ContinuationAuthorizationReview from '@/views/auth/staff/ContinuationAuthorizationReview.vue'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
-import DashboardView from '@/views/auth/DashboardView.vue'
 import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
 import DuplicateAccountWarningView from '@/views/auth/create-account/DuplicateAccountWarningView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
-import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import GovmAccountCreationSuccessView from '@/views/auth/create-account/GovmAccountCreationSuccessView.vue'
 import GovmAccountSetupView from '@/views/auth/create-account/GovmAccountSetupView.vue'
 import HomeView from '@/views/auth/home/HomeView.vue'
 import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
 import InvoluntaryDissolution from '@/views/auth/staff/InvoluntaryDissolution.vue'
-import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
@@ -84,6 +76,17 @@ import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import UpdateAccountView from '@/views/auth/create-account/UpdateAccountView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
 import { ViewAllTransactions } from '@/views'
+
+function redirectToBusinessDashboard (to) {
+  // redirect to new business registry dashboard
+  const baseUrl = ConfigHelper.getNewBusinessRegistryDashboardUrl() + '/account/' + to.params.orgId
+  // Preserve query parameters when redirecting
+  const queryString = new URLSearchParams(to.query as Record<string, string>).toString()
+  const redirectUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl
+
+  window.location.href = redirectUrl
+  return false // Stop the navigation, as we're redirecting externally
+}
 
 function mapReturnPayVars (route: any) {
   let payResponseUrl = window.location.search
@@ -124,12 +127,6 @@ function mapPendingDetails (route: any) {
     teamName: orgName,
     pendingAffidavit: route.params.pendingAffidavit
   }
-}
-
-function isStaff (): boolean {
-  const userProfile = KeyCloakService.getUserInfo()
-  const roles = userProfile?.roles || []
-  return roles.includes(Role.Staff) || roles.includes(Role.ExternalStaffReadonly)
 }
 
 export function getRoutes (): RouteConfig[] {
@@ -221,78 +218,24 @@ export function getRoutes (): RouteConfig[] {
       path: '/business',
       name: 'business-root',
       meta: { requiresAuth: true, showNavBar: true },
-      redirect: `/account/${JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0}/business`
+      beforeEnter: () => {
+        // Get the account ID
+        const orgId = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) ?? '{}').id ?? 0
+        // Use the redirect function with a mock route object
+        return redirectToBusinessDashboard({ params: { orgId }, query: {} })
+      }
     },
     {
       path: '/account/:orgId',
       name: 'account',
-      beforeEnter: (to, from, next) => {
-        // redirect to new business registry dashboard
-        if (LaunchDarklyService.getFlag(LDFlags.EnableBusinessRegistryDashboard) && !to.query.noRedirect) {
-          const baseUrl = ConfigHelper.getNewBusinessRegistryDashboardUrl() + '/account/' + to.params.orgId
-          // Preserve query parameters when redirecting
-          const queryString = new URLSearchParams(to.query as Record<string, string>).toString()
-          const redirectUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl
-
-          window.location.href = redirectUrl
-        } else {
-          next()
-        }
-      },
-      component: DashboardView,
-      meta: { requiresAuth: true, requiresProfile: true },
-      redirect: '/account/:orgId/business',
-      props: true,
-      children: [
-        {
-          path: 'business',
-          name: 'business',
-          component: EntityManagement,
-          props: true,
-          meta: {
-            showNavBar: true,
-            disabledRoles: [Role.AnonymousUser],
-            requiresAuth: true,
-            requiresActiveAccount: true,
-            get breadcrumb () {
-              return isStaff()
-                ? [StaffDashboardBreadcrumb, StaffBusinessRegistryBreadcrumb]
-                : [RegistryDashboardBreadcrumb, MyBusinessRegistryBreadcrumb]
-            }
-          }
-        }
-      ]
+      beforeEnter: redirectToBusinessDashboard,
+      meta: { requiresAuth: true, requiresProfile: true }
     },
     {
-      path: '/:base64OrgName/affiliationInvitation/acceptToken/:base64Token',
-      name: 'account-magic-link',
-      component: EntityManagement,
-      props: route => {
-        try {
-          // The :base64Token consists of a token that is divided into three parts, separated by periods.
-          // we extract the first part of the token for decoding.
-          const base64Token = route.params.base64Token
-          const base64TokenObject = base64Token.split('.')[0]
-          const decodedToken = Base64.decode(base64TokenObject)
-          const orgId = JSON.parse(decodedToken).fromOrgId.toString()
-
-          return {
-            orgId: orgId,
-            base64Token: base64Token,
-            base64OrgName: route.params.base64OrgName
-          }
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('Error decoding token:', error)
-        }
-      },
-      meta: {
-        checkMagicLink: true,
-        showNavBar: true,
-        disabledRoles: [Role.AnonymousUser],
-        requiresAuth: true,
-        requiresActiveAccount: true
-      }
+      path: '/account/:orgId/business',
+      name: 'business',
+      beforeEnter: redirectToBusinessDashboard,
+      meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true }
     },
     {
       path: '/account/:orgId/settings',
