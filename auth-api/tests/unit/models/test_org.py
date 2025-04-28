@@ -196,7 +196,7 @@ def test_delete(session):  # pylint:disable=unused-argument
 
 def test_invalid_org_create_type_code(session):
     """Test that creating an Org with an invalid type code is rejected."""
-    invalid_type_code = OrgTypeEnum.CONTACT_CENTRE_STAFF.value
+    invalid_type_code = OrgTypeEnum.CC_STAFF.value
 
     org_info = {"name": "Invalid Org", "type_code": invalid_type_code}
 
