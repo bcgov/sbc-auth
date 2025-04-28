@@ -29,6 +29,7 @@ from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort does
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
+from auth_api.models.dataclass import AffiliationInvitationSearchDeatils
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
@@ -352,27 +353,30 @@ def get_organization_affiliations(org_id):
     """Get all affiliated entities for the given org."""
     try:
         env = get_request_environment()
-        search_filter_status = request.args.getlist("status")
-        search_filter_name = request.args.get("name")
-        search_filter_type = request.args.getlist("type")
+        page = request.args.get("page")
+        limit = request.args.get("limit")
         if (request.args.get("new", "false")).lower() != "true":
             return (
                 jsonify({"entities": AffiliationService.find_visible_affiliations_by_org_id(org_id, env)}),
                 HTTPStatus.OK,
             )
-
         # get affiliation identifiers and the urls for the source data
         affiliations = AffiliationModel.find_affiliations_by_org_id(org_id, env)
-        affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(
-            affiliations,
-            org_id,
-            search_filter_status,
-            search_filter_name,
-            search_filter_type))
+        search_details = AffiliationInvitationSearchDeatils()
+        search_details.search_filter_status = request.args.getlist("status")
+        search_details.search_filter_name = request.args.get("name")
+        search_details.search_filter_type = request.args.getlist("type")
+        search_details.page = int(page)
+        search_details.limit = int(limit)
+        affiliations_details_list = asyncio.run(
+            AffiliationService.get_affiliation_details(affiliations, search_details, org_id)
+        )
         # Use orjson serializer here, it's quite a bit faster.
         response, status = (
             current_app.response_class(
-                response=orjson.dumps({"entities": affiliations_details_list}),  # pylint: disable=maybe-no-member
+                response=orjson.dumps(
+                    {"entities": affiliations_details_list, "totalResults": len(affiliations_details_list)}
+                ),  # pylint: disable=maybe-no-member
                 status=200,
                 mimetype="application/json",
             ),
