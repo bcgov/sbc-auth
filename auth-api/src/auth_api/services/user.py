@@ -379,7 +379,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         if is_anonymous_user:
             existing_user = UserModel.find_by_username(user_from_context.user_name)
         else:
-            existing_user = UserModel.find_by_jwt_idp_userid()
+            existing_user = UserModel.find_by_jwt_token()
 
         first_name, last_name = User._get_names(existing_user, request_json)
 
