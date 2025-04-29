@@ -97,6 +97,7 @@ class Affiliation:
 
     @staticmethod
     def filter_affiliations(data, nr_numbers, nr_number_name_dict: dict):
+        """Filter affiliations."""
         # Create a list of all temporary business names
         temp_codes = {CorpType.TMP.value, CorpType.ATMP.value, CorpType.CTMP.value, CorpType.RTMP.value}
         tmp_names = {d["name"] for d in data if d["corp_type"]["code"] in temp_codes}
@@ -120,16 +121,12 @@ class Affiliation:
                 # In this case, a TMP affiliation will be there but the name will be BC...
                 if name in nr_numbers or name == identifier:
                     if name in nr_numbers:
-                        entity.update({
-                            "nr_number": name,
-                            "name": nr_number_name_dict[name]
-                        })
+                        entity.update({"nr_number": name, "name": nr_number_name_dict[name]})
                     filtered_affiliations.append(entity)
 
             else:
                 filtered_affiliations.append(entity)
         return filtered_affiliations
-
 
     @staticmethod
     def find_affiliations_by_org_id(org_id):
