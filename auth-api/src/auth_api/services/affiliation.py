@@ -96,32 +96,40 @@ class Affiliation:
         return filtered_affiliations
 
     @staticmethod
-    def filter_affiliations(data, nr_numbers: List[str], nr_number_name_dict: dict):
+    def filter_affiliations(data, nr_numbers, nr_number_name_dict: dict):
         # Create a list of all temporary business names
-        temp_types = [CorpType.TMP.value, CorpType.ATMP.value, CorpType.CTMP.value, CorpType.RTMP.value]
-        tmp_business_list = [d["name"] for d in data if d["corp_type"]["code"] in temp_types]
-        filtered_affiliations: list = []
+        temp_codes = {CorpType.TMP.value, CorpType.ATMP.value, CorpType.CTMP.value, CorpType.RTMP.value}
+        tmp_names = {d["name"] for d in data if d["corp_type"]["code"] in temp_codes}
+        filtered_affiliations = []
+
         for entity in data:
-            if entity["corp_type"]["code"] == CorpType.NR.value:
-                # If there is a TMP affiliation present for the NR, do not show NR
-                if not entity["business_identifier"] in tmp_business_list:
+            code = entity["corp_type"]["code"]
+            name = entity["name"]
+            identifier = entity["business_identifier"]
+
+            if code == CorpType.NR.value:
+                # Skip NR if a TMP exists for it
+                if identifier not in tmp_names:
                     filtered_affiliations.append(entity)
 
-            elif entity["corp_type"]["code"] in temp_types:
-
+            elif code in temp_codes:
+                # Skip temp unless it's a numbered company or matches NR
                 # If affiliation is not for a named company IA, and not a Numbered company
                 # (name and businessIdentifier same)
                 # --> Its a Temp affiliation with incorporation complete.
                 # In this case, a TMP affiliation will be there but the name will be BC...
-                if entity["name"] in nr_numbers or entity["name"] == entity["business_identifier"]:
-                    # If temp affiliation is for an NR, change the name to NR's name
-                    if entity["name"] in nr_numbers:
-                        entity["nr_number"] = entity["name"]
-                        entity["name"] = nr_number_name_dict[entity["name"]]
-
+                if name in nr_numbers or name == identifier:
+                    if name in nr_numbers:
+                        entity.update({
+                            "nr_number": name,
+                            "name": nr_number_name_dict[name]
+                        })
                     filtered_affiliations.append(entity)
+
             else:
                 filtered_affiliations.append(entity)
+        return filtered_affiliations
+
 
     @staticmethod
     def find_affiliations_by_org_id(org_id):
