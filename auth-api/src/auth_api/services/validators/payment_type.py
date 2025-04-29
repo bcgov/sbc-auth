@@ -27,11 +27,7 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     selected_payment_method: str = kwargs.get("selected_payment_method")
     access_type: str = kwargs.get("access_type")
     org_type: str = kwargs.get("org_type")
-    default_cc_method = (
-        PaymentMethod.DIRECT_PAY.value
-        if current_app.config.get("DIRECT_PAY_ENABLED")
-        else PaymentMethod.CREDIT_CARD.value
-    )
+    default_cc_method = PaymentMethod.DIRECT_PAY.value
     validator_response = ValidatorResponse()
     non_ejv_payment_methods = (
         PaymentMethod.CREDIT_CARD.value,

@@ -40,7 +40,6 @@ from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRName
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
-from auth_api.utils.util import get_request_environment
 
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
@@ -78,7 +77,7 @@ class Affiliation:
         return obj
 
     @staticmethod
-    def find_visible_affiliations_by_org_id(org_id, environment=None):
+    def find_visible_affiliations_by_org_id(org_id):
         """Given an org_id, this will return the entities affiliated with it."""
         logger.debug(f"<find_visible_affiliations_by_org_id for org_id {org_id}")
         if not org_id:
@@ -88,7 +87,7 @@ class Affiliation:
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        data = Affiliation.find_affiliations_by_org_id(org_id, environment)
+        data = Affiliation.find_affiliations_by_org_id(org_id)
 
         # 3806 : Filter out the NR affiliation if there is IA affiliation for the same NR.
         # Dict with key as NR number and value as name
@@ -129,7 +128,7 @@ class Affiliation:
         return filtered_affiliations
 
     @staticmethod
-    def find_affiliations_by_org_id(org_id, environment=None):
+    def find_affiliations_by_org_id(org_id):
         """Return business affiliations for the org."""
         # Accomplished in service instead of model (easier to avoid circular reference issues).
         entities = (
@@ -146,19 +145,13 @@ class Affiliation:
                 Entity.affiliations.any(AffiliationModel.org_id == int(org_id or -1)),
             )
         )
-        if environment:
-            entities = entities.filter(AffiliationModel.environment == environment)
-        else:
-            entities = entities.filter(AffiliationModel.environment.is_(None))
         entities = entities.order_by(AffiliationModel.created.desc()).all()
         return [EntityService(entity).as_dict() for entity in entities]
 
     @staticmethod
-    def find_affiliation(org_id, business_identifier, environment=None):
+    def find_affiliation(org_id, business_identifier):
         """Return business affiliation by the org id and business identifier."""
-        affiliation = AffiliationModel.find_affiliation_by_org_id_and_business_identifier(
-            org_id, business_identifier, environment
-        )
+        affiliation = AffiliationModel.find_affiliation_by_org_id_and_business_identifier(org_id, business_identifier)
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         return Affiliation(affiliation).as_dict()
@@ -167,7 +160,6 @@ class Affiliation:
     def create_affiliation(
         org_id,
         business_identifier,
-        environment=None,
         pass_code=None,
         certified_by_name=None,
         skip_membership_check=False,
@@ -193,13 +185,11 @@ class Affiliation:
 
         logger.debug("<create_affiliation find affiliation")
         # Ensure this affiliation does not already exist
-        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id, environment)
+        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)
         if affiliation is not None:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
-        affiliation = AffiliationModel(
-            org_id=org_id, entity_id=entity_id, certified_by_name=certified_by_name, environment=environment
-        )
+        affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=certified_by_name)
         affiliation.save()
 
         if entity_type not in ["SP", "GP"]:
@@ -230,9 +220,7 @@ class Affiliation:
         return True
 
     @staticmethod
-    def create_new_business_affiliation(  # pylint: disable=too-many-locals
-        affiliation_data: AffiliationData, environment: str = None
-    ):
+    def create_new_business_affiliation(affiliation_data: AffiliationData):  # pylint: disable=too-many-locals
         """Initiate a new incorporation."""
         org_id = affiliation_data.org_id
         business_identifier = affiliation_data.business_identifier
@@ -307,9 +295,7 @@ class Affiliation:
 
         # Affiliation may already already exist.
         if not (
-            affiliation_model := AffiliationModel.find_affiliation_by_org_and_entity_ids(
-                org_id, entity.identifier, environment
-            )
+            affiliation_model := AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier)
         ):
             # Create an affiliation with org
             affiliation_model = AffiliationModel(
@@ -328,7 +314,6 @@ class Affiliation:
                     )
                 )
         affiliation_model.certified_by_name = certified_by_name
-        affiliation_model.environment = environment
         affiliation_model.save()
         entity.set_pass_code_claimed(True)
 
@@ -345,7 +330,7 @@ class Affiliation:
         return invoices
 
     @staticmethod
-    def delete_affiliation(delete_affiliation_request: DeleteAffiliationRequest, environment: str = None):
+    def delete_affiliation(delete_affiliation_request: DeleteAffiliationRequest):
         """Delete the affiliation for the provided org id and business id."""
         org_id = delete_affiliation_request.org_id
         business_identifier = delete_affiliation_request.business_identifier
@@ -366,9 +351,7 @@ class Affiliation:
 
         entity_id = entity.identifier
 
-        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(
-            org_id=org_id, entity_id=entity_id, environment=environment
-        )
+        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=org_id, entity_id=entity_id)
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -403,7 +386,7 @@ class Affiliation:
 
     @staticmethod
     @user_context
-    def fix_stale_affiliations(org_id: int, entity_details: Dict, environment: str = None, **kwargs):
+    def fix_stale_affiliations(org_id: int, entity_details: Dict, **kwargs):
         """Corrects affiliations to point at the latest entity."""
         # Example staff/client scenario:
         # 1. client creates an NR (that gets affiliated) - realizes they need help to create a business
@@ -424,7 +407,7 @@ class Affiliation:
             and from_entity.corp_type == "NR"
             and (to_entity := EntityService.find_by_business_identifier(identifier, skip_auth=True))
         ):
-            affiliations = AffiliationModel.find_affiliations_by_entity_id(from_entity.identifier, environment)
+            affiliations = AffiliationModel.find_affiliations_by_entity_id(from_entity.identifier)
             for affiliation in affiliations:
                 # These are already handled by the filer.
                 if affiliation.org_id == org_id:
@@ -433,7 +416,6 @@ class Affiliation:
                     f"Moving affiliation {affiliation.id} from {from_entity.identifier} to {to_entity.identifier}"
                 )
                 affiliation.entity_id = to_entity.identifier
-                affiliation.environment = environment
                 affiliation.save()
 
         logger.debug(">fix_stale_affiliations")
@@ -557,13 +539,7 @@ class Affiliation:
 
     @staticmethod
     def _validate_firms_party(token, business_identifier, party_name_str: str):
-        env = get_request_environment()
-        if env == "sandbox":
-            legal_api_url = current_app.config.get("LEGAL_SANDBOX_API_URL") + current_app.config.get(
-                "LEGAL_API_VERSION_2"
-            )
-        else:
-            legal_api_url = current_app.config.get("LEGAL_API_URL") + current_app.config.get("LEGAL_API_VERSION_2")
+        legal_api_url = current_app.config.get("LEGAL_API_URL") + current_app.config.get("LEGAL_API_VERSION_2")
 
         parties_url = f"{legal_api_url}/businesses/{business_identifier}/parties"
         try:
