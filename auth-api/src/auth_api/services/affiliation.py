@@ -286,49 +286,52 @@ class Affiliation:
         business_identifier = affiliation_data.business_identifier
         email = affiliation_data.email
         phone = affiliation_data.phone
+
         user_is_staff = Affiliation.has_role_to_skip_auth()
-        if not user_is_staff and (not email and not phone):
+        if not user_is_staff and not (email or phone):
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
-        # Validate if org_id is valid by calling Org Service.
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
 
-        # Call the legal-api to verify the NR details
-        if not (nr_json := Affiliation._get_nr_details(business_identifier)):
+        nr_json = Affiliation._get_nr_details(business_identifier)
+        if not nr_json:
             raise BusinessException(Error.NR_NOT_FOUND, None)
 
         status = nr_json.get("state")
-
-        if status not in (
+        if status not in {
             NRStatus.APPROVED.value,
             NRStatus.CONDITIONAL.value,
             NRStatus.DRAFT.value,
             NRStatus.INPROGRESS.value,
-        ):
+        }:
             raise BusinessException(Error.NR_INVALID_STATUS, None)
 
-        if not nr_json.get("applicants"):
-            raise BusinessException(Error.NR_INVALID_APPLICANTS, None)
+        applicants = nr_json.get("applicants") or {}
+        nr_phone = applicants.get("phoneNumber")
+        nr_email = applicants.get("emailAddress")
 
-        nr_phone = nr_json.get("applicants").get("phoneNumber")
-        nr_email = nr_json.get("applicants").get("emailAddress")
+        if not applicants:
+            raise BusinessException(Error.NR_INVALID_APPLICANTS, None)
 
         if status == NRStatus.DRAFT.value:
             invoices = Affiliation.get_nr_payment_details(business_identifier)
-
-            # Ideally there should be only one or two (priority fees) payment request for the NR.
-            if not (invoices and invoices["invoices"] and invoices["invoices"][0].get("statusCode") == "COMPLETED"):
+            paid = invoices and invoices.get("invoices", [{}])[0].get("statusCode") == "COMPLETED"
+            if not paid:
                 raise BusinessException(Error.NR_NOT_PAID, None)
 
-        if not user_is_staff and (
-            (phone and re.sub(r"\D", "", phone) != re.sub(r"\D", "", nr_phone))
-            or (email and email.casefold() != nr_email.casefold())
-        ):
-            raise BusinessException(Error.NR_INVALID_CONTACT, None)
+        if not user_is_staff:
+            # Normalize and compare phone numbers and emails
+            normalized_phone = re.sub(r"\D", "", phone or "")
+            normalized_nr_phone = re.sub(r"\D", "", nr_phone or "")
+            emails_match = (email or "").casefold() == (nr_email or "").casefold()
+
+            if (phone and normalized_phone != normalized_nr_phone) or (email and not emails_match):
+                raise BusinessException(Error.NR_INVALID_CONTACT, None)
+
         return entity, nr_json
 
     @staticmethod
