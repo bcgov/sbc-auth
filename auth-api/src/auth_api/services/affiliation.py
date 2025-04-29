@@ -80,9 +80,6 @@ class Affiliation:
     def find_visible_affiliations_by_org_id(org_id):
         """Given an org_id, this will return the entities affiliated with it."""
         logger.debug(f"<find_visible_affiliations_by_org_id for org_id {org_id}")
-        if not org_id:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-
         org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -90,17 +87,19 @@ class Affiliation:
         data = Affiliation.find_affiliations_by_org_id(org_id)
 
         # 3806 : Filter out the NR affiliation if there is IA affiliation for the same NR.
-        # Dict with key as NR number and value as name
         nr_number_name_dict = {
             d["business_identifier"]: d["name"] for d in data if d["corp_type"]["code"] == CorpType.NR.value
         }
+        nr_numbers = nr_number_name_dict.keys()
+        filtered_affiliations = Affiliation.filter_affiliations(data, nr_numbers, nr_number_name_dict)
+        logger.debug(">find_visible_affiliations_by_org_id")
+        return filtered_affiliations
+
+    @staticmethod
+    def filter_affiliations(data, nr_numbers: List[str], nr_number_name_dict: dict):
         # Create a list of all temporary business names
         temp_types = [CorpType.TMP.value, CorpType.ATMP.value, CorpType.CTMP.value, CorpType.RTMP.value]
         tmp_business_list = [d["name"] for d in data if d["corp_type"]["code"] in temp_types]
-
-        # NR Numbers
-        nr_numbers = nr_number_name_dict.keys()
-
         filtered_affiliations: list = []
         for entity in data:
             if entity["corp_type"]["code"] == CorpType.NR.value:
@@ -123,9 +122,6 @@ class Affiliation:
                     filtered_affiliations.append(entity)
             else:
                 filtered_affiliations.append(entity)
-
-        logger.debug(">find_visible_affiliations_by_org_id")
-        return filtered_affiliations
 
     @staticmethod
     def find_affiliations_by_org_id(org_id):
@@ -224,55 +220,12 @@ class Affiliation:
         """Initiate a new incorporation."""
         org_id = affiliation_data.org_id
         business_identifier = affiliation_data.business_identifier
-        email = affiliation_data.email
-        phone = affiliation_data.phone
         certified_by_name = affiliation_data.certified_by_name
 
         logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
-        user_is_staff = Affiliation.has_role_to_skip_auth()
-        if not user_is_staff and (not email and not phone):
-            raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
-        # Validate if org_id is valid by calling Org Service.
-        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
-        if org is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-
-        entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
-
-        # Call the legal-api to verify the NR details
-        if not (nr_json := Affiliation._get_nr_details(business_identifier)):
-            raise BusinessException(Error.NR_NOT_FOUND, None)
-
+        entity, nr_json = Affiliation.validate_new_business_affiliation(affiliation_data)
         status = nr_json.get("state")
-
-        if status not in (
-            NRStatus.APPROVED.value,
-            NRStatus.CONDITIONAL.value,
-            NRStatus.DRAFT.value,
-            NRStatus.INPROGRESS.value,
-        ):
-            raise BusinessException(Error.NR_INVALID_STATUS, None)
-
-        if not nr_json.get("applicants"):
-            raise BusinessException(Error.NR_INVALID_APPLICANTS, None)
-
-        nr_phone = nr_json.get("applicants").get("phoneNumber")
-        nr_email = nr_json.get("applicants").get("emailAddress")
-
-        if status == NRStatus.DRAFT.value:
-            invoices = Affiliation.get_nr_payment_details(business_identifier)
-
-            # Ideally there should be only one or two (priority fees) payment request for the NR.
-            if not (invoices and invoices["invoices"] and invoices["invoices"][0].get("statusCode") == "COMPLETED"):
-                raise BusinessException(Error.NR_NOT_PAID, None)
-
-        if not user_is_staff and (
-            (phone and re.sub(r"\D", "", phone) != re.sub(r"\D", "", nr_phone))
-            or (email and email.casefold() != nr_email.casefold())
-        ):
-            raise BusinessException(Error.NR_INVALID_CONTACT, None)
-
         # Create an entity with the Name from NR if entity doesn't exist
         if not entity:
             # Filter the names from NR response and get the name which has status APPROVED as the name.
@@ -318,6 +271,58 @@ class Affiliation:
         entity.set_pass_code_claimed(True)
 
         return Affiliation(affiliation_model)
+
+    @staticmethod
+    def validate_new_business_affiliation(affiliation_data: AffiliationData):
+        """Validate the new business affiliation."""
+        org_id = affiliation_data.org_id
+        business_identifier = affiliation_data.business_identifier
+        email = affiliation_data.email
+        phone = affiliation_data.phone
+        user_is_staff = Affiliation.has_role_to_skip_auth()
+        if not user_is_staff and (not email and not phone):
+            raise BusinessException(Error.NR_INVALID_CONTACT, None)
+
+        # Validate if org_id is valid by calling Org Service.
+        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+
+        # Call the legal-api to verify the NR details
+        if not (nr_json := Affiliation._get_nr_details(business_identifier)):
+            raise BusinessException(Error.NR_NOT_FOUND, None)
+
+        status = nr_json.get("state")
+
+        if status not in (
+            NRStatus.APPROVED.value,
+            NRStatus.CONDITIONAL.value,
+            NRStatus.DRAFT.value,
+            NRStatus.INPROGRESS.value,
+        ):
+            raise BusinessException(Error.NR_INVALID_STATUS, None)
+
+        if not nr_json.get("applicants"):
+            raise BusinessException(Error.NR_INVALID_APPLICANTS, None)
+
+        nr_phone = nr_json.get("applicants").get("phoneNumber")
+        nr_email = nr_json.get("applicants").get("emailAddress")
+
+        if status == NRStatus.DRAFT.value:
+            invoices = Affiliation.get_nr_payment_details(business_identifier)
+
+            # Ideally there should be only one or two (priority fees) payment request for the NR.
+            if not (invoices and invoices["invoices"] and invoices["invoices"][0].get("statusCode") == "COMPLETED"):
+                raise BusinessException(Error.NR_NOT_PAID, None)
+
+        if not user_is_staff and (
+            (phone and re.sub(r"\D", "", phone) != re.sub(r"\D", "", nr_phone))
+            or (email and email.casefold() != nr_email.casefold())
+        ):
+            raise BusinessException(Error.NR_INVALID_CONTACT, None)
+        return entity, nr_json
 
     @staticmethod
     def get_nr_payment_details(business_identifier):
