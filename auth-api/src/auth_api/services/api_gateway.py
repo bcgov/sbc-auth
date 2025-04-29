@@ -147,9 +147,6 @@ class ApiGateway:
                 break
         if not email_id:
             raise BusinessException(Error.DATA_NOT_FOUND, Exception())
-        env = "sandbox"
-        if email_id == cls._get_email_id(org_id, "prod"):
-            env = "prod"
         consumer_endpoint = current_app.config.get("API_GW_CONSUMERS_API_URL")
         gw_api_key = current_app.config.get("API_GW_KEY")
 
