@@ -17,8 +17,22 @@ depends_on = None
 
 
 def upgrade():
-    op.execute('delete from affiliations where environment=\'sandbox\'')
+    with op.batch_alter_table('affiliations', schema=None) as batch_op:
+        batch_op.drop_index('ix_affiliations_environment')
+        batch_op.drop_column('environment')
+
+    with op.batch_alter_table('affiliations_history', schema=None) as batch_op:
+        batch_op.drop_index('ix_affiliations_history_environment')
+        batch_op.drop_column('environment')
+
 
 def downgrade():
-    pass
+    with op.batch_alter_table('affiliations_history', schema=None) as batch_op:
+        batch_op.add_column(sa.Column('environment', sa.VARCHAR(length=20), autoincrement=False, nullable=True))
+        batch_op.create_index('ix_affiliations_history_environment', ['environment'], unique=False)
+
+    with op.batch_alter_table('affiliations', schema=None) as batch_op:
+        batch_op.add_column(sa.Column('environment', sa.VARCHAR(length=20), autoincrement=False, nullable=True))
+        batch_op.create_index('ix_affiliations_environment', ['environment'], unique=False)
+
     
