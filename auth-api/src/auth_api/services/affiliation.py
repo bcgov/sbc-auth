@@ -98,7 +98,6 @@ class Affiliation:
     @staticmethod
     def filter_affiliations(data, nr_numbers, nr_number_name_dict: dict):
         """Filter affiliations."""
-        # Create a list of all temporary business names
         temp_codes = {CorpType.TMP.value, CorpType.ATMP.value, CorpType.CTMP.value, CorpType.RTMP.value}
         tmp_names = {d["name"] for d in data if d["corp_type"]["code"] in temp_codes}
         filtered_affiliations = []
@@ -108,24 +107,17 @@ class Affiliation:
             name = entity["name"]
             identifier = entity["business_identifier"]
 
-            # Skip NR if a TMP exists for it
             if code == CorpType.NR.value and identifier in tmp_names:
                 continue
 
-            # Handle TMP types
             if code in temp_codes:
                 # Only include if named company IA or numbered company
                 # Skip temp unless it's a numbered company or matches NR
-                # If affiliation is not for a named company IA, and not a Numbered company
-                # (name and businessIdentifier same)
-                # --> Its a Temp affiliation with incorporation complete.
-                # In this case, a TMP affiliation will be there but the name will be BC...
                 if name not in nr_numbers and name != identifier:
                     continue
                 if name in nr_numbers:
                     entity.update({"nr_number": name, "name": nr_number_name_dict[name]})
 
-            # All others, or valid TMP/NR, are included
             filtered_affiliations.append(entity)
 
         return filtered_affiliations
