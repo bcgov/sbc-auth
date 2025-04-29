@@ -306,7 +306,7 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
 
         email_body = mock_send.call_args.args[0].get("content").get("body")
         assert email_body is not None
-        assert "This email confirms recent transaction(s) on you account" in email_body
+        assert "This email confirms recent transaction(s) on your account" in email_body
         assert "Invoice reference number: 1234567890" in email_body
         assert "Transaction date:" in email_body
         assert "Log in to view transaction details" in email_body

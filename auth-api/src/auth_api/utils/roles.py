@@ -76,7 +76,7 @@ INVALID_ORG_CREATE_TYPE_CODES = (
     OrgType.SBC_STAFF.value,
     OrgType.STAFF.value,
     OrgType.MAXIMUS_STAFF.value,
-    OrgType.CONTACT_CENTRE_STAFF.value,
+    OrgType.CC_STAFF.value,
 )
 
 CLIENT_ADMIN_ROLES = (COORDINATOR, ADMIN)
