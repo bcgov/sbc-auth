@@ -93,18 +93,18 @@ class User(BaseModel):
         """Find an existing user by the keycloak GUID and (idpUserId is null or from token) in the provided token."""
         user_from_context: UserContext = kwargs["user_context"]
         return (
-                db.session.query(User)
-                .filter(
-                    and_(
-                        User.keycloak_guid == user_from_context.sub,
-                        or_(
-                            User.idp_userid == user_from_context.token_info.get("idp_userid", None),
-                            User.idp_userid.is_(None),
-                        ),
-                    )
+            db.session.query(User)
+            .filter(
+                and_(
+                    User.keycloak_guid == user_from_context.sub,
+                    or_(
+                        User.idp_userid == user_from_context.token_info.get("idp_userid", None),
+                        User.idp_userid.is_(None),
+                    ),
                 )
-                .one_or_none()
             )
+            .one_or_none()
+        )
 
     @classmethod
     @user_context
