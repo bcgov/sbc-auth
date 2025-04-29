@@ -1,4 +1,4 @@
-"""Clear out the sandbox affiliations
+"""Remove environment column from affiliations
 
 Revision ID: bddf9fe7468c
 Revises: 0879befaf0b6
