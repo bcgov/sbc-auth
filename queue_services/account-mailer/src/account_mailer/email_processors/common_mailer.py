@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """A Template for the account suspended email."""
+from jinja2 import Template
+from flask import current_app
+
+from structured_logging import StructuredLogging
 from auth_api.models import Org as OrgModel
 from auth_api.models import Entity as EntityModel 
-from flask import current_app
-from jinja2 import Template
-from structured_logging import StructuredLogging
-
 from account_mailer.auth_utils import get_dashboard_url, get_login_url, get_payment_statements_url
 from account_mailer.email_processors import generate_template
 
