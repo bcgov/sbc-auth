@@ -54,19 +54,14 @@ class ApiGateway:
         1 - Create key for specific environment.
         """
         logger.debug("<create_key ")
-        env = request_json.get("environment", "sandbox")
+        env = current_app.config.get("ENVIRONMENT_NAME")
         name = request_json.get("keyName")
         org: OrgModel = OrgModel.find_by_id(org_id)
         # first find if there is a consumer created for this account.
-        consumer_endpoint: str = cls._get_api_consumer_endpoint(env)
-        gw_api_key = cls._get_api_gw_key(env)
+        consumer_endpoint: str = current_app.config.get("API_GW_CONSUMERS_API_URL")
+        gw_api_key = current_app.config.get("API_GW_KEY")
         email = cls._get_email_id(org_id, env)
         if not cls._consumer_exists(email, env):  # If the account doesn't have api access, add it
-            # If env is sandbox; then create a sandbox payment account.
-            if env != "prod":
-                cls._create_payment_account(org)
-                # Future - if PROD and target is SANDBOX - Call into AUTH-API to create an org, this will call PAY-API
-                # to create payment account
             cls._create_consumer(name, org, env=env)
             org.has_api_access = True
             org.save()
@@ -95,12 +90,6 @@ class ApiGateway:
             if MembershipModel.find_membership_by_user_and_org(api_user.id, org_id) is None:
                 MembershipService.create_admin_membership_for_api_user(org_id, api_user.id)
 
-    @classmethod
-    def _get_api_gw_key(cls, env):
-        """Get the api gateway key."""
-        logger.info("_get_api_gw_key %s", env)
-        return current_app.config.get("API_GW_KEY") if env == "prod" else current_app.config.get("API_GW_NON_PROD_KEY")
-
     @staticmethod
     def get_api_client_id(org_id, env):
         """Get the client id for the org."""
@@ -112,8 +101,8 @@ class ApiGateway:
     @classmethod
     def _create_consumer(cls, name, org, env):
         """Create an API Gateway consumer."""
-        consumer_endpoint: str = cls._get_api_consumer_endpoint(env)
-        gw_api_key = cls._get_api_gw_key(env)
+        consumer_endpoint: str = current_app.config.get("API_GW_CONSUMERS_API_URL")
+        gw_api_key = current_app.config.get("API_GW_KEY")
         email = cls._get_email_id(org.id, env)
         client_rep = generate_client_representation(org.id, ApiGateway.get_api_client_id(org.id, env))
         KeycloakService.create_client(client_rep)
@@ -158,11 +147,8 @@ class ApiGateway:
                 break
         if not email_id:
             raise BusinessException(Error.DATA_NOT_FOUND, Exception())
-        env = "sandbox"
-        if email_id == cls._get_email_id(org_id, "prod"):
-            env = "prod"
-        consumer_endpoint = cls._get_api_consumer_endpoint(env)
-        gw_api_key = cls._get_api_gw_key(env)
+        consumer_endpoint = current_app.config.get("API_GW_CONSUMERS_API_URL")
+        gw_api_key = current_app.config.get("API_GW_KEY")
 
         RestService.patch(
             f"{consumer_endpoint}/mc/v1/consumers/{email_id}/apikeys/{api_key}?action=revoke",
@@ -177,22 +163,21 @@ class ApiGateway:
         logger.debug("<get_api_keys ")
         check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         api_keys_response = {"consumer": {"consumerKey": []}}
-        for env in ("sandbox", "prod"):
-            email = cls._get_email_id(org_id, env)
-            consumer_endpoint: str = cls._get_api_consumer_endpoint(env)
-            gw_api_key: str = cls._get_api_gw_key(env)
-
-            try:
-                consumers_response = RestService.get(
-                    f"{consumer_endpoint}/mc/v1/consumers/{email}",
-                    additional_headers={"x-apikey": gw_api_key},
-                    skip_404_logging=True,
-                )
-                keys = consumers_response.json()["consumer"]["consumerKey"]
-                cls._filter_and_add_keys(api_keys_response, keys, email)
-            except HTTPError as exc:
-                if exc.response.status_code != 404:  # If consumer doesn't exist
-                    raise exc
+        env = current_app.config.get("ENVIRONMENT_NAME")
+        email = cls._get_email_id(org_id, env)
+        consumer_endpoint: str = current_app.config.get("API_GW_CONSUMERS_API_URL")
+        gw_api_key: str = current_app.config.get("API_GW_KEY")
+        try:
+            consumers_response = RestService.get(
+                f"{consumer_endpoint}/mc/v1/consumers/{email}",
+                additional_headers={"x-apikey": gw_api_key},
+                skip_404_logging=True,
+            )
+            keys = consumers_response.json()["consumer"]["consumerKey"]
+            cls._filter_and_add_keys(api_keys_response, keys, email)
+        except HTTPError as exc:
+            if exc.response.status_code != 404:  # If consumer doesn't exist
+                raise exc
 
         return api_keys_response
 
@@ -224,8 +209,8 @@ class ApiGateway:
     @classmethod
     def _consumer_exists(cls, email, env):
         """Return if customer exists with this email."""
-        consumer_endpoint: str = cls._get_api_consumer_endpoint(env)
-        gw_api_key: str = cls._get_api_gw_key(env)
+        consumer_endpoint: str = current_app.config.get("API_GW_CONSUMERS_API_URL")
+        gw_api_key: str = current_app.config.get("API_GW_KEY")
         try:
             RestService.get(
                 f"{consumer_endpoint}/mc/v1/consumers/{email}",
@@ -240,61 +225,11 @@ class ApiGateway:
         return True
 
     @classmethod
-    @user_context
-    def _create_payment_account(cls, org: OrgModel, **kwargs):
-        """Create a payment account for sandbox environment.
-
-        Steps:
-        - Get the payment account details (non sandbox).
-        - Mask the details and call pay sandbox endpoint to create a sandbox account.
-        """
-        if not current_app.config.get("PAY_API_SANDBOX_URL"):
-            logger.warning("Sandbox URL not provided, skipping sandbox pay account creation")
-            return
-        user: UserContext = kwargs["user_context"]
-        pay_account = cls._get_pay_account(org, user)
-        pay_request = {
-            "accountId": org.id,
-            "accountName": f"{org.name}-{org.branch_name or ''}",
-            "padTosAcceptedBy": pay_account.get("padTosAcceptedBy", ""),
-            "bcolAccountNumber": org.bcol_account_id or "",
-            "bcolUserId": org.bcol_user_id or "",
-            "paymentInfo": {
-                "methodOfPayment": pay_account.get("futurePaymentMethod", None) or pay_account["paymentMethod"],
-                "bankInstitutionNumber": "000",  # Dummy values
-                "bankTransitNumber": "00000",  # Dummy values
-                "bankAccountNumber": "0000000",  # Dummy values
-            },
-            "contactInfo": {},
-        }
-
-        cls._create_sandbox_pay_account(pay_request, user)
-
-    @classmethod
-    def _create_sandbox_pay_account(cls, pay_request, user):
-        """Create a sandbox payment account."""
-        logger.info("Creating Sandbox Payload %s", pay_request)
-        pay_sandbox_accounts_endpoint = f"{current_app.config.get('PAY_API_SANDBOX_URL')}/accounts?sandbox=true"
-        RestService.post(
-            endpoint=pay_sandbox_accounts_endpoint, token=user.bearer_token, data=pay_request, raise_for_status=True
-        )
-
-    @classmethod
     def _get_pay_account(cls, org, user):
         """Get the payment account for the org."""
         pay_accounts_endpoint = f"{current_app.config.get('PAY_API_URL')}/accounts/{org.id}"
         pay_account = RestService.get(endpoint=pay_accounts_endpoint, token=user.bearer_token).json()
         return pay_account
-
-    @classmethod
-    def _get_api_consumer_endpoint(cls, env):
-        """Get the consumer endpoint for the environment."""
-        logger.info("_get_api_consumer_endpoint %s", env)
-        return (
-            current_app.config.get("API_GW_CONSUMERS_API_URL")
-            if env == "prod"
-            else current_app.config.get("API_GW_CONSUMERS_SANDBOX_API_URL")
-        )
 
     @classmethod
     def _make_string_compatible(cls, target: str) -> str:

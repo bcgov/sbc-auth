@@ -28,7 +28,6 @@ from auth_api.services.authorization import check_auth
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import Role
-from auth_api.utils.util import get_request_environment
 
 bp = Blueprint("AFFILIATION_INVITATIONS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/affiliationInvitations")
 
@@ -84,7 +83,6 @@ def get_affiliation_invitations():
 )
 def post_affiliation_invitation():
     """Send a new affiliation invitation using the details in request and saves the affiliation invitation."""
-    environment = get_request_environment()
     origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "affiliation_invitation")
@@ -93,7 +91,7 @@ def post_affiliation_invitation():
     try:
         user = UserService.find_by_jwt_token()
         response, status = (
-            AffiliationInvitationService.create_affiliation_invitation(request_json, user, origin, environment).as_dict(
+            AffiliationInvitationService.create_affiliation_invitation(request_json, user, origin).as_dict(
                 mask_email=True
             ),
             HTTPStatus.CREATED,
@@ -167,7 +165,6 @@ def delete_affiliation_invitation(affiliation_invitation_id):
 def accept_affiliation_invitation_token(affiliation_invitation_id, affiliation_invitation_token):
     """Check whether the passed token is valid and add affiliation from the affiliation invitation."""
     origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
-    environment = get_request_environment()
 
     try:
         if not (user := UserService.find_by_jwt_token()):
@@ -182,7 +179,7 @@ def accept_affiliation_invitation_token(affiliation_invitation_id, affiliation_i
             )
             response, status = (
                 AffiliationInvitationService.accept_affiliation_invitation(
-                    affiliation_invitation_id, user, origin, environment
+                    affiliation_invitation_id, user, origin
                 ).as_dict(mask_email=True),
                 HTTPStatus.OK,
             )
@@ -197,7 +194,6 @@ def accept_affiliation_invitation_token(affiliation_invitation_id, affiliation_i
 def patch_affiliation_invitation_authorization(affiliation_invitation_id, authorize_action):
     """Check if user is active part of the Org. Authorize/Refuse Authorization invite if he is."""
     origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
-    env = get_request_environment()
 
     try:
         user = UserService.find_by_jwt_token()
@@ -206,7 +202,7 @@ def patch_affiliation_invitation_authorization(affiliation_invitation_id, author
         if authorize_action == "accept":
             response, status = (
                 AffiliationInvitationService.accept_affiliation_invitation(
-                    affiliation_invitation_id=affiliation_invitation_id, user=user, origin=origin, environment=env
+                    affiliation_invitation_id=affiliation_invitation_id, user=user, origin=origin
                 ).as_dict(mask_email=True),
                 HTTPStatus.OK,
             )
