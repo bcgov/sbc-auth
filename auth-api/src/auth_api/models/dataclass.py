@@ -50,7 +50,7 @@ class AffiliationInvitationSearch:  # pylint: disable=too-many-instance-attribut
 @dataclass
 class AffiliationInvitationSearchDeatils:  # pylint: disable=too-many-instance-attributes
     """Used for filtering Affiliation Invitations based on filters passed."""
-
+    identifier: Optional[str] = None
     search_filter_status: Optional[str] = None
     search_filter_name: Optional[str] = None
     search_filter_type: Optional[str] = None

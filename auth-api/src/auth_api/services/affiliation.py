@@ -464,12 +464,12 @@ class Affiliation:
             url_identifiers.setdefault(url, [affiliation.entity.business_identifier]).append(
                 affiliation.entity.business_identifier
             )
-
         call_info = [
             {
                 "url": url,
                 "payload": {
                     "identifiers": identifiers,
+                    "identifier":search_details.identifier,
                     "state": search_details.search_filter_status,
                     "name": search_details.search_filter_name,
                     "type": search_details.search_filter_type,
@@ -479,7 +479,6 @@ class Affiliation:
             }
             for url, identifiers in url_identifiers.items()
         ]
-
         token = RestService.get_service_account_token(
             config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
         )
