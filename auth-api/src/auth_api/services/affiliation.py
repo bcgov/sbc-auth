@@ -99,7 +99,7 @@ class Affiliation:
     def filter_affiliations(data, nr_numbers, nr_number_name_dict: dict):
         """Filter affiliations."""
         temp_codes = {CorpType.TMP.value, CorpType.ATMP.value, CorpType.CTMP.value, CorpType.RTMP.value}
-        tmp_names = {d["name"] for d in data if d["corp_type"]["code"] in temp_codes}
+        tmp_business_list = {d["name"] for d in data if d["corp_type"]["code"] in temp_codes}
         filtered_affiliations = []
 
         for entity in data:
@@ -107,7 +107,7 @@ class Affiliation:
             name = entity["name"]
             identifier = entity["business_identifier"]
 
-            if code == CorpType.NR.value and identifier in tmp_names:
+            if code == CorpType.NR.value and identifier in tmp_business_list:
                 continue
 
             if code in temp_codes:
