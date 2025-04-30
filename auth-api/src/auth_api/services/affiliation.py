@@ -497,7 +497,7 @@ class Affiliation:
             return combined
         except ServiceUnavailableException as err:
             logger.debug(err)
-            logger.debug("Failed to get affiliations details: %s")
+            logger.debug("Failed to get affiliations details:  %s", affiliations)
             raise ServiceUnavailableException("Failed to get affiliation details") from err
 
     @staticmethod
