@@ -511,7 +511,7 @@ def test_send_affiliation_invitation_magic_link(
     affiliation_invitation = _setup_affiliation_invitation_data()
     business_name = "Busy Inc."
     affiliation_invitation.token = "ABCD"
-    
+
     AffiliationInvitationService.send_affiliation_invitation(
         affiliation_invitation=affiliation_invitation,
         business_name=business_name,
