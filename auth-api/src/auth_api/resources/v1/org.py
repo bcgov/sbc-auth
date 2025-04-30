@@ -369,7 +369,7 @@ def get_organization_affiliations(org_id):
         search_details.page = int(page)
         search_details.limit = int(limit)
         
-        affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations, org_id))
+        affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations,search_details, org_id))
         # Use orjson serializer here, it's quite a bit faster.
         response, status = (
             current_app.response_class(
