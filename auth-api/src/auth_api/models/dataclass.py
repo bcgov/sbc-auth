@@ -14,7 +14,7 @@
 """This module holds data classes."""
 
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Self
 
 from requests import Request
 
@@ -61,7 +61,7 @@ class AffiliationInvitationSearchDetails:  # pylint: disable=too-many-instance-a
     limit: int = 100
 
     @classmethod
-    def from_request_args(cls, req: Request) -> "AffiliationInvitationSearchDetails":
+    def from_request_args(cls, req: Request) -> Self:
         return cls(
             identifier=req.args.get("identifier"),
             status=req.args.getlist("status") or [],
