@@ -553,11 +553,11 @@ def test_send_affiliation_invitation_request_sent(
         "businessName": business_name,
         "emailAddresses": affiliation_invitation.recipient_email,
         "orgName": affiliation_invitation.from_org.name,
+        "businessIdentifier": affiliation_invitation.entity.business_identifier,
         "fromOrgName": affiliation_invitation.from_org.name,
         "fromOrgBranchName": affiliation_invitation.from_org.branch_name,
         "toOrgName": affiliation_invitation.to_org.name,
         "toOrgBranchName": affiliation_invitation.to_org.branch_name,
-        "businessIdentifier": affiliation_invitation.entity.business_identifier,
         "additionalMessage": additional_message,
     }
     notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value
@@ -600,11 +600,11 @@ def test_send_affiliation_invitation_request_authorized(
         "businessName": business_name,
         "emailAddresses": expected_email,
         "orgName": affiliation_invitation.from_org.name,
+        "businessIdentifier": affiliation_invitation.entity.business_identifier,
         "fromOrgName": affiliation_invitation.from_org.name,
         "fromOrgBranchName": affiliation_invitation.from_org.branch_name,
         "toOrgName": affiliation_invitation.to_org.name,
         "toOrgBranchName": affiliation_invitation.to_org.branch_name,
-        "businessIdentifier": affiliation_invitation.entity.business_identifier,
         "isAuthorized": True,
     }
 
@@ -650,11 +650,11 @@ def test_send_affiliation_invitation_request_refused(
         "businessName": business_name,
         "emailAddresses": expected_email,
         "orgName": affiliation_invitation.from_org.name,
+        "businessIdentifier": affiliation_invitation.entity.business_identifier,
         "fromOrgName": affiliation_invitation.from_org.name,
         "fromOrgBranchName": affiliation_invitation.from_org.branch_name,
         "toOrgName": affiliation_invitation.to_org.name,
         "toOrgBranchName": affiliation_invitation.to_org.branch_name,
-        "BusinessIdentifier": affiliation_invitation.entity.business_identifier,
         "isAuthorized": False,
     }
 
