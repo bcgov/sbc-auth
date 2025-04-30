@@ -153,7 +153,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         return query.all()
 
     @classmethod
-    def search_org(cls, search: OrgSearch, environment: str):
+    def search_org(cls, search: OrgSearch):
         """Find all orgs with the given type."""
         query = (
             db.session.query(Org)
@@ -193,7 +193,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
 
             query = query.filter(member_exists_subquery)
 
-        query = cls._search_by_business_identifier(query, search.business_identifier, environment)
+        query = cls._search_by_business_identifier(query, search.business_identifier)
         query = cls._search_for_statuses(query, search.statuses)
 
         query = cls.get_order_by(search, query)
@@ -211,12 +211,12 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         return query.order_by(Org.created.desc())
 
     @classmethod
-    def search_orgs_by_business_identifier(cls, business_identifier, environment, excluded_org_types: List[str] = None):
+    def search_orgs_by_business_identifier(cls, business_identifier, excluded_org_types: List[str] = None):
         """Find all orgs affiliated with provided business identifier."""
         query = db.session.query(Org)
 
         query = cls._search_for_statuses(query, [])
-        query = cls._search_by_business_identifier(query, business_identifier, environment)
+        query = cls._search_by_business_identifier(query, business_identifier)
         if excluded_org_types:
             query = query.filter(Org.type_code.notin_(excluded_org_types))
 
@@ -226,9 +226,9 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         return items, len(items)
 
     @classmethod
-    def _search_by_business_identifier(cls, query, business_identifier, environment):
+    def _search_by_business_identifier(cls, query, business_identifier):
         if business_identifier:
-            affilliations = Affiliation.find_affiliations_by_business_identifier(business_identifier, environment)
+            affilliations = Affiliation.find_affiliations_by_business_identifier(business_identifier)
             affilliation_org_ids = [affilliation.org_id for affilliation in affilliations]
             query = query.filter(Org.id.in_(affilliation_org_ids))
         return query

@@ -159,7 +159,6 @@ class AffiliationInvitation:
         business_identifier,
         from_org_id,
         to_org_id,
-        environment,
         affiliation_invitation_type=AffiliationInvitationType.EMAIL,
     ):
         # Validate from organizations exists
@@ -190,7 +189,7 @@ class AffiliationInvitation:
             raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
 
         # Check if affiliation already exists
-        if AffiliationModel.find_affiliation_by_org_and_entity_ids(from_org_id, entity.identifier, environment):
+        if AffiliationModel.find_affiliation_by_org_and_entity_ids(from_org_id, entity.identifier):
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         # Check if an affiliation invitation already exists
@@ -256,7 +255,6 @@ class AffiliationInvitation:
         # pylint:disable=unused-argument,too-many-locals
         user,
         invitation_origin,
-        environment=None,
         **kwargs,
     ):
         """Create a new affiliation invitation."""
@@ -277,7 +275,6 @@ class AffiliationInvitation:
             business_identifier=business_identifier,
             from_org_id=from_org_id,
             to_org_id=to_org_id,
-            environment=environment,
             affiliation_invitation_type=affiliation_invitation_type,
         )
 
@@ -637,7 +634,6 @@ class AffiliationInvitation:
         # pylint:disable=unused-argument
         user: UserService,
         origin,
-        environment=None,
         **kwargs,
     ):
         """Add an affiliation from the affiliation invitation."""
@@ -658,13 +654,9 @@ class AffiliationInvitation:
         org_id = affiliation_invitation.from_org_id
         entity_id = affiliation_invitation.entity_id
 
-        if not (
-            affiliation_model := AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id, environment)
-        ):
+        if not (affiliation_model := AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)):
             # Create an affiliation with to_org_id
-            affiliation_model = AffiliationModel(
-                org_id=org_id, entity_id=entity_id, certified_by_name=None, environment=environment
-            )
+            affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=None)
             affiliation_model.save()
 
         affiliation_invitation.affiliation_id = affiliation_model.id

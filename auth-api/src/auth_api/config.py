@@ -131,13 +131,11 @@ class _Config:  # pylint: disable=too-few-public-methods
     PAY_API_URL = os.getenv("PAY_API_URL", "") + os.getenv("PAY_API_VERSION", "")
 
     LEGAL_API_URL = os.getenv("LEGAL_API_URL", "")
-    LEGAL_SANDBOX_API_URL = os.getenv("LEGAL_SANDBOX_API_URL", "")
     LEGAL_API_VERSION = os.getenv("LEGAL_API_VERSION")
     LEGAL_API_VERSION_2 = os.getenv("LEGAL_API_VERSION_2", "")
 
     LEAR_AFFILIATION_DETAILS_URL = f"{LEGAL_API_URL + LEGAL_API_VERSION_2}/businesses/search"
     NAMEX_AFFILIATION_DETAILS_URL = f"{NAMEX_API_URL}/requests/search"
-    PAY_API_SANDBOX_URL = os.getenv("PAY_API_SANDBOX_URL")
 
     # PUB/SUB - PUB: account-mailer-dev, auth-event-dev
     ACCOUNT_MAILER_TOPIC = os.getenv("ACCOUNT_MAILER_TOPIC", "account-mailer-dev")
@@ -174,17 +172,9 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     BCOL_ACCOUNT_LINK_CHECK = os.getenv("BCOL_ACCOUNT_LINK_CHECK", "True").lower() == "true"
 
-    # Till direct pay is fully ready , keep this value false
-    DIRECT_PAY_ENABLED = os.getenv("DIRECT_PAY_ENABLED", "False").lower() == "true"
-
-    # Config value to disable activity logs
-    DISABLE_ACTIVITY_LOGS = os.getenv("DISABLE_ACTIVITY_LOGS", "False").lower() == "true"
-
     # API gateway config
     API_GW_CONSUMERS_API_URL = os.getenv("API_GW_CONSUMERS_API_URL", None)
     API_GW_KEY = os.getenv("API_GW_KEY", None)
-    API_GW_CONSUMERS_SANDBOX_API_URL = os.getenv("API_GW_CONSUMERS_SANDBOX_API_URL", None)
-    API_GW_NON_PROD_KEY = os.getenv("API_GW_NON_PROD_KEY", None)
     API_GW_EMAIL_SUFFIX = os.getenv("API_GW_EMAIL_SUFFIX", None)
     API_GW_KC_CLIENT_ID_PATTERN = os.getenv("API_GW_KC_CLIENT_ID_PATTERN", "api-key-account-{account_id}")
 
@@ -198,6 +188,8 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     # SANDBOX ONLY - needs to be env variable, beacuse PROD and SANDBOX share the same LD. Untested.
     SKIP_STAFF_APPROVAL_BCEID = os.getenv("SKIP_STAFF_APPROVAL_BCEID", "False").lower() == "true"
+
+    ENVIRONMENT_NAME = os.getenv("ENVIRONMENT_NAME", "local")
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
@@ -296,13 +288,11 @@ NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
     ENTITY_SVC_CLIENT_SECRET = os.getenv("KEYCLOAK_TEST_ADMIN_SECRET")
 
     LEGAL_API_URL = "https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7"
-    LEGAL_SANDBOX_API_URL = "https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7"
     LEGAL_API_VERSION_2 = "/api/v1"
 
     NOTIFY_API_URL = "http://localhost:8080/notify-api/api/v1"
     BCOL_API_URL = "http://localhost:8080/bcol-api/api/v1"
     PAY_API_URL = "http://localhost:8080/pay-api/api/v1"
-    PAY_API_SANDBOX_URL = "http://localhost:8080/pay-api/api/v1"
 
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv("USE_TEST_KEYCLOAK_DOCKER", None)

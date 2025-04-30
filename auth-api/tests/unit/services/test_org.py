@@ -892,9 +892,7 @@ def test_delete_org_with_affiliation(session, auth_mock, keycloak_mock, monkeypa
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     entity_dictionary = entity_service.as_dict()
     business_identifier = entity_dictionary["business_identifier"]
-    AffiliationService.create_affiliation(
-        org_id, business_identifier, None, TestEntityInfo.entity_lear_mock["passCode"]
-    )
+    AffiliationService.create_affiliation(org_id, business_identifier, TestEntityInfo.entity_lear_mock["passCode"])
 
     patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
     patch_pay_account_delete(monkeypatch)

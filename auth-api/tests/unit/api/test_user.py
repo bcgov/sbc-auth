@@ -787,10 +787,9 @@ def test_delete_unknown_user_returns_404(client, jwt, session):  # pylint:disabl
     assert rv.status_code == HTTPStatus.NOT_FOUND
 
 
-@pytest.mark.parametrize("environment", ["test", None])
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_delete_user_as_only_admin_returns_400(
-    client, jwt, session, keycloak_mock, monkeypatch, environment
+    client, jwt, session, keycloak_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Test if the user is the only owner of a team assert status is 400."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
@@ -811,7 +810,7 @@ def test_delete_user_as_only_admin_returns_400(
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
 
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment=environment)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
     affiliation.save()
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -820,10 +819,9 @@ def test_delete_user_as_only_admin_returns_400(
     assert rv.status_code == HTTPStatus.BAD_REQUEST
 
 
-@pytest.mark.parametrize("environment", ["test", None])
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_delete_user_is_member_returns_204(
-    client, jwt, session, keycloak_mock, monkeypatch, environment
+    client, jwt, session, keycloak_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Test if the user is the member of a team assert status is 204."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
@@ -851,7 +849,7 @@ def test_delete_user_is_member_returns_204(
     org_id = org_dictionary["id"]
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment=environment)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
     affiliation.save()
 
     membership = MembershipModel(

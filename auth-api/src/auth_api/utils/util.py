@@ -72,19 +72,6 @@ def mask_email(email: str) -> str:
     return email
 
 
-def get_request_environment():
-    """Return the environment corresponding to the user request."""
-    env_override = request.headers.get("Environment-Override")
-    sandbox_host = current_app.config.get("AUTH_WEB_SANDBOX_HOST")
-    is_production = os.getenv("FLASK_ENV") == "production"
-
-    if env_override:
-        return env_override
-    if is_production and sandbox_host in request.host_url:
-        return "sandbox"
-    return None
-
-
 def extract_numbers(input_string: str):
     """Extract numbers from an input string."""
     if input_string is None:

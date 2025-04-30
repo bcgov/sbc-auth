@@ -39,31 +39,20 @@ class Affiliation(
     entity_id = Column(ForeignKey("entities.id"), nullable=False, index=True)
     org_id = Column(ForeignKey("orgs.id"), nullable=False)
     certified_by_name = Column(String(100), nullable=True)
-    environment = Column(String(20), nullable=True, index=True)
 
     entity = relationship("Entity", foreign_keys=[entity_id], lazy="select")
     org = relationship("Org", foreign_keys=[org_id], lazy="select")
 
     @classmethod
-    def filter_environment(cls, environment: str):
-        """Filter affiliation by environment."""
-        query = cls.query
-        if environment:
-            query = query.filter_by(environment=environment)
-        else:
-            query = query.filter(Affiliation.environment.is_(None))
-        return query
-
-    @classmethod
-    def find_affiliation_by_org_and_entity_ids(cls, org_id: int, entity_id: int, environment) -> Affiliation:
+    def find_affiliation_by_org_and_entity_ids(cls, org_id: int, entity_id: int) -> Affiliation:
         """Return an affiliation for the provided org and entity ids."""
-        query = cls.filter_environment(environment).filter_by(org_id=int(org_id or -1), entity_id=int(entity_id or -1))
+        query = cls.query.filter_by(org_id=int(org_id or -1), entity_id=int(entity_id or -1))
         return query.one_or_none()
 
     @classmethod
-    def find_affiliations_by_entity_id(cls, entity_id: int, environment) -> List[Affiliation]:
+    def find_affiliations_by_entity_id(cls, entity_id: int) -> List[Affiliation]:
         """Return affiliations for the provided entity id."""
-        return cls.filter_environment(environment).filter_by(entity_id=int(entity_id or -1)).all()
+        return cls.query.filter_by(entity_id=int(entity_id or -1)).all()
 
     @classmethod
     def find_affiliation_by_ids(cls, org_id: int, affiliation_id: int) -> Affiliation:
@@ -71,7 +60,7 @@ class Affiliation(
         return cls.query.filter_by(org_id=int(org_id or -1)).filter_by(id=int(affiliation_id or -1)).one_or_none()
 
     @classmethod
-    def find_affiliations_by_org_id(cls, org_id: int, environment: str) -> List[Affiliation]:
+    def find_affiliations_by_org_id(cls, org_id: int) -> List[Affiliation]:
         """Return the affiliations with the provided org id."""
         query = (
             db.session.query(Affiliation)
@@ -83,26 +72,15 @@ class Affiliation(
             )
             .filter(Affiliation.org_id == int(org_id or -1))
         )
-        if environment:
-            query = query.filter(Affiliation.environment == environment)
-        else:
-            query = query.filter(Affiliation.environment.is_(None))
         return query.order_by(Affiliation.created.desc()).all()
 
     @classmethod
-    def find_affiliations_by_business_identifier(cls, business_identifier: str, environment: str):
+    def find_affiliations_by_business_identifier(cls, business_identifier: str):
         """Return the affiliations with the provided business identifier."""
-        return (
-            cls.filter_environment(environment)
-            .join(EntityModel)
-            .filter(EntityModel.business_identifier == business_identifier)
-            .all()
-        )
+        return cls.query.join(EntityModel).filter(EntityModel.business_identifier == business_identifier).all()
 
     @classmethod
-    def find_affiliation_by_org_id_and_business_identifier(
-        cls, org_id: int, business_identifier: str, environment: str
-    ) -> Affiliation:
+    def find_affiliation_by_org_id_and_business_identifier(cls, org_id: int, business_identifier: str) -> Affiliation:
         """Return the affiliations with the provided org id and business identifier."""
         query = (
             db.session.query(Affiliation)
@@ -115,8 +93,4 @@ class Affiliation(
             .filter(Affiliation.org_id == int(org_id or -1))
             .filter(EntityModel.business_identifier == business_identifier)
         )
-        if environment:
-            query = query.filter(Affiliation.environment == environment)
-        else:
-            query = query.filter(Affiliation.environment.is_(None))
         return query.first()

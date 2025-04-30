@@ -57,7 +57,6 @@ PAYBC_CLIENT_SECRET=test
 PAYBC_PORTAL_URL=http://localhost:8080
 NOTIFY_API_URL="https://mock-lear-tools.pathfinder.gov.bc.ca/rest/SBC+Notify+API+Reference/2.0.0/api/v1"
 LEGAL_API_URL="https://legal-api-dev.pathfinder.gov.bc.ca/api/v1"
-LEGAL_SANDBOX_API_URL="https://legal-api-dev.pathfinder.gov.bc.ca/api/v1"
 
 
 
