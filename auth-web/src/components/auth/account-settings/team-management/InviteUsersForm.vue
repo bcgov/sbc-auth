@@ -105,6 +105,7 @@ import { Component, Emit } from 'vue-property-decorator'
 import { MembershipType, RoleInfo } from '@/models/Organization'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
+import { Role } from '@/util/constants'
 import TeamManagementMixin from '../../mixins/TeamManagementMixin.vue'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
@@ -129,7 +130,8 @@ export default class InviteUsersForm extends TeamManagementMixin {
   }
 
   private get availableRoles () {
-    if ((this.currentMembership.membershipTypeCode !== MembershipType.Admin)) {
+    const isStaffManageAccounts = this.currentUser?.roles?.includes(Role.StaffManageAccounts)
+    if ((this.currentMembership.membershipTypeCode !== MembershipType.Admin) && !isStaffManageAccounts) {
       return this.roles.filter(role => role.name !== MembershipType.Admin)
     }
     return this.roles

@@ -349,11 +349,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def _get_default_payment_method_for_creditcard():
-        return (
-            PaymentMethod.DIRECT_PAY.value
-            if current_app.config.get("DIRECT_PAY_ENABLED")
-            else PaymentMethod.CREDIT_CARD.value
-        )
+        return PaymentMethod.DIRECT_PAY.value
 
     @staticmethod
     def get_bcol_details(bcol_credential: Dict, org_id=None):
@@ -824,7 +820,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     @user_context
-    def search_orgs(search: OrgSearch, environment, **kwargs):  # pylint: disable=too-many-locals
+    def search_orgs(search: OrgSearch, **kwargs):  # pylint: disable=too-many-locals
         """Search for orgs based on input parameters."""
         orgs_result = {"orgs": [], "page": search.page, "limit": search.limit, "total": 0}
         include_invitations: bool = False
@@ -838,7 +834,7 @@ class Org:  # pylint: disable=too-many-public-methods
             org_models, orgs_result["total"] = OrgModel.search_pending_activation_orgs(name=search.name)
             include_invitations = True
         else:
-            org_models, orgs_result["total"] = OrgModel.search_org(search, environment)
+            org_models, orgs_result["total"] = OrgModel.search_org(search)
 
         for org in org_models:
             orgs_result["orgs"].append(
@@ -864,9 +860,9 @@ class Org:  # pylint: disable=too-many-public-methods
         return orgs_result
 
     @staticmethod
-    def search_orgs_by_affiliation(business_identifier, environment, excluded_org_types):
+    def search_orgs_by_affiliation(business_identifier, excluded_org_types):
         """Search for orgs based on input parameters."""
-        orgs, total = OrgModel.search_orgs_by_business_identifier(business_identifier, environment, excluded_org_types)
+        orgs, total = OrgModel.search_orgs_by_business_identifier(business_identifier, excluded_org_types)
 
         return {"orgs": orgs, "total": total}
 

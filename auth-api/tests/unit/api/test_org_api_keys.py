@@ -49,9 +49,6 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, monkeypatch):  # p
         return {"paymentMethod": "PAD"}
 
     monkeypatch.setattr("auth_api.services.api_gateway.ApiGateway._get_pay_account", get_pay_account_mock)
-    monkeypatch.setattr(
-        "auth_api.services.api_gateway.ApiGateway._create_sandbox_pay_account", lambda *args, **kwargs: None
-    )
 
     rv = client.post(
         f"/api/v1/orgs/{org_id}/api-keys",

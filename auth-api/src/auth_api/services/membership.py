@@ -51,7 +51,7 @@ logger = StructuredLogging.get_logger()
 
 org_type_to_group_mapping = {
     OrgType.MAXIMUS_STAFF.value: GROUP_MAXIMUS_STAFF,
-    OrgType.CONTACT_CENTRE_STAFF.value: GROUP_CONTACT_CENTRE_STAFF,
+    OrgType.CC_STAFF.value: GROUP_CONTACT_CENTRE_STAFF,
 }
 
 
