@@ -297,12 +297,14 @@ class Affiliation:
 
     @staticmethod
     def _validate_org_exists(org_id):
+        """Validate if org_id is valid by calling Org Service."""
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
     @staticmethod
     def _get_and_validate_nr_details(business_identifier):
+        """Get and validate NR details."""
         nr_json = Affiliation._get_nr_details(business_identifier)
         if not nr_json:
             raise BusinessException(Error.NR_NOT_FOUND, None)
@@ -324,12 +326,14 @@ class Affiliation:
 
     @staticmethod
     def _validate_nr_payment(business_identifier):
+        """Validate NR payment status."""
         invoices = Affiliation.get_nr_payment_details(business_identifier)
         if not (invoices and invoices.get("invoices") and invoices["invoices"][0].get("statusCode") == "COMPLETED"):
             raise BusinessException(Error.NR_NOT_PAID, None)
 
     @staticmethod
     def _contacts_match(phone, email, nr_json):
+        """Check if the provided phone and email match the NR details."""
         applicants = nr_json.get("applicants", {})
         nr_phone = applicants.get("phoneNumber") or ""
         nr_email = applicants.get("emailAddress") or ""
@@ -489,6 +493,7 @@ class Affiliation:
 
     @staticmethod
     def _group_details(details):
+        """Group details from the affiliation details response."""
         name_requests = {}
         businesses = []
         drafts = []
@@ -509,6 +514,7 @@ class Affiliation:
 
     @staticmethod
     def _update_draft_type_for_amalgamation_nr(business):
+        # If the business is a draft and the NR is an amalgamation, set the draftType to ATMP.
         if (
             business.get("draftType", None)
             and business["nameRequest"]["request_action_cd"] == NRActionCodes.AMALGAMATE.value
@@ -518,7 +524,7 @@ class Affiliation:
 
     @staticmethod
     def _combine_nrs(name_requests, businesses, drafts):
-        # combine NRs
+        """Combine NRs with the business and draft entities."""
         for business in drafts + businesses:
             # Only drafts have nrNumber coming back from legal-api.
             if "nrNumber" in business and (nr_num := business["nrNumber"]):
@@ -559,6 +565,7 @@ class Affiliation:
 
     @staticmethod
     def _validate_firms_party(token, business_identifier, party_name_str: str):
+        """Validate if the party name is in the firms party list."""
         legal_api_url = current_app.config.get("LEGAL_API_URL") + current_app.config.get("LEGAL_API_VERSION_2")
 
         parties_url = f"{legal_api_url}/businesses/{business_identifier}/parties"
