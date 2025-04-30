@@ -355,6 +355,7 @@ def handle_reset_passcode(message_type, email_msg):
     )
     process_email(email_dict)
 
+
 def handle_affiliation_invitation(message_type, email_msg):
     """Handle the affiliation invitation messages."""
     if message_type not in {

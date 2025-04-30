@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""A Template for the account suspended email."""
 # Local application imports
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
@@ -25,6 +25,7 @@ from account_mailer.auth_utils import get_dashboard_url, get_login_url, get_paym
 from account_mailer.email_processors import generate_template
 
 logger = StructuredLogging.get_logger()
+
 
 def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> dict:
     """Build the email for Account notification."""
