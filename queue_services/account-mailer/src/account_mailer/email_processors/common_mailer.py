@@ -13,6 +13,7 @@
 # limitations under the License.
 """A Template for the account suspended email."""
 from auth_api.models import Org as OrgModel
+from auth_api.models import Entity as EntityModel 
 from flask import current_app
 from jinja2 import Template
 from structured_logging import StructuredLogging
@@ -31,6 +32,8 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
     account_name_with_branch: str = None
     if org_id:
         org: OrgModel = OrgModel.find_by_id(org_id)
+        entity: EntityModel = EntityModel.find_by_entity_id(org_id)
+        business_identifier = entity.business_identifier
         account_name = org.name
         account_name_with_branch = org.name
         if org.branch_name:
@@ -44,6 +47,7 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
         "account_name": account_name,
         "account_name_with_branch": account_name_with_branch,
         "account_number": org_id,
+        "business_identifier": business_identifier,
         "url": get_login_url(),
         "logo_url": logo_url,
         "dashboard_url": get_dashboard_url(),
