@@ -16,6 +16,8 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+from requests import Request
+
 from auth_api.utils.enums import KeycloakGroupActions
 
 
@@ -48,14 +50,26 @@ class AffiliationInvitationSearch:  # pylint: disable=too-many-instance-attribut
 
 
 @dataclass
-class AffiliationInvitationSearchDeatils:  # pylint: disable=too-many-instance-attributes
+class AffiliationInvitationSearchDetails:  # pylint: disable=too-many-instance-attributes
     """Used for filtering Affiliation Invitations based on filters passed."""
+
     identifier: Optional[str] = None
-    search_filter_status: Optional[str] = None
-    search_filter_name: Optional[str] = None
-    search_filter_type: Optional[str] = None
+    status: Optional[str] = None
+    name: Optional[str] = None
+    type: Optional[str] = None
     page: int = 1
     limit: int = 100
+
+    @classmethod
+    def from_request_args(cls, req: Request) -> "AffiliationInvitationSearchDetails":
+        return cls(
+            identifier=req.args.get("identifier"),
+            status=req.args.getlist("status") or [],
+            name=req.args.get("name"),
+            type=req.args.getlist("type") or [],
+            page=int(req.args.get("page", 1)),
+            limit=int(req.args.get("limit", 100)),
+        )
 
 
 @dataclass

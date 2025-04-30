@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation data."""
+from dataclasses import asdict
 import datetime
 import re
 from typing import Dict, List, Optional
@@ -29,7 +30,7 @@ from auth_api.models.affiliation_invitation import AffiliationInvitation as Affi
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
 from auth_api.models.dataclass import Affiliation as AffiliationData
-from auth_api.models.dataclass import AffiliationInvitationSearchDeatils
+from auth_api.models.dataclass import AffiliationInvitationSearchDetails
 from auth_api.models.dataclass import DeleteAffiliationRequest
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
@@ -455,7 +456,7 @@ class Affiliation:
 
     @staticmethod
     async def get_affiliation_details(
-        affiliations: List[AffiliationModel], search_details: AffiliationInvitationSearchDeatils, org_id
+        affiliations: List[AffiliationModel], search_details: AffiliationInvitationSearchDetails, org_id
     ) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
@@ -469,12 +470,7 @@ class Affiliation:
                 "url": url,
                 "payload": {
                     "identifiers": identifiers,
-                    "identifier":search_details.identifier,
-                    "state": search_details.search_filter_status,
-                    "name": search_details.search_filter_name,
-                    "type": search_details.search_filter_type,
-                    "page": search_details.page,
-                    "limit": search_details.limit,
+                    **asdict(search_details),
                 },
             }
             for url, identifiers in url_identifiers.items()
