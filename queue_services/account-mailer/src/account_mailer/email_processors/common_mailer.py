@@ -11,18 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""A Template for the account suspended email."""
-from jinja2 import Template
-from flask import current_app
 
-from structured_logging import StructuredLogging
+# Local application imports
+from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
-from auth_api.models import Entity as EntityModel 
+
+# Third-party imports
+from flask import current_app
+from jinja2 import Template
+from structured_logging import StructuredLogging
+
 from account_mailer.auth_utils import get_dashboard_url, get_login_url, get_payment_statements_url
 from account_mailer.email_processors import generate_template
 
 logger = StructuredLogging.get_logger()
-
 
 def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> dict:
     """Build the email for Account notification."""
