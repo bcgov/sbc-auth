@@ -39,6 +39,7 @@ export default defineComponent({
   },
   setup (props, { root }) {
     const { proxy } = getCurrentInstance()
+    const mixinProxy = proxy as any
     const orgStore = useOrgStore()
     const userStore = useUserStore()
     const state = reactive({
@@ -108,7 +109,8 @@ export default defineComponent({
       if (invitingOrg.statusCode === AccountStatus.ACTIVE && isExternalStaff) {
         window.location.assign(`${ConfigHelper.getSelfURL()}${Pages.STAFF_DASHBOARD}`)
       } else {
-        root.$router.push((proxy as any).getNextPageUrl())
+        const redirectUrl = mixinProxy.getNextPageUrl()
+        mixinProxy.redirectTo(redirectUrl)
       }
     }
 
