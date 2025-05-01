@@ -95,16 +95,20 @@ export default defineComponent({
             await orgStore.syncMembership(invitation?.membership[0]?.org?.id)
           }
           useAppStore().updateHeader()
-          const isExternalStaff = ExternalStaffAccounts.includes(invitingOrg.typeCode)
-          if (invitingOrg.statusCode === AccountStatus.ACTIVE && isExternalStaff) {
-            window.location.assign(`${ConfigHelper.getSelfURL()}${Pages.STAFF_DASHBOARD}`)
-          } else {
-            root.$router.push((proxy as any).getNextPageUrl())
-          }
+          redirectToNextPage(invitingOrg)
         }
       } catch (exception) {
         console.error(exception)
         state.inviteError = true
+      }
+    }
+
+    function redirectToNextPage(invitingOrg) {
+      const isExternalStaff = ExternalStaffAccounts.includes(invitingOrg.typeCode)
+      if (invitingOrg.statusCode === AccountStatus.ACTIVE && isExternalStaff) {
+        window.location.assign(`${ConfigHelper.getSelfURL()}${Pages.STAFF_DASHBOARD}`)
+      } else {
+        root.$router.push((proxy as any).getNextPageUrl())
       }
     }
 
