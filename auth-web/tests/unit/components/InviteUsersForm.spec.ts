@@ -1,6 +1,6 @@
+import { AccessType, Role } from '@/util/constants'
 import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
 import { useOrgStore, useUserStore } from '@/stores'
-import { AccessType } from '@/util/constants'
 import InviteUsersForm from '@/components/auth/account-settings/team-management/InviteUsersForm.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
@@ -123,5 +123,97 @@ describe('InviteUsersForm.vue', () => {
     await Vue.nextTick()
 
     expect(wrapper.vm.isFormValid()).toBeTruthy()
+  })
+
+  it('availableRoles getter filters out admin role for non-admin members', async () => {
+    const $t = () => 'test'
+
+    const userStore = useUserStore()
+    userStore.roleInfos = [
+      {
+        'default': false,
+        'desc': 'Admin for the organization',
+        'displayName': 'Admin',
+        'icon': 'mdi-shield-account',
+        'label': 'Manage team members and account settings',
+        'name': 'ADMIN'
+      },
+      {
+        'default': false,
+        'desc': 'Member of the organization',
+        'displayName': 'Team Member',
+        'icon': 'mdi-account',
+        'label': 'Submit searches and filings',
+        'name': 'USER'
+      }
+    ] as any
+
+    orgStore.currentMembership = [{
+      membershipTypeCode: 'USER',
+      membershipStatus: 'ACTIVE',
+      user: { username: 'test' }
+    }] as any
+
+    wrapper = mount(InviteUsersForm, {
+      localVue,
+      mocks: { $t },
+      stubs: {
+        'v-overflow-btn': `<div/>`
+      }
+    })
+
+    await Vue.nextTick()
+
+    expect(wrapper.vm.availableRoles.length).toBe(1)
+    expect(wrapper.vm.availableRoles[0].name).toBe('USER')
+  })
+
+  it('availableRoles includes admin role for staff with StaffManageAccounts role', async () => {
+    const $t = () => 'test'
+
+    const userStore = useUserStore()
+    userStore.currentUser = {
+      userName: 'test',
+      roles: ['staff', Role.StaffManageAccounts]
+    } as any
+
+    userStore.roleInfos = [
+      {
+        'default': false,
+        'desc': 'Admin for the organization',
+        'displayName': 'Admin',
+        'icon': 'mdi-shield-account',
+        'label': 'Manage team members and account settings',
+        'name': 'ADMIN'
+      },
+      {
+        'default': false,
+        'desc': 'Member of the organization',
+        'displayName': 'Team Member',
+        'icon': 'mdi-account',
+        'label': 'Submit searches and filings',
+        'name': 'USER'
+      }
+    ] as any
+
+    orgStore.currentMembership = [{
+      membershipTypeCode: 'USER',
+      membershipStatus: 'ACTIVE',
+      user: { username: 'test' }
+    }] as any
+
+    wrapper = mount(InviteUsersForm, {
+      localVue,
+      mocks: { $t },
+      stubs: {
+        'v-overflow-btn': `<div/>`
+      }
+    })
+
+    await Vue.nextTick()
+
+    // Staff with StaffManageAccounts role should have access to admin role despite not being an admin member
+    expect(wrapper.vm.availableRoles.length).toBe(2)
+    expect(wrapper.vm.availableRoles.some(role => role.name === 'ADMIN')).toBeTruthy()
   })
 })
