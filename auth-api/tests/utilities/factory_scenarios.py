@@ -242,6 +242,19 @@ class TestJwtClaims(dict, Enum):
         "product_code": ProductCode.BUSINESS.value,
     }
 
+    competent_authority_role = {
+        "iss": CONFIG.JWT_OIDC_TEST_ISSUER,
+        "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
+        "idp_userid": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
+        "firstname": fake.first_name(),
+        "lastname": fake.last_name(),
+        "preferred_username": fake.user_name(),
+        "realm_access": {"roles": ["staff", "create_accounts", "view_accounts", "edit"]},
+        "roles": ["staff", "create_accounts"],
+        "loginSource": LoginSource.STAFF.value,
+        "product_code": ProductCode.CA_SEARCH.value,
+    }
+
     system_admin_role = {
         "iss": CONFIG.JWT_OIDC_TEST_ISSUER,
         "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
