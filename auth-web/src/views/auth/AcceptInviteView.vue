@@ -11,7 +11,8 @@
 
 <script lang="ts">
 
-import { AccessType, LoginSource, Pages } from '@/util/constants'
+import ConfigHelper from '@/util/config-helper'
+import { AccessType, Account, AccountStatus, ExternalStaffAccounts, LoginSource, Pages } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
 import { defineComponent, getCurrentInstance, onMounted, reactive, toRefs } from '@vue/composition-api'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
@@ -37,7 +38,7 @@ export default defineComponent({
     }
   },
   setup (props, { root }) {
-    const instance = getCurrentInstance()
+    const { proxy } = getCurrentInstance()
     const orgStore = useOrgStore()
     const userStore = useUserStore()
     const state = reactive({
@@ -94,9 +95,15 @@ export default defineComponent({
             await orgStore.syncMembership(invitation?.membership[0]?.org?.id)
           }
           useAppStore().updateHeader()
-          root.$router.push((instance?.proxy as any).getNextPageUrl()) // This for the mixin.
+          const isExternalStaff = ExternalStaffAccounts.includes(invitingOrg.typeCode)
+          if (invitingOrg.statusCode === AccountStatus.ACTIVE && isExternalStaff) {
+            window.location.assign(`${ConfigHelper.getSelfURL()}${Pages.STAFF_DASHBOARD}`)
+          } else {
+            root.$router.push((proxy as any).getNextPageUrl())
+          }
         }
       } catch (exception) {
+        console.error(exception)
         state.inviteError = true
       }
     }
