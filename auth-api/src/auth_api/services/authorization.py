@@ -214,7 +214,7 @@ def is_competent_authority(**kwargs) -> bool:
     user_from_context: UserContext = kwargs["user_context"]
     account_id = user_from_context.account_id
 
-    authorization = AuthorizationView.find_account_authorization_by_org_id_and_product(account_id, 'CA_SEARCH')
+    authorization = AuthorizationView.find_account_authorization_by_org_id_and_product(account_id, "CA_SEARCH")
 
     return authorization is not None
 
