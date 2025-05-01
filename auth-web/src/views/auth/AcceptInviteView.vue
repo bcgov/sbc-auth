@@ -11,10 +11,10 @@
 
 <script lang="ts">
 
-import ConfigHelper from '@/util/config-helper'
-import { AccessType, Account, AccountStatus, ExternalStaffAccounts, LoginSource, Pages } from '@/util/constants'
+import { AccessType, AccountStatus, ExternalStaffAccounts, LoginSource, Pages } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
 import { defineComponent, getCurrentInstance, onMounted, reactive, toRefs } from '@vue/composition-api'
+import ConfigHelper from '@/util/config-helper'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import { useAppStore } from '@/stores'
