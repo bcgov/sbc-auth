@@ -116,9 +116,10 @@ def test_add_entity_invalid_returns_exception(client, jwt, session):  # pylint:d
         )
         assert rv.status_code == 400
 
+#from auth_api.models.views.authorization import Authorization as AuthorizationView
 
-@mock.patch("auth_api.services.entity.check_auth")
-def test_get_entity(check_auth, client, jwt, session):  # pylint:disable=unused-argument
+@mock.patch('auth_api.resources.v1.entity.is_competent_authority')
+def test_get_entity(mock_function, client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an entity can be retrieved via GET."""
     headers_system = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv_create = client.post(
@@ -131,13 +132,15 @@ def test_get_entity(check_auth, client, jwt, session):  # pylint:disable=unused-
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
 
+    mock_function.assert_not_called()
+
     rv = client.get(
         "/api/v1/entities/{}".format(TestEntityInfo.entity1["businessIdentifier"]),
         headers=headers,
         content_type="application/json",
     )
 
-    check_auth.assert_called_once()
+    mock_function.assert_called_once()
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "business")[0]
     dictionary = json.loads(rv.data)
@@ -145,23 +148,29 @@ def test_get_entity(check_auth, client, jwt, session):  # pylint:disable=unused-
 
 
 @mock.patch("auth_api.services.entity.check_auth")
-@mock.patch("auth_api.services.products.Product")
+@mock.patch("auth_api.services.authorization.AuthorizationView")
 def test_get_entity_as_competent_authority(
-    mock_product, check_auth, client, jwt, session
+    mock_auth_view, check_auth, client, jwt, session
 ):  # pylint:disable=unused-argument
     """Assert that an entity can be retrieved via GET."""
-    mock_product.get_all_product_subscription.return_value = [
-        {
-            "type": ProductTypeCode.INTERNAL.value,
-            "parentCode": None,
-            "premiumOnly": False,
-            "need_system_admin": True,
-            "hidden": True,
-            "code": ProductCode.CA_SEARCH.value,
-            "description": "Competent Authority Search",
-            "subscriptionStatus": ProductSubscriptionStatus.ACTIVE.value,
-        }
-    ]
+    mock_auth_view.find_account_authorization_by_org_id_and_product.return_value =  {
+        '_sa_instance_state':'<sqlalchemy.orm.state.InstanceState object at 0x000001A73DE07410>',
+        'entity_name': 'BC0871427',
+        'keycloak_guid': 'e9e349c8-2ed6-4817-853a-85cdc616e649',
+        'business_identifier': 'T6akW6ZhFl',
+        'org_type': 'PREMIUM',
+        'product_code': 'CA_SEARCH',
+        'bcol_user_id': None,
+        'folio_number': None,
+        'org_membership': 'ADMIN',
+        'org_id': 3113,
+        'user_id': 5857,
+        'corp_type_code': 'TMP',
+        'org_name': 'Kial Dev 1 (BTR test account)',
+        'bcol_account_id': None,
+        'status_code': 'ACTIVE'
+    }
+
     headers_system = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv_create = client.post(
         "/api/v1/entities",
@@ -181,8 +190,8 @@ def test_get_entity_as_competent_authority(
     )
     # this verifies that `is_competent_authority()` was called and it fetched account id from context, then called
     # `get_all_product_subscription` with correct values
-    mock_product.get_all_product_subscription.assert_called_once_with(
-        org_id=int(headers["Account-Id"]), include_hidden=True
+    mock_auth_view.find_account_authorization_by_org_id_and_product.assert_called_once_with(
+        headers["Account-Id"], 'CA_SEARCH'
     )
     # make sure check_auth is not called, as it is a competent authority (skip auth)
     check_auth.assert_not_called()
