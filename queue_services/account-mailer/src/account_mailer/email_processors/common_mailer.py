@@ -33,12 +33,8 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
 
     account_name: str = None
     account_name_with_branch: str = None
-    business_identifier: str = None
     if org_id:
         org: OrgModel = OrgModel.find_by_id(org_id)
-        entity: EntityModel = EntityModel.find_by_entity_id(org_id)
-        if entity.business_identifier:
-            business_identifier = entity.business_identifier
         account_name = org.name
         account_name_with_branch = org.name
         if org.branch_name:
@@ -52,7 +48,6 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
         "account_name": account_name,
         "account_name_with_branch": account_name_with_branch,
         "account_number": org_id,
-        "business_identifier": business_identifier,
         "url": get_login_url(),
         "logo_url": logo_url,
         "dashboard_url": get_dashboard_url(),

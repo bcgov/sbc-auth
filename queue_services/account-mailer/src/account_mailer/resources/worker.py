@@ -534,6 +534,7 @@ def handle_other_messages(message_type, email_msg):
         "remarks": email_msg.get("remarks"),
         "applicationDate": email_msg.get("applicationDate"),
         "business_name": email_msg.get("businessName"),
+        "business_identifier": email_msg.get("busiessIdentifier"),
     }
 
     org_id = email_msg.get("accountId")
