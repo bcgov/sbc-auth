@@ -209,6 +209,20 @@ class Authorization:
 
 
 @user_context
+def is_competent_authority(**kwargs) -> bool:
+    """Check if the account has a competent authority ('CA_SEARCH') product subscription."""
+    user_from_context: UserContext = kwargs["user_context"]
+    account_id = user_from_context.account_id
+
+    if account_id is None:
+        return False
+
+    authorization = AuthorizationView.find_account_authorization_by_org_id_and_product(account_id, "CA_SEARCH")
+
+    return authorization is not None
+
+
+@user_context
 def check_auth(**kwargs):
     """Check if user is authorized to perform action on the service."""
     user_from_context: UserContext = kwargs["user_context"]
