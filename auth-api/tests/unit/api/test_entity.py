@@ -20,6 +20,7 @@ Test-Suite to ensure that the /entities endpoint is working as expected.
 import copy
 import json
 from http import HTTPStatus
+from unittest import mock
 from unittest.mock import patch
 
 import pytest
@@ -28,6 +29,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Entity as EntityService
+from auth_api.utils.enums import ProductCode, ProductSubscriptionStatus, ProductTypeCode
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims
 from tests.utilities.factory_utils import (
     factory_affiliation_model,
@@ -115,7 +117,8 @@ def test_add_entity_invalid_returns_exception(client, jwt, session):  # pylint:d
         assert rv.status_code == 400
 
 
-def test_get_entity(client, jwt, session):  # pylint:disable=unused-argument
+@mock.patch("auth_api.resources.v1.entity.is_competent_authority")
+def test_get_entity(mock_function, client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an entity can be retrieved via GET."""
     headers_system = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv_create = client.post(
@@ -128,12 +131,69 @@ def test_get_entity(client, jwt, session):  # pylint:disable=unused-argument
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
 
+    mock_function.assert_not_called()
+
     rv = client.get(
         "/api/v1/entities/{}".format(TestEntityInfo.entity1["businessIdentifier"]),
         headers=headers,
         content_type="application/json",
     )
 
+    mock_function.assert_called_once()
+    assert rv.status_code == HTTPStatus.OK
+    assert schema_utils.validate(rv.json, "business")[0]
+    dictionary = json.loads(rv.data)
+    assert dictionary["businessIdentifier"] == TestEntityInfo.entity1["businessIdentifier"]
+
+
+@mock.patch("auth_api.services.entity.check_auth")
+@mock.patch("auth_api.services.authorization.AuthorizationView")
+def test_get_entity_as_competent_authority(
+    mock_auth_view, check_auth, client, jwt, session
+):  # pylint:disable=unused-argument
+    """Assert that an entity can be retrieved via GET."""
+    mock_auth_view.find_account_authorization_by_org_id_and_product.return_value = {
+        "_sa_instance_state": "<sqlalchemy.orm.state.InstanceState object at 0x000001A73DE07410>",
+        "entity_name": "BC0871427",
+        "keycloak_guid": "e9e349c8-2ed6-4817-853a-85cdc616e649",
+        "business_identifier": "T6akW6ZhFl",
+        "org_type": "PREMIUM",
+        "product_code": "CA_SEARCH",
+        "bcol_user_id": None,
+        "folio_number": None,
+        "org_membership": "ADMIN",
+        "org_id": 3113,
+        "user_id": 5857,
+        "corp_type_code": "TMP",
+        "org_name": "Kial Dev 1 (BTR test account)",
+        "bcol_account_id": None,
+        "status_code": "ACTIVE",
+    }
+
+    headers_system = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv_create = client.post(
+        "/api/v1/entities",
+        data=json.dumps(TestEntityInfo.entity1),
+        headers=headers_system,
+        content_type="application/json",
+    )
+    assert rv_create.status_code == HTTPStatus.CREATED
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    headers["Account-Id"] = "3117"
+
+    rv = client.get(
+        "/api/v1/entities/{}".format(TestEntityInfo.entity1["businessIdentifier"]),
+        headers=headers,
+        content_type="application/json",
+    )
+    # this verifies that `is_competent_authority()` was called and it fetched account id from context, then called
+    # `get_all_product_subscription` with correct values
+    mock_auth_view.find_account_authorization_by_org_id_and_product.assert_called_once_with(
+        headers["Account-Id"], "CA_SEARCH"
+    )
+    # make sure check_auth is not called, as it is a competent authority (skip auth)
+    check_auth.assert_not_called()
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "business")[0]
     dictionary = json.loads(rv.data)

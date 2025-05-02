@@ -118,8 +118,10 @@ export enum Account {
     STAFF = 'STAFF',
     SBC_STAFF = 'SBC_STAFF',
     MAXIMUS_STAFF = 'MAXIMUS_STAFF',
-    CONTACT_CENTRE_STAFF = 'CONTACT_CENTRE_STAFF'
+    CONTACT_CENTRE_STAFF = 'CC_STAFF'
 }
+
+export const ExternalStaffAccounts = [Account.MAXIMUS_STAFF, Account.CONTACT_CENTRE_STAFF]
 
 export enum AccountStatus {
     ACTIVE = 'ACTIVE',

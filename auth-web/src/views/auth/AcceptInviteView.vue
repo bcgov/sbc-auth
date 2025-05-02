@@ -11,9 +11,10 @@
 
 <script lang="ts">
 
-import { AccessType, LoginSource, Pages } from '@/util/constants'
+import { AccessType, AccountStatus, ExternalStaffAccounts, LoginSource, Pages } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
 import { defineComponent, getCurrentInstance, onMounted, reactive, toRefs } from '@vue/composition-api'
+import ConfigHelper from '@/util/config-helper'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import { useAppStore } from '@/stores'
@@ -37,7 +38,8 @@ export default defineComponent({
     }
   },
   setup (props, { root }) {
-    const instance = getCurrentInstance()
+    const { proxy } = getCurrentInstance()
+    const mixinProxy = proxy as any
     const orgStore = useOrgStore()
     const userStore = useUserStore()
     const state = reactive({
@@ -94,10 +96,21 @@ export default defineComponent({
             await orgStore.syncMembership(invitation?.membership[0]?.org?.id)
           }
           useAppStore().updateHeader()
-          root.$router.push((instance?.proxy as any).getNextPageUrl()) // This for the mixin.
+          redirectToNextPage(invitingOrg)
         }
       } catch (exception) {
+        console.error(exception)
         state.inviteError = true
+      }
+    }
+
+    function redirectToNextPage(invitingOrg) {
+      const isExternalStaff = ExternalStaffAccounts.includes(invitingOrg.typeCode)
+      if (invitingOrg.statusCode === AccountStatus.ACTIVE && isExternalStaff) {
+        window.location.assign(`${ConfigHelper.getSelfURL()}${Pages.STAFF_DASHBOARD}`)
+      } else {
+        const redirectUrl = mixinProxy.getNextPageUrl()
+        mixinProxy.redirectTo(redirectUrl)
       }
     }
 
