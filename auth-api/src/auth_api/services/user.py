@@ -702,7 +702,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @staticmethod
     def is_user_admin_or_coordinator_or_user(user, org_id: int) -> bool:
         """Check if user provided is admin, coordinator, or user for the given org id."""
-        current_user_membership: MembershipModel = MembershipModel.find_membership_by_user_and_org(
+        current_user_membership = MembershipModel.find_membership_by_user_and_org(
             user_id=user.identifier, org_id=org_id
         )
 
