@@ -32,7 +32,7 @@ ENV APP_ENV=${APP_ENV} \
   PIP_DEFAULT_TIMEOUT=100 \
   PIP_ROOT_USER_ACTION=ignore \
   # poetry:
-  POETRY_VERSION=1.8.3 \
+  POETRY_VERSION=2.1.3 \
   POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
@@ -71,7 +71,6 @@ COPY --chown=web:web ./README.md /code
 
 # Project initialization:
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
-  pip install --upgrade pip virtualenv && \
   echo "$APP_ENV" \
   && poetry version \
   # Install deps:
