@@ -49,6 +49,7 @@ RUN apt-get update && apt-get upgrade -y \
     gettext \
     git \
     libpq-dev \
+    virtualenv \
     wait-for-it \
   && curl -sSL 'https://install.python-poetry.org' | python - \
   && poetry --version \
