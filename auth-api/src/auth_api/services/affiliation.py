@@ -465,12 +465,15 @@ class Affiliation:
             url_identifiers.setdefault(url, [affiliation.entity.business_identifier]).append(
                 affiliation.entity.business_identifier
             )
+        search_dict = asdict(search_details)
+        has_filters = any(v not in (None, "", [], {}) for k, v in search_dict.items() if k not in {"page", "limit"})
+
         call_info = [
             {
                 "url": url,
                 "payload": {
-                    "identifiers": identifiers,
-                    **asdict(search_details),
+                    "identifiers": identifiers if has_filters else identifiers[:100],
+                    **(search_dict if has_filters else {}),
                 },
             }
             for url, identifiers in url_identifiers.items()
