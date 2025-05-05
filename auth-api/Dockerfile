@@ -49,7 +49,6 @@ RUN apt-get update && apt-get upgrade -y \
     gettext \
     git \
     libpq-dev \
-    virtualenv \
     wait-for-it \
   && curl -sSL 'https://install.python-poetry.org' | python - \
   && poetry --version \
@@ -72,6 +71,7 @@ COPY --chown=web:web ./README.md /code
 
 # Project initialization:
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
+  pip install --upgrade pip virtualenv && \
   echo "$APP_ENV" \
   && poetry version \
   # Install deps:
