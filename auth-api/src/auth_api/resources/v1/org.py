@@ -350,13 +350,6 @@ def delete_organzization_contact(org_id):
 def get_organization_affiliations(org_id):
     """Get all affiliated entities for the given org."""
     try:
-        # keep old response until UI is updated
-        if (request.args.get("new", "false")).lower() != "true":
-            return (
-                jsonify({"entities": AffiliationService.find_visible_affiliations_by_org_id(org_id)}),
-                HTTPStatus.OK,
-            )
-
         # get affiliation identifiers and the urls for the source data
         affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
         affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations, org_id))
