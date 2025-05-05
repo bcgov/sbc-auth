@@ -83,7 +83,7 @@ def get_affiliation_invitations():
 )
 def post_affiliation_invitation():
     """Send a new affiliation invitation using the details in request and saves the affiliation invitation."""
-    origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
+    origin = current_app.config.get("WEB_APP_URL")
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "affiliation_invitation")
     if not valid_format:
@@ -121,7 +121,7 @@ def get_affiliation_invitation(affiliation_invitation_id):
 @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def patch_affiliation_invitation(affiliation_invitation_id):
     """Update the affiliation invitation specified by the provided id."""
-    origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
+    origin = current_app.config.get("WEB_APP_URL")
     request_json = request.get_json()
     try:
         affiliation_invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(
@@ -164,7 +164,7 @@ def delete_affiliation_invitation(affiliation_invitation_id):
 @_jwt.requires_auth
 def accept_affiliation_invitation_token(affiliation_invitation_id, affiliation_invitation_token):
     """Check whether the passed token is valid and add affiliation from the affiliation invitation."""
-    origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
+    origin = current_app.config.get("WEB_APP_URL")
 
     try:
         if not (user := UserService.find_by_jwt_token()):
@@ -193,7 +193,7 @@ def accept_affiliation_invitation_token(affiliation_invitation_id, affiliation_i
 @_jwt.requires_auth
 def patch_affiliation_invitation_authorization(affiliation_invitation_id, authorize_action):
     """Check if user is active part of the Org. Authorize/Refuse Authorization invite if he is."""
-    origin = request.environ.get("HTTP_ORIGIN", current_app.config.get("WEB_APP_URL"))
+    origin = current_app.config.get("WEB_APP_URL")
 
     try:
         user = UserService.find_by_jwt_token()
