@@ -367,7 +367,7 @@ def get_organization_affiliations_search(org_id):
 def get_organization_affiliations(org_id):
     """Get all affiliated entities for the given org."""
     try:
-        # Remove this after UI is pointing at new route. Please repoint unit tests.
+        # Remove this after UI is pointing at new route.
         if (request.args.get("new", "false")).lower() != "true":
             return (
                 jsonify({"entities": AffiliationService.find_visible_affiliations_by_org_id(org_id)}),
