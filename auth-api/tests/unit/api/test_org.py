@@ -1618,13 +1618,13 @@ def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock,
     assert dictionary["organization"]["id"] == org_id
     assert dictionary["certifiedByName"] == certified_by_name
 
-    rv = client.get(
-        f"/api/v1/orgs/{org_id}/affiliations/{TestAffliationInfo.new_business_affiliation["businessIdentifier"]}",
-        headers=headers,
-    )
+    rv = client.get("/api/v1/orgs/{}/affiliations".format(org_id), headers=headers)
     assert rv.status_code == HTTPStatus.OK
+
+    assert schema_utils.validate(rv.json, "affiliations_response")[0]
     affiliations = json.loads(rv.data)
-    assert affiliations["business"]["affiliations"][0]["certifiedByName"] == certified_by_name
+
+    assert affiliations["entities"][0]["affiliations"][0]["certifiedByName"] == certified_by_name
 
 
 def test_get_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -1693,6 +1693,52 @@ def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock):
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
     rv = client.get(f"/api/v1/orgs/{org_id}/affiliations/{business_identifier}", headers=headers)
     assert rv.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a list of affiliation for an org can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post(
+        "/api/v1/entities",
+        data=json.dumps(TestEntityInfo.entity_lear_mock),
+        headers=headers,
+        content_type="application/json",
+    )
+    rv = client.post(
+        "/api/v1/entities",
+        data=json.dumps(TestEntityInfo.entity_lear_mock2),
+        headers=headers,
+        content_type="application/json",
+    )
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json"
+    )
+    dictionary = json.loads(rv.data)
+    org_id = dictionary["id"]
+
+    rv = client.post(
+        "/api/v1/orgs/{}/affiliations".format(org_id),
+        data=json.dumps(TestAffliationInfo.affiliation3),
+        headers=headers,
+        content_type="application/json",
+    )
+    rv = client.post(
+        "/api/v1/orgs/{}/affiliations".format(org_id),
+        data=json.dumps(TestAffliationInfo.affiliation4),
+        headers=headers,
+        content_type="application/json",
+    )
+
+    rv = client.get("/api/v1/orgs/{}/affiliations".format(org_id), headers=headers)
+    assert rv.status_code == HTTPStatus.OK
+
+    assert schema_utils.validate(rv.json, "affiliations_response")[0]
+    affiliations = json.loads(rv.data)
+    # Result is sorted desc order of created date
+    assert affiliations["entities"][1]["businessIdentifier"] == TestEntityInfo.entity_lear_mock["businessIdentifier"]
+    assert affiliations["entities"][0]["businessIdentifier"] == TestEntityInfo.entity_lear_mock2["businessIdentifier"]
 
 
 def test_search_orgs_for_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -2366,18 +2412,18 @@ def test_delete_affiliation_no_payload(client, jwt, session, keycloak_mock):  # 
         content_type="application/json",
     )
 
-    rv = client.get(
-        f"/api/v1/orgs/{org_id}/affiliations/{TestAffliationInfo.affiliation3['businessIdentifier']}", headers=headers
-    )
+    rv = client.get("/api/v1/orgs/{}/affiliations".format(org_id), headers=headers)
     assert rv.status_code == HTTPStatus.OK
 
+    assert schema_utils.validate(rv.json, "affiliations_response")[0]
     affiliations = json.loads(rv.data)
-    assert affiliations["business"]["businessIdentifier"] == TestEntityInfo.entity_lear_mock["businessIdentifier"]
+    # Result is sorted desc order of created date
+    assert affiliations["entities"][0]["businessIdentifier"] == TestEntityInfo.entity_lear_mock["businessIdentifier"]
+
+    affiliation_id = affiliations["entities"][0]["businessIdentifier"]
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     da = client.delete(
-        "/api/v1/orgs/{org_id}/affiliations/{affiliation_id}".format(
-            org_id=org_id, affiliation_id=affiliations["business"]["businessIdentifier"]
-        ),
+        "/api/v1/orgs/{org_id}/affiliations/{affiliation_id}".format(org_id=org_id, affiliation_id=affiliation_id),
         headers=headers,
         content_type="application/json",
     )
@@ -2408,17 +2454,18 @@ def test_delete_affiliation_payload_no_mail(client, jwt, session, keycloak_mock)
         content_type="application/json",
     )
 
-    rv = client.get(
-        f"/api/v1/orgs/{org_id}/affiliations/{TestAffliationInfo.affiliation3['businessIdentifier']}", headers=headers
-    )
+    rv = client.get("/api/v1/orgs/{}/affiliations".format(org_id), headers=headers)
     assert rv.status_code == HTTPStatus.OK
+
+    assert schema_utils.validate(rv.json, "affiliations_response")[0]
     affiliations = json.loads(rv.data)
-    assert affiliations["business"]["businessIdentifier"] == TestEntityInfo.entity_lear_mock["businessIdentifier"]
+    # Result is sorted desc order of created date
+    assert affiliations["entities"][0]["businessIdentifier"] == TestEntityInfo.entity_lear_mock["businessIdentifier"]
+
+    affiliation_id = affiliations["entities"][0]["businessIdentifier"]
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
     da = client.delete(
-        "/api/v1/orgs/{org_id}/affiliations/{affiliation_id}".format(
-            org_id=org_id, affiliation_id=affiliations["business"]["businessIdentifier"]
-        ),
+        "/api/v1/orgs/{org_id}/affiliations/{affiliation_id}".format(org_id=org_id, affiliation_id=affiliation_id),
         headers=headers,
         data=json.dumps(DeleteAffiliationPayload.delete_affiliation2),
         content_type="application/json",
@@ -2747,7 +2794,7 @@ def test_get_org_affiliations(
     mocker.patch("auth_api.services.rest_service.RestService.get_service_account_token", return_value="token")
 
     rv = client.get(
-        "/api/v1/orgs/{}/affiliations?new=true".format(org_id), headers=headers, content_type="application/json"
+        "/api/v1/orgs/{}/affiliations/search".format(org_id), headers=headers, content_type="application/json"
     )
 
     assert rv.status_code == HTTPStatus.OK

@@ -647,16 +647,23 @@ def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert_masked_email(TestContactInfo.contact1["email"], dictionary["recipientEmail"])
 
     # Assert from org affiliation is created
-    rv_affiliations = client.get(f"/api/v1/orgs/{from_org_id}/affiliations/{business_identifier}", headers=headers)
+    rv_affiliations = client.get("/api/v1/orgs/{}/affiliations".format(from_org_id), headers=headers)
     assert rv_affiliations.status_code == HTTPStatus.OK
 
+    assert schema_utils.validate(rv_affiliations.json, "affiliations_response")[0]
     affiliations = json.loads(rv_affiliations.data)
     assert affiliations is not None
-    assert affiliations["business"]["businessIdentifier"] == business_identifier
+    assert len(affiliations["entities"]) == 1
+    assert affiliations["entities"][0]["businessIdentifier"] == business_identifier
 
     # Assert to org affiliation is empty
-    rv_affiliations = client.get(f"/api/v1/orgs/{to_org_id}/affiliations/{business_identifier}", headers=headers)
-    assert rv_affiliations.status_code == HTTPStatus.NOT_FOUND
+    rv_affiliations = client.get("/api/v1/orgs/{}/affiliations".format(to_org_id), headers=headers)
+    assert rv_affiliations.status_code == HTTPStatus.OK
+
+    assert schema_utils.validate(rv_affiliations.json, "affiliations_response")[0]
+    affiliations = json.loads(rv_affiliations.data)
+    assert affiliations is not None
+    assert len(affiliations["entities"]) == 0
 
 
 def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, business_mock):
