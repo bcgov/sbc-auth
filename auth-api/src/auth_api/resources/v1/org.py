@@ -381,7 +381,7 @@ def get_organization_affiliations(org_id):
                 HTTPStatus.OK,
             )
 
-        # Remove this after UI is pointing at new route.
+        # Remove below after UI is pointing at new route.
         # get affiliation identifiers and the urls for the source data
         affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
         affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations, org_id))
