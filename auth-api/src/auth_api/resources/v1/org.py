@@ -349,19 +349,7 @@ def delete_organzization_contact(org_id):
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def get_organization_affiliations_search(org_id):
     try:
-        # get affiliation identifiers and the urls for the source data
-        affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
-        affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations, org_id))
-        # Use orjson serializer here, it's quite a bit faster.
-        response, status = (
-            current_app.response_class(
-                response=orjson.dumps({"entities": affiliations_details_list}),  # pylint: disable=maybe-no-member
-                status=200,
-                mimetype="application/json",
-            ),
-            HTTPStatus.OK,
-        )
-
+        response, status = new_affiliation_search(org_id)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     except ServiceUnavailableException as exception:
@@ -380,26 +368,30 @@ def get_organization_affiliations(org_id):
                 jsonify({"entities": AffiliationService.find_visible_affiliations_by_org_id(org_id)}),
                 HTTPStatus.OK,
             )
-
         # Remove below after UI is pointing at new route.
-        # get affiliation identifiers and the urls for the source data
-        affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
-        affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations, org_id))
-        # Use orjson serializer here, it's quite a bit faster.
-        response, status = (
-            current_app.response_class(
-                response=orjson.dumps({"entities": affiliations_details_list}),  # pylint: disable=maybe-no-member
-                status=200,
-                mimetype="application/json",
-            ),
-            HTTPStatus.OK,
-        )
-
+        response, status = new_affiliation_search(org_id)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     except ServiceUnavailableException as exception:
         response, status = {"message": exception.error}, exception.status_code
 
+    return response, status
+
+
+def new_affiliation_search(org_id):
+    """Get all affiliated entities for the given org by calling into Names and LEAR."""
+    # get affiliation identifiers and the urls for the source data
+    affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
+    affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations, org_id))
+    # Use orjson serializer here, it's quite a bit faster.
+    response, status = (
+        current_app.response_class(
+            response=orjson.dumps({"entities": affiliations_details_list}),  # pylint: disable=maybe-no-member
+            status=200,
+            mimetype="application/json",
+        ),
+        HTTPStatus.OK,
+    )
     return response, status
 
 
