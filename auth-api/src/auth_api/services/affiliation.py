@@ -28,7 +28,7 @@ from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.affiliation_invitation import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models.contact_link import ContactLink
-from auth_api.models.dataclass import Activity
+from auth_api.models.dataclass import Activity, AffiliationInvitationSearchDetails
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.dataclass import AffiliationInvitationSearchDetails
 from auth_api.models.dataclass import DeleteAffiliationRequest
@@ -471,7 +471,6 @@ class Affiliation:
                 url_identifiers.setdefault(url, []).append(affiliation.entity.business_identifier)
                 or (not has_filters and (total := total + 1))
             )
-        print(total, has_filters)
         call_info = [
             {
                 "url": url,
