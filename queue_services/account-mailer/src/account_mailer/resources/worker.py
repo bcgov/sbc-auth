@@ -364,6 +364,7 @@ def handle_affiliation_invitation(message_type, email_msg):
     }:
         return
     business_name = email_msg.get("businessName")
+    business_identifier = email_msg.get("businessIdentifier")
     logo_url = email_msg.get("logo_url")
     requesting_account = email_msg.get("fromOrgName")
     if from_branch_name := email_msg.get("fromOrgBranchName"):
@@ -381,6 +382,7 @@ def handle_affiliation_invitation(message_type, email_msg):
             "subject": SubjectType[QueueMessageTypes(message_type).name].value.format(business_name=business_name),
             "logo_url": logo_url,
             "business_name": business_name,
+            "business_identifier": business_identifier,
             "requesting_account": requesting_account,
             "account": account,
             "is_authorized": email_msg.get("isAuthorized", None),
@@ -532,6 +534,7 @@ def handle_other_messages(message_type, email_msg):
         "remarks": email_msg.get("remarks"),
         "applicationDate": email_msg.get("applicationDate"),
         "business_name": email_msg.get("businessName"),
+        "business_identifier": email_msg.get("businessIdentifier"),
     }
 
     org_id = email_msg.get("accountId")

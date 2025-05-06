@@ -487,6 +487,8 @@ def _setup_affiliation_invitation_data(
     to_org = OrgModel()
     to_org.id = 2
     to_org.name = "To the stars inc."
+    entity = EntityModel()
+    entity.business_identifier = "BC1111111"
 
     affiliation_invitation = AffiliationInvitationModel()
     affiliation_invitation.from_org = from_org
@@ -496,6 +498,7 @@ def _setup_affiliation_invitation_data(
     affiliation_invitation.to_org_id = to_org.id
     affiliation_invitation.invitation_status_code = affiliation_invitation_status_code
     affiliation_invitation.type = affiliation_invitation_type
+    affiliation_invitation.entity = entity
 
     return affiliation_invitation
 
@@ -520,6 +523,7 @@ def test_send_affiliation_invitation_magic_link(
         "businessName": business_name,
         "emailAddresses": affiliation_invitation.recipient_email,
         "orgName": affiliation_invitation.from_org.name,
+        "businessIdentifier": affiliation_invitation.entity.business_identifier,
         "contextUrl": "None/RnJvbSB0aGUgbW9vbiBpbmMu/affiliationInvitation/acceptToken/ABCD",
     }
 
@@ -549,6 +553,7 @@ def test_send_affiliation_invitation_request_sent(
         "businessName": business_name,
         "emailAddresses": affiliation_invitation.recipient_email,
         "orgName": affiliation_invitation.from_org.name,
+        "businessIdentifier": affiliation_invitation.entity.business_identifier,
         "fromOrgName": affiliation_invitation.from_org.name,
         "fromOrgBranchName": affiliation_invitation.from_org.branch_name,
         "toOrgName": affiliation_invitation.to_org.name,
@@ -574,6 +579,7 @@ def test_send_affiliation_invitation_request_authorized(
     )
     business_name = "BarFoo, Inc."  # will get it from business mock 'get_business' method
     expected_email = "expected@email.com"
+    business_identifier = "BC1111111"
     monkeypatch.setattr(
         "auth_api.services.affiliation_invitation.UserService.get_admin_emails_for_org",
         lambda org_id: expected_email if org_id == affiliation_invitation.from_org_id else None,
@@ -582,6 +588,7 @@ def test_send_affiliation_invitation_request_authorized(
     # simulate subquery for entity
     entity = EntityModel()
     entity.name = business_name
+    entity.business_identifier = business_identifier
     affiliation_invitation.entity = entity
 
     AffiliationInvitationService.send_affiliation_invitation_authorization_email(
@@ -593,6 +600,7 @@ def test_send_affiliation_invitation_request_authorized(
         "businessName": business_name,
         "emailAddresses": expected_email,
         "orgName": affiliation_invitation.from_org.name,
+        "businessIdentifier": affiliation_invitation.entity.business_identifier,
         "fromOrgName": affiliation_invitation.from_org.name,
         "fromOrgBranchName": affiliation_invitation.from_org.branch_name,
         "toOrgName": affiliation_invitation.to_org.name,
@@ -625,10 +633,12 @@ def test_send_affiliation_invitation_request_refused(
     )
 
     business_name = "BarFoo, Inc."  # will get it from business mock 'get_business' method
+    business_identifier = "BC1111111"
 
     # simulate subquery for entity
     entity = EntityModel()
     entity.name = business_name
+    entity.business_identifier = business_identifier
     affiliation_invitation.entity = entity
 
     AffiliationInvitationService.send_affiliation_invitation_authorization_email(
@@ -640,6 +650,7 @@ def test_send_affiliation_invitation_request_refused(
         "businessName": business_name,
         "emailAddresses": expected_email,
         "orgName": affiliation_invitation.from_org.name,
+        "businessIdentifier": affiliation_invitation.entity.business_identifier,
         "fromOrgName": affiliation_invitation.from_org.name,
         "fromOrgBranchName": affiliation_invitation.from_org.branch_name,
         "toOrgName": affiliation_invitation.to_org.name,
