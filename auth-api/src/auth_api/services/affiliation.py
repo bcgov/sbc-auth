@@ -460,24 +460,29 @@ class Affiliation:
     ) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
+        search_dict = asdict(search_details)
+        total = 0
+        has_filters = any(
+            value not in (None, "", [], {}) for field, value in search_dict.items() if field not in {"page", "limit"}
+        )
         for affiliation in affiliations:
             url = Affiliation._affiliation_details_url(affiliation)
-            url_identifiers.setdefault(url, [affiliation.entity.business_identifier]).append(
-                affiliation.entity.business_identifier
+            not has_filters and total >= 100 or (
+                url_identifiers.setdefault(url, []).append(affiliation.entity.business_identifier)
+                or (not has_filters and (total := total + 1))
             )
-        search_dict = asdict(search_details)
-        has_filters = any(v not in (None, "", [], {}) for k, v in search_dict.items() if k not in {"page", "limit"})
-
+        print(total, has_filters)
         call_info = [
             {
                 "url": url,
                 "payload": {
-                    "identifiers": identifiers if has_filters else identifiers[:100],
-                    **(search_dict if has_filters else {}),
+                    "identifiers": identifiers,
+                    **search_dict,
                 },
             }
             for url, identifiers in url_identifiers.items()
         ]
+
         token = RestService.get_service_account_token(
             config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
         )
