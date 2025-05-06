@@ -13,7 +13,6 @@
 # limitations under the License.
 """A Template for the account suspended email."""
 # Local application imports
-from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 
 # Third-party imports
