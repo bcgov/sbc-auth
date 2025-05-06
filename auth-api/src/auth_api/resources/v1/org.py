@@ -344,13 +344,30 @@ def delete_organzization_contact(org_id):
     return response, status
 
 
+@bp.route("/<int:org_id>/affiliations/search", methods=["GET", "OPTIONS"])
+@cross_origin(origins="*", methods=["POST", "GET"])
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
+def get_organization_affiliations_search(org_id):
+    try:
+        return (
+            jsonify({"entities": AffiliationService.find_visible_affiliations_by_org_id(org_id)}),
+            HTTPStatus.OK,
+        )
+    except BusinessException as exception:
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
+    except ServiceUnavailableException as exception:
+        response, status = {"message": exception.error}, exception.status_code
+
+    return response, status
+
+
 @bp.route("/<int:org_id>/affiliations", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["POST", "GET"])
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def get_organization_affiliations(org_id):
     """Get all affiliated entities for the given org."""
     try:
-        # keep old response until UI is updated
+        # Remove this after UI is pointing at new route. Please repoint unit tests.
         if (request.args.get("new", "false")).lower() != "true":
             return (
                 jsonify({"entities": AffiliationService.find_visible_affiliations_by_org_id(org_id)}),

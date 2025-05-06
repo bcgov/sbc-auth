@@ -2794,7 +2794,7 @@ def test_get_org_affiliations(
     mocker.patch("auth_api.services.rest_service.RestService.get_service_account_token", return_value="token")
 
     rv = client.get(
-        "/api/v1/orgs/{}/affiliations?new=true".format(org_id), headers=headers, content_type="application/json"
+        "/api/v1/orgs/{}/affiliations/search".format(org_id), headers=headers, content_type="application/json"
     )
 
     assert rv.status_code == HTTPStatus.OK
