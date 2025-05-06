@@ -513,12 +513,14 @@ class AffiliationInvitation:
         from_org_name = affiliation_invitation.from_org.name
         from_org_id = affiliation_invitation.from_org_id
         to_org_name = affiliation_invitation.to_org.name if affiliation_invitation.to_org else None
+        business_identifier = affiliation_invitation.entity.business_identifier
 
         data = {
             "accountId": from_org_id,
             "businessName": business_name,
             "emailAddresses": email_addresses,
             "orgName": from_org_name,
+            "businessIdentifier": business_identifier,
         }
         notification_type = QueueMessageTypes.AFFILIATION_INVITATION.value
 

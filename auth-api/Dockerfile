@@ -32,7 +32,7 @@ ENV APP_ENV=${APP_ENV} \
   PIP_DEFAULT_TIMEOUT=100 \
   PIP_ROOT_USER_ACTION=ignore \
   # poetry:
-  POETRY_VERSION=1.8.3 \
+  POETRY_VERSION=2.1.3 \
   POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
@@ -52,7 +52,6 @@ RUN apt-get update && apt-get upgrade -y \
     wait-for-it \
   && curl -sSL 'https://install.python-poetry.org' | python - \
   && poetry --version \
-  && poetry config installer.max-workers 1 \
   # Cleaning cache:
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && apt-get clean -y && rm -rf /var/lib/apt/lists/*

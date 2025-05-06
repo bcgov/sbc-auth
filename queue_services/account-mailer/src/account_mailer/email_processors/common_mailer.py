@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """A Template for the account suspended email."""
+# Local application imports
 from auth_api.models import Org as OrgModel
+
+# Third-party imports
 from flask import current_app
 from jinja2 import Template
 from structured_logging import StructuredLogging
