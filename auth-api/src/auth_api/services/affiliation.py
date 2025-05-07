@@ -30,7 +30,7 @@ from auth_api.models.affiliation_invitation import AffiliationInvitation as Affi
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
 from auth_api.models.dataclass import Affiliation as AffiliationData
-from auth_api.models.dataclass import AffiliationInvitationSearchDetails, DeleteAffiliationRequest
+from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
@@ -455,7 +455,7 @@ class Affiliation:
 
     @staticmethod
     async def get_affiliation_details(
-        affiliations: List[AffiliationModel], search_details: AffiliationInvitationSearchDetails, org_id
+        affiliations: List[AffiliationModel], search_details: AffiliationSearchDetails, org_id
     ) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }

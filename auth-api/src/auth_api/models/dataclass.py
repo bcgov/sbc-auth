@@ -50,15 +50,15 @@ class AffiliationInvitationSearch:  # pylint: disable=too-many-instance-attribut
 
 
 @dataclass
-class AffiliationInvitationSearchDetails:  # pylint: disable=too-many-instance-attributes
-    """Used for filtering Affiliation Invitations based on filters passed."""
+class AffiliationSearchDetails:  # pylint: disable=too-many-instance-attributes
+    """Used for filtering Affiliations based on filters passed."""
 
-    identifier: Optional[str] = None
-    status: Optional[str] = None
-    name: Optional[str] = None
-    type: Optional[str] = None
-    page: int = 1
-    limit: int = 100
+    identifier: Optional[str]
+    status: Optional[str]
+    name: Optional[str]
+    type: Optional[str]
+    page: int
+    limit: int
 
     @classmethod
     def from_request_args(cls, req: Request) -> Self:
