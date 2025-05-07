@@ -314,10 +314,7 @@ class AffiliationInvitation:
             alternative_names = business["business"].get("alternateNames")
             if alternative_names is not None:
                 for alt_name in alternative_names:
-                    if (
-                        alt_name.get("identifier") == business_identifier
-                        and alt_name.get("name")
-                    ):
+                    if alt_name.get("identifier") == business_identifier and alt_name.get("name"):
                         business_name = alt_name.get("name")
                         break
         AffiliationInvitation.send_affiliation_invitation(
@@ -388,9 +385,8 @@ class AffiliationInvitation:
                 alternative_names = business["business"].get("alternateNames")
                 if alternative_names is not None:
                     for alt_name in alternative_names:
-                        if (
-                            alt_name.get("identifier") == self._model.entity.business_identifier
-                            and alt_name.get("name")
+                        if alt_name.get("identifier") == self._model.entity.business_identifier and alt_name.get(
+                            "name"
                         ):
                             business_name = alt_name.get("name")
                             break
@@ -603,10 +599,7 @@ class AffiliationInvitation:
             alternative_names = business["business"].get("alternateNames")
             if alternative_names is not None:
                 for alt_name in alternative_names:
-                    if (
-                        alt_name.get("identifier") == business["business"]["identifier"]
-                        and alt_name.get("name")
-                    ):
+                    if alt_name.get("identifier") == business["business"]["identifier"] and alt_name.get("name"):
                         business_name = alt_name.get("name")
                         break
         email_address = AffiliationInvitation.get_invitation_email(
