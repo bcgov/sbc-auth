@@ -14,7 +14,8 @@
 """Service for managing Affiliation data."""
 import datetime
 import re
-from typing import Dict, List
+from dataclasses import asdict
+from typing import Dict, List, Optional
 
 from flask import current_app
 from requests.exceptions import HTTPError
@@ -29,7 +30,7 @@ from auth_api.models.affiliation_invitation import AffiliationInvitation as Affi
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
 from auth_api.models.dataclass import Affiliation as AffiliationData
-from auth_api.models.dataclass import DeleteAffiliationRequest
+from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
@@ -453,17 +454,24 @@ class Affiliation:
         return current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
 
     @staticmethod
-    async def get_affiliation_details(affiliations: List[AffiliationModel], org_id) -> List:
+    async def get_affiliation_details(
+        affiliations: List[AffiliationModel], search_details: AffiliationSearchDetails, org_id
+    ) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
+        search_dict = asdict(search_details)
         for affiliation in affiliations:
             url = Affiliation._affiliation_details_url(affiliation)
-            url_identifiers.setdefault(url, [affiliation.entity.business_identifier]).append(
-                affiliation.entity.business_identifier
-            )
-
+            url_identifiers.setdefault(url, []).append(affiliation.entity.business_identifier)
         call_info = [
-            {"url": url, "payload": {"identifiers": identifiers}} for url, identifiers in url_identifiers.items()
+            {
+                "url": url,
+                "payload": {
+                    "identifiers": identifiers,
+                    **search_dict,
+                },
+            }
+            for url, identifiers in url_identifiers.items()
         ]
 
         token = RestService.get_service_account_token(
@@ -488,7 +496,7 @@ class Affiliation:
             return combined
         except ServiceUnavailableException as err:
             logger.debug(err)
-            logger.debug("Failed to get affiliations details: %s", affiliations)
+            logger.debug("Failed to get affiliations details:  %s", affiliations)
             raise ServiceUnavailableException("Failed to get affiliation details") from err
 
     @staticmethod
@@ -560,7 +568,6 @@ class Affiliation:
         except (HTTPError, ServiceUnavailableException) as e:
             logger.info(e)
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
-
         return get_nr_response.json()
 
     @staticmethod
