@@ -306,10 +306,13 @@ class AffiliationInvitation:
         affiliation_invitation.token = confirmation_token
         affiliation_invitation.login_source = mandatory_login_source
         affiliation_invitation.save()
-
+        if business["business"]["legalType"] not in ["SP", "GP"]:
+            business_name = business["business"]["legalName"]
+        else:
+            business_name = business["business"]["alternateNames"]["name"]
         AffiliationInvitation.send_affiliation_invitation(
             affiliation_invitation=affiliation_invitation,
-            business_name=business["business"]["legalName"],
+            business_name=business_name,
             app_url=invitation_origin + "/",
             email_addresses=affiliation_invitation.recipient_email,
         )
@@ -368,10 +371,13 @@ class AffiliationInvitation:
                 config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
             )
             business = AffiliationInvitation._get_business_details(entity.business_identifier, token)
-
+            if business["business"]["legalType"] not in ["SP", "GP"]:
+                business_name = business["business"]["legalName"]
+            else:
+                business_name = business["business"]["alternateNames"]["name"]
             AffiliationInvitation.send_affiliation_invitation(
                 affiliation_invitation=invitation,
-                business_name=business["business"]["legalName"],
+                business_name=business_name,
                 app_url=invitation_origin + "/",
                 email_addresses=invitation.recipient_email,
             )
@@ -571,7 +577,10 @@ class AffiliationInvitation:
         business = AffiliationInvitation._get_business_details(
             business_identifier=affiliation_invitation.entity.business_identifier, token=token
         )
-        business_name = business["business"]["legalName"]
+        if business["business"]["legalType"] not in ["SP", "GP"]:
+            business_name = business["business"]["legalName"]
+        else:
+            business_name = business["business"]["alternateNames"]["name"]
 
         email_address = AffiliationInvitation.get_invitation_email(
             affiliation_invitation_type=AffiliationInvitationType.REQUEST, org_id=affiliation_invitation.from_org_id
