@@ -461,16 +461,9 @@ class Affiliation:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
         search_dict = asdict(search_details)
-        total = 0
-        has_filters = any(
-            value not in (None, "", [], {}) for field, value in search_dict.items() if field not in {"page", "limit"}
-        )
         for affiliation in affiliations:
             url = Affiliation._affiliation_details_url(affiliation)
-            not has_filters and total >= 100 or (
-                url_identifiers.setdefault(url, []).append(affiliation.entity.business_identifier)
-                or (not has_filters and (total := total + 1))
-            )
+            url_identifiers.setdefault(url, []).append(affiliation.entity.business_identifier)
         call_info = [
             {
                 "url": url,
