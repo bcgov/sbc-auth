@@ -23,8 +23,8 @@ from structured_logging import StructuredLogging
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Org as OrgModel
-from auth_api.models.dataclass import Affiliation as AffiliationData, AffiliationInvitationSearchDetails
-from auth_api.models.dataclass import DeleteAffiliationRequest, SimpleOrgSearch
+from auth_api.models.dataclass import Affiliation as AffiliationData
+from auth_api.models.dataclass import AffiliationInvitationSearchDetails, DeleteAffiliationRequest, SimpleOrgSearch
 from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils

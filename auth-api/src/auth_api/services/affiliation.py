@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation data."""
-from dataclasses import asdict
 import datetime
 import re
+from dataclasses import asdict
 from typing import Dict, List, Optional
 
 from flask import current_app
@@ -28,10 +28,9 @@ from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.affiliation_invitation import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models.contact_link import ContactLink
-from auth_api.models.dataclass import Activity, AffiliationInvitationSearchDetails
+from auth_api.models.dataclass import Activity
 from auth_api.models.dataclass import Affiliation as AffiliationData
-from auth_api.models.dataclass import AffiliationInvitationSearchDetails
-from auth_api.models.dataclass import DeleteAffiliationRequest
+from auth_api.models.dataclass import AffiliationInvitationSearchDetails, DeleteAffiliationRequest
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
