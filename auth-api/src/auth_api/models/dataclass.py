@@ -14,7 +14,9 @@
 """This module holds data classes."""
 
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Self
+
+from requests import Request
 
 from auth_api.utils.enums import KeycloakGroupActions
 
@@ -45,6 +47,29 @@ class AffiliationInvitationSearch:  # pylint: disable=too-many-instance-attribut
     entity_id: Optional[str] = None
     affiliation_id: Optional[str] = None
     is_deleted: bool = False
+
+
+@dataclass
+class AffiliationSearchDetails:  # pylint: disable=too-many-instance-attributes
+    """Used for filtering Affiliations based on filters passed."""
+
+    identifier: Optional[str]
+    status: Optional[str]
+    name: Optional[str]
+    type: Optional[str]
+    page: int
+    limit: int
+
+    @classmethod
+    def from_request_args(cls, req: Request) -> Self:
+        return cls(
+            identifier=req.args.get("identifier"),
+            status=req.args.getlist("status") or [],
+            name=req.args.get("name"),
+            type=req.args.getlist("type") or [],
+            page=int(req.args.get("page", 1)),
+            limit=int(req.args.get("limit", 100000)),
+        )
 
 
 @dataclass

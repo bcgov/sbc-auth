@@ -24,7 +24,7 @@ from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
-from auth_api.models.dataclass import DeleteAffiliationRequest, SimpleOrgSearch
+from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest, SimpleOrgSearch
 from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
@@ -382,11 +382,16 @@ def new_affiliation_search(org_id):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
     # get affiliation identifiers and the urls for the source data
     affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
-    affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations, org_id))
+    search_details = AffiliationSearchDetails.from_request_args(request)
+    affiliations_details_list = asyncio.run(
+        AffiliationService.get_affiliation_details(affiliations, search_details, org_id)
+    )
     # Use orjson serializer here, it's quite a bit faster.
     response, status = (
         current_app.response_class(
-            response=orjson.dumps({"entities": affiliations_details_list}),  # pylint: disable=maybe-no-member
+            response=orjson.dumps(
+                {"entities": affiliations_details_list, "totalResults": len(affiliations_details_list)}
+            ),  # pylint: disable=maybe-no-member
             status=200,
             mimetype="application/json",
         ),
