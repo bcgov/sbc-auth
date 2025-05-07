@@ -311,12 +311,9 @@ class AffiliationInvitation:
         # reassign business_name if we find an alternative name.
         # Replicates the front end established method of using first alternate name in list with same identifier.
         if business["business"]["legalType"] in ["SP", "GP"]:
-            alternative_names = business["business"].get("alternateNames")
-            if alternative_names is not None:
-                for alt_name in alternative_names:
-                    if alt_name.get("identifier") == business_identifier and alt_name.get("name"):
-                        business_name = alt_name.get("name")
-                        break
+            business_name = AffiliationInvitation.get_business_name_from_alternative_name(
+                business, business_name, business_identifier
+            )
         AffiliationInvitation.send_affiliation_invitation(
             affiliation_invitation=affiliation_invitation,
             business_name=business_name,
@@ -353,6 +350,18 @@ class AffiliationInvitation:
 
         return get_business_response.json()["businessEntities"]
 
+    @staticmethod
+    def get_business_name_from_alternative_name(business, business_name, business_identifier):
+        """Firms use alternative names rather than legalName. Reassign business_name if we find an alternative name."""
+        alternative_names = business["business"].get("alternateNames")
+        if alternative_names is not None:
+            for alt_name in alternative_names:
+                if alt_name.get("identifier") == business_identifier and alt_name.get("name"):
+                    business_name = alt_name.get("name")
+                    break
+
+        return business_name
+
     def update_affiliation_invitation(self, user, invitation_origin, affiliation_invitation_info: Dict):
         """Update the specified affiliation invitation with new data."""
         check_auth(org_id=self._model.from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
@@ -380,16 +389,11 @@ class AffiliationInvitation:
             business = AffiliationInvitation._get_business_details(entity.business_identifier, token)
             business_name = business["business"]["legalName"]
             # Firms use alternative names rather than legalName.
-            # reassign business_name if we find an alternative name.
             if business["business"]["legalType"] in ["SP", "GP"]:
-                alternative_names = business["business"].get("alternateNames")
-                if alternative_names is not None:
-                    for alt_name in alternative_names:
-                        if alt_name.get("identifier") == self._model.entity.business_identifier and alt_name.get(
-                            "name"
-                        ):
-                            business_name = alt_name.get("name")
-                            break
+                business_name = AffiliationInvitation.get_business_name_from_alternative_name(
+                    business, business_name, self._model.entity.business_identifier
+                )
+
             AffiliationInvitation.send_affiliation_invitation(
                 affiliation_invitation=invitation,
                 business_name=business_name,
@@ -596,12 +600,9 @@ class AffiliationInvitation:
         # Firms use alternative names rather than legalName.
         # reassign business_name if we find an alternative name.
         if business["business"]["legalType"] in ["SP", "GP"]:
-            alternative_names = business["business"].get("alternateNames")
-            if alternative_names is not None:
-                for alt_name in alternative_names:
-                    if alt_name.get("identifier") == business["business"]["identifier"] and alt_name.get("name"):
-                        business_name = alt_name.get("name")
-                        break
+            business_name = AffiliationInvitation.get_business_name_from_alternative_name(
+                business, business_name, business["business"]["identifier"]
+            )
         email_address = AffiliationInvitation.get_invitation_email(
             affiliation_invitation_type=AffiliationInvitationType.REQUEST, org_id=affiliation_invitation.from_org_id
         )
