@@ -169,7 +169,7 @@ def process_name_events(event_message: SimpleCloudEvent):
     nr_entity.last_modified_by = None  # TODO not present in event message.
     nr_entity.last_modified = parser.parse(event_message.time)
     # Future - None needs to be replaced with whatever we decide to fill the data with.
-    if nr_status == 'DRAFT' and not AffiliationModel.find_affiliations_by_business_identifier(nr_number, None):
+    if nr_status == 'DRAFT' and not AffiliationModel.find_affiliations_by_business_identifier(nr_number):
         logger.info('Status is DRAFT, getting invoices for account')
         token = None
         # Find account details for the NR.

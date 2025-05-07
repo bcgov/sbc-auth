@@ -79,7 +79,7 @@ def test_names_events_listener_queue(app, session, client, monkeypatch, access_t
     # Query the affiliations and assert the org has affiliation for the NR.
     if is_auto_affiliate_expected:
         assert entity.pass_code_claimed
-        affiliations: List[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id, None)
+        affiliations: List[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
         activity_logs: List[ActivityLogModel] = db.session.query(ActivityLogModel) \
                                                           .filter(ActivityLogModel.org_id == org_id) \
                                                           .all()
@@ -90,7 +90,7 @@ def test_names_events_listener_queue(app, session, client, monkeypatch, access_t
 
         # Publish message again and assert it doesn't create duplicate affiliation.
         helper_add_nr_event_to_queue(client, nr_number, nr_state, 'TEST')
-        affiliations: List[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id, None)
+        affiliations: List[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
         activity_logs: List[ActivityLogModel] = db.session.query(ActivityLogModel) \
                                                           .filter(ActivityLogModel.org_id == org_id) \
                                                           .all()
