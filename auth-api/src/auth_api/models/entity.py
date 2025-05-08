@@ -15,6 +15,8 @@
 
 The class and schema are both present in this module.
 """
+from typing import Self
+
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -65,7 +67,7 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods, too-many-ins
         return None
 
     @classmethod
-    def find_by_entity_id(cls, entity_id: int):
+    def find_by_entity_id(cls, entity_id: int) -> Self:
         """Find an Entity instance that matches the provided id."""
         return cls.query.filter_by(id=int(entity_id or -1)).first()
 
