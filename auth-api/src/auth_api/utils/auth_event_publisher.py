@@ -26,37 +26,25 @@ from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import GcpQueue, queue
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import QueueSources, Status
+from auth_api.utils.serializable import Serializable
 
 logger = StructuredLogging.get_logger()
 
 
 @dataclass
-class AccountEvent:
+class AccountEvent(Serializable):
     """Used account management queue messages."""
 
     account_id: int
     actioned_by: str
+    action_category: str = "account-management"
     business_identifier: Optional[str] = None
     user_ids: Optional[List[int]] = None
-    user_id: Optional[int] = None
 
 
-def publish_account_event(
-    queue_message_type: str, data: AccountEvent = None, source: str = QueueSources.AUTH_API.value
-):
+def publish_account_event(queue_message_type: str, data: AccountEvent, source: str = QueueSources.AUTH_API.value):
     """Publish to auth event topic."""
-    payload = {
-        "accountId": data.account_id,
-        "businessIdentifier": data.business_identifier,
-        "actionedBy": data.actioned_by,
-        "actionCategory": "account-management",
-    }
-
-    if data.user_ids:
-        payload["userIds"] = data.user_ids
-    else:
-        payload["user_id"] = data.user_id
-
+    payload = data.to_dict()
     cloud_event = SimpleCloudEvent(
         id=str(uuid.uuid4()),
         source=source,
@@ -99,6 +87,6 @@ def publish_team_member_event(queue_message_type: str, org_id: int, user_id: int
         publish_account_event(
             queue_message_type=queue_message_type,
             data=AccountEvent(
-                account_id=org_id, actioned_by=current_user.identifier if current_user else None, user_id=user_id
+                account_id=org_id, actioned_by=current_user.identifier if current_user else None, user_ids=[user_id]
             ),
         )
