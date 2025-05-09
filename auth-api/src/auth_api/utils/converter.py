@@ -1,14 +1,15 @@
 """Converter module to support attrs and data class serialization."""
 
-import re
 import dataclasses
+import re
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, Type
 
 import cattrs
-from attrs import fields as attrs_fields, has as attrs_has
+from attrs import fields as attrs_fields
+from attrs import has as attrs_has
 from cattrs.gen import make_dict_structure_fn, make_dict_unstructure_fn, override
 
 
