@@ -51,7 +51,7 @@ from auth_api.utils.enums import (
     Status,
     UserStatus,
 )
-from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, COORDINATOR, STAFF, Role
+from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
 
@@ -698,18 +698,3 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             return False
 
         return current_user_membership.membership_type_code in CLIENT_ADMIN_ROLES
-
-    @staticmethod
-    def is_user_admin_or_coordinator_or_user(user, org_id: int) -> bool:
-        """Check if user provided is admin, coordinator, or user for the given org id."""
-        current_user_membership = MembershipModel.find_membership_by_user_and_org(
-            user_id=user.identifier, org_id=org_id
-        )
-
-        if current_user_membership is None:
-            return False
-
-        if current_user_membership.status != Status.ACTIVE.value:
-            return False
-
-        return current_user_membership.membership_type_code in CLIENT_AUTH_ROLES
