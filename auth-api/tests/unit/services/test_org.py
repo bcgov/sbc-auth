@@ -21,8 +21,10 @@ from unittest.mock import ANY, Mock, patch
 
 import pytest
 from requests import Response
+from sbc_common_components.utils.enums import QueueMessageTypes
 from werkzeug.exceptions import HTTPException
 
+import auth_api
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
@@ -878,8 +880,11 @@ def test_delete_org_with_members(session, auth_mock, keycloak_mock, monkeypatch)
     assert len(MembershipService.get_members_for_org(org_id)) == 0
 
 
+@patch.object(auth_api.services.affiliation, "publish_affiliation_event")
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_delete_org_with_affiliation(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_delete_org_with_affiliation(
+    publish_mock, session, auth_mock, keycloak_mock, monkeypatch
+):  # pylint:disable=unused-argument
     """Assert that an org cannot be deleted."""
     user_with_token = dict(TestUserInfo.user_test)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_user_role["sub"]
@@ -894,10 +899,13 @@ def test_delete_org_with_affiliation(session, auth_mock, keycloak_mock, monkeypa
     business_identifier = entity_dictionary["business_identifier"]
     AffiliationService.create_affiliation(org_id, business_identifier, TestEntityInfo.entity_lear_mock["passCode"])
 
+    publish_mock.assert_called_once_with(QueueMessageTypes.BUSINESS_AFFILIATED.value, org_id, business_identifier)
+    publish_mock.reset_mock()
     patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
     patch_pay_account_delete(monkeypatch)
     OrgService.delete_org(org_id)
 
+    publish_mock.assert_called_once_with(QueueMessageTypes.BUSINESS_UNAFFILIATED.value, org_id, business_identifier)
     assert len(AffiliationService.find_visible_affiliations_by_org_id(org_id)) == 0
 
 

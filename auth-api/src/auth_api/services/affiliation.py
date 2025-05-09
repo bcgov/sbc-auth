@@ -19,6 +19,7 @@ from typing import Dict, List, Optional
 
 from flask import current_app
 from requests.exceptions import HTTPError
+from sbc_common_components.utils.enums import QueueMessageTypes
 from sqlalchemy.orm import contains_eager, subqueryload
 from structured_logging import StructuredLogging
 
@@ -37,11 +38,12 @@ from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
-from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus
+from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus, Status
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
+from ..utils.auth_event_publisher import publish_affiliation_event
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
 
@@ -195,6 +197,8 @@ class Affiliation:
             ActivityLogPublisher.publish_activity(
                 Activity(org_id, ActivityAction.CREATE_AFFILIATION.value, name=name, id=entity.business_identifier)
             )
+
+        publish_affiliation_event(QueueMessageTypes.BUSINESS_AFFILIATED.value, org_id, entity.business_identifier)
         return Affiliation(affiliation)
 
     @staticmethod
@@ -408,6 +412,8 @@ class Affiliation:
             ActivityLogPublisher.publish_activity(
                 Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value, name=name, id=entity.business_identifier)
             )
+
+        publish_affiliation_event(QueueMessageTypes.BUSINESS_UNAFFILIATED.value, org_id, entity.business_identifier)
 
     @staticmethod
     @user_context
