@@ -370,10 +370,7 @@ class AffiliationInvitation:
         """Update the specified affiliation invitation with new data."""
         invitation: AffiliationInvitationModel = self._model
 
-        if invitation.type == AffiliationInvitationType.EMAIL:
-            check_auth(org_id=self._model.from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
-        if invitation.type == AffiliationInvitationType.REQUEST:
-            check_auth(org_id=self._model.from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+        AffiliationInvitation.check_auth_for_invitation(self._model)
 
         # Don't do any updates if the invitation is not in PENDING state
         if invitation.invitation_status_code != InvitationStatus.PENDING.value:
@@ -419,10 +416,7 @@ class AffiliationInvitation:
         if not (invitation := AffiliationInvitationModel.find_invitation_by_id(invitation_id)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        if invitation.type == AffiliationInvitationType.EMAIL:
-            check_auth(org_id=invitation.from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
-        if invitation.type == AffiliationInvitationType.REQUEST:
-            check_auth(org_id=invitation.from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+        AffiliationInvitation.check_auth_for_invitation(invitation)
 
         if invitation.status == InvitationStatus.ACCEPTED.value:
             invitation.is_deleted = True
@@ -755,3 +749,14 @@ class AffiliationInvitation:
         )
 
         return AffiliationInvitation(invitation)
+
+    @staticmethod
+    def check_auth_for_invitation(invitation: AffiliationInvitationModel):
+        """Check if the user has the right to view the invitation."""
+        match invitation.type:
+            case AffiliationInvitationType.REQUEST:
+                check_auth(org_id=invitation.from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+            case AffiliationInvitationType.EMAIL:
+                check_auth(org_id=invitation.from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
+            case _:
+                raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
