@@ -44,6 +44,10 @@ class Error(Enum):
         "The affiliation invitation is in an invalid state for this action.",
         HTTPStatus.BAD_REQUEST,
     )
+    INVALID_AFFILIATION_INVITATION_TYPE = (
+        "The affiliation invitation type is invalid.",
+        HTTPStatus.BAD_REQUEST,
+    )
     INVALID_AFFILIATION_INVITATION_TOKEN = (
         "The affiliation invitation token is invalid.",
         HTTPStatus.BAD_REQUEST,
