@@ -19,6 +19,9 @@ Test suite to ensure that the Membership service routines are working as expecte
 from unittest import mock
 from unittest.mock import ANY, patch
 
+from sbc_common_components.utils.enums import QueueMessageTypes
+
+import auth_api
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models.dataclass import Activity
 from auth_api.services import ActivityLogPublisher
@@ -79,8 +82,9 @@ def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:d
     assert GROUP_ACCOUNT_HOLDERS in groups
 
 
+@patch.object(auth_api.services.membership, "publish_team_member_event")
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylint:disable=unused-argument
+def test_remove_member_removes_group_to_the_user(publish_mock, session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that accepting an invite adds group to the user."""
     # Create a user in keycloak
     keycloak_service = KeycloakService()
@@ -114,7 +118,8 @@ def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylin
     factory_product_model(org.as_dict().get("id"), product_code=ProductCode.BUSINESS.value)
 
     # Find the membership and update to ACTIVE
-    membership = MembershipService.get_membership_for_org_and_user(org.as_dict().get("id"), user2.id)
+    org_id = org.as_dict().get("id")
+    membership = MembershipService.get_membership_for_org_and_user(org_id, user2.id)
     active_membership_status = MembershipStatusCodeModel.get_membership_status_by_code(Status.ACTIVE.name)
     updated_fields = {"membership_status": active_membership_status}
     with patch.object(ActivityLogPublisher, "publish_activity", return_value=None) as mock_alp:
@@ -134,6 +139,8 @@ def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylin
         mock_alp.assert_called_with(
             Activity(action=ActivityAction.REMOVE_TEAM_MEMBER.value, org_id=ANY, name=ANY, id=ANY, value=ANY)
         )
+
+        publish_mock.assert_called_once_with(QueueMessageTypes.TEAM_MEMBER_REMOVED.value, org_id, membership.user_id)
 
     # ACTIVE
     active_membership_status = MembershipStatusCodeModel.get_membership_status_by_code(Status.ACTIVE.name)

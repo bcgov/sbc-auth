@@ -39,6 +39,7 @@ from auth_api.utils.roles import ADMIN, ALLOWED_READ_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
+from ..utils.auth_event_publisher import publish_team_member_event
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .keycloak import KeycloakService
@@ -320,6 +321,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 id=self._model.user.id,
             )
         )
+
+        publish_team_member_event(QueueMessageTypes.TEAM_MEMBER_REMOVED.value, self._model.org_id, self._model.user_id)
         logger.debug(">deactivate_membership")
         return self
 

@@ -47,6 +47,7 @@ from auth_api.utils.user_context import UserContext, user_context
 
 from ..schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
 from ..utils.account_mailer import publish_to_mailer
+from ..utils.auth_event_publisher import publish_affiliation_event
 from ..utils.util import escape_wam_friendly_url
 from .authorization import check_auth
 from .rest_service import RestService
@@ -690,6 +691,10 @@ class AffiliationInvitation:
             # Create an affiliation with to_org_id
             affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=None)
             affiliation_model.save()
+            entity_model = EntityModel.find_by_entity_id(entity_id)
+            publish_affiliation_event(
+                QueueMessageTypes.BUSINESS_AFFILIATED.value, org_id, entity_model.business_identifier
+            )
 
         affiliation_invitation.affiliation_id = affiliation_model.id
         affiliation_invitation.approver_id = user.identifier

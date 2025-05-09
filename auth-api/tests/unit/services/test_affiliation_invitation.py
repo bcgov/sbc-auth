@@ -330,9 +330,10 @@ def test_validate_token_exception(session):  # pylint:disable=unused-argument
     assert exception.value.code == Error.EXPIRED_AFFILIATION_INVITATION.name
 
 
+@patch.object(auth_api.services.affiliation_invitation, "publish_affiliation_event")
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_accept_affiliation_invitation(
-    session, auth_mock, keycloak_mock, business_mock, monkeypatch
+    publish_mock, session, auth_mock, keycloak_mock, business_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Accept the affiliation invitation and add the affiliation from the invitation."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
@@ -365,6 +366,11 @@ def test_accept_affiliation_invitation(
             patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
             affiliation = AffiliationService.find_affiliation(
                 new_invitation["from_org"]["id"], entity_dictionary["business_identifier"]
+            )
+            publish_mock.assert_called_once_with(
+                QueueMessageTypes.BUSINESS_AFFILIATED.value,
+                from_org_dictionary["id"],
+                entity_dictionary["business_identifier"],
             )
             assert affiliation
             assert invitation
