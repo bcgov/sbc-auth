@@ -42,7 +42,7 @@ from auth_api.services.flags import flags
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
-from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF
+from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
@@ -270,7 +270,9 @@ class AffiliationInvitation:
         if from_org_id == to_org_id:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
-        check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+        AffiliationInvitation.check_auth_for_invitation(
+            invitation_type=affiliation_invitation_type, from_org_id=from_org_id
+        )
 
         entity, from_org, business = AffiliationInvitation._validate_prerequisites(
             business_identifier=business_identifier,
@@ -365,9 +367,9 @@ class AffiliationInvitation:
 
     def update_affiliation_invitation(self, user, invitation_origin, affiliation_invitation_info: Dict):
         """Update the specified affiliation invitation with new data."""
-        check_auth(org_id=self._model.from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
-
         invitation: AffiliationInvitationModel = self._model
+
+        AffiliationInvitation.check_auth_for_invitation(invitation=self._model)
 
         # Don't do any updates if the invitation is not in PENDING state
         if invitation.invitation_status_code != InvitationStatus.PENDING.value:
@@ -413,7 +415,7 @@ class AffiliationInvitation:
         if not (invitation := AffiliationInvitationModel.find_invitation_by_id(invitation_id)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        check_auth(org_id=invitation.from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+        AffiliationInvitation.check_auth_for_invitation(invitation=invitation)
 
         if invitation.status == InvitationStatus.ACCEPTED.value:
             invitation.is_deleted = True
@@ -746,3 +748,20 @@ class AffiliationInvitation:
         )
 
         return AffiliationInvitation(invitation)
+
+    @staticmethod
+    def check_auth_for_invitation(
+        invitation: AffiliationInvitationModel = None,
+        invitation_type: AffiliationInvitationType = None,
+        from_org_id: int = None,
+    ):
+        """Check if the user has the right to view the invitation."""
+        invitation_type = invitation_type or AffiliationInvitationType.from_value(invitation.type)
+        from_org_id = from_org_id or invitation.from_org_id
+        match invitation_type:
+            case AffiliationInvitationType.REQUEST:
+                check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+            case AffiliationInvitationType.EMAIL:
+                check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
+            case _:
+                raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
