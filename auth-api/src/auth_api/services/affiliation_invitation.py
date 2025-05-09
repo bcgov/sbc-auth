@@ -270,10 +270,9 @@ class AffiliationInvitation:
         if from_org_id == to_org_id:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
-        if affiliation_invitation_type == AffiliationInvitationType.EMAIL:
-            check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
-        if affiliation_invitation_type == AffiliationInvitationType.REQUEST:
-            check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+        AffiliationInvitation.check_auth_for_invitation(
+            invitation_type=affiliation_invitation_type, from_org_id=from_org_id
+        )
 
         entity, from_org, business = AffiliationInvitation._validate_prerequisites(
             business_identifier=business_identifier,
@@ -751,12 +750,18 @@ class AffiliationInvitation:
         return AffiliationInvitation(invitation)
 
     @staticmethod
-    def check_auth_for_invitation(invitation: AffiliationInvitationModel):
+    def check_auth_for_invitation(
+        invitation: AffiliationInvitationModel,
+        invitation_type: AffiliationInvitationType = None,
+        from_org_id: int = None,
+    ):
         """Check if the user has the right to view the invitation."""
-        match invitation.type:
+        invitation_type = invitation.type or invitation_type
+        from_org_id = invitation.from_org_id or from_org_id
+        match invitation_type:
             case AffiliationInvitationType.REQUEST:
-                check_auth(org_id=invitation.from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+                check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
             case AffiliationInvitationType.EMAIL:
-                check_auth(org_id=invitation.from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
+                check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
             case _:
                 raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
