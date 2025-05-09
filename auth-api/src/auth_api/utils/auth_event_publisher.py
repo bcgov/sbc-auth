@@ -54,7 +54,9 @@ def publish_account_event(queue_message_type: str, data: AccountEvent, source: s
         data=payload,
     )
     try:
-        queue.publish(current_app.config.get("AUTH_EVENT_TOPIC"), GcpQueue.to_queue_message(cloud_event))
+        kwargs = {}
+        kwargs.update({"action_category": data.action_category})
+        queue.publish(current_app.config.get("AUTH_EVENT_TOPIC"), GcpQueue.to_queue_message(cloud_event), **kwargs)
     except Exception as e:  # NOQA # pylint: disable=broad-except
         error_msg = f"Failed to publish to auth event topic {e}"
         logger.error(error_msg)
