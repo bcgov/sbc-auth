@@ -221,8 +221,9 @@ class AffiliationInvitationType(Enum):
     @classmethod
     def from_value(cls, value):
         """Return instance from value of the enum."""
+        # Change this back to None after business-ui gets pushed to production.
         return (
-            AffiliationInvitationType(value) if value in cls._value2member_map_ else None
+            AffiliationInvitationType(value) if value in cls._value2member_map_ else AffiliationInvitationType.EMAIL
         )  # pylint: disable=no-member
 
 
