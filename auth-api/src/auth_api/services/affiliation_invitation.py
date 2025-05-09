@@ -369,7 +369,7 @@ class AffiliationInvitation:
         """Update the specified affiliation invitation with new data."""
         invitation: AffiliationInvitationModel = self._model
 
-        AffiliationInvitation.check_auth_for_invitation(self._model)
+        AffiliationInvitation.check_auth_for_invitation(invitation=self._model)
 
         # Don't do any updates if the invitation is not in PENDING state
         if invitation.invitation_status_code != InvitationStatus.PENDING.value:
@@ -415,7 +415,7 @@ class AffiliationInvitation:
         if not (invitation := AffiliationInvitationModel.find_invitation_by_id(invitation_id)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        AffiliationInvitation.check_auth_for_invitation(invitation)
+        AffiliationInvitation.check_auth_for_invitation(invitation=invitation)
 
         if invitation.status == InvitationStatus.ACCEPTED.value:
             invitation.is_deleted = True
@@ -751,7 +751,7 @@ class AffiliationInvitation:
 
     @staticmethod
     def check_auth_for_invitation(
-        invitation: AffiliationInvitationModel,
+        invitation: AffiliationInvitationModel = None,
         invitation_type: AffiliationInvitationType = None,
         from_org_id: int = None,
     ):
