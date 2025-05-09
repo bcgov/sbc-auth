@@ -343,7 +343,7 @@ Werkzeug = "^3.0.0"
 type = "git"
 url = "https://github.com/seeker25/sbc-auth.git"
 reference = "27368"
-resolved_reference = "5076a9bcf2b7d2d44742e9c72a0022063df66631"
+resolved_reference = "c2ffb3035f40232a7a0c29e0ba5b501fe5723ea6"
 subdirectory = "build-deps"
 
 [[package]]
@@ -2995,7 +2995,7 @@ jaeger-client = "*"
 type = "git"
 url = "https://github.com/bcgov/sbc-common-components.git"
 reference = "master"
-resolved_reference = "d640dc75ea51add2d611a30259d15d93d8654381"
+resolved_reference = "7846a52dab34ee2784964493c473f8d3b20b1364"
 subdirectory = "python"
 
 [[package]]
