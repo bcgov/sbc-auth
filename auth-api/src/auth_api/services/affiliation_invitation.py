@@ -756,8 +756,8 @@ class AffiliationInvitation:
         from_org_id: int = None,
     ):
         """Check if the user has the right to view the invitation."""
-        invitation_type = invitation.type or invitation_type
-        from_org_id = invitation.from_org_id or from_org_id
+        invitation_type = invitation_type or AffiliationInvitationType.from_value(invitation.type)
+        from_org_id = from_org_id or invitation.from_org_id
         match invitation_type:
             case AffiliationInvitationType.REQUEST:
                 check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
