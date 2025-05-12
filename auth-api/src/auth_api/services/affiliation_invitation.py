@@ -255,7 +255,6 @@ class AffiliationInvitation:
         affiliation_invitation_info: Dict,
         # pylint:disable=unused-argument,too-many-locals
         user,
-        invitation_origin,
         **kwargs,
     ):
         """Create a new affiliation invitation."""
@@ -320,7 +319,6 @@ class AffiliationInvitation:
         AffiliationInvitation.send_affiliation_invitation(
             affiliation_invitation=affiliation_invitation,
             business_name=business_name,
-            app_url=invitation_origin + "/",
             email_addresses=affiliation_invitation.recipient_email,
         )
         return AffiliationInvitation(affiliation_invitation)
@@ -400,7 +398,6 @@ class AffiliationInvitation:
             AffiliationInvitation.send_affiliation_invitation(
                 affiliation_invitation=invitation,
                 business_name=business_name,
-                app_url=invitation_origin + "/",
                 email_addresses=invitation.recipient_email,
             )
         # Expire invitation
@@ -501,7 +498,7 @@ class AffiliationInvitation:
         return AffiliationInvitation(invitation)
 
     @staticmethod
-    def _get_token_confirm_path(app_url, org_name, token, query_params=None):
+    def _get_token_confirm_path(org_name, token, query_params=None):
         """Get the config for different email types."""
         if flags.is_on("enable-new-magic-link-formatting-with-query-params", default=False):
             # New query parameter based URL structure
@@ -514,9 +511,13 @@ class AffiliationInvitation:
             if query_params:
                 params.update(query_params)
 
+            # Point to new business registry project
+            app_url = current_app.config.get("BUSINESS_REGISTRY_URL") + "/"
             # Build the URL with query parameters
             token_confirm_url = f"{app_url}/affiliationInvitation/acceptToken?{urlencode(params)}"
         else:
+            # Point to auth-web
+            app_url = current_app.config.get("WEB_APP_URL") + "/"
             # Original URL structure
             escape_url = escape_wam_friendly_url(org_name)
             path = f"{escape_url}/affiliationInvitation/acceptToken"
@@ -531,7 +532,6 @@ class AffiliationInvitation:
     def send_affiliation_invitation(
         affiliation_invitation: AffiliationInvitationModel,
         business_name,
-        app_url=None,
         is_authorized=None,
         email_addresses=None,
     ):
@@ -555,7 +555,7 @@ class AffiliationInvitation:
         if affiliation_invitation_type == AffiliationInvitationType.EMAIL.value:
             # if MAGIC LINK type, add data for magic link
             data["contextUrl"] = AffiliationInvitation._get_token_confirm_path(
-                app_url=app_url, org_name=from_org_name, token=affiliation_invitation.token
+                org_name=from_org_name, token=affiliation_invitation.token
             )
 
         elif affiliation_invitation_type == AffiliationInvitationType.REQUEST.value:

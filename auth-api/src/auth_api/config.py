@@ -158,6 +158,7 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     # url for the front end app
     WEB_APP_URL = os.getenv("WEB_APP_URL")
+    BUSINESS_REGISTRY_URL = os.getenv("BUSINESS_REGISTRY_URL")
 
     # url for the front end app
     BCEID_SIGNIN_ROUTE = os.getenv("BCEID_SIGNIN_ROUTE", "signin/bceid")
@@ -307,7 +308,8 @@ NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
     API_GW_CONSUMERS_API_URL = "https://bcregistry-bcregistry-mock.apigee.net/mockTarget"
     API_GW_CONSUMERS_SANDBOX_API_URL = "https://bcregistry-bcregistry-mock.apigee.net/mockTarget"
     API_GW_CONSUMER_EMAIL = "test.all.mc@gov.bc.ca"
-    WEB_APP_URL = "https://localhost.com/"
+    WEB_APP_URL = "https://localhost.com"
+    BUSINESS_REGISTRY_URL = "https://localhost.com"
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
