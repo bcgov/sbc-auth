@@ -94,7 +94,7 @@ def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch):
         )
 
         affiliation_invitation = AffiliationInvitationService.create_affiliation_invitation(
-            affiliation_invitation_info, User(user), ""
+            affiliation_invitation_info, User(user)
         )
         affiliation_invitation_dictionary = affiliation_invitation.as_dict()
         assert affiliation_invitation_dictionary["recipient_email"] == affiliation_invitation_info["recipientEmail"]
@@ -126,7 +126,7 @@ def test_create_affiliation_invitation(
         )
 
         affiliation_invitation = AffiliationInvitationService.create_affiliation_invitation(
-            affiliation_invitation_info, User(user), ""
+            affiliation_invitation_info, User(user)
         )
         invitation_dictionary = affiliation_invitation.as_dict()
         assert invitation_dictionary["recipient_email"] == affiliation_invitation_info["recipientEmail"]
@@ -151,7 +151,7 @@ def test_find_affiliation_invitation_by_id(
         )
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(
-            affiliation_invitation_info, User(user), ""
+            affiliation_invitation_info, User(user)
         ).as_dict()
         invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(new_invitation["id"]).as_dict()
 
@@ -182,7 +182,7 @@ def test_delete_affiliation_invitation(
         )
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(
-            affiliation_invitation_info, User(user), ""
+            affiliation_invitation_info, User(user)
         ).as_dict()
         AffiliationInvitationService.delete_affiliation_invitation(new_invitation["id"])
         invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(new_invitation["id"])
@@ -206,7 +206,7 @@ def test_delete_accepted_affiliation_invitation(
         )
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(
-            affiliation_invitation_info, User(user), ""
+            affiliation_invitation_info, User(user)
         ).as_dict()
 
         invitation = AffiliationInvitationService.accept_affiliation_invitation(
@@ -246,7 +246,7 @@ def test_update_affiliation_invitation(
         )
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(
-            affiliation_invitation_info, User(user), ""
+            affiliation_invitation_info, User(user)
         )
         updated_invitation = new_invitation.update_affiliation_invitation(User(user), "", {}).as_dict()
         assert updated_invitation["status"] == "PENDING"
@@ -269,7 +269,7 @@ def test_update_invitation_verify_different_tokens(
         )
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(
-            affiliation_invitation_info, User(user), ""
+            affiliation_invitation_info, User(user)
         )
         old_token = new_invitation.as_dict().get("token")
         with freeze_time(
@@ -305,7 +305,7 @@ def test_validate_token_accepted(
         )
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(
-            affiliation_invitation_info, User(user_invitee), ""
+            affiliation_invitation_info, User(user_invitee)
         ).as_dict()
         token = AffiliationInvitationService.generate_confirmation_token(
             new_invitation["id"],
@@ -357,7 +357,7 @@ def test_accept_affiliation_invitation(
             user_invitee = factory_user_model(user_with_token_invitee)
 
             new_invitation = AffiliationInvitationService.create_affiliation_invitation(
-                affiliation_invitation_info, User(user_invitee), ""
+                affiliation_invitation_info, User(user_invitee)
             ).as_dict()
 
             invitation = AffiliationInvitationService.accept_affiliation_invitation(
@@ -404,7 +404,7 @@ def test_accept_invitation_exceptions(
 
             # Accepting an invitation multiple times should raise actioned invitation exception
             new_invitation = AffiliationInvitationService.create_affiliation_invitation(
-                affiliation_invitation_info, User(user_invitee), ""
+                affiliation_invitation_info, User(user_invitee)
             ).as_dict()
 
             AffiliationInvitationService.accept_affiliation_invitation(new_invitation["id"], User(user_invitee), "")
@@ -446,7 +446,7 @@ def test_get_invitations_by_from_org_id(
             from_org_id=from_org_id, to_org_id=to_org_id, business_identifier=entity_dictionary["business_identifier"]
         )
 
-        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), "")
+        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user))
 
         invitations: list = AffiliationInvitationService.search_invitations(
             AffiliationInvitationSearch(from_org_id=from_org_id, status_codes=["PENDING"])
@@ -474,7 +474,7 @@ def test_get_invitations_by_to_org_id(
             from_org_id=from_org_id, to_org_id=to_org_id, business_identifier=entity_dictionary["business_identifier"]
         )
 
-        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), "")
+        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user))
 
         invitations: list = AffiliationInvitationService.search_invitations(
             search_filter=AffiliationInvitationSearch(to_org_id=to_org_id, status_codes=["PENDING"])
@@ -530,7 +530,7 @@ def test_send_affiliation_invitation_magic_link(
         "emailAddresses": affiliation_invitation.recipient_email,
         "orgName": affiliation_invitation.from_org.name,
         "businessIdentifier": affiliation_invitation.entity.business_identifier,
-        "contextUrl": "None/RnJvbSB0aGUgbW9vbiBpbmMu/affiliationInvitation/acceptToken/ABCD",
+        "contextUrl": "https://localhost.com//RnJvbSB0aGUgbW9vbiBpbmMu/affiliationInvitation/acceptToken/ABCD",
     }
 
     publish_to_mailer_mock.assert_called_with(
