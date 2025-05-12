@@ -158,6 +158,7 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     # url for the front end app
     WEB_APP_URL = os.getenv("WEB_APP_URL")
+    BUSINESS_REGISTRY_URL = os.getenv("BUSINESS_REGISTRY_URL")
 
     # url for the front end app
     BCEID_SIGNIN_ROUTE = os.getenv("BCEID_SIGNIN_ROUTE", "signin/bceid")
