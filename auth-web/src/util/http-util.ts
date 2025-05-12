@@ -21,7 +21,7 @@ axios.interceptors.request.use(
     }
     const authApiUrl = ConfigHelper.getAuthAPIUrl()
     const authApiKey = import.meta.env.VUE_APP_AUTH_API_KEY
-    if (authApiKey && authApiUrl?.includes(authApiUrl)) {
+    if (authApiKey && authApiUrl?.includes(request.url)) {
       request.headers['x-apikey'] = authApiKey
     }
     return request
