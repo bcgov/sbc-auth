@@ -83,7 +83,6 @@ def get_affiliation_invitations():
 )
 def post_affiliation_invitation():
     """Send a new affiliation invitation using the details in request and saves the affiliation invitation."""
-    origin = current_app.config.get("WEB_APP_URL")
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "affiliation_invitation")
     if not valid_format:
@@ -91,9 +90,7 @@ def post_affiliation_invitation():
     try:
         user = UserService.find_by_jwt_token()
         response, status = (
-            AffiliationInvitationService.create_affiliation_invitation(request_json, user, origin).as_dict(
-                mask_email=True
-            ),
+            AffiliationInvitationService.create_affiliation_invitation(request_json, user).as_dict(mask_email=True),
             HTTPStatus.CREATED,
         )
     except BusinessException as exception:
