@@ -255,7 +255,6 @@ class AffiliationInvitation:
         affiliation_invitation_info: Dict,
         # pylint:disable=unused-argument,too-many-locals
         user,
-        invitation_origin,
         **kwargs,
     ):
         """Create a new affiliation invitation."""
