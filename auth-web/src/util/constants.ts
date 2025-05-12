@@ -497,6 +497,7 @@ export enum LDFlags {
     EnableEFTBalanceByPAD = 'enable-eft-balance-by-pad',
     EnableDRSLookup = 'enable-drs-lookup', // Document Record Services
     HideBCOLProductSettings = 'hide-bcol-product-settings',
+    EnablePricelistFooter = 'enable-pricelist'
 }
 
 export enum DateFilterCodes {
