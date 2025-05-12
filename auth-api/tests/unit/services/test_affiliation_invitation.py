@@ -530,7 +530,7 @@ def test_send_affiliation_invitation_magic_link(
         "emailAddresses": affiliation_invitation.recipient_email,
         "orgName": affiliation_invitation.from_org.name,
         "businessIdentifier": affiliation_invitation.entity.business_identifier,
-        "contextUrl": "None/RnJvbSB0aGUgbW9vbiBpbmMu/affiliationInvitation/acceptToken/ABCD",
+        "contextUrl": "https://localhost.com//RnJvbSB0aGUgbW9vbiBpbmMu/affiliationInvitation/acceptToken/ABCD",
     }
 
     publish_to_mailer_mock.assert_called_with(
