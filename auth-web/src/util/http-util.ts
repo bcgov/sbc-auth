@@ -19,6 +19,11 @@ axios.interceptors.request.use(
     if (token) {
       request.headers.Authorization = `Bearer ${token}`
     }
+    const authApiUrl = ConfigHelper.getAuthAPIUrl()
+    const authApiKey = import.meta.env.VUE_APP_AUTH_API_KEY
+    if (authApiKey && request.url.includes(authApiUrl)) {
+      request.headers['x-apikey'] = authApiKey
+    }
     return request
   },
   error => Promise.reject(error)
