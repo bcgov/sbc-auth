@@ -213,10 +213,6 @@ export default defineComponent({
       state.isOrgBusinessTypeValid = !!isValid
     }
 
-    onMounted(async () => {
-      console.log('AccountCreate onMounted', currentOrganization)
-    })
-
     return {
       ...toRefs(state),
       createAccountInfoForm,
