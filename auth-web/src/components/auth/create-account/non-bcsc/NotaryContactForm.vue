@@ -105,7 +105,10 @@ export default class NotaryContactForm extends Vue {
 
   @Emit('is-form-valid')
   isFormValid () {
-    return this.$refs.notaryContactForm.validate()
+    if (this.$refs.notaryContactForm) {
+      return this.$refs.notaryContactForm.validate()
+    }
+    return false
   }
 }
 </script>

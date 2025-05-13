@@ -13,6 +13,7 @@
           :saving="saving"
           :premiumLinkedAccount="true"
           :bcolDuplicateNameErrorMessage="bcolDuplicateNameErrorMessage"
+          :isEditAccount="isEditAccount"
           @update:org-business-type="updateOrgBusinessType"
           @valid="checkOrgBusinessTypeValid"
           @update:org-name-clear-errors="updateOrgNameAndClearErrors"
@@ -78,7 +79,7 @@
 
 <script lang="ts">
 import { OrgBusinessType, Organization } from '@/models/Organization'
-import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
@@ -111,11 +112,15 @@ export default defineComponent({
     govmAccount: {
       type: Boolean,
       default: false
+    },
+    isEditAccount: {
+      type: Boolean,
+      default: false
     }
   },
   setup (props, { root }) {
     const { currentOrgAddress, isOrgNameAvailable, setCurrentOrganizationAddress, resetBcolDetails,
-      setCurrentOrganizationBusinessType } = useOrgStore()
+      setCurrentOrganizationBusinessType, currentOrganization } = useOrgStore()
     const DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
     const createAccountInfoForm = ref<HTMLFormElement>()
     const baseAddressSchema = addressSchema
@@ -207,6 +212,10 @@ export default defineComponent({
     function checkOrgBusinessTypeValid (isValid) {
       state.isOrgBusinessTypeValid = !!isValid
     }
+
+    onMounted(async () => {
+      console.log('AccountCreate onMounted', currentOrganization)
+    })
 
     return {
       ...toRefs(state),
