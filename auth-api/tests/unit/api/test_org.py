@@ -289,7 +289,7 @@ def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_moc
         headers=headers,
         content_type="application/json",
     )
-    assert org_response.status_code == HTTPStatus.CREATED
+    assert org_response.status_code == HTTPStatus.FORBIDDEN
 
     # staff search
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
