@@ -18,7 +18,6 @@ This module manages the Membership Information between an org and a user.
 
 import json
 from operator import or_
-from pydoc import text
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -408,8 +407,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 MembershipModel.user_id == user_id,
                 MembershipModel.status == Status.ACTIVE.value,
                 or_(
-                    MembershipModel.org.has(OrgModel.status_code == text(OrgStatus.NSF_SUSPENDED.value)),
-                    MembershipModel.org.has(OrgModel.status_code == text(OrgStatus.SUSPENDED.value)),
+                    MembershipModel.org.has(OrgModel.status_code == OrgStatus.NSF_SUSPENDED.value),
+                    MembershipModel.org.has(OrgModel.status_code == OrgStatus.SUSPENDED.value),
                 ),
             )
             .all()
