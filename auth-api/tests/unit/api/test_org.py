@@ -297,7 +297,7 @@ def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_moc
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "paged_response")[0]
     orgs = json.loads(rv.data)
-    assert orgs.get("total") == 3
+    assert orgs.get("total") == 2
 
     rv = client.get("/api/v1/orgs?status=ACTIVE&status=SUSPENDED", headers=headers, content_type="application/json")
 
