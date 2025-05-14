@@ -400,10 +400,14 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
     @staticmethod
     def has_nsf_or_suspended_membership(user_id):
         """Check if the user has an active membership in an NSF_SUSPENDED or SUSPENDED organization."""
-        nsf_or_suspended_memberships = MembershipModel.query.join(MembershipModel.org).filter(
-            MembershipModel.user_id == user_id,
-            MembershipModel.status == Status.ACTIVE.value,
-            MembershipModel.org.has(OrgStatus.NSF_SUSPENDED.value, OrgStatus.SUSPENDED.value)
-        ).all()
+        nsf_or_suspended_memberships = (
+            MembershipModel.query.join(MembershipModel.org)
+            .filter(
+                MembershipModel.user_id == user_id,
+                MembershipModel.status == Status.ACTIVE.value,
+                MembershipModel.org.has(OrgStatus.NSF_SUSPENDED.value, OrgStatus.SUSPENDED.value),
+            )
+            .all()
+        )
 
         return bool(nsf_or_suspended_memberships)
