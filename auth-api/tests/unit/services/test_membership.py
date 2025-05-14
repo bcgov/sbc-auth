@@ -23,16 +23,23 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 
 import auth_api
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
+from auth_api.models import OrgStatus as OrgStatusModel
+from auth_api.models import User as UserModel
 from auth_api.models.dataclass import Activity
 from auth_api.services import ActivityLogPublisher
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import ActivityAction, ProductCode, Status
+from auth_api.utils.enums import ActivityAction, OrgStatus, ProductCode, Status
 from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo
-from tests.utilities.factory_utils import factory_membership_model, factory_product_model, factory_user_model
+from tests.utilities.factory_utils import (
+    factory_membership_model,
+    factory_org_model,
+    factory_product_model,
+    factory_user_model,
+)
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
@@ -165,3 +172,41 @@ def test_remove_member_removes_group_to_the_user(publish_mock, session, monkeypa
     assert GROUP_ACCOUNT_HOLDERS not in groups
 
     MembershipService(membership).deactivate_membership()
+
+
+def test_has_nsf_or_suspended_membership_returns_true(session, monkeypatch):
+    """Test that has_nsf_or_suspended_membership returns True when have an NSF_SUSPENDED or SUSPENDED membership."""
+    monkeypatch.undo()
+    user = session.query(UserModel).first()
+    if not user:
+        user = factory_user_model(TestUserInfo.user1)
+    user_id = user.id
+    existing_org_status = session.query(OrgStatusModel).filter_by(code=OrgStatus.NSF_SUSPENDED.value).first()
+    if not existing_org_status:
+        org_status_info = {"code": OrgStatus.NSF_SUSPENDED.value, "desc": "NSF Suspended"}
+        org = factory_org_model(org_status_info=org_status_info)
+    else:
+        org = factory_org_model(existing_org_status=existing_org_status)
+    factory_membership_model(user_id=user_id, org_id=org.id)
+    result = MembershipService.has_nsf_or_suspended_membership(user_id=user_id)
+
+    assert result is True
+
+
+def test_has_nsf_or_suspended_membership_returns_false(session, monkeypatch):
+    """Test that has_nsf_or_suspended_membership returns False when no NSF_SUSPENDED or SUSPENDED membership."""
+    monkeypatch.undo()
+    user = session.query(UserModel).first()
+    if not user:
+        user = factory_user_model(TestUserInfo.user2)
+    user_id = user.id
+    existing_org_status = session.query(OrgStatusModel).filter_by(code=OrgStatus.ACTIVE.value).first()
+    if not existing_org_status:
+        org_status_info = {"code": OrgStatus.ACTIVE.value, "desc": "Active"}
+        org = factory_org_model(org_status_info=org_status_info)
+    else:
+        org = factory_org_model(existing_org_status=existing_org_status)
+    factory_membership_model(user_id=user_id, org_id=org.id)
+    result = MembershipService.has_nsf_or_suspended_membership(user_id=user_id)
+
+    assert result is False

@@ -17,6 +17,7 @@ This module manages the Membership Information between an org and a user.
 """
 
 import json
+from operator import or_
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -34,7 +35,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Activity
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.constants import GROUP_CONTACT_CENTRE_STAFF, GROUP_MAXIMUS_STAFF
-from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, OrgType, Status
+from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, OrgStatus, OrgType, Status
 from auth_api.utils.roles import ADMIN, ALLOWED_READ_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -402,3 +403,21 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         return MembershipModel(
             org_id=org_id, user_id=user_id, membership_type_code=ADMIN, status=Status.ACTIVE.value
         ).save()
+
+    @staticmethod
+    def has_nsf_or_suspended_membership(user_id):
+        """Check if the user has an active membership in an NSF_SUSPENDED or SUSPENDED organization."""
+        nsf_or_suspended_memberships = (
+            MembershipModel.query.join(MembershipModel.org)
+            .filter(
+                MembershipModel.user_id == user_id,
+                MembershipModel.status == Status.ACTIVE.value,
+                or_(
+                    MembershipModel.org.has(OrgModel.status_code == OrgStatus.NSF_SUSPENDED.value),
+                    MembershipModel.org.has(OrgModel.status_code == OrgStatus.SUSPENDED.value),
+                ),
+            )
+            .all()
+        )
+
+        return bool(nsf_or_suspended_memberships)

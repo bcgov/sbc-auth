@@ -246,6 +246,27 @@ def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_moc
     )
     assert rv.status_code == HTTPStatus.CREATED
 
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+    document_signature = client.get(
+        "/api/v1/documents/test.jpeg/signatures", headers=headers, content_type="application/json"
+    )
+    doc_key = document_signature.json.get("key")
+    client.post(
+        "/api/v1/users/{}/affidavits".format(TestJwtClaims.public_user_role.get("sub")),
+        headers=headers,
+        data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key)),
+        content_type="application/json",
+    )
+
+    org_response = client.post(
+        "/api/v1/orgs",
+        data=json.dumps(TestOrgInfo.org_with_mailing_address(name="foobar1")),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert org_response.status_code == HTTPStatus.CREATED
+
     # create suspended org
     public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
     client.post("/api/v1/users", headers=public_headers, content_type="application/json")
@@ -269,27 +290,6 @@ def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_moc
         content_type="application/json",
     )
     assert org_patch_response.json.get("orgStatus") == OrgStatus.SUSPENDED.value
-
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
-    client.post("/api/v1/users", headers=headers, content_type="application/json")
-    document_signature = client.get(
-        "/api/v1/documents/test.jpeg/signatures", headers=headers, content_type="application/json"
-    )
-    doc_key = document_signature.json.get("key")
-    client.post(
-        "/api/v1/users/{}/affidavits".format(TestJwtClaims.public_user_role.get("sub")),
-        headers=headers,
-        data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key)),
-        content_type="application/json",
-    )
-
-    org_response = client.post(
-        "/api/v1/orgs",
-        data=json.dumps(TestOrgInfo.org_with_mailing_address(name="foobar1")),
-        headers=headers,
-        content_type="application/json",
-    )
-    assert org_response.status_code == HTTPStatus.CREATED
 
     # staff search
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)

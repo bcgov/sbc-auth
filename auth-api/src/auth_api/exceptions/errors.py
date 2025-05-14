@@ -140,6 +140,10 @@ class Error(Enum):
     PATCH_INVALID_ACTION = "PATCH_INVALID_ACTION", HTTPStatus.BAD_REQUEST
     SERVICE_UNAVAILABLE = "3rd party application unavailable", HTTPStatus.SERVICE_UNAVAILABLE
     NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION = "Not authorized to perform this action", HTTPStatus.FORBIDDEN
+    NSF_OR_SUSPENDED_CLIENT_CANNOT_CREATE_ACCOUNT = (
+        "Clients with NSF or SUSPENDED statuses cannot create new accounts.",
+        HTTPStatus.FORBIDDEN,
+    )
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

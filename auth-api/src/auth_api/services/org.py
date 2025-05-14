@@ -38,6 +38,7 @@ from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, MembershipSchema, OrgSchema
 from auth_api.services.flags import flags
+from auth_api.services.membership import Membership
 from auth_api.services.user import User as UserService
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
@@ -104,6 +105,8 @@ class Org:  # pylint: disable=too-many-public-methods
     def create_org(org_info: dict, user_id):
         """Create a new organization."""
         logger.debug("<create_org ")
+        if Membership.has_nsf_or_suspended_membership(user_id):
+            raise BusinessException(Error.NSF_OR_SUSPENDED_CLIENT_CANNOT_CREATE_ACCOUNT, None)
         # bcol is treated like an access type as well;so its outside the scheme
         mailing_address = org_info.pop("mailingAddress", None)
         payment_info = org_info.pop("paymentInfo", {})

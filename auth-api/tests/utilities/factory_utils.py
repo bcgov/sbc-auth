@@ -153,6 +153,7 @@ def factory_org_model(
     org_status_info: dict = None,
     user_id=None,
     bcol_info: dict = TestBCOLInfo.bcol1,
+    existing_org_status: OrgStatusModel = None,
 ):
     """Produce a templated org model."""
     org_type = OrgTypeModel.get_default_type()
@@ -160,7 +161,9 @@ def factory_org_model(
         org_type = OrgTypeModel(code=org_type_info["code"], description=org_type_info["desc"])
         org_type.save()
 
-    if org_status_info is not None:
+    if existing_org_status is not None:
+        org_status = existing_org_status
+    elif org_status_info is not None:
         org_status = OrgStatusModel(code=org_status_info["code"], description=org_status_info["desc"])
         org_status.save()
     else:
