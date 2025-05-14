@@ -22,7 +22,8 @@ from unittest.mock import ANY, patch
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 import auth_api
-from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel, OrgStatus as OrgStatusModel
+from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
+from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models.dataclass import Activity
 from auth_api.services import ActivityLogPublisher
 from auth_api.services import Membership as MembershipService
