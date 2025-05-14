@@ -275,6 +275,10 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                     self._model.org_id, action, name=json.dumps(name), id=self._model.user.id, value=membership_type
                 )
             )
+            
+            if action == ActivityAction.REMOVE_TEAM_MEMBER.value:
+                publish_team_member_event(QueueMessageTypes.TEAM_MEMBER_REMOVED.value, self._model.org_id, self._model.user_id)
+                
         # Add to account_holders group in keycloak
         Membership._add_or_remove_group(self._model)
         is_bcros_user = self._model.user.login_source == LoginSource.BCROS.value
