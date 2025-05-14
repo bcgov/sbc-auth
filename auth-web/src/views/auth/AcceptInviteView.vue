@@ -104,7 +104,7 @@ export default defineComponent({
       }
     }
 
-    function redirectToNextPage(invitingOrg) {
+    function redirectToNextPage (invitingOrg) {
       const isExternalStaff = ExternalStaffAccounts.includes(invitingOrg.typeCode)
       if (invitingOrg.statusCode === AccountStatus.ACTIVE && isExternalStaff) {
         window.location.assign(`${ConfigHelper.getSelfURL()}${Pages.STAFF_DASHBOARD}`)
