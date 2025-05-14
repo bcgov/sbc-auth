@@ -33,7 +33,10 @@ from auth_api.utils.enums import ActivityAction, OrgStatus, ProductCode, Status
 from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
-    factory_membership_model, factory_org_model, factory_product_model, factory_user_model
+    factory_membership_model,
+    factory_org_model,
+    factory_product_model,
+    factory_user_model,
 )
 
 

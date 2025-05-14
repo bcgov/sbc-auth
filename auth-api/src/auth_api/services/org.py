@@ -38,13 +38,13 @@ from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, MembershipSchema, OrgSchema
 from auth_api.services.flags import flags
+from auth_api.services.membership import Membership
 from auth_api.services.user import User as UserService
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
 from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
-from auth_api.services.membership import Membership
 from auth_api.utils.enums import (
     AccessType,
     ActivityAction,
