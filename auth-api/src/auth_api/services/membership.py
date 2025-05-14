@@ -34,7 +34,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Activity
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.constants import GROUP_CONTACT_CENTRE_STAFF, GROUP_MAXIMUS_STAFF
-from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, OrgStatus, OrgType, Status
+from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, OrgType, Status
 from auth_api.utils.roles import ADMIN, ALLOWED_READ_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -396,14 +396,3 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         return MembershipModel(
             org_id=org_id, user_id=user_id, membership_type_code=ADMIN, status=Status.ACTIVE.value
         ).save()
-        
-    @staticmethod
-    def has_nsf_or_suspended_membership(user_id):
-        """Check if the user has an active membership in an NSF_SUSPENDED or SUSPENDED organization."""
-        nsf_or_suspended_memberships = MembershipModel.query.join(MembershipModel.org).filter(
-            MembershipModel.user_id == user_id,
-            MembershipModel.status == Status.ACTIVE.value,
-            MembershipModel.org.has(OrgStatus.NSF_SUSPENDED.value, OrgStatus.SUSPENDED.value)
-        ).all()
-
-        return bool(nsf_or_suspended_memberships)
