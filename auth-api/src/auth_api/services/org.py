@@ -44,6 +44,7 @@ from auth_api.services.validators.account_limit import validate as account_limit
 from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
+from auth_api.services.membership import Membership
 from auth_api.utils.enums import (
     AccessType,
     ActivityAction,
@@ -104,6 +105,8 @@ class Org:  # pylint: disable=too-many-public-methods
     def create_org(org_info: dict, user_id):
         """Create a new organization."""
         logger.debug("<create_org ")
+        if Membership.has_nsf_or_suspended_membership(user_id):
+            raise BusinessException(Error.NSF_CLIENT_CANNOT_CREATE_ACCOUNT, None)
         # bcol is treated like an access type as well;so its outside the scheme
         mailing_address = org_info.pop("mailingAddress", None)
         payment_info = org_info.pop("paymentInfo", {})
