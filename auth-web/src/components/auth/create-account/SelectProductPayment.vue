@@ -17,7 +17,7 @@
         :indeterminate="isLoading"
       />
     </v-overlay>
-    <template v-if="productList && productList.length > 0">
+    <template v-if="productList && productList.length > 0 && !isLoading">
       <div
         v-for="product in productList"
         :key="product.code"

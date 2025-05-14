@@ -13,6 +13,7 @@
           :saving="saving"
           :premiumLinkedAccount="true"
           :bcolDuplicateNameErrorMessage="bcolDuplicateNameErrorMessage"
+          :isEditAccount="isEditAccount"
           @update:org-business-type="updateOrgBusinessType"
           @valid="checkOrgBusinessTypeValid"
           @update:org-name-clear-errors="updateOrgNameAndClearErrors"
@@ -109,6 +110,10 @@ export default defineComponent({
       default: false
     },
     govmAccount: {
+      type: Boolean,
+      default: false
+    },
+    isEditAccount: {
       type: Boolean,
       default: false
     }
