@@ -153,7 +153,7 @@ def factory_org_model(
     org_status_info: dict = None,
     user_id=None,
     bcol_info: dict = TestBCOLInfo.bcol1,
-    existing_org_status: OrgStatusModel = None
+    existing_org_status: OrgStatusModel = None,
 ):
     """Produce a templated org model."""
     org_type = OrgTypeModel.get_default_type()

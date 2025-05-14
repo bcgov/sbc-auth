@@ -174,7 +174,7 @@ def test_remove_member_removes_group_to_the_user(publish_mock, session, monkeypa
 def test_has_nsf_or_suspended_membership_returns_true(session, monkeypatch):
     """Test that has_nsf_or_suspended_membership returns True when have an NSF_SUSPENDED or SUSPENDED membership."""
     monkeypatch.delattr("auth_api.services.membership.Membership.has_nsf_or_suspended_membership")
-    user_id = 1    
+    user_id = 1
     existing_org_status = session.query(OrgStatusModel).filter_by(code=OrgStatus.NSF_SUSPENDED.value).first()
     if not existing_org_status:
         org_status_info = {"code": OrgStatus.NSF_SUSPENDED.value, "desc": "NSF Suspended"}
@@ -191,7 +191,7 @@ def test_has_nsf_or_suspended_membership_returns_false(session, monkeypatch):
     """Test that has_nsf_or_suspended_membership returns False when no NSF_SUSPENDED or SUSPENDED membership."""
     monkeypatch.delattr("auth_api.services.membership.Membership.has_nsf_or_suspended_membership")
     user_id = 2
-    existing_org_status = session.query(OrgStatusModel).filter_by(code=OrgStatus.ACTIVE.value).first()    
+    existing_org_status = session.query(OrgStatusModel).filter_by(code=OrgStatus.ACTIVE.value).first()
     if not existing_org_status:
         org_status_info = {"code": OrgStatus.ACTIVE.value, "desc": "Active"}
         org = factory_org_model(org_status_info=org_status_info)
