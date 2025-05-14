@@ -29,10 +29,12 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import ActivityAction, ProductCode, Status
+from auth_api.utils.enums import ActivityAction, OrgStatus, ProductCode, Status
 from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo
-from tests.utilities.factory_utils import factory_membership_model, factory_product_model, factory_user_model
+from tests.utilities.factory_utils import (
+    factory_membership_model, factory_org_model, factory_product_model, factory_user_model
+)
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
@@ -163,3 +165,25 @@ def test_remove_member_removes_group_to_the_user(publish_mock, session, monkeypa
     assert GROUP_ACCOUNT_HOLDERS not in groups
 
     MembershipService(membership).deactivate_membership()
+
+
+def test_has_nsf_or_suspended_membership_returns_true(session, monkeypatch):
+    """Test that has_nsf_or_suspended_membership returns True when have an NSF_SUSPENDED or SUSPENDED membership."""
+    monkeypatch.delattr("auth_api.services.membership.Membership.has_nsf_or_suspended_membership")
+    user_id = 1
+    org = factory_org_model(status_code=OrgStatus.NSF_SUSPENDED.value)
+    factory_membership_model(user_id=user_id, org_id=org.id, status=Status.ACTIVE.value)
+    result = MembershipService.has_nsf_or_suspended_membership(user_id=user_id)
+
+    assert result is True
+
+
+def test_has_nsf_or_suspended_membership_returns_false(session, monkeypatch):
+    """Test that has_nsf_or_suspended_membership returns False when no NSF_SUSPENDED or SUSPENDED membership."""
+    monkeypatch.delattr("auth_api.services.membership.Membership.has_nsf_or_suspended_membership")
+    user_id = 2
+    org = factory_org_model(status_code=OrgStatus.ACTIVE.value)
+    factory_membership_model(user_id=user_id, org_id=org.id, status=Status.ACTIVE.value)
+    result = MembershipService.has_nsf_or_suspended_membership(user_id=user_id)
+
+    assert result is False
