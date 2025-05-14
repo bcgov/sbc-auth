@@ -98,7 +98,9 @@ export default defineComponent({
           title: 'Account Information',
           stepName: 'Account Information',
           component: AccountCreate,
-          componentProps: {}
+          componentProps: {
+            isStepperView: true
+          }
         },
         {
           title: 'Account Administrator Information',
@@ -137,17 +139,17 @@ export default defineComponent({
       state.readOnly = !!props.orgId
       if (props.orgId) {
         // setting view only mode for all other pages which not need to edit
-        orgStore.setViewOnlyMode(DisplayModeValues.VIEW_ONLY)
-        stepper.value.jumpToStep(3)
         const orgId = props.orgId
         await orgStore.syncOrganization(orgId)
-        orgStore.syncAddress()
-        orgStore.getOrgPayments()
+        await orgStore.syncAddress()
+        await orgStore.getOrgPayments()
         orgStore.setCurrentOrganizationType(orgStore.currentOrganization.orgType)
+        stepper.value.jumpToStep(1)
+        orgStore.setViewOnlyMode(DisplayModeValues.VIEW_ONLY)
         // passing additional props for readonly
         accountStepperConfig[2].componentProps = { ...accountStepperConfig[2].componentProps, clearForm: true }
         accountStepperConfig[3].componentProps = { ...accountStepperConfig[3].componentProps, readOnly: true, orgId }
-        accountStepperConfig[1].componentProps = { ...accountStepperConfig[1].componentProps, readOnly: true }
+        accountStepperConfig[1].componentProps = { ...accountStepperConfig[1].componentProps, readOnly: true, isEditAccount: true } // Account Info
       } else {
         orgStore.setViewOnlyMode('')
       }
