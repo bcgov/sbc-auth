@@ -340,11 +340,11 @@ def mock_pub_sub_call(mocker):
     mocker.patch("google.cloud.pubsub_v1.PublisherClient", PublisherMock)
 
 
-@pytest.fixture(autouse=True)
-def mock_has_nsf_or_suspended_membership(monkeypatch):
-    """Globally mock has_nsf_or_suspended_membership to always return False."""
+# @pytest.fixture(autouse=True)
+# def mock_has_nsf_or_suspended_membership(monkeypatch):
+#     """Globally mock has_nsf_or_suspended_membership to always return False."""
 
-    def mock_method(user_id):
-        return False
+#     def mock_method(user_id):
+#         return False
 
-    monkeypatch.setattr("auth_api.services.membership.Membership.has_nsf_or_suspended_membership", mock_method)
+#     monkeypatch.setattr("auth_api.services.membership.Membership.has_nsf_or_suspended_membership", mock_method)
