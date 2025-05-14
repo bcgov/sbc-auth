@@ -174,7 +174,8 @@ def test_has_nsf_or_suspended_membership_returns_true(session, monkeypatch):
     """Test that has_nsf_or_suspended_membership returns True when have an NSF_SUSPENDED or SUSPENDED membership."""
     monkeypatch.delattr("auth_api.services.membership.Membership.has_nsf_or_suspended_membership")
     user_id = 1
-    org = factory_org_model(status_code=OrgStatus.NSF_SUSPENDED.value)
+    org_status_info = {"code": OrgStatus.NSF_SUSPENDED.value, "desc": "NSF Suspended"}
+    org = factory_org_model(org_status_info=org_status_info)
     factory_membership_model(user_id=user_id, org_id=org.id, status=Status.ACTIVE.value)
     result = MembershipService.has_nsf_or_suspended_membership(user_id=user_id)
 
@@ -185,7 +186,8 @@ def test_has_nsf_or_suspended_membership_returns_false(session, monkeypatch):
     """Test that has_nsf_or_suspended_membership returns False when no NSF_SUSPENDED or SUSPENDED membership."""
     monkeypatch.delattr("auth_api.services.membership.Membership.has_nsf_or_suspended_membership")
     user_id = 2
-    org = factory_org_model(status_code=OrgStatus.ACTIVE.value)
+    org_status_info = {"code": OrgStatus.ACTIVE.value, "desc": "Active"}
+    org = factory_org_model(org_status_info=org_status_info)
     factory_membership_model(user_id=user_id, org_id=org.id, status=Status.ACTIVE.value)
     result = MembershipService.has_nsf_or_suspended_membership(user_id=user_id)
 
