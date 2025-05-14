@@ -106,7 +106,7 @@ class Org:  # pylint: disable=too-many-public-methods
         """Create a new organization."""
         logger.debug("<create_org ")
         if Membership.has_nsf_or_suspended_membership(user_id):
-            raise BusinessException(Error.NSF_CLIENT_CANNOT_CREATE_ACCOUNT, None)
+            raise BusinessException(Error.NSF_OR_SUSPENDED_CLIENT_CANNOT_CREATE_ACCOUNT, None)
         # bcol is treated like an access type as well;so its outside the scheme
         mailing_address = org_info.pop("mailingAddress", None)
         payment_info = org_info.pop("paymentInfo", {})

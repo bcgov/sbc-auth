@@ -408,8 +408,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 MembershipModel.user_id == user_id,
                 MembershipModel.status == Status.ACTIVE.value,
                 or_(
-                    MembershipModel.org.has(OrgModel.status == text(OrgStatus.NSF_SUSPENDED.value)),
-                    MembershipModel.org.has(OrgModel.status == text(OrgStatus.SUSPENDED.value)),
+                    MembershipModel.org.has(OrgModel.status_code == text(OrgStatus.NSF_SUSPENDED.value)),
+                    MembershipModel.org.has(OrgModel.status_code == text(OrgStatus.SUSPENDED.value)),
                 ),
             )
             .all()
