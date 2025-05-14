@@ -141,6 +141,7 @@ def test_remove_member_removes_group_to_the_user(publish_mock, session, monkeypa
         )
 
         publish_mock.assert_called_once_with(QueueMessageTypes.TEAM_MEMBER_REMOVED.value, org_id, membership.user_id)
+        publish_mock.reset_mock()
 
     # ACTIVE
     active_membership_status = MembershipStatusCodeModel.get_membership_status_by_code(Status.ACTIVE.name)
@@ -155,6 +156,7 @@ def test_remove_member_removes_group_to_the_user(publish_mock, session, monkeypa
         mock_alp.assert_called_with(
             Activity(action=ActivityAction.REMOVE_TEAM_MEMBER.value, org_id=ANY, name=ANY, id=ANY, value=ANY)
         )
+        publish_mock.assert_called_once_with(QueueMessageTypes.TEAM_MEMBER_REMOVED.value, org_id, membership.user_id)
 
     user_groups = keycloak_service.get_user_groups(user_id=kc_user2.id)
     groups = []
