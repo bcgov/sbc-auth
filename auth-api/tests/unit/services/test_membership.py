@@ -181,7 +181,7 @@ def test_has_nsf_or_suspended_membership_returns_true(session, monkeypatch):
         org = factory_org_model(org_status_info=org_status_info)
     else:
         org = factory_org_model(existing_org_status=existing_org_status)
-    factory_membership_model(user_id=user_id, org_id=org.id, status=Status.ACTIVE.value)
+    factory_membership_model(user_id=user_id, org_id=org.id)
     result = MembershipService.has_nsf_or_suspended_membership(user_id=user_id)
 
     assert result is True
@@ -197,7 +197,7 @@ def test_has_nsf_or_suspended_membership_returns_false(session, monkeypatch):
         org = factory_org_model(org_status_info=org_status_info)
     else:
         org = factory_org_model(existing_org_status=existing_org_status)
-    factory_membership_model(user_id=user_id, org_id=org.id, status=Status.ACTIVE.value)
+    factory_membership_model(user_id=user_id, org_id=org.id)
     result = MembershipService.has_nsf_or_suspended_membership(user_id=user_id)
 
     assert result is False
