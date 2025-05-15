@@ -57,3 +57,4 @@ from .task import Task
 from .user import User
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
+from .affiliation_mapping import AffiliationMapping

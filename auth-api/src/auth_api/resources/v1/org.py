@@ -22,6 +22,8 @@ from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.models import Affiliation as AffiliationModel
+from auth_api.models import AffiliationMapping
+from auth_api.services.affiliation_mapping import AffiliationMappingService
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest, SimpleOrgSearch
@@ -381,7 +383,7 @@ def get_organization_affiliations(org_id):
 def new_affiliation_search(org_id):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
     # get affiliation identifiers and the urls for the source data
-    affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
+    affiliations = AffiliationMappingService.get_filtered_affiliations(org_id)
     search_details = AffiliationSearchDetails.from_request_args(request)
     affiliations_details_list = asyncio.run(
         AffiliationService.get_affiliation_details(affiliations, search_details, org_id)
@@ -442,6 +444,10 @@ def post_organization_affiliation(org_id):
 
         entity_details = request_json.get("entityDetails", None)
         if entity_details:
+            # If entity details are provided, update the affiliation mapping
+            # with affiliation id and identifiers
+            AffiliationMappingService.from_entity_details(entity_details)
+
             AffiliationService.fix_stale_affiliations(org_id, entity_details)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
