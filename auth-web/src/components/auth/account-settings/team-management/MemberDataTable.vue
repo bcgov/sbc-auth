@@ -456,7 +456,8 @@ export default class MemberDataTable extends Vue {
 
     // Admin can be removed by other admin. #4909
     if (memberToRemove.membershipTypeCode === MembershipType.Admin) {
-      if (this.currentMembership.membershipTypeCode === MembershipType.Admin) {
+      if (this.currentMembership.membershipTypeCode === MembershipType.Admin ||
+          this.currentUser.roles?.includes(Role.StaffManageAccounts)) {
         return true
       } else {
         return false
