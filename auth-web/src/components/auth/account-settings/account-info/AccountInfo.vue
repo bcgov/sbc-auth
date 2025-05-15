@@ -199,7 +199,7 @@
       </template>
       <template #text>
         <p class="px-10">
-          {{ dialogText }}<br>
+          {{ $t(dialogText) }}<br>
         </p>
         <v-form
           id="suspensionReasonForm"
