@@ -94,7 +94,7 @@ class ApiGateway:
     def get_api_client_id(org_id, env):
         """Get the client id for the org."""
         client_id_pattern = current_app.config.get("API_GW_KC_CLIENT_ID_PATTERN")
-        suffix = "-sandbox" if env != "prod" else ""
+        suffix = "-sandbox" if env != "production" else ""
         client_id = f"{client_id_pattern}{suffix}".format(account_id=org_id)
         return client_id
 
@@ -109,7 +109,7 @@ class ApiGateway:
         service_account = KeycloakService.get_service_account_user(client_rep.get("id"))
 
         KeycloakService.add_user_to_group(
-            service_account.get("id"), GROUP_API_GW_USERS if env == "prod" else GROUP_API_GW_SANDBOX_USERS
+            service_account.get("id"), GROUP_API_GW_USERS if env == "production" else GROUP_API_GW_SANDBOX_USERS
         )
         KeycloakService.add_user_to_group(service_account.get("id"), GROUP_ACCOUNT_HOLDERS)
         org_name = cls._make_string_compatible(org.name)
