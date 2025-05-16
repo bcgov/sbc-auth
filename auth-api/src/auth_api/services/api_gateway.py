@@ -65,7 +65,7 @@ class ApiGateway:
             cls._create_consumer(name, org, env=env)
             org.has_api_access = True
             org.save()
-            response = cls.get_api_keys(org_id)
+            response = cls.get_api_keys(org_id, skip_auth=True)
         else:
             # Create additional API Key if a consumer exists
             api_key_response = RestService.post(
@@ -157,10 +157,11 @@ class ApiGateway:
         )
 
     @classmethod
-    def get_api_keys(cls, org_id: int) -> List[Dict[str, any]]:
+    def get_api_keys(cls, org_id: int, skip_auth=False) -> List[Dict[str, any]]:
         """Get all api keys."""
         logger.debug("<get_api_keys ")
-        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
+        if skip_auth is False:
+            check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         api_keys_response = {"consumer": {"consumerKey": []}}
         env = current_app.config.get("ENVIRONMENT_NAME")
         email = cls._get_email_id(org_id, env)
