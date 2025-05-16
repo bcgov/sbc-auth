@@ -61,7 +61,7 @@ class ApiGateway:
         consumer_endpoint: str = current_app.config.get("API_GW_CONSUMERS_API_URL")
         gw_api_key = current_app.config.get("API_GW_KEY")
         email = cls._get_email_id(org_id, env)
-        if not cls._consumer_exists(email, env):  # If the account doesn't have api access, add it
+        if not cls._consumer_exists(email):  # If the account doesn't have api access, add it
             cls._create_consumer(name, org, env=env)
             org.has_api_access = True
             org.save()
