@@ -6,8 +6,7 @@
     "title": "API Key",
     "additionalProperties": false,
     "required": [
-      "keyName",
-      "environment"
+      "keyName"
     ],
     "properties": {
       "keyName": {
@@ -19,12 +18,6 @@
           "TEST"
         ],
         "pattern": "^[^\\s]+(\\s+[^\\s]+)*$"
-      },
-      "environment": {
-        "$id": "#/properties/environment",
-        "type": "string",
-        "title": "API gateway Environment",
-        "pattern": "^(.*)$"
       }
     }
   }
