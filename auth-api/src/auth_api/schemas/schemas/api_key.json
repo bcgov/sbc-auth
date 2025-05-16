@@ -15,7 +15,7 @@
         "title": "Name of the key",
         "default": "",
         "examples": [
-          "TEST"
+          "prod-1-key-main"
         ],
         "pattern": "^[^\\s]+(\\s+[^\\s]+)*$"
       }
