@@ -82,13 +82,12 @@ class ApiGateway:
     @classmethod
     def _create_user_and_membership_for_api_user(cls, org_id: int, env: str):
         """Create a user and membership for the api user."""
-        if flags.is_on("enable-api-gw-user-membership-creation", False) is True:
-            client_name = ApiGateway.get_api_client_id(org_id, env)
-            client = KeycloakService.get_service_account_by_client_name(client_name)
-            if (api_user := UserModel.find_by_username(client_name)) is None:
-                api_user = UserModel.create_user_for_api_user(client_name, client.get("id"))
-            if MembershipModel.find_membership_by_user_and_org(api_user.id, org_id) is None:
-                MembershipService.create_admin_membership_for_api_user(org_id, api_user.id)
+        client_name = ApiGateway.get_api_client_id(org_id, env)
+        client = KeycloakService.get_service_account_by_client_name(client_name)
+        if (api_user := UserModel.find_by_username(client_name)) is None:
+            api_user = UserModel.create_user_for_api_user(client_name, client.get("id"))
+        if MembershipModel.find_membership_by_user_and_org(api_user.id, org_id) is None:
+            MembershipService.create_admin_membership_for_api_user(org_id, api_user.id)
 
     @staticmethod
     def get_api_client_id(org_id, env):
