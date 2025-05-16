@@ -202,12 +202,12 @@ class ApiGateway:
             return current_app.config.get("API_GW_CONSUMER_EMAIL")
 
         api_gw_email_suffix: str = current_app.config.get("API_GW_EMAIL_SUFFIX")
-        id_suffix = "" if env == "prod" else "-sandbox"
+        id_suffix = "" if env == "production" else "-sandbox"
         email_id = f"{org_id}{id_suffix}@{api_gw_email_suffix}"
         return email_id
 
     @classmethod
-    def _consumer_exists(cls, email, env):
+    def _consumer_exists(cls, email):
         """Return if customer exists with this email."""
         consumer_endpoint: str = current_app.config.get("API_GW_CONSUMERS_API_URL")
         gw_api_key: str = current_app.config.get("API_GW_KEY")
