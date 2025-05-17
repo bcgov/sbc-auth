@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-flask-cors = "^5.0.0"
+flask-cors = "^6.0.0"
 flask-migrate = "^4.0.7"
 flask-moment = "^1.0.6"
 flask-sqlalchemy = "^3.1.1"
