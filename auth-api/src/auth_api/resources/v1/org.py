@@ -444,10 +444,7 @@ def post_organization_affiliation(org_id):
 
         entity_details = request_json.get("entityDetails", None)
         if entity_details:
-            # If entity details are provided, update the affiliation mapping
-            # with affiliation id and identifiers
             AffiliationMappingService.from_entity_details(entity_details)
-
             AffiliationService.fix_stale_affiliations(org_id, entity_details)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code

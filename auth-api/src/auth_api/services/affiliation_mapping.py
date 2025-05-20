@@ -69,14 +69,14 @@ class AffiliationMappingService:  # pylint: disable=too-few-public-methods
             .join(
                 AffiliationMapping,
                 or_(
-                    AffiliationMapping.business_identifier_affilation_id == AffiliationModel.id,
+                    AffiliationMapping.business_identifier_affiliation_id == AffiliationModel.id,
                     and_(
-                        AffiliationMapping.business_identifier_affilation_id.is_(None),
-                        AffiliationMapping.bootstrap_affilation_id == AffiliationModel.id,
+                        AffiliationMapping.business_identifier_affiliation_id.is_(None),
+                        AffiliationMapping.bootstrap_affiliation_id == AffiliationModel.id,
                     ),
                     and_(
-                        AffiliationMapping.business_identifier_affilation_id.is_(None),
-                        AffiliationMapping.bootstrap_affilation_id.is_(None),
+                        AffiliationMapping.business_identifier_affiliation_id.is_(None),
+                        AffiliationMapping.bootstrap_affiliation_id.is_(None),
                         AffiliationMapping.nr_affiliation_id == AffiliationModel.id,
                     ),
                 ),
@@ -89,50 +89,31 @@ class AffiliationMappingService:  # pylint: disable=too-few-public-methods
     @staticmethod
     def from_entity_details(entity_details: dict) -> AffiliationMapping:
         """Create and populate an AffiliationMapping object from entity details."""
+
         affiliation_mapping = AffiliationMapping()
         affiliation_mapping.nr_identifier = entity_details.get("nrNumber")
         affiliation_mapping.bootstrap_identifier = entity_details.get("bootstrapIdentifier")
         affiliation_mapping.business_identifier = entity_details.get("identifier")
 
-        # 1. NR Affiliation
-        if affiliation_mapping.nr_identifier:
-            nr_entity = (
-                db.session.query(Entity).filter(Entity.business_identifier == affiliation_mapping.nr_identifier).first()
-            )
-            if nr_entity:
-                nr_affiliation = (
-                    db.session.query(AffiliationModel).filter(AffiliationModel.entity_id == nr_entity.id).first()
-                )
-                if nr_affiliation:
-                    affiliation_mapping.nr_affiliation_id = nr_affiliation.id
+        def resolve_affiliation_id(identifier: str) -> Optional[int]:
+            """Resolves the affiliation ID based on a given business identifier."""
+            if not identifier:
+                return None
 
-        # 2. Bootstrap Affiliation
-        if affiliation_mapping.bootstrap_identifier:
-            bootstrap_entity = (
-                db.session.query(Entity)
-                .filter(Entity.business_identifier == affiliation_mapping.bootstrap_identifier)
+            result = (
+                db.session.query(AffiliationModel.id)
+                .join(Entity, AffiliationModel.entity_id == Entity.id)
+                .filter(Entity.business_identifier == identifier)
                 .first()
             )
-            if bootstrap_entity:
-                bootstrap_affiliation = (
-                    db.session.query(AffiliationModel).filter(AffiliationModel.entity_id == bootstrap_entity.id).first()
-                )
-                if bootstrap_affiliation:
-                    affiliation_mapping.bootstrap_affilation_id = bootstrap_affiliation.id
+            return result[0] if result else None
 
-        # 3. Business Identifier Affiliation
-        if affiliation_mapping.business_identifier:
-            business_entity = (
-                db.session.query(Entity)
-                .filter(Entity.business_identifier == affiliation_mapping.business_identifier)
-                .first()
-            )
-            if business_entity:
-                business_affiliation = (
-                    db.session.query(AffiliationModel).filter(AffiliationModel.entity_id == business_entity.id).first()
-                )
-                if business_affiliation:
-                    affiliation_mapping.business_identifier_affilation_id = business_affiliation.id
+        # Populate affiliation ids
+        affiliation_mapping.nr_affiliation_id = resolve_affiliation_id(affiliation_mapping.nr_identifier)
+        affiliation_mapping.bootstrap_affiliation_id = resolve_affiliation_id(affiliation_mapping.bootstrap_identifier)
+        affiliation_mapping.business_identifier_affiliation_id = resolve_affiliation_id(
+            affiliation_mapping.business_identifier
+        )
 
         db.session.add(affiliation_mapping)
         db.session.commit()

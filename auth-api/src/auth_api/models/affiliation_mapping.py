@@ -1,4 +1,4 @@
-from sqlalchemy import and_, or_
+from sqlalchemy import Index, and_, or_
 from typing import List
 from requests import session
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
@@ -18,32 +18,15 @@ class AffiliationMapping(BaseModel):  # pylint: disable=too-few-public-methods, 
     __tablename__ = "affiliation_mapping"
 
     id = Column(Integer, primary_key=True)
-    business_identifier = Column("identifier_1", String(75), unique=True, nullable=True)  # business identifier
-    bootstrap_identifier = Column("identifier_2", String(75), unique=True, nullable=True)  # temp
-    nr_identifier = Column("identifier_3", String(75), unique=True, nullable=True)  # NR
-    business_identifier_affilation_id = Column(Integer, ForeignKey("affiliations.id"), nullable=True)
-    bootstrap_affilation_id = Column(Integer, ForeignKey("affiliations.id"), nullable=True)
-    nr_affiliation_id = Column(Integer, ForeignKey("affiliations.id"), nullable=True)
+    business_identifier = Column("business_identifier", String(75), unique=True, nullable=True)  # business identifier
+    bootstrap_identifier = Column("bootstrap_identifier", String(75), unique=True, nullable=True)  # temp
+    nr_identifier = Column("nr_identifier", String(75), unique=True, nullable=True)  # NR
+    business_identifier_affiliation_id = Column(Integer, ForeignKey("affiliations.id"), nullable=True)
+    bootstrap_affiliation_id = Column(Integer, ForeignKey("affiliations.id"), nullable=True)
+    nr_affiliation_id = Column(Integer, ForeignKey("affiliations.id", ondelete="CASCADE"), nullable=True)
 
-    # Relationships to the Affiliation model with explicit onclause
-    business_affiliation = relationship(
-        "Affiliation",
-        foreign_keys=[business_identifier_affilation_id],
-        backref="business_mappings",
-        lazy="joined",
-        primaryjoin="Affiliation.id == AffiliationMapping.business_identifier_affilation_id",
-    )
-    bootstrap_affiliation = relationship(
-        "Affiliation",
-        foreign_keys=[bootstrap_affilation_id],
-        backref="bootstrap_mappings",
-        lazy="joined",
-        primaryjoin="Affiliation.id == AffiliationMapping.bootstrap_affilation_id",
-    )
-    nr_affiliation = relationship(
-        "Affiliation",
-        foreign_keys=[nr_affiliation_id],
-        backref="nr_mappings",
-        lazy="joined",
-        primaryjoin="Affiliation.id == AffiliationMapping.nr_affiliation_id",
+    __table_args__ = (
+        Index("ix_business_identifier", "business_identifier"),
+        Index("ix_bootstrap_identifier", "bootstrap_identifier"),
+        Index("ix_nr_identifier", "nr_identifier"),
     )
