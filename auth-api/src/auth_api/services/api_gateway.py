@@ -61,11 +61,11 @@ class ApiGateway:
         consumer_endpoint: str = current_app.config.get("API_GW_CONSUMERS_API_URL")
         gw_api_key = current_app.config.get("API_GW_KEY")
         email = cls._get_email_id(org_id, env)
-        if not cls._consumer_exists(email, env):  # If the account doesn't have api access, add it
+        if not cls._consumer_exists(email):  # If the account doesn't have api access, add it
             cls._create_consumer(name, org, env=env)
             org.has_api_access = True
             org.save()
-            response = cls.get_api_keys(org_id)
+            response = cls.get_api_keys(org_id, skip_auth=True)
         else:
             # Create additional API Key if a consumer exists
             api_key_response = RestService.post(
@@ -82,19 +82,18 @@ class ApiGateway:
     @classmethod
     def _create_user_and_membership_for_api_user(cls, org_id: int, env: str):
         """Create a user and membership for the api user."""
-        if flags.is_on("enable-api-gw-user-membership-creation", False) is True:
-            client_name = ApiGateway.get_api_client_id(org_id, env)
-            client = KeycloakService.get_service_account_by_client_name(client_name)
-            if (api_user := UserModel.find_by_username(client_name)) is None:
-                api_user = UserModel.create_user_for_api_user(client_name, client.get("id"))
-            if MembershipModel.find_membership_by_user_and_org(api_user.id, org_id) is None:
-                MembershipService.create_admin_membership_for_api_user(org_id, api_user.id)
+        client_name = ApiGateway.get_api_client_id(org_id, env)
+        client = KeycloakService.get_service_account_by_client_name(client_name)
+        if (api_user := UserModel.find_by_username(client_name)) is None:
+            api_user = UserModel.create_user_for_api_user(client_name, client.get("id"))
+        if MembershipModel.find_membership_by_user_and_org(api_user.id, org_id) is None:
+            MembershipService.create_admin_membership_for_api_user(org_id, api_user.id)
 
     @staticmethod
     def get_api_client_id(org_id, env):
         """Get the client id for the org."""
         client_id_pattern = current_app.config.get("API_GW_KC_CLIENT_ID_PATTERN")
-        suffix = "-sandbox" if env != "prod" else ""
+        suffix = "-sandbox" if env != "production" else ""
         client_id = f"{client_id_pattern}{suffix}".format(account_id=org_id)
         return client_id
 
@@ -109,7 +108,7 @@ class ApiGateway:
         service_account = KeycloakService.get_service_account_user(client_rep.get("id"))
 
         KeycloakService.add_user_to_group(
-            service_account.get("id"), GROUP_API_GW_USERS if env == "prod" else GROUP_API_GW_SANDBOX_USERS
+            service_account.get("id"), GROUP_API_GW_USERS if env == "production" else GROUP_API_GW_SANDBOX_USERS
         )
         KeycloakService.add_user_to_group(service_account.get("id"), GROUP_ACCOUNT_HOLDERS)
         org_name = cls._make_string_compatible(org.name)
@@ -158,10 +157,11 @@ class ApiGateway:
         )
 
     @classmethod
-    def get_api_keys(cls, org_id: int) -> List[Dict[str, any]]:
+    def get_api_keys(cls, org_id: int, skip_auth=False) -> List[Dict[str, any]]:
         """Get all api keys."""
         logger.debug("<get_api_keys ")
-        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
+        if skip_auth is False:
+            check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         api_keys_response = {"consumer": {"consumerKey": []}}
         env = current_app.config.get("ENVIRONMENT_NAME")
         email = cls._get_email_id(org_id, env)
@@ -202,12 +202,12 @@ class ApiGateway:
             return current_app.config.get("API_GW_CONSUMER_EMAIL")
 
         api_gw_email_suffix: str = current_app.config.get("API_GW_EMAIL_SUFFIX")
-        id_suffix = "" if env == "prod" else "-sandbox"
+        id_suffix = "" if env == "production" else "-sandbox"
         email_id = f"{org_id}{id_suffix}@{api_gw_email_suffix}"
         return email_id
 
     @classmethod
-    def _consumer_exists(cls, email, env):
+    def _consumer_exists(cls, email):
         """Return if customer exists with this email."""
         consumer_endpoint: str = current_app.config.get("API_GW_CONSUMERS_API_URL")
         gw_api_key: str = current_app.config.get("API_GW_KEY")

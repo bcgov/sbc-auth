@@ -100,7 +100,7 @@ export default class ConfigHelper {
   }
 
   static getPaymentPayeeName () {
-    return `${import.meta.env.VUE_APP_PAYMENT_PAYEE_NAME}` || 'BC Registries and Online Services'
+    return `${import.meta.env.VUE_APP_PAYMENT_PAYEE_NAME}` || 'BC Registries'
   }
 
   static getAuthAPIUrl () {

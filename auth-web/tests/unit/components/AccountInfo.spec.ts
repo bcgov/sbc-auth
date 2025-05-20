@@ -176,6 +176,8 @@ describe('AccountInfo.vue', () => {
     const MyStub = {
       template: '<div />'
     }
+    const $t = () => `test`
+    
     wrapper = mount(AccountInfo, {
       localVue,
       vuetify,
@@ -194,7 +196,8 @@ describe('AccountInfo.vue', () => {
         'v-btn': {
           template: `<button @click='$listeners.click'></button>`
         }
-      }
+      },
+      mocks: { $t }
     })
     expect(wrapper.find("[data-test='modal-suspend-account']").exists()).toBe(true)
     expect(wrapper.vm.isSuspensionReasonFormValid).toBeFalsy()

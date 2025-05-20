@@ -54,7 +54,7 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, monkeypatch):  # p
         f"/api/v1/orgs/{org_id}/api-keys",
         headers=headers,
         content_type="application/json",
-        data=json.dumps({"environment": "sandbox", "keyName": "TEST"}),
+        data=json.dumps({"keyName": "TEST"}),
     )
     assert rv.json["consumer"]["consumerKey"]
 
