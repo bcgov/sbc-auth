@@ -440,7 +440,7 @@ export default defineComponent({
           orgType: undefined,
           accessType: undefined,
           ...getOrgAndAccessTypeFromAccountType(state.searchParams.orgType),
-          includeMembers: true,
+          includeMembers: state.headersSelected.includes('Team Member'),
           page: page,
           limit: pageLimit
         }
@@ -521,6 +521,7 @@ export default defineComponent({
         }
       })
       state.filteredHeaders = state.headers.filter(item => item.visible)
+      debouncedOrgSearch()
     }
 
     function mounted () {
