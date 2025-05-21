@@ -196,6 +196,10 @@ export default defineComponent({
       currentOrganizationType: computed(() => orgStore.currentOrganizationType),
       currentOrgPaymentType: computed(() => orgStore.currentOrgPaymentType),
       isPaymentValid: computed(() => {
+        if (props.readOnly) {
+          return !!state.selectedPaymentMethod
+        }
+
         if (state.selectedPaymentMethod === PaymentTypes.PAD) {
           return state.isPADValid
         } else if (state.selectedPaymentMethod === PaymentTypes.BCOL) {
