@@ -200,14 +200,15 @@ export default defineComponent({
           return !!state.selectedPaymentMethod
         }
 
-        const validationMap = {
-          [PaymentTypes.PAD]: () => state.isPADValid,
-          [PaymentTypes.BCOL]: () => state.currentOrganization.bcolProfile?.password,
-          [PaymentTypes.EJV]: () => state.isEJVValid,
-          default: () => !!state.selectedPaymentMethod
+        if (state.selectedPaymentMethod === PaymentTypes.PAD) {
+          return state.isPADValid
+        } else if (state.selectedPaymentMethod === PaymentTypes.BCOL) {
+          return state.currentOrganization.bcolProfile?.password
+        } else if (state.selectedPaymentMethod === PaymentTypes.EJV) {
+          return state.isEJVValid
+        } else {
+          return !!state.selectedPaymentMethod
         }
-
-        return (validationMap[state.selectedPaymentMethod] || validationMap.default)()
       }),
       isPADValid: false,
       isEJVValid: false,
