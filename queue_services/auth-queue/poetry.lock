@@ -214,11 +214,11 @@ develop = false
 [package.dependencies]
 aiohttp = "^3.10.2"
 bcrypt = "^4.2.0"
-build-deps = {git = "https://github.com/bcgov/sbc-auth.git", rev = "dependency_upgrades_p2", subdirectory = "build-deps"}
+build-deps = {git = "https://github.com/seeker25/sbc-auth.git", rev = "27368", subdirectory = "build-deps"}
 cachelib = "^0.13.0"
 cattrs = "^23.2.3"
 flask-caching = {git = "https://github.com/pallets-eco/flask-caching.git", branch = "master"}
-flask-cors = "^5.0.0"
+flask-cors = "^6.0.0"
 flask-jwt-oidc = {git = "https://github.com/seeker25/flask-jwt-oidc.git", branch = "main"}
 flask-mail = "^0.10.0"
 flask-marshmallow = "^1.2.1"
@@ -242,7 +242,7 @@ sqlalchemy-utils = "^0.41.2"
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
 reference = "main"
-resolved_reference = "3c3596247eb88f13f479a8a04db4a6bb18528ac7"
+resolved_reference = "d2fdfc5a70f34722bb6c40a2e0672ae343a883c5"
 subdirectory = "auth-api"
 
 [[package]]
@@ -343,9 +343,9 @@ Werkzeug = "^3.0.0"
 
 [package.source]
 type = "git"
-url = "https://github.com/bcgov/sbc-auth.git"
-reference = "dependency_upgrades"
-resolved_reference = "a202363e5dd2e3b4770b1666ce43960eb02f8e4d"
+url = "https://github.com/seeker25/sbc-auth.git"
+reference = "27368"
+resolved_reference = "0f292b66446a94d6c8479b8a6ae3b91c2e46409f"
 subdirectory = "build-deps"
 
 [[package]]
@@ -1010,18 +1010,19 @@ resolved_reference = "494d49882537a6cbcfe3cb41c4df05ae8acf60ce"
 
 [[package]]
 name = "flask-cors"
-version = "5.0.0"
-description = "A Flask extension adding a decorator for CORS support"
+version = "6.0.0"
+description = "A Flask extension simplifying CORS support"
 optional = false
-python-versions = "*"
+python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "Flask_Cors-5.0.0-py2.py3-none-any.whl", hash = "sha256:b9e307d082a9261c100d8fb0ba909eec6a228ed1b60a8315fd85f783d61910bc"},
-    {file = "flask_cors-5.0.0.tar.gz", hash = "sha256:5aadb4b950c4e93745034594d9f3ea6591f734bb3662e16e255ffbf5e89c88ef"},
+    {file = "flask_cors-6.0.0-py3-none-any.whl", hash = "sha256:6332073356452343a8ccddbfec7befdc3fdd040141fe776ec9b94c262f058657"},
+    {file = "flask_cors-6.0.0.tar.gz", hash = "sha256:4592c1570246bf7beee96b74bc0adbbfcb1b0318f6ba05c412e8909eceec3393"},
 ]
 
 [package.dependencies]
-Flask = ">=0.9"
+flask = ">=0.9"
+Werkzeug = ">=0.7"
 
 [[package]]
 name = "flask-jwt-oidc"
