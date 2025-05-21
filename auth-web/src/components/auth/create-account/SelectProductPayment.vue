@@ -196,15 +196,18 @@ export default defineComponent({
       currentOrganizationType: computed(() => orgStore.currentOrganizationType),
       currentOrgPaymentType: computed(() => orgStore.currentOrgPaymentType),
       isPaymentValid: computed(() => {
-        if (state.selectedPaymentMethod === PaymentTypes.PAD && !props.readOnly) {
-          return state.isPADValid
-        } else if (state.selectedPaymentMethod === PaymentTypes.BCOL) {
-          return state.currentOrganization.bcolProfile?.password
-        } else if (state.selectedPaymentMethod === PaymentTypes.EJV) {
-          return state.isEJVValid
-        } else {
+        if (props.readOnly) {
           return !!state.selectedPaymentMethod
         }
+
+        const validationMap = {
+          [PaymentTypes.PAD]: () => state.isPADValid,
+          [PaymentTypes.BCOL]: () => state.currentOrganization.bcolProfile?.password,
+          [PaymentTypes.EJV]: () => state.isEJVValid,
+          default: () => !!state.selectedPaymentMethod
+        }
+
+        return (validationMap[state.selectedPaymentMethod] || validationMap.default)()
       }),
       isPADValid: false,
       isEJVValid: false,
