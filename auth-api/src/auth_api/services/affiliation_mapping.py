@@ -48,18 +48,15 @@ class AffiliationMappingService:  # pylint: disable=too-few-public-methods
         - If no filters are applied (initial load), show only top 5 pages max.
         - If filters are applied, allow full pagination.
         """
-        # Determine pagination settings
         limit = search_details.limit
         page = search_details.page
         MAX_INITIAL_PAGES = 5
 
-        # Check if it's an unfiltered "initial load"
-        is_initial_load = not any(
+        is_unfiltered_initial_load = not any(
             [search_details.identifier, search_details.status, search_details.name, search_details.type]
         )
 
-        # If initial load, restrict to first 5 pages
-        if is_initial_load and page > MAX_INITIAL_PAGES:
+        if is_unfiltered_initial_load and page > MAX_INITIAL_PAGES:
             return []
 
         offset_value = (page - 1) * limit
@@ -90,10 +87,9 @@ class AffiliationMappingService:  # pylint: disable=too-few-public-methods
     def from_entity_details(entity_details: dict) -> AffiliationMapping:
         """Create and populate an AffiliationMapping object from entity details."""
 
-        affiliation_mapping = AffiliationMapping()
-        affiliation_mapping.nr_identifier = entity_details.get("nrNumber")
-        affiliation_mapping.bootstrap_identifier = entity_details.get("bootstrapIdentifier")
-        affiliation_mapping.business_identifier = entity_details.get("identifier")
+        nr_identifier = entity_details.get("nrNumber")
+        bootstrap_identifier = entity_details.get("bootstrapIdentifier")
+        business_identifier = entity_details.get("identifier")
 
         def resolve_affiliation_id(identifier: str) -> Optional[int]:
             """Resolves the affiliation ID based on a given business identifier."""
@@ -108,14 +104,18 @@ class AffiliationMappingService:  # pylint: disable=too-few-public-methods
             )
             return result[0] if result else None
 
-        # Populate affiliation ids
-        affiliation_mapping.nr_affiliation_id = resolve_affiliation_id(affiliation_mapping.nr_identifier)
-        affiliation_mapping.bootstrap_affiliation_id = resolve_affiliation_id(affiliation_mapping.bootstrap_identifier)
-        affiliation_mapping.business_identifier_affiliation_id = resolve_affiliation_id(
-            affiliation_mapping.business_identifier
-        )
+        affiliation_mapping = db.session.query(AffiliationMapping).filter_by(nr_identifier=nr_identifier).first()
 
-        db.session.add(affiliation_mapping)
+        if not affiliation_mapping:
+            affiliation_mapping = AffiliationMapping()
+            affiliation_mapping.nr_identifier = nr_identifier
+            affiliation_mapping.nr_affiliation_id = resolve_affiliation_id(nr_identifier)
+            db.session.add(affiliation_mapping)
+
+        affiliation_mapping.bootstrap_identifier = bootstrap_identifier
+        affiliation_mapping.business_identifier = business_identifier
+        affiliation_mapping.bootstrap_affiliation_id = resolve_affiliation_id(bootstrap_identifier)
+        affiliation_mapping.business_identifier_affiliation_id = resolve_affiliation_id(business_identifier)
+
         db.session.commit()
-
         return affiliation_mapping

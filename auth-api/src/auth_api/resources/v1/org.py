@@ -383,7 +383,6 @@ def get_organization_affiliations(org_id):
 def new_affiliation_search(org_id):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
     search_details = AffiliationSearchDetails.from_request_args(request)
-    # get affiliation identifiers and the urls for the source data
     affiliations = AffiliationMappingService.get_filtered_affiliations(org_id, search_details)
     affiliations_details_list = asyncio.run(
         AffiliationService.get_affiliation_details(affiliations, search_details, org_id)
