@@ -31,7 +31,7 @@
           {{ payeeName }}
         </span>
         <span>
-          <strong>Account #:</strong>
+          <strong>Payment Identifier:</strong>
           {{ cfsAccountId }}
         </span>
       </div>
@@ -47,7 +47,7 @@
         <li>Sign in to your financial institution's online banking website or app</li>
         <li>Go to your financial institution's bill payment page</li>
         <li>Enter <b>"BC Registries"</b> as payee</li>
-        <li>Enter the following account number: <b>{{ cfsAccountId }}</b></li>
+        <li>Enter this payment identifier as your account number: <b>{{ cfsAccountId }}</b></li>
         <li>Submit your payment for the balance due</li>
       </ol>
       <v-divider class="my-6" />
