@@ -117,9 +117,7 @@ class AffiliationInvitation:
             )
             if to_org_dict := affiliation_invitation_dict.get("to_org"):
                 to_org = AffiliationInvitationData.OrgDetails(
-                    **_init_dict_for_dataclass_from_dict(
-                        AffiliationInvitationData.OrgDetails, to_org_dict
-                    )
+                    **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails, to_org_dict)
                 )
             else:
                 to_org = None
@@ -141,9 +139,7 @@ class AffiliationInvitation:
 
                 if entity_legal_type in ["SP", "GP"]:
                     entity_name_to_display = AffiliationInvitation.get_business_name_from_alternative_name(
-                        business_entity,
-                        entity_name_to_display,
-                        business_identifier
+                        business_entity, entity_name_to_display, business_identifier
                     )
 
                 entity_details = AffiliationInvitationData.EntityDetails(
@@ -365,12 +361,12 @@ class AffiliationInvitation:
     @staticmethod
     def get_business_name_from_alternative_name(business_data, default_name, business_identifier):
         """Get the business name from the alternative name list, if it exists."""
-        business_info_dict = business_data.get('business') if 'business' in business_data else business_data
+        business_info_dict = business_data.get("business") if "business" in business_data else business_data
 
-        if alternative_names := business_info_dict.get('alternateNames'):
+        if alternative_names := business_info_dict.get("alternateNames"):
             for alt_name in alternative_names:
-                if alt_name.get('identifier') == business_identifier:
-                    return alt_name.get('name')
+                if alt_name.get("identifier") == business_identifier:
+                    return alt_name.get("name")
         return default_name
 
     def update_affiliation_invitation(self, user, invitation_origin, affiliation_invitation_info: Dict):
