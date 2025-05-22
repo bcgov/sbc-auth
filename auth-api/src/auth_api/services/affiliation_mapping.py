@@ -16,7 +16,7 @@ import datetime
 from sqlalchemy import and_, or_
 import re
 from dataclasses import asdict
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from flask import current_app
 from requests.exceptions import HTTPError
@@ -119,3 +119,16 @@ class AffiliationMappingService:  # pylint: disable=too-few-public-methods
 
         db.session.commit()
         return affiliation_mapping
+
+    @staticmethod
+    def update_deleted_affiliation_id(nr_identifier: int) -> Optional[AffiliationMapping]:
+        """Find and return an existing AffiliationMapping by affiliation ID."""
+        if nr_identifier is None:
+            return None
+
+        model = AffiliationMapping.find_by_identifier(nr_identifier)
+        if not model:
+            return None
+        model.nr_affiliation_id = None
+        model.save()
+        return model

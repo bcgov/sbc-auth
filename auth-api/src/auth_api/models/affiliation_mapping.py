@@ -30,3 +30,10 @@ class AffiliationMapping(BaseModel):  # pylint: disable=too-few-public-methods, 
         Index("ix_bootstrap_identifier", "bootstrap_identifier"),
         Index("ix_nr_identifier", "nr_identifier"),
     )
+
+    @classmethod
+    def find_by_identifier(cls, nr_id: int):
+        """Find an Affiliation Mapping instance that matches the provided id."""
+        if nr_id is None:
+            return None
+        return cls.query.filter_by(nr_identifier=nr_id).first()
