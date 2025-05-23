@@ -23,7 +23,6 @@ from structured_logging import StructuredLogging
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import AffiliationMapping
-from auth_api.services.affiliation_mapping import AffiliationMappingService
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest, SimpleOrgSearch
@@ -37,6 +36,7 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import SimpleOrg as SimpleOrgService
 from auth_api.services import User as UserService
+from auth_api.services.affiliation_mapping import AffiliationMappingService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum

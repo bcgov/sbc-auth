@@ -25,6 +25,7 @@ from .affidavit import Affidavit
 from .affidavit_status import AffidavitStatus
 from .affiliation import Affiliation
 from .affiliation_invitation import AffiliationInvitation
+from .affiliation_mapping import AffiliationMapping
 from .business_size_code import BusinessSizeCode
 from .business_type_code import BusinessTypeCode
 from .contact import Contact
@@ -57,4 +58,3 @@ from .task import Task
 from .user import User
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
-from .affiliation_mapping import AffiliationMapping

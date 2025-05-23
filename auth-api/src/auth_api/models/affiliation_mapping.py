@@ -1,15 +1,13 @@
-from sqlalchemy import Index, and_, or_
 from typing import List
-from requests import session
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
 
+from requests import session
+from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, String, and_, or_
+from sqlalchemy.orm import aliased, joinedload, relationship
+
+from .affiliation import Affiliation as AffiliationModel
 from .base_model import BaseModel
 from .db import db
-from sqlalchemy.orm import aliased
-from sqlalchemy.orm import joinedload
 from .entity import Entity
-from .affiliation import Affiliation as AffiliationModel
 
 
 class AffiliationMapping(BaseModel):  # pylint: disable=too-few-public-methods, too-many-instance-attributes

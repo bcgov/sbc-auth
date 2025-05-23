@@ -13,21 +13,21 @@
 # limitations under the License.
 """Service for managing Affiliation Mapping data."""
 import datetime
-from sqlalchemy import and_, or_
 import re
 from dataclasses import asdict
 from typing import Dict, List, Optional, Tuple
 
 from flask import current_app
 from requests.exceptions import HTTPError
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import contains_eager, subqueryload
 
 from auth_api.exceptions.errors import Error
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
-from auth_api.models.entity import Entity
 from auth_api.models.affiliation_mapping import AffiliationMapping
 from auth_api.models.dataclass import AffiliationSearchDetails
+from auth_api.models.entity import Entity
 
 
 class AffiliationMappingService:  # pylint: disable=too-few-public-methods
