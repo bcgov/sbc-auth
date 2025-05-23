@@ -21,7 +21,6 @@ from typing import Dict, List, Optional, Tuple
 from flask import current_app
 from requests.exceptions import HTTPError
 from sqlalchemy.orm import contains_eager, subqueryload
-from structured_logging import StructuredLogging
 
 from auth_api.exceptions.errors import Error
 from auth_api.models import db
@@ -29,8 +28,6 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.entity import Entity
 from auth_api.models.affiliation_mapping import AffiliationMapping
 from auth_api.models.dataclass import AffiliationSearchDetails
-
-logger = StructuredLogging.get_logger()
 
 
 class AffiliationMappingService:  # pylint: disable=too-few-public-methods
@@ -112,14 +109,14 @@ class AffiliationMappingService:  # pylint: disable=too-few-public-methods
             affiliation_mapping = AffiliationMapping()
             affiliation_mapping.nr_identifier = nr_identifier
             affiliation_mapping.nr_affiliation_id = resolve_affiliation_id(nr_identifier)
-            db.session.add(affiliation_mapping)
+            affiliation_mapping.save()
 
         affiliation_mapping.bootstrap_identifier = bootstrap_identifier
         affiliation_mapping.business_identifier = business_identifier
         affiliation_mapping.bootstrap_affiliation_id = resolve_affiliation_id(bootstrap_identifier)
         affiliation_mapping.business_identifier_affiliation_id = resolve_affiliation_id(business_identifier)
 
-        db.session.commit()
+        affiliation_mapping.save()
         return affiliation_mapping
 
     @staticmethod
@@ -128,8 +125,7 @@ class AffiliationMappingService:  # pylint: disable=too-few-public-methods
         if nr_identifier is None:
             return None
 
-        model = AffiliationMapping.find_by_identifier(nr_identifier)
-        if not model:
+        if not (model := AffiliationMapping.find_by_identifier(nr_identifier)):
             return None
         model.nr_affiliation_id = None
         model.save()

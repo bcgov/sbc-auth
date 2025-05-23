@@ -18,14 +18,18 @@ class AffiliationMapping(BaseModel):  # pylint: disable=too-few-public-methods, 
     __tablename__ = "affiliation_mapping"
 
     id = Column(Integer, primary_key=True)
-    business_identifier = Column(
-        "business_identifier", String(75), index=True, unique=True, nullable=True
-    )  # business identifier
-    bootstrap_identifier = Column("bootstrap_identifier", String(75), index=True, unique=True, nullable=True)  # temp
-    nr_identifier = Column("nr_identifier", String(75), index=True, unique=True, nullable=True)  # NR
+    business_identifier = Column("business_identifier", String(75), index=True, unique=True, nullable=True)
+    bootstrap_identifier = Column("bootstrap_identifier", String(75), index=True, unique=True, nullable=True)
+    nr_identifier = Column("nr_identifier", String(75), index=True, unique=True, nullable=True)
     business_identifier_affiliation_id = Column(Integer, ForeignKey("affiliations.id"), nullable=True)
     bootstrap_affiliation_id = Column(Integer, ForeignKey("affiliations.id"), nullable=True)
     nr_affiliation_id = Column(Integer, ForeignKey("affiliations.id"), nullable=True)
+
+    business_identifier_affiliation = relationship(
+        "Affiliation", foreign_keys=[business_identifier_affiliation_id], lazy="joined"
+    )
+    bootstrap_affiliation = relationship("Affiliation", foreign_keys=[bootstrap_affiliation_id], lazy="joined")
+    nr_affiliation = relationship("Affiliation", foreign_keys=[nr_affiliation_id], lazy="joined")
 
     @classmethod
     def find_by_identifier(cls, nr_id: int):
