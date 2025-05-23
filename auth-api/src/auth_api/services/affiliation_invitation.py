@@ -115,40 +115,47 @@ class AffiliationInvitation:
                     AffiliationInvitationData.OrgDetails, affiliation_invitation_dict["from_org"]
                 )
             )
-            if to_org := affiliation_invitation_dict.get("to_org"):
+            if to_org_dict := affiliation_invitation_dict.get("to_org"):
                 to_org = AffiliationInvitationData.OrgDetails(
-                    **_init_dict_for_dataclass_from_dict(
-                        AffiliationInvitationData.OrgDetails, affiliation_invitation_dict["to_org"]
-                    )
+                    **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails, to_org_dict)
                 )
+            else:
+                to_org = None
 
             business_entity = next(
                 (
-                    business_entity
-                    for business_entity in business_entities
-                    if affiliation_invitation_dict["business_identifier"] == business_entity["identifier"]
+                    be
+                    for be in business_entities
+                    if affiliation_invitation_dict["business_identifier"] == be["identifier"]
                 ),
                 None,
             )
 
-            entity = (
-                AffiliationInvitationData.EntityDetails(
-                    business_identifier=business_entity["identifier"],
-                    name=business_entity["legalName"],
-                    state=business_entity["state"],
-                    corp_type=business_entity["legalType"],
+            entity_details = None
+            if business_entity:
+                entity_name_to_display = business_entity.get("legalName")
+                entity_legal_type = business_entity.get("legalType")
+                business_identifier = business_entity.get("identifier")
+
+                if entity_legal_type in ["SP", "GP"]:
+                    entity_name_to_display = AffiliationInvitation.get_business_name_from_alternative_name(
+                        business_entity, entity_name_to_display, business_identifier
+                    )
+
+                entity_details = AffiliationInvitationData.EntityDetails(
+                    business_identifier=business_identifier,
+                    name=entity_name_to_display,
+                    state=business_entity.get("state"),
+                    corp_type=entity_legal_type,
                     corp_sub_type=business_entity.get("legalSubType", None),
                 )
-                if business_entity
-                else None
-            )
 
             aid = AffiliationInvitationData(
                 **{
                     **_init_dict_for_dataclass_from_dict(AffiliationInvitationData, affiliation_invitation_dict),
                     "from_org": from_org,
                     "to_org": to_org,
-                    "entity": entity,
+                    "entity": entity_details,
                 }
             )
             result.append(aid)
@@ -352,16 +359,15 @@ class AffiliationInvitation:
         return get_business_response.json()["businessEntities"]
 
     @staticmethod
-    def get_business_name_from_alternative_name(business, business_name, business_identifier):
-        """Firms use alternative names rather than legalName. Reassign business_name if we find an alternative name."""
-        alternative_names = business["business"].get("alternateNames")
-        if alternative_names is not None:
-            for alt_name in alternative_names:
-                if alt_name.get("identifier") == business_identifier and alt_name.get("name"):
-                    business_name = alt_name.get("name")
-                    break
+    def get_business_name_from_alternative_name(business_data, default_name, business_identifier):
+        """Get the business name from the alternative name list, if it exists."""
+        business_info_dict = business_data.get("business") if "business" in business_data else business_data
 
-        return business_name
+        if alternative_names := business_info_dict.get("alternateNames"):
+            for alt_name in alternative_names:
+                if alt_name.get("identifier") == business_identifier:
+                    return alt_name.get("name")
+        return default_name
 
     def update_affiliation_invitation(self, user, invitation_origin, affiliation_invitation_info: Dict):
         """Update the specified affiliation invitation with new data."""
