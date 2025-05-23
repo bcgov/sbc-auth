@@ -505,6 +505,7 @@ def delete_org_affiliation_by_business_identifier(org_id, business_identifier):
             reset_passcode=request_json.get("resetPasscode", False),
             log_delete_draft=request_json.get("logDeleteDraft", False),
         )
+        AffiliationMappingService.update_deleted_affiliation_id(business_identifier)
         AffiliationService.delete_affiliation(delete_affiliation_request)
         response, status = {}, HTTPStatus.OK
 

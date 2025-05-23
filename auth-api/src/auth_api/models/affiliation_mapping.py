@@ -18,18 +18,14 @@ class AffiliationMapping(BaseModel):  # pylint: disable=too-few-public-methods, 
     __tablename__ = "affiliation_mapping"
 
     id = Column(Integer, primary_key=True)
-    business_identifier = Column("business_identifier", String(75), unique=True, nullable=True)  # business identifier
-    bootstrap_identifier = Column("bootstrap_identifier", String(75), unique=True, nullable=True)  # temp
-    nr_identifier = Column("nr_identifier", String(75), unique=True, nullable=True)  # NR
+    business_identifier = Column(
+        "business_identifier", String(75), index=True, unique=True, nullable=True
+    )  # business identifier
+    bootstrap_identifier = Column("bootstrap_identifier", String(75), index=True, unique=True, nullable=True)  # temp
+    nr_identifier = Column("nr_identifier", String(75), index=True, unique=True, nullable=True)  # NR
     business_identifier_affiliation_id = Column(Integer, ForeignKey("affiliations.id"), nullable=True)
     bootstrap_affiliation_id = Column(Integer, ForeignKey("affiliations.id"), nullable=True)
-    nr_affiliation_id = Column(Integer, ForeignKey("affiliations.id", ondelete="CASCADE"), nullable=True)
-
-    __table_args__ = (
-        Index("ix_business_identifier", "business_identifier"),
-        Index("ix_bootstrap_identifier", "bootstrap_identifier"),
-        Index("ix_nr_identifier", "nr_identifier"),
-    )
+    nr_affiliation_id = Column(Integer, ForeignKey("affiliations.id"), nullable=True)
 
     @classmethod
     def find_by_identifier(cls, nr_id: int):

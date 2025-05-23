@@ -104,7 +104,9 @@ class AffiliationMappingService:  # pylint: disable=too-few-public-methods
             )
             return result[0] if result else None
 
-        affiliation_mapping = db.session.query(AffiliationMapping).filter_by(nr_identifier=nr_identifier).first()
+        affiliation_mapping = None
+        if nr_identifier:
+            affiliation_mapping = db.session.query(AffiliationMapping).filter_by(nr_identifier=nr_identifier).first()
 
         if not affiliation_mapping:
             affiliation_mapping = AffiliationMapping()

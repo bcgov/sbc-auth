@@ -1,8 +1,8 @@
-"""Create affiliation_mapping table
+"""empty message
 
-Revision ID: 84591539b298
+Revision ID: 6f2c09061fd3
 Revises: bddf9fe7468c
-Create Date: 2025-05-20 13:35:10.295447
+Create Date: 2025-05-22 17:21:47.908470
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '84591539b298'
+revision = '6f2c09061fd3'
 down_revision = 'bddf9fe7468c'
 branch_labels = None
 depends_on = None
@@ -34,16 +34,14 @@ def upgrade():
     sa.ForeignKeyConstraint(['business_identifier_affiliation_id'], ['affiliations.id'], ),
     sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['nr_affiliation_id'], ['affiliations.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('bootstrap_identifier'),
-    sa.UniqueConstraint('business_identifier'),
-    sa.UniqueConstraint('nr_identifier')
+    sa.ForeignKeyConstraint(['nr_affiliation_id'], ['affiliations.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('affiliation_mapping', schema=None) as batch_op:
-        batch_op.create_index('ix_bootstrap_identifier', ['bootstrap_identifier'], unique=False)
-        batch_op.create_index('ix_business_identifier', ['business_identifier'], unique=False)
-        batch_op.create_index('ix_nr_identifier', ['nr_identifier'], unique=False)
+        batch_op.create_index(batch_op.f('ix_affiliation_mapping_bootstrap_identifier'), ['bootstrap_identifier'], unique=True)
+        batch_op.create_index(batch_op.f('ix_affiliation_mapping_business_identifier'), ['business_identifier'], unique=True)
+        batch_op.create_index(batch_op.f('ix_affiliation_mapping_nr_identifier'), ['nr_identifier'], unique=True)
+
 
     # ### end Alembic commands ###
 
