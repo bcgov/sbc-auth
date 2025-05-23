@@ -40,7 +40,9 @@ class AffiliationMappingService:  # pylint: disable=too-few-public-methods
         """Return an AffiliationMapping Service."""
         self._model = model
 
-    def get_filtered_affiliations(org_id: int, search_details: AffiliationSearchDetails) -> List[AffiliationModel]:
+    def get_filtered_affiliations(
+        self, org_id: int, search_details: AffiliationSearchDetails
+    ) -> List[AffiliationModel]:
         """Get affiliations from DB based on priority mapping logic.
         - If no filters are applied (initial load), show only top 5 pages max.
         - If filters are applied, allow full pagination.
