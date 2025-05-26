@@ -88,14 +88,12 @@ def setup_org_and_entity(user):
                     "identifier": "FM0000123",
                     "legalName": "John Smith",
                     "legalType": "SP",
-                    "alternateNames": [
-                        {"identifier": "FM0000123", "name": "Smith's Construction"}
-                    ]
+                    "alternateNames": [{"identifier": "FM0000123", "name": "Smith's Construction"}],
                 }
             },
             "John Smith",
             "FM0000123",
-            "Smith's Construction"
+            "Smith's Construction",
         ),
         # Test case 2: Direct business object structure with matching alternate name
         (
@@ -103,13 +101,11 @@ def setup_org_and_entity(user):
                 "identifier": "FM0000123",
                 "legalName": "John Smith",
                 "legalType": "SP",
-                "alternateNames": [
-                    {"identifier": "FM0000123", "name": "Smith's Construction"}
-                ]
+                "alternateNames": [{"identifier": "FM0000123", "name": "Smith's Construction"}],
             },
             "John Smith",
             "FM0000123",
-            "Smith's Construction"
+            "Smith's Construction",
         ),
         # Test case 3: No matching alternate name (different identifier)
         (
@@ -118,14 +114,12 @@ def setup_org_and_entity(user):
                     "identifier": "FM0000123",
                     "legalName": "John Smith",
                     "legalType": "SP",
-                    "alternateNames": [
-                        {"identifier": "FM0000999", "name": "Other Business"}
-                    ]
+                    "alternateNames": [{"identifier": "FM0000999", "name": "Other Business"}],
                 }
             },
             "John Smith",
             "FM0000123",
-            "John Smith"  # Should return default name
+            "John Smith",  # Should return default name
         ),
         # Test case 4: No alternate names at all
         (
@@ -134,25 +128,19 @@ def setup_org_and_entity(user):
                     "identifier": "FM0000123",
                     "legalName": "John Smith",
                     "legalType": "SP",
-                    "alternateNames": []
+                    "alternateNames": [],
                 }
             },
             "John Smith",
             "FM0000123",
-            "John Smith"  # Should return default name
+            "John Smith",  # Should return default name
         ),
         # Test case 5: alternateNames field missing
         (
-            {
-                "business": {
-                    "identifier": "FM0000123",
-                    "legalName": "John Smith",
-                    "legalType": "SP"
-                }
-            },
+            {"business": {"identifier": "FM0000123", "legalName": "John Smith", "legalType": "SP"}},
             "John Smith",
             "FM0000123",
-            "John Smith"  # Should return default name
+            "John Smith",  # Should return default name
         ),
         # Test case 6: Multiple alternate names, only first matching one is used
         (
@@ -163,15 +151,15 @@ def setup_org_and_entity(user):
                     "legalType": "SP",
                     "alternateNames": [
                         {"identifier": "FM0000123", "name": "Smith's Construction"},
-                        {"identifier": "FM0000123", "name": "John's Business"}
-                    ]
+                        {"identifier": "FM0000123", "name": "John's Business"},
+                    ],
                 }
             },
             "John Smith",
             "FM0000123",
-            "Smith's Construction"  # Should return first matching alternate name
+            "Smith's Construction",  # Should return first matching alternate name
         ),
-    ]
+    ],
 )
 def test_get_business_name_from_alternative_name(business_data, default_name, business_identifier, expected_name):
     """Test get_business_name_from_alternative_name method with various scenarios."""
@@ -193,12 +181,10 @@ def test_get_business_name_from_alternative_name(business_data, default_name, bu
                     "legalName": "John Smith",
                     "legalType": "SP",
                     "state": "ACTIVE",
-                    "alternateNames": [
-                        {"identifier": "FM0000123", "name": "Smith's Construction"}
-                    ]
+                    "alternateNames": [{"identifier": "FM0000123", "name": "Smith's Construction"}],
                 }
             ],
-            ["Smith's Construction"]  # Should use alternate name
+            ["Smith's Construction"],  # Should use alternate name
         ),
         # Test case 2: GP firm with alternate name
         (
@@ -208,24 +194,15 @@ def test_get_business_name_from_alternative_name(business_data, default_name, bu
                     "legalName": "Smith & Jones",
                     "legalType": "GP",
                     "state": "ACTIVE",
-                    "alternateNames": [
-                        {"identifier": "FM0000124", "name": "Smith Jones Construction Partnership"}
-                    ]
+                    "alternateNames": [{"identifier": "FM0000124", "name": "Smith Jones Construction Partnership"}],
                 }
             ],
-            ["Smith Jones Construction Partnership"]  # Should use alternate name
+            ["Smith Jones Construction Partnership"],  # Should use alternate name
         ),
         # Test case 3: SP firm without alternate name
         (
-            [
-                {
-                    "identifier": "FM0000125",
-                    "legalName": "Jane Doe",
-                    "legalType": "SP",
-                    "state": "ACTIVE"
-                }
-            ],
-            ["Jane Doe"]  # Should use legal name
+            [{"identifier": "FM0000125", "legalName": "Jane Doe", "legalType": "SP", "state": "ACTIVE"}],
+            ["Jane Doe"],  # Should use legal name
         ),
         # Test case 4: Non-SP/GP firm (should always use legal name)
         (
@@ -235,12 +212,10 @@ def test_get_business_name_from_alternative_name(business_data, default_name, bu
                     "legalName": "ABC Corp",
                     "legalType": "BC",
                     "state": "ACTIVE",
-                    "alternateNames": [
-                        {"identifier": "BC0000126", "name": "ABC Corporation"}
-                    ]
+                    "alternateNames": [{"identifier": "BC0000126", "name": "ABC Corporation"}],
                 }
             ],
-            ["ABC Corp"]  # Should use legal name even with alternate name
+            ["ABC Corp"],  # Should use legal name even with alternate name
         ),
         # Test case 5: Mixed firms
         (
@@ -250,50 +225,45 @@ def test_get_business_name_from_alternative_name(business_data, default_name, bu
                     "legalName": "Alice Smith",
                     "legalType": "SP",
                     "state": "ACTIVE",
-                    "alternateNames": [
-                        {"identifier": "FM0000127", "name": "Alice's Bakery"}
-                    ]
+                    "alternateNames": [{"identifier": "FM0000127", "name": "Alice's Bakery"}],
                 },
                 {
                     "identifier": "BC0000128",
                     "legalName": "XYZ Inc",
                     "legalType": "BC",
                     "state": "ACTIVE",
-                    "alternateNames": [
-                        {"identifier": "BC0000128", "name": "XYZ Corporation"}
-                    ]
-                }
+                    "alternateNames": [{"identifier": "BC0000128", "name": "XYZ Corporation"}],
+                },
             ],
-            ["Alice's Bakery", "XYZ Inc"]  # SP uses alternate, BC uses legal
+            ["Alice's Bakery", "XYZ Inc"],  # SP uses alternate, BC uses legal
         ),
-    ]
+    ],
 )
 def test_enrich_affiliation_invitations_with_business_name_logic(monkeypatch, business_entities, expected_names):
     """Test that enrich_affiliation_invitations_dict_list_with_business_data uses correct names for SP/GP firms."""
+
     # Mock the _get_multiple_business_details method to return our test data
     def mock_get_multiple_business_details(business_identifiers, token):
         return business_entities
 
     monkeypatch.setattr(
         "auth_api.services.affiliation_invitation.AffiliationInvitation._get_multiple_business_details",
-        mock_get_multiple_business_details
+        mock_get_multiple_business_details,
     )
 
     # Create test affiliation invitation dictionaries
     affiliation_invitation_dicts = []
     for i, business_entity in enumerate(business_entities):
-        affiliation_invitation_dicts.append({
-            "id": i + 1,
-            "business_identifier": business_entity["identifier"],
-            "from_org": {
-                "id": 100,
-                "name": "Test Org",
-                "org_type": "PREMIUM"
-            },
-            "to_org": None,
-            "status": "PENDING",
-            "type": "EMAIL"
-        })
+        affiliation_invitation_dicts.append(
+            {
+                "id": i + 1,
+                "business_identifier": business_entity["identifier"],
+                "from_org": {"id": 100, "name": "Test Org", "org_type": "PREMIUM"},
+                "to_org": None,
+                "status": "PENDING",
+                "type": "EMAIL",
+            }
+        )
 
     # Call the method under test
     result = AffiliationInvitationService.enrich_affiliation_invitations_dict_list_with_business_data(
@@ -318,27 +288,26 @@ def test_enrich_affiliation_invitations_empty_list():
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_enrich_affiliation_invitations_missing_business_entity(monkeypatch):
     """Test handling when business entity is not found in the response."""
+
     # Mock to return empty list (no matching business entities)
     def mock_get_multiple_business_details(business_identifiers, token):
         return []
 
     monkeypatch.setattr(
         "auth_api.services.affiliation_invitation.AffiliationInvitation._get_multiple_business_details",
-        mock_get_multiple_business_details
+        mock_get_multiple_business_details,
     )
 
-    affiliation_invitation_dicts = [{
-        "id": 1,
-        "business_identifier": "FM0000999",
-        "from_org": {
-            "id": 100,
-            "name": "Test Org",
-            "org_type": "PREMIUM"
-        },
-        "to_org": None,
-        "status": "PENDING",
-        "type": "EMAIL"
-    }]
+    affiliation_invitation_dicts = [
+        {
+            "id": 1,
+            "business_identifier": "FM0000999",
+            "from_org": {"id": 100, "name": "Test Org", "org_type": "PREMIUM"},
+            "to_org": None,
+            "status": "PENDING",
+            "type": "EMAIL",
+        }
+    ]
 
     result = AffiliationInvitationService.enrich_affiliation_invitations_dict_list_with_business_data(
         affiliation_invitation_dicts
