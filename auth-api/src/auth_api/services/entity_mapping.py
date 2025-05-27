@@ -113,7 +113,7 @@ class EntityMappingService:
         This joins the affiliation and entity tables, then finds records where there is no
         matching entity mapping for any of the identifiers (business, bootstrap, or NR).
         """
-        return (
+        results = (
             db.session.query(Entity.business_identifier)
             .join(AffiliationModel, Entity.id == AffiliationModel.entity_id)
             .outerjoin(
@@ -134,6 +134,7 @@ class EntityMappingService:
             .filter(AffiliationModel.org_id == org_id, EntityMapping.id.is_(None), Entity.is_loaded_lear.is_(True))
             .all()
         )
+        return [row[0] for row in results]
 
     @staticmethod
     def fetch_entity_mappings_details(org_id: int):
