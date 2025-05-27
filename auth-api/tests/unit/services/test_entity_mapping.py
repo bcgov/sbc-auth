@@ -16,44 +16,45 @@ from tests.utilities.factory_utils import factory_org_service
     [
         (
             "all_identifiers_present",
-            {'business_identifier': 'BC5234567',
-             'bootstrap_identifier': 'Txxxxxxxxx',
-             'nr_identifier': 'NR5234567'},
+            # This payload comes straight from LEAR into the affiliation POST call.
+            {'identifier': 'BC5234567',
+             'bootstrapIdentifier': 'Txxxxxxxxx',
+             'nrNumber': 'NR5234567'},
             1
         ),
         (
             "business_and_bootstrap_only",
             {
-                'business_identifier': 'BC5234567',
-                'bootstrap_identifier': 'Txxxxxxxxx',
-                'nr_identifier': None
+                'identifier': 'BC5234567',
+                'bootstrapIdentifier': 'Txxxxxxxxx',
+                'nrNumber': None
             },
             1
         ),
         (
             "bootstrap_and_nr_only",
             {
-                'business_identifier': None,
-                'bootstrap_identifier': 'Txxxxxxxxx',
-                'nr_identifier': 'NR5234567'
+                'identifier': None,
+                'bootstrapIdentifier': 'Txxxxxxxxx',
+                'nrNumber': 'NR5234567'
             },
             1
         ),
         (
             "nr_only",
             {
-                'business_identifier': None,
-                'bootstrap_identifier': None,
-                'nr_identifier': 'NR5234567'
+                'identifier': None,
+                'bootstrapIdentifier': None,
+                'nrNumber': 'NR5234567'
             },
             1
         ),
         (
             "no_match",
             {
-                'business_identifier': 'DIFFERENT',
-                'bootstrap_identifier': 'DIFFERENT',
-                'nr_identifier': 'DIFFERENT'
+                'identifier': 'DIFFERENT',
+                'bootstrapIdentifier': 'DIFFERENT',
+                'nrNumber': 'DIFFERENT'
             },
             0
         ),
@@ -70,7 +71,6 @@ def test_get_filtered_affiliations_identifier_matches(
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary["id"]
 
-
     entity1 = Entity(business_identifier='BC5234567', corp_type_code='BC').save()
     AffiliationModel(org_id=org_id, entity_id=entity1.id).save()
     entity2 = Entity(business_identifier='Txxxxxxxxx', corp_type_code='TMP').save()
@@ -78,7 +78,7 @@ def test_get_filtered_affiliations_identifier_matches(
     entity3 = Entity(business_identifier='NR5234567', corp_type_code='NR').save()
     AffiliationModel(org_id=org_id, entity_id=entity3.id).save()
 
-    EntityMapping(**entity_mapping_data).save()
+    service.from_entity_details(entity_mapping_data)
 
     search_details = AffiliationSearchDetails(page=1, limit=100)
     results = service.get_filtered_affiliations(org_id, search_details)
