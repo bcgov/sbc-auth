@@ -25,6 +25,8 @@ from sqlalchemy_utils import create_database, database_exists, drop_database
 from auth_api import create_app, setup_jwt_manager
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models import db as _db
+from auth_api.models import Org
+from auth_api.models.org import receive_before_update
 from auth_api.utils.auth import jwt as _jwt
 
 
@@ -338,3 +340,10 @@ def mock_pub_sub_call(mocker):
             raise CancelledError("This is a mock")
 
     mocker.patch("google.cloud.pubsub_v1.PublisherClient", PublisherMock)
+
+@pytest.fixture
+def disable_org_update_listener():
+    """Temporarily remove before update listener on Org then re-add after test."""
+    event.remove(Org, "before_update", receive_before_update)
+    yield
+    event.listen(Org, "before_update", receive_before_update)
