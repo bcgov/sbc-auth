@@ -341,6 +341,7 @@ def mock_pub_sub_call(mocker):
 
     mocker.patch("google.cloud.pubsub_v1.PublisherClient", PublisherMock)
 
+
 @pytest.fixture
 def disable_org_update_listener():
     """Temporarily remove before update listener on Org then re-add after test."""

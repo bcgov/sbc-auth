@@ -36,7 +36,7 @@ fake = Faker()
 
 def generate_claims_gov_user_payload():
     """Generate unique claims payload with different names."""
-    return  {
+    return {
         "iss": CONFIG.JWT_OIDC_TEST_ISSUER,
         "firstname": fake.first_name(),
         "lastname": fake.last_name(),
@@ -45,15 +45,17 @@ def generate_claims_gov_user_payload():
         "loginSource": LoginSource.IDIR.value,
     }
 
+
 def generate_gov_user_headers(jwt):
     """Create KC User and generate JWT for headers."""
     claims = generate_claims_gov_user_payload()
     request = KeycloakScenario.create_user_by_user_info(claims)
     KeycloakService.add_user(request, return_if_exists=True)
     kc_user = KeycloakService.get_user_by_username(request.user_name)
-    claims['id'] = kc_user.id
-    claims['sub'] = kc_user.id
+    claims["id"] = kc_user.id
+    claims["sub"] = kc_user.id
     return kc_user, factory_auth_header(jwt=jwt, claims=claims)
+
 
 def assert_invite(client, org_id, headers_inviter, headers_invitee, kc_invitee, security_group):
     """Assert invitation send and accept flow."""
@@ -64,7 +66,7 @@ def assert_invite(client, org_id, headers_inviter, headers_invitee, kc_invitee, 
         content_type="application/json",
     )
     invitation_dict = json.loads(rv.data)
-    invitation_token = invitation_dict['token']
+    invitation_token = invitation_dict["token"]
 
     rv = client.put(
         "/api/v1/invitations/tokens/{}".format(invitation_token),
@@ -80,12 +82,13 @@ def assert_invite(client, org_id, headers_inviter, headers_invitee, kc_invitee, 
     assert kc_user_groups
     assert any(group["name"] == security_group for group in kc_user_groups)
 
+
 @pytest.mark.parametrize(
     "security_group, org_type",
     [
         (GROUP_MAXIMUS_STAFF, OrgType.MAXIMUS_STAFF.value),
         (GROUP_CONTACT_CENTRE_STAFF, OrgType.CC_STAFF.value),
-        (GROUP_SBC_STAFF, OrgType.SBC_STAFF.value)
+        (GROUP_SBC_STAFF, OrgType.SBC_STAFF.value),
     ],
 )
 def test_keycloak_groups_by_org_type(security_group, org_type, client, jwt, session, disable_org_update_listener):
@@ -99,14 +102,17 @@ def test_keycloak_groups_by_org_type(security_group, org_type, client, jwt, sess
     client.post("/api/v1/users", headers=headers_staff_admin, content_type="application/json")
 
     rv = client.post(
-        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org_govm), headers=headers_staff_admin, content_type="application/json"
+        "/api/v1/orgs",
+        data=json.dumps(TestOrgInfo.org_govm),
+        headers=headers_staff_admin,
+        content_type="application/json",
     )
     dictionary = json.loads(rv.data)
     assert dictionary.get("branchName") == TestOrgInfo.org_govm.get("branchName")
     org_id = dictionary["id"]
     org_type_model = OrgTypeModel.get_type_for_code(org_type)
     org = OrgModel.find_by_org_id(org_id)
-    org.org_type = org_type_model # Requires the disable_org_update_listener fixture to bypass type_code change check
+    org.org_type = org_type_model  # Requires the disable_org_update_listener fixture to bypass type_code change check
     org.save()
 
     # Confirm account create admin invitation flow and added security group - staff user inviting
@@ -124,7 +130,7 @@ def test_keycloak_groups_by_org_type(security_group, org_type, client, jwt, sess
 
     # Confirm deactivating membership also removed security group
     rv = client.patch(
-        "/api/v1/orgs/{}/members/{}".format(org_id, members[1]['id']),
+        "/api/v1/orgs/{}/members/{}".format(org_id, members[1]["id"]),
         headers=headers_gov_account_admin,
         data=json.dumps({"status": "INACTIVE"}),
         content_type="application/json",
