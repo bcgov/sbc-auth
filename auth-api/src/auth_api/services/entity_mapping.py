@@ -91,14 +91,11 @@ class EntityMappingService:
                 )
             )
             .first()
-        )
+        ) or EntityMapping()
 
-        if not affiliation_mapping:
-            affiliation_mapping = EntityMapping()
-
-        affiliation_mapping.nr_identifier = nr_identifier
-        affiliation_mapping.bootstrap_identifier = bootstrap_identifier
-        affiliation_mapping.business_identifier = business_identifier
+        affiliation_mapping.nr_identifier = nr_identifier or affiliation_mapping.nr_identifier
+        affiliation_mapping.bootstrap_identifier = bootstrap_identifier or affiliation_mapping.bootstrap_identifier
+        affiliation_mapping.business_identifier = business_identifier or affiliation_mapping.business_identifier
 
         if use_flush:
             affiliation_mapping.flush()

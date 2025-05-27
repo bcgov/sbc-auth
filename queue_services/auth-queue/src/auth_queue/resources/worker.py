@@ -23,7 +23,7 @@ from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import db
 from auth_api.models.pubsub_message_processing import PubSubMessageProcessing
-from auth_api.services.affiliation_mapping import AffiliationMappingService
+from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.services.gcp_queue import queue
 from auth_api.services.rest_service import RestService
 from auth_api.utils.account_mailer import publish_to_mailer
@@ -204,5 +204,5 @@ def process_name_events(event_message: SimpleCloudEvent):
 
     nr_entity.save()
     entity_details = {"nrNumber": nr_number}
-    AffiliationMappingService.from_entity_details(entity_details)
+    EntityMappingService.from_entity_details(entity_details)
     logger.debug('<<<<<<<process_name_events<<<<<<<<<<')
