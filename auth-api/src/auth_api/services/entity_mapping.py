@@ -30,15 +30,11 @@ from auth_api.services.rest_service import RestService
 logger = StructuredLogging.get_logger()
 
 
-class EntityMappingService:  # pylint: disable=too-few-public-methods
+class EntityMappingService:
     """Manages all aspect of Entity Mapping data.
 
     This manages updating, retrieving Affiliations in Entity Mapping data via the EntityMapping model.
     """
-
-    def __init__(self, model):
-        """Return an EntityMapping Service."""
-        self._model = model
 
     @staticmethod
     def get_filtered_affiliations(org_id: int, search_details: AffiliationSearchDetails) -> List[AffiliationModel]:

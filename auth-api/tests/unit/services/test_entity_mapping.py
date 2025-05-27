@@ -37,7 +37,7 @@ from tests.utilities.factory_utils import factory_org_service
 )
 def test_get_filtered_affiliations_identifier_matches(test_name, entity_mapping_data, expected_count):
     """Test that affiliations are returned based on identifier matching logic."""
-    service = EntityMappingService(EntityMapping)
+    service = EntityMappingService()
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary["id"]
