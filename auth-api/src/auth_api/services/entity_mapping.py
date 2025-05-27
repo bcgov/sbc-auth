@@ -68,7 +68,7 @@ class EntityMappingService:  # pylint: disable=too-few-public-methods
                     ),
                 ),
             )
-            .filter(AffiliationModel.org_id == int(org_id or -1), Entity.is_loaded_lear == True)
+            .filter(AffiliationModel.org_id == int(org_id or -1), Entity.is_loaded_lear.is_(True))
         ).order_by(AffiliationModel.created.desc())
 
         if paginate_for_non_search:
@@ -135,7 +135,7 @@ class EntityMappingService:  # pylint: disable=too-few-public-methods
                     ),
                 ),
             )
-            .filter(AffiliationModel.org_id == org_id, EntityMapping.id.is_(None), Entity.is_loaded_lear == True)
+            .filter(AffiliationModel.org_id == org_id, EntityMapping.id.is_(None), Entity.is_loaded_lear.is_(True))
             .all()
         )
 
