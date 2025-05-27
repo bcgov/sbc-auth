@@ -17,7 +17,7 @@ from tests.utilities.factory_utils import factory_org_service
         (
             "all_identifiers_present",
             {'business_identifier': 'BC5234567',
-             'bootstrap_identifier': 'BOOT1234567',
+             'bootstrap_identifier': 'Txxxxxxxxx',
              'nr_identifier': 'NR5234567'},
             1
         ),
@@ -25,7 +25,7 @@ from tests.utilities.factory_utils import factory_org_service
             "business_and_bootstrap_only",
             {
                 'business_identifier': 'BC5234567',
-                'bootstrap_identifier': 'BOOT1234567',
+                'bootstrap_identifier': 'Txxxxxxxxx',
                 'nr_identifier': None
             },
             1
@@ -34,7 +34,7 @@ from tests.utilities.factory_utils import factory_org_service
             "bootstrap_and_nr_only",
             {
                 'business_identifier': None,
-                'bootstrap_identifier': 'BOOT1234567',
+                'bootstrap_identifier': 'Txxxxxxxxx',
                 'nr_identifier': 'NR5234567'
             },
             1
@@ -73,7 +73,7 @@ def test_get_filtered_affiliations_identifier_matches(
 
     entity1 = Entity(business_identifier='BC5234567', corp_type_code='BC').save()
     AffiliationModel(org_id=org_id, entity_id=entity1.id).save()
-    entity2 = Entity(business_identifier='BOOT1234567', corp_type_code='TMP').save()
+    entity2 = Entity(business_identifier='Txxxxxxxxx', corp_type_code='TMP').save()
     AffiliationModel(org_id=org_id, entity_id=entity2.id).save()
     entity3 = Entity(business_identifier='NR5234567', corp_type_code='NR').save()
     AffiliationModel(org_id=org_id, entity_id=entity3.id).save()
