@@ -13,13 +13,20 @@
 # limitations under the License.
 """Service for managing Affiliation Mapping data."""
 
+from sqlite3 import IntegrityError
 from typing import List
 from sqlalchemy import and_, or_
+from auth_api.exceptions.exceptions import ServiceUnavailableException
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.entity_mapping import EntityMapping
 from auth_api.models.dataclass import AffiliationSearchDetails
 from auth_api.models.entity import Entity
+from auth_api.services.rest_service import RestService
+from structured_logging import StructuredLogging
+
+logger = StructuredLogging.get_logger()
+from flask import current_app
 
 
 class EntityMappingService:  # pylint: disable=too-few-public-methods
@@ -32,9 +39,8 @@ class EntityMappingService:  # pylint: disable=too-few-public-methods
         """Return an EntityMapping Service."""
         self._model = model
 
-    def get_filtered_affiliations(
-        self, org_id: int, search_details: AffiliationSearchDetails
-    ) -> List[AffiliationModel]:
+    @staticmethod
+    def get_filtered_affiliations(org_id: int, search_details: AffiliationSearchDetails) -> List[AffiliationModel]:
         """Get affiliations from DB based on priority mapping logic.
         - If no filters are applied (initial load), show only 1 page with 100 results.
         - If filters are applied grab all identifiers
@@ -99,3 +105,48 @@ class EntityMappingService:  # pylint: disable=too-few-public-methods
 
         affiliation_mapping.save()
         return affiliation_mapping
+
+    @staticmethod
+    async def get_affiliation_mappings(org_id) -> List:
+        """Return affiliation details by calling the source api."""
+        token = RestService.get_service_account_token(
+            config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+        )
+        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
+        new_url = current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
+        endpoint = f"{new_url}/{org_id}/affiliation_mappings"
+
+        try:
+            response = await RestService.async_get_call(endpoint, headers)
+            return response
+            
+        except ServiceUnavailableException as err:
+            logger.debug(err)
+            logger.debug("Failed to get affiliations mappings:")
+            raise ServiceUnavailableException("Failed to get affiliation details") from err
+
+    @staticmethod
+    def from_entity_details_batch(entity_details_list: list) -> list:
+        results = []
+        filtered_list = [
+            ed for ed in entity_details_list if ed.get("nrId") or ed.get("bootstrapId") or ed.get("identifier")
+        ]
+        for entity_details in filtered_list:
+
+            mapped_entity = {
+                "nrNumber": entity_details.get("nrId"),
+                "bootstrapIdentifier": entity_details.get("bootstrapId"),
+                "identifier": entity_details.get("identifier"),
+            }
+            mapping = EntityMappingService.from_entity_details(mapped_entity)
+            mapping.save()
+
+            try:
+                db.session.flush()
+                results.append(mapping)
+            except IntegrityError as e:
+                db.session.rollback()
+                print(f"Duplicate detected, skipping row: {mapped_entity}")
+                continue
+
+        return results

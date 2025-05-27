@@ -351,6 +351,9 @@ def delete_organzization_contact(org_id):
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def get_organization_affiliations_search(org_id):
     try:
+        mappings_response = asyncio.run(EntityMappingService.get_affiliation_mappings(org_id=org_id))
+        mappings = mappings_response.get("entityDetails", [])
+        update_mappings = EntityMappingService.from_entity_details_batch(mappings)
         response, status = new_affiliation_search(org_id)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
