@@ -24,8 +24,8 @@ from sqlalchemy_utils import create_database, database_exists, drop_database
 
 from auth_api import create_app, setup_jwt_manager
 from auth_api.exceptions import BusinessException, Error
-from auth_api.models import db as _db
 from auth_api.models import Org
+from auth_api.models import db as _db
 from auth_api.models.org import receive_before_update
 from auth_api.utils.auth import jwt as _jwt
 

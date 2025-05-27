@@ -22,22 +22,14 @@ from http import HTTPStatus
 import pytest
 from faker import Faker
 
-from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.constants import GROUP_MAXIMUS_STAFF, GROUP_CONTACT_CENTRE_STAFF, GROUP_SBC_STAFF
-from auth_api.utils.enums import (
-    OrgType, LoginSource,
-)
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgType as OrgTypeModel
+from auth_api.services.keycloak import KeycloakService
+from auth_api.utils.constants import GROUP_CONTACT_CENTRE_STAFF, GROUP_MAXIMUS_STAFF, GROUP_SBC_STAFF
+from auth_api.utils.enums import LoginSource, OrgType
 from auth_api.utils.roles import ADMIN, USER
-from tests.utilities.factory_scenarios import (
-    TestJwtClaims,
-    TestOrgInfo, KeycloakScenario, CONFIG,
-)
-from tests.utilities.factory_utils import (
-    factory_auth_header,
-    factory_invitation,
-)
+from tests.utilities.factory_scenarios import CONFIG, KeycloakScenario, TestJwtClaims, TestOrgInfo
+from tests.utilities.factory_utils import factory_auth_header, factory_invitation
 
 fake = Faker()
 
