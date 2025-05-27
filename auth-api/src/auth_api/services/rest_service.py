@@ -292,22 +292,6 @@ class RestService:
                 responses.append(task_json)
         return responses
 
-    @staticmethod
-    async def async_get_call(endpoint, additional_headers):
-        """Asynchronously call a sync REST GET """
-
-        def sync_get():
-            response = RestService.get(endpoint=endpoint, additional_headers=additional_headers)
-            try:
-                json_data = response.json()
-            except Exception as e:
-                json_data = None
-            finally:
-                response.close()
-            return json_data
-
-        return await asyncio.to_thread(sync_get)
-
 
 def _get_token() -> str:
     token: str = request.headers["Authorization"] if request and "Authorization" in request.headers else None

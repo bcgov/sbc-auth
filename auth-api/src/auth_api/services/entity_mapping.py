@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation Mapping data."""
-
-from sqlite3 import IntegrityError
+from flask import current_app
 from typing import List
+from requests import HTTPError
 from sqlalchemy import and_, or_
 from auth_api.exceptions.exceptions import ServiceUnavailableException
 from auth_api.models import db
@@ -26,7 +26,6 @@ from auth_api.services.rest_service import RestService
 from structured_logging import StructuredLogging
 
 logger = StructuredLogging.get_logger()
-from flask import current_app
 
 
 class EntityMappingService:  # pylint: disable=too-few-public-methods
@@ -67,7 +66,7 @@ class EntityMappingService:  # pylint: disable=too-few-public-methods
                     ),
                 ),
             )
-            .filter(AffiliationModel.org_id == int(org_id or -1))
+            .filter(AffiliationModel.org_id == int(org_id or -1), Entity.is_loaded_lear == True)
         ).order_by(AffiliationModel.created.desc())
 
         if paginate_for_non_search:
@@ -78,7 +77,7 @@ class EntityMappingService:  # pylint: disable=too-few-public-methods
         return query.all()
 
     @staticmethod
-    def from_entity_details(entity_details: dict) -> EntityMapping:
+    def from_entity_details(entity_details: dict, use_flush: bool = False) -> EntityMapping:
         """Create and populate an EntityMapping object from entity details."""
         nr_identifier = entity_details.get("nrNumber")
         bootstrap_identifier = entity_details.get("bootstrapIdentifier")
@@ -103,50 +102,66 @@ class EntityMappingService:  # pylint: disable=too-few-public-methods
         affiliation_mapping.bootstrap_identifier = bootstrap_identifier
         affiliation_mapping.business_identifier = business_identifier
 
-        affiliation_mapping.save()
+        if use_flush:
+            affiliation_mapping.flush()
+        else:
+            affiliation_mapping.save()
         return affiliation_mapping
 
     @staticmethod
-    async def get_affiliation_mappings(org_id) -> List:
+    def get_identifiers_without_mappings(org_id: int) -> List[str]:
+        """Find all business identifiers for an org that don't have corresponding entity mappings.
+
+        This joins the affiliation and entity tables, then finds records where there is no
+        matching entity mapping for any of the identifiers (business, bootstrap, or NR).
+        """
+        return (
+            db.session.query(Entity.business_identifier)
+            .join(AffiliationModel, Entity.id == AffiliationModel.entity_id)
+            .outerjoin(
+                EntityMapping,
+                or_(
+                    EntityMapping.business_identifier == Entity.business_identifier,
+                    and_(
+                        EntityMapping.business_identifier.is_(None),
+                        EntityMapping.bootstrap_identifier == Entity.business_identifier,
+                    ),
+                    and_(
+                        EntityMapping.business_identifier.is_(None),
+                        EntityMapping.bootstrap_identifier.is_(None),
+                        EntityMapping.nr_identifier == Entity.business_identifier,
+                    ),
+                ),
+            )
+            .filter(AffiliationModel.org_id == org_id, EntityMapping.id.is_(None), Entity.is_loaded_lear == True)
+            .all()
+        )
+
+    @staticmethod
+    def fetch_entity_mappings_details(org_id: int):
         """Return affiliation details by calling the source api."""
+        if not (identifiers := EntityMappingService.get_identifiers_without_mappings(org_id)):
+            return
         token = RestService.get_service_account_token(
             config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
         )
         headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
-        new_url = current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
-        endpoint = f"{new_url}/{org_id}/affiliation_mappings"
-
+        new_url = f"{current_app.config.get("LEGAL_API_URL") + current_app.config.get('LEGAL_API_VERSION_2')}"
+        endpoint = f"{new_url}/search/affiliation_mappings"
         try:
-            response = await RestService.async_get_call(endpoint, headers)
-            return response
-            
-        except ServiceUnavailableException as err:
-            logger.debug(err)
-            logger.debug("Failed to get affiliations mappings:")
-            raise ServiceUnavailableException("Failed to get affiliation details") from err
+            response = RestService.post(endpoint, headers, data={"identifiers": identifiers})
+            return response.json()
+        except HTTPError as http_error:
+            # If this fails, we should still allow affiliation search to continue.
+            logger.error("Failed to get affiliations mappings for org_id: %s", org_id)
+            logger.error(http_error)
 
     @staticmethod
-    def from_entity_details_batch(entity_details_list: list) -> list:
-        results = []
-        filtered_list = [
-            ed for ed in entity_details_list if ed.get("nrId") or ed.get("bootstrapId") or ed.get("identifier")
-        ]
-        for entity_details in filtered_list:
-
-            mapped_entity = {
-                "nrNumber": entity_details.get("nrId"),
-                "bootstrapIdentifier": entity_details.get("bootstrapId"),
-                "identifier": entity_details.get("identifier"),
-            }
-            mapping = EntityMappingService.from_entity_details(mapped_entity)
-            mapping.save()
-
-            try:
-                db.session.flush()
-                results.append(mapping)
-            except IntegrityError as e:
-                db.session.rollback()
-                print(f"Duplicate detected, skipping row: {mapped_entity}")
-                continue
-
-        return results
+    def populate_entity_mappings(org_id):
+        """Populate the entity mappings for an org."""
+        if not (mapping_details := EntityMappingService.fetch_entity_mappings_details(org_id)):
+            return
+        # We could have a thousand rows, rather do this in one commit instead of multiple.
+        for details in mapping_details:
+            mapping = EntityMappingService.from_entity_details(details, use_flush=True)
+        mapping.save()

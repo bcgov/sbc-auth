@@ -351,10 +351,7 @@ def delete_organzization_contact(org_id):
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def get_organization_affiliations_search(org_id):
     try:
-        mappings_response = asyncio.run(EntityMappingService.get_affiliation_mappings(org_id=org_id))
-        mappings = mappings_response.get("entityDetails", [])
-        update_mappings = EntityMappingService.from_entity_details_batch(mappings)
-        response, status = new_affiliation_search(org_id)
+        response, status = affiliation_search(org_id, use_entity_mapping=True)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     except ServiceUnavailableException as exception:
@@ -374,7 +371,7 @@ def get_organization_affiliations(org_id):
                 HTTPStatus.OK,
             )
         # Remove below after UI is pointing at new route.
-        response, status = new_affiliation_search(org_id)
+        response, status = affiliation_search(org_id)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     except ServiceUnavailableException as exception:
@@ -383,10 +380,14 @@ def get_organization_affiliations(org_id):
     return response, status
 
 
-def new_affiliation_search(org_id):
+def affiliation_search(org_id, use_entity_mapping=False):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
     search_details = AffiliationSearchDetails.from_request_args(request)
-    affiliations = EntityMappingService.get_filtered_affiliations(org_id, search_details)
+    if use_entity_mapping:
+        EntityMappingService.populate_entity_mappings(org_id)
+        affiliations = EntityMappingService.get_filtered_affiliations(org_id, search_details)
+    else:
+        affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
     affiliations_details_list = asyncio.run(
         AffiliationService.get_affiliation_details(affiliations, search_details, org_id)
     )

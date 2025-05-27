@@ -17,6 +17,8 @@ depends_on = None
 
 
 def upgrade():
+    op.add_column('entity', sa.Column('is_loaded_lear', sa.Boolean(), nullable=False, server_default=sa.true()))
+
     op.create_table('entity_mapping',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('business_identifier', sa.String(length=75), nullable=True),
@@ -41,3 +43,4 @@ def downgrade():
         batch_op.drop_index(batch_op.f('ix_entity_mapping_bootstrap_identifier'))
 
     op.drop_table('entity_mapping')
+    op.drop_column('entity', 'is_loaded_lear')
