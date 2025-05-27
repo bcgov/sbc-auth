@@ -36,8 +36,8 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import SimpleOrg as SimpleOrgService
 from auth_api.services import User as UserService
-from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.services.authorization import Authorization as AuthorizationService
+from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import AccessType, NotificationType, OrgStatus, OrgType, PatchActions, Status

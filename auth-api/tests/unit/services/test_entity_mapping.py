@@ -5,9 +5,9 @@ from sqlalchemy import and_, or_
 
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
-from auth_api.models.entity_mapping import EntityMapping
 from auth_api.models.dataclass import AffiliationSearchDetails
 from auth_api.models.entity import Entity
+from auth_api.models.entity_mapping import EntityMapping
 from auth_api.services.entity_mapping import EntityMappingService
 from tests.utilities.factory_utils import factory_org_service
 

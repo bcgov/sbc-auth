@@ -25,7 +25,6 @@ from .affidavit import Affidavit
 from .affidavit_status import AffidavitStatus
 from .affiliation import Affiliation
 from .affiliation_invitation import AffiliationInvitation
-from .entity_mapping import EntityMapping
 from .business_size_code import BusinessSizeCode
 from .business_type_code import BusinessTypeCode
 from .contact import Contact
@@ -34,6 +33,7 @@ from .corp_type import CorpType
 from .db import db, ma
 from .documents import Documents
 from .entity import Entity
+from .entity_mapping import EntityMapping
 from .invitation import Invitation
 from .invitation_membership import InvitationMembership
 from .invitation_type import InvitationType

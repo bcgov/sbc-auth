@@ -12,18 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation Mapping data."""
-from flask import current_app
 from typing import List
+
+from flask import current_app
 from requests import HTTPError
 from sqlalchemy import and_, or_
+from structured_logging import StructuredLogging
+
 from auth_api.exceptions.exceptions import ServiceUnavailableException
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
-from auth_api.models.entity_mapping import EntityMapping
 from auth_api.models.dataclass import AffiliationSearchDetails
 from auth_api.models.entity import Entity
+from auth_api.models.entity_mapping import EntityMapping
 from auth_api.services.rest_service import RestService
-from structured_logging import StructuredLogging
 
 logger = StructuredLogging.get_logger()
 
