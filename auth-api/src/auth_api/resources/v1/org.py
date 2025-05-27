@@ -22,7 +22,7 @@ from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.models import Affiliation as AffiliationModel
-from auth_api.models import AffiliationMapping
+from auth_api.models import EntityMapping
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest, SimpleOrgSearch
@@ -36,7 +36,7 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import SimpleOrg as SimpleOrgService
 from auth_api.services import User as UserService
-from auth_api.services.affiliation_mapping import AffiliationMappingService
+from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
@@ -383,7 +383,7 @@ def get_organization_affiliations(org_id):
 def new_affiliation_search(org_id):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
     search_details = AffiliationSearchDetails.from_request_args(request)
-    affiliations = AffiliationMappingService.get_filtered_affiliations(org_id, search_details)
+    affiliations = EntityMappingService.get_filtered_affiliations(org_id, search_details)
     affiliations_details_list = asyncio.run(
         AffiliationService.get_affiliation_details(affiliations, search_details, org_id)
     )
@@ -443,7 +443,7 @@ def post_organization_affiliation(org_id):
 
         entity_details = request_json.get("entityDetails", None)
         if entity_details:
-            AffiliationMappingService.from_entity_details(entity_details)
+            EntityMappingService.from_entity_details(entity_details)
             AffiliationService.fix_stale_affiliations(org_id, entity_details)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
@@ -505,7 +505,6 @@ def delete_org_affiliation_by_business_identifier(org_id, business_identifier):
             reset_passcode=request_json.get("resetPasscode", False),
             log_delete_draft=request_json.get("logDeleteDraft", False),
         )
-        AffiliationMappingService.update_deleted_affiliation_id(business_identifier)
         AffiliationService.delete_affiliation(delete_affiliation_request)
         response, status = {}, HTTPStatus.OK
 
