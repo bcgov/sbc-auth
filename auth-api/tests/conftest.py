@@ -343,8 +343,10 @@ def mock_pub_sub_call(mocker):
 
 
 @pytest.fixture
-def disable_org_update_listener():
+def disable_org_update_listener(monkeypatch):
     """Temporarily remove before update listener on Org then re-add after test."""
     event.remove(Org, "before_update", receive_before_update)
-    yield
-    event.listen(Org, "before_update", receive_before_update)
+    try:
+        yield
+    finally:
+        event.listen(Org, "before_update", receive_before_update, raw=True)
