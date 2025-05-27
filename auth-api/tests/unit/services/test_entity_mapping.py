@@ -83,7 +83,7 @@ def test_get_filtered_affiliations_identifier_matches(
     search_details = AffiliationSearchDetails(page=1, limit=100)
     results = service.get_filtered_affiliations(org_id, search_details)
     
-    # Clean up after.
+    # Clean up after this doesn't get reset in between these tests.
     db.session.query(AffiliationModel).delete()
     db.session.query(Entity).delete()
     db.session.query(EntityMapping).delete()
