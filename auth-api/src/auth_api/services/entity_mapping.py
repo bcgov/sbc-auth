@@ -142,7 +142,7 @@ class EntityMappingService:
             config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
         )
         headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
-        new_url = f"{current_app.config.get("LEGAL_API_URL") + current_app.config.get('LEGAL_API_VERSION')}"
+        new_url = f"{current_app.config.get('LEGAL_API_URL')}{current_app.config.get('LEGAL_API_VERSION_2')}"
         endpoint = f"{new_url}/search/affiliation_mappings"
         try:
             response = RestService.post(endpoint, headers, data={"identifiers": identifiers})
