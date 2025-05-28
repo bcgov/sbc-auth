@@ -143,10 +143,10 @@ class EntityMappingService:
         )
         headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
         new_url = f"{current_app.config.get('LEGAL_API_URL')}{current_app.config.get('LEGAL_API_VERSION_2')}"
-        endpoint = f"{new_url}/search/affiliation_mappings"
+        endpoint = f"{new_url}/business/search/affiliation_mappings"
         try:
             response = RestService.post(endpoint, headers, data={"identifiers": identifiers})
-            return response.json()
+            return response.json().get('entityDetails')
         except HTTPError as http_error:
             # If this fails, we should still allow affiliation search to continue.
             logger.error("Failed to get affiliations mappings for org_id: %s", org_id)
