@@ -141,11 +141,10 @@ class EntityMappingService:
         token = RestService.get_service_account_token(
             config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
         )
-        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
         new_url = f"{current_app.config.get('LEGAL_API_URL')}{current_app.config.get('LEGAL_API_VERSION_2')}"
         endpoint = f"{new_url}/businesses/search/affiliation_mappings"
         try:
-            response = RestService.post(endpoint, headers, data={"identifiers": identifiers})
+            response = RestService.post(endpoint, token=token, data={"identifiers": identifiers})
             return response.json().get("entityDetails")
         except HTTPError as http_error:
             # If this fails, we should still allow affiliation search to continue.
