@@ -12,3 +12,16 @@ class EntityMapping(db.Model):  # pylint: disable=too-few-public-methods, too-ma
     business_identifier = Column("business_identifier", String(75), index=True, unique=True, nullable=True)
     bootstrap_identifier = Column("bootstrap_identifier", String(75), index=True, unique=True, nullable=True)
     nr_identifier = Column("nr_identifier", String(75), index=True, unique=True, nullable=True)
+
+    def flush(self):
+        """Save and flush."""
+        db.session.add(self)
+        db.session.flush()
+        return self
+
+    def save(self):
+        """Save and commit."""
+        db.session.add(self)
+        db.session.flush()
+        db.session.commit()
+        return self
