@@ -15,7 +15,7 @@
 
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
-from typing import List
+from typing import List, Self
 
 from sql_versioning import Versioned
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, desc, event, func, text
@@ -120,7 +120,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         return cls.query.filter_by(uuid=org_uuid).first()
 
     @classmethod
-    def find_by_org_id(cls, org_id: int):
+    def find_by_org_id(cls, org_id: int) -> Self:
         """Find an Org instance that matches the provided id."""
         return cls.query.filter_by(id=int(org_id or -1)).first()
 

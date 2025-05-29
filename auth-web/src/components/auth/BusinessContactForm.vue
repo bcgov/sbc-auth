@@ -113,6 +113,7 @@ import { mapActions, mapState } from 'pinia'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { Organization } from '@/models/Organization'
+import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { mask } from 'vue-the-mask'
 import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
@@ -171,7 +172,8 @@ export default class BusinessContactForm extends Vue {
     if (this.$route.query.redirect) {
       this.$router.push({ path: `/account/${this.currentOrganization.id}` })
     } else {
-      window.location.href = `${ConfigHelper.getBusinessURL()}${this.currentBusiness.businessIdentifier}`
+      const businessUrl = `${ConfigHelper.getBusinessURL()}${this.currentBusiness.businessIdentifier}`
+      window.location.href = appendAccountId(businessUrl, this.currentOrganization.id.toString())
     }
   }
 

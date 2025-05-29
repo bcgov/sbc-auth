@@ -78,6 +78,7 @@ import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
 import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
+import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { useBusinessStore } from '@/stores/business'
 
 @Component({
@@ -106,7 +107,8 @@ export default class BusinessProfileView extends Mixins(AccountChangeMixin, Next
         this.$router.push('/home')
       }
     } else {
-      window.location.href = `${ConfigHelper.getBusinessURL()}${this.currentBusiness.businessIdentifier}`
+      const businessUrl = `${ConfigHelper.getBusinessURL()}${this.currentBusiness.businessIdentifier}`
+      window.location.href = appendAccountId(businessUrl, this.currentOrganization.id.toString())
     }
   }
 
