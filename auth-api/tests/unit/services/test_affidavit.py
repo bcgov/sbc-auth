@@ -175,7 +175,7 @@ def test_reject_org_with_inactive_affidavit(session, keycloak_mock, monkeypatch,
 
     # Create test affidavit and org
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    affidavit = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
 
@@ -201,7 +201,7 @@ def test_reject_org_with_inactive_affidavit(session, keycloak_mock, monkeypatch,
         "relationshipStatus": TaskRelationshipStatus.REJECTED.value,
         "remarks": ["Rejecting with inactive affidavit"],
     }
-    task = TaskService.update_task(TaskService(task_model), task_info)
+    TaskService.update_task(TaskService(task_model), task_info)
 
     # Verify org was rejected
     org = OrgService.find_by_org_id(org_dict["id"])
@@ -243,7 +243,7 @@ def test_reject_org_without_affidavit(session, keycloak_mock, monkeypatch):
         "relationshipStatus": TaskRelationshipStatus.REJECTED.value,
         "remarks": ["Rejecting without affidavit"],
     }
-    task = TaskService.update_task(TaskService(task_model), task_info)
+    TaskService.update_task(TaskService(task_model), task_info)
 
     # Verify org was rejected
     org = OrgService.find_by_org_id(org_dict["id"])
