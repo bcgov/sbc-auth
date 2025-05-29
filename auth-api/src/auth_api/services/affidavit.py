@@ -166,7 +166,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         # 1. Inactive affidavits - usually while the old affidavit is made inactive
         # while the task is put on hold and the user uploads a new one.
         # 2. When the user account request is rejected, then user creates a new account
-        
+
         # When rejecting, we should also consider INACTIVE affidavits (for scenario 1)
         if is_approved:
             # For approval, filter out INACTIVE and REJECTED affidavits
@@ -174,17 +174,19 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         else:
             # For rejection, only filter out REJECTED affidavits, allow INACTIVE ones
             filtered_affidavit_statuses = [AffidavitStatus.REJECTED.value]
-            
+
         affidavit: AffidavitModel = AffidavitModel.find_by_org_id(org_id, filtered_affidavit_statuses)
-        
+
         # Handle cases where no affidavit is found (e.g., missing or invalid status)
         if affidavit is None:
-            logger.warning(f"No valid affidavit found for org_id {org_id} during approve/reject operation. "
-                          f"Filtered statuses: {filtered_affidavit_statuses}. "
-                          f"Action: {'approval' if is_approved else 'rejection'}")
+            logger.warning(
+                f"No valid affidavit found for org_id {org_id} during approve/reject operation. "
+                f"Filtered statuses: {filtered_affidavit_statuses}. "
+                f"Action: {'approval' if is_approved else 'rejection'}"
+            )
             # Allow the operation to continue without updating affidavit
             return None
-            
+
         affidavit.decision_made_by = user.username
         affidavit.decision_made_on = datetime.now()
         affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
