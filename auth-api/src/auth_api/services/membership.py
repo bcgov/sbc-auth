@@ -34,7 +34,7 @@ from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Activity
 from auth_api.schemas import MembershipSchema
-from auth_api.utils.constants import GROUP_CONTACT_CENTRE_STAFF, GROUP_MAXIMUS_STAFF
+from auth_api.utils.constants import GROUP_CONTACT_CENTRE_STAFF, GROUP_MAXIMUS_STAFF, GROUP_SBC_STAFF
 from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, OrgStatus, OrgType, Status
 from auth_api.utils.roles import ADMIN, ALLOWED_READ_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
@@ -54,6 +54,7 @@ logger = StructuredLogging.get_logger()
 org_type_to_group_mapping = {
     OrgType.MAXIMUS_STAFF.value: GROUP_MAXIMUS_STAFF,
     OrgType.CC_STAFF.value: GROUP_CONTACT_CENTRE_STAFF,
+    OrgType.SBC_STAFF.value: GROUP_SBC_STAFF,
 }
 
 
