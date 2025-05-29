@@ -158,3 +158,91 @@ def test_reject_org(session, keycloak_mock, monkeypatch, gcs_mock):
 
     # Verify GCS mock was called
     assert gcs_mock["mock_blob"].generate_signed_url.called
+
+
+@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
+def test_reject_org_with_inactive_affidavit(session, keycloak_mock, monkeypatch, gcs_mock):
+    """Assert that an org can be rejected when affidavit is INACTIVE (Scenario 1)."""
+    # Setup mock for GCS
+    gcs_mock["mock_blob"].generate_signed_url.return_value = "http://mocked.url/document.pdf"
+
+    # Create test user
+    user = factory_user_model_with_contact(user_info=TestUserInfo.user_bceid_tester)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid
+    )
+    patch_token_info(token_info, monkeypatch)
+
+    # Create test affidavit and org
+    affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    affidavit = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
+    org_dict = org.as_dict()
+    
+    # Find the task and set it to HOLD (simulating staff action)
+    task_model = TaskModel.find_by_task_for_account(org_dict["id"], status=TaskStatus.OPEN.value)
+    task_model.status = TaskStatus.HOLD.value
+    task_model.save()
+    
+    # Create another affidavit which will make the first one INACTIVE
+    new_affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    AffidavitService.create_affidavit(affidavit_info=new_affidavit_info)
+    
+    # Verify first affidavit is now INACTIVE
+    affidavit1 = AffidavitService.find_affidavit_by_org_id(org_dict["id"])
+    assert affidavit1["status_code"] == AffidavitStatus.PENDING.value  # The new one
+    
+    # Find the new task that was created
+    task_model = TaskModel.find_by_task_for_account(org_dict["id"], status=TaskStatus.OPEN.value)
+    
+    # Now try to reject the org - this should work even with INACTIVE affidavit
+    task_info = {
+        "status": TaskStatus.OPEN.value,
+        "relationshipStatus": TaskRelationshipStatus.REJECTED.value,
+        "remarks": ["Rejecting with inactive affidavit"],
+    }
+    task = TaskService.update_task(TaskService(task_model), task_info)
+    
+    # Verify org was rejected
+    org = OrgService.find_by_org_id(org_dict["id"])
+    assert org.as_dict()["status_code"] == OrgStatus.REJECTED.value
+
+
+@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
+def test_reject_org_without_affidavit(session, keycloak_mock, monkeypatch):
+    """Assert that an org can be rejected when no affidavit exists (Scenario 2)."""
+    # Create test user (staff)
+    staff_user = factory_user_model_with_contact(user_info=TestUserInfo.user_staff_admin)
+    staff_token_info = TestJwtClaims.get_test_user(
+        sub=staff_user.keycloak_guid, source=LoginSource.STAFF.value, idp_userid=staff_user.idp_userid,
+        roles=['staff', 'create_accounts']
+    )
+    
+    # First create an org as a regular user without affidavit
+    user = factory_user_model_with_contact(user_info=TestUserInfo.user_bceid_tester)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid
+    )
+    patch_token_info(token_info, monkeypatch)
+    
+    # Create org without creating an affidavit first
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
+    org_dict = org.as_dict()
+    
+    # Switch to staff user for rejection
+    patch_token_info(staff_token_info, monkeypatch)
+    
+    # Find the task
+    task_model = TaskModel.find_by_task_for_account(org_dict["id"], status=TaskStatus.OPEN.value)
+    
+    # Try to reject the org - this should work even without affidavit
+    task_info = {
+        "status": TaskStatus.OPEN.value,
+        "relationshipStatus": TaskRelationshipStatus.REJECTED.value,
+        "remarks": ["Rejecting without affidavit"],
+    }
+    task = TaskService.update_task(TaskService(task_model), task_info)
+    
+    # Verify org was rejected
+    org = OrgService.find_by_org_id(org_dict["id"])
+    assert org.as_dict()["status_code"] == OrgStatus.REJECTED.value
