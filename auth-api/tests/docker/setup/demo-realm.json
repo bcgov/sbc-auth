@@ -438,6 +438,30 @@
       ],
       "clientRoles": {},
       "subGroups": []
+    },
+    {
+      "name": "maximus_staff",
+      "path": "/maximus_staff",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
+      "subGroups": []
+    },
+    {
+      "name": "contact_centre_staff",
+      "path": "/contact_centre_staff",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
+      "subGroups": []
+    },
+    {
+      "name": "sbc_staff",
+      "path": "/sbc_staff",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
+      "subGroups": []
     }
   ],
   "defaultRoles": [

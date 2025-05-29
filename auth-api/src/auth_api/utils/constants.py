@@ -22,6 +22,7 @@ GROUP_API_GW_USERS = "api_gateway_users"
 GROUP_API_GW_SANDBOX_USERS = "api_gateway_sandbox_users"
 GROUP_MAXIMUS_STAFF = "maximus_staff"
 GROUP_CONTACT_CENTRE_STAFF = "contact_centre_staff"
+GROUP_SBC_STAFF = "sbc_staff"
 
 # Affidavit folder
 AFFIDAVIT_FOLDER_NAME = "Affidavits"
