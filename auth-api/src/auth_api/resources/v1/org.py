@@ -384,7 +384,6 @@ def affiliation_search(org_id, use_entity_mapping=False):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
     search_details = AffiliationSearchDetails.from_request_args(request)
     if use_entity_mapping:
-        EntityMappingService.populate_entity_mappings(org_id)
         affiliations = EntityMappingService.get_filtered_affiliations(org_id, search_details)
     else:
         affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)

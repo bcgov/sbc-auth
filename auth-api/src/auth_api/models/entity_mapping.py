@@ -1,10 +1,9 @@
 from sqlalchemy import Column, Integer, String
 
-from .base_model import BaseModel
 from .db import db
 
 
-class EntityMapping(BaseModel):  # pylint: disable=too-few-public-methods, too-many-instance-attributes
+class EntityMapping(db.Model):  # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """This is the Entity model for the Auth service."""
 
     __tablename__ = "entity_mapping"
