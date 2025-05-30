@@ -350,6 +350,7 @@ def delete_organzization_contact(org_id):
 @cross_origin(origins="*", methods=["POST", "GET"])
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def get_organization_affiliations_search(org_id):
+    """Get all affiliated entities for the given org, this works with pagination."""
     try:
         response, status = affiliation_search(org_id, use_entity_mapping=True)
     except BusinessException as exception:
@@ -393,9 +394,9 @@ def affiliation_search(org_id, use_entity_mapping=False):
     # Use orjson serializer here, it's quite a bit faster.
     response, status = (
         current_app.response_class(
-            response=orjson.dumps(
+            response=orjson.dumps(  # pylint: disable=maybe-no-member
                 {"entities": affiliations_details_list, "totalResults": len(affiliations_details_list)}
-            ),  # pylint: disable=maybe-no-member
+            ),
             status=200,
             mimetype="application/json",
         ),

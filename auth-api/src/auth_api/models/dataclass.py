@@ -62,6 +62,7 @@ class AffiliationSearchDetails:  # pylint: disable=too-many-instance-attributes
 
     @classmethod
     def from_request_args(cls, req: Request) -> Self:
+        """Used for searching affiliations."""
         return cls(
             identifier=req.args.get("identifier"),
             status=req.args.getlist("status") or [],

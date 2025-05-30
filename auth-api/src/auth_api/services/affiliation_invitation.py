@@ -95,14 +95,11 @@ class AffiliationInvitation:
         if not affiliation_invitation_dicts:
             return []
 
-        token = RestService.get_service_account_token(
-            config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
-        )
-
-        business_identifiers = [afi["business_identifier"] for afi in affiliation_invitation_dicts]
-
         business_entities = AffiliationInvitation._get_multiple_business_details(
-            business_identifiers=business_identifiers, token=token
+            business_identifiers=[afi["business_identifier"] for afi in affiliation_invitation_dicts],
+            token=RestService.get_service_account_token(
+                config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+            ),
         )
         result = []
 

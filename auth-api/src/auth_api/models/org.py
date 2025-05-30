@@ -29,7 +29,6 @@ from auth_api.models.affiliation import Affiliation
 from auth_api.models.dataclass import OrgSearch
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
-from auth_api.utils.enums import OrgType as OrgTypeEnum
 from auth_api.utils.roles import EXCLUDED_FIELDS, INVALID_ORG_CREATE_TYPE_CODES, VALID_STATUSES
 
 from .base_model import BaseModel

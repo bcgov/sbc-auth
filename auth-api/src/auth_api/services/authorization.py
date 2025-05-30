@@ -22,7 +22,6 @@ from structured_logging import StructuredLogging
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.services.permissions import Permissions as PermissionsService
-from auth_api.utils.enums import LoginSource
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context

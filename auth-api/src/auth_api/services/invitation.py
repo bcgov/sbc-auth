@@ -408,20 +408,24 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    @user_context
-    def accept_invitation(invitation_id, user: UserService, origin, add_membership: bool = True, **kwargs):
-        """Add user, role and org from the invitation to membership."""
-        logger.debug(">accept_invitation")
-        user_from_context: UserContext = kwargs["user_context"]
-        invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
-
+    def validate_invitation(invitation_id: int) -> InvitationModel:
+        """Validate the invitation."""
+        invitation = InvitationModel.find_invitation_by_id(invitation_id)
         if invitation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         if invitation.invitation_status_code == "ACCEPTED":
             raise BusinessException(Error.ACTIONED_INVITATION, None)
         if invitation.invitation_status_code == "EXPIRED":
             raise BusinessException(Error.EXPIRED_INVITATION, None)
+        return invitation
 
+    @staticmethod
+    @user_context
+    def accept_invitation(invitation_id, user: UserService, origin, add_membership: bool = True, **kwargs):
+        """Add user, role and org from the invitation to membership."""
+        logger.debug(">accept_invitation")
+        user_from_context: UserContext = kwargs["user_context"]
+        invitation = Invitation.validate_invitation(invitation_id)
         login_source = user_from_context.login_source
 
         if invitation.login_source == LoginSource.STAFF.value:  # Ensure STAFF login source for STAFF invitations
