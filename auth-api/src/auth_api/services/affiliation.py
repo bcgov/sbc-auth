@@ -494,9 +494,7 @@ class Affiliation:
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
             combined = Affiliation._combine_affiliation_details(responses)
-            # Should provide us with ascending order
             affiliations_bases_sorted = sorted(affiliation_bases, key=lambda x: x.created, reverse=True)
-            # Provide us with a dict with the max created date.
             ordered = {affiliation.identifier: affiliation.created for affiliation in affiliations_bases_sorted}
 
             def sort_key(item):
