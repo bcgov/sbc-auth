@@ -49,7 +49,7 @@ class GoogleStoreService:
         Works in both production (GCE) and local development.
         """
         try:
-            creds, project = google.auth.default()
+            creds, _ = google.auth.default()
 
             if isinstance(creds, Credentials):
                 auth_request = requests.Request()

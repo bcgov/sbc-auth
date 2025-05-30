@@ -18,12 +18,10 @@ A simple decorator to add the options method to a Request Class.
 """
 import ast
 import base64
-import os
 import re
 import urllib
 
 import humps
-from flask import current_app, request
 
 
 def camelback2snake(camel_dict: dict):

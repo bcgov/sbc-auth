@@ -14,6 +14,7 @@
 """This model manages a Invitation item in the Auth Service."""
 
 from datetime import datetime, timedelta
+from typing import Self
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -90,7 +91,7 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         return cls.query.filter_by(sender_id=int(user_id or -1)).all()
 
     @classmethod
-    def find_invitation_by_id(cls, invitation_id: int):
+    def find_invitation_by_id(cls, invitation_id: int) -> Self:
         """Find an invitation record that matches the id."""
         return cls.query.filter_by(id=int(invitation_id or -1)).first()
 

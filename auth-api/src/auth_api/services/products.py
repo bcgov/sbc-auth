@@ -30,7 +30,6 @@ from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.models.dataclass import Activity, KeycloakGroupSubscription, ProductReviewTask
 from auth_api.schemas import ProductCodeSchema
-from auth_api.services.flags import flags
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
@@ -57,7 +56,7 @@ from ..utils.notifications import (
     get_product_notification_data,
     get_product_notification_type,
 )
-from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, PREMIUM_ORG_TYPES, STAFF
+from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .task import Task as TaskService
@@ -176,7 +175,7 @@ class Product:
         create product subscription first
         create the product role next if roles are given
         """
-        org: OrgModel = OrgModel.find_by_org_id(org_id)
+        org = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user
@@ -186,10 +185,9 @@ class Product:
         subscriptions_list = subscription_data.get("subscriptions")
         for subscription in subscriptions_list:
             product_code = subscription.get("productCode")
-            existing_product_subscriptions = ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code)
-            if existing_product_subscriptions:
+            if ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code):
                 raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)
-            product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_code)
+            product_model = ProductCodeModel.find_by_code(product_code)
             if product_model:
                 # Check if product requires system admin, if yes abort
                 if product_model.need_system_admin:
@@ -217,8 +215,6 @@ class Product:
 
                 # create a staff review task for this product subscription if pending status
                 if subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
-                    user = UserModel.find_by_jwt_token()
-                    external_source_id = subscription.get("externalSourceId")
                     Product._create_review_task(
                         ProductReviewTask(
                             org_id=org.id,
@@ -226,8 +222,8 @@ class Product:
                             product_code=product_subscription.product_code,
                             product_description=product_model.description,
                             product_subscription_id=product_subscription.id,
-                            user_id=user.id,
-                            external_source_id=external_source_id,
+                            user_id=UserModel.find_by_jwt_token().id,
+                            external_source_id=subscription.get("externalSourceId"),
                         )
                     )
                     Product._send_product_subscription_confirmation(
@@ -248,7 +244,7 @@ class Product:
     @staticmethod
     def remove_product_subscription(org_id: int, product_code: str, skip_auth=False):
         """Deactivate org product subscription by code."""
-        org: OrgModel = OrgModel.find_by_org_id(org_id)
+        org = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
