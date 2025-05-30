@@ -32,7 +32,7 @@ class EntityMappingService:
     """
 
     @staticmethod
-    def paginage_from_affiliations(org_id: int, search_details: AffiliationSearchDetails):
+    def paginate_from_affiliations(org_id: int, search_details: AffiliationSearchDetails):
         """Get affiliations from DB based on priority mapping logic.
         - If no filters are applied (initial load), show only 1 page with 100 results.
         - If filters are applied grab all identifiers
@@ -126,7 +126,7 @@ class EntityMappingService:
     @staticmethod
     def populate_affiliation_base(org_id: int, search_details: AffiliationSearchDetails):
         """Get entity details from the database and expand multiple identifiers into separate rows."""
-        data = EntityMappingService.paginage_from_affiliations(org_id, search_details)
+        data = EntityMappingService.paginate_from_affiliations(org_id, search_details)
         return [
             AffiliationBase(identifier=identifier, created=created)
             for identifiers, created in data

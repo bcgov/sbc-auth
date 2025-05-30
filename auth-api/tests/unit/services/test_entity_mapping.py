@@ -54,7 +54,7 @@ def test_get_filtered_affiliations_identifier_matches(session):
 
     for page in range(1, len(entity_mapping_data)):
         search_details = AffiliationSearchDetails(page=page, limit=1)
-        results = service.paginage_from_affiliations(org_id, search_details)
+        results = service.paginate_from_affiliations(org_id, search_details)
         assert results[0][0] == expected_before_search[page - 1]
 
 
