@@ -108,7 +108,6 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.NSF_OR_SUSPENDED_CLIENT_CANNOT_CREATE_ACCOUNT, None)
         # bcol is treated like an access type as well;so its outside the scheme
         mailing_address = org_info.pop("mailingAddress", None)
-        payment_info = org_info.pop("paymentInfo", {})
         product_subscriptions = org_info.pop("productSubscriptions", None)
         type_code = org_info.get("typeCode", None)
 
@@ -149,7 +148,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
 
-        payment_account_status, error = Org._create_payment_for_org(mailing_address, org, payment_info, True)
+        payment_account_status, error = Org._create_payment_for_org(mailing_address, org,
+                                                                    org_info.pop("paymentInfo", {}), True)
 
         if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
             logger.warning(f"Account update payment Error: {error}")
@@ -161,9 +161,8 @@ class Org:  # pylint: disable=too-many-public-methods
             and current_app.config.get("SKIP_STAFF_APPROVAL_BCEID") is False
         )
 
-        user = UserModel.find_by_jwt_token()
         if is_staff_review_needed:
-            Org._create_staff_review_task(org, user)
+            Org._create_staff_review_task(org, UserModel.find_by_jwt_token())
 
         org.commit()
 
