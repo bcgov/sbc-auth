@@ -36,6 +36,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import SimpleOrg as SimpleOrgService
 from auth_api.services import User as UserService
 from auth_api.services.authorization import Authorization as AuthorizationService
+from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import AccessType, NotificationType, OrgStatus, OrgType, PatchActions, Status
@@ -350,7 +351,7 @@ def delete_organzization_contact(org_id):
 def get_organization_affiliations_search(org_id):
     """Get all affiliated entities for the given org, this works with pagination."""
     try:
-        response, status = new_affiliation_search(org_id)
+        response, status = affiliation_search(org_id, use_entity_mapping=True)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     except ServiceUnavailableException as exception:
@@ -370,7 +371,7 @@ def get_organization_affiliations(org_id):
                 HTTPStatus.OK,
             )
         # Remove below after UI is pointing at new route.
-        response, status = new_affiliation_search(org_id)
+        response, status = affiliation_search(org_id)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     except ServiceUnavailableException as exception:
@@ -379,13 +380,16 @@ def get_organization_affiliations(org_id):
     return response, status
 
 
-def new_affiliation_search(org_id):
+def affiliation_search(org_id, use_entity_mapping=False):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
-    # get affiliation identifiers and the urls for the source data
-    affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
     search_details = AffiliationSearchDetails.from_request_args(request)
+    if use_entity_mapping:
+        affiliation_bases = EntityMappingService.populate_affiliation_base(org_id, search_details)
+    else:
+        affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
+        affiliation_bases = AffiliationService.affiliation_to_affiliation_base(affiliations)
     affiliations_details_list = asyncio.run(
-        AffiliationService.get_affiliation_details(affiliations, search_details, org_id)
+        AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id)
     )
     # Use orjson serializer here, it's quite a bit faster.
     response, status = (
@@ -443,6 +447,7 @@ def post_organization_affiliation(org_id):
 
         entity_details = request_json.get("entityDetails", None)
         if entity_details:
+            EntityMappingService.from_entity_details(entity_details)
             AffiliationService.fix_stale_affiliations(org_id, entity_details)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code

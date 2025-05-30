@@ -241,8 +241,8 @@ sqlalchemy-utils = "^0.41.2"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
-reference = "main"
-resolved_reference = "3f2b8892880f72892a5728fe96c3f99641f62d91"
+reference = "feature-track-affiliations"
+resolved_reference = "bd8944a8813b47f84d014781ee06db3954ce11a9"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3683,4 +3683,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "c235e1dbf93bb6c05420e3c2992dda3be3af8629f61a22b4e438754aae568a12"
+content-hash = "cb6fa3a72a22d6c7af6d5b25f6e41783d6651e6550496e5347b00eb6c0d08e0b"

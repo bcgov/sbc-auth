@@ -43,6 +43,7 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods, too-many-ins
     status = Column(String(), nullable=True)
     last_modified_by = Column(String(), nullable=True)
     last_modified = Column(DateTime, default=None, nullable=True)
+    is_loaded_lear = Column(Boolean(), default=True, nullable=False)
 
     contacts = relationship("ContactLink", back_populates="entity")
     corp_type = relationship("CorpType", foreign_keys=[corp_type_code], lazy="joined", innerjoin=True)
