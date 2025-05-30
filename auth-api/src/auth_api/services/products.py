@@ -175,7 +175,7 @@ class Product:
         create product subscription first
         create the product role next if roles are given
         """
-        org: OrgModel = OrgModel.find_by_org_id(org_id)
+        org = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user
@@ -247,7 +247,7 @@ class Product:
     @staticmethod
     def remove_product_subscription(org_id: int, product_code: str, skip_auth=False):
         """Deactivate org product subscription by code."""
-        org: OrgModel = OrgModel.find_by_org_id(org_id)
+        org = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
