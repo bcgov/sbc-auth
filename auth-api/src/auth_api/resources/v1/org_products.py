@@ -106,5 +106,6 @@ def delete_product_subscription(org_id, product_code):
 
 
 def validate_organization(org_id):
+    """Validate the organization id."""
     if not org_id or org_id == "None" or not org_id.isdigit() or int(org_id) < 0:
         raise BusinessException(Error.INVALID_ORG, None)

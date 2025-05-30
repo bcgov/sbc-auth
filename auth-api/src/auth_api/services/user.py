@@ -17,11 +17,9 @@ This module manages the User Information.
 """
 
 import json
-from datetime import datetime, timezone
 from http import HTTPStatus
 from typing import Dict, List
 
-from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from requests import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -36,7 +34,6 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.models.dataclass import Activity
-from auth_api.models.user import UserStatusCode
 from auth_api.schemas import UserSchema
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser

@@ -18,7 +18,7 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Dict, List, Tuple
 
-from flask import current_app, g, request
+from flask import current_app, request
 from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -37,7 +37,6 @@ from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, MembershipSchema, OrgSchema
-from auth_api.services.flags import flags
 from auth_api.services.membership import Membership
 from auth_api.services.user import User as UserService
 from auth_api.services.validators.access_type import validate as access_type_validate
@@ -285,7 +284,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 "",
             )
             logger.error(f"Account create payment Error: {http_error}")
-            raise BusinessException(error_code, error_details)
+            raise BusinessException(error_code, error_details) from http_error
 
     @staticmethod
     def _build_payment_request(org_model: OrgModel, payment_info: dict, payment_method: str, mailing_address, **kwargs):

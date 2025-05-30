@@ -30,7 +30,6 @@ from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.models.dataclass import Activity, KeycloakGroupSubscription, ProductReviewTask
 from auth_api.schemas import ProductCodeSchema
-from auth_api.services.flags import flags
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
@@ -57,7 +56,7 @@ from ..utils.notifications import (
     get_product_notification_data,
     get_product_notification_type,
 )
-from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, PREMIUM_ORG_TYPES, STAFF
+from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .task import Task as TaskService
@@ -189,7 +188,7 @@ class Product:
             existing_product_subscriptions = ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code)
             if existing_product_subscriptions:
                 raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)
-            product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_code)
+            product_model = ProductCodeModel.find_by_code(product_code)
             if product_model:
                 # Check if product requires system admin, if yes abort
                 if product_model.need_system_admin:
