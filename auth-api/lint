@@ -1,0 +1,1 @@
+poetry run isort . && poetry run black . && poetry run pylint src/auth_api && poetry run flake8 src/auth_api tests
