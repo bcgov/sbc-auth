@@ -109,6 +109,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # bcol is treated like an access type as well;so its outside the scheme
         mailing_address = org_info.pop("mailingAddress", None)
         product_subscriptions = org_info.pop("productSubscriptions", None)
+        payment_info = org_info.pop("paymentInfo", {})
         type_code = org_info.get("typeCode", None)
 
         bcol_profile_flags = None
@@ -143,14 +144,13 @@ class Org:  # pylint: disable=too-many-public-methods
         Org.create_membership(access_type, org, user_id)
 
         if product_subscriptions is not None:
-            subscription_data = {"subscriptions": product_subscriptions}
-            ProductService.create_product_subscription(org.id, subscription_data=subscription_data, skip_auth=True)
+            ProductService.create_product_subscription(
+                org.id, subscription_data={"subscriptions": product_subscriptions}, skip_auth=True
+            )
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
 
-        payment_account_status, error = Org._create_payment_for_org(
-            mailing_address, org, org_info.pop("paymentInfo", {}), True
-        )
+        payment_account_status, error = Org._create_payment_for_org(mailing_address, org, payment_info, True)
 
         if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
             logger.warning(f"Account update payment Error: {error}")
