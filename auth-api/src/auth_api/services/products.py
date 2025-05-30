@@ -185,8 +185,7 @@ class Product:
         subscriptions_list = subscription_data.get("subscriptions")
         for subscription in subscriptions_list:
             product_code = subscription.get("productCode")
-            existing_product_subscriptions = ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code)
-            if existing_product_subscriptions:
+            if ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code):
                 raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)
             product_model = ProductCodeModel.find_by_code(product_code)
             if product_model:
@@ -216,8 +215,6 @@ class Product:
 
                 # create a staff review task for this product subscription if pending status
                 if subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
-                    user = UserModel.find_by_jwt_token()
-                    external_source_id = subscription.get("externalSourceId")
                     Product._create_review_task(
                         ProductReviewTask(
                             org_id=org.id,
@@ -225,8 +222,8 @@ class Product:
                             product_code=product_subscription.product_code,
                             product_description=product_model.description,
                             product_subscription_id=product_subscription.id,
-                            user_id=user.id,
-                            external_source_id=external_source_id,
+                            user_id=UserModel.find_by_jwt_token().id,
+                            external_source_id=subscription.get("externalSourceId"),
                         )
                     )
                     Product._send_product_subscription_confirmation(

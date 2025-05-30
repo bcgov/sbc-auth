@@ -148,8 +148,9 @@ class Org:  # pylint: disable=too-many-public-methods
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
 
-        payment_account_status, error = Org._create_payment_for_org(mailing_address, org,
-                                                                    org_info.pop("paymentInfo", {}), True)
+        payment_account_status, error = Org._create_payment_for_org(
+            mailing_address, org, org_info.pop("paymentInfo", {}), True
+        )
 
         if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
             logger.warning(f"Account update payment Error: {error}")
