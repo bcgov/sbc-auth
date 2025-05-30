@@ -140,6 +140,10 @@ class EntityMappingService:
         bootstrap_identifier = entity_details.get("bootstrapIdentifier")
         business_identifier = entity_details.get("identifier")
 
+        logger.debug(
+            f"Upserting entity mapping with business_identifier: {business_identifier} "
+            f" bootstrap_identifier: {bootstrap_identifier} nr_identifier: {nr_identifier}"
+        )
         conditions = []
         if nr_identifier:
             conditions.append(EntityMapping.nr_identifier == nr_identifier)
