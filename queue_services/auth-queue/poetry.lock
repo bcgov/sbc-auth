@@ -242,7 +242,7 @@ sqlalchemy-utils = "^0.41.2"
 type = "git"
 url = "https://github.com/bcgov/sbc-auth.git"
 reference = "feature-track-affiliations"
-resolved_reference = "123283924349c06c3a23e246c67836cdf63f47ee"
+resolved_reference = "bd8944a8813b47f84d014781ee06db3954ce11a9"
 subdirectory = "auth-api"
 
 [[package]]
