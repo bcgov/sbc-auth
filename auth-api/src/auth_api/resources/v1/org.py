@@ -22,7 +22,6 @@ from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.models import Affiliation as AffiliationModel
-from auth_api.models import EntityMapping
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest, SimpleOrgSearch
@@ -385,11 +384,12 @@ def affiliation_search(org_id, use_entity_mapping=False):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
     search_details = AffiliationSearchDetails.from_request_args(request)
     if use_entity_mapping:
-        affiliations = EntityMappingService.get_filtered_affiliations(org_id, search_details)
+        affiliation_bases = EntityMappingService.populate_affiliation_base(org_id, search_details)
     else:
         affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
+        affiliation_bases = AffiliationService.affiliation_to_affiliation_base(affiliations)
     affiliations_details_list = asyncio.run(
-        AffiliationService.get_affiliation_details(affiliations, search_details, org_id)
+        AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id)
     )
     # Use orjson serializer here, it's quite a bit faster.
     response, status = (

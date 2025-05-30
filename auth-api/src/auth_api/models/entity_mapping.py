@@ -1,3 +1,5 @@
+"""Entity Mapping model which enables us to be able to do pagination on affiliations."""
+
 from sqlalchemy import Column, Integer, String
 
 from .db import db

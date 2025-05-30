@@ -14,6 +14,7 @@
 """This module holds data classes."""
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import List, Optional, Self
 
 from requests import Request
@@ -201,3 +202,11 @@ class ProductReviewTask:
     product_subscription_id: int
     user_id: str
     external_source_id: Optional[str] = None
+
+
+@dataclass
+class AffiliationBase:
+    """Small class for searching in Names and LEAR."""
+
+    identifier: str
+    created: datetime

@@ -12,20 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation Mapping data."""
-from typing import List
-
-from flask import current_app
-from requests import HTTPError
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, case, func, or_, text
+from sqlalchemy.dialects.postgresql import array
 from structured_logging import StructuredLogging
 
-from auth_api.exceptions.exceptions import ServiceUnavailableException
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
-from auth_api.models.dataclass import AffiliationSearchDetails
+from auth_api.models.dataclass import AffiliationBase, AffiliationSearchDetails
 from auth_api.models.entity import Entity
 from auth_api.models.entity_mapping import EntityMapping
-from auth_api.services.rest_service import RestService
 
 logger = StructuredLogging.get_logger()
 
@@ -37,126 +32,127 @@ class EntityMappingService:
     """
 
     @staticmethod
-    def get_filtered_affiliations(org_id: int, search_details: AffiliationSearchDetails) -> List[AffiliationModel]:
+    def paginage_from_affiliations(org_id: int, search_details: AffiliationSearchDetails):
         """Get affiliations from DB based on priority mapping logic.
         - If no filters are applied (initial load), show only 1 page with 100 results.
         - If filters are applied grab all identifiers
+        - For TEMP business with NR, group them together and count as one row for pagination
+        - Returns an array of identifiers where NR+TMP pairs will have both identifiers in the array
         """
         paginate_for_non_search = not any(
             [search_details.identifier, search_details.status, search_details.name, search_details.type]
         )
 
-        query = (
-            db.session.query(AffiliationModel)
+        bootstrap_dates = (
+            db.session.query(
+                EntityMapping.bootstrap_identifier,
+                EntityMapping.nr_identifier,
+                AffiliationModel.created.label("bootstrap_created"),
+            )
+            .join(Entity, Entity.business_identifier == EntityMapping.bootstrap_identifier)
+            .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
+            .filter(
+                EntityMapping.business_identifier.is_(None),
+                EntityMapping.bootstrap_identifier.isnot(None),
+                EntityMapping.nr_identifier.isnot(None),
+                AffiliationModel.org_id == int(org_id or -1),
+                Entity.is_loaded_lear.is_(True),
+            )
+            .subquery()
+        )
+
+        identifiers_case = case(
+            (EntityMapping.business_identifier.isnot(None), array([EntityMapping.business_identifier])),
+            (
+                and_(EntityMapping.bootstrap_identifier.isnot(None), EntityMapping.nr_identifier.isnot(None)),
+                array([EntityMapping.bootstrap_identifier, EntityMapping.nr_identifier]),
+            ),
+            (EntityMapping.nr_identifier.isnot(None), array([EntityMapping.nr_identifier])),
+            (EntityMapping.bootstrap_identifier.isnot(None), array([EntityMapping.bootstrap_identifier])),
+        )
+
+        base_query = (
+            db.session.query(
+                identifiers_case.label("identifiers"),
+                func.coalesce(bootstrap_dates.c.bootstrap_created, AffiliationModel.created).label("order_date"),
+            )
             .join(Entity, Entity.id == AffiliationModel.entity_id)
             .join(
                 EntityMapping,
                 or_(
+                    # Fully formed business (standalone)
                     EntityMapping.business_identifier == Entity.business_identifier,
+                    # TEMP business only, numbered temp filing (standalone)
                     and_(
                         EntityMapping.business_identifier.is_(None),
                         EntityMapping.bootstrap_identifier == Entity.business_identifier,
+                        EntityMapping.nr_identifier.is_(None),
                     ),
+                    # NR only (standalone)
                     and_(
                         EntityMapping.business_identifier.is_(None),
                         EntityMapping.bootstrap_identifier.is_(None),
                         EntityMapping.nr_identifier == Entity.business_identifier,
                     ),
+                    # Named TEMP business with NR (combined info, need both affiliation rows to count as 1)
+                    and_(
+                        EntityMapping.business_identifier.is_(None),
+                        EntityMapping.bootstrap_identifier == Entity.business_identifier,
+                        EntityMapping.nr_identifier.isnot(None),
+                    ),
+                ),
+            )
+            .outerjoin(
+                bootstrap_dates,
+                and_(
+                    EntityMapping.bootstrap_identifier == bootstrap_dates.c.bootstrap_identifier,
+                    EntityMapping.nr_identifier == bootstrap_dates.c.nr_identifier,
                 ),
             )
             .filter(AffiliationModel.org_id == int(org_id or -1), Entity.is_loaded_lear.is_(True))
-        ).order_by(AffiliationModel.created.desc())
+            .order_by(text("order_date DESC"))
+        )
 
         if paginate_for_non_search:
             limit = search_details.limit
             page = search_details.page
             offset_value = (page - 1) * limit
-            query = query.offset(offset_value).limit(limit)
+            query = base_query.offset(offset_value).limit(limit)
+        else:
+            query = base_query
+
         return query.all()
 
     @staticmethod
-    def from_entity_details(entity_details: dict, use_flush: bool = False) -> EntityMapping:
+    def populate_affiliation_base(org_id: int, search_details: AffiliationSearchDetails):
+        """Get entity details from the database and expand multiple identifiers into separate rows."""
+        data = EntityMappingService.paginage_from_affiliations(org_id, search_details)
+        return [
+            AffiliationBase(identifier=identifier, created=created)
+            for identifiers, created in data
+            for identifier in identifiers
+        ]
+
+    @staticmethod
+    def from_entity_details(entity_details: dict) -> EntityMapping:
         """Create and populate an EntityMapping object from entity details."""
         nr_identifier = entity_details.get("nrNumber")
         bootstrap_identifier = entity_details.get("bootstrapIdentifier")
         business_identifier = entity_details.get("identifier")
 
-        affiliation_mapping = (
-            db.session.query(EntityMapping)
-            .filter(
-                or_(
-                    EntityMapping.nr_identifier == nr_identifier if nr_identifier else False,
-                    EntityMapping.bootstrap_identifier == bootstrap_identifier if bootstrap_identifier else False,
-                    EntityMapping.business_identifier == business_identifier if business_identifier else False,
-                )
-            )
-            .first()
-        ) or EntityMapping()
+        conditions = []
+        if nr_identifier:
+            conditions.append(EntityMapping.nr_identifier == nr_identifier)
+        if bootstrap_identifier:
+            conditions.append(EntityMapping.bootstrap_identifier == bootstrap_identifier)
+        if business_identifier:
+            conditions.append(EntityMapping.business_identifier == business_identifier)
+
+        affiliation_mapping = (db.session.query(EntityMapping).filter(or_(*conditions)).first()) or EntityMapping()
 
         affiliation_mapping.nr_identifier = nr_identifier or affiliation_mapping.nr_identifier
         affiliation_mapping.bootstrap_identifier = bootstrap_identifier or affiliation_mapping.bootstrap_identifier
         affiliation_mapping.business_identifier = business_identifier or affiliation_mapping.business_identifier
 
-        if use_flush:
-            affiliation_mapping.flush()
-        else:
-            affiliation_mapping.save()
+        affiliation_mapping.save()
         return affiliation_mapping
-
-    @staticmethod
-    def get_identifiers_without_mappings(org_id: int) -> List[str]:
-        """Find all business identifiers for an org that don't have corresponding entity mappings.
-
-        This joins the affiliation and entity tables, then finds records where there is no
-        matching entity mapping for any of the identifiers (business, bootstrap, or NR).
-        """
-        results = (
-            db.session.query(Entity.business_identifier)
-            .join(AffiliationModel, Entity.id == AffiliationModel.entity_id)
-            .outerjoin(
-                EntityMapping,
-                or_(
-                    EntityMapping.business_identifier == Entity.business_identifier,
-                    and_(
-                        EntityMapping.business_identifier.is_(None),
-                        EntityMapping.bootstrap_identifier == Entity.business_identifier,
-                    ),
-                    and_(
-                        EntityMapping.business_identifier.is_(None),
-                        EntityMapping.bootstrap_identifier.is_(None),
-                        EntityMapping.nr_identifier == Entity.business_identifier,
-                    ),
-                ),
-            )
-            .filter(AffiliationModel.org_id == org_id, EntityMapping.id.is_(None), Entity.is_loaded_lear.is_(True))
-            .all()
-        )
-        return [row[0] for row in results]
-
-    @staticmethod
-    def fetch_entity_mappings_details(org_id: int):
-        """Return affiliation details by calling the source api."""
-        if not (identifiers := EntityMappingService.get_identifiers_without_mappings(org_id)):
-            return
-        token = RestService.get_service_account_token(
-            config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
-        )
-        new_url = f"{current_app.config.get('LEGAL_API_URL')}{current_app.config.get('LEGAL_API_VERSION_2')}"
-        endpoint = f"{new_url}/businesses/search/affiliation_mappings"
-        try:
-            response = RestService.post(endpoint, token=token, data={"identifiers": identifiers})
-            return response.json().get("entityDetails")
-        except HTTPError as http_error:
-            # If this fails, we should still allow affiliation search to continue.
-            logger.error("Failed to get affiliations mappings for org_id: %s", org_id)
-            logger.error(http_error)
-
-    @staticmethod
-    def populate_entity_mappings(org_id):
-        """Populate the entity mappings for an org."""
-        if not (mapping_details := EntityMappingService.fetch_entity_mappings_details(org_id)):
-            return
-        # We could have a thousand rows, rather do this in one commit instead of multiple.
-        for details in mapping_details:
-            mapping = EntityMappingService.from_entity_details(details, use_flush=True)
-        mapping.save()

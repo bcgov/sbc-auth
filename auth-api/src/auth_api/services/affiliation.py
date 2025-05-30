@@ -31,7 +31,7 @@ from auth_api.models.affiliation_invitation import AffiliationInvitation as Affi
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
 from auth_api.models.dataclass import Affiliation as AffiliationData
-from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest
+from auth_api.models.dataclass import AffiliationBase, AffiliationSearchDetails, DeleteAffiliationRequest
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
@@ -452,23 +452,31 @@ class Affiliation:
         logger.debug(">fix_stale_affiliations")
 
     @staticmethod
-    def _affiliation_details_url(affiliation: AffiliationModel) -> str:
+    def _affiliation_details_url(identifier: str) -> str:
         """Determine url to call for affiliation details."""
         # only have LEAR and NAMEX affiliations
-        if affiliation.entity.corp_type_code == CorpType.NR.value:
+        if identifier.startswith("NR"):
             return current_app.config.get("NAMEX_AFFILIATION_DETAILS_URL")
         return current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
 
     @staticmethod
+    def affiliation_to_affiliation_base(affiliations: List[AffiliationModel]) -> List[AffiliationBase]:
+        """Convert affiliations to a common data class."""
+        return [
+            AffiliationBase(identifier=affiliation.entity.business_identifier, created=affiliation.created)
+            for affiliation in affiliations
+        ]
+
+    @staticmethod
     async def get_affiliation_details(
-        affiliations: List[AffiliationModel], search_details: AffiliationSearchDetails, org_id
+        affiliation_bases: List[AffiliationBase], search_details: AffiliationSearchDetails, org_id
     ) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
         search_dict = asdict(search_details)
-        for affiliation in affiliations:
-            url = Affiliation._affiliation_details_url(affiliation)
-            url_identifiers.setdefault(url, []).append(affiliation.entity.business_identifier)
+        for affiliation_base in affiliation_bases:
+            url = Affiliation._affiliation_details_url(affiliation_base.identifier)
+            url_identifiers.setdefault(url, []).append(affiliation_base.identifier)
         call_info = [
             {
                 "url": url,
@@ -487,11 +495,9 @@ class Affiliation:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
             combined = Affiliation._combine_affiliation_details(responses)
             # Should provide us with ascending order
-            affiliations_sorted = sorted(affiliations, key=lambda x: x.created, reverse=True)
+            affiliations_bases_sorted = sorted(affiliation_bases, key=lambda x: x.created, reverse=True)
             # Provide us with a dict with the max created date.
-            ordered = {
-                affiliation.entity.business_identifier: affiliation.created for affiliation in affiliations_sorted
-            }
+            ordered = {affiliation.identifier: affiliation.created for affiliation in affiliations_bases_sorted}
 
             def sort_key(item):
                 identifier = item.get("identifier", item.get("nameRequest", {}).get("nrNum", ""))
@@ -502,7 +508,7 @@ class Affiliation:
             return combined
         except ServiceUnavailableException as err:
             logger.debug(err)
-            logger.debug("Failed to get affiliations details:  %s", affiliations)
+            logger.debug("Failed to get affiliations details:  %s", affiliation_bases)
             raise ServiceUnavailableException("Failed to get affiliation details") from err
 
     @staticmethod

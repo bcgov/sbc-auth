@@ -1,128 +1,105 @@
 """Unit tests for the EntityMapping service."""
 
-import pytest
-from requests import HTTPError
-from sqlalchemy import and_, or_
-
-from auth_api.exceptions import BusinessException
-from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.dataclass import AffiliationSearchDetails
 from auth_api.models.entity import Entity
 from auth_api.models.entity_mapping import EntityMapping
-from auth_api.models.org import Org as OrgModel
 from auth_api.services.entity_mapping import EntityMappingService
-from auth_api.services.rest_service import RestService
 from tests.utilities.factory_utils import factory_org_service
 
 
-@pytest.mark.parametrize(
-    "test_name,entity_mapping_data,expected_count",
-    [
-        (
-            "all_identifiers_present",
-            # This payload comes straight from LEAR into the affiliation POST call.
-            {"identifier": "BC5234567", "bootstrapIdentifier": "Txxxxxxxxx", "nrNumber": "NR5234567"},
-            1,
-        ),
-        (
-            "business_and_bootstrap_only",
-            {"identifier": "BC5234567", "bootstrapIdentifier": "Txxxxxxxxx", "nrNumber": None},
-            1,
-        ),
-        (
-            "bootstrap_and_nr_only",
-            {"identifier": None, "bootstrapIdentifier": "Txxxxxxxxx", "nrNumber": "NR5234567"},
-            1,
-        ),
-        ("nr_only", {"identifier": None, "bootstrapIdentifier": None, "nrNumber": "NR5234567"}, 1),
-        ("no_match", {"identifier": "DIFFERENT", "bootstrapIdentifier": "DIFFERENT", "nrNumber": "DIFFERENT"}, 0),
-    ],
-)
-def test_get_filtered_affiliations_identifier_matches(session, test_name, entity_mapping_data, expected_count):
+def test_get_filtered_affiliations_identifier_matches(session):
     """Test that affiliations are returned based on identifier matching logic."""
+
+    entity_mapping_data = [
+        # COLIN import - Business only on BRD
+        {"identifier": "BC1234567", "bootstrapIdentifier": None, "nrNumber": None},
+        # Numbered company draft - only temp identifier on BRD
+        {"identifier": None, "bootstrapIdentifier": "Tyyyyyyy", "nrNumber": None},
+        # NR - only nr identifier on BRD
+        {"identifier": None, "bootstrapIdentifier": None, "nrNumber": "NR1234567"},
+        # NR and TEMP (unconsumed) these should be combined into 1 row on the BRD,
+        # but we need both entities to be considered 1 row for pagination
+        {"identifier": None, "bootstrapIdentifier": "Taaaaaaa", "nrNumber": "NR1234561"},
+        # Duplicate of above, considered 1 row for pagination
+        {"identifier": None, "bootstrapIdentifier": "Tbbbbbbb", "nrNumber": "NR1234561"},
+        # Normal named business flow - only business identifier - Skip rows for NR
+        {"identifier": "BC7234567", "bootstrapIdentifier": "Txxxxxxx", "nrNumber": "NR1234565"},
+        # Scenario where one TEMP has used the NR and completed the temp, the other TEMP just sits.
+        {"identifier": "BC5234567", "bootstrapIdentifier": "Tiiiiiii", "nrNumber": "NR1235565"},
+        {"identifier": None, "bootstrapIdentifier": "Tddddddd", "nrNumber": "NR1235565"},
+        # Additional: Change of Name, I believe shows 2 rows and doesn't combine
+    ]
+
+    expected_before_search = [
+        ["BC1234567"],
+        ["Tyyyyyyy"],
+        ["NR1234567"],
+        ["Taaaaaaa", "NR1234561"],
+        ["Tbbbbbbb", "NR1234561"],
+        ["BC7234567"],
+        ["BC5234567"],
+        ["Tddddddd", "NR1235565"],
+    ]
+
     service = EntityMappingService()
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary["id"]
 
-    entity1 = Entity(business_identifier="BC5234567", corp_type_code="BC").save()
-    AffiliationModel(org_id=org_id, entity_id=entity1.id).save()
-    entity2 = Entity(business_identifier="Txxxxxxxxx", corp_type_code="TMP").save()
-    AffiliationModel(org_id=org_id, entity_id=entity2.id).save()
-    entity3 = Entity(business_identifier="NR5234567", corp_type_code="NR").save()
-    AffiliationModel(org_id=org_id, entity_id=entity3.id).save()
+    # Reverse the list since results are ordered by created date DESC
+    entity_mapping_data.reverse()
+    for data in entity_mapping_data:
+        _create_affiliations_for_mapping(session, org_id, data)
 
-    service.from_entity_details(entity_mapping_data)
-
-    search_details = AffiliationSearchDetails(page=1, limit=100)
-    results = service.get_filtered_affiliations(org_id, search_details)
-
-    assert len(results) == expected_count
+    for page in range(1, len(entity_mapping_data)):
+        search_details = AffiliationSearchDetails(page=page, limit=1)
+        results = service.paginage_from_affiliations(org_id, search_details)
+        assert results[0][0] == expected_before_search[page - 1]
 
 
-@pytest.mark.parametrize(
-    "test_name,identifiers,api_response,expected_mappings",
-    [
-        (
-            "successful_population",
-            ["BC1234567", "BC7654321"],
-            [
-                {"nrNumber": "NR1234567", "bootstrapIdentifier": "Txxxxxxxxx", "identifier": "BC1234567"},
-                {"nrNumber": "NR7654321", "bootstrapIdentifier": "Tyyyyyyyy", "identifier": "BC7654321"},
-            ],
-            2,
-        ),
-        ("no_identifiers", [], [], 0),
-        (
-            "skip_existing_mappings",
-            ["BC1234567", "BC7654321", "BC9999999"],
-            [
-                {"nrNumber": "NR1234567", "bootstrapIdentifier": "Txxxxxxxxx", "identifier": "BC1234567"},
-                {"nrNumber": "NR7654321", "bootstrapIdentifier": "Tyyyyyyyy", "identifier": "BC7654321"},
-                {"nrNumber": "NR9999999", "bootstrapIdentifier": "Tzzzzzzzz", "identifier": "BC9999999"},
-            ],
-            3,
-        ),
-        (
-            "update_existing_mapping",
-            ["BC1234567"],
-            [{"nrNumber": "NR1234567", "bootstrapIdentifier": "Txxxxxxxxx", "identifier": "BC1234567"}],
-            1,
-        ),
-    ],
-)
-def test_populate_entity_mappings(session, test_name, identifiers, api_response, expected_mappings, monkeypatch):
-    """Test that populate_entity_mappings correctly fetches and populates entity mappings."""
-    org_service = factory_org_service()
-    org_dictionary = org_service.as_dict()
-    org_id = org_dictionary["id"]
-    service = EntityMappingService()
+def _get_or_create_entity(session, business_identifier, corp_type_code):
+    """Get existing entity or create a new one if it doesn't exist."""
+    existing_entity = (
+        session.query(Entity)
+        .filter(Entity.business_identifier == business_identifier, Entity.corp_type_code == corp_type_code)
+        .first()
+    )
 
-    # Create entities and affiliations without mappings
-    for identifier in identifiers:
-        entity = Entity(business_identifier=identifier, corp_type_code="BC").save()
-        AffiliationModel(org_id=org_id, entity_id=entity.id).save()
+    return (
+        existing_entity
+        or Entity(business_identifier=business_identifier, corp_type_code=corp_type_code, is_loaded_lear=True).save()
+    )
 
-    # For the skip_existing_mappings test case, create a mapping for the third identifier
-    if test_name == "skip_existing_mappings":
-        EntityMapping(
-            business_identifier="BC9999999", bootstrap_identifier="Tzzzzzzzz", nr_identifier="NR9999999"
-        ).save()
-    # For the update_existing_mapping test case, create a mapping with only nr_identifier
-    elif test_name == "update_existing_mapping":
-        EntityMapping(nr_identifier="NR1234567").save()
 
-    monkeypatch.setattr(RestService, "get_service_account_token", lambda *args, **kwargs: {"accessToken": "mock_token"})
-    monkeypatch.setattr(EntityMappingService, "fetch_entity_mappings_details", lambda *args, **kwargs: api_response)
+def _get_or_create_affiliation(session, org_id, entity_id):
+    """Get existing affiliation or create a new one if it doesn't exist."""
+    existing_affiliation = (
+        session.query(AffiliationModel)
+        .filter(AffiliationModel.org_id == org_id, AffiliationModel.entity_id == entity_id)
+        .first()
+    )
 
-    service.populate_entity_mappings(org_id)
+    return existing_affiliation or AffiliationModel(org_id=org_id, entity_id=entity_id).save()
 
-    mappings = EntityMapping.query.all()
-    assert len(mappings) == expected_mappings
-    if expected_mappings > 0:
-        mappings.sort(key=lambda x: x.business_identifier or "")
-        for mapping, expected in zip(mappings, api_response):
-            assert mapping.nr_identifier == expected["nrNumber"]
-            assert mapping.bootstrap_identifier == expected["bootstrapIdentifier"]
-            assert mapping.business_identifier == expected["identifier"]
+
+def _create_affiliations_for_mapping(session, org_id, data):
+    """Create an affiliation for each non-None value in the mapping data."""
+    EntityMapping(
+        business_identifier=data.get("identifier"),
+        bootstrap_identifier=data.get("bootstrapIdentifier"),
+        nr_identifier=data.get("nrNumber"),
+    ).save()
+
+    # Follows the business flow, NR always comes first
+    if data.get("nrNumber"):
+        entity = _get_or_create_entity(session, data["nrNumber"], "NR")
+        _get_or_create_affiliation(session, org_id, entity.id)
+
+    if data.get("bootstrapIdentifier"):
+        entity = _get_or_create_entity(session, data["bootstrapIdentifier"], "TMP")
+        _get_or_create_affiliation(session, org_id, entity.id)
+
+    if data.get("identifier"):
+        entity = _get_or_create_entity(session, data["identifier"], "BC")
+        _get_or_create_affiliation(session, org_id, entity.id)
