@@ -182,6 +182,7 @@ class EntityMappingService:
         Each case ensures that other identifiers are None to prevent partial matches.
         """
         conditions = []
+        # Full business
         if all([nr_identifier, bootstrap_identifier, business_identifier]):
             conditions.extend(
                 [
@@ -190,6 +191,7 @@ class EntityMappingService:
                     EntityMapping.business_identifier.is_(None),
                 ]
             )
+        # Numbered business            
         elif all([bootstrap_identifier, business_identifier]):
             conditions.extend(
                 [
@@ -198,6 +200,7 @@ class EntityMappingService:
                     EntityMapping.business_identifier.is_(None),
                 ]
             )
+        # NR and Bootstrap
         elif all([nr_identifier, bootstrap_identifier]):
             conditions.extend(
                 [
@@ -206,6 +209,7 @@ class EntityMappingService:
                     EntityMapping.bootstrap_identifier.is_(None),
                 ]
             )
+        # Business only, could be from COLIN
         elif business_identifier:
             conditions.extend(
                 [
@@ -214,6 +218,7 @@ class EntityMappingService:
                     EntityMapping.business_identifier == business_identifier,
                 ]
             )
+        # Bootstrap only numbered business
         elif bootstrap_identifier:
             conditions.extend(
                 [
@@ -222,6 +227,7 @@ class EntityMappingService:
                     EntityMapping.business_identifier.is_(None),
                 ]
             )
+        # NR only could be from auth-queue
         elif nr_identifier:
             conditions.extend(
                 [
