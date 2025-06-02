@@ -134,15 +134,19 @@ class EntityMappingService:
         ]
 
     @staticmethod
-    def from_entity_details(entity_details: dict) -> EntityMapping:
-        """Create and populate an EntityMapping object from entity details."""
+    def from_entity_details(entity_details: dict):
+        """Create and populate an EntityMapping object from entity details.
+        
+        Only updates an existing row if the new data fills in missing identifiers.
+        Otherwise creates a new row.
+        """
         nr_identifier = entity_details.get("nrNumber")
         bootstrap_identifier = entity_details.get("bootstrapIdentifier")
         business_identifier = entity_details.get("identifier")
 
         logger.debug(
-            f"Upserting entity mapping with business_identifier: {business_identifier} "
-            f" bootstrap_identifier: {bootstrap_identifier} nr_identifier: {nr_identifier}"
+            f"Upserting entity mapping with business_identifier: {business_identifier}, "
+            f" bootstrap_identifier: {bootstrap_identifier}, nr_identifier: {nr_identifier}"
         )
         conditions = []
         if nr_identifier:
@@ -152,11 +156,26 @@ class EntityMappingService:
         if business_identifier:
             conditions.append(EntityMapping.business_identifier == business_identifier)
 
-        affiliation_mapping = (db.session.query(EntityMapping).filter(or_(*conditions)).first()) or EntityMapping()
+        existing_mapping = db.session.query(EntityMapping).filter(or_(*conditions)).first()
+        if existing_mapping:
+            should_update = False
+            if nr_identifier and not existing_mapping.nr_identifier:
+                existing_mapping.nr_identifier = nr_identifier
+                should_update = True
+            if bootstrap_identifier and not existing_mapping.bootstrap_identifier:
+                existing_mapping.bootstrap_identifier = bootstrap_identifier
+                should_update = True
+            if business_identifier and not existing_mapping.business_identifier:
+                existing_mapping.business_identifier = business_identifier
+                should_update = True
+            if should_update:
+                existing_mapping.save()
+                return
+            
 
-        affiliation_mapping.nr_identifier = nr_identifier or affiliation_mapping.nr_identifier
-        affiliation_mapping.bootstrap_identifier = bootstrap_identifier or affiliation_mapping.bootstrap_identifier
-        affiliation_mapping.business_identifier = business_identifier or affiliation_mapping.business_identifier
-
-        affiliation_mapping.save()
-        return affiliation_mapping
+        new_mapping = EntityMapping(
+            nr_identifier=nr_identifier,
+            bootstrap_identifier=bootstrap_identifier,
+            business_identifier=business_identifier
+        )
+        new_mapping.save()
