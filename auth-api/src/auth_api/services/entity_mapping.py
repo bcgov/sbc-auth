@@ -181,64 +181,50 @@ class EntityMappingService:
 
         Each case ensures that other identifiers are None to prevent partial matches.
         """
-        conditions = []
         # Full business
         if all([nr_identifier, bootstrap_identifier, business_identifier]):
-            conditions.extend(
-                [
-                    EntityMapping.nr_identifier == nr_identifier,
-                    EntityMapping.bootstrap_identifier == bootstrap_identifier,
-                    EntityMapping.business_identifier.is_(None),
-                ]
-            )
-        # Numbered business            
+            return [
+                EntityMapping.nr_identifier == nr_identifier,
+                EntityMapping.bootstrap_identifier == bootstrap_identifier,
+                EntityMapping.business_identifier.is_(None),
+            ]
+        # Numbered business
         elif all([bootstrap_identifier, business_identifier]):
-            conditions.extend(
-                [
-                    EntityMapping.nr_identifier.is_(None),
-                    EntityMapping.bootstrap_identifier == bootstrap_identifier,
-                    EntityMapping.business_identifier.is_(None),
-                ]
-            )
+            return [
+                EntityMapping.nr_identifier.is_(None),
+                EntityMapping.bootstrap_identifier == bootstrap_identifier,
+                EntityMapping.business_identifier.is_(None),
+            ]
         # NR and Bootstrap
         elif all([nr_identifier, bootstrap_identifier]):
-            conditions.extend(
-                [
-                    EntityMapping.nr_identifier == nr_identifier,
-                    EntityMapping.business_identifier.is_(None),
-                    EntityMapping.bootstrap_identifier.is_(None),
-                ]
-            )
+            return [
+                EntityMapping.nr_identifier == nr_identifier,
+                EntityMapping.business_identifier.is_(None),
+                EntityMapping.bootstrap_identifier.is_(None),
+            ]
         # Business only, could be from COLIN
         elif business_identifier:
-            conditions.extend(
-                [
-                    EntityMapping.nr_identifier.is_(None),
-                    EntityMapping.bootstrap_identifier.is_(None),
-                    EntityMapping.business_identifier == business_identifier,
-                ]
-            )
+            return [
+                EntityMapping.nr_identifier.is_(None),
+                EntityMapping.bootstrap_identifier.is_(None),
+                EntityMapping.business_identifier == business_identifier,
+            ]
         # Bootstrap only numbered business
         elif bootstrap_identifier:
-            conditions.extend(
-                [
-                    EntityMapping.nr_identifier.is_(None),
-                    EntityMapping.bootstrap_identifier == bootstrap_identifier,
-                    EntityMapping.business_identifier.is_(None),
-                ]
-            )
+            return [
+                EntityMapping.nr_identifier.is_(None),
+                EntityMapping.bootstrap_identifier == bootstrap_identifier,
+                EntityMapping.business_identifier.is_(None),
+            ]
         # NR only could be from auth-queue
         elif nr_identifier:
-            conditions.extend(
-                [
-                    EntityMapping.nr_identifier == nr_identifier,
-                    EntityMapping.bootstrap_identifier.is_(None),
-                    EntityMapping.business_identifier.is_(None),
-                ]
-            )
+            return [
+                EntityMapping.nr_identifier == nr_identifier,
+                EntityMapping.bootstrap_identifier.is_(None),
+                EntityMapping.business_identifier.is_(None),
+            ]
         else:
             raise ValueError("No identifiers provided")
-        return conditions
 
     @staticmethod
     def from_entity_details(entity_details: dict):
