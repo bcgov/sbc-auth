@@ -21,6 +21,8 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.dataclass import AffiliationBase, AffiliationSearchDetails
 from auth_api.models.entity import Entity
 from auth_api.models.entity_mapping import EntityMapping
+from auth_api.utils import user_context
+from auth_api.utils.user_context import UserContext
 
 logger = StructuredLogging.get_logger()
 
@@ -224,12 +226,17 @@ class EntityMappingService:
             ]
 
     @staticmethod
-    def from_entity_details(entity_details: dict):
+    @user_context
+    def from_entity_details(entity_details: dict, skip_auth: bool = False, **kwargs):
         """Create and populate an EntityMapping object from entity details.
 
         Only updates an existing row if the new data fills in missing identifiers.
         Otherwise creates a new row.
         """
+        user_from_context: UserContext = kwargs["user_context"]
+        if skip_auth is False and not user_from_context.is_system():
+            return
+
         nr_identifier = entity_details.get("nrNumber")
         bootstrap_identifier = entity_details.get("bootstrapIdentifier")
         business_identifier = entity_details.get("identifier")
