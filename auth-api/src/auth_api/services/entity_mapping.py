@@ -214,7 +214,9 @@ class EntityMappingService:
                 EntityMapping.business_identifier == business_identifier,
             ]
         else:
-            logger.error(
+            # Handle not possible cases like NR, no TEMP and BUSINESS IDENTIFIER
+            # Log warning instead of raising an exception incase we have some of these weird cases.
+            logger.warning(
                 f"Invalid identifier combination provided: {nr_identifier}, {bootstrap_identifier}, {business_identifier}"
             )
             return [
