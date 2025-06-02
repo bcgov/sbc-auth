@@ -143,11 +143,6 @@ class EntityMappingService:
         nr_identifier = entity_details.get("nrNumber")
         bootstrap_identifier = entity_details.get("bootstrapIdentifier")
         business_identifier = entity_details.get("identifier")
-
-        logger.debug(
-            f"Upserting entity mapping with business_identifier: {business_identifier}, "
-            f" bootstrap_identifier: {bootstrap_identifier}, nr_identifier: {nr_identifier}"
-        )
         conditions = []
         if nr_identifier:
             conditions.append(EntityMapping.nr_identifier == nr_identifier)
@@ -170,8 +165,10 @@ class EntityMappingService:
                 should_update = True
             if should_update:
                 logger.debug(
-                    f"Updating entity mapping {existing_mapping.id} with business_identifier: {business_identifier}, "
-                    f"bootstrap_identifier: {bootstrap_identifier}, nr_identifier: {nr_identifier}"
+                    f"Updating entity mapping {existing_mapping.id} with: "
+                    f"business_identifier: {business_identifier}, "
+                    f"bootstrap_identifier: {bootstrap_identifier}, "
+                    f"nr_identifier: {nr_identifier}"
                 )
                 existing_mapping.save()
                 return
@@ -182,7 +179,9 @@ class EntityMappingService:
             business_identifier=business_identifier,
         )
         logger.debug(
-            f"Creating new entity mapping with business_identifier: {business_identifier}, "
-            f"bootstrap_identifier: {bootstrap_identifier}, nr_identifier: {nr_identifier}"
+            f"Creating new entity mapping with: "
+            f"business_identifier: {business_identifier}, "
+            f"bootstrap_identifier: {bootstrap_identifier}, "
+            f"nr_identifier: {nr_identifier}"
         )
         new_mapping.save()
