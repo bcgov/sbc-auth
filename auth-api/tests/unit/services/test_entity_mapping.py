@@ -147,3 +147,8 @@ def test_from_entity_details_multiple_identifiers(session):
     # Should only update the bootstrapIdentifier and nrNumber matching
     service.from_entity_details({"identifier": "BC6534567", "bootstrapIdentifier": "T5234563", "nrNumber": "NR1234563"})
     assert session.query(EntityMapping).order_by(EntityMapping.id).count() == 6
+    results = session.query(EntityMapping).order_by(EntityMapping.id).filter(EntityMapping.nr_identifier == "NR1234563").all()
+    assert len(results) == 2
+    assert results[0].business_identifier is None
+    assert results[1].business_identifier == "BC6534567"
+    
