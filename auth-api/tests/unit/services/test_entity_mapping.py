@@ -133,7 +133,7 @@ def test_from_entity_details_multiple_identifiers(session):
     results = session.query(EntityMapping).order_by(EntityMapping.id).all()
 
     # Should have 4 distinct rows:
-    # 1. NR+TMP+BC (updated from NR+TMP)
+    # 1. NR+TMP+BC (updated from NR with TMP then BC)
     # 2. NR+TMP (new row with different TMP)
     # 3. TMP+BC (updated from TMP)
     # 4. BC only (new row)
