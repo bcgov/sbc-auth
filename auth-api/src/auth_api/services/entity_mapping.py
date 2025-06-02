@@ -134,15 +134,17 @@ class EntityMappingService:
         ]
 
     @staticmethod
-    def _is_duplicate_mapping(
-        existing_mapping: EntityMapping, nr_identifier: str, bootstrap_identifier: str, business_identifier: str
-    ) -> bool:
+    def _is_duplicate_mapping(nr_identifier: str, bootstrap_identifier: str, business_identifier: str) -> bool:
         """Check if the new mapping data exactly matches an existing mapping."""
-        return (
-            existing_mapping.nr_identifier == nr_identifier
-            and existing_mapping.bootstrap_identifier == bootstrap_identifier
-            and existing_mapping.business_identifier == business_identifier
-        )
+        conditions = []
+        if nr_identifier:
+            conditions.append(EntityMapping.nr_identifier == nr_identifier)
+        if bootstrap_identifier:
+            conditions.append(EntityMapping.bootstrap_identifier == bootstrap_identifier)
+        if business_identifier:
+            conditions.append(EntityMapping.business_identifier == business_identifier)
+        duplicate = db.session.query(EntityMapping).filter(and_(*conditions)).first()
+        return duplicate is not None
 
     @staticmethod
     def _update_existing_mapping(
@@ -174,6 +176,65 @@ class EntityMappingService:
         return should_update
 
     @staticmethod
+    def _build_mapping_conditions(nr_identifier: str, bootstrap_identifier: str, business_identifier: str) -> list:
+        """Build conditions for finding an existing mapping based on provided identifiers.
+
+        Each case ensures that other identifiers are None to prevent partial matches.
+        """
+        conditions = []
+        if all([nr_identifier, bootstrap_identifier, business_identifier]):
+            conditions.extend(
+                [
+                    EntityMapping.nr_identifier == nr_identifier,
+                    EntityMapping.bootstrap_identifier == bootstrap_identifier,
+                    EntityMapping.business_identifier.is_(None),
+                ]
+            )
+        elif all([bootstrap_identifier, business_identifier]):
+            conditions.extend(
+                [
+                    EntityMapping.nr_identifier.is_(None),
+                    EntityMapping.bootstrap_identifier == bootstrap_identifier,
+                    EntityMapping.business_identifier.is_(None),
+                ]
+            )
+        elif all([nr_identifier, bootstrap_identifier]):
+            conditions.extend(
+                [
+                    EntityMapping.nr_identifier == nr_identifier,
+                    EntityMapping.business_identifier.is_(None),
+                    EntityMapping.bootstrap_identifier.is_(None),
+                ]
+            )
+        elif business_identifier:
+            conditions.extend(
+                [
+                    EntityMapping.nr_identifier.is_(None),
+                    EntityMapping.bootstrap_identifier.is_(None),
+                    EntityMapping.business_identifier == business_identifier,
+                ]
+            )
+        elif bootstrap_identifier:
+            conditions.extend(
+                [
+                    EntityMapping.nr_identifier.is_(None),
+                    EntityMapping.bootstrap_identifier == bootstrap_identifier,
+                    EntityMapping.business_identifier.is_(None),
+                ]
+            )
+        elif nr_identifier:
+            conditions.extend(
+                [
+                    EntityMapping.nr_identifier == nr_identifier,
+                    EntityMapping.bootstrap_identifier.is_(None),
+                    EntityMapping.business_identifier.is_(None),
+                ]
+            )
+        else:
+            raise ValueError("No identifiers provided")
+        return conditions
+
+    @staticmethod
     def from_entity_details(entity_details: dict):
         """Create and populate an EntityMapping object from entity details.
 
@@ -183,19 +244,15 @@ class EntityMappingService:
         nr_identifier = entity_details.get("nrNumber")
         bootstrap_identifier = entity_details.get("bootstrapIdentifier")
         business_identifier = entity_details.get("identifier")
-        conditions = []
-        if nr_identifier:
-            conditions.append(EntityMapping.nr_identifier == nr_identifier)
-        if bootstrap_identifier:
-            conditions.append(EntityMapping.bootstrap_identifier == bootstrap_identifier)
-        if business_identifier:
-            conditions.append(EntityMapping.business_identifier == business_identifier)
 
-        if (existing_mapping := db.session.query(EntityMapping).filter(or_(*conditions)).first()) is not None:
-            if EntityMappingService._is_duplicate_mapping(
-                existing_mapping, nr_identifier, bootstrap_identifier, business_identifier
-            ):
-                return
+        if EntityMappingService._is_duplicate_mapping(nr_identifier, bootstrap_identifier, business_identifier):
+            return
+
+        conditions = EntityMappingService._build_mapping_conditions(
+            nr_identifier, bootstrap_identifier, business_identifier
+        )
+
+        if (existing_mapping := db.session.query(EntityMapping).filter(and_(*conditions)).first()) is not None:
             if EntityMappingService._update_existing_mapping(
                 existing_mapping, nr_identifier, bootstrap_identifier, business_identifier
             ):
