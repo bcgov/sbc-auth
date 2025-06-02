@@ -215,7 +215,7 @@ class EntityMappingService:
             ]
         # NR only could be from auth-queue
         else:
-            raise ValueError("No identifiers provided")
+            raise ValueError("Invalid identifiers provided")
 
     @staticmethod
     def from_entity_details(entity_details: dict):
