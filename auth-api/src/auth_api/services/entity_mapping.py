@@ -21,8 +21,7 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.dataclass import AffiliationBase, AffiliationSearchDetails
 from auth_api.models.entity import Entity
 from auth_api.models.entity_mapping import EntityMapping
-from auth_api.utils import user_context
-from auth_api.utils.user_context import UserContext
+from auth_api.utils.user_context import UserContext, user_context
 
 logger = StructuredLogging.get_logger()
 
