@@ -153,6 +153,10 @@ class EntityMappingService:
 
         existing_mapping = db.session.query(EntityMapping).filter(or_(*conditions)).first()
         if existing_mapping:
+            if (existing_mapping.nr_identifier == nr_identifier and 
+                existing_mapping.bootstrap_identifier == bootstrap_identifier and 
+                existing_mapping.business_identifier == business_identifier):
+                return
             should_update = False
             if nr_identifier and not existing_mapping.nr_identifier:
                 existing_mapping.nr_identifier = nr_identifier

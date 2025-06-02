@@ -112,9 +112,11 @@ def test_from_entity_details_multiple_identifiers(session):
     nr_data = {"identifier": None, "bootstrapIdentifier": None, "nrNumber": "NR1234567"}
     service.from_entity_details(nr_data)
 
-    # This should update the row above.
-    nr_data = {"identifier": None, "bootstrapIdentifier": None, "nrNumber": "NR1234567"}
+    # Should skip this row, as it's a duplicate of the row above.
+    nr_data = {"nrNumber": "NR1234567"}
     service.from_entity_details(nr_data)
+
+    assert session.query(EntityMapping).order_by(EntityMapping.id).count() == 1
 
     nr_temp_data = {"identifier": None, "bootstrapIdentifier": "T1234567", "nrNumber": "NR1234567"}
     service.from_entity_details(nr_temp_data)
