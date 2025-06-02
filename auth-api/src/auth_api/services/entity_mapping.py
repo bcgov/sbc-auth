@@ -213,7 +213,6 @@ class EntityMappingService:
                 EntityMapping.bootstrap_identifier.is_(None),
                 EntityMapping.business_identifier == business_identifier,
             ]
-        # NR only could be from auth-queue
         else:
             raise ValueError("Invalid identifiers provided")
 
