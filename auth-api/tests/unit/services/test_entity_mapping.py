@@ -111,7 +111,7 @@ def test_from_entity_details_multiple_identifiers(session):
     service.from_entity_details({"identifier": None, "bootstrapIdentifier": None, "nrNumber": "NR1234567"})
     # Should skip this row, as it's a duplicate of the row above.
     service.from_entity_details({"nrNumber": "NR1234567"})
-    
+
     assert session.query(EntityMapping).order_by(EntityMapping.id).count() == 1
 
     service.from_entity_details({"identifier": None, "bootstrapIdentifier": "T1234567", "nrNumber": "NR1234567"})
