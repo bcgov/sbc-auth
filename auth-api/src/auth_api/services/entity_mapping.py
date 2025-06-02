@@ -214,9 +214,11 @@ class EntityMappingService:
                 EntityMapping.business_identifier == business_identifier,
             ]
         else:
-            logger.error(f"Invalid identifier combination provided: {nr_identifier}, {bootstrap_identifier}, {business_identifier}")
+            logger.error(
+                f"Invalid identifier combination provided: {nr_identifier}, {bootstrap_identifier}, {business_identifier}"
+            )
             return [
-                 EntityMapping.id == -1,
+                EntityMapping.id == -1,
             ]
 
     @staticmethod
