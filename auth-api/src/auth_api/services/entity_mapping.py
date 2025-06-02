@@ -188,41 +188,32 @@ class EntityMappingService:
                 EntityMapping.bootstrap_identifier == bootstrap_identifier,
                 EntityMapping.business_identifier.is_(None),
             ]
-        # Numbered business
-        elif all([bootstrap_identifier, business_identifier]):
+        # Numbered business or bootstrap only numbered business
+        elif all([bootstrap_identifier, business_identifier]) or (
+            bootstrap_identifier and not nr_identifier and not business_identifier
+        ):
             return [
                 EntityMapping.nr_identifier.is_(None),
                 EntityMapping.bootstrap_identifier == bootstrap_identifier,
                 EntityMapping.business_identifier.is_(None),
             ]
-        # NR and Bootstrap
-        elif all([nr_identifier, bootstrap_identifier]):
+        # NR and Bootstrap or just NR
+        elif all([nr_identifier, bootstrap_identifier]) or (
+            nr_identifier and not bootstrap_identifier and not business_identifier
+        ):
             return [
                 EntityMapping.nr_identifier == nr_identifier,
                 EntityMapping.business_identifier.is_(None),
                 EntityMapping.bootstrap_identifier.is_(None),
             ]
         # Business only, could be from COLIN
-        elif business_identifier:
+        elif business_identifier and (not nr_identifier and not bootstrap_identifier):
             return [
                 EntityMapping.nr_identifier.is_(None),
                 EntityMapping.bootstrap_identifier.is_(None),
                 EntityMapping.business_identifier == business_identifier,
             ]
-        # Bootstrap only numbered business
-        elif bootstrap_identifier:
-            return [
-                EntityMapping.nr_identifier.is_(None),
-                EntityMapping.bootstrap_identifier == bootstrap_identifier,
-                EntityMapping.business_identifier.is_(None),
-            ]
         # NR only could be from auth-queue
-        elif nr_identifier:
-            return [
-                EntityMapping.nr_identifier == nr_identifier,
-                EntityMapping.bootstrap_identifier.is_(None),
-                EntityMapping.business_identifier.is_(None),
-            ]
         else:
             raise ValueError("No identifiers provided")
 
