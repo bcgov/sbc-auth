@@ -473,7 +473,6 @@ class Affiliation:
     ) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
-        search_dict = asdict(search_details)
         for affiliation_base in affiliation_bases:
             url = Affiliation._affiliation_details_url(affiliation_base.identifier)
             url_identifiers.setdefault(url, []).append(affiliation_base.identifier)
@@ -482,7 +481,9 @@ class Affiliation:
                 "url": url,
                 "payload": {
                     "identifiers": identifiers,
-                    **search_dict,
+                    "status": search_details.status,
+                    "name": search_details.name,
+                    "type": search_details.type,
                 },
             }
             for url, identifiers in url_identifiers.items()
