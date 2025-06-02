@@ -134,6 +134,46 @@ class EntityMappingService:
         ]
 
     @staticmethod
+    def _is_duplicate_mapping(
+        existing_mapping: EntityMapping, nr_identifier: str, bootstrap_identifier: str, business_identifier: str
+    ) -> bool:
+        """Check if the new mapping data exactly matches an existing mapping."""
+        return (
+            existing_mapping.nr_identifier == nr_identifier
+            and existing_mapping.bootstrap_identifier == bootstrap_identifier
+            and existing_mapping.business_identifier == business_identifier
+        )
+
+    @staticmethod
+    def _update_existing_mapping(
+        existing_mapping: EntityMapping, nr_identifier: str, bootstrap_identifier: str, business_identifier: str
+    ) -> bool:
+        """Update an existing mapping with new identifiers if they fill in missing values.
+
+        Returns True if the mapping was updated, False otherwise.
+        """
+        should_update = False
+        if nr_identifier and not existing_mapping.nr_identifier:
+            existing_mapping.nr_identifier = nr_identifier
+            should_update = True
+        if bootstrap_identifier and not existing_mapping.bootstrap_identifier:
+            existing_mapping.bootstrap_identifier = bootstrap_identifier
+            should_update = True
+        if business_identifier and not existing_mapping.business_identifier:
+            existing_mapping.business_identifier = business_identifier
+            should_update = True
+
+        if should_update:
+            logger.debug(
+                f"Updating entity mapping {existing_mapping.id} with: "
+                f"business_identifier: {business_identifier}, "
+                f"bootstrap_identifier: {bootstrap_identifier}, "
+                f"nr_identifier: {nr_identifier}"
+            )
+            existing_mapping.save()
+        return should_update
+
+    @staticmethod
     def from_entity_details(entity_details: dict):
         """Create and populate an EntityMapping object from entity details.
 
@@ -151,30 +191,14 @@ class EntityMappingService:
         if business_identifier:
             conditions.append(EntityMapping.business_identifier == business_identifier)
 
-        existing_mapping = db.session.query(EntityMapping).filter(or_(*conditions)).first()
-        if existing_mapping:
-            if (existing_mapping.nr_identifier == nr_identifier and 
-                existing_mapping.bootstrap_identifier == bootstrap_identifier and 
-                existing_mapping.business_identifier == business_identifier):
+        if (existing_mapping := db.session.query(EntityMapping).filter(or_(*conditions)).first()) is not None:
+            if EntityMappingService._is_duplicate_mapping(
+                existing_mapping, nr_identifier, bootstrap_identifier, business_identifier
+            ):
                 return
-            should_update = False
-            if nr_identifier and not existing_mapping.nr_identifier:
-                existing_mapping.nr_identifier = nr_identifier
-                should_update = True
-            if bootstrap_identifier and not existing_mapping.bootstrap_identifier:
-                existing_mapping.bootstrap_identifier = bootstrap_identifier
-                should_update = True
-            if business_identifier and not existing_mapping.business_identifier:
-                existing_mapping.business_identifier = business_identifier
-                should_update = True
-            if should_update:
-                logger.debug(
-                    f"Updating entity mapping {existing_mapping.id} with: "
-                    f"business_identifier: {business_identifier}, "
-                    f"bootstrap_identifier: {bootstrap_identifier}, "
-                    f"nr_identifier: {nr_identifier}"
-                )
-                existing_mapping.save()
+            if EntityMappingService._update_existing_mapping(
+                existing_mapping, nr_identifier, bootstrap_identifier, business_identifier
+            ):
                 return
 
         new_mapping = EntityMapping(
