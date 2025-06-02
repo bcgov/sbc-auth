@@ -108,58 +108,30 @@ def _create_affiliations_for_mapping(session, org_id, data):
 def test_from_entity_details_multiple_identifiers(session):
     """Test that from_entity_details correctly handles multiple identifiers and duplicate NRs."""
     service = EntityMappingService()
-    
-    nr_data = {
-        "identifier": None,
-        "bootstrapIdentifier": None,
-        "nrNumber": "NR1234567"
-    }
+
+    nr_data = {"identifier": None, "bootstrapIdentifier": None, "nrNumber": "NR1234567"}
     service.from_entity_details(nr_data)
 
-    nr_temp_data = {
-        "identifier": None,
-        "bootstrapIdentifier": "T1234567",
-        "nrNumber": "NR1234567"
-    }
+    nr_temp_data = {"identifier": None, "bootstrapIdentifier": "T1234567", "nrNumber": "NR1234567"}
     service.from_entity_details(nr_temp_data)
-    
-    nr_temp_duplicate = {
-        "identifier": None,
-        "bootstrapIdentifier": "T7654321",
-        "nrNumber": "NR1234567"
-    }
+
+    nr_temp_duplicate = {"identifier": None, "bootstrapIdentifier": "T7654321", "nrNumber": "NR1234567"}
     service.from_entity_details(nr_temp_duplicate)
-    
-    nr_temp_business = {
-        "identifier": "BC1234567",
-        "bootstrapIdentifier": "T1234567",
-        "nrNumber": "NR1234567"
-    }
+
+    nr_temp_business = {"identifier": "BC1234567", "bootstrapIdentifier": "T1234567", "nrNumber": "NR1234567"}
     service.from_entity_details(nr_temp_business)
 
-    temp_data = {
-        "identifier": None,
-        "bootstrapIdentifier": "T5234567",
-        "nrNumber": None
-    }
+    temp_data = {"identifier": None, "bootstrapIdentifier": "T5234567", "nrNumber": None}
     service.from_entity_details(temp_data)
 
-    temp_business = {
-        "identifier": "BC5234567",
-        "bootstrapIdentifier": "T5234567",
-        "nrNumber": None
-    }
+    temp_business = {"identifier": "BC5234567", "bootstrapIdentifier": "T5234567", "nrNumber": None}
     service.from_entity_details(temp_business)
 
-    business_data = {
-        "identifier": "BC6234567",
-        "bootstrapIdentifier": None,
-        "nrNumber": None
-    }
+    business_data = {"identifier": "BC6234567", "bootstrapIdentifier": None, "nrNumber": None}
     service.from_entity_details(business_data)
 
     results = session.query(EntityMapping).order_by(EntityMapping.id).all()
-    
+
     # Should have 4 distinct rows:
     # 1. NR+TMP+BC (updated from NR+TMP)
     # 2. NR+TMP (new row with different TMP)
@@ -178,4 +150,3 @@ def test_from_entity_details_multiple_identifiers(session):
     assert results[3].business_identifier == "BC6234567"
     assert results[3].bootstrap_identifier is None
     assert results[3].nr_identifier is None
-

@@ -136,7 +136,7 @@ class EntityMappingService:
     @staticmethod
     def from_entity_details(entity_details: dict):
         """Create and populate an EntityMapping object from entity details.
-        
+
         Only updates an existing row if the new data fills in missing identifiers.
         Otherwise creates a new row.
         """
@@ -171,11 +171,10 @@ class EntityMappingService:
             if should_update:
                 existing_mapping.save()
                 return
-            
 
         new_mapping = EntityMapping(
             nr_identifier=nr_identifier,
             bootstrap_identifier=bootstrap_identifier,
-            business_identifier=business_identifier
+            business_identifier=business_identifier,
         )
         new_mapping.save()
