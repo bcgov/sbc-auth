@@ -214,7 +214,10 @@ class EntityMappingService:
                 EntityMapping.business_identifier == business_identifier,
             ]
         else:
-            raise ValueError("Invalid identifiers provided")
+            logger.error(f"Invalid identifier combination provided: {nr_identifier}, {bootstrap_identifier}, {business_identifier}")
+            return [
+                 EntityMapping.id == -1,
+            ]
 
     @staticmethod
     def from_entity_details(entity_details: dict):
