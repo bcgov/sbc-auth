@@ -112,6 +112,10 @@ def test_from_entity_details_multiple_identifiers(session):
     nr_data = {"identifier": None, "bootstrapIdentifier": None, "nrNumber": "NR1234567"}
     service.from_entity_details(nr_data)
 
+    # This should update the row above.
+    nr_data = {"identifier": None, "bootstrapIdentifier": None, "nrNumber": "NR1234567"}
+    service.from_entity_details(nr_data)
+
     nr_temp_data = {"identifier": None, "bootstrapIdentifier": "T1234567", "nrNumber": "NR1234567"}
     service.from_entity_details(nr_temp_data)
 

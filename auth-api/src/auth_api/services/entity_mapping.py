@@ -169,6 +169,10 @@ class EntityMappingService:
                 existing_mapping.business_identifier = business_identifier
                 should_update = True
             if should_update:
+                logger.debug(
+                    f"Updating entity mapping {existing_mapping.id} with business_identifier: {business_identifier}, "
+                    f"bootstrap_identifier: {bootstrap_identifier}, nr_identifier: {nr_identifier}"
+                )
                 existing_mapping.save()
                 return
 
@@ -176,5 +180,9 @@ class EntityMappingService:
             nr_identifier=nr_identifier,
             bootstrap_identifier=bootstrap_identifier,
             business_identifier=business_identifier,
+        )
+        logger.debug(
+            f"Creating new entity mapping with business_identifier: {business_identifier}, "
+            f"bootstrap_identifier: {bootstrap_identifier}, nr_identifier: {nr_identifier}"
         )
         new_mapping.save()
