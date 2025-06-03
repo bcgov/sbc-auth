@@ -355,5 +355,7 @@ def disable_org_update_listener(monkeypatch):
 @pytest.fixture
 def entity_mapping_mock(monkeypatch):
     """Mock entity mapping service."""
-    monkeypatch.setattr("auth_api.services.entity_mapping.EntityMappingService.fetch_entity_mapping_details",
-                        lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        "auth_api.services.entity_mapping.EntityMappingService.fetch_entity_mapping_details",
+        lambda *args, **kwargs: None,
+    )

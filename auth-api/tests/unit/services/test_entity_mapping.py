@@ -1,12 +1,13 @@
 """Unit tests for the EntityMapping service."""
 
+from unittest.mock import Mock, patch
+
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.dataclass import AffiliationSearchDetails
 from auth_api.models.entity import Entity
 from auth_api.models.entity_mapping import EntityMapping
 from auth_api.services.entity_mapping import EntityMappingService
 from tests.utilities.factory_utils import factory_org_service
-from unittest.mock import patch, Mock
 
 
 def test_get_filtered_affiliations_identifier_matches(session):
@@ -179,14 +180,10 @@ def test_from_entity_details_multiple_identifiers(session):
 
 def test_populate_entity_mapping_for_identifier_success(session):
     """Test successful population of entity mapping for identifier."""
-    mock_entity_details = [{
-        "nrNumber": "NR1234567",
-        "bootstrapIdentifier": "TMP1234567",
-        "identifier": "BC1234567"
-    }]
-    with patch.object(EntityMappingService, 'fetch_entity_mapping_details', return_value=mock_entity_details):
+    mock_entity_details = [{"nrNumber": "NR1234567", "bootstrapIdentifier": "TMP1234567", "identifier": "BC1234567"}]
+    with patch.object(EntityMappingService, "fetch_entity_mapping_details", return_value=mock_entity_details):
         EntityMappingService.populate_entity_mapping_for_identifier("BC1234567")
-        
+
         mapping = session.query(EntityMapping).first()
         assert mapping is not None
         assert mapping.nr_identifier == "NR1234567"
@@ -196,8 +193,7 @@ def test_populate_entity_mapping_for_identifier_success(session):
 
 def test_populate_entity_mapping_for_identifier_no_data(session):
     """Test that no entity mapping is created when no data is returned."""
-    with patch.object(EntityMappingService, 'fetch_entity_mapping_details', return_value=None):
+    with patch.object(EntityMappingService, "fetch_entity_mapping_details", return_value=None):
         EntityMappingService.populate_entity_mapping_for_identifier("BC1234567")
         mapping = session.query(EntityMapping).first()
         assert mapping is None
-
