@@ -21,6 +21,7 @@ from flask_cors import cross_origin
 from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
+from auth_api.exceptions.errors import Error
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
@@ -383,6 +384,10 @@ def get_organization_affiliations(org_id):
 
 def affiliation_search(org_id, use_entity_mapping=False):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
+    # get affiliation identifiers and the urls for the source data
+    org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
+    if org is None:
+        raise BusinessException(Error.DATA_NOT_FOUND, None)
     search_details = AffiliationSearchDetails.from_request_args(request)
     if use_entity_mapping:
         affiliation_bases = EntityMappingService.populate_affiliation_base(org_id, search_details)
