@@ -311,42 +311,6 @@ files = [
 ]
 
 [[package]]
-name = "build-deps"
-version = "1.0.0"
-description = "common dependencies for all auth tools"
-optional = false
-python-versions = "^3.12"
-groups = ["main"]
-files = []
-develop = false
-
-[package.dependencies]
-attrs = "24.2.0"
-CacheControl = "0.14.0"
-cachetools = "5.5.0"
-certifi = "2024.8.30"
-flask = "3.0.2"
-flask-jwt-oidc = {git = "https://github.com/seeker25/flask-jwt-oidc.git", branch = "main"}
-gcp-queue = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/gcp-queue"}
-itsdangerous = "2.1.2"
-jinja2 = "^3.1.5"
-jsonschema = "4.17.3"
-launchdarkly-server-sdk = "9.5.0"
-MarkupSafe = "2.1.1"
-python-dotenv = "^1.0.1"
-requests = "2.32.3"
-sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", rev = "master", subdirectory = "python"}
-structured-logging = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/structured-logging"}
-Werkzeug = "^3.0.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/seeker25/sbc-auth.git"
-reference = "main"
-resolved_reference = "279bc8eafed3484dab8d5239f9cbc6fcbf70667b"
-subdirectory = "build-deps"
-
-[[package]]
 name = "cachecontrol"
 version = "0.14.0"
 description = "httplib2 caching for requests"
@@ -3589,4 +3553,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "39b1f0870ba78b4494f4a98887f6bfc3f0c5874c5ebfcaad2310294fcf0b02a6"
+content-hash = "c6e826f03d8da48b10591dbe33881b61ad7cb1e1d1bf5ff09484b41ab3352d23"
