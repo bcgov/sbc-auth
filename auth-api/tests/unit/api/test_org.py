@@ -1584,7 +1584,7 @@ def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):
         assert schema_utils.validate(rv.json, "exception")[0]
 
 
-def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock, nr_mock):
+def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock, nr_mock, entity_mapping_mock):
     """Assert that an affiliation can be added by staff."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post(
@@ -1916,7 +1916,7 @@ def test_add_bcol_linked_org_different_name(client, jwt, session, keycloak_mock)
     ],
 )
 def test_new_business_affiliation(
-    client, jwt, session, keycloak_mock, mocker, test_name, nr_status, payment_status, error
+    client, jwt, session, keycloak_mock, entity_mapping_mock, mocker, test_name, nr_status, payment_status, error
 ):
     """Assert that an NR can be affiliated to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
