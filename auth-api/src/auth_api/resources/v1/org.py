@@ -433,7 +433,7 @@ def post_organization_affiliation(org_id):
                 phone=request_json.get("phone"),
                 certified_by_name=request_json.get("certifiedByName"),
             )
-
+            entity_details = {"nrNumber": business_identifier}
             response, status = (
                 AffiliationService.create_new_business_affiliation(affiliation_data).as_dict(),
                 HTTPStatus.CREATED,
@@ -449,11 +449,10 @@ def post_organization_affiliation(org_id):
                 ).as_dict(),
                 HTTPStatus.CREATED,
             )
-
-        entity_details = request_json.get("entityDetails", None)
+            entity_details = request_json.get("entityDetails", None)
         if entity_details:
             if flags.is_on("enable-entity-mapping", default=False) is True:
-                EntityMappingService.from_entity_details(entity_details)
+                EntityMappingService.from_entity_details(entity_details, skip_auth=is_new_business)
             AffiliationService.fix_stale_affiliations(org_id, entity_details)
         else:
             if flags.is_on("enable-entity-mapping", default=False) is True:
