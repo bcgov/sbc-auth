@@ -3,6 +3,7 @@
         "string-flag": "a string value",
         "bool-flag": true,
         "integer-flag": 10,
-        "enable-publish-account-events": true
+        "enable-publish-account-events": true,
+        "enable-entity-mapping": true
     }
 }
