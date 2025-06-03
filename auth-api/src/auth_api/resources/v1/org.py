@@ -21,6 +21,7 @@ from flask_cors import cross_origin
 from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
+from auth_api.exceptions.errors import Error
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
