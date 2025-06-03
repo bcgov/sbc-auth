@@ -25,7 +25,8 @@ def test_get_filtered_affiliations_identifier_matches(session):
         {"identifier": None, "bootstrapIdentifier": "Tbbbbbbb", "nrNumber": "NR1234561"},
         # Normal named business flow - only business identifier - Skip rows for NR
         {"identifier": "BC7234567", "bootstrapIdentifier": "Txxxxxxx", "nrNumber": "NR1234565"},
-        # Scenario where one TEMP has used the NR and completed the temp, the other TEMP just sits.
+        # Scenario where one TEMP has used the NR and completed the temp, the other temps are hidden.
+        {"identifier": None, "bootstrapIdentifier": "Teeeeeee", "nrNumber": "NR1235565"},
         {"identifier": "BC5234567", "bootstrapIdentifier": "Tiiiiiii", "nrNumber": "NR1235565"},
         {"identifier": None, "bootstrapIdentifier": "Tddddddd", "nrNumber": "NR1235565"},
         # Additional: Change of Name, I believe shows 2 rows and doesn't combine
@@ -39,7 +40,8 @@ def test_get_filtered_affiliations_identifier_matches(session):
         ["Tbbbbbbb", "NR1234561"],
         ["BC7234567"],
         ["BC5234567"],
-        ["Tddddddd", "NR1235565"],
+        [],
+        [],
     ]
 
     service = EntityMappingService()
@@ -55,7 +57,10 @@ def test_get_filtered_affiliations_identifier_matches(session):
     for page in range(1, len(entity_mapping_data)):
         search_details = AffiliationSearchDetails(page=page, limit=1)
         results = service.paginate_from_affiliations(org_id, search_details)
-        assert results[0][0] == expected_before_search[page - 1]
+        if expected_before_search[page - 1]:
+            assert results[0][0] == expected_before_search[page - 1]
+        else:
+            assert results == expected_before_search[page - 1]
 
 
 def _get_or_create_entity(session, business_identifier, corp_type_code):

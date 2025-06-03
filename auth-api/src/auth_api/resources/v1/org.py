@@ -449,6 +449,8 @@ def post_organization_affiliation(org_id):
         if entity_details:
             EntityMappingService.from_entity_details(entity_details)
             AffiliationService.fix_stale_affiliations(org_id, entity_details)
+        else:
+            logger.info("No entity details provided for new affiliation")
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
 

@@ -44,6 +44,24 @@ class EntityMappingService:
             [search_details.identifier, search_details.status, search_details.name, search_details.type]
         )
 
+        # Hide TMP and NR rows when a full business row exists with the same NR
+        full_business_nrs = (
+            db.session.query(EntityMapping.nr_identifier)
+            .select_from(EntityMapping)
+            .join(Entity, Entity.business_identifier == EntityMapping.business_identifier)
+            .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
+            .filter(
+                and_(
+                    EntityMapping.nr_identifier.isnot(None),
+                    EntityMapping.bootstrap_identifier.isnot(None),
+                    EntityMapping.business_identifier.isnot(None),
+                    AffiliationModel.org_id == int(org_id or -1),
+                    Entity.is_loaded_lear.is_(True),
+                )
+            )
+            .scalar_subquery()
+        )
+
         bootstrap_dates = (
             db.session.query(
                 EntityMapping.bootstrap_identifier,
@@ -56,6 +74,7 @@ class EntityMappingService:
                 EntityMapping.business_identifier.is_(None),
                 EntityMapping.bootstrap_identifier.isnot(None),
                 EntityMapping.nr_identifier.isnot(None),
+                EntityMapping.nr_identifier.notin_(full_business_nrs),
                 AffiliationModel.org_id == int(org_id or -1),
                 Entity.is_loaded_lear.is_(True),
             )
@@ -100,6 +119,7 @@ class EntityMappingService:
                         EntityMapping.business_identifier.is_(None),
                         EntityMapping.bootstrap_identifier == Entity.business_identifier,
                         EntityMapping.nr_identifier.isnot(None),
+                        EntityMapping.nr_identifier.notin_(full_business_nrs),
                     ),
                 ),
             )
