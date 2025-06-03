@@ -314,3 +314,4 @@ class EntityMappingService:
             # If this fails, we should still allow affiliation search to continue.
             logger.error("Failed to get affiliations mappings for identifier: %s", identifier)
             logger.error(http_error)
+        return None
