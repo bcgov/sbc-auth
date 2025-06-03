@@ -37,6 +37,7 @@ from auth_api.services import SimpleOrg as SimpleOrgService
 from auth_api.services import User as UserService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.entity_mapping import EntityMappingService
+from auth_api.services.flags import flags
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import AccessType, NotificationType, OrgStatus, OrgType, PatchActions, Status
@@ -447,10 +448,12 @@ def post_organization_affiliation(org_id):
 
         entity_details = request_json.get("entityDetails", None)
         if entity_details:
-            EntityMappingService.from_entity_details(entity_details)
+            if flags.is_on("enable-entity-mapping", default=False) is True:
+                EntityMappingService.from_entity_details(entity_details)
             AffiliationService.fix_stale_affiliations(org_id, entity_details)
         else:
-            logger.info("No entity details provided for new affiliation")
+            if flags.is_on("enable-entity-mapping", default=False) is True:
+                EntityMappingService.fetch_entity_mapping_details(business_identifier)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
 

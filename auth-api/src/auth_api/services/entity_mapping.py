@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation Mapping data."""
+from flask import current_app
+from requests import HTTPError
 from sqlalchemy import and_, case, func, or_, text
 from sqlalchemy.dialects.postgresql import array
 from structured_logging import StructuredLogging
@@ -21,6 +23,7 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.dataclass import AffiliationBase, AffiliationSearchDetails
 from auth_api.models.entity import Entity
 from auth_api.models.entity_mapping import EntityMapping
+from auth_api.services.rest_service import RestService
 from auth_api.utils.user_context import UserContext, user_context
 
 logger = StructuredLogging.get_logger()
@@ -287,3 +290,27 @@ class EntityMappingService:
             f"nr_identifier: {nr_identifier}"
         )
         new_mapping.save()
+
+    @staticmethod
+    def populate_entity_mapping_for_identifier(identifier: str):
+        """Populate the entity mapping for the identifier."""
+        if entity_mapping := EntityMappingService.fetch_entity_mapping_details(identifier):
+            EntityMappingService.from_entity_details(entity_mapping[0], skip_auth=True)
+
+    @staticmethod
+    def fetch_entity_mapping_details(identifier: str):
+        """Return affiliation details by calling the source api."""
+        logger.info(f"Fetching entity mapping for identifier: {identifier}")
+        token = RestService.get_service_account_token(
+            config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+        )
+        new_url = f"{current_app.config.get('LEGAL_API_URL')}{current_app.config.get('LEGAL_API_VERSION_2')}"
+        endpoint = f"{new_url}/businesses/search/affiliation_mappings"
+        try:
+            response = RestService.post(endpoint, token=token, data={"identifiers": [identifier]})
+            logger.debug(f"Response: {response.json()}")
+            return response.json().get("entityDetails")
+        except HTTPError as http_error:
+            # If this fails, we should still allow affiliation search to continue.
+            logger.error("Failed to get affiliations mappings for identifier: %s", identifier)
+            logger.error(http_error)
