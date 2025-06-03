@@ -384,7 +384,6 @@ def get_organization_affiliations(org_id):
 
 def affiliation_search(org_id, use_entity_mapping=False):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
-    # get affiliation identifiers and the urls for the source data
     org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
     if org is None:
         raise BusinessException(Error.DATA_NOT_FOUND, None)
