@@ -11,12 +11,6 @@ export interface CreateRequestBody {
   passCode: string
 }
 
-export interface CreateNRAffiliationRequestBody {
-  businessIdentifier: string
-  phone?: string
-  email?: string
-}
-
 export interface Affiliation {
   organization: Organization
   business: Business
