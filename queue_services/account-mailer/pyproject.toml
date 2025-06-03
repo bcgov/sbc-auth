@@ -29,12 +29,11 @@ semver = "3.0.2"
 six = "1.16.0"
 threadloop = "1.0.2"
 thrift = "0.20.0"
-tornado = "6.4.2"
 urllib3 = "2.2.2"
 zipp = "3.19.1"
 
 # VCS dependencies
-auth-api = { git = "https://github.com/bcgov/sbc-auth.git", rev = "main", subdirectory = "auth-api" }
+auth-api = { git = "https://github.com/seeker25/sbc-auth.git", rev = "fix_security_deps", subdirectory = "auth-api" }
 simple-cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py.git" }
 cloud-sql-python-connector = "^1.13.0"
 pkginfo = "^1.12.1.2"
