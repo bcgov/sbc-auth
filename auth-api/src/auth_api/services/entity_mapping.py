@@ -169,12 +169,14 @@ class EntityMappingService:
 
     @staticmethod
     def _update_existing_mapping(
-        existing_mapping: EntityMapping, nr_identifier: str, bootstrap_identifier: str, business_identifier: str
+        existing_mapping: EntityMapping | None, nr_identifier: str, bootstrap_identifier: str, business_identifier: str
     ) -> bool:
         """Update an existing mapping with new identifiers if they fill in missing values.
 
         Returns True if the mapping was updated, False otherwise.
         """
+        if existing_mapping is None:
+            return False
         should_update = False
         if nr_identifier and not existing_mapping.nr_identifier:
             existing_mapping.nr_identifier = nr_identifier
@@ -267,11 +269,11 @@ class EntityMappingService:
             nr_identifier, bootstrap_identifier, business_identifier
         )
 
-        if (existing_mapping := db.session.query(EntityMapping).filter(and_(*conditions)).first()) is not None:
-            if EntityMappingService._update_existing_mapping(
-                existing_mapping, nr_identifier, bootstrap_identifier, business_identifier
-            ):
-                return
+        existing_mapping = db.session.query(EntityMapping).filter(and_(*conditions)).first()
+        if EntityMappingService._update_existing_mapping(
+            existing_mapping, nr_identifier, bootstrap_identifier, business_identifier
+        ):
+            return
 
         new_mapping = EntityMapping(
             nr_identifier=nr_identifier,
