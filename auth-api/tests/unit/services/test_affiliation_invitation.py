@@ -771,7 +771,7 @@ def test_send_affiliation_invitation_magic_link(
         "orgName": affiliation_invitation.from_org.name,
         "businessIdentifier": affiliation_invitation.entity.business_identifier,
         "contextUrl": "https://localhost.com//affiliationInvitation/acceptToken"
-                      "?token=ABCD&orgName=RnJvbSB0aGUgbW9vbiBpbmMu",
+        "?token=ABCD&orgName=RnJvbSB0aGUgbW9vbiBpbmMu",
     }
 
     publish_to_mailer_mock.assert_called_with(
