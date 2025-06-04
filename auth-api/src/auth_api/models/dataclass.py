@@ -14,6 +14,7 @@
 """This module holds data classes."""
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import List, Optional, Self
 
 from requests import Request
@@ -53,12 +54,12 @@ class AffiliationInvitationSearch:  # pylint: disable=too-many-instance-attribut
 class AffiliationSearchDetails:  # pylint: disable=too-many-instance-attributes
     """Used for filtering Affiliations based on filters passed."""
 
-    identifier: Optional[str]
-    status: Optional[str]
-    name: Optional[str]
-    type: Optional[str]
     page: int
     limit: int
+    identifier: Optional[str] = None
+    status: Optional[str] = None
+    name: Optional[str] = None
+    type: Optional[str] = None
 
     @classmethod
     def from_request_args(cls, req: Request) -> Self:
@@ -201,3 +202,11 @@ class ProductReviewTask:
     product_subscription_id: int
     user_id: str
     external_source_id: Optional[str] = None
+
+
+@dataclass
+class AffiliationBase:
+    """Small class for searching in Names and LEAR."""
+
+    identifier: str
+    created: datetime

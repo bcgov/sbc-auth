@@ -53,6 +53,7 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
         with app.app_context():
             execute_migrations(app)
         logger.info("Finished migration upgrade.")
+        logger.info("Note: endpoints will 404 until the DEPLOYMENT_ENV is switched off of migration.")
     else:
         flags.init_app(app)
         ma.init_app(app)

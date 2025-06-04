@@ -255,9 +255,9 @@ Werkzeug = "^3.0.0"
 
 [package.source]
 type = "git"
-url = "https://github.com/seeker25/sbc-auth.git"
-reference = "fix_security_deps"
-resolved_reference = "7f46f83db966fb6f355f41948f2e24cb1dbfbe9c"
+url = "https://github.com/bcgov/sbc-auth.git"
+reference = "feature-track-affiliations"
+resolved_reference = "d6019d5b6fa9db64b78d5b538e2ce71127ac3c58"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3663,4 +3663,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "f291688d1a706f4e81a023a36fa432881f131761ff023702a0d258cc1de815db"
+content-hash = "871500274157e26662e0ae4e401ffa8db6a07164668cafc50ebbdf2aef1c61cf"

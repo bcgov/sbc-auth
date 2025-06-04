@@ -1,8 +1,7 @@
 import {
   Affiliation,
   AffiliationResponse,
-  CreateRequestBody as CreateAffiliationRequestBody,
-  CreateNRAffiliationRequestBody
+  CreateRequestBody as CreateAffiliationRequestBody
 } from '@/models/affiliation'
 import {
   CreateRequestBody as CreateOrganizationRequestBody,
@@ -120,12 +119,6 @@ export default class OrgService {
   static async createAffiliation (orgIdentifier: number, affiliation: CreateAffiliationRequestBody):
     Promise<AxiosResponse<Affiliation>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, affiliation)
-  }
-
-  static async createNRAffiliation (orgIdentifier: number, affiliation: CreateNRAffiliationRequestBody):
-    Promise<AxiosResponse<Affiliation>> {
-    const url = `${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations?newBusiness=true`
-    return axios.post(url, affiliation)
   }
 
   static async removeAffiliation (

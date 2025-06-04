@@ -1494,7 +1494,7 @@ def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylin
     assert dictionary["membershipTypeCode"] == "COORDINATOR"
 
 
-def test_add_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_add_affiliation(client, jwt, session, keycloak_mock, entity_mapping_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post(
@@ -1584,7 +1584,7 @@ def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):
         assert schema_utils.validate(rv.json, "exception")[0]
 
 
-def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock, nr_mock):
+def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock, nr_mock, entity_mapping_mock):
     """Assert that an affiliation can be added by staff."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post(
@@ -1627,7 +1627,7 @@ def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock,
     assert affiliations["entities"][0]["affiliations"][0]["certifiedByName"] == certified_by_name
 
 
-def test_get_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_get_affiliation(client, jwt, session, keycloak_mock, entity_mapping_mock):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post(
@@ -1662,7 +1662,9 @@ def test_get_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable
     assert dictionary["business"]["businessIdentifier"] == business_identifier
 
 
-def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_get_affiliation_without_authrized(
+    client, jwt, session, keycloak_mock, entity_mapping_mock
+):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post(
@@ -1693,6 +1695,18 @@ def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock):
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
     rv = client.get(f"/api/v1/orgs/{org_id}/affiliations/{business_identifier}", headers=headers)
     assert rv.status_code == HTTPStatus.UNAUTHORIZED
+
+    headers = factory_auth_header(
+        jwt=jwt, claims=TestJwtClaims.get_test_real_user(sub="a8098c1a-f86e-11da-bd1a-00112444be1d")
+    )
+    rv = client.get(f"/api/v1/orgs/{org_id}/affiliations/search", headers=headers)
+    assert rv.status_code == HTTPStatus.FORBIDDEN
+
+    headers = factory_auth_header(
+        jwt=jwt, claims=TestJwtClaims.get_test_real_user(sub="a8098c1a-f86e-11da-bd1a-00112444be1d")
+    )
+    rv = client.get(f"/api/v1/orgs/{org_id}/affiliations?new=true", headers=headers)
+    assert rv.status_code == HTTPStatus.FORBIDDEN
 
 
 def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -1902,7 +1916,7 @@ def test_add_bcol_linked_org_different_name(client, jwt, session, keycloak_mock)
     ],
 )
 def test_new_business_affiliation(
-    client, jwt, session, keycloak_mock, mocker, test_name, nr_status, payment_status, error
+    client, jwt, session, keycloak_mock, entity_mapping_mock, mocker, test_name, nr_status, payment_status, error
 ):
     """Assert that an NR can be affiliated to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)

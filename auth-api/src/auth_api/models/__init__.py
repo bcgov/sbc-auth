@@ -33,6 +33,7 @@ from .corp_type import CorpType
 from .db import db, ma
 from .documents import Documents
 from .entity import Entity
+from .entity_mapping import EntityMapping
 from .invitation import Invitation
 from .invitation_membership import InvitationMembership
 from .invitation_type import InvitationType
