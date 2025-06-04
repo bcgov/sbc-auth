@@ -85,20 +85,11 @@ class EntityMappingService:
         identifiers_case = case(
             (EntityMapping.business_identifier.isnot(None), array([EntityMapping.business_identifier])),
             (
-                and_(
-                    EntityMapping.bootstrap_identifier.isnot(None),
-                    EntityMapping.nr_identifier.isnot(None)
-                ),
-                array([EntityMapping.bootstrap_identifier, EntityMapping.nr_identifier])
+                and_(EntityMapping.bootstrap_identifier.isnot(None), EntityMapping.nr_identifier.isnot(None)),
+                array([EntityMapping.bootstrap_identifier, EntityMapping.nr_identifier]),
             ),
-            (
-                EntityMapping.nr_identifier.isnot(None),
-                array([EntityMapping.nr_identifier])
-            ),
-            (
-                EntityMapping.bootstrap_identifier.isnot(None),
-                array([EntityMapping.bootstrap_identifier])
-            ),
+            (EntityMapping.nr_identifier.isnot(None), array([EntityMapping.nr_identifier])),
+            (EntityMapping.bootstrap_identifier.isnot(None), array([EntityMapping.bootstrap_identifier])),
         )
 
         base_query = (
@@ -138,7 +129,7 @@ class EntityMappingService:
                 and_(
                     EntityMapping.bootstrap_identifier == bootstrap_dates_cte.c.bootstrap_identifier,
                     EntityMapping.nr_identifier == bootstrap_dates_cte.c.nr_identifier,
-                )
+                ),
             )
             .filter(
                 AffiliationModel.org_id == org_id_int,
