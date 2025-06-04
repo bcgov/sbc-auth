@@ -687,7 +687,7 @@ class AffiliationInvitation:
             affiliation_model.save()
             entity_model = EntityModel.find_by_entity_id(entity_id)
             if flags.is_on("enable-entity-mapping", default=False) is True:
-                EntityMappingService.fetch_entity_mapping_details(entity_model.business_identifier)
+                EntityMappingService.populate_entity_mapping_for_identifier(entity_model.business_identifier)
             publish_affiliation_event(
                 QueueMessageTypes.BUSINESS_AFFILIATED.value, org_id, entity_model.business_identifier
             )
