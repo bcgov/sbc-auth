@@ -14,7 +14,7 @@
 """Service for managing Affiliation Mapping data."""
 from flask import current_app
 from requests import HTTPError
-from sqlalchemy import and_, case, func, or_, text
+from sqlalchemy import and_, case, func, or_, select, text
 from sqlalchemy.dialects.postgresql import array
 from structured_logging import StructuredLogging
 
@@ -47,28 +47,26 @@ class EntityMappingService:
             [search_details.identifier, search_details.status, search_details.name, search_details.type]
         )
 
-        # Hide TMP and NR rows when a full business row exists with the same NR
-        full_business_nrs = (
+        org_id_int = int(org_id or -1)
+
+        excluded_nrs_cte = (
             db.session.query(EntityMapping.nr_identifier)
-            .select_from(EntityMapping)
             .join(Entity, Entity.business_identifier == EntityMapping.business_identifier)
             .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
             .filter(
-                and_(
-                    EntityMapping.nr_identifier.isnot(None),
-                    EntityMapping.bootstrap_identifier.isnot(None),
-                    EntityMapping.business_identifier.isnot(None),
-                    AffiliationModel.org_id == int(org_id or -1),
-                    Entity.is_loaded_lear.is_(True),
-                )
+                EntityMapping.nr_identifier.isnot(None),
+                EntityMapping.bootstrap_identifier.isnot(None),
+                EntityMapping.business_identifier.isnot(None),
+                AffiliationModel.org_id == org_id_int,
+                Entity.is_loaded_lear.is_(True),
             )
-            .scalar_subquery()
+            .cte("excluded_nrs")
         )
 
-        bootstrap_dates = (
+        bootstrap_dates_cte = (
             db.session.query(
-                EntityMapping.bootstrap_identifier,
-                EntityMapping.nr_identifier,
+                EntityMapping.bootstrap_identifier.label("bootstrap_identifier"),
+                EntityMapping.nr_identifier.label("nr_identifier"),
                 AffiliationModel.created.label("bootstrap_created"),
             )
             .join(Entity, Entity.business_identifier == EntityMapping.bootstrap_identifier)
@@ -77,27 +75,36 @@ class EntityMappingService:
                 EntityMapping.business_identifier.is_(None),
                 EntityMapping.bootstrap_identifier.isnot(None),
                 EntityMapping.nr_identifier.isnot(None),
-                EntityMapping.nr_identifier.notin_(full_business_nrs),
-                AffiliationModel.org_id == int(org_id or -1),
+                EntityMapping.nr_identifier.not_in(select(excluded_nrs_cte.c.nr_identifier)),
+                AffiliationModel.org_id == org_id_int,
                 Entity.is_loaded_lear.is_(True),
             )
-            .subquery()
+            .cte("bootstrap_dates")
         )
 
         identifiers_case = case(
             (EntityMapping.business_identifier.isnot(None), array([EntityMapping.business_identifier])),
             (
-                and_(EntityMapping.bootstrap_identifier.isnot(None), EntityMapping.nr_identifier.isnot(None)),
-                array([EntityMapping.bootstrap_identifier, EntityMapping.nr_identifier]),
+                and_(
+                    EntityMapping.bootstrap_identifier.isnot(None),
+                    EntityMapping.nr_identifier.isnot(None)
+                ),
+                array([EntityMapping.bootstrap_identifier, EntityMapping.nr_identifier])
             ),
-            (EntityMapping.nr_identifier.isnot(None), array([EntityMapping.nr_identifier])),
-            (EntityMapping.bootstrap_identifier.isnot(None), array([EntityMapping.bootstrap_identifier])),
+            (
+                EntityMapping.nr_identifier.isnot(None),
+                array([EntityMapping.nr_identifier])
+            ),
+            (
+                EntityMapping.bootstrap_identifier.isnot(None),
+                array([EntityMapping.bootstrap_identifier])
+            ),
         )
 
         base_query = (
             db.session.query(
                 identifiers_case.label("identifiers"),
-                func.coalesce(bootstrap_dates.c.bootstrap_created, AffiliationModel.created).label("order_date"),
+                func.coalesce(bootstrap_dates_cte.c.bootstrap_created, AffiliationModel.created).label("order_date"),
             )
             .join(Entity, Entity.id == AffiliationModel.entity_id)
             .join(
@@ -122,30 +129,30 @@ class EntityMappingService:
                         EntityMapping.business_identifier.is_(None),
                         EntityMapping.bootstrap_identifier == Entity.business_identifier,
                         EntityMapping.nr_identifier.isnot(None),
-                        EntityMapping.nr_identifier.notin_(full_business_nrs),
+                        EntityMapping.nr_identifier.not_in(select(excluded_nrs_cte.c.nr_identifier)),
                     ),
                 ),
             )
             .outerjoin(
-                bootstrap_dates,
+                bootstrap_dates_cte,
                 and_(
-                    EntityMapping.bootstrap_identifier == bootstrap_dates.c.bootstrap_identifier,
-                    EntityMapping.nr_identifier == bootstrap_dates.c.nr_identifier,
-                ),
+                    EntityMapping.bootstrap_identifier == bootstrap_dates_cte.c.bootstrap_identifier,
+                    EntityMapping.nr_identifier == bootstrap_dates_cte.c.nr_identifier,
+                )
             )
-            .filter(AffiliationModel.org_id == int(org_id or -1), Entity.is_loaded_lear.is_(True))
+            .filter(
+                AffiliationModel.org_id == org_id_int,
+                Entity.is_loaded_lear.is_(True),
+            )
             .order_by(text("order_date DESC"))
         )
 
         if paginate_for_non_search:
             limit = search_details.limit
-            page = search_details.page
-            offset_value = (page - 1) * limit
-            query = base_query.offset(offset_value).limit(limit)
-        else:
-            query = base_query
+            offset_value = (search_details.page - 1) * limit
+            base_query = base_query.offset(offset_value).limit(limit)
 
-        return query.all()
+        return base_query.all()
 
     @staticmethod
     def populate_affiliation_base(org_id: int, search_details: AffiliationSearchDetails):
