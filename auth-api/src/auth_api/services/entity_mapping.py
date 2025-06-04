@@ -308,7 +308,6 @@ class EntityMappingService:
         endpoint = f"{new_url}/businesses/search/affiliation_mappings"
         try:
             response = RestService.post(endpoint, token=token, data={"identifiers": [identifier]})
-            logger.debug(f"Response: {response.json()}")
             return response.json().get("entityDetails")
         except HTTPError as http_error:
             # If this fails, we should still allow affiliation search to continue.
