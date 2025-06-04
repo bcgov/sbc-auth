@@ -456,7 +456,7 @@ def post_organization_affiliation(org_id):
         # Auth-queue handles the row creation for new business (NR only), this handles passcode missing info
         elif is_new_business is False:
             if flags.is_on("enable-entity-mapping", default=False) is True:
-                EntityMappingService.fetch_entity_mapping_details(business_identifier)
+                EntityMappingService.populate_entity_mapping_for_identifier(business_identifier)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
 
