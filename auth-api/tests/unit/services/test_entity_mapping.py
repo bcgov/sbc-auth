@@ -31,10 +31,15 @@ def test_get_filtered_affiliations_identifier_matches(session):
         {"identifier": None, "bootstrapIdentifier": "Teeeeeee", "nrNumber": "NR1235565"},
         {"identifier": "BC5234567", "bootstrapIdentifier": "Tiiiiiii", "nrNumber": "NR1235565"},
         {"identifier": None, "bootstrapIdentifier": "Tddddddd", "nrNumber": "NR1235565"},
-        # Additional: Change of Name, I believe shows 2 rows and doesn't combine
+        # Test cases with affiliations to different orgs
+        # Business belongs to Org 1, Temp Org 1, NR Org 2 - Should show NR for Org 2
+        # fix stale affiliations does this currently
+        {"identifier": "BC9999999", "bootstrapIdentifier": "T9999999", "nrNumber": "NR9999999", "nrDifferentOrg": True},
+        # Temp belongs to Org 1, NR belongs to Org 2 - should show Temp for Org1 and Nr for Org 2
+        {"identifier": None, "bootstrapIdentifier": "T8888888", "nrNumber": "NR8888888", "nrDifferentOrg": True},
     ]
 
-    expected_before_search = [
+    expected_before_search_org_1 = [
         ["BC1234567"],
         ["Tyyyyyyy"],
         ["NR1234567"],
@@ -42,27 +47,34 @@ def test_get_filtered_affiliations_identifier_matches(session):
         ["Tbbbbbbb", "NR1234561"],
         ["BC7234567"],
         ["BC5234567"],
-        [],
-        [],
+        ["BC9999999"],
+        ["T8888888"],
     ]
+
+    expected_before_search_org_2 = [["NR9999999"], ["NR8888888"]]
 
     service = EntityMappingService()
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary["id"]
 
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    alternate_org_id = org_dictionary["id"]
+
     # Reverse the list since results are ordered by created date DESC
     entity_mapping_data.reverse()
     for data in entity_mapping_data:
-        _create_affiliations_for_mapping(session, org_id, data)
+        _create_affiliations_for_mapping(session, org_id, data, alternate_org_id)
 
-    for page in range(1, len(entity_mapping_data)):
-        search_details = AffiliationSearchDetails(page=page, limit=1)
-        results = service.paginate_from_affiliations(org_id, search_details)
-        if expected_before_search[page - 1]:
-            assert results[0][0] == expected_before_search[page - 1]
-        else:
-            assert results == expected_before_search[page - 1]
+    search_details = AffiliationSearchDetails(page=1, limit=11)
+    results = service.paginate_from_affiliations(org_id, search_details)
+    for index, entry in enumerate(expected_before_search_org_1):
+        assert results[index][0] == entry
+
+    results = service.paginate_from_affiliations(alternate_org_id, search_details)
+    for index, entry in enumerate(expected_before_search_org_2):
+        assert results[index][0] == entry
 
 
 def _get_or_create_entity(session, business_identifier, corp_type_code):
@@ -90,7 +102,7 @@ def _get_or_create_affiliation(session, org_id, entity_id):
     return existing_affiliation or AffiliationModel(org_id=org_id, entity_id=entity_id).save()
 
 
-def _create_affiliations_for_mapping(session, org_id, data):
+def _create_affiliations_for_mapping(session, org_id, data, alternate_org_id):
     """Create an affiliation for each non-None value in the mapping data."""
     EntityMapping(
         business_identifier=data.get("identifier"),
@@ -101,7 +113,7 @@ def _create_affiliations_for_mapping(session, org_id, data):
     # Follows the business flow, NR always comes first
     if data.get("nrNumber"):
         entity = _get_or_create_entity(session, data["nrNumber"], "NR")
-        _get_or_create_affiliation(session, org_id, entity.id)
+        _get_or_create_affiliation(session, alternate_org_id if "nrDifferentOrg" in data else org_id, entity.id)
 
     if data.get("bootstrapIdentifier"):
         entity = _get_or_create_entity(session, data["bootstrapIdentifier"], "TMP")
