@@ -14,7 +14,7 @@
 """Service for managing Affiliation Mapping data."""
 from flask import current_app
 from requests import HTTPError
-from sqlalchemy import and_, case, func, or_, select, text
+from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.dialects.postgresql import array
 from structured_logging import StructuredLogging
 
@@ -42,6 +42,19 @@ class EntityMappingService:
         - If filters are applied grab all identifiers
         - For TEMP business with NR, group them together and count as one row for pagination
         - Returns an array of identifiers where NR+TMP pairs will have both identifiers in the array
+
+        If all these have the same affiliations to the same org:
+            - Business identifier gets shown over TEMP and NR (TEMP and NR are hidden)
+            - TEMP and NR are combined into 1 row
+            - TEMP by itself can show up if there is no NR and no BUSINESS for it
+            - NR by itself can show up if there is no TEMP and no BUSINESS for it
+
+        If affiliations are distributed over other orgs:
+            - EG. For Business Identifier Org 1, Temp Org 1, NR Org 2
+            - fix_stale_affiliations should repoint the NR to the Business
+            - but if this bad data shows up Org 1 would have business, Org 2 would have NR (without affiliation)
+            - EG. For Temp Org 1, NR Org2
+            - Temp would show on Org 1, NR would show on Org2
         """
         paginate_for_non_search = not any(
             [search_details.identifier, search_details.status, search_details.name, search_details.type]
@@ -49,101 +62,148 @@ class EntityMappingService:
 
         org_id_int = int(org_id or -1)
 
-        excluded_nrs_cte = (
-            db.session.query(EntityMapping.nr_identifier)
-            .join(Entity, Entity.business_identifier == EntityMapping.business_identifier)
+        affiliated_identifiers = (
+            db.session.query(Entity.business_identifier)
             .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
-            .filter(
-                EntityMapping.nr_identifier.isnot(None),
-                EntityMapping.bootstrap_identifier.isnot(None),
-                EntityMapping.business_identifier.isnot(None),
-                AffiliationModel.org_id == org_id_int,
-                Entity.is_loaded_lear.is_(True),
-            )
-            .cte("excluded_nrs")
+            .filter(AffiliationModel.org_id == org_id_int)
+            .subquery()
         )
 
-        bootstrap_dates_cte = (
-            db.session.query(
-                EntityMapping.bootstrap_identifier.label("bootstrap_identifier"),
-                EntityMapping.nr_identifier.label("nr_identifier"),
-                AffiliationModel.created.label("bootstrap_created"),
-            )
-            .join(Entity, Entity.business_identifier == EntityMapping.bootstrap_identifier)
-            .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
+        filtered_mappings = (
+            db.session.query(EntityMapping)
             .filter(
-                EntityMapping.business_identifier.is_(None),
-                EntityMapping.bootstrap_identifier.isnot(None),
-                EntityMapping.nr_identifier.isnot(None),
-                EntityMapping.nr_identifier.not_in(select(excluded_nrs_cte.c.nr_identifier)),
-                AffiliationModel.org_id == org_id_int,
-                Entity.is_loaded_lear.is_(True),
+                or_(
+                    EntityMapping.business_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                    EntityMapping.bootstrap_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                    EntityMapping.nr_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                ),
             )
-            .cte("bootstrap_dates")
+            .subquery()
         )
+
+        priority_case = case(
+            (filtered_mappings.c.business_identifier.isnot(None), 1),
+            (
+                and_(
+                    filtered_mappings.c.bootstrap_identifier.isnot(None), filtered_mappings.c.nr_identifier.isnot(None)
+                ),
+                2,
+            ),
+            (filtered_mappings.c.nr_identifier.isnot(None), 3),
+            (filtered_mappings.c.bootstrap_identifier.isnot(None), 4),
+            else_=5,
+        ).label("priority")
 
         identifiers_case = case(
-            (EntityMapping.business_identifier.isnot(None), array([EntityMapping.business_identifier])),
             (
-                and_(EntityMapping.bootstrap_identifier.isnot(None), EntityMapping.nr_identifier.isnot(None)),
-                array([EntityMapping.bootstrap_identifier, EntityMapping.nr_identifier]),
+                and_(
+                    filtered_mappings.c.business_identifier.isnot(None),
+                    filtered_mappings.c.business_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                ),
+                array([filtered_mappings.c.business_identifier]),
             ),
-            (EntityMapping.nr_identifier.isnot(None), array([EntityMapping.nr_identifier])),
-            (EntityMapping.bootstrap_identifier.isnot(None), array([EntityMapping.bootstrap_identifier])),
+            (
+                and_(
+                    filtered_mappings.c.bootstrap_identifier.isnot(None), filtered_mappings.c.nr_identifier.isnot(None)
+                ),
+                case(
+                    (
+                        and_(
+                            filtered_mappings.c.bootstrap_identifier.in_(
+                                select(affiliated_identifiers.c.business_identifier)
+                            ),
+                            filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                        ),
+                        array([filtered_mappings.c.bootstrap_identifier, filtered_mappings.c.nr_identifier]),
+                    ),
+                    (
+                        filtered_mappings.c.bootstrap_identifier.in_(
+                            select(affiliated_identifiers.c.business_identifier)
+                        ),
+                        array([filtered_mappings.c.bootstrap_identifier]),
+                    ),
+                    (
+                        filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                        array([filtered_mappings.c.nr_identifier]),
+                    ),
+                ),
+            ),
+            (
+                and_(
+                    filtered_mappings.c.nr_identifier.isnot(None),
+                    filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                ),
+                array([filtered_mappings.c.nr_identifier]),
+            ),
+            (
+                and_(
+                    filtered_mappings.c.bootstrap_identifier.isnot(None),
+                    filtered_mappings.c.bootstrap_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                ),
+                array([filtered_mappings.c.bootstrap_identifier]),
+            ),
+        ).label("identifiers")
+
+        created_date_case = case(
+            (filtered_mappings.c.business_identifier == Entity.business_identifier, AffiliationModel.created),
+            (filtered_mappings.c.bootstrap_identifier == Entity.business_identifier, AffiliationModel.created),
+            (filtered_mappings.c.nr_identifier == Entity.business_identifier, AffiliationModel.created),
+        ).label("created_on")
+
+        row_number_column = (
+            func.row_number()
+            .over(partition_by=identifiers_case, order_by=(priority_case.asc(), created_date_case.desc()))
+            .label("row_number")
         )
 
-        base_query = (
-            db.session.query(
-                identifiers_case.label("identifiers"),
-                func.coalesce(bootstrap_dates_cte.c.bootstrap_created, AffiliationModel.created).label("order_date"),
-            )
-            .join(Entity, Entity.id == AffiliationModel.entity_id)
-            .join(
-                EntityMapping,
-                or_(
-                    # Fully formed business (standalone)
-                    EntityMapping.business_identifier == Entity.business_identifier,
-                    # TEMP business only, numbered temp filing (standalone)
-                    and_(
-                        EntityMapping.business_identifier.is_(None),
-                        EntityMapping.bootstrap_identifier == Entity.business_identifier,
-                        EntityMapping.nr_identifier.is_(None),
-                    ),
-                    # NR only (standalone)
-                    and_(
-                        EntityMapping.business_identifier.is_(None),
-                        EntityMapping.bootstrap_identifier.is_(None),
-                        EntityMapping.nr_identifier == Entity.business_identifier,
-                    ),
-                    # Named TEMP business with NR (combined info, need both affiliation rows to count as 1)
-                    and_(
-                        EntityMapping.business_identifier.is_(None),
-                        EntityMapping.bootstrap_identifier == Entity.business_identifier,
-                        EntityMapping.nr_identifier.isnot(None),
-                        EntityMapping.nr_identifier.not_in(select(excluded_nrs_cte.c.nr_identifier)),
-                    ),
-                ),
-            )
-            .outerjoin(
-                bootstrap_dates_cte,
-                and_(
-                    EntityMapping.bootstrap_identifier == bootstrap_dates_cte.c.bootstrap_identifier,
-                    EntityMapping.nr_identifier == bootstrap_dates_cte.c.nr_identifier,
-                ),
-            )
+        complete_mappings_cte = (
+            db.session.query(filtered_mappings.c.nr_identifier)
+            .join(Entity, Entity.business_identifier == filtered_mappings.c.business_identifier)
+            .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
             .filter(
+                filtered_mappings.c.business_identifier.isnot(None),
+                filtered_mappings.c.bootstrap_identifier.isnot(None),
+                filtered_mappings.c.nr_identifier.isnot(None),
                 AffiliationModel.org_id == org_id_int,
                 Entity.is_loaded_lear.is_(True),
             )
-            .order_by(text("order_date DESC"))
+            .cte("complete_mappings")
+        )
+
+        subq = (
+            db.session.query(identifiers_case, created_date_case, row_number_column)
+            .select_from(filtered_mappings)
+            .join(
+                Entity,
+                or_(
+                    filtered_mappings.c.business_identifier == Entity.business_identifier,
+                    filtered_mappings.c.bootstrap_identifier == Entity.business_identifier,
+                    filtered_mappings.c.nr_identifier == Entity.business_identifier,
+                ),
+            )
+            .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
+            .filter(
+                AffiliationModel.org_id == org_id_int,
+                Entity.is_loaded_lear.is_(True),
+                or_(
+                    filtered_mappings.c.business_identifier.isnot(None),
+                    filtered_mappings.c.nr_identifier.is_(None),
+                    filtered_mappings.c.nr_identifier.not_in(select(complete_mappings_cte.c.nr_identifier)),
+                ),
+            )
+        ).subquery()
+
+        query = (
+            db.session.query(subq.c.identifiers, subq.c.created_on)
+            .filter(subq.c.row_number == 1)
+            .order_by(subq.c.created_on.desc())
         )
 
         if paginate_for_non_search:
-            limit = search_details.limit
-            offset_value = (search_details.page - 1) * limit
-            base_query = base_query.offset(offset_value).limit(limit)
+            query = query.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
 
-        return base_query.all()
+        data = query.all()
+        return data
 
     @staticmethod
     def populate_affiliation_base(org_id: int, search_details: AffiliationSearchDetails):
