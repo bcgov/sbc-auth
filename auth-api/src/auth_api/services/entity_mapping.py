@@ -202,9 +202,7 @@ class EntityMappingService:
         if paginate_for_non_search:
             query = query.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
 
-        #print(datetime.now(), 'before')
         data = query.all()
-        #print(datetime.now(), 'after')
         return data
 
     @staticmethod
