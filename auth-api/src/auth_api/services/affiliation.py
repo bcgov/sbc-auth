@@ -472,7 +472,7 @@ class Affiliation:
         affiliation_bases: List[AffiliationBase],
         search_details: AffiliationSearchDetails,
         org_id,
-        remove_stale_drafts=True,
+        remove_stale_drafts,
     ) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
