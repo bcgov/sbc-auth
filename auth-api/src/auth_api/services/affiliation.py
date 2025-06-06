@@ -469,7 +469,10 @@ class Affiliation:
 
     @staticmethod
     async def get_affiliation_details(
-        affiliation_bases: List[AffiliationBase], search_details: AffiliationSearchDetails, org_id
+        affiliation_bases: List[AffiliationBase],
+        search_details: AffiliationSearchDetails,
+        org_id,
+        remove_stale_drafts=True,
     ) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
@@ -496,7 +499,7 @@ class Affiliation:
         )
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
-            combined = Affiliation._combine_affiliation_details(responses)
+            combined = Affiliation._combine_affiliation_details(responses, remove_stale_drafts)
             affiliations_bases_sorted = sorted(affiliation_bases, key=lambda x: x.created, reverse=True)
             ordered = {affiliation.identifier: affiliation.created for affiliation in affiliations_bases_sorted}
 
@@ -544,7 +547,7 @@ class Affiliation:
         return business
 
     @staticmethod
-    def _combine_nrs(name_requests, businesses, drafts):
+    def _combine_nrs(name_requests, businesses, drafts, remove_stale_drafts=True):
         """Combine NRs with the business and draft entities."""
         for business in drafts + businesses:
             # Only drafts have nrNumber coming back from legal-api.
@@ -558,15 +561,16 @@ class Affiliation:
                     del name_requests[nr_num]
                 else:
                     # If not in name_requests then it's a stale draft.
-                    drafts.remove(business)
+                    if remove_stale_drafts:
+                        drafts.remove(business)
 
         return [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
 
     @staticmethod
-    def _combine_affiliation_details(details):
+    def _combine_affiliation_details(details, remove_stale_drafts=True):
         """Parse affiliation details responses and combine draft entities with NRs if applicable."""
         name_requests, businesses, drafts = Affiliation._group_details(details)
-        return Affiliation._combine_nrs(name_requests, businesses, drafts)
+        return Affiliation._combine_nrs(name_requests, businesses, drafts, remove_stale_drafts)
 
     @staticmethod
     def _get_nr_details(nr_number: str):

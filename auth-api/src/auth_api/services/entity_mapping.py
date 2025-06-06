@@ -79,8 +79,8 @@ class EntityMappingService:
                 ),
                 or_(
                     EntityMapping.business_identifier.is_(None),
-                    EntityMapping.business_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier))
-                )
+                    EntityMapping.business_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
+                ),
             )
             .subquery()
         )
@@ -102,7 +102,9 @@ class EntityMappingService:
             (
                 and_(
                     filtered_mappings.c.business_identifier.isnot(None),
-                    filtered_mappings.c.business_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
+                    filtered_mappings.c.business_identifier.in_(
+                        select(affiliated_identifiers_cte.c.business_identifier)
+                    ),
                 ),
                 array([filtered_mappings.c.business_identifier]),
             ),
@@ -116,7 +118,9 @@ class EntityMappingService:
                             filtered_mappings.c.bootstrap_identifier.in_(
                                 select(affiliated_identifiers_cte.c.business_identifier)
                             ),
-                            filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
+                            filtered_mappings.c.nr_identifier.in_(
+                                select(affiliated_identifiers_cte.c.business_identifier)
+                            ),
                         ),
                         array([filtered_mappings.c.bootstrap_identifier, filtered_mappings.c.nr_identifier]),
                     ),
@@ -142,7 +146,9 @@ class EntityMappingService:
             (
                 and_(
                     filtered_mappings.c.bootstrap_identifier.isnot(None),
-                    filtered_mappings.c.bootstrap_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
+                    filtered_mappings.c.bootstrap_identifier.in_(
+                        select(affiliated_identifiers_cte.c.business_identifier)
+                    ),
                 ),
                 array([filtered_mappings.c.bootstrap_identifier]),
             ),
@@ -213,21 +219,25 @@ class EntityMappingService:
     def populate_affiliation_base(org_id: int, search_details: AffiliationSearchDetails):
         """Get entity details from the database and expand multiple identifiers into separate rows."""
         data = EntityMappingService.paginate_from_affiliations(org_id, search_details)
-        
+
         affiliation_bases = [
             AffiliationBase(identifier=identifier, created=created)
             for identifiers, created in data
             for identifier in identifiers
         ]
-        
-        t_identifiers = [f'"{base.identifier}"' for base in affiliation_bases if base.identifier.startswith('T')]
-        nr_identifiers = [f'"{base.identifier}"' for base in affiliation_bases if base.identifier.startswith('NR')]
-        other_identifiers = [f'"{base.identifier}"' for base in affiliation_bases if not base.identifier.startswith('T') and not base.identifier.startswith('NR')]
-        
-        print(f"T identifiers ({len(t_identifiers)}): {', '.join(t_identifiers)}")
-        print(f"NR identifiers ({len(nr_identifiers)}): {', '.join(nr_identifiers)}")
-        print(f"Other identifiers ({len(other_identifiers)}): {', '.join(other_identifiers)}")
-        
+
+        if (current_app.config.get('AFFILIATION_DEBUG') is True):
+            t_identifiers = [f'"{base.identifier}"' for base in affiliation_bases if base.identifier.startswith("T")]
+            nr_identifiers = [f'"{base.identifier}"' for base in affiliation_bases if base.identifier.startswith("NR")]
+            other_identifiers = [
+                f'"{base.identifier}"'
+                for base in affiliation_bases
+                if not base.identifier.startswith("T") and not base.identifier.startswith("NR")
+            ]
+            print(f"T identifiers ({len(t_identifiers)}): {', '.join(t_identifiers)}")
+            print(f"NR identifiers ({len(nr_identifiers)}): {', '.join(nr_identifiers)}")
+            print(f"Other identifiers ({len(other_identifiers)}): {', '.join(other_identifiers)}")
+
         return affiliation_bases
 
     @staticmethod

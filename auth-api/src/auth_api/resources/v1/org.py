@@ -389,12 +389,14 @@ def affiliation_search(org_id, use_entity_mapping=False):
         raise BusinessException(Error.DATA_NOT_FOUND, None)
     search_details = AffiliationSearchDetails.from_request_args(request)
     if use_entity_mapping:
+        remove_stale_drafts = False
         affiliation_bases = EntityMappingService.populate_affiliation_base(org_id, search_details)
     else:
+        remove_stale_drafts = True
         affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
         affiliation_bases = AffiliationService.affiliation_to_affiliation_base(affiliations)
     affiliations_details_list = asyncio.run(
-        AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id)
+        AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id, remove_stale_drafts)
     )
     # Use orjson serializer here, it's quite a bit faster.
     response, status = (

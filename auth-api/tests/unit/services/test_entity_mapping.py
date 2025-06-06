@@ -40,7 +40,12 @@ def test_get_filtered_affiliations_identifier_matches(session):
         # Test case with no entity or affiliation for the business identifier
         # But having an entity and affiliation for the bootstrap identifier
         # This should not show up in the results
-        {"identifier": "BC9999993", "identifierSkipAffiliationAndEntity": True, "bootstrapIdentifier": "T7777777", "nrNumber": "NR7777777"},
+        {
+            "identifier": "BC9999993",
+            "identifierSkipAffiliationAndEntity": True,
+            "bootstrapIdentifier": "T7777777",
+            "nrNumber": "NR7777777",
+        },
     ]
 
     expected_before_search_org_1 = [
@@ -52,7 +57,7 @@ def test_get_filtered_affiliations_identifier_matches(session):
         ["BC7234567"],
         ["BC5234567"],
         ["BC9999999"],
-        ["T8888888"]
+        ["T8888888"],
     ]
 
     expected_before_search_org_2 = [["NR9999999"], ["NR8888888"]]
