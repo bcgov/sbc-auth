@@ -699,7 +699,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        check_auth(one_of_roles=ADMIN, org_id=org_id)
+        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
 
         login_option = AccountLoginOptionsModel(login_source=login_source, org_id=org_id)
         login_option.save()
@@ -714,7 +714,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        check_auth(one_of_roles=ADMIN, org_id=org_id)
+        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
 
         existing_login_option = AccountLoginOptionsModel.find_active_by_org_id(org_id)
         if existing_login_option is not None:
