@@ -77,7 +77,6 @@ class EntityMappingService:
                     EntityMapping.bootstrap_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
                     EntityMapping.nr_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
                 ),
-                # Exclude rows where business_identifier exists but has no affiliation
                 or_(
                     EntityMapping.business_identifier.is_(None),
                     EntityMapping.business_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier))
