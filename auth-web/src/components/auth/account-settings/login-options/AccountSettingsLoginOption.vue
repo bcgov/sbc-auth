@@ -17,6 +17,7 @@
       </v-alert>
     </div>
     <account-login-option-picker
+      :org-id="orgId"
       @auth-type-selected="setLoginOption"
     />
     <v-divider class="mt-6" />
@@ -41,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountLoginOptionPicker from '@/components/auth/common/AccountLoginOptionPicker.vue'
@@ -66,6 +67,7 @@ import { useOrgStore } from '@/stores/org'
   }
 })
 export default class AccountSettingsLoginOption extends Mixins(AccountChangeMixin) {
+  @Prop({ default: -1 }) private orgId: number
   private isBtnSaved = false
   private disableSaveBtn = true
   private readonly updateLoginOption!: (loginType:string) => Promise<string>
