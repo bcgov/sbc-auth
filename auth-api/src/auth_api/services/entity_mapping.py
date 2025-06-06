@@ -226,7 +226,7 @@ class EntityMappingService:
             for identifier in identifiers
         ]
 
-        if (current_app.config.get('AFFILIATION_DEBUG') is True):
+        if current_app.config.get("AFFILIATION_DEBUG") is True:
             t_identifiers = [f'"{base.identifier}"' for base in affiliation_bases if base.identifier.startswith("T")]
             nr_identifiers = [f'"{base.identifier}"' for base in affiliation_bases if base.identifier.startswith("NR")]
             other_identifiers = [
