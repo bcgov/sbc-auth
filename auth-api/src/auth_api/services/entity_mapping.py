@@ -234,9 +234,9 @@ class EntityMappingService:
                 for base in affiliation_bases
                 if not base.identifier.startswith("T") and not base.identifier.startswith("NR")
             ]
-            print(f"T identifiers ({len(t_identifiers)}): {', '.join(t_identifiers)}")
-            print(f"NR identifiers ({len(nr_identifiers)}): {', '.join(nr_identifiers)}")
-            print(f"Other identifiers ({len(other_identifiers)}): {', '.join(other_identifiers)}")
+            logger.debug(f"T identifiers ({len(t_identifiers)}): {', '.join(t_identifiers)}")
+            logger.debug(f"NR identifiers ({len(nr_identifiers)}): {', '.join(nr_identifiers)}")
+            logger.debug(f"Other identifiers ({len(other_identifiers)}): {', '.join(other_identifiers)}")
 
         return affiliation_bases
 
