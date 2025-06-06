@@ -37,6 +37,10 @@ def test_get_filtered_affiliations_identifier_matches(session):
         {"identifier": "BC9999999", "bootstrapIdentifier": "T9999999", "nrNumber": "NR9999999", "nrDifferentOrg": True},
         # Temp belongs to Org 1, NR belongs to Org 2 - should show Temp for Org1 and Nr for Org 2
         {"identifier": None, "bootstrapIdentifier": "T8888888", "nrNumber": "NR8888888", "nrDifferentOrg": True},
+        # Test case with no entity or affiliation for the business identifier
+        # But having an entity and affiliation for the bootstrap identifier
+        # This should not show up in the results
+        {"identifier": "BC9999993", "identifierSkipAffiliationAndEntity": True, "bootstrapIdentifier": "T7777777", "nrNumber": "NR7777777"},
     ]
 
     expected_before_search_org_1 = [
@@ -48,7 +52,7 @@ def test_get_filtered_affiliations_identifier_matches(session):
         ["BC7234567"],
         ["BC5234567"],
         ["BC9999999"],
-        ["T8888888"],
+        ["T8888888"]
     ]
 
     expected_before_search_org_2 = [["NR9999999"], ["NR8888888"]]
@@ -119,7 +123,7 @@ def _create_affiliations_for_mapping(session, org_id, data, alternate_org_id):
         entity = _get_or_create_entity(session, data["bootstrapIdentifier"], "TMP")
         _get_or_create_affiliation(session, org_id, entity.id)
 
-    if data.get("identifier"):
+    if data.get("identifier") and not data.get("identifierSkipAffiliationAndEntity"):
         entity = _get_or_create_entity(session, data["identifier"], "BC")
         _get_or_create_affiliation(session, org_id, entity.id)
 
