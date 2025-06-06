@@ -500,8 +500,10 @@ class Affiliation:
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
             combined = Affiliation._combine_affiliation_details(responses, remove_stale_drafts)
-            affiliations_bases_sorted = sorted(affiliation_bases, key=lambda x: x.created, reverse=True)
-            ordered = {affiliation.identifier: affiliation.created for affiliation in affiliations_bases_sorted}
+            ordered = {
+                affiliation.identifier: affiliation.created
+                for affiliation in sorted(affiliation_bases, key=lambda x: x.created, reverse=True)
+            }
 
             def sort_key(item):
                 identifier = item.get("identifier", item.get("nameRequest", {}).get("nrNum", ""))
