@@ -32,10 +32,10 @@ def test_get_filtered_affiliations_identifier_matches(session):
         {"identifier": "BC5234567", "bootstrapIdentifier": "Tiiiiiii", "nrNumber": "NR1235565"},
         {"identifier": None, "bootstrapIdentifier": "Tddddddd", "nrNumber": "NR1235565"},
         # Test cases with affiliations to different orgs
-        # Business belongs to Org 1, Temp Org 1, NR Org 2 - Should show NR for Org 2
-        # fix stale affiliations does this currently
+        # Business belongs to Org 1, Temp Org 1, NR Org 2 - Should Hide NR for Org 2
+        # fix stale affiliations will repoint the NR to the business automatically
         {"identifier": "BC9999999", "bootstrapIdentifier": "T9999999", "nrNumber": "NR9999999", "nrDifferentOrg": True},
-        # Temp belongs to Org 1, NR belongs to Org 2 - should show Temp for Org1 and Nr for Org 2
+        # Business belongs to Org 1, NR belongs to Org 2 - should show Business for Org1, Org 2 should be hidden
         {"identifier": None, "bootstrapIdentifier": "T8888888", "nrNumber": "NR8888888", "nrDifferentOrg": True},
         # Test case with no entity or affiliation for the business identifier
         # But having an entity and affiliation for the bootstrap identifier
@@ -60,7 +60,10 @@ def test_get_filtered_affiliations_identifier_matches(session):
         ["T8888888"],
     ]
 
-    expected_before_search_org_2 = [["NR9999999"], ["NR8888888"]]
+    # NR9999999 is not shown because it's turned into a business
+    # the NR affiliation is typically repointed to the business - which is important the business affiliation
+    # must exist to manage the business.
+    expected_before_search_org_2 = [["NR8888888"]]
 
     service = EntityMappingService()
     org_service = factory_org_service()
