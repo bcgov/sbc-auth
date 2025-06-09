@@ -567,7 +567,6 @@ class Affiliation:
         for business in drafts + businesses:
             if "nrNumber" in business and business["nrNumber"]:
                 processed = Affiliation._process_nr_for_business(business, name_requests, drafts)
-                # Remove "stale" drafts if not processed
                 if not processed and remove_stale_drafts and business in drafts:
                     drafts.remove(business)
         return list(name_requests.values()) + drafts + businesses
