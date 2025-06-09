@@ -549,24 +549,28 @@ class Affiliation:
         return business
 
     @staticmethod
+    def _process_nr_for_business(business, name_requests, drafts):
+        """Process NR for a business entity."""
+        nr_num = business["nrNumber"]
+        if nr_num in name_requests:
+            business["nameRequest"] = name_requests[nr_num]["nameRequest"]
+            business = Affiliation._update_draft_type_for_amalgamation_nr(business)
+            if business["nameRequest"]["stateCd"] == NRStatus.CONSUMED.value:
+                drafts.remove(business)
+            del name_requests[nr_num]
+            return True
+        return False
+
+    @staticmethod
     def _combine_nrs(name_requests, businesses, drafts, remove_stale_drafts=True):
         """Combine NRs with the business and draft entities."""
         for business in drafts + businesses:
-            # Only drafts have nrNumber coming back from legal-api.
-            if "nrNumber" in business and (nr_num := business["nrNumber"]):
-                if business["nrNumber"] in name_requests:
-                    business["nameRequest"] = name_requests[nr_num]["nameRequest"]
-                    business = Affiliation._update_draft_type_for_amalgamation_nr(business)
-                    # Remove the business if the draft associated to the NR is consumed.
-                    if business["nameRequest"]["stateCd"] == NRStatus.CONSUMED.value:
-                        drafts.remove(business)
-                    del name_requests[nr_num]
-                else:
-                    # If not in name_requests then it's a stale draft.
-                    if remove_stale_drafts:
-                        drafts.remove(business)
-
-        return [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
+            if "nrNumber" in business and business["nrNumber"]:
+                processed = Affiliation._process_nr_for_business(business, name_requests, drafts)
+                # Remove "stale" drafts if not processed
+                if not processed and remove_stale_drafts and business in drafts:
+                    drafts.remove(business)
+        return list(name_requests.values()) + drafts + businesses
 
     @staticmethod
     def _combine_affiliation_details(details, remove_stale_drafts=True):
