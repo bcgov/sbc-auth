@@ -62,20 +62,24 @@ class EntityMappingService:
 
         org_id_int = int(org_id or -1)
 
-        affiliated_identifiers = (
+        affiliated_identifiers_cte = (
             db.session.query(Entity.business_identifier)
             .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
             .filter(AffiliationModel.org_id == org_id_int)
-            .subquery()
+            .cte("affiliated_identifiers")
         )
 
         filtered_mappings = (
             db.session.query(EntityMapping)
             .filter(
                 or_(
-                    EntityMapping.business_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
-                    EntityMapping.bootstrap_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
-                    EntityMapping.nr_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                    EntityMapping.business_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
+                    EntityMapping.bootstrap_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
+                    EntityMapping.nr_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
+                ),
+                or_(
+                    EntityMapping.business_identifier.is_(None),
+                    EntityMapping.business_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
                 ),
             )
             .subquery()
@@ -98,7 +102,9 @@ class EntityMappingService:
             (
                 and_(
                     filtered_mappings.c.business_identifier.isnot(None),
-                    filtered_mappings.c.business_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                    filtered_mappings.c.business_identifier.in_(
+                        select(affiliated_identifiers_cte.c.business_identifier)
+                    ),
                 ),
                 array([filtered_mappings.c.business_identifier]),
             ),
@@ -110,20 +116,22 @@ class EntityMappingService:
                     (
                         and_(
                             filtered_mappings.c.bootstrap_identifier.in_(
-                                select(affiliated_identifiers.c.business_identifier)
+                                select(affiliated_identifiers_cte.c.business_identifier)
                             ),
-                            filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                            filtered_mappings.c.nr_identifier.in_(
+                                select(affiliated_identifiers_cte.c.business_identifier)
+                            ),
                         ),
                         array([filtered_mappings.c.bootstrap_identifier, filtered_mappings.c.nr_identifier]),
                     ),
                     (
                         filtered_mappings.c.bootstrap_identifier.in_(
-                            select(affiliated_identifiers.c.business_identifier)
+                            select(affiliated_identifiers_cte.c.business_identifier)
                         ),
                         array([filtered_mappings.c.bootstrap_identifier]),
                     ),
                     (
-                        filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                        filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
                         array([filtered_mappings.c.nr_identifier]),
                     ),
                 ),
@@ -131,14 +139,16 @@ class EntityMappingService:
             (
                 and_(
                     filtered_mappings.c.nr_identifier.isnot(None),
-                    filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                    filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
                 ),
                 array([filtered_mappings.c.nr_identifier]),
             ),
             (
                 and_(
                     filtered_mappings.c.bootstrap_identifier.isnot(None),
-                    filtered_mappings.c.bootstrap_identifier.in_(select(affiliated_identifiers.c.business_identifier)),
+                    filtered_mappings.c.bootstrap_identifier.in_(
+                        select(affiliated_identifiers_cte.c.business_identifier)
+                    ),
                 ),
                 array([filtered_mappings.c.bootstrap_identifier]),
             ),
@@ -209,11 +219,26 @@ class EntityMappingService:
     def populate_affiliation_base(org_id: int, search_details: AffiliationSearchDetails):
         """Get entity details from the database and expand multiple identifiers into separate rows."""
         data = EntityMappingService.paginate_from_affiliations(org_id, search_details)
-        return [
+
+        affiliation_bases = [
             AffiliationBase(identifier=identifier, created=created)
             for identifiers, created in data
             for identifier in identifiers
         ]
+
+        if current_app.config.get("AFFILIATION_DEBUG") is True:
+            t_identifiers = [f'"{base.identifier}"' for base in affiliation_bases if base.identifier.startswith("T")]
+            nr_identifiers = [f'"{base.identifier}"' for base in affiliation_bases if base.identifier.startswith("NR")]
+            other_identifiers = [
+                f'"{base.identifier}"'
+                for base in affiliation_bases
+                if not base.identifier.startswith("T") and not base.identifier.startswith("NR")
+            ]
+            logger.debug(f"T identifiers ({len(t_identifiers)}): {', '.join(t_identifiers)}")
+            logger.debug(f"NR identifiers ({len(nr_identifiers)}): {', '.join(nr_identifiers)}")
+            logger.debug(f"Other identifiers ({len(other_identifiers)}): {', '.join(other_identifiers)}")
+
+        return affiliation_bases
 
     @staticmethod
     def _is_duplicate_mapping(nr_identifier: str, bootstrap_identifier: str, business_identifier: str) -> bool:

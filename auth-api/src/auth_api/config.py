@@ -191,6 +191,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     SKIP_STAFF_APPROVAL_BCEID = os.getenv("SKIP_STAFF_APPROVAL_BCEID", "False").lower() == "true"
 
     ENVIRONMENT_NAME = os.getenv("ENVIRONMENT_NAME", "local")
+    AFFILIATION_DEBUG = os.getenv("AFFILIATION_DEBUG", "False").lower() == "true"
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
