@@ -15,7 +15,7 @@
 import datetime
 import re
 from dataclasses import asdict
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from flask import current_app
 from requests.exceptions import HTTPError
@@ -31,14 +31,14 @@ from auth_api.models.affiliation_invitation import AffiliationInvitation as Affi
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
 from auth_api.models.dataclass import Affiliation as AffiliationData
-from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest
+from auth_api.models.dataclass import AffiliationBase, AffiliationSearchDetails, DeleteAffiliationRequest
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
-from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus, Status
+from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
@@ -452,23 +452,37 @@ class Affiliation:
         logger.debug(">fix_stale_affiliations")
 
     @staticmethod
-    def _affiliation_details_url(affiliation: AffiliationModel) -> str:
+    def _affiliation_details_url(identifier: str) -> str:
         """Determine url to call for affiliation details."""
         # only have LEAR and NAMEX affiliations
-        if affiliation.entity.corp_type_code == CorpType.NR.value:
+        if identifier.startswith("NR"):
             return current_app.config.get("NAMEX_AFFILIATION_DETAILS_URL")
         return current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
 
     @staticmethod
+    def affiliation_to_affiliation_base(affiliations: List[AffiliationModel]) -> List[AffiliationBase]:
+        """Convert affiliations to a common data class."""
+        return [
+            AffiliationBase(identifier=affiliation.entity.business_identifier, created=affiliation.created)
+            for affiliation in affiliations
+        ]
+
+    @staticmethod
     async def get_affiliation_details(
-        affiliations: List[AffiliationModel], search_details: AffiliationSearchDetails, org_id
+        affiliation_bases: List[AffiliationBase],
+        search_details: AffiliationSearchDetails,
+        org_id,
+        remove_stale_drafts,
     ) -> List:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
+        # Our pagination is already handled at the auth level when not doing a search.
+        if not (search_details.status and search_details.name and search_details.type and search_details.identifier):
+            search_details.page = 1
         search_dict = asdict(search_details)
-        for affiliation in affiliations:
-            url = Affiliation._affiliation_details_url(affiliation)
-            url_identifiers.setdefault(url, []).append(affiliation.entity.business_identifier)
+        for affiliation_base in affiliation_bases:
+            url = Affiliation._affiliation_details_url(affiliation_base.identifier)
+            url_identifiers.setdefault(url, []).append(affiliation_base.identifier)
         call_info = [
             {
                 "url": url,
@@ -485,12 +499,10 @@ class Affiliation:
         )
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
-            combined = Affiliation._combine_affiliation_details(responses)
-            # Should provide us with ascending order
-            affiliations_sorted = sorted(affiliations, key=lambda x: x.created, reverse=True)
-            # Provide us with a dict with the max created date.
+            combined = Affiliation._combine_affiliation_details(responses, remove_stale_drafts)
             ordered = {
-                affiliation.entity.business_identifier: affiliation.created for affiliation in affiliations_sorted
+                affiliation.identifier: affiliation.created
+                for affiliation in sorted(affiliation_bases, key=lambda x: x.created, reverse=True)
             }
 
             def sort_key(item):
@@ -498,12 +510,27 @@ class Affiliation:
                 return ordered.get(identifier, datetime.datetime.min)
 
             combined.sort(key=sort_key, reverse=True)
-
+            Affiliation._handle_affiliation_debug(affiliation_bases, combined)
             return combined
         except ServiceUnavailableException as err:
             logger.debug(err)
-            logger.debug("Failed to get affiliations details:  %s", affiliations)
+            logger.debug("Failed to get affiliations details:  %s", affiliation_bases)
             raise ServiceUnavailableException("Failed to get affiliation details") from err
+
+    @staticmethod
+    def _handle_affiliation_debug(affiliation_bases, combined):
+        """Enable affiliation debug."""
+        if current_app.config.get("AFFILIATION_DEBUG") is False:
+            return
+        base_identifiers = {base.identifier for base in affiliation_bases}
+        combined_identifiers = set()
+        for item in combined:
+            identifier = item.get("identifier") or item.get("nameRequest", {}).get("nrNum")
+            if identifier:
+                combined_identifiers.add(identifier)
+        missing_identifiers = base_identifiers - combined_identifiers
+        if missing_identifiers:
+            logger.warning(f"Identifiers missing from combined results: {missing_identifiers}")
 
     @staticmethod
     def _group_details(details):
@@ -537,29 +564,33 @@ class Affiliation:
         return business
 
     @staticmethod
-    def _combine_nrs(name_requests, businesses, drafts):
-        """Combine NRs with the business and draft entities."""
-        for business in drafts + businesses:
-            # Only drafts have nrNumber coming back from legal-api.
-            if "nrNumber" in business and (nr_num := business["nrNumber"]):
-                if business["nrNumber"] in name_requests:
-                    business["nameRequest"] = name_requests[nr_num]["nameRequest"]
-                    business = Affiliation._update_draft_type_for_amalgamation_nr(business)
-                    # Remove the business if the draft associated to the NR is consumed.
-                    if business["nameRequest"]["stateCd"] == NRStatus.CONSUMED.value:
-                        drafts.remove(business)
-                    del name_requests[nr_num]
-                else:
-                    # If not in name_requests then it's a stale draft.
-                    drafts.remove(business)
-
-        return [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
+    def _process_nr_for_business(business, name_requests, drafts):
+        """Process NR for a business entity."""
+        nr_num = business["nrNumber"]
+        if nr_num in name_requests:
+            business["nameRequest"] = name_requests[nr_num]["nameRequest"]
+            business = Affiliation._update_draft_type_for_amalgamation_nr(business)
+            if business["nameRequest"]["stateCd"] == NRStatus.CONSUMED.value:
+                drafts.remove(business)
+            del name_requests[nr_num]
+            return True
+        return False
 
     @staticmethod
-    def _combine_affiliation_details(details):
+    def _combine_nrs(name_requests, businesses, drafts, remove_stale_drafts=True):
+        """Combine NRs with the business and draft entities."""
+        for business in drafts + businesses:
+            if "nrNumber" in business and business["nrNumber"]:
+                processed = Affiliation._process_nr_for_business(business, name_requests, drafts)
+                if not processed and remove_stale_drafts and business in drafts:
+                    drafts.remove(business)
+        return list(name_requests.values()) + drafts + businesses
+
+    @staticmethod
+    def _combine_affiliation_details(details, remove_stale_drafts=True):
         """Parse affiliation details responses and combine draft entities with NRs if applicable."""
         name_requests, businesses, drafts = Affiliation._group_details(details)
-        return Affiliation._combine_nrs(name_requests, businesses, drafts)
+        return Affiliation._combine_nrs(name_requests, businesses, drafts, remove_stale_drafts)
 
     @staticmethod
     def _get_nr_details(nr_number: str):

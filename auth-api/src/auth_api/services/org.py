@@ -18,7 +18,7 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Dict, List, Tuple
 
-from flask import current_app, g, request
+from flask import current_app, request
 from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -37,7 +37,6 @@ from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, MembershipSchema, OrgSchema
-from auth_api.services.flags import flags
 from auth_api.services.membership import Membership
 from auth_api.services.user import User as UserService
 from auth_api.services.validators.access_type import validate as access_type_validate
@@ -109,8 +108,8 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.NSF_OR_SUSPENDED_CLIENT_CANNOT_CREATE_ACCOUNT, None)
         # bcol is treated like an access type as well;so its outside the scheme
         mailing_address = org_info.pop("mailingAddress", None)
-        payment_info = org_info.pop("paymentInfo", {})
         product_subscriptions = org_info.pop("productSubscriptions", None)
+        payment_info = org_info.pop("paymentInfo", {})
         type_code = org_info.get("typeCode", None)
 
         bcol_profile_flags = None
@@ -145,8 +144,9 @@ class Org:  # pylint: disable=too-many-public-methods
         Org.create_membership(access_type, org, user_id)
 
         if product_subscriptions is not None:
-            subscription_data = {"subscriptions": product_subscriptions}
-            ProductService.create_product_subscription(org.id, subscription_data=subscription_data, skip_auth=True)
+            ProductService.create_product_subscription(
+                org.id, subscription_data={"subscriptions": product_subscriptions}, skip_auth=True
+            )
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
 
@@ -162,9 +162,8 @@ class Org:  # pylint: disable=too-many-public-methods
             and current_app.config.get("SKIP_STAFF_APPROVAL_BCEID") is False
         )
 
-        user = UserModel.find_by_jwt_token()
         if is_staff_review_needed:
-            Org._create_staff_review_task(org, user)
+            Org._create_staff_review_task(org, UserModel.find_by_jwt_token())
 
         org.commit()
 
@@ -233,14 +232,19 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request = Org._build_payment_request(org_model, payment_info, payment_method, mailing_address, **kwargs)
             error_code = None
 
-            token = RestService.get_service_account_token()
             if is_new_org:
                 response = RestService.post(
-                    endpoint=f"{pay_url}/accounts", data=pay_request, token=token, raise_for_status=True
+                    endpoint=f"{pay_url}/accounts",
+                    data=pay_request,
+                    token=RestService.get_service_account_token(),
+                    raise_for_status=True,
                 )
             else:
                 response = RestService.put(
-                    endpoint=f"{pay_url}/accounts/{org_model.id}", data=pay_request, token=token, raise_for_status=True
+                    endpoint=f"{pay_url}/accounts/{org_model.id}",
+                    data=pay_request,
+                    token=RestService.get_service_account_token(),
+                    raise_for_status=True,
                 )
 
             match response.status_code:
@@ -285,7 +289,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 "",
             )
             logger.error(f"Account create payment Error: {http_error}")
-            raise BusinessException(error_code, error_details)
+            raise BusinessException(error_code, error_details) from http_error
 
     @staticmethod
     def _build_payment_request(org_model: OrgModel, payment_info: dict, payment_method: str, mailing_address, **kwargs):
@@ -695,7 +699,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        check_auth(one_of_roles=ADMIN, org_id=org_id)
+        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
 
         login_option = AccountLoginOptionsModel(login_source=login_source, org_id=org_id)
         login_option.save()
@@ -710,7 +714,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        check_auth(one_of_roles=ADMIN, org_id=org_id)
+        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
 
         existing_login_option = AccountLoginOptionsModel.find_active_by_org_id(org_id)
         if existing_login_option is not None:

@@ -70,7 +70,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     url = Column(String(100), nullable=True)
 
     @classmethod
-    def find_by_code(cls, code):
+    def find_by_code(cls, code: str) -> ProductCode:
         """Find a Product Role Code instance that matches the code."""
         return cls.query.filter_by(code=code).one_or_none()
 

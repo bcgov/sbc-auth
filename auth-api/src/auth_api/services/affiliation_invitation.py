@@ -38,6 +38,7 @@ from auth_api.models.entity import Entity as EntityModel  # noqa: I005
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.services.entity import Entity as EntityService
+from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.services.flags import flags
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
@@ -95,14 +96,11 @@ class AffiliationInvitation:
         if not affiliation_invitation_dicts:
             return []
 
-        token = RestService.get_service_account_token(
-            config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
-        )
-
-        business_identifiers = [afi["business_identifier"] for afi in affiliation_invitation_dicts]
-
         business_entities = AffiliationInvitation._get_multiple_business_details(
-            business_identifiers=business_identifiers, token=token
+            business_identifiers=[afi["business_identifier"] for afi in affiliation_invitation_dicts],
+            token=RestService.get_service_account_token(
+                config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+            ),
         )
         result = []
 
@@ -506,32 +504,20 @@ class AffiliationInvitation:
     @staticmethod
     def _get_token_confirm_path(org_name, token, query_params=None):
         """Get the config for different email types."""
-        if flags.is_on("enable-new-magic-link-formatting-with-query-params", default=False):
-            # New query parameter based URL structure
-            params = {
-                "token": token,
-                "orgName": escape_wam_friendly_url(org_name),
-            }
+        # New query parameter based URL structure
+        params = {
+            "token": token,
+            "orgName": escape_wam_friendly_url(org_name),
+        }
 
-            # Add any additional query params
-            if query_params:
-                params.update(query_params)
+        # Add any additional query params
+        if query_params:
+            params.update(query_params)
 
-            # Point to new business registry project
-            app_url = current_app.config.get("BUSINESS_REGISTRY_URL") + "/"
-            # Build the URL with query parameters
-            token_confirm_url = f"{app_url}/affiliationInvitation/acceptToken?{urlencode(params)}"
-        else:
-            # Point to auth-web
-            app_url = current_app.config.get("WEB_APP_URL") + "/"
-            # Original URL structure
-            escape_url = escape_wam_friendly_url(org_name)
-            path = f"{escape_url}/affiliationInvitation/acceptToken"
-            token_confirm_url = f"{app_url}/{path}/{token}"
-
-            if query_params:
-                token_confirm_url += f"?{urlencode(query_params)}"
-
+        # Point to new business registry project
+        app_url = current_app.config.get("BUSINESS_REGISTRY_URL") + "/"
+        # Build the URL with query parameters
+        token_confirm_url = f"{app_url}/affiliationInvitation/acceptToken?{urlencode(params)}"
         return token_confirm_url
 
     @staticmethod
@@ -700,6 +686,8 @@ class AffiliationInvitation:
             affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=None)
             affiliation_model.save()
             entity_model = EntityModel.find_by_entity_id(entity_id)
+            if flags.is_on("enable-entity-mapping", default=False) is True:
+                EntityMappingService.populate_entity_mapping_for_identifier(entity_model.business_identifier)
             publish_affiliation_event(
                 QueueMessageTypes.BUSINESS_AFFILIATED.value, org_id, entity_model.business_identifier
             )

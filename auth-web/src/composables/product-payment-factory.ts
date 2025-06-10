@@ -62,11 +62,11 @@ export const useProductPayment = (props = null, state = null) => {
             </ul>
           </p>
           <p>
-            Once your account is created, you can use your account number to add BC Registries and Online Services as a
+            Once your account is created, you can use your account number to add BC Registries as a
             payee in your financial institution's online banking system to make payments.
           </p>
           <p class="mb-0">
-            BC Registries and Online Services <strong>must receive payment in full</strong> 
+            BC Registries <strong>must receive payment in full</strong> 
             from your financial institution prior to the release of items purchased through this service. 
             Receipt of an online banking payment generally takes 3-4 days from when you make the payment with your 
             financial institution.

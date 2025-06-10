@@ -343,7 +343,7 @@ def test_delete_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert dictionary["message"] == "The requested affiliation invitation could not be found."
 
 
-def test_delete_accepted_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock):
+def test_delete_accepted_affiliation_inv(client, jwt, session, keycloak_mock, business_mock, entity_mapping_mock):
     """Assert that an accepted affiliation invitation can be deleted."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(
         client, jwt, session, keycloak_mock
@@ -606,7 +606,7 @@ def test_expire_affiliation_invitation_exclude_to_org(client, jwt, session, keyc
     assert_masked_email(TestContactInfo.contact1["email"], result_json["recipientEmail"])
 
 
-def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock):
+def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, entity_mapping_mock):
     """Assert that an affiliation invitation can be accepted."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(
         client, jwt, session, keycloak_mock
@@ -700,7 +700,7 @@ def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, busine
     assert_masked_email(TestContactInfo.contact1["email"], result_json["affiliationInvitations"][0]["recipientEmail"])
 
 
-def test_get_affiliation_invitations_deleted(client, jwt, session, keycloak_mock, business_mock):
+def test_get_affiliation_invitations_deleted(client, jwt, session, keycloak_mock, business_mock, entity_mapping_mock):
     """Assert that affiliation invitations that are soft deleted are not returned."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(
         client, jwt, session, keycloak_mock
@@ -861,7 +861,7 @@ def setup_additional_affiliation_invitation_data(
     return new_org_ids, new_entity_business_identifiers
 
 
-def test_authorize_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock):
+def test_authorize_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, entity_mapping_mock):
     """Assert that an affiliation invitation (type REQUEST) can be authorized."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(
         client, jwt, session, keycloak_mock

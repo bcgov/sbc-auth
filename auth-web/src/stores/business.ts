@@ -13,7 +13,6 @@ import {
 import {
   AffiliationResponse,
   CreateRequestBody as CreateAffiliationRequestBody,
-  CreateNRAffiliationRequestBody,
   NameRequestResponse
 } from '@/models/affiliation'
 import { AmalgamationTypes, FilingTypes } from '@bcrs-shared-components/enums'
@@ -300,11 +299,6 @@ export const useBusinessStore = defineStore('business', () => {
 
     // Create an affiliation between implicit org and requested business
     return OrgService.createAffiliation(currentOrganization.value.id, requestBody)
-  }
-
-  async function addNameRequest (requestBody: CreateNRAffiliationRequestBody) {
-    // Create an affiliation between implicit org and requested business
-    return OrgService.createNRAffiliation(currentOrganization.value.id, requestBody)
   }
 
   async function createNamedBusiness ({ filingType, business }: { filingType: FilingTypes, business: Business}) {
@@ -601,7 +595,6 @@ export const useBusinessStore = defineStore('business', () => {
     loadBusiness,
     loadFiling,
     addBusiness,
-    addNameRequest,
     createNamedBusiness,
     searchBusiness,
     searchBusinessIndex,

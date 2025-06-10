@@ -1494,7 +1494,7 @@ def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylin
     assert dictionary["membershipTypeCode"] == "COORDINATOR"
 
 
-def test_add_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_add_affiliation(client, jwt, session, keycloak_mock, entity_mapping_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post(
@@ -1584,7 +1584,7 @@ def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):
         assert schema_utils.validate(rv.json, "exception")[0]
 
 
-def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock, nr_mock):
+def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock, nr_mock, entity_mapping_mock):
     """Assert that an affiliation can be added by staff."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post(
@@ -1627,7 +1627,7 @@ def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock,
     assert affiliations["entities"][0]["affiliations"][0]["certifiedByName"] == certified_by_name
 
 
-def test_get_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_get_affiliation(client, jwt, session, keycloak_mock, entity_mapping_mock):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post(
@@ -1662,7 +1662,9 @@ def test_get_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable
     assert dictionary["business"]["businessIdentifier"] == business_identifier
 
 
-def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_get_affiliation_without_authrized(
+    client, jwt, session, keycloak_mock, entity_mapping_mock
+):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post(
@@ -1693,6 +1695,18 @@ def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock):
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
     rv = client.get(f"/api/v1/orgs/{org_id}/affiliations/{business_identifier}", headers=headers)
     assert rv.status_code == HTTPStatus.UNAUTHORIZED
+
+    headers = factory_auth_header(
+        jwt=jwt, claims=TestJwtClaims.get_test_real_user(sub="a8098c1a-f86e-11da-bd1a-00112444be1d")
+    )
+    rv = client.get(f"/api/v1/orgs/{org_id}/affiliations/search", headers=headers)
+    assert rv.status_code == HTTPStatus.FORBIDDEN
+
+    headers = factory_auth_header(
+        jwt=jwt, claims=TestJwtClaims.get_test_real_user(sub="a8098c1a-f86e-11da-bd1a-00112444be1d")
+    )
+    rv = client.get(f"/api/v1/orgs/{org_id}/affiliations?new=true", headers=headers)
+    assert rv.status_code == HTTPStatus.FORBIDDEN
 
 
 def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -1902,7 +1916,7 @@ def test_add_bcol_linked_org_different_name(client, jwt, session, keycloak_mock)
     ],
 )
 def test_new_business_affiliation(
-    client, jwt, session, keycloak_mock, mocker, test_name, nr_status, payment_status, error
+    client, jwt, session, keycloak_mock, entity_mapping_mock, mocker, test_name, nr_status, payment_status, error
 ):
     """Assert that an NR can be affiliated to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -2685,7 +2699,7 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
                 ("T12dfhsff1", CorpType.BC.value, CorpType.TMP.value, "NR 1234567"),
                 ("T12dfhsff2", CorpType.GP.value, CorpType.RTMP.value, "NR 1234566"),
             ],
-            [("NR 1234567", "AML"), ("NR 1234566", "AML")],
+            [("NR 1234567"), ("NR 1234566")],
             [],
         ),
         (
@@ -2712,7 +2726,7 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
                 ("T12dfhsff3", CorpType.BC.value, CorpType.TMP.value, "NR 1234567"),
                 ("T12dfhsff4", CorpType.GP.value, CorpType.RTMP.value, "NR 1234566"),
             ],
-            [("NR 1234567", "AML"), ("NR 1234566", "AML"), ("NR 1234565", "AML")],
+            [("NR 1234567"), ("NR 1234566"), ("NR 1234565")],
             [datetime(2021, 1, 1), datetime(2022, 2, 1)],
         ),
     ],
@@ -2793,36 +2807,37 @@ def test_get_org_affiliations(
     )
     mocker.patch("auth_api.services.rest_service.RestService.get_service_account_token", return_value="token")
 
-    rv = client.get(
-        "/api/v1/orgs/{}/affiliations/search".format(org_id), headers=headers, content_type="application/json"
-    )
+    for search_type in ["affiliations/search", "affiliations?new=true"]:
+        rv = client.get(
+            "/api/v1/orgs/{}/{}".format(org_id, search_type), headers=headers, content_type="application/json"
+        )
 
-    assert rv.status_code == HTTPStatus.OK
-    assert rv.json.get("entities", None) and isinstance(rv.json["entities"], list)
-    assert len(rv.json["entities"]) == len(businesses) + len(drafts) + len(nrs)
+        assert rv.status_code == HTTPStatus.OK
+        assert rv.json.get("entities", None) and isinstance(rv.json["entities"], list)
+        assert len(rv.json["entities"]) == len(businesses) + len(drafts) + len(nrs)
 
-    drafts_nr_numbers = [data[3] for data in drafts_with_nrs]
-    for entity in rv.json["entities"]:
-        if entity["legalType"] == CorpType.NR.value:
-            assert entity["nameRequest"]["nrNum"] not in drafts_nr_numbers
+        drafts_nr_numbers = [data[3] for data in drafts_with_nrs]
+        for entity in rv.json["entities"]:
+            if entity["legalType"] == CorpType.NR.value:
+                assert entity["nameRequest"]["nrNum"] not in drafts_nr_numbers
 
-        if draft_type := entity.get("draftType", None):
-            expected = (
-                CorpType.RTMP.value
-                if entity["legalType"] in [CorpType.SP.value, CorpType.GP.value]
-                else CorpType.TMP.value
-            )
-            if entity.get("nameRequest", {}).get("requestActionCd") == NRActionCodes.AMALGAMATE.value:
-                expected = CorpType.ATMP.value
+            if draft_type := entity.get("draftType", None):
+                expected = (
+                    CorpType.RTMP.value
+                    if entity["legalType"] in [CorpType.SP.value, CorpType.GP.value]
+                    else CorpType.TMP.value
+                )
+                if entity.get("nameRequest", {}).get("requestActionCd") == NRActionCodes.AMALGAMATE.value:
+                    expected = CorpType.ATMP.value
 
-            assert draft_type == expected
+                assert draft_type == expected
 
-    # Assert that the entities are sorted in descending order of creation dates
-    if test_name == "affiliations_order" and len(dates) > 0:
-        created_order = [affiliation["nameRequest"].get("created") for affiliation in rv.json["entities"]]
-        dates.sort()
-        date_iso = [date.isoformat() for date in dates]
-        assert date_iso == created_order
+        # Assert that the entities are sorted in descending order of creation dates
+        if test_name == "affiliations_order" and len(dates) > 0:
+            created_order = [affiliation["nameRequest"].get("created") for affiliation in rv.json["entities"]]
+            dates.sort()
+            date_iso = [date.isoformat() for date in dates]
+            assert date_iso == created_order
 
 
 def _create_orgs_entities_and_affiliations(client, jwt, count):
