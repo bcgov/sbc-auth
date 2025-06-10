@@ -14,9 +14,9 @@
 """Service to invoke Rest services."""
 from typing import Dict, List, Tuple
 
+from flask import current_app
 from sqlalchemy import and_, select
 from sqlalchemy.exc import SQLAlchemyError
-from structured_logging import StructuredLogging
 
 from auth_api.models import db
 from auth_api.models.membership import Membership as MembershipModel
@@ -28,8 +28,6 @@ from ..utils.cache import cache
 from ..utils.enums import OrgStatus, Status
 from ..utils.roles import VALID_ORG_STATUSES
 from ..utils.user_context import UserContext, user_context
-
-logger = StructuredLogging.get_logger()
 
 
 class Permissions:  # pylint: disable=too-few-public-methods
@@ -58,7 +56,7 @@ class Permissions:  # pylint: disable=too-few-public-methods
                 cache.set(key, val)
 
         except SQLAlchemyError as e:
-            logger.info("Error on building cache %s", e)
+            current_app.logger.info("Error on building cache %s", e)
 
     @staticmethod
     def get_permissions_for_membership(

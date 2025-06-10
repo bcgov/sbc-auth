@@ -16,7 +16,6 @@ from flask import current_app
 from requests import HTTPError
 from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.dialects.postgresql import array
-from structured_logging import StructuredLogging
 
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
@@ -25,8 +24,6 @@ from auth_api.models.entity import Entity
 from auth_api.models.entity_mapping import EntityMapping
 from auth_api.services.rest_service import RestService
 from auth_api.utils.user_context import UserContext, user_context
-
-logger = StructuredLogging.get_logger()
 
 
 class EntityMappingService:
@@ -202,9 +199,9 @@ class EntityMappingService:
                 for base in affiliation_bases
                 if not base.identifier.startswith("T") and not base.identifier.startswith("NR")
             ]
-            logger.debug(f"T identifiers ({len(t_identifiers)}): {', '.join(t_identifiers)}")
-            logger.debug(f"NR identifiers ({len(nr_identifiers)}): {', '.join(nr_identifiers)}")
-            logger.debug(f"Other identifiers ({len(other_identifiers)}): {', '.join(other_identifiers)}")
+            current_app.logger.debug(f"T identifiers ({len(t_identifiers)}): {', '.join(t_identifiers)}")
+            current_app.logger.debug(f"NR identifiers ({len(nr_identifiers)}): {', '.join(nr_identifiers)}")
+            current_app.logger.debug(f"Other identifiers ({len(other_identifiers)}): {', '.join(other_identifiers)}")
 
         return affiliation_bases
 
@@ -243,7 +240,7 @@ class EntityMappingService:
             should_update = True
 
         if should_update:
-            logger.debug(
+            current_app.logger.debug(
                 f"Updating entity mapping {existing_mapping.id} with: "
                 f"business_identifier: {business_identifier}, "
                 f"bootstrap_identifier: {bootstrap_identifier}, "
@@ -293,7 +290,7 @@ class EntityMappingService:
         else:
             # Handle not possible cases like NR, no TEMP and BUSINESS IDENTIFIER
             # Log warning instead of raising an exception incase we have some of these weird cases.
-            logger.warning(
+            current_app.logger.warning(
                 f"Invalid identifier combination provided: {nr_identifier},{bootstrap_identifier},{business_identifier}"
             )
             return [
@@ -334,7 +331,7 @@ class EntityMappingService:
             bootstrap_identifier=bootstrap_identifier,
             business_identifier=business_identifier,
         )
-        logger.debug(
+        current_app.logger.debug(
             f"Creating new entity mapping with: "
             f"business_identifier: {business_identifier}, "
             f"bootstrap_identifier: {bootstrap_identifier}, "
@@ -351,7 +348,7 @@ class EntityMappingService:
     @staticmethod
     def fetch_entity_mapping_details(identifier: str):
         """Return affiliation details by calling the source api."""
-        logger.info(f"Fetching entity mapping for identifier: {identifier}")
+        current_app.logger.info(f"Fetching entity mapping for identifier: {identifier}")
         token = RestService.get_service_account_token(
             config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
         )
@@ -362,6 +359,6 @@ class EntityMappingService:
             return response.json().get("entityDetails")
         except HTTPError as http_error:
             # If this fails, we should still allow affiliation search to continue.
-            logger.error("Failed to get affiliations mappings for identifier: %s", identifier)
-            logger.error(http_error)
+            current_app.logger.error("Failed to get affiliations mappings for identifier: %s", identifier)
+            current_app.logger.error(http_error)
         return None
