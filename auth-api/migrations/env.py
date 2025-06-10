@@ -1,6 +1,8 @@
 from __future__ import with_statement
 
+import logging
 import re
+from logging.config import fileConfig
 
 from alembic import context
 
@@ -14,6 +16,11 @@ from sqlalchemy import engine_from_config, pool
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
+fileConfig(config.config_file_name)
+logger = logging.getLogger("alembic.env")
 
 config.set_main_option("sqlalchemy.url", current_app.config.get("SQLALCHEMY_DATABASE_URI"))
 target_metadata = current_app.extensions["migrate"].db.metadata
