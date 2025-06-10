@@ -94,7 +94,6 @@ class EntityMappingService:
         )
         nr_in_org = filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier))
 
-        # CTE to identify NRs that are part of TEMP+NR pairs for this org
         paired_nrs_cte = (
             db.session.query(filtered_mappings.c.nr_identifier)
             .filter(
@@ -170,7 +169,6 @@ class EntityMappingService:
                     filtered_mappings.c.nr_identifier.is_(None),
                     filtered_mappings.c.nr_identifier.not_in(select(complete_mappings_cte.c.nr_identifier)),
                 ),
-                # Exclude empty identifier arrays (cross-org contamination)
                 identifiers_case != func.cast(array([]), db.ARRAY(db.String)),
             )
         ).subquery()
