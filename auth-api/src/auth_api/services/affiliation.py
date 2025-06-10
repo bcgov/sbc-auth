@@ -510,12 +510,27 @@ class Affiliation:
                 return ordered.get(identifier, datetime.datetime.min)
 
             combined.sort(key=sort_key, reverse=True)
-
+            Affiliation._handle_affiliation_debug(affiliation_bases, combined)
             return combined
         except ServiceUnavailableException as err:
             logger.debug(err)
             logger.debug("Failed to get affiliations details:  %s", affiliation_bases)
             raise ServiceUnavailableException("Failed to get affiliation details") from err
+
+    @staticmethod
+    def _handle_affiliation_debug(affiliation_bases, combined):
+        """Enable affiliation debug."""
+        if current_app.config.get("AFFILIATION_DEBUG") is False:
+            return
+        base_identifiers = {base.identifier for base in affiliation_bases}
+        combined_identifiers = set()
+        for item in combined:
+            identifier = item.get("identifier") or item.get("nameRequest", {}).get("nrNum")
+            if identifier:
+                combined_identifiers.add(identifier)
+        missing_identifiers = base_identifiers - combined_identifiers
+        if missing_identifiers:
+            logger.warning(f"Identifiers missing from combined results: {missing_identifiers}")
 
     @staticmethod
     def _group_details(details):

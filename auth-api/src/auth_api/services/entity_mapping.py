@@ -56,16 +56,16 @@ class EntityMappingService:
             - EG. For Temp Org 1, NR Org2
             - Temp would show on Org 1, NR would show on Org2
         """
+        org_id = int(org_id or -1)
+
         paginate_for_non_search = not any(
             [search_details.identifier, search_details.status, search_details.name, search_details.type]
         )
 
-        org_id_int = int(org_id or -1)
-
         affiliated_identifiers_cte = (
             db.session.query(Entity.business_identifier)
             .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
-            .filter(AffiliationModel.org_id == org_id_int)
+            .filter(AffiliationModel.org_id == org_id)
             .cte("affiliated_identifiers")
         )
 
@@ -85,73 +85,45 @@ class EntityMappingService:
             .subquery()
         )
 
-        priority_case = case(
-            (filtered_mappings.c.business_identifier.isnot(None), 1),
-            (
-                and_(
-                    filtered_mappings.c.bootstrap_identifier.isnot(None), filtered_mappings.c.nr_identifier.isnot(None)
-                ),
-                2,
-            ),
-            (filtered_mappings.c.bootstrap_identifier.isnot(None), 3),
-            (filtered_mappings.c.nr_identifier.isnot(None), 4),
-            else_=5,
-        ).label("priority")
+        business_in_org = filtered_mappings.c.business_identifier.in_(
+            select(affiliated_identifiers_cte.c.business_identifier)
+        )
+        bootstrap_in_org = filtered_mappings.c.bootstrap_identifier.in_(
+            select(affiliated_identifiers_cte.c.business_identifier)
+        )
+        nr_in_org = filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier))
+
+        paired_nrs_cte = (
+            db.session.query(filtered_mappings.c.nr_identifier)
+            .filter(
+                filtered_mappings.c.bootstrap_identifier.isnot(None),
+                filtered_mappings.c.nr_identifier.isnot(None),
+                filtered_mappings.c.bootstrap_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
+                filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
+            )
+            .cte("paired_nrs")
+        )
 
         identifiers_case = case(
+            # Business identifier takes priority
+            (business_in_org, array([filtered_mappings.c.business_identifier])),
+            # TEMP + NR both in org
             (
-                and_(
-                    filtered_mappings.c.business_identifier.isnot(None),
-                    filtered_mappings.c.business_identifier.in_(
-                        select(affiliated_identifiers_cte.c.business_identifier)
-                    ),
-                ),
-                array([filtered_mappings.c.business_identifier]),
+                and_(bootstrap_in_org, nr_in_org),
+                array([filtered_mappings.c.bootstrap_identifier, filtered_mappings.c.nr_identifier]),
             ),
+            # TEMP only in org
+            (bootstrap_in_org, array([filtered_mappings.c.bootstrap_identifier])),
+            # NR only in org (but exclude if this NR is already part of a TEMP+NR pair)
             (
                 and_(
-                    filtered_mappings.c.bootstrap_identifier.isnot(None), filtered_mappings.c.nr_identifier.isnot(None)
-                ),
-                case(
-                    (
-                        and_(
-                            filtered_mappings.c.bootstrap_identifier.in_(
-                                select(affiliated_identifiers_cte.c.business_identifier)
-                            ),
-                            filtered_mappings.c.nr_identifier.in_(
-                                select(affiliated_identifiers_cte.c.business_identifier)
-                            ),
-                        ),
-                        array([filtered_mappings.c.bootstrap_identifier, filtered_mappings.c.nr_identifier]),
-                    ),
-                    (
-                        filtered_mappings.c.bootstrap_identifier.in_(
-                            select(affiliated_identifiers_cte.c.business_identifier)
-                        ),
-                        array([filtered_mappings.c.bootstrap_identifier]),
-                    ),
-                    (
-                        filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
-                        array([filtered_mappings.c.nr_identifier]),
-                    ),
-                ),
-            ),
-            (
-                and_(
-                    filtered_mappings.c.nr_identifier.isnot(None),
-                    filtered_mappings.c.nr_identifier.in_(select(affiliated_identifiers_cte.c.business_identifier)),
+                    nr_in_org,
+                    or_(filtered_mappings.c.bootstrap_identifier.is_(None), ~bootstrap_in_org),
+                    filtered_mappings.c.nr_identifier.not_in(select(paired_nrs_cte.c.nr_identifier)),
                 ),
                 array([filtered_mappings.c.nr_identifier]),
             ),
-            (
-                and_(
-                    filtered_mappings.c.bootstrap_identifier.isnot(None),
-                    filtered_mappings.c.bootstrap_identifier.in_(
-                        select(affiliated_identifiers_cte.c.business_identifier)
-                    ),
-                ),
-                array([filtered_mappings.c.bootstrap_identifier]),
-            ),
+            else_=func.cast(array([]), db.ARRAY(db.String)),
         ).label("identifiers")
 
         created_date_case = case(
@@ -161,9 +133,7 @@ class EntityMappingService:
         ).label("created_on")
 
         row_number_column = (
-            func.row_number()
-            .over(partition_by=identifiers_case, order_by=(priority_case.asc(), created_date_case.desc()))
-            .label("row_number")
+            func.row_number().over(partition_by=identifiers_case, order_by=created_date_case.desc()).label("row_number")
         )
 
         complete_mappings_cte = (
@@ -174,8 +144,7 @@ class EntityMappingService:
                 filtered_mappings.c.business_identifier.isnot(None),
                 filtered_mappings.c.bootstrap_identifier.isnot(None),
                 filtered_mappings.c.nr_identifier.isnot(None),
-                AffiliationModel.org_id == org_id_int,
-                Entity.is_loaded_lear.is_(True),
+                AffiliationModel.org_id == org_id,
             )
             .cte("complete_mappings")
         )
@@ -193,13 +162,13 @@ class EntityMappingService:
             )
             .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
             .filter(
-                AffiliationModel.org_id == org_id_int,
-                Entity.is_loaded_lear.is_(True),
+                AffiliationModel.org_id == org_id,
                 or_(
                     filtered_mappings.c.business_identifier.isnot(None),
                     filtered_mappings.c.nr_identifier.is_(None),
                     filtered_mappings.c.nr_identifier.not_in(select(complete_mappings_cte.c.nr_identifier)),
                 ),
+                identifiers_case != func.cast(array([]), db.ARRAY(db.String)),
             )
         ).subquery()
 
@@ -212,8 +181,7 @@ class EntityMappingService:
         if paginate_for_non_search:
             query = query.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
 
-        data = query.all()
-        return data
+        return query.all()
 
     @staticmethod
     def populate_affiliation_base(org_id: int, search_details: AffiliationSearchDetails):
