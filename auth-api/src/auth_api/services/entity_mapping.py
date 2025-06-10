@@ -56,8 +56,7 @@ class EntityMappingService:
             - EG. For Temp Org 1, NR Org2
             - Temp would show on Org 1, NR would show on Org2
         """
-        if org_id is None:
-            return []
+        org_id = int(org_id or -1)
 
         paginate_for_non_search = not any(
             [search_details.identifier, search_details.status, search_details.name, search_details.type]
