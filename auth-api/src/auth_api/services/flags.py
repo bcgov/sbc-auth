@@ -19,11 +19,8 @@ from ldclient import get as ldclient_get  # noqa: I001
 from ldclient import set_config as ldclient_set_config
 from ldclient.config import Config  # noqa: I005
 from ldclient.integrations import Files
-from structured_logging import StructuredLogging
 
 from auth_api.models import User
-
-logger = StructuredLogging.get_logger()
 
 
 class Flags:
@@ -72,7 +69,7 @@ class Flags:
                 self.init_app(current_app)
                 client = current_app.extensions["featureflags"]
             except KeyError:
-                logger.warning("Couldn't retrieve launch darkly client from extensions.")
+                current_app.logger.warning("Couldn't retrieve launch darkly client from extensions.")
                 client = None
 
         return client

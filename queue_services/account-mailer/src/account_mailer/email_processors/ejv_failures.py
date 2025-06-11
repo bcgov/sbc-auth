@@ -17,7 +17,6 @@ import base64
 
 from flask import current_app
 from jinja2 import Template
-from structured_logging import StructuredLogging
 
 from account_mailer.email_processors import generate_template
 from account_mailer.enums import SubjectType, TemplateType
@@ -25,15 +24,13 @@ from account_mailer.enums import SubjectType, TemplateType
 # from account_mailer.services import google_store
 from account_mailer.services import minio_service
 
-logger = StructuredLogging.get_logger()
-
 
 def process(email_msg: dict) -> dict:
     """Build the email for JV failures."""
-    logger.debug("ejv_failures: %s", email_msg)
+    current_app.logger.debug("ejv_failures: %s", email_msg)
     # fill in template
     failed_jv_file_name = email_msg.get("fileName")
-    # TODO update minioLocation
+    # NEED TO update minioLocation
     file_location = email_msg.get("minioLocation")
     bcol_admin_email = current_app.config["BCOL_ADMIN_EMAIL"]
     feedback_attachment = _get_jv_file(file_location, failed_jv_file_name)

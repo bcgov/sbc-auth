@@ -21,11 +21,8 @@ from flask import current_app
 from google.auth.compute_engine import Credentials
 from google.auth.transport import requests
 from google.cloud import storage
-from structured_logging import StructuredLogging
 
 from auth_api.utils.constants import AFFIDAVIT_FOLDER_NAME
-
-logger = StructuredLogging.get_logger()
 
 
 class GoogleStoreService:
@@ -53,18 +50,18 @@ class GoogleStoreService:
 
             if isinstance(creds, Credentials):
                 auth_request = requests.Request()
-                logger.info(f"Initial credentials: {creds.service_account_email}")
+                current_app.logger.info(f"Initial credentials: {creds.service_account_email}")
                 if not creds.token:
-                    logger.info("Refreshing stale credentials")
+                    current_app.logger.info("Refreshing stale credentials")
                     creds.refresh(auth_request)
             else:
-                logger.info("Using local service account credentials")
+                current_app.logger.info("Using local service account credentials")
 
-            logger.info(f"Using token expiring at: {creds.expiry}")
+            current_app.logger.info(f"Using token expiring at: {creds.expiry}")
             return creds
 
         except Exception as e:
-            logger.error(f"Error getting credentials: {str(e)}")
+            current_app.logger.error(f"Error getting credentials: {str(e)}")
             raise
 
     @staticmethod
@@ -93,7 +90,7 @@ class GoogleStoreService:
         Raises:
             ValueError: For invalid extensions or content mismatch.
         """
-        logger.debug(f"Creating signed URL for {file_name}")
+        current_app.logger.debug(f"Creating signed URL for {file_name}")
 
         # Validate extension
         file_extension = GoogleStoreService._validate_file_extension(file_name)
@@ -120,9 +117,9 @@ class GoogleStoreService:
             return {"preSignedUrl": signed_url, "key": key}
 
         except Exception as e:
-            logger.error(f"Signing failed: {str(e)}")
-            logger.error(f"Service Account: {credentials.service_account_email}")
-            logger.error(f"Token valid: {credentials.valid}")
+            current_app.logger.error(f"Signing failed: {str(e)}")
+            current_app.logger.error(f"Service Account: {credentials.service_account_email}")
+            current_app.logger.error(f"Token valid: {credentials.valid}")
             raise
 
     @staticmethod
@@ -136,7 +133,7 @@ class GoogleStoreService:
         Returns:
             str: A signed URL for downloading the file.
         """
-        logger.debug("Creating signed URL for download.")
+        current_app.logger.debug("Creating signed URL for download.")
         credentials = GoogleStoreService._get_signing_credentials()
 
         client = storage.Client()
@@ -157,7 +154,7 @@ class GoogleStoreService:
             return signed_url
 
         except Exception as e:
-            logger.error(f"Signing failed: {str(e)}")
-            logger.error(f"Service Account: {credentials.service_account_email}")
-            logger.error(f"Token valid: {credentials.valid}")
+            current_app.logger.error(f"Signing failed: {str(e)}")
+            current_app.logger.error(f"Service Account: {credentials.service_account_email}")
+            current_app.logger.error(f"Token valid: {credentials.valid}")
             raise

@@ -21,7 +21,6 @@ from typing import Dict, List
 import aiohttp
 import requests
 from flask import current_app
-from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -37,8 +36,6 @@ from auth_api.utils.roles import Role
 from auth_api.utils.user_context import UserContext, user_context
 
 from .keycloak_user import KeycloakUser
-
-logger = StructuredLogging.get_logger()
 
 
 class KeycloakService:
@@ -231,7 +228,9 @@ class KeycloakService:
             try:
                 KeycloakService.remove_user_from_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
             except Exception as err:
-                logger.error(f"Error removing user {user_from_context.sub} from account holders group: {err}")
+                current_app.logger.error(
+                    f"Error removing user {user_from_context.sub} from account holders group: {err}"
+                )
 
     @staticmethod
     @user_context
@@ -249,7 +248,7 @@ class KeycloakService:
         add_groups = [kg for kg in kgs if kg.group_action == KeycloakGroupActions.ADD_TO_GROUP.value]
         remove_groups = [kg for kg in kgs if kg.group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value]
         for keycloak_group_subscription in add_groups + remove_groups:
-            logger.debug(
+            current_app.logger.debug(
                 f"Action: {keycloak_group_subscription.group_action} "
                 f"Product: {keycloak_group_subscription.product_code} "
                 f"Keycloak Group: {keycloak_group_subscription.group_name} "
@@ -294,13 +293,13 @@ class KeycloakService:
             tasks = await asyncio.gather(*tasks, return_exceptions=True)
             for task in tasks:
                 if isinstance(task, aiohttp.ClientConnectionError):
-                    logger.error("Connection error")
+                    current_app.logger.error("Connection error")
                 elif isinstance(task, asyncio.TimeoutError):
-                    logger.error("Timeout error")
+                    current_app.logger.error("Timeout error")
                 elif isinstance(task, Exception):
-                    logger.error(f"Exception: {task}")
+                    current_app.logger.error(f"Exception: {task}")
                 elif task.status != 204:
-                    logger.error(f"Returned non 204: {task.method} - {task.url} - {task.status}")
+                    current_app.logger.error(f"Returned non 204: {task.method} - {task.url} - {task.status}")
 
     @staticmethod
     def get_user_emails_with_role(role: str):

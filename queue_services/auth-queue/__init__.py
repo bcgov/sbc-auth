@@ -1,0 +1,1 @@
+"""Auth queue package."""

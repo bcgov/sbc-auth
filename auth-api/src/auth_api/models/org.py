@@ -17,11 +17,11 @@ Basic users will have an internal Org that is not created explicitly, but implic
 """
 from typing import List, Self
 
+from flask import current_app
 from sql_versioning import Versioned
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, desc, event, func, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import contains_eager, relationship
-from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -38,8 +38,6 @@ from .db import db
 from .invitation import Invitation, InvitationMembership
 from .org_status import OrgStatus
 from .org_type import OrgType
-
-logger = StructuredLogging.get_logger()
 
 
 class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
@@ -102,7 +100,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         if org_info:
 
             org = Org(**org_info)
-            logger.debug(f"Creating org from dictionary {org_info}")
+            current_app.logger.debug(f"Creating org from dictionary {org_info}")
             if org.type_code:
                 org.org_type = OrgType.get_type_for_code(org.type_code)
             else:

@@ -15,9 +15,9 @@
 from datetime import datetime
 from typing import Any, Dict, List
 
+from flask import current_app
 from sqlalchemy import and_, case, func, literal, or_
 from sqlalchemy.exc import SQLAlchemyError
-from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -62,7 +62,6 @@ from .authorization import check_auth
 from .task import Task as TaskService
 
 QUALIFIED_SUPPLIER_PRODUCT_CODES = [ProductCode.MHR_QSLN.value, ProductCode.MHR_QSHD.value, ProductCode.MHR_QSHM.value]
-logger = StructuredLogging.get_logger()
 
 
 class Product:
@@ -79,7 +78,7 @@ class Product:
             for product in product_list:
                 cache.set(product.code, product.type_code)
         except SQLAlchemyError as e:
-            logger.info("Error on building cache %s", e)
+            current_app.logger.info("Error on building cache %s", e)
 
     @staticmethod
     def find_product_type_by_code(code: str) -> str:
@@ -441,7 +440,7 @@ class Product:
     @staticmethod
     def update_product_subscription(product_sub_info: ProductSubscriptionInfo, is_new_transaction: bool = True):
         """Update Product Subscription."""
-        logger.debug("<update_product_subscription ")
+        current_app.logger.debug("<update_product_subscription ")
 
         product_subscription_id = product_sub_info.product_subscription_id
         is_approved = product_sub_info.is_approved
@@ -482,7 +481,7 @@ class Product:
         else:
             # continue but log error
             error_msg = f"No admin email record for org id {org_id}"
-            logger.error(error_msg)
+            current_app.logger.error(error_msg)
         if is_approved:
             ActivityLogPublisher.publish_activity(
                 Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value, name=product_model.description)
@@ -493,14 +492,14 @@ class Product:
                 product_model.parent_code, is_approved, is_hold, org_id, is_new_transaction
             )
 
-        logger.debug(">update_product_subscription ")
+        current_app.logger.debug(">update_product_subscription ")
 
     @staticmethod
     def approve_reject_parent_subscription(
         parent_product_code: int, is_approved: bool, is_hold: bool, org_id: int, is_new_transaction: bool = True
     ):
         """Approve or reject Parent Product Subscription."""
-        logger.debug("<approve_reject_parent_subscription ")
+        current_app.logger.debug("<approve_reject_parent_subscription ")
 
         product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_org_id_product_code(
             org_id=org_id, product_code=parent_product_code
@@ -544,12 +543,12 @@ class Product:
         else:
             # continue but log error
             error_msg = f"No admin email record for org id {org_id}"
-            logger.error(error_msg)
+            current_app.logger.error(error_msg)
         if is_approved:
             ActivityLogPublisher.publish_activity(
                 Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value, name=product_model.description)
             )
-        logger.debug(">approve_reject_parent_subscription ")
+        current_app.logger.debug(">approve_reject_parent_subscription ")
 
     @staticmethod
     def is_reapproved(product_sub_status: str, is_approved: bool, is_resubmitted: bool = False) -> bool:
@@ -568,7 +567,7 @@ class Product:
     @staticmethod
     def send_product_subscription_notification(product_notification_info: ProductNotificationInfo):
         """Send Approved product subscription notification to the user."""
-        logger.debug("<send_prod_subscription_notification")
+        current_app.logger.debug("<send_prod_subscription_notification")
 
         notification_type = get_product_notification_type(product_notification_info)
 
@@ -580,9 +579,9 @@ class Product:
 
         try:
             publish_to_mailer(notification_type, data=data)
-            logger.debug("<send_prod_subscription_notification>")
+            current_app.logger.debug("<send_prod_subscription_notification>")
         except Exception as e:  # noqa=B901
-            logger.error("<send_prod_subscription_notification failed")
+            current_app.logger.error("<send_prod_subscription_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
@@ -662,10 +661,10 @@ class Product:
     @staticmethod
     def update_users_products_keycloak_groups(user_ids: List[int]):
         """Update list of user's keycloak roles for product subscriptions."""
-        logger.debug("<update_users_products_keycloak_group ")
+        current_app.logger.debug("<update_users_products_keycloak_group ")
         kc_groups = Product.get_users_product_subscriptions_kc_groups(user_ids)
         KeycloakService.add_or_remove_product_keycloak_groups(kc_groups)
-        logger.debug(">update_users_products_keycloak_group ")
+        current_app.logger.debug(">update_users_products_keycloak_group ")
 
     @staticmethod
     def update_org_product_keycloak_groups(org_id: int):

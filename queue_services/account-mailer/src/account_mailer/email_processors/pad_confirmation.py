@@ -18,21 +18,16 @@ import datetime
 
 from auth_api.models import User as UserModel
 from auth_api.services.org import Org as OrgService
-from auth_api.services.rest_service import RestService
-from auth_api.utils.enums import AuthHeaderType, ContentType
 from flask import current_app
 from jinja2 import Template
-from structured_logging import StructuredLogging
 
 from account_mailer.email_processors import generate_template
-from account_mailer.services import google_store
-
-logger = StructuredLogging.get_logger()
+from account_mailer.pdf_utils import get_pdf_from_report_api, get_pdf_from_storage
 
 
 def process(email_msg: dict, token: str) -> dict:
     """Build the email for PAD Confirmation notification."""
-    logger.debug("email_msg notification: %s", email_msg)
+    current_app.logger.debug("email_msg notification: %s", email_msg)
     # fill in template
 
     username = email_msg.get("padTosAcceptedBy")
@@ -111,31 +106,8 @@ def _get_pad_confirmation_report_pdf(email_msg, token):
         "populatePageNumber": True,
     }
 
-    report_response = RestService.post(
-        endpoint=current_app.config.get("REPORT_API_BASE_URL"),
-        token=token,
-        auth_header_type=AuthHeaderType.BEARER,
-        content_type=ContentType.JSON,
-        data=pdf_payload,
-        raise_for_status=True,
-        additional_headers={"Accept": "application/pdf"},
-    )
-    pdf_attachment = None
-    if report_response.status_code != 200:
-        logger.error("Failed to get pdf")
-    else:
-        pdf_attachment = base64.b64encode(report_response.content)
-
-    return pdf_attachment
+    return get_pdf_from_report_api(pdf_payload, token)
 
 
 def _get_pdf(pad_tos_file_name: str):
-
-    read_pdf = None
-    store_blob = google_store.GoogleStoreService.download_file_from_bucket(
-        current_app.config["ACCOUNT_MAILER_BUCKET"], pad_tos_file_name
-    )
-    if store_blob:
-        read_pdf = base64.b64encode(store_blob)
-
-    return read_pdf
+    return get_pdf_from_storage(pad_tos_file_name)

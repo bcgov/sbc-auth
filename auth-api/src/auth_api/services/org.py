@@ -22,7 +22,6 @@ from flask import current_app, request
 from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
-from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -78,7 +77,6 @@ from .task import Task as TaskService
 from .validators.validator_response import ValidatorResponse
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
-logger = StructuredLogging.get_logger()
 
 
 class Org:  # pylint: disable=too-many-public-methods
@@ -103,7 +101,7 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def create_org(org_info: dict, user_id):
         """Create a new organization."""
-        logger.debug("<create_org ")
+        current_app.logger.debug("<create_org ")
         if Membership.has_nsf_or_suspended_membership(user_id):
             raise BusinessException(Error.NSF_OR_SUSPENDED_CLIENT_CANNOT_CREATE_ACCOUNT, None)
         # bcol is treated like an access type as well;so its outside the scheme
@@ -153,7 +151,7 @@ class Org:  # pylint: disable=too-many-public-methods
         payment_account_status, error = Org._create_payment_for_org(mailing_address, org, payment_info, True)
 
         if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
-            logger.warning(f"Account update payment Error: {error}")
+            current_app.logger.warning(f"Account update payment Error: {error}")
 
         # Send an email to staff to remind review the pending account
         is_staff_review_needed = access_type == AccessType.GOVN.value or (
@@ -169,7 +167,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         ProductService.update_org_product_keycloak_groups(org.id)
 
-        logger.info(f"<created_org org_id:{org.id}")
+        current_app.logger.info(f"<created_org org_id:{org.id}")
 
         return Org(org)
 
@@ -256,7 +254,7 @@ class Org:  # pylint: disable=too-many-public-methods
                     payment_account_status = PaymentAccountStatus.FAILED
                     error_payload = getattr(response, "json", lambda: {})()
                     error_code = error_payload.get("error", "UNKNOWN_ERROR")
-                    logger.error(f"Account create payment Error: {response.text}")
+                    current_app.logger.error(f"Account create payment Error: {response.text}")
 
             if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
                 payment_method_description = (
@@ -288,7 +286,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 ),
                 "",
             )
-            logger.error(f"Account create payment Error: {http_error}")
+            current_app.logger.error(f"Account create payment Error: {http_error}")
             raise BusinessException(error_code, error_details) from http_error
 
     @staticmethod
@@ -396,7 +394,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
     def update_org(self, org_info):  # pylint: disable=too-many-locals, too-many-statements
         """Update the passed organization with the new info."""
-        logger.debug("<update_org ")
+        current_app.logger.debug("<update_org ")
 
         has_org_updates: bool = False  # update the org table if this variable is set true
         has_status_changing: bool = False
@@ -467,18 +465,18 @@ class Org:  # pylint: disable=too-many-public-methods
                 mailing_address, self._model, payment_info, False
             )
             if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
-                logger.warning(f"Account update payment Error: {error}")
+                current_app.logger.warning(f"Account update payment Error: {error}")
         # Depreciated (use update_org_address instead)
         Org._publish_activity_on_mailing_address_change(org_model.id, current_org_name, mailing_address)
         Org._publish_activity_on_name_change(org_model.id, org_name)
 
         ProductService.update_org_product_keycloak_groups(org_model.id)
-        logger.debug(">update_org ")
+        current_app.logger.debug(">update_org ")
         return self
 
     def update_org_address(self, org_info):
         """Update or Create a new address for organization."""
-        logger.debug("<update_org_address ")
+        current_app.logger.debug("<update_org_address ")
         org_model: OrgModel = self._model
         mailing_address = org_info.get("mailingAddress", None)
         contacts = self._model.contacts
@@ -491,7 +489,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         self._model.update_org_from_dict(camelback2snake(org_info), exclude=EXCLUDED_FIELDS)
         Org._publish_activity_on_mailing_address_change(org_model.id, org_model.name, mailing_address)
-        logger.debug(">update_org_address ")
+        current_app.logger.debug(">update_org_address ")
         return self
 
     @staticmethod
@@ -564,7 +562,7 @@ class Org:  # pylint: disable=too-many-public-methods
         1 - If there is any active PAD transactions going on, then cannot be deleted.
 
         """
-        logger.debug(f"<Delete Org {org_id}")
+        current_app.logger.debug(f"<Delete Org {org_id}")
         # Affiliation uses OrgService, adding as local import
         # pylint:disable=import-outside-toplevel, cyclic-import
         from auth_api.services.affiliation import Affiliation as AffiliationService
@@ -612,7 +610,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         ProductService.update_org_product_keycloak_groups(org.id)
 
-        logger.debug("org Inactivated>")
+        current_app.logger.debug("org Inactivated>")
 
     @staticmethod
     def _delete_pay_account(org_id):
@@ -624,7 +622,7 @@ class Org:  # pylint: disable=too-many-public-methods
             )
             pay_response.raise_for_status()
         except HTTPError as pay_err:
-            logger.info(pay_err)
+            current_app.logger.info(pay_err)
             response_json = pay_response.json()
             error_type = response_json.get("type")
             error: Error = Error[error_type] if error_type in Error.__members__ else Error.PAY_ACCOUNT_DEACTIVATE_ERROR
@@ -681,7 +679,7 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def get_login_options_for_org(org_id, allowed_roles: Tuple = None):
         """Get the payment settings for the given org."""
-        logger.debug("get_login_options(>")
+        current_app.logger.debug("get_login_options(>")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -694,7 +692,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def add_login_option(org_id, login_source):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
-        logger.debug(">add_login_option")
+        current_app.logger.debug(">add_login_option")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -709,7 +707,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def update_login_option(org_id, login_source):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
-        logger.debug(">update_login_option")
+        current_app.logger.debug(">update_login_option")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -737,7 +735,7 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def get_contacts(org_id):
         """Get the contacts for the given org."""
-        logger.debug("get_contacts>")
+        current_app.logger.debug("get_contacts>")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -751,7 +749,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def add_contact(org_id, contact_info):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
-        logger.debug(">add_contact")
+        current_app.logger.debug(">add_contact")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -767,14 +765,14 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.contact = contact
         contact_link.org = org
         contact_link.save()
-        logger.debug("<add_contact")
+        current_app.logger.debug("<add_contact")
 
         return ContactService(contact)
 
     @staticmethod
     def update_contact(org_id, contact_info):
         """Update the existing contact for this org."""
-        logger.debug(">update_contact ")
+        current_app.logger.debug(">update_contact ")
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -787,7 +785,7 @@ class Org:  # pylint: disable=too-many-public-methods
         contact = contact_link.contact
         contact.update_from_dict(**camelback2snake(contact_info))
         contact.save()
-        logger.debug("<update_contact ")
+        current_app.logger.debug("<update_contact ")
 
         # return the updated contact
         return ContactService(contact)
@@ -795,13 +793,13 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def delete_contact(org_id):
         """Delete the contact for this org."""
-        logger.debug(">delete_contact ")
+        current_app.logger.debug(">delete_contact ")
         org = OrgModel.find_by_org_id(org_id)
         if not org or not org.contacts:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         deleted_contact = Org.__delete_contact(org)
-        logger.debug("<delete_contact ")
+        current_app.logger.debug("<delete_contact ")
 
         return ContactService(deleted_contact)
 
@@ -909,7 +907,7 @@ class Org:  # pylint: disable=too-many-public-methods
             3) suspend it
 
         """
-        logger.debug("<change_org_status ")
+        current_app.logger.debug("<change_org_status ")
 
         user: UserModel = UserModel.find_by_jwt_token()
         org_model = self._model
@@ -933,13 +931,13 @@ class Org:  # pylint: disable=too-many-public-methods
                     value=suspension_reason_description,
                 )
             )
-        logger.debug("change_org_status>")
+        current_app.logger.debug("change_org_status>")
         return Org(org_model)
 
     @staticmethod
     def approve_or_reject(org_id: int, is_approved: bool, origin_url: str = None, task_action: str = None):
         """Mark the affidavit as approved or rejected."""
-        logger.debug("<find_affidavit_by_org_id ")
+        current_app.logger.debug("<find_affidavit_by_org_id ")
         # Get the org and check what's the current status
         org: OrgModel = OrgModel.find_by_org_id(org_id)
 
@@ -972,15 +970,15 @@ class Org:  # pylint: disable=too-many-public-methods
         else:
             # continue but log error
             error_msg = f"No admin email record for org id {org_id}"
-            logger.error(error_msg)
+            current_app.logger.error(error_msg)
 
-        logger.debug(">find_affidavit_by_org_id ")
+        current_app.logger.debug(">find_affidavit_by_org_id ")
         return Org(org)
 
     @staticmethod
     def send_staff_review_account_reminder(relationship_id, task_relationship_type=TaskRelationshipType.ORG.value):
         """Send staff review account reminder notification."""
-        logger.debug("<send_staff_review_account_reminder")
+        current_app.logger.debug("<send_staff_review_account_reminder")
         user: UserModel = UserModel.find_by_jwt_token()
         recipient = current_app.config.get("STAFF_ADMIN_EMAIL")
         # Get task id that is related with the task. Task Relationship Type can be ORG, PRODUCT etc.
@@ -1002,15 +1000,15 @@ class Org:  # pylint: disable=too-many-public-methods
         }
         try:
             publish_to_mailer(QueueMessageTypes.STAFF_REVIEW_ACCOUNT.value, data=data)
-            logger.debug("<send_staff_review_account_reminder")
+            current_app.logger.debug("<send_staff_review_account_reminder")
         except Exception as e:  # noqa=B901
-            logger.error("<send_staff_review_account_reminder failed")
+            current_app.logger.error("<send_staff_review_account_reminder failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
     def send_approved_rejected_notification(receipt_admin_emails, org_name, org_id, org_status: OrgStatus, origin_url):
         """Send Approved/Rejected notification to the user."""
-        logger.debug("<send_approved_rejected_notification")
+        current_app.logger.debug("<send_approved_rejected_notification")
 
         if org_status == OrgStatus.ACTIVE.value:
             notification_type = QueueMessageTypes.NON_BCSC_ORG_APPROVED_NOTIFICATION.value
@@ -1022,9 +1020,9 @@ class Org:  # pylint: disable=too-many-public-methods
         data = {"accountId": org_id, "emailAddresses": receipt_admin_emails, "contextUrl": app_url, "orgName": org_name}
         try:
             publish_to_mailer(notification_type, data=data)
-            logger.debug("<send_approved_rejected_notification")
+            current_app.logger.debug("<send_approved_rejected_notification")
         except Exception as e:  # noqa=B901
-            logger.error("<send_approved_rejected_notification failed")
+            current_app.logger.error("<send_approved_rejected_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
@@ -1032,7 +1030,7 @@ class Org:  # pylint: disable=too-many-public-methods
         receipt_admin_email, org_name, org_id, org_status: OrgStatus, origin_url
     ):
         """Send Approved govm notification to the user."""
-        logger.debug("<send_approved_rejected_govm_govn_notification")
+        current_app.logger.debug("<send_approved_rejected_govm_govn_notification")
 
         if org_status == OrgStatus.ACTIVE.value:
             notification_type = QueueMessageTypes.GOVM_APPROVED_NOTIFICATION.value
@@ -1044,27 +1042,27 @@ class Org:  # pylint: disable=too-many-public-methods
         data = {"accountId": org_id, "emailAddresses": receipt_admin_email, "contextUrl": app_url, "orgName": org_name}
         try:
             publish_to_mailer(notification_type, data=data)
-            logger.debug("send_approved_rejected_govm_govn_notification>")
+            current_app.logger.debug("send_approved_rejected_govm_govn_notification>")
         except Exception as e:  # noqa=B901
-            logger.error("<send_approved_rejected_govm_govn_notification failed")
+            current_app.logger.error("<send_approved_rejected_govm_govn_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     def change_org_access_type(self, access_type):
         """Update the access type of the org."""
-        logger.debug("<change_org_access_type ")
+        current_app.logger.debug("<change_org_access_type ")
         org_model = self._model
         org_model.access_type = access_type
         org_model.save()
-        logger.debug("change_org_access_type>")
+        current_app.logger.debug("change_org_access_type>")
         return Org(org_model)
 
     def change_org_api_access(self, has_api_access):
         """Update the org API access."""
-        logger.debug("<change_org_api_access")
+        current_app.logger.debug("<change_org_api_access")
         org_model = self._model
         org_model.has_api_access = has_api_access
         org_model.save()
-        logger.debug("change_org_api_access>")
+        current_app.logger.debug("change_org_api_access>")
         return Org(org_model)
 
     def patch_org(self, action: str = None, request_json: Dict[str, any] = None):

@@ -255,9 +255,9 @@ Werkzeug = "^3.0.0"
 
 [package.source]
 type = "git"
-url = "https://github.com/bcgov/sbc-auth.git"
-reference = "feature-track-affiliations"
-resolved_reference = "d6019d5b6fa9db64b78d5b538e2ce71127ac3c58"
+url = "https://github.com/seeker25/sbc-auth.git"
+reference = "28735"
+resolved_reference = "55334d0036ca5483e299c61545d5436a1bd25034"
 subdirectory = "auth-api"
 
 [[package]]
@@ -928,6 +928,23 @@ files = [
 
 [package.dependencies]
 flake8 = "*"
+
+[[package]]
+name = "flake8-pyproject"
+version = "1.2.3"
+description = "Flake8 plug-in loading the configuration from pyproject.toml"
+optional = false
+python-versions = ">= 3.6"
+groups = ["dev"]
+files = [
+    {file = "flake8_pyproject-1.2.3-py3-none-any.whl", hash = "sha256:6249fe53545205af5e76837644dc80b4c10037e73a0e5db87ff562d75fb5bd4a"},
+]
+
+[package.dependencies]
+Flake8 = ">=5"
+
+[package.extras]
+dev = ["pyTest", "pyTest-cov"]
 
 [[package]]
 name = "flake8-quotes"
@@ -3663,4 +3680,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "871500274157e26662e0ae4e401ffa8db6a07164668cafc50ebbdf2aef1c61cf"
+content-hash = "2e3201e44871dc9777a185bf3d5d2a4cdaaaaabcbe58372c6e5fd8f52d5ba2fd"

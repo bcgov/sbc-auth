@@ -21,7 +21,6 @@ from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.utils.enums import QueueMessageTypes
-from structured_logging import StructuredLogging
 
 from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException
@@ -59,7 +58,6 @@ from .products import Product as ProductService
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 CONFIG = get_named_config()
-logger = StructuredLogging.get_logger()
 
 
 class Invitation:
@@ -140,13 +138,13 @@ class Invitation:
         # notify admin if staff adds team members
         if user_from_context.is_staff() and invitation_type == InvitationType.STANDARD.value:
             try:
-                logger.debug("<send_team_member_invitation_notification")
+                current_app.logger.debug("<send_team_member_invitation_notification")
                 data = {"accountId": org_id}
                 publish_to_mailer(notification_type=QueueMessageTypes.TEAM_MEMBER_INVITED.value, data=data)
-                logger.debug("send_team_member_invitation_notification>")
+                current_app.logger.debug("send_team_member_invitation_notification>")
             except Exception as e:  # noqa=B901
 
-                logger.error("<send_team_member_invitation_notification failed")
+                current_app.logger.error("<send_team_member_invitation_notification failed")
                 raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
         return Invitation(invitation)
 
@@ -261,11 +259,11 @@ class Invitation:
             "orgName": org_name,
         }
         try:
-            logger.debug("<send_admin_notification")
+            current_app.logger.debug("<send_admin_notification")
             publish_to_mailer(QueueMessageTypes.ADMIN_NOTIFICATION.value, data=data)
-            logger.debug("send_admin_notification>")
+            current_app.logger.debug("send_admin_notification>")
         except Exception as e:  # noqa=B901
-            logger.error("<send_admin_notification failed")
+            current_app.logger.error("<send_admin_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
@@ -280,7 +278,7 @@ class Invitation:
         query_params: Dict[str, any] = None,
     ):
         """Send the email notification."""
-        logger.debug("<send_invitation")
+        current_app.logger.debug("<send_invitation")
         mail_configs = Invitation._get_invitation_configs(org_name, login_source, org_status)
         recipient = invitation.recipient_email
         token_confirm_url = f"{app_url}/{mail_configs.get('token_confirm_path')}/{invitation.token}"
@@ -302,11 +300,11 @@ class Invitation:
         except BusinessException as exception:
             invitation.invitation_status_code = "FAILED"
             invitation.save()
-            logger.debug(">send_invitation failed")
-            logger.debug(exception)
+            current_app.logger.debug(">send_invitation failed")
+            current_app.logger.debug(exception)
             raise BusinessException(Error.FAILED_INVITATION, None) from exception
 
-        logger.debug(">send_invitation")
+        current_app.logger.debug(">send_invitation")
 
     @staticmethod
     def _get_invitation_configs(org_name, login_source, org_status=None):
@@ -384,7 +382,7 @@ class Invitation:
     @staticmethod
     def notify_admin(user, invitation_id, membership_id, invitation_origin):
         """Admins should be notified if user has responded to invitation."""
-        logger.debug("<notify_admin")
+        current_app.logger.debug("<notify_admin")
         admin_list = UserService.get_admins_for_membership(membership_id)
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
 
@@ -403,7 +401,7 @@ class Invitation:
                 invitation.membership[0].org.name,
                 invitation.membership[0].org.id,
             )
-            logger.debug(">notify_admin")
+            current_app.logger.debug(">notify_admin")
 
         return Invitation(invitation)
 
@@ -423,7 +421,7 @@ class Invitation:
     @user_context
     def accept_invitation(invitation_id, user: UserService, origin, add_membership: bool = True, **kwargs):
         """Add user, role and org from the invitation to membership."""
-        logger.debug(">accept_invitation")
+        current_app.logger.debug(">accept_invitation")
         user_from_context: UserContext = kwargs["user_context"]
         invitation = Invitation.validate_invitation(invitation_id)
         login_source = user_from_context.login_source
@@ -468,7 +466,7 @@ class Invitation:
                         Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
                 except BusinessException as exception:
                     error_msg = f"<send_notification_to_admin failed {exception.message} ---"
-                    logger.error(error_msg)
+                    current_app.logger.error(error_msg)
 
         invitation.login_source = login_source  # Update login source to the source when accepted
         invitation.accepted_date = datetime.now()
@@ -487,7 +485,7 @@ class Invitation:
                     {"email": user_from_context.token_info.get("email", None)}, throw_error_for_duplicates=False
                 )
 
-        logger.debug("<accept_invitation")
+        current_app.logger.debug("<accept_invitation")
         return Invitation(invitation)
 
     @staticmethod

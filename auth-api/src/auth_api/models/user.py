@@ -18,10 +18,10 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 
 import datetime
 
+from flask import current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from structured_logging import StructuredLogging
 
 from auth_api.utils.enums import LoginSource, Status, UserStatus
 from auth_api.utils.roles import Role
@@ -32,8 +32,6 @@ from .db import db
 from .membership import Membership as MembershipModel
 from .org import Org as OrgModel
 from .user_status_code import UserStatusCode
-
-logger = StructuredLogging.get_logger()
 
 
 class User(BaseModel):
@@ -114,7 +112,7 @@ class User(BaseModel):
         if idp_userid := user_from_context.token_info.get("idp_userid", None):
             return db.session.query(User).filter(User.idp_userid == idp_userid).one_or_none()
         if not idp_userid:
-            logger.error("No idp_userid provided from token_info.")
+            current_app.logger.error("No idp_userid provided from token_info.")
         return None
 
     @classmethod
@@ -138,7 +136,7 @@ class User(BaseModel):
                 type=cls._get_type(user_from_context=user_from_context),
                 verified=cls._is_verified(user_from_context.login_source),
             )
-            logger.debug(f"Creating user from JWT:{token}; User:{user}")
+            current_app.logger.debug(f"Creating user from JWT:{token}; User:{user}")
 
             user.save()
             return user
@@ -194,7 +192,7 @@ class User(BaseModel):
         ):
             return user
 
-        logger.debug(f"Updating user from JWT:{token}; User:{user}")
+        current_app.logger.debug(f"Updating user from JWT:{token}; User:{user}")
         user.username = user_from_context.user_name or user.username
 
         user.firstname = first_name
@@ -238,7 +236,7 @@ class User(BaseModel):
             user.is_terms_of_use_accepted = is_terms_accepted
             user.terms_of_use_accepted_version = terms_of_use_version
 
-            logger.debug(
+            current_app.logger.debug(
                 f"Updating users Terms of use is_terms_accepted:{is_terms_accepted}; "
                 f"terms_of_use_version:{terms_of_use_version}"
             )
