@@ -73,17 +73,9 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         # This is the path we'll use in legal_api!!
 
         # even though this isn't referenced directly, it sets up the internal configs that upgrade
-
-        venv_src_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), os.pardir, ".venv/src/sbc-auth/auth-api")
-        )
-        if venv_src_path not in sys.path:
-            sys.path.insert(0, venv_src_path)
-
-        auth_api_folder = [folder for folder in sys.path if "auth-api" in folder][0]
-        migration_path = auth_api_folder.replace("/auth-api", "/auth-api/migrations")
-
-        Migrate(app, _db, directory=migration_path)
+        auth_api_dir = os.path.abspath("..").replace("queue_services", "auth-api")
+        auth_api_dir = os.path.join(auth_api_dir, "migrations")
+        Migrate(app, _db, directory=auth_api_dir)
         upgrade()
 
         return _db
