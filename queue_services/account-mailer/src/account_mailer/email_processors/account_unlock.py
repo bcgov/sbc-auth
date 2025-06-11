@@ -13,14 +13,11 @@
 # limitations under the License.
 """A Template for the Account Unlocked Email."""
 
-import base64
-
-from auth_api.services.rest_service import RestService
-from auth_api.utils.enums import AuthHeaderType, ContentType
 from flask import current_app
 from jinja2 import Template
 
 from account_mailer.email_processors import generate_template
+from account_mailer.pdf_utils import get_pdf_from_report_api
 
 
 def process(data: dict, token: str) -> dict:
@@ -60,19 +57,4 @@ def _get_account_unlock_pdf(data, token):
         "templateName": "payment_receipt",
     }
 
-    report_response = RestService.post(
-        endpoint=current_app.config.get("REPORT_API_BASE_URL"),
-        token=token,
-        auth_header_type=AuthHeaderType.BEARER,
-        content_type=ContentType.JSON,
-        data=pdf_payload,
-        raise_for_status=True,
-        additional_headers={"Accept": "application/pdf"},
-    )
-    pdf_attachment = None
-    if report_response.status_code != 200:
-        current_app.logger.error("Failed to get pdf")
-    else:
-        pdf_attachment = base64.b64encode(report_response.content)
-
-    return pdf_attachment
+    return get_pdf_from_report_api(pdf_payload, token)

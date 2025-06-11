@@ -103,7 +103,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     REPORT_API_URL = REPORT_API_URL + REPORT_API_VERSION
     REPORT_API_BASE_URL = f"{REPORT_API_URL}/reports"
 
-    # TODO remove when cgi_ejv bucket moves to google storage
+    # Remove when cgi_ejv bucket moves to google storage
     MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
     MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
     MINIO_ACCESS_SECRET = os.getenv("MINIO_ACCESS_SECRET")

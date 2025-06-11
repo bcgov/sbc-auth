@@ -30,7 +30,7 @@ def process(email_msg: dict) -> dict:
     current_app.logger.debug("ejv_failures: %s", email_msg)
     # fill in template
     failed_jv_file_name = email_msg.get("fileName")
-    # TODO update minioLocation
+    # NEED TO update minioLocation
     file_location = email_msg.get("minioLocation")
     bcol_admin_email = current_app.config["BCOL_ADMIN_EMAIL"]
     feedback_attachment = _get_jv_file(file_location, failed_jv_file_name)
