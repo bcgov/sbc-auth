@@ -39,8 +39,13 @@ from .utils import get_random_number, helper_add_nr_event_to_queue
         (AccessType.GOVM.value, False),
     ],
 )
-def test_names_events_listener_queue(
-    app, session, client, monkeypatch, access_type, is_auto_affiliate_expected
+def test_names_events_listener_queue(  # pylint: disable=too-many-arguments
+    app,  # pylint: disable=unused-argument
+    session,  # pylint: disable=unused-argument
+    client,
+    monkeypatch,
+    access_type,
+    is_auto_affiliate_expected,
 ):
     """Assert that events can be retrieved and decoded from the Queue."""
     # 1. Create an Org
@@ -58,7 +63,7 @@ def test_names_events_listener_queue(
     nr_state = "DRAFT"
 
     # Mock the rest service response to return the org just created.
-    def get_invoices_mock(nr_number, token):
+    def get_invoices_mock(nr_number, token):  # pylint: disable=unused-argument
         response_content = json.dumps(
             {
                 "invoices": [
@@ -72,7 +77,9 @@ def test_names_events_listener_queue(
 
         response = Response()
         response.status_code = 200
-        response._content = str.encode(response_content)
+        response._content = str.encode(  # pylint: disable=protected-access
+            response_content
+        )
         return response
 
     monkeypatch.setattr(
@@ -116,8 +123,10 @@ def test_names_events_listener_queue(
         assert len(affiliations) == 1
         assert len(activity_logs) == 1
 
-    # Publish message for an NR which was done using a service account or staff with no user account.
-    def get_invoices_mock(nr_number, token):
+    # Publish message for an NR using a service account or staff with no user account.
+    def get_invoices_mock_service_account(
+        nr_number, token
+    ):  # pylint: disable=unused-argument
         response_content = json.dumps(
             {
                 "invoices": [
@@ -133,11 +142,14 @@ def test_names_events_listener_queue(
 
         response = Response()
         response.status_code = 200
-        response._content = str.encode(response_content)
+        response._content = str.encode(  # pylint: disable=protected-access
+            response_content
+        )
         return response
 
     monkeypatch.setattr(
-        "auth_api.services.rest_service.RestService.get", get_invoices_mock
+        "auth_api.services.rest_service.RestService.get",
+        get_invoices_mock_service_account,
     )
     # add an event to queue
     nr_number = f"NR {get_random_number()}"

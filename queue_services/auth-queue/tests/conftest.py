@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
+import os
+import sys
 from concurrent.futures import CancelledError
 from contextlib import contextmanager
 
@@ -31,8 +33,8 @@ def not_raises(exception):
     """
     try:
         yield
-    except exception:
-        raise pytest.fail(f"DID RAISE {exception}")
+    except exception as exc:
+        raise pytest.fail(f"DID RAISE {exception}") from exc
 
 
 @pytest.fixture(scope="session")
@@ -71,8 +73,6 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         # This is the path we'll use in legal_api!!
 
         # even though this isn't referenced directly, it sets up the internal configs that upgrade
-        import os
-        import sys
 
         venv_src_path = os.path.abspath(
             os.path.join(
@@ -92,7 +92,7 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
 
 
 @pytest.fixture
-def config(app):
+def config(app):  # pylint: disable=redefined-outer-name
     """Return the application config."""
     return app.config
 
@@ -117,8 +117,10 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         conn = db.engine.connect()
         txn = conn.begin()
 
-        options = dict(bind=conn, binds={})
-        sess = db._make_scoped_session(options=options)
+        options = {"bind": conn, "binds": {}}
+        sess = db._make_scoped_session(  # pylint: disable=protected-access
+            options=options
+        )
 
         # establish  a SAVEPOINT just before beginning the test
         # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
@@ -128,8 +130,9 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         def restart_savepoint(sess2, trans):  # pylint: disable=unused-variable
             # Detecting whether this is indeed the nested transaction of the test
             if (
-                trans.nested and not trans._parent.nested
-            ):  # pylint: disable=protected-access
+                trans.nested
+                and not trans._parent.nested  # pylint: disable=protected-access
+            ):  # noqa: E501
                 # Handle where test DOESN'T session.commit(),
                 sess2.expire_all()
                 sess.begin_nested()
@@ -152,7 +155,7 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
 def mock_pub_sub_call(mocker):
     """Mock pub sub call."""
 
-    class PublisherMock:
+    class PublisherMock:  # pylint: disable=too-few-public-methods
         """Publisher Mock."""
 
         def __init__(self, *args, **kwargs):
