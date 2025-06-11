@@ -28,13 +28,7 @@ from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
 from auth_api.services.rest_service import RestService
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import (
-    AccessType,
-    ActivityAction,
-    CorpType,
-    OrgStatus,
-    QueueSources,
-)
+from auth_api.utils.enums import AccessType, ActivityAction, CorpType, OrgStatus, QueueSources
 from dateutil import parser
 from flask import Blueprint, current_app, request
 from sbc_common_components.utils.enums import QueueMessageTypes
