@@ -242,7 +242,12 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     update_task_payload = {
         "status": TaskStatus.HOLD.value,
         "relationshipStatus": TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
-        "remarks": ["AFFIDAVIT SEAL MISSING"],
+        "remarks": [
+            """AFFIDAVIT SEAL MISSING - This is a detailed remark explaining why the affidavit seal
+        is missing and what actions need to be taken to resolve this issue. The user needs to provide a properly sealed
+        affidavit document with all required signatures and notary stamps. Please ensure the document is properly
+        formatted and contains all necessary information before resubmitting."""
+        ],
     }
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
