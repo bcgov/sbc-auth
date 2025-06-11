@@ -23,7 +23,6 @@ from account_mailer.auth_utils import get_dashboard_url, get_login_url, get_paym
 from account_mailer.email_processors import generate_template
 
 
-
 def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> dict:
     """Build the email for Account notification."""
     current_app.logger.debug("account  notification: %s", org_id)

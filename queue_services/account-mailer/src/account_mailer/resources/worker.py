@@ -42,7 +42,6 @@ from account_mailer.utils import format_currency, format_day_with_suffix, get_lo
 bp = Blueprint("worker", __name__)
 
 
-
 @bp.route("/", methods=("POST",))
 def worker():
     """Worker to handle incoming queue pushes."""

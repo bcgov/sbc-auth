@@ -34,7 +34,8 @@ from google.cloud.sql.connector import Connector
 from account_mailer import config as app_config
 from account_mailer.resources.worker import bp as worker_endpoint
 
-setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
+setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), "logging.conf"))  # important to do this first
+
 
 @dataclass
 class DBConfig:
