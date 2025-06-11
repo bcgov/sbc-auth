@@ -930,6 +930,23 @@ files = [
 flake8 = "*"
 
 [[package]]
+name = "flake8-pyproject"
+version = "1.2.3"
+description = "Flake8 plug-in loading the configuration from pyproject.toml"
+optional = false
+python-versions = ">= 3.6"
+groups = ["dev"]
+files = [
+    {file = "flake8_pyproject-1.2.3-py3-none-any.whl", hash = "sha256:6249fe53545205af5e76837644dc80b4c10037e73a0e5db87ff562d75fb5bd4a"},
+]
+
+[package.dependencies]
+Flake8 = ">=5"
+
+[package.extras]
+dev = ["pyTest", "pyTest-cov"]
+
+[[package]]
 name = "flake8-quotes"
 version = "3.4.0"
 description = "Flake8 lint for quotes."
@@ -3663,4 +3680,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "715faaceebf4415411bcd35fe680e23baec176c9d9fa72f99ca611806cf0fd82"
+content-hash = "2e3201e44871dc9777a185bf3d5d2a4cdaaaaabcbe58372c6e5fd8f52d5ba2fd"

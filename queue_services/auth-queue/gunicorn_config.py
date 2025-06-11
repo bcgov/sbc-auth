@@ -11,9 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""The configuration for gunicorn, which picks up the
-runtime options from environment variables
-"""
+"""The configuration for gunicorn, which picks up the runtime options from environment variables."""
 
 import os
 

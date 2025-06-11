@@ -176,7 +176,7 @@ def process_name_events(event_message: SimpleCloudEvent):
     nr_entity.last_modified = parser.parse(event_message.time)
     # Future - None needs to be replaced with whatever we decide to fill the data with.
     if nr_status == "DRAFT" and not AffiliationModel.find_affiliations_by_business_identifier(nr_number):
-        logger.info("Status is DRAFT, getting invoices for account")
+        current_app.logger.info("Status is DRAFT, getting invoices for account")
         token = None
         # Find account details for the NR.
         with current_app.test_request_context("service_token"):
@@ -193,13 +193,13 @@ def process_name_events(event_message: SimpleCloudEvent):
             and (auth_account_id := invoices["invoices"][0].get("paymentAccount").get("accountId"))
             and str(auth_account_id).isnumeric()
         ):
-            logger.info("Account ID received : %s", auth_account_id)
+            current_app.logger.info("Account ID received : %s", auth_account_id)
             # Auth account id can be service account value too, so doing a query lookup than find_by_id
             org: OrgModel = db.session.query(OrgModel).filter(OrgModel.id == int(auth_account_id or -1)).one_or_none()
             # If account is present and is not a gov account, then affiliate.
             if org and org.access_type != AccessType.GOVM.value:
                 nr_entity.pass_code_claimed = True
-                logger.info(
+                current_app.logger.info(
                     "Creating affiliation between Entity : %s and Org : %s",
                     nr_entity,
                     org,
@@ -221,4 +221,4 @@ def process_name_events(event_message: SimpleCloudEvent):
     if flags.is_on("enable-entity-mapping", default=False) is True:
         entity_details = {"nrNumber": nr_number}
         EntityMappingService.from_entity_details(entity_details, skip_auth=True)
-    logger.debug("<<<<<<<process_name_events<<<<<<<<<<")
+    current_app.logger.debug("<<<<<<<process_name_events<<<<<<<<<<")
