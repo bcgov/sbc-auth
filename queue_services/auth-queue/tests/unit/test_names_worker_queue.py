@@ -77,14 +77,10 @@ def test_names_events_listener_queue(  # pylint: disable=too-many-arguments
 
         response = Response()
         response.status_code = 200
-        response._content = str.encode(  # pylint: disable=protected-access
-            response_content
-        )
+        response._content = str.encode(response_content)  # pylint: disable=protected-access
         return response
 
-    monkeypatch.setattr(
-        "auth_api.services.rest_service.RestService.get", get_invoices_mock
-    )
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.get", get_invoices_mock)
     monkeypatch.setattr(
         "auth_api.services.rest_service.RestService.get_service_account_token",
         lambda *args, **kwargs: None,
@@ -97,13 +93,9 @@ def test_names_events_listener_queue(  # pylint: disable=too-many-arguments
     # Query the affiliations and assert the org has affiliation for the NR.
     if is_auto_affiliate_expected:
         assert entity.pass_code_claimed
-        affiliations: List[AffiliationModel] = (
-            AffiliationModel.find_affiliations_by_org_id(org_id)
-        )
+        affiliations: List[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
         activity_logs: List[ActivityLogModel] = (
-            db.session.query(ActivityLogModel)
-            .filter(ActivityLogModel.org_id == org_id)
-            .all()
+            db.session.query(ActivityLogModel).filter(ActivityLogModel.org_id == org_id).all()
         )
         assert len(affiliations) == 1
         assert len(activity_logs) == 1
@@ -112,29 +104,21 @@ def test_names_events_listener_queue(  # pylint: disable=too-many-arguments
 
         # Publish message again and assert it doesn't create duplicate affiliation.
         helper_add_nr_event_to_queue(client, nr_number, nr_state, "TEST")
-        affiliations: List[AffiliationModel] = (
-            AffiliationModel.find_affiliations_by_org_id(org_id)
-        )
+        affiliations: List[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
         activity_logs: List[ActivityLogModel] = (
-            db.session.query(ActivityLogModel)
-            .filter(ActivityLogModel.org_id == org_id)
-            .all()
+            db.session.query(ActivityLogModel).filter(ActivityLogModel.org_id == org_id).all()
         )
         assert len(affiliations) == 1
         assert len(activity_logs) == 1
 
     # Publish message for an NR using a service account or staff with no user account.
-    def get_invoices_mock_service_account(
-        nr_number, token
-    ):  # pylint: disable=unused-argument
+    def get_invoices_mock_service_account(nr_number, token):  # pylint: disable=unused-argument
         response_content = json.dumps(
             {
                 "invoices": [
                     {
                         "businessIdentifier": nr_number,
-                        "paymentAccount": {
-                            "accountId": "SERVICE-ACCOUNT-NAME-REQUEST-SERVICE-ACCOUNT"
-                        },
+                        "paymentAccount": {"accountId": "SERVICE-ACCOUNT-NAME-REQUEST-SERVICE-ACCOUNT"},
                     }
                 ]
             }
@@ -142,9 +126,7 @@ def test_names_events_listener_queue(  # pylint: disable=too-many-arguments
 
         response = Response()
         response.status_code = 200
-        response._content = str.encode(  # pylint: disable=protected-access
-            response_content
-        )
+        response._content = str.encode(response_content)  # pylint: disable=protected-access
         return response
 
     monkeypatch.setattr(

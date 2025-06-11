@@ -23,24 +23,18 @@ from .utils import helper_add_lock_unlock_event_to_queue
 
 
 @patch("auth_queue.resources.worker.publish_to_mailer")
-def test_lock_and_unlock(
-    mock_publish_to_mailer, app, session, client
-):  # pylint: disable=unused-argument
+def test_lock_and_unlock(mock_publish_to_mailer, app, session, client):  # pylint: disable=unused-argument
     """Assert that the update internal payment records works."""
     org = factory_org_model()
 
-    helper_add_lock_unlock_event_to_queue(
-        client, QueueMessageTypes.NSF_LOCK_ACCOUNT.value, org_id=org.id
-    )
+    helper_add_lock_unlock_event_to_queue(client, QueueMessageTypes.NSF_LOCK_ACCOUNT.value, org_id=org.id)
 
     new_org = OrgModel.find_by_org_id(org.id)
     assert new_org.status_code == OrgStatus.NSF_SUSPENDED.value
     assert mock_publish_to_mailer.call_count == 1
     mock_publish_to_mailer.reset_mock()
 
-    helper_add_lock_unlock_event_to_queue(
-        client, QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value, org_id=org.id
-    )
+    helper_add_lock_unlock_event_to_queue(client, QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value, org_id=org.id)
 
     new_org = OrgModel.find_by_org_id(org.id)
     assert new_org.status_code == OrgStatus.ACTIVE.value

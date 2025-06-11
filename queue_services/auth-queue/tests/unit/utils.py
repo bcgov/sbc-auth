@@ -53,15 +53,11 @@ def post_to_queue(client, request_payload):
 
 def helper_add_activity_log_event_to_queue(client, details):
     """Add event to the Queue."""
-    payload = build_request_for_queue_push(
-        QueueMessageTypes.ACTIVITY_LOG.value, details
-    )
+    payload = build_request_for_queue_push(QueueMessageTypes.ACTIVITY_LOG.value, details)
     post_to_queue(client, payload)
 
 
-def helper_add_lock_unlock_event_to_queue(
-    client, message_type: str, org_id, skip_notification: bool = False
-):
+def helper_add_lock_unlock_event_to_queue(client, message_type: str, org_id, skip_notification: bool = False):
     """Add event to the Queue."""
     queue_payload = {
         "accountId": org_id,
@@ -74,9 +70,7 @@ def helper_add_lock_unlock_event_to_queue(
     post_to_queue(client, payload)
 
 
-def helper_add_nr_event_to_queue(
-    client, nr_number: str, new_state: str, old_state: str
-):
+def helper_add_nr_event_to_queue(client, nr_number: str, new_state: str, old_state: str):
     """Add event to the Queue."""
     queue_payload = {
         "request": {
@@ -85,9 +79,7 @@ def helper_add_nr_event_to_queue(
             "previousState": old_state,
         }
     }
-    payload = build_request_for_queue_push(
-        QueueMessageTypes.NAMES_EVENT.value, queue_payload
-    )
+    payload = build_request_for_queue_push(QueueMessageTypes.NAMES_EVENT.value, queue_payload)
     post_to_queue(client, payload)
 
 

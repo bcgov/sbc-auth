@@ -17,7 +17,6 @@ runtime options from environment variables
 
 import os
 
-
 workers = int(os.environ.get("GUNICORN_PROCESSES", "1"))  # pylint: disable=invalid-name
 timeout = int(os.environ.get("GUNICORN_TIMEOUT", "0"))  # pylint: disable=invalid-name
 threads = int(os.environ.get("GUNICORN_THREADS", "1"))  # pylint: disable=invalid-name

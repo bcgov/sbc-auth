@@ -28,10 +28,7 @@ from google.cloud.sql.connector import Connector
 from auth_queue import config as app_config
 from auth_queue.resources.worker import bp as worker_endpoint
 
-
-setup_logging(
-    os.path.join(os.path.abspath(os.path.dirname(__file__)), "logging.conf")
-)  # important to do this first
+setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), "logging.conf"))  # important to do this first
 
 
 @dataclass
@@ -89,9 +86,7 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")) -> Flask:
             user=app.config.get("DB_USER"),
             password=app.config.get("DB_PASSWORD"),
         )
-        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-            "creator": lambda: getconn(connector, db_config)
-        }
+        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"creator": lambda: getconn(connector, db_config)}
 
     db.init_app(app)
     flags.init_app(app)

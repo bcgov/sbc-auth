@@ -34,7 +34,6 @@ from flask import Blueprint, current_app, request
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
 
-
 bp = Blueprint("worker", __name__)
 
 
@@ -45,9 +44,7 @@ def worker():
         # Return a 200, so event is removed from the Queue
         return {}, HTTPStatus.OK
 
-    current_app.logger.info(
-        "Event message received: %s", json.dumps(dataclasses.asdict(event_message))
-    )
+    current_app.logger.info("Event message received: %s", json.dumps(dataclasses.asdict(event_message)))
     if is_message_processed(event_message):
         current_app.logger.info("Event message already processed, skipping.")
         return {}, HTTPStatus.OK
@@ -67,9 +64,7 @@ def worker():
 
 def is_message_processed(event_message):
     """Check if the queue message is processed."""
-    if PubSubMessageProcessing.find_by_cloud_event_id_and_type(
-        event_message.id, event_message.type
-    ):
+    if PubSubMessageProcessing.find_by_cloud_event_id_and_type(event_message.id, event_message.type):
         return True
     pubsub_message_processing = PubSubMessageProcessing()
     pubsub_message_processing.cloud_event_id = event_message.id
@@ -173,21 +168,14 @@ def process_name_events(event_message: SimpleCloudEvent):
     nr_entity = EntityModel.find_by_business_identifier(nr_number)
     if nr_entity is None:
         current_app.logger.info("Entity doesn't exist, creating a new entity.")
-        nr_entity = EntityModel(
-            business_identifier=nr_number, corp_type_code=CorpType.NR.value
-        )
+        nr_entity = EntityModel(business_identifier=nr_number, corp_type_code=CorpType.NR.value)
 
     nr_entity.status = nr_status
-    nr_entity.name = request_data.get(
-        "name", ""
-    )  # its not part of event now, this is to handle if they include it.
+    nr_entity.name = request_data.get("name", "")  # its not part of event now, this is to handle if they include it.
     nr_entity.last_modified_by = None  # TODO not present in event message.
     nr_entity.last_modified = parser.parse(event_message.time)
     # Future - None needs to be replaced with whatever we decide to fill the data with.
-    if (
-        nr_status == "DRAFT"
-        and not AffiliationModel.find_affiliations_by_business_identifier(nr_number)
-    ):
+    if nr_status == "DRAFT" and not AffiliationModel.find_affiliations_by_business_identifier(nr_number):
         logger.info("Status is DRAFT, getting invoices for account")
         token = None
         # Find account details for the NR.
@@ -202,20 +190,12 @@ def process_name_events(event_message: SimpleCloudEvent):
         if (
             invoices
             and invoices["invoices"]
-            and (
-                auth_account_id := invoices["invoices"][0]
-                .get("paymentAccount")
-                .get("accountId")
-            )
+            and (auth_account_id := invoices["invoices"][0].get("paymentAccount").get("accountId"))
             and str(auth_account_id).isnumeric()
         ):
             logger.info("Account ID received : %s", auth_account_id)
             # Auth account id can be service account value too, so doing a query lookup than find_by_id
-            org: OrgModel = (
-                db.session.query(OrgModel)
-                .filter(OrgModel.id == int(auth_account_id or -1))
-                .one_or_none()
-            )
+            org: OrgModel = db.session.query(OrgModel).filter(OrgModel.id == int(auth_account_id or -1)).one_or_none()
             # If account is present and is not a gov account, then affiliate.
             if org and org.access_type != AccessType.GOVM.value:
                 nr_entity.pass_code_claimed = True
@@ -224,9 +204,7 @@ def process_name_events(event_message: SimpleCloudEvent):
                     nr_entity,
                     org,
                 )
-                affiliation: AffiliationModel = AffiliationModel(
-                    entity=nr_entity, org=org
-                )
+                affiliation: AffiliationModel = AffiliationModel(entity=nr_entity, org=org)
                 affiliation.flush()
                 activity: ActivityLogModel = ActivityLogModel(
                     org_id=org.id,

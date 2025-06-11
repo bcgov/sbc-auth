@@ -75,9 +75,7 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         # even though this isn't referenced directly, it sets up the internal configs that upgrade
 
         venv_src_path = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__), os.pardir, ".venv/src/sbc-auth/auth-api"
-            )
+            os.path.join(os.path.dirname(__file__), os.pardir, ".venv/src/sbc-auth/auth-api")
         )
         if venv_src_path not in sys.path:
             sys.path.insert(0, venv_src_path)
@@ -118,9 +116,7 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         txn = conn.begin()
 
         options = {"bind": conn, "binds": {}}
-        sess = db._make_scoped_session(  # pylint: disable=protected-access
-            options=options
-        )
+        sess = db._make_scoped_session(options=options)  # pylint: disable=protected-access
 
         # establish  a SAVEPOINT just before beginning the test
         # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
@@ -129,10 +125,7 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         @event.listens_for(sess(), "after_transaction_end")
         def restart_savepoint(sess2, trans):  # pylint: disable=unused-variable
             # Detecting whether this is indeed the nested transaction of the test
-            if (
-                trans.nested
-                and not trans._parent.nested  # pylint: disable=protected-access
-            ):  # noqa: E501
+            if trans.nested and not trans._parent.nested:  # pylint: disable=protected-access  # noqa: E501
                 # Handle where test DOESN'T session.commit(),
                 sess2.expire_all()
                 sess.begin_nested()
