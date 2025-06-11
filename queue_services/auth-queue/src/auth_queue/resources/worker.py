@@ -33,12 +33,9 @@ from dateutil import parser
 from flask import Blueprint, current_app, request
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
-from structured_logging import StructuredLogging
 
 
 bp = Blueprint('worker', __name__)
-
-logger = StructuredLogging.get_logger()
 
 
 @bp.route('/', methods=('POST',))
@@ -48,9 +45,9 @@ def worker():
         # Return a 200, so event is removed from the Queue
         return {}, HTTPStatus.OK
 
-    logger.info('Event message received: %s', json.dumps(dataclasses.asdict(event_message)))
+    current_app.logger.info('Event message received: %s', json.dumps(dataclasses.asdict(event_message)))
     if is_message_processed(event_message):
-        logger.info('Event message already processed, skipping.')
+        current_app.logger.info('Event message already processed, skipping.')
         return {}, HTTPStatus.OK
     if event_message.type == QueueMessageTypes.NAMES_EVENT.value:
         process_name_events(event_message)
@@ -79,7 +76,7 @@ def is_message_processed(event_message):
 
 def process_activity_log(data):
     """Process activity log events."""
-    logger.debug('>>>>>>>process_activity_log>>>>>')
+    current_app.logger.debug('>>>>>>>process_activity_log>>>>>')
     activity_model = ActivityLogModel(actor_id=data.get('actorId'),
                                       action=data.get('action'),
                                       item_type=data.get('itemType'),
@@ -93,21 +90,21 @@ def process_activity_log(data):
     try:
         activity_model.save()
     except Exception as e:  # NOQA # pylint: disable=broad-except
-        logger.error('DB Error: %s', e)
+        current_app.logger.error('DB Error: %s', e)
         db.session.rollback()
-    logger.debug('<<<<<<<process_activity_log<<<<<')
+    current_app.logger.debug('<<<<<<<process_activity_log<<<<<')
 
 
 def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
     """Process a pay event to either unlock or lock an account. Source message comes from Pay-api."""
-    logger.debug('>>>>>>>process_pay_lock_unlock_event>>>>>')
+    current_app.logger.debug('>>>>>>>process_pay_lock_unlock_event>>>>>')
     message_type = event_message.type
     queue_data = event_message.data
     skip_notification = queue_data.get('skipNotification', False)
     org_id = queue_data.get('accountId')
     org: OrgModel = OrgModel.find_by_org_id(org_id)
     if org is None:
-        logger.error('Unknown org for orgid %s', org_id)
+        current_app.logger.error('Unknown org for orgid %s', org_id)
         return
 
     data = {
@@ -129,7 +126,7 @@ def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
 
     org.flush()
     db.session.commit()
-    logger.debug('<<<<<<<process_pay_lock_unlock_event<<<<<')
+    current_app.logger.debug('<<<<<<<process_pay_lock_unlock_event<<<<<')
 
 
 def process_name_events(event_message: SimpleCloudEvent):
@@ -154,13 +151,13 @@ def process_name_events(event_message: SimpleCloudEvent):
                 }
             }
     """
-    logger.debug('>>>>>>>process_name_events>>>>>')
+    current_app.logger.debug('>>>>>>>process_name_events>>>>>')
     request_data = event_message.data.get('request') or event_message.data.get('name')
     nr_number = request_data['nrNum']
     nr_status = request_data['newState']
     nr_entity = EntityModel.find_by_business_identifier(nr_number)
     if nr_entity is None:
-        logger.info("Entity doesn't exist, creating a new entity.")
+        current_app.logger.info("Entity doesn't exist
         nr_entity = EntityModel(
             business_identifier=nr_number,
             corp_type_code=CorpType.NR.value

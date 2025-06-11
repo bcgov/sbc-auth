@@ -17,7 +17,10 @@
 """Initialize Flask app."""
 
 import os
+
 from auth_queue import create_app
+
+
 app = create_app()
 
 if __name__ == '__main__':

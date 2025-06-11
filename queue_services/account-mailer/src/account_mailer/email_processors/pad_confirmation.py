@@ -22,17 +22,14 @@ from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import AuthHeaderType, ContentType
 from flask import current_app
 from jinja2 import Template
-from structured_logging import StructuredLogging
 
 from account_mailer.email_processors import generate_template
 from account_mailer.services import google_store
 
-logger = StructuredLogging.get_logger()
-
 
 def process(email_msg: dict, token: str) -> dict:
     """Build the email for PAD Confirmation notification."""
-    logger.debug("email_msg notification: %s", email_msg)
+    current_app.logger.debug("email_msg notification: %s", email_msg)
     # fill in template
 
     username = email_msg.get("padTosAcceptedBy")
@@ -122,7 +119,7 @@ def _get_pad_confirmation_report_pdf(email_msg, token):
     )
     pdf_attachment = None
     if report_response.status_code != 200:
-        logger.error("Failed to get pdf")
+        current_app.logger.error("Failed to get pdf")
     else:
         pdf_attachment = base64.b64encode(report_response.content)
 

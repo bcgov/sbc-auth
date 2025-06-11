@@ -18,9 +18,7 @@ import os
 
 from flask import current_app
 from minio import Minio
-from structured_logging import StructuredLogging
 
-logger = StructuredLogging.get_logger()
 
 
 class MinioService:
@@ -30,7 +28,7 @@ class MinioService:
     def get_minio_file(bucket_name: str, file_name: str):
         """Return the file from Minio."""
         minio_client: Minio = MinioService._get_client()
-        logger.debug(f'Get Minio file {bucket_name}/{file_name}')
+        current_app.logger.debug(f'Get Minio file {bucket_name}/{file_name}')
 
         return minio_client.get_object(bucket_name, file_name)
 
@@ -38,7 +36,7 @@ class MinioService:
     def put_minio_file(bucket_name: str, file_name: str, value_as_bytes: bytearray):
         """Return the file from Minio."""
         minio_client: Minio = MinioService._get_client()
-        logger.debug(f'Put Minio file {bucket_name}/{file_name}')
+        current_app.logger.debug(f'Put Minio file {bucket_name}/{file_name}')
 
         value_as_stream = io.BytesIO(value_as_bytes)
         minio_client.put_object(current_app.config['MINIO_BUCKET_NAME'], file_name, value_as_stream,
@@ -60,7 +58,7 @@ class MinioService:
     @staticmethod
     def get_minio_public_url(key: str) -> str:
         """Return a URL for uploaded document."""
-        logger.debug(f'GET URL for {key}')
+        current_app.logger.debug(f'GET URL for {key}')
         minio_endpoint = current_app.config['MINIO_ENDPOINT']
 
         return f'https://{minio_endpoint}/public/{key}'  # noqa: E231
