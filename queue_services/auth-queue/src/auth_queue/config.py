@@ -79,7 +79,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     # PUB/SUB - PUB: account-mailer-dev, SUB: auth-event-dev and namex-nr-state-dev
     ACCOUNT_MAILER_TOPIC = os.getenv("ACCOUNT_MAILER_TOPIC", "account-mailer-dev")
 
-    PAY_API_URL = os.getenv("PAY_API_URL") + os.getenv("PAY_API_VERSION")
+    PAY_API_URL = os.getenv("PAY_API_URL", "http://localhost:5000") + os.getenv("PAY_API_VERSION", "/api/v1/")
 
     # Service account details
     JWT_OIDC_ISSUER = os.getenv("JWT_OIDC_ISSUER")
@@ -111,7 +111,6 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
         "DATABASE_TEST_URL",
         default=f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}",  # noqa: E501,E231
     )
-    PAY_API_URL = "https://localhost:5000/api/v1"
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
