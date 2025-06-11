@@ -86,6 +86,30 @@ max-line-length = 120
 docstring-min-length=10
 count = true
 
+[tool.zimports]
+black-line-length = 120
+keep-unused-type-checking = true
+
+[tool.black]
+target-version =  ["py310", "py311", "py312"]
+line-length = 120
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # The following are specific to Black, you probably don't want those.
+  migrations
+  | devops
+  | .history
+)/
+'''
+
+[tool.isort]
+atomic = true
+profile = "black"
+line_length = 120
+skip_gitignore = true
+skip_glob = ["migrations", "devops"]
+
 [tool.pylint.main]
 fail-under = 10
 max-line-length = 120
