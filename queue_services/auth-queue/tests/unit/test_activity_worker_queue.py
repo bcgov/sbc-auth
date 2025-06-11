@@ -19,12 +19,12 @@ from .utils import helper_add_activity_log_event_to_queue
 def test_activity_listener_queue(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
     event_details = {
-        'action': 'test_action',
-        'itemType': 'test_type',
-        'itemName': 'test_name',
-        'itemId': '100',
-        'actor': 'test_Actor',
-        'remoteAddr': ''
+        "action": "test_action",
+        "itemType": "test_type",
+        "itemName": "test_name",
+        "itemId": "100",
+        "actor": "test_Actor",
+        "remoteAddr": "",
     }
 
     helper_add_activity_log_event_to_queue(client, details=event_details)

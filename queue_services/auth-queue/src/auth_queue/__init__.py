@@ -29,7 +29,10 @@ from auth_queue import config as app_config
 from auth_queue.resources.worker import bp as worker_endpoint
 
 
-setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
+setup_logging(
+    os.path.join(os.path.abspath(os.path.dirname(__file__)), "logging.conf")
+)  # important to do this first
+
 
 @dataclass
 class DBConfig:
@@ -51,12 +54,12 @@ def getconn(connector: Connector, db_config: DBConfig) -> object:
         object: A connection object to the database.
     """
     return connector.connect(
-        instance_connection_string=db_config.unix_sock.replace('/cloudsql/', ''),
-        ip_type='private',
+        instance_connection_string=db_config.unix_sock.replace("/cloudsql/", ""),
+        ip_type="private",
         user=db_config.user,
         password=db_config.password,
         db=db_config.database,
-        driver='pg8000',
+        driver="pg8000",
     )
 
 
@@ -66,28 +69,28 @@ def register_endpoints(app: Flask):
     app.url_map.strict_slashes = False
 
     app.register_blueprint(
-        url_prefix='/',
+        url_prefix="/",
         blueprint=worker_endpoint,
     )
     app.register_blueprint(ops_bp)
 
 
-def create_app(run_mode=os.getenv('DEPLOYMENT_ENV', 'production')) -> Flask:
+def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")) -> Flask:
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(app_config.get_named_config(run_mode))
-    app.config['ENV'] = run_mode
+    app.config["ENV"] = run_mode
 
-    if app.config.get('DB_UNIX_SOCKET'):
-        connector = Connector(refresh_strategy='lazy')
+    if app.config.get("DB_UNIX_SOCKET"):
+        connector = Connector(refresh_strategy="lazy")
         db_config = DBConfig(
-            unix_sock=app.config.get('DB_UNIX_SOCKET'),
-            database=app.config.get('DB_NAME'),
-            user=app.config.get('DB_USER'),
-            password=app.config.get('DB_PASSWORD')
+            unix_sock=app.config.get("DB_UNIX_SOCKET"),
+            database=app.config.get("DB_NAME"),
+            user=app.config.get("DB_USER"),
+            password=app.config.get("DB_PASSWORD"),
         )
-        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-            'creator': lambda: getconn(connector, db_config)
+        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+            "creator": lambda: getconn(connector, db_config)
         }
 
     db.init_app(app)
