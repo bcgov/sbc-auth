@@ -36,7 +36,7 @@ class ExceptionHandler:
 
     def auth_handler(self, error):  # pylint: disable=useless-option-value
         """Handle AuthError."""
-        http_logger.logger.warning(error.error)
+        http_logger.warning(error.error)
         return error.error, error.status_code, RESPONSE_HEADERS
 
     def db_handler(self, error):  # pylint: disable=useless-option-value
@@ -60,7 +60,7 @@ class ExceptionHandler:
                 f"origin: {request.remote_addr}, "
                 f"headers: {request.headers} }}"
             )
-            http_logger.logger.warning(error_message)
+            http_logger.warning(error_message)
             message = {"message": error.description, "path": request.path}
         else:
             stack_trace = traceback.format_exc()
