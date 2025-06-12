@@ -10,6 +10,68 @@ from auth_api.services.entity_mapping import EntityMappingService
 from tests.utilities.factory_utils import factory_org_service
 
 
+def _setup_orgs():
+    """Set up test organizations."""
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary["id"]
+
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    alternate_org_id = org_dictionary["id"]
+
+    return org_id, alternate_org_id
+
+
+def _get_or_create_entity(session, business_identifier, corp_type_code, is_loaded_lear=True):
+    """Get existing entity or create a new one if it doesn't exist."""
+    existing_entity = (
+        session.query(Entity)
+        .filter(Entity.business_identifier == business_identifier, Entity.corp_type_code == corp_type_code)
+        .first()
+    )
+
+    return (
+        existing_entity
+        or Entity(
+            business_identifier=business_identifier, corp_type_code=corp_type_code, is_loaded_lear=is_loaded_lear
+        ).save()
+    )
+
+
+def _get_or_create_affiliation(session, org_id, entity_id):
+    """Get existing affiliation or create a new one if it doesn't exist."""
+    existing_affiliation = (
+        session.query(AffiliationModel)
+        .filter(AffiliationModel.org_id == org_id, AffiliationModel.entity_id == entity_id)
+        .first()
+    )
+
+    return existing_affiliation or AffiliationModel(org_id=org_id, entity_id=entity_id).save()
+
+
+def _create_affiliations_for_mapping(session, org_id, data, alternate_org_id, is_loaded_lear=True):
+    """Create an affiliation for each non-None value in the mapping data."""
+    EntityMapping(
+        business_identifier=data.get("identifier"),
+        bootstrap_identifier=data.get("bootstrapIdentifier"),
+        nr_identifier=data.get("nrNumber"),
+    ).save()
+
+    # Follows the business flow, NR always comes first
+    if data.get("nrNumber"):
+        entity = _get_or_create_entity(session, data["nrNumber"], "NR", is_loaded_lear)
+        _get_or_create_affiliation(session, alternate_org_id if "nrDifferentOrg" in data else org_id, entity.id)
+
+    if data.get("bootstrapIdentifier"):
+        entity = _get_or_create_entity(session, data["bootstrapIdentifier"], "TMP", is_loaded_lear)
+        _get_or_create_affiliation(session, alternate_org_id if "bootstrapDifferentOrg" in data else org_id, entity.id)
+
+    if data.get("identifier") and not data.get("identifierSkipAffiliationAndEntity"):
+        entity = _get_or_create_entity(session, data["identifier"], "BC", is_loaded_lear)
+        _get_or_create_affiliation(session, org_id, entity.id)
+
+
 def test_get_filtered_affiliations_identifier_matches(session):
     """Test that affiliations are returned based on identifier matching logic."""
 
@@ -88,76 +150,16 @@ def test_get_filtered_affiliations_identifier_matches(session):
         _create_affiliations_for_mapping(session, org_id, data, alternate_org_id)
 
     search_details = AffiliationSearchDetails(page=1, limit=1000)
-    results = service.paginate_from_affiliations(org_id, search_details)
+    results, _ = service.paginate_from_affiliations(org_id, search_details)
 
     actual_identifiers = [result[0] for result in results]
     expected_identifiers = [entry for entry in expected_before_search_org_1 if entry != []]
     assert actual_identifiers == expected_identifiers
 
-    results = service.paginate_from_affiliations(alternate_org_id, search_details)
+    results, _ = service.paginate_from_affiliations(alternate_org_id, search_details)
     actual_identifiers = [result[0] for result in results]
     expected_identifiers = [entry for entry in expected_before_search_org_2 if entry != []]
     assert actual_identifiers == expected_identifiers
-
-
-def _setup_orgs():
-    """Set up test organizations."""
-    org_service = factory_org_service()
-    org_dictionary = org_service.as_dict()
-    org_id = org_dictionary["id"]
-
-    org_service = factory_org_service()
-    org_dictionary = org_service.as_dict()
-    alternate_org_id = org_dictionary["id"]
-
-    return org_id, alternate_org_id
-
-
-def _get_or_create_entity(session, business_identifier, corp_type_code):
-    """Get existing entity or create a new one if it doesn't exist."""
-    existing_entity = (
-        session.query(Entity)
-        .filter(Entity.business_identifier == business_identifier, Entity.corp_type_code == corp_type_code)
-        .first()
-    )
-
-    return (
-        existing_entity
-        or Entity(business_identifier=business_identifier, corp_type_code=corp_type_code, is_loaded_lear=True).save()
-    )
-
-
-def _get_or_create_affiliation(session, org_id, entity_id):
-    """Get existing affiliation or create a new one if it doesn't exist."""
-    existing_affiliation = (
-        session.query(AffiliationModel)
-        .filter(AffiliationModel.org_id == org_id, AffiliationModel.entity_id == entity_id)
-        .first()
-    )
-
-    return existing_affiliation or AffiliationModel(org_id=org_id, entity_id=entity_id).save()
-
-
-def _create_affiliations_for_mapping(session, org_id, data, alternate_org_id):
-    """Create an affiliation for each non-None value in the mapping data."""
-    EntityMapping(
-        business_identifier=data.get("identifier"),
-        bootstrap_identifier=data.get("bootstrapIdentifier"),
-        nr_identifier=data.get("nrNumber"),
-    ).save()
-
-    # Follows the business flow, NR always comes first
-    if data.get("nrNumber"):
-        entity = _get_or_create_entity(session, data["nrNumber"], "NR")
-        _get_or_create_affiliation(session, alternate_org_id if "nrDifferentOrg" in data else org_id, entity.id)
-
-    if data.get("bootstrapIdentifier"):
-        entity = _get_or_create_entity(session, data["bootstrapIdentifier"], "TMP")
-        _get_or_create_affiliation(session, alternate_org_id if "bootstrapDifferentOrg" in data else org_id, entity.id)
-
-    if data.get("identifier") and not data.get("identifierSkipAffiliationAndEntity"):
-        entity = _get_or_create_entity(session, data["identifier"], "BC")
-        _get_or_create_affiliation(session, org_id, entity.id)
 
 
 def test_from_entity_details_multiple_identifiers(session):
@@ -245,3 +247,45 @@ def test_populate_entity_mapping_for_identifier_no_data(session):
         EntityMappingService.populate_entity_mapping_for_identifier("BC1234567")
         mapping = session.query(EntityMapping).first()
         assert mapping is None
+
+
+def test_get_filtered_affiliations_identifier_matches_not_loaded_lear(session):
+    """Test that affiliations are not returned when is_loaded_lear is False."""
+    entity_mapping_data = [
+        {"identifier": "BC1234567", "bootstrapIdentifier": None, "nrNumber": None},
+        {"identifier": None, "bootstrapIdentifier": "Tyyyyyyy", "nrNumber": None},
+        {"identifier": None, "bootstrapIdentifier": None, "nrNumber": "NR1234567"},
+    ]
+
+    service = EntityMappingService()
+    org_id, _ = _setup_orgs()
+
+    for data in entity_mapping_data:
+        _create_affiliations_for_mapping(session, org_id, data, None, is_loaded_lear=False)
+
+    search_details = AffiliationSearchDetails(page=1, limit=1000)
+    results, _ = service.paginate_from_affiliations(org_id, search_details)
+
+    assert len(results) == 0
+
+
+def test_get_filtered_affiliations_pagination_limit_one(session):
+    """Test pagination behavior with limit=1 and hasMore=true."""
+    entity_mapping_data = [
+        {"identifier": "BC1234567", "bootstrapIdentifier": None, "nrNumber": None},
+        {"identifier": "BC1234568", "bootstrapIdentifier": None, "nrNumber": None},
+        {"identifier": "BC1234569", "bootstrapIdentifier": None, "nrNumber": None},
+    ]
+
+    service = EntityMappingService()
+    org_id, _ = _setup_orgs()
+
+    for data in entity_mapping_data:
+        _create_affiliations_for_mapping(session, org_id, data, None)
+
+    search_details = AffiliationSearchDetails(page=1, limit=1)
+    results, has_more = service.paginate_from_affiliations(org_id, search_details)
+
+    assert len(results) == 1
+    assert has_more is True
+    assert results[0][0] == ["BC1234569"]

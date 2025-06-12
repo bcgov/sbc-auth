@@ -55,10 +55,6 @@ class EntityMappingService:
         """
         org_id = int(org_id or -1)
 
-        paginate_for_non_search = not any(
-            [search_details.identifier, search_details.status, search_details.name, search_details.type]
-        )
-
         affiliated_identifiers_cte = (
             db.session.query(Entity.business_identifier)
             .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
@@ -177,16 +173,17 @@ class EntityMappingService:
             .filter(subq.c.row_number == 1)
             .order_by(subq.c.created_on.desc())
         )
+        # For search we need all identifiers, the filtering is done in LEAR and NAMES.
+        if not any([search_details.identifier, search_details.status, search_details.name, search_details.type]):
+            query = query.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit + 1)
 
-        if paginate_for_non_search:
-            query = query.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit)
-
-        return query.all()
+        data = query.all()
+        return data[: search_details.limit], len(data) > search_details.limit
 
     @staticmethod
     def populate_affiliation_base(org_id: int, search_details: AffiliationSearchDetails):
         """Get entity details from the database and expand multiple identifiers into separate rows."""
-        data = EntityMappingService.paginate_from_affiliations(org_id, search_details)
+        data, has_more = EntityMappingService.paginate_from_affiliations(org_id, search_details)
 
         affiliation_bases = [
             AffiliationBase(identifier=identifier, created=created)
@@ -206,7 +203,7 @@ class EntityMappingService:
             current_app.logger.debug(f"NR identifiers ({len(nr_identifiers)}): {', '.join(nr_identifiers)}")
             current_app.logger.debug(f"Other identifiers ({len(other_identifiers)}): {', '.join(other_identifiers)}")
 
-        return affiliation_bases
+        return affiliation_bases, has_more
 
     @staticmethod
     def _is_duplicate_mapping(nr_identifier: str, bootstrap_identifier: str, business_identifier: str) -> bool:
