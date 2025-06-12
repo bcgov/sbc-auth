@@ -63,6 +63,7 @@ class EntityMappingService:
             db.session.query(Entity.business_identifier)
             .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
             .filter(AffiliationModel.org_id == org_id)
+            .filter(Entity.is_loaded_lear.is_(True))
             .cte("affiliated_identifiers")
         )
 
@@ -157,6 +158,7 @@ class EntityMappingService:
                     filtered_mappings.c.nr_identifier == Entity.business_identifier,
                 ),
             )
+            .filter(Entity.is_loaded_lear.is_(True))
             .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
             .filter(
                 AffiliationModel.org_id == org_id,
