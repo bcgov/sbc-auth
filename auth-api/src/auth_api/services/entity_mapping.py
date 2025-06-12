@@ -143,6 +143,7 @@ class EntityMappingService:
                 filtered_mappings.c.bootstrap_identifier.isnot(None),
                 filtered_mappings.c.nr_identifier.isnot(None),
                 AffiliationModel.org_id == org_id,
+                Entity.is_loaded_lear.is_(True),
             )
             .cte("complete_mappings")
         )
