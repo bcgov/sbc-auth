@@ -388,20 +388,27 @@ def affiliation_search(org_id, use_entity_mapping=False):
     search_details = AffiliationSearchDetails.from_request_args(request)
     if use_entity_mapping:
         remove_stale_drafts = False
-        affiliation_bases = EntityMappingService.populate_affiliation_base(org_id, search_details)
+        affiliation_bases, has_more = EntityMappingService.populate_affiliation_base(org_id, search_details)
+        affiliations_details_list = asyncio.run(
+            AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id, remove_stale_drafts)
+        )
+        response = {
+            "entities": affiliations_details_list,
+            "totalResults": len(affiliations_details_list),
+            "hasMore": has_more,
+        }
     else:
         remove_stale_drafts = True
         affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
         affiliation_bases = AffiliationService.affiliation_to_affiliation_base(affiliations)
-    affiliations_details_list = asyncio.run(
-        AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id, remove_stale_drafts)
-    )
+        affiliations_details_list = asyncio.run(
+            AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id, remove_stale_drafts)
+        )
+        response = {"entities": affiliations_details_list, "totalResults": len(affiliations_details_list)}
     # Use orjson serializer here, it's quite a bit faster.
     response, status = (
         current_app.response_class(
-            response=orjson.dumps(  # pylint: disable=maybe-no-member
-                {"entities": affiliations_details_list, "totalResults": len(affiliations_details_list)}
-            ),
+            response=orjson.dumps(response),  # pylint: disable=maybe-no-member
             status=200,
             mimetype="application/json",
         ),
