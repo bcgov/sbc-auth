@@ -17,9 +17,6 @@ from flask import Flask, current_app
 from config import Config
 from structured_logging import StructuredLogging
 
-# Suppress verbose papermill logging
-logging.getLogger("papermill").setLevel(logging.ERROR)
-
 # Notebook Scheduler
 # ---------------------------------------
 # This script helps with the automated processing of Jupyter Notebooks via
@@ -74,7 +71,7 @@ def processnotebooks(notebookdirectory, token):
 
     # For weekly tasks, we only run on the specified days
     if date.today().weekday() in week_report_dates:
-        logging.info('Processing: %s', notebookdirectory)        
+        current_app.logger.info('Processing: %s', notebookdirectory)
         file = 'auth.ipynb'
         
         subject = 'SBC-AUTH Weekly Stats till ' + datetime.strftime(datetime.now()-timedelta(1), '%Y-%m-%d') + ext
@@ -105,7 +102,7 @@ def processnotebooks(notebookdirectory, token):
                 )
             email['content']['attachments'] = attachments
         except Exception:  # noqa: B902
-            logging.exception('Error processing notebook %s.', notebookdirectory)
+            current_app.logger.exception('Error processing notebook %s.', notebookdirectory)
             email = {
                 'recipients': Config.ERROR_EMAIL_RECIPIENTS,
                 'content': {
@@ -142,5 +139,5 @@ if __name__ == '__main__':
     processnotebooks('weekly', token)
 
     end_time = datetime.now()
-    logging.info('job - jupyter notebook report completed in: %s', end_time - start_time)
+    current_app.logger.info('job - jupyter notebook report completed in: %s', end_time - start_time)
     sys.exit()
