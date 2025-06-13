@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "notebook-report"
+version = "0.1.0"
+description = "An app to detect and notify about notebook report."
+authors = ["Steven Chen <steven.chen@gov.bc.ca>"]
+license = "Apache-2.0"
+readme = "README.md"
+packages = [    
+    { include = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging" }
+flask = "^3.0.2"
+sqlalchemy = "^1.4.18"
+psycopg2-binary = "^2.9.7"
+secure-smtplib = "^0.1.1"
+pytz = "^2022.4"
+python-dotenv = "0.21.0"
+requests = "^2.31.0"
+pg8000 = "^1.31.2"
+papermill = "^2.3.3"
+ipython-sql = "^0.4.0"
+ipykernel = "^6.25.2"
+pandas = "^1.5.3"
+notebook = "^7.0.4"
+jupyter_client = "^8.3.1"
+jupyterlab_server = "^2.25.0"
+numpy = "^1.26.0"
+matplotlib = "^3.8.0"
