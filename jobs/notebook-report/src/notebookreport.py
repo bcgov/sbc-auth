@@ -56,7 +56,7 @@ def send_email(email: dict, token):
     if response.status_code == 200:
         current_app.logger.info('The email was sent successfully')
     else:    
-        current_app.logger.info(f'response:{response}')
+        current_app.logger.error(f'response:{response}')
         raise Exception('Unsuccessful response when sending email.')
   
 
@@ -102,7 +102,7 @@ def processnotebooks(notebookdirectory, token):
                 )
             email['content']['attachments'] = attachments
         except Exception:  # noqa: B902
-            current_app.logger.exception('Error processing notebook %s.', notebookdirectory)
+            current_app.logger.error('Error processing notebook %s.', notebookdirectory)
             email = {
                 'recipients': Config.ERROR_EMAIL_RECIPIENTS,
                 'content': {
