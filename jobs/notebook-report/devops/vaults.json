@@ -1,9 +1,0 @@
-[
-    {
-        "vault": "relationship",
-        "application": [
-            "postgres-auth",
-            "notebook-report"
-        ]
-    }
-]

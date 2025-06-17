@@ -1,3 +1,4 @@
-cd /opt/app-root
-echo 'run notebookreport'
+#! /bin/bash
+cd src
+echo 'start running notebookreport...'
 python notebookreport.py
