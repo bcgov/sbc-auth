@@ -23,7 +23,7 @@ jobs:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-job-cd.yaml@main
     with:
       target: ${{ inputs.target }}
-      app_name: "notebook-report"
+      app_name: "sbc-auth-notebook-report"
       working_directory: "./jobs/notebook-report"
     secrets:
       WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
