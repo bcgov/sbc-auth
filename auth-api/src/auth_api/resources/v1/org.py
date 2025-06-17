@@ -18,7 +18,6 @@ from http import HTTPStatus
 import orjson
 from flask import Blueprint, current_app, g, jsonify, request
 from flask_cors import cross_origin
-from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
@@ -47,7 +46,6 @@ from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, U
 from auth_api.utils.util import extract_numbers, string_to_bool
 
 bp = Blueprint("ORGS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs")
-logger = StructuredLogging.get_logger()
 
 
 @bp.route("", methods=["GET", "OPTIONS"])
@@ -102,7 +100,7 @@ def search_organizations():
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.MANAGE_EFT.value])
 def search_simple_orgs():
     """Return simplified organization information."""
-    logger.info("<search_simple_orgs")
+    current_app.logger.info("<search_simple_orgs")
 
     org_id = request.args.get("id", None)
     page: int = int(request.args.get("page", "1"))
@@ -129,7 +127,7 @@ def search_simple_orgs():
         HTTPStatus.OK,
     )
 
-    logger.info(">search_simple_orgs")
+    current_app.logger.info(">search_simple_orgs")
     return jsonify(response), status
 
 
@@ -389,19 +387,28 @@ def affiliation_search(org_id, use_entity_mapping=False):
         raise BusinessException(Error.DATA_NOT_FOUND, None)
     search_details = AffiliationSearchDetails.from_request_args(request)
     if use_entity_mapping:
-        affiliation_bases = EntityMappingService.populate_affiliation_base(org_id, search_details)
+        remove_stale_drafts = False
+        affiliation_bases, has_more = EntityMappingService.populate_affiliation_base(org_id, search_details)
+        affiliations_details_list = asyncio.run(
+            AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id, remove_stale_drafts)
+        )
+        response = {
+            "entities": affiliations_details_list,
+            "totalResults": len(affiliations_details_list),
+            "hasMore": has_more,
+        }
     else:
+        remove_stale_drafts = True
         affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
         affiliation_bases = AffiliationService.affiliation_to_affiliation_base(affiliations)
-    affiliations_details_list = asyncio.run(
-        AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id)
-    )
+        affiliations_details_list = asyncio.run(
+            AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id, remove_stale_drafts)
+        )
+        response = {"entities": affiliations_details_list, "totalResults": len(affiliations_details_list)}
     # Use orjson serializer here, it's quite a bit faster.
     response, status = (
         current_app.response_class(
-            response=orjson.dumps(  # pylint: disable=maybe-no-member
-                {"entities": affiliations_details_list, "totalResults": len(affiliations_details_list)}
-            ),
+            response=orjson.dumps(response),  # pylint: disable=maybe-no-member
             status=200,
             mimetype="application/json",
         ),

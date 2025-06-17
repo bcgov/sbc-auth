@@ -40,7 +40,7 @@ jsonschema = "4.17.3"
 launchdarkly-server-sdk = "9.5.0"
 MarkupSafe = "2.1.1"
 python-dotenv = "^1.0.1"
-requests = "2.32.3"
+requests = "2.32.4"
 Werkzeug = "^3.0.0"
 
 # VCS dependencies

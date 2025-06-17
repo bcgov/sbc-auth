@@ -22,7 +22,6 @@ from operator import or_
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.utils.enums import QueueMessageTypes
-from structured_logging import StructuredLogging
 
 from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException
@@ -49,7 +48,6 @@ from .user import User as UserService
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 CONFIG = get_named_config()
-logger = StructuredLogging.get_logger()
 
 org_type_to_group_mapping = {
     OrgType.MAXIMUS_STAFF.value: GROUP_MAXIMUS_STAFF,
@@ -176,13 +174,13 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
     def send_notification_to_member(self, origin_url, notification_type):
         """Send member notification."""
-        logger.debug(f"<send {notification_type} notification")
+        current_app.logger.debug(f"<send {notification_type} notification")
         org_name = self._model.org.name
         org_id = self._model.org.id
         if not self._model.user.contacts:
             error_msg = f"No user contact record for user id {self._model.user_id}"
-            logger.error(error_msg)
-            logger.error("<send_notification_to_member failed")
+            current_app.logger.error(error_msg)
+            current_app.logger.error("<send_notification_to_member failed")
             return
         recipient = self._model.user.contacts[0].contact.email
         app_url = f"{origin_url}/"
@@ -212,16 +210,16 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         try:
             publish_to_mailer(notification_type_for_mailer, data=data)
-            logger.debug("<send_approval_notification_to_member")
+            current_app.logger.debug("<send_approval_notification_to_member")
         except Exception as e:  # noqa=B901
-            logger.error("<send_notification_to_member failed")
+            current_app.logger.error("<send_notification_to_member failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @user_context
     def update_membership(self, updated_fields, **kwargs):
         """Update an existing membership with the given role."""
         # Ensure that this user is an COORDINATOR or ADMIN on the org associated with this membership
-        logger.debug("<update_membership")
+        current_app.logger.debug("<update_membership")
         user_from_context: UserContext = kwargs["user_context"]
         check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN, STAFF))
         updated_membership_status = updated_fields.get("membership_status")
@@ -298,13 +296,13 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 data = {"accountId": self._model.org.id, "recipientEmail": contact_link.contact.email}
                 publish_to_mailer(notification_type=QueueMessageTypes.ADMIN_REMOVED.value, data=data)
 
-        logger.debug(">update_membership")
+        current_app.logger.debug(">update_membership")
         return self
 
     @user_context
     def deactivate_membership(self, **kwargs):
         """Mark this membership as inactive."""
-        logger.debug("<deactivate_membership")
+        current_app.logger.debug("<deactivate_membership")
         user_from_context: UserContext = kwargs["user_context"]
 
         # if this is a member removing another member, check that they admin or owner
@@ -316,7 +314,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN))  # pylint: disable=superfluous-parens
 
         self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code("INACTIVE")
-        logger.info(f"<deactivate_membership for {self._model.user.username}")
+        current_app.logger.info(f"<deactivate_membership for {self._model.user.username}")
         self._model.save()
         # Remove from account_holders group in keycloak
         Membership._add_or_remove_group(self._model)
@@ -331,7 +329,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         )
 
         publish_team_member_event(QueueMessageTypes.TEAM_MEMBER_REMOVED.value, self._model.org_id, self._model.user_id)
-        logger.debug(">deactivate_membership")
+        current_app.logger.debug(">deactivate_membership")
         return self
 
     @staticmethod

@@ -17,16 +17,13 @@ from datetime import datetime
 
 from flask import current_app
 from jinja2 import Template
-from structured_logging import StructuredLogging
 
 from account_mailer.email_processors import generate_template
-
-logger = StructuredLogging.get_logger()
 
 
 def process(email_msg: dict) -> dict:
     """Build the email for Payment Completed notification."""
-    logger.debug("refund_request notification: %s", email_msg)
+    current_app.logger.debug("refund_request notification: %s", email_msg)
     template_name = "bcol_refund_request_email"
     recepients = current_app.config.get("REFUND_REQUEST").get("bcol").get("recipients")
     refund_date = datetime.strptime(email_msg.get("refundDate"), "%Y%m%d").strftime("%Y-%m-%d")

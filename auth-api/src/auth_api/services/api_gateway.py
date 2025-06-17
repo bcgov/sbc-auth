@@ -18,7 +18,6 @@ from typing import Dict, List
 
 from flask import current_app
 from requests.exceptions import HTTPError
-from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models.membership import Membership as MembershipModel
@@ -31,8 +30,6 @@ from auth_api.services.rest_service import RestService
 from auth_api.utils.api_gateway import generate_client_representation
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_API_GW_SANDBOX_USERS, GROUP_API_GW_USERS
 from auth_api.utils.roles import ADMIN, STAFF
-
-logger = StructuredLogging.get_logger()
 
 
 class ApiGateway:
@@ -50,7 +47,7 @@ class ApiGateway:
         B - If consumer already exists,
         1 - Create key for specific environment.
         """
-        logger.debug("<create_key ")
+        current_app.logger.debug("<create_key ")
         env = current_app.config.get("ENVIRONMENT_NAME")
         name = request_json.get("keyName")
         org: OrgModel = OrgModel.find_by_id(org_id)
@@ -133,7 +130,7 @@ class ApiGateway:
     @classmethod
     def revoke_key(cls, org_id: int, api_key: str):
         """Revoke api key."""
-        logger.debug("<revoke_key ")
+        current_app.logger.debug("<revoke_key ")
         check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         # Find the environment for this key, based on it consumer changes.
         email_id: str = None
@@ -156,7 +153,7 @@ class ApiGateway:
     @classmethod
     def get_api_keys(cls, org_id: int, skip_auth=False) -> List[Dict[str, any]]:
         """Get all api keys."""
-        logger.debug("<get_api_keys ")
+        current_app.logger.debug("<get_api_keys ")
         if skip_auth is False:
             check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         api_keys_response = {"consumer": {"consumerKey": []}}

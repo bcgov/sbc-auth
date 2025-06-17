@@ -27,7 +27,6 @@ from requests.adapters import HTTPAdapter  # pylint:disable=ungrouped-imports
 # pylint:disable=ungrouped-imports
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import ConnectTimeout, HTTPError
-from structured_logging import StructuredLogging
 from urllib3.util.retry import Retry
 
 from auth_api.exceptions import ServiceUnavailableException
@@ -35,7 +34,6 @@ from auth_api.utils.cache import cache
 from auth_api.utils.enums import AuthHeaderType, ContentType
 
 RETRY_ADAPTER = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[404]))
-logger = StructuredLogging.get_logger()
 
 
 class RestService:
@@ -55,7 +53,7 @@ class RestService:
     ):
         """Invoke different method depending on the input."""
         # just to avoid the duplicate code for PUT and POSt
-        logger.debug(f"<_invoke-{rest_method}")
+        current_app.logger.debug(f"<_invoke-{rest_method}")
 
         if not token and generate_token:
             token = _get_token()
@@ -64,8 +62,8 @@ class RestService:
         if content_type == ContentType.JSON:
             data = json.dumps(data)
 
-        logger.debug(f"Endpoint : {endpoint}")
-        logger.debug(f"headers : {headers}")
+        current_app.logger.debug(f"Endpoint : {endpoint}")
+        current_app.logger.debug(f"headers : {headers}")
         response = None
         try:
             invoke_rest_method = getattr(requests, rest_method)
@@ -75,11 +73,11 @@ class RestService:
             if raise_for_status:
                 response.raise_for_status()
         except (ReqConnectionError, ConnectTimeout) as exc:
-            logger.error("---Error on POST---")
-            logger.error(exc)
+            current_app.logger.error("---Error on POST---")
+            current_app.logger.error(exc)
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
-            logger.error(
+            current_app.logger.error(
                 f"HTTPError on POST {endpoint} with status code " f"{exc.response.status_code if exc.response else ''}"
             )
             if response and response.status_code >= 500:
@@ -88,20 +86,20 @@ class RestService:
         finally:
             RestService.__log_response(response)
 
-        logger.debug(">post")
+        current_app.logger.debug(">post")
         return response
 
     @staticmethod
     def __log_response(response):
         if response is not None:
-            logger.info(f"Response Headers {response.headers}")
+            current_app.logger.info(f"Response Headers {response.headers}")
             if (
                 response.headers
                 and isinstance(response.headers, Iterable)
                 and "Content-Type" in response.headers
                 and response.headers["Content-Type"] == ContentType.JSON.value
             ):
-                logger.info(f"response : {response.text if response else ''}")
+                current_app.logger.info(f"response : {response.text if response else ''}")
 
     @staticmethod
     def post(  # pylint: disable=too-many-positional-arguments,too-many-arguments
@@ -115,7 +113,7 @@ class RestService:
         generate_token: bool = True,
     ):
         """POST service."""
-        logger.debug("<post")
+        current_app.logger.debug("<post")
         return RestService._invoke(
             "post",
             endpoint,
@@ -138,7 +136,7 @@ class RestService:
         raise_for_status: bool = True,
     ):
         """POST service."""
-        logger.debug("<post")
+        current_app.logger.debug("<post")
         return RestService._invoke("put", endpoint, token, auth_header_type, content_type, data, raise_for_status)
 
     @staticmethod
@@ -153,7 +151,7 @@ class RestService:
         generate_token=True,
     ):
         """Patch service."""
-        logger.debug("<patch")
+        current_app.logger.debug("<patch")
         return RestService._invoke(
             "patch",
             endpoint,
@@ -178,7 +176,8 @@ class RestService:
         generate_token=True,
     ):
         """Patch service."""
-        logger.debug("<delete")
+        current_app.logger.debug("<delete")
+        current_app.logger.debug("<delete")
         return RestService._invoke(
             "delete",
             endpoint,
@@ -202,12 +201,12 @@ class RestService:
         skip_404_logging: bool = False,
     ):
         """GET service."""
-        logger.debug("<GET")
+        current_app.logger.debug("<GET")
 
         headers = RestService._generate_headers(content_type, additional_headers, token, auth_header_type)
 
-        logger.debug(f"Endpoint : {endpoint}")
-        logger.debug(f"headers : {headers}")
+        current_app.logger.debug(f"Endpoint : {endpoint}")
+        current_app.logger.debug(f"headers : {headers}")
         session = requests.Session()
         if retry_on_failure:
             session.mount(endpoint, RETRY_ADAPTER)
@@ -216,12 +215,12 @@ class RestService:
             response = session.get(endpoint, headers=headers, timeout=current_app.config.get("CONNECT_TIMEOUT", 60))
             response.raise_for_status()
         except (ReqConnectionError, ConnectTimeout) as exc:
-            logger.error("---Error on GET---")
-            logger.error(exc)
+            current_app.logger.error("---Error on GET---")
+            current_app.logger.error(exc)
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
             if not (exc.response and exc.response.status_code == 404 and skip_404_logging):
-                logger.error(
+                current_app.logger.error(
                     f"HTTPError on GET {endpoint} "
                     f"with status code {exc.response.status_code if exc.response else ''}"
                 )
@@ -229,10 +228,10 @@ class RestService:
                 raise ServiceUnavailableException(exc) from exc
             raise exc
         finally:
-            logger.debug(response.headers if response else "Empty Response Headers")
-            logger.info(f"response : {response.text if response else ''}")
+            current_app.logger.debug(response.headers if response else "Empty Response Headers")
+            current_app.logger.info(f"response : {response.text if response else ''}")
 
-        logger.debug(">GET")
+        current_app.logger.debug(">GET")
         return response
 
     @staticmethod
@@ -282,11 +281,11 @@ class RestService:
                 if isinstance(task, ClientConnectorError):
                     # if no response from task we will go in here (i.e. namex-api is down)
                     error_msg = f"Error for ({str(org_id)}) in _call_urls_in_parallel: no response from {task.os_error}"
-                    logger.error(error_msg)
+                    current_app.logger.error(error_msg)
                     raise ServiceUnavailableException(f"No response from {task.os_error}")
                 if task.status != HTTPStatus.OK:
                     error_msg = f"Error for ({str(org_id)}) in _call_urls_in_parallel: error response from {task.url}"
-                    logger.error(error_msg)
+                    current_app.logger.error(error_msg)
                     raise ServiceUnavailableException(f"Error response from {task.url}")
                 task_json = await task.json()
                 responses.append(task_json)

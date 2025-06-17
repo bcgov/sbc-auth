@@ -15,9 +15,6 @@
 
 from flask import current_app
 from google.cloud import storage
-from structured_logging import StructuredLogging
-
-logger = StructuredLogging.get_logger()
 
 
 class GoogleStoreService:
@@ -36,7 +33,7 @@ class GoogleStoreService:
             bytes: The content of the file as bytes.
         """
         client = storage.Client()
-        logger.debug(f"Get bucket file {bucket_name}/{source_blob_name}")
+        current_app.logger.debug(f"Get bucket file {bucket_name}/{source_blob_name}")
         bucket = client.bucket(bucket_name)
         blob = bucket.blob(source_blob_name)
         file_content = blob.download_as_bytes()
@@ -63,7 +60,7 @@ class GoogleStoreService:
             Upload of remote-file.txt complete.
         """
         client = storage.Client()
-        logger.debug(f"Put bucket file {bucket_name}/{destination_blob_name}")
+        current_app.logger.debug(f"Put bucket file {bucket_name}/{destination_blob_name}")
         bucket = client.bucket(bucket_name)
         blob = bucket.blob(destination_blob_name)
         blob.upload_from_filename(source_file_name)
@@ -84,6 +81,6 @@ class GoogleStoreService:
             >>> GoogleStoreService.get_static_resource_url('my-file.txt')
             'https://my-bucket-url/my-file.txt'
         """
-        logger.debug(f"GET URL for {key}")
+        current_app.logger.debug(f"GET URL for {key}")
         bucket_url = current_app.config["STATIC_RESOURCES_BUCKET_URL"]
         return f"https://{bucket_url}/{key}"  # noqa: E231

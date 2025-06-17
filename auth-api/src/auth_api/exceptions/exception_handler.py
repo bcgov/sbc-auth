@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Function to handle all exceptions."""
+import logging
 import traceback
 
 from flask import request
 from flask_jwt_oidc import AuthError
 from sqlalchemy.exc import SQLAlchemyError
-from structured_logging import StructuredLogging
 from werkzeug.exceptions import HTTPException, default_exceptions
 
-logger = StructuredLogging.get_logger()
+logger = logging.getLogger("api-exceptions")
+http_logger = logging.getLogger("api-exceptions-http")
 
 RESPONSE_HEADERS = {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"}
 
@@ -35,7 +36,7 @@ class ExceptionHandler:
 
     def auth_handler(self, error):  # pylint: disable=useless-option-value
         """Handle AuthError."""
-        logger.warning(error.error)
+        http_logger.warning(error.error)
         return error.error, error.status_code, RESPONSE_HEADERS
 
     def db_handler(self, error):  # pylint: disable=useless-option-value
@@ -59,7 +60,7 @@ class ExceptionHandler:
                 f"origin: {request.remote_addr}, "
                 f"headers: {request.headers} }}"
             )
-            logger.warning(error_message)
+            http_logger.warning(error_message)
             message = {"message": error.description, "path": request.path}
         else:
             stack_trace = traceback.format_exc()

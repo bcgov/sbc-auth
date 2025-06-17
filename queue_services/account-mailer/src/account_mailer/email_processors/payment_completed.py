@@ -16,8 +16,6 @@
 
 def process(email_msg: dict) -> dict:
     """Build the email for Payment Completed notification."""
-    # TODO Replace this file
-
     return {
         "recipients": "",
         "content": {
