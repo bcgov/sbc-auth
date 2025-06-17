@@ -20,10 +20,10 @@ class Config(object):
     PG_PORT = os.getenv('PG_PORT', '5432')
     
     if DB_UNIX_SOCKET := os.getenv('DATABASE_UNIX_SOCKET', None):
-        SQLALCHEMY_DATABASE_URI = f'postgresql+psycopg2://{PG_USER}:{PG_PASSWORD}@/{PG_NAME}?host={DB_UNIX_SOCKET}'
+        SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{PG_USER}:{PG_PASSWORD}@/{PG_NAME}?unix_sock={DB_UNIX_SOCKET}/.s.PGSQL.5432'                                      
     else:
-        SQLALCHEMY_DATABASE_URI = f'postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{int(PG_PORT)}/{PG_NAME}'
-  
+        SQLALCHEMY_DATABASE_URI = f'postgresql+pg8000://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_NAME}'
+    
     NOTIFY_API_URL = f"{os.getenv("NOTIFY_API_URL", "") + os.getenv("NOTIFY_API_VERSION", "")}/notify"
     NOTIFY_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID")
     NOTIFY_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET")

@@ -14,7 +14,6 @@ python = "^3.12"
 structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging" }
 flask = "^3.0.2"
 sqlalchemy = "^1.4.18"
-psycopg2-binary = "^2.9.7"
 secure-smtplib = "^0.1.1"
 pytz = "^2022.4"
 python-dotenv = "0.21.0"
