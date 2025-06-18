@@ -17,7 +17,13 @@ on:
           - test
           - sandbox
           - prod
-
+      redeploy:
+        description: "Redeploy Application"
+        required: true
+        type: choice
+        options:
+          - "false"
+          - "true"
 jobs:
   notebook-report-cd:
     uses: bcgov/bcregistry-sre/.github/workflows/backend-job-cd.yaml@main
