@@ -31,6 +31,7 @@ jobs:
       target: ${{ inputs.target }}
       app_name: "sbc-auth-notebook-report"
       working_directory: "./jobs/notebook-report"
+      redeploy: ${{ inputs.redeploy }}
     secrets:
       WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
