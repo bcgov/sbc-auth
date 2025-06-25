@@ -389,16 +389,12 @@ def affiliation_search(org_id, use_entity_mapping=False):
     if use_entity_mapping:
         remove_stale_drafts = False
         affiliation_bases, has_more = EntityMappingService.populate_affiliation_base(org_id, search_details)
-        affiliations_details_list = asyncio.run(
+        affiliations_details_list, has_more_search = asyncio.run(
             AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id, remove_stale_drafts)
         )
         # Added Pagination after fetching filtered details from LEAR and Names otherwise searches only on page 1.
         if any([search_details.identifier, search_details.status, search_details.name, search_details.type]):
-            start = (search_details.page - 1) * search_details.limit
-            end = start + search_details.limit
-            has_more = len(affiliations_details_list) > end
-            print(f"start={start}, end={end}, has_more={has_more}")
-            affiliations_details_list = affiliations_details_list[start:end]
+            has_more = has_more_search
 
         response = {
             "entities": affiliations_details_list,

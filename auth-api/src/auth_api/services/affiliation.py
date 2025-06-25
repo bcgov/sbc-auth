@@ -496,6 +496,7 @@ class Affiliation:
         )
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
+            has_more_apis = any(r.get("hasMore", False) for r in responses if isinstance(r, dict))
             combined = Affiliation._combine_affiliation_details(responses, remove_stale_drafts)
             ordered = {
                 affiliation.identifier: affiliation.created
@@ -508,7 +509,7 @@ class Affiliation:
 
             combined.sort(key=sort_key, reverse=True)
             Affiliation._handle_affiliation_debug(affiliation_bases, combined)
-            return combined
+            return combined, has_more_apis
         except ServiceUnavailableException as err:
             current_app.logger.debug(err)
             current_app.logger.debug("Failed to get affiliations details:  %s", affiliation_bases)
