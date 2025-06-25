@@ -474,7 +474,7 @@ class Affiliation:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
         # Our pagination is already handled at the auth level when not doing a search.
-        if not (search_details.status and search_details.name and search_details.type and search_details.identifier):
+        if not any([search_details.status, search_details.name, search_details.type, search_details.identifier]):
             search_details.page = 1
         search_dict = asdict(search_details)
         for affiliation_base in affiliation_bases:
