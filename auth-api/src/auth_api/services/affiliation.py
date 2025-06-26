@@ -465,6 +465,7 @@ class Affiliation:
         ]
 
     @staticmethod
+    # pylint: disable=too-many-locals
     async def get_affiliation_details(
         affiliation_bases: List[AffiliationBase],
         search_details: AffiliationSearchDetails,
@@ -538,17 +539,21 @@ class Affiliation:
         drafts = []
         businesses_key = "businessEntities"
         drafts_key = "draftEntities"
+        name_requests_key = "requests"
         for data in details:
-            if isinstance(data, list):
+            if not isinstance(data, dict):
+                continue
+            nr_list = data.get(name_requests_key)
+            if isinstance(nr_list, list):
                 # assume this is an NR list
-                for name_request in data:
+                for name_request in nr_list:
                     # i.e. {'NR1234567': {...}}
                     name_requests[name_request["nrNum"]] = {"legalType": CorpType.NR.value, "nameRequest": name_request}
                 continue
             if businesses_key in data:
-                businesses = list(data[businesses_key])
+                businesses.extend(data.get(businesses_key))
             if drafts_key in data:
-                drafts = data[drafts_key]
+                drafts.extend(data.get(drafts_key))
         return name_requests, businesses, drafts
 
     @staticmethod
