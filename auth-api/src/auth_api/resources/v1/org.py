@@ -405,7 +405,7 @@ def affiliation_search(org_id, use_entity_mapping=False):
         remove_stale_drafts = True
         affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
         affiliation_bases = AffiliationService.affiliation_to_affiliation_base(affiliations)
-        affiliations_details_list = asyncio.run(
+        affiliations_details_list, _ = asyncio.run(
             AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id, remove_stale_drafts)
         )
         response = {"entities": affiliations_details_list, "totalResults": len(affiliations_details_list)}
