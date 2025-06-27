@@ -465,7 +465,6 @@ class Affiliation:
         ]
 
     @staticmethod
-    # pylint: disable=too-many-locals
     async def get_affiliation_details(
         affiliation_bases: List[AffiliationBase],
         search_details: AffiliationSearchDetails,
@@ -499,22 +498,30 @@ class Affiliation:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
             has_more_apis = any(r.get("hasMore", False) for r in responses if isinstance(r, dict))
             combined = Affiliation._combine_affiliation_details(responses, remove_stale_drafts)
-            ordered = {
-                affiliation.identifier: affiliation.created
-                for affiliation in sorted(affiliation_bases, key=lambda x: x.created, reverse=True)
-            }
+            combined = Affiliation._sort_affiliations_by_created(combined, affiliation_bases)
 
-            def sort_key(item):
-                identifier = item.get("identifier", item.get("nameRequest", {}).get("nrNum", ""))
-                return ordered.get(identifier, datetime.datetime.min)
-
-            combined.sort(key=sort_key, reverse=True)
             Affiliation._handle_affiliation_debug(affiliation_bases, combined)
             return combined, has_more_apis
         except ServiceUnavailableException as err:
             current_app.logger.debug(err)
             current_app.logger.debug("Failed to get affiliations details:  %s", affiliation_bases)
             raise ServiceUnavailableException("Failed to get affiliation details") from err
+
+    @staticmethod
+    def _sort_affiliations_by_created(combined: list, affiliation_bases: list) -> list:
+        """Sort affiliations by created date."""
+        ordered = {
+            affiliation.identifier: affiliation.created
+            for affiliation in sorted(affiliation_bases, key=lambda x: x.created, reverse=True)
+        }
+
+        def sort_key(item):
+            return ordered.get(
+                item.get("identifier", item.get("nameRequest", {}).get("nrNum", "")), datetime.datetime.min
+            )
+
+        combined.sort(key=sort_key, reverse=True)
+        return combined
 
     @staticmethod
     def _handle_affiliation_debug(affiliation_bases, combined):
@@ -532,6 +539,22 @@ class Affiliation:
             current_app.logger.warning(f"Identifiers missing from combined results: {missing_identifiers}")
 
     @staticmethod
+    def _extract_name_requests(data: dict) -> dict:
+        """Updates Name Requests from the affiliation details response."""
+        name_requests_key = "requests"
+        normalized = {"hasMore": False, "requests": []}
+
+        if not isinstance(data, dict):
+            return normalized
+
+        nr_list = data.get(name_requests_key)
+        if isinstance(nr_list, list):
+            normalized["requests"] = nr_list
+            normalized["hasMore"] = data.get("hasMore", False)
+
+        return normalized
+
+    @staticmethod
     def _group_details(details):
         """Group details from the affiliation details response."""
         name_requests = {}
@@ -541,13 +564,9 @@ class Affiliation:
         drafts_key = "draftEntities"
         name_requests_key = "requests"
         for data in details:
-            if not isinstance(data, dict):
-                continue
-            nr_list = data.get(name_requests_key)
-            if isinstance(nr_list, list):
-                # assume this is an NR list
-                for name_request in nr_list:
-                    # i.e. {'NR1234567': {...}}
+            nr_data = Affiliation._extract_name_requests(data)
+            for name_request in nr_data[name_requests_key]:
+                if "nrNum" in name_request:
                     name_requests[name_request["nrNum"]] = {"legalType": CorpType.NR.value, "nameRequest": name_request}
                 continue
             if businesses_key in data:
