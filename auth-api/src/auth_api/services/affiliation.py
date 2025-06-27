@@ -15,7 +15,7 @@
 import datetime
 import re
 from dataclasses import asdict
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from flask import current_app
 from requests.exceptions import HTTPError
@@ -470,7 +470,7 @@ class Affiliation:
         search_details: AffiliationSearchDetails,
         org_id,
         remove_stale_drafts,
-    ) -> List:
+    ) -> Tuple[List, bool]:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
         # Our pagination is already handled at the auth level when not doing a search.
@@ -568,7 +568,6 @@ class Affiliation:
             for name_request in nr_data[name_requests_key]:
                 if "nrNum" in name_request:
                     name_requests[name_request["nrNum"]] = {"legalType": CorpType.NR.value, "nameRequest": name_request}
-                continue
             if businesses_key in data:
                 businesses.extend(data.get(businesses_key))
             if drafts_key in data:
