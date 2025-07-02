@@ -2772,26 +2772,28 @@ def test_get_org_affiliations(
         for data in drafts_with_nrs
     ]
 
-    nrs_details = [
-        {
-            "actions": [],
-            "applicants": {
-                "emailAddress": "1@1.com",
-                "phoneNumber": "1234567890",
-            },
-            "names": [{"name": f"TEST INC. {nr}", "state": "APPROVED"}],
-            "stateCd": "APPROVED",
-            "requestTypeCd": "BC",
-            "request_action_cd": nr[1],
-            "nrNum": nr,
-        }
-        for nr in nrs
-    ]
-
+    nrs_details = {
+        "hasMore": False,
+        "requests": [
+            {
+                "actions": [],
+                "applicants": {
+                    "emailAddress": "1@1.com",
+                    "phoneNumber": "1234567890",
+                },
+                "names": [{"name": f"TEST INC. {nr}", "state": "APPROVED"}],
+                "stateCd": "APPROVED",
+                "requestTypeCd": "BC",
+                "request_action_cd": nr[1],
+                "nrNum": nr,
+            }
+            for nr in nrs
+        ],
+    }
     # Add dates to nrs_details
     for i, date in enumerate(dates):
-        if i < len(nrs_details):
-            nrs_details[i]["created"] = date.isoformat()
+        if i < len(nrs_details["requests"]):
+            nrs_details["requests"][i]["created"] = date.isoformat()
 
     entities_response = {
         "businessEntities": businesses_details,

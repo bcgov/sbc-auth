@@ -176,9 +176,11 @@ class EntityMappingService:
         # For search we need all identifiers, the filtering is done in LEAR and NAMES.
         if not any([search_details.identifier, search_details.status, search_details.name, search_details.type]):
             query = query.offset((search_details.page - 1) * search_details.limit).limit(search_details.limit + 1)
+            data = query.all()
+            return data[: search_details.limit], len(data) > search_details.limit
 
         data = query.all()
-        return data[: search_details.limit], len(data) > search_details.limit
+        return data, False
 
     @staticmethod
     def populate_affiliation_base(org_id: int, search_details: AffiliationSearchDetails):

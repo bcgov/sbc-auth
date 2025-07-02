@@ -15,7 +15,7 @@
 import datetime
 import re
 from dataclasses import asdict
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from flask import current_app
 from requests.exceptions import HTTPError
@@ -470,11 +470,11 @@ class Affiliation:
         search_details: AffiliationSearchDetails,
         org_id,
         remove_stale_drafts,
-    ) -> List:
+    ) -> Tuple[List, bool]:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
         # Our pagination is already handled at the auth level when not doing a search.
-        if not (search_details.status and search_details.name and search_details.type and search_details.identifier):
+        if not any([search_details.status, search_details.name, search_details.type, search_details.identifier]):
             search_details.page = 1
         search_dict = asdict(search_details)
         for affiliation_base in affiliation_bases:
@@ -496,23 +496,32 @@ class Affiliation:
         )
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
+            has_more_apis = any(r.get("hasMore", False) for r in responses if isinstance(r, dict))
             combined = Affiliation._combine_affiliation_details(responses, remove_stale_drafts)
-            ordered = {
-                affiliation.identifier: affiliation.created
-                for affiliation in sorted(affiliation_bases, key=lambda x: x.created, reverse=True)
-            }
+            combined = Affiliation._sort_affiliations_by_created(combined, affiliation_bases)
 
-            def sort_key(item):
-                identifier = item.get("identifier", item.get("nameRequest", {}).get("nrNum", ""))
-                return ordered.get(identifier, datetime.datetime.min)
-
-            combined.sort(key=sort_key, reverse=True)
             Affiliation._handle_affiliation_debug(affiliation_bases, combined)
-            return combined
+            return combined, has_more_apis
         except ServiceUnavailableException as err:
             current_app.logger.debug(err)
             current_app.logger.debug("Failed to get affiliations details:  %s", affiliation_bases)
             raise ServiceUnavailableException("Failed to get affiliation details") from err
+
+    @staticmethod
+    def _sort_affiliations_by_created(combined: list, affiliation_bases: list) -> list:
+        """Sort affiliations by created date."""
+        ordered = {
+            affiliation.identifier: affiliation.created
+            for affiliation in sorted(affiliation_bases, key=lambda x: x.created, reverse=True)
+        }
+
+        def sort_key(item):
+            return ordered.get(
+                item.get("identifier", item.get("nameRequest", {}).get("nrNum", "")), datetime.datetime.min
+            )
+
+        combined.sort(key=sort_key, reverse=True)
+        return combined
 
     @staticmethod
     def _handle_affiliation_debug(affiliation_bases, combined):
@@ -530,6 +539,22 @@ class Affiliation:
             current_app.logger.warning(f"Identifiers missing from combined results: {missing_identifiers}")
 
     @staticmethod
+    def _extract_name_requests(data: dict) -> dict:
+        """Updates Name Requests from the affiliation details response."""
+        name_requests_key = "requests"
+        normalized = {"hasMore": False, "requests": []}
+
+        if not isinstance(data, dict):
+            return normalized
+
+        nr_list = data.get(name_requests_key)
+        if isinstance(nr_list, list):
+            normalized["requests"] = nr_list
+            normalized["hasMore"] = data.get("hasMore", False)
+
+        return normalized
+
+    @staticmethod
     def _group_details(details):
         """Group details from the affiliation details response."""
         name_requests = {}
@@ -537,17 +562,16 @@ class Affiliation:
         drafts = []
         businesses_key = "businessEntities"
         drafts_key = "draftEntities"
+        name_requests_key = "requests"
         for data in details:
-            if isinstance(data, list):
-                # assume this is an NR list
-                for name_request in data:
-                    # i.e. {'NR1234567': {...}}
+            nr_data = Affiliation._extract_name_requests(data)
+            for name_request in nr_data[name_requests_key]:
+                if "nrNum" in name_request:
                     name_requests[name_request["nrNum"]] = {"legalType": CorpType.NR.value, "nameRequest": name_request}
-                continue
             if businesses_key in data:
-                businesses = list(data[businesses_key])
+                businesses.extend(data.get(businesses_key))
             if drafts_key in data:
-                drafts = data[drafts_key]
+                drafts.extend(data.get(drafts_key))
         return name_requests, businesses, drafts
 
     @staticmethod
