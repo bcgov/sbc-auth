@@ -125,7 +125,6 @@
         </div>
       </template>
       <template
-        v-if="hasEFTPaymentMethod"
         #[`item.frequency`]="{ item }"
       >
         <div>
