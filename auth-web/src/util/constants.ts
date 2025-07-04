@@ -489,7 +489,6 @@ export enum LDFlags {
     ProductWillsStatus = 'product-VS-status',
     SupportedAmalgamationEntities = 'supported-amalgamation-entities',
     SupportedContinuationInEntities = 'supported-continuation-in-entities',
-    SentryEnable = 'sentry-enable',
     SupportRestorationEntities = 'supported-restoration-entities',
     AllowableBusinessSearchTypes = 'allowable-business-search-types',
     AllowableBusinessPasscodeTypes = 'allowable-business-passcode-types',

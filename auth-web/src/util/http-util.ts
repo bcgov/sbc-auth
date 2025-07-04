@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/browser'
 import Axios from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { SessionStorageKeys } from '@/util/constants'
@@ -32,7 +31,6 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   response => response,
   error => {
-    Sentry.captureException(error)
     return Promise.reject(error)
   }
 )

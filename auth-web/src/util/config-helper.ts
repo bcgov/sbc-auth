@@ -199,10 +199,6 @@ export default class ConfigHelper {
     return `${import.meta.env.VUE_APP_AUTH_LD_CLIENT_ID}`
   }
 
-  static getSentryDsn () {
-    return `${import.meta.env.VUE_APP_SENTRY_DSN}`
-  }
-
   static getAddressCompleteKey () {
     return `${import.meta.env.VUE_APP_ADDRESS_COMPLETE_KEY}`
   }

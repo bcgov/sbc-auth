@@ -177,7 +177,7 @@ describe('AccountInfo.vue', () => {
       template: '<div />'
     }
     const $t = () => `test`
-    
+
     wrapper = mount(AccountInfo, {
       localVue,
       vuetify,
