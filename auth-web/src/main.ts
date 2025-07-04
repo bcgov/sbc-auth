@@ -20,9 +20,6 @@ import initializeI18n from './plugins/i18n'
 import router from './routes/index'
 import vuetify from './plugins/vuetify'
 
-// eslint-disable-next-line sort-imports
-import { LDFlags } from '@/util/constants'
-
 Vue.use(VueCompositionAPI)
 Vue.use(PiniaVuePlugin)
 const pinia = createPinia()
