@@ -1,6 +1,5 @@
 import './composition-api-setup' // ensure this happens before any imports trigger use of composition-api
 import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://materialdesignicons.com/)
-import * as Sentry from '@sentry/vue'
 import { PiniaVuePlugin, createPinia, setActivePinia } from 'pinia'
 import App from './App.vue'
 import CommonUtils from '@/util/common-util'
@@ -51,15 +50,6 @@ ConfigHelper.saveConfigToSessionStorage().then(async () => {
   await LaunchDarklyService.init(ConfigHelper.getLdClientId());
   // addressCompleteKey is for canada post address lookup, which is to be used in sbc-common-components
   (<any>window).addressCompleteKey = ConfigHelper.getAddressCompleteKey()
-
-  if (LaunchDarklyService.getFlag(LDFlags.SentryEnable)) {
-    // initialize Sentry
-    console.info('Initializing Sentry...') // eslint-disable-line no-console
-    Sentry.init({
-      Vue,
-      dsn: ConfigHelper.getSentryDsn()
-    })
-  }
 
   // initialize Hotjar
   const hotjarId = ConfigHelper.getHotjarId();
