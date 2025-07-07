@@ -1,7 +1,6 @@
-import { createLocalVue, mount } from '@vue/test-utils'
+import { createPaymentCardData, createWrapper, expectElementExists, expectVueInstance, waitForNextTick } from '../test-utils/vue-test-utils'
 import PaymentCard from '@/components/pay/PaymentCard.vue'
 import PaymentServices from '@/services/payment.services'
-import Vuetify from 'vuetify'
 
 // Mock PaymentServices
 vi.mock('@/services/payment.services', () => ({
@@ -12,12 +11,8 @@ vi.mock('@/services/payment.services', () => ({
 
 describe('PaymentCard.vue', () => {
   let wrapper: any
-  let vuetify: any
-  let localVue: any
 
   beforeEach(() => {
-    localVue = createLocalVue()
-    vuetify = new Vuetify({})
     vi.clearAllMocks()
   })
 
@@ -27,61 +22,46 @@ describe('PaymentCard.vue', () => {
     }
   })
 
-  const createWrapper = (paymentCardData: any, showPayWithOnlyCC = false) => {
-    const $t = () => ''
-    return mount(PaymentCard, {
-      propsData: {
-        paymentCardData,
-        showPayWithOnlyCC
-      },
-      localVue,
-      vuetify,
-      mocks: { $t }
+  const createPaymentCardWrapper = (paymentCardData: any, showPayWithOnlyCC = false) => {
+    return createWrapper(PaymentCard, {
+      paymentCardData,
+      showPayWithOnlyCC
     })
   }
 
   describe('Basic functionality', () => {
     it('is a Vue instance', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 50,
-        payeeName: 'BC Reg',
         cfsAccountId: 1234,
         obCredit: 10,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
-      expect(wrapper.vm).toBeTruthy()
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
+      expectVueInstance(wrapper)
     })
 
     it('Should render Payment card div', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 50,
-        payeeName: 'BC Reg',
         cfsAccountId: 1234,
         obCredit: 10,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
-      expect(wrapper.find('[data-test="div-bcol-payment-card"]')).toBeTruthy()
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
+      expectElementExists(wrapper, '[data-test="div-bcol-payment-card"]')
     })
   })
 
   describe('obCredit functionality', () => {
     it('should handle obCredit when credit is greater than balance due', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 50,
-        payeeName: 'BC Reg',
         cfsAccountId: 1234,
         obCredit: 100,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       expect(wrapper.vm.totalBalanceDue).toBe(50)
       expect(wrapper.vm.totalPaid).toBe(0)
@@ -92,16 +72,13 @@ describe('PaymentCard.vue', () => {
     })
 
     it('should handle obCredit when credit is less than balance due', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
-        payeeName: 'BC Reg',
         cfsAccountId: 1234,
         obCredit: 30,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       expect(wrapper.vm.overCredit).toBe(false)
       expect(wrapper.vm.partialCredit).toBe(true)
@@ -110,16 +87,13 @@ describe('PaymentCard.vue', () => {
     })
 
     it('should handle obCredit when credit equals balance due', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 50,
-        payeeName: 'BC Reg',
         cfsAccountId: 1234,
         obCredit: 50,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       expect(wrapper.vm.overCredit).toBe(true)
       expect(wrapper.vm.partialCredit).toBe(false)
@@ -128,16 +102,13 @@ describe('PaymentCard.vue', () => {
     })
 
     it('should handle zero obCredit', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 50,
-        payeeName: 'BC Reg',
         cfsAccountId: 1234,
         obCredit: 0,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       expect(wrapper.vm.doHaveCredit).toBe(false)
       expect(wrapper.vm.overCredit).toBe(false)
@@ -147,16 +118,13 @@ describe('PaymentCard.vue', () => {
     })
 
     it('should handle undefined obCredit', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 50,
-        payeeName: 'BC Reg',
         cfsAccountId: 1234,
         obCredit: undefined,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       expect(wrapper.vm.doHaveCredit).toBe(false)
       expect(wrapper.vm.overCredit).toBe(false)
@@ -168,31 +136,25 @@ describe('PaymentCard.vue', () => {
 
   describe('padCredit functionality', () => {
     it('should include padCredit in payment card data', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 50,
-        payeeName: 'BC Reg',
         cfsAccountId: 1234,
         obCredit: 10,
-        padCredit: 25,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 25
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       expect(wrapper.vm.paymentCardData.padCredit).toBe(25)
     })
 
     it('should handle zero padCredit', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 50,
-        payeeName: 'BC Reg',
         cfsAccountId: 1234,
         obCredit: 10,
-        padCredit: 0,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 0
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       expect(wrapper.vm.paymentCardData.padCredit).toBe(0)
     })
@@ -200,54 +162,48 @@ describe('PaymentCard.vue', () => {
 
   describe('Credit calculations with totalPaid', () => {
     it('should calculate balance due correctly when totalPaid is greater than 0', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
-        payeeName: 'BC Reg',
-        cfsAccountId: 1234,
+        totalPaid: 20,
         obCredit: 30,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 20
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       expect(wrapper.vm.totalBalanceDue).toBe(100)
       expect(wrapper.vm.totalPaid).toBe(20)
-      expect(wrapper.vm.balanceDue).toBe(50) // 100 - 20 - 30
+      // Initial balanceDue = 100 - 20 = 80
+      // After credit applied: 80 - 30 = 50
+      expect(wrapper.vm.balanceDue).toBe(50)
+      expect(wrapper.vm.overCredit).toBe(false)
+      expect(wrapper.vm.partialCredit).toBe(true)
     })
 
     it('should apply obCredit to remaining balance after totalPaid', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
-        payeeName: 'BC Reg',
-        cfsAccountId: 1234,
-        obCredit: 30,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 20
-      }
-      wrapper = createWrapper(paymentCardData)
+        totalPaid: 10,
+        obCredit: 50,
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
-      // balanceDue = 100 - 20 = 80
-      // with obCredit of 30, partialCredit = true
-      expect(wrapper.vm.balanceDue).toBe(50) // 80 - 30
-      expect(wrapper.vm.partialCredit).toBe(true)
+      expect(wrapper.vm.balanceDue).toBe(40) // (100 - 10) - 50
       expect(wrapper.vm.overCredit).toBe(false)
+      expect(wrapper.vm.partialCredit).toBe(true)
     })
   })
 
   describe('Online banking data setup', () => {
     it('should set up online banking data correctly', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
         payeeName: 'BC Reg',
         cfsAccountId: '123456',
         obCredit: 30,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       const onlineBankingData = wrapper.vm.onlineBankingData
       expect(onlineBankingData.totalBalanceDue).toBe(70) // 100 - 30
@@ -260,16 +216,14 @@ describe('PaymentCard.vue', () => {
     })
 
     it('should set up online banking data for over credit scenario', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 50,
         payeeName: 'BC Reg',
         cfsAccountId: '123456',
         obCredit: 100,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       const onlineBankingData = wrapper.vm.onlineBankingData
       expect(onlineBankingData.totalBalanceDue).toBe(0) // 50 - 50 (capped at balance due)
@@ -281,50 +235,43 @@ describe('PaymentCard.vue', () => {
 
   describe('Credit card payment flow', () => {
     it('should show credit card option when not over credit', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
         payeeName: 'BC Reg',
         cfsAccountId: '123456',
         obCredit: 30,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       expect(wrapper.vm.overCredit).toBe(false)
       expect(wrapper.find('.pay-with-credit-card').exists()).toBe(true)
     })
 
     it('should hide credit card option when over credit', async () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 50,
         payeeName: 'BC Reg',
         cfsAccountId: '123456',
         obCredit: 100,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
-      await wrapper.vm.$nextTick()
+      await waitForNextTick(wrapper)
       expect(wrapper.vm.overCredit).toBe(true)
-      // The credit card checkbox should not be visible when over credit
       expect(wrapper.find('.pay-with-credit-card').exists()).toBe(false)
     })
 
     it('should show partial credit warning when using credit card', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
         payeeName: 'BC Reg',
         cfsAccountId: '123456',
         obCredit: 30,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       expect(wrapper.vm.partialCredit).toBe(true)
     })
@@ -332,16 +279,14 @@ describe('PaymentCard.vue', () => {
 
   describe('Event handling', () => {
     it('should emit complete-online-banking event', async () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
         payeeName: 'BC Reg',
         cfsAccountId: '123456',
         obCredit: 30,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       await wrapper.vm.emitBtnClick('complete-online-banking')
 
@@ -350,16 +295,14 @@ describe('PaymentCard.vue', () => {
     })
 
     it('should emit pay-with-credit-card event', async () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
         payeeName: 'BC Reg',
         cfsAccountId: '123456',
         obCredit: 30,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       await wrapper.vm.emitBtnClick('pay-with-credit-card')
 
@@ -368,16 +311,14 @@ describe('PaymentCard.vue', () => {
     })
 
     it('should emit download-invoice event', async () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
         payeeName: 'BC Reg',
         cfsAccountId: '123456',
         obCredit: 30,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       await wrapper.vm.emitBtnClick('download-invoice')
 
@@ -386,16 +327,14 @@ describe('PaymentCard.vue', () => {
     })
 
     it('should not call applycredit when no credit available', async () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
         payeeName: 'BC Reg',
         cfsAccountId: '123456',
         obCredit: 0,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData)
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData)
 
       await wrapper.vm.emitBtnClick('complete-online-banking')
 
@@ -405,34 +344,30 @@ describe('PaymentCard.vue', () => {
   })
 
   describe('Cancel functionality', () => {
-    it('should emit complete-online-banking when canceling with showPayWithOnlyCC', () => {
-      const paymentCardData = {
+    it('should emit complete-online-banking when canceling with showPayWithOnlyCC', async () => {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
         payeeName: 'BC Reg',
         cfsAccountId: '123456',
         obCredit: 30,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData, true) // showPayWithOnlyCC = true
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData, true) // showPayWithOnlyCC = true
 
-      wrapper.vm.cancel()
+      await wrapper.vm.cancel()
 
-      expect(PaymentServices.applycredit).toHaveBeenCalled()
+      expect(wrapper.emitted('complete-online-banking')).toBeTruthy()
     })
 
     it('should set payWithCreditCard to false when canceling without showPayWithOnlyCC', () => {
-      const paymentCardData = {
+      const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
         payeeName: 'BC Reg',
         cfsAccountId: '123456',
         obCredit: 30,
-        padCredit: 5,
-        paymentId: 1,
-        totalPaid: 0
-      }
-      wrapper = createWrapper(paymentCardData, false) // showPayWithOnlyCC = false
+        padCredit: 5
+      })
+      wrapper = createPaymentCardWrapper(paymentCardData, false) // showPayWithOnlyCC = false
 
       wrapper.vm.payWithCreditCard = true
       wrapper.vm.cancel()
