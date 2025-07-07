@@ -110,7 +110,7 @@ export const mountTransactionsWithStore = async (
 ) => {
   const { localVue, vuetify } = createTestSetup()
   const orgStore = useOrgStore()
-  orgStore.currentOrgPaymentDetails = orgPaymentDetails as any
+  orgStore.currentOrgPaymentDetails = orgPaymentDetails
   orgStore.currentOrganization = { id: 123, orgType: accountType } as any
   orgStore.getOrgPayments = vi.fn(() => Promise.resolve(orgPaymentDetails)) as any
   orgStore.currentMembership = { membershipTypeCode: 'ADMIN' } as any
