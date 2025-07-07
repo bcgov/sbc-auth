@@ -106,17 +106,22 @@ describe('Transactions obCredit and padCredit functionality', () => {
     restoreSandbox(sandbox)
   })
 
+  // Helper function to setup wrapper with given credit values
+  const setupWrapperWithCredits = async (obCredit: string | undefined | null, padCredit: string | undefined | null, paymentMethod: string) => {
+    const orgPaymentDetails = createOrgPaymentDetails({
+      obCredit: obCredit?.toString(),
+      padCredit: padCredit?.toString(),
+      paymentMethod
+    })
+    const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
+    wrapper = setup.wrapper
+    sandbox = setup.sandbox
+    await Vue.nextTick()
+  }
+
   describe('obCredit display', () => {
     it('should display obCredit when available', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '50.00',
-        padCredit: '0',
-        paymentMethod: 'ONLINE_BANKING'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits('50.00', '0', 'ONLINE_BANKING')
       expect(wrapper.find('.credit-header-row').exists()).toBe(true)
       expect(wrapper.text()).toContain('Account Credit Available:')
       expect(wrapper.text()).toContain('Online Banking')
@@ -124,15 +129,7 @@ describe('Transactions obCredit and padCredit functionality', () => {
     })
 
     it('should not display obCredit when zero', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '0',
-        padCredit: '25.00',
-        paymentMethod: 'PAD'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits('0', '25.00', 'PAD')
       expect(wrapper.find('.credit-header-row').exists()).toBe(true)
       expect(wrapper.text()).toContain('Account Credit Available:')
       expect(wrapper.text()).not.toContain('Online Banking')
@@ -141,43 +138,19 @@ describe('Transactions obCredit and padCredit functionality', () => {
     })
 
     it('should handle undefined obCredit', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: undefined,
-        padCredit: '0',
-        paymentMethod: 'CC'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits(undefined, '0', 'CC')
       expect(wrapper.vm.obCredit).toBe(0)
       expect(wrapper.vm.hasObCredit).toBe(false)
     })
 
     it('should handle null obCredit', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: null,
-        padCredit: '0',
-        paymentMethod: 'CC'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits(null, '0', 'CC')
       expect(wrapper.vm.obCredit).toBe(0)
       expect(wrapper.vm.hasObCredit).toBe(false)
     })
 
     it('should handle string obCredit values', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '75.50',
-        padCredit: '0',
-        paymentMethod: 'ONLINE_BANKING'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits('75.50', '0', 'ONLINE_BANKING')
       expect(wrapper.vm.obCredit).toBe(75.50)
       expect(wrapper.vm.hasObCredit).toBe(true)
       expect(wrapper.text()).toContain('$75.50')
@@ -186,15 +159,7 @@ describe('Transactions obCredit and padCredit functionality', () => {
 
   describe('padCredit display', () => {
     it('should display padCredit when available', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '0',
-        padCredit: '100.00',
-        paymentMethod: 'PAD'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits('0', '100.00', 'PAD')
       expect(wrapper.find('.credit-header-row').exists()).toBe(true)
       expect(wrapper.text()).toContain('Account Credit Available:')
       expect(wrapper.text()).toContain('Pre-Authorized Debit')
@@ -202,15 +167,7 @@ describe('Transactions obCredit and padCredit functionality', () => {
     })
 
     it('should not display padCredit when zero', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '50.00',
-        padCredit: '0',
-        paymentMethod: 'ONLINE_BANKING'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits('50.00', '0', 'ONLINE_BANKING')
       expect(wrapper.find('.credit-header-row').exists()).toBe(true)
       expect(wrapper.text()).toContain('Account Credit Available:')
       expect(wrapper.text()).not.toContain('Pre-Authorized Debit')
@@ -219,60 +176,28 @@ describe('Transactions obCredit and padCredit functionality', () => {
     })
 
     it('should handle undefined padCredit', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '0',
-        padCredit: undefined,
-        paymentMethod: 'CC'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits('0', undefined, 'CC')
       expect(wrapper.vm.padCredit).toBe(0)
       expect(wrapper.vm.hasPadCredit).toBe(false)
     })
 
     it('should handle null padCredit', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '0',
-        padCredit: null,
-        paymentMethod: 'CC'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits('0', null, 'CC')
       expect(wrapper.vm.padCredit).toBe(0)
       expect(wrapper.vm.hasPadCredit).toBe(false)
     })
 
     it('should handle string padCredit values', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '0',
-        padCredit: '250.75',
-        paymentMethod: 'PAD'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits('0', '250.75', 'PAD')
       expect(wrapper.vm.padCredit).toBe(250.75)
       expect(wrapper.vm.hasPadCredit).toBe(true)
       expect(wrapper.text()).toContain('$250.75')
     })
   })
 
-  describe('Both credits display', () => {
-    it('should display both obCredit and padCredit when both are available', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '75.00',
-        padCredit: '125.00',
-        paymentMethod: 'ONLINE_BANKING'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+  describe('Credit display scenarios', () => {
+    it('should display both credits when available', async () => {
+      await setupWrapperWithCredits('75.00', '125.00', 'ONLINE_BANKING')
       expect(wrapper.find('.credit-header-row').exists()).toBe(true)
       expect(wrapper.text()).toContain('Account Credit Available:')
       expect(wrapper.text()).toContain('Online Banking')
@@ -282,29 +207,13 @@ describe('Transactions obCredit and padCredit functionality', () => {
     })
 
     it('should hide credit section when no credits are available', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '0',
-        padCredit: '0',
-        paymentMethod: 'CC'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits('0', '0', 'CC')
       expect(wrapper.find('.credit-header-row').exists()).toBe(false)
       expect(wrapper.text()).not.toContain('Account Credit Available:')
     })
 
     it('should show credit details message when credits are available', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '50.00',
-        padCredit: '0',
-        paymentMethod: 'ONLINE_BANKING'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits('50.00', '0', 'ONLINE_BANKING')
       expect(wrapper.find('.credit-details').exists()).toBe(true)
       expect(wrapper.text()).toContain('Credit for different payment methods are not transferable')
       expect(wrapper.text()).toContain('Product and Payment page')
@@ -312,44 +221,20 @@ describe('Transactions obCredit and padCredit functionality', () => {
   })
 
   describe('Credit calculations', () => {
-    it('should calculate hasObCredit correctly', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '25.50',
-        padCredit: '0',
-        paymentMethod: 'ONLINE_BANKING'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+    it('should calculate obCredit properties correctly', async () => {
+      await setupWrapperWithCredits('25.50', '0', 'ONLINE_BANKING')
       expect(wrapper.vm.hasObCredit).toBe(true)
       expect(wrapper.vm.hasPadCredit).toBe(false)
     })
 
-    it('should calculate hasPadCredit correctly', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '0',
-        padCredit: '100.00',
-        paymentMethod: 'PAD'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+    it('should calculate padCredit properties correctly', async () => {
+      await setupWrapperWithCredits('0', '100.00', 'PAD')
       expect(wrapper.vm.hasObCredit).toBe(false)
       expect(wrapper.vm.hasPadCredit).toBe(true)
     })
 
     it('should calculate both credits correctly', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '50.00',
-        padCredit: '75.00',
-        paymentMethod: 'ONLINE_BANKING'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
-      await Vue.nextTick()
+      await setupWrapperWithCredits('50.00', '75.00', 'ONLINE_BANKING')
       expect(wrapper.vm.hasObCredit).toBe(true)
       expect(wrapper.vm.hasPadCredit).toBe(true)
       expect(wrapper.vm.obCredit).toBe(50.00)
@@ -359,29 +244,15 @@ describe('Transactions obCredit and padCredit functionality', () => {
 
   describe('Show credit prop', () => {
     it('should hide credit section when showCredit is false', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '50.00',
-        padCredit: '25.00',
-        paymentMethod: 'ONLINE_BANKING'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
+      await setupWrapperWithCredits('50.00', '25.00', 'ONLINE_BANKING')
       wrapper.setProps({ showCredit: false })
       await Vue.nextTick()
       expect(wrapper.find('.credit-header-row').exists()).toBe(false)
       expect(wrapper.text()).not.toContain('Account Credit Available:')
     })
 
-    it('should show credit section when showCredit is true and credits are available', async () => {
-      const orgPaymentDetails = createOrgPaymentDetails({
-        obCredit: '50.00',
-        padCredit: '25.00',
-        paymentMethod: 'ONLINE_BANKING'
-      })
-      const setup = await mountTransactionsWithStore(orgPaymentDetails, Account.PREMIUM, transactionResponse)
-      wrapper = setup.wrapper
-      sandbox = setup.sandbox
+    it('should show credit section when showCredit is true', async () => {
+      await setupWrapperWithCredits('50.00', '25.00', 'ONLINE_BANKING')
       wrapper.setProps({ showCredit: true })
       await Vue.nextTick()
       expect(wrapper.find('.credit-header-row').exists()).toBe(true)

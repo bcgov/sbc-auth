@@ -116,9 +116,15 @@ export const mountTransactionsWithStore = async (
   orgStore.currentMembership = { membershipTypeCode: 'ADMIN' } as any
   orgStore.permissions = ['TRANSACTION_HISTORY']
 
-  // stub axios
+  // stub axios - check if already wrapped first
   const sandbox = sinon.createSandbox()
+  // Check if axios.post is already a sinon stub by looking for 'restore'
+  const existingStub = axios.post as any
+  if (typeof existingStub.restore === 'function') {
+    existingStub.restore()
+  }
   const postStub = sandbox.stub(axios, 'post')
+
   postStub.returns(Promise.resolve({ data: transactionResponse }))
 
   const wrapper = mount(Transactions, {
