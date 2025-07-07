@@ -21,11 +21,28 @@
         {{ title }}
       </h2>
     </header>
-    <section v-if="showCredit && credit !== 0">
+    <section v-if="showCredit && (hasPadCredit || hasObCredit)">
       <v-divider class="mb-8" />
-      <h2>Account Credit: <span class="cad-credit ml-4">CAD</span> ${{ credit.toFixed(2) }}</h2>
+      <div class="credit-header-row">
+        <span class="font-weight-bold">Account Credit Available:</span>
+        <span
+          v-if="hasPadCredit"
+          class="credit-method-amount ml-4"
+        >
+          <span class="font-weight-bold">{{ paymentTypeDisplay.PAD }}</span>
+          <span class="font-weight-bold ml-1">${{ padCredit.toFixed(2) }}</span>
+        </span>
+        <span
+          v-if="hasObCredit"
+          class="credit-method-amount ml-4"
+        >
+          <span class="font-weight-bold">{{ paymentTypeDisplay.ONLINE_BANKING }}</span>
+          <span class="font-weight-bold ml-1">${{ obCredit.toFixed(2) }}</span>
+        </span>
+      </div>
       <p class="credit-details mt-1">
-        You have a credit of ${{ credit.toFixed(2) }} on this account.
+        Credit for different payment methods are not transferable. To use your credit, please navigate
+        to the Product and Payment page and select the related payment method.
       </p>
       <v-divider class="mb-8 mt-8" />
     </section>
@@ -126,6 +143,7 @@ import { StatusCodes } from 'http-status-codes'
 import TransactionsDataTable from './TransactionsDataTable.vue'
 import { getTransactionTableHeaders } from '@/resources/table-headers'
 import moment from 'moment'
+import { paymentTypeDisplay } from '@/resources/display-mappers/payment-type-display'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
@@ -151,7 +169,12 @@ export default defineComponent({
     const { clearAllFilters, getTransactionReport, loadTransactionList, setViewAll, defaultSearchToOneYear } = useTransactions()
 
     const state = reactive({
-      isLoading: false
+      isLoading: false,
+      obCredit: 0,
+      padCredit: 0,
+      paymentMethod: null,
+      hasPadCredit: computed(() => state.padCredit > 0),
+      hasObCredit: computed(() => state.obCredit > 0)
     })
 
     // FUTURE: vue3 we can set this fn explicitly in the resource instead of doing it here
@@ -186,8 +209,6 @@ export default defineComponent({
       })
     })
 
-    const credit = ref(0)
-
     const isTransactionsAllowed = computed((): boolean => {
       return orgStore.hasPermission(Permission.TRANSACTION_HISTORY)
     })
@@ -196,9 +217,13 @@ export default defineComponent({
       const accountId = currentOrgPaymentDetails.value?.accountId
       if (!accountId || Number(accountId) !== currentOrganization.value?.id) {
         const paymentDetails: OrgPaymentDetails = await orgStore.getOrgPayments(currentOrganization.value?.id)
-        credit.value = Number(paymentDetails?.credit || 0)
+        state.obCredit = Number(paymentDetails?.obCredit || 0)
+        state.padCredit = Number(paymentDetails?.padCredit || 0)
+        state.paymentMethod = paymentDetails.paymentMethod || ''
       } else {
-        credit.value = Number(currentOrgPaymentDetails.value?.credit || 0)
+        state.obCredit = Number(currentOrgPaymentDetails.value?.obCredit || 0)
+        state.padCredit = Number(currentOrgPaymentDetails.value?.padCredit || 0)
+        state.paymentMethod = currentOrgPaymentDetails.value?.paymentMethod || ''
       }
     }
 
@@ -245,8 +270,8 @@ export default defineComponent({
       headerSelections,
       headersSelected,
       sortedHeaders,
-      credit,
-      exportCSV
+      exportCSV,
+      paymentTypeDisplay
     }
   }
 })
@@ -340,5 +365,14 @@ export default defineComponent({
 
   .loading-container {
     background: rgba(255,255,255, 0.8);
+  }
+
+  .credit-header-row {
+    display: flex;
+    align-items: center;
+    font-size: 1.15rem;
+  }
+  .credit-method-amount {
+    font-size: 1.15rem;
   }
 </style>

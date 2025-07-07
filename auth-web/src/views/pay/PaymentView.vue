@@ -111,21 +111,21 @@ import { useOrgStore } from '@/stores/org'
 export default class PaymentView extends Vue {
   @Prop({ default: '' }) paymentId: string
   @Prop({ default: '' }) redirectUrl: string
-  private readonly createTransaction!: (transactionData) => any
-  private readonly updateInvoicePaymentMethodAsCreditCard!: (invoicePayload) => any
-  private readonly downloadOBInvoice!: (paymentId: string) => any
-  private readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
-  private readonly getInvoice!: (invoicePayload) => Invoice
-  private showLoading: boolean = true
-  private showdownloadLoading: boolean = false
-  private showOnlineBanking: boolean = false
-  private errorMessage: string = ''
-  private showErrorModal: boolean = false
-  private returnUrl: string = ''
-  private paymentCardData: any
-  private showPayWithOnlyCC: boolean = false
+  readonly createTransaction!: (transactionData) => any
+  readonly updateInvoicePaymentMethodAsCreditCard!: (invoicePayload) => any
+  readonly downloadOBInvoice!: (paymentId: string) => any
+  readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
+  readonly getInvoice!: (invoicePayload) => Invoice
+  showLoading: boolean = true
+  showdownloadLoading: boolean = false
+  showOnlineBanking: boolean = false
+  errorMessage: string = ''
+  showErrorModal: boolean = false
+  returnUrl: string = ''
+  paymentCardData: any
+  showPayWithOnlyCC: boolean = false
 
-  private async mounted () {
+  async mounted () {
     this.showLoading = true
     if (!this.paymentId || !this.redirectUrl) {
       this.showLoading = false
@@ -147,7 +147,8 @@ export default class PaymentView extends Vue {
               totalBalanceDue: invoice?.total || 0, // to fix credit amount
               payeeName: ConfigHelper.getPaymentPayeeName(),
               cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || '',
-              credit: paymentDetails?.credit,
+              obCredit: paymentDetails?.obCredit,
+              padCredit: paymentDetails?.padCredit,
               paymentId: this.paymentId,
               totalPaid: invoice?.paid || 0
             }
@@ -179,23 +180,23 @@ export default class PaymentView extends Vue {
     return this.redirectUrl
   }
 
-  private isUserSignedIn (): boolean {
+  isUserSignedIn (): boolean {
     return !!ConfigHelper.getFromSession('KEYCLOAK_TOKEN')
   }
 
-  protected getAccountFromSession (): AccountSettings {
+  getAccountFromSession (): AccountSettings {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
   }
 
-  private goToUrl (url:string) {
+  goToUrl (url:string) {
     window.location.href = url || this.redirectUrlFixed
   }
 
-  private completeOBPayment () {
+  completeOBPayment () {
     this.goToUrl(this.returnUrl)
   }
 
-  private async payNow () {
+  async payNow () {
     // patch the transaction
     // redirect for payment
     try {
@@ -207,7 +208,7 @@ export default class PaymentView extends Vue {
     }
   }
 
-  private async downloadInvoice () {
+  async downloadInvoice () {
     // download invoice fot online banking
     this.showLoading = true // to avoid rapid download clicks
     this.showdownloadLoading = true // to avoid rapid download clicks
@@ -230,7 +231,7 @@ export default class PaymentView extends Vue {
     }
   }
 
-  private async doCreateTransaction () {
+  async doCreateTransaction () {
     const transactionDetails = await this.createTransaction({
       paymentId: this.paymentId,
       redirectUrl: this.redirectUrlFixed

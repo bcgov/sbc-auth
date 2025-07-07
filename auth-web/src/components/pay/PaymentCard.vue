@@ -109,7 +109,6 @@
 </template>
 
 <script lang="ts">
-
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import PayWithCreditCard from '@/components/pay/PayWithCreditCard.vue'
 import PayWithOnlineBanking from '@/components/pay/PayWithOnlineBanking.vue'
@@ -120,40 +119,40 @@ import PaymentServices from '@/services/payment.services'
     PayWithCreditCard,
     PayWithOnlineBanking
   }
-
 })
 export default class PaymentCard extends Vue {
   @Prop() paymentCardData: any
   @Prop({ default: false }) showPayWithOnlyCC: boolean
-  private payWithCreditCard: boolean = false
-  private balanceDue = 0
-  private totalBalanceDue = 0
-  private cfsAccountId: string = ''
-  private payeeName: string = ''
-  private onlineBankingData: any = []
-  private credit?: number = null
-  private doHaveCredit:boolean = false
-  private overCredit:boolean = false
-  private partialCredit:boolean = false
-  private creditBalance = 0
-  private paymentId: string
-  private totalPaid = 0
+  payWithCreditCard: boolean = false
+  balanceDue = 0
+  totalBalanceDue = 0
+  cfsAccountId: string = ''
+  payeeName: string = ''
+  onlineBankingData: any = []
+  credit?: number = null
+  doHaveCredit:boolean = false
+  overCredit:boolean = false
+  partialCredit:boolean = false
+  creditBalance = 0
+  paymentId: string
+  totalPaid = 0
 
-  private mounted () {
+  mounted () {
     this.totalBalanceDue = this.paymentCardData?.totalBalanceDue || 0
     this.totalPaid = this.paymentCardData?.totalPaid || 0
-    this.balanceDue = this.totalBalanceDue - this.totalPaid
+    this.balanceDue = (this.totalBalanceDue - this.totalPaid) || 0
     this.payeeName = this.paymentCardData.payeeName
     this.cfsAccountId = this.paymentCardData?.cfsAccountId || ''
     this.payWithCreditCard = this.showPayWithOnlyCC
-    this.credit = this.paymentCardData.credit
-    this.doHaveCredit = this.paymentCardData?.credit > 0
+    this.credit = this.paymentCardData.obCredit || 0
+    this.doHaveCredit = this.paymentCardData?.obCredit > 0
+    this.creditBalance = Math.max(this.credit - this.balanceDue, 0)
     if (this.doHaveCredit) {
       this.overCredit = this.credit >= this.totalBalanceDue
       this.partialCredit = this.credit < this.totalBalanceDue
-      this.balanceDue = this.overCredit ? this.balanceDue : this.balanceDue - this.credit
+      this.balanceDue = Math.max(this.balanceDue - this.credit, 0)
     }
-    this.creditBalance = this.overCredit ? this.credit - this.balanceDue : 0
+
     this.paymentId = this.paymentCardData.paymentId
 
     // setting online data
@@ -168,7 +167,7 @@ export default class PaymentCard extends Vue {
     }
   }
 
-  private cancel () {
+  cancel () {
     if (this.showPayWithOnlyCC) { // cancel will redirect back to page
       this.emitBtnClick('complete-online-banking')
     } else {
@@ -176,7 +175,7 @@ export default class PaymentCard extends Vue {
     }
   }
 
-  private async emitBtnClick (eventName) {
+  async emitBtnClick (eventName) {
     if (eventName === 'complete-online-banking' && this.doHaveCredit) {
       await PaymentServices.applycredit(this.paymentId)
     }
