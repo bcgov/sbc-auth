@@ -121,7 +121,6 @@ describe('Transactions obCredit and padCredit functionality', () => {
 
   describe('Credit display and calculations', () => {
     it('should handle obCredit and padCredit display scenarios', async () => {
-      // Test obCredit display
       await setupWrapperWithCredits('50.00', '0', 'ONLINE_BANKING')
       expect(wrapper.find('.credit-header-row').exists()).toBe(true)
       expect(wrapper.text()).toContain('Account Credit Available:')
