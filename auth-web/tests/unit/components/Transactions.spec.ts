@@ -119,84 +119,27 @@ describe('Transactions obCredit and padCredit functionality', () => {
     await Vue.nextTick()
   }
 
-  describe('obCredit display', () => {
-    it('should display obCredit when available', async () => {
+  describe('Credit display and calculations', () => {
+    it('should handle obCredit and padCredit display scenarios', async () => {
+      // Test obCredit display
       await setupWrapperWithCredits('50.00', '0', 'ONLINE_BANKING')
       expect(wrapper.find('.credit-header-row').exists()).toBe(true)
       expect(wrapper.text()).toContain('Account Credit Available:')
       expect(wrapper.text()).toContain('Online Banking')
       expect(wrapper.text()).toContain('$50.00')
-    })
-
-    it('should not display obCredit when zero', async () => {
-      await setupWrapperWithCredits('0', '25.00', 'PAD')
-      expect(wrapper.find('.credit-header-row').exists()).toBe(true)
-      expect(wrapper.text()).toContain('Account Credit Available:')
-      expect(wrapper.text()).not.toContain('Online Banking')
-      expect(wrapper.text()).toContain('Pre-Authorized Debit')
-      expect(wrapper.text()).toContain('$25.00')
-    })
-
-    it('should handle undefined obCredit', async () => {
-      await setupWrapperWithCredits(undefined, '0', 'CC')
-      expect(wrapper.vm.obCredit).toBe(0)
-      expect(wrapper.vm.hasObCredit).toBe(false)
-    })
-
-    it('should handle null obCredit', async () => {
-      await setupWrapperWithCredits(null, '0', 'CC')
-      expect(wrapper.vm.obCredit).toBe(0)
-      expect(wrapper.vm.hasObCredit).toBe(false)
-    })
-
-    it('should handle string obCredit values', async () => {
-      await setupWrapperWithCredits('75.50', '0', 'ONLINE_BANKING')
-      expect(wrapper.vm.obCredit).toBe(75.50)
+      expect(wrapper.vm.obCredit).toBe(50.00)
       expect(wrapper.vm.hasObCredit).toBe(true)
-      expect(wrapper.text()).toContain('$75.50')
-    })
-  })
+      expect(wrapper.vm.hasPadCredit).toBe(false)
 
-  describe('padCredit display', () => {
-    it('should display padCredit when available', async () => {
       await setupWrapperWithCredits('0', '100.00', 'PAD')
       expect(wrapper.find('.credit-header-row').exists()).toBe(true)
       expect(wrapper.text()).toContain('Account Credit Available:')
       expect(wrapper.text()).toContain('Pre-Authorized Debit')
       expect(wrapper.text()).toContain('$100.00')
-    })
-
-    it('should not display padCredit when zero', async () => {
-      await setupWrapperWithCredits('50.00', '0', 'ONLINE_BANKING')
-      expect(wrapper.find('.credit-header-row').exists()).toBe(true)
-      expect(wrapper.text()).toContain('Account Credit Available:')
-      expect(wrapper.text()).not.toContain('Pre-Authorized Debit')
-      expect(wrapper.text()).toContain('Online Banking')
-      expect(wrapper.text()).toContain('$50.00')
-    })
-
-    it('should handle undefined padCredit', async () => {
-      await setupWrapperWithCredits('0', undefined, 'CC')
-      expect(wrapper.vm.padCredit).toBe(0)
-      expect(wrapper.vm.hasPadCredit).toBe(false)
-    })
-
-    it('should handle null padCredit', async () => {
-      await setupWrapperWithCredits('0', null, 'CC')
-      expect(wrapper.vm.padCredit).toBe(0)
-      expect(wrapper.vm.hasPadCredit).toBe(false)
-    })
-
-    it('should handle string padCredit values', async () => {
-      await setupWrapperWithCredits('0', '250.75', 'PAD')
-      expect(wrapper.vm.padCredit).toBe(250.75)
+      expect(wrapper.vm.padCredit).toBe(100.00)
+      expect(wrapper.vm.hasObCredit).toBe(false)
       expect(wrapper.vm.hasPadCredit).toBe(true)
-      expect(wrapper.text()).toContain('$250.75')
-    })
-  })
 
-  describe('Credit display scenarios', () => {
-    it('should display both credits when available', async () => {
       await setupWrapperWithCredits('75.00', '125.00', 'ONLINE_BANKING')
       expect(wrapper.find('.credit-header-row').exists()).toBe(true)
       expect(wrapper.text()).toContain('Account Credit Available:')
@@ -204,15 +147,65 @@ describe('Transactions obCredit and padCredit functionality', () => {
       expect(wrapper.text()).toContain('$75.00')
       expect(wrapper.text()).toContain('Pre-Authorized Debit')
       expect(wrapper.text()).toContain('$125.00')
+      expect(wrapper.vm.obCredit).toBe(75.00)
+      expect(wrapper.vm.padCredit).toBe(125.00)
+      expect(wrapper.vm.hasObCredit).toBe(true)
+      expect(wrapper.vm.hasPadCredit).toBe(true)
     })
 
-    it('should hide credit section when no credits are available', async () => {
+    it('should handle zero and null credit scenarios', async () => {
+      await setupWrapperWithCredits('0', '25.00', 'PAD')
+      expect(wrapper.find('.credit-header-row').exists()).toBe(true)
+      expect(wrapper.text()).toContain('Account Credit Available:')
+      expect(wrapper.text()).not.toContain('Online Banking')
+      expect(wrapper.text()).toContain('Pre-Authorized Debit')
+      expect(wrapper.text()).toContain('$25.00')
+      expect(wrapper.vm.obCredit).toBe(0)
+      expect(wrapper.vm.hasObCredit).toBe(false)
+
+      await setupWrapperWithCredits('50.00', '0', 'ONLINE_BANKING')
+      expect(wrapper.find('.credit-header-row').exists()).toBe(true)
+      expect(wrapper.text()).toContain('Account Credit Available:')
+      expect(wrapper.text()).not.toContain('Pre-Authorized Debit')
+      expect(wrapper.text()).toContain('Online Banking')
+      expect(wrapper.text()).toContain('$50.00')
+      expect(wrapper.vm.padCredit).toBe(0)
+      expect(wrapper.vm.hasPadCredit).toBe(false)
+
       await setupWrapperWithCredits('0', '0', 'CC')
       expect(wrapper.find('.credit-header-row').exists()).toBe(false)
       expect(wrapper.text()).not.toContain('Account Credit Available:')
     })
 
-    it('should show credit details message when credits are available', async () => {
+    it('should handle undefined and null credit values', async () => {
+      await setupWrapperWithCredits(undefined, '0', 'CC')
+      expect(wrapper.vm.obCredit).toBe(0)
+      expect(wrapper.vm.hasObCredit).toBe(false)
+
+      await setupWrapperWithCredits(null, '0', 'CC')
+      expect(wrapper.vm.obCredit).toBe(0)
+      expect(wrapper.vm.hasObCredit).toBe(false)
+
+      await setupWrapperWithCredits('0', undefined, 'CC')
+      expect(wrapper.vm.padCredit).toBe(0)
+      expect(wrapper.vm.hasPadCredit).toBe(false)
+
+      await setupWrapperWithCredits('0', null, 'CC')
+      expect(wrapper.vm.padCredit).toBe(0)
+      expect(wrapper.vm.hasPadCredit).toBe(false)
+    })
+
+    it('should handle string credit values and edge cases', async () => {
+      await setupWrapperWithCredits('75.50', '0', 'ONLINE_BANKING')
+      expect(wrapper.vm.obCredit).toBe(75.50)
+      expect(wrapper.vm.hasObCredit).toBe(true)
+      expect(wrapper.text()).toContain('$75.50')
+
+      await setupWrapperWithCredits('0', '250.75', 'PAD')
+      expect(wrapper.vm.padCredit).toBe(250.75)
+      expect(wrapper.vm.hasPadCredit).toBe(true)
+      expect(wrapper.text()).toContain('$250.75')
+
       await setupWrapperWithCredits('50.00', '0', 'ONLINE_BANKING')
       expect(wrapper.find('.credit-details').exists()).toBe(true)
       expect(wrapper.text()).toContain('Credit for different payment methods are not transferable')
@@ -220,39 +213,15 @@ describe('Transactions obCredit and padCredit functionality', () => {
     })
   })
 
-  describe('Credit calculations', () => {
-    it('should calculate obCredit properties correctly', async () => {
-      await setupWrapperWithCredits('25.50', '0', 'ONLINE_BANKING')
-      expect(wrapper.vm.hasObCredit).toBe(true)
-      expect(wrapper.vm.hasPadCredit).toBe(false)
-    })
-
-    it('should calculate padCredit properties correctly', async () => {
-      await setupWrapperWithCredits('0', '100.00', 'PAD')
-      expect(wrapper.vm.hasObCredit).toBe(false)
-      expect(wrapper.vm.hasPadCredit).toBe(true)
-    })
-
-    it('should calculate both credits correctly', async () => {
-      await setupWrapperWithCredits('50.00', '75.00', 'ONLINE_BANKING')
-      expect(wrapper.vm.hasObCredit).toBe(true)
-      expect(wrapper.vm.hasPadCredit).toBe(true)
-      expect(wrapper.vm.obCredit).toBe(50.00)
-      expect(wrapper.vm.padCredit).toBe(75.00)
-    })
-  })
-
-  describe('Show credit prop', () => {
-    it('should hide credit section when showCredit is false', async () => {
+  describe('Show credit prop functionality', () => {
+    it('should handle showCredit prop scenarios', async () => {
       await setupWrapperWithCredits('50.00', '25.00', 'ONLINE_BANKING')
+
       wrapper.setProps({ showCredit: false })
       await Vue.nextTick()
       expect(wrapper.find('.credit-header-row').exists()).toBe(false)
       expect(wrapper.text()).not.toContain('Account Credit Available:')
-    })
 
-    it('should show credit section when showCredit is true', async () => {
-      await setupWrapperWithCredits('50.00', '25.00', 'ONLINE_BANKING')
       wrapper.setProps({ showCredit: true })
       await Vue.nextTick()
       expect(wrapper.find('.credit-header-row').exists()).toBe(true)
