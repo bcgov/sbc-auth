@@ -294,7 +294,7 @@ describe('PaymentCard.vue', () => {
       expect(PaymentServices.applycredit).toHaveBeenCalledWith(1)
     })
 
-    it('should emit pay-with-credit-card event', async () => {
+    it('should emit pay-with-credit-card and download-invoice events', async () => {
       const paymentCardData = createPaymentCardData({
         totalBalanceDue: 100,
         payeeName: 'BC Reg',
@@ -305,23 +305,10 @@ describe('PaymentCard.vue', () => {
       wrapper = createPaymentCardWrapper(paymentCardData)
 
       await wrapper.vm.emitBtnClick('pay-with-credit-card')
-
       expect(wrapper.emitted('pay-with-credit-card')).toBeTruthy()
       expect(PaymentServices.applycredit).not.toHaveBeenCalled()
-    })
-
-    it('should emit download-invoice event', async () => {
-      const paymentCardData = createPaymentCardData({
-        totalBalanceDue: 100,
-        payeeName: 'BC Reg',
-        cfsAccountId: '123456',
-        obCredit: 30,
-        padCredit: 5
-      })
-      wrapper = createPaymentCardWrapper(paymentCardData)
 
       await wrapper.vm.emitBtnClick('download-invoice')
-
       expect(wrapper.emitted('download-invoice')).toBeTruthy()
       expect(PaymentServices.applycredit).not.toHaveBeenCalled()
     })

@@ -1,10 +1,10 @@
 import '../test-utils/composition-api-setup'
 import { createOrgPaymentDetails, mountTransactionsWithStore, restoreSandbox } from '../test-utils/vue-test-utils'
-import { transactionResponse } from '../test-utils/test-data/transaction'
 import { Account } from '@/util/constants'
 import Transactions from '@/components/auth/account-settings/transaction/Transactions.vue'
 import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
 import Vue from 'vue'
+import { transactionResponse } from '../test-utils/test-data/transaction'
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
