@@ -539,18 +539,19 @@ class Affiliation:
             current_app.logger.warning(f"Identifiers missing from combined results: {missing_identifiers}")
 
     @staticmethod
-    def _extract_name_requests(data: dict) -> dict:
+    def _extract_name_requests(data: dict | list) -> dict:
         """Updates Name Requests from the affiliation details response."""
         name_requests_key = "requests"
         normalized = {"hasMore": False, "requests": []}
-
-        if not isinstance(data, dict):
+        if isinstance(data, list):
+            normalized["requests"] = data
+            normalized["hasMore"] = False
             return normalized
-
-        nr_list = data.get(name_requests_key)
-        if isinstance(nr_list, list):
-            normalized["requests"] = nr_list
-            normalized["hasMore"] = data.get("hasMore", False)
+        if isinstance(data, dict):
+            nr_list = data.get(name_requests_key)
+            if isinstance(nr_list, list):
+                normalized["requests"] = nr_list
+                normalized["hasMore"] = data.get("hasMore", False)
 
         return normalized
 
@@ -567,7 +568,10 @@ class Affiliation:
             nr_data = Affiliation._extract_name_requests(data)
             for name_request in nr_data[name_requests_key]:
                 if "nrNum" in name_request:
-                    name_requests[name_request["nrNum"]] = {"legalType": CorpType.NR.value, "nameRequest": name_request}
+                    name_requests[name_request["nrNum"]] = {
+                        "legalType": CorpType.NR.value,
+                        "nameRequest": name_request,
+                    }
             if businesses_key in data:
                 businesses.extend(data.get(businesses_key))
             if drafts_key in data:
