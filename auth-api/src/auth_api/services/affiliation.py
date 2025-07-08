@@ -565,9 +565,16 @@ class Affiliation:
         name_requests_key = "requests"
         for data in details:
             nr_data = Affiliation._extract_name_requests(data)
-            for name_request in nr_data[name_requests_key]:
-                if "nrNum" in name_request:
+            if isinstance(data, list):
+                for name_request in data:
                     name_requests[name_request["nrNum"]] = {"legalType": CorpType.NR.value, "nameRequest": name_request}
+            else:
+                for name_request in nr_data[name_requests_key]:
+                    if "nrNum" in name_request:
+                        name_requests[name_request["nrNum"]] = {
+                            "legalType": CorpType.NR.value,
+                            "nameRequest": name_request,
+                        }
             if businesses_key in data:
                 businesses.extend(data.get(businesses_key))
             if drafts_key in data:
