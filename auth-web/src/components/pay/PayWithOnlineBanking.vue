@@ -2,6 +2,7 @@
   <v-card elevation="0">
     <v-card-text class="heading-info py-7 px-8">
       <h2 class="mb-2">
+        Original Amount: <span class="ml-2">${{ originalAmount.toFixed(2) }}</span><br>
         Balance Due: <span class="ml-2">${{ totalBalanceDue.toFixed(2) }}</span>
       </h2>
       <template v-if="overCredit">
@@ -79,7 +80,8 @@ export default defineComponent({
       overCredit: false,
       creditBalance: 0,
       partialCredit: false,
-      credit: 0
+      credit: 0,
+      originalAmount: 0
     })
 
     const updateOnlineBankingData = () => {
@@ -90,6 +92,7 @@ export default defineComponent({
       state.partialCredit = props.onlineBankingData?.partialCredit || false
       state.creditBalance = props.onlineBankingData?.creditBalance || 0
       state.credit = props.onlineBankingData?.obCredit || 0
+      state.originalAmount = props.onlineBankingData?.originalAmount || 0
     }
 
     watch(() => props.onlineBankingData, updateOnlineBankingData, { deep: true })

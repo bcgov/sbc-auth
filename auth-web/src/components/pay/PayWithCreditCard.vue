@@ -58,13 +58,6 @@ export default defineComponent({
       type: Boolean,
       default: false
     }
-  },
-  setup (props) {
-    return {
-      showPayWithOnlyCC: props.showPayWithOnlyCC,
-      totalBalanceDue: props.totalBalanceDue,
-      partialCredit: props.partialCredit
-    }
   }
 })
 </script>

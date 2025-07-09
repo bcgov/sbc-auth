@@ -136,11 +136,13 @@ export default class PaymentCard extends Vue {
   creditBalance = 0
   paymentId: string
   totalPaid = 0
+  originalAmount = 0
 
   mounted () {
     this.totalBalanceDue = this.paymentCardData?.totalBalanceDue || 0
     this.totalPaid = this.paymentCardData?.totalPaid || 0
-    this.balanceDue = (this.totalBalanceDue - this.totalPaid) || 0
+    this.originalAmount = (this.totalBalanceDue - this.totalPaid) || 0
+    this.balanceDue = this.originalAmount
     this.payeeName = this.paymentCardData.payeeName
     this.cfsAccountId = this.paymentCardData?.cfsAccountId || ''
     this.payWithCreditCard = this.showPayWithOnlyCC
@@ -151,12 +153,15 @@ export default class PaymentCard extends Vue {
       this.overCredit = this.credit >= this.totalBalanceDue
       this.partialCredit = this.credit < this.totalBalanceDue
       this.balanceDue = Math.max(this.balanceDue - this.credit, 0)
+      // Credit card uses totalBalanceDue, not balanceDue
+      // Thus it doesn't include credit in calculation
     }
 
     this.paymentId = this.paymentCardData.paymentId
 
     // setting online data
     this.onlineBankingData = {
+      originalAmount: this.originalAmount,
       totalBalanceDue: this.balanceDue,
       payeeName: this.payeeName,
       cfsAccountId: this.cfsAccountId,
