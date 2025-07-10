@@ -29,14 +29,14 @@
           v-if="hasPadCredit"
           class="credit-method-amount ml-4"
         >
-          <span class="font-weight-bold">{{ paymentTypeDisplay.PAD }}</span>
-          <span class="font-weight-bold ml-1">${{ padCredit.toFixed(2) }}</span>
+          <span class="font-weight-bold credit-method-name">{{ paymentTypeDisplay.PAD }}</span>
+          <span class="font-weight-bold ml-1">CAD ${{ padCredit.toFixed(2) }}</span>
         </span>
         <span
           v-if="hasObCredit"
           class="credit-method-amount ml-4"
         >
-          <span class="font-weight-bold">{{ paymentTypeDisplay.ONLINE_BANKING }}</span>
+          <span class="font-weight-bold credit-method-name">{{ paymentTypeDisplay.ONLINE_BANKING }}</span>
           <span class="font-weight-bold ml-1">${{ obCredit.toFixed(2) }}</span>
         </span>
       </div>
@@ -374,5 +374,8 @@ export default defineComponent({
   }
   .credit-method-amount {
     font-size: 1.15rem;
+  }
+  .credit-method-name {
+    color: $gray7;
   }
 </style>
