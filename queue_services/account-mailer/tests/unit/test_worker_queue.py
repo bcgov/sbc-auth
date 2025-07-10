@@ -475,50 +475,6 @@ def test_payment_pending_emails(app, session, client):
         )
 
 
-@pytest.mark.skip(reason="Skipping until pay queue switches to google storage")
-def test_ejv_failure_emails(app, session, client):
-    """Assert that events can be retrieved and decoded from the Queue."""
-    gcs_file_name = "FEEDBACK.1234567890"
-    gcs_bucket = "cgi-ejv"
-    try:
-        with patch.object(notification_service, "send_email", return_value=None) as mock_send:
-
-            # Set the environment variable for the GCS emulator
-            os.environ["CLOUD_STORAGE_EMULATOR_HOST"] = "http://localhost:4443"
-            os.environ["STORAGE_EMULATOR_HOST"] = "http://localhost:4443"  # Add this if needed
-
-            # Create the bucket in the GCS emulator
-            create_bucket(gcs_bucket)
-            # Create a temporary file for testing
-            with open(gcs_file_name, "w") as jv_file:
-                jv_file.write("TEST")
-            # Upload the file to the GCS emulator
-            google_store.GoogleStoreService.upload_file_to_bucket(gcs_bucket, gcs_file_name, gcs_file_name)
-
-            file_content = google_store.GoogleStoreService.download_file_from_bucket(gcs_bucket, gcs_file_name)
-            assert file_content == b"TEST", f"File content mismatch: {file_content}"
-
-            # Add an event to the queue
-            mail_details = {
-                "fileName": gcs_file_name,
-                "minioLocation": gcs_bucket,  # TODO change this value later
-            }
-
-            # Ensure Pub/Sub emulator is correctly set up
-            helper_add_event_to_queue(
-                client,
-                message_type=QueueMessageTypes.EJV_FAILED.value,
-                mail_details=mail_details,
-            )
-
-            # Verify the email was sent
-            mock_send.assert_called()
-            assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
-            assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.EJV_FAILED.value
-    finally:
-        delete_bucket(gcs_bucket)
-
-
 def test_passcode_reset_email(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
     with patch.object(notification_service, "send_email", return_value=None) as mock_send:

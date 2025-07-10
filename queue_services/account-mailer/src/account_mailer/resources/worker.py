@@ -30,7 +30,6 @@ from account_mailer.auth_utils import get_login_url, get_member_emails, get_tran
 from account_mailer.email_processors import (
     account_unlock,
     common_mailer,
-    ejv_failures,
     pad_confirmation,
     product_confirmation,
     refund_requested,
@@ -67,7 +66,6 @@ def worker():
         handle_online_banking(message_type, email_msg)
         handle_pad_setup_failed(message_type, email_msg)
         handle_payment_pending(message_type, email_msg)
-        handle_ejv_failed(message_type, email_msg)
         handle_reset_passcode(message_type, email_msg)
         handle_affiliation_invitation(message_type, email_msg)
         handle_product_actions(message_type, email_msg)
@@ -322,14 +320,6 @@ def handle_payment_pending(message_type, email_msg):
         logo_url=logo_url,
         **args,
     )
-    process_email(email_dict)
-
-
-def handle_ejv_failed(message_type, email_msg):
-    """Handle the ejv failed message."""
-    if message_type != QueueMessageTypes.EJV_FAILED.value:
-        return
-    email_dict = ejv_failures.process(email_msg)
     process_email(email_dict)
 
 
