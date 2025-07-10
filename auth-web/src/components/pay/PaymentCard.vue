@@ -109,84 +109,107 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { defineComponent, onMounted, reactive } from '@vue/composition-api'
 import PayWithCreditCard from '@/components/pay/PayWithCreditCard.vue'
 import PayWithOnlineBanking from '@/components/pay/PayWithOnlineBanking.vue'
 import PaymentServices from '@/services/payment.services'
 
-@Component({
+export default defineComponent({
+  name: 'PaymentCard',
   components: {
     PayWithCreditCard,
     PayWithOnlineBanking
+  },
+  props: {
+    paymentCardData: {
+      type: Object,
+      required: true
+    },
+    showPayWithOnlyCC: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ['complete-online-banking', 'pay-with-credit-card', 'download-invoice'],
+  setup (props, { emit }) {
+    const state = reactive({
+      payWithCreditCard: false,
+      balanceDue: 0,
+      totalBalanceDue: 0,
+      cfsAccountId: '',
+      payeeName: '',
+      onlineBankingData: {} as any,
+      credit: null as number | null,
+      doHaveCredit: false,
+      overCredit: false,
+      partialCredit: false,
+      creditBalance: 0,
+      paymentId: '',
+      totalPaid: 0,
+      originalAmount: 0
+    })
+
+    const initializePaymentData = () => {
+      state.totalBalanceDue = props.paymentCardData?.totalBalanceDue || 0
+      state.totalPaid = props.paymentCardData?.totalPaid || 0
+      state.originalAmount = (state.totalBalanceDue - state.totalPaid) || 0
+      state.balanceDue = state.originalAmount
+      state.payeeName = props.paymentCardData.payeeName
+      state.cfsAccountId = props.paymentCardData?.cfsAccountId || ''
+      state.payWithCreditCard = props.showPayWithOnlyCC
+      state.credit = props.paymentCardData.obCredit || 0
+      state.doHaveCredit = props.paymentCardData?.obCredit > 0
+      state.creditBalance = Math.max(state.credit - state.balanceDue, 0)
+
+      if (state.doHaveCredit) {
+        state.overCredit = state.credit >= state.totalBalanceDue
+        state.partialCredit = state.credit < state.totalBalanceDue
+        state.balanceDue = Math.max(state.balanceDue - state.credit, 0)
+        // Credit card uses totalBalanceDue, not balanceDue
+        // Thus it doesn't include credit in calculation
+      }
+
+      state.paymentId = props.paymentCardData.paymentId
+
+      // setting online data
+      state.onlineBankingData = {
+        originalAmount: state.originalAmount,
+        totalBalanceDue: state.balanceDue,
+        payeeName: state.payeeName,
+        cfsAccountId: state.cfsAccountId,
+        overCredit: state.overCredit,
+        partialCredit: state.partialCredit,
+        creditBalance: state.creditBalance,
+        credit: state.credit
+      }
+    }
+
+    function emitBtnClick (eventName: string) {
+      if (eventName === 'complete-online-banking' && state.doHaveCredit) {
+        PaymentServices.applycredit(state.paymentId)
+      }
+      emit(eventName)
+    }
+
+    function cancel () {
+      if (props.showPayWithOnlyCC) { // cancel will redirect back to page
+        emitBtnClick('complete-online-banking')
+      } else {
+        state.payWithCreditCard = false
+      }
+    }
+
+    onMounted(() => {
+      initializePaymentData()
+    })
+
+    return {
+      ...state,
+      cancel,
+      emitBtnClick
+    }
   }
 })
-export default class PaymentCard extends Vue {
-  @Prop() paymentCardData: any
-  @Prop({ default: false }) showPayWithOnlyCC: boolean
-  payWithCreditCard: boolean = false
-  balanceDue = 0
-  totalBalanceDue = 0
-  cfsAccountId: string = ''
-  payeeName: string = ''
-  onlineBankingData: any = []
-  credit?: number = null
-  doHaveCredit:boolean = false
-  overCredit:boolean = false
-  partialCredit:boolean = false
-  creditBalance = 0
-  paymentId: string
-  totalPaid = 0
-  originalAmount = 0
-
-  mounted () {
-    this.totalBalanceDue = this.paymentCardData?.totalBalanceDue || 0
-    this.totalPaid = this.paymentCardData?.totalPaid || 0
-    this.originalAmount = (this.totalBalanceDue - this.totalPaid) || 0
-    this.balanceDue = this.originalAmount
-    this.payeeName = this.paymentCardData.payeeName
-    this.cfsAccountId = this.paymentCardData?.cfsAccountId || ''
-    this.payWithCreditCard = this.showPayWithOnlyCC
-    this.credit = this.paymentCardData.obCredit || 0
-    this.doHaveCredit = this.paymentCardData?.obCredit > 0
-    this.creditBalance = Math.max(this.credit - this.balanceDue, 0)
-    if (this.doHaveCredit) {
-      this.overCredit = this.credit >= this.totalBalanceDue
-      this.partialCredit = this.credit < this.totalBalanceDue
-      this.balanceDue = Math.max(this.balanceDue - this.credit, 0)
-      // Credit card uses totalBalanceDue, not balanceDue
-      // Thus it doesn't include credit in calculation
-    }
-
-    this.paymentId = this.paymentCardData.paymentId
-
-    // setting online data
-    this.onlineBankingData = {
-      originalAmount: this.originalAmount,
-      totalBalanceDue: this.balanceDue,
-      payeeName: this.payeeName,
-      cfsAccountId: this.cfsAccountId,
-      overCredit: this.overCredit,
-      partialCredit: this.partialCredit,
-      creditBalance: this.creditBalance,
-      credit: this.credit
-    }
-  }
-
-  cancel () {
-    if (this.showPayWithOnlyCC) { // cancel will redirect back to page
-      this.emitBtnClick('complete-online-banking')
-    } else {
-      this.payWithCreditCard = false
-    }
-  }
-
-  async emitBtnClick (eventName) {
-    if (eventName === 'complete-online-banking' && this.doHaveCredit) {
-      await PaymentServices.applycredit(this.paymentId)
-    }
-    this.$emit(eventName)
-  }
-}
 </script>
 
 <style lang="scss" scoped>
