@@ -184,9 +184,9 @@ export default defineComponent({
       }
     }
 
-    function emitBtnClick (eventName: string) {
+    async function emitBtnClick (eventName: string) {
       if (eventName === 'complete-online-banking' && state.doHaveCredit) {
-        PaymentServices.applycredit(state.paymentId)
+        await PaymentServices.applycredit(state.paymentId)
       }
       emit(eventName)
     }
