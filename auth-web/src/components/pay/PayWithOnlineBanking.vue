@@ -2,7 +2,7 @@
   <v-card elevation="0">
     <v-card-text class="heading-info py-7 px-8">
       <h2 class="mb-2">
-        Original Amount: <span class="ml-2">${{ originalAmount.toFixed(2) }}</span><br>
+        Transaction Amount: <span class="ml-2">${{ originalAmount.toFixed(2) }}</span><br>
         Balance Due: <span class="ml-2">${{ totalBalanceDue.toFixed(2) }}</span>
       </h2>
       <template v-if="overCredit">

@@ -79,184 +79,208 @@
 </template>
 
 <script lang="ts">
-
-import { Component, Prop, Vue } from 'vue-property-decorator'
 import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
-import { Invoice } from '@/models/invoice'
 import { OrgPaymentDetails } from '@/models/Organization'
 import PaymentCard from '@/components/pay/PaymentCard.vue'
 import PaymentService from '@/services/payment.services'
+
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
 import { mapActions } from 'pinia'
 import { useOrgStore } from '@/stores/org'
 
-@Component({
+export default defineComponent({
+  name: 'PaymentView',
   components: {
     SbcSystemError,
     PaymentCard
   },
-  methods: {
-    ...mapActions(useOrgStore, [
+  props: {
+    paymentId: {
+      type: String,
+      default: ''
+    },
+    redirectUrl: {
+      type: String,
+      default: ''
+    }
+  },
+  setup (props) {
+    const state = reactive({
+      showLoading: true,
+      showdownloadLoading: false,
+      showOnlineBanking: false,
+      errorMessage: '',
+      showErrorModal: false,
+      returnUrl: '',
+      paymentCardData: null,
+      showPayWithOnlyCC: false
+    })
+
+    const { createTransaction, getOrgPayments, getInvoice, updateInvoicePaymentMethodAsCreditCard, downloadOBInvoice } = mapActions(useOrgStore, [
       'createTransaction',
       'getOrgPayments',
       'getInvoice',
       'updateInvoicePaymentMethodAsCreditCard',
       'downloadOBInvoice'
     ])
+
+    // We need this, otherwise we can get redirect Urls with just a single slash.
+    const redirectUrlFixed = computed(() => {
+      if (!props.redirectUrl.includes('://')) {
+        return props.redirectUrl.replace(':/', '://')
+      }
+      return props.redirectUrl
+    })
+
+    function isUserSignedIn (): boolean {
+      return !!ConfigHelper.getFromSession('KEYCLOAK_TOKEN')
+    }
+
+    function getAccountFromSession (): AccountSettings {
+      return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
+    }
+
+    function goToUrl (url: string) {
+      window.location.href = url || redirectUrlFixed.value
+    }
+
+    function completeOBPayment () {
+      goToUrl(state.returnUrl)
+    }
+
+    function doCreateTransaction () {
+      createTransaction({
+        paymentId: props.paymentId,
+        redirectUrl: redirectUrlFixed.value
+      }).then((transactionDetails) => {
+        state.showLoading = false
+        state.returnUrl = transactionDetails?.paySystemUrl
+        goToUrl(state.returnUrl)
+      })
+    }
+
+    function doHandleError (error) {
+      state.showLoading = false
+      if (error.response.data && ['COMPLETED_PAYMENT', 'INVALID_TRANSACTION'].includes(error.response.data.type)) {
+        // Skip PAYBC, take directly to the "clients redirect url", this avoids transaction already done error.
+        PaymentService.isValidRedirectUrl(redirectUrlFixed.value).then((isValid) => {
+          if (!isValid) {
+            state.errorMessage = 'Payment failed' // Replace with $t('payFailedMessage') when i18n is available
+            throw new Error('Invalid redirect url: ' + redirectUrlFixed.value)
+          }
+          goToUrl(redirectUrlFixed.value)
+        })
+      } else {
+        state.errorMessage = 'Payment failed' // Replace with $t('payFailedMessage') when i18n is available
+        state.showErrorModal = true
+      }
+    }
+
+    function payNow () {
+      // patch the transaction
+      // redirect for payment
+      try {
+        const accountSettings = getAccountFromSession()
+        updateInvoicePaymentMethodAsCreditCard({ paymentId: props.paymentId, accountId: accountSettings?.id })
+        doCreateTransaction()
+      } catch (error) {
+        doHandleError(error)
+      }
+    }
+
+    function downloadInvoice () {
+      // download invoice fot online banking
+      state.showLoading = true // to avoid rapid download clicks
+      state.showdownloadLoading = true // to avoid rapid download clicks
+      state.errorMessage = ''
+      try {
+        const downloadType = 'application/pdf'
+
+        downloadOBInvoice(props.paymentId).then((response: any) => {
+          const contentDispArr = response?.headers['content-disposition'].split('=')
+
+          const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-${props.paymentId}`
+          CommonUtils.fileDownload(response.data, fileName, downloadType)
+          state.showdownloadLoading = false
+          state.showLoading = false
+        }).catch(() => {
+          state.showdownloadLoading = false
+          state.showLoading = false
+          state.errorMessage = 'Download failed' // Replace with $t('downloadFailedMessage') when i18n is available
+          // state.showErrorModal = true
+        })
+      } catch {
+        state.showdownloadLoading = false
+        state.showLoading = false
+        state.errorMessage = 'Download failed' // Replace with $t('downloadFailedMessage') when i18n is available
+        // state.showErrorModal = true
+      }
+    }
+
+    onMounted(() => {
+      state.showLoading = true
+      if (!props.paymentId || !props.redirectUrl) {
+        state.showLoading = false
+        state.errorMessage = 'No payment parameters' // Replace with $t('payNoParams') when i18n is available
+        return
+      }
+      try {
+        const accountSettings = getAccountFromSession()
+        // user should be signed in and should have account as well
+        if (isUserSignedIn() && !!accountSettings) {
+          // get the invoice and check for OB
+          try {
+            getInvoice({ invoiceId: props.paymentId, accountId: accountSettings?.id }).then((invoice: any) => {
+              if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
+                // get account data to show in the UI
+                getOrgPayments(accountSettings?.id).then((paymentDetails: OrgPaymentDetails) => {
+                  state.paymentCardData = {
+                    totalBalanceDue: invoice?.total || 0, // to fix credit amount
+                    payeeName: ConfigHelper.getPaymentPayeeName(),
+                    cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || '',
+                    obCredit: paymentDetails?.obCredit,
+                    padCredit: paymentDetails?.padCredit,
+                    paymentId: props.paymentId,
+                    totalPaid: invoice?.paid || 0
+                  }
+
+                  state.showLoading = false
+                  state.showOnlineBanking = true
+                  // if isOnlineBankingAllowed is true, allowed show CC as only payment type
+                  state.showPayWithOnlyCC = !invoice?.isOnlineBankingAllowed
+                })
+              }
+            }).catch(() => {
+              // eslint-disable-next-line no-console
+              console.error('error in accessing the invoice.Defaulting to CC flow')
+            })
+          } catch {
+            // eslint-disable-next-line no-console
+            console.error('error in accessing the invoice.Defaulting to CC flow')
+          }
+        }
+
+        if (!state.showOnlineBanking) {
+          doCreateTransaction()
+        }
+      } catch (error) {
+        doHandleError(error)
+      }
+    })
+
+    return {
+      ...toRefs(state),
+      completeOBPayment,
+      payNow,
+      downloadInvoice,
+      goToUrl
+    }
   }
 })
-export default class PaymentView extends Vue {
-  @Prop({ default: '' }) paymentId: string
-  @Prop({ default: '' }) redirectUrl: string
-  readonly createTransaction!: (transactionData) => any
-  readonly updateInvoicePaymentMethodAsCreditCard!: (invoicePayload) => any
-  readonly downloadOBInvoice!: (paymentId: string) => any
-  readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
-  readonly getInvoice!: (invoicePayload) => Invoice
-  showLoading: boolean = true
-  showdownloadLoading: boolean = false
-  showOnlineBanking: boolean = false
-  errorMessage: string = ''
-  showErrorModal: boolean = false
-  returnUrl: string = ''
-  paymentCardData: any
-  showPayWithOnlyCC: boolean = false
-
-  async mounted () {
-    this.showLoading = true
-    if (!this.paymentId || !this.redirectUrl) {
-      this.showLoading = false
-      this.errorMessage = this.$t('payNoParams').toString()
-      return
-    }
-    try {
-      const accountSettings = this.getAccountFromSession()
-      // user should be signed in and should have account as well
-      if (this.isUserSignedIn && !!accountSettings) {
-        // get the invoice and check for OB
-        try {
-          const invoice = await this.getInvoice({ invoiceId: this.paymentId, accountId: accountSettings?.id })
-
-          if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
-            // get account data to show in the UI
-            const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
-            this.paymentCardData = {
-              totalBalanceDue: invoice?.total || 0, // to fix credit amount
-              payeeName: ConfigHelper.getPaymentPayeeName(),
-              cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || '',
-              obCredit: paymentDetails?.obCredit,
-              padCredit: paymentDetails?.padCredit,
-              paymentId: this.paymentId,
-              totalPaid: invoice?.paid || 0
-            }
-
-            this.showLoading = false
-            this.showOnlineBanking = true
-            // if isOnlineBankingAllowed is true, allowed show CC as only payment type
-            this.showPayWithOnlyCC = !invoice?.isOnlineBankingAllowed
-          }
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('error in accessing the invoice.Defaulting to CC flow')
-        }
-      }
-
-      if (!this.showOnlineBanking) {
-        await this.doCreateTransaction()
-      }
-    } catch (error) {
-      await this.doHandleError(error)
-    }
-  }
-
-  // We need this, otherwise we can get redirect Urls with just a single slash.
-  get redirectUrlFixed () {
-    if (!this.redirectUrl.includes('://')) {
-      return this.redirectUrl.replace(':/', '://')
-    }
-    return this.redirectUrl
-  }
-
-  isUserSignedIn (): boolean {
-    return !!ConfigHelper.getFromSession('KEYCLOAK_TOKEN')
-  }
-
-  getAccountFromSession (): AccountSettings {
-    return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
-  }
-
-  goToUrl (url:string) {
-    window.location.href = url || this.redirectUrlFixed
-  }
-
-  completeOBPayment () {
-    this.goToUrl(this.returnUrl)
-  }
-
-  async payNow () {
-    // patch the transaction
-    // redirect for payment
-    try {
-      const accountSettings = this.getAccountFromSession()
-      await this.updateInvoicePaymentMethodAsCreditCard({ paymentId: this.paymentId, accountId: accountSettings?.id })
-      await this.doCreateTransaction()
-    } catch (error) {
-      await this.doHandleError(error)
-    }
-  }
-
-  async downloadInvoice () {
-    // download invoice fot online banking
-    this.showLoading = true // to avoid rapid download clicks
-    this.showdownloadLoading = true // to avoid rapid download clicks
-    this.errorMessage = ''
-    try {
-      const downloadType = 'application/pdf'
-
-      const response = await this.downloadOBInvoice(this.paymentId)
-      const contentDispArr = response?.headers['content-disposition'].split('=')
-
-      const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-${this.paymentId}`
-      CommonUtils.fileDownload(response.data, fileName, downloadType)
-      this.showdownloadLoading = false
-      this.showLoading = false
-    } catch (error) {
-      this.showdownloadLoading = false
-      this.showLoading = false
-      this.errorMessage = this.$t('downloadFailedMessage').toString()
-      // this.showErrorModal = true
-    }
-  }
-
-  async doCreateTransaction () {
-    const transactionDetails = await this.createTransaction({
-      paymentId: this.paymentId,
-      redirectUrl: this.redirectUrlFixed
-    })
-    this.showLoading = false
-    this.returnUrl = transactionDetails?.paySystemUrl
-    this.goToUrl(this.returnUrl)
-  }
-
-  async doHandleError (error) {
-    this.showLoading = false
-    if (error.response.data && ['COMPLETED_PAYMENT', 'INVALID_TRANSACTION'].includes(error.response.data.type)) {
-      // Skip PAYBC, take directly to the "clients redirect url", this avoids transaction already done error.
-      const isValid = await PaymentService.isValidRedirectUrl(this.redirectUrlFixed)
-      if (!isValid) {
-        this.errorMessage = this.$t('payFailedMessage').toString()
-        throw new Error('Invalid redirect url: ' + this.redirectUrlFixed)
-      }
-      this.goToUrl(this.redirectUrlFixed)
-    } else {
-      this.errorMessage = this.$t('payFailedMessage').toString()
-      this.showErrorModal = true
-    }
-  }
-}
 </script>
 
 <style lang="scss" scoped>
@@ -269,5 +293,4 @@ export default class PaymentView extends Vue {
   font-weight: 600;
   margin-top: 14px;
 }
-
 </style>

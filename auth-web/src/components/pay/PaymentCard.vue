@@ -109,7 +109,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive } from '@vue/composition-api'
+import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import PayWithCreditCard from '@/components/pay/PayWithCreditCard.vue'
 import PayWithOnlineBanking from '@/components/pay/PayWithOnlineBanking.vue'
 import PaymentServices from '@/services/payment.services'
@@ -149,7 +149,7 @@ export default defineComponent({
       originalAmount: 0
     })
 
-    const initializePaymentData = () => {
+    function initializePaymentData () {
       state.totalBalanceDue = props.paymentCardData?.totalBalanceDue || 0
       state.totalPaid = props.paymentCardData?.totalPaid || 0
       state.originalAmount = (state.totalBalanceDue - state.totalPaid) || 0
@@ -204,7 +204,7 @@ export default defineComponent({
     })
 
     return {
-      ...state,
+      ...toRefs(state),
       cancel,
       emitBtnClick
     }
