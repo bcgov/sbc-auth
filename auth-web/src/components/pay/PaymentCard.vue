@@ -113,6 +113,7 @@ import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-a
 import PayWithCreditCard from '@/components/pay/PayWithCreditCard.vue'
 import PayWithOnlineBanking from '@/components/pay/PayWithOnlineBanking.vue'
 import PaymentServices from '@/services/payment.services'
+import { useOrgStore } from '@/stores'
 
 export default defineComponent({
   name: 'PaymentCard',
@@ -186,7 +187,19 @@ export default defineComponent({
 
     async function emitBtnClick (eventName: string) {
       if (eventName === 'complete-online-banking' && state.doHaveCredit) {
-        await PaymentServices.applycredit(state.paymentId)
+        try {
+          await PaymentServices.applycredit(state.paymentId)
+        } catch (error) {
+          if (error?.status === 403) {
+            try {
+              await PaymentServices.applycredit(state.paymentId, useOrgStore().currentOrganization?.id)
+            } catch (retryError) {
+              console.log('Error applying credit with account identifier', retryError)
+            }
+          } else {
+            console.log('Error applying credit with business identifier', error)
+          }
+        }
       }
       emit(eventName)
     }
