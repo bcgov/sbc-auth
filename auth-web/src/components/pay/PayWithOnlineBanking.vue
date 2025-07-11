@@ -91,7 +91,7 @@ export default defineComponent({
       state.overCredit = props.onlineBankingData?.overCredit || false
       state.partialCredit = props.onlineBankingData?.partialCredit || false
       state.creditBalance = props.onlineBankingData?.creditBalance || 0
-      state.credit = props.onlineBankingData?.obCredit || 0
+      state.credit = props.onlineBankingData?.credit || 0
       state.originalAmount = props.onlineBankingData?.originalAmount || 0
     }
 
