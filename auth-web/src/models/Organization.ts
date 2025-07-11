@@ -231,7 +231,8 @@ export interface OrgPaymentDetails {
   bcolAccount: string
   bcolUserId: string
   cfsAccount: CFSAccountDetails
-  credit: string
+  obCredit: string
+  padCredit: string
   paymentMethod: string
   statementNotificationEnabled: true
   padTosAcceptedBy:string

@@ -79,7 +79,6 @@
 </template>
 
 <script lang="ts">
-
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { AccountSettings } from '@/models/account-settings'
@@ -92,7 +91,6 @@ import PaymentService from '@/services/payment.services'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
 import { mapActions } from 'pinia'
 import { useOrgStore } from '@/stores/org'
-
 @Component({
   components: {
     SbcSystemError,
@@ -111,21 +109,20 @@ import { useOrgStore } from '@/stores/org'
 export default class PaymentView extends Vue {
   @Prop({ default: '' }) paymentId: string
   @Prop({ default: '' }) redirectUrl: string
-  private readonly createTransaction!: (transactionData) => any
-  private readonly updateInvoicePaymentMethodAsCreditCard!: (invoicePayload) => any
-  private readonly downloadOBInvoice!: (paymentId: string) => any
-  private readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
-  private readonly getInvoice!: (invoicePayload) => Invoice
-  private showLoading: boolean = true
-  private showdownloadLoading: boolean = false
-  private showOnlineBanking: boolean = false
-  private errorMessage: string = ''
-  private showErrorModal: boolean = false
-  private returnUrl: string = ''
-  private paymentCardData: any
-  private showPayWithOnlyCC: boolean = false
-
-  private async mounted () {
+  readonly createTransaction!: (transactionData) => any
+  readonly updateInvoicePaymentMethodAsCreditCard!: (invoicePayload) => any
+  readonly downloadOBInvoice!: (paymentId: string) => any
+  readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
+  readonly getInvoice!: (invoicePayload) => Invoice
+  showLoading: boolean = true
+  showdownloadLoading: boolean = false
+  showOnlineBanking: boolean = false
+  errorMessage: string = ''
+  showErrorModal: boolean = false
+  returnUrl: string = ''
+  paymentCardData: any
+  showPayWithOnlyCC: boolean = false
+  async mounted () {
     this.showLoading = true
     if (!this.paymentId || !this.redirectUrl) {
       this.showLoading = false
@@ -139,7 +136,6 @@ export default class PaymentView extends Vue {
         // get the invoice and check for OB
         try {
           const invoice = await this.getInvoice({ invoiceId: this.paymentId, accountId: accountSettings?.id })
-
           if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
             // get account data to show in the UI
             const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
@@ -147,11 +143,11 @@ export default class PaymentView extends Vue {
               totalBalanceDue: invoice?.total || 0, // to fix credit amount
               payeeName: ConfigHelper.getPaymentPayeeName(),
               cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || '',
-              credit: paymentDetails?.credit,
+              obCredit: paymentDetails?.obCredit,
+              padCredit: paymentDetails?.padCredit,
               paymentId: this.paymentId,
               totalPaid: invoice?.paid || 0
             }
-
             this.showLoading = false
             this.showOnlineBanking = true
             // if isOnlineBankingAllowed is true, allowed show CC as only payment type
@@ -162,7 +158,6 @@ export default class PaymentView extends Vue {
           console.error('error in accessing the invoice.Defaulting to CC flow')
         }
       }
-
       if (!this.showOnlineBanking) {
         await this.doCreateTransaction()
       }
@@ -170,7 +165,6 @@ export default class PaymentView extends Vue {
       await this.doHandleError(error)
     }
   }
-
   // We need this, otherwise we can get redirect Urls with just a single slash.
   get redirectUrlFixed () {
     if (!this.redirectUrl.includes('://')) {
@@ -178,24 +172,19 @@ export default class PaymentView extends Vue {
     }
     return this.redirectUrl
   }
-
-  private isUserSignedIn (): boolean {
+  isUserSignedIn (): boolean {
     return !!ConfigHelper.getFromSession('KEYCLOAK_TOKEN')
   }
-
-  protected getAccountFromSession (): AccountSettings {
+  getAccountFromSession (): AccountSettings {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
   }
-
-  private goToUrl (url:string) {
+  goToUrl (url:string) {
     window.location.href = url || this.redirectUrlFixed
   }
-
-  private completeOBPayment () {
+  completeOBPayment () {
     this.goToUrl(this.returnUrl)
   }
-
-  private async payNow () {
+  async payNow () {
     // patch the transaction
     // redirect for payment
     try {
@@ -206,18 +195,15 @@ export default class PaymentView extends Vue {
       await this.doHandleError(error)
     }
   }
-
-  private async downloadInvoice () {
+  async downloadInvoice () {
     // download invoice fot online banking
     this.showLoading = true // to avoid rapid download clicks
     this.showdownloadLoading = true // to avoid rapid download clicks
     this.errorMessage = ''
     try {
       const downloadType = 'application/pdf'
-
       const response = await this.downloadOBInvoice(this.paymentId)
       const contentDispArr = response?.headers['content-disposition'].split('=')
-
       const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-${this.paymentId}`
       CommonUtils.fileDownload(response.data, fileName, downloadType)
       this.showdownloadLoading = false
@@ -229,8 +215,7 @@ export default class PaymentView extends Vue {
       // this.showErrorModal = true
     }
   }
-
-  private async doCreateTransaction () {
+  async doCreateTransaction () {
     const transactionDetails = await this.createTransaction({
       paymentId: this.paymentId,
       redirectUrl: this.redirectUrlFixed
@@ -239,7 +224,6 @@ export default class PaymentView extends Vue {
     this.returnUrl = transactionDetails?.paySystemUrl
     this.goToUrl(this.returnUrl)
   }
-
   async doHandleError (error) {
     this.showLoading = false
     if (error.response.data && ['COMPLETED_PAYMENT', 'INVALID_TRANSACTION'].includes(error.response.data.type)) {
@@ -263,10 +247,8 @@ export default class PaymentView extends Vue {
   margin: 0 auto;
   max-width: 48rem;
 }
-
 .loading-msg {
   font-weight: 600;
   margin-top: 14px;
 }
-
 </style>

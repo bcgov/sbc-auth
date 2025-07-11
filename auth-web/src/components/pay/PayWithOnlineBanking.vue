@@ -2,7 +2,8 @@
   <v-card elevation="0">
     <v-card-text class="heading-info py-7 px-8">
       <h2 class="mb-2">
-        Balance Due: <span class="ml-2">{{ overCredit ? '-': '' }}${{ totalBalanceDue.toFixed(2) }}</span>
+        Transaction Amount: <span class="ml-2">${{ originalAmount.toFixed(2) }}</span><br>
+        Balance Due: <span class="ml-2">${{ totalBalanceDue.toFixed(2) }}</span>
       </h2>
       <template v-if="overCredit">
         <p class="mb-6">
@@ -56,42 +57,55 @@
 </template>
 
 <script lang="ts">
+import { defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 
-import { Component, Prop, Watch } from 'vue-property-decorator'
-import Vue from 'vue'
+export default defineComponent({
+  name: 'PayWithOnlineBanking',
+  props: {
+    onlineBankingData: {
+      type: Object,
+      required: true
+    },
+    showPayWithOnlyCC: {
+      type: Boolean,
+      default: false
+    }
+  },
+  setup (props) {
+    const state = reactive({
+      payWithCreditCard: false,
+      totalBalanceDue: 0,
+      cfsAccountId: '',
+      payeeName: '',
+      overCredit: false,
+      creditBalance: 0,
+      partialCredit: false,
+      credit: 0,
+      originalAmount: 0
+    })
 
-@Component
-export default class PayWithOnlineBanking extends Vue {
-  @Prop() onlineBankingData: any
-  @Prop({ default: false }) showPayWithOnlyCC: boolean
-  private payWithCreditCard: boolean = false
-  private totalBalanceDue = 0
-  private cfsAccountId: string = ''
-  private payeeName: string = ''
-  private overCredit:boolean = false
-  private creditBalance = 0
-  private partialCredit:boolean = false
-  private credit = 0
+    const updateOnlineBankingData = () => {
+      state.totalBalanceDue = props.onlineBankingData?.totalBalanceDue || 0
+      state.payeeName = props.onlineBankingData?.payeeName
+      state.cfsAccountId = props.onlineBankingData?.cfsAccountId || ''
+      state.overCredit = props.onlineBankingData?.overCredit || false
+      state.partialCredit = props.onlineBankingData?.partialCredit || false
+      state.creditBalance = props.onlineBankingData?.creditBalance || 0
+      state.credit = props.onlineBankingData?.credit || 0
+      state.originalAmount = props.onlineBankingData?.originalAmount || 0
+    }
 
-  @Watch('onlineBankingData', { deep: true })
-  async updateonlineBankingData () {
-    this.setData()
+    watch(() => props.onlineBankingData, updateOnlineBankingData, { deep: true })
+
+    onMounted(() => {
+      updateOnlineBankingData()
+    })
+
+    return {
+      ...toRefs(state)
+    }
   }
-
-  private setData () {
-    this.totalBalanceDue = this.onlineBankingData?.totalBalanceDue || 0
-    this.payeeName = this.onlineBankingData?.payeeName
-    this.cfsAccountId = this.onlineBankingData?.cfsAccountId || ''
-    this.overCredit = this.onlineBankingData?.overCredit || false
-    this.partialCredit = this.onlineBankingData?.partialCredit || false
-    this.creditBalance = this.onlineBankingData?.creditBalance || 0
-    this.credit = this.onlineBankingData?.credit || 0
-  }
-
-  private mounted () {
-    this.setData()
-  }
-}
+})
 </script>
 
 <style lang="scss" scoped>
