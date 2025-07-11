@@ -142,7 +142,7 @@ describe('PayWithOnlineBanking.vue', () => {
         overCredit: false,
         partialCredit: true,
         creditBalance: 0,
-        obCredit: 30
+        credit: 30
       })
       wrapper = createOnlineBankingWrapper(onlineBankingData)
       await waitForNextTick(wrapper)
@@ -161,7 +161,7 @@ describe('PayWithOnlineBanking.vue', () => {
         overCredit: false,
         partialCredit: true,
         creditBalance: 0,
-        obCredit: 30
+        credit: 30
       })
       wrapper = createOnlineBankingWrapper(onlineBankingData)
       await waitForNextTick(wrapper)
@@ -178,7 +178,7 @@ describe('PayWithOnlineBanking.vue', () => {
         overCredit: false,
         partialCredit: true,
         creditBalance: 0,
-        obCredit: 30
+        credit: 30
       })
       wrapper = createOnlineBankingWrapper(onlineBankingData)
       await waitForNextTick(wrapper)
@@ -278,7 +278,7 @@ describe('PayWithOnlineBanking.vue', () => {
         overCredit: true,
         partialCredit: false,
         creditBalance: 50,
-        obCredit: 50
+        credit: 50
       })
       wrapper = createOnlineBankingWrapper(onlineBankingData)
       await waitForNextTick(wrapper)
@@ -326,7 +326,7 @@ describe('PayWithOnlineBanking.vue', () => {
         overCredit: true,
         partialCredit: false,
         creditBalance: 50,
-        obCredit: 50
+        credit: 50
       })
       wrapper = createOnlineBankingWrapper(onlineBankingData)
       await waitForNextTick(wrapper)
