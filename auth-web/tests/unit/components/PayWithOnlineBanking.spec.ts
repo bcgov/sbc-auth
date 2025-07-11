@@ -14,6 +14,29 @@ describe('PayWithOnlineBanking.vue', () => {
     return createWrapper(PayWithOnlineBanking, { onlineBankingData })
   }
 
+  async function expectPayeeInformation(wrapper: any) {
+    expectTextContains(wrapper, 'Payee Name:')
+    expectTextContains(wrapper, 'Payment Identifier:')
+  }
+
+  async function expectPaymentInstructions(wrapper: any, includePayee = true) {
+    expectTextContains(wrapper, 'How to pay with online banking:')
+    expectTextContains(wrapper, 'Sign in to your financial institution')
+    if (includePayee) {
+      expectTextContains(wrapper, 'Enter "BC Registries" as payee')
+    }
+  }
+
+  async function expectNoPayeeInformation(wrapper: any) {
+    expectTextNotContains(wrapper, 'Payee Name:')
+    expectTextNotContains(wrapper, 'Payment Identifier:')
+  }
+
+  async function expectNoPaymentInstructions(wrapper: any) {
+    expectTextNotContains(wrapper, 'How to pay with online banking:')
+    expectTextNotContains(wrapper, 'Sign in to your financial institution')
+  }
+
   describe('totalBalanceDue', () => {
     it('should display totalBalanceDue correctly', async () => {
       const onlineBankingData = createOnlineBankingData({
@@ -112,8 +135,7 @@ describe('PayWithOnlineBanking.vue', () => {
       await waitForNextTick(wrapper)
 
       expect(wrapper.vm.originalAmount).toBe(75.00)
-      expectTextNotContains(wrapper, 'Payee Name:')
-      expectTextNotContains(wrapper, 'Payment Identifier:')
+      await expectNoPayeeInformation(wrapper)
     })
 
     it('should hide payment instructions when overCredit is true', async () => {
@@ -129,8 +151,7 @@ describe('PayWithOnlineBanking.vue', () => {
       await waitForNextTick(wrapper)
 
       expect(wrapper.vm.originalAmount).toBe(75.00)
-      expectTextNotContains(wrapper, 'How to pay with online banking:')
-      expectTextNotContains(wrapper, 'Sign in to your financial institution')
+      await expectNoPaymentInstructions(wrapper)
     })
   })
 
@@ -167,8 +188,7 @@ describe('PayWithOnlineBanking.vue', () => {
       await waitForNextTick(wrapper)
 
       expect(wrapper.vm.originalAmount).toBe(100.00)
-      expectTextContains(wrapper, 'Payee Name:')
-      expectTextContains(wrapper, 'Payment Identifier:')
+      await expectPayeeInformation(wrapper)
     })
 
     it('should show payment instructions when partialCredit is true', async () => {
@@ -184,8 +204,7 @@ describe('PayWithOnlineBanking.vue', () => {
       await waitForNextTick(wrapper)
 
       expect(wrapper.vm.originalAmount).toBe(100.00)
-      expectTextContains(wrapper, 'How to pay with online banking:')
-      expectTextContains(wrapper, 'Sign in to your financial institution')
+      await expectPaymentInstructions(wrapper, false)
     })
   })
 
@@ -219,8 +238,7 @@ describe('PayWithOnlineBanking.vue', () => {
       await waitForNextTick(wrapper)
 
       expect(wrapper.vm.originalAmount).toBe(100.00)
-      expectTextContains(wrapper, 'Payee Name:')
-      expectTextContains(wrapper, 'Payment Identifier:')
+      await expectPayeeInformation(wrapper)
     })
 
     it('should show payment instructions when not over credit and not partial credit', async () => {
@@ -234,9 +252,7 @@ describe('PayWithOnlineBanking.vue', () => {
       await waitForNextTick(wrapper)
 
       expect(wrapper.vm.originalAmount).toBe(100.00)
-      expectTextContains(wrapper, 'How to pay with online banking:')
-      expectTextContains(wrapper, 'Sign in to your financial institution')
-      expectTextContains(wrapper, 'Enter "BC Registries" as payee')
+      await expectPaymentInstructions(wrapper, true)
     })
   })
 
