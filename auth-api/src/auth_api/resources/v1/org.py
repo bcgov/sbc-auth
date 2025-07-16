@@ -368,9 +368,7 @@ def get_organization_affiliations_search(org_id):
 
 @bp.route("/<int:org_id>/affiliations", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["POST", "GET"])
-@_jwt.has_one_of_roles(
-    [Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value]
-)
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def get_organization_affiliations(org_id):
     """Get all affiliated entities for the given org."""
     try:
