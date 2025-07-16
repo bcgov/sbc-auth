@@ -42,7 +42,14 @@ from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import AccessType, NotificationType, OrgStatus, OrgType, PatchActions, Status
 from auth_api.utils.role_validator import validate_roles
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role  # noqa: I005
+from auth_api.utils.roles import (  # noqa: I005
+    AFFILIATION_ALLOWED_ROLES,
+    ALL_ALLOWED_ROLES,
+    CLIENT_ADMIN_ROLES,
+    STAFF,
+    USER,
+    Role,
+)
 from auth_api.utils.util import extract_numbers, string_to_bool
 
 bp = Blueprint("ORGS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs")
@@ -382,7 +389,7 @@ def get_organization_affiliations(org_id):
 
 def affiliation_search(org_id, use_entity_mapping=False):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
-    org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
+    org = OrgService.find_by_org_id(org_id, allowed_roles=AFFILIATION_ALLOWED_ROLES)
     if org is None:
         raise BusinessException(Error.DATA_NOT_FOUND, None)
     search_details = AffiliationSearchDetails.from_request_args(request)
