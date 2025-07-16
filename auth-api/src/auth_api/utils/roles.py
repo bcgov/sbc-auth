@@ -42,7 +42,7 @@ class Role(Enum):
     STAFF_MANAGE_BUSINESS = "manage_business"
     STAFF_SUSPEND_ACCOUNTS = "suspend_accounts"
 
-    # Used by Business-AR to create affiliations that may already have a passcode (bypass passcode check)
+    # Used by Business-AR / Contact Centre Staff / Maximus Staff to create affiliations (and bypass passcode check)
     SKIP_AFFILIATION_AUTH = "skip_affiliation_auth"
 
     STAFF_TASK_SEARCH = "staff_task_search"
