@@ -39,7 +39,7 @@ from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
+from auth_api.utils.roles import AFFILIATION_ALLOWED_ROLES, ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.auth_event_publisher import publish_affiliation_event
@@ -80,7 +80,7 @@ class Affiliation:
     def find_visible_affiliations_by_org_id(org_id):
         """Given an org_id, this will return the entities affiliated with it."""
         current_app.logger.debug(f"<find_visible_affiliations_by_org_id for org_id {org_id}")
-        org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
+        org = OrgService.find_by_org_id(org_id, allowed_roles=AFFILIATION_ALLOWED_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
