@@ -13,7 +13,7 @@ axios.interceptors.request.use(
       return request
     }
 
-    if (!url.host.includes(import.meta.env.VUE_APP_VON_API_URL)) {
+    if (!url.href.includes(import.meta.env.VUE_APP_VON_API_URL)) {
       request.headers['App-Name'] = import.meta.env.APP_NAME
     }
     const token = ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
