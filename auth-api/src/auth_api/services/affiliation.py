@@ -355,9 +355,11 @@ class Affiliation:
         ).json()
         return invoices
 
+    @user_context
     @staticmethod
-    def delete_affiliation(delete_affiliation_request: DeleteAffiliationRequest):
+    def delete_affiliation(delete_affiliation_request: DeleteAffiliationRequest, **kwargs):
         """Delete the affiliation for the provided org id and business id."""
+        user_from_context: UserContext = kwargs["user_context"]
         org_id = delete_affiliation_request.org_id
         business_identifier = delete_affiliation_request.business_identifier
         reset_passcode = delete_affiliation_request.reset_passcode
@@ -365,12 +367,13 @@ class Affiliation:
         email_addresses = delete_affiliation_request.email_addresses
 
         current_app.logger.info(f"<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}")
-        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
+        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF, Role.EXTERNAL_STAFF_READONLY.value))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
+        skip_auth = user_from_context.is_staff() or user_from_context.is_external_staff()
         entity = EntityService.find_by_business_identifier(
-            business_identifier, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF)
+            business_identifier, skip_auth=skip_auth, allowed_roles=(CLIENT_AUTH_ROLES)
         )
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
