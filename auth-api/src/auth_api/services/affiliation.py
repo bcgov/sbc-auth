@@ -367,13 +367,16 @@ class Affiliation:
         email_addresses = delete_affiliation_request.email_addresses
 
         current_app.logger.info(f"<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}")
-        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF, Role.EXTERNAL_STAFF_READONLY.value))
+        org = OrgService.find_by_org_id(
+            org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF, Role.EXTERNAL_STAFF_READONLY.value)
+        )
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        skip_auth = user_from_context.is_staff() or user_from_context.is_external_staff()
         entity = EntityService.find_by_business_identifier(
-            business_identifier, skip_auth=skip_auth, allowed_roles=(CLIENT_AUTH_ROLES)
+            business_identifier,
+            skip_auth=user_from_context.is_staff() or user_from_context.is_external_staff(),
+            allowed_roles=(CLIENT_AUTH_ROLES),
         )
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
