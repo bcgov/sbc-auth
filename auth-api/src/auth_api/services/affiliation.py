@@ -357,24 +357,18 @@ class Affiliation:
 
     @user_context
     @staticmethod
-    def delete_affiliation(delete_affiliation_request: DeleteAffiliationRequest, **kwargs):
+    def delete_affiliation(da: DeleteAffiliationRequest, **kwargs):
         """Delete the affiliation for the provided org id and business id."""
         user_from_context: UserContext = kwargs["user_context"]
-        org_id = delete_affiliation_request.org_id
-        business_identifier = delete_affiliation_request.business_identifier
-        reset_passcode = delete_affiliation_request.reset_passcode
-        log_delete_draft = delete_affiliation_request.log_delete_draft
-        email_addresses = delete_affiliation_request.email_addresses
-
-        current_app.logger.info(f"<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}")
+        current_app.logger.info(f"<delete_affiliation org_id:{da.org_id} business_identifier:{da.business_identifier}")
         org = OrgService.find_by_org_id(
-            org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF, Role.EXTERNAL_STAFF_READONLY.value)
+            da.org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF, Role.EXTERNAL_STAFF_READONLY.value)
         )
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity = EntityService.find_by_business_identifier(
-            business_identifier,
+            da.business_identifier,
             skip_auth=user_from_context.is_staff() or user_from_context.is_external_staff(),
             allowed_roles=(CLIENT_AUTH_ROLES),
         )
@@ -383,7 +377,7 @@ class Affiliation:
 
         entity_id = entity.identifier
 
-        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=org_id, entity_id=entity_id)
+        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=da.org_id, entity_id=entity_id)
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -391,8 +385,8 @@ class Affiliation:
         for affiliation_invitation in AffiliationInvitationModel.find_invitations_by_affiliation(affiliation.id):
             affiliation_invitation.delete()
 
-        if reset_passcode:
-            entity.reset_passcode(entity.business_identifier, email_addresses)
+        if da.reset_passcode:
+            entity.reset_passcode(entity.business_identifier, da.email_addresses)
         affiliation.delete()
         entity.set_pass_code_claimed(False)
 
@@ -409,14 +403,14 @@ class Affiliation:
         name_request = (
             entity.status in [NRStatus.DRAFT.value, NRStatus.CONSUMED.value] and entity.corp_type == CorpType.NR.value
         ) or "NR " in entity.business_identifier
-        publish = log_delete_draft or not name_request
+        publish = da.log_delete_draft or not name_request
         if publish:
             name = entity.name if len(entity.name) > 0 else entity.business_identifier
             ActivityLogPublisher.publish_activity(
-                Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value, name=name, id=entity.business_identifier)
+                Activity(da.org_id, ActivityAction.REMOVE_AFFILIATION.value, name=name, id=entity.business_identifier)
             )
 
-        publish_affiliation_event(QueueMessageTypes.BUSINESS_UNAFFILIATED.value, org_id, entity.business_identifier)
+        publish_affiliation_event(QueueMessageTypes.BUSINESS_UNAFFILIATED.value, da.org_id, entity.business_identifier)
 
     @staticmethod
     @user_context
