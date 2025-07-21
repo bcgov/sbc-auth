@@ -199,11 +199,13 @@ class Authorization:
 
 
 @user_context
-def is_competent_authority(**kwargs) -> bool:
+def is_competent_authority_or_external_staff(**kwargs) -> bool:
     """Check if the account has a competent authority ('CA_SEARCH') product subscription."""
     user_from_context: UserContext = kwargs["user_context"]
     account_id = user_from_context.account_id
 
+    if user_from_context.is_external_staff():
+        return True
     if account_id is None:
         return False
 
