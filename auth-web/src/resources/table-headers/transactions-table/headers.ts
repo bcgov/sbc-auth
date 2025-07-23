@@ -176,6 +176,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
         { text: paymentTypeDisplay[PaymentTypes.EJV], value: PaymentTypes.EJV },
         { text: paymentTypeDisplay[PaymentTypes.ONLINE_BANKING], value: PaymentTypes.ONLINE_BANKING },
         { text: paymentTypeDisplay[PaymentTypes.PAD], value: PaymentTypes.PAD },
+        { text: paymentTypeDisplay[PaymentTypes.CREDIT], value: PaymentTypes.CREDIT },
         { text: paymentTypeDisplay[PaymentTypes.INTERNAL], value: PaymentTypes.INTERNAL },
         { text: paymentTypeDisplay[PaymentTypes.NO_FEE], value: PaymentTypes.NO_FEE }
       ],
@@ -184,7 +185,27 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       value: ''
     },
     hasFilter: true,
-    itemFn: (val: Transaction) => (val.total === 0 && val.paymentMethod === PaymentTypes.INTERNAL) ? 'No Fee' : paymentTypeDisplay[val.paymentMethod],
+    itemFn: (val: Transaction) => {
+      if (val.total === 0 && val.paymentMethod === PaymentTypes.INTERNAL) {
+        return paymentTypeDisplay[PaymentTypes.NO_FEE]
+      }
+
+      if (val.appliedCredits?.length > 0) {
+        const totalAppliedCredits = val.appliedCredits.reduce((sum, credit) => sum + credit.amountApplied, 0)
+        const remainingAmount = val.total - totalAppliedCredits
+        if (remainingAmount > 0) {
+          if (val.paymentMethod === PaymentTypes.PAD) {
+            return `${paymentTypeDisplay[PaymentTypes.CREDIT]} and ${paymentTypeDisplay[PaymentTypes.PAD]}`
+          } else if (val.paymentMethod === PaymentTypes.ONLINE_BANKING) {
+            return `${paymentTypeDisplay[PaymentTypes.CREDIT]} and ${paymentTypeDisplay[PaymentTypes.ONLINE_BANKING]}`
+          }
+        } else {
+          return paymentTypeDisplay[PaymentTypes.CREDIT]
+        }
+      }
+
+      return paymentTypeDisplay[val.paymentMethod]
+    },
     minWidth: '185px',
     value: 'Payment Method'
   },
@@ -200,7 +221,10 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
         { text: invoiceStatusDisplay[InvoiceStatus.PENDING], value: InvoiceStatus.PENDING },
         { text: invoiceStatusDisplay[InvoiceStatus.APPROVED], value: InvoiceStatus.APPROVED },
         { text: invoiceStatusDisplay[InvoiceStatus.REFUNDED], value: InvoiceStatus.REFUNDED },
-        { text: invoiceStatusDisplay[InvoiceStatus.REFUND_REQUESTED], value: InvoiceStatus.REFUND_REQUESTED }
+        { text: invoiceStatusDisplay[InvoiceStatus.REFUND_REQUESTED], value: InvoiceStatus.REFUND_REQUESTED },
+        // These are FE only on the backend they are PAID
+        { text: invoiceStatusDisplay[InvoiceStatus.PARTIALLY_CREDITED], value: InvoiceStatus.PARTIALLY_CREDITED },
+        { text: invoiceStatusDisplay[InvoiceStatus.PARTIALLY_REFUNDED], value: InvoiceStatus.PARTIALLY_REFUNDED }
       ],
       label: 'Status',
       type: 'select',

@@ -162,4 +162,318 @@ describe('TransactionsDataTable tests', () => {
     await Vue.nextTick()
     expect(wrapper.findComponent(DatePicker).isVisible()).toBe(true)
   })
+
+  const createTransaction = (overrides: any = {}) => ({
+    id: 1,
+    businessIdentifier: 'TEST123',
+    createdOn: '2023-01-01T10:00:00Z',
+    createdName: 'Test User',
+    folioNumber: 'FOLIO123',
+    invoiceNumber: 'INV123',
+    lineItems: [{ description: 'Test Service', quantity: 1, price: 100 }],
+    details: [],
+    paymentAccount: { accountId: '123', accountName: 'Test Account', billable: true },
+    paymentMethod: 'PAD',
+    product: 'PPR',
+    statusCode: 'PAID',
+    total: 100,
+    updatedOn: '2023-01-01T10:00:00Z',
+    refundDate: null,
+    appliedCredits: [],
+    partialRefunds: [],
+    ...overrides
+  })
+
+  describe('Transaction Scenarios', () => {
+    describe('1. PAID - Applied Credit Full [PAD] (Spent credit)', () => {
+      it('should show Account Credit as payment method and no dropdown', async () => {
+        const transaction = createTransaction({
+          statusCode: 'PAID',
+          paymentMethod: 'PAD',
+          total: 100,
+          appliedCredits: [
+            {
+              amountApplied: 100,
+              cfsIdentifier: 'CREDIT1',
+              createdOn: new Date('2023-01-01T10:00:00Z'),
+              creditId: 1,
+              invoiceAmount: 100,
+              invoiceNumber: 'INV123'
+            }
+          ]
+        })
+
+        wrapper.setProps({
+          transactions: { results: [transaction], totalResults: 1 },
+          loading: false
+        })
+        await Vue.nextTick()
+
+        // Test that no dropdown is shown (credits cover entire amount)
+        const hasDropdown = wrapper.vm.hasDropdownContent(transaction)
+        expect(hasDropdown).toBe(false)
+      })
+    })
+
+    describe('2. PAID - Applied Partial Credit [PAD] (Spent credit)', () => {
+      it('should show combined payment method and dropdown', async () => {
+        const transaction = createTransaction({
+          statusCode: 'PAID',
+          paymentMethod: 'PAD',
+          total: 100,
+          appliedCredits: [
+            {
+              amountApplied: 60,
+              cfsIdentifier: 'CREDIT1',
+              createdOn: new Date('2023-01-01T10:00:00Z'),
+              creditId: 1,
+              invoiceAmount: 100,
+              invoiceNumber: 'INV123'
+            }
+          ]
+        })
+
+        wrapper.setProps({
+          transactions: { results: [transaction], totalResults: 1 },
+          loading: false
+        })
+        await Vue.nextTick()
+
+        // Test that dropdown is shown
+        const hasDropdown = wrapper.vm.hasDropdownContent(transaction)
+        expect(hasDropdown).toBe(true)
+
+        // Test dropdown items
+        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
+        expect(dropdownItems).toHaveLength(2) // credit + remaining amount
+        expect(dropdownItems[0].paymentMethod).toBe('Account Credit')
+        expect(dropdownItems[1].paymentMethod).toBe('PAD')
+      })
+    })
+
+    describe('2a. PAID - Multiple Applied Credits [PAD] (Multiple credits applied)', () => {
+      it('should handle multiple applied credits correctly', async () => {
+        const transaction = createTransaction({
+          statusCode: 'PAID',
+          paymentMethod: 'PAD',
+          total: 150,
+          appliedCredits: [
+            {
+              amountApplied: 50,
+              cfsIdentifier: 'CREDIT1',
+              createdOn: new Date('2023-01-01T10:00:00Z'),
+              creditId: 1,
+              invoiceAmount: 150,
+              invoiceNumber: 'INV123'
+            },
+            {
+              amountApplied: 75,
+              cfsIdentifier: 'CREDIT2',
+              createdOn: new Date('2023-01-02T11:00:00Z'),
+              creditId: 2,
+              invoiceAmount: 150,
+              invoiceNumber: 'INV123'
+            }
+          ]
+        })
+
+        wrapper.setProps({
+          transactions: { results: [transaction], totalResults: 1 },
+          loading: false
+        })
+        await Vue.nextTick()
+
+        // Test that dropdown is shown
+        const hasDropdown = wrapper.vm.hasDropdownContent(transaction)
+        expect(hasDropdown).toBe(true)
+
+        // Test dropdown items
+        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
+        expect(dropdownItems).toHaveLength(3) // 2 credits + remaining amount
+
+        // Test first credit
+        expect(dropdownItems[0].id).toBe('credit-1')
+        expect(dropdownItems[0].amount).toBe('$50.00')
+        expect(dropdownItems[0].paymentMethod).toBe('Account Credit')
+        expect(dropdownItems[0].transactionId).toBe(1)
+        expect(dropdownItems[0].date).toEqual(new Date('2023-01-01T10:00:00Z'))
+
+        // Test second credit
+        expect(dropdownItems[1].id).toBe('credit-2')
+        expect(dropdownItems[1].amount).toBe('$75.00')
+        expect(dropdownItems[1].paymentMethod).toBe('Account Credit')
+        expect(dropdownItems[1].transactionId).toBe(2)
+        expect(dropdownItems[1].date).toEqual(new Date('2023-01-02T11:00:00Z'))
+
+        // Test remaining amount (150 - 50 - 75 = 25)
+        expect(dropdownItems[2].id).toBe('remaining-1')
+        expect(dropdownItems[2].amount).toBe('$25.00')
+        expect(dropdownItems[2].paymentMethod).toBe('PAD')
+        expect(dropdownItems[2].transactionId).toBe(1)
+        expect(dropdownItems[2].date).toEqual(new Date('2023-01-01T10:00:00Z')) // Uses first credit's createdOn
+      })
+    })
+
+    describe('3. CREDITED - Refund as credits [PAD] (Generates a credit)', () => {
+      it('should show Credited status and dropdown', async () => {
+        const transaction = createTransaction({
+          statusCode: 'CREDITED',
+          paymentMethod: 'PAD',
+          total: 100,
+          refundDate: '2023-01-02T10:00:00Z'
+        })
+
+        wrapper.setProps({
+          transactions: { results: [transaction], totalResults: 1 },
+          loading: false
+        })
+        await Vue.nextTick()
+
+        // Test dropdown items
+        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
+        expect(dropdownItems).toHaveLength(1)
+        expect(dropdownItems[0].type).toBe('Refund as credits')
+        expect(dropdownItems[0].paymentMethod).toBe('Account Credit')
+      })
+    })
+
+    describe('4. CANCELLED - total $0 [PAD]', () => {
+      it('should show $0.00 and no dropdown', async () => {
+        const transaction = createTransaction({
+          statusCode: 'CANCELLED',
+          paymentMethod: 'PAD',
+          total: 0
+        })
+
+        wrapper.setProps({
+          transactions: { results: [transaction], totalResults: 1 },
+          loading: false
+        })
+        await Vue.nextTick()
+
+        // Test that no dropdown is shown
+        const hasDropdown = wrapper.vm.hasDropdownContent(transaction)
+        expect(hasDropdown).toBe(false)
+      })
+    })
+
+    describe('5. PAID - Normal [PAD]', () => {
+      it('should show normal payment method and no dropdown', async () => {
+        const transaction = createTransaction({
+          statusCode: 'PAID',
+          paymentMethod: 'PAD',
+          total: 100
+        })
+
+        wrapper.setProps({
+          transactions: { results: [transaction], totalResults: 1 },
+          loading: false
+        })
+        await Vue.nextTick()
+
+        // Test that no dropdown is shown
+        const hasDropdown = wrapper.vm.hasDropdownContent(transaction)
+        expect(hasDropdown).toBe(false)
+      })
+    })
+
+    describe('6. PAID - Partial Refund [DIRECT_PAY]', () => {
+      it('should show Partially Refunded status and combined refunds', async () => {
+        const transaction = createTransaction({
+          statusCode: 'PAID',
+          paymentMethod: 'DIRECT_PAY',
+          total: 100,
+          partialRefunds: [
+            { paymentLineItemId: 1, refundType: 'PARTIAL', refundAmount: 30 },
+            { paymentLineItemId: 2, refundType: 'PARTIAL', refundAmount: 20 }
+          ]
+        })
+
+        wrapper.setProps({
+          transactions: { results: [transaction], totalResults: 1 },
+          loading: false
+        })
+        await Vue.nextTick()
+
+        // Test dropdown items - should combine refunds
+        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
+        const refundItems = dropdownItems.filter(item => item.isRefund)
+        expect(refundItems).toHaveLength(1)
+        expect(refundItems[0].amount).toBe('-$50.00')
+        expect(refundItems[0].type).toBe('Refund')
+      })
+    })
+
+    describe('7. PAID - Partial Credit [PAD] (Generates a credit)', () => {
+      it('should show Partially Credited status and Account Credit', async () => {
+        const transaction = createTransaction({
+          statusCode: 'PAID',
+          paymentMethod: 'PAD',
+          total: 100,
+          partialRefunds: [
+            { paymentLineItemId: 1, refundType: 'PARTIAL', refundAmount: 50 }
+          ]
+        })
+
+        wrapper.setProps({
+          transactions: { results: [transaction], totalResults: 1 },
+          loading: false
+        })
+        await Vue.nextTick()
+
+        // Test dropdown items
+        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
+        const refundItem = dropdownItems.find(item => item.isRefund)
+        expect(refundItem.paymentMethod).toBe('Account Credit')
+        expect(refundItem.status).toBe('Partially Credited')
+        expect(refundItem.type).toBe('Refund as credits')
+      })
+    })
+
+    describe('8. REFUNDED - Dropdown rows [DIRECT_PAY]', () => {
+      it('should show Refunded status and dropdown', async () => {
+        const transaction = createTransaction({
+          statusCode: 'REFUNDED',
+          paymentMethod: 'DIRECT_PAY',
+          total: 100,
+          refundDate: '2023-01-02T10:00:00Z'
+        })
+
+        wrapper.setProps({
+          transactions: { results: [transaction], totalResults: 1 },
+          loading: false
+        })
+        await Vue.nextTick()
+
+        // Test dropdown items
+        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
+        expect(dropdownItems).toHaveLength(1)
+        expect(dropdownItems[0].type).toBe('Refund')
+        expect(dropdownItems[0].paymentMethod).toBe('DIRECT_PAY')
+      })
+    })
+
+    describe('9. CREDITED - Refunds as credits (Generates a credit) [PAD]', () => {
+      it('should show Credited status and Account Credit', async () => {
+        const transaction = createTransaction({
+          statusCode: 'CREDITED',
+          paymentMethod: 'PAD',
+          total: 100,
+          refundDate: '2023-01-02T10:00:00Z'
+        })
+
+        wrapper.setProps({
+          transactions: { results: [transaction], totalResults: 1 },
+          loading: false
+        })
+        await Vue.nextTick()
+
+        // Test dropdown items
+        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
+        expect(dropdownItems).toHaveLength(1)
+        expect(dropdownItems[0].type).toBe('Refund as credits')
+        expect(dropdownItems[0].paymentMethod).toBe('Account Credit')
+      })
+    })
+  })
 })

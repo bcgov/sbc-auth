@@ -23,6 +23,28 @@ export interface Transaction {
   total: number
   updatedOn: string
   refundDate: string
+  appliedCredits?: AppliedCredit[]
+  partialRefunds?: PartialRefund[]
+}
+
+export interface AppliedCredit {
+  id: number
+  amountApplied: number
+  cfsIdentifier: string
+  createdOn: Date
+  creditId: number
+  invoiceAmount: number
+  invoiceNumber: string
+}
+
+export interface PartialRefund {
+  id: number
+  createdName: string
+  createdBy: string
+  paymentLineItemId: number
+  refundType: string
+  refundAmount: number
+  createdOn: Date
 }
 
 export interface TransactionFilter {

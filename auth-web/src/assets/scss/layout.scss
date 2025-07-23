@@ -88,3 +88,24 @@
 .soft-corners-top {
   border-radius: 5px 5px 0 0;
 }
+
+// Expand just for the transactions page.
+.transaction-container .container,
+.transaction-container .v-container,
+.transaction-container .view-container,
+.transaction-container .app-body,
+.transaction-container .v-app {
+  max-width: 90% !important;
+}
+
+.app-body .transaction-container ~ .container,
+.app-body .transaction-container ~ .v-container,
+.app-body .transaction-container ~ .view-container {
+  max-width: 90% !important;
+}
+
+.app-body:has(.transaction-container) .container,
+.app-body:has(.transaction-container) .v-container,
+.app-body:has(.transaction-container) .view-container {
+  max-width: 90% !important;
+}
