@@ -405,88 +405,103 @@ export default defineComponent({
       return paymentTypeDisplay[paymentMethod] || paymentMethod
     }
 
-    const getDropdownItems = (item: Transaction) => {
-      const dropdownItems = []
-      if (item.appliedCredits?.length > 0) {
-        const totalAppliedCredits = item.appliedCredits.reduce((sum, credit) => sum + credit.amountApplied, 0)
-        const remainingAmount = item.total - totalAppliedCredits
+    const createDropdownItem = (item: Transaction, overrides: any = {}) => ({
+      folioNumber: item.folioNumber,
+      createdName: item.createdName,
+      invoiceNumber: item.invoiceNumber,
+      ...overrides
+    })
 
-        item.appliedCredits.forEach(credit => {
-          dropdownItems.push({
-            id: `credit-${credit.id}`,
-            type: '',
-            date: credit.createdOn,
-            time: true,
-            amount: `$${credit.amountApplied.toFixed(2)}`,
-            paymentMethod: paymentTypeDisplay[PaymentTypes.CREDIT],
-            isRefund: false,
-            status: invoiceStatusDisplay[InvoiceStatus.COMPLETED],
-            folioNumber: item.folioNumber,
-            createdName: item.createdName,
-            transactionId: credit.id,
-            invoiceNumber: item.invoiceNumber
-          })
-        })
+    const isRefundAsCredits = (paymentMethod: PaymentTypes) => {
+      return [PaymentTypes.ONLINE_BANKING, PaymentTypes.PAD].includes(paymentMethod)
+    }
 
-        // Only add remaining amount row if there's a remaining balance
-        if (remainingAmount > 0) {
-          dropdownItems.push({
-            id: `remaining-${item.id}`,
-            type: '',
-            date: item.appliedCredits[0].createdOn,
-            time: true,
-            amount: `$${remainingAmount.toFixed(2)}`,
-            paymentMethod: item.paymentMethod,
-            isRefund: false,
-            status: invoiceStatusDisplay[InvoiceStatus.COMPLETED],
-            folioNumber: item.folioNumber,
-            createdName: item.createdName,
-            transactionId: item.id,
-            invoiceNumber: item.invoiceNumber
-          })
-        }
-      }
-      if (item.partialRefunds?.length > 0) {
-        // Combine all partial refunds and sum their amounts
-        const totalRefundAmount = item.partialRefunds.reduce((sum, refund) => sum + refund.refundAmount, 0)
-        const isRefundAsCredits = [PaymentTypes.ONLINE_BANKING, PaymentTypes.PAD].includes(item.paymentMethod)
-        const refundIds = item.partialRefunds.map(refund => refund.paymentLineItemId).join(', ')
+    const getAppliedCreditsItems = (item: Transaction) => {
+      if (!item.appliedCredits?.length) return []
 
-        dropdownItems.push({
-          id: `refund-${item.id}`,
-          type: isRefundAsCredits ? 'Refund as credits' : 'Refund',
-          date: item.partialRefunds[0].createdOn,
-          time: false,
-          amount: `-$${totalRefundAmount.toFixed(2)}`,
-          paymentMethod: isRefundAsCredits ? paymentTypeDisplay[PaymentTypes.CREDIT] : item.paymentMethod,
-          isRefund: true,
-          status: isRefundAsCredits ? invoiceStatusDisplay[InvoiceStatus.PARTIALLY_CREDITED] : invoiceStatusDisplay[InvoiceStatus.PARTIALLY_REFUNDED],
-          folioNumber: item.folioNumber,
-          createdName: item.partialRefunds[0].createdName,
-          transactionId: refundIds,
-          invoiceNumber: item.invoiceNumber
-        })
-      }
-      if ([InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED].includes(item.statusCode)) {
-        const isRefundAsCredits = [PaymentTypes.ONLINE_BANKING, PaymentTypes.PAD].includes(item.paymentMethod)
-        dropdownItems.push({
-          id: `full-${item.id}`,
-          type: item.statusCode === InvoiceStatus.CREDITED ? 'Refund as credits' : 'Refund',
-          date: item.refundDate || item.createdOn,
+      const items = []
+      const totalAppliedCredits = item.appliedCredits.reduce((sum, credit) => sum + credit.amountApplied, 0)
+      const remainingAmount = item.total - totalAppliedCredits
+
+      // Add applied credits
+      item.appliedCredits.forEach(credit => {
+        items.push(createDropdownItem(item, {
+          id: `credit-${credit.id}`,
+          type: '',
+          date: credit.createdOn,
           time: true,
-          amount: `-$${item.total.toFixed(2)}`,
-          paymentMethod: isRefundAsCredits ? paymentTypeDisplay[PaymentTypes.CREDIT] : item.paymentMethod,
-          isRefund: true,
-          status: [PaymentTypes.ONLINE_BANKING, PaymentTypes.PAD].includes(item.paymentMethod)
-            ? invoiceStatusDisplay[InvoiceStatus.CREDITED] : invoiceStatusDisplay[InvoiceStatus.REFUNDED],
-          folioNumber: item.folioNumber,
-          createdName: item.createdName,
-          transactionId: item.id,
-          invoiceNumber: item.invoiceNumber
-        })
+          amount: `$${credit.amountApplied.toFixed(2)}`,
+          paymentMethod: paymentTypeDisplay[PaymentTypes.CREDIT],
+          isRefund: false,
+          status: invoiceStatusDisplay[InvoiceStatus.COMPLETED],
+          transactionId: credit.id
+        }))
+      })
+
+      // Add remaining amount if any
+      if (remainingAmount > 0) {
+        items.push(createDropdownItem(item, {
+          id: `remaining-${item.id}`,
+          type: '',
+          date: item.appliedCredits[0].createdOn,
+          time: true,
+          amount: `$${remainingAmount.toFixed(2)}`,
+          paymentMethod: item.paymentMethod,
+          isRefund: false,
+          status: invoiceStatusDisplay[InvoiceStatus.COMPLETED],
+          transactionId: item.id
+        }))
       }
 
-      return dropdownItems
+      return items
+    }
+
+    const getPartialRefundsItems = (item: Transaction) => {
+      if (!item.partialRefunds?.length) return []
+
+      const totalRefundAmount = item.partialRefunds.reduce((sum, refund) => sum + refund.refundAmount, 0)
+      const refundAsCredits = isRefundAsCredits(item.paymentMethod)
+      const refundIds = item.partialRefunds.map(refund => refund.paymentLineItemId).join(', ')
+
+      return [createDropdownItem(item, {
+        id: `refund-${item.id}`,
+        type: refundAsCredits ? 'Refund as credits' : 'Refund',
+        date: item.partialRefunds[0].createdOn,
+        time: false,
+        amount: `-$${totalRefundAmount.toFixed(2)}`,
+        paymentMethod: refundAsCredits ? paymentTypeDisplay[PaymentTypes.CREDIT] : item.paymentMethod,
+        isRefund: true,
+        status: refundAsCredits ? invoiceStatusDisplay[InvoiceStatus.PARTIALLY_CREDITED] : invoiceStatusDisplay[InvoiceStatus.PARTIALLY_REFUNDED],
+        createdName: item.partialRefunds[0].createdName,
+        transactionId: refundIds
+      })]
+    }
+
+    const getFullRefundItems = (item: Transaction) => {
+      if (![InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED].includes(item.statusCode)) return []
+
+      const refundAsCredits = isRefundAsCredits(item.paymentMethod)
+      const isCredited = item.statusCode === InvoiceStatus.CREDITED
+
+      return [createDropdownItem(item, {
+        id: `full-${item.id}`,
+        type: isCredited ? 'Refund as credits' : 'Refund',
+        date: item.refundDate || item.createdOn,
+        time: true,
+        amount: `-$${item.total.toFixed(2)}`,
+        paymentMethod: refundAsCredits ? paymentTypeDisplay[PaymentTypes.CREDIT] : item.paymentMethod,
+        isRefund: true,
+        status: refundAsCredits ? invoiceStatusDisplay[InvoiceStatus.CREDITED] : invoiceStatusDisplay[InvoiceStatus.REFUNDED],
+        transactionId: item.id
+      })]
+    }
+
+    const getDropdownItems = (item: Transaction) => {
+      return [
+        ...getAppliedCreditsItems(item),
+        ...getPartialRefundsItems(item),
+        ...getFullRefundItems(item)
+      ]
     }
 
     // date picker stuff
