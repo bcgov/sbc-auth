@@ -1,4 +1,5 @@
 import '../test-utils/composition-api-setup' // important to import this first
+import { InvoiceStatus, PaymentTypes } from '@/util/constants'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components/datatable'
 import { DatePicker } from '@/components'
@@ -39,9 +40,9 @@ const createTestTransaction = (overrides: any = {}) => ({
   lineItems: [{ description: 'Test Service', quantity: 1, price: 100 }],
   details: [],
   paymentAccount: { accountId: '123', accountName: 'Test Account', billable: true },
-  paymentMethod: 'PAD',
+  paymentMethod: PaymentTypes.PAD,
   product: 'PPR',
-  statusCode: 'PAID',
+  statusCode: InvoiceStatus.PAID,
   total: 100,
   updatedOn: '2023-01-01T10:00:00Z',
   refundDate: null,
@@ -98,7 +99,7 @@ const setupTransactionTest = async (transaction: any, existingWrapper: any) => {
 
 const testDropdownContent = (wrapper: any, transaction: any, expectedLength: number, expectedTypes: any[] = []) => {
   if (expectedLength > 0) {
-    const dropdownItems = (wrapper.vm as any).getDropdownItems(transaction)
+    const dropdownItems = wrapper.vm.getDropdownItems(transaction)
     expect(dropdownItems).toHaveLength(expectedLength)
 
     expectedTypes.forEach((expectedType, index) => {
@@ -125,7 +126,7 @@ const testRefundScenario = async (transactionOverrides: any, expectedRefundAmoun
   const transaction = createTestTransaction(transactionOverrides)
   const { wrapper: testWrapperResult } = await setupTransactionTest(transaction, testWrapper)
 
-  const dropdownItems = (testWrapperResult.vm as any).getDropdownItems(transaction)
+  const dropdownItems = testWrapperResult.vm.getDropdownItems(transaction)
   const refundItems = dropdownItems.filter(item => item.isRefund)
   expect(refundItems[0].amount).toBe(expectedRefundAmount)
   expect(refundItems[0].type).toBe(expectedType)
@@ -245,8 +246,8 @@ describe('TransactionsDataTable tests', () => {
 
   it('PAID with full applied credit [PAD] - should show Account Credit as payment method and no dropdown', async () => {
     await testTransactionScenario({
-      statusCode: 'PAID',
-      paymentMethod: 'PAD',
+      statusCode: InvoiceStatus.PAID,
+      paymentMethod: PaymentTypes.PAD,
       total: 100,
       appliedCredits: [createAppliedCredit({ amountApplied: 100 })]
     }, 0, wrapper, [])
@@ -254,8 +255,8 @@ describe('TransactionsDataTable tests', () => {
 
   it('PAID with partial applied credit [PAD] - should show combined payment method and dropdown', async () => {
     await testTransactionScenario({
-      statusCode: 'PAID',
-      paymentMethod: 'PAD',
+      statusCode: InvoiceStatus.PAID,
+      paymentMethod: PaymentTypes.PAD,
       total: 100,
       appliedCredits: [createAppliedCredit({ amountApplied: 60 })]
     }, 2, wrapper, [
@@ -266,8 +267,8 @@ describe('TransactionsDataTable tests', () => {
 
   it('PAID with multiple applied credits [PAD] - should handle multiple applied credits correctly', async () => {
     const transaction = createTestTransaction({
-      statusCode: 'PAID',
-      paymentMethod: 'PAD',
+      statusCode: InvoiceStatus.PAID,
+      paymentMethod: PaymentTypes.PAD,
       total: 150,
       appliedCredits: [
         createAppliedCredit({
@@ -288,7 +289,7 @@ describe('TransactionsDataTable tests', () => {
 
     const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
 
-    const dropdownItems = (testWrapper.vm as any).getDropdownItems(transaction)
+    const dropdownItems = testWrapper.vm.getDropdownItems(transaction)
     expect(dropdownItems).toHaveLength(3)
 
     expect(dropdownItems[0].id).toBe('credit-1')
@@ -312,8 +313,8 @@ describe('TransactionsDataTable tests', () => {
 
   it('CREDITED with refund as credits [PAD] - should show Credited status and dropdown', async () => {
     await testTransactionScenario({
-      statusCode: 'CREDITED',
-      paymentMethod: 'PAD',
+      statusCode: InvoiceStatus.CREDITED,
+      paymentMethod: PaymentTypes.PAD,
       total: 100,
       refundDate: '2023-01-02T10:00:00Z'
     }, 1, wrapper, [
@@ -323,24 +324,24 @@ describe('TransactionsDataTable tests', () => {
 
   it('CANCELLED with $0 total [PAD] - should show $0.00 and no dropdown', async () => {
     await testTransactionScenario({
-      statusCode: 'CANCELLED',
-      paymentMethod: 'PAD',
+      statusCode: InvoiceStatus.CANCELLED,
+      paymentMethod: PaymentTypes.PAD,
       total: 0
     }, 0, wrapper, [])
   })
 
   it('PAID normal transaction [PAD] - should show normal payment method and no dropdown', async () => {
     await testTransactionScenario({
-      statusCode: 'PAID',
-      paymentMethod: 'PAD',
+      statusCode: InvoiceStatus.PAID,
+      paymentMethod: PaymentTypes.PAD,
       total: 100
     }, 0, wrapper, [])
   })
 
   it('PAID with partial refund [DIRECT_PAY] - should show Partially Refunded status and combined refunds', async () => {
     await testRefundScenario({
-      statusCode: 'PAID',
-      paymentMethod: 'DIRECT_PAY',
+      statusCode: InvoiceStatus.PAID,
+      paymentMethod: PaymentTypes.DIRECT_PAY,
       total: 100,
       partialRefunds: [
         createPartialRefund({ refundAmount: 30 }),
@@ -351,15 +352,15 @@ describe('TransactionsDataTable tests', () => {
 
   it('PAID with partial credit [PAD] - should show Partially Credited status and Account Credit', async () => {
     const transaction = createTestTransaction({
-      statusCode: 'PAID',
-      paymentMethod: 'PAD',
+      statusCode: InvoiceStatus.PAID,
+      paymentMethod: PaymentTypes.PAD,
       total: 100,
       partialRefunds: [createPartialRefund()]
     })
 
     const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
 
-    const dropdownItems = (testWrapper.vm as any).getDropdownItems(transaction)
+    const dropdownItems = testWrapper.vm.getDropdownItems(transaction)
     const refundItem = dropdownItems.find(item => item.isRefund)
     expect(refundItem.paymentMethod).toBe('Account Credit')
     expect(refundItem.status).toBe('Partially Credited')
@@ -368,8 +369,8 @@ describe('TransactionsDataTable tests', () => {
 
   it('REFUNDED with dropdown rows [DIRECT_PAY] - should show Refunded status and dropdown', async () => {
     await testTransactionScenario({
-      statusCode: 'REFUNDED',
-      paymentMethod: 'DIRECT_PAY',
+      statusCode: InvoiceStatus.REFUNDED,
+      paymentMethod: PaymentTypes.DIRECT_PAY,
       total: 100,
       refundDate: '2023-01-02T10:00:00Z'
     }, 1, wrapper, [
@@ -379,8 +380,8 @@ describe('TransactionsDataTable tests', () => {
 
   it('CREDITED with refunds as credits [PAD] - should show Credited status and Account Credit', async () => {
     await testTransactionScenario({
-      statusCode: 'CREDITED',
-      paymentMethod: 'PAD',
+      statusCode: InvoiceStatus.CREDITED,
+      paymentMethod: PaymentTypes.PAD,
       total: 100,
       refundDate: '2023-01-02T10:00:00Z'
     }, 1, wrapper, [
