@@ -409,6 +409,10 @@ export default defineComponent({
         [OrgAccountTypes.SBC_STAFF]: {
           accessType: [AccessType.GOVM],
           orgType: Account.SBC_STAFF
+        },
+        [OrgAccountTypes.MAXIMUS_STAFF]: {
+          accessType: [AccessType.GOVM],
+          orgType: Account.MAXIMUS_STAFF
         }
       } as EnumDictionary<OrgAccountTypes, OrgMap>,
       accountTypes: [] as string[],
