@@ -18,60 +18,115 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-// selectors
 const heading = '.section-heading'
 const header = baseVdataTable.header
 const headerTitles = baseVdataTable.headerTitles
 const itemRow = baseVdataTable.itemRow
 const itemCell = baseVdataTable.itemCell
 
+const config = {
+  AUTH_API_URL: 'https://localhost:8080/api/v1/app',
+  PAY_API_URL: 'https://pay-api.gov.bc.ca/api/v1'
+}
+
+const createTestTransaction = (overrides: any = {}) => ({
+  id: 1,
+  businessIdentifier: 'TEST123',
+  createdOn: '2023-01-01T10:00:00Z',
+  createdName: 'Test User',
+  folioNumber: 'FOLIO123',
+  invoiceNumber: 'INV123',
+  lineItems: [{ description: 'Test Service', quantity: 1, price: 100 }],
+  details: [],
+  paymentAccount: { accountId: '123', accountName: 'Test Account', billable: true },
+  paymentMethod: 'PAD',
+  product: 'PPR',
+  statusCode: 'PAID',
+  total: 100,
+  updatedOn: '2023-01-01T10:00:00Z',
+  refundDate: null,
+  appliedCredits: [],
+  partialRefunds: [],
+  ...overrides
+})
+
+const setupTestWrapper = async (headers = getTransactionTableHeaders()) => {
+  const localVue = createLocalVue()
+  const orgStore = useOrgStore()
+  orgStore.currentOrganization = { id: 123 } as any
+
+  const testSandbox = sinon.createSandbox()
+  const get = testSandbox.stub(axios, 'post')
+  get.returns(Promise.resolve({ data: transactionResponse }))
+
+  const wrapper = mount(TransactionsDataTable, {
+    localVue,
+    vuetify,
+    propsData: { headers }
+  })
+  await flushPromises()
+
+  return { wrapper, sandbox: testSandbox }
+}
+
+const setupTransactionTest = async (transaction: any, existingWrapper: any) => {
+  existingWrapper.setProps({
+    transactions: { results: [transaction], totalResults: 1 },
+    loading: false
+  })
+  await Vue.nextTick()
+
+  return { wrapper: existingWrapper }
+}
+
+const testDropdownContent = (wrapper: any, transaction: any, expectedLength: number, expectedTypes: any[] = []) => {
+  const hasDropdown = (wrapper.vm as any).hasDropdownContent(transaction)
+  expect(hasDropdown).toBe(expectedLength > 0)
+
+  if (expectedLength > 0) {
+    const dropdownItems = (wrapper.vm as any).getDropdownItems(transaction)
+    expect(dropdownItems).toHaveLength(expectedLength)
+
+    expectedTypes.forEach((expectedType, index) => {
+      if (expectedType.type) {
+        expect(dropdownItems[index].type).toBe(expectedType.type)
+      }
+      if (expectedType.paymentMethod) {
+        expect(dropdownItems[index].paymentMethod).toBe(expectedType.paymentMethod)
+      }
+      if (expectedType.amount) {
+        expect(dropdownItems[index].amount).toBe(expectedType.amount)
+      }
+    })
+  }
+}
+
 describe('TransactionsDataTable tests', () => {
   let wrapper: Wrapper<any>
   let sandbox: any
 
-  const config = {
-    AUTH_API_URL: 'https://localhost:8080/api/v1/app',
-    PAY_API_URL: 'https://pay-api.gov.bc.ca/api/v1'
-  }
-  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
-
-  const headers = getTransactionTableHeaders()
-  const headersExtended = getTransactionTableHeaders(true)
-
   beforeEach(async () => {
-    const localVue = createLocalVue()
-    const orgStore = useOrgStore()
-    orgStore.currentOrganization = { id: 123 } as any
-
-    // stub get transactions get call
-    sandbox = sinon.createSandbox()
-    const get = sandbox.stub(axios, 'post')
-    get.returns(Promise.resolve({ data: transactionResponse }))
-
-    wrapper = mount(TransactionsDataTable, {
-      localVue,
-      vuetify,
-      propsData: { headers: headers }
-    })
-    await flushPromises()
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
+    const setup = await setupTestWrapper()
+    wrapper = setup.wrapper
+    sandbox = setup.sandbox
   }, 50000)
 
   afterEach(() => {
-    wrapper.destroy()
-    sandbox.restore()
+    if (wrapper) wrapper.destroy()
+    if (sandbox) sandbox.restore()
   })
 
   it('renders transaction table with child components', async () => {
-    // trigger load
     await wrapper.vm.loadTransactionList()
     expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
     expect(wrapper.findComponent(DatePicker).exists()).toBe(true)
     expect(wrapper.findComponent(DatePicker).isVisible()).toBe(false)
     expect(wrapper.find(heading).exists()).toBe(false)
-    // table headers
+
     expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
     const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
-    expect(titles.length).toBe(headers.length)
+    expect(titles.length).toBe(getTransactionTableHeaders().length)
     expect(titles.at(0).text()).toBe('Transaction Type')
     expect(titles.at(1).text()).toBe('Folio #')
     expect(titles.at(2).text()).toBe('Initiated by')
@@ -83,16 +138,15 @@ describe('TransactionsDataTable tests', () => {
     expect(titles.at(8).text()).toBe('Payment Status')
     expect(titles.at(9).text()).toBe('Downloads')
     expect(titles.at(10).text()).toBe('')
-    // table items
+
     const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
     expect(itemRows.length).toBe(transactionResponse.items.length)
-    // test cell data
+
     const row1Cells = itemRows.at(0).findAll(itemCell)
     expect(row1Cells.at(0).find('b').text()).toBe('Statement of Registration')
     expect(row1Cells.at(0).find('span').text()).toBe('label1 value1')
     expect(row1Cells.at(1).text()).toBe('ab12')
     expect(row1Cells.at(2).text()).toBe('tester 123')
-    // Input:createdOn: '2023-01-24T14:00:00'
     expect(row1Cells.at(3).text()).toContain('January 24, 20236:00 AM')
     expect(row1Cells.at(4).text()).toBe('$0.00')
     expect(row1Cells.at(5).text()).toBe('25663')
@@ -101,20 +155,19 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(8).text()).toBe('CompletedJanuary 24, 2023')
     expect(row1Cells.at(9).text()).toBe('Receipt')
     expect(row1Cells.at(10).text()).toBe('')
-    // clear filters is hidden
+
     expect(wrapper.find('.clear-btn').exists()).toBe(false)
   })
 
   it('shows extended stuff when set', async () => {
-    wrapper.setProps({ extended: true, headers: headersExtended })
-    // trigger load
+    wrapper.setProps({ extended: true, headers: getTransactionTableHeaders(true) })
     await wrapper.vm.loadTransactionList()
     expect(wrapper.find(heading).exists()).toBe(true)
     expect(wrapper.find(heading).text().replaceAll(' ', '').replaceAll('\n', '')).toBe('Transactions')
-    // table headers
+
     expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
     const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
-    expect(titles.length).toBe(headersExtended.length)
+    expect(titles.length).toBe(getTransactionTableHeaders(true).length)
     expect(titles.at(0).text()).toBe('Account Name')
     expect(titles.at(1).text()).toBe('Application Type')
     expect(titles.at(2).text()).toBe('Transaction Type')
@@ -130,10 +183,10 @@ describe('TransactionsDataTable tests', () => {
     expect(titles.at(12).text()).toBe('Payment Status')
     expect(titles.at(13).text()).toBe('Downloads')
     expect(titles.at(14).text()).toBe('')
-    // table items
+
     const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
     expect(itemRows.length).toBe(transactionResponse.items.length)
-    // test cell data
+
     const row1Cells = itemRows.at(0).findAll(itemCell)
     expect(row1Cells.at(0).text()).toBe("Ministry of Citizens' Services-BC Registries and Online Services Staff")
     expect(row1Cells.at(1).text()).toBe('Personal Property Registry')
@@ -142,7 +195,6 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(4).text()).toBe('123')
     expect(row1Cells.at(5).text()).toBe('ab12')
     expect(row1Cells.at(6).text()).toBe('tester 123')
-    // Input:createdOn: 2023-01-24T14:00:00
     expect(row1Cells.at(7).text()).toContain('January 24, 20236:00 AM')
     expect(row1Cells.at(8).text()).toBe('$0.00')
     expect(row1Cells.at(9).text()).toBe('25663')
@@ -154,40 +206,17 @@ describe('TransactionsDataTable tests', () => {
   })
 
   it('shows date picker when date filter clicked', async () => {
-    // verify setup
     expect(wrapper.findComponent(DatePicker).isVisible()).toBe(false)
     expect(wrapper.find('.date-filter').exists()).toBe(true)
-    // simulate click (trigger click not working in this test)
     wrapper.vm.showDatePicker = true
     await Vue.nextTick()
     expect(wrapper.findComponent(DatePicker).isVisible()).toBe(true)
   })
 
-  const createTransaction = (overrides: any = {}) => ({
-    id: 1,
-    businessIdentifier: 'TEST123',
-    createdOn: '2023-01-01T10:00:00Z',
-    createdName: 'Test User',
-    folioNumber: 'FOLIO123',
-    invoiceNumber: 'INV123',
-    lineItems: [{ description: 'Test Service', quantity: 1, price: 100 }],
-    details: [],
-    paymentAccount: { accountId: '123', accountName: 'Test Account', billable: true },
-    paymentMethod: 'PAD',
-    product: 'PPR',
-    statusCode: 'PAID',
-    total: 100,
-    updatedOn: '2023-01-01T10:00:00Z',
-    refundDate: null,
-    appliedCredits: [],
-    partialRefunds: [],
-    ...overrides
-  })
-
   describe('Transaction Scenarios', () => {
     describe('1. PAID - Applied Credit Full [PAD] (Spent credit)', () => {
       it('should show Account Credit as payment method and no dropdown', async () => {
-        const transaction = createTransaction({
+        const transaction = createTestTransaction({
           statusCode: 'PAID',
           paymentMethod: 'PAD',
           total: 100,
@@ -203,21 +232,14 @@ describe('TransactionsDataTable tests', () => {
           ]
         })
 
-        wrapper.setProps({
-          transactions: { results: [transaction], totalResults: 1 },
-          loading: false
-        })
-        await Vue.nextTick()
-
-        // Test that no dropdown is shown (credits cover entire amount)
-        const hasDropdown = wrapper.vm.hasDropdownContent(transaction)
-        expect(hasDropdown).toBe(false)
+        const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
+        testDropdownContent(testWrapper, transaction, 0)
       })
     })
 
     describe('2. PAID - Applied Partial Credit [PAD] (Spent credit)', () => {
       it('should show combined payment method and dropdown', async () => {
-        const transaction = createTransaction({
+        const transaction = createTestTransaction({
           statusCode: 'PAID',
           paymentMethod: 'PAD',
           total: 100,
@@ -233,32 +255,23 @@ describe('TransactionsDataTable tests', () => {
           ]
         })
 
-        wrapper.setProps({
-          transactions: { results: [transaction], totalResults: 1 },
-          loading: false
-        })
-        await Vue.nextTick()
-
-        // Test that dropdown is shown
-        const hasDropdown = wrapper.vm.hasDropdownContent(transaction)
-        expect(hasDropdown).toBe(true)
-
-        // Test dropdown items
-        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
-        expect(dropdownItems).toHaveLength(2) // credit + remaining amount
-        expect(dropdownItems[0].paymentMethod).toBe('Account Credit')
-        expect(dropdownItems[1].paymentMethod).toBe('PAD')
+        const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
+        testDropdownContent(testWrapper, transaction, 2, [
+          { paymentMethod: 'Account Credit' },
+          { paymentMethod: 'PAD' }
+        ])
       })
     })
 
     describe('2a. PAID - Multiple Applied Credits [PAD] (Multiple credits applied)', () => {
       it('should handle multiple applied credits correctly', async () => {
-        const transaction = createTransaction({
+        const transaction = createTestTransaction({
           statusCode: 'PAID',
           paymentMethod: 'PAD',
           total: 150,
           appliedCredits: [
             {
+              id: 1,
               amountApplied: 50,
               cfsIdentifier: 'CREDIT1',
               createdOn: new Date('2023-01-01T10:00:00Z'),
@@ -267,6 +280,7 @@ describe('TransactionsDataTable tests', () => {
               invoiceNumber: 'INV123'
             },
             {
+              id: 2,
               amountApplied: 75,
               cfsIdentifier: 'CREDIT2',
               createdOn: new Date('2023-01-02T11:00:00Z'),
@@ -277,109 +291,79 @@ describe('TransactionsDataTable tests', () => {
           ]
         })
 
-        wrapper.setProps({
-          transactions: { results: [transaction], totalResults: 1 },
-          loading: false
-        })
-        await Vue.nextTick()
+        const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
 
-        // Test that dropdown is shown
-        const hasDropdown = wrapper.vm.hasDropdownContent(transaction)
+        const hasDropdown = (testWrapper.vm as any).hasDropdownContent(transaction)
         expect(hasDropdown).toBe(true)
 
-        // Test dropdown items
-        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
-        expect(dropdownItems).toHaveLength(3) // 2 credits + remaining amount
+        const dropdownItems = (testWrapper.vm as any).getDropdownItems(transaction)
+        expect(dropdownItems).toHaveLength(3)
 
-        // Test first credit
         expect(dropdownItems[0].id).toBe('credit-1')
         expect(dropdownItems[0].amount).toBe('$50.00')
         expect(dropdownItems[0].paymentMethod).toBe('Account Credit')
         expect(dropdownItems[0].transactionId).toBe(1)
         expect(dropdownItems[0].date).toEqual(new Date('2023-01-01T10:00:00Z'))
 
-        // Test second credit
         expect(dropdownItems[1].id).toBe('credit-2')
         expect(dropdownItems[1].amount).toBe('$75.00')
         expect(dropdownItems[1].paymentMethod).toBe('Account Credit')
         expect(dropdownItems[1].transactionId).toBe(2)
         expect(dropdownItems[1].date).toEqual(new Date('2023-01-02T11:00:00Z'))
 
-        // Test remaining amount (150 - 50 - 75 = 25)
         expect(dropdownItems[2].id).toBe('remaining-1')
         expect(dropdownItems[2].amount).toBe('$25.00')
         expect(dropdownItems[2].paymentMethod).toBe('PAD')
         expect(dropdownItems[2].transactionId).toBe(1)
-        expect(dropdownItems[2].date).toEqual(new Date('2023-01-01T10:00:00Z')) // Uses first credit's createdOn
+        expect(dropdownItems[2].date).toEqual(new Date('2023-01-01T10:00:00Z'))
       })
     })
 
     describe('3. CREDITED - Refund as credits [PAD] (Generates a credit)', () => {
       it('should show Credited status and dropdown', async () => {
-        const transaction = createTransaction({
+        const transaction = createTestTransaction({
           statusCode: 'CREDITED',
           paymentMethod: 'PAD',
           total: 100,
           refundDate: '2023-01-02T10:00:00Z'
         })
 
-        wrapper.setProps({
-          transactions: { results: [transaction], totalResults: 1 },
-          loading: false
-        })
-        await Vue.nextTick()
-
-        // Test dropdown items
-        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
-        expect(dropdownItems).toHaveLength(1)
-        expect(dropdownItems[0].type).toBe('Refund as credits')
-        expect(dropdownItems[0].paymentMethod).toBe('Account Credit')
+        const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
+        testDropdownContent(testWrapper, transaction, 1, [
+          { type: 'Refund as credits', paymentMethod: 'Account Credit' }
+        ])
       })
     })
 
     describe('4. CANCELLED - total $0 [PAD]', () => {
       it('should show $0.00 and no dropdown', async () => {
-        const transaction = createTransaction({
+        const transaction = createTestTransaction({
           statusCode: 'CANCELLED',
           paymentMethod: 'PAD',
           total: 0
         })
 
-        wrapper.setProps({
-          transactions: { results: [transaction], totalResults: 1 },
-          loading: false
-        })
-        await Vue.nextTick()
-
-        // Test that no dropdown is shown
-        const hasDropdown = wrapper.vm.hasDropdownContent(transaction)
-        expect(hasDropdown).toBe(false)
+        const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
+        testDropdownContent(testWrapper, transaction, 0)
       })
     })
 
     describe('5. PAID - Normal [PAD]', () => {
       it('should show normal payment method and no dropdown', async () => {
-        const transaction = createTransaction({
+        const transaction = createTestTransaction({
           statusCode: 'PAID',
           paymentMethod: 'PAD',
           total: 100
         })
 
-        wrapper.setProps({
-          transactions: { results: [transaction], totalResults: 1 },
-          loading: false
-        })
-        await Vue.nextTick()
-
-        // Test that no dropdown is shown
-        const hasDropdown = wrapper.vm.hasDropdownContent(transaction)
-        expect(hasDropdown).toBe(false)
+        const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
+        testDropdownContent(testWrapper, transaction, 0)
       })
     })
 
     describe('6. PAID - Partial Refund [DIRECT_PAY]', () => {
       it('should show Partially Refunded status and combined refunds', async () => {
-        const transaction = createTransaction({
+        const transaction = createTestTransaction({
           statusCode: 'PAID',
           paymentMethod: 'DIRECT_PAY',
           total: 100,
@@ -389,14 +373,9 @@ describe('TransactionsDataTable tests', () => {
           ]
         })
 
-        wrapper.setProps({
-          transactions: { results: [transaction], totalResults: 1 },
-          loading: false
-        })
-        await Vue.nextTick()
+        const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
 
-        // Test dropdown items - should combine refunds
-        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
+        const dropdownItems = (testWrapper.vm as any).getDropdownItems(transaction)
         const refundItems = dropdownItems.filter(item => item.isRefund)
         expect(refundItems).toHaveLength(1)
         expect(refundItems[0].amount).toBe('-$50.00')
@@ -406,7 +385,7 @@ describe('TransactionsDataTable tests', () => {
 
     describe('7. PAID - Partial Credit [PAD] (Generates a credit)', () => {
       it('should show Partially Credited status and Account Credit', async () => {
-        const transaction = createTransaction({
+        const transaction = createTestTransaction({
           statusCode: 'PAID',
           paymentMethod: 'PAD',
           total: 100,
@@ -415,14 +394,9 @@ describe('TransactionsDataTable tests', () => {
           ]
         })
 
-        wrapper.setProps({
-          transactions: { results: [transaction], totalResults: 1 },
-          loading: false
-        })
-        await Vue.nextTick()
+        const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
 
-        // Test dropdown items
-        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
+        const dropdownItems = (testWrapper.vm as any).getDropdownItems(transaction)
         const refundItem = dropdownItems.find(item => item.isRefund)
         expect(refundItem.paymentMethod).toBe('Account Credit')
         expect(refundItem.status).toBe('Partially Credited')
@@ -432,47 +406,33 @@ describe('TransactionsDataTable tests', () => {
 
     describe('8. REFUNDED - Dropdown rows [DIRECT_PAY]', () => {
       it('should show Refunded status and dropdown', async () => {
-        const transaction = createTransaction({
+        const transaction = createTestTransaction({
           statusCode: 'REFUNDED',
           paymentMethod: 'DIRECT_PAY',
           total: 100,
           refundDate: '2023-01-02T10:00:00Z'
         })
 
-        wrapper.setProps({
-          transactions: { results: [transaction], totalResults: 1 },
-          loading: false
-        })
-        await Vue.nextTick()
-
-        // Test dropdown items
-        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
-        expect(dropdownItems).toHaveLength(1)
-        expect(dropdownItems[0].type).toBe('Refund')
-        expect(dropdownItems[0].paymentMethod).toBe('DIRECT_PAY')
+        const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
+        testDropdownContent(testWrapper, transaction, 1, [
+          { type: 'Refund', paymentMethod: 'DIRECT_PAY' }
+        ])
       })
     })
 
     describe('9. CREDITED - Refunds as credits (Generates a credit) [PAD]', () => {
       it('should show Credited status and Account Credit', async () => {
-        const transaction = createTransaction({
+        const transaction = createTestTransaction({
           statusCode: 'CREDITED',
           paymentMethod: 'PAD',
           total: 100,
           refundDate: '2023-01-02T10:00:00Z'
         })
 
-        wrapper.setProps({
-          transactions: { results: [transaction], totalResults: 1 },
-          loading: false
-        })
-        await Vue.nextTick()
-
-        // Test dropdown items
-        const dropdownItems = wrapper.vm.getDropdownItems(transaction)
-        expect(dropdownItems).toHaveLength(1)
-        expect(dropdownItems[0].type).toBe('Refund as credits')
-        expect(dropdownItems[0].paymentMethod).toBe('Account Credit')
+        const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
+        testDropdownContent(testWrapper, transaction, 1, [
+          { type: 'Refund as credits', paymentMethod: 'Account Credit' }
+        ])
       })
     })
   })
