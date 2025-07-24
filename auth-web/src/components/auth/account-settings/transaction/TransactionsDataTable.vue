@@ -727,7 +727,7 @@ export default defineComponent({
 }
 
 .dropdown-row {
-  background-color: #DEE2E6;
+  background-color: #F2F6FB;
   border-bottom: 1px solid #e0e0e0;
   height: 58px;
   min-height: 58px;
