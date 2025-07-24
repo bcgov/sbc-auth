@@ -146,8 +146,14 @@
         </div>
       </template>
       <template #item-slot-total="{ item }">
-        <span class="total-amount-cell" v-if="item.statusCode === InvoiceStatus.CANCELLED">$0.00</span>
-        <span class="total-amount-cell" v-else>{{ '$' + item.total.toFixed(2) }}</span>
+        <span
+          v-if="item.statusCode === InvoiceStatus.CANCELLED"
+          class="total-amount-cell"
+        >$0.00</span>
+        <span
+          v-else
+          class="total-amount-cell"
+        >{{ '$' + item.total.toFixed(2) }}</span>
       </template>
       <template #item-slot-statusCode="{ item }">
         <v-row no-gutters>
