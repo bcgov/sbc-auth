@@ -344,8 +344,8 @@ describe('TransactionsDataTable tests', () => {
       paymentMethod: PaymentTypes.DIRECT_PAY,
       total: 100,
       partialRefunds: [
-        createPartialRefund({ refundAmount: 30 }),
-        createPartialRefund({ paymentLineItemId: 2, refundAmount: 20 })
+        createPartialRefund({ refundAmount: 30, isCredit: false }),
+        createPartialRefund({ paymentLineItemId: 2, refundAmount: 20, isCredit: false })
       ]
     }, '-$50.00', 'Refund', wrapper)
   })
@@ -355,7 +355,13 @@ describe('TransactionsDataTable tests', () => {
       statusCode: InvoiceStatus.PAID,
       paymentMethod: PaymentTypes.PAD,
       total: 100,
-      partialRefunds: [createPartialRefund()]
+      partialRefunds: [createPartialRefund({ 
+        isCredit: true,
+        createdName: 'Test User',
+        createdBy: 'testuser',
+        id: 1,
+        createdOn: new Date('2023-01-01T10:00:00Z')
+      })]
     })
 
     const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)

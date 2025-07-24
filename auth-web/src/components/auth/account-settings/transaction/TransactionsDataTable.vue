@@ -452,8 +452,11 @@ export default defineComponent({
       ...overrides
     })
 
-    const isRefundAsCredits = (paymentMethod: PaymentTypes) => {
-      return [PaymentTypes.ONLINE_BANKING, PaymentTypes.PAD].includes(paymentMethod)
+    const isRefundAsCredits = (item: Transaction) => {
+      if (item.partialRefunds?.length > 0) {
+        return item.partialRefunds.some(refund => refund.isCredit)
+      }
+      return item.statusCode === InvoiceStatus.CREDITED
     }
 
     const getAppliedCreditsItems = (item: Transaction) => {
@@ -500,7 +503,7 @@ export default defineComponent({
       if (!item.partialRefunds?.length) return []
 
       const totalRefundAmount = item.partialRefunds.reduce((sum, refund) => sum + refund.refundAmount, 0)
-      const refundAsCredits = isRefundAsCredits(item.paymentMethod)
+      const refundAsCredits = isRefundAsCredits(item)
       const refundIds = item.partialRefunds.map(refund => refund.paymentLineItemId).join(', ')
 
       return [createDropdownItem(item, {
@@ -520,7 +523,7 @@ export default defineComponent({
     const getFullRefundItems = (item: Transaction) => {
       if (![InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED].includes(item.statusCode)) return []
 
-      const refundAsCredits = isRefundAsCredits(item.paymentMethod)
+      const refundAsCredits = isRefundAsCredits(item)
       const isCredited = item.statusCode === InvoiceStatus.CREDITED
 
       return [createDropdownItem(item, {
