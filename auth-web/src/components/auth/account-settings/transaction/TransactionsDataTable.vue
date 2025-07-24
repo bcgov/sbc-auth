@@ -67,6 +67,9 @@
           <div v-html="getStatusCodeHelpText()" />
         </IconTooltip>
       </template>
+      <template #header-title-slot-total="{ header }">
+        <span class="total-header-cell">{{ header.value }}</span>
+      </template>
       <!-- header filter slots -->
       <template #header-filter-slot-createdOn>
         <div @click="scrollToDatePicker()">
@@ -143,8 +146,8 @@
         </div>
       </template>
       <template #item-slot-total="{ item }">
-        <span v-if="item.statusCode === InvoiceStatus.CANCELLED">$0.00</span>
-        <span v-else>{{ '$' + item.total.toFixed(2) }}</span>
+        <span class="total-amount-cell" v-if="item.statusCode === InvoiceStatus.CANCELLED">$0.00</span>
+        <span class="total-amount-cell" v-else>{{ '$' + item.total.toFixed(2) }}</span>
       </template>
       <template #item-slot-statusCode="{ item }">
         <v-row no-gutters>
@@ -695,6 +698,26 @@ export default defineComponent({
 
 ::v-deep .transaction-list .base-table__item-cell {
   padding: 8px 8px 8px 12px !important;
+}
+
+.total-amount-cell {
+  text-align: right !important;
+}
+
+::v-deep .transaction-list .cell-total {
+  text-align: right !important;
+}
+
+.total-header-cell {
+  text-align: right !important;
+}
+
+::v-deep .transaction-list .header-total {
+  text-align: right !important;
+}
+
+.dropdown-item-amount {
+  text-align: right;
 }
 
 .dropdown-row {

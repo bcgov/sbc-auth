@@ -40,7 +40,7 @@
             <th
               v-for="header, i in headers"
               :key="header.col + i"
-              :class="[header.class, 'base-table__header__title']"
+              :class="[header.class, 'base-table__header__title', `header-${header.col}`]"
               :style="header.minWidth ? { 'min-width': header.minWidth, 'max-width': header.minWidth } : {'width': header.width}"
             >
               <slot
@@ -97,7 +97,7 @@
         <td
           v-for="header in headers"
           :key="'item-' + header.col"
-          :class="[header.itemClass, 'base-table__item-cell']"
+          :class="[header.itemClass, 'base-table__item-cell', `cell-${header.col}`]"
         >
           <slot
             :header="header"
