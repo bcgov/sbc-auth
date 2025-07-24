@@ -45,6 +45,7 @@ export interface PartialRefund {
   refundType: string
   refundAmount: number
   createdOn: Date
+  isCredit: boolean
 }
 
 export interface TransactionFilter {
