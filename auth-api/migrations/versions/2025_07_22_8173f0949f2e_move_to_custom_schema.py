@@ -218,6 +218,101 @@ def upgrade():
         url = make_url(conn.engine.url)
         logger.info("URL is %s", url)
 
+        import tempfile
+
+        # Create temporary file for dump
+        dump_file = tempfile.NamedTemporaryFile(suffix='.dump', delete=False)
+        
+        try:
+            # 1. First dump the original public schema (data only)
+            dump_cmd = [
+                f"{postgres_bin_path}pg_dump",
+                f"--host={url.host}" if url.host else "",
+                f"--port={url.port}" if url.port else "",
+                f"--username={url.username}" if url.username else "",
+                f"--dbname={url.database}",
+                "--format=custom",
+                "--schema=public",
+                "--schema-only"
+                f"--file={dump_file.name}"
+            ]
+            
+            logger.info(f"Executing dump: {' '.join(dump_cmd)}")
+            subprocess.run(
+                [arg for arg in dump_cmd if arg],
+                check=True,
+                env={'PGPASSWORD': url.password} if url.password else None
+            )
+
+            import shutil
+            local_copy_path = f"./pg_dump_output_{target_schema}.sql"
+            shutil.copy2(tmp_file.name, local_copy_path)
+            logger.info(f"Saved pg_dump output to: {local_copy_path}")
+
+            # 2. Rename schemas
+            conn.execute(text("ALTER SCHEMA public RENAME TO original_public;"))
+            conn.execute(text("CREATE SCHEMA public;"))
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\" SCHEMA public;"))
+
+            conn.commit()
+
+            # 4. Restore data to public schema
+            restore_cmd = [
+                f"{postgres_bin_path}pg_restore",
+                f"--host={url.host}" if url.host else "",
+                f"--port={url.port}" if url.port else "",
+                f"--username={url.username}" if url.username else "",
+                f"--dbname={url.database}",
+                "--single-transaction",
+                "--schema=public",
+                dump_file.name
+            ]
+            
+            logger.info(f"Executing restore: {' '.join(restore_cmd)}")
+            restore_result = subprocess.run(
+                [arg for arg in restore_cmd if arg],
+                env={'PGPASSWORD': url.password} if url.password else None,
+                capture_output=True,
+                text=True
+            )
+
+            if restore_result.returncode != 0:
+                logger.error(f"Restore failed: {restore_result.stderr}")
+                raise Exception(f"Restore failed: {restore_result.stderr}")
+            
+            conn.execute(text(f"ALTER SCHEMA public RENAME TO {target_schema};"))
+
+            logger.info("Migration completed successfully")
+
+        finally:
+            try:
+                conn.execute(text(f"ALTER SCHEMA original_public RENAME TO public;"))
+                os.unlink(dump_file.name)
+            except FileNotFoundError:
+                pass
+
+    except Exception as e:
+        logger.error(f"Migration failed: {str(e)}")
+        # Restore original state
+        conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
+        conn.execute(text("ALTER SCHEMA original_public RENAME TO public"))
+        raise
+
+
+def upgrade2():
+    target_schema = get_target_schema()
+    if target_schema == 'public':
+        logger.info("Target schema is public, skipping migration")
+        return
+
+    conn = op.get_bind()
+    postgres_bin_path = "/usr/local/Cellar/postgresql@15/15.13/bin/"
+
+    try:
+        from sqlalchemy.engine.url import make_url
+        url = make_url(conn.engine.url)
+        logger.info("URL is %s", url)
+
         import shutil
         import tempfile
 
@@ -362,7 +457,7 @@ def upgrade():
         raise
 
 
-def upgrade2():
+def upgrade3():
     target_schema = get_target_schema()
     if target_schema == 'public':
         logger.info("Target schema is public, skipping migration")
