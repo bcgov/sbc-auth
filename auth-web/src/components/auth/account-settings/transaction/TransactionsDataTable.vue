@@ -683,6 +683,20 @@ export default defineComponent({
   cursor: pointer !important;
 }
 
+::v-deep .transaction-list .v-data-table > .v-data-table__wrapper > table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+::v-deep .transaction-list .base-table__header__title,
+::v-deep .transaction-list .base-table__header__filter {
+  padding: 8px 8px !important;
+}
+
+::v-deep .transaction-list .base-table__item-cell {
+  padding: 8px 8px 8px 12px !important;
+}
+
 .dropdown-row {
   background-color: #DEE2E6;
   border-bottom: 1px solid #e0e0e0;
@@ -699,7 +713,7 @@ export default defineComponent({
 }
 
 .dropdown-cell {
-  padding: 8px 0 8px 16px;
+  padding: 8px 8px;
   font-size: 0.875rem;
   vertical-align: top;
   border: 0px;
