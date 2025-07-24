@@ -42,6 +42,8 @@
       :totalItems="transactions.totalResults"
       :disableRowCount="true"
       :setExpanded="expandedRows"
+      :isRowExpanded="getExpandedRowClass"
+      :onRowClick="handleRowClick"
       @update-table-options="tableDataOptions = $event"
     >
       <template #header-filter-slot-actions>
@@ -83,11 +85,11 @@
       </template>
       <!-- item slots -->
       <template #item-slot-lineItemsAndDetails="{ item }">
-        <div class="d-flex align-center">
+        <div class="d-flex align-start">
           <div
             v-if="hasDropdownContent(item)"
-            class="expand-icon-container mr-2 mb-4"
-            @click="toggleExpanded(item)"
+            class="expand-icon-container mr-2"
+            @click.stop="toggleExpanded(item)"
           >
             <v-icon
               v-if="isExpanded(item)"
@@ -111,13 +113,32 @@
               class="dark-text"
             >
               {{ lineItem.description }}
-            </b><br>
+            </b>
             <span
               v-for="detail, i in item.details"
               :key="detail.label + i"
             >
               {{ detail.label }} {{ detail.value }}
-            </span><br>
+            </span>
+            <div
+              v-if="hasDropdownContent(item)"
+              class="detail-link-container"
+            >
+              <a
+                v-if="!isExpanded(item)"
+                class="detail-link"
+                @click.stop="toggleExpanded(item)"
+              >
+                View Detail
+              </a>
+              <a
+                v-else
+                class="detail-link"
+                @click.stop="toggleExpanded(item)"
+              >
+                Hide Detail
+              </a>
+            </div>
           </div>
         </div>
       </template>
@@ -372,6 +393,10 @@ export default defineComponent({
       return expandedState.value.has(item.id)
     }
 
+    const getExpandedRowClass = (item: Transaction): string => {
+      return isExpanded(item) ? 'expanded-parent-row' : ''
+    }
+
     const expandedRows = computed(() => {
       return transactions.results.filter(item =>
         state.expandedRows.includes(item.id)
@@ -383,6 +408,12 @@ export default defineComponent({
         state.expandedRows = state.expandedRows.filter(expandedItem => expandedItem !== item.id)
       } else {
         state.expandedRows.push(item.id)
+      }
+    }
+
+    const handleRowClick = (item: Transaction) => {
+      if (hasDropdownContent(item)) {
+        toggleExpanded(item)
       }
     }
 
@@ -611,6 +642,8 @@ export default defineComponent({
       getHeaders,
       hasDropdownContent,
       isExpanded,
+      getExpandedRowClass,
+      handleRowClick,
       isColumnVisible,
       expandedRows,
       getDropdownItems,
@@ -651,15 +684,28 @@ export default defineComponent({
 }
 
 .dropdown-row {
-  background-color: #f8f9fa;
+  background-color: #DEE2E6;
   border-bottom: 1px solid #e0e0e0;
+  height: 58px;
+  min-height: 58px;
 }
 
-s.dropdown-cell {
+::v-deep .base-table__item-row.expanded-parent-row {
+  background-color: #E4EDF7 !important;
+}
+
+::v-deep .base-table__item-cell {
+  color: #495057 !important;
+}
+
+.dropdown-cell {
   padding: 8px 0 8px 16px;
   font-size: 0.875rem;
   vertical-align: top;
   border: 0px;
+  height: 58px;
+  min-height: 58px;
+  color: #495057;
 }
 
 .expansion-icon {
@@ -671,5 +717,25 @@ s.dropdown-cell {
   justify-content: center;
   width: 24px;
   height: 24px;
+}
+
+.expand-icon-container {
+  display: flex;
+  align-items: flex-start;
+}
+
+.detail-link-container {
+  margin-top: 4px;
+}
+
+.detail-link {
+  color: var(--v-primary-base);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.875rem;
+
+  &:hover {
+    text-decoration: none;
+  }
 }
 </style>

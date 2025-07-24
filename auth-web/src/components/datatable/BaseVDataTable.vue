@@ -88,7 +88,11 @@
     <template #item="{ item, index }">
       <tr
         :key="index"
-        :class="index==highlightIndex ? highlightClass :'base-table__item-row'"
+        :class="[
+          index==highlightIndex ? highlightClass :'base-table__item-row',
+          isRowExpanded ? isRowExpanded(item) : ''
+        ]"
+        @click="onRowClick ? onRowClick(item) : null"
       >
         <td
           v-for="header in headers"
@@ -198,7 +202,9 @@ export default defineComponent({
     observerCallback: { type: Function as PropType<() => Promise<boolean>>, required: false, default: null },
     hideFilters: { type: Boolean, default: false },
     setExpanded: { default: () => [] as object[] },
-    disableRowCount: { type: Boolean, default: false }
+    disableRowCount: { type: Boolean, default: false },
+    isRowExpanded: { type: Function as PropType<(item: any) => string>, default: null },
+    onRowClick: { type: Function as PropType<(item: any) => void>, default: null }
   },
   emits: ['update-table-options'],
   setup (props, { emit }) {
