@@ -713,7 +713,7 @@ export default defineComponent({
 }
 
 .dropdown-cell {
-  padding: 8px 8px;
+  padding: 8px 8px 8px 12px;
   font-size: 0.875rem;
   vertical-align: top;
   border: 0px;
