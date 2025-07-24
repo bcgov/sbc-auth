@@ -15,13 +15,16 @@
     </v-fade-transition>
     <header
       v-if="title"
-      class="view-header align-center mb-5 ml-4"
+      class="view-header align-center mb-5 ml-2"
     >
       <h2 class="view-header__title">
         {{ title }}
       </h2>
     </header>
-    <section v-if="showCredit && (hasPadCredit || hasObCredit)">
+    <section
+      v-if="showCredit && (hasPadCredit || hasObCredit)"
+      class="ml-4"
+    >
       <v-divider class="mb-8" />
       <div class="credit-header-row">
         <span class="font-weight-bold">Account Credit Available:</span>

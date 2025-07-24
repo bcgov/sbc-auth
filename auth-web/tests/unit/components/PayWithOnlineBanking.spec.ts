@@ -14,12 +14,12 @@ describe('PayWithOnlineBanking.vue', () => {
     return createWrapper(PayWithOnlineBanking, { onlineBankingData })
   }
 
-  async function expectPayeeInformation(wrapper: any) {
+  async function expectPayeeInformation (wrapper: any) {
     expectTextContains(wrapper, 'Payee Name:')
     expectTextContains(wrapper, 'Payment Identifier:')
   }
 
-  async function expectPaymentInstructions(wrapper: any, includePayee = true) {
+  async function expectPaymentInstructions (wrapper: any, includePayee = true) {
     expectTextContains(wrapper, 'How to pay with online banking:')
     expectTextContains(wrapper, 'Sign in to your financial institution')
     if (includePayee) {
@@ -27,12 +27,12 @@ describe('PayWithOnlineBanking.vue', () => {
     }
   }
 
-  async function expectNoPayeeInformation(wrapper: any) {
+  async function expectNoPayeeInformation (wrapper: any) {
     expectTextNotContains(wrapper, 'Payee Name:')
     expectTextNotContains(wrapper, 'Payment Identifier:')
   }
 
-  async function expectNoPaymentInstructions(wrapper: any) {
+  async function expectNoPaymentInstructions (wrapper: any) {
     expectTextNotContains(wrapper, 'How to pay with online banking:')
     expectTextNotContains(wrapper, 'Sign in to your financial institution')
   }
