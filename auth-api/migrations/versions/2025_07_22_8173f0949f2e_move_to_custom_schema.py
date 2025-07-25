@@ -9,7 +9,6 @@ import importlib.util
 import logging
 import os
 import re
-import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -225,11 +224,6 @@ def upgrade():
 
         conn.execute(text(f"ALTER SCHEMA public RENAME TO {target_schema};"))
         conn.execute(text("CREATE SCHEMA public;"))
-        conn.execute(text("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\" SCHEMA public;"))
-
-        uuid_exists = conn.execute(text("SELECT 1 FROM pg_proc WHERE proname = 'uuid_generate_v4'")).scalar()
-        if not uuid_exists:
-            raise Exception("uuid_generate_v4 function not available after extension creation")
         
         # Create alembic_version table in new public schema
         conn.execute(text("""
