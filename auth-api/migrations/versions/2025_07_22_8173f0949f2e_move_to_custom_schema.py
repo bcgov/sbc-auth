@@ -211,402 +211,49 @@ def upgrade():
         return
 
     conn = op.get_bind()
-    postgres_bin_path = "/usr/local/Cellar/postgresql@15/15.13/bin/"
 
     try:
-        from sqlalchemy.engine.url import make_url
-        url = make_url(conn.engine.url)
-        logger.info("URL is %s", url)
+        # Check if target schema already exists
+        schema_exists = conn.execute(text(f"""
+            SELECT 1 FROM information_schema.schemata
+            WHERE schema_name = '{target_schema}'
+        """)).scalar()
 
-        import tempfile
+        if schema_exists:
+            logger.info(f"Schema {target_schema} already exists, skipping migration")
+            return
 
-        # Create temporary file for dump
-        dump_file = tempfile.NamedTemporaryFile(suffix='.dump', delete=False)
+        conn.execute(text(f"ALTER SCHEMA public RENAME TO {target_schema};"))
+        conn.execute(text("CREATE SCHEMA public;"))
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\" SCHEMA public;"))
+
+        uuid_exists = conn.execute(text("SELECT 1 FROM pg_proc WHERE proname = 'uuid_generate_v4'")).scalar()
+        if not uuid_exists:
+            raise Exception("uuid_generate_v4 function not available after extension creation")
         
-        try:
-            # 1. First dump the original public schema (data only)
-            dump_cmd = [
-                f"{postgres_bin_path}pg_dump",
-                f"--host={url.host}" if url.host else "",
-                f"--port={url.port}" if url.port else "",
-                f"--username={url.username}" if url.username else "",
-                f"--dbname={url.database}",
-                "--format=custom",
-                "--schema=public",
-                "--schema-only"
-                f"--file={dump_file.name}"
-            ]
-            
-            logger.info(f"Executing dump: {' '.join(dump_cmd)}")
-            subprocess.run(
-                [arg for arg in dump_cmd if arg],
-                check=True,
-                env={'PGPASSWORD': url.password} if url.password else None
+        # Create alembic_version table in new public schema
+        conn.execute(text("""
+            CREATE TABLE public.alembic_version (
+                version_num character varying(32) NOT NULL,
+                CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
             )
-
-            import shutil
-            local_copy_path = f"./pg_dump_output_{target_schema}.sql"
-            shutil.copy2(tmp_file.name, local_copy_path)
-            logger.info(f"Saved pg_dump output to: {local_copy_path}")
-
-            # 2. Rename schemas
-            conn.execute(text("ALTER SCHEMA public RENAME TO original_public;"))
-            conn.execute(text("CREATE SCHEMA public;"))
-            conn.execute(text("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\" SCHEMA public;"))
-
-            conn.commit()
-
-            # 4. Restore data to public schema
-            restore_cmd = [
-                f"{postgres_bin_path}pg_restore",
-                f"--host={url.host}" if url.host else "",
-                f"--port={url.port}" if url.port else "",
-                f"--username={url.username}" if url.username else "",
-                f"--dbname={url.database}",
-                "--single-transaction",
-                "--schema=public",
-                dump_file.name
-            ]
-            
-            logger.info(f"Executing restore: {' '.join(restore_cmd)}")
-            restore_result = subprocess.run(
-                [arg for arg in restore_cmd if arg],
-                env={'PGPASSWORD': url.password} if url.password else None,
-                capture_output=True,
-                text=True
-            )
-
-            if restore_result.returncode != 0:
-                logger.error(f"Restore failed: {restore_result.stderr}")
-                raise Exception(f"Restore failed: {restore_result.stderr}")
-            
-            conn.execute(text(f"ALTER SCHEMA public RENAME TO {target_schema};"))
-
-            logger.info("Migration completed successfully")
-
-        finally:
-            try:
-                conn.execute(text(f"ALTER SCHEMA original_public RENAME TO public;"))
-                os.unlink(dump_file.name)
-            except FileNotFoundError:
-                pass
+        """))
+        
+        # Insert the down_revision value (previous migration)
+        conn.execute(text(f"""
+            INSERT INTO public.alembic_version (version_num) 
+            VALUES ('{down_revision}')
+        """))
+        conn.commit()
 
     except Exception as e:
         logger.error(f"Migration failed: {str(e)}")
-        # Restore original state
+        conn.rollback()
         conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
-        conn.execute(text("ALTER SCHEMA original_public RENAME TO public"))
+        conn.execute(text(f"ALTER SCHEMA {target_schema} RENAME TO public"))
+        conn.commit()
         raise
 
-
-def upgrade2():
-    target_schema = get_target_schema()
-    if target_schema == 'public':
-        logger.info("Target schema is public, skipping migration")
-        return
-
-    conn = op.get_bind()
-    postgres_bin_path = "/usr/local/Cellar/postgresql@15/15.13/bin/"
-
-    try:
-        from sqlalchemy.engine.url import make_url
-        url = make_url(conn.engine.url)
-        logger.info("URL is %s", url)
-
-        import shutil
-        import tempfile
-
-        # Create temporary files
-        schema_file = tempfile.NamedTemporaryFile(mode='w+', suffix='.sql', delete=False)
-        modified_schema_file = tempfile.NamedTemporaryFile(mode='w+', suffix='.sql', delete=False)
-        data_file = tempfile.NamedTemporaryFile(suffix='.dump', delete=False)  # Binary format for data
-        
-        try:
-            # 1. Dump SCHEMA in plain text for modification
-            schema_dump_cmd = [
-                f"{postgres_bin_path}pg_dump",
-                f"--host={url.host}" if url.host else "",
-                f"--port={url.port}" if url.port else "",
-                f"--username={url.username}" if url.username else "",
-                f"--dbname={url.database}",
-                "--format=plain",
-                "--schema-only",
-                "--schema=public",
-                "--no-comments",
-                f"--file={schema_file.name}"
-            ]
-            
-            logger.info(f"Executing schema dump: {' '.join(schema_dump_cmd)}")
-            subprocess.run(
-                [arg for arg in schema_dump_cmd if arg],
-                check=True,
-                env={'PGPASSWORD': url.password} if url.password else None
-            )
-
-            # 2. Dump DATA in binary format for performance
-            data_dump_cmd = [
-                f"{postgres_bin_path}pg_dump",
-                f"--host={url.host}" if url.host else "",
-                f"--port={url.port}" if url.port else "",
-                f"--username={url.username}" if url.username else "",
-                f"--dbname={url.database}",
-                "--format=custom",
-                "--data-only",
-                "--schema=public",
-                f"--file={data_file.name}"
-            ]
-            
-            logger.info(f"Executing data dump: {' '.join(data_dump_cmd)}")
-            subprocess.run(
-                [arg for arg in data_dump_cmd if arg],
-                check=True,
-                env={'PGPASSWORD': url.password} if url.password else None
-            )
-
-            # 3. Modify the schema file to change references
-            with open(schema_file.name, 'r') as f_in, open(modified_schema_file.name, 'w') as f_out:
-                content = f_in.read()
-
-                # Show first few lines for debugging
-                first_few_lines = content.split('\n')[:15]
-                logger.info("Dump file starts with:\n%s", '\n'.join(first_few_lines))
-
-
-                # Replace public schema references with target schema
-                modified_content = content.replace('public.', f'{target_schema}.')
-
-                # IMPORTANT: Fix UUID function references back to public schema
-                modified_content = modified_content.replace(f'{target_schema}.uuid_generate_v4()', 'public.uuid_generate_v4()')
-
-                # Remove CREATE SCHEMA statements
-                modified_content = modified_content.replace('ALTER SCHEMA public OWNER TO pg_database_owner;', '')
-                modified_content = modified_content.replace('CREATE SCHEMA public;', f'CREATE SCHEMA IF NOT EXISTS {target_schema};')
-
-                logger.debug(modified_content[:500])  # Log first 500 chars for debugging
-
-                # 4. Create debug copies
-                shutil.copy2(f_out.name, "./debug_schema_modified.sql")
-                logger.info("Saved modified schema to debug_schema_modified.sql")
-
-                f_out.write(modified_content)
-
-
-                # 6. Restore modified schema using psql
-                schema_restore_cmd = [
-                    '/usr/local/opt/libpq/bin/psql',
-                    f"--host={url.host}" if url.host else "",
-                    f"--port={url.port}" if url.port else "",
-                    f"--username={url.username}" if url.username else "",
-                    f"--dbname={url.database}",
-                    "--quiet",
-                    "--single-transaction",
-                    f"--file={f_out.name}"
-                ]
-            
-            logger.info(f"Executing schema restore: {' '.join(schema_restore_cmd)}")
-            schema_result = subprocess.run(
-                [arg for arg in schema_restore_cmd if arg],
-                env={'PGPASSWORD': url.password} if url.password else None,
-                capture_output=True,
-                text=True
-            )
-
-            if schema_result.returncode != 0:
-                logger.error(f"Schema restore failed: {schema_result.stderr}")
-                raise Exception(f"Schema restore failed: {schema_result.stderr}")
-
-            # 7. Restore data using pg_restore with binary format
-            data_restore_cmd = [
-                f"{postgres_bin_path}pg_restore",
-                f"--host={url.host}" if url.host else "",
-                f"--port={url.port}" if url.port else "",
-                f"--username={url.username}" if url.username else "",
-                f"--dbname={url.database}",
-                "--single-transaction",
-                f"--schema={target_schema}",  # This loads data into the target schema
-                data_file.name
-            ]
-            
-            logger.info(f"Executing data restore: {' '.join(data_restore_cmd)}")
-            data_result = subprocess.run(
-                [arg for arg in data_restore_cmd if arg],
-                env={'PGPASSWORD': url.password} if url.password else None,
-                capture_output=True,
-                text=True
-            )
-
-            if data_result.returncode != 0:
-                logger.error(f"Data restore failed: {data_result.stderr}")
-                raise Exception(f"Data restore failed: {data_result.stderr}")
-
-            logger.info("Migration completed successfully")
-
-        finally:
-            # Clean up temporary files
-            for f in [schema_file, modified_schema_file, data_file]:
-                try:
-                    os.unlink(f.name)
-                except FileNotFoundError:
-                    pass
-
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Command failed: {e.stderr.decode('utf-8') if e.stderr else str(e)}")
-        raise Exception("Migration failed") from e
-    except Exception as e:
-        logger.error(f"Migration failed: {str(e)}")
-        raise
-
-
-def upgrade3():
-    target_schema = get_target_schema()
-    if target_schema == 'public':
-        logger.info("Target schema is public, skipping migration")
-        return
-
-    conn = op.get_bind()
-
-    try:
-        # 1. Get database connection parameters
-        from sqlalchemy.engine.url import make_url
-        url = make_url(conn.engine.url)
-        logger.info("URL is %s", url)
-
-        # 2. Use a temporary file for more reliable transfer
-        import tempfile
-        with tempfile.NamedTemporaryFile(mode='w+', suffix='.sql', delete=False) as tmp_file:
-            # 4. Build and execute pg_dump command
-            dump_cmd = [
-                '/usr/local/Cellar/postgresql@15/15.13/bin/pg_dump',
-                f"--host={url.host}" if url.host else "",
-                f"--port={url.port}" if url.port else "",
-                f"--username={url.username}" if url.username else "",
-                f"--dbname={url.database}",
-                "--schema-only",
-                "--schema=public",
-                "--no-comments",
-                # "--no-owner",
-                # "--no-privileges",
-                f"--file={tmp_file.name}"
-            ]
-
-            # Remove empty arguments
-            dump_cmd = [arg for arg in dump_cmd if arg]
-
-            # Execute pg_dump
-            result = subprocess.run(
-                dump_cmd,
-                check=True,
-                env={'PGPASSWORD': url.password} if url.password else None,
-                stderr=subprocess.PIPE
-            )
-
-            logger.debug(f"pg_dump stdout: {result.stdout}")
-            logger.debug(f"pg_dump stderr: {result.stderr}")
-
-            # After pg_dump completes:
-            file_size = os.path.getsize(tmp_file.name)
-            logger.info(f"pg_dump file size: {file_size} bytes")
-
-            if file_size == 0:
-                logger.warning("pg_dump failed: Output file is empty!")
-                return
-            
-            import shutil
-            local_copy_path = f"./pg_dump_output_{target_schema}.sql"
-            shutil.copy2(tmp_file.name, local_copy_path)
-            logger.info(f"Saved pg_dump output to: {local_copy_path}")
-
-        # 3. Modify the SQL file to use target schema (outside the with block but before deletion)
-        try:
-            with open(tmp_file.name, 'r') as f:
-                content = f.read()
-
-                # Show first few lines for debugging
-                first_few_lines = content.split('\n')[:15]
-                logger.info("Dump file starts with:\n%s", '\n'.join(first_few_lines))
-
-
-                # Replace public schema references with target schema
-                modified_content = content.replace('public.', f'{target_schema}.')
-
-                # IMPORTANT: Fix UUID function references back to public schema
-                modified_content = modified_content.replace(f'{target_schema}.uuid_generate_v4()', 'public.uuid_generate_v4()')
-
-                # Fix PostgreSQL version issues
-                modified_content = modified_content.replace('SET transaction_timeout = 0;', '\n')
-
-                # Remove CREATE SCHEMA statements
-                modified_content = modified_content.replace('ALTER SCHEMA public OWNER TO pg_database_owner;', '')
-                modified_content = modified_content.replace('CREATE SCHEMA public;', f'CREATE SCHEMA IF NOT EXISTS {target_schema};')
-
-                logger.debug(modified_content[:500])  # Log first 500 chars for debugging
-                with open(tmp_file.name, 'w') as f:
-                    f.write(modified_content)
-
-                import shutil
-                local_copy_path = f"./pg_dump_output_modified_{target_schema}.sql"
-                shutil.copy2(tmp_file.name, local_copy_path)
-                logger.info(f"Saved modified pg_dump output to: {local_copy_path}")
-
-                # 4. Load the modified SQL with simplified psql command
-                # TODO add to Dockerfile and figure out path
-                load_cmd = [
-                    '/usr/local/Cellar/postgresql@15/15.13/bin/psql',
-                    f"--host={url.host}" if url.host else "",
-                    f"--port={url.port}" if url.port else "",
-                    f"--username={url.username}" if url.username else "",
-                    f"--dbname={url.database}",
-                    "--quiet",
-                    "--single-transaction",
-                    f"--file={tmp_file.name}"
-                ]
-
-                # Remove empty arguments
-                load_cmd = [arg for arg in load_cmd if arg]
-
-                logger.info(f"Executing psql command: {' '.join(load_cmd)}")
-
-                # Execute psql
-                result = subprocess.run(
-                    load_cmd,
-                    env={'PGPASSWORD': url.password} if url.password else None,
-                    capture_output=True,
-                    text=True
-                )
-
-                if result.returncode != 0:
-                    logger.error(f"psql stderr: {result.stderr}")
-                    raise Exception(f"Schema load failed: {result.stderr}")
-
-                logger.info("Schema structure loaded successfully")
-
-        finally:
-            # Clean up the temporary file
-            try:
-                os.unlink(tmp_file.name)
-            except FileNotFoundError:
-                pass
-
-        # 5. Copy data
-        # TODO should pg_dump be also used for data?
-
-        tables_in_target = conn.execute(text(f"""
-            SELECT table_name FROM information_schema.tables 
-            WHERE table_schema = '{target_schema}'
-        """)).fetchall()
-        logger.info(f"Tables found in {target_schema} after psql: {[t[0] for t in tables_in_target]}")
-        
-
-        copy_data_with_dependencies(conn, target_schema)
-
-        logger.info("Migration completed successfully")
-
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Command failed: {e.stderr.decode('utf-8') if e.stderr else str(e)}")
-        raise Exception("Schema copy failed") from e
-    except Exception as e:
-        logger.error(f"Migration failed: {str(e)}")
-        raise
 
 def downgrade():
     target_schema = get_target_schema()
