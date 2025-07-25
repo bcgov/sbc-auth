@@ -269,9 +269,13 @@ def downgrade():
             logger.info(f"Schema {target_schema} does not exist, nothing to downgrade")
             return
 
-        # Then drop the schema
-        logger.info(f"Dropping schema {target_schema}")
-        conn.execute(text(f"DROP SCHEMA {target_schema} CASCADE"))
+        # 1. Drop the current public schema (which is empty/minimal)
+        logger.info("Dropping current public schema")
+        conn.execute(text("DROP SCHEMA public CASCADE"))
+
+        # 2. Rename the target schema back to public
+        logger.info(f"Renaming {target_schema} back to public")
+        conn.execute(text(f"ALTER SCHEMA {target_schema} RENAME TO public"))
 
         logger.info("Downgrade completed successfully")
     except Exception as e:
