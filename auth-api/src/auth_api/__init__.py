@@ -57,7 +57,7 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
             user=app.config["DB_USER"],
             ip_type="private",
             schema=schema if run_mode != "migration" else None,
-            pool_recycle=300
+            pool_recycle=300,
         )
 
         app.config["SQLALCHEMY_ENGINE_OPTIONS"] = db_config.get_engine_options()
@@ -67,6 +67,7 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
         with app.app_context():
             engine = db.engine
             from cloud_sql_connector import setup_search_path_event_listener
+
             setup_search_path_event_listener(engine, schema)
 
     if run_mode == "migration":
