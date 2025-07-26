@@ -5,8 +5,9 @@ Revises: 628b52a95bad
 Create Date: 2023-08-15 08:38:16.786130
 
 """
-import sqlalchemy as sa
 from alembic import op
+import sqlalchemy as sa
+
 
 # revision identifiers, used by Alembic.
 revision = '98bee9969323'
@@ -16,25 +17,25 @@ depends_on = None
 
 
 def upgrade():
-    op.execute("UPDATE product_codes "
+    op.execute("UPDATE public.product_codes "
                "SET description='Manufactured Home Registry – Lawyers and Notaries'"
                "WHERE code='MHR_QSLN'")
-    op.execute("UPDATE product_codes "
+    op.execute("UPDATE public.product_codes "
                "SET description='Manufactured Home Registry – Manufacturers'"
                "WHERE code='MHR_QSHM'")
-    op.execute("UPDATE product_codes "
+    op.execute("UPDATE public.product_codes "
                "SET description='Manufactured Home Registry – Home Dealers'"
                "WHERE code='MHR_QSHD'")
 
 
 def downgrade():
-    op.execute("UPDATE product_codes "
+    op.execute("UPDATE public.product_codes "
                "SET description='Qualified Supplier - Lawyers and Notaries'"
                "WHERE code='MHR_QSLN'")
-    op.execute("UPDATE product_codes "
+    op.execute("UPDATE public.product_codes "
                "SET description='Qualified Supplier - Home Manufacturers'"
                "WHERE code='MHR_QSHM'")
-    op.execute("UPDATE product_codes "
+    op.execute("UPDATE public.product_codes "
                "SET description='Qualified Supplier - Home Dealers'"
                "WHERE code='MHR_QSHD'")
 

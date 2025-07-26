@@ -9,6 +9,7 @@ from alembic import op
 
 from auth_api.utils.custom_sql import CustomSql
 
+
 # revision identifiers, used by Alembic.
 revision = '615db0d23fee'
 down_revision = 'b32d868d628c'
@@ -21,7 +22,7 @@ authorizations_view = CustomSql('authorizations_view',
                                 'e.business_identifier, e.name as entity_name, m.membership_type_code as org_membership, '
                                 'u.keycloak_guid, u.id as user_id, o.id as org_id, o.type_code as org_type '
                                 'from  '
-                                'entity e,  affiliation a,  org o,  membership m,  user u '
+                                'entity e,  affiliation a,  org o,  membership m,  public.user u '
                                 'where  '
                                 'e.id = a.entity_id  '
                                 'and o.id = a.org_id  '

@@ -16,7 +16,7 @@ depends_on = None
 
 
 def upgrade():
-    op.execute("INSERT INTO product_codes "
+    op.execute("INSERT INTO public.product_codes "
                "(code, description,\"default\", type_code, hidden, need_review, premium_only, url) "
                "VALUES "
                "('RPPR', 'Restricted Personal Property Registry',false, 'INTERNAL', true,false, true, "
