@@ -74,7 +74,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     DB_PASSWORD = os.getenv("DATABASE_PASSWORD", "")
     DB_NAME = os.getenv("DATABASE_NAME", "")
     DB_HOST = os.getenv("DATABASE_HOST", "")
-    DB_PORT = int(os.getenv("DATABASE_PORT", "5432"))  # POSTGRESQL
+    DB_PORT = int(os.getenv("DATABASE_PORT", "5432"))
     DB_SCHEMA = os.getenv("DATABASE_SCHEMA", "public")
 
     if DB_INSTANCE_CONNECTION_NAME := os.getenv("DATABASE_INSTANCE_CONNECTION_NAME", None):
@@ -82,7 +82,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     else:
         DB_PASSWORD = os.getenv("DATABASE_PASSWORD", "")
         DB_HOST = os.getenv("DATABASE_HOST", "")
-        DB_PORT = os.getenv("DATABASE_PORT", "5432")
+        DB_PORT = int(os.getenv("DATABASE_PORT", "5432"))
         SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
     # JWT_OIDC Settings

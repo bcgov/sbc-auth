@@ -50,11 +50,11 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
 
     CORS(app, resources="*")
 
-    if app.config["DB_INSTANCE_CONNECTION_NAME"]:
+    if app.config.get("DB_INSTANCE_CONNECTION_NAME"):
         db_config = DBConfig(
-            instance_name=app.config["DB_INSTANCE_CONNECTION_NAME"],
-            database=app.config["DB_NAME"],
-            user=app.config["DB_USER"],
+            instance_name=app.config.get("DB_INSTANCE_CONNECTION_NAME"),
+            database=app.config.get("DB_NAME"),
+            user=app.config.get("DB_USER"),
             ip_type="private",
             schema=schema if run_mode != "migration" else None,
             pool_recycle=300,
