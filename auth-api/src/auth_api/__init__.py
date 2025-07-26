@@ -61,7 +61,8 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
         )
 
         app.config["SQLALCHEMY_ENGINE_OPTIONS"] = db_config.get_engine_options()
-        db.init_app(app)
+
+    db.init_app(app)
 
     if run_mode != "migration":
         with app.app_context():
