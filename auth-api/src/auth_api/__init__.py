@@ -18,10 +18,10 @@ This module is the API for the Authroization system.
 import os
 import traceback
 
+from cloud_sql_connector import DBConfig, getconn
 from flask import Flask, request
 from flask_cors import CORS
 from flask_migrate import Migrate, upgrade
-from sbc_common_components.cloud_sql.connection import DBConfig, getconn
 from sbc_common_components.utils.camel_case_response import convert_to_camel
 
 import auth_api.config as config  # pylint:disable=consider-using-from-import
@@ -56,21 +56,17 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
             database=app.config["DB_NAME"],
             user=app.config["DB_USER"],
             ip_type="private",
-            schema=schema if run_mode != "migration" else None
+            schema=schema if run_mode != "migration" else None,
+            pool_recycle=300
         )
 
-        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-            "creator": lambda: getconn(db_config),
-            "pool_pre_ping": True,
-            "pool_recycle": 300
-        }
-
-    db.init_app(app)
+        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = db_config.get_engine_options()
+        db.init_app(app)
 
     if run_mode != "migration":
         with app.app_context():
             engine = db.engine
-            from sbc_common_components.cloud_sql.connection import setup_search_path_event_listener
+            from cloud_sql_connector import setup_search_path_event_listener
             setup_search_path_event_listener(engine, schema)
 
     if run_mode == "migration":

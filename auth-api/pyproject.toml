@@ -46,7 +46,8 @@ Werkzeug = "^3.0.0"
 # VCS dependencies
 sql-versioning = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/sql-versioning", branch = "main" }
 flask-jwt-oidc = {git = "https://github.com/seeker25/flask-jwt-oidc.git", branch = "main" }
-sbc-common-components = { git = "https://github.com/bolyachevets/sbc-common-components.git", subdirectory = "python", branch = "gcp-db-connector" }
+sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", rev = "master", subdirectory = "python" }
+cloud-sql-connector = { git = "https://github.com/bolyachevets/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", branch = "gcp-db-conenctor-lib" }
 gcp-queue = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/gcp-queue", branch = "main" }
 structured-logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging", branch = "main" }
 

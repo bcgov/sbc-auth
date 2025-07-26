@@ -613,6 +613,28 @@ files = [
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
+name = "cloud-sql-connector"
+version = "0.1.0"
+description = "Cloud SQL connection utilities for database connectivity with authentication and schema management"
+optional = false
+python-versions = "^3.12"
+groups = ["main"]
+files = []
+develop = false
+
+[package.dependencies]
+cloud-sql-python-connector = "^1.16.0"
+pg8000 = "^1.30.0"
+sqlalchemy = "^2.0.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/bolyachevets/sbc-connect-common.git"
+reference = "gcp-db-conenctor-lib"
+resolved_reference = "c87d8769f6fbdf7c899bab58c8a23f8c345572d2"
+subdirectory = "python/cloud-sql-connector"
+
+[[package]]
 name = "cloud-sql-python-connector"
 version = "1.16.0"
 description = "The Cloud SQL Python Connector is a library that can be used alongside a database driver to allow users with sufficient permissions to connect to a Cloud SQL database without having to manually allowlist IPs or manage SSL certificates."
@@ -1388,7 +1410,6 @@ files = [
     {file = "google_crc32c-1.7.0-cp313-cp313-macosx_12_0_x86_64.whl", hash = "sha256:6a40522958040051c755a173eb98c05ad4d64a6dd898888c3e5ccca2d1cbdcdc"},
     {file = "google_crc32c-1.7.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f714fe5cdf5007d7064c57cf7471a99e0cbafda24ddfa829117fc3baafa424f7"},
     {file = "google_crc32c-1.7.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f04e58dbe1bf0c9398e603a9be5aaa09e0ba7eb022a3293195d8749459a01069"},
-    {file = "google_crc32c-1.7.0-cp313-cp313-win_amd64.whl", hash = "sha256:e545b51ddf97f604d30114f7c23eecaf4c06cd6c023ff1ae0b80dcd99af32833"},
     {file = "google_crc32c-1.7.0-cp313-cp313t-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:364067b063664dd8d1fec75a3fe85edf05c46f688365269beccaf42ef5dfe889"},
     {file = "google_crc32c-1.7.0-cp313-cp313t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e1b0d6044799f6ac51d1cc2decb997280a83c448b3bef517a54b57a3b71921c0"},
     {file = "google_crc32c-1.7.0-cp39-cp39-macosx_12_0_arm64.whl", hash = "sha256:02bc3295d26cd7666521fd6d5b7b93923ae1eb4417ddd3bc57185a5881ad7b96"},
@@ -3020,19 +3041,17 @@ files = []
 develop = false
 
 [package.dependencies]
-cloud-sql-python-connector = "1.16.0"
 flask = "*"
 flask-jwt-oidc = ">=0.1.5"
 Flask-OpenTracing = "1.1.0"
 Flask-SQLAlchemy = "*"
 jaeger-client = "*"
-pg8000 = "1.31.2"
 
 [package.source]
 type = "git"
-url = "https://github.com/bolyachevets/sbc-common-components.git"
-reference = "gcp-db-connector"
-resolved_reference = "1ab15253bf015c06670f9a124c2c063539507a01"
+url = "https://github.com/bcgov/sbc-common-components.git"
+reference = "master"
+resolved_reference = "d280cd1f9cba1ff1a24f5fb823ba089a8ad66e2a"
 subdirectory = "python"
 
 [[package]]
@@ -3625,4 +3644,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "41f3ae1df61b030d0b832648b8ffaff91234318af6daa9f8dd838bac7de1a8f8"
+content-hash = "a08a63632f95976188fd5d75d75edda035e804efcb7b413d1a6d5a11a3775362"
