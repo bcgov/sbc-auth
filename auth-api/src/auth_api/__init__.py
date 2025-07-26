@@ -18,7 +18,7 @@ This module is the API for the Authroization system.
 import os
 import traceback
 
-from cloud_sql_connector import DBConfig, getconn
+from cloud_sql_connector import DBConfig, setup_search_path_event_listener
 from flask import Flask, request
 from flask_cors import CORS
 from flask_migrate import Migrate, upgrade
@@ -66,8 +66,6 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
     if run_mode != "migration":
         with app.app_context():
             engine = db.engine
-            from cloud_sql_connector import setup_search_path_event_listener
-
             setup_search_path_event_listener(engine, schema)
 
     if run_mode == "migration":
