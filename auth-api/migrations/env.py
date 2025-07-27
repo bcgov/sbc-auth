@@ -3,6 +3,7 @@ from __future__ import with_statement
 import logging
 import re
 from logging.config import fileConfig
+from multiprocessing.dummy import connection
 
 from alembic import context
 
@@ -11,7 +12,9 @@ from alembic import context
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from flask import current_app
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, text
+
+from auth_api.config import MigrationConfig
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -64,7 +67,12 @@ def run_migrations_offline():
     )
 
     with context.begin_transaction():
+        owner_role = MigrationConfig.AUTH_DATABASE_OWNER
+        connection.execute(text(f"SET ROLE {owner_role};"))
+        result = connection.execute(text("SELECT current_user, session_user;"))
+        logger.info(f"User running migration is: {result.fetchone()}")
         context.run_migrations()
+    connection.execute(text("RESET ROLE;"))
 
 
 def run_migrations_online():

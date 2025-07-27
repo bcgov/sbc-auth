@@ -76,6 +76,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     DB_HOST = os.getenv("DATABASE_HOST", "")
     DB_PORT = int(os.getenv("DATABASE_PORT", "5432"))
     DB_SCHEMA = os.getenv("DATABASE_SCHEMA", "public")
+    AUTH_DATABASE_OWNER = os.getenv("AUTH_DATABASE_OWNER", "auth")
 
     if DB_INSTANCE_CONNECTION_NAME := os.getenv("DATABASE_INSTANCE_CONNECTION_NAME", None):
         SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://"
