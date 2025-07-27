@@ -40,6 +40,9 @@ from auth_api.utils.user_context import _get_context
 setup_logging(os.path.join(_Config.PROJECT_ROOT, "logging.conf"))
 
 
+import pprint
+
+
 def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
@@ -55,7 +58,7 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
             instance_name=app.config.get("DB_INSTANCE_CONNECTION_NAME"),
             database=app.config.get("DB_NAME"),
             user=app.config.get("DB_USER"),
-            ip_type="private",
+            ip_type=app.config.get("DB_IP_TYPE"),
             schema=schema if run_mode != "migration" else None,
             pool_recycle=300,
         )
