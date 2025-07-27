@@ -5,15 +5,12 @@ Revises: 00566833d2e0
 Create Date: 2025-07-22 14:03:01.729742
 
 """
-import importlib.util
 import logging
 import os
 import re
 import sys
-from collections import defaultdict
 from pathlib import Path
 
-import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.sql import text
 
@@ -54,13 +51,6 @@ def get_target_schema():
     if not re.match(r'^[a-z_][a-z0-9_]*$', schema, re.I):
         raise ValueError(f"Invalid schema name: {schema}")
     return schema
-
-def load_migration_module(file_path):
-    """Load a migration module from file."""
-    spec = importlib.util.spec_from_file_location(f"migration_{file_path.stem}", file_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 def upgrade():
     target_schema = get_target_schema()
