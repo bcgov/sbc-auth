@@ -6,3 +6,10 @@ export interface Code {
     isBusiness?: boolean;
     isGovernmentAgency?: boolean;
 }
+
+export interface PaymentMethod {
+    code: string;
+    description: string;
+    partialRefund?: boolean;
+    refundableStatuses?: string;
+}

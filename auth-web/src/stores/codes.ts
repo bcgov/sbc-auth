@@ -1,5 +1,5 @@
+import { Code, PaymentMethod } from '@/models/Code'
 import { reactive, toRefs } from '@vue/composition-api'
-import { Code } from '@/models/Code'
 import CodesService from '@/services/codes.service'
 import { defineStore } from 'pinia'
 
@@ -16,7 +16,8 @@ export const useCodesStore = defineStore('codes', () => {
     governmentTypeCodes: [] as Code[],
     onholdReasonCodes: [] as Code[],
     suspensionReasonCodes: [] as Code[],
-    productPaymentMethods: {} as {[key: string]: Array<string>}
+    productPaymentMethods: {} as {[key: string]: Array<string>},
+    paymentMethods: [] as PaymentMethod[]
   })
 
   function $reset () {
@@ -27,6 +28,7 @@ export const useCodesStore = defineStore('codes', () => {
     state.onholdReasonCodes = []
     state.suspensionReasonCodes = []
     state.productPaymentMethods = {}
+    state.paymentMethods = []
   }
 
   async function getBusinessSizeCodes (): Promise<Code[]> {
@@ -82,6 +84,10 @@ export const useCodesStore = defineStore('codes', () => {
     state.productPaymentMethods = data
   }
 
+  async function getPaymentMethods (): Promise<void> {
+    state.paymentMethods = await CodesService.getPaymentMethodCodes()
+  }
+
   return {
     ...toRefs(state),
     businessSizeCodeTable,
@@ -95,6 +101,7 @@ export const useCodesStore = defineStore('codes', () => {
     onholdReasonCodeTable,
     suspensionReasonCodeTable,
     getProductPaymentMethods,
+    getPaymentMethods,
     $reset
   }
 })
