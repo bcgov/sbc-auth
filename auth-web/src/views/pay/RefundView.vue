@@ -237,7 +237,6 @@
 import { computed, defineComponent, nextTick, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { Invoice } from '@/models/invoice'
-import { PaymentTypes } from '@/util/constants'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
 
