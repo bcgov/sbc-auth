@@ -40,7 +40,6 @@ from auth_api.utils.user_context import _get_context
 setup_logging(os.path.join(_Config.PROJECT_ROOT, "logging.conf"))
 
 
-
 def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
