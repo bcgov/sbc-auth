@@ -8,10 +8,9 @@ Create Date: 2025-07-22 14:03:01.729742
 import logging
 import os
 import re
-import sys
-from pathlib import Path
 
 from alembic import op
+from flask import current_app
 from sqlalchemy.sql import text
 
 # revision identifiers, used by Alembic.
@@ -20,30 +19,7 @@ down_revision = '00566833d2e0'
 branch_labels = None
 depends_on = None
 
-# Configure structured logging for migration
-try:
-    # Add the src directory to the path so we can import auth_api modules
-    current_dir = Path(__file__).parent.parent.parent
-    src_dir = current_dir / 'src'
-    if str(src_dir) not in sys.path:
-        sys.path.insert(0, str(src_dir))
-
-    # Import and setup structured logging
-    from auth_api.config import _Config
-    from auth_api.utils.logging import setup_logging
-
-    # Setup structured logging using the same config as the main app
-    logging_conf_path = os.path.join(_Config.PROJECT_ROOT, "logging.conf")
-    setup_logging(logging_conf_path)
-
-    # Get a logger that will use the structured format
-    logger = logging.getLogger('auth_api')
-except ImportError as e:
-    # Fallback to basic logging if structured logging setup fails
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
-    logger.warning(f"Could not setup structured logging, using basic logging: {e}")
-
+logger =current_app.logger if hasattr(current_app, 'logger') else logging.getLogger("auth_api")
 
 def get_target_schema():
     """Minimal schema name fetch with validation."""
