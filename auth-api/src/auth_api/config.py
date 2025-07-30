@@ -218,7 +218,6 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DB_HOST = os.getenv("DATABASE_TEST_HOST", "localhost")
     DB_PORT = os.getenv("DATABASE_TEST_PORT", "5432")
     SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"
-    DATABASE_OWNER = os.getenv("DATABASE_OWNER", "postgres")
 
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use
@@ -337,3 +336,4 @@ class MigrationConfig(_Config):  # pylint: disable=too-few-public-methods
 
     TESTING = False
     DEBUG = True
+    DATABASE_OWNER = os.getenv("DATABASE_OWNER", "postgres")
