@@ -861,11 +861,6 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data || {}
   }
 
-  async function refundInvoice (invoiceId, refundPayload: RefundRequest) {
-    const response = await PaymentService.refundInvoice(invoiceId, refundPayload)
-    return response?.data || {}
-  }
-
   async function updateInvoicePaymentMethodAsCreditCard (invoicePayload) {
     const response = await PaymentService.updateInvoicePaymentMethodAsCreditCard(invoicePayload.paymentId, invoicePayload.accountId)
     return response?.data || {}
@@ -1162,7 +1157,6 @@ export const useOrgStore = defineStore('org', () => {
     getProductList,
     addToCurrentSelectedProducts,
     resetoCurrentSelectedProducts,
-    refundInvoice,
     setSubscribedProducts,
     fetchCurrentOrganizationGLInfo,
     fetchOrgProductFeeCodes,
