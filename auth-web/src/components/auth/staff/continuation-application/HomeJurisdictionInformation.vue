@@ -230,7 +230,7 @@ import { DRS_ID_PATTERN } from '@/util/constants'
 import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
 import { DocumentServices } from '@bcrs-shared-components/services'
-import { JurisdictionLocation, DocumentClassEnum } from '@bcrs-shared-components/enums'
+import { JurisdictionLocation, DocumentClasses } from '@bcrs-shared-components/enums'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import moment from 'moment-timezone'
 
@@ -321,7 +321,7 @@ export default defineComponent({
           await DocumentServices.downloadDocumentFromDRS(
             documentKey,
             documentName,
-            DocumentClassEnum.CORP
+            DocumentClasses.CORP
           )
         } else {
           await BusinessService.downloadDocument(documentKey, documentName)
