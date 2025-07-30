@@ -77,7 +77,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     DB_PORT = int(os.getenv("DATABASE_PORT", "5432"))
     DB_SCHEMA = os.getenv("DATABASE_SCHEMA", "public")
     DB_IP_TYPE = os.getenv("DATABASE_IP_TYPE", "private")
-    AUTH_DATABASE_OWNER = os.getenv("AUTH_DATABASE_OWNER", "auth")
+    DATABASE_OWNER = os.getenv("DATABASE_OWNER", "auth")
 
     if DB_INSTANCE_CONNECTION_NAME := os.getenv("DATABASE_INSTANCE_CONNECTION_NAME", None):
         SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://"
@@ -218,6 +218,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DB_HOST = os.getenv("DATABASE_TEST_HOST", "localhost")
     DB_PORT = os.getenv("DATABASE_TEST_PORT", "5432")
     SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"
+    DATABASE_OWNER = os.getenv("DATABASE_OWNER", "postgres")
 
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use
@@ -331,26 +332,7 @@ class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
     DEBUG = False
 
 
-class MigrationConfig:  # pylint: disable=too-few-public-methods
+class MigrationConfig(_Config):  # pylint: disable=too-few-public-methods
     """Config for db migration."""
-
     TESTING = False
     DEBUG = True
-
-    # POSTGRESQL
-    DB_USER = os.getenv("DATABASE_USERNAME", "")
-    DB_PASSWORD = os.getenv("DATABASE_PASSWORD", "")
-    DB_NAME = os.getenv("DATABASE_NAME", "")
-    DB_HOST = os.getenv("DATABASE_HOST", "")
-    DB_PORT = int(os.getenv("DATABASE_PORT", "5432"))  # POSTGRESQL
-    DB_SCHEMA = os.getenv("DATABASE_SCHEMA", "public")
-    AUTH_DATABASE_OWNER = os.getenv("AUTH_DATABASE_OWNER", "auth")
-    DB_IP_TYPE = os.getenv("DATABASE_IP_TYPE", "private")
-
-    if DB_INSTANCE_CONNECTION_NAME := os.getenv("DATABASE_INSTANCE_CONNECTION_NAME", None):
-        SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://"
-    else:
-        DB_PASSWORD = os.getenv("DATABASE_PASSWORD", "")
-        DB_HOST = os.getenv("DATABASE_HOST", "")
-        DB_PORT = os.getenv("DATABASE_PORT", "5432")
-        SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
