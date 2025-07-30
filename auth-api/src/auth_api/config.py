@@ -334,5 +334,6 @@ class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
 
 class MigrationConfig(_Config):  # pylint: disable=too-few-public-methods
     """Config for db migration."""
+
     TESTING = False
     DEBUG = True
