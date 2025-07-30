@@ -263,6 +263,7 @@ export function getRoutes (): RouteConfig[] {
         {
           path: 'login-option',
           name: 'login-option',
+          props: (route) => ({ orgId: route.params.orgId }),
           component: accountLoginOption
         },
         {

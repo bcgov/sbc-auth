@@ -88,3 +88,41 @@
 .soft-corners-top {
   border-radius: 5px 5px 0 0;
 }
+
+// Expand just for the standalone transactions page, but not on staff dashboard.
+// Exclude any transaction containers within expansion panels
+.transaction-container .container,
+.transaction-container .v-container,
+.transaction-container .view-container,
+.transaction-container .app-body,
+.transaction-container .v-app {
+  max-width: 90% !important;
+}
+
+// Remove the expansion for transactions within expansion panels (staff dashboard)
+.v-expansion-panel .transaction-container .container,
+.v-expansion-panel .transaction-container .v-container,
+.v-expansion-panel .transaction-container .view-container,
+.v-expansion-panel .transaction-container .app-body,
+.v-expansion-panel .transaction-container .v-app {
+  max-width: 1360px !important; // Reset to default
+}
+
+.app-body .transaction-container ~ .container,
+.app-body .transaction-container ~ .v-container,
+.app-body .transaction-container ~ .view-container {
+  max-width: 90% !important;
+}
+
+.app-body:has(.transaction-container) .container,
+.app-body:has(.transaction-container) .v-container,
+.app-body:has(.transaction-container) .view-container {
+  max-width: 90% !important;
+}
+
+// Reset for expansion panels
+.app-body:has(.v-expansion-panel .transaction-container) .container,
+.app-body:has(.v-expansion-panel .transaction-container) .v-container,
+.app-body:has(.v-expansion-panel .transaction-container) .view-container {
+  max-width: 1360px !important; // Reset to default
+}

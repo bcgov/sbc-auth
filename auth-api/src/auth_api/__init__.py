@@ -22,9 +22,9 @@ from flask import Flask, request
 from flask_cors import CORS
 from flask_migrate import Migrate, upgrade
 from sbc_common_components.utils.camel_case_response import convert_to_camel
-from structured_logging import StructuredLogging
 
 import auth_api.config as config  # pylint:disable=consider-using-from-import
+from auth_api.config import _Config
 from auth_api.exceptions import ExceptionHandler
 from auth_api.extensions import mail
 from auth_api.models import db, ma
@@ -33,9 +33,10 @@ from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
 from auth_api.utils.auth import jwt
 from auth_api.utils.cache import cache
+from auth_api.utils.logging import setup_logging
 from auth_api.utils.user_context import _get_context
 
-logger = StructuredLogging.get_logger()
+setup_logging(os.path.join(_Config.PROJECT_ROOT, "logging.conf"))
 
 
 def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
@@ -49,10 +50,13 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
 
     if run_mode == "migration":
         Migrate(app, db)
-        logger.info("Running migration upgrade.")
+        app.logger.info("Running migration upgrade.")
         with app.app_context():
             execute_migrations(app)
-        logger.info("Finished migration upgrade.")
+        # Alembic has it's own logging config, we'll need to restore our logging here.
+        setup_logging(os.path.join(_Config.PROJECT_ROOT, "logging.conf"))
+        app.logger.info("Finished migration upgrade.")
+        app.logger.info("Note: endpoints will 404 until the DEPLOYMENT_ENV is switched off of migration.")
     else:
         flags.init_app(app)
         ma.init_app(app)
@@ -95,7 +99,7 @@ def execute_migrations(app):
     except Exception as e:  # NOQA pylint: disable=broad-except
         app.logger.disabled = False
         error_message = f"Error processing migrations: {e}\n{traceback.format_exc()}"
-        logger.error(error_message)
+        app.logger.error(error_message)
         raise e
 
 
@@ -136,4 +140,4 @@ def build_cache(app):
                 ProductService.build_all_products_cache()
             except Exception as e:  # NOQA # pylint:disable=broad-except
                 error_msg = f"Error on caching {e}"
-                logger.error(error_msg)
+                app.logger.error(error_msg)

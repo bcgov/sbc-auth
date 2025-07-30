@@ -117,7 +117,7 @@ def test_add_entity_invalid_returns_exception(client, jwt, session):  # pylint:d
         assert rv.status_code == 400
 
 
-@mock.patch("auth_api.resources.v1.entity.is_competent_authority")
+@mock.patch("auth_api.resources.v1.entity.is_competent_authority_or_external_staff")
 def test_get_entity(mock_function, client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an entity can be retrieved via GET."""
     headers_system = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
@@ -187,7 +187,8 @@ def test_get_entity_as_competent_authority(
         headers=headers,
         content_type="application/json",
     )
-    # this verifies that `is_competent_authority()` was called and it fetched account id from context, then called
+    # this verifies that `is_competent_authority_or_external_staff()`
+    # was called and it fetched account id from context, then called
     # `get_all_product_subscription` with correct values
     mock_auth_view.find_account_authorization_by_org_id_and_product.assert_called_once_with(
         headers["Account-Id"], "CA_SEARCH"

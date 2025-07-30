@@ -431,7 +431,7 @@ def test_delete_affiliation_invitation(
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_delete_accepted_affiliation_invitation(
-    session, auth_mock, keycloak_mock, business_mock, monkeypatch
+    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Delete the specified accepted affiliation invitation."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
@@ -529,7 +529,7 @@ def test_generate_confirmation_token(session):  # pylint:disable=unused-argument
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_validate_token_accepted(
-    session, auth_mock, keycloak_mock, business_mock, monkeypatch
+    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Validate invalid invitation token."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
@@ -573,7 +573,7 @@ def test_validate_token_exception(session):  # pylint:disable=unused-argument
 @patch.object(auth_api.services.affiliation_invitation, "publish_affiliation_event")
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_accept_affiliation_invitation(
-    publish_mock, session, auth_mock, keycloak_mock, business_mock, monkeypatch
+    publish_mock, session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Accept the affiliation invitation and add the affiliation from the invitation."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
@@ -619,7 +619,7 @@ def test_accept_affiliation_invitation(
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_accept_invitation_exceptions(
-    session, auth_mock, keycloak_mock, business_mock, monkeypatch
+    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Accept the affiliation invitation exceptions."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
@@ -770,7 +770,8 @@ def test_send_affiliation_invitation_magic_link(
         "emailAddresses": affiliation_invitation.recipient_email,
         "orgName": affiliation_invitation.from_org.name,
         "businessIdentifier": affiliation_invitation.entity.business_identifier,
-        "contextUrl": "https://localhost.com//RnJvbSB0aGUgbW9vbiBpbmMu/affiliationInvitation/acceptToken/ABCD",
+        "contextUrl": "https://localhost.com//affiliationInvitation/acceptToken"
+        "?token=ABCD&orgName=RnJvbSB0aGUgbW9vbiBpbmMu",
     }
 
     publish_to_mailer_mock.assert_called_with(

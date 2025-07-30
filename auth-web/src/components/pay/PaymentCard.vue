@@ -109,80 +109,120 @@
 </template>
 
 <script lang="ts">
-
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import PayWithCreditCard from '@/components/pay/PayWithCreditCard.vue'
 import PayWithOnlineBanking from '@/components/pay/PayWithOnlineBanking.vue'
 import PaymentServices from '@/services/payment.services'
+import { useOrgStore } from '@/stores'
 
-@Component({
+export default defineComponent({
+  name: 'PaymentCard',
   components: {
     PayWithCreditCard,
     PayWithOnlineBanking
-  }
+  },
+  props: {
+    paymentCardData: {
+      type: Object,
+      required: true
+    },
+    showPayWithOnlyCC: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ['complete-online-banking', 'pay-with-credit-card', 'download-invoice'],
+  setup (props, { emit }) {
+    const state = reactive({
+      payWithCreditCard: false,
+      balanceDue: 0,
+      totalBalanceDue: 0,
+      cfsAccountId: '',
+      payeeName: '',
+      onlineBankingData: {} as any,
+      credit: null as number | null,
+      doHaveCredit: false,
+      overCredit: false,
+      partialCredit: false,
+      creditBalance: 0,
+      paymentId: '',
+      totalPaid: 0,
+      originalAmount: 0
+    })
 
+    function initializePaymentData () {
+      state.totalBalanceDue = props.paymentCardData?.totalBalanceDue || 0
+      state.totalPaid = props.paymentCardData?.totalPaid || 0
+      state.originalAmount = (state.totalBalanceDue - state.totalPaid) || 0
+      state.balanceDue = state.originalAmount
+      state.payeeName = props.paymentCardData.payeeName
+      state.cfsAccountId = props.paymentCardData?.cfsAccountId || ''
+      state.payWithCreditCard = props.showPayWithOnlyCC
+      state.credit = props.paymentCardData.obCredit || 0
+      state.doHaveCredit = props.paymentCardData?.obCredit > 0
+      state.creditBalance = Math.max(state.credit - state.balanceDue, 0)
+
+      if (state.doHaveCredit) {
+        state.overCredit = state.credit >= state.totalBalanceDue
+        state.partialCredit = state.credit < state.totalBalanceDue
+        state.balanceDue = Math.max(state.balanceDue - state.credit, 0)
+        // Credit card uses totalBalanceDue, not balanceDue
+        // Thus it doesn't include credit in calculation
+      }
+
+      state.paymentId = props.paymentCardData.paymentId
+
+      // setting online data
+      state.onlineBankingData = {
+        originalAmount: state.originalAmount,
+        totalBalanceDue: state.balanceDue,
+        payeeName: state.payeeName,
+        cfsAccountId: state.cfsAccountId,
+        overCredit: state.overCredit,
+        partialCredit: state.partialCredit,
+        creditBalance: state.creditBalance,
+        credit: state.credit
+      }
+    }
+
+    async function emitBtnClick (eventName: string) {
+      if (eventName === 'complete-online-banking' && state.doHaveCredit) {
+        try {
+          await PaymentServices.applycredit(state.paymentId)
+        } catch (error) {
+          if (error?.status === 403) {
+            try {
+              await PaymentServices.applycredit(state.paymentId, useOrgStore().currentOrganization?.id)
+            } catch (retryError) {
+              console.log('Error applying credit with account identifier', retryError)
+            }
+          } else {
+            console.log('Error applying credit with business identifier', error)
+          }
+        }
+      }
+      emit(eventName)
+    }
+
+    function cancel () {
+      if (props.showPayWithOnlyCC) { // cancel will redirect back to page
+        emitBtnClick('complete-online-banking')
+      } else {
+        state.payWithCreditCard = false
+      }
+    }
+
+    onMounted(() => {
+      initializePaymentData()
+    })
+
+    return {
+      ...toRefs(state),
+      cancel,
+      emitBtnClick
+    }
+  }
 })
-export default class PaymentCard extends Vue {
-  @Prop() paymentCardData: any
-  @Prop({ default: false }) showPayWithOnlyCC: boolean
-  private payWithCreditCard: boolean = false
-  private balanceDue = 0
-  private totalBalanceDue = 0
-  private cfsAccountId: string = ''
-  private payeeName: string = ''
-  private onlineBankingData: any = []
-  private credit?: number = null
-  private doHaveCredit:boolean = false
-  private overCredit:boolean = false
-  private partialCredit:boolean = false
-  private creditBalance = 0
-  private paymentId: string
-  private totalPaid = 0
-
-  private mounted () {
-    this.totalBalanceDue = this.paymentCardData?.totalBalanceDue || 0
-    this.totalPaid = this.paymentCardData?.totalPaid || 0
-    this.balanceDue = this.totalBalanceDue - this.totalPaid
-    this.payeeName = this.paymentCardData.payeeName
-    this.cfsAccountId = this.paymentCardData?.cfsAccountId || ''
-    this.payWithCreditCard = this.showPayWithOnlyCC
-    this.credit = this.paymentCardData.credit
-    this.doHaveCredit = this.paymentCardData?.credit > 0
-    if (this.doHaveCredit) {
-      this.overCredit = this.credit >= this.totalBalanceDue
-      this.partialCredit = this.credit < this.totalBalanceDue
-      this.balanceDue = this.overCredit ? this.balanceDue : this.balanceDue - this.credit
-    }
-    this.creditBalance = this.overCredit ? this.credit - this.balanceDue : 0
-    this.paymentId = this.paymentCardData.paymentId
-
-    // setting online data
-    this.onlineBankingData = {
-      totalBalanceDue: this.balanceDue,
-      payeeName: this.payeeName,
-      cfsAccountId: this.cfsAccountId,
-      overCredit: this.overCredit,
-      partialCredit: this.partialCredit,
-      creditBalance: this.creditBalance,
-      credit: this.credit
-    }
-  }
-
-  private cancel () {
-    if (this.showPayWithOnlyCC) { // cancel will redirect back to page
-      this.emitBtnClick('complete-online-banking')
-    } else {
-      this.payWithCreditCard = false
-    }
-  }
-
-  private async emitBtnClick (eventName) {
-    if (eventName === 'complete-online-banking' && this.doHaveCredit) {
-      await PaymentServices.applycredit(this.paymentId)
-    }
-    this.$emit(eventName)
-  }
-}
 </script>
 
 <style lang="scss" scoped>

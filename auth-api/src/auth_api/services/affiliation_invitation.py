@@ -23,7 +23,6 @@ from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
 from sqlalchemy.exc import DataError
-from structured_logging import StructuredLogging
 
 from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
@@ -38,6 +37,7 @@ from auth_api.models.entity import Entity as EntityModel  # noqa: I005
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.services.entity import Entity as EntityService
+from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.services.flags import flags
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
@@ -54,7 +54,6 @@ from .rest_service import RestService
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 CONFIG = get_named_config()
-logger = StructuredLogging.get_logger()
 
 
 class AffiliationInvitation:
@@ -214,12 +213,12 @@ class AffiliationInvitation:
         if affiliation_invitation_type == AffiliationInvitationType.REQUEST:
             admin_emails = UserService.get_admin_emails_for_org(org_id)
             if admin_emails != "":
-                logger.debug(f"Sending emails to: ${admin_emails}")
+                current_app.logger.debug(f"Sending emails to: ${admin_emails}")
                 return admin_emails
 
             # continue but log error
             error_msg = f"No admin email record for org id {org_id}"
-            logger.error(error_msg)
+            current_app.logger.error(error_msg)
             return None
 
         if affiliation_invitation_type == AffiliationInvitationType.EMAIL:
@@ -335,7 +334,7 @@ class AffiliationInvitation:
         try:
             get_business_response = RestService.get(get_businesses_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
-            logger.info(e)
+            current_app.logger.info(e)
             raise BusinessException(Error.AFFILIATION_INVITATION_BUSINESS_NOT_FOUND, None) from e
 
         return get_business_response.json()
@@ -350,7 +349,7 @@ class AffiliationInvitation:
         try:
             get_business_response = RestService.post(get_businesses_url, token=token, data=data)
         except (HTTPError, ServiceUnavailableException) as e:
-            logger.info(e)
+            current_app.logger.info(e)
             raise BusinessException(Error.AFFILIATION_INVITATION_BUSINESS_NOT_FOUND, None) from e
 
         return get_business_response.json()["businessEntities"]
@@ -503,32 +502,20 @@ class AffiliationInvitation:
     @staticmethod
     def _get_token_confirm_path(org_name, token, query_params=None):
         """Get the config for different email types."""
-        if flags.is_on("enable-new-magic-link-formatting-with-query-params", default=False):
-            # New query parameter based URL structure
-            params = {
-                "token": token,
-                "orgName": escape_wam_friendly_url(org_name),
-            }
+        # New query parameter based URL structure
+        params = {
+            "token": token,
+            "orgName": escape_wam_friendly_url(org_name),
+        }
 
-            # Add any additional query params
-            if query_params:
-                params.update(query_params)
+        # Add any additional query params
+        if query_params:
+            params.update(query_params)
 
-            # Point to new business registry project
-            app_url = current_app.config.get("BUSINESS_REGISTRY_URL") + "/"
-            # Build the URL with query parameters
-            token_confirm_url = f"{app_url}/affiliationInvitation/acceptToken?{urlencode(params)}"
-        else:
-            # Point to auth-web
-            app_url = current_app.config.get("WEB_APP_URL") + "/"
-            # Original URL structure
-            escape_url = escape_wam_friendly_url(org_name)
-            path = f"{escape_url}/affiliationInvitation/acceptToken"
-            token_confirm_url = f"{app_url}/{path}/{token}"
-
-            if query_params:
-                token_confirm_url += f"?{urlencode(query_params)}"
-
+        # Point to new business registry project
+        app_url = current_app.config.get("BUSINESS_REGISTRY_URL") + "/"
+        # Build the URL with query parameters
+        token_confirm_url = f"{app_url}/affiliationInvitation/acceptToken?{urlencode(params)}"
         return token_confirm_url
 
     @staticmethod
@@ -539,7 +526,7 @@ class AffiliationInvitation:
         email_addresses=None,
     ):
         """Send the email notification."""
-        logger.debug("<send_affiliation_invitation")
+        current_app.logger.debug("<send_affiliation_invitation")
         affiliation_invitation_type = affiliation_invitation.type
         from_org_name = affiliation_invitation.from_org.name
         from_org_id = affiliation_invitation.from_org_id
@@ -585,11 +572,11 @@ class AffiliationInvitation:
         except BusinessException as exception:
             affiliation_invitation.invitation_status_code = InvitationStatus.FAILED.value
             affiliation_invitation.save()
-            logger.debug(">send_affiliation_invitation failed")
-            logger.debug(exception)
+            current_app.logger.debug(">send_affiliation_invitation failed")
+            current_app.logger.debug(exception)
             raise BusinessException(Error.FAILED_AFFILIATION_INVITATION, None) from exception
 
-        logger.debug(">send_affiliation_invitation")
+        current_app.logger.debug(">send_affiliation_invitation")
 
     @staticmethod
     def send_affiliation_invitation_authorization_email(
@@ -675,7 +662,7 @@ class AffiliationInvitation:
         **kwargs,
     ):
         """Add an affiliation from the affiliation invitation."""
-        logger.debug(">accept_affiliation_invitation")
+        current_app.logger.debug(">accept_affiliation_invitation")
         affiliation_invitation: AffiliationInvitationModel = AffiliationInvitationModel.find_invitation_by_id(
             affiliation_invitation_id
         )
@@ -697,6 +684,8 @@ class AffiliationInvitation:
             affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=None)
             affiliation_model.save()
             entity_model = EntityModel.find_by_entity_id(entity_id)
+            if flags.is_on("enable-entity-mapping", default=False) is True:
+                EntityMappingService.populate_entity_mapping_for_identifier(entity_model.business_identifier)
             publish_affiliation_event(
                 QueueMessageTypes.BUSINESS_AFFILIATED.value, org_id, entity_model.business_identifier
             )
@@ -714,7 +703,7 @@ class AffiliationInvitation:
                 affiliation_invitation=affiliation_invitation, is_authorized=True
             )
 
-        logger.debug("<accept_affiliation_invitation")
+        current_app.logger.debug("<accept_affiliation_invitation")
         return AffiliationInvitation(affiliation_invitation)
 
     @classmethod

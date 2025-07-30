@@ -85,8 +85,9 @@ export default class PaymentService {
     })
   }
 
-  static applycredit (paymentId: string): AxiosPromise<any> {
-    return axios.patch(`${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}?applyCredit=true`, {})
+  static applycredit (paymentId: string, accountId = null): AxiosPromise<any> {
+    const headers = accountId ? { 'Account-Id': accountId } : {}
+    return axios.patch(`${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}?applyCredit=true`, {}, { headers })
   }
 
   static createTransactionForPadPayment (paymentId: string, redirectUrl: string): AxiosPromise<any> {

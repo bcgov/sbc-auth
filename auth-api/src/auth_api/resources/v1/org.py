@@ -18,7 +18,6 @@ from http import HTTPStatus
 import orjson
 from flask import Blueprint, current_app, g, jsonify, request
 from flask_cors import cross_origin
-from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
@@ -37,15 +36,23 @@ from auth_api.services import Org as OrgService
 from auth_api.services import SimpleOrg as SimpleOrgService
 from auth_api.services import User as UserService
 from auth_api.services.authorization import Authorization as AuthorizationService
+from auth_api.services.entity_mapping import EntityMappingService
+from auth_api.services.flags import flags
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import AccessType, NotificationType, OrgStatus, OrgType, PatchActions, Status
 from auth_api.utils.role_validator import validate_roles
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role  # noqa: I005
+from auth_api.utils.roles import (  # noqa: I005
+    AFFILIATION_ALLOWED_ROLES,
+    ALL_ALLOWED_ROLES,
+    CLIENT_ADMIN_ROLES,
+    STAFF,
+    USER,
+    Role,
+)
 from auth_api.utils.util import extract_numbers, string_to_bool
 
 bp = Blueprint("ORGS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs")
-logger = StructuredLogging.get_logger()
 
 
 @bp.route("", methods=["GET", "OPTIONS"])
@@ -100,7 +107,7 @@ def search_organizations():
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.MANAGE_EFT.value])
 def search_simple_orgs():
     """Return simplified organization information."""
-    logger.info("<search_simple_orgs")
+    current_app.logger.info("<search_simple_orgs")
 
     org_id = request.args.get("id", None)
     page: int = int(request.args.get("page", "1"))
@@ -127,7 +134,7 @@ def search_simple_orgs():
         HTTPStatus.OK,
     )
 
-    logger.info(">search_simple_orgs")
+    current_app.logger.info(">search_simple_orgs")
     return jsonify(response), status
 
 
@@ -351,7 +358,7 @@ def delete_organzization_contact(org_id):
 def get_organization_affiliations_search(org_id):
     """Get all affiliated entities for the given org, this works with pagination."""
     try:
-        response, status = new_affiliation_search(org_id)
+        response, status = affiliation_search(org_id, use_entity_mapping=True)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     except ServiceUnavailableException as exception:
@@ -371,7 +378,7 @@ def get_organization_affiliations(org_id):
                 HTTPStatus.OK,
             )
         # Remove below after UI is pointing at new route.
-        response, status = new_affiliation_search(org_id)
+        response, status = affiliation_search(org_id)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     except ServiceUnavailableException as exception:
@@ -380,23 +387,39 @@ def get_organization_affiliations(org_id):
     return response, status
 
 
-def new_affiliation_search(org_id):
+def affiliation_search(org_id, use_entity_mapping=False):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
-    # get affiliation identifiers and the urls for the source data
-    org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
+    org = OrgService.find_by_org_id(org_id, allowed_roles=AFFILIATION_ALLOWED_ROLES)
     if org is None:
         raise BusinessException(Error.DATA_NOT_FOUND, None)
-    affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
     search_details = AffiliationSearchDetails.from_request_args(request)
-    affiliations_details_list = asyncio.run(
-        AffiliationService.get_affiliation_details(affiliations, search_details, org_id)
-    )
+    if use_entity_mapping:
+        remove_stale_drafts = False
+        affiliation_bases, has_more = EntityMappingService.populate_affiliation_base(org_id, search_details)
+        affiliations_details_list, has_more_search = asyncio.run(
+            AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id, remove_stale_drafts)
+        )
+        # Added Pagination after fetching filtered details from LEAR and Names otherwise searches only on page 1.
+        if any([search_details.identifier, search_details.status, search_details.name, search_details.type]):
+            has_more = has_more_search
+
+        response = {
+            "entities": affiliations_details_list,
+            "totalResults": len(affiliations_details_list),
+            "hasMore": has_more,
+        }
+    else:
+        remove_stale_drafts = True
+        affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
+        affiliation_bases = AffiliationService.affiliation_to_affiliation_base(affiliations)
+        affiliations_details_list, _ = asyncio.run(
+            AffiliationService.get_affiliation_details(affiliation_bases, search_details, org_id, remove_stale_drafts)
+        )
+        response = {"entities": affiliations_details_list, "totalResults": len(affiliations_details_list)}
     # Use orjson serializer here, it's quite a bit faster.
     response, status = (
         current_app.response_class(
-            response=orjson.dumps(  # pylint: disable=maybe-no-member
-                {"entities": affiliations_details_list, "totalResults": len(affiliations_details_list)}
-            ),
+            response=orjson.dumps(response),  # pylint: disable=maybe-no-member
             status=200,
             mimetype="application/json",
         ),
@@ -428,7 +451,6 @@ def post_organization_affiliation(org_id):
                 phone=request_json.get("phone"),
                 certified_by_name=request_json.get("certifiedByName"),
             )
-
             response, status = (
                 AffiliationService.create_new_business_affiliation(affiliation_data).as_dict(),
                 HTTPStatus.CREATED,
@@ -444,10 +466,15 @@ def post_organization_affiliation(org_id):
                 ).as_dict(),
                 HTTPStatus.CREATED,
             )
-
         entity_details = request_json.get("entityDetails", None)
         if entity_details:
+            if flags.is_on("enable-entity-mapping", default=False) is True:
+                EntityMappingService.from_entity_details(entity_details)
             AffiliationService.fix_stale_affiliations(org_id, entity_details)
+        # Auth-queue handles the row creation for new business (NR only), this handles passcode missing info
+        elif is_new_business is False:
+            if flags.is_on("enable-entity-mapping", default=False) is True:
+                EntityMappingService.populate_entity_mapping_for_identifier(business_identifier)
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
 

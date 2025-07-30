@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/browser'
 import Axios from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { SessionStorageKeys } from '@/util/constants'
@@ -14,7 +13,9 @@ axios.interceptors.request.use(
       return request
     }
 
-    request.headers['App-Name'] = import.meta.env.APP_NAME
+    if (!url.href.includes(import.meta.env.VUE_APP_VON_API_URL)) {
+      request.headers['App-Name'] = import.meta.env.APP_NAME
+    }
     const token = ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
     if (token) {
       request.headers.Authorization = `Bearer ${token}`
@@ -32,7 +33,6 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   response => response,
   error => {
-    Sentry.captureException(error)
     return Promise.reject(error)
   }
 )

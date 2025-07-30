@@ -5,6 +5,7 @@ TARGET_DIRS=("account-mailer" "auth-queue")
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 REPO=$(git config --get remote.origin.url)
+# git config --get remote.upstream.url if you need bcgov
 
 update_pyproject_and_poetry() {
   local dir=$1

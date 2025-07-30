@@ -41,15 +41,25 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from '@vue/composition-api'
 
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-@Component({})
-export default class PayWithCreditCard extends Vue {
-  @Prop({ default: false }) showPayWithOnlyCC: boolean
-  @Prop({ default: 0 }) totalBalanceDue: number
-  @Prop({ default: false }) partialCredit: boolean
-}
+export default defineComponent({
+  name: 'PayWithCreditCard',
+  props: {
+    showPayWithOnlyCC: {
+      type: Boolean,
+      default: false
+    },
+    totalBalanceDue: {
+      type: Number,
+      default: 0
+    },
+    partialCredit: {
+      type: Boolean,
+      default: false
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>

@@ -20,10 +20,10 @@ import json
 from http import HTTPStatus
 from typing import Dict, List
 
+from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from requests import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
-from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -59,7 +59,6 @@ from .documents import Documents as DocumentService
 from .keycloak import KeycloakService
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
-logger = StructuredLogging.get_logger()
 
 
 class User:  # pylint: disable=too-many-instance-attributes disable=too-many-public-methods
@@ -120,11 +119,11 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         """
         User._validate_and_throw_exception(memberships, org_id, single_mode)
 
-        logger.debug("create_user")
+        current_app.logger.debug("create_user")
         users = []
         for membership in memberships:
             username = membership["username"]
-            logger.debug(f"create user username: {username}")
+            current_app.logger.debug(f"create user username: {username}")
             create_user_request = User._create_kc_user(membership)
             db_username = IdpHint.BCROS.value + "/" + username
             user_model = UserModel.find_by_username(db_username)
@@ -135,7 +134,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
                 membership_model = MembershipModel.find_membership_by_userid(user_model.id)
                 re_enable_user = membership_model.org_id == int(org_id or -1)
             if user_model and not re_enable_user:
-                logger.debug("Existing users found in DB")
+                current_app.logger.debug("Existing users found in DB")
                 users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))
                 continue
 
@@ -148,12 +147,12 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
                     kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
             except BusinessException as err:
                 error_msg = f"create_user in keycloak failed :duplicate user {err}"
-                logger.error(error_msg)
+                current_app.logger.error(error_msg)
                 users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))
                 continue
             except HTTPError as err:
                 error_msg = f"create_user in keycloak failed {err}"
-                logger.error(error_msg)
+                current_app.logger.error(error_msg)
                 users.append(User._get_error_dict(username, Error.FAILED_ADDING_USER_ERROR))
                 continue
             try:
@@ -174,7 +173,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
                 users.append(user_dict)
             except Exception as e:  # NOQA # pylint: disable=broad-except
                 error_msg = f"Error on  create_user_and_add_membership {e}"
-                logger.error(error_msg)
+                current_app.logger.error(error_msg)
                 db.session.rollback()
                 if re_enable_user:
                     User._update_user_in_kc(create_user_request)
@@ -254,25 +253,25 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             User.send_otp_authenticator_reset_notification(user.email, origin_url, org_id)
         except HTTPError as err:
             error_msg = f"update_user in keycloak failed {err}"
-            logger.error(error_msg)
+            current_app.logger.error(error_msg)
             raise BusinessException(Error.UNDEFINED_ERROR, err) from err
 
     @staticmethod
     def send_otp_authenticator_reset_notification(recipient_email, origin_url, org_id):
         """Send Authenticator reset notification to the user."""
-        logger.debug("<send_otp_authenticator_reset_notification")
+        current_app.logger.debug("<send_otp_authenticator_reset_notification")
         app_url = f"{origin_url}/"
         context_path = "signin/bceid"
         login_url = f"{app_url}/{context_path}"
         data = {"accountId": org_id, "emailAddresses": recipient_email, "contextUrl": login_url}
         try:
             publish_to_mailer(QueueMessageTypes.OTP_AUTHENTICATOR_RESET_NOTIFICATION.value, data=data)
-            logger.debug("<send_otp_authenticator_reset_notification")
+            current_app.logger.debug("<send_otp_authenticator_reset_notification")
             ActivityLogPublisher.publish_activity(
                 Activity(org_id, ActivityAction.RESET_2FA.value, name=recipient_email)
             )
         except Exception as e:  # noqa=B901
-            logger.error("<send_otp_authenticator_reset_notification failed")
+            current_app.logger.error("<send_otp_authenticator_reset_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
@@ -295,7 +294,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             kc_user = KeycloakService.update_user(update_user_request)
         except HTTPError as err:
             error_msg = f"update_user in keycloak failed {err}"
-            logger.error(error_msg)
+            current_app.logger.error(error_msg)
             raise BusinessException(Error.UNDEFINED_ERROR, err) from err
         return kc_user
 
@@ -366,7 +365,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @user_context
     def save_from_jwt_token(cls, request_json: Dict = None, **kwargs):
         """Save user to database (create/update)."""
-        logger.debug("save_from_jwt_token")
+        current_app.logger.debug("save_from_jwt_token")
         user_from_context: UserContext = kwargs["user_context"]
         if not user_from_context.token_info:
             return None
@@ -430,7 +429,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @staticmethod
     def get_contacts():
         """Get the contact associated with this user."""
-        logger.debug("get_contact")
+        current_app.logger.debug("get_contact")
         user = UserModel.find_by_jwt_token()
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -447,7 +446,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @staticmethod
     def add_contact(contact_info: dict, throw_error_for_duplicates: bool = True):
         """Add contact information for an existing user."""
-        logger.debug("add_contact")
+        current_app.logger.debug("add_contact")
         user = UserModel.find_by_jwt_token()
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -473,7 +472,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @staticmethod
     def update_contact(contact_info: dict):
         """Update a contact for an existing user."""
-        logger.debug("update_contact")
+        current_app.logger.debug("update_contact")
         user = UserModel.find_by_jwt_token()
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -496,7 +495,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @user_context
     def update_terms_of_use(is_terms_accepted, terms_of_use_version, **kwargs):
         """Update terms of use for an existing user."""
-        logger.debug("update_terms_of_use")
+        current_app.logger.debug("update_terms_of_use")
         user_from_context: UserContext = kwargs["user_context"]
         if user_from_context.token_info is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -506,7 +505,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @staticmethod
     def delete_contact():
         """Delete the contact for an existing user."""
-        logger.info("delete_contact")
+        current_app.logger.info("delete_contact")
         user = UserModel.find_by_jwt_token()
         if not user or not user.contacts:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -611,7 +610,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         5) Delete the contact information for the user and the accepted terms of service
         6) Mark the user record as inactive
         """
-        logger.debug("<delete_user")
+        current_app.logger.debug("<delete_user")
 
         user: UserModel = UserModel.find_by_jwt_token()
         if not user:
@@ -621,11 +620,11 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
 
         user_orgs: List[OrgModel] = MembershipModel.find_orgs_for_user(user.id)
 
-        logger.info(f"Found {len(user_orgs or [])} orgs for the user")
+        current_app.logger.info(f"Found {len(user_orgs or [])} orgs for the user")
 
         if user_orgs:
             for org in user_orgs:
-                logger.debug(f"Org : {org.name},  Status : {org.status_code}")
+                current_app.logger.debug(f"Org : {org.name},  Status : {org.status_code}")
                 if org.status_code == Status.ACTIVE.name:
                     User.__remove_org_membership(org, user.id)
 
@@ -645,7 +644,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         # Remove user from account_holders group
         KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
 
-        logger.debug("<delete_user")
+        current_app.logger.debug("<delete_user")
 
     @staticmethod
     def __remove_org_membership(org, user_id):
@@ -659,9 +658,11 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
                     is_user_an_owner = True
             elif member.membership_type_code == ADMIN:
                 org_has_other_owners = True
-        logger.info(f"Org :{org.name} --> User Owner : {is_user_an_owner},Has other owners :{org_has_other_owners}")
+        current_app.logger.info(
+            f"Org :{org.name} --> User Owner : {is_user_an_owner},Has other owners :{org_has_other_owners}"
+        )
         if is_user_an_owner and not org_has_other_owners:
-            logger.info(f"Affiliated entities : {len(org.affiliated_entities)}")
+            current_app.logger.info(f"Affiliated entities : {len(org.affiliated_entities)}")
             if len(org.affiliated_entities) == 0:
                 org.status_code = OrgStatus.INACTIVE.value
                 org.flush()

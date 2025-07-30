@@ -20,8 +20,7 @@ from auth_api.models import OrgType as OrgTypeModel
 from auth_api.utils.enums import AccessType
 
 
-def factory_org_model(org_name: str = 'Test ORg',
-                      user_id=None):
+def factory_org_model(org_name: str = "Test ORg", user_id=None):
     """Produce a templated org model."""
     org_type = OrgTypeModel.get_default_type()
     org_status = OrgStatusModel.get_default_status()

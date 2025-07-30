@@ -182,7 +182,10 @@ export enum InvoiceStatus {
     REFUNDED = 'REFUNDED',
     SETTLEMENT_SCHEDULED = 'SETTLEMENT_SCHED',
     UPDATE_REVENUE_ACCOUNT = 'GL_UPDATED',
-    UPDATE_REVENUE_ACCOUNT_REFUND = 'GL_UPDATED_REFUND'
+    UPDATE_REVENUE_ACCOUNT_REFUND = 'GL_UPDATED_REFUND',
+    // Not in pay-api, but shown in transaction table
+    PARTIALLY_REFUNDED = 'PARTIALLY_REFUNDED',
+    PARTIALLY_CREDITED = 'PARTIALLY_CREDITED'
 }
 
 export enum AffiliationTypes {
@@ -491,7 +494,6 @@ export enum LDFlags {
     ProductWillsStatus = 'product-VS-status',
     SupportedAmalgamationEntities = 'supported-amalgamation-entities',
     SupportedContinuationInEntities = 'supported-continuation-in-entities',
-    SentryEnable = 'sentry-enable',
     SupportRestorationEntities = 'supported-restoration-entities',
     AllowableBusinessSearchTypes = 'allowable-business-search-types',
     AllowableBusinessPasscodeTypes = 'allowable-business-passcode-types',

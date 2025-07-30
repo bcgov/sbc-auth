@@ -95,9 +95,9 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         target_subpath = "auth-api/migrations"
 
         result = find_subpath(root_directory, target_subpath)
-        
+
         if not result:
-            root_directory = '/home/runner'
+            root_directory = "/home/runner"
             result = find_subpath(root_directory, target_subpath)
 
         Migrate(app, _db, directory=result)

@@ -210,7 +210,8 @@
       <br>
       <v-btn
         id="process-refund-btn"
-        :disabled="isRefundSubmitDisabled"
+        :disabled="isRefundSubmitDisabled || isLoading"
+        :loading="isLoading"
         @click="processRefund"
       >
         REFUND
@@ -263,6 +264,7 @@ export default defineComponent({
       'Service Fees',
       'Action']
     const state = reactive({
+      isLoading: false,
       form: null,
       shouldValidate: true,
       disableSubmit: false,
@@ -381,14 +383,18 @@ export default defineComponent({
 
     async function processRefund () {
       try {
+        state.isLoading = true
         const invoiceId = matchInvoiceId(state.invoiceId)
         const response = await state.orgStore.refundInvoice(invoiceId, getRefundPayload())
         state.refundResponse = 'Refund successful.'
         state.disableSubmit = true
         console.log('Refund successful:', response)
       } catch (error) {
+        state.disableSubmit = false
         state.refundResponse = 'Refund failed.'
         console.error('Refund process failed:', error)
+      } finally {
+        state.isLoading = false
       }
     }
 

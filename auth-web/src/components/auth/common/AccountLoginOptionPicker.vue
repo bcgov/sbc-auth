@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
@@ -96,6 +96,7 @@ import { useOrgStore } from '@/stores/org'
   }
 })
 export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin, AccountMixin) {
+  @Prop({ default: -1 }) private orgId: number
   private btnLabel = 'Save'
   private readonly memberLoginOption!: LoginSource
   private readonly syncMemberLoginOption!: (currentAccount: number) => string
@@ -154,9 +155,8 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
   }
 
   private async mounted () {
-    if (!this.memberLoginOption) {
-      await this.syncMemberLoginOption(this.getAccountFromSession().id)
-    }
+    const orgId = this.orgId ? this.orgId : this.getAccountFromSession().id
+    await this.syncMemberLoginOption(orgId)
     this.authType = this.memberLoginOption ? this.memberLoginOption : this.authType
   }
 }

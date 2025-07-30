@@ -231,7 +231,8 @@ export interface OrgPaymentDetails {
   bcolAccount: string
   bcolUserId: string
   cfsAccount: CFSAccountDetails
-  credit: string
+  obCredit: string
+  padCredit: string
   paymentMethod: string
   statementNotificationEnabled: true
   padTosAcceptedBy:string
@@ -331,5 +332,6 @@ export enum OrgAccountTypes {
   GOVN = 'GovN',
   DIRECTOR_SEARCH = 'Director Search',
   STAFF = 'BC Registries Staff',
-  SBC_STAFF = 'Service BC Staff'
+  SBC_STAFF = 'Service BC Staff',
+  MAXIMUS_STAFF = 'Maximus Staff'
 }

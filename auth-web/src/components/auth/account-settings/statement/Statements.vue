@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="statements-container">
     <v-fade-transition>
       <div
         v-if="isLoading"
@@ -89,91 +89,95 @@
         </v-alert>
       </div>
     </template>
-    <div>
-      <v-data-table
-        class="statement-list"
-        :headers="headerStatements"
-        :items="statementsList"
-        :no-data-text="$t('noStatementsList')"
-        :server-items-length="totalStatementsCount"
-        :options.sync="tableDataOptions"
-        :custom-sort="customSortActive"
-        :loading="isDataLoading"
-        loading-text="loading text"
-        :footer-props="{ itemsPerPageOptions: [5, 10, 15, 20] }"
+
+    <v-data-table
+      :headers="headerStatements"
+      :items="statementsList"
+      :no-data-text="$t('noStatementsList')"
+      :server-items-length="totalStatementsCount"
+      :options.sync="tableDataOptions"
+      :custom-sort="customSortActive"
+      :loading="isDataLoading"
+      loading-text="loading text"
+      :footer-props="{ itemsPerPageOptions: [5, 10, 15, 20] }"
+    >
+      <template #loading>
+        Loading...
+      </template>
+      <template #[`item.dateRange`]="{ item }">
+        <div class="font-weight-bold">
+          <span>{{ formatDateRange(item.fromDate, item.toDate) }}</span>
+        </div>
+        <div>
+          <span
+            v-if="isStatementNew(item)"
+            class="label mr-2 mb-2 px-2 d-inline-block"
+          >NEW</span>
+          <span
+            v-if="isStatementOverdue(item)"
+            class="label overdue mr-2 mb-2 px-2 d-inline-block"
+          >OVERDUE</span>
+        </div>
+      </template>
+      <template #[`item.statementTotal`]="{ item }">
+        <div class="font-weight-bold">
+          <span>{{ formatAmount(item.statementTotal) }}</span>
+        </div>
+      </template>
+      <template
+        v-if="hasEFTPaymentMethod"
+        #[`item.frequency`]="{ item }"
       >
-        <template #loading>
-          Loading...
-        </template>
-        <template #[`item.dateRange`]="{ item }">
-          <div class="font-weight-bold">
-            <span>{{ formatDateRange(item.fromDate, item.toDate) }}</span>
-            <span
-              v-if="isStatementNew(item)"
-              class="label ml-2 px-2 d-inline-block"
-            >NEW</span>
-            <span
-              v-if="isStatementOverdue(item)"
-              class="label overdue ml-2 px-2 d-inline-block"
-            >OVERDUE</span>
-          </div>
-        </template>
-        <template
-          v-if="hasEFTPaymentMethod"
-          #[`item.frequency`]="{ item }"
-        >
-          <div>
-            <span>{{ frequencyDisplay(item) }}</span>
-          </div>
-        </template>
-        <template
-          v-if="hasEFTPaymentMethod"
-          #[`item.paymentMethods`]="{ item }"
-        >
-          <div>
-            <span>{{ paymentMethodsDisplay(item.paymentMethods) }}</span>
-          </div>
-        </template>
-        <template
-          #[`item.statementNumber`]="{ item }"
-        >
-          <div>
-            <span>{{ item.id }}</span>
-          </div>
-        </template>
-        <template #[`item.action`]="{ item }">
-          <div>
-            <v-btn
-              text
-              color="primary"
-              class="mr-1"
-              aria-label="Download CSV"
-              title="Download statement as a CSV file"
-              :data-test="getIndexedTag('csv-button', item.id)"
-              @click="downloadStatement(item, 'CSV')"
-            >
-              <v-icon class="ml-n2">
-                mdi-file-table-outline
-              </v-icon>
-              <span class="ml-n1 font-weight-bold">CSV</span>
-            </v-btn>
-            <v-btn
-              text
-              color="primary"
-              aria-label="Download PDF"
-              title="Download statement as a PDF file"
-              :data-test="getIndexedTag('pdf-button', item.id)"
-              @click="downloadStatement(item, 'PDF')"
-            >
-              <v-icon class="ml-n2">
-                mdi-file-pdf-outline
-              </v-icon>
-              <span class="ml-n1 font-weight-bold">PDF</span>
-            </v-btn>
-          </div>
-        </template>
-      </v-data-table>
-    </div>
+        <div>
+          <span>{{ frequencyDisplay(item) }}</span>
+        </div>
+      </template>
+      <template
+        #[`item.statementNumber`]="{ item }"
+      >
+        <div>
+          <span>{{ item.id }}</span>
+        </div>
+      </template>
+      <template
+        #[`item.paymentMethods`]="{ item }"
+      >
+        <div>
+          <span>{{ paymentMethodsDisplay(item.paymentMethods) }}</span>
+        </div>
+      </template>
+      <template #[`item.action`]="{ item }">
+        <div>
+          <v-btn
+            text
+            color="primary"
+            class="mr-1"
+            aria-label="Download CSV"
+            title="Download statement as a CSV file"
+            :data-test="getIndexedTag('csv-button', item.id)"
+            @click="downloadStatement(item, 'CSV')"
+          >
+            <v-icon class="ml-n2">
+              mdi-file-table-outline
+            </v-icon>
+            <span class="ml-n1 font-weight-bold">CSV</span>
+          </v-btn>
+          <v-btn
+            text
+            color="primary"
+            aria-label="Download PDF"
+            title="Download statement as a PDF file"
+            :data-test="getIndexedTag('pdf-button', item.id)"
+            @click="downloadStatement(item, 'PDF')"
+          >
+            <v-icon class="ml-n2">
+              mdi-file-pdf-outline
+            </v-icon>
+            <span class="ml-n1 font-weight-bold">PDF</span>
+          </v-btn>
+        </div>
+      </template>
+    </v-data-table>
     <StatementsSettings
       ref="statementSettingsModal"
     />
@@ -232,30 +236,50 @@ export default defineComponent({
             text: 'Date',
             align: 'left',
             sortable: false,
-            value: 'dateRange'
+            value: 'dateRange',
+            maxWidth: '200',
+            width: '200'
+          },
+          {
+            text: 'Statement Total',
+            align: 'right',
+            sortable: false,
+            value: 'statementTotal',
+            maxWidth: '150',
+            width: '150'
           },
           {
             text: 'Frequency',
             align: 'left',
             sortable: false,
-            value: 'frequency'
+            value: 'frequency',
+            maxWidth: '100',
+            width: '100'
           },
           {
-            text: 'Statement Number',
+            text: 'Statement #',
             align: 'left',
             sortable: false,
-            value: 'statementNumber'
+            value: 'statementNumber',
+            maxWidth: '110',
+            width: '110'
+          },
+          { text: 'Payment Type',
+            align: 'left',
+            sortable: false,
+            value: 'paymentMethods',
+            maxWidth: '200',
+            width: '200'
           },
           {
             text: 'Downloads',
-            align: 'right',
+            align: 'left',
             sortable: false,
-            value: 'action'
+            value: 'action',
+            maxWidth: '200',
+            width: '200'
           }
         ]
-        if (state.hasEFTPaymentMethod) {
-          headers.splice(2, 0, { text: 'Payment Methods', align: 'left', sortable: false, value: 'paymentMethods' })
-        }
         return headers
       }),
       nextStatementDate: computed<string>(() => {
@@ -539,4 +563,9 @@ export default defineComponent({
   color: $gray7;
   font-size: 12px;
 }
+
+.statements-container {
+  overflow: hidden;
+}
+
 </style>

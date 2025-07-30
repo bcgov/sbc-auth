@@ -23,15 +23,13 @@ from auth_api.models.pubsub_message_processing import PubSubMessageProcessing
 from auth_api.services.gcp_queue import queue
 from auth_api.services.rest_service import RestService
 from auth_api.utils.roles import ADMIN, COORDINATOR
-from flask import Blueprint, request
+from flask import Blueprint, current_app, request
 from sbc_common_components.utils.enums import QueueMessageTypes
-from structured_logging import StructuredLogging
 
 from account_mailer.auth_utils import get_login_url, get_member_emails, get_transaction_url
 from account_mailer.email_processors import (
     account_unlock,
     common_mailer,
-    ejv_failures,
     pad_confirmation,
     product_confirmation,
     refund_requested,
@@ -43,9 +41,6 @@ from account_mailer.utils import format_currency, format_day_with_suffix, get_lo
 bp = Blueprint("worker", __name__)
 
 
-logger = StructuredLogging.get_logger()
-
-
 @bp.route("/", methods=("POST",))
 def worker():
     """Worker to handle incoming queue pushes."""
@@ -54,9 +49,9 @@ def worker():
         return {}, HTTPStatus.OK
 
     try:
-        logger.info("Event message received: %s", json.dumps(dataclasses.asdict(event_message)))
+        current_app.logger.info("Event message received: %s", json.dumps(dataclasses.asdict(event_message)))
         if is_message_processed(event_message):
-            logger.info("Event message already processed, skipping.")
+            current_app.logger.info("Event message already processed, skipping.")
             return {}, HTTPStatus.OK
         message_type, email_msg = event_message.type, event_message.data
         email_msg["logo_url"] = google_store.GoogleStoreService.get_static_resource_url("bc_logo_for_email.png")
@@ -71,7 +66,6 @@ def worker():
         handle_online_banking(message_type, email_msg)
         handle_pad_setup_failed(message_type, email_msg)
         handle_payment_pending(message_type, email_msg)
-        handle_ejv_failed(message_type, email_msg)
         handle_reset_passcode(message_type, email_msg)
         handle_affiliation_invitation(message_type, email_msg)
         handle_product_actions(message_type, email_msg)
@@ -140,7 +134,7 @@ def handle_eft_available_notification(message_type, email_msg):
 def handle_nsf_lock_unlock_account(message_type, email_msg):
     """Handle the NSF lock/unlock account message."""
     if message_type == QueueMessageTypes.NSF_LOCK_ACCOUNT.value:
-        logger.debug("Lock account message received")
+        current_app.logger.debug("Lock account message received")
         template_name = TemplateType.NSF_LOCK_ACCOUNT_TEMPLATE_NAME.value
         org_id = email_msg.get("accountId")
         emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
@@ -151,7 +145,7 @@ def handle_nsf_lock_unlock_account(message_type, email_msg):
         email_dict = common_mailer.process(org_id, emails, template_name, subject, logo_url=logo_url)
         process_email(email_dict)
     elif message_type == QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value:
-        logger.debug("Unlock account message received")
+        current_app.logger.debug("Unlock account message received")
         template_name = TemplateType.NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME.value
         org_id = email_msg.get("accountId")
         admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
@@ -200,7 +194,7 @@ def handle_team_actions(message_type, email_msg):
         QueueMessageTypes.TEAM_MODIFIED.value,
         QueueMessageTypes.TEAM_MEMBER_INVITED.value,
     ):
-        logger.debug("Team Modified message received")
+        current_app.logger.debug("Team Modified message received")
         template_name = TemplateType.TEAM_MODIFIED_TEMPLATE_NAME.value
         org_id = email_msg.get("accountId")
         admin_coordinator_emails = get_member_emails(org_id, (ADMIN,))
@@ -209,7 +203,7 @@ def handle_team_actions(message_type, email_msg):
         email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject, logo_url=logo_url)
         process_email(email_dict)
     elif message_type == QueueMessageTypes.ADMIN_REMOVED.value:
-        logger.debug("ADMIN_REMOVED message received")
+        current_app.logger.debug("ADMIN_REMOVED message received")
         template_name = TemplateType.ADMIN_REMOVED_TEMPLATE_NAME.value
         org_id = email_msg.get("accountId")
         recipient_email = email_msg.get("recipientEmail")
@@ -326,14 +320,6 @@ def handle_payment_pending(message_type, email_msg):
         logo_url=logo_url,
         **args,
     )
-    process_email(email_dict)
-
-
-def handle_ejv_failed(message_type, email_msg):
-    """Handle the ejv failed message."""
-    if message_type != QueueMessageTypes.EJV_FAILED.value:
-        return
-    email_dict = ejv_failures.process(email_msg)
     process_email(email_dict)
 
 
@@ -520,7 +506,7 @@ def handle_other_messages(message_type, email_msg):
         )
         template_name = TemplateType[f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"].value
     else:
-        logger.error("Unknown message type: %s", message_type)
+        current_app.logger.error("Unknown message type: %s", message_type)
         return
 
     kwargs = {
@@ -552,10 +538,10 @@ def handle_other_messages(message_type, email_msg):
 
 def process_email(email_dict: dict, token: str = None):  # pylint: disable=too-many-branches
     """Process the email contained in the message."""
-    logger.debug("Attempting to process email: %s", email_dict.get("recipients", ""))
+    current_app.logger.debug("Attempting to process email: %s", email_dict.get("recipients", ""))
     if email_dict:
         if not token:
             token = RestService.get_service_account_token()
         notification_service.send_email(email_dict, token=token)
     else:
-        logger.error("No email content generated")
+        current_app.logger.error("No email content generated")

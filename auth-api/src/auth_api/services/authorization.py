@@ -17,16 +17,13 @@ This module is to handle authorization related queries.
 """
 from typing import Dict, Optional
 
-from flask import abort
-from structured_logging import StructuredLogging
+from flask import abort, current_app
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.services.permissions import Permissions as PermissionsService
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
-
-logger = StructuredLogging.get_logger()
 
 
 class Authorization:
@@ -93,7 +90,7 @@ class Authorization:
         auth_response = {}
         auth = None
         token_roles = user_from_context.roles
-        logger.debug(f"check roles=:{token_roles}")
+        current_app.logger.debug(f"check roles=:{token_roles}")
         if Role.STAFF.value in token_roles:
             if expanded:
                 # Query Authorization view by business identifier
@@ -202,11 +199,13 @@ class Authorization:
 
 
 @user_context
-def is_competent_authority(**kwargs) -> bool:
+def is_competent_authority_or_external_staff(**kwargs) -> bool:
     """Check if the account has a competent authority ('CA_SEARCH') product subscription."""
     user_from_context: UserContext = kwargs["user_context"]
     account_id = user_from_context.account_id
 
+    if user_from_context.is_external_staff():
+        return True
     if account_id is None:
         return False
 

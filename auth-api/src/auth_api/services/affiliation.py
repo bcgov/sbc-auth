@@ -15,13 +15,12 @@
 import datetime
 import re
 from dataclasses import asdict
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from flask import current_app
 from requests.exceptions import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
 from sqlalchemy.orm import contains_eager, subqueryload
-from structured_logging import StructuredLogging
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
@@ -31,7 +30,7 @@ from auth_api.models.affiliation_invitation import AffiliationInvitation as Affi
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
 from auth_api.models.dataclass import Affiliation as AffiliationData
-from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest
+from auth_api.models.dataclass import AffiliationBase, AffiliationSearchDetails, DeleteAffiliationRequest
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
@@ -40,14 +39,12 @@ from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
+from auth_api.utils.roles import AFFILIATION_ALLOWED_ROLES, ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.auth_event_publisher import publish_affiliation_event
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
-
-logger = StructuredLogging.get_logger()
 
 
 class Affiliation:
@@ -82,8 +79,8 @@ class Affiliation:
     @staticmethod
     def find_visible_affiliations_by_org_id(org_id):
         """Given an org_id, this will return the entities affiliated with it."""
-        logger.debug(f"<find_visible_affiliations_by_org_id for org_id {org_id}")
-        org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
+        current_app.logger.debug(f"<find_visible_affiliations_by_org_id for org_id {org_id}")
+        org = OrgService.find_by_org_id(org_id, allowed_roles=AFFILIATION_ALLOWED_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -95,7 +92,7 @@ class Affiliation:
         }
         nr_numbers = nr_number_name_dict.keys()
         filtered_affiliations = Affiliation.filter_affiliations(data, nr_numbers, nr_number_name_dict)
-        logger.debug(">find_visible_affiliations_by_org_id")
+        current_app.logger.debug(">find_visible_affiliations_by_org_id")
         return filtered_affiliations
 
     @staticmethod
@@ -164,7 +161,7 @@ class Affiliation:
     ):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
-        logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
+        current_app.logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
         if skip_membership_check is False:
             org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
             if org is None:
@@ -173,15 +170,15 @@ class Affiliation:
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        logger.debug("<create_affiliation entity found")
+        current_app.logger.debug("<create_affiliation entity found")
         entity_id = entity.identifier
         entity_type = entity.corp_type
 
         if not Affiliation.is_authorized(entity, pass_code):
-            logger.debug("<create_affiliation not authorized")
+            current_app.logger.debug("<create_affiliation not authorized")
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
-        logger.debug("<create_affiliation find affiliation")
+        current_app.logger.debug("<create_affiliation find affiliation")
         # Ensure this affiliation does not already exist
         affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)
         if affiliation is not None:
@@ -226,7 +223,7 @@ class Affiliation:
         business_identifier = affiliation_data.business_identifier
         certified_by_name = affiliation_data.certified_by_name
 
-        logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
+        current_app.logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
 
         entity, nr_json = Affiliation.validate_new_business_affiliation(affiliation_data)
         status = nr_json.get("state")
@@ -358,29 +355,29 @@ class Affiliation:
         ).json()
         return invoices
 
+    @user_context
     @staticmethod
-    def delete_affiliation(delete_affiliation_request: DeleteAffiliationRequest):
+    def delete_affiliation(da: DeleteAffiliationRequest, **kwargs):
         """Delete the affiliation for the provided org id and business id."""
-        org_id = delete_affiliation_request.org_id
-        business_identifier = delete_affiliation_request.business_identifier
-        reset_passcode = delete_affiliation_request.reset_passcode
-        log_delete_draft = delete_affiliation_request.log_delete_draft
-        email_addresses = delete_affiliation_request.email_addresses
-
-        logger.info(f"<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}")
-        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
+        user_from_context: UserContext = kwargs["user_context"]
+        current_app.logger.info(f"<delete_affiliation org_id:{da.org_id} business_identifier:{da.business_identifier}")
+        org = OrgService.find_by_org_id(
+            da.org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF, Role.EXTERNAL_STAFF_READONLY.value)
+        )
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity = EntityService.find_by_business_identifier(
-            business_identifier, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF)
+            da.business_identifier,
+            skip_auth=user_from_context.is_staff() or user_from_context.is_external_staff(),
+            allowed_roles=(CLIENT_AUTH_ROLES),
         )
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity_id = entity.identifier
 
-        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=org_id, entity_id=entity_id)
+        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=da.org_id, entity_id=entity_id)
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -388,8 +385,8 @@ class Affiliation:
         for affiliation_invitation in AffiliationInvitationModel.find_invitations_by_affiliation(affiliation.id):
             affiliation_invitation.delete()
 
-        if reset_passcode:
-            entity.reset_passcode(entity.business_identifier, email_addresses)
+        if da.reset_passcode:
+            entity.reset_passcode(entity.business_identifier, da.email_addresses)
         affiliation.delete()
         entity.set_pass_code_claimed(False)
 
@@ -406,14 +403,14 @@ class Affiliation:
         name_request = (
             entity.status in [NRStatus.DRAFT.value, NRStatus.CONSUMED.value] and entity.corp_type == CorpType.NR.value
         ) or "NR " in entity.business_identifier
-        publish = log_delete_draft or not name_request
+        publish = da.log_delete_draft or not name_request
         if publish:
             name = entity.name if len(entity.name) > 0 else entity.business_identifier
             ActivityLogPublisher.publish_activity(
-                Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value, name=name, id=entity.business_identifier)
+                Activity(da.org_id, ActivityAction.REMOVE_AFFILIATION.value, name=name, id=entity.business_identifier)
             )
 
-        publish_affiliation_event(QueueMessageTypes.BUSINESS_UNAFFILIATED.value, org_id, entity.business_identifier)
+        publish_affiliation_event(QueueMessageTypes.BUSINESS_UNAFFILIATED.value, da.org_id, entity.business_identifier)
 
     @staticmethod
     @user_context
@@ -430,7 +427,7 @@ class Affiliation:
         nr_number: str = entity_details.get("nrNumber")
         bootstrap_identifier: str = entity_details.get("bootstrapIdentifier")
         identifier: str = entity_details.get("identifier")
-        logger.debug(f"<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier}")
+        current_app.logger.debug(f"<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier}")
         from_entity: Entity = EntityService.find_by_business_identifier(nr_number, skip_auth=True)
         # Find entity with nr_number (stale, because this is now a business)
         if (
@@ -443,32 +440,46 @@ class Affiliation:
                 # These are already handled by the filer.
                 if affiliation.org_id == org_id:
                     continue
-                logger.debug(
+                current_app.logger.debug(
                     f"Moving affiliation {affiliation.id} from {from_entity.identifier} to {to_entity.identifier}"
                 )
                 affiliation.entity_id = to_entity.identifier
                 affiliation.save()
 
-        logger.debug(">fix_stale_affiliations")
+        current_app.logger.debug(">fix_stale_affiliations")
 
     @staticmethod
-    def _affiliation_details_url(affiliation: AffiliationModel) -> str:
+    def _affiliation_details_url(identifier: str) -> str:
         """Determine url to call for affiliation details."""
         # only have LEAR and NAMEX affiliations
-        if affiliation.entity.corp_type_code == CorpType.NR.value:
+        if identifier.startswith("NR"):
             return current_app.config.get("NAMEX_AFFILIATION_DETAILS_URL")
         return current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
 
     @staticmethod
+    def affiliation_to_affiliation_base(affiliations: List[AffiliationModel]) -> List[AffiliationBase]:
+        """Convert affiliations to a common data class."""
+        return [
+            AffiliationBase(identifier=affiliation.entity.business_identifier, created=affiliation.created)
+            for affiliation in affiliations
+        ]
+
+    @staticmethod
     async def get_affiliation_details(
-        affiliations: List[AffiliationModel], search_details: AffiliationSearchDetails, org_id
-    ) -> List:
+        affiliation_bases: List[AffiliationBase],
+        search_details: AffiliationSearchDetails,
+        org_id,
+        remove_stale_drafts,
+    ) -> Tuple[List, bool]:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
+        # Our pagination is already handled at the auth level when not doing a search.
+        if not any([search_details.status, search_details.name, search_details.type, search_details.identifier]):
+            search_details.page = 1
         search_dict = asdict(search_details)
-        for affiliation in affiliations:
-            url = Affiliation._affiliation_details_url(affiliation)
-            url_identifiers.setdefault(url, []).append(affiliation.entity.business_identifier)
+        for affiliation_base in affiliation_bases:
+            url = Affiliation._affiliation_details_url(affiliation_base.identifier)
+            url_identifiers.setdefault(url, []).append(affiliation_base.identifier)
         call_info = [
             {
                 "url": url,
@@ -485,25 +496,64 @@ class Affiliation:
         )
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
-            combined = Affiliation._combine_affiliation_details(responses)
-            # Should provide us with ascending order
-            affiliations_sorted = sorted(affiliations, key=lambda x: x.created, reverse=True)
-            # Provide us with a dict with the max created date.
-            ordered = {
-                affiliation.entity.business_identifier: affiliation.created for affiliation in affiliations_sorted
-            }
+            has_more_apis = any(r.get("hasMore", False) for r in responses if isinstance(r, dict))
+            combined = Affiliation._combine_affiliation_details(responses, remove_stale_drafts)
+            combined = Affiliation._sort_affiliations_by_created(combined, affiliation_bases)
 
-            def sort_key(item):
-                identifier = item.get("identifier", item.get("nameRequest", {}).get("nrNum", ""))
-                return ordered.get(identifier, datetime.datetime.min)
-
-            combined.sort(key=sort_key, reverse=True)
-
-            return combined
+            Affiliation._handle_affiliation_debug(affiliation_bases, combined)
+            return combined, has_more_apis
         except ServiceUnavailableException as err:
-            logger.debug(err)
-            logger.debug("Failed to get affiliations details:  %s", affiliations)
+            current_app.logger.debug(err)
+            current_app.logger.debug("Failed to get affiliations details:  %s", affiliation_bases)
             raise ServiceUnavailableException("Failed to get affiliation details") from err
+
+    @staticmethod
+    def _sort_affiliations_by_created(combined: list, affiliation_bases: list) -> list:
+        """Sort affiliations by created date."""
+        ordered = {
+            affiliation.identifier: affiliation.created
+            for affiliation in sorted(affiliation_bases, key=lambda x: x.created, reverse=True)
+        }
+
+        def sort_key(item):
+            return ordered.get(
+                item.get("identifier", item.get("nameRequest", {}).get("nrNum", "")), datetime.datetime.min
+            )
+
+        combined.sort(key=sort_key, reverse=True)
+        return combined
+
+    @staticmethod
+    def _handle_affiliation_debug(affiliation_bases, combined):
+        """Enable affiliation debug."""
+        if current_app.config.get("AFFILIATION_DEBUG") is False:
+            return
+        base_identifiers = {base.identifier for base in affiliation_bases}
+        combined_identifiers = set()
+        for item in combined:
+            identifier = item.get("identifier") or item.get("nameRequest", {}).get("nrNum")
+            if identifier:
+                combined_identifiers.add(identifier)
+        missing_identifiers = base_identifiers - combined_identifiers
+        if missing_identifiers:
+            current_app.logger.warning(f"Identifiers missing from combined results: {missing_identifiers}")
+
+    @staticmethod
+    def _extract_name_requests(data: dict | list) -> dict:
+        """Updates Name Requests from the affiliation details response."""
+        name_requests_key = "requests"
+        normalized = {"hasMore": False, "requests": []}
+        if isinstance(data, list):
+            normalized["requests"] = data
+            normalized["hasMore"] = False
+            return normalized
+        if isinstance(data, dict):
+            nr_list = data.get(name_requests_key)
+            if isinstance(nr_list, list):
+                normalized["requests"] = nr_list
+                normalized["hasMore"] = data.get("hasMore", False)
+
+        return normalized
 
     @staticmethod
     def _group_details(details):
@@ -513,17 +563,19 @@ class Affiliation:
         drafts = []
         businesses_key = "businessEntities"
         drafts_key = "draftEntities"
+        name_requests_key = "requests"
         for data in details:
-            if isinstance(data, list):
-                # assume this is an NR list
-                for name_request in data:
-                    # i.e. {'NR1234567': {...}}
-                    name_requests[name_request["nrNum"]] = {"legalType": CorpType.NR.value, "nameRequest": name_request}
-                continue
+            nr_data = Affiliation._extract_name_requests(data)
+            for name_request in nr_data[name_requests_key]:
+                if "nrNum" in name_request:
+                    name_requests[name_request["nrNum"]] = {
+                        "legalType": CorpType.NR.value,
+                        "nameRequest": name_request,
+                    }
             if businesses_key in data:
-                businesses = list(data[businesses_key])
+                businesses.extend(data.get(businesses_key))
             if drafts_key in data:
-                drafts = data[drafts_key]
+                drafts.extend(data.get(drafts_key))
         return name_requests, businesses, drafts
 
     @staticmethod
@@ -537,29 +589,33 @@ class Affiliation:
         return business
 
     @staticmethod
-    def _combine_nrs(name_requests, businesses, drafts):
-        """Combine NRs with the business and draft entities."""
-        for business in drafts + businesses:
-            # Only drafts have nrNumber coming back from legal-api.
-            if "nrNumber" in business and (nr_num := business["nrNumber"]):
-                if business["nrNumber"] in name_requests:
-                    business["nameRequest"] = name_requests[nr_num]["nameRequest"]
-                    business = Affiliation._update_draft_type_for_amalgamation_nr(business)
-                    # Remove the business if the draft associated to the NR is consumed.
-                    if business["nameRequest"]["stateCd"] == NRStatus.CONSUMED.value:
-                        drafts.remove(business)
-                    del name_requests[nr_num]
-                else:
-                    # If not in name_requests then it's a stale draft.
-                    drafts.remove(business)
-
-        return [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
+    def _process_nr_for_business(business, name_requests, drafts):
+        """Process NR for a business entity."""
+        nr_num = business["nrNumber"]
+        if nr_num in name_requests:
+            business["nameRequest"] = name_requests[nr_num]["nameRequest"]
+            business = Affiliation._update_draft_type_for_amalgamation_nr(business)
+            if business["nameRequest"]["stateCd"] == NRStatus.CONSUMED.value:
+                drafts.remove(business)
+            del name_requests[nr_num]
+            return True
+        return False
 
     @staticmethod
-    def _combine_affiliation_details(details):
+    def _combine_nrs(name_requests, businesses, drafts, remove_stale_drafts=True):
+        """Combine NRs with the business and draft entities."""
+        for business in drafts + businesses:
+            if "nrNumber" in business and business["nrNumber"]:
+                processed = Affiliation._process_nr_for_business(business, name_requests, drafts)
+                if not processed and remove_stale_drafts and business in drafts:
+                    drafts.remove(business)
+        return list(name_requests.values()) + drafts + businesses
+
+    @staticmethod
+    def _combine_affiliation_details(details, remove_stale_drafts=True):
         """Parse affiliation details responses and combine draft entities with NRs if applicable."""
         name_requests, businesses, drafts = Affiliation._group_details(details)
-        return Affiliation._combine_nrs(name_requests, businesses, drafts)
+        return Affiliation._combine_nrs(name_requests, businesses, drafts, remove_stale_drafts)
 
     @staticmethod
     def _get_nr_details(nr_number: str):
@@ -572,7 +628,7 @@ class Affiliation:
             )
             get_nr_response = RestService.get(get_nr_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
-            logger.info(e)
+            current_app.logger.info(e)
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
         return get_nr_response.json()
 
@@ -585,7 +641,7 @@ class Affiliation:
         try:
             lear_response = RestService.get(parties_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
-            logger.info(e)
+            current_app.logger.info(e)
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
         parties_json = lear_response.json()
         for party in parties_json["parties"]:

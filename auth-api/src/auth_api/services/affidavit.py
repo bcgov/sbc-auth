@@ -18,7 +18,7 @@ This module manages the User Information.
 from datetime import datetime
 from typing import Dict
 
-from structured_logging import StructuredLogging
+from flask import current_app
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -36,8 +36,6 @@ from auth_api.utils.enums import AffidavitStatus, TaskRelationshipStatus, TaskRe
 from auth_api.utils.util import camelback2snake
 
 from .user import User as UserService
-
-logger = StructuredLogging.get_logger()
 
 
 class Affidavit:  # pylint: disable=too-many-instance-attributes
@@ -59,7 +57,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def create_affidavit(affidavit_info: Dict):
         """Create a new affidavit record."""
-        logger.debug("<create_affidavit ")
+        current_app.logger.debug("<create_affidavit ")
         user = UserService.find_by_jwt_token()
         # If the user already have a pending affidavit, raise error
         existing_affidavit: AffidavitModel = AffidavitModel.find_pending_by_user_id(user_id=user.identifier)
@@ -105,10 +103,10 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         if org:
             # check if there is any holding tasks
             # Find if the corresponding task is NEW_ACCOUNT_STAFF_REVIEW / GOVN type, clone and close it
-            task_model: TaskModel = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
+            task_model = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
             if task_model is None:
                 # Else, find if there are any associated task of BCEID_ADMIN type, clone and close it
-                task_model: TaskModel = TaskModel.find_by_user_and_status(org.id, TaskStatus.HOLD.value)
+                task_model = TaskModel.find_by_user_and_status(org.id, TaskStatus.HOLD.value)
 
             if task_model:
                 task_info = {
@@ -141,44 +139,44 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def find_affidavit_by_org_id(org_id: int, filtered_affidavit_statuses=None):
         """Return affidavit for the org by finding the admin for the org."""
-        logger.debug("<find_affidavit_by_org_id ")
+        current_app.logger.debug("<find_affidavit_by_org_id ")
         affidavit = AffidavitModel.find_by_org_id(org_id, filtered_affidavit_statuses)
         affidavit_dict = Affidavit(affidavit).as_dict()
         affidavit_dict["documentUrl"] = GoogleStoreService.create_signed_get_url(affidavit.document_id)
-        logger.debug(">find_affidavit_by_org_id ")
+        current_app.logger.debug(">find_affidavit_by_org_id ")
         return affidavit_dict
 
     @staticmethod
     def find_affidavit_by_user_guid(user_guid: str, status: str = None):
         """Return affidavit for the user."""
-        logger.debug("<find_affidavit_by_user_guid ")
+        current_app.logger.debug("<find_affidavit_by_user_guid ")
         affidavit = AffidavitModel.find_effective_by_user_guid(user_guid, status)
         affidavit_dict = Affidavit(affidavit).as_dict()
         affidavit_dict["documentUrl"] = GoogleStoreService.create_signed_get_url(affidavit.document_id)
-        logger.debug(">find_affidavit_by_user_guid ")
+        current_app.logger.debug(">find_affidavit_by_user_guid ")
         return affidavit_dict
 
     @staticmethod
     def approve_or_reject(org_id: int, is_approved: bool, user: UserModel):
         """Mark the affidavit as approved or rejected."""
-        logger.debug("<approve_or_reject ")
+        current_app.logger.debug("<approve_or_reject ")
         # In order to get the pending affidavit to be reviewed, we need to filter out the following cases
         # 1. Inactive affidavits - usually while the old affidavit is made inactive
         # while the task is put on hold and the user uploads a new one.
         # 2. When the user account request is rejected, then user creates a new account
         filtered_affidavit_statuses = [AffidavitStatus.INACTIVE.value, AffidavitStatus.REJECTED.value]
-        affidavit: AffidavitModel = AffidavitModel.find_by_org_id(org_id, filtered_affidavit_statuses)
+        affidavit = AffidavitModel.find_by_org_id(org_id, filtered_affidavit_statuses)
         affidavit.decision_made_by = user.username
         affidavit.decision_made_on = datetime.now()
         affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
-        logger.debug(">approve_or_reject")
+        current_app.logger.debug(">approve_or_reject")
         return Affidavit(affidavit)
 
     @staticmethod
     def approve_or_reject_bceid_admin(admin_user_id: int, is_approved: bool, user: UserModel):
         """Mark the BCeId Admin Affidavit as approved or rejected."""
-        logger.debug("<approve_or_reject_bceid_admin ")
-        affidavit: AffidavitModel = AffidavitModel.find_approved_by_user_id(admin_user_id)
+        current_app.logger.debug("<approve_or_reject_bceid_admin ")
+        affidavit = AffidavitModel.find_approved_by_user_id(admin_user_id)
         if affidavit is None:
             affidavit = AffidavitModel.find_pending_by_user_id(admin_user_id)
             if affidavit is None:
@@ -188,5 +186,5 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
             affidavit.decision_made_on = datetime.now()
             affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
 
-        logger.debug(">approve_or_reject_bceid_admin ")
+        current_app.logger.debug(">approve_or_reject_bceid_admin ")
         return Affidavit(affidavit)

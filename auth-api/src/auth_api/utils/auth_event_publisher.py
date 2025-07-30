@@ -19,7 +19,6 @@ from typing import List, Optional
 
 from flask import current_app
 from simple_cloudevent import SimpleCloudEvent
-from structured_logging import StructuredLogging
 
 from auth_api.models import Membership as MembershipModel
 from auth_api.services.flags import flags
@@ -27,8 +26,6 @@ from auth_api.services.gcp_queue import GcpQueue, queue
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import QueueSources, Status
 from auth_api.utils.serializable import Serializable
-
-logger = StructuredLogging.get_logger()
 
 
 @dataclass
@@ -59,7 +56,7 @@ def publish_account_event(queue_message_type: str, data: AccountEvent, source: s
         queue.publish(current_app.config.get("AUTH_EVENT_TOPIC"), GcpQueue.to_queue_message(cloud_event), **kwargs)
     except Exception as e:  # NOQA # pylint: disable=broad-except
         error_msg = f"Failed to publish to auth event topic {e}"
-        logger.error(error_msg)
+        current_app.logger.error(error_msg)
 
 
 def publish_affiliation_event(queue_message_type: str, org_id: int, business_identifier: str):

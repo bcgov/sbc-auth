@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=implicit-str-concat
 """Enum definitions."""
 from enum import Enum
 
@@ -27,7 +28,6 @@ class SubjectType(Enum):
     ONLINE_BANKING_PAYMENT_SUBJECT = "[BC Registries and Online Services] Online Banking payment has been received"
     PAD_SETUP_FAILED = "[BC Registries and Online Services] Your Account is Temporarily Suspended"
     PAYMENT_PENDING = "[BC Registries and Online Services] Payment is now due for pending transaction on your account"
-    EJV_FAILED = "GL disbursement failure for EJV"
     RESET_PASSCODE = "BC Registries Account Passcode Reset"
     ADMIN_NOTIFICATION = (
         "[BC Registries and Online Services] {user_first_name} {user_last_name} "
@@ -136,7 +136,6 @@ class TemplateType(Enum):
     ONLINE_BANKING_UNDER_PAYMENT_TEMPLATE_NAME = "online_banking_under_payment"
     PAD_SETUP_FAILED_TEMPLATE_NAME = "pad_setup_failed"
     PAYMENT_PENDING_TEMPLATE_NAME = "paymanet_pending"
-    EJV_FAILED_TEMPLATE_NAME = "ejv_failed_email"
     RESET_PASSCODE_TEMPLATE_NAME = "reset_passcode"
     ADMIN_NOTIFICATION_TEMPLATE_NAME = "admin_notification_email"
     AFFILIATION_INVITATION_TEMPLATE_NAME = "affiliation_invitation_email"

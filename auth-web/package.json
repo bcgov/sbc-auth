@@ -1,6 +1,6 @@
 {
   "name": "auth-web",
-  "version": "2.10.10",
+  "version": "2.10.17",
   "appName": "Auth Web",
   "sbcName": "SBC Common Components",
   "private": true,
@@ -25,7 +25,6 @@
     "@bcrs-shared-components/jurisdiction": "1.1.4",
     "@bcrs-shared-components/services": "1.1.3",
     "@mdi/font": "^4.5.95",
-    "@sentry/vue": "^8.33.1",
     "@vue/compiler-dom": "^3.2.45",
     "@vue/composition-api": "^1.7.1",
     "axios": "^1.7.4",

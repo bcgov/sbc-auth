@@ -42,7 +42,7 @@ class Role(Enum):
     STAFF_MANAGE_BUSINESS = "manage_business"
     STAFF_SUSPEND_ACCOUNTS = "suspend_accounts"
 
-    # Used by Business-AR to create affiliations that may already have a passcode (bypass passcode check)
+    # Used by Business-AR / Contact Centre Staff / Maximus Staff to create affiliations (and bypass passcode check)
     SKIP_AFFILIATION_AUTH = "skip_affiliation_auth"
 
     STAFF_TASK_SEARCH = "staff_task_search"
@@ -83,6 +83,7 @@ CLIENT_ADMIN_ROLES = (COORDINATOR, ADMIN)
 CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, USER)
 ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF)
 ALLOWED_READ_ROLES = (*CLIENT_AUTH_ROLES, STAFF, Role.EXTERNAL_STAFF_READONLY.value)
+AFFILIATION_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF, Role.EXTERNAL_STAFF_READONLY.value)
 EXCLUDED_FIELDS = ("status_code", "type_code")
 
 PREMIUM_ORG_TYPES = (OrgType.PREMIUM.value, OrgType.SBC_STAFF.value, OrgType.STAFF.value)
