@@ -53,7 +53,6 @@ import KeyCloakService from 'sbc-common-components/src/services/keycloak.service
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import PermissionService from '@/services/permission.services'
-import { RefundRequest } from '@/models/refund'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
@@ -861,11 +860,6 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data || {}
   }
 
-  async function refundInvoice (invoiceId, refundPayload: RefundRequest) {
-    const response = await PaymentService.refundInvoice(invoiceId, refundPayload)
-    return response?.data || {}
-  }
-
   async function updateInvoicePaymentMethodAsCreditCard (invoicePayload) {
     const response = await PaymentService.updateInvoicePaymentMethodAsCreditCard(invoicePayload.paymentId, invoicePayload.accountId)
     return response?.data || {}
@@ -1162,7 +1156,6 @@ export const useOrgStore = defineStore('org', () => {
     getProductList,
     addToCurrentSelectedProducts,
     resetoCurrentSelectedProducts,
-    refundInvoice,
     setSubscribedProducts,
     fetchCurrentOrganizationGLInfo,
     fetchOrgProductFeeCodes,
