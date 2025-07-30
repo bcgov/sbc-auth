@@ -355,7 +355,7 @@ describe('TransactionsDataTable tests', () => {
       statusCode: InvoiceStatus.PAID,
       paymentMethod: PaymentTypes.PAD,
       total: 100,
-      partialRefunds: [createPartialRefund({ 
+      partialRefunds: [createPartialRefund({
         isCredit: true,
         createdName: 'Test User',
         createdBy: 'testuser',

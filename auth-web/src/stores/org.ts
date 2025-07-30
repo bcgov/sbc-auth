@@ -53,7 +53,6 @@ import KeyCloakService from 'sbc-common-components/src/services/keycloak.service
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import PermissionService from '@/services/permission.services'
-import { RefundRequest } from '@/models/refund'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
