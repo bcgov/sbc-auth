@@ -77,7 +77,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     if DB_INSTANCE_CONNECTION_NAME := os.getenv("DATABASE_INSTANCE_CONNECTION_NAME", None):
         SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://"
     else:
-        SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"  # noqa: E231, E501
 
     # Keycloak & Jwt
     JWT_OIDC_ISSUER = os.getenv("JWT_OIDC_ISSUER")
