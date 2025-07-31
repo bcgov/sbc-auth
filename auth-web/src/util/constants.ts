@@ -33,9 +33,7 @@ export enum SessionStorageKeys {
     PprWebUrl = 'PPR_WEB_URL',
     SiteminderLogoutUrl = 'SITEMINDER_LOGOUT_URL',
     PayApiUrl = 'PAY_API_URL',
-    StatementsDownloaded = 'STATEMENTS_DOWNLOADED',
-    DocApiUrl = 'DOC_API_URL',
-    DocApiKey = 'DOC_API_KEY'
+    StatementsDownloaded = 'STATEMENTS_DOWNLOADED'
 }
 
 export enum Role {
