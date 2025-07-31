@@ -77,14 +77,11 @@ class _Config:  # pylint: disable=too-few-public-methods
     DB_PORT = int(os.getenv("DATABASE_PORT", "5432"))
     DB_SCHEMA = os.getenv("DATABASE_SCHEMA", "public")
     DB_IP_TYPE = os.getenv("DATABASE_IP_TYPE", "private")
-    DATABASE_OWNER = os.getenv("DATABASE_OWNER", "auth")
+    DATABASE_OWNER = os.getenv("DATABASE_OWNER", "postgres")
 
     if DB_INSTANCE_CONNECTION_NAME := os.getenv("DATABASE_INSTANCE_CONNECTION_NAME", None):
         SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://"
     else:
-        DB_PASSWORD = os.getenv("DATABASE_PASSWORD", "")
-        DB_HOST = os.getenv("DATABASE_HOST", "")
-        DB_PORT = int(os.getenv("DATABASE_PORT", "5432"))
         SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
     # JWT_OIDC Settings
@@ -336,4 +333,3 @@ class MigrationConfig(_Config):  # pylint: disable=too-few-public-methods
 
     TESTING = False
     DEBUG = True
-    DATABASE_OWNER = os.getenv("DATABASE_OWNER", "postgres")
