@@ -718,12 +718,4 @@ export enum OrgNameLabel {
     REGULAR = 'Account Name'
 }
 
-export enum ShortNameRefundStatus {
-    PENDING_APPROVAL = 'PENDING_APPROVAL'
-}
-
-export enum ShortNameRefundLabel {
-    PENDING_APPROVAL = 'REFUND REQUEST'
-}
-
 export const DRS_ID_PATTERN = /^DS\d{10}$/

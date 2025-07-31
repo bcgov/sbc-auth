@@ -226,11 +226,11 @@
 <script lang="ts">
 import { CanJurisdictions, IntlJurisdictions, UsaJurisdiction } from '@bcrs-shared-components/jurisdiction/list-data'
 import { ContinuationFilingIF, ContinuationReviewIF } from '@/models/continuation-review'
-import { DRS_ID_PATTERN } from '@/util/constants'
+import { DocumentClasses, JurisdictionLocation } from '@bcrs-shared-components/enums'
 import { computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
+import { DRS_ID_PATTERN } from '@/util/constants'
 import { DocumentServices } from '@bcrs-shared-components/services'
-import { JurisdictionLocation, DocumentClasses } from '@bcrs-shared-components/enums'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import moment from 'moment-timezone'
 
