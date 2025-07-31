@@ -53,7 +53,6 @@ import PaymentView from '@/views/pay/PaymentView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import PriceListView from '@/views/auth/PriceListView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
-import RefundViewVue from '@/views/pay/RefundView.vue'
 import RequestNameView from '@/views/auth/home/RequestNameView.vue'
 import RestrictedProductView from '@/views/auth/RestrictedProductView.vue'
 import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
@@ -800,16 +799,6 @@ export function getRoutes (): RouteConfig[] {
       component: ViewAllTransactions,
       props: true,
       meta: { requiresAuth: true }
-    },
-    {
-      path: '/pay/refund',
-      name: 'refund',
-      component: RefundViewVue,
-      props: true,
-      meta: {
-        requiresAuth: true,
-        allowedRoles: [Role.CreateCredits, Role.FasRefund]
-      }
     },
     {
       path: '/staff/involuntary-dissolution',
