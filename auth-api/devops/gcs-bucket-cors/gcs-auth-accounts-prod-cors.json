@@ -3,7 +3,8 @@
       "maxAgeSeconds": 3600,
       "method": ["PUT", "GET", "OPTIONS"],
       "origin": [
-        "https://account.bcregistry.gov.bc.ca"
+        "https://account.bcregistry.gov.bc.ca",
+        "https://wwww.account.bcregistry.gov.bc.ca"
       ],
       "responseHeader": [
         "Content-Type",
