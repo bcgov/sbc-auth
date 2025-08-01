@@ -73,11 +73,14 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")) -> Flask:
         )
 
         app.config["SQLALCHEMY_ENGINE_OPTIONS"] = db_config.get_engine_options()
+
+    db.init_app(app)
+
+    if app.config.get("DB_INSTANCE_CONNECTION_NAME"):
         with app.app_context():
             engine = db.engine
             setup_search_path_event_listener(engine, schema)
 
-    db.init_app(app)
     flags.init_app(app)
     cache.init_app(app)
     queue.init_app(app)
