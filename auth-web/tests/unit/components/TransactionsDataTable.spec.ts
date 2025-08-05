@@ -394,4 +394,42 @@ describe('TransactionsDataTable tests', () => {
       { type: 'Refund as credits', paymentMethod: 'Account Credit' }
     ])
   })
+
+  it('PAID with full applied credit AND partial credit [PAD] - should show both applied credit and partial credit in dropdown', async () => {
+    const transaction = createTestTransaction({
+      statusCode: InvoiceStatus.PAID,
+      paymentMethod: PaymentTypes.PAD,
+      total: 100,
+      appliedCredits: [createAppliedCredit({ amountApplied: 100 })], // Covers full amount
+      partialRefunds: [createPartialRefund({
+        isCredit: true,
+        refundAmount: 30,
+        createdName: 'Test User',
+        createdBy: 'testuser',
+        id: 1,
+        createdOn: new Date('2023-01-01T10:00:00Z')
+      })]
+    })
+
+    const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
+
+    expect(testWrapper.vm.hasDropdownContent(transaction)).toBe(true)
+
+    const dropdownItems = testWrapper.vm.getDropdownItems(transaction)
+    
+    expect(dropdownItems).toHaveLength(2)
+
+    const appliedCreditItem = dropdownItems.find(item => item.id === 'credit-1')
+    expect(appliedCreditItem).toBeTruthy()
+    expect(appliedCreditItem.amount).toBe('$100.00')
+    expect(appliedCreditItem.paymentMethod).toBe('Account Credit')
+    expect(appliedCreditItem.isRefund).toBe(false)
+
+    const partialCreditItem = dropdownItems.find(item => item.isRefund)
+    expect(partialCreditItem).toBeTruthy()
+    expect(partialCreditItem.amount).toBe('-$30.00')
+    expect(partialCreditItem.paymentMethod).toBe('Account Credit')
+    expect(partialCreditItem.type).toBe('Refund as credits')
+    expect(partialCreditItem.status).toBe('Partially Credited')
+  })
 })
