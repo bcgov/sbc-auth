@@ -4,7 +4,7 @@
       "method": ["PUT", "GET", "OPTIONS"],
       "origin": [
         "https://account.bcregistry.gov.bc.ca",
-        "https://wwww.account.bcregistry.gov.bc.ca"
+        "https://www.account.bcregistry.gov.bc.ca"
       ],
       "responseHeader": [
         "Content-Type",

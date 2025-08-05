@@ -19,7 +19,7 @@ down_revision = '00566833d2e0'
 branch_labels = None
 depends_on = None
 
-logger =current_app.logger if hasattr(current_app, 'logger') else logging.getLogger("auth_api")
+logger = current_app.logger if hasattr(current_app, 'logger') else logging.getLogger("auth_api")
 
 def get_target_schema():
     """Minimal schema name fetch with validation."""
