@@ -378,16 +378,17 @@ export default defineComponent({
     }
 
     const hasDropdownContent = (item: Transaction): boolean => {
+      const hasPartialRefunds = item.partialRefunds?.length > 0
+      let hasAppliedCreditsWithRemaining = false
       if (item.appliedCredits?.length > 0) {
         const totalAppliedCredits = item.appliedCredits.reduce((sum, credit) => sum + credit.amountApplied, 0)
         const remainingAmount = item.total - totalAppliedCredits
-        return remainingAmount > 0
+        hasAppliedCreditsWithRemaining = remainingAmount > 0
       }
 
-      const hasContent = item.statusCode === InvoiceStatus.CREDITED ||
-             item.partialRefunds?.length > 0 ||
-             item.statusCode === InvoiceStatus.REFUNDED
-      return hasContent
+      const hasRefundStatus = item.statusCode === InvoiceStatus.CREDITED ||
+                              item.statusCode === InvoiceStatus.REFUNDED
+      return hasPartialRefunds || hasAppliedCreditsWithRemaining || hasRefundStatus
     }
 
     const expandedState = computed(() => {
