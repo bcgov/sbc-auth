@@ -50,7 +50,6 @@ def upgrade():
         conn.execute(text(f"ALTER SCHEMA public RENAME TO {target_schema};"))
         conn.execute(text("CREATE SCHEMA public;"))
         
-        # Create alembic_version table in new public schema
         conn.execute(text("""
             CREATE TABLE public.alembic_version (
                 version_num character varying(32) NOT NULL,
@@ -58,7 +57,6 @@ def upgrade():
             )
         """))
         
-        # Insert the down_revision value (previous migration)
         conn.execute(text(f"""
             INSERT INTO public.alembic_version (version_num) 
             VALUES ('{down_revision}')
@@ -77,7 +75,6 @@ def upgrade():
 def downgrade():
     target_schema = get_target_schema()
 
-    # Skip if target schema is public
     if target_schema == 'public':
         logger.info("Target schema is public, skipping downgrade")
         return
@@ -85,7 +82,6 @@ def downgrade():
     conn = op.get_bind()
 
     try:
-        # Check if schema exists
         schema_exists = conn.execute(
             text(f"SELECT 1 FROM information_schema.schemata WHERE schema_name = '{target_schema}'")
         ).scalar()
@@ -94,11 +90,9 @@ def downgrade():
             logger.info(f"Schema {target_schema} does not exist, nothing to downgrade")
             return
 
-        # 1. Drop the current public schema (which is empty/minimal)
         logger.info("Dropping current public schema")
         conn.execute(text("DROP SCHEMA public CASCADE"))
 
-        # 2. Rename the target schema back to public
         logger.info(f"Renaming {target_schema} back to public")
         conn.execute(text(f"ALTER SCHEMA {target_schema} RENAME TO public"))
 
