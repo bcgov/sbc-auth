@@ -400,7 +400,7 @@ describe('TransactionsDataTable tests', () => {
       statusCode: InvoiceStatus.PAID,
       paymentMethod: PaymentTypes.PAD,
       total: 100,
-      appliedCredits: [createAppliedCredit({ amountApplied: 100 })], // Covers full amount
+      appliedCredits: [createAppliedCredit({ id: 1, amountApplied: 100 })], // Covers full amount
       partialRefunds: [createPartialRefund({
         isCredit: true,
         refundAmount: 30,
