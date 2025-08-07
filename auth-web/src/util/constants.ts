@@ -715,3 +715,5 @@ export enum OrgNameLabel {
     BUSINESS = 'Legal Business Name',
     REGULAR = 'Account Name'
 }
+
+export const DRS_ID_PATTERN = /^DS\d{10}$/
