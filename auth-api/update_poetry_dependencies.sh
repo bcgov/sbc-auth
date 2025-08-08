@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-TARGET_DIRS=("account-mailer" "auth-queue")
+TARGET_DIRS=("../queue_services/account-mailer" "../queue_services/auth-queue")
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 REPO=$(git config --get remote.origin.url)
@@ -16,7 +16,7 @@ update_pyproject_and_poetry() {
   fi
 
   echo "Updating $file..."
-  sed -i -E "s|auth-api = \{ git = .*?, rev = .*?, subdirectory = \"auth-api\" \}|auth-api = \{ git = \"$REPO\", rev = \"$BRANCH\", subdirectory = \"auth-api\" \}|" "$file"
+  sed -i -E  "s|auth-api\s*=\s*\{[^}]*subdirectory\s*=\s*\"auth-api\"[^}]*\}|auth-api = { git = \"$REPO\", branch = \"$BRANCH\", subdirectory = \"auth-api\" }|" "$file"
 
   echo "Running poetry update auth-api in $dir..."
   cd "$dir"
