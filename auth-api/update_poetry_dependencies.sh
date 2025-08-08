@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-TARGET_DIRS=("account-mailer" "auth-queue")
+TARGET_DIRS=("../queue_services/account-mailer" "../queue_services/auth-queue")
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 REPO=$(git config --get remote.origin.url)
