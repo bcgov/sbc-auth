@@ -16,7 +16,7 @@ update_pyproject_and_poetry() {
   fi
 
   echo "Updating $file..."
-  sed -i -E "s|auth-api = \{ git = .*?, rev = .*?, subdirectory = \"auth-api\" \}|auth-api = \{ git = \"$REPO\", rev = \"$BRANCH\", subdirectory = \"auth-api\" \}|" "$file"
+  sed -i -E  "s|auth-api\s*=\s*\{[^}]*subdirectory\s*=\s*\"auth-api\"[^}]*\}|auth-api = { git = \"$REPO\", branch = \"$BRANCH\", subdirectory = \"auth-api\" }|" "$file"
 
   echo "Running poetry update auth-api in $dir..."
   cd "$dir"

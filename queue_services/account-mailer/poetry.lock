@@ -267,9 +267,9 @@ Werkzeug = "^3.0.0"
 
 [package.source]
 type = "git"
-url = "https://github.com/bcgov/sbc-auth.git"
-reference = "feature-db-upgrade"
-resolved_reference = "e3db337a6b5d1ada0cd6529c6ba7ee6f2fc8124d"
+url = "https://github.com/seeker25/sbc-auth.git"
+reference = "jinja_security_fix"
+resolved_reference = "3f910c4335ef284213cfaeff4f09e6519eadbd90"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3701,4 +3701,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "e4f48186f3715f5bfd891852a0c8d75a4fdc7cbc8b30be91699c359163c052eb"
+content-hash = "a9804e15cddb6a0fb62a54cad920d3a8510e2e28ec2b251bbf082f0a268a7c85"
