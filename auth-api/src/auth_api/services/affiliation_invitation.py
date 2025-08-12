@@ -626,7 +626,7 @@ class AffiliationInvitation:
         token_valid_for = (
             int(CONFIG.AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS) * 60
             if CONFIG.AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS
-            else 60 * 15
+            else 12 * 60 * 60  # 12 hours
         )
         try:
             token_payload = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT, max_age=token_valid_for)
