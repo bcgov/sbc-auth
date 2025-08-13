@@ -544,7 +544,7 @@ class AffiliationInvitation:
             "emailAddresses": email_addresses,
             "orgName": from_org_name,
             "businessIdentifier": business_identifier,
-            "expiry_text": expiry_text,
+            "expiryText": expiry_text,
         }
         notification_type = QueueMessageTypes.AFFILIATION_INVITATION.value
 

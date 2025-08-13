@@ -358,7 +358,7 @@ def handle_affiliation_invitation(message_type, email_msg):
     account = email_msg.get("toOrgName")
     if to_branch_name := email_msg.get("toOrgBranchName"):
         account += " - " + to_branch_name
-    expiry_text = email_msg.get("expiry_text")
+    expiry_text = email_msg.get("expiryText")
 
     email_dict = common_mailer.process(
         **{
