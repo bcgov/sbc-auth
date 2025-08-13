@@ -535,7 +535,10 @@ class AffiliationInvitation:
 
         token_expiry_period = int(current_app.config.get("AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS"))
         expiry_text = (
-            f"{token_expiry_period} minutes" if (token_expiry_period < 60) else f"{token_expiry_period // 60} hours"
+            # token_expiry_period should be < 60 or a multiple of 60
+            f"{token_expiry_period} minutes"
+            if (token_expiry_period < 60)
+            else f"{token_expiry_period // 60} hours"
         )
 
         data = {
