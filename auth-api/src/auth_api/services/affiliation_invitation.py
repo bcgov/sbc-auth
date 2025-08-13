@@ -534,9 +534,8 @@ class AffiliationInvitation:
         business_identifier = affiliation_invitation.entity.business_identifier
 
         token_expiry_period = int(current_app.config.get("AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS"))
-        # token_expiry_period = int(CONFIG.AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS)
         expiry_text = (
-            f"{token_expiry_period} minutes" if (token_expiry_period < 60) else f"{token_expiry_period / 60} hours"
+            f"{token_expiry_period} minutes" if (token_expiry_period < 60) else f"{token_expiry_period // 60} hours"
         )
 
         data = {
