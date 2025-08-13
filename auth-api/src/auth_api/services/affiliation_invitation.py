@@ -533,12 +533,19 @@ class AffiliationInvitation:
         to_org_name = affiliation_invitation.to_org.name if affiliation_invitation.to_org else None
         business_identifier = affiliation_invitation.entity.business_identifier
 
+        token_expiry_period = int(current_app.config.get("AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS"))
+        # token_expiry_period = int(CONFIG.AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS)
+        expiry_text = (
+            f"{token_expiry_period} minutes" if (token_expiry_period < 60) else f"{token_expiry_period / 60} hours"
+        )
+
         data = {
             "accountId": from_org_id,
             "businessName": business_name,
             "emailAddresses": email_addresses,
             "orgName": from_org_name,
             "businessIdentifier": business_identifier,
+            "expiry_text": expiry_text,
         }
         notification_type = QueueMessageTypes.AFFILIATION_INVITATION.value
 
