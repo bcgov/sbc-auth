@@ -355,10 +355,10 @@ def handle_affiliation_invitation(message_type, email_msg):
     requesting_account = email_msg.get("fromOrgName")
     if from_branch_name := email_msg.get("fromOrgBranchName"):
         requesting_account += " - " + from_branch_name
+
     account = email_msg.get("toOrgName")
     if to_branch_name := email_msg.get("toOrgBranchName"):
         account += " - " + to_branch_name
-    expiry_text = email_msg.get("expiryText")
 
     email_dict = common_mailer.process(
         **{
@@ -373,7 +373,6 @@ def handle_affiliation_invitation(message_type, email_msg):
             "account": account,
             "is_authorized": email_msg.get("isAuthorized", None),
             "additional_message": email_msg.get("additionalMessage", None),
-            "expiry_text": expiry_text,
         }
     )
     process_email(email_dict)
