@@ -352,13 +352,14 @@ def handle_affiliation_invitation(message_type, email_msg):
     business_name = email_msg.get("businessName")
     business_identifier = email_msg.get("businessIdentifier")
     logo_url = email_msg.get("logo_url")
+
     requesting_account = email_msg.get("fromOrgName")
     if from_branch_name := email_msg.get("fromOrgBranchName"):
         requesting_account += " - " + from_branch_name
+
     account = email_msg.get("toOrgName")
     if to_branch_name := email_msg.get("toOrgBranchName"):
         account += " - " + to_branch_name
-    expiry_text = email_msg.get("expiryText")
 
     email_dict = common_mailer.process(
         **{
@@ -373,7 +374,7 @@ def handle_affiliation_invitation(message_type, email_msg):
             "account": account,
             "is_authorized": email_msg.get("isAuthorized", None),
             "additional_message": email_msg.get("additionalMessage", None),
-            "expiry_text": expiry_text,
+            "expiry_text": email_msg.get("expiryText"),
         }
     )
     process_email(email_dict)
@@ -522,6 +523,7 @@ def handle_other_messages(message_type, email_msg):
         "applicationDate": email_msg.get("applicationDate"),
         "business_name": email_msg.get("businessName"),
         "business_identifier": email_msg.get("businessIdentifier"),
+        "expiry_text": email_msg.get("expiryText"),
     }
 
     org_id = email_msg.get("accountId")
