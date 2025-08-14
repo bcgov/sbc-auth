@@ -449,9 +449,7 @@ class Affiliation:
         if identifier is not None and temp_entity:
             affiliations = AffiliationModel.find_affiliations_by_entity_id(temp_entity.identifier)
             for affiliation in affiliations:
-                current_app.logger.debug(
-                    f"Removing affiliation {affiliation.id} as it is stale Temp Entity"
-                )
+                current_app.logger.debug(f"Removing affiliation {affiliation.id} as it is stale Temp Entity")
                 affiliation.delete()
         current_app.logger.debug(">fix_stale_affiliations")
 
