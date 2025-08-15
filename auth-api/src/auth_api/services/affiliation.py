@@ -428,7 +428,8 @@ class Affiliation:
         bootstrap_identifier: str = entity_details.get("bootstrapIdentifier")
         identifier: str = entity_details.get("identifier")
         current_app.logger.debug(f"<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier}")
-        from_entity: Entity = EntityService.find_by_business_identifier(nr_number, skip_auth=True)
+        from_entity = EntityService.find_by_business_identifier(nr_number, skip_auth=True)
+        temp_entity = EntityService.find_by_business_identifier(bootstrap_identifier, skip_auth=True)
         # Find entity with nr_number (stale, because this is now a business)
         if (
             from_entity
@@ -445,7 +446,11 @@ class Affiliation:
                 )
                 affiliation.entity_id = to_entity.identifier
                 affiliation.save()
-
+        if identifier is not None and temp_entity:
+            affiliations = AffiliationModel.find_affiliations_by_entity_id(temp_entity.identifier)
+            for affiliation in affiliations:
+                current_app.logger.debug(f"Removing affiliation {affiliation.id} as it is stale Temp Entity")
+                affiliation.delete()
         current_app.logger.debug(">fix_stale_affiliations")
 
     @staticmethod
