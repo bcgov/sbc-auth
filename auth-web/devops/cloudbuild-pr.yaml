@@ -28,7 +28,7 @@ steps:
   # Deploy to firebase channel, using the PR #
   # store log to /workspace to get the channel URL
   #
-  - name: gcr.io/yfthig-dev/firebase
+  - name: us-docker.pkg.dev/firebase-cli/us/firebase
     dir: "auth-web"
     entrypoint: bash
     args: ['-c', 'firebase hosting:channel:deploy --project=yfthig-dev PR-$_PR_NUMBER > /workspace/firebase-deploy.txt']
