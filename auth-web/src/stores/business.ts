@@ -518,7 +518,7 @@ export const useBusinessStore = defineStore('business', () => {
 
       // redirect to Filings UI
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, tempRegNum)
-      const redirectURL = `${ConfigHelper.getBusinessURL()}${tempRegNum}`
+      const redirectURL = `${ConfigHelper.getBusinessDashURL()}${tempRegNum}`
       window.location.href = decodeURIComponent(redirectURL)
     } catch (error) {
       // eslint-disable-next-line no-console

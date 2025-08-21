@@ -416,7 +416,7 @@ describe('TransactionsDataTable tests', () => {
     expect(testWrapper.vm.hasDropdownContent(transaction)).toBe(true)
 
     const dropdownItems = testWrapper.vm.getDropdownItems(transaction)
-    
+
     expect(dropdownItems).toHaveLength(2)
 
     const appliedCreditItem = dropdownItems.find(item => item.id === 'credit-1')
