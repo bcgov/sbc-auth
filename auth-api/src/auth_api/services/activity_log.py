@@ -148,6 +148,10 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
     def _payment_info_change(activity: ActivityLogModel) -> str:
         """User X updated the account payment information to [payment method]."""
         payment_information = activity.item_value.replace("_", " ")
+        if "|" in payment_information:
+            from_payment_method, to_payment_method = payment_information.split("|")
+            if from_payment_method and to_payment_method:
+                return f"Updated the account payment information from {from_payment_method} to {to_payment_method}"
         return f"Updated the account payment information to {payment_information}"
 
     @staticmethod
