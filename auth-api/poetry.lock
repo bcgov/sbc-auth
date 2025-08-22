@@ -614,7 +614,7 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "cloud-sql-connector"
-version = "0.1.0"
+version = "0.2.0"
 description = "Cloud SQL connection utilities for database connectivity with authentication and schema management"
 optional = false
 python-versions = "^3.12"
@@ -631,7 +631,7 @@ sqlalchemy = "^2.0.0"
 type = "git"
 url = "https://github.com/bcgov/sbc-connect-common.git"
 reference = "main"
-resolved_reference = "8bdcf7f8a305a1e891197aeb18932bb57361da9a"
+resolved_reference = "9240434e42a3c21187abe59f4c1b0318680f7c84"
 subdirectory = "python/cloud-sql-connector"
 
 [[package]]
