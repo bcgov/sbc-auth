@@ -263,23 +263,22 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request = Org._build_payment_request(org_model, payment_info, payment_method, mailing_address, **kwargs)
             error_code = None
             current_payment_method = None
+            token = RestService.get_service_account_token()
 
             if is_new_org:
                 response = RestService.post(
                     endpoint=f"{pay_url}/accounts",
                     data=pay_request,
-                    token=RestService.get_service_account_token(),
+                    token=token,
                     raise_for_status=True,
                 )
             else:
-                current_payment_account = RestService.get(
-                    endpoint=f"{pay_url}/accounts/{org_model.id}", token=RestService.get_service_account_token()
-                )
-                current_payment_method = current_payment_account.json().get("paymentMethod")
+                response = RestService.get(endpoint=f"{pay_url}/accounts/{org_model.id}", token=token)
+                current_payment_method = response.json().get("paymentMethod")
                 response = RestService.put(
                     endpoint=f"{pay_url}/accounts/{org_model.id}",
                     data=pay_request,
-                    token=RestService.get_service_account_token(),
+                    token=token,
                     raise_for_status=True,
                 )
 
