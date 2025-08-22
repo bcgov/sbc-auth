@@ -280,7 +280,7 @@ export default class MemberDataTable extends Vue {
   private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
   private readonly getRoleInfo!: () => Promise<RoleInfo[]>
-  private readonly resetOTPAuthenticator!: (username: string) => any
+  private readonly resetOTPAuthenticator!: (username: string, org_id: number) => any
   private readonly roleInfos!: RoleInfo[]
   private readonly SNACKBAR_TIMEOUT: number = 3000 // milliseconds
   private confirmResetAuthDialog = false
@@ -582,7 +582,7 @@ export default class MemberDataTable extends Vue {
 
   private async resetAuthenticator () {
     try {
-      await this.resetOTPAuthenticator(this.selectedUserForReset?.user?.username)
+      await this.resetOTPAuthenticator(this.selectedUserForReset?.user?.username, this.currentOrganization?.id)
       this.showResetSnackBar = true
       this.$refs.resetAuthenticatorDialog.close()
       // wait for the SNACKBAR_TIMEOUT value before unsetting the selectedUserForReset,

@@ -113,8 +113,8 @@ export default class UserService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(userGuid)}/affidavits`, { params })
   }
 
-  static async resetOTPAuthenticator (username: string): Promise<AxiosResponse<any>> {
-    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/users/${username}/otp`)
+  static async resetOTPAuthenticator (username: string, orgId: number): Promise<AxiosResponse<any>> {
+    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/users/${username}/otp/${orgId}`)
   }
 
   static getUserAccountSettings (currentUserSub: string): Promise<AxiosResponse<UserSettings[]>> {
