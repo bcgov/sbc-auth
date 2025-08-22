@@ -70,7 +70,7 @@ services:
     image: stoplight/prism:3.3.0
     command: >
       mock -p 4010 --host 0.0.0.0
-      https://raw.githubusercontent.com/bcgov/sbc-pay/7ece855ccdb0f5718f4dc12588f2797caae5f869/docs/docs/api_contract/pay-api.yaml
+      https://raw.githubusercontent.com/bcgov/sbc-pay/61a46f52b33f828df4a4049f635e73b00154e6ce/docs/docs/api_contract/pay-api.yaml
 
 networks:
   tier:
