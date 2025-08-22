@@ -172,7 +172,7 @@ export default class BusinessContactForm extends Vue {
     if (this.$route.query.redirect) {
       this.$router.push({ path: `/account/${this.currentOrganization.id}` })
     } else {
-      const businessUrl = `${ConfigHelper.getBusinessURL()}${this.currentBusiness.businessIdentifier}`
+      const businessUrl = `${ConfigHelper.getBusinessDashURL()}${this.currentBusiness.businessIdentifier}`
       window.location.href = appendAccountId(businessUrl, this.currentOrganization.id.toString())
     }
   }

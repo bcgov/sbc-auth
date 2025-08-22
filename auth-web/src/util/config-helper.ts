@@ -32,9 +32,9 @@ export default class ConfigHelper {
     // }
   }
 
-  static getBusinessURL () {
+  static getBusinessDashURL () {
     // this needs trailing slash
-    return `${import.meta.env.VUE_APP_DASHBOARD_URL}`
+    return `${import.meta.env.VUE_APP_BUSINESS_DASH_URL}`
   }
 
   static getRegistryHomeURL () {

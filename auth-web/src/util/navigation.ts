@@ -6,7 +6,7 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 /** Navigation handler for entities dashboard. */
 export const goToDashboard = (businessIdentifier: string): void => {
   ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
-  const redirectURL = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
+  const redirectURL = `${ConfigHelper.getBusinessDashURL()}${businessIdentifier}`
   window.location.href = appendAccountId(decodeURIComponent(redirectURL))
 }
 

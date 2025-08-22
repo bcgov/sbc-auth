@@ -92,25 +92,29 @@ export default class IncorporationSearchResultView extends Vue {
     generatePasscodeDialog: GeneratePasscodeView
   }
 
-  get actions (): object[] {
+  get actions (): any[] {
     if (this.isThereAnAffiliatedAccount) {
       return [
-        { title: 'Manage Business',
+        {
+          title: 'Manage Business',
           icon: 'mdi-view-dashboard',
           event: this.manageBusinessEvent
         },
-        { title: 'Manage Account',
+        {
+          title: 'Manage Account',
           icon: 'mdi-domain',
           event: this.manageAccountEvent
         }
       ]
     } else {
       return [
-        { title: 'Manage Business',
+        {
+          title: 'Manage Business',
           icon: 'mdi-view-dashboard',
           event: this.manageBusinessEvent
         },
-        { title: 'Generate Passcode',
+        {
+          title: 'Generate Passcode',
           icon: 'mdi-lock-outline',
           event: this.generatePasscodeEvent
         }
@@ -186,7 +190,7 @@ export default class IncorporationSearchResultView extends Vue {
     const businessIdentifier = this.currentBusiness.businessIdentifier
     const filingId = this.filingID
 
-    let url = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
+    let url = `${ConfigHelper.getBusinessDashURL()}${businessIdentifier}`
 
     if (filingId) {
       url += `?filing_id=${filingId}`
