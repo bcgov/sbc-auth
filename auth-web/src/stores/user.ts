@@ -203,8 +203,8 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  async function resetOTPAuthenticator (username: string) {
-    const response = await UserService.resetOTPAuthenticator(username)
+  async function resetOTPAuthenticator (username: string, orgId: number) {
+    const response = await UserService.resetOTPAuthenticator(username, orgId)
     return response?.data || {}
   }
 
