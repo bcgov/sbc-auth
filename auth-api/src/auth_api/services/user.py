@@ -238,13 +238,9 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
 
     @staticmethod
     @user_context
-    def delete_otp_for_user(user_name, origin_url: str = None, **kwargs):
+    def delete_otp_for_user(user_name, org_id, origin_url: str = None, **kwargs):
         """Reset the OTP of the user."""
-        # TODO - handle when the multiple teams implemented for bceid..
         user = UserModel.find_by_username(user_name)
-        membership = MembershipModel.find_membership_by_userid(user.id)
-        org_id = membership.org_id
-
         user_from_context: UserContext = kwargs["user_context"]
         if not user_from_context.has_role(Role.MANAGE_RESET_OTP.value):
             check_auth(org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))

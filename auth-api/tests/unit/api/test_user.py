@@ -895,7 +895,7 @@ def test_delete_otp_for_user(client, jwt, session):  # pylint:disable=unused-arg
 
     # staff with manage accounts otp reset
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
-    rv = client.delete(f"api/v1/users/{user.username}/otp", headers=headers)
+    rv = client.delete(f"api/v1/users/{user.username}/otp/{org.id}", headers=headers)
     assert rv.status_code == HTTPStatus.NO_CONTENT
 
     user1 = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
@@ -904,19 +904,19 @@ def test_delete_otp_for_user(client, jwt, session):  # pylint:disable=unused-arg
 
     # staff with basic access cant do otp reset
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.delete(f"api/v1/users/{user.username}/otp", headers=headers)
+    rv = client.delete(f"api/v1/users/{user.username}/otp/{org.id}", headers=headers)
     assert rv.status_code == HTTPStatus.UNAUTHORIZED
 
     #  admin can do otp reset
-    rv = client.delete(f"api/v1/users/{user.username}/otp", headers=admin_headers)
+    rv = client.delete(f"api/v1/users/{user.username}/otp/{org.id}", headers=admin_headers)
     assert rv.status_code == HTTPStatus.NO_CONTENT
 
     #  coordinator can do otp reset
-    rv = client.delete(f"api/v1/users/{user.username}/otp", headers=coordinator_headers)
+    rv = client.delete(f"api/v1/users/{user.username}/otp/{org.id}", headers=coordinator_headers)
     assert rv.status_code == HTTPStatus.NO_CONTENT
 
     #  user can not do otp reset
-    rv = client.delete(f"api/v1/users/{user.username}/otp", headers=user_headers)
+    rv = client.delete(f"api/v1/users/{user.username}/otp/{org.id}", headers=user_headers)
     assert rv.status_code == HTTPStatus.FORBIDDEN
 
     # another org admin cant do
@@ -925,7 +925,7 @@ def test_delete_otp_for_user(client, jwt, session):  # pylint:disable=unused-arg
     factory_membership_model(admin_user1.id, org1.id)
     admin_claims = TestJwtClaims.get_test_real_user(admin_user1.keycloak_guid)
     admin1_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
-    rv = client.delete(f"api/v1/users/{user.username}/otp", headers=admin1_headers)
+    rv = client.delete(f"api/v1/users/{user.username}/otp/{org.id}", headers=admin1_headers)
     assert rv.status_code == HTTPStatus.FORBIDDEN
 
 

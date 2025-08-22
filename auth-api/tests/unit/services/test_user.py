@@ -180,7 +180,7 @@ def test_delete_otp_for_user(session, auth_mock, keycloak_mock, monkeypatch):
     factory_membership_model(user.id, org.id)
 
     patch_token_info(admin_claims, monkeypatch)
-    UserService.delete_otp_for_user(user.username)
+    UserService.delete_otp_for_user(user.username, org.id)
     user1 = kc_service.get_user_by_username(request.user_name)
     assert "CONFIGURE_TOTP" in json.loads(user1.value()).get("requiredActions")
 

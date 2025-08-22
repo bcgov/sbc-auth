@@ -135,7 +135,7 @@ def post_user():
     return response, status
 
 
-@bp.route("/<path:username>/otp", methods=["DELETE", "OPTIONS"])
+@bp.route("/<path:username>/otp/<int:org_id>", methods=["DELETE", "OPTIONS"])
 @cross_origin(origins="*", methods=["DELETE"])
 @_jwt.has_one_of_roles(
     [
@@ -145,7 +145,7 @@ def post_user():
         Role.MANAGE_RESET_OTP.value,
     ]
 )
-def delete_user_otp(username):
+def delete_user_otp(username, org_id):
     """Delete/Reset the OTP of user profile associated with the provided username."""
     try:
         user = UserService.find_by_username(username)
@@ -155,7 +155,7 @@ def delete_user_otp(username):
             response, status = {"Only BCEID users has OTP", HTTPStatus.BAD_REQUEST}
         else:
             origin_url = request.environ.get("HTTP_ORIGIN", "localhost")
-            UserService.delete_otp_for_user(username, origin_url=origin_url)
+            UserService.delete_otp_for_user(user_name=username, org_id=org_id, origin_url=origin_url)
             response, status = "", HTTPStatus.NO_CONTENT
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
