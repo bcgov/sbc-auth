@@ -104,6 +104,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
             ActivityAction.AUTHENTICATION_METHOD_CHANGE.value: ActivityLog._authentication_method_changes,
             ActivityAction.ACCOUNT_SUSPENSION.value: ActivityLog._account_suspension,
             ActivityAction.ADD_PRODUCT_AND_SERVICE.value: ActivityLog._adding_products_and_services,
+            # TODO add in activity action
         }.get(activity.action)
         return mapping(activity) if (mapping) else activity.action
 
