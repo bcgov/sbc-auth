@@ -212,7 +212,7 @@ def test_update_basic_org_assert_pay_request_activity(session, keycloak_mock, mo
                 org_id=ANY,
                 name=ANY,
                 id=ANY,
-                value=PaymentMethod.ONLINE_BANKING.value,
+                value=f"{PaymentMethod.EJV.value}|{PaymentMethod.ONLINE_BANKING.value}",
             )
         )
 

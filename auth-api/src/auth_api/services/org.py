@@ -215,6 +215,39 @@ class Org:  # pylint: disable=too-many-public-methods
             KeycloakService.join_account_holders_group()
 
     @staticmethod
+    def _get_payment_method_descriptions(current_payment_method: str, new_payment_method: str) -> str:
+        """Get payment method descriptions for activity logging."""
+        valid_payment_methods = [item.value for item in PaymentMethod]
+        new_method_description = (
+            PaymentMethod(new_payment_method).name if new_payment_method in valid_payment_methods else ""
+        )
+        if not current_payment_method:
+            return new_method_description
+        current_method_description = (
+            PaymentMethod(current_payment_method).name if current_payment_method in valid_payment_methods else ""
+        )
+        return f"{current_method_description}|{new_method_description}"
+
+    @staticmethod
+    def _handle_pay_http_error_raise_business_exception(http_error: HTTPError) -> None:
+        """Handle HTTP error by extracting error info and raising BusinessException."""
+        error_payload = http_error.response.json()
+        error_code = next(
+            (error_payload[key] for key in ["error", "code"] if key in error_payload),
+            Error.PAYMENT_ACCOUNT_UPSERT_FAILED,
+        )
+        error_details = next(
+            (
+                error_payload[key]
+                for key in ["error_description", "message", "description", "type"]
+                if key in error_payload
+            ),
+            "",
+        )
+        current_app.logger.error(f"Account create payment Error: {http_error}")
+        raise BusinessException(error_code, error_details) from http_error
+
+    @staticmethod
     @user_context
     def _create_payment_settings(
         org_model: OrgModel,
@@ -229,19 +262,23 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_url = current_app.config.get("PAY_API_URL")
             pay_request = Org._build_payment_request(org_model, payment_info, payment_method, mailing_address, **kwargs)
             error_code = None
+            current_payment_method = None
+            token = RestService.get_service_account_token()
 
             if is_new_org:
                 response = RestService.post(
                     endpoint=f"{pay_url}/accounts",
                     data=pay_request,
-                    token=RestService.get_service_account_token(),
+                    token=token,
                     raise_for_status=True,
                 )
             else:
+                response = RestService.get(endpoint=f"{pay_url}/accounts/{org_model.id}", token=token)
+                current_payment_method = response.json().get("paymentMethod")
                 response = RestService.put(
                     endpoint=f"{pay_url}/accounts/{org_model.id}",
                     data=pay_request,
-                    token=RestService.get_service_account_token(),
+                    token=token,
                     raise_for_status=True,
                 )
 
@@ -252,42 +289,25 @@ class Org:  # pylint: disable=too-many-public-methods
                     payment_account_status = PaymentAccountStatus.PENDING
                 case _:
                     payment_account_status = PaymentAccountStatus.FAILED
-                    error_payload = getattr(response, "json", lambda: {})()
-                    error_code = error_payload.get("error", "UNKNOWN_ERROR")
+                    error_code = getattr(response, "json", lambda: {})().get("error", "UNKNOWN_ERROR")
                     current_app.logger.error(f"Account create payment Error: {response.text}")
 
             if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
-                payment_method_description = (
-                    PaymentMethod(payment_method).name
-                    if payment_method in [item.value for item in PaymentMethod]
-                    else ""
+                payment_method_descriptions = Org._get_payment_method_descriptions(
+                    current_payment_method, payment_method
                 )
                 ActivityLogPublisher.publish_activity(
                     Activity(
                         org_model.id,
                         ActivityAction.PAYMENT_INFO_CHANGE.value,
                         name=org_model.name,
-                        value=payment_method_description,
+                        value=payment_method_descriptions,
                     )
                 )
             return payment_account_status, error_code
 
         except HTTPError as http_error:
-            error_payload = http_error.response.json()
-            error_code = next(
-                (error_payload[key] for key in ["error", "code"] if key in error_payload),
-                Error.PAYMENT_ACCOUNT_UPSERT_FAILED,
-            )
-            error_details = next(
-                (
-                    error_payload[key]
-                    for key in ["error_description", "message", "description", "type"]
-                    if key in error_payload
-                ),
-                "",
-            )
-            current_app.logger.error(f"Account create payment Error: {http_error}")
-            raise BusinessException(error_code, error_details) from http_error
+            return Org._handle_pay_http_error_raise_business_exception(http_error)
 
     @staticmethod
     def _build_payment_request(org_model: OrgModel, payment_info: dict, payment_method: str, mailing_address, **kwargs):
