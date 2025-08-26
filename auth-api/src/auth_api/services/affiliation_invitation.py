@@ -767,9 +767,7 @@ class AffiliationInvitation:
         invitation_type = invitation_type or AffiliationInvitationType.from_value(invitation.type)
         from_org_id = from_org_id or invitation.from_org_id
         match invitation_type:
-            case AffiliationInvitationType.REQUEST:
-                check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
-            case AffiliationInvitationType.EMAIL:
+            case AffiliationInvitationType.REQUEST | AffiliationInvitationType.EMAIL:
                 check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
             case _:
                 raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
