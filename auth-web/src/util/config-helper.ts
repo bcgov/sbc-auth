@@ -111,10 +111,6 @@ export default class ConfigHelper {
     return `${import.meta.env.VUE_APP_AUTH_API_GW_URL}` + '/test/reset'
   }
 
-  static getLegalAPIUrl () {
-    return `${import.meta.env.VUE_APP_LEGAL_API_URL}` + `${import.meta.env.VUE_APP_LEGAL_API_VERSION}`
-  }
-
   static getLegalAPIV2Url () {
     return `${import.meta.env.VUE_APP_LEGAL_API_URL}` + `${import.meta.env.VUE_APP_LEGAL_API_VERSION_2}`
   }

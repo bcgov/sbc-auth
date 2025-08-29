@@ -273,7 +273,8 @@ export const useBusinessStore = defineStore('business', () => {
   async function loadFiling () {
     const filingID = ConfigHelper.getFromSession(SessionStorageKeys.FilingIdentifierKey)
     state.filingID = filingID
-    const response = await BusinessService.searchFiling(filingID).catch(() => null)
+    const response = await BusinessService.searchFiling(filingID).catch(error => error)
+
     if (response?.status === 200) {
       const businessIdentifier = response?.data.filing.business.identifier
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
@@ -428,12 +429,13 @@ export const useBusinessStore = defineStore('business', () => {
 
   // Following searchBusiness will search data from legal-api.
   async function searchBusiness (businessIdentifier: string): Promise<LearBusiness> {
-    const response = await BusinessService.searchBusiness(businessIdentifier).catch(() => null)
+    const response = await BusinessService.searchBusiness(businessIdentifier).catch(error => error)
+
     if (response?.status === 200 && response?.data?.business?.legalName) {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
       return response.data.business
     } else if (response?.status === 404) {
-      throw Error('No match found for Incorporation Number')
+      throw Error('No match found for Business Number')
     } else {
       throw Error('Search failed')
     }
