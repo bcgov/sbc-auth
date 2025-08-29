@@ -458,11 +458,6 @@ export default defineComponent({
       return identifier.charAt(0).toUpperCase() === 'T'
     }
 
-    const resetSearchState = () => {
-      businessStore.resetCurrentBusiness()
-      businessStore.resetFilingID()
-    }
-
     const updateCurrentBusiness = async () => {
       try {
         // Search for business, action will set session storage
@@ -470,7 +465,10 @@ export default defineComponent({
         localVars.affiliatedOrg = await orgStore.getOrganizationForAffiliate()
         localVars.canViewIncorporationSearchResult = true
       } catch (exception) {
-        localVars.errorMessage = exception?.message
+        localVars.errorMessage =
+          exception?.response?.data?.rootCause?.message ||
+          exception?.response?.data?.rootCause ||
+          exception?.message
         localVars.canViewIncorporationSearchResult = false
         businessStore.resetCurrentBusiness()
       }
@@ -489,7 +487,8 @@ export default defineComponent({
     }
 
     const search = async () => {
-      resetSearchState()
+      businessStore.resetCurrentBusiness()
+      businessStore.resetFilingID()
 
       if (isFormValid()) {
         localVars.searchActive = true
