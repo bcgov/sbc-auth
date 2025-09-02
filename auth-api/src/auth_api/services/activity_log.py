@@ -104,6 +104,10 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
             ActivityAction.AUTHENTICATION_METHOD_CHANGE.value: ActivityLog._authentication_method_changes,
             ActivityAction.ACCOUNT_SUSPENSION.value: ActivityLog._account_suspension,
             ActivityAction.ADD_PRODUCT_AND_SERVICE.value: ActivityLog._adding_products_and_services,
+            ActivityAction.PAD_NSF_LOCK.value: ActivityLog._pad_nsf_lock,
+            ActivityAction.PAD_NSF_UNLOCK.value: ActivityLog._pad_nsf_unlock,
+            ActivityAction.EFT_OVERDUE_LOCK.value: ActivityLog._eft_overdue_lock,
+            ActivityAction.EFT_OVERDUE_UNLOCK.value: ActivityLog._eft_overdue_unlock,
             # TODO add in activity action
         }.get(activity.action)
         return mapping(activity) if (mapping) else activity.action
@@ -207,6 +211,26 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
     def _removing_products_and_services(activity: ActivityLogModel) -> str:
         """User X removed [product name] from the account Products and Services."""
         return f"Removed {activity.item_name} from account Products and Services"
+
+    @staticmethod
+    def _pad_nsf_lock(activity: ActivityLogModel) -> str:
+        """Account suspended and locked due to NSF."""
+        return f"Account suspended and locked due to {activity.item_value}"
+
+    @staticmethod
+    def _pad_nsf_unlock(activity: ActivityLogModel) -> str:
+        """Account unlocked. Payment made by [payment method]."""
+        return f"Account unlocked. Payment made by {activity.item_value}"
+
+    @staticmethod
+    def _eft_overdue_lock(activity: ActivityLogModel) -> str:
+        """Account suspended and locked due to EFT payment for statement(s) # [statement numbers] is overdue"""
+        return f"Account suspended and locked due to EFT payment for statement(s) # {activity.item_value} is overdue"
+
+    @staticmethod
+    def _eft_overdue_unlock(activity: ActivityLogModel) -> str:
+        """Account unlocked. Payment made by [payment method]."""
+        return f"Account unlocked. Payment made by {activity.item_value}"
 
     @staticmethod
     def _mask_user_name(is_staff_access, user):
