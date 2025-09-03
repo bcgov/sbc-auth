@@ -60,6 +60,9 @@ bp = Blueprint("ORGS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs")
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def search_organizations():
     """Search orgs."""
+    org_id = extract_numbers(request.args.get("id", None))
+    if org_id and org_id.isdigit() and int(org_id) >= 2147483647:
+        raise BusinessException(Error.INVALID_INPUT, None)
     org_search = OrgSearch(
         request.args.get("name", None),
         request.args.get("branchName", None),
@@ -67,7 +70,7 @@ def search_organizations():
         request.args.getlist("status", None),
         request.args.getlist("accessType", None),
         request.args.get("bcolAccountId", None),
-        extract_numbers(request.args.get("id", None)),
+        org_id,
         request.args.get("decisionMadeBy", None),
         request.args.get("orgType", None),
         string_to_bool(request.args.get("includeMembers", "False")),
