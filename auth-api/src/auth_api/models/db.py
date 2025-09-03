@@ -40,4 +40,3 @@ def handle_disconnect_event(engine):
 ma = Marshmallow()  # pylint: disable=invalid-name
 db = SQLAlchemy(query_class=CustomQuery)  # pylint: disable=invalid-name
 versioned_session(db.session)
-handle_disconnect_event(db.engine)
