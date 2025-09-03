@@ -219,7 +219,7 @@ class RestService:
             current_app.logger.error(exc)
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
-            if exc.response and exc.response.status_code == 404 and not skip_404_logging:
+            if exc.response and exc.response.status_code == 404 and skip_404_logging is False:
                 current_app.logger.error(
                     f"HTTPError on GET {endpoint} "
                     f"with status code {exc.response.status_code if exc.response else ''}"
