@@ -214,7 +214,7 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 
 [[package]]
 name = "auth-api"
-version = "3.0.6"
+version = "3.0.8"
 description = ""
 optional = false
 python-versions = "^3.12"
@@ -267,9 +267,9 @@ Werkzeug = "^3.0.0"
 
 [package.source]
 type = "git"
-url = "https://github.com/seeker25/sbc-auth.git"
-reference = "jinja_security_fix"
-resolved_reference = "3f910c4335ef284213cfaeff4f09e6519eadbd90"
+url = "https://github.com/bcgov/sbc-auth"
+reference = "30423"
+resolved_reference = "daa2ab343f5166ad9e9b2bc3939ce8395541ca35"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3701,4 +3701,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "a9804e15cddb6a0fb62a54cad920d3a8510e2e28ec2b251bbf082f0a268a7c85"
+content-hash = "128bd636a375da9c74552a4a27f3b477c5854578e8ce1cf043dd71fe99ff1fea"

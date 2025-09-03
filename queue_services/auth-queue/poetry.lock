@@ -267,9 +267,9 @@ Werkzeug = "^3.0.0"
 
 [package.source]
 type = "git"
-url = "https://github.com/seeker25/sbc-auth.git"
-reference = "jinja_fix_p2"
-resolved_reference = "475b498004fe8dd2fb8e3376c7fb165e394842e4"
+url = "https://github.com/bcgov/sbc-auth"
+reference = "30423"
+resolved_reference = "daa2ab343f5166ad9e9b2bc3939ce8395541ca35"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3714,4 +3714,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "f16d1b6a755ede687f93f35b36dd74f6abe406e139b530782ab9fef2dcd2f639"
+content-hash = "a5399830c7c7858f9de50c5353e9227dd9ba1c27daddd8f4491d8ff5b0219be3"
