@@ -24,7 +24,7 @@ from sqlalchemy import event
 from .custom_query import CustomQuery
 
 
-def handle_disconnect_event(engine):
+def handle_disconnect_event_listener(engine):
     """Fixes issue where a socket closes throws exception Broken Pipe that causes network error."""
 
     @event.listens_for(engine, "handle_disconnect")
