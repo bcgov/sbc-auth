@@ -29,7 +29,6 @@ from auth_api.config import _Config
 from auth_api.exceptions import ExceptionHandler
 from auth_api.extensions import mail
 from auth_api.models import db, ma
-from auth_api.models.db import setup_disconnect_event_listener
 from auth_api.resources import endpoints
 from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
@@ -69,7 +68,6 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
         with app.app_context():
             engine = db.engine
             setup_search_path_event_listener(engine, schema)
-            setup_disconnect_event_listener(engine)
 
     if run_mode == "migration":
         Migrate(app, db)
