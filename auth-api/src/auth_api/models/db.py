@@ -15,14 +15,29 @@
 
 These will get initialized by the application using the models
 """
+import pg8000
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from sql_versioning import versioned_session
+from sqlalchemy import event
 
 from .custom_query import CustomQuery
+
+
+def handle_disconnect_event(engine):
+    """Fixes issue where a socket closes throws exception Broken Pipe that causes network error."""
+
+    @event.listens_for(engine, "handle_disconnect")
+    def _handle_disconnect(dialect, connection, exc, **kw):
+        # Tell SQLAlchemy this exception means "connection is dead" → invalidate it
+        if isinstance(exc, (pg8000.exceptions.InterfaceError, BrokenPipeError)):
+            return True
+        return False
+
 
 # by convention in the Flask community these are lower case,
 # whereas pylint wants them upper case
 ma = Marshmallow()  # pylint: disable=invalid-name
 db = SQLAlchemy(query_class=CustomQuery)  # pylint: disable=invalid-name
 versioned_session(db.session)
+handle_disconnect_event(db.engine)
