@@ -17,11 +17,6 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table("users", schema=None) as batch_op:
-        batch_op.add_column(
-            sa.Column("version", sa.Integer(), nullable=False, server_default="1")
-        )
-
     op.create_table('users_history',
     sa.Column('id', sa.Integer(), autoincrement=False, nullable=False),
     sa.Column('username', sa.String(length=100), autoincrement=False, nullable=True),
@@ -157,6 +152,3 @@ def downgrade():
         batch_op.create_index('ix_users_version_email', ['email'], unique=False)
 
     op.drop_table('users_history')
-
-    with op.batch_alter_table("users", schema=None) as batch_op:
-        batch_op.drop_column("version")
