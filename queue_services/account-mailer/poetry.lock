@@ -267,9 +267,9 @@ Werkzeug = "^3.0.0"
 
 [package.source]
 type = "git"
-url = "https://github.com/bcgov/sbc-auth"
-reference = "30423"
-resolved_reference = "daa2ab343f5166ad9e9b2bc3939ce8395541ca35"
+url = "https://github.com/seeker25/sbc-auth.git"
+reference = "users_history"
+resolved_reference = "d43f6c35ffdbaf12b07b051f78a07aebe05d3166"
 subdirectory = "auth-api"
 
 [[package]]
@@ -2843,6 +2843,8 @@ files = [
 ]
 
 [package.dependencies]
+astroid = ">=1.0"
+pylint = ">=1.0"
 pylint-plugin-utils = ">=0.2.1"
 
 [[package]]
@@ -3701,4 +3703,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "128bd636a375da9c74552a4a27f3b477c5854578e8ce1cf043dd71fe99ff1fea"
+content-hash = "ef115365278f042b09f1c7736459404f5c24daa77191fb27f3b363391a39935c"

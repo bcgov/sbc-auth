@@ -38,8 +38,8 @@ def upgrade():
     sa.Column('modified_by_id', sa.Integer(), autoincrement=False, nullable=True),
     sa.Column('version', sa.Integer(), autoincrement=False, nullable=False),
     sa.Column('changed', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['created_by_id'], ['users_history.id'], ),
-    sa.ForeignKeyConstraint(['modified_by_id'], ['users_history.id'], ),
+    #sa.ForeignKeyConstraint(['created_by_id'], ['users_history.id'], ),
+    #sa.ForeignKeyConstraint(['modified_by_id'], ['users_history.id'], ),
     sa.ForeignKeyConstraint(['status'], ['user_status_codes.id'], ),
     sa.ForeignKeyConstraint(['terms_of_use_accepted_version'], ['documents.version_id'], ),
     sa.PrimaryKeyConstraint('id', 'version'),
@@ -66,6 +66,7 @@ def upgrade():
                """
     )
 
+    # "modified", "modified_by_id", "modified_by", "created" are not included in the users_version table
     op.execute(
         """
         with subquery as (
@@ -76,10 +77,6 @@ def upgrade():
                 last_name, 
                 email, 
                 keycloak_guid, 
-                created, 
-                modified, 
-                created_by_id,
-                modified_by_id,
                 is_terms_of_use_accepted,
                 terms_of_use_accepted_version,
                 type,
@@ -105,9 +102,9 @@ def upgrade():
         )
                
         insert into 
-                    users_history (id, username, first_name, last_name, email, keycloak_guid, created, modified, created_by_id, modified_by_id, is_terms_of_use_accepted, terms_of_use_accepted_version, type, status, idp_userid, login_source, login_time, verified, changed, version) 
+            users_history (id, username, first_name, last_name, email, keycloak_guid, is_terms_of_use_accepted, terms_of_use_accepted_version, type, status, idp_userid, login_source, login_time, verified, changed, version) 
         select 
-            sq.id, sq.username, sq.first_name, sq.last_name, sq.email, sq.keycloak_guid, sq.created, sq.modified, sq.created_by_id, sq.modified_by_id, sq.is_terms_of_use_accepted, sq.terms_of_use_accepted_version, sq.type, sq.status, sq.idp_userid, sq.login_source, sq.login_time, sq.verified, sq.changed, sq.version
+            sq.id, sq.username, sq.first_name, sq.last_name, sq.email, sq.keycloak_guid, sq.is_terms_of_use_accepted, sq.terms_of_use_accepted_version, sq.type, sq.status, sq.idp_userid, sq.login_source, sq.login_time, sq.verified, sq.changed, sq.version
         from 
             subquery sq
         left join 
