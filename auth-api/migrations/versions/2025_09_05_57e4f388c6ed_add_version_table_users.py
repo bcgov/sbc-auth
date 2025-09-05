@@ -1,4 +1,4 @@
-"""Add in verison table for users
+"""Add in version table for users
 
 Revision ID: 57e4f388c6ed
 Revises: 8173f0949f2e
