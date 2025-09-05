@@ -122,7 +122,40 @@ def upgrade():
                """
     )
 
+    op.drop_table('users_version')
+
 def downgrade():
+    op.create_table('users_version',
+    sa.Column('id', sa.INTEGER(), autoincrement=False, nullable=False),
+    sa.Column('username', sa.VARCHAR(length=100), autoincrement=False, nullable=True),
+    sa.Column('first_name', sa.VARCHAR(length=200), autoincrement=False, nullable=True),
+    sa.Column('last_name', sa.VARCHAR(length=200), autoincrement=False, nullable=True),
+    sa.Column('email', sa.VARCHAR(length=200), autoincrement=False, nullable=True),
+    sa.Column('keycloak_guid', sa.UUID(), autoincrement=False, nullable=True),
+    sa.Column('is_terms_of_use_accepted', sa.BOOLEAN(), autoincrement=False, nullable=True),
+    sa.Column('terms_of_use_accepted_version', sa.VARCHAR(length=10), autoincrement=False, nullable=True),
+    sa.Column('type', sa.VARCHAR(length=200), autoincrement=False, nullable=True),
+    sa.Column('status', sa.INTEGER(), autoincrement=False, nullable=True),
+    sa.Column('idp_userid', sa.VARCHAR(length=256), autoincrement=False, nullable=True),
+    sa.Column('login_source', sa.VARCHAR(length=200), autoincrement=False, nullable=True),
+    sa.Column('login_time', postgresql.TIMESTAMP(), autoincrement=False, nullable=True),
+    sa.Column('created_by_id', sa.INTEGER(), autoincrement=False, nullable=True),
+    sa.Column('transaction_id', sa.BIGINT(), autoincrement=False, nullable=False),
+    sa.Column('end_transaction_id', sa.BIGINT(), autoincrement=False, nullable=True),
+    sa.Column('operation_type', sa.SMALLINT(), autoincrement=False, nullable=False),
+    sa.Column('verified', sa.BOOLEAN(), autoincrement=False, nullable=True),
+    sa.PrimaryKeyConstraint('id', 'transaction_id', name='user_version_pkey')
+    )
+    with op.batch_alter_table('users_version', schema=None) as batch_op:
+        batch_op.create_index('ix_users_version_username', ['username'], unique=False)
+        batch_op.create_index('ix_users_version_transaction_id', ['transaction_id'], unique=False)
+        batch_op.create_index('ix_users_version_operation_type', ['operation_type'], unique=False)
+        batch_op.create_index('ix_users_version_last_name', ['last_name'], unique=False)
+        batch_op.create_index('ix_users_version_idp_userid', ['idp_userid'], unique=False)
+        batch_op.create_index('ix_users_version_first_name', ['first_name'], unique=False)
+        batch_op.create_index('ix_users_version_end_transaction_id', ['end_transaction_id'], unique=False)
+        batch_op.create_index('ix_users_version_email', ['email'], unique=False)
+
     op.drop_table('users_history')
 
     with op.batch_alter_table("users", schema=None) as batch_op:
