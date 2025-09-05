@@ -19,6 +19,7 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 import datetime
 
 from flask import current_app
+from sql_versioning import Versioned
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -34,7 +35,7 @@ from .org import Org as OrgModel
 from .user_status_code import UserStatusCode
 
 
-class User(BaseModel):
+class User(Versioned, BaseModel):
     """This is the model for a User."""
 
     __tablename__ = "users"
