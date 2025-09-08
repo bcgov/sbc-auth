@@ -106,6 +106,8 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
             ActivityAction.ACCOUNT_DEACTIVATION.value: ActivityLog._account_deactivation,
             ActivityAction.ADD_PRODUCT_AND_SERVICE.value: ActivityLog._adding_products_and_services,
             ActivityAction.REMOVE_PRODUCT_AND_SERVICE.value: ActivityLog._removing_products_and_services,
+            ActivityAction.STATEMENT_INTERVAL_CHANGE.value: ActivityLog._statement_interval_change,
+            ActivityAction.STATEMENT_RECIPIENT_CHANGE.value: ActivityLog._statement_recipient_change,
         }.get(activity.action)
         return mapping(activity) if (mapping) else activity.action
 
@@ -213,6 +215,22 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
     def _removing_products_and_services(activity: ActivityLogModel) -> str:
         """User X removed [product name] from the account Products and Services."""
         return f"Removed {activity.item_name} from account Products and Services"
+
+    @staticmethod
+    def _statement_interval_change(activity: ActivityLogModel) -> str:
+        """User X changed the statement interval to [statement interval]."""
+        from_statement_interval, to_statement_interval = activity.item_value.split("|")
+        if from_statement_interval == "None":
+            return f"Changed statement interval to {to_statement_interval}"
+        return f"Changed statement interval from {from_statement_interval} to {to_statement_interval}"
+
+    @staticmethod
+    def _statement_recipient_change(activity: ActivityLogModel) -> str:
+        """User X changed the statement recipient to [statement recipient]."""
+        from_statement_recipient, to_statement_recipient = activity.item_value.split("|")
+        if from_statement_recipient == "None":
+            return f"Changed statement recipient(s) to {to_statement_recipient}"
+        return f"Changed statement recipient(s) from {from_statement_recipient} to {to_statement_recipient}"
 
     @staticmethod
     def _mask_user_name(is_staff_access, user):
