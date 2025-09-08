@@ -44,7 +44,7 @@ requests = "2.32.4"
 Werkzeug = "^3.0.0"
 
 # VCS dependencies
-sql-versioning = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/sql-versioning", branch = "main" }
+sql-versioning = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/sql-versioning", branch = "add_column_exclusion" }
 flask-jwt-oidc = {git = "https://github.com/seeker25/flask-jwt-oidc.git", branch = "main" }
 sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", rev = "master", subdirectory = "python" }
 cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", branch = "main" }

@@ -40,7 +40,7 @@ class User(Versioned, BaseModel):
 
     __tablename__ = "users"
 
-    __versioned__ = {"exclude": ["modified", "modified_by_id", "modified_by", "created"]}
+    __versioned__ = {"exclude": ["modified", "modified_by_id", "modified_by", "created", "login_time"]}
 
     id = Column(Integer, primary_key=True)
     username = Column("username", String(100), index=True)
