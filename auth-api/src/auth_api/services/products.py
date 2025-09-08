@@ -264,6 +264,11 @@ class Product:
             if pending_task:
                 pending_task.delete()
 
+        product = ProductCodeModel.find_by_code(product_code)
+        ActivityLogPublisher.publish_activity(
+            Activity(org_id, ActivityAction.REMOVE_PRODUCT_AND_SERVICE.value, name=product.description)
+        )
+
         return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
 
     @staticmethod
