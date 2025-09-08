@@ -141,13 +141,13 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
             ActivityAction.STATEMENT_RECIPIENT_CHANGE.value,
             "",
             "old@example.com|new@example.com",
-            "Changed statement recipient from old@example.com to new@example.com",
+            "Changed statement recipient(s) from old@example.com to new@example.com",
         ),
         (
             ActivityAction.STATEMENT_RECIPIENT_CHANGE.value,
             "",
             "None|test@example.com",
-            "Changed statement recipient to test@example.com",
+            "Changed statement recipient(s) to test@example.com",
         ),
     ],
 )
