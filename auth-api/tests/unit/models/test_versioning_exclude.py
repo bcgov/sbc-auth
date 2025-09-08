@@ -43,7 +43,7 @@ def test_versioned_excludes_columns_in_create_version(session):
     # modified, login_time, modified_by_id, modified_by, created are excluded.
     user.modified = datetime.now(tz=timezone.utc) + timedelta(seconds=1)
     user.login_time = datetime.now(tz=timezone.utc) + timedelta(seconds=1)
-    user.modified_by_id = 1
+    user.modified_by_id = user.id
     user.created = datetime.now(tz=timezone.utc)
 
     session.flush()
