@@ -135,7 +135,7 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
             ActivityAction.STATEMENT_INTERVAL_CHANGE.value,
             "",
             "None|Monthly",
-            "Changed the statement interval to Monthly",
+            "Changed statement interval to Monthly",
         ),
         (
             ActivityAction.STATEMENT_RECIPIENT_CHANGE.value,
@@ -147,7 +147,7 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
             ActivityAction.STATEMENT_RECIPIENT_CHANGE.value,
             "",
             "None|test@example.com",
-            "Changed the statement recipient to test@example.com",
+            "Changed statement recipient to test@example.com",
         ),
     ],
 )
