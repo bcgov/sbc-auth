@@ -19,6 +19,7 @@ import copy
 from http import HTTPStatus
 
 import pytest
+
 from auth_api.schemas import utils as schema_utils
 from auth_api.utils.enums import ActivityAction
 from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo
@@ -115,30 +116,49 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
     assert user_actor.get("actor") == f"{user.firstname} {user.lastname}"
 
 
-@pytest.mark.parametrize("action,item_name,item_value,expected_message", [
-    (ActivityAction.REMOVE_PRODUCT_AND_SERVICE.value, "Test Product", "",
-     "Removed Test Product from account Products and Services"),
-    (ActivityAction.STATEMENT_INTERVAL_CHANGE.value, "", "Weekly|Monthly",
-     "Changed statement interval from Weekly to Monthly"),
-    (ActivityAction.STATEMENT_INTERVAL_CHANGE.value, "", "None|Monthly",
-     "Changed the statement interval to Monthly"),
-    (ActivityAction.STATEMENT_RECIPIENT_CHANGE.value, "", "old@example.com|new@example.com",
-     "Changed statement recipient from old@example.com to new@example.com"),
-    (ActivityAction.STATEMENT_RECIPIENT_CHANGE.value, "", "None|test@example.com",
-     "Changed the statement recipient to test@example.com"),
-])
-def test_activity_log_actions(client, jwt, session, action, item_name, item_value, expected_message):  # pylint:disable=unused-argument
+@pytest.mark.parametrize(
+    "action,item_name,item_value,expected_message",
+    [
+        (
+            ActivityAction.REMOVE_PRODUCT_AND_SERVICE.value,
+            "Test Product",
+            "",
+            "Removed Test Product from account Products and Services",
+        ),
+        (
+            ActivityAction.STATEMENT_INTERVAL_CHANGE.value,
+            "",
+            "Weekly|Monthly",
+            "Changed statement interval from Weekly to Monthly",
+        ),
+        (
+            ActivityAction.STATEMENT_INTERVAL_CHANGE.value,
+            "",
+            "None|Monthly",
+            "Changed the statement interval to Monthly",
+        ),
+        (
+            ActivityAction.STATEMENT_RECIPIENT_CHANGE.value,
+            "",
+            "old@example.com|new@example.com",
+            "Changed statement recipient from old@example.com to new@example.com",
+        ),
+        (
+            ActivityAction.STATEMENT_RECIPIENT_CHANGE.value,
+            "",
+            "None|test@example.com",
+            "Changed the statement recipient to test@example.com",
+        ),
+    ],
+)
+def test_activity_log_actions(
+    client, jwt, session, action, item_name, item_value, expected_message
+):  # pylint:disable=unused-argument
     """Test activity log for various actions with parameterized test cases."""
     user = factory_user_model()
     org = factory_org_model()
 
-    factory_activity_log_model(
-        actor=user.id,
-        action=action,
-        org_id=org.id,
-        item_name=item_name,
-        item_value=item_value
-    )
+    factory_activity_log_model(actor=user.id, action=action, org_id=org.id, item_name=item_name, item_value=item_value)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
     rv = client.get(f"/api/v1/orgs/{org.id}/activity-logs", headers=headers, content_type="application/json")
