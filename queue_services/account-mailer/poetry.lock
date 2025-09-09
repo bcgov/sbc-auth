@@ -214,7 +214,7 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 
 [[package]]
 name = "auth-api"
-version = "3.0.6"
+version = "3.0.8"
 description = ""
 optional = false
 python-versions = "^3.12"
@@ -268,8 +268,8 @@ Werkzeug = "^3.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/seeker25/sbc-auth.git"
-reference = "jinja_security_fix"
-resolved_reference = "3f910c4335ef284213cfaeff4f09e6519eadbd90"
+reference = "users_history"
+resolved_reference = "d43f6c35ffdbaf12b07b051f78a07aebe05d3166"
 subdirectory = "auth-api"
 
 [[package]]
@@ -2843,6 +2843,8 @@ files = [
 ]
 
 [package.dependencies]
+astroid = ">=1.0"
+pylint = ">=1.0"
 pylint-plugin-utils = ">=0.2.1"
 
 [[package]]
@@ -3701,4 +3703,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "a9804e15cddb6a0fb62a54cad920d3a8510e2e28ec2b251bbf082f0a268a7c85"
+content-hash = "ef115365278f042b09f1c7736459404f5c24daa77191fb27f3b363391a39935c"

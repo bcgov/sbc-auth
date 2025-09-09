@@ -268,8 +268,8 @@ Werkzeug = "^3.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/seeker25/sbc-auth.git"
-reference = "jinja_fix_p2"
-resolved_reference = "475b498004fe8dd2fb8e3376c7fb165e394842e4"
+reference = "users_history"
+resolved_reference = "d43f6c35ffdbaf12b07b051f78a07aebe05d3166"
 subdirectory = "auth-api"
 
 [[package]]
@@ -2801,6 +2801,8 @@ files = [
 ]
 
 [package.dependencies]
+astroid = ">=1.0"
+pylint = ">=1.0"
 pylint-plugin-utils = ">=0.2.1"
 
 [[package]]
@@ -3714,4 +3716,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "f16d1b6a755ede687f93f35b36dd74f6abe406e139b530782ab9fef2dcd2f639"
+content-hash = "da4bbf9cb5c2b288c858997ec15dc6cce7fbf0c294dc7569b55220e52d8c8406"

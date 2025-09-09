@@ -595,7 +595,6 @@ class Org:  # pylint: disable=too-many-public-methods
         if org.status_code not in (OrgStatus.ACTIVE.value, OrgStatus.PENDING_INVITE_ACCEPT.value):
             raise BusinessException(Error.NOT_ACTIVE_ACCOUNT, None)
 
-        # Deactivate pay account
         Org._delete_pay_account(org_id)
 
         # Find all active affiliations and remove them.
@@ -606,7 +605,6 @@ class Org:  # pylint: disable=too-many-public-methods
             )
             AffiliationService.delete_affiliation(delete_affiliation_request)
 
-        # Deactivate all members.
         members = MembershipModel.find_members_by_org_id(org_id)
         for member in members:
             member.status = Status.INACTIVE.value
@@ -629,6 +627,15 @@ class Org:  # pylint: disable=too-many-public-methods
         org.save()
 
         ProductService.update_org_product_keycloak_groups(org.id)
+
+        ActivityLogPublisher.publish_activity(
+            Activity(
+                org.id,
+                ActivityAction.ACCOUNT_DEACTIVATION.value,
+                name=org.name,
+                value=None,
+            )
+        )
 
         current_app.logger.debug("org Inactivated>")
 

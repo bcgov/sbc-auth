@@ -17,8 +17,10 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 """
 
 import datetime
+import uuid
 
 from flask import current_app
+from sql_versioning import Versioned
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -34,12 +36,12 @@ from .org import Org as OrgModel
 from .user_status_code import UserStatusCode
 
 
-class User(BaseModel):
+class User(Versioned, BaseModel):
     """This is the model for a User."""
 
     __tablename__ = "users"
 
-    __versioned__ = {"exclude": ["modified", "modified_by_id", "modified_by", "created"]}
+    __versioned__ = {"exclude": ["modified", "modified_by_id", "modified_by", "created", "login_time"]}
 
     id = Column(Integer, primary_key=True)
     username = Column("username", String(100), index=True)
@@ -193,26 +195,23 @@ class User(BaseModel):
             return user
 
         current_app.logger.debug(f"Updating user from JWT:{token}; User:{user}")
-        user.username = user_from_context.user_name or user.username
-
-        user.firstname = first_name
-        user.lastname = last_name
-        user.email = token.get("email", user.email)
-
+        user.set_fields_if_different(
+            username=user_from_context.user_name or user.username,
+            firstname=first_name,
+            lastname=last_name,
+            email=token.get("email", user.email),
+            keycloak_guid=uuid.UUID(user_from_context.sub) if user_from_context.sub else user.keycloak_guid,
+            # If this user is marked as Inactive, this login will re-activate them
+            status=UserStatus.ACTIVE.value,
+            login_source=user_from_context.login_source or user.login_source,
+            type=cls._get_type(user_from_context),
+            idp_userid=token.get("idp_userid"),
+        )
         user.modified = datetime.datetime.now()
-
-        user.keycloak_guid = user_from_context.sub or user.keycloak_guid
-
-        # If this user is marked as Inactive, this login will re-activate them
-        user.status = UserStatus.ACTIVE.value
-        user.login_source = user_from_context.login_source or user.login_source
-        user.type = cls._get_type(user_from_context)
 
         # If this is a request during login, update login_time
         if is_login:
             user.login_time = datetime.datetime.now()
-
-        user.idp_userid = token.get("idp_userid")
 
         cls.commit()
 
@@ -293,3 +292,9 @@ class User(BaseModel):
     def _is_verified(cls, login_source):
         """Return if user is a verified user by checking login source."""
         return login_source == LoginSource.BCSC.value
+
+    def set_fields_if_different(self, **kwargs):
+        """Helper function to conditionally set fields only if they have different values."""
+        for field, value in kwargs.items():
+            if hasattr(self, field) and getattr(self, field) != value:
+                setattr(self, field, value)

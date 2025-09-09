@@ -32,7 +32,7 @@ urllib3 = "2.5.0"
 zipp = "3.19.1"
 
 # VCS dependencies
-auth-api = { git = "https://github.com/seeker25/sbc-auth.git", branch = "jinja_security_fix", subdirectory = "auth-api" }
+auth-api = { git = "https://github.com/seeker25/sbc-auth.git", branch = "users_history", subdirectory = "auth-api" }
 simple-cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py.git" }
 cloud-sql-python-connector = "^1.13.0"
 pkginfo = "^1.12.1.2"
