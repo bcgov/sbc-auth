@@ -132,18 +132,6 @@ def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
                 data,
                 QueueSources.AUTH_QUEUE.value,
             )
-        # TODO we need the reason here 
-        action = ActivityAction.PAD_NSF_LOCK.value or ActivityAction.EFT_OVERDUE_LOCK
-        activity = ActivityLogModel(
-            org_id=org.id,
-            action=action,
-            item_name=None,
-            item_id=None,
-            item_type=None,
-            item_value=None,
-            actor_id=None,
-        )
-        activity.flush()
     elif message_type == QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value:
         org.status_code = OrgStatus.ACTIVE.value
         org.suspension_reason_code = None
@@ -154,17 +142,6 @@ def process_pay_lock_unlock_event(event_message: SimpleCloudEvent):
                 queue_data,
                 QueueSources.AUTH_QUEUE.value,
             )
-        action = ActivityAction.PAD_NSF_UNLOCK.value or ActivityAction.EFT_OVERDUE_UNLOCK
-        activity = ActivityLogModel(
-            org_id=org.id,
-            action=action,
-            item_name=None,
-            item_id=None,
-            item_type=None,
-            item_value=None,
-            actor_id=None,
-        )
-        activity.flush()
 
     org.flush()
     db.session.commit()
