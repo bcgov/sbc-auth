@@ -154,7 +154,7 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
             ActivityAction.STATEMENT_RECIPIENT_CHANGE.value,
             "",
             "None|test@example.com|enabled",
-            "Changed statement recipient(s) to test@example.com. Statement notification emails are disabled.",
+            "Changed statement recipient(s) to test@example.com. Statement notification emails are enabled.",
         ),
     ],
 )
