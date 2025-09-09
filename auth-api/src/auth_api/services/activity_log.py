@@ -227,10 +227,15 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _statement_recipient_change(activity: ActivityLogModel) -> str:
         """User X changed the statement recipient to [statement recipient]."""
-        from_statement_recipient, to_statement_recipient = activity.item_value.split("|")
+        from_statement_recipient, to_statement_recipient, statement_notification_enabled = activity.item_value.split(
+            "|"
+        )
         if from_statement_recipient == "None":
-            return f"Changed statement recipient(s) to {to_statement_recipient}"
-        return f"Changed statement recipient(s) from {from_statement_recipient} to {to_statement_recipient}"
+            data = f"Changed statement recipient(s) to {to_statement_recipient}."
+        else:
+            data = f"Changed statement recipient(s) from {from_statement_recipient} to {to_statement_recipient}."
+        data += f" Statement notification emails are {statement_notification_enabled}."
+        return data
 
     @staticmethod
     def _mask_user_name(is_staff_access, user):
