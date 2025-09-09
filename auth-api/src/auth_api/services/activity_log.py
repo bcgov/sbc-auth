@@ -230,11 +230,12 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         from_statement_recipient, to_statement_recipient, statement_notification_enabled = activity.item_value.split(
             "|"
         )
-        if from_statement_recipient == "None":
-            data = f"Changed statement recipient(s) to {to_statement_recipient}."
-        else:
-            data = f"Changed statement recipient(s) from {from_statement_recipient} to {to_statement_recipient}."
-        data += f" Statement notification emails are {statement_notification_enabled}."
+        if statement_notification_enabled == "enabled":
+            if from_statement_recipient == "None":
+                data = f"Changed statement recipient(s) to {to_statement_recipient}. "
+            else:
+                data = f"Changed statement recipient(s) from {from_statement_recipient} to {to_statement_recipient}. "
+        data += f"Statement notification emails are {statement_notification_enabled}."
         return data
 
     @staticmethod
