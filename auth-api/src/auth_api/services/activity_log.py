@@ -232,8 +232,8 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def _eft_overdue_lock(activity: ActivityLogModel) -> str:
-        """Account suspended and locked due to EFT payment for statement(s) # [statement numbers] is overdue"""
-        return f"Account suspended and locked due to EFT payment for statement(s) # {activity.item_value} is overdue"
+        """Account suspended and locked due to EFT payment for statement(s) # [statement numbers] are overdue."""
+        return f"Account suspended and locked due to EFT payment for statement(s) # {activity.item_value} are overdue"
 
     @staticmethod
     def _eft_overdue_unlock(activity: ActivityLogModel) -> str:
