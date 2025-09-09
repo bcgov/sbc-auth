@@ -235,7 +235,9 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
             if from_statement_recipient == "None":
                 display_str = f"Changed statement recipient(s) to {to_statement_recipient}. "
             else:
-                display_str = f"Changed statement recipient(s) from {from_statement_recipient} to {to_statement_recipient}. "
+                display_str = (
+                    f"Changed statement recipient(s) from {from_statement_recipient} to {to_statement_recipient}. "
+                )
         display_str += f"Statement notification emails are {statement_notification_enabled}."
         return display_str
 
