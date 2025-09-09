@@ -85,6 +85,7 @@ def process_activity_log(data):
         if user := db.session.query(UserModel).filter(UserModel.keycloak_guid == actor_id).first():
             actor_id = user.id
         else:
+            actor_id = None
             current_app.logger.warning("No user found with keycloak_guid: %s", actor_id)
     activity_model = ActivityLogModel(
         actor_id=actor_id,
