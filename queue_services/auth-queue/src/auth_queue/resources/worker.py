@@ -21,6 +21,7 @@ from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
+from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.models.pubsub_message_processing import PubSubMessageProcessing
 from auth_api.services.entity_mapping import EntityMappingService
@@ -78,8 +79,16 @@ def is_message_processed(event_message):
 def process_activity_log(data):
     """Process activity log events."""
     current_app.logger.debug(">>>>>>>process_activity_log>>>>>")
+    actor_id = data.get("actorId")
+    # We may not have the USER ID in PAY, but we would have the keycloak_guid or sub.
+    if actor_id and not actor_id.isdigit():
+        if user := db.session.query(UserModel).filter(UserModel.keycloak_guid == actor_id).first():
+            actor_id = user.id
+        else:
+            actor_id = None
+            current_app.logger.warning("No user found with keycloak_guid: %s", actor_id)
     activity_model = ActivityLogModel(
-        actor_id=data.get("actorId"),
+        actor_id=actor_id,
         action=data.get("action"),
         item_type=data.get("itemType"),
         item_name=data.get("itemName"),
