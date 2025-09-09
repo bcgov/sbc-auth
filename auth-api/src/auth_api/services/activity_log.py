@@ -105,6 +105,10 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
             ActivityAction.ACCOUNT_SUSPENSION.value: ActivityLog._account_suspension,
             ActivityAction.ACCOUNT_DEACTIVATION.value: ActivityLog._account_deactivation,
             ActivityAction.ADD_PRODUCT_AND_SERVICE.value: ActivityLog._adding_products_and_services,
+            ActivityAction.PAD_NSF_LOCK.value: ActivityLog._pad_nsf_lock,
+            ActivityAction.PAD_NSF_UNLOCK.value: ActivityLog._pad_nsf_unlock,
+            ActivityAction.EFT_OVERDUE_LOCK.value: ActivityLog._eft_overdue_lock,
+            ActivityAction.EFT_OVERDUE_UNLOCK.value: ActivityLog._eft_overdue_unlock,
             ActivityAction.REMOVE_PRODUCT_AND_SERVICE.value: ActivityLog._removing_products_and_services,
             ActivityAction.STATEMENT_INTERVAL_CHANGE.value: ActivityLog._statement_interval_change,
             ActivityAction.STATEMENT_RECIPIENT_CHANGE.value: ActivityLog._statement_recipient_change,
@@ -217,6 +221,26 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         return f"Removed {activity.item_name} from account Products and Services"
 
     @staticmethod
+    def _pad_nsf_lock(activity: ActivityLogModel) -> str:
+        """Account suspended and locked due to NSF."""
+        return f"Account suspended and locked due to {activity.item_value}"
+
+    @staticmethod
+    def _pad_nsf_unlock(activity: ActivityLogModel) -> str:
+        """Account unlocked. Payment made by [payment method]."""
+        return f"Account unlocked. Payment made by {activity.item_value}"
+
+    @staticmethod
+    def _eft_overdue_lock(activity: ActivityLogModel) -> str:
+        """Account suspended and locked due to EFT payment for statement(s) # [statement numbers] are overdue."""
+        return f"Account suspended and locked due to EFT payment for statement(s) # {activity.item_value} are overdue"
+
+    @staticmethod
+    def _eft_overdue_unlock(activity: ActivityLogModel) -> str:
+        """Account unlocked. Payment made by [payment method]."""
+        return f"Account unlocked. Payment made by {activity.item_value}"
+
+    @staticmethod
     def _statement_interval_change(activity: ActivityLogModel) -> str:
         """User X changed the statement interval to [statement interval]."""
         from_statement_interval, to_statement_interval = activity.item_value.split("|")
@@ -238,7 +262,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
                 display_str = (
                     f"Changed statement recipient(s) from {from_statement_recipient} to {to_statement_recipient}. "
                 )
-        display_str += f"Statement notification emails are {statement_notification_enabled}."
+        display_str += f"Statement notification emails are {statement_notification_enabled}"
         return display_str
 
     @staticmethod

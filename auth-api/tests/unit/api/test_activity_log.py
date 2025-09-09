@@ -142,19 +142,43 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
             "",
             "old@example.com|new@example.com|enabled",
             "Changed statement recipient(s) from old@example.com to new@example.com."
-            " Statement notification emails are enabled.",
+            " Statement notification emails are enabled",
         ),
         (
             ActivityAction.STATEMENT_RECIPIENT_CHANGE.value,
             "",
             "None|test@example.com|disabled",
-            "Statement notification emails are disabled.",
+            "Statement notification emails are disabled",
         ),
         (
             ActivityAction.STATEMENT_RECIPIENT_CHANGE.value,
             "",
             "None|test@example.com|enabled",
-            "Changed statement recipient(s) to test@example.com. Statement notification emails are enabled.",
+            "Changed statement recipient(s) to test@example.com. Statement notification emails are enabled",
+        ),
+        (
+            ActivityAction.PAD_NSF_LOCK.value,
+            "",
+            "NSF - Insufficient funds",
+            "Account suspended and locked due to NSF - Insufficient funds",
+        ),
+        (
+            ActivityAction.PAD_NSF_UNLOCK.value,
+            "",
+            "Credit Card",
+            "Account unlocked. Payment made by Credit Card",
+        ),
+        (
+            ActivityAction.EFT_OVERDUE_LOCK.value,
+            "",
+            "12345, 67890",
+            "Account suspended and locked due to EFT payment for statement(s) # 12345, 67890 are overdue",
+        ),
+        (
+            ActivityAction.EFT_OVERDUE_UNLOCK.value,
+            "",
+            "Bank Transfer",
+            "Account unlocked. Payment made by Bank Transfer",
         ),
     ],
 )
