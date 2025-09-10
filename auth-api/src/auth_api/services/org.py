@@ -262,7 +262,6 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_url = current_app.config.get("PAY_API_URL")
             pay_request = Org._build_payment_request(org_model, payment_info, payment_method, mailing_address, **kwargs)
             error_code = None
-            current_payment_method = None
             token = RestService.get_service_account_token()
 
             if is_new_org:
@@ -274,7 +273,6 @@ class Org:  # pylint: disable=too-many-public-methods
                 )
             else:
                 response = RestService.get(endpoint=f"{pay_url}/accounts/{org_model.id}", token=token)
-                current_payment_method = response.json().get("paymentMethod")
                 response = RestService.put(
                     endpoint=f"{pay_url}/accounts/{org_model.id}",
                     data=pay_request,
