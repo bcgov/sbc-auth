@@ -195,7 +195,7 @@ def test_update_basic_org_assert_pay_request_activity(session, keycloak_mock, mo
 
     # Have to patch this because the pay spec is wrong and returns 201, not 202 or 200.
     patch_pay_account_put(monkeypatch)
-    with patch.object(ActivityLogPublisher, "publish_activity", return_value=None) as mock_alp:
+    with patch.object(ActivityLogPublisher, "publish_activity", return_value=None):
         org = OrgService.update_org(org, new_payment_method)
 
 
