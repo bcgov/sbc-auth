@@ -292,18 +292,6 @@ class Org:  # pylint: disable=too-many-public-methods
                     error_code = getattr(response, "json", lambda: {})().get("error", "UNKNOWN_ERROR")
                     current_app.logger.error(f"Account create payment Error: {response.text}")
 
-            if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
-                payment_method_descriptions = Org._get_payment_method_descriptions(
-                    current_payment_method, payment_method
-                )
-                ActivityLogPublisher.publish_activity(
-                    Activity(
-                        org_model.id,
-                        ActivityAction.PAYMENT_INFO_CHANGE.value,
-                        name=org_model.name,
-                        value=payment_method_descriptions,
-                    )
-                )
             return payment_account_status, error_code
 
         except HTTPError as http_error:
