@@ -180,6 +180,30 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
             "Bank Transfer",
             "Account unlocked. Payment made by Bank Transfer",
         ),
+        (
+            ActivityAction.PAYMENT_METHOD_CHANGE.value,
+            "",
+            "Credit Card",
+            "Updated the account payment information to Credit Card",
+        ),
+        (
+            ActivityAction.PAYMENT_METHOD_CHANGE.value,
+            "",
+            "Credit_Card|Online_Banking",
+            "Updated the account payment information from Credit Card to Online Banking",
+        ),
+        (
+            ActivityAction.PAYMENT_METHOD_CHANGE.value,
+            "",
+            "EJV|Direct_Debit",
+            "Updated the account payment information from EJV to Direct Debit",
+        ),
+        (
+            ActivityAction.PAYMENT_INFO_CHANGE.value,
+            "",
+            "PAD",
+            "Updated the account PAD information",
+        ),
     ],
 )
 def test_activity_log_actions(

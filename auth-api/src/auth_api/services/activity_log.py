@@ -97,7 +97,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
             ActivityAction.REMOVE_TEAM_MEMBER.value: ActivityLog._removing_team_member,
             ActivityAction.RESET_2FA.value: ActivityLog._twofactor_reset,
             ActivityAction.PAYMENT_METHOD_CHANGE.value: ActivityLog._payment_method_change,
-            ActivityAction.PAD_INFO_CHANGE.value: ActivityLog._pad_info_change,
+            ActivityAction.PAYMENT_INFO_CHANGE.value: ActivityLog._payment_info_change,
             ActivityAction.CREATE_AFFILIATION.value: ActivityLog._adding_a_business_affilliation,
             ActivityAction.REMOVE_AFFILIATION.value: ActivityLog._removing_a_business_affilliation,
             ActivityAction.ACCOUNT_NAME_CHANGE.value: ActivityLog._account_name_changes,
@@ -164,9 +164,9 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         return f"Updated the account payment information to {payment_information}"
 
     @staticmethod
-    def _pad_info_change(activity: ActivityLogModel) -> str:
-        """User X updated the account PAD information to [PAD information]."""
-        return "Updated the account PAD information."
+    def _payment_info_change(activity: ActivityLogModel) -> str:
+        """User X updated the account [payment method] information."""
+        return f"Updated the account {activity.item_value} information"
 
     @staticmethod
     def _adding_a_business_affilliation(activity: ActivityLogModel) -> str:
