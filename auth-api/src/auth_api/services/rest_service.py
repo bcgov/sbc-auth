@@ -134,10 +134,22 @@ class RestService:
         content_type: ContentType = ContentType.JSON,
         data=None,
         raise_for_status: bool = True,
+        additional_headers: dict = None,
+        generate_token: bool = True,
     ):
-        """POST service."""
-        current_app.logger.debug("<post")
-        return RestService._invoke("put", endpoint, token, auth_header_type, content_type, data, raise_for_status)
+        """PUT service."""
+        current_app.logger.debug("<put")
+        return RestService._invoke(
+            "put",
+            endpoint,
+            token,
+            auth_header_type,
+            content_type,
+            data,
+            raise_for_status,
+            additional_headers,
+            generate_token,
+        )
 
     @staticmethod
     def patch(  # pylint: disable=too-many-positional-arguments,too-many-arguments
