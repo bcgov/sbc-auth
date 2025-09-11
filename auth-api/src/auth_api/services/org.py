@@ -267,7 +267,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
             additional_headers = {
                 "Original-Username": user_from_context.user_name or "",
-                "Original-Sub": user_from_context.sub or "",
+                "Original-Sub": str(user_from_context.sub or ""),
             }
 
             if is_new_org:
