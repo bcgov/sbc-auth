@@ -229,5 +229,6 @@ def _verify_permissions(user, affiliation_invitation_id):
         raise BusinessException(Error.DATA_NOT_FOUND, None)
 
     to_org_id = affiliation_invitation.as_dict()["to_org"]["id"]
-    if not UserService.is_user_admin_or_coordinator(user=user, org_id=to_org_id):
+    # Prevent users from accepting or rejecting.
+    if not UserService.is_user_in_membership_roles(user=user, org_id=to_org_id):
         raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
