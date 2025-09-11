@@ -130,15 +130,6 @@ def test_create_org_products(session, keycloak_mock, monkeypatch):
                 name=ANY,
             )
         )
-        mock_alp.assert_any_call(
-            Activity(
-                action=ActivityAction.PAYMENT_INFO_CHANGE.value,
-                org_id=ANY,
-                value=ANY,
-                id=ANY,
-                name=ANY,
-            )
-        )
         assert org
     dictionary = org.as_dict()
     assert dictionary["name"] == TestOrgInfo.org_with_products["name"]
@@ -204,17 +195,8 @@ def test_update_basic_org_assert_pay_request_activity(session, keycloak_mock, mo
 
     # Have to patch this because the pay spec is wrong and returns 201, not 202 or 200.
     patch_pay_account_put(monkeypatch)
-    with patch.object(ActivityLogPublisher, "publish_activity", return_value=None) as mock_alp:
+    with patch.object(ActivityLogPublisher, "publish_activity", return_value=None):
         org = OrgService.update_org(org, new_payment_method)
-        mock_alp.assert_called_with(
-            Activity(
-                action=ActivityAction.PAYMENT_INFO_CHANGE.value,
-                org_id=ANY,
-                name=ANY,
-                id=ANY,
-                value=f"{PaymentMethod.EJV.value}|{PaymentMethod.ONLINE_BANKING.value}",
-            )
-        )
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)

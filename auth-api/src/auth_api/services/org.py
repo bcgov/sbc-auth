@@ -262,7 +262,6 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_url = current_app.config.get("PAY_API_URL")
             pay_request = Org._build_payment_request(org_model, payment_info, payment_method, mailing_address, **kwargs)
             error_code = None
-            current_payment_method = None
             token = RestService.get_service_account_token()
 
             if is_new_org:
@@ -274,7 +273,6 @@ class Org:  # pylint: disable=too-many-public-methods
                 )
             else:
                 response = RestService.get(endpoint=f"{pay_url}/accounts/{org_model.id}", token=token)
-                current_payment_method = response.json().get("paymentMethod")
                 response = RestService.put(
                     endpoint=f"{pay_url}/accounts/{org_model.id}",
                     data=pay_request,
@@ -292,18 +290,6 @@ class Org:  # pylint: disable=too-many-public-methods
                     error_code = getattr(response, "json", lambda: {})().get("error", "UNKNOWN_ERROR")
                     current_app.logger.error(f"Account create payment Error: {response.text}")
 
-            if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
-                payment_method_descriptions = Org._get_payment_method_descriptions(
-                    current_payment_method, payment_method
-                )
-                ActivityLogPublisher.publish_activity(
-                    Activity(
-                        org_model.id,
-                        ActivityAction.PAYMENT_INFO_CHANGE.value,
-                        name=org_model.name,
-                        value=payment_method_descriptions,
-                    )
-                )
             return payment_account_status, error_code
 
         except HTTPError as http_error:
