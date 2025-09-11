@@ -679,8 +679,9 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         return user_from_context.is_staff()
 
     @staticmethod
-    def is_user_admin_or_coordinator(user, org_id: int) -> bool:
-        """Check if user(userservice wrapper) provided is admin or coordinator for the given org id."""
+    def is_user_in_membership_roles(user, org_id: int, membership_roles=CLIENT_ADMIN_ROLES) -> bool:
+        """Check if user(userservice wrapper) provided is admin or coordinator for the given org id.
+        Defaults to ADMIN, COODRINATOR."""
         current_user_membership: MembershipModel = MembershipModel.find_membership_by_user_and_org(
             user_id=user.identifier, org_id=org_id
         )
@@ -691,4 +692,4 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         if current_user_membership.status != Status.ACTIVE.value:
             return False
 
-        return current_user_membership.membership_type_code in CLIENT_ADMIN_ROLES
+        return current_user_membership.membership_type_code in membership_roles

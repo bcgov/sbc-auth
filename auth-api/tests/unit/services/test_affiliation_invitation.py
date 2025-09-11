@@ -918,7 +918,7 @@ def test_send_affiliation_invitation_request_refused(
     [
         ("test user is org admin", roles.ADMIN, True),
         ("test user is org coordinator", roles.COORDINATOR, True),
-        ("test user is org user", roles.USER, False),
+        ("test user is org user", roles.USER, True),
     ],
 )
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)

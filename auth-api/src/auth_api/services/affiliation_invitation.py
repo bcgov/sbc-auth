@@ -42,7 +42,7 @@ from auth_api.services.flags import flags
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
-from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
+from auth_api.utils.roles import ADMIN, CLIENT_AUTH_ROLES, COORDINATOR, STAFF, USER
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
@@ -434,7 +434,10 @@ class AffiliationInvitation:
             return []
 
         current_user: UserService = UserService.find_by_jwt_token()
-        if UserService.is_user_admin_or_coordinator(user=current_user, org_id=org_id):
+        # Allow users to view affiliation invitations.
+        if UserService.is_user_in_membership_roles(
+            user=current_user, org_id=org_id, membership_roles=CLIENT_AUTH_ROLES
+        ):
             return affiliation_invitation_models
 
         # filter out affiliation invitations of type request
