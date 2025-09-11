@@ -231,7 +231,6 @@ def test_update_basic_org_assert_pay_request_is_correct(
         }
         assert expected_data == actual_data, "updating to Online Banking works."
 
-        # Verify additional_headers are included
         call_kwargs = mock_put.call_args.kwargs
         assert "additional_headers" in call_kwargs
         additional_headers = call_kwargs["additional_headers"]
@@ -253,7 +252,6 @@ def test_update_basic_org_assert_pay_request_is_correct(
         }
         assert expected_data == actual_data, "updating bank  to Credit Card works."
 
-        # Verify additional_headers are included
         call_kwargs = mock_put.call_args.kwargs
         assert "additional_headers" in call_kwargs
         additional_headers = call_kwargs["additional_headers"]
