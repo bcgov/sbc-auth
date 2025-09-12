@@ -157,6 +157,12 @@ def test_create_org_assert_pay_request_is_correct(
         }
         assert expected_data == actual_data
 
+        call_kwargs = mock_post.call_args.kwargs
+        assert "additional_headers" in call_kwargs
+        additional_headers = call_kwargs["additional_headers"]
+        assert "Original-Username" in additional_headers
+        assert "Original-Sub" in additional_headers
+
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_pay_request_is_correct_with_branch_name(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
@@ -225,6 +231,12 @@ def test_update_basic_org_assert_pay_request_is_correct(
         }
         assert expected_data == actual_data, "updating to Online Banking works."
 
+        call_kwargs = mock_put.call_args.kwargs
+        assert "additional_headers" in call_kwargs
+        additional_headers = call_kwargs["additional_headers"]
+        assert "Original-Username" in additional_headers
+        assert "Original-Sub" in additional_headers
+
         new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.DIRECT_PAY)
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
         org = OrgService.update_org(org, new_payment_method)
@@ -239,6 +251,12 @@ def test_update_basic_org_assert_pay_request_is_correct(
             "paymentInfo": {"methodOfPayment": PaymentMethod.DIRECT_PAY.value},
         }
         assert expected_data == actual_data, "updating bank  to Credit Card works."
+
+        call_kwargs = mock_put.call_args.kwargs
+        assert "additional_headers" in call_kwargs
+        additional_headers = call_kwargs["additional_headers"]
+        assert "Original-Username" in additional_headers
+        assert "Original-Sub" in additional_headers
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
