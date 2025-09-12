@@ -113,7 +113,6 @@ class Membership(
             .filter(cls.user_id == int(user_id or -1))
             .filter(cls.status.in_(valid_statuses))
             .filter(OrgModel.status_code.in_(VALID_ORG_STATUSES))
-            .order_by(Membership.created)
             .all()
         )
 
