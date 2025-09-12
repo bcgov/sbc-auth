@@ -37,7 +37,7 @@
         </template>
         <template #[`item.created`]="{ item }">
           <div class="font-weight-bold">
-            {{ formatDate(item.created,'MMMM DD, YYYY') }}
+            {{ formatDate(moment.utc(item.created).toDate(), 'MMMM DD, YYYY h:mm A') }}
           </div>
         </template>
       </v-data-table>
@@ -46,96 +46,132 @@
 </template>
 
 <script lang="ts">
-import { Action, State } from 'pinia-class'
 import { ActivityLog, ActivityLogFilterParams } from '@/models/activityLog'
-import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { PropType, computed, defineComponent, onBeforeUnmount, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
+import moment from 'moment'
 import { useActivityStore } from '@/stores/activityLog'
 import { useOrgStore } from '@/stores/org'
 
-@Component({})
-export default class ActivityLogs extends Mixins(AccountChangeMixin) {
-  @Prop({ default: '' }) private orgId: number
-  @State(useOrgStore) public currentOrganization!: Organization
-  @State(useOrgStore) public currentMembership!: Member
-  @State(useActivityStore) public currentOrgActivity!: ActivityLog
-  @Action(useActivityStore) public getActivityLog!:(filterParams:ActivityLogFilterParams) =>Promise<ActivityLog>
-
-  private readonly ITEMS_PER_PAGE = 5
-  private readonly PAGINATION_COUNTER_STEP = 4
-  public formatDate = CommonUtils.formatDisplayDate
-  public totalActivityCount: number = 0
-  public tableDataOptions: any = {}
-  public isDataLoading: boolean = false
-  public activityList: ActivityLog[] = []
-  public isLoading: boolean = false
-
-  public readonly activityHeader = [
-    {
-      text: 'Date',
-      align: 'left',
-      sortable: false,
-      value: 'created',
-      class: 'bold-header'
-    },
-
-    {
-      text: 'Initiated by',
-      align: 'left',
-      sortable: false,
-      value: 'actor',
-      class: 'bold-header'
-    },
-    {
-      text: 'Subject',
-      align: 'left',
-      sortable: false,
-      value: 'action',
-      class: 'bold-header'
+export default defineComponent({
+  name: 'ActivityLogs',
+  props: {
+    orgId: {
+      type: Number as PropType<number>,
+      default: 0
     }
-  ]
+  },
+  setup () {
+    const activityStore = useActivityStore()
+    const orgStore = useOrgStore()
 
-  public get getPaginationOptions () {
-    return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
-  }
+    const ITEMS_PER_PAGE = 5
+    const PAGINATION_COUNTER_STEP = 4
 
-  public async mounted () {
-    this.setAccountChangedHandler(this.initialize)
-    this.initialize()
-  }
+    const state = reactive({
+      totalActivityCount: 0,
+      tableDataOptions: {},
+      isDataLoading: false,
+      activityList: [] as ActivityLog[],
+      isLoading: false,
+      activityHeader: [
+        {
+          text: 'Date (Pacific Time)',
+          align: 'left',
+          sortable: false,
+          value: 'created',
+          class: 'bold-header'
+        },
+        {
+          text: 'Initiated by',
+          align: 'left',
+          sortable: false,
+          value: 'actor',
+          class: 'bold-header'
+        },
+        {
+          text: 'Subject',
+          align: 'left',
+          sortable: false,
+          value: 'action',
+          class: 'bold-header'
+        }
+      ]
+    })
 
-  public async initialize () {
-    await this.loadActivityList()
-  }
+    const currentOrganization = computed(() => orgStore.currentOrganization)
+    const currentMembership = computed(() => orgStore.currentMembership)
+    const currentOrgActivity = computed(() => activityStore.currentOrgActivity)
 
-  @Watch('tableDataOptions', { deep: true })
-  async getActivityLogs (val) {
-    const pageNumber = val?.page || 1
-    const itemsPerPage = val?.itemsPerPage
-    await this.loadActivityList(pageNumber, itemsPerPage)
-  }
+    const getPaginationOptions = computed(() => {
+      return [...Array(PAGINATION_COUNTER_STEP)].map((value, index) => ITEMS_PER_PAGE * (index + 1))
+    })
 
-  public async loadActivityList (pageNumber?: number, itemsPerPage?: number) {
-    this.isDataLoading = true
-    const filterParams: ActivityLogFilterParams = {
-      pageNumber: pageNumber,
-      pageLimit: itemsPerPage,
-      orgId: this.currentOrganization.id
+    const loadActivityList = async (pageNumber?: number, itemsPerPage?: number) => {
+      state.isDataLoading = true
+      const filterParams: ActivityLogFilterParams = {
+        pageNumber: pageNumber,
+        pageLimit: itemsPerPage,
+        orgId: currentOrganization.value.id
+      }
+      try {
+        const resp: any = await activityStore.getActivityLog(filterParams)
+        state.activityList = resp?.activityLogs || []
+        state.totalActivityCount = resp?.total || 0
+        state.isDataLoading = false
+      } catch {
+        state.activityList = []
+        state.totalActivityCount = 0
+        state.isDataLoading = false
+      }
     }
-    try {
-      const resp:any = await this.getActivityLog(filterParams)
-      this.activityList = resp?.activityLogs || []
-      this.totalActivityCount = resp?.total || 0
-      this.isDataLoading = false
-    } catch {
-      this.activityList = []
-      this.totalActivityCount = 0
-      this.isDataLoading = false
+
+    const initialize = async () => {
+      await loadActivityList()
+    }
+
+    let unregisterHandler: (() => void) | null = null
+
+    const setAccountChangedHandler = (handler: () => any) => {
+      unregisterHandler = orgStore.$onAction(({ name, after }) => {
+        after(() => {
+          if (['syncOrganization', 'setCurrentOrganization'].includes(name)) {
+            handler()
+          }
+        })
+      })
+    }
+
+    watch(() => state.tableDataOptions, async (val: any) => {
+      const pageNumber = val?.page || 1
+      const itemsPerPage = val?.itemsPerPage
+      await loadActivityList(pageNumber, itemsPerPage)
+    }, { deep: true })
+
+    onMounted(async () => {
+      setAccountChangedHandler(initialize)
+      await initialize()
+    })
+
+    onBeforeUnmount(() => {
+      if (unregisterHandler) {
+        unregisterHandler()
+      }
+    })
+
+    return {
+      ...toRefs(state),
+      currentOrganization,
+      currentMembership,
+      currentOrgActivity,
+      getPaginationOptions,
+      formatDate: CommonUtils.formatDisplayDate,
+      loadActivityList,
+      initialize,
+      moment
     }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
