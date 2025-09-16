@@ -690,7 +690,14 @@ def get_org_payment_info(org_id):
 def put_mailing_address(org_id):
     """Update the mailing address specified by the provided id with the request body."""
     request_json = request.get_json()
-    valid_format, errors = schema_utils.validate(request_json, "org")
+    if not request_json or not isinstance(request_json, dict):
+        return {"message": "Request body cannot be empty"}, HTTPStatus.BAD_REQUEST
+
+    mailing_address = request_json.get("mailingAddress")
+    if not mailing_address or not isinstance(mailing_address, dict):
+        return {"message": "mailingAddress is required"}, HTTPStatus.BAD_REQUEST
+
+    valid_format, errors = schema_utils.validate(mailing_address, "mailing_address")
     if not valid_format:
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
     try:
