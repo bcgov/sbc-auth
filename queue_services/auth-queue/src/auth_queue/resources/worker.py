@@ -81,7 +81,7 @@ def process_activity_log(data):
     current_app.logger.debug(">>>>>>>process_activity_log>>>>>")
     actor_id = data.get("actorId")
     # We may not have the USER ID in PAY, but we would have the keycloak_guid or sub.
-    if actor_id and not actor_id.isdigit():
+    if actor_id and not str(actor_id).isdigit():
         if user := db.session.query(UserModel).filter(UserModel.keycloak_guid == actor_id).first():
             actor_id = user.id
         else:
