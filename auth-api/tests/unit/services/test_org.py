@@ -121,7 +121,7 @@ def test_create_org_products(session, keycloak_mock, monkeypatch):
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
     with patch.object(ActivityLogPublisher, "publish_activity", return_value=None) as mock_alp:
         org = OrgService.create_org(TestOrgInfo.org_with_products, user_id=user.id)
-        mock_alp.assert_any_call(
+        mock_alp.assert_called_once_with(
             Activity(
                 action=ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
                 org_id=ANY,

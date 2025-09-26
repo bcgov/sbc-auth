@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Product and Product Subscription data."""
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from flask import current_app
 from sqlalchemy import and_, case, func, literal, or_
@@ -60,6 +61,19 @@ from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .task import Task as TaskService
+
+
+@dataclass
+class SubscriptionRequest:
+    """Data class for product subscription requests."""
+
+    org_id: int
+    product_code: str
+    status_code: str
+    product_model_description: str
+    inactive_sub: Optional[Any] = None
+    publish_activity: bool = True
+
 
 QUALIFIED_SUPPLIER_PRODUCT_CODES = [ProductCode.MHR_QSLN.value, ProductCode.MHR_QSHD.value, ProductCode.MHR_QSHM.value]
 
@@ -197,14 +211,26 @@ class Product:
 
                 subscription_status = Product.find_subscription_status(org, product_model, auto_approve)
                 product_subscription = Product._subscribe_and_publish_activity(
-                    org_id, product_code, subscription_status, product_model.description, inactive_sub
+                    SubscriptionRequest(
+                        org_id=org_id,
+                        product_code=product_code,
+                        status_code=subscription_status,
+                        product_model_description=product_model.description,
+                        inactive_sub=inactive_sub,
+                    )
                 )
 
                 # If there is a linked product, add subscription to that too.
                 # This is to handle cases where Names and Business Registry is combined together.
                 if product_model.linked_product_code:
                     Product._subscribe_and_publish_activity(
-                        org_id, product_model.linked_product_code, subscription_status, product_model.description
+                        SubscriptionRequest(
+                            org_id=org_id,
+                            product_code=product_model.linked_product_code,
+                            status_code=subscription_status,
+                            product_model_description=product_model.description,
+                            publish_activity=False,
+                        )
                     )
 
                 # If there is a parent product, add subscription to that to
@@ -287,7 +313,12 @@ class Product:
         # Parent sub does not exist create it and return
         if not existing_parent_sub:
             Product._subscribe_and_publish_activity(
-                org_id, sub_product_model.parent_code, subscription_status, parent_product_model.description
+                SubscriptionRequest(
+                    org_id=org_id,
+                    product_code=sub_product_model.parent_code,
+                    status_code=subscription_status,
+                    product_model_description=parent_product_model.description,
+                )
             )
             return
 
@@ -297,26 +328,22 @@ class Product:
             existing_parent_sub.flush()
 
     @staticmethod
-    def _subscribe_and_publish_activity(
-        org_id: int,
-        product_code: str,
-        status_code: str,
-        product_model_description: str,
-        inactive_sub: ProductSubscriptionModel = None,
-    ):
+    def _subscribe_and_publish_activity(request: SubscriptionRequest):
         subscription = None
-        if inactive_sub:
-            subscription = inactive_sub
-            subscription.status_code = status_code
+        if request.inactive_sub:
+            subscription = request.inactive_sub
+            subscription.status_code = request.status_code
             subscription.flush()
         else:
             subscription = ProductSubscriptionModel(
-                org_id=org_id, product_code=product_code, status_code=status_code
+                org_id=request.org_id, product_code=request.product_code, status_code=request.status_code
             ).flush()
 
-        if status_code == ProductSubscriptionStatus.ACTIVE.value:
+        if request.publish_activity and request.status_code == ProductSubscriptionStatus.ACTIVE.value:
             ActivityLogPublisher.publish_activity(
-                Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value, name=product_model_description)
+                Activity(
+                    request.org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value, name=request.product_model_description
+                )
             )
         return subscription
 
