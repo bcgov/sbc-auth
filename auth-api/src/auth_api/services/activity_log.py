@@ -249,10 +249,13 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _statement_interval_change(activity: ActivityLogModel) -> str:
         """User X changed the statement interval to [statement interval]."""
-        from_statement_interval, to_statement_interval = activity.item_value.split("|")
+        from_statement_interval, to_statement_interval, effective_date = activity.item_value.split("|")
         if from_statement_interval == "None":
             return f"Changed statement interval to {to_statement_interval}"
-        return f"Changed statement interval from {from_statement_interval} to {to_statement_interval}"
+        return (
+            f"Changed statement interval from {from_statement_interval} to {to_statement_interval}"
+            f" effective {effective_date}"
+        )
 
     @staticmethod
     def _statement_recipient_change(activity: ActivityLogModel) -> str:
