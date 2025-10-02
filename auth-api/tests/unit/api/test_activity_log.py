@@ -128,8 +128,8 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
         (
             ActivityAction.STATEMENT_INTERVAL_CHANGE.value,
             "",
-            "Weekly|Monthly",
-            "Changed statement interval from Weekly to Monthly",
+            "Weekly|Monthly|November 11, 2025",
+            "Changed statement interval from Weekly to Monthly effective November 11, 2025",
         ),
         (
             ActivityAction.STATEMENT_INTERVAL_CHANGE.value,
