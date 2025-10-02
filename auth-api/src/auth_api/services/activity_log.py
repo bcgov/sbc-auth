@@ -257,7 +257,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
 
         if len(parts) == 3:
             from_interval, to_interval, effective_date = parts
-            return f"Changed statement interval from {from_interval} to {to_interval}" f" effective {effective_date}"
+            return f"Changed statement interval from {from_interval} to {to_interval} effective {effective_date}"
 
         raise ValueError(f"Unexpected statement interval format: {activity.item_value}")
 
