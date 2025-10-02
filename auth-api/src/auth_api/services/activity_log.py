@@ -246,6 +246,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         """Account unlocked. Payment made by [payment method]."""
         return f"Account unlocked. Payment made by {activity.item_value}"
 
+    @staticmethod
     def _statement_interval_change(activity: ActivityLogModel) -> str:
         """User X changed the statement interval."""
         parts = activity.item_value.split("|")
