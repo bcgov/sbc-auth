@@ -668,6 +668,8 @@ class AffiliationInvitation:
             raise BusinessException(Error.ACTIONED_AFFILIATION_INVITATION, None)
         if affiliation_invitation.invitation_status_code == InvitationStatus.EXPIRED.value:
             raise BusinessException(Error.EXPIRED_AFFILIATION_INVITATION, None)
+        if affiliation_invitation.type == AffiliationInvitationType.REQUEST.value:
+            raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
 
         return AffiliationInvitation(affiliation_invitation)
 
