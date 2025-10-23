@@ -131,9 +131,7 @@ def patch_affiliation_invitation(affiliation_invitation_id):
         else:
             user = UserService.find_by_jwt_token()
             response, status = (
-                affiliation_invitation.update_affiliation_invitation(user, request_json).as_dict(
-                    mask_email=True
-                ),
+                affiliation_invitation.update_affiliation_invitation(user, request_json).as_dict(mask_email=True),
                 HTTPStatus.OK,
             )
     except BusinessException as exception:
