@@ -111,7 +111,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_TEST_URL",
         default=f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}",  # noqa: E501,E231
-    )
+    ).replace("postgresql://", "postgresql+pg8000://")
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
