@@ -53,15 +53,17 @@ install-dev: ## Instal development dependencies
 #################################################################################
 # COMMANDS - CI                                                                 #
 #################################################################################
-ci: lint flake8 test ## CI flow
+ci: ruff-check test ## CI flow
 
-pylint: ## Linting with pylint
-	poetry run pylint --rcfile=setup.cfg  src/$(PROJECT_NAME)
+ruff: ## Format and lint with ruff
+	poetry run ruff format .
+	poetry run ruff check --fix .
 
-flake8: ## Linting with flake8
-	poetry run flake8 src/$(PROJECT_NAME) tests
+ruff-check: ## Check formatting and linting with ruff
+	poetry run ruff format --check .
+	poetry run ruff check .
 
-lint: pylint flake8 ## run all lint type scripts
+lint: ruff ## run all lint type scripts
 
 test: ## Unit testing
 	poetry run pytest

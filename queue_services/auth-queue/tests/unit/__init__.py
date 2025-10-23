@@ -13,7 +13,6 @@
 # limitations under the License.
 """Test suite for the integrations to NATS Queue."""
 
-
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel

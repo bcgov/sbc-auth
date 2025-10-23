@@ -15,6 +15,7 @@
 
 When deployed in OKD, it adds the last commit hash onto the version info.
 """
+
 import os
 
 from auth_queue.version import __version__

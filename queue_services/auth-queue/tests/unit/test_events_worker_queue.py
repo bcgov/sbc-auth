@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test Suite to ensure the worker routines are working as expected."""
+
 from unittest.mock import patch
 
 from auth_api.models import Org as OrgModel
