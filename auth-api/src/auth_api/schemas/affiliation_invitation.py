@@ -16,8 +16,8 @@
 from marshmallow import fields, post_dump
 
 from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
+from auth_api.utils.util import mask_email
 
-from ..utils.util import mask_email
 from .base_schema import BaseSchema
 
 
@@ -55,7 +55,7 @@ class AffiliationInvitationSchemaPublic(AffiliationInvitationSchema):
     """This is the public schema for the Affiliation Invitation model that masks the email."""
 
     @post_dump(pass_many=False)
-    def _mask_recipient_email_field(self, data, many):  # pylint: disable=unused-argument
+    def _mask_recipient_email_field(self, data, many):  # noqa: ARG002
         """Mask recipient email field."""
         data["recipient_email"] = mask_email(data.get("recipient_email"))
         return data

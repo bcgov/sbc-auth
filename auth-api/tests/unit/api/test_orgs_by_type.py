@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the proper security groups are granted based on org type.
 """
+
 import json
 from http import HTTPStatus
 
@@ -27,7 +28,7 @@ from auth_api.models import OrgType as OrgTypeModel
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_CONTACT_CENTRE_STAFF, GROUP_MAXIMUS_STAFF, GROUP_SBC_STAFF
 from auth_api.utils.enums import LoginSource, OrgType
-from auth_api.utils.roles import ADMIN, USER
+from auth_api.utils.roles import ADMIN
 from tests.utilities.factory_scenarios import CONFIG, KeycloakScenario, TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation
 
@@ -69,7 +70,7 @@ def assert_invite(client, org_id, headers_inviter, headers_invitee, kc_invitee, 
     invitation_token = invitation_dict["token"]
 
     rv = client.put(
-        "/api/v1/invitations/tokens/{}".format(invitation_token),
+        f"/api/v1/invitations/tokens/{invitation_token}",
         headers=headers_invitee,
         content_type="application/json",
     )
@@ -121,7 +122,7 @@ def test_keycloak_groups_by_org_type(security_group, org_type, client, jwt, sess
     # Confirm admin inviting member flow and added security group - admin user inviting
     assert_invite(client, org_id, headers_gov_account_admin, headers_gov_account_user, kc_gov_user, security_group)
 
-    rv = client.get("/api/v1/orgs/{}/members?status=ACTIVE".format(org_id), headers=headers_staff_admin)
+    rv = client.get(f"/api/v1/orgs/{org_id}/members?status=ACTIVE", headers=headers_staff_admin)
     assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
     members = dictionary["members"]
@@ -136,7 +137,7 @@ def test_keycloak_groups_by_org_type(security_group, org_type, client, jwt, sess
         content_type="application/json",
     )
 
-    rv = client.get("/api/v1/orgs/{}/members?status=ACTIVE".format(org_id), headers=headers_staff_admin)
+    rv = client.get(f"/api/v1/orgs/{org_id}/members?status=ACTIVE", headers=headers_staff_admin)
     assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
     members = dictionary["members"]

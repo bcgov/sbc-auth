@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the /users endpoint is working as expected.
 """
+
 import copy
 from http import HTTPStatus
 from unittest import mock
@@ -60,7 +61,7 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     assert account["additionalLabel"] == TestOrgInfo.org_branch_name.get("branchName")
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(item_list, "user_settings_response")[0]
-    assert account["productSettings"] == f'/account/{account["id"]}/restricted-product'
+    assert account["productSettings"] == f"/account/{account['id']}/restricted-product"
 
     kc_id_no_user = dict(TestUserInfo.user1).get("keycloak_guid")
     claims = copy.deepcopy(TestJwtClaims.updated_test.value)

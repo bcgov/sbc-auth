@@ -15,7 +15,7 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Self
+from typing import Self
 
 from requests import Request
 
@@ -29,24 +29,24 @@ class Activity:
     org_id: int
     action: str
     name: str
-    value: Optional[str] = None
-    id: Optional[int] = None
-    type: Optional[str] = None
-    actor_id: Optional[int] = None
+    value: str | None = None
+    id: int | None = None
+    type: str | None = None
+    actor_id: int | None = None
 
 
 @dataclass
 class AffiliationInvitationSearch:  # pylint: disable=too-many-instance-attributes
     """Used for searching Affiliation Invitations."""
 
-    status_codes: Optional[List[str]] = None
-    invitation_types: Optional[List[str]] = None
-    from_org_id: Optional[str] = None
-    to_org_id: Optional[str] = None
-    sender_id: Optional[str] = None
-    approver_id: Optional[str] = None
-    entity_id: Optional[str] = None
-    affiliation_id: Optional[str] = None
+    status_codes: list[str] | None = None
+    invitation_types: list[str] | None = None
+    from_org_id: str | None = None
+    to_org_id: str | None = None
+    sender_id: str | None = None
+    approver_id: str | None = None
+    entity_id: str | None = None
+    affiliation_id: str | None = None
     is_deleted: bool = False
 
 
@@ -56,10 +56,10 @@ class AffiliationSearchDetails:  # pylint: disable=too-many-instance-attributes
 
     page: int
     limit: int
-    identifier: Optional[str] = None
-    status: Optional[str] = None
-    name: Optional[str] = None
-    type: Optional[str] = None
+    identifier: str | None = None
+    status: str | None = None
+    name: str | None = None
+    type: str | None = None
 
     @classmethod
     def from_request_args(cls, req: Request) -> Self:
@@ -86,7 +86,7 @@ class AffiliationInvitationData:  # pylint: disable=too-many-instance-attributes
         name: str
         corp_type: str
         state: str
-        corp_sub_type: Optional[str]
+        corp_sub_type: str | None
 
     @dataclass
     class OrgDetails:
@@ -116,9 +116,9 @@ class Affiliation:
 
     org_id: str
     business_identifier: str
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    certified_by_name: Optional[str] = None
+    email: str | None = None
+    phone: str | None = None
+    certified_by_name: str | None = None
 
 
 @dataclass
@@ -127,7 +127,7 @@ class DeleteAffiliationRequest:
 
     org_id: str
     business_identifier: str
-    email_addresses: Optional[str] = None
+    email_addresses: str | None = None
     reset_passcode: bool = False
     log_delete_draft: bool = False
 
@@ -139,8 +139,8 @@ class OrgSearch:  # pylint: disable=too-many-instance-attributes
     name: str
     branch_name: str
     business_identifier: str
-    statuses: List[str] = field()
-    access_type: List[str] = field()
+    statuses: list[str] = field()
+    access_type: list[str] = field()
     bcol_account_id: str
     id: str
     decision_made_by: str
@@ -159,7 +159,7 @@ class SimpleOrgSearch:  # pylint: disable=too-many-instance-attributes
     name: str
     branch_name: str
     search_text: str
-    statuses: List[str] = field()
+    statuses: list[str] = field()
     exclude_statuses: bool
     page: int
     limit: int
@@ -169,7 +169,7 @@ class SimpleOrgSearch:  # pylint: disable=too-many-instance-attributes
 class TaskSearch:  # pylint: disable=too-many-instance-attributes
     """Used for searching tasks."""
 
-    status: List[str] = field()
+    status: list[str] = field()
     relationship_status: str = ""
     name: str = ""
     start_date: str = ""
@@ -201,7 +201,7 @@ class ProductReviewTask:
     product_description: str
     product_subscription_id: int
     user_id: str
-    external_source_id: Optional[str] = None
+    external_source_id: str | None = None
 
 
 @dataclass

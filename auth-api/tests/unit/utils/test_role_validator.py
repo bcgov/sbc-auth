@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Tests to assure the Role validator."""
+
 from unittest.mock import patch
 
 import pytest

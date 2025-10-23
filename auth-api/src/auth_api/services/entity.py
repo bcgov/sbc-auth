@@ -15,7 +15,6 @@
 
 import secrets
 import string
-from typing import Tuple
 
 from flask import current_app
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -96,7 +95,7 @@ class Entity:
 
     @classmethod
     def find_by_business_identifier(
-        cls, business_identifier: str = None, allowed_roles: Tuple = None, skip_auth: bool = False
+        cls, business_identifier: str = None, allowed_roles: tuple = None, skip_auth: bool = False
     ):
         """Given a business identifier, this will return the corresponding entity or None."""
         if not business_identifier:

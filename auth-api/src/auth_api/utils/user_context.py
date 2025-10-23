@@ -14,7 +14,6 @@
 """User Context to hold request scoped variables."""
 
 import functools
-from typing import Dict
 
 from flask import g, request
 
@@ -33,7 +32,7 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
 
     def __init__(self):
         """Return a User Context object."""
-        token_info: Dict = _get_token_info() or {}
+        token_info: dict = _get_token_info() or {}
         self._token_info = token_info
         self._user_name: str = token_info.get("username", token_info.get("preferred_username", None))
         self._first_name: str = token_info.get("firstname", None)
@@ -106,17 +105,17 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         return self._name
 
     @property
-    def token_info(self) -> Dict:
+    def token_info(self) -> dict:
         """Return the name."""
         return self._token_info
 
     @property
-    def account_id_claim(self) -> Dict:
+    def account_id_claim(self) -> dict:
         """Return the account id."""
         return _get_token_info().get("Account-Id", None)
 
     @property
-    def account_id(self) -> Dict:
+    def account_id(self) -> dict:
         """Return the account id."""
         account_id = _get_token_info().get("Account-Id", None)
         if not account_id:
@@ -141,7 +140,7 @@ def user_context(function):
     return wrapper
 
 
-def _get_token_info() -> Dict:
+def _get_token_info() -> dict:
     return g.jwt_oidc_token_info if g and "jwt_oidc_token_info" in g else {}
 
 

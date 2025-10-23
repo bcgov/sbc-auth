@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common validator response objects."""
-from typing import Dict, List
 
 from auth_api.exceptions import Error
 
@@ -20,7 +19,7 @@ from auth_api.exceptions import Error
 class ValidatorResponse:  # pylint: disable=too-few-public-methods; convenience class
     """A convenience class for managing errors as code outside of Exceptions."""
 
-    def __init__(self, error: List[Error] = None, info: Dict = None):
+    def __init__(self, error: list[Error] = None, info: dict = None):
         """Initialize the error object."""
         self.error = error if error is not None else []
         self.info = info if info is not None else {}

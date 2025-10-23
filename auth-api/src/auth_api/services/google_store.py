@@ -43,6 +43,7 @@ class GoogleStoreService:
     @staticmethod
     def _get_signing_credentials():
         """Get credentials with explicit token refresh.
+
         Works in both production (GCE) and local development.
         """
         try:
@@ -77,8 +78,7 @@ class GoogleStoreService:
 
     @staticmethod
     def create_signed_put_url(file_name: str, prefix_key: str = AFFIDAVIT_FOLDER_NAME) -> dict:
-        """
-        Return a signed URL for uploading a file to GCS with validation.
+        """Return a signed URL for uploading a file to GCS with validation.
 
         Args:
             file_name: The name of the file to be uploaded.
@@ -124,8 +124,7 @@ class GoogleStoreService:
 
     @staticmethod
     def create_signed_get_url(key: str) -> str:
-        """
-        Return a signed URL for downloading an existing file from Google Cloud Storage.
+        """Return a signed URL for downloading an existing file from Google Cloud Storage.
 
         Args:
             key (str): The object key in GCS.

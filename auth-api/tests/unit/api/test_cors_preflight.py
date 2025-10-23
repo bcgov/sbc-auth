@@ -17,7 +17,6 @@
 Test-Suite to ensure that the cors flight responses are working as expected.
 """
 
-
 from http import HTTPStatus
 
 

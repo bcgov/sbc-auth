@@ -16,12 +16,13 @@
 
 Test-Suite to ensure that the passcode hashing is working as expected.
 """
+
 from auth_api.utils import passcode
 
 
 def test_passcode_hash():
     """Assert that passcode can be hashed."""
-    pass_code: str = "111111111"
+    pass_code: str = "111111111"  # noqa: S105
     hashed_pass_code: str = passcode.passcode_hash(pass_code)
     assert hashed_pass_code
 
@@ -35,7 +36,7 @@ def test_passcode_hash_fail():
 
 def test_passcode_hash_different():
     """Assert that the same passcode get different hash value by multiple running."""
-    pass_code: str = "111111111"
+    pass_code: str = "111111111"  # noqa: S105
     hashed_pass_code: str = passcode.passcode_hash(pass_code)
     hashed_pass_code2: str = passcode.passcode_hash(pass_code)
     assert hashed_pass_code != hashed_pass_code2
@@ -43,16 +44,16 @@ def test_passcode_hash_different():
 
 def test_validate_passcode():
     """Assert that passcode can be validate."""
-    pass_code: str = "111111111"
+    pass_code: str = "111111111"  # noqa: S105
     hashed_pass_code: str = passcode.passcode_hash(pass_code)
-    checked_pass_code: str = "111111111"
+    checked_pass_code: str = "111111111"  # noqa: S105
     validated: bool = passcode.validate_passcode(checked_pass_code, hashed_pass_code)
     assert validated
 
 
 def test_validate_passcode_empty_input():
     """Assert that passcode can be validate."""
-    pass_code: str = "111111111"
+    pass_code: str = "111111111"  # noqa: S105
     hashed_pass_code: str = passcode.passcode_hash(pass_code)
     checked_pass_code: str = None
     validated: bool = passcode.validate_passcode(checked_pass_code, hashed_pass_code)
@@ -61,8 +62,8 @@ def test_validate_passcode_empty_input():
 
 def test_validate_passcode_fail():
     """Assert that passcode can be validate."""
-    pass_code: str = "111111111"
+    pass_code: str = "111111111"  # noqa: S105
     hashed_pass_code: str = passcode.passcode_hash(pass_code)
-    checked_pass_code: str = "222222222"
+    checked_pass_code: str = "222222222"  # noqa: S105
     validated: bool = passcode.validate_passcode(checked_pass_code, hashed_pass_code)
     assert not validated

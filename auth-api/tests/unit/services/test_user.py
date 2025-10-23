@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the User Service is working as expected.
 """
+
 import json
 from unittest import mock
 from unittest.mock import patch
@@ -107,9 +108,7 @@ def test_user_save_by_token_no_token(session):  # pylint: disable=unused-argumen
     assert user is None
 
 
-def test_create_user_and_add_membership_owner_skip_auth_mode(
-    session, auth_mock, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an owner can be added as anonymous."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
@@ -185,9 +184,7 @@ def test_delete_otp_for_user(session, auth_mock, keycloak_mock, monkeypatch):
     assert "CONFIGURE_TOTP" in json.loads(user1.value()).get("requiredActions")
 
 
-def test_create_user_and_add_same_user_name_error_in_kc(
-    session, auth_mock, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_create_user_and_add_same_user_name_error_in_kc(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that same user name cannot be added twice."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
@@ -200,9 +197,7 @@ def test_create_user_and_add_same_user_name_error_in_kc(
     assert users["users"][0]["error"] == "The username is already taken"
 
 
-def test_create_user_and_add_same_user_name_error_in_db(
-    session, auth_mock, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that same user name cannot be added twice."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model(TestUserInfo.user_bcros)
@@ -215,9 +210,7 @@ def test_create_user_and_add_same_user_name_error_in_db(
     assert users["users"][0]["error"] == "The username is already taken"
 
 
-def test_create_user_and_add_transaction_membership(
-    session, auth_mock, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_create_user_and_add_transaction_membership(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert transactions works fine."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
@@ -240,9 +233,7 @@ def test_create_user_and_add_transaction_membership(
     assert len(members) == 0
 
 
-def test_create_user_and_add_transaction_membership_1(
-    session, auth_mock, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_create_user_and_add_transaction_membership_1(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert transactions works fine."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
@@ -265,9 +256,7 @@ def test_create_user_and_add_transaction_membership_1(
     assert len(members) == 0
 
 
-def test_create_user_and_add_membership_admin_skip_auth_mode(
-    session, auth_mock, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an admin can be added as anonymous."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(COORDINATOR)]
@@ -283,9 +272,7 @@ def test_create_user_and_add_membership_admin_skip_auth_mode(
     assert members[0].membership_type_code == COORDINATOR
 
 
-def test_create_user_and_add_membership_admin_bulk_mode(
-    session, auth_mock, keycloak_mock, monkeypatch
-):  # pylint:disable=unused-argument
+def test_create_user_and_add_membership_admin_bulk_mode(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an admin can add a member."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model()
@@ -307,9 +294,7 @@ def test_create_user_and_add_membership_admin_bulk_mode(
     assert len(members) == 2
 
 
-def test_create_user_add_membership_reenable(
-    session, auth_mock, keycloak_mock, monkeypatch
-):  # pylint:disable=unused-argument
+def test_create_user_add_membership_reenable(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an admin can add a member."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model()
@@ -364,9 +349,7 @@ def test_create_user_add_membership_reenable(
     assert users["users"][0]["type"] == Role.ANONYMOUS_USER.name
 
 
-def test_create_user_and_add_membership_admin_bulk_mode_unauthorised(
-    session, auth_mock, keycloak_mock, monkeypatch
-):  # pylint:disable=unused-argument
+def test_create_user_and_add_membership_admin_bulk_mode_unauthorised(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that bulk operation cannot be performed by unauthorised users."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model()
@@ -379,9 +362,7 @@ def test_create_user_and_add_membership_admin_bulk_mode_unauthorised(
     assert excinfo.value.code == 403
 
 
-def test_create_user_and_add_membership_admin_bulk_mode_multiple(
-    session, auth_mock, keycloak_mock, monkeypatch
-):  # pylint:disable=unused-argument
+def test_create_user_and_add_membership_admin_bulk_mode_multiple(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an admin can add a group of members."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model()
@@ -408,9 +389,7 @@ def test_create_user_and_add_membership_admin_bulk_mode_multiple(
     assert len(members) == 3
 
 
-def test_create_user_and_add_membership_member_error_skip_auth_mode(
-    session, auth_mock, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_create_user_and_add_membership_member_error_skip_auth_mode(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an member cannot be added as anonymous in single_mode mode."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(USER)]
@@ -419,9 +398,7 @@ def test_create_user_and_add_membership_member_error_skip_auth_mode(
     assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
 
 
-def test_create_user_and_add_membership_multiple_error_skip_auth_mode(
-    session, auth_mock, keycloak_mock, monkeypatch
-):  # pylint:disable=unused-argument
+def test_create_user_and_add_membership_multiple_error_skip_auth_mode(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that multiple user cannot be created  in single_mode mode."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [
@@ -724,9 +701,7 @@ def test_delete_user(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_delete_user_where_org_has_affiliations(
-    session, auth_mock, keycloak_mock, monkeypatch
-):  # pylint:disable=unused-argument
+def test_delete_user_where_org_has_affiliations(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -758,9 +733,7 @@ def test_delete_user_where_org_has_affiliations(
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_delete_user_where_user_is_member_on_org(
-    session, auth_mock, keycloak_mock, monkeypatch
-):  # pylint:disable=unused-argument
+def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     # Create a user and org
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
@@ -808,9 +781,7 @@ def test_delete_user_where_user_is_member_on_org(
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_delete_user_where_org_has_another_owner(
-    session, auth_mock, keycloak_mock, monkeypatch
-):  # pylint:disable=unused-argument
+def test_delete_user_where_org_has_another_owner(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     # Create a user and org
     user_model = factory_user_model(user_info=TestUserInfo.user_test)

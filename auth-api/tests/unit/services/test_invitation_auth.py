@@ -15,6 +15,7 @@
 
 Test suite to ensure that the Invitation service authentication / login source checks are correct.
 """
+
 from unittest import mock
 from unittest.mock import ANY, patch
 
@@ -24,11 +25,10 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models.dataclass import Activity
-from auth_api.services import ActivityLogPublisher
+from auth_api.services import ActivityLogPublisher, User
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
-from auth_api.services import User
 from auth_api.utils.enums import AccessType, ActivityAction, InvitationStatus, LoginSource
 from auth_api.utils.user_context import UserContext, user_context
 from tests.conftest import mock_token

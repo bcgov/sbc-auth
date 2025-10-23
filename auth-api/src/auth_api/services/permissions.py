@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to invoke Rest services."""
-from typing import Dict, List, Tuple
 
 from flask import current_app
 from sqlalchemy import and_, select
@@ -23,11 +22,10 @@ from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.models.permissions import Permissions as PermissionsModel
 from auth_api.models.user import User as UserModel
-
-from ..utils.cache import cache
-from ..utils.enums import OrgStatus, Status
-from ..utils.roles import VALID_ORG_STATUSES
-from ..utils.user_context import UserContext, user_context
+from auth_api.utils.cache import cache
+from auth_api.utils.enums import OrgStatus, Status
+from auth_api.utils.roles import VALID_ORG_STATUSES
+from auth_api.utils.user_context import UserContext, user_context
 
 
 class Permissions:  # pylint: disable=too-few-public-methods
@@ -41,11 +39,11 @@ class Permissions:  # pylint: disable=too-few-public-methods
     def build_all_permission_cache(cls):
         """Build cache for all permission values."""
         try:
-            permissions: List[PermissionsModel] = PermissionsModel.get_all_permissions()
-            per_kv: Dict[Tuple[str, int], List[str]] = {}
+            permissions: list[PermissionsModel] = PermissionsModel.get_all_permissions()
+            per_kv: dict[tuple[str, int], list[str]] = {}
             for perm in permissions:
                 key_tuple = (perm.org_status_code, perm.membership_type_code)
-                actions_v: List = per_kv.get(key_tuple)
+                actions_v: list = per_kv.get(key_tuple)
                 if actions_v:
                     actions_v.append(perm.actions)
                     per_kv.update({key_tuple: actions_v})

@@ -16,7 +16,6 @@
 import asyncio
 import json
 from string import Template
-from typing import Dict, List
 
 import aiohttp
 import requests
@@ -222,7 +221,7 @@ class KeycloakService:
         """Remove user from the group."""
         user_from_context: UserContext = kwargs["user_context"]
         if not keycloak_guid:
-            keycloak_guid: Dict = user_from_context.sub
+            keycloak_guid: dict = user_from_context.sub
 
         if Role.ACCOUNT_HOLDER.value in user_from_context.roles:
             try:
@@ -238,12 +237,12 @@ class KeycloakService:
         """Reset user one time  password from Keycloak."""
         if not keycloak_guid:
             user_from_context: UserContext = kwargs["user_context"]
-            keycloak_guid: Dict = user_from_context.sub
+            keycloak_guid: dict = user_from_context.sub
 
         KeycloakService._reset_otp(keycloak_guid)
 
     @staticmethod
-    def add_or_remove_product_keycloak_groups(kgs: List[KeycloakGroupSubscription]):
+    def add_or_remove_product_keycloak_groups(kgs: list[KeycloakGroupSubscription]):
         """Call add_or_remove_users_from_group, by add to group then remove from group."""
         add_groups = [kg for kg in kgs if kg.group_action == KeycloakGroupActions.ADD_TO_GROUP.value]
         remove_groups = [kg for kg in kgs if kg.group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value]
@@ -258,7 +257,7 @@ class KeycloakService:
         asyncio.run(KeycloakService.add_or_remove_users_from_group(remove_groups))
 
     @staticmethod
-    async def add_or_remove_users_from_group(kgs: List[KeycloakGroupSubscription]):
+    async def add_or_remove_users_from_group(kgs: list[KeycloakGroupSubscription]):
         """Asynchronously add/remove users from group - there can be upwards of 700+ users at once."""
         if not kgs:
             return
@@ -282,8 +281,7 @@ class KeycloakService:
                 asyncio.create_task(
                     session.request(
                         method,
-                        f"{base_url}/auth/admin/realms/{realm}/users/"
-                        f"{kg.user_guid}/groups/{group_ids[kg.group_name]}",
+                        f"{base_url}/auth/admin/realms/{realm}/users/{kg.user_guid}/groups/{group_ids[kg.group_name]}",
                         headers=headers,
                         timeout=timeout,
                     )
@@ -374,7 +372,7 @@ class KeycloakService:
 
         response = requests.post(
             token_url,
-            data=f"client_id={admin_client_id}&grant_type=client_credentials" f"&client_secret={admin_secret}",
+            data=f"client_id={admin_client_id}&grant_type=client_credentials&client_secret={admin_secret}",
             headers=headers,
             timeout=timeout,
         )
@@ -424,12 +422,12 @@ class KeycloakService:
             response = requests.get(get_credentials_url, headers=headers, timeout=timeout)
             for credential in response.json():
                 if credential["type"] == "otp":
-                    delete_credential_url = f'{get_credentials_url}/{credential["id"]}'
+                    delete_credential_url = f"{get_credentials_url}/{credential['id']}"
                     response = requests.delete(delete_credential_url, headers=headers, timeout=timeout)
         response.raise_for_status()
 
     @staticmethod
-    def create_client(client_representation: Dict[str, any]):
+    def create_client(client_representation: dict[str, any]):
         """Create a client in keycloak."""
         config = current_app.config
         base_url = config.get("KEYCLOAK_BASE_URL")

@@ -14,7 +14,6 @@
 """Test Suite to ensure the worker routines are working as expected."""
 
 import json
-from typing import List
 
 import pytest
 from auth_api.models import ActivityLog as ActivityLogModel
@@ -83,7 +82,7 @@ def test_names_events_listener_queue(  # pylint: disable=too-many-arguments
     monkeypatch.setattr("auth_api.services.rest_service.RestService.get", get_invoices_mock)
     monkeypatch.setattr(
         "auth_api.services.rest_service.RestService.get_service_account_token",
-        lambda *args, **kwargs: None,
+        lambda *_args, **_kwargs: None,
     )
 
     helper_add_nr_event_to_queue(client, nr_number, nr_state, "TEST")
@@ -93,8 +92,8 @@ def test_names_events_listener_queue(  # pylint: disable=too-many-arguments
     # Query the affiliations and assert the org has affiliation for the NR.
     if is_auto_affiliate_expected:
         assert entity.pass_code_claimed
-        affiliations: List[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
-        activity_logs: List[ActivityLogModel] = (
+        affiliations: list[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
+        activity_logs: list[ActivityLogModel] = (
             db.session.query(ActivityLogModel).filter(ActivityLogModel.org_id == org_id).all()
         )
         assert len(affiliations) == 1
@@ -104,8 +103,8 @@ def test_names_events_listener_queue(  # pylint: disable=too-many-arguments
 
         # Publish message again and assert it doesn't create duplicate affiliation.
         helper_add_nr_event_to_queue(client, nr_number, nr_state, "TEST")
-        affiliations: List[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
-        activity_logs: List[ActivityLogModel] = (
+        affiliations: list[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
+        activity_logs: list[ActivityLogModel] = (
             db.session.query(ActivityLogModel).filter(ActivityLogModel.org_id == org_id).all()
         )
         assert len(affiliations) == 1

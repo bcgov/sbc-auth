@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Role definitions."""
+
 from enum import Enum
 
 from .enums import OrgStatus, OrgType, ProductSubscriptionStatus, Status

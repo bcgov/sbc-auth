@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Exposes all of the Services used in the API."""
+
 from .activity_log import ActivityLog
 from .activity_log_publisher import ActivityLogPublisher
 from .affidavit import Affidavit

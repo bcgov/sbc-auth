@@ -4,7 +4,7 @@ NOTE: Only use this when it's not possible to use other indicators to track mess
       Currently used by the account-mailer / auth-queue. This prevents duplicates.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import Column, DateTime, Integer, String
 
@@ -18,7 +18,7 @@ class PubSubMessageProcessing(db.Model):
 
     id = Column(Integer, index=True, primary_key=True)
     cloud_event_id = Column(String(250), nullable=False)
-    created = Column(DateTime, default=lambda: datetime.now(tz=timezone.utc))
+    created = Column(DateTime, default=lambda: datetime.now(tz=UTC))
     message_type = Column(String(250), nullable=False)
     processed = Column(DateTime, nullable=True)
 

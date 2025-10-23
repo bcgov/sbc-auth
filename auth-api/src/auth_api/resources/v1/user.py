@@ -61,9 +61,10 @@ def post_anonymous_user():
         )
         user_dict = user["users"][0]
         if user_dict["http_status"] != HTTPStatus.CREATED:
-            response, status = {"code": user_dict["http_status"], "message": user_dict["error"]}, user_dict[
-                "http_status"
-            ]
+            response, status = (
+                {"code": user_dict["http_status"], "message": user_dict["error"]},
+                user_dict["http_status"],
+            )
         else:
             InvitationService.accept_invitation(invitation["id"], None, None, False)
             response, status = user, HTTPStatus.CREATED
@@ -203,7 +204,6 @@ def patch_by_username(username):
     User only for patching the password.
     """
     try:
-
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, "anonymous_user")
         if not valid_format:

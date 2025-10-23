@@ -16,11 +16,12 @@
 
 Test-Suite to ensure that the /orgs endpoint is working as expected.
 """
+
 import json
 import uuid
 from datetime import datetime
 from http import HTTPStatus
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from faker import Faker
@@ -57,7 +58,7 @@ from auth_api.utils.enums import (
     TaskRelationshipStatus,
     TaskStatus,
 )
-from auth_api.utils.roles import ADMIN  # noqa: I005
+from auth_api.utils.roles import ADMIN  # noqa: I001
 from tests.utilities.factory_scenarios import (
     DeleteAffiliationPayload,
     TestAffidavit,
@@ -404,7 +405,7 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
     invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
 
     # Get pending members for the org as invitee and assert length of 1
-    rv = client.get("/api/v1/orgs/{}/members?status=ACTIVE".format(org_id), headers=headers)
+    rv = client.get(f"/api/v1/orgs/{org_id}/members?status=ACTIVE", headers=headers)
     assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
 
@@ -414,7 +415,7 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
 
     # Accept invite as invited user
     rv = client.put(
-        "/api/v1/invitations/tokens/{}".format(invitation_id_token),
+        f"/api/v1/invitations/tokens/{invitation_id_token}",
         headers=headers_invited,
         content_type="application/json",
     )
@@ -424,7 +425,7 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
     assert dictionary["status"] == "ACCEPTED"
 
     # Get ACTIVE members for the org as invitee and assert length of 1
-    rv = client.get("/api/v1/orgs/{}/members?status=ACTIVE".format(org_id), headers=headers)
+    rv = client.get(f"/api/v1/orgs/{org_id}/members?status=ACTIVE", headers=headers)
     assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
     assert dictionary["members"]
@@ -445,7 +446,7 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
         "productSubscriptions": [{"productCode": "VS"}, {"productCode": "BCA"}],
     }
     rv = client.put(
-        "/api/v1/orgs/{}".format(org_id),
+        f"/api/v1/orgs/{org_id}",
         data=json.dumps(update_org_payload),
         headers=headers_invited,
         content_type="application/json",
@@ -494,9 +495,7 @@ def test_add_anonymous_org_by_user_exception(client, jwt, session, keycloak_mock
     assert rv.status_code == HTTPStatus.UNAUTHORIZED
 
 
-def test_add_org_staff_admin_anonymous_not_passed(
-    client, jwt, session, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_add_org_staff_admin_anonymous_not_passed(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
@@ -685,7 +684,7 @@ def test_get_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     org_id = dictionary["id"]
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
-    rv = client.get("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "org_response")[0]
     dictionary = json.loads(rv.data)
@@ -701,14 +700,14 @@ def test_get_org_no_auth_returns_401(client, jwt, session, keycloak_mock):  # py
     )
     dictionary = json.loads(rv.data)
     org_id = dictionary["id"]
-    rv = client.get("/api/v1/orgs/{}".format(org_id), headers=None, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{org_id}", headers=None, content_type="application/json")
     assert rv.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_get_org_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that attempting to retrieve a non-existent org returns a 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
-    rv = client.get("/api/v1/orgs/{}".format(999), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{999}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.NOT_FOUND
 
 
@@ -725,7 +724,7 @@ def test_update_org_duplicate_branch_name(client, jwt, session, keycloak_mock): 
     # assert updating branch name works
     new_branch_name = FAKE.name()
     rv = client.put(
-        "/api/v1/orgs/{}".format(org_id),
+        f"/api/v1/orgs/{org_id}",
         data=json.dumps({"branchName": new_branch_name}),
         headers=headers,
         content_type="application/json",
@@ -742,7 +741,7 @@ def test_update_org_duplicate_branch_name(client, jwt, session, keycloak_mock): 
 
     # assert updating branch name to same name doesnt work
     rv = client.put(
-        "/api/v1/orgs/{}".format(new_org_id),
+        f"/api/v1/orgs/{new_org_id}",
         data=json.dumps({"branchName": new_branch_name}),
         headers=headers,
         content_type="application/json",
@@ -770,7 +769,7 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     # assert updating org name works alrite
     name = FAKE.name()
     rv = client.put(
-        "/api/v1/orgs/{}".format(org_id),
+        f"/api/v1/orgs/{org_id}",
         data=json.dumps({"name": name}),
         headers=headers,
         content_type="application/json",
@@ -854,7 +853,7 @@ def test_upgrade_anon_org_fail(client, jwt, session, keycloak_mock):  # pylint:d
     premium_info["typeCode"] = OrgType.STAFF.value
 
     rv = client.put(
-        "/api/v1/orgs/{}?action=UPGRADE".format(org_id),
+        f"/api/v1/orgs/{org_id}?action=UPGRADE",
         data=json.dumps(premium_info),
         headers=headers,
         content_type="application/json",
@@ -876,7 +875,7 @@ def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disa
     org_id = dictionary["id"]
     # Update with same data
     rv = client.put(
-        "/api/v1/orgs/{}".format(org_id),
+        f"/api/v1/orgs/{org_id}",
         data=json.dumps(TestOrgInfo.update_bcol_linked()),
         headers=headers,
         content_type="application/json",
@@ -900,21 +899,17 @@ def test_update_org_type_to_staff_fails(client, jwt, session, keycloak_mock):  #
     data = TestOrgInfo.update_bcol_linked()
     data["typeCode"] = OrgType.SBC_STAFF.value
 
-    rv = client.put(
-        "/api/v1/orgs/{}".format(org_id), data=json.dumps(data), headers=headers, content_type="application/json"
-    )
+    rv = client.put(f"/api/v1/orgs/{org_id}", data=json.dumps(data), headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
 
-    rv = client.get("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.json.get("orgType") == OrgType.PREMIUM.value
 
     data["typeCode"] = OrgType.STAFF.value
-    rv = client.put(
-        "/api/v1/orgs/{}".format(org_id), data=json.dumps(data), headers=headers, content_type="application/json"
-    )
+    rv = client.put(f"/api/v1/orgs/{org_id}", data=json.dumps(data), headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
 
-    rv = client.get("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.json.get("orgType") == OrgType.PREMIUM.value
 
 
@@ -934,7 +929,7 @@ def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylin
 
     dictionary = json.loads(rv.data)
     org_id = dictionary["id"]
-    rv = client.get("/api/v1/orgs/{}/contacts".format(org_id), headers=headers)
+    rv = client.get(f"/api/v1/orgs/{org_id}/contacts", headers=headers)
     assert schema_utils.validate(rv.json, "contacts")[0]
 
 
@@ -949,7 +944,7 @@ def test_update_org_returns_400(client, jwt, session, keycloak_mock):  # pylint:
     org_id = dictionary["id"]
 
     rv = client.put(
-        "/api/v1/orgs/{}".format(org_id),
+        f"/api/v1/orgs/{org_id}",
         data=json.dumps(TestOrgInfo.invalid),
         headers=headers,
         content_type="application/json",
@@ -961,7 +956,7 @@ def test_update_org_no_org_returns_404(client, jwt, session):  # pylint:disable=
     """Assert that attempting to update a non-existent org returns a 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.put(
-        "/api/v1/orgs/{}".format(999),
+        f"/api/v1/orgs/{999}",
         data=json.dumps(TestOrgInfo.org1),
         headers=headers,
         content_type="application/json",
@@ -981,7 +976,7 @@ def test_update_org_returns_exception(client, jwt, session, keycloak_mock):  # p
 
     with patch.object(OrgService, "update_org", side_effect=BusinessException(Error.DATA_ALREADY_EXISTS, None)):
         rv = client.put(
-            "/api/v1/orgs/{}".format(org_id),
+            f"/api/v1/orgs/{org_id}",
             data=json.dumps(TestOrgInfo.org1),
             headers=headers,
             content_type="application/json",
@@ -1001,7 +996,7 @@ def test_add_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unu
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact1),
         content_type="application/json",
@@ -1023,7 +1018,7 @@ def test_add_contact_invalid_format_returns_400(client, jwt, session, keycloak_m
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.invalid),
         content_type="application/json",
@@ -1042,7 +1037,7 @@ def test_add_contact_valid_email_returns_201(client, jwt, session, keycloak_mock
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.email_valid),
         content_type="application/json",
@@ -1055,7 +1050,7 @@ def test_add_contact_no_org_returns_404(client, jwt, session):  # pylint:disable
     """Assert that adding a contact to a non-existant org returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post(
-        "/api/v1/orgs/{}/contacts".format(99),
+        f"/api/v1/orgs/{99}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact1),
         content_type="application/json",
@@ -1074,13 +1069,13 @@ def test_add_contact_duplicate_returns_400(client, jwt, session, keycloak_mock):
     org_id = dictionary["id"]
 
     client.post(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact1),
         content_type="application/json",
     )
     rv = client.post(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact1),
         content_type="application/json",
@@ -1099,7 +1094,7 @@ def test_update_contact(client, jwt, session, keycloak_mock):  # pylint:disable=
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact1),
         content_type="application/json",
@@ -1107,7 +1102,7 @@ def test_update_contact(client, jwt, session, keycloak_mock):  # pylint:disable=
     assert rv.status_code == HTTPStatus.CREATED
 
     rv = client.put(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact2),
         content_type="application/json",
@@ -1119,9 +1114,7 @@ def test_update_contact(client, jwt, session, keycloak_mock):  # pylint:disable=
     assert dictionary["email"] == TestContactInfo.contact2["email"]
 
 
-def test_update_contact_invalid_format_returns_400(
-    client, jwt, session, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_update_contact_invalid_format_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that updating with an invalidly formatted contact returns a 400."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
@@ -1132,13 +1125,13 @@ def test_update_contact_invalid_format_returns_400(
     org_id = dictionary["id"]
 
     client.post(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact1),
         content_type="application/json",
     )
     rv = client.put(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.invalid),
         content_type="application/json",
@@ -1146,9 +1139,7 @@ def test_update_contact_invalid_format_returns_400(
     assert rv.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_update_contact_valid_email_format_returns_200(
-    client, jwt, session, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_update_contact_valid_email_format_returns_200(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that updating with an validly formatted contact with special characters in email returns a 200."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
@@ -1159,13 +1150,13 @@ def test_update_contact_valid_email_format_returns_200(
     org_id = dictionary["id"]
 
     client.post(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact1),
         content_type="application/json",
     )
     rv = client.put(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.email_valid),
         content_type="application/json",
@@ -1178,7 +1169,7 @@ def test_update_contact_no_org_returns_404(client, jwt, session):  # pylint:disa
     """Assert that updating a contact on a non-existant entity returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.put(
-        "/api/v1/orgs/{}/contacts".format(99),
+        f"/api/v1/orgs/{99}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact1),
         content_type="application/json",
@@ -1197,7 +1188,7 @@ def test_update_contact_missing_returns_404(client, jwt, session, keycloak_mock)
     org_id = dictionary["id"]
 
     rv = client.put(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact1),
         content_type="application/json",
@@ -1216,7 +1207,7 @@ def test_delete_contact(client, jwt, session, keycloak_mock):  # pylint:disable=
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact1),
         content_type="application/json",
@@ -1224,7 +1215,7 @@ def test_delete_contact(client, jwt, session, keycloak_mock):  # pylint:disable=
     assert rv.status_code == HTTPStatus.CREATED
 
     rv = client.delete(
-        "/api/v1/orgs/{}/contacts".format(org_id),
+        f"/api/v1/orgs/{org_id}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact2),
         content_type="application/json",
@@ -1233,7 +1224,7 @@ def test_delete_contact(client, jwt, session, keycloak_mock):  # pylint:disable=
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "contact_response")[0]
 
-    rv = client.get("/api/v1/orgs/{}/contacts".format(org_id), headers=headers)
+    rv = client.get(f"/api/v1/orgs/{org_id}/contacts", headers=headers)
 
     dictionary = None
     dictionary = json.loads(rv.data)
@@ -1245,7 +1236,7 @@ def test_delete_contact_no_org_returns_404(client, jwt, session):  # pylint:disa
     """Assert that deleting a contact on a non-existant entity returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.delete(
-        "/api/v1/orgs/{}/contacts".format(99),
+        f"/api/v1/orgs/{99}/contacts",
         headers=headers,
         data=json.dumps(TestContactInfo.contact1),
         content_type="application/json",
@@ -1264,7 +1255,7 @@ def test_delete_contact_returns_exception(client, jwt, session, keycloak_mock): 
     org_id = dictionary["id"]
 
     with patch.object(OrgService, "delete_contact", side_effect=BusinessException(Error.DATA_ALREADY_EXISTS, None)):
-        rv = client.delete("/api/v1/orgs/{}/contacts".format(org_id), headers=headers, content_type="application/json")
+        rv = client.delete(f"/api/v1/orgs/{org_id}/contacts", headers=headers, content_type="application/json")
         assert rv.status_code == 400
         assert schema_utils.validate(rv.json, "exception")[0]
 
@@ -1284,7 +1275,7 @@ def test_get_members(client, jwt, session, keycloak_mock):  # pylint:disable=unu
     api_user = factory_user_model(user_dict)
     factory_membership_model(api_user.id, org_id=org_id)
 
-    rv = client.get("/api/v1/orgs/{}/members".format(org_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{org_id}/members", headers=headers, content_type="application/json")
 
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "members")[0]
@@ -1304,7 +1295,7 @@ def test_delete_org(client, jwt, session, keycloak_mock, monkeypatch):  # pylint
     client.post("/api/v1/users", headers=headers, content_type="application/json")
     rv = client.post("/api/v1/orgs", data=json.dumps(org_payload), headers=headers, content_type="application/json")
     org_id = rv.json.get("id")
-    rv = client.delete("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.delete(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.NO_CONTENT
 
     # 2 - Verify orgs with affiliations can be deleted and assert passcode is reset.
@@ -1319,7 +1310,7 @@ def test_delete_org(client, jwt, session, keycloak_mock, monkeypatch):  # pylint
     member_user = factory_user_model()
     factory_membership_model(member_user.id, org_id=org_id)
 
-    rv = client.delete("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.delete(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.NO_CONTENT
     assert EntityModel.find_by_id(entity_id).pass_code != passcode
     assert AffiliationModel.find_by_id(affiliation.id) is None
@@ -1345,7 +1336,7 @@ def test_delete_org(client, jwt, session, keycloak_mock, monkeypatch):  # pylint
         content_type="application/json",
     )
     org_id = org_response.json.get("id")
-    rv = client.delete("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.delete(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.NO_CONTENT
     assert AffidavitModel.find_by_id(affidavit_id).status_code == AffidavitStatus.INACTIVE.value
 
@@ -1361,7 +1352,7 @@ def test_delete_org_failures(client, jwt, session, keycloak_mock, monkeypatch): 
     )
     dictionary = json.loads(rv.data)
     org_id = dictionary["id"]
-    rv = client.delete("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.delete(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.BAD_REQUEST
     assert rv.json.get("code") == "OUTSTANDING_CREDIT"
 
@@ -1390,7 +1381,7 @@ def test_get_invitations(client, jwt, session, keycloak_mock):  # pylint:disable
         content_type="application/json",
     )
 
-    rv = client.get("/api/v1/orgs/{}/invitations".format(org_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{org_id}/invitations", headers=headers, content_type="application/json")
 
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "invitations")[0]
@@ -1413,7 +1404,7 @@ def test_update_anon_org(client, jwt, session, keycloak_mock):  # pylint:disable
     assert dictionary["accessType"] == "ANONYMOUS"
     org_id = dictionary["id"]
     rv = client.put(
-        "/api/v1/orgs/{}".format(org_id),
+        f"/api/v1/orgs/{org_id}",
         data=json.dumps({"name": "helo2"}),
         headers=headers,
         content_type="application/json",
@@ -1423,7 +1414,7 @@ def test_update_anon_org(client, jwt, session, keycloak_mock):  # pylint:disable
 
     public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
     rv = client.put(
-        "/api/v1/orgs/{}".format(org_id),
+        f"/api/v1/orgs/{org_id}",
         data=json.dumps({"name": "helo2"}),
         headers=public_headers,
         content_type="application/json",
@@ -1460,7 +1451,7 @@ def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylin
 
     # Accept invite as invited user
     rv = client.put(
-        "/api/v1/invitations/tokens/{}".format(invitation_id_token),
+        f"/api/v1/invitations/tokens/{invitation_id_token}",
         headers=headers_invited,
         content_type="application/json",
     )
@@ -1470,7 +1461,7 @@ def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylin
     assert dictionary["status"] == "ACCEPTED"
 
     # Get pending members for the org as invitee and assert length of 1
-    rv = client.get("/api/v1/orgs/{}/members?status=PENDING_APPROVAL".format(org_id), headers=headers_invitee)
+    rv = client.get(f"/api/v1/orgs/{org_id}/members?status=PENDING_APPROVAL", headers=headers_invitee)
     assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
     assert dictionary["members"]
@@ -1483,7 +1474,7 @@ def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylin
 
     # Update the new member
     rv = client.patch(
-        "/api/v1/orgs/{}/members/{}".format(org_id, member_id),
+        f"/api/v1/orgs/{org_id}/members/{member_id}",
         headers=headers_invitee,
         data=json.dumps({"role": "COORDINATOR"}),
         content_type="application/json",
@@ -1512,7 +1503,7 @@ def test_add_affiliation(client, jwt, session, keycloak_mock, entity_mapping_moc
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/affiliations".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations",
         headers=headers,
         data=json.dumps(TestAffliationInfo.affiliation3),
         content_type="application/json",
@@ -1524,9 +1515,7 @@ def test_add_affiliation(client, jwt, session, keycloak_mock, entity_mapping_moc
     assert dictionary["organization"]["id"] == org_id
 
 
-def test_add_affiliation_invalid_format_returns_400(
-    client, jwt, session, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_add_affiliation_invalid_format_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that adding an invalidly formatted affiliations returns a 400."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
@@ -1537,7 +1526,7 @@ def test_add_affiliation_invalid_format_returns_400(
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/affiliations".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations",
         headers=headers,
         data=json.dumps(TestAffliationInfo.invalid),
         content_type="application/json",
@@ -1549,7 +1538,7 @@ def test_add_affiliation_no_org_returns_404(client, jwt, session):  # pylint:dis
     """Assert that adding a contact to a non-existant org returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post(
-        "/api/v1/orgs/{}/affiliations".format(99),
+        f"/api/v1/orgs/{99}/affiliations",
         headers=headers,
         data=json.dumps(TestAffliationInfo.affiliation1),
         content_type="application/json",
@@ -1575,7 +1564,7 @@ def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):
         AffiliationService, "create_affiliation", side_effect=BusinessException(Error.DATA_ALREADY_EXISTS, None)
     ):
         rv = client.post(
-            "/api/v1/orgs/{}/affiliations".format(org_id),
+            f"/api/v1/orgs/{org_id}/affiliations",
             data=json.dumps(TestAffliationInfo.affiliation1),
             headers=headers,
             content_type="application/json",
@@ -1605,7 +1594,7 @@ def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock,
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_business)
     rv = client.post(
-        "/api/v1/orgs/{}/affiliations?newBusiness=true".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations?newBusiness=true",
         headers=headers,
         data=json.dumps(TestAffliationInfo.new_business_affiliation),
         content_type="application/json",
@@ -1618,7 +1607,7 @@ def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock,
     assert dictionary["organization"]["id"] == org_id
     assert dictionary["certifiedByName"] == certified_by_name
 
-    rv = client.get("/api/v1/orgs/{}/affiliations".format(org_id), headers=headers)
+    rv = client.get(f"/api/v1/orgs/{org_id}/affiliations", headers=headers)
     assert rv.status_code == HTTPStatus.OK
 
     assert schema_utils.validate(rv.json, "affiliations_response")[0]
@@ -1645,7 +1634,7 @@ def test_get_affiliation(client, jwt, session, keycloak_mock, entity_mapping_moc
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/affiliations".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations",
         data=json.dumps(TestAffliationInfo.nr_affiliation),
         headers=headers,
         content_type="application/json",
@@ -1662,9 +1651,7 @@ def test_get_affiliation(client, jwt, session, keycloak_mock, entity_mapping_moc
     assert dictionary["business"]["businessIdentifier"] == business_identifier
 
 
-def test_get_affiliation_without_authrized(
-    client, jwt, session, keycloak_mock, entity_mapping_mock
-):  # pylint:disable=unused-argument
+def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock, entity_mapping_mock):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post(
@@ -1682,7 +1669,7 @@ def test_get_affiliation_without_authrized(
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/affiliations".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations",
         data=json.dumps(TestAffliationInfo.nr_affiliation),
         headers=headers,
         content_type="application/json",
@@ -1733,19 +1720,19 @@ def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disabl
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/affiliations".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations",
         data=json.dumps(TestAffliationInfo.affiliation3),
         headers=headers,
         content_type="application/json",
     )
     rv = client.post(
-        "/api/v1/orgs/{}/affiliations".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations",
         data=json.dumps(TestAffliationInfo.affiliation4),
         headers=headers,
         content_type="application/json",
     )
 
-    rv = client.get("/api/v1/orgs/{}/affiliations".format(org_id), headers=headers)
+    rv = client.get(f"/api/v1/orgs/{org_id}/affiliations", headers=headers)
     assert rv.status_code == HTTPStatus.OK
 
     assert schema_utils.validate(rv.json, "affiliations_response")[0]
@@ -1773,7 +1760,7 @@ def test_search_orgs_for_affiliation(client, jwt, session, keycloak_mock):  # py
     org_id = dictionary["id"]
 
     client.post(
-        "/api/v1/orgs/{}/affiliations".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations",
         headers=headers,
         data=json.dumps(TestAffliationInfo.affiliation3),
         content_type="application/json",
@@ -1792,9 +1779,7 @@ def test_search_orgs_for_affiliation(client, jwt, session, keycloak_mock):  # py
     assert orgs.get("orgs")[0].get("name") == TestOrgInfo.org1.get("name")
 
 
-def test_unauthorized_search_orgs_for_affiliation(
-    client, jwt, session, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_unauthorized_search_orgs_for_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that search org with affiliation works."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     client.post(
@@ -1812,7 +1797,7 @@ def test_unauthorized_search_orgs_for_affiliation(
     org_id = dictionary["id"]
 
     client.post(
-        "/api/v1/orgs/{}/affiliations".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations",
         headers=headers,
         data=json.dumps(TestAffliationInfo.affiliation3),
         content_type="application/json",
@@ -1842,7 +1827,7 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     # assert user have access to VS, as this bcol linked user have VS access
     org_id = rv.json.get("id")
     rv = client.get(
-        "/api/v1/orgs/{}/products?includeInternal=false".format(org_id),
+        f"/api/v1/orgs/{org_id}/products?includeInternal=false",
         headers=headers,
         content_type="application/json",
     )
@@ -1878,9 +1863,7 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     assert account_id == new_account_id
 
 
-def test_add_bcol_linked_org_failure_mailing_address(
-    client, jwt, session, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_add_bcol_linked_org_failure_mailing_address(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
@@ -1944,7 +1927,7 @@ def test_new_business_affiliation(
     mocker.patch("auth_api.services.affiliation.Affiliation.get_nr_payment_details", return_value=payment_response)
 
     rv = client.post(
-        "/api/v1/orgs/{}/affiliations?newBusiness=true".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations?newBusiness=true",
         headers=headers,
         data=json.dumps(TestAffliationInfo.nr_affiliation),
         content_type="application/json",
@@ -1963,7 +1946,6 @@ def test_new_business_affiliation(
 
 def test_get_org_admin_affidavits(client, jwt, session, keycloak_mock, gcs_mock):
     """Assert that staff admin can get pending affidavits."""
-
     # Setup
     user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
     admin_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
@@ -2091,9 +2073,9 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
 
     # 8. Verify org status changed to ACTIVE
     org = client.get(f"/api/v1/orgs/{org_id}", headers=user_headers)
-    assert (
-        org.json.get("orgStatus") == OrgStatus.ACTIVE.value
-    ), f"Expected ACTIVE status, got {org.json.get('orgStatus')}"
+    assert org.json.get("orgStatus") == OrgStatus.ACTIVE.value, (
+        f"Expected ACTIVE status, got {org.json.get('orgStatus')}"
+    )
 
     # 9. Verify affidavit status
     staff_response = client.get(
@@ -2106,9 +2088,7 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
 
 
 @pytest.mark.skip(reason="Fix this later")
-def test_approve_org_with_pending_affidavits_duplicate_affidavit(
-    client, jwt, session, keycloak_mock
-):  # pylint:disable=unused-argument
+def test_approve_org_with_pending_affidavits_duplicate_affidavit(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that staff admin can approve pending affidavits."""
     # 1. Create User
     # 2. Get document signed link
@@ -2287,7 +2267,7 @@ def test_org_suspended_reason(client, jwt, session, keycloak_mock):  # pylint:di
     assert org_patch_response.json.get("suspensionReasonCode") == SuspensionReasonCode.OWNER_CHANGE.name
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
-    rv = client.get("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "org_response")[0]
     dictionary = json.loads(rv.data)
@@ -2390,7 +2370,7 @@ def test_search_org_invitations(client, jwt, session, keycloak_mock):  # pylint:
 
     # staff search
     rv = client.get(
-        "/api/v1/orgs?status={}".format(OrgStatus.PENDING_ACTIVATION.value),
+        f"/api/v1/orgs?status={OrgStatus.PENDING_ACTIVATION.value}",
         headers=headers,
         content_type="application/json",
     )
@@ -2420,13 +2400,13 @@ def test_delete_affiliation_no_payload(client, jwt, session, keycloak_mock):  # 
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/affiliations".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations",
         data=json.dumps(TestAffliationInfo.affiliation3),
         headers=headers,
         content_type="application/json",
     )
 
-    rv = client.get("/api/v1/orgs/{}/affiliations".format(org_id), headers=headers)
+    rv = client.get(f"/api/v1/orgs/{org_id}/affiliations", headers=headers)
     assert rv.status_code == HTTPStatus.OK
 
     assert schema_utils.validate(rv.json, "affiliations_response")[0]
@@ -2437,7 +2417,7 @@ def test_delete_affiliation_no_payload(client, jwt, session, keycloak_mock):  # 
     affiliation_id = affiliations["entities"][0]["businessIdentifier"]
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     da = client.delete(
-        "/api/v1/orgs/{org_id}/affiliations/{affiliation_id}".format(org_id=org_id, affiliation_id=affiliation_id),
+        f"/api/v1/orgs/{org_id}/affiliations/{affiliation_id}",
         headers=headers,
         content_type="application/json",
     )
@@ -2462,13 +2442,13 @@ def test_delete_affiliation_payload_no_mail(client, jwt, session, keycloak_mock)
     org_id = dictionary["id"]
 
     rv = client.post(
-        "/api/v1/orgs/{}/affiliations".format(org_id),
+        f"/api/v1/orgs/{org_id}/affiliations",
         data=json.dumps(TestAffliationInfo.affiliation3),
         headers=headers,
         content_type="application/json",
     )
 
-    rv = client.get("/api/v1/orgs/{}/affiliations".format(org_id), headers=headers)
+    rv = client.get(f"/api/v1/orgs/{org_id}/affiliations", headers=headers)
     assert rv.status_code == HTTPStatus.OK
 
     assert schema_utils.validate(rv.json, "affiliations_response")[0]
@@ -2479,7 +2459,7 @@ def test_delete_affiliation_payload_no_mail(client, jwt, session, keycloak_mock)
     affiliation_id = affiliations["entities"][0]["businessIdentifier"]
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
     da = client.delete(
-        "/api/v1/orgs/{org_id}/affiliations/{affiliation_id}".format(org_id=org_id, affiliation_id=affiliation_id),
+        f"/api/v1/orgs/{org_id}/affiliations/{affiliation_id}",
         headers=headers,
         data=json.dumps(DeleteAffiliationPayload.delete_affiliation2),
         content_type="application/json",
@@ -2607,7 +2587,7 @@ def test_search_org_govm(client, jwt, session, monkeypatch):  # pylint:disable=u
     patch_pay_account_delete(monkeypatch)
 
     # Delete PENDING_INVITE_ACCEPT org.
-    rv = client.delete("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.delete(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.NO_CONTENT
 
 
@@ -2810,9 +2790,7 @@ def test_get_org_affiliations(
     mocker.patch("auth_api.services.rest_service.RestService.get_service_account_token", return_value="token")
 
     for search_type in ["affiliations/search", "affiliations?new=true"]:
-        rv = client.get(
-            "/api/v1/orgs/{}/{}".format(org_id, search_type), headers=headers, content_type="application/json"
-        )
+        rv = client.get(f"/api/v1/orgs/{org_id}/{search_type}", headers=headers, content_type="application/json")
 
         assert rv.status_code == HTTPStatus.OK
         assert rv.json.get("entities", None) and isinstance(rv.json["entities"], list)
@@ -2865,7 +2843,7 @@ def _create_orgs_entities_and_affiliations(client, jwt, count):
         created_orgs.append(new_org)
 
         client.post(
-            "/api/v1/orgs/{}/affiliations".format(org_id),
+            f"/api/v1/orgs/{org_id}/affiliations",
             headers=headers,
             data=json.dumps(TestAffliationInfo.affiliation3),
             content_type="application/json",
@@ -2968,7 +2946,7 @@ def test_update_org_api_access(client, jwt, session, keycloak_mock):  # pylint:d
     org_id = dictionary["id"]
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
-    rv = client.get("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "org_response")[0]
     dictionary = json.loads(rv.data)
@@ -2977,12 +2955,12 @@ def test_update_org_api_access(client, jwt, session, keycloak_mock):  # pylint:d
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
     client.patch(
-        "/api/v1/orgs/{}".format(org_id),
+        f"/api/v1/orgs/{org_id}",
         data=json.dumps({"hasApiAccess": True, "action": PatchActions.UPDATE_API_ACCESS.value}),
         headers=headers,
         content_type="application/json",
     )
-    rv = client.get("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
     assert dictionary["hasApiAccess"] is True

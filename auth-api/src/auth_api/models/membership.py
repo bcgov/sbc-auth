@@ -18,8 +18,6 @@ The Membership object connects User models to one or more Org models.
 
 from __future__ import annotations
 
-from typing import List
-
 from sql_versioning import Versioned
 from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
 from sqlalchemy.orm import relationship
@@ -34,9 +32,7 @@ from .membership_type import MembershipType
 from .org import Org as OrgModel
 
 
-class Membership(
-    Versioned, BaseModel
-):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Membership(Versioned, BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """Model for a Membership model.  Associates Users and Orgs."""
 
     __tablename__ = "memberships"
@@ -73,7 +69,7 @@ class Membership(
         return cls.query.filter_by(id=int(membership_id or -1)).first()
 
     @classmethod
-    def find_members_by_org_id(cls, org_id: int) -> List[Membership]:
+    def find_members_by_org_id(cls, org_id: int) -> list[Membership]:
         """Return all members of the org with a status."""
         return cls.query.filter_by(org_id=int(org_id or -1)).all()
 
@@ -94,7 +90,7 @@ class Membership(
     @classmethod
     def find_members_by_org_id_by_status_by_roles(
         cls, org_id: int, roles, status=Status.ACTIVE.value
-    ) -> List[Membership]:
+    ) -> list[Membership]:
         """Return all members of the org with a status."""
         return (
             db.session.query(Membership)
@@ -106,7 +102,7 @@ class Membership(
         )
 
     @classmethod
-    def find_orgs_for_user(cls, user_id: int, valid_statuses=VALID_STATUSES) -> List[OrgModel]:
+    def find_orgs_for_user(cls, user_id: int, valid_statuses=VALID_STATUSES) -> list[OrgModel]:
         """Find the orgs for a user."""
         records = (
             cls.query.join(OrgModel)
@@ -116,10 +112,10 @@ class Membership(
             .all()
         )
 
-        return list(map(lambda x: x.org, records))
+        return [x.org for x in records]
 
     @classmethod
-    def find_active_staff_org_memberships_for_user(cls, user_id: int) -> List[Membership]:
+    def find_active_staff_org_memberships_for_user(cls, user_id: int) -> list[Membership]:
         """Find staff orgs memberships for a user."""
         return (
             cls.query.join(OrgModel)
@@ -169,14 +165,14 @@ class Membership(
         return records
 
     @classmethod
-    def find_memberships_by_user_ids(cls, user_id: int) -> List[Membership]:
+    def find_memberships_by_user_ids(cls, user_id: int) -> list[Membership]:
         """Get the memberships for the specified user ids."""
         records = cls.query.filter(cls.user_id == int(user_id or -1)).order_by(desc(Membership.created)).all()
 
         return records
 
     @classmethod
-    def find_memberships_by_user_id_and_status(cls, user_id: int, status: str) -> List[Membership]:
+    def find_memberships_by_user_id_and_status(cls, user_id: int, status: str) -> list[Membership]:
         """Get the memberships for the specified user ids."""
         records = (
             cls.query.filter(cls.user_id == int(user_id or -1))

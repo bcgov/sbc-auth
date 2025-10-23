@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Resource package for the auth-queue service."""
+
 import os
 
 from auth_api.exceptions import ExceptionHandler
@@ -43,8 +44,10 @@ def register_endpoints(app: Flask):
     app.register_blueprint(ops_bp)
 
 
-def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")) -> Flask:
+def create_app(run_mode=None) -> Flask:
     """Return a configured Flask App using the Factory method."""
+    if run_mode is None:
+        run_mode = os.getenv("DEPLOYMENT_ENV", "production")
     app = Flask(__name__)
     app.config.from_object(app_config.get_named_config(run_mode))
     app.config["ENV"] = run_mode

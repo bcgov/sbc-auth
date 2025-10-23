@@ -621,7 +621,8 @@ def test_get_account_authorizations_for_product(session, monkeypatch):  # pylint
 
 
 def test_get_user_authorizations_for_entity_with_multiple_affiliations(
-    session, monkeypatch  # pylint:disable=unused-argument
+    session,
+    monkeypatch,  # pylint:disable=unused-argument
 ):
     """Assert that user authorizations for entity is working."""
     user = factory_user_model()

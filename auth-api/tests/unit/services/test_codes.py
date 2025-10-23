@@ -15,6 +15,7 @@
 
 Test-Suite to ensure that the User Service is working as expected.
 """
+
 import importlib
 from unittest.mock import patch
 

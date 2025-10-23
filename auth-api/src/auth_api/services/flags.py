@@ -17,7 +17,7 @@ from flask import current_app
 from ldclient import Context
 from ldclient import get as ldclient_get  # noqa: I001
 from ldclient import set_config as ldclient_set_config
-from ldclient.config import Config  # noqa: I005
+from ldclient.config import Config  # noqa: I001
 from ldclient.integrations import Files
 
 from auth_api.models import User
@@ -49,7 +49,6 @@ class Flags:
         self.sdk_key = app.config.get("AUTH_LD_SDK_KEY")
 
         if self.sdk_key or app.config["ENV"] != "production":
-
             if app.config["ENV"] == "testing":
                 factory = Files.new_data_source(paths=["flags.json"], auto_update=True)
                 config = Config(sdk_key=self.sdk_key, update_processor_class=factory, send_events=False)

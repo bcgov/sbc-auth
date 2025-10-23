@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Mounting the end-points."""
+
 import os
-from typing import Optional
 
 from flask import Blueprint, Flask  # noqa: I001
 
@@ -25,7 +25,7 @@ TEST_BLUEPRINT = Blueprint("TEST", __name__, url_prefix="/test")
 class Endpoints:  # pylint: disable=too-few-public-methods
     """Manage the mounting, traversal and redirects for a set of versioned end-points."""
 
-    app: Optional[Flask] = None
+    app: Flask | None = None
 
     def init_app(self, app: Flask):
         """Initialize the endpoints mapped for all services.

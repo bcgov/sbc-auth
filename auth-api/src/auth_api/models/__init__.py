@@ -13,11 +13,10 @@
 # limitations under the License.
 
 """This exports all of the models and schemas used by the application."""
-# noqa: I004
-# noqa: I001, I003, I004
+# noqa: I001
 
-from sqlalchemy import event  # noqa: I001
-from sqlalchemy.engine import Engine  # noqa: I001, I003, I004
+from sqlalchemy import event  # noqa: I001, TC002
+from sqlalchemy.engine import Engine  # noqa: I001, TC002
 
 from .account_login_options import AccountLoginOptions
 from .activity_log import ActivityLog

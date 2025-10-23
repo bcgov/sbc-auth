@@ -18,8 +18,7 @@ It defines the settings available for the user which can be displayed in the hea
 
 
 class UserSettings:  # pylint: disable=too-few-public-methods, too-many-instance-attributes
-    """
-    This is the User Settings model.
+    """This is the User Settings model.
 
     the structure of the model is not well defined.so going for this now.
     In general , it should items info and a way to access them [url] which user has access to.

@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Organization data."""
+
 # pylint:disable=too-many-lines
 import json
 from datetime import datetime
 from http import HTTPStatus
-from typing import Dict, List, Tuple
 
 from flask import current_app, request
 from jinja2 import Environment, FileSystemLoader
@@ -43,6 +43,7 @@ from auth_api.services.validators.account_limit import validate as account_limit
 from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
+from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.enums import (
     AccessType,
     ActivityAction,
@@ -61,11 +62,10 @@ from auth_api.utils.enums import (
     TaskStatus,
     TaskTypePrefix,
 )
-from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I005
+from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I001
+from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
 
-from ..utils.account_mailer import publish_to_mailer
-from ..utils.user_context import UserContext, user_context
 from .activity_log_publisher import ActivityLogPublisher
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
@@ -74,7 +74,7 @@ from .keycloak import KeycloakService
 from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
-from .validators.validator_response import ValidatorResponse
+from .validators.validator_response import ValidatorResponse  # noqa: TC001
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 
@@ -352,7 +352,7 @@ class Org:  # pylint: disable=too-many-public-methods
             validators.insert(0, bcol_credentials_validate)  # first validator should be bcol ,thus 0th position
             arg_dict["bcol_credential"] = bcol_credential
 
-        validator_response_list: List[ValidatorResponse] = []
+        validator_response_list: list[ValidatorResponse] = []
         for validate in validators:
             validator_response_list.append(validate(**arg_dict))
 
@@ -370,7 +370,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return PaymentMethod.DIRECT_PAY.value
 
     @staticmethod
-    def get_bcol_details(bcol_credential: Dict, org_id=None):
+    def get_bcol_details(bcol_credential: dict, org_id=None):
         """Retrieve and validate BC Online credentials."""
         arg_dict = {"bcol_credential": bcol_credential, "org_id": org_id}
         validator_obj = bcol_credentials_validate(**arg_dict)
@@ -664,7 +664,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return user_from_context.is_staff() or user_from_context.is_external_staff()
 
     @staticmethod
-    def find_by_org_id(org_id, allowed_roles: Tuple = None, **kwargs):
+    def find_by_org_id(org_id, allowed_roles: tuple = None, **kwargs):  # noqa: ARG004
         """Find and return an existing organization with the provided id."""
         if org_id is None:
             return None
@@ -697,7 +697,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return orgs
 
     @staticmethod
-    def get_login_options_for_org(org_id, allowed_roles: Tuple = None):
+    def get_login_options_for_org(org_id, allowed_roles: tuple = None):
         """Get the payment settings for the given org."""
         current_app.logger.debug("get_login_options(>")
         org = OrgModel.find_by_org_id(org_id)
@@ -1021,7 +1021,7 @@ class Org:  # pylint: disable=too-many-public-methods
         try:
             publish_to_mailer(QueueMessageTypes.STAFF_REVIEW_ACCOUNT.value, data=data)
             current_app.logger.debug("<send_staff_review_account_reminder")
-        except Exception as e:  # noqa=B901
+        except Exception as e:  # noqa: B901
             current_app.logger.error("<send_staff_review_account_reminder failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
@@ -1041,7 +1041,7 @@ class Org:  # pylint: disable=too-many-public-methods
         try:
             publish_to_mailer(notification_type, data=data)
             current_app.logger.debug("<send_approved_rejected_notification")
-        except Exception as e:  # noqa=B901
+        except Exception as e:  # noqa: B901
             current_app.logger.error("<send_approved_rejected_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
@@ -1063,7 +1063,7 @@ class Org:  # pylint: disable=too-many-public-methods
         try:
             publish_to_mailer(notification_type, data=data)
             current_app.logger.debug("send_approved_rejected_govm_govn_notification>")
-        except Exception as e:  # noqa=B901
+        except Exception as e:  # noqa: B901
             current_app.logger.error("<send_approved_rejected_govm_govn_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
@@ -1085,7 +1085,7 @@ class Org:  # pylint: disable=too-many-public-methods
         current_app.logger.debug("change_org_api_access>")
         return Org(org_model)
 
-    def patch_org(self, action: str = None, request_json: Dict[str, any] = None):
+    def patch_org(self, action: str = None, request_json: dict[str, any] = None):
         """Update Org."""
         if (patch_action := PatchActions.from_value(action)) is None:
             raise BusinessException(Error.PATCH_INVALID_ACTION, None)

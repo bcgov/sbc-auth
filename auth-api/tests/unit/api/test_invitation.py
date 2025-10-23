@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the /invitations endpoint is working as expected.
 """
+
 import json
 from http import HTTPStatus
 
@@ -91,7 +92,7 @@ def test_get_invitations_by_id(client, jwt, session, keycloak_mock):  # pylint:d
     )
     invitation_dictionary = json.loads(rv.data)
     invitation_id = invitation_dictionary["id"]
-    rv = client.get("/api/v1/invitations/{}".format(invitation_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/invitations/{invitation_id}", headers=headers, content_type="application/json")
     assert schema_utils.validate(rv.json, "invitation_response")[0]
     assert rv.status_code == HTTPStatus.OK
 
@@ -113,10 +114,10 @@ def test_delete_invitation(client, jwt, session, keycloak_mock):  # pylint:disab
     )
     invitation_dictionary = json.loads(rv.data)
     invitation_id = invitation_dictionary["id"]
-    rv = client.delete("/api/v1/invitations/{}".format(invitation_id), headers=headers, content_type="application/json")
+    rv = client.delete(f"/api/v1/invitations/{invitation_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
 
-    rv = client.get("/api/v1/invitations/{}".format(invitation_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/invitations/{invitation_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.NOT_FOUND
     dictionary = json.loads(rv.data)
     assert dictionary["message"] == "The requested invitation could not be found."
@@ -141,7 +142,7 @@ def test_update_invitation(client, jwt, session, keycloak_mock):  # pylint:disab
     invitation_id = invitation_dictionary["id"]
     updated_invitation = {}
     rv = client.patch(
-        "/api/v1/invitations/{}".format(invitation_id),
+        f"/api/v1/invitations/{invitation_id}",
         data=json.dumps(updated_invitation),
         headers=headers,
         content_type="application/json",
@@ -171,7 +172,7 @@ def test_validate_token(client, jwt, session, keycloak_mock):  # pylint:disable=
     invitation_id = invitation_dictionary["id"]
     invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
     rv = client.get(
-        "/api/v1/invitations/tokens/{}".format(invitation_id_token), headers=headers, content_type="application/json"
+        f"/api/v1/invitations/tokens/{invitation_id_token}", headers=headers, content_type="application/json"
     )
     assert rv.status_code == HTTPStatus.OK
 
@@ -224,7 +225,14 @@ def test_validate_token(client, jwt, session, keycloak_mock):  # pylint:disable=
     ],
 )
 def test_accept_public_users_invitation(
-    client, jwt, session, org_info, role, claims, source, exp_status  # pylint:disable=unused-argument
+    client,
+    jwt,
+    session,
+    org_info,
+    role,
+    claims,
+    source,
+    exp_status,  # pylint:disable=unused-argument
 ):
     """Assert that an invitation can be accepted."""
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -249,7 +257,7 @@ def test_accept_public_users_invitation(
     headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source=source))
     client.post("/api/v1/users", headers=headers_invitee, content_type="application/json")
     rv = client.put(
-        "/api/v1/invitations/tokens/{}".format(invitation_id_token),
+        f"/api/v1/invitations/tokens/{invitation_id_token}",
         headers=headers_invitee,
         content_type="application/json",
     )
@@ -295,14 +303,14 @@ def test_accept_gov_account_invitation(client, jwt, session):  # pylint:disable=
     headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source="IDIR", roles=[]))
     client.post("/api/v1/users", headers=headers_invitee, content_type="application/json")
     rv = client.put(
-        "/api/v1/invitations/tokens/{}".format(invitation_id_token),
+        f"/api/v1/invitations/tokens/{invitation_id_token}",
         headers=headers_invitee,
         content_type="application/json",
     )
     assert rv.status_code == HTTPStatus.OK
 
     rv = client.get(
-        "/api/v1/orgs/{}/members?status=PENDING_APPROVAL".format(org_id),
+        f"/api/v1/orgs/{org_id}/members?status=PENDING_APPROVAL",
         headers=headers,
         content_type="application/json",
     )

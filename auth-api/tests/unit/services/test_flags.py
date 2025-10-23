@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Test-Suite to ensure that the Flag Service is working as expected."""
+
 import pytest
 from flask import Flask
 

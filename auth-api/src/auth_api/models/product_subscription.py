@@ -15,13 +15,15 @@
 
 The ProductSubscription object connects Org models to one or more ProductSubscription models.
 """
+
 from typing import Self
 
 from sql_versioning import Versioned
 from sqlalchemy import Column, ForeignKey, Integer, and_
 from sqlalchemy.orm import relationship
 
-from ..utils.roles import VALID_SUBSCRIPTION_STATUSES
+from auth_api.utils.roles import VALID_SUBSCRIPTION_STATUSES
+
 from .base_model import BaseModel
 
 

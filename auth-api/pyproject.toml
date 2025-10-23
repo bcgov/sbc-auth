@@ -62,89 +62,121 @@ pytest-asyncio = "^0.23.8"
 lovely-pytest-docker = "^0.3.1"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.8.0"
-pylint = "^3.2.6"
 bandit = "^1.7.9"
-flake8-pyproject = "^1.2.3"
-isort = "^5.13.2"
+ruff = "^0.14.1"
 
 [tool.bandit]
 exclude_dirs = [".venv","tests"]
 skips = ["B104"]
 
-[tool.flake8]
-ignore = ["F401","E402", "Q000", "E203", "W503"]
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
 exclude = [
-    ".venv",
-    "./venv",
+    ".bzr",
+    ".direnv",
+    ".eggs",
     ".git",
-    ".history",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations",
     "devops",
-    "*migrations*",
+    ".history",
 ]
-per-file-ignores = [
-    "__init__.py:F401",
-    "*.py:B902"
-]
-max-line-length = 120
-docstring-min-length=10
-count = true
 
-[tool.zimports]
-black-line-length = 120
-keep-unused-type-checking = true
-
-[tool.black]
-target-version =  ["py310", "py311", "py312"]
+# Same as Black.
 line-length = 120
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  # The following are specific to Black, you probably don't want those.
-  migrations
-  | devops
-  | .history
-)/
-'''
+indent-width = 4
 
-[tool.isort]
-atomic = true
-profile = "black"
-line_length = 120
-skip_gitignore = true
-skip_glob = ["migrations", "devops"]
+# Assume Python 3.12
+target-version = "py312"
 
-[tool.pylint.main]
-fail-under = 10
-max-line-length = 120
-ignore = [ "migrations", "devops", "tests"]
-ignore-patterns = ["^\\.#"]
-ignored-modules= ["flask_sqlalchemy", "sqlalchemy", "SQLAlchemy" , "alembic", "scoped_session"]
-ignored-classes= "scoped_session"
-ignore-long-lines = "^\\s*(# )?<?https?://\\S+>?$"
-extension-pkg-whitelist = "pydantic"
-notes = ["FIXME","XXX","TODO"]
-overgeneral-exceptions = ["builtins.BaseException", "builtins.Exception"]
-confidence = ["HIGH", "CONTROL_FLOW", "INFERENCE", "INFERENCE_FAILURE", "UNDEFINED"]
-disable = "C0209,C0301,W0511,W0613,W0703,W1514,W1203,R0801,R0902,R0903,R0911,R0401,R1705,R1718,W3101"
-argument-naming-style = "snake_case"
-attr-naming-style = "snake_case"
-class-attribute-naming-style = "any"
-class-const-naming-style = "UPPER_CASE"
-class-naming-style = "PascalCase"
-const-naming-style = "UPPER_CASE"
-function-naming-style = "snake_case"
-inlinevar-naming-style = "any"
-method-naming-style = "snake_case"
-module-naming-style = "any"
-variable-naming-style = "snake_case"
-docstring-min-length = -1
-good-names = ["i", "j", "k", "ex", "Run", "_"]
-bad-names = ["foo", "bar", "baz", "toto", "tutu", "tata"]
-defining-attr-methods = ["__init__", "__new__", "setUp", "asyncSetUp", "__post_init__"]
-exclude-protected = ["_asdict", "_fields", "_replace", "_source", "_make", "os._exit"]
-valid-classmethod-first-arg = ["cls"]
-valid-metaclass-classmethod-first-arg = ["mcs"]
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
+select = [
+    "E4",      # pycodestyle errors
+    "E7",      # pycodestyle errors  
+    "E9",      # pycodestyle errors
+    "F",       # pyflakes
+    "W",       # pycodestyle warnings
+    "B",       # flake8-bugbear
+    "C4",      # flake8-comprehensions
+    "UP",      # pyupgrade
+    "ARG",     # unused-function-argument
+    "D",       # pydocstyle
+    "I",       # isort
+    "N",       # pep8-naming
+    "Q",       # flake8-quotes
+    "S",       # flake8-bandit
+    "T",       # flake8-type-checking
+    "TCH",     # flake8-type-checking
+    "TID",     # flake8-tidy-imports
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*.py" = ["PLR2004", "S101", "TID252", "ARG001", "B006", "B008", "S311", "T201"]
+# Allow magic values in tests
+"**/test_*.py" = ["PLR2004", "S101", "TID252", "ARG001", "B006", "B008", "S311", "T201"]
+# Allow magic values in conftest.py
+"conftest.py" = ["PLR2004", "S101", "TID252", "ARG001", "B006", "B008", "S311", "T201"]
+# Allow magic values in migrations
+"migrations/**/*.py" = ["PLR2004", "S101", "TID252"]
+# Allow magic values in devops
+"devops/**/*.py" = ["PLR2004", "S101", "TID252"]
+# Allow unused imports in __init__.py and ignore N999 (invalid module name)
+"__init__.py" = ["F401", "N999"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pay_api"]
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+docstring-code-format = false
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+docstring-code-line-length = "dynamic"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

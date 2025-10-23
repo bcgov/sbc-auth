@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the /orgs endpoint is working as expected.
 """
+
 from http import HTTPStatus
 
 from faker import Faker

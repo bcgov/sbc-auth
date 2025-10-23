@@ -16,9 +16,9 @@
 
 A simple decorator to validate roles.
 """
+
 from functools import wraps
 from http import HTTPStatus
-from typing import Dict
 
 from flask import abort, g
 
@@ -26,7 +26,10 @@ from auth_api.utils.auth import jwt as _jwt
 
 
 def validate_roles(**role_args):
-    """Verify the roles .
+    """Verify the roles.
+
+    Args:
+        **role_args: Role arguments to validate.
 
     Args:
         allowed_roles [str,]: Comma separated list of any valid roles
@@ -37,7 +40,7 @@ def validate_roles(**role_args):
         @wraps(func)
         @_jwt.requires_auth
         def wrapper(*args, **kwargs):
-            token_info: Dict = _get_token_info() or {}
+            token_info: dict = _get_token_info() or {}
             user_roles: list = (
                 token_info.get("realm_access", None).get("roles", []) if "realm_access" in token_info else []
             )
@@ -60,5 +63,5 @@ def validate_roles(**role_args):
     return decorated
 
 
-def _get_token_info() -> Dict:
+def _get_token_info() -> dict:
     return g.jwt_oidc_token_info if g and "jwt_oidc_token_info" in g else {}

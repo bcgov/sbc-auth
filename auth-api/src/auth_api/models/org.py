@@ -15,7 +15,8 @@
 
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
-from typing import List, Self
+
+from typing import Self
 
 from flask import current_app
 from sql_versioning import Versioned
@@ -88,7 +89,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
     login_options = relationship(
         "AccountLoginOptions",
         cascade="all,delete,delete-orphan",
-        primaryjoin="and_(Org.id == AccountLoginOptions.org_id, " "AccountLoginOptions.is_active == True)",
+        primaryjoin="and_(Org.id == AccountLoginOptions.org_id, AccountLoginOptions.is_active == True)",
         lazy="select",
         back_populates="org",
     )
@@ -98,7 +99,6 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
     def create_from_dict(cls, org_info: dict):
         """Create a new Org from the provided dictionary."""
         if org_info:
-
             org = Org(**org_info)
             current_app.logger.debug(f"Creating org from dictionary {org_info}")
             if org.type_code:
@@ -122,7 +122,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         return cls.query.filter_by(id=int(org_id or -1)).first()
 
     @classmethod
-    def find_by_org_ids_and_org_types(cls, org_ids: List[int], org_types: List[str]):
+    def find_by_org_ids_and_org_types(cls, org_ids: list[int], org_types: list[str]):
         """Find all Org instances that match the provided ids and org types."""
         return cls.query.filter(Org.id.in_(org_ids), Org.type_code.in_(org_types)).all()
 
@@ -208,7 +208,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         return query.order_by(Org.created.desc())
 
     @classmethod
-    def search_orgs_by_business_identifier(cls, business_identifier, excluded_org_types: List[str] = None):
+    def search_orgs_by_business_identifier(cls, business_identifier, excluded_org_types: list[str] = None):
         """Find all orgs affiliated with provided business identifier."""
         query = db.session.query(Org)
 
@@ -347,7 +347,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
 
 
 @event.listens_for(Org, "before_insert")
-def receive_before_insert(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
+def receive_before_insert(mapper, connection, target):  # noqa: ARG001
     """Rejects invalid type_codes on insert."""
     org = target
     if org.type_code in INVALID_ORG_CREATE_TYPE_CODES:
@@ -355,7 +355,7 @@ def receive_before_insert(mapper, connection, target):  # pylint: disable=unused
 
 
 @event.listens_for(Org, "before_update", raw=True)
-def receive_before_update(mapper, connection, state):  # pylint: disable=unused-argument; SQLAlchemy callback signature
+def receive_before_update(mapper, connection, state):  # noqa: ARG001
     """Rejects invalid type_codes on update."""
     if Org.type_code.key in state.unmodified:
         return

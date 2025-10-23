@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the /permissions endpoint is working as expected.
 """
+
 import json
 from http import HTTPStatus
 
@@ -35,7 +36,7 @@ def test_permissions_returns_200(client, jwt, session):  # pylint:disable=unused
 
     """Assert get permissions endpoint returns 200."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.get("/api/v1/permissions/foo/bar", headers=headers, content_type="application" "/json")
+    rv = client.get("/api/v1/permissions/foo/bar", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
     assert len(dictionary) == 0

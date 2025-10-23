@@ -16,6 +16,7 @@
 Test Utility for creating test scenarios. NOTE IF USING THIS, MAKE SURE YOU CLONE (EG. wrap it with DICT)
 THE OBJECTS OTHERWISE THEY WILL BLEED BETWEEN UNIT TESTS.
 """
+
 import uuid
 from enum import Enum
 from random import choice
@@ -844,7 +845,7 @@ class KeycloakScenario:
         create_user_request = KeycloakUser()
         user_name = "".join(choice(ascii_lowercase) for i in range(5))
         create_user_request.user_name = user_name
-        create_user_request.password = "Test@123"
+        create_user_request.password = "Test@123"  # noqa: S105
         create_user_request.first_name = "test_first"
         create_user_request.last_name = "test_last"
         create_user_request.email = f"{user_name}@gov.bc.ca"
@@ -857,7 +858,7 @@ class KeycloakScenario:
         """Return create user request."""
         create_user_request = KeycloakUser()
         create_user_request.user_name = user_info["preferred_username"]
-        create_user_request.password = "Test@123"
+        create_user_request.password = "Test@123"  # noqa: S105
         create_user_request.first_name = user_info["firstname"]
         create_user_request.last_name = user_info["lastname"]
         create_user_request.attributes = {"source": user_info["loginSource"]}

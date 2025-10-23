@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
+
 import os
-import sys
 from concurrent.futures import CancelledError
 from contextlib import contextmanager
 
@@ -146,7 +146,7 @@ def mock_pub_sub_call(mocker):
         def __init__(self, *args, **kwargs):
             pass
 
-        def publish(self, *args, **kwargs):
+        def publish(self, *_args, **_kwargs):
             """Publish mock."""
             raise CancelledError("This is a mock")
 

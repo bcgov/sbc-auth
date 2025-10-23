@@ -15,6 +15,7 @@
 
 This module is the service worker for applying filings to the Business Database structure.
 """
+
 import os
 from pathlib import Path
 

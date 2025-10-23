@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Invitation data."""
+
 import json
 from datetime import datetime
-from typing import Dict
 from urllib.parse import urlencode
 
 from flask import current_app
@@ -34,10 +34,14 @@ from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.task import Task
 from auth_api.services.user import User as UserService
+from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
-from auth_api.utils.enums import AccessType, ActivityAction, InvitationStatus, InvitationType, LoginSource
-from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.enums import (
+    AccessType,
+    ActivityAction,
+    InvitationStatus,
+    InvitationType,
+    LoginSource,
     Status,
     TaskAction,
     TaskRelationshipStatus,
@@ -45,11 +49,11 @@ from auth_api.utils.enums import (
     TaskStatus,
     TaskTypePrefix,
 )
+from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER, Role
 from auth_api.utils.user_context import UserContext, user_context
+from auth_api.utils.util import escape_wam_friendly_url
 
-from ..utils.account_mailer import publish_to_mailer
-from ..utils.util import escape_wam_friendly_url
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .keycloak import KeycloakService
@@ -78,13 +82,13 @@ class Invitation:
 
     @staticmethod
     @user_context
-    def create_invitation(invitation_info: Dict, user, invitation_origin, **kwargs):  # pylint: disable=too-many-locals
+    def create_invitation(invitation_info: dict, user, invitation_origin, **kwargs):  # pylint: disable=too-many-locals
         """Create a new invitation."""
         user_from_context: UserContext = kwargs["user_context"]
         # Ensure that the current user is ADMIN or COORDINATOR on each org being invited to
         org_id = invitation_info["membership"][0]["orgId"]
         membership_type = invitation_info["membership"][0]["membershipType"]
-        token_email_query_params: Dict = {}
+        token_email_query_params: dict = {}
         # get the org and check the access_type
         org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
@@ -142,8 +146,7 @@ class Invitation:
                 data = {"accountId": org_id}
                 publish_to_mailer(notification_type=QueueMessageTypes.TEAM_MEMBER_INVITED.value, data=data)
                 current_app.logger.debug("send_team_member_invitation_notification>")
-            except Exception as e:  # noqa=B901
-
+            except Exception as e:  # noqa: B901
                 current_app.logger.error("<send_team_member_invitation_notification failed")
                 raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
         return Invitation(invitation)
@@ -161,7 +164,7 @@ class Invitation:
     def update_invitation(self, user, invitation_origin):
         """Update the specified invitation with new data."""
         # Ensure that the current user is ADMIN or COORDINATOR on each org being re-invited to
-        token_email_query_params: Dict = {}
+        token_email_query_params: dict = {}
         for membership in self._model.membership:
             org_id = membership.org_id
             check_auth(org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
@@ -262,7 +265,7 @@ class Invitation:
             current_app.logger.debug("<send_admin_notification")
             publish_to_mailer(QueueMessageTypes.ADMIN_NOTIFICATION.value, data=data)
             current_app.logger.debug("send_admin_notification>")
-        except Exception as e:  # noqa=B901
+        except Exception as e:  # noqa: B901
             current_app.logger.error("<send_admin_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
@@ -275,7 +278,7 @@ class Invitation:
         app_url,
         login_source,
         org_status=None,
-        query_params: Dict[str, any] = None,
+        query_params: dict[str, any] = None,
     ):
         """Send the email notification."""
         current_app.logger.debug("<send_invitation")

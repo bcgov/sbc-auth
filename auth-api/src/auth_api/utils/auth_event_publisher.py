@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """helper to publish to mailer."""
+
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
 
 from flask import current_app
 from simple_cloudevent import SimpleCloudEvent
@@ -35,8 +35,8 @@ class AccountEvent(Serializable):
     account_id: int
     actioned_by: str
     action_category: str = "account-management"
-    business_identifier: Optional[str] = None
-    user_ids: Optional[List[int]] = None
+    business_identifier: str | None = None
+    user_ids: list[int] | None = None
 
 
 def publish_account_event(queue_message_type: str, data: AccountEvent, source: str = QueueSources.AUTH_API.value):
@@ -46,7 +46,7 @@ def publish_account_event(queue_message_type: str, data: AccountEvent, source: s
         id=str(uuid.uuid4()),
         source=source,
         subject=None,
-        time=datetime.now(tz=timezone.utc).isoformat(),
+        time=datetime.now(tz=UTC).isoformat(),
         type=queue_message_type,
         data=payload,
     )

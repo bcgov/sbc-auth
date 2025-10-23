@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for publishing the activity stream data."""
+
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from flask import current_app, g, request
 from sbc_common_components.utils.enums import QueueMessageTypes
@@ -53,12 +54,12 @@ class ActivityLogPublisher:  # pylint: disable=too-many-instance-attributes, too
                 id=str(uuid.uuid4()),
                 source="sbc-auth-auth-api",
                 subject=None,
-                time=datetime.now(tz=timezone.utc).isoformat(),
+                time=datetime.now(tz=UTC).isoformat(),
                 type=QueueMessageTypes.ACTIVITY_LOG.value,
                 data=data,
             )
             queue.publish(CONFIG.AUTH_EVENT_TOPIC, GcpQueue.to_queue_message(cloud_event))
             current_app.logger.info("Activity published successfully")
-        except Exception as e:  # noqa: B902 # pylint: disable=broad-except
+        except Exception as e:  # noqa: BLE001 # pylint: disable=broad-except
             error_msg = f"Activity Queue Publish Event Error: {e}"
             current_app.logger.error(error_msg)

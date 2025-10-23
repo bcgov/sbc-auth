@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The unique worker functionality for this service is contained here."""
+
 import dataclasses
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from http import HTTPStatus
 
@@ -86,7 +87,7 @@ def is_message_processed(event_message):
     pubsub_message_processing = PubSubMessageProcessing()
     pubsub_message_processing.cloud_event_id = event_message.id
     pubsub_message_processing.message_type = event_message.type
-    pubsub_message_processing.processed = datetime.now(timezone.utc)
+    pubsub_message_processing.processed = datetime.now(UTC)
     db.session.add(pubsub_message_processing)
     db.session.commit()
     return False

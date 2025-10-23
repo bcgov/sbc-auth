@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test suite for the integrations to PubSub."""
+
 import uuid
 from enum import Enum
 

@@ -1,1 +1,1 @@
-poetry run isort . && poetry run black . && poetry run pylint . && poetry run flake8 .
+poetry run ruff format . && poetry run ruff check --fix .

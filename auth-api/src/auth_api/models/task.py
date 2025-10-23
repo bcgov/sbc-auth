@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This model manages a Task item in the Auth Service."""
+
 import datetime as dt
 from typing import Self
 
@@ -21,8 +22,8 @@ from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 
 from auth_api.models.dataclass import TaskSearch
+from auth_api.utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 
-from ..utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from .base_model import BaseModel
 from .db import db
 

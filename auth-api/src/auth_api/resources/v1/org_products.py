@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """API endpoints for managing an Org resource."""
+
 import json
 from http import HTTPStatus
 
@@ -33,7 +34,6 @@ bp = Blueprint("ORG_PRODUCTS", __name__, url_prefix=f"{EndpointEnum.API_V1.value
 @_jwt.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value])
 def get_org_product_subscriptions(org_id):
     """GET a new product subscription to the org using the request body."""
-
     try:
         validate_organization(org_id)
         include_hidden = request.args.get("include_hidden", None) == "true"  # used by NDS
@@ -51,7 +51,6 @@ def get_org_product_subscriptions(org_id):
 @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value, Role.SYSTEM.value])
 def post_org_product_subscription(org_id):
     """Post a new product subscription to the org using the request body."""
-
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "org_product_subscription")
     if not valid_format:
@@ -75,7 +74,6 @@ def post_org_product_subscription(org_id):
 @_jwt.has_one_of_roles([Role.PUBLIC_USER.value])
 def patch_org_product_subscription(org_id):
     """Patch existing product subscription to resubmit it for review."""
-
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "org_product_subscription")
     if not valid_format:
@@ -95,7 +93,6 @@ def patch_org_product_subscription(org_id):
 @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value, Role.SYSTEM.value])
 def delete_product_subscription(org_id, product_code):
     """Delete existing product subscription."""
-
     try:
         validate_organization(org_id)
         subscriptions = ProductService.remove_product_subscription(int(org_id), product_code)

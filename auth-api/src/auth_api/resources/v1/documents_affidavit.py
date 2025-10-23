@@ -13,7 +13,6 @@
 # limitations under the License.
 """API endpoints for managing a document resource."""
 
-
 from http import HTTPStatus
 
 from flask import Blueprint, send_from_directory

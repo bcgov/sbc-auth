@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to invoke Rest services."""
+
 import asyncio
 import json
 from collections.abc import Iterable
 from http import HTTPStatus
-from typing import Dict
 
 import aiohttp
 import requests
@@ -78,7 +78,7 @@ class RestService:
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
             current_app.logger.error(
-                f"HTTPError on POST {endpoint} with status code " f"{exc.response.status_code if exc.response else ''}"
+                f"HTTPError on POST {endpoint} with status code {exc.response.status_code if exc.response else ''}"
             )
             if response and response.status_code >= 500:
                 raise ServiceUnavailableException(exc) from exc
@@ -209,7 +209,7 @@ class RestService:
         auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
         content_type: ContentType = ContentType.JSON,
         retry_on_failure: bool = False,
-        additional_headers: Dict = None,
+        additional_headers: dict = None,
         skip_404_logging: bool = False,
     ):
         """GET service."""
@@ -233,8 +233,7 @@ class RestService:
         except HTTPError as exc:
             if exc.response and exc.response.status_code == 404 and skip_404_logging is False:
                 current_app.logger.error(
-                    f"HTTPError on GET {endpoint} "
-                    f"with status code {exc.response.status_code if exc.response else ''}"
+                    f"HTTPError on GET {endpoint} with status code {exc.response.status_code if exc.response else ''}"
                 )
             if response and response.status_code >= 500:
                 raise ServiceUnavailableException(exc) from exc
@@ -249,7 +248,8 @@ class RestService:
     @staticmethod
     @cache.cached(query_string=True)
     def get_service_account_token(
-        config_id="KEYCLOAK_SERVICE_ACCOUNT_ID", config_secret="KEYCLOAK_SERVICE_ACCOUNT_SECRET"
+        config_id="KEYCLOAK_SERVICE_ACCOUNT_ID",
+        config_secret="KEYCLOAK_SERVICE_ACCOUNT_SECRET",  # noqa: S107
     ) -> str:
         """Generate a service account token."""
         kc_service_id = current_app.config.get(config_id)

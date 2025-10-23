@@ -29,7 +29,6 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Entity as EntityService
-from auth_api.utils.enums import ProductCode, ProductSubscriptionStatus, ProductTypeCode
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims
 from tests.utilities.factory_utils import (
     factory_affiliation_model,
@@ -148,9 +147,7 @@ def test_get_entity(mock_function, client, jwt, session):  # pylint:disable=unus
 
 @mock.patch("auth_api.services.entity.check_auth")
 @mock.patch("auth_api.services.authorization.AuthorizationView")
-def test_get_entity_as_competent_authority(
-    mock_auth_view, check_auth, client, jwt, session
-):  # pylint:disable=unused-argument
+def test_get_entity_as_competent_authority(mock_auth_view, check_auth, client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an entity can be retrieved via GET."""
     mock_auth_view.find_account_authorization_by_org_id_and_product.return_value = {
         "_sa_instance_state": "<sqlalchemy.orm.state.InstanceState object at 0x000001A73DE07410>",
@@ -684,7 +681,7 @@ def test_get_entity_contacts(client, jwt, session):
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.get(
-        f'/api/v1/entities/{TestEntityInfo.entity1["businessIdentifier"]}/contacts',
+        f"/api/v1/entities/{TestEntityInfo.entity1['businessIdentifier']}/contacts",
         headers=headers,
         content_type="application/json",
     )
@@ -712,7 +709,7 @@ def test_get_entity_authentication(client, jwt, session):
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.get(
-        f'/api/v1/entities/{TestEntityInfo.entity1["businessIdentifier"]}/authentication',
+        f"/api/v1/entities/{TestEntityInfo.entity1['businessIdentifier']}/authentication",
         headers=headers,
         content_type="application/json",
     )

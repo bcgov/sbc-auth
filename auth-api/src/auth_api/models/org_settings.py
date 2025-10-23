@@ -23,9 +23,7 @@ from sqlalchemy.orm import relationship
 from .base_model import BaseModel
 
 
-class OrgSettings(
-    Versioned, BaseModel
-):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class OrgSettings(Versioned, BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Org Settings record."""
 
     __tablename__ = "org_settings"

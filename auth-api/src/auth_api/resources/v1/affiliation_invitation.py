@@ -118,22 +118,20 @@ def get_affiliation_invitation(affiliation_invitation_id):
 @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def patch_affiliation_invitation(affiliation_invitation_id):
     """Update the affiliation invitation specified by the provided id."""
-    origin = current_app.config.get("WEB_APP_URL")
     request_json = request.get_json()
     try:
         affiliation_invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(
             affiliation_invitation_id
         )
         if affiliation_invitation is None:
-            response, status = {
-                "message": "The requested affiliation invitation could not be found."
-            }, HTTPStatus.NOT_FOUND
+            response, status = (
+                {"message": "The requested affiliation invitation could not be found."},
+                HTTPStatus.NOT_FOUND,
+            )
         else:
             user = UserService.find_by_jwt_token()
             response, status = (
-                affiliation_invitation.update_affiliation_invitation(user, origin, request_json).as_dict(
-                    mask_email=True
-                ),
+                affiliation_invitation.update_affiliation_invitation(user, request_json).as_dict(mask_email=True),
                 HTTPStatus.OK,
             )
     except BusinessException as exception:

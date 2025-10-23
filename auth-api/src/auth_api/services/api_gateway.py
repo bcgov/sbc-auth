@@ -14,7 +14,6 @@
 """This module manages API gateway service integrations."""
 
 import re
-from typing import Dict, List
 
 from flask import current_app
 from requests.exceptions import HTTPError
@@ -36,7 +35,7 @@ class ApiGateway:
     """Manages all aspects of the API gateway integration."""
 
     @classmethod
-    def create_key(cls, org_id: int, request_json: Dict[str, str]):
+    def create_key(cls, org_id: int, request_json: dict[str, str]):
         """Create a key for the account.
 
         Steps:
@@ -151,7 +150,7 @@ class ApiGateway:
         )
 
     @classmethod
-    def get_api_keys(cls, org_id: int, skip_auth=False) -> List[Dict[str, any]]:
+    def get_api_keys(cls, org_id: int, skip_auth=False) -> list[dict[str, any]]:
         """Get all api keys."""
         current_app.logger.debug("<get_api_keys ")
         if skip_auth is False:

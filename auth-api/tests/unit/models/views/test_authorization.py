@@ -15,6 +15,7 @@
 
 Test suite to ensure that the Authorizations view routines are working as expected.
 """
+
 import uuid
 
 from auth_api.models.views.authorization import Authorization

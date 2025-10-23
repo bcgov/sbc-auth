@@ -21,7 +21,6 @@ rather than reading environment variables directly or by accessing this configur
 
 import os
 import sys
-from typing import List
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -58,7 +57,7 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    SECRET_KEY = "a secret"
+    SECRET_KEY = "a secret"  # noqa: S105
     TESTING = False
     DEBUG = False
 
@@ -182,7 +181,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     API_GW_KC_CLIENT_ID_PATTERN = os.getenv("API_GW_KC_CLIENT_ID_PATTERN", "api-key-account-{account_id}")
 
     # NR Supported Request types.
-    NR_SUPPORTED_REQUEST_TYPES: List[str] = os.getenv("NR_SUPPORTED_REQUEST_TYPES", "BC").replace(" ", "").split(",")
+    NR_SUPPORTED_REQUEST_TYPES: list[str] = os.getenv("NR_SUPPORTED_REQUEST_TYPES", "BC").replace(" ", "").split(",")
     AUTH_WEB_SANDBOX_HOST = os.getenv("AUTH_WEB_SANDBOX_HOST", "localhost")
 
     # LaunchDarkly SDK key
@@ -322,7 +321,7 @@ class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
 
     if not SECRET_KEY:
         SECRET_KEY = os.urandom(24)
-        print("WARNING: SECRET_KEY being set as a one-shot", file=sys.stderr)
+        print("WARNING: SECRET_KEY being set as a one-shot", file=sys.stderr)  # noqa: T201
 
     TESTING = False
     DEBUG = False

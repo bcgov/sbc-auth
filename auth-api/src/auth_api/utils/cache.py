@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Bring in the common cache."""
+
 import os
 
 from flask_caching import Cache
@@ -21,7 +22,6 @@ cache_servers = os.environ.get("CACHE_MEMCACHED_SERVERS")
 if cache_servers:
     cache = Cache(config={"CACHE_TYPE": "MemcachedCache", "CACHE_MEMCACHED_SERVERS": cache_servers.split(",")})
 else:
-
     redis_host = os.environ.get("CACHE_REDIS_HOST")
     redis_port = os.environ.get("CACHE_REDIS_PORT")
 

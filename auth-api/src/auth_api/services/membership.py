@@ -33,13 +33,13 @@ from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Activity
 from auth_api.schemas import MembershipSchema
+from auth_api.utils.account_mailer import publish_to_mailer
+from auth_api.utils.auth_event_publisher import publish_team_member_event
 from auth_api.utils.constants import GROUP_CONTACT_CENTRE_STAFF, GROUP_MAXIMUS_STAFF, GROUP_SBC_STAFF
 from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, OrgStatus, OrgType, Status
 from auth_api.utils.roles import ADMIN, ALLOWED_READ_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
-from ..utils.account_mailer import publish_to_mailer
-from ..utils.auth_event_publisher import publish_team_member_event
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .keycloak import KeycloakService
@@ -211,7 +211,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         try:
             publish_to_mailer(notification_type_for_mailer, data=data)
             current_app.logger.debug("<send_approval_notification_to_member")
-        except Exception as e:  # noqa=B901
+        except Exception as e:  # noqa: B901
             current_app.logger.error("<send_notification_to_member failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 

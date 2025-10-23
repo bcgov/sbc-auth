@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation Invitation data."""
+
 from dataclasses import fields
 from datetime import datetime
-from typing import Dict, List, Optional
 from urllib.parse import urlencode
 
 from flask import current_app
@@ -33,22 +33,22 @@ from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.dataclass import AffiliationInvitationData, AffiliationInvitationSearch
-from auth_api.models.entity import Entity as EntityModel  # noqa: I005
+from auth_api.models.entity import Entity as EntityModel  # noqa: I001
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
+from auth_api.schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.services.flags import flags
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
+from auth_api.utils.account_mailer import publish_to_mailer
+from auth_api.utils.auth_event_publisher import publish_affiliation_event
 from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
 from auth_api.utils.roles import ADMIN, CLIENT_AUTH_ROLES, COORDINATOR, STAFF, USER
 from auth_api.utils.user_context import UserContext, user_context
+from auth_api.utils.util import escape_wam_friendly_url
 
-from ..schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
-from ..utils.account_mailer import publish_to_mailer
-from ..utils.auth_event_publisher import publish_affiliation_event
-from ..utils.util import escape_wam_friendly_url
 from .authorization import check_auth
 from .rest_service import RestService
 
@@ -80,16 +80,16 @@ class AffiliationInvitation:
 
     @classmethod
     def affiliation_invitations_to_dict_list(
-        cls, models: List[AffiliationInvitationModel], mask_email=True
-    ) -> List[Dict]:
+        cls, models: list[AffiliationInvitationModel], mask_email=True
+    ) -> list[dict]:
         """Return list of AffiliationInvitationModels converted to list dicts."""
         schema = cls.get_affiliation_invitation_schema(mask_email)
         return [schema.dump(model) for model in models]
 
     @classmethod
     def enrich_affiliation_invitations_dict_list_with_business_data(
-        cls, affiliation_invitation_dicts: List[Dict]
-    ) -> List[AffiliationInvitationData]:
+        cls, affiliation_invitation_dicts: list[dict]
+    ) -> list[AffiliationInvitationData]:
         """Enrich affiliation invitation model data with business details."""
         if not affiliation_invitation_dicts:
             return []
@@ -97,12 +97,13 @@ class AffiliationInvitation:
         business_entities = AffiliationInvitation._get_multiple_business_details(
             business_identifiers=[afi["business_identifier"] for afi in affiliation_invitation_dicts],
             token=RestService.get_service_account_token(
-                config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+                config_id="ENTITY_SVC_CLIENT_ID",
+                config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
             ),
         )
         result = []
 
-        def _init_dict_for_dataclass_from_dict(dataclass, initial_dict: Dict):
+        def _init_dict_for_dataclass_from_dict(dataclass, initial_dict: dict):
             return {field.name: initial_dict.get(field.name) for field in fields(dataclass)}
 
         for affiliation_invitation_dict in affiliation_invitation_dicts:
@@ -176,7 +177,8 @@ class AffiliationInvitation:
         # Validate business exists in LEAR
         # Fetch the up-to-date business details from legal API - Business exception raised if failure
         token = RestService.get_service_account_token(
-            config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+            config_id="ENTITY_SVC_CLIENT_ID",
+            config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
         )
         business = AffiliationInvitation._get_business_details(business_identifier, token)
 
@@ -206,9 +208,9 @@ class AffiliationInvitation:
     @staticmethod
     def get_invitation_email(
         affiliation_invitation_type: AffiliationInvitationType,
-        entity: Optional[EntityService] = None,
-        org_id: Optional[int] = None,
-    ) -> Optional[str]:
+        entity: EntityService | None = None,
+        org_id: int | None = None,
+    ) -> str | None:
         """Get affiliation invitation email based on provided params."""
         if affiliation_invitation_type == AffiliationInvitationType.REQUEST:
             admin_emails = UserService.get_admin_emails_for_org(org_id)
@@ -228,8 +230,8 @@ class AffiliationInvitation:
 
     @staticmethod
     def _get_invitation_email(
-        affiliation_invitation_info: Dict, entity: OrgService = None, org_id: Optional[int] = None
-    ) -> Optional[str]:
+        affiliation_invitation_info: dict, entity: OrgService = None, org_id: int | None = None
+    ) -> str | None:
         if invitation_type := AffiliationInvitationType.from_value(
             affiliation_invitation_info.get("type", AffiliationInvitationType.EMAIL.value)
         ):
@@ -255,10 +257,10 @@ class AffiliationInvitation:
     @staticmethod
     @user_context
     def create_affiliation_invitation(
-        affiliation_invitation_info: Dict,
+        affiliation_invitation_info: dict,
         # pylint:disable=unused-argument,too-many-locals
         user,
-        **kwargs,
+        **kwargs,  # noqa: ARG004
     ):
         """Create a new affiliation invitation."""
         from_org_id = affiliation_invitation_info["fromOrgId"]
@@ -340,7 +342,7 @@ class AffiliationInvitation:
         return get_business_response.json()
 
     @staticmethod
-    def _get_multiple_business_details(business_identifiers: List[str], token: str) -> List:
+    def _get_multiple_business_details(business_identifiers: list[str], token: str) -> list:
         """Return json of multiple business details by calling legal-api."""
         legal_api_url = current_app.config.get("LEGAL_API_URL") + current_app.config.get("LEGAL_API_VERSION_2")
         get_businesses_url = f"{legal_api_url}/businesses/search"
@@ -365,7 +367,7 @@ class AffiliationInvitation:
                     return alt_name.get("name")
         return default_name
 
-    def update_affiliation_invitation(self, user, invitation_origin, affiliation_invitation_info: Dict):
+    def update_affiliation_invitation(self, user, affiliation_invitation_info: dict):
         """Update the specified affiliation invitation with new data."""
         invitation: AffiliationInvitationModel = self._model
 
@@ -387,7 +389,8 @@ class AffiliationInvitation:
             entity: EntityModel = invitation.entity
 
             token = RestService.get_service_account_token(
-                config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+                config_id="ENTITY_SVC_CLIENT_ID",
+                config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
             )
             business = AffiliationInvitation._get_business_details(entity.business_identifier, token)
             business_name = business["business"]["legalName"]
@@ -424,8 +427,8 @@ class AffiliationInvitation:
 
     @staticmethod
     def _filter_request_invites_role_based(
-        affiliation_invitation_models: List[AffiliationInvitationModel], org_id: int
-    ) -> List[AffiliationInvitationModel]:
+        affiliation_invitation_models: list[AffiliationInvitationModel], org_id: int
+    ) -> list[AffiliationInvitationModel]:
         """Filter out affiliation invitations of type REQUEST if current user is not staff or org admin/coordinator."""
         if UserService.is_context_user_staff():
             return affiliation_invitation_models
@@ -603,7 +606,8 @@ class AffiliationInvitation:
     ):
         """Send authorization email, either for accepted or refused authorization."""
         token = RestService.get_service_account_token(
-            config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+            config_id="ENTITY_SVC_CLIENT_ID",
+            config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
         )
         business = AffiliationInvitation._get_business_details(
             business_identifier=affiliation_invitation.entity.business_identifier, token=token
@@ -679,8 +683,8 @@ class AffiliationInvitation:
         affiliation_invitation_id,
         # pylint:disable=unused-argument
         user: UserService,
-        origin,
-        **kwargs,
+        origin,  # noqa: ARG004
+        **kwargs,  # noqa: ARG004
     ):
         """Add an affiliation from the affiliation invitation."""
         current_app.logger.debug(">accept_affiliation_invitation")
@@ -730,7 +734,7 @@ class AffiliationInvitation:
     @classmethod
     def get_all_invitations_with_details_related_to_org(
         cls, org_id: int, search_filter: AffiliationInvitationSearch
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Get affiliation invitations for from org and for to org."""
         affiliation_invitations = AffiliationInvitationModel.find_all_related_to_org(
             org_id=org_id, search_filter=search_filter

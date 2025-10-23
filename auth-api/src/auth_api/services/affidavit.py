@@ -15,8 +15,8 @@
 
 This module manages the User Information.
 """
+
 from datetime import datetime
-from typing import Dict
 
 from flask import current_app
 
@@ -55,7 +55,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def create_affidavit(affidavit_info: Dict):
+    def create_affidavit(affidavit_info: dict):
         """Create a new affidavit record."""
         current_app.logger.debug("<create_affidavit ")
         user = UserService.find_by_jwt_token()

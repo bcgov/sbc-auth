@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Enum definitions."""
+
 from enum import Enum
 
 
@@ -71,7 +72,7 @@ class RequiredAction(Enum):
     VERIFY_EMAIL = "VERIFY_EMAIL"
     UPDATE_PROFILE = "UPDATE_PROFILE"
     CONFIGURE_TOTP = "CONFIGURE_TOTP"
-    UPDATE_PASSWORD = "UPDATE_PASSWORD"
+    UPDATE_PASSWORD = "UPDATE_PASSWORD"  # noqa: S105
 
 
 class PaymentMethod(Enum):
@@ -222,9 +223,7 @@ class AffiliationInvitationType(Enum):
     def from_value(cls, value):
         """Return instance from value of the enum."""
         # Change this back to None after business-ui gets pushed to production.
-        return (
-            AffiliationInvitationType(value) if value in cls._value2member_map_ else AffiliationInvitationType.EMAIL
-        )  # pylint: disable=no-member
+        return AffiliationInvitationType(value) if value in cls._value2member_map_ else AffiliationInvitationType.EMAIL  # pylint: disable=no-member
 
 
 class IdpHint(Enum):

@@ -1,6 +1,6 @@
 """Unit tests for the EntityMapping service."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.dataclass import AffiliationSearchDetails
@@ -74,7 +74,6 @@ def _create_affiliations_for_mapping(session, org_id, data, alternate_org_id, is
 
 def test_get_filtered_affiliations_identifier_matches(session):
     """Test that affiliations are returned based on identifier matching logic."""
-
     entity_mapping_data = [
         # COLIN import - Business only on BRD
         {"identifier": "BC1234567", "bootstrapIdentifier": None, "nrNumber": None},
