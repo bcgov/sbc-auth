@@ -125,9 +125,10 @@ def patch_affiliation_invitation(affiliation_invitation_id):
             affiliation_invitation_id
         )
         if affiliation_invitation is None:
-            response, status = {
-                "message": "The requested affiliation invitation could not be found."
-            }, HTTPStatus.NOT_FOUND
+            response, status = (
+                {"message": "The requested affiliation invitation could not be found."},
+                HTTPStatus.NOT_FOUND,
+            )
         else:
             user = UserService.find_by_jwt_token()
             response, status = (

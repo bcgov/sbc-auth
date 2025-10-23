@@ -15,7 +15,6 @@
 
 Test suite to ensure that the Affiliation model routines are working as expected.
 """
-import pytest
 
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel

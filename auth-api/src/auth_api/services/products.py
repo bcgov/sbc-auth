@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Product and Product Subscription data."""
+
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from flask import current_app
 from sqlalchemy import and_, case, func, literal, or_
@@ -33,6 +34,8 @@ from auth_api.models.dataclass import Activity, KeycloakGroupSubscription, Produ
 from auth_api.schemas import ProductCodeSchema
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.user import User as UserService
+from auth_api.utils.account_mailer import publish_to_mailer
+from auth_api.utils.cache import cache
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
     AccessType,
@@ -47,17 +50,15 @@ from auth_api.utils.enums import (
     TaskRelationshipType,
     TaskStatus,
 )
-from auth_api.utils.user_context import UserContext, user_context
-
-from ..utils.account_mailer import publish_to_mailer
-from ..utils.cache import cache
-from ..utils.notifications import (
+from auth_api.utils.notifications import (
     ProductNotificationInfo,
     ProductSubscriptionInfo,
     get_product_notification_data,
     get_product_notification_type,
 )
-from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
+from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
+from auth_api.utils.user_context import UserContext, user_context
+
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .task import Task as TaskService
@@ -71,7 +72,7 @@ class SubscriptionRequest:
     product_code: str
     status_code: str
     product_model_description: str
-    inactive_sub: Optional[Any] = None
+    inactive_sub: Any | None = None
     publish_activity: bool = True
 
 
@@ -88,7 +89,7 @@ class Product:
     def build_all_products_cache(cls):
         """Build cache for all permission values."""
         try:
-            product_list: List[ProductCodeModel] = ProductCodeModel.get_all_products()
+            product_list: list[ProductCodeModel] = ProductCodeModel.get_all_products()
             for product in product_list:
                 cache.set(product.code, product.type_code)
         except SQLAlchemyError as e:
@@ -112,7 +113,7 @@ class Product:
             raise BusinessException(Error.INVALID_PRODUCT_RESUB_STATE, None)
 
     @staticmethod
-    def resubmit_product_subscription(org_id, subscription_data: Dict[str, Any], skip_auth=False):
+    def resubmit_product_subscription(org_id, subscription_data: dict[str, Any], skip_auth=False):
         """Reset product subscription state.
 
         A re-submission is only possible when:
@@ -178,7 +179,7 @@ class Product:
     @staticmethod
     def create_product_subscription(
         org_id,
-        subscription_data: Dict[str, Any],  # pylint: disable=too-many-locals
+        subscription_data: dict[str, Any],  # pylint: disable=too-many-locals
         is_new_transaction: bool = True,
         skip_auth=False,
         auto_approve=False,
@@ -405,7 +406,7 @@ class Product:
         return ProductSubscriptionStatus.ACTIVE.value
 
     @staticmethod
-    def create_subscription_from_bcol_profile(org_id: int, bcol_profile_flags: List[str]):
+    def create_subscription_from_bcol_profile(org_id: int, bcol_profile_flags: list[str]):
         """Create product subscription from bcol profile flags."""
         if not bcol_profile_flags:
             return
@@ -450,7 +451,7 @@ class Product:
         if not skip_auth and not user_from_context.is_external_staff():
             check_auth(one_of_roles=(*CLIENT_AUTH_ROLES, STAFF), org_id=org_id)
 
-        product_subscriptions: List[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_ids([org_id])
+        product_subscriptions: list[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_ids([org_id])
         subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}
 
         # Include hidden products only for staff and SBC staff
@@ -612,12 +613,12 @@ class Product:
         try:
             publish_to_mailer(notification_type, data=data)
             current_app.logger.debug("<send_prod_subscription_notification>")
-        except Exception as e:  # noqa=B901
+        except Exception as e:  # noqa: B901
             current_app.logger.error("<send_prod_subscription_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
-    def get_users_product_subscriptions_kc_groups(user_ids: List[int]) -> List[KeycloakGroupSubscription]:
+    def get_users_product_subscriptions_kc_groups(user_ids: list[int]) -> list[KeycloakGroupSubscription]:
         """Generate Keycloak Group Subscriptions."""
         ps_max_subquery = (
             db.session.query(
@@ -691,7 +692,7 @@ class Product:
         return keycloak_group_subscriptions
 
     @staticmethod
-    def update_users_products_keycloak_groups(user_ids: List[int]):
+    def update_users_products_keycloak_groups(user_ids: list[int]):
         """Update list of user's keycloak roles for product subscriptions."""
         current_app.logger.debug("<update_users_products_keycloak_group ")
         kc_groups = Product.get_users_product_subscriptions_kc_groups(user_ids)

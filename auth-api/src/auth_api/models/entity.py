@@ -15,6 +15,7 @@
 
 The class and schema are both present in this module.
 """
+
 from typing import Self
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String

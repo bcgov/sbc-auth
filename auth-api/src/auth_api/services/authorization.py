@@ -15,7 +15,6 @@
 
 This module is to handle authorization related queries.
 """
-from typing import Dict, Optional
 
 from flask import abort, current_app
 
@@ -40,7 +39,7 @@ class Authorization:
     @staticmethod
     @user_context
     def get_account_authorizations_for_org(
-        account_id: str, corp_type_code: Optional[str], expanded: bool = False, **kwargs
+        account_id: str, corp_type_code: str | None, expanded: bool = False, **kwargs
     ):
         """Get User authorizations for the org."""
         user_from_context: UserContext = kwargs["user_context"]
@@ -111,7 +110,6 @@ class Authorization:
                     auth_response["roles"] = permissions
         else:
             if business_identifier:
-
                 # Check if the user has access to the resource
                 if keycloak_guid := user_from_context.sub:
                     auth = AuthorizationView.find_user_authorization_by_business_number(
@@ -132,7 +130,7 @@ class Authorization:
     @staticmethod
     def get_user_authorizations(keycloak_guid: str):
         """Get all user authorizations."""
-        authorizations_response: Dict = {"authorizations": []}
+        authorizations_response: dict = {"authorizations": []}
 
         authorizations = AuthorizationView.find_all_authorizations_for_user(keycloak_guid)
         if authorizations:
@@ -185,7 +183,6 @@ class Authorization:
 
     @staticmethod
     def _is_product_based_auth(product_code):
-
         check_product_based_auth = False
         if product_code:
             # pylint:disable=cyclic-import, import-outside-toplevel

@@ -15,6 +15,7 @@
 
 Test suite to ensure that the  model routines are working as expected.
 """
+
 from _datetime import datetime, timedelta
 
 from auth_api.config import get_named_config
@@ -58,7 +59,7 @@ def factory_invitation_model(session, status, sent_date=datetime.now()):
     invitation.sender = user
     invitation.sent_date = sent_date
     invitation.invitation_status_code = status
-    invitation.token = "ABCD"
+    invitation.token = "ABCD"  # noqa: S105
 
     invitation_membership = InvitationMembershipModel()
     invitation_membership.org_id = org.id

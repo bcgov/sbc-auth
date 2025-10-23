@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the /affiliationsInvitations endpoint is working as expected.
 """
+
 import json
 from http import HTTPStatus
 
@@ -327,14 +328,14 @@ def test_delete_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     affiliation_invitation_id = invitation_dictionary["id"]
 
     rv_invitation = client.delete(
-        "/api/v1/affiliationInvitations/{}".format(affiliation_invitation_id),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
         headers=headers,
         content_type="application/json",
     )
     assert rv_invitation.status_code == HTTPStatus.OK
 
     rv_invitation = client.get(
-        "/api/v1/affiliationInvitations/{}".format(affiliation_invitation_id),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
         headers=headers,
         content_type="application/json",
     )
@@ -371,7 +372,7 @@ def test_delete_accepted_affiliation_inv(client, jwt, session, keycloak_mock, bu
 
     # Accept invitation
     rv_invitation = client.put(
-        "/api/v1/affiliationInvitations/{}/token/{}".format(affiliation_invitation_id, affiliation_invitation_token),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}/token/{affiliation_invitation_token}",
         headers=headers,
         content_type="application/json",
     )
@@ -383,14 +384,14 @@ def test_delete_accepted_affiliation_inv(client, jwt, session, keycloak_mock, bu
 
     # Delete the accepted invitation
     rv_invitation = client.delete(
-        "/api/v1/affiliationInvitations/{}".format(affiliation_invitation_id),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
         headers=headers,
         content_type="application/json",
     )
     assert rv_invitation.status_code == HTTPStatus.OK
 
     rv_invitation = client.get(
-        "/api/v1/affiliationInvitations/{}".format(affiliation_invitation_id),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
         headers=headers,
         content_type="application/json",
     )
@@ -432,7 +433,7 @@ def test_get_affiliation_invitation_by_id(client, jwt, session, keycloak_mock, b
     affiliation_invitation_id = invitation_dictionary["id"]
 
     rv = client.get(
-        "/api/v1/affiliationInvitations/{}".format(affiliation_invitation_id),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
         headers=headers,
         content_type="application/json",
     )
@@ -469,7 +470,7 @@ def test_update_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     updated_affiliation_invitation = {}
 
     rv_invitation = client.patch(
-        "/api/v1/affiliationInvitations/{}".format(affiliation_invitation_id),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
         data=json.dumps(updated_affiliation_invitation),
         headers=headers,
         content_type="application/json",
@@ -509,7 +510,7 @@ def test_update_affiliation_invitation_exclude_to_org(client, jwt, session, keyc
     updated_affiliation_invitation = {}
 
     rv_invitation = client.patch(
-        "/api/v1/affiliationInvitations/{}".format(affiliation_invitation_id),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
         data=json.dumps(updated_affiliation_invitation),
         headers=headers,
         content_type="application/json",
@@ -549,7 +550,7 @@ def test_expire_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     updated_affiliation_invitation = {"status": "EXPIRED"}
 
     rv_invitation = client.patch(
-        "/api/v1/affiliationInvitations/{}".format(affiliation_invitation_id),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
         data=json.dumps(updated_affiliation_invitation),
         headers=headers,
         content_type="application/json",
@@ -589,7 +590,7 @@ def test_expire_affiliation_invitation_exclude_to_org(client, jwt, session, keyc
     updated_affiliation_invitation = {"status": "EXPIRED"}
 
     rv_invitation = client.patch(
-        "/api/v1/affiliationInvitations/{}".format(affiliation_invitation_id),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
         data=json.dumps(updated_affiliation_invitation),
         headers=headers,
         content_type="application/json",
@@ -633,7 +634,7 @@ def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert affiliation_invitation_token is not None
 
     rv_invitation = client.put(
-        "/api/v1/affiliationInvitations/{}/token/{}".format(affiliation_invitation_id, affiliation_invitation_token),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}/token/{affiliation_invitation_token}",
         headers=headers,
         content_type="application/json",
     )
@@ -647,7 +648,7 @@ def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert_masked_email(TestContactInfo.contact1["email"], dictionary["recipientEmail"])
 
     # Assert from org affiliation is created
-    rv_affiliations = client.get("/api/v1/orgs/{}/affiliations".format(from_org_id), headers=headers)
+    rv_affiliations = client.get(f"/api/v1/orgs/{from_org_id}/affiliations", headers=headers)
     assert rv_affiliations.status_code == HTTPStatus.OK
 
     assert schema_utils.validate(rv_affiliations.json, "affiliations_response")[0]
@@ -657,7 +658,7 @@ def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert affiliations["entities"][0]["businessIdentifier"] == business_identifier
 
     # Assert to org affiliation is empty
-    rv_affiliations = client.get("/api/v1/orgs/{}/affiliations".format(to_org_id), headers=headers)
+    rv_affiliations = client.get(f"/api/v1/orgs/{to_org_id}/affiliations", headers=headers)
     assert rv_affiliations.status_code == HTTPStatus.OK
 
     assert schema_utils.validate(rv_affiliations.json, "affiliations_response")[0]
@@ -685,7 +686,7 @@ def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, busine
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     rv_invitations = client.get(
-        "/api/v1/affiliationInvitations?fromOrgId={}".format(from_org_id),
+        f"/api/v1/affiliationInvitations?fromOrgId={from_org_id}",
         headers=headers,
         content_type="application/json",
     )
@@ -728,7 +729,7 @@ def test_get_affiliation_invitations_deleted(client, jwt, session, keycloak_mock
 
     # Accept invitation
     rv_invitation = client.put(
-        "/api/v1/affiliationInvitations/{}/token/{}".format(affiliation_invitation_id, affiliation_invitation_token),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}/token/{affiliation_invitation_token}",
         headers=headers,
         content_type="application/json",
     )
@@ -740,7 +741,7 @@ def test_get_affiliation_invitations_deleted(client, jwt, session, keycloak_mock
 
     # Delete invitation - soft delete
     client.delete(
-        "/api/v1/affiliationInvitations/{}".format(affiliation_invitation_id),
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
         headers=headers,
         content_type="application/json",
     )
@@ -748,7 +749,7 @@ def test_get_affiliation_invitations_deleted(client, jwt, session, keycloak_mock
 
     # Confirm soft deleted invitation does not return on search with fromOrgId
     rv_invitations = client.get(
-        "/api/v1/affiliationInvitations?fromOrgId={}".format(from_org_id),
+        f"/api/v1/affiliationInvitations?fromOrgId={from_org_id}",
         headers=headers,
         content_type="application/json",
     )
@@ -760,7 +761,7 @@ def test_get_affiliation_invitations_deleted(client, jwt, session, keycloak_mock
 
     # Confirm soft deleted invitation does not return on search with orgId
     rv_invitations = client.get(
-        "/api/v1/affiliationInvitations?orgId={}".format(from_org_id), headers=headers, content_type="application/json"
+        f"/api/v1/affiliationInvitations?orgId={from_org_id}", headers=headers, content_type="application/json"
     )
 
     result_json = rv_invitations.json

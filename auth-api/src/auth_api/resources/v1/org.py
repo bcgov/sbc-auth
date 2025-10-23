@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """API endpoints for managing an Org resource."""
+
 import asyncio
 from http import HTTPStatus
 
@@ -25,7 +26,7 @@ from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest, SimpleOrgSearch
-from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
+from auth_api.models.org import OrgSearch  # noqa: I001
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
@@ -42,7 +43,7 @@ from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import AccessType, NotificationType, OrgStatus, OrgType, PatchActions, Status
 from auth_api.utils.role_validator import validate_roles
-from auth_api.utils.roles import (  # noqa: I005
+from auth_api.utils.roles import (  # noqa: I001
     AFFILIATION_ALLOWED_ROLES,
     ALL_ALLOWED_ROLES,
     CLIENT_ADMIN_ROLES,
@@ -164,11 +165,14 @@ def post_organization():
             return response, status
         response, status = OrgService.create_org(request_json, user.identifier).as_dict(), HTTPStatus.CREATED
     except BusinessException as exception:
-        response, status = {
-            "code": exception.code,
-            "message": exception.message,
-            "detail": exception.detail,
-        }, exception.status_code
+        response, status = (
+            {
+                "code": exception.code,
+                "message": exception.message,
+                "detail": exception.detail,
+            },
+            exception.status_code,
+        )
     return response, status
 
 
@@ -210,11 +214,14 @@ def put_organization(org_id):
         else:
             response, status = {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
     except BusinessException as exception:
-        response, status = {
-            "code": exception.code,
-            "message": exception.message,
-            "detail": exception.detail,
-        }, exception.status_code
+        response, status = (
+            {
+                "code": exception.code,
+                "message": exception.message,
+                "detail": exception.detail,
+            },
+            exception.status_code,
+        )
     return response, status
 
 
@@ -553,7 +560,6 @@ def delete_org_affiliation_by_business_identifier(org_id, business_identifier):
 def get_organization_members(org_id):
     """Retrieve the set of members for the given org."""
     try:
-
         status = request.args.get("status").upper() if request.args.get("status") else None
         roles = request.args.get("roles").upper().split(",") if request.args.get("roles") else None
 
@@ -572,7 +578,7 @@ def get_organization_members(org_id):
 @bp.route("/<int:org_id>/members/<int:membership_id>", methods=["PATCH", "OPTIONS"])
 @cross_origin(origins="*", methods=["PATCH", "DELETE"])
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
-def patch_organization_member(org_id, membership_id):  # pylint:disable=unused-argument
+def patch_organization_member(org_id, membership_id):  # noqa: ARG001
     """Update a membership record with new member role."""
     role = request.get_json().get("role")
     membership_status = request.get_json().get("status")
@@ -616,7 +622,7 @@ def patch_organization_member(org_id, membership_id):  # pylint:disable=unused-a
 @bp.route("/<int:org_id>/members/<int:membership_id>", methods=["DELETE"])
 @cross_origin(origins="*")
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
-def delete_organization_member(org_id, membership_id):  # pylint:disable=unused-argument
+def delete_organization_member(org_id, membership_id):  # noqa: ARG001
     """Mark a membership record as inactive.  Membership must match current user token."""
     try:
         membership = MembershipService.find_membership_by_id(membership_id)
@@ -637,13 +643,13 @@ def delete_organization_member(org_id, membership_id):  # pylint:disable=unused-
 def get_organization_invitations(org_id):
     """Retrieve the set of invitations for the given org."""
     try:
-
         invitation_status = request.args.get("status").upper() if request.args.get("status") else None
         invitations = InvitationService.get_invitations_for_org(org_id=org_id, status=invitation_status)
 
-        response, status = {
-            "invitations": InvitationSchema(exclude=["membership.org"]).dump(invitations, many=True)
-        }, HTTPStatus.OK
+        response, status = (
+            {"invitations": InvitationSchema(exclude=["membership.org"]).dump(invitations, many=True)},
+            HTTPStatus.OK,
+        )
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
 

@@ -15,6 +15,7 @@
 
 Test-Suite to ensure that the /Activity Log endpoint is working as expected.
 """
+
 import copy
 from http import HTTPStatus
 
@@ -206,9 +207,7 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
         ),
     ],
 )
-def test_activity_log_actions(
-    client, jwt, session, action, item_name, item_value, expected_message
-):  # pylint:disable=unused-argument
+def test_activity_log_actions(client, jwt, session, action, item_name, item_value, expected_message):  # pylint:disable=unused-argument
     """Test activity log for various actions with parameterized test cases."""
     user = factory_user_model()
     org = factory_org_model()

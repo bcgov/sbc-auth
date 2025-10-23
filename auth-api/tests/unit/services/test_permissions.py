@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the Permissions Service is working as expected.
 """
+
 from unittest.mock import patch
 
 from auth_api.services import Permissions as PermissionService

@@ -19,9 +19,7 @@ This is a mapping between status codes and descriptions for Affidavit objects.
 from .base_model import BaseCodeModel
 
 
-class AffidavitStatus(
-    BaseCodeModel
-):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class AffidavitStatus(BaseCodeModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Affidavit Status record."""
 
     __tablename__ = "affidavit_statuses"

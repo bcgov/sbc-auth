@@ -15,6 +15,7 @@
 
 Test suite to ensure that the Invitation service routines are working as expected.
 """
+
 from datetime import datetime, timedelta
 from unittest import mock
 from unittest.mock import ANY, patch
@@ -28,11 +29,10 @@ from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models.dataclass import Activity
-from auth_api.services import ActivityLogPublisher
+from auth_api.services import ActivityLogPublisher, User
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
-from auth_api.services import User
 from auth_api.utils.enums import ActivityAction
 from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
@@ -141,7 +141,10 @@ def test_update_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_update_invitation_verify_different_tokens(
-    session, auth_mock, keycloak_mock, monkeypatch  # pylint:disable=unused-argument
+    session,
+    auth_mock,
+    keycloak_mock,
+    monkeypatch,  # pylint:disable=unused-argument
 ):
     """Update the specified invitation with new data."""
     with patch.object(InvitationService, "send_invitation", return_value=None):

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for the Google Store service."""
+
 from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
@@ -38,7 +39,7 @@ def test_create_signed_put_url(session, gcs_mock):  # pylint:disable=unused-argu
         method="PUT",
         content_type="application/pdf",
         service_account_email="test@project.iam.gserviceaccount.com",  # From fixture
-        access_token="mock-token",  # From fixture
+        access_token="mock-token",  # noqa: S106
     )
 
 
@@ -47,7 +48,7 @@ def test_create_signed_get_url(session, tmpdir, gcs_mock):  # pylint:disable=unu
     # Setup mock credentials
     mock_credentials = MagicMock()
     mock_credentials.service_account_email = "test@project.iam.gserviceaccount.com"
-    mock_credentials.token = "mock-token"
+    mock_credentials.token = "mock-token"  # noqa: S105
 
     with patch("google.auth.compute_engine.Credentials", return_value=mock_credentials):
         # Set up test file
@@ -85,5 +86,5 @@ def test_create_signed_get_url(session, tmpdir, gcs_mock):  # pylint:disable=unu
             expiration=timedelta(hours=1),
             method="GET",
             service_account_email="test@project.iam.gserviceaccount.com",
-            access_token="mock-token",
+            access_token="mock-token",  # noqa: S106
         )

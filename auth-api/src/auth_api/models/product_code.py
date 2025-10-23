@@ -15,9 +15,8 @@
 
 It defines the available products.
 """
-from __future__ import annotations
 
-from typing import List
+from __future__ import annotations
 
 from sqlalchemy import Boolean, Column, ForeignKey, String
 
@@ -99,6 +98,6 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
         )
 
     @classmethod
-    def find_by_type_code(cls, type_code: str) -> List[ProductCode]:
+    def find_by_type_code(cls, type_code: str) -> list[ProductCode]:
         """Find products by the type code."""
         return cls.query.filter(ProductCode.type_code == type_code).all()

@@ -1,3 +1,5 @@
+"""Test module for API Gateway service."""
+
 import os
 
 import pytest

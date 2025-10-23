@@ -29,11 +29,11 @@ from auth_api.services import Codes as CodesService
 def test_get_codes(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the code type can be fetched."""
     code_type = "membership_types"
-    rv = client.get("/api/v1/codes/{}".format(code_type), content_type="application/json")
+    rv = client.get(f"/api/v1/codes/{code_type}", content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "codes")[0]
 
-    rv = client.get("/api/v1/codes/{}".format(code_type.upper()), content_type="application/json")
+    rv = client.get(f"/api/v1/codes/{code_type.upper()}", content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "codes")[0]
 

@@ -15,7 +15,6 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 from sbc_common_components.utils.enums import QueueMessageTypes
 
@@ -33,9 +32,9 @@ class ProductSubscriptionInfo:
     is_approved: bool
     product_subscription_id: int
     org_id: int
-    task_remarks: Optional[str] = None
-    is_hold: Optional[bool] = False
-    is_resubmitted: Optional[bool] = False
+    task_remarks: str | None = None
+    is_hold: bool | None = False
+    is_resubmitted: bool | None = False
 
 
 @dataclass
@@ -44,10 +43,10 @@ class ProductNotificationInfo:
 
     product_model: ProductCodeModel
     product_sub_model: ProductSubscriptionModel
-    recipient_emails: Optional[str] = None
-    remarks: Optional[str] = None
-    is_reapproved: Optional[bool] = False
-    is_confirmation: Optional[bool] = False
+    recipient_emails: str | None = None
+    remarks: str | None = None
+    is_reapproved: bool | None = False
+    is_confirmation: bool | None = False
 
 
 # e.g [BC Registries and Online Services] Your {{MHR_QUALIFIED_SUPPLIER}} Access Has Been Approved

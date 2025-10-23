@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Object to hold keycloak user information."""
+
 import json
-from typing import Dict
 
 from auth_api.utils.enums import RequiredAction
 
@@ -21,7 +21,7 @@ from auth_api.utils.enums import RequiredAction
 class KeycloakUser:  # pylint: disable=too-many-instance-attributes
     """Object to hold keycloak user information."""
 
-    def __init__(self, user: Dict = None):
+    def __init__(self, user: dict = None):
         """Create user."""
         self._user = user or {}
 
@@ -125,6 +125,6 @@ class KeycloakUser:  # pylint: disable=too-many-instance-attributes
             self._user["requiredActions"] = []
         self._user["requiredActions"].append(RequiredAction.CONFIGURE_TOTP.value)
 
-    def value(self) -> Dict:
+    def value(self) -> dict:
         """Return dict value."""
         return json.dumps(self._user)

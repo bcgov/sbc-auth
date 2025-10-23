@@ -15,9 +15,9 @@
 
 This module manages the tasks.
 """
+
 import urllib
 from datetime import datetime
-from typing import Dict, List
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -35,7 +35,7 @@ from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.enums import Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from auth_api.utils.notifications import ProductSubscriptionInfo
-from auth_api.utils.util import camelback2snake  # noqa: I005
+from auth_api.utils.util import camelback2snake  # noqa: I001
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 
@@ -57,7 +57,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         """Return the identifier for this user."""
         return self._model.id
 
-    def as_dict(self, exclude: List = None):
+    def as_dict(self, exclude: list = None):
         """Return the Task as a python dict.
 
         None fields are not included in the dict.
@@ -90,7 +90,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         if do_commit:
             db.session.commit()
 
-    def update_task(self, task_info: Dict = None, origin_url: str = None):
+    def update_task(self, task_info: dict = None, origin_url: str = None):
         """Update a task record."""
         current_app.logger.debug("<update_task ")
         task_model: TaskModel = self._model
@@ -184,7 +184,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
     ):
         if is_new_bceid_admin_request:
             create_account_signin_route = urllib.parse.quote_plus(
-                f"{current_app.config.get('BCEID_ADMIN_SETUP_ROUTE')}/" f"{task_model.account_id}/" f"{membership_id}"
+                f"{current_app.config.get('BCEID_ADMIN_SETUP_ROUTE')}/{task_model.account_id}/{membership_id}"
             )
             admin_emails = user.contacts[0].contact.email if user.contacts else ""
             account_id = task_model.account_id
@@ -192,7 +192,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
 
         else:
             create_account_signin_route = urllib.parse.quote_plus(
-                f"{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/" f"{org.id}"
+                f"{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/{org.id}"
             )
             admin_emails = UserService.get_admin_emails_for_org(org.id)
             account_id = org.id
@@ -216,7 +216,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         try:
             publish_to_mailer(mailer_type, data=data)
             current_app.logger.debug("<send_approval_notification_to_member")
-        except Exception as e:  # noqa=B901
+        except Exception as e:  # noqa: B901
             current_app.logger.error("<send_notification_to_member failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 

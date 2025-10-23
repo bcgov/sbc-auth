@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the /users endpoint is working as expected.
 """
+
 import copy
 import json
 import time
@@ -23,7 +24,6 @@ import uuid
 from http import HTTPStatus
 from unittest import mock
 
-import pytest
 from sqlalchemy import event
 
 from auth_api.exceptions.errors import Error
@@ -788,9 +788,7 @@ def test_delete_unknown_user_returns_404(client, jwt, session):  # pylint:disabl
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_delete_user_as_only_admin_returns_400(
-    client, jwt, session, keycloak_mock, monkeypatch
-):  # pylint:disable=unused-argument
+def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Test if the user is the only owner of a team assert status is 400."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -820,9 +818,7 @@ def test_delete_user_as_only_admin_returns_400(
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_delete_user_is_member_returns_204(
-    client, jwt, session, keycloak_mock, monkeypatch
-):  # pylint:disable=unused-argument
+def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Test if the user is the member of a team assert status is 204."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()

@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the CORS decorator is working as expected.
 """
+
 import base64
 from urllib.parse import unquote
 

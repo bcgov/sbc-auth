@@ -15,6 +15,7 @@
 
 Test suite to ensure that the Product service routines are working as expected.
 """
+
 from unittest import mock
 from unittest.mock import ANY, patch
 
@@ -68,10 +69,10 @@ def test_update_product_subscription(session, keycloak_mock, monkeypatch, test_n
         org_id=org._model.id, product_code="PPR", status_code=ProductSubscriptionStatus.ACTIVE.value
     ).flush()
 
-    class MockContact(object):
+    class MockContact:
         email = ""
 
-    class MockPerson(object):
+    class MockPerson:
         def __init__(self, contact: MockContact):
             self.contact = contact
 

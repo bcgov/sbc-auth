@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Function to handle all exceptions."""
+
 import logging
 import traceback
 
@@ -47,7 +48,7 @@ class ExceptionHandler:
         logger.exception(error_message)
         error_text = error.__dict__["code"] if hasattr(error.__dict__, "code") else ""
         status_code = error.status_code if hasattr(error, "status_code") else 500
-        return {"error": "{}".format(error_text), "message": "{}".format(message_text)}, status_code, RESPONSE_HEADERS
+        return {"error": f"{error_text}", "message": f"{message_text}"}, status_code, RESPONSE_HEADERS
 
     def std_handler(self, error):  # pylint: disable=useless-option-value
         """Handle standard exception."""
@@ -96,6 +97,7 @@ class ExceptionHandler:
         else:
             exc_class = exc_class_or_code
 
-        assert issubclass(exc_class, Exception)
+        if not issubclass(exc_class, Exception):
+            raise ValueError("exc_class must be a subclass of Exception")
 
         return exc_class

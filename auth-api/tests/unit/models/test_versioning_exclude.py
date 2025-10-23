@@ -17,7 +17,7 @@
 Test-Suite to ensure that the Versioned class works as expected with column exclusions.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sql_versioning import versioned_session
 
@@ -33,18 +33,18 @@ def test_versioned_excludes_columns_in_create_version(session):
         keycloak_guid="1b20db59-19a0-4727-affe-c6f64309fd04",
         firstname="John",
         lastname="Doe",
-        modified=datetime.now(tz=timezone.utc),
-        login_time=datetime.now(tz=timezone.utc),
+        modified=datetime.now(tz=UTC),
+        login_time=datetime.now(tz=UTC),
     )
 
     session.add(user)
     session.commit()
 
     # modified, login_time, modified_by_id, modified_by, created are excluded.
-    user.modified = datetime.now(tz=timezone.utc) + timedelta(seconds=1)
-    user.login_time = datetime.now(tz=timezone.utc) + timedelta(seconds=1)
+    user.modified = datetime.now(tz=UTC) + timedelta(seconds=1)
+    user.login_time = datetime.now(tz=UTC) + timedelta(seconds=1)
     user.modified_by_id = user.id
-    user.created = datetime.now(tz=timezone.utc)
+    user.created = datetime.now(tz=UTC)
 
     session.flush()
     session.commit()

@@ -15,6 +15,7 @@
 
 Test suite to ensure that the affidavit service routines are working as expected.
 """
+
 from unittest import mock
 
 from auth_api.models import Task as TaskModel
@@ -23,7 +24,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.utils.enums import AffidavitStatus, LoginSource, OrgStatus, TaskAction, TaskRelationshipStatus, TaskStatus
 from tests.conftest import mock_token
-from tests.utilities.factory_scenarios import TestAffidavit, TestJwtClaims, TestOrgInfo, TestUserInfo  # noqa: I005
+from tests.utilities.factory_scenarios import TestAffidavit, TestJwtClaims, TestOrgInfo, TestUserInfo  # noqa: I001
 from tests.utilities.factory_utils import factory_user_model, factory_user_model_with_contact, patch_token_info
 
 

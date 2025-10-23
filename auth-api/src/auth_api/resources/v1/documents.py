@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """API endpoints for managing an Invitation resource."""
+
 from datetime import datetime
 from http import HTTPStatus
 

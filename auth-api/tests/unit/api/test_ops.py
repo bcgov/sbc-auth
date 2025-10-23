@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the /ops endpoint is working as expected.
 """
+
 from sqlalchemy.exc import SQLAlchemyError
 
 from auth_api.models import db

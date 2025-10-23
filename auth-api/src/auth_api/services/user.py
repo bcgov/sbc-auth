@@ -18,7 +18,6 @@ This module manages the User Information.
 
 import json
 from http import HTTPStatus
-from typing import Dict, List
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -38,6 +37,7 @@ from auth_api.schemas import UserSchema
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils import util
+from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.enums import (
     AccessType,
     ActivityAction,
@@ -52,7 +52,6 @@ from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF, 
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
 
-from ..utils.account_mailer import publish_to_mailer
 from .activity_log_publisher import ActivityLogPublisher
 from .contact import Contact as ContactService
 from .documents import Documents as DocumentService
@@ -104,13 +103,12 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
 
     @staticmethod
     def create_user_and_add_membership(
-        memberships: List[dict],
+        memberships: list[dict],
         org_id,
         # pylint: disable=too-many-locals, too-many-statements, too-many-branches
         single_mode: bool = False,
     ):
-        """
-        Create user(s) in the  DB and upstream keycloak.
+        """Create user(s) in the  DB and upstream keycloak.
 
         accepts a list of memberships ie.a list of objects with username,password and membershipTpe
         single_mode can be used if called method already perfomed the authenticaiton
@@ -266,7 +264,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             ActivityLogPublisher.publish_activity(
                 Activity(org_id, ActivityAction.RESET_2FA.value, name=recipient_email)
             )
-        except Exception as e:  # noqa=B901
+        except Exception as e:  # noqa: B901
             current_app.logger.error("<send_otp_authenticator_reset_notification failed")
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
@@ -297,8 +295,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @staticmethod
     @user_context
     def delete_anonymous_user(user_name, **kwargs):
-        """
-        Delete User Profile.
+        """Delete User Profile.
 
         1) check if the token user is admin/owner of the current user
         2) disable the user from kc
@@ -359,7 +356,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
 
     @classmethod
     @user_context
-    def save_from_jwt_token(cls, request_json: Dict = None, **kwargs):
+    def save_from_jwt_token(cls, request_json: dict = None, **kwargs):
         """Save user to database (create/update)."""
         current_app.logger.debug("save_from_jwt_token")
         user_from_context: UserContext = kwargs["user_context"]
@@ -614,7 +611,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         if user.status == UserStatus.INACTIVE.value:
             raise BusinessException(Error.DELETE_FAILED_INACTIVE_USER, None)
 
-        user_orgs: List[OrgModel] = MembershipModel.find_orgs_for_user(user.id)
+        user_orgs: list[OrgModel] = MembershipModel.find_orgs_for_user(user.id)
 
         current_app.logger.info(f"Found {len(user_orgs or [])} orgs for the user")
 
@@ -681,7 +678,9 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     @staticmethod
     def is_user_in_membership_roles(user, org_id: int, membership_roles=CLIENT_ADMIN_ROLES) -> bool:
         """Check if user(userservice wrapper) provided is admin or coordinator for the given org id.
-        Defaults to ADMIN, COODRINATOR."""
+
+        Defaults to ADMIN, COODRINATOR.
+        """
         current_user_membership: MembershipModel = MembershipModel.find_membership_by_user_and_org(
             user_id=user.identifier, org_id=org_id
         )

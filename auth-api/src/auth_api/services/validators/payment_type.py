@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Util for validating access type against each user roles."""
+
 from auth_api.exceptions import BusinessException, Error
 from auth_api.services.validators.validator_response import ValidatorResponse
 from auth_api.utils.enums import AccessType, OrgType, PaymentMethod

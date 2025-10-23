@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation Mapping data."""
+
 from flask import current_app
 from requests import HTTPError
 from sqlalchemy import and_, case, func, or_, select
@@ -35,6 +36,7 @@ class EntityMappingService:
     @staticmethod
     def paginate_from_affiliations(org_id: int, search_details: AffiliationSearchDetails):
         """Get affiliations from DB based on priority mapping logic.
+
         - If no filters are applied (initial load), show only 1 page with 100 results.
         - If filters are applied grab all identifiers
         - For TEMP business with NR, group them together and count as one row for pagination
@@ -352,7 +354,8 @@ class EntityMappingService:
         """Return affiliation details by calling the source api."""
         current_app.logger.info(f"Fetching entity mapping for identifier: {identifier}")
         token = RestService.get_service_account_token(
-            config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+            config_id="ENTITY_SVC_CLIENT_ID",
+            config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
         )
         new_url = f"{current_app.config.get('LEGAL_API_URL')}{current_app.config.get('LEGAL_API_VERSION_2')}"
         endpoint = f"{new_url}/businesses/search/affiliation_mappings"

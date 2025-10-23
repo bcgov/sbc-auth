@@ -15,9 +15,8 @@
 
 An Affiliation is between an Org and an Entity.
 """
-from __future__ import annotations
 
-from typing import List
+from __future__ import annotations
 
 from sql_versioning import Versioned
 from sqlalchemy import Column, ForeignKey, Integer, String
@@ -28,9 +27,7 @@ from .db import db
 from .entity import Entity as EntityModel
 
 
-class Affiliation(
-    Versioned, BaseModel
-):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Affiliation(Versioned, BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Affiliation."""
 
     __tablename__ = "affiliations"
@@ -50,7 +47,7 @@ class Affiliation(
         return query.one_or_none()
 
     @classmethod
-    def find_affiliations_by_entity_id(cls, entity_id: int) -> List[Affiliation]:
+    def find_affiliations_by_entity_id(cls, entity_id: int) -> list[Affiliation]:
         """Return affiliations for the provided entity id."""
         return cls.query.filter_by(entity_id=int(entity_id or -1)).all()
 
@@ -60,7 +57,7 @@ class Affiliation(
         return cls.query.filter_by(org_id=int(org_id or -1)).filter_by(id=int(affiliation_id or -1)).one_or_none()
 
     @classmethod
-    def find_affiliations_by_org_id(cls, org_id: int) -> List[Affiliation]:
+    def find_affiliations_by_org_id(cls, org_id: int) -> list[Affiliation]:
         """Return the affiliations with the provided org id."""
         query = (
             db.session.query(Affiliation)

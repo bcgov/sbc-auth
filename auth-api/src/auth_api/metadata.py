@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Get metadata information from pyproject.toml
-"""
+"""Get metadata information from pyproject.toml."""
+
 import os
 from importlib.metadata import metadata, version
 

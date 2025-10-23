@@ -414,7 +414,7 @@ def test_hold_notification(mock_mailer, session, auth_mock, keycloak_mock, monke
 
     with patch.object(UserService, "get_admin_emails_for_org", return_value="test@test.com"):
         TaskService.update_task(TaskService(task), task_info=task_info)
-        mock_mailer.assert_not_called
+        mock_mailer.assert_not_called()
 
 
 @pytest.mark.parametrize(

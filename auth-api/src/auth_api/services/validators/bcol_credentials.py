@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Util for validating BCOL data."""
+
 import json
 from http import HTTPStatus
 

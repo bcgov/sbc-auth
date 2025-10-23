@@ -18,12 +18,8 @@ Test-Suite to ensure that the /orgs/api-keys endpoint is working as expected.
 """
 
 import json
-from contextlib import suppress
 from http import HTTPStatus
 
-from auth_api.services.api_gateway import ApiGateway
-from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.api_gateway import generate_client_representation
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header
 
@@ -43,7 +39,7 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, monkeypatch):  # p
     # Create a system token and create an API key for this account.
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     # Patch to return has_consumer as False, so that it would create a new consumer.
-    monkeypatch.setattr("auth_api.services.api_gateway.ApiGateway._consumer_exists", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.api_gateway.ApiGateway._consumer_exists", lambda *args, **kwargs: None)  # noqa: ARG005
 
     def get_pay_account_mock(org, user):
         return {"paymentMethod": "PAD"}

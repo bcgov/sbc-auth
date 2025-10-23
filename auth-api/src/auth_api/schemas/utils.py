@@ -15,9 +15,9 @@
 
 Test helper functions to load and assert that a JSON payload validates against a defined schema.
 """
+
 import json
 from os import listdir, path
-from typing import Tuple
 
 from jsonschema import Draft7Validator, RefResolver, SchemaError
 
@@ -34,7 +34,7 @@ def _load_json_schema(filename: str):
     relative_path = path.join("schemas", filename)
     absolute_path = path.join(path.dirname(__file__), relative_path)
 
-    with open(absolute_path, "r", encoding="utf-8") as schema_file:
+    with open(absolute_path, encoding="utf-8") as schema_file:
         schema = json.loads(schema_file.read())
 
         return schema
@@ -53,7 +53,7 @@ def get_schema_store(validate_schema: bool = False, schema_search_path: str = No
         for fname in fnames:
             fpath = path.join(schema_search_path, fname)
             if fpath[-5:] == ".json":
-                with open(fpath, "r", encoding="utf-8") as schema_fd:
+                with open(fpath, encoding="utf-8") as schema_fd:
                     schema = json.load(schema_fd)
                     if "$id" in schema:
                         schemastore[schema["$id"]] = schema
@@ -74,7 +74,7 @@ def validate(
     schema_store: dict = None,
     validate_schema: bool = False,
     schema_search_path: str = None,
-) -> Tuple[bool, iter]:
+) -> tuple[bool, iter]:
     """Load the json file and validate against loaded schema."""
     try:
         if not schema_search_path:

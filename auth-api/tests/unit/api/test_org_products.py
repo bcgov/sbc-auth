@@ -1071,6 +1071,7 @@ def test_remove_org_product_without_review(client, jwt, session, keycloak_mock):
 
 
 def assert_product_subscription(client, jwt, org_id, product_code, expected_status):
+    """Assert product subscription status."""
     staff_view_account_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_view_accounts_role)
     rv_products = client.get(
         f"/api/v1/orgs/{org_id}/products", headers=staff_view_account_headers, content_type="application/json"
@@ -1085,6 +1086,7 @@ def assert_product_subscription(client, jwt, org_id, product_code, expected_stat
 
 
 def assert_task(client, jwt, relationship_status, task_status, relationship_type, action, expected_task_length=1):
+    """Assert task status and properties."""
     staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
     rv = client.get("/api/v1/tasks", headers=staff_headers, content_type="application/json")
 

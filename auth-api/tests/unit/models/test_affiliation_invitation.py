@@ -15,10 +15,9 @@
 
 Test suite to ensure that the  model routines are working as expected.
 """
-from typing import List
-from uuid import uuid4
 
 from _datetime import datetime, timedelta
+from uuid import uuid4
 
 from auth_api.config import get_named_config
 from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
@@ -41,7 +40,7 @@ def _get_random_affiliation_invitation_model(
     # optional params below
     affiliation_identifier: int = 1,
     affiliation_type="REQUEST",
-    invitation_token="ABCD",
+    invitation_token="ABCD",  # noqa: S107
     sent_date=datetime.now(),
     recipient_email=None,
     invitation_status_code=InvitationStatus.PENDING.value,
@@ -119,7 +118,7 @@ def factory_affiliation_invitation_model(
     affiliation_invitation.sender = user
     affiliation_invitation.sent_date = sent_date
     affiliation_invitation.invitation_status_code = status
-    affiliation_invitation.token = "ABCD"
+    affiliation_invitation.token = "ABCD"  # noqa: S105
     affiliation_invitation.from_org_id = from_org.id
     affiliation_invitation.to_org_id = to_org.id
     affiliation_invitation.entity_id = entity.id
@@ -453,7 +452,7 @@ def test_find_all_related_to_org(session):
     """Assert that finding affiliations related to org returns correct count."""
     affiliation_invitation_count = 5
     _setup_multiple_orgs_and_invites(session, create_affiliation_invitation_count=affiliation_invitation_count)
-    affiliation_invitations: List = AffiliationInvitationModel.find_all_related_to_org(org_id=1)
+    affiliation_invitations: list = AffiliationInvitationModel.find_all_related_to_org(org_id=1)
     assert len(affiliation_invitations) == affiliation_invitation_count
 
 
@@ -461,7 +460,7 @@ def test_find_all_sent_to_org_affiliated_with_entity(session):
     """Assert that finding affiliations sent to org and requested for specific entity return correct count."""
     affiliation_invitation_count = 5
     _setup_multiple_orgs_and_invites(session, create_affiliation_invitation_count=affiliation_invitation_count)
-    affiliation_invitations: List = AffiliationInvitationModel.filter_by(
+    affiliation_invitations: list = AffiliationInvitationModel.filter_by(
         AffiliationInvitationSearch(to_org_id="1", entity_id="1")
     )
     assert len(affiliation_invitations) == affiliation_invitation_count - 1

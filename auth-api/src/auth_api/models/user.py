@@ -49,7 +49,10 @@ class User(Versioned, BaseModel):
     lastname = Column("last_name", String(200), index=True)
     email = Column("email", String(200), index=True)
     keycloak_guid = Column(
-        "keycloak_guid", UUID(as_uuid=True), unique=True, nullable=True  # bcros users comes with no guid
+        "keycloak_guid",
+        UUID(as_uuid=True),
+        unique=True,
+        nullable=True,  # bcros users comes with no guid
     )
 
     is_terms_of_use_accepted = Column(Boolean(), default=False, nullable=True)
@@ -75,7 +78,7 @@ class User(Versioned, BaseModel):
         + "))",
         lazy="select",
         back_populates="user",
-    )  # noqa:E127
+    )
 
     terms_of_use_version = relationship(
         "Documents", foreign_keys=[terms_of_use_accepted_version], uselist=False, lazy="select"
@@ -153,11 +156,11 @@ class User(Versioned, BaseModel):
             lastname=username,
             email=None,
             keycloak_guid=keycloak_guid,
-            created=datetime.datetime.now(tz=datetime.timezone.utc),
+            created=datetime.datetime.now(tz=datetime.UTC),
             login_source=LoginSource.API_GW.value,
             status=UserStatusCode.get_default_type(),
             idp_userid=username,
-            login_time=datetime.datetime.now(tz=datetime.timezone.utc),
+            login_time=datetime.datetime.now(tz=datetime.UTC),
             type=Role.PUBLIC_USER.name,
             verified=True,
         ).save()

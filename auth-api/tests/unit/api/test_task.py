@@ -15,6 +15,7 @@
 
 Test-Suite to ensure that the /tasks endpoint is working as expected.
 """
+
 import datetime as dt
 import json
 from http import HTTPStatus
@@ -201,7 +202,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     assert dictionary["relationshipStatus"] == TaskRelationshipStatus.ACTIVE.value
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.get("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
     assert dictionary["id"] == org_id
@@ -259,7 +260,7 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     assert dictionary["relationshipStatus"] == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.get("/api/v1/orgs/{}".format(org_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
     dictionary = json.loads(rv.data)
     assert dictionary["id"] == org_id
@@ -359,7 +360,7 @@ def test_fetch_task(client, jwt, session):  # pylint:disable=unused-argument
     task_id = task._model.id
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.get("/api/v1/tasks/{}".format(task_id), headers=headers, content_type="application/json")
+    rv = client.get(f"/api/v1/tasks/{task_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.OK
     assert rv.json.get("name") == task._model.name
 

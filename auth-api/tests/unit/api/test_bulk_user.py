@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the /users endpoint is working as expected.
 """
+
 import json
 import uuid
 from http import HTTPStatus
@@ -64,7 +65,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
     assert rv.status_code == HTTPStatus.CREATED
 
     user = {
-        "username": "testuser{}".format(randint(0, 1000)),
+        "username": f"testuser{randint(0, 1000)}",
         "password": "Password@1234",
     }
     rv = client.post(

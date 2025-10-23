@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model for all activity stream related changes."""
+
 from sqlalchemy import Column, Integer, String, desc
 
 from .base_model import BaseModel

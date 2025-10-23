@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation data."""
+
 import datetime
 import re
 from dataclasses import asdict
-from typing import Dict, List, Tuple
 
 from flask import current_app
 from requests.exceptions import HTTPError
@@ -28,21 +28,20 @@ from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.affiliation_invitation import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models.contact_link import ContactLink
-from auth_api.models.dataclass import Activity
+from auth_api.models.dataclass import Activity, AffiliationBase, AffiliationSearchDetails, DeleteAffiliationRequest
 from auth_api.models.dataclass import Affiliation as AffiliationData
-from auth_api.models.dataclass import AffiliationBase, AffiliationSearchDetails, DeleteAffiliationRequest
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
+from auth_api.utils.auth_event_publisher import publish_affiliation_event
 from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import AFFILIATION_ALLOWED_ROLES, ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
-from ..utils.auth_event_publisher import publish_affiliation_event
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
 
@@ -207,7 +206,8 @@ class Affiliation:
             if not pass_code:
                 return False
             token = RestService.get_service_account_token(
-                config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+                config_id="ENTITY_SVC_CLIENT_ID",
+                config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
             )
             return Affiliation._validate_firms_party(token, entity.business_identifier, pass_code)
         if pass_code:
@@ -414,7 +414,7 @@ class Affiliation:
 
     @staticmethod
     @user_context
-    def fix_stale_affiliations(org_id: int, entity_details: Dict, **kwargs):
+    def fix_stale_affiliations(org_id: int, entity_details: dict, **kwargs):
         """Corrects affiliations to point at the latest entity."""
         # Example staff/client scenario:
         # 1. client creates an NR (that gets affiliated) - realizes they need help to create a business
@@ -462,7 +462,7 @@ class Affiliation:
         return current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
 
     @staticmethod
-    def affiliation_to_affiliation_base(affiliations: List[AffiliationModel]) -> List[AffiliationBase]:
+    def affiliation_to_affiliation_base(affiliations: list[AffiliationModel]) -> list[AffiliationBase]:
         """Convert affiliations to a common data class."""
         return [
             AffiliationBase(identifier=affiliation.entity.business_identifier, created=affiliation.created)
@@ -471,11 +471,11 @@ class Affiliation:
 
     @staticmethod
     async def get_affiliation_details(
-        affiliation_bases: List[AffiliationBase],
+        affiliation_bases: list[AffiliationBase],
         search_details: AffiliationSearchDetails,
         org_id,
         remove_stale_drafts,
-    ) -> Tuple[List, bool]:
+    ) -> tuple[list, bool]:
         """Return affiliation details by calling the source api."""
         url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
         # Our pagination is already handled at the auth level when not doing a search.
@@ -497,7 +497,8 @@ class Affiliation:
         ]
 
         token = RestService.get_service_account_token(
-            config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+            config_id="ENTITY_SVC_CLIENT_ID",
+            config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
         )
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
@@ -629,7 +630,8 @@ class Affiliation:
         get_nr_url = f"{nr_api_url}/requests/{nr_number}"
         try:
             token = RestService.get_service_account_token(
-                config_id="ENTITY_SVC_CLIENT_ID", config_secret="ENTITY_SVC_CLIENT_SECRET"
+                config_id="ENTITY_SVC_CLIENT_ID",
+                config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
             )
             get_nr_response = RestService.get(get_nr_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:

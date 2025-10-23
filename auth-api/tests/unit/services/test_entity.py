@@ -15,6 +15,7 @@
 
 Test suite to ensure that the Entity service routines are working as expected.
 """
+
 import pytest
 
 from auth_api.exceptions import BusinessException

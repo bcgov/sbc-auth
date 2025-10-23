@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Dict, Type
+from typing import Any
 
 import cattrs
 from attrs import fields as attrs_fields
@@ -22,6 +22,7 @@ class Converter(cattrs.Converter):
         snake_case_to_camel: bool = False,
         enum_to_value: bool = False,
     ):
+        """Initialize the converter with configuration options."""
         super().__init__()
 
         self.register_structure_hook(Decimal, self._structure_decimal)
@@ -81,11 +82,11 @@ class Converter(cattrs.Converter):
         return components[0] + "".join(x.title() for x in components[1:])
 
     @staticmethod
-    def _structure_decimal(obj: Any, cls: Type) -> Decimal:
+    def _structure_decimal(obj: Any, cls: type) -> Decimal:
         return cls(str(obj))
 
     @staticmethod
-    def _structure_enum_value(obj: Any, cls: Type):
+    def _structure_enum_value(obj: Any, cls: type):
         if not issubclass(cls, Enum):
             return None
         return obj
@@ -99,7 +100,7 @@ class Converter(cattrs.Converter):
         return obj.isoformat() if obj else None
 
     @staticmethod
-    def remove_nones(data: Dict[Any, Any]) -> Dict[str, Any]:
+    def remove_nones(data: dict[Any, Any]) -> dict[str, Any]:
         """Remove keys with None values from a dictionary, recursively."""
         new_data = {}
         for key, val in data.items():

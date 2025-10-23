@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Util for validating duplication maximum number of orgs."""
+
 from flask import current_app
 
 from auth_api.exceptions import BusinessException, Error

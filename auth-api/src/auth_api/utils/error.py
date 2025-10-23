@@ -32,6 +32,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 """Core error handlers and custom exceptions."""
+
 from flask import current_app, jsonify
 from werkzeug.exceptions import HTTPException
 from werkzeug.routing import RoutingException
@@ -57,7 +58,6 @@ def handle_http_error(error):
 
 def handle_uncaught_error(error: Exception):  # pylint: disable=unused-argument
     """Handle any uncaught exceptions."""
-
     error_msg = f"Uncaught exception {error}"
     current_app.logger.error(error_msg)
     response = jsonify({"message": "Internal server error"})

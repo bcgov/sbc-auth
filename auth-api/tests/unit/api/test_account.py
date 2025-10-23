@@ -112,7 +112,7 @@ def test_authorizations_with_multiple_accounts_returns_200(client, jwt, session)
 
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "account_response")[0]
-    len(rv.json.get("roles")) > 0
+    assert len(rv.json.get("roles")) > 0
 
 
 def test_authorizations_for_extended_returns_200(app, client, jwt, session):  # pylint:disable=unused-argument

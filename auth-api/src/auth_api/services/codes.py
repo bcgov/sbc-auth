@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for retrieving the codes."""
+
 import importlib
 
 from auth_api.exceptions import BusinessException
@@ -62,9 +63,7 @@ class Codes:
                         try:
                             schema = getattr(importlib.import_module(module_name), class_name)
                         except ModuleNotFoundError:
-                            schema = getattr(
-                                importlib.import_module("auth_api.schemas.basecode_type"), "BaseCodeSchema"
-                            )
+                            schema = importlib.import_module("auth_api.schemas.basecode_type").BaseCodeSchema
                         code_schema = schema()
                         data.append(code_schema.dump(entry, many=False))
                 return data

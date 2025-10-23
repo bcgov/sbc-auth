@@ -15,6 +15,7 @@
 
 Test Utility for creating model factory.
 """
+
 import datetime
 
 from requests.exceptions import HTTPError
@@ -319,7 +320,7 @@ def factory_task_models(count: int, user_id: int):
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
     for i in range(0, count):
         task = TaskModel(
-            name="TEST {}".format(i),
+            name=f"TEST {i}",
             date_submitted=datetime.datetime.now(),
             relationship_type=TaskRelationshipType.ORG.value,
             relationship_id=10,
@@ -391,7 +392,8 @@ def patch_pay_account_post(monkeypatch):
             pass
 
     monkeypatch.setattr(
-        "auth_api.services.rest_service.RestService.post", lambda *args, **kwargs: MockPayResponse(None, 200)
+        "auth_api.services.rest_service.RestService.post",
+        lambda *args, **kwargs: MockPayResponse(None, 200),  # noqa: ARG005
     )
 
 
@@ -411,7 +413,8 @@ def patch_pay_account_put(monkeypatch):
             pass
 
     monkeypatch.setattr(
-        "auth_api.services.rest_service.RestService.put", lambda *args, **kwargs: MockPayResponse(None, 200)
+        "auth_api.services.rest_service.RestService.put",
+        lambda *args, **kwargs: MockPayResponse(None, 200),  # noqa: ARG005
     )
 
 
@@ -419,7 +422,6 @@ def patch_pay_account_delete(monkeypatch):
     """Patch pay account delete success."""
 
     class MockPayResponse:
-
         @staticmethod
         def json():
             return {}
@@ -427,14 +429,13 @@ def patch_pay_account_delete(monkeypatch):
         def raise_for_status(self):
             pass
 
-    monkeypatch.setattr("auth_api.services.rest_service.RestService.delete", lambda *args, **kwargs: MockPayResponse())
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.delete", lambda *args, **kwargs: MockPayResponse())  # noqa: ARG005
 
 
 def patch_pay_account_delete_error(monkeypatch):
     """Patch pay account delete error."""
 
     class MockPayResponse:
-
         @staticmethod
         def json():
             return {"type": "OUTSTANDING_CREDIT", "title": "OUTSTANDING_CREDIT"}
@@ -442,14 +443,13 @@ def patch_pay_account_delete_error(monkeypatch):
         def raise_for_status(self):
             raise HTTPError("TEST ERROR")
 
-    monkeypatch.setattr("auth_api.services.rest_service.RestService.delete", lambda *args, **kwargs: MockPayResponse())
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.delete", lambda *args, **kwargs: MockPayResponse())  # noqa: ARG005
 
 
 def patch_get_firms_parties(monkeypatch):
     """Patch pay account delete success."""
 
     class MockPartiesResponse:
-
         @staticmethod
         def json():
             return {
@@ -469,7 +469,7 @@ def patch_get_firms_parties(monkeypatch):
         def raise_for_status(self):
             pass
 
-    monkeypatch.setattr("auth_api.services.rest_service.RestService.get", lambda *args, **kwargs: MockPartiesResponse())
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.get", lambda *args, **kwargs: MockPartiesResponse())  # noqa: ARG005
 
 
 def convert_org_to_staff_org(org_id: int, type_code: OrgType):

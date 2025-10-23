@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Manager for corp type schema and export."""
+
 from marshmallow import fields
 
 from auth_api.models import UserStatusCode as UserStatusModel

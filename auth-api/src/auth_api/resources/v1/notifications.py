@@ -34,7 +34,7 @@ bp = Blueprint(
 @bp.route("", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["GET"])
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
-def get_notifications(user_id, org_id):  # pylint:disable=unused-argument
+def get_notifications(user_id, org_id):  # noqa: ARG001
     """Find the count of notification remaining.If any details invalid, it returns zero."""
     try:
         pending_count = MembershipService.get_pending_member_count_for_org(org_id)

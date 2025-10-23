@@ -123,8 +123,8 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def _get_names(name):
-        first_name = f'{name.get("first_name")}' if name.get("first_name") else ""
-        last_name = f'{name.get("last_name")}' if name.get("last_name") else ""
+        first_name = f"{name.get('first_name')}" if name.get("first_name") else ""
+        last_name = f"{name.get('last_name')}" if name.get("last_name") else ""
         return first_name, last_name
 
     @staticmethod
@@ -191,12 +191,12 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         except ValueError:
             address = {}
         account_address_formatted = ""
-        street = f'{address.get("street")}; ' if address.get("street") else ""
-        street_additional = f'{address.get("streetAdditional")}; ' if address.get("streetAdditional") else ""
-        city = f'{address.get("city")}; ' if address.get("city") else ""
-        region = f'{address.get("region")}; ' if address.get("region") else ""
-        postal_code = f'{address.get("postalCode")}; ' if address.get("postal_code") else ""
-        country = f'{address.get("country")}; ' if address.get("country") else ""
+        street = f"{address.get('street')}; " if address.get("street") else ""
+        street_additional = f"{address.get('streetAdditional')}; " if address.get("streetAdditional") else ""
+        city = f"{address.get('city')}; " if address.get("city") else ""
+        region = f"{address.get('region')}; " if address.get("region") else ""
+        postal_code = f"{address.get('postalCode')}; " if address.get("postal_code") else ""
+        country = f"{address.get('country')}; " if address.get("country") else ""
         account_address_formatted = f"{street}{street_additional}{city}{region}{postal_code}{country}"
         return f"Changed the mailing address to {account_address_formatted}"
 
@@ -212,7 +212,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         return f"The account was suspended due to {suspension_reason}"
 
     @staticmethod
-    def _account_deactivation(activity: ActivityLogModel) -> str:
+    def _account_deactivation(activity: ActivityLogModel) -> str:  # noqa: ARG004
         """Account was deactivated."""
         return "The account was deactivated"
 

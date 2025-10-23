@@ -15,11 +15,12 @@
 
 This module is the API for the Authroization system.
 """
+
 import os
 import traceback
 
 from cloud_sql_connector import DBConfig, setup_search_path_event_listener
-from flask import Flask, request
+from flask import Flask, request  # noqa: TC002
 from flask_cors import CORS
 from flask_migrate import Migrate, upgrade
 from sbc_common_components.utils.camel_case_response import convert_to_camel
@@ -40,8 +41,10 @@ from auth_api.utils.user_context import _get_context
 setup_logging(os.path.join(_Config.PROJECT_ROOT, "logging.conf"))
 
 
-def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")):
+def create_app(run_mode=None):
     """Return a configured Flask App using the Factory method."""
+    if run_mode is None:
+        run_mode = os.getenv("DEPLOYMENT_ENV", "production")
     app = Flask(__name__)
     app.config["ENV"] = run_mode
     app.config.from_object(config.CONFIGURATION[run_mode])

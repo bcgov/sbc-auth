@@ -15,6 +15,7 @@
 
 Test suite to ensure that the Affiliation service routines are working as expected.
 """
+
 from unittest import mock
 from unittest.mock import ANY, patch
 
@@ -25,9 +26,8 @@ import auth_api
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation as AffiliationModel
-from auth_api.models.dataclass import Activity
+from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.models.dataclass import Affiliation as AffiliationData
-from auth_api.models.dataclass import DeleteAffiliationRequest
 from auth_api.models.org import Org as OrgModel
 from auth_api.services import ActivityLogPublisher
 from auth_api.services import Affiliation as AffiliationService
@@ -97,7 +97,7 @@ def test_create_affiliation_implicit(session, auth_mock):  # pylint:disable=unus
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary["id"]
 
-    pass_code = "111111111"
+    pass_code = "111111111"  # noqa: S105
 
     with pytest.raises(BusinessException) as exception:
         AffiliationService.create_affiliation(org_id, business_identifier1, pass_code)
@@ -553,9 +553,7 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock, monkeyp
     assert affiliated_entities[0]["business_identifier"] == business_identifier1
 
 
-def test_find_affiliations_for_new_business_incorporation_complete(
-    session, auth_mock, nr_mock
-):  # pylint:disable=unused-argument
+def test_find_affiliations_for_new_business_incorporation_complete(session, auth_mock, nr_mock):  # pylint:disable=unused-argument
     """Assert that an Affiliation can be created."""
     # Create 2 entities - 1 with type NR and another one TMP
     # Affiliate to an org

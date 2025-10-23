@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
+
 import os
 import time
 from concurrent.futures import CancelledError
@@ -98,7 +99,7 @@ def session(db, app):  # pylint: disable=redefined-outer-name, invalid-name
     with app.app_context():
         with db.engine.connect() as conn:
             transaction = conn.begin()
-            sess = db._make_scoped_session(dict(bind=conn))  # pylint: disable=protected-access
+            sess = db._make_scoped_session({"bind": conn})  # pylint: disable=protected-access
             # Establish SAVEPOINT (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
             nested = sess.begin_nested()
             old_session = db.session
@@ -160,37 +161,40 @@ def docker_compose_files(pytestconfig):
 @pytest.fixture()
 def auth_mock(monkeypatch):
     """Mock check_auth."""
-    monkeypatch.setattr("auth_api.services.entity.check_auth", lambda *args, **kwargs: None)
-    monkeypatch.setattr("auth_api.services.org.check_auth", lambda *args, **kwargs: None)
-    monkeypatch.setattr("auth_api.services.invitation.check_auth", lambda *args, **kwargs: None)
-    monkeypatch.setattr("auth_api.services.affiliation_invitation.check_auth", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.entity.check_auth", lambda *args, **kwargs: None)  # noqa: ARG005
+    monkeypatch.setattr("auth_api.services.org.check_auth", lambda *args, **kwargs: None)  # noqa: ARG005
+    monkeypatch.setattr("auth_api.services.invitation.check_auth", lambda *args, **kwargs: None)  # noqa: ARG005
+    monkeypatch.setattr("auth_api.services.affiliation_invitation.check_auth", lambda *args, **kwargs: None)  # noqa: ARG005
 
 
 @pytest.fixture()
 def notify_mock(monkeypatch):
     """Mock send_email."""
-    monkeypatch.setattr("auth_api.services.invitation.send_email", lambda *args, **kwargs: None)
-    monkeypatch.setattr("auth_api.services.affiliation_invitation.send_email", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.invitation.send_email", lambda *args, **kwargs: None)  # noqa: ARG005
+    monkeypatch.setattr("auth_api.services.affiliation_invitation.send_email", lambda *args, **kwargs: None)  # noqa: ARG005
 
 
 @pytest.fixture()
 def notify_org_mock(monkeypatch):
     """Mock send_email."""
-    monkeypatch.setattr("auth_api.services.org.send_email", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.org.send_email", lambda *args, **kwargs: None)  # noqa: ARG005
 
 
 @pytest.fixture()
 def keycloak_mock(monkeypatch):
     """Mock keycloak services."""
     monkeypatch.setattr(
-        "auth_api.services.keycloak.KeycloakService.join_account_holders_group", lambda *args, **kwargs: None
+        "auth_api.services.keycloak.KeycloakService.join_account_holders_group",
+        lambda *args, **kwargs: None,  # noqa: ARG005
     )
-    monkeypatch.setattr("auth_api.services.keycloak.KeycloakService.join_users_group", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.keycloak.KeycloakService.join_users_group", lambda *args, **kwargs: None)  # noqa: ARG005
     monkeypatch.setattr(
-        "auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group", lambda *args, **kwargs: None
+        "auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group",
+        lambda *args, **kwargs: None,  # noqa: ARG005
     )
     monkeypatch.setattr(
-        "auth_api.services.keycloak.KeycloakService.add_or_remove_product_keycloak_groups", lambda *args, **kwargs: None
+        "auth_api.services.keycloak.KeycloakService.add_or_remove_product_keycloak_groups",
+        lambda *args, **kwargs: None,  # noqa: ARG005
     )
 
 
@@ -271,7 +275,7 @@ def gcs_mock(monkeypatch):
     # Mock credentials
     mock_credentials = MagicMock()
     mock_credentials.service_account_email = "test@project.iam.gserviceaccount.com"
-    mock_credentials.token = "mock-token"
+    mock_credentials.token = "mock-token"  # noqa: S105
     mock_credentials.expiry = "2025-01-01T00:00:00Z"
 
     with patch("google.auth.default", return_value=(mock_credentials, "mock-project")):
@@ -335,7 +339,7 @@ def mock_pub_sub_call(mocker):
         def __init__(self, *args, **kwargs):
             pass
 
-        def publish(self, *args, **kwargs):
+        def publish(self, *args, **kwargs):  # noqa: ARG002
             """Publish mock."""
             raise CancelledError("This is a mock")
 
@@ -357,5 +361,5 @@ def entity_mapping_mock(monkeypatch):
     """Mock entity mapping service."""
     monkeypatch.setattr(
         "auth_api.services.entity_mapping.EntityMappingService.fetch_entity_mapping_details",
-        lambda *args, **kwargs: None,
+        lambda *args, **kwargs: None,  # noqa: ARG005
     )

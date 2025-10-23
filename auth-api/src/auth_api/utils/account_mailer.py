@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """helper to publish to mailer."""
+
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from flask import current_app
 from simple_cloudevent import SimpleCloudEvent
@@ -28,7 +29,7 @@ def publish_to_mailer(notification_type, data=None, source=QueueSources.AUTH_API
         id=str(uuid.uuid4()),
         source=source,
         subject=None,
-        time=datetime.now(tz=timezone.utc).isoformat(),
+        time=datetime.now(tz=UTC).isoformat(),
         type=notification_type,
         data=data,
     )
