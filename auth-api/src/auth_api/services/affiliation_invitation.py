@@ -367,7 +367,7 @@ class AffiliationInvitation:
                     return alt_name.get("name")
         return default_name
 
-    def update_affiliation_invitation(self, user, invitation_origin, affiliation_invitation_info: dict):  # noqa: ARG002
+    def update_affiliation_invitation(self, user, affiliation_invitation_info: dict):
         """Update the specified affiliation invitation with new data."""
         invitation: AffiliationInvitationModel = self._model
 

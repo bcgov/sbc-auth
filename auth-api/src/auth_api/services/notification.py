@@ -20,7 +20,7 @@ from flask import current_app
 from .rest_service import RestService
 
 
-def send_email(subject: str, sender: str, recipients: str, html_body: str):  # noqa: ARG001
+def send_email(subject: str, recipients: str, html_body: str):
     """Send the email asynchronously, using the given details."""
     current_app.logger.info(f"send_email {recipients}")
     notify_url = current_app.config.get("NOTIFY_API_URL") + "/notify/"
