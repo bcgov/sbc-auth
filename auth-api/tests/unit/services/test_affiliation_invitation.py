@@ -481,7 +481,7 @@ def test_update_affiliation_invitation(session, auth_mock, keycloak_mock, busine
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(
             affiliation_invitation_info, User(user)
         )
-        updated_invitation = new_invitation.update_affiliation_invitation(User(user), "", {}).as_dict()
+        updated_invitation = new_invitation.update_affiliation_invitation(User(user),{}).as_dict()
         assert updated_invitation["status"] == "PENDING"
 
 
@@ -506,7 +506,7 @@ def test_update_invitation_verify_different_tokens(session, auth_mock, keycloak_
         with freeze_time(
             lambda: datetime.now() + timedelta(seconds=1)
         ):  # to give time difference..or else token will be same..
-            updated_invitation = new_invitation.update_affiliation_invitation(User(user), "", {}).as_dict()
+            updated_invitation = new_invitation.update_affiliation_invitation(User(user), {}).as_dict()
             new_token = updated_invitation.get("token")
         assert old_token != new_token
         assert updated_invitation["status"] == "PENDING"
