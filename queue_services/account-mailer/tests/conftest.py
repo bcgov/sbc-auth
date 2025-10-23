@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
+
 import os
 import random
 import time
@@ -29,7 +30,7 @@ from account_mailer import create_app
 
 def find_subpath(root_dir, target_subpath):
     """Auxiliary subpath search function."""
-    for root, dirs, files in os.walk(root_dir):
+    for root, _dirs, _files in os.walk(root_dir):
         if target_subpath in os.path.join(root, "").replace("\\", "/"):  # Ensure cross-platform compatibility
             return os.path.join(root, "")
     return None
@@ -43,8 +44,8 @@ def not_raises(exception):
     """
     try:
         yield
-    except exception:
-        raise pytest.fail(f"DID RAISE {exception}")
+    except exception as exc:
+        raise pytest.fail(f"DID RAISE {exception}") from exc
 
 
 @pytest.fixture(scope="session")
@@ -141,7 +142,7 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         conn = db.engine.connect()
         txn = conn.begin()
 
-        options = dict(bind=conn, binds={})
+        options = {"bind": conn, "binds": {}}
         sess = db._make_scoped_session(options=options)
 
         # establish  a SAVEPOINT just before beginning the test
@@ -195,21 +196,21 @@ def docker_compose_files(pytestconfig):
 @pytest.fixture()
 def auth_mock(monkeypatch):
     """Mock check_auth."""
-    monkeypatch.setattr("auth_api.services.entity.check_auth", lambda *args, **kwargs: None)
-    monkeypatch.setattr("auth_api.services.org.check_auth", lambda *args, **kwargs: None)
-    monkeypatch.setattr("auth_api.services.invitation.check_auth", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.entity.check_auth", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr("auth_api.services.org.check_auth", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr("auth_api.services.invitation.check_auth", lambda *_args, **_kwargs: None)
 
 
 @pytest.fixture()
 def notify_mock(monkeypatch):
     """Mock send_email."""
-    monkeypatch.setattr("auth_api.services.invitation.send_email", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.invitation.send_email", lambda *_args, **_kwargs: None)
 
 
 @pytest.fixture()
 def notify_org_mock(monkeypatch):
     """Mock send_email."""
-    monkeypatch.setattr("auth_api.services.org.send_email", lambda *args, **kwargs: None)
+    monkeypatch.setattr("auth_api.services.org.send_email", lambda *_args, **_kwargs: None)
 
 
 @pytest.fixture()
@@ -217,11 +218,11 @@ def keycloak_mock(monkeypatch):
     """Mock keycloak services."""
     monkeypatch.setattr(
         "auth_api.services.keycloak.KeycloakService.join_account_holders_group",
-        lambda *args, **kwargs: None,
+        lambda *_args, **_kwargs: None,
     )
     monkeypatch.setattr(
         "auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group",
-        lambda *args, **kwargs: None,
+        lambda *_args, **_kwargs: None,
     )
 
 
@@ -235,7 +236,7 @@ def mock_pub_sub_call(mocker):
         def __init__(self, *args, **kwargs):
             pass
 
-        def publish(self, *args, **kwargs):
+        def publish(self, *_args, **_kwargs):
             """Publish mock."""
             raise CancelledError("This is a mock")
 

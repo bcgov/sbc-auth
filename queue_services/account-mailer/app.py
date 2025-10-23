@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Copyright © 2024 Province of British Columbia
 #
@@ -15,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Provides the WSGI entry point for running the application."""
+
 import os
 
 from account_mailer import create_app
@@ -23,4 +23,4 @@ app = create_app()
 
 if __name__ == "__main__":
     server_port = os.environ.get("PORT", "8080")
-    app.run(debug=False, port=server_port, host="0.0.0.0")
+    app.run(debug=False, port=server_port, host="0.0.0.0")  # noqa: S104

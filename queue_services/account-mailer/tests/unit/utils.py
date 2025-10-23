@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Utilities used by the unit tests."""
+
 import base64
 import json
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from simple_cloudevent import SimpleCloudEvent, to_queue_message
 
@@ -27,7 +28,7 @@ def build_request_for_queue_push(message_type, payload, message_id=None):
             id=str(message_id if message_id else uuid.uuid4()),
             source="account-mailer",
             subject=None,
-            time=datetime.now(tz=timezone.utc).isoformat(),
+            time=datetime.now(tz=UTC).isoformat(),
             type=message_type,
             data=payload,
         )

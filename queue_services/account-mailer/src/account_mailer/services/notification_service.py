@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Invitation data."""
+
 from auth_api.services.rest_service import RestService
 from flask import current_app
 
 
 def send_email(notify_body: dict, token: str):  # pylint:disable=unused-argument
     """Send the email asynchronously, using the given details."""
-    current_app.logger.info(f'send_email to {notify_body.get("recipients")}')
+    current_app.logger.info(f"send_email to {notify_body.get('recipients')}")
     notify_url = current_app.config.get("NOTIFY_API_URL") + "/notify/"
     RestService.post(notify_url, token=token, data=notify_body)
-    current_app.logger.info(f'Email sent to {notify_body.get("recipients")}')
+    current_app.logger.info(f"Email sent to {notify_body.get('recipients')}")

@@ -16,6 +16,7 @@
 
 This module is the service worker for applying filings to the Business Database structure.
 """
+
 from __future__ import annotations
 
 import os
@@ -48,7 +49,7 @@ def register_endpoints(app: Flask) -> None:
     app.register_blueprint(ops_bp)
 
 
-def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")) -> Flask:
+def create_app(run_mode=None) -> Flask:
     """Return a configured Flask App using the Factory method.
 
     Args:
@@ -57,6 +58,9 @@ def create_app(run_mode=os.getenv("DEPLOYMENT_ENV", "production")) -> Flask:
     Returns:
         Flask: The configured Flask application instance.
     """
+    if run_mode is None:
+        run_mode = os.getenv("DEPLOYMENT_ENV", "production")
+
     app = Flask(__name__)
     app.config.from_object(app_config.get_named_config(run_mode))
     app.config["ENV"] = run_mode

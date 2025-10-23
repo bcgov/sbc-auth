@@ -22,8 +22,7 @@ class GoogleStoreService:
 
     @staticmethod
     def download_file_from_bucket(bucket_name: str, source_blob_name: str) -> bytes:
-        """
-        Download a file from a Google Cloud Storage bucket and return its content as bytes.
+        """Download a file from a Google Cloud Storage bucket and return its content as bytes.
 
         Args:
             bucket_name (str): The name of the bucket.
@@ -41,8 +40,7 @@ class GoogleStoreService:
 
     @staticmethod
     def upload_file_to_bucket(bucket_name, source_file_name, destination_blob_name):
-        """
-        Upload a file to a specified Google Cloud Storage (GCS) bucket.
+        """Upload a file to a specified Google Cloud Storage (GCS) bucket.
 
         Args:
             bucket_name (str): The name of the GCS bucket where the file will be uploaded.
@@ -68,8 +66,7 @@ class GoogleStoreService:
 
     @staticmethod
     def get_static_resource_url(key: str) -> str:
-        """
-        Generate a publicly accessible URL for a file stored in a Google Cloud Storage (GCS) bucket.
+        """Generate a publicly accessible URL for a file stored in a Google Cloud Storage (GCS) bucket.
 
         Args:
             key (str): The name or path of the file in the GCS bucket.

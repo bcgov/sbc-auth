@@ -13,6 +13,7 @@
 # limitations under the License.
 # pylint: disable=implicit-str-concat
 """Enum definitions."""
+
 from enum import Enum
 
 
@@ -35,56 +36,56 @@ class SubjectType(Enum):
     )
     AFFILIATION_INVITATION = "[BC Registries and Online Services] Authorise Access to Manage Your Business"
     BUSINESS_INVITATION = (
-        "[BC Registries and Online Services] {user_first_name} {user_last_name} " "has invited you to join an account"
+        "[BC Registries and Online Services] {user_first_name} {user_last_name} has invited you to join an account"
     )
     BUSINESS_INVITATION_FOR_BCEID = (
-        "[BC Registries and Online Services] {user_first_name} {user_last_name} " "has invited you to join an account"
+        "[BC Registries and Online Services] {user_first_name} {user_last_name} has invited you to join an account"
     )
     DIRSEARCH_BUSINESS_INVITATION = "Your BC Registries Account has been created"
     GOVM_BUSINESS_INVITATION = (
-        "[BC Registries and Online Services] " "You’ve been invited to create a BC Registries account"
+        "[BC Registries and Online Services] You’ve been invited to create a BC Registries account"
     )
     GOVM_MEMBER_INVITATION = "[BC Registries and Online Services] You have been added as a team member"
     MEMBERSHIP_APPROVED_NOTIFICATION = "[BC Registries and Online Services] Welcome to the account {account_name}"
     MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = (
-        "[BC Registries and Online Services] Welcome to the account " "{account_name}"
+        "[BC Registries and Online Services] Welcome to the account {account_name}"
     )
     NON_BCSC_ORG_APPROVED_NOTIFICATION = "[BC Registries and Online Services] APPROVED Business Registry Account"
     NON_BCSC_ORG_REJECTED_NOTIFICATION = (
-        "[BC Registries and Online Services] YOUR ACTION REQUIRED: " "Business Registry Account cannot be approved"
+        "[BC Registries and Online Services] YOUR ACTION REQUIRED: Business Registry Account cannot be approved"
     )
     OTP_AUTHENTICATOR_RESET_NOTIFICATION = "[BC Registries and Online Services] Authenticator Has Been Reset"
     ROLE_CHANGED_NOTIFICATION = "[BC Registries and Online Services] Your Role Has Been Changed"
     STAFF_REVIEW_ACCOUNT = "[BC Registries and Online Services] An out of province account needs to be approved."
     GOVM_APPROVED_NOTIFICATION = "[BC Registries and Online Services] Your BC Registries Account Has Been Approved"
     GOVM_REJECTED_NOTIFICATION = (
-        "[BC Registries and Online Services] Your BC Registries Account {account_name} " "Has Been Rejected"
+        "[BC Registries and Online Services] Your BC Registries Account {account_name} Has Been Rejected"
     )
     PROD_PACKAGE_APPROVED_NOTIFICATION = (
-        "[BC Registries and Online Services] Your Product Request " "{product_name} Has Been Approved"
+        "[BC Registries and Online Services] Your Product Request {product_name} Has Been Approved"
     )
     PROD_PACKAGE_REJECTED_NOTIFICATION = (
         "[BC Registries and Online Services] YOUR ACTION REQUIRED: "
         "Your Product Request {product_name} Has Been Rejected"
     )
     PRODUCT_APPROVED_NOTIFICATION_DETAILED = (
-        "[BC Registries and Online Services] Your {subject_descriptor} " "Access Has Been Approved"
+        "[BC Registries and Online Services] Your {subject_descriptor} Access Has Been Approved"
     )
     PRODUCT_REJECTED_NOTIFICATION_DETAILED = (
-        "[BC Registries and Online Services] Your {subject_descriptor} " "Access Has Been Rejected"
+        "[BC Registries and Online Services] Your {subject_descriptor} Access Has Been Rejected"
     )
     PRODUCT_CONFIRMATION_NOTIFICATION = (
-        "[BC Registries and Online Services] {subject_descriptor} " "Application Confirmation"
+        "[BC Registries and Online Services] {subject_descriptor} Application Confirmation"
     )
     RESUBMIT_BCEID_ORG_NOTIFICATION = (
-        "[BC Registries and Online Services] YOUR ACTION REQUIRED: " "Update your information."
+        "[BC Registries and Online Services] YOUR ACTION REQUIRED: Update your information."
     )
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = (
-        "[BC Registries and Online Services] YOUR ACTION REQUIRED: " "Update your information."
+        "[BC Registries and Online Services] YOUR ACTION REQUIRED: Update your information."
     )
     AFFILIATION_INVITATION_REQUEST = "[BC Registries and Online Services] Request to manage {business_name}"
     AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = (
-        "[BC Registries and Online Services] " "Request to manage {business_name}"
+        "[BC Registries and Online Services] Request to manage {business_name}"
     )
     STATEMENT_NOTIFICATION = "Your BC Registries statement is available"
     PAYMENT_REMINDER_NOTIFICATION = "Your BC Registries payment reminder"

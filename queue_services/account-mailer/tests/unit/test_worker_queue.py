@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test Suite to ensure the worker routines are working as expected."""
+
 import os
 import types
 from datetime import datetime
 from unittest.mock import patch
 
-import pytest
 from auth_api.services.rest_service import RestService
 from google.cloud import storage
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 from account_mailer.enums import SubjectType
-from account_mailer.services import google_store, notification_service
+from account_mailer.services import notification_service
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
 from .utils import helper_add_event_to_queue
@@ -92,7 +92,7 @@ def test_refund_request(app, session, client):
             QueueMessageTypes.REFUND_DRAWDOWN_REQUEST.value,
             mail_details=mail_details,
         )
-        mock_send.assert_called
+        mock_send.assert_called()
 
 
 def test_duplicate_messages(app, session, client):
@@ -110,7 +110,7 @@ def test_duplicate_messages(app, session, client):
             mail_details=mail_details,
             message_id="f76e5ca9-93f3-44ee-a0f8-f47ee83b1971",
         )
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
         assert mock_send.call_args.args[0].get("attachments") is None
@@ -123,7 +123,7 @@ def test_duplicate_messages(app, session, client):
             mail_details=mail_details,
             message_id="f76e5ca9-93f3-44ee-a0f8-f47ee83b1971",
         )
-        mock_send.assert_not_called
+        mock_send.assert_not_called()
 
 
 def test_lock_account_mailer_queue(app, session, client):
@@ -139,7 +139,7 @@ def test_lock_account_mailer_queue(app, session, client):
             message_type=QueueMessageTypes.NSF_LOCK_ACCOUNT.value,
             mail_details=mail_details,
         )
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
         assert mock_send.call_args.args[0].get("attachments") is None
@@ -241,7 +241,7 @@ def test_unlock_account_mailer_queue(app, session, client):
                 message_type=QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value,
                 mail_details=mail_details,
             )
-            mock_send.assert_called
+            mock_send.assert_called()
             assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
             assert (
                 mock_send.call_args.args[0].get("content").get("subject")
@@ -268,7 +268,7 @@ def test_account_conf_mailer_queue(app, session, client):
             mail_details=mail_details,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.ACCOUNT_CONF_OVER_SUBJECT.value
         assert mock_send.call_args.args[0].get("attachments") is None
@@ -299,7 +299,7 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
             mail_details=mail_details,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.PAD_INVOICE_CREATED.value
         assert mock_send.call_args.args[0].get("attachments") is None
@@ -310,7 +310,7 @@ def test_account_pad_invoice_mailer_queue(app, session, client):
         assert "Invoice reference number: 1234567890" in email_body
         assert "Transaction date:" in email_body
         assert "Log in to view transaction details" in email_body
-        assert "/account/{org_id}/settings/transactions".format(org_id=org.id) in email_body
+        assert f"/account/{org.id}/settings/transactions" in email_body
 
 
 def test_account_admin_removed(app, session, client):
@@ -329,7 +329,7 @@ def test_account_admin_removed(app, session, client):
             mail_details=mail_details,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == email
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.ADMIN_REMOVED_SUBJECT.value
         assert mock_send.call_args.args[0].get("attachments") is None
@@ -353,7 +353,7 @@ def test_account_team_modified(app, session, client):
             mail_details=mail_details,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.TEAM_MODIFIED_SUBJECT.value
         assert mock_send.call_args.args[0].get("attachments") is None
@@ -375,7 +375,7 @@ def test_online_banking_emails(app, session, client):
             mail_details=mail_details,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
         assert (
             mock_send.call_args.args[0].get("content").get("subject")
@@ -390,7 +390,7 @@ def test_online_banking_emails(app, session, client):
             mail_details=mail_details,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
         assert (
             mock_send.call_args.args[0].get("content").get("subject")
@@ -405,7 +405,7 @@ def test_online_banking_emails(app, session, client):
             mail_details=mail_details,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
         assert (
             mock_send.call_args.args[0].get("content").get("subject")
@@ -430,7 +430,7 @@ def test_pad_failed_emails(app, session, client):
             mail_details=mail_details,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.PAD_SETUP_FAILED.value
         assert mock_send.call_args.args[0].get("attachments") is None
@@ -462,7 +462,7 @@ def test_payment_pending_emails(app, session, client):
             mail_details=mail_details,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.PAYMENT_PENDING.value
         assert mock_send.call_args.args[0].get("attachments") is None
@@ -491,7 +491,7 @@ def test_passcode_reset_email(app, session, client):
             mail_details=msg_payload,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.RESET_PASSCODE.value
 
@@ -509,7 +509,7 @@ def test_passcode_reset_email(app, session, client):
             mail_details=msg_payload,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.RESET_PASSCODE.value
 
@@ -536,7 +536,7 @@ def test_statement_notification_email(app, session, client):
             mail_details=msg_payload,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.STATEMENT_NOTIFICATION.value
 
@@ -565,7 +565,7 @@ def test_payment_reminder_notification_email(app, session, client):
             mail_details=msg_payload,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
         assert (
             mock_send.call_args.args[0].get("content").get("subject") == SubjectType.PAYMENT_REMINDER_NOTIFICATION.value
@@ -595,6 +595,6 @@ def test_payment_due_notification_email(app, session, client):
             mail_details=msg_payload,
         )
 
-        mock_send.assert_called
+        mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.PAYMENT_DUE_NOTIFICATION.value
