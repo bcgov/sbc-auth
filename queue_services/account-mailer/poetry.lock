@@ -214,7 +214,7 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 
 [[package]]
 name = "auth-api"
-version = "3.0.8"
+version = "3.0.9"
 description = ""
 optional = false
 python-versions = "^3.12"
@@ -254,13 +254,13 @@ MarkupSafe = "2.1.1"
 marshmallow = "<4.0.0"
 marshmallow-sqlalchemy = "^1.0.0"
 orjson = "^3.10.7"
-pg8000 = "^1.31.2"
+pg8000 = "^1.31.5"
 pyhumps = "^3.8.0"
 python-dotenv = "^1.0.1"
 pytz = "^2024.2"
 requests = "2.32.4"
 sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", rev = "master", subdirectory = "python"}
-sql-versioning = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/sql-versioning"}
+sql-versioning = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "add_column_exclusion", subdirectory = "python/sql-versioning"}
 sqlalchemy-utils = "^0.41.2"
 structured-logging = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/structured-logging"}
 Werkzeug = "^3.0.0"
@@ -268,8 +268,8 @@ Werkzeug = "^3.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/seeker25/sbc-auth.git"
-reference = "users_history"
-resolved_reference = "d43f6c35ffdbaf12b07b051f78a07aebe05d3166"
+reference = "update_deps_pg8000"
+resolved_reference = "b4d7d61c73b5d60e4a8afeda495eb3dcdb66cb87"
 subdirectory = "auth-api"
 
 [[package]]
@@ -2258,14 +2258,14 @@ files = [
 
 [[package]]
 name = "pg8000"
-version = "1.31.2"
+version = "1.31.5"
 description = "PostgreSQL interface library"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pg8000-1.31.2-py3-none-any.whl", hash = "sha256:436c771ede71af4d4c22ba867a30add0bc5c942d7ab27fadbb6934a487ecc8f6"},
-    {file = "pg8000-1.31.2.tar.gz", hash = "sha256:1ea46cf09d8eca07fe7eaadefd7951e37bee7fabe675df164f1a572ffb300876"},
+    {file = "pg8000-1.31.5-py3-none-any.whl", hash = "sha256:0af2c1926b153307639868d2ee5cef6cd3a7d07448e12736989b10e1d491e201"},
+    {file = "pg8000-1.31.5.tar.gz", hash = "sha256:46ebb03be52b7a77c03c725c79da2ca281d6e8f59577ca66b17c9009618cae78"},
 ]
 
 [package.dependencies]
@@ -2899,8 +2899,8 @@ develop = false
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-connect-common.git"
-reference = "main"
-resolved_reference = "7f1cc0ea4a374310ac558ff435fa6b7ea7bb2f8b"
+reference = "add_column_exclusion"
+resolved_reference = "e0969473f122f15fbffca37ff3d39dcc2e78991f"
 subdirectory = "python/sql-versioning"
 
 [[package]]
@@ -3387,4 +3387,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "5a1e3121d59cce6f69a3d6f4141d3667febebd16fb59d7d173a3404ba29ba05c"
+content-hash = "784b8af7047acae37abcd7fc5f9e2a62098f548226ba257ed34613fc555454e0"
