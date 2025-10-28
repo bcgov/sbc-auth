@@ -54,16 +54,16 @@ def upgrade():
     
     op.execute(
         """
-               update users set version =
-                    (select coalesce(
-                        (select count(transaction_id) as version
-                            from users_version
-                        where 
-                            users.id = users_version.id
-                        group by
-                            id
-                    ), 1));
-               """
+            UPDATE users u
+            SET version = COALESCE(uv.tx_count, 1)
+            FROM (
+                SELECT u.id, COUNT(v.transaction_id) AS tx_count
+                FROM users u
+                LEFT JOIN users_version v ON u.id = v.id
+                GROUP BY u.id
+            ) uv
+            WHERE u.id = uv.id;
+        """
     )
 
     # "modified", "modified_by_id", "modified_by", "created" are not included in the users_version table
