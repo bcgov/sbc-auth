@@ -481,7 +481,7 @@ def test_update_affiliation_invitation(session, auth_mock, keycloak_mock, busine
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(
             affiliation_invitation_info, User(user)
         )
-        updated_invitation = new_invitation.update_affiliation_invitation(User(user),{}).as_dict()
+        updated_invitation = new_invitation.update_affiliation_invitation(User(user), {}).as_dict()
         assert updated_invitation["status"] == "PENDING"
 
 
