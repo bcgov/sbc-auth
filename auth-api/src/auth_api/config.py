@@ -307,8 +307,8 @@ NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
     STAFF_ADMIN_EMAIL = "test@test.com"
     ACCOUNT_MAILER_TOPIC = os.getenv("ACCOUNT_MAILER_TOPIC", "account-mailer-dev")
 
-    API_GW_CONSUMERS_API_URL = "https://bcregistry-bcregistry-mock.apigee.net/mockTarget"
-    API_GW_CONSUMERS_SANDBOX_API_URL = "https://bcregistry-bcregistry-mock.apigee.net/mockTarget"
+    API_GW_CONSUMERS_API_URL = "https://mock.bcregistry.gov.bc.ca"
+    API_GW_CONSUMERS_SANDBOX_API_URL = "https://mock.bcregistry.gov.bc.ca"
     API_GW_CONSUMER_EMAIL = "test.all.mc@gov.bc.ca"
     WEB_APP_URL = "https://localhost.com"
     BUSINESS_REGISTRY_URL = "https://localhost.com"
