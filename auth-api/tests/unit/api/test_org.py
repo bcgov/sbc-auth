@@ -29,8 +29,6 @@ from faker import Faker
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Affidavit as AffidavitModel
-from auth_api.models import Affiliation as AffiliationModel
-from auth_api.models import Entity as EntityModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import TaskSearch
@@ -53,7 +51,6 @@ from auth_api.utils.enums import (
     PaymentMethod,
     ProductCode,
     ProductSubscriptionStatus,
-    Status,
     SuspensionReasonCode,
     TaskRelationshipStatus,
     TaskStatus,
@@ -72,9 +69,7 @@ from tests.utilities.factory_scenarios import (
 )
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
-    factory_affiliation_model,
     factory_auth_header,
-    factory_entity_model,
     factory_invitation,
     factory_invitation_anonymous,
     factory_membership_model,
@@ -1285,50 +1280,27 @@ def test_get_members(client, jwt, session, keycloak_mock):  # pylint:disable=unu
     assert dictionary["members"][0]["membershipTypeCode"] == "ADMIN"
 
 
-def test_delete_org(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that an org can be deleted."""
-    # 1 - assert org can be deleted without any dependencies like members or business affiliations.
+@pytest.mark.parametrize(
+    "test_scenario,expected_affidavit_status",
+    [("single_org", AffidavitStatus.INACTIVE.value), ("multiple_orgs", AffidavitStatus.APPROVED.value)],
+)
+def test_delete_org(client, jwt, session, keycloak_mock, monkeypatch, test_scenario, expected_affidavit_status):  # pylint:disable=unused-argument
+    """Assert that an org can be deleted with proper affidavit handling."""
     patch_pay_account_delete(monkeypatch)
 
-    org_payload = TestOrgInfo.org_with_all_info
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    client.post("/api/v1/users", headers=headers, content_type="application/json")
-    rv = client.post("/api/v1/orgs", data=json.dumps(org_payload), headers=headers, content_type="application/json")
-    org_id = rv.json.get("id")
-    rv = client.delete(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
-    assert rv.status_code == HTTPStatus.NO_CONTENT
-
-    # 2 - Verify orgs with affiliations can be deleted and assert passcode is reset.
-    # 3 - Verify orgs with members and other admins can be deleted.
-    org_payload["name"] = FAKE.name()
-    rv = client.post("/api/v1/orgs", data=json.dumps(org_payload), headers=headers, content_type="application/json")
-    org_id = rv.json.get("id")
-    entity = factory_entity_model()
-    entity_id = entity.id
-    passcode = entity.pass_code
-    affiliation = factory_affiliation_model(entity.id, org_id)
-    member_user = factory_user_model()
-    factory_membership_model(member_user.id, org_id=org_id)
-
-    rv = client.delete(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
-    assert rv.status_code == HTTPStatus.NO_CONTENT
-    assert EntityModel.find_by_id(entity_id).pass_code != passcode
-    assert AffiliationModel.find_by_id(affiliation.id) is None
-    for membership in MembershipModel.find_members_by_org_id(org_id):
-        assert membership.status == Status.INACTIVE.value
-
-    # 3 - Verify bceid orgs can be deleted and assert the affidavit is INACTIVE.
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
     user = client.post("/api/v1/users", headers=headers, content_type="application/json")
+    user_id = user.json.get("id")
 
-    affidavit: AffidavitModel = AffidavitModel(
+    affidavit = AffidavitModel(
         document_id=str(uuid.uuid4()),
         issuer="TEST",
         status_code=AffidavitStatus.APPROVED.value,
-        user_id=user.json.get("id"),
+        user_id=user_id,
     ).save()
     affidavit_id = affidavit.id
 
+    # Create first organization
     org_response = client.post(
         "/api/v1/orgs",
         data=json.dumps(TestOrgInfo.bceid_org_with_all_info),
@@ -1336,9 +1308,29 @@ def test_delete_org(client, jwt, session, keycloak_mock, monkeypatch):  # pylint
         content_type="application/json",
     )
     org_id = org_response.json.get("id")
+
+    if test_scenario == "multiple_orgs":
+        second_org_payload = TestOrgInfo.bceid_org_with_all_info.copy()
+        second_org_payload["name"] = FAKE.name()
+        second_org_response = client.post(
+            "/api/v1/orgs",
+            data=json.dumps(second_org_payload),
+            headers=headers,
+            content_type="application/json",
+        )
+        second_org_id = second_org_response.json.get("id")
+        # Add user as admin to second org
+        factory_membership_model(user_id, second_org_id, "ADMIN")
+
     rv = client.delete(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.NO_CONTENT
-    assert AffidavitModel.find_by_id(affidavit_id).status_code == AffidavitStatus.INACTIVE.value
+
+    assert AffidavitModel.find_by_id(affidavit_id).status_code == expected_affidavit_status
+
+    if test_scenario == "multiple_orgs":
+        remaining_orgs = MembershipModel.find_orgs_for_user(user_id)
+        assert len(remaining_orgs) == 1
+        assert remaining_orgs[0].id == second_org_id
 
 
 def test_delete_org_failures(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument

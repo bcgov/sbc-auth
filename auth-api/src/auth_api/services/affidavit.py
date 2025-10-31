@@ -25,7 +25,6 @@ from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
-from auth_api.models import Org as OrgModel
 from auth_api.models import Task as TaskModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.user import User as UserModel
@@ -97,10 +96,8 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _modify_task(user):
         """Clone on-hold task to a new active task; handle user-based and org-based tasks."""
-        # find users org. ideally only one org
-        org_list = MembershipModel.find_orgs_for_user(user.identifier)
-        org: OrgModel = next(iter(org_list or []), None)
-        if org:
+        org_list = MembershipModel.find_orgs_for_user(user.identifier) or []
+        for org in org_list:
             # check if there is any holding tasks
             # Find if the corresponding task is NEW_ACCOUNT_STAFF_REVIEW / GOVN type, clone and close it
             task_model = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
@@ -133,7 +130,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
                 else:
                     OrgService.send_staff_review_account_reminder(relationship_id=org.id)
 
-                remarks = [f"User Uploaded New affidavit .Created New task id: {new_task.identifier}"]
+                remarks = [f"User Uploaded New affidavit. Created New task id: {new_task.identifier}"]
                 TaskService.close_task(task_model.id, remarks)
 
     @staticmethod
@@ -166,9 +163,13 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         # 2. When the user account request is rejected, then user creates a new account
         filtered_affidavit_statuses = [AffidavitStatus.INACTIVE.value, AffidavitStatus.REJECTED.value]
         affidavit = AffidavitModel.find_by_org_id(org_id, filtered_affidavit_statuses)
-        affidavit.decision_made_by = user.username
-        affidavit.decision_made_on = datetime.now()
-        affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
+        if is_approved is False and not affidavit:
+            current_app.logger.warning(f"No affidavit found for org {org_id}, silently allowing reject to happen.")
+            return None
+        else:
+            affidavit.decision_made_by = user.username
+            affidavit.decision_made_on = datetime.now()
+            affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
         current_app.logger.debug(">approve_or_reject")
         return Affidavit(affidavit)
 
@@ -180,7 +181,13 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         if affidavit is None:
             affidavit = AffidavitModel.find_pending_by_user_id(admin_user_id)
             if affidavit is None:
-                raise BusinessException(Error.DATA_NOT_FOUND, None)
+                if is_approved:
+                    raise BusinessException(Error.DATA_NOT_FOUND, None)
+                else:
+                    current_app.logger.warning(
+                        f"No affidavit found for user {admin_user_id}, silently allowing this to happen."
+                    )
+                    return None
 
             affidavit.decision_made_by = user.username
             affidavit.decision_made_on = datetime.now()
