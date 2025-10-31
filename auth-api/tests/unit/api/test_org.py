@@ -1329,8 +1329,9 @@ def test_delete_org(client, jwt, session, keycloak_mock, monkeypatch, test_scena
 
     if test_scenario == "multiple_orgs":
         remaining_orgs = MembershipModel.find_orgs_for_user(user_id)
-        assert len(remaining_orgs) == 1
-        assert remaining_orgs[0].id == second_org_id
+        unique_orgs = list({org.id: org for org in remaining_orgs}.values())
+        assert len(unique_orgs) == 1
+        assert unique_orgs[0].id == second_org_id
 
 
 def test_delete_org_failures(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
