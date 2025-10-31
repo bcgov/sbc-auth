@@ -610,7 +610,9 @@ class Org:  # pylint: disable=too-many-public-methods
 
             # If the admin is BCeID user, mark the affidavit INACTIVE.
             if user.login_source == LoginSource.BCEID.value and member.membership_type_code == ADMIN:
-                affidavit: AffidavitModel = AffidavitModel.find_approved_by_user_id(user.id)
+                if len(MembershipModel.find_orgs_for_user(user.id)) > 0:
+                    continue
+                affidavit = AffidavitModel.find_approved_by_user_id(user.id)
                 if affidavit:
                     affidavit.status_code = AffidavitStatus.INACTIVE.value
                     affidavit.flush()
