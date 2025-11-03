@@ -381,10 +381,14 @@ def get_user_affidavit(user_guid):
         abort(403)
 
     try:
-        response, status = (
-            AffidavitService.find_affidavit_by_user_guid(user_guid, status=affidavit_status),
-            HTTPStatus.OK,
-        )
+        affidavit = AffidavitService.find_affidavit_by_user_guid(user_guid, status=affidavit_status)
+        if not affidavit:
+            response, status = {"message": "Affidavit not found."}, HTTPStatus.NOT_FOUND
+        else:
+            response, status = (
+                AffidavitService.find_affidavit_by_user_guid(user_guid, status=affidavit_status),
+                HTTPStatus.OK,
+            )
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status
