@@ -149,7 +149,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug("<find_affidavit_by_user_guid ")
         affidavit = AffidavitModel.find_effective_by_user_guid(user_guid, status)
         if not affidavit:
-            current_app.logger.warning(f"Couldnt find affidavit for user {user_guid}")
+            current_app.logger.warning(f"Couldn't find affidavit for user {user_guid}")
             return None
         affidavit_dict = Affidavit(affidavit).as_dict()
         affidavit_dict["documentUrl"] = GoogleStoreService.create_signed_get_url(affidavit.document_id)
