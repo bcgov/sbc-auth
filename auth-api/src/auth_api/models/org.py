@@ -28,6 +28,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation
 from auth_api.models.dataclass import OrgSearch
+from auth_api.utils.date import str_to_utc_dt
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import EXCLUDED_FIELDS, INVALID_ORG_CREATE_TYPE_CODES, VALID_STATUSES
@@ -193,6 +194,17 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         query = cls._search_by_business_identifier(query, search.business_identifier)
         query = cls._search_for_statuses(query, search.statuses)
 
+        start_date = None
+        end_date = None
+        if search.suspended_date_from:
+            start_date = str_to_utc_dt(search.suspended_date_from, False)
+        if search.suspended_date_to:
+            end_date = str_to_utc_dt(search.suspended_date_to, True)
+        if start_date or end_date:
+            query = query.filter_conditional_date_range(start_date, end_date, Org.suspended_on, cast_to_date=False)
+        if search.suspension_reason_code:
+            query = query.filter(Org.suspension_reason_code == search.suspension_reason_code)
+
         query = cls.get_order_by(search, query)
         pagination = query.paginate(per_page=search.limit, page=search.page)
 
@@ -204,6 +216,11 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         # If searching by id, surface the perfect matches to the top
         if search.id:
             return query.order_by(desc(Org.id == int(search.id or -1)), Org.created.desc())
+
+        if search.statuses and (
+            OrgStatusEnum.SUSPENDED.value in search.statuses or OrgStatusEnum.NSF_SUSPENDED.value in search.statuses
+        ):
+            return query.order_by(desc(Org.suspended_on), Org.created.desc())
 
         return query.order_by(Org.created.desc())
 

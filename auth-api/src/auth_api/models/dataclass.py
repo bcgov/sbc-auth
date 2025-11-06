@@ -147,6 +147,9 @@ class OrgSearch:  # pylint: disable=too-many-instance-attributes
     org_type: str
     include_members: bool
     member_search_text: str
+    suspended_date_from: str
+    suspended_date_to: str
+    suspension_reason_code: str
     page: int
     limit: int
 

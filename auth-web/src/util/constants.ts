@@ -21,6 +21,7 @@ export enum SessionStorageKeys {
     PendingAccountsSearchFilter = 'PENDING_ACCOUNTS_SEARCH_FILTER',
     RejectedAccountsSearchFilter = 'REJECTED_ACCOUNTS_SEARCH_FILTER',
     InactiveAccountsSearchFilter = 'INACTIVE_ACCOUNTS_SEARCH_FILTER',
+    SuspendedAccountsSearchFilter = 'SUSPENDED_ACCOUNTS_SEARCH_FILTER',
     AuthApiUrl = 'AUTH_API_URL',
     AuthWebUrl = 'AUTH_WEB_URL',
     RegistryHomeUrl = 'REGISTRY_HOME_URL',

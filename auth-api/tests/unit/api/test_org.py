@@ -19,7 +19,7 @@ Test-Suite to ensure that the /orgs endpoint is working as expected.
 
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from http import HTTPStatus
 from unittest.mock import patch
 
@@ -3005,3 +3005,102 @@ def test_search_org_members(client, jwt, session, keycloak_mock):  # pylint:disa
     )
     dictionary = json.loads(rv.data)
     assert not dictionary["orgs"]
+
+
+def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that orgs can be searched by suspended date and suspension reason code."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
+
+    today = datetime.now()
+    yesterday = today - timedelta(days=1)
+    last_week = today - timedelta(days=7)
+
+    org1 = factory_org_model(org_info=TestOrgInfo.org1)
+    org1.status_code = OrgStatus.SUSPENDED.value
+    org1.suspended_on = yesterday
+    org1.suspension_reason_code = SuspensionReasonCode.OWNER_CHANGE.name
+    org1.save()
+
+    org2 = factory_org_model(org_info=TestOrgInfo.org2)
+    org2.status_code = OrgStatus.SUSPENDED.value
+    org2.suspended_on = last_week
+    org2.suspension_reason_code = SuspensionReasonCode.DISPUTE.name
+    org2.save()
+
+    org3 = factory_org_model(org_info=TestOrgInfo.org_with_mailing_address())
+    org3.status_code = OrgStatus.SUSPENDED.value
+    org3.suspended_on = today
+    org3.suspension_reason_code = SuspensionReasonCode.OWNER_CHANGE.name
+    org3.save()
+
+    rv = client.get(
+        f"/api/v1/orgs?status=SUSPENDED&suspensionReasonCode={SuspensionReasonCode.OWNER_CHANGE.name}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.OK
+    orgs = json.loads(rv.data)
+    assert orgs.get("total") == 2
+    org_ids = [org.get("id") for org in orgs.get("orgs")]
+    assert org1.id in org_ids
+    assert org3.id in org_ids
+    assert org2.id not in org_ids
+
+    rv = client.get(
+        f"/api/v1/orgs?status=SUSPENDED&suspensionReasonCode={SuspensionReasonCode.DISPUTE.name}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.OK
+    orgs = json.loads(rv.data)
+    assert orgs.get("total") == 1
+    assert orgs.get("orgs")[0].get("id") == org2.id
+
+    rv = client.get(
+        f"/api/v1/orgs?status=SUSPENDED&suspendedDateFrom={yesterday.strftime('%Y-%m-%d')}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.OK
+    orgs = json.loads(rv.data)
+    assert orgs.get("total") == 2
+    org_ids = [org.get("id") for org in orgs.get("orgs")]
+    assert org1.id in org_ids
+    assert org3.id in org_ids
+    assert org2.id not in org_ids
+
+    rv = client.get(
+        f"/api/v1/orgs?status=SUSPENDED&suspendedDateTo={yesterday.strftime('%Y-%m-%d')}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.OK
+    orgs = json.loads(rv.data)
+    assert orgs.get("total") == 2
+    org_ids = [org.get("id") for org in orgs.get("orgs")]
+    assert org1.id in org_ids
+    assert org2.id in org_ids
+    assert org3.id not in org_ids
+
+    rv = client.get(
+        f"/api/v1/orgs?status=SUSPENDED&suspendedDateFrom={last_week.strftime('%Y-%m-%d')}&suspendedDateTo={yesterday.strftime('%Y-%m-%d')}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.OK
+    orgs = json.loads(rv.data)
+    assert orgs.get("total") == 2
+    org_ids = [org.get("id") for org in orgs.get("orgs")]
+    assert org1.id in org_ids
+    assert org2.id in org_ids
+    assert org3.id not in org_ids
+
+    rv = client.get(
+        f"/api/v1/orgs?status=SUSPENDED&suspendedDateFrom={last_week.strftime('%Y-%m-%d')}&suspendedDateTo={yesterday.strftime('%Y-%m-%d')}&suspensionReasonCode={SuspensionReasonCode.OWNER_CHANGE.name}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.OK
+    orgs = json.loads(rv.data)
+    assert orgs.get("total") == 1
+    assert orgs.get("orgs")[0].get("id") == org1.id

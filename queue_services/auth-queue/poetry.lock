@@ -217,7 +217,7 @@ name = "auth-api"
 version = "3.0.9"
 description = ""
 optional = false
-python-versions = "^3.12"
+python-versions = ">=3.12,<3.13"
 groups = ["main"]
 files = []
 develop = false
@@ -268,8 +268,8 @@ Werkzeug = "^3.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/seeker25/sbc-auth.git"
-reference = "update_deps_pg8000"
-resolved_reference = "b4d7d61c73b5d60e4a8afeda495eb3dcdb66cb87"
+reference = "31183"
+resolved_reference = "d9a220c633c6a1683f1e3d2a3cdba519e9f05999"
 subdirectory = "auth-api"
 
 [[package]]
@@ -1251,10 +1251,7 @@ google-auth = ">=2.14.1,<3.0.0"
 googleapis-common-protos = ">=1.56.2,<2.0.0"
 grpcio = {version = ">=1.49.1,<2.0dev", optional = true, markers = "python_version >= \"3.11\" and extra == \"grpc\""}
 grpcio-status = {version = ">=1.49.1,<2.0.dev0", optional = true, markers = "python_version >= \"3.11\" and extra == \"grpc\""}
-proto-plus = [
-    {version = ">=1.25.0,<2.0.0", markers = "python_version >= \"3.13\""},
-    {version = ">=1.22.3,<2.0.0"},
-]
+proto-plus = ">=1.22.3,<2.0.0"
 protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<7.0.0"
 requests = ">=2.18.0,<3.0.0"
 
@@ -1327,10 +1324,7 @@ grpcio = ">=1.51.3,<2.0.0"
 grpcio-status = ">=1.33.2"
 opentelemetry-api = {version = ">=1.27.0", markers = "python_version >= \"3.8\""}
 opentelemetry-sdk = {version = ">=1.27.0", markers = "python_version >= \"3.8\""}
-proto-plus = [
-    {version = ">=1.25.0,<2.0.0", markers = "python_version >= \"3.13\""},
-    {version = ">=1.22.2,<2.0.0", markers = "python_version >= \"3.11\" and python_version < \"3.13\""},
-]
+proto-plus = {version = ">=1.22.2,<2.0.0", markers = "python_version >= \"3.11\""}
 protobuf = ">=3.20.2,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<7.0.0"
 
 [package.extras]
@@ -1452,7 +1446,7 @@ description = "Lightweight in-process concurrent programming"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
-markers = "python_version < \"3.14\" and (platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\")"
+markers = "platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\""
 files = [
     {file = "greenlet-3.1.1-cp310-cp310-macosx_11_0_universal2.whl", hash = "sha256:0bbae94a29c9e5c7e4a2b7f0aae5c17e8e90acbfd3bf6270eeba60c39fce3563"},
     {file = "greenlet-3.1.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0fde093fb93f35ca72a556cf72c92ea3ebfda3d79fc35bb19fbe685853869a83"},
@@ -3566,5 +3560,5 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 
 [metadata]
 lock-version = "2.1"
-python-versions = "^3.12"
-content-hash = "bd02c8935df2489986350b47976d4c23ddf990d8e3d1a2ab78ccad30490c4598"
+python-versions = ">=3.12,<3.13"
+content-hash = "ee88350811d9a3a4f171d3b3a44467867a3bfea6065ba17e777a998e42bee76e"

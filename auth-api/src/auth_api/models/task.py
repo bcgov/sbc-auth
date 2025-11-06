@@ -13,15 +13,14 @@
 # limitations under the License.
 """This model manages a Task item in the Auth Service."""
 
-import datetime as dt
 from typing import Self
 
-import pytz
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 
 from auth_api.models.dataclass import TaskSearch
+from auth_api.utils.date import str_to_utc_dt
 from auth_api.utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 
 from .base_model import BaseModel
@@ -67,14 +66,14 @@ class Task(BaseModel):
             query = query.filter(Task.type == task_search.type)
         if task_search.status:
             query = query.filter(Task.status.in_(task_search.status))
+        start_date = None
+        end_date = None
         if task_search.start_date:
-            # convert PST start_date to UTC then filter
-            start_date_utc = cls._str_to_utc_dt(task_search.start_date, False)
-            query = query.filter(Task.date_submitted >= start_date_utc)
+            start_date = str_to_utc_dt(task_search.start_date, False)
         if task_search.end_date:
-            # convert PST end_date to UTC then set time to end of day then filter
-            end_date_utc = cls._str_to_utc_dt(task_search.end_date, True)
-            query = query.filter(Task.date_submitted <= end_date_utc)
+            end_date = str_to_utc_dt(task_search.end_date, True)
+        if start_date or end_date:
+            query = query.filter_conditional_date_range(start_date, end_date, Task.date_submitted, cast_to_date=False)
         if task_search.relationship_status:
             query = query.filter(Task.relationship_status == task_search.relationship_status)
         if task_search.modified_by:
@@ -149,15 +148,3 @@ class Task(BaseModel):
             .filter_by(account_id=int(org_id or -1), relationship_type=TaskRelationshipType.USER.value, status=status)
             .first()
         )
-
-    @classmethod
-    def _str_to_utc_dt(cls, date: str, add_time: bool):
-        """Convert ISO formatted dates into dateTime objects in UTC."""
-        time_zone = pytz.timezone("Canada/Pacific")
-        naive_dt = dt.datetime.strptime(date, "%Y-%m-%d")
-        local_dt = time_zone.localize(naive_dt, is_dst=None)
-        if add_time:
-            local_dt = dt.datetime(local_dt.year, local_dt.month, local_dt.day, 23, 59, 59)
-        utc_dt = local_dt.astimezone(pytz.utc)
-
-        return utc_dt

@@ -1,12 +1,18 @@
-[tool.poetry]
+[project]
 name = "account-mailer"
 version = "0.2.0"
 description = ""
-authors = ["SBC Connect Team & Pay Team & SRE Team"]
+authors = [{ name = "SBC Connect Team & Pay Team & SRE Team" }]
 readme = "README.md"
+requires-python = ">=3.12,<3.13"
+
+[tool.poetry]
+packages = [
+    { include = "account_mailer", from = "src" }
+]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<3.13"
 blinker = "1.8.2"
 charset-normalizer = "3.3.2"
 click = "8.1.7"
@@ -32,7 +38,7 @@ urllib3 = "2.5.0"
 zipp = "3.19.1"
 
 # VCS dependencies
-auth-api = { git = "https://github.com/seeker25/sbc-auth.git", branch = "update_deps_pg8000", subdirectory = "auth-api" }
+auth-api = { git = "https://github.com/seeker25/sbc-auth.git", branch = "31183", subdirectory = "auth-api" }
 simple-cloudevent = { git = "https://github.com/daxiom/simple-cloudevent.py.git" }
 cloud-sql-python-connector = "^1.13.0"
 pkginfo = "^1.12.1.2"

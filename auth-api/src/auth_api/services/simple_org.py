@@ -93,4 +93,5 @@ class SimpleOrg:  # pylint: disable=too-few-public-methods
         # If searching by id, surface the perfect matches to the top
         if search.id:
             return query.order_by(desc(OrgModel.id == int(search.id)), OrgModel.created.desc())
+
         return query.order_by(OrgModel.name)
