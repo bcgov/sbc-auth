@@ -215,7 +215,6 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         if search.id:
             return query.order_by(desc(Org.id == int(search.id or -1)), Org.created.desc())
 
-        # If searching for suspended orgs, sort by suspended_on desc
         if search.statuses and (
             OrgStatusEnum.SUSPENDED.value in search.statuses or OrgStatusEnum.NSF_SUSPENDED.value in search.statuses
         ):
