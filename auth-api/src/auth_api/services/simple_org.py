@@ -23,7 +23,6 @@ from auth_api.models import db
 from auth_api.models.dataclass import SimpleOrgSearch
 from auth_api.schemas.simple_org import SimpleOrgInfoSchema
 from auth_api.utils.converter import Converter
-from auth_api.utils.enums import OrgStatus
 
 ENV = Environment(loader=FileSystemLoader("."), autoescape=True)
 CONFIG = get_named_config()
@@ -94,10 +93,5 @@ class SimpleOrg:  # pylint: disable=too-few-public-methods
         # If searching by id, surface the perfect matches to the top
         if search.id:
             return query.order_by(desc(OrgModel.id == int(search.id)), OrgModel.created.desc())
-
-        if search.statuses and (
-            OrgStatus.SUSPENDED.value in search.statuses or OrgStatus.NSF_SUSPENDED.value in search.statuses
-        ):
-            return query.order_by(desc(OrgModel.suspended_on), OrgModel.name)
 
         return query.order_by(OrgModel.name)
