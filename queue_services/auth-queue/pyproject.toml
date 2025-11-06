@@ -7,10 +7,9 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 
 [tool.poetry]
-name = "auth-queue"
-version = "1.1.0"
-description = ""
-authors = ["BC Registries and Online Services"]
+packages = [
+    { include = "auth_queue" }
+]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"

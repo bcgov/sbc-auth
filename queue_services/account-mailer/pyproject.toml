@@ -7,10 +7,9 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 
 [tool.poetry]
-name = "account-mailer"
-version = "0.2.0"
-description = ""
-authors = ["SBC Connect Team & Pay Team & SRE Team"]
+packages = [
+    { include = "account_mailer", from = "src" }
+]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
