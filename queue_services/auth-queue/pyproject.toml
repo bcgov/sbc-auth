@@ -4,9 +4,10 @@ version = "1.1.0"
 description = ""
 authors = ["\"BC Registries and Online Services\""]
 readme = "README.md"
+requires-python = "3.12"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "3.12"
 blinker = "1.8.2"
 charset-normalizer = "3.3.2"
 click = "8.1.7"
