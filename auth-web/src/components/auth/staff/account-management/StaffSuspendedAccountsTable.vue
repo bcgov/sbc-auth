@@ -170,21 +170,18 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, SessionStorageKeys, SuspensionReason, SuspensionReasonCode } from '@/util/constants'
-import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
-import { Member, OrgAccountTypes, OrgFilterParams, OrgList, OrgMap, Organization } from '@/models/Organization'
-import { Code } from '@/models/Code'
+import { AccountStatus, SessionStorageKeys, SuspensionReason, SuspensionReasonCode } from '@/util/constants'
+import { computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
+import { OrgAccountTypes, Organization } from '@/models/Organization'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
-import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
 import { useStaffStore } from '@/stores/staff'
 import debounce from '@/util/debounce'
 import { DatePicker } from '@/components'
 import moment from 'moment'
-import { EnumDictionary } from '@/models/util'
 import {
   DEFAULT_DATA_OPTIONS,
   cachePageInfo,
@@ -194,6 +191,7 @@ import {
   numberOfItems,
   saveItemsPerPage as saveItemsPerPageUtil
 } from '@/components/datatable/resources'
+import { getAccountTypeFromOrgAndAccessType, getOrgAndAccessTypeFromAccountType } from '@/util/account-type-utils'
 
 export default defineComponent({
   name: 'StaffSuspendedAccountsTable',
@@ -244,39 +242,6 @@ export default defineComponent({
         width: '105'
       }
     ]
-
-    const accountTypeMap = {
-      [OrgAccountTypes.ALL]: {},
-      [OrgAccountTypes.PREMIUM]: {
-        accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
-        orgType: Account.PREMIUM
-      },
-      [OrgAccountTypes.PREMIUM_OUT_OF_PROVINCE]: {
-        accessType: [AccessType.EXTRA_PROVINCIAL],
-        orgType: Account.PREMIUM
-      },
-      [OrgAccountTypes.GOVM]: {
-        accessType: [AccessType.GOVM]
-      },
-      [OrgAccountTypes.GOVN]: {
-        accessType: [AccessType.GOVN]
-      },
-      [OrgAccountTypes.DIRECTOR_SEARCH]: {
-        accessType: [AccessType.ANONYMOUS]
-      },
-      [OrgAccountTypes.STAFF]: {
-        accessType: [AccessType.GOVM],
-        orgType: Account.STAFF
-      },
-      [OrgAccountTypes.SBC_STAFF]: {
-        accessType: [AccessType.GOVM],
-        orgType: Account.SBC_STAFF
-      },
-      [OrgAccountTypes.MAXIMUS_STAFF]: {
-        accessType: [AccessType.GOVM],
-        orgType: Account.MAXIMUS_STAFF
-      }
-    } as EnumDictionary<OrgAccountTypes, OrgMap>
 
     const state = reactive({
       totalAccountsCount: 0,
@@ -341,34 +306,6 @@ export default defineComponent({
       return header.text
     }
 
-    const getOrgAndAccessTypeFromAccountType = (accountType: string): object => {
-      return accountTypeMap[accountType] || {}
-    }
-
-    const getAccountTypeFromOrgAndAccessType = (org: Organization): any => {
-      const entries = Object.entries(accountTypeMap)
-      const byAccessTypeAndOrgType = entries.find(([, value]) =>
-        value?.accessType?.includes(org.accessType) &&
-        value?.orgType === org.orgType
-      )
-      if (byAccessTypeAndOrgType) {
-        return byAccessTypeAndOrgType[0]
-      }
-      const byAccessType = entries.find(([, value]) =>
-        value?.accessType?.includes(org.accessType)
-      )
-      if (byAccessType) {
-        return byAccessType[0]
-      }
-      const byOrgType = entries.find(([, value]) =>
-        value?.orgType === org.orgType
-      )
-      if (byOrgType) {
-        return byOrgType[0]
-      }
-      return ''
-    }
-
     const getOrgs = async (page: number = 1, pageLimit: number = numberOfItems(SessionStorageKeys.PaginationNumberOfItems)) => {
       try {
         state.isTableLoading = true
@@ -384,13 +321,14 @@ export default defineComponent({
           delete completeSearchParams.orgType
           delete completeSearchParams.accessType
         }
-        if (!state.searchParams.suspensionReasonCode || state.searchParams.suspensionReasonCode === '') {
+        const isEmpty = (value: string) => !value || value === ''
+        if (isEmpty(state.searchParams.suspensionReasonCode)) {
           delete completeSearchParams.suspensionReasonCode
         }
-        if (!state.searchParams.startDate || state.searchParams.startDate === '') {
+        if (isEmpty(state.searchParams.startDate)) {
           delete completeSearchParams.startDate
         }
-        if (!state.searchParams.endDate || state.searchParams.endDate === '') {
+        if (isEmpty(state.searchParams.endDate)) {
           delete completeSearchParams.endDate
         }
         const activeAccountsResp: any = await staffStore.searchOrgs(completeSearchParams)
@@ -425,11 +363,15 @@ export default defineComponent({
       })
     }
 
+    const formatDateRange = (startDate: string, endDate: string): string => {
+      return `${moment(startDate).format('MMM DD, YYYY')} - ${moment(endDate).format('MMM DD, YYYY')}`
+    }
+
     const updateDateRange = (event: any) => {
       if (!(event.endDate && event.startDate)) {
         state.dateTxt = ''
       } else {
-        state.dateTxt = `${moment(event.startDate).format('MMM DD, YYYY')} - ${moment(event.endDate).format('MMM DD, YYYY')}`
+        state.dateTxt = formatDateRange(event.startDate, event.endDate)
       }
 
       state.searchParams.startDate = event.startDate
@@ -492,7 +434,7 @@ export default defineComponent({
           Object.assign(state.searchParams, parsed)
         }
         if (state.searchParams.startDate && state.searchParams.endDate) {
-          state.dateTxt = `${moment(state.searchParams.startDate).format('MMM DD, YYYY')} - ${moment(state.searchParams.endDate).format('MMM DD, YYYY')}`
+          state.dateTxt = formatDateRange(state.searchParams.startDate, state.searchParams.endDate)
         }
       } catch {
       }
@@ -609,36 +551,36 @@ export default defineComponent({
     .date-filter-wrapper {
       margin: 0 !important;
       padding: 0 !important;
-    }
 
-    .date-filter-wrapper .v-text-field {
-      margin: 0 !important;
-      padding: 0 !important;
-    }
+      .v-text-field {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
 
-    .date-filter-wrapper .v-input__control {
-      margin: 0 !important;
-      padding: 0 !important;
-      min-height: auto !important;
-    }
+      .v-input__control {
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: auto !important;
+      }
 
-    .date-filter-wrapper .v-input__slot {
-      margin: 0 !important;
-      height: 28px !important;
-      padding: 0 8px !important;
-    }
+      .v-input__slot {
+        margin: 0 !important;
+        height: 28px !important;
+        padding: 0 8px !important;
+      }
 
-    .date-filter-wrapper input {
-      padding: 0 !important;
-      font-size: 14px !important;
-      height: 28px !important;
-      line-height: 28px !important;
-    }
+      input {
+        padding: 0 !important;
+        font-size: 14px !important;
+        height: 28px !important;
+        line-height: 28px !important;
+      }
 
-    .date-filter-wrapper .v-input__append-inner {
-      margin-top: 0 !important;
-      padding-top: 0 !important;
-      align-self: center !important;
+      .v-input__append-inner {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        align-self: center !important;
+      }
     }
 
     .date-filter-wrapper .v-icon {

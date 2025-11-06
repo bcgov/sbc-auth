@@ -304,7 +304,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, LoginSource, SessionStorageKeys } from '@/util/constants'
+import { AccountStatus, LoginSource, SessionStorageKeys } from '@/util/constants'
 
 import {
   DEFAULT_DATA_OPTIONS,
@@ -319,19 +319,18 @@ import {
   MembershipType,
   OrgAccountTypes,
   OrgFilterParams,
-  OrgMap,
   Organization
 } from '@/models/Organization'
 import { PropType, computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
-import { EnumDictionary } from '@/models/util'
 import { IconTooltip } from '@/components'
 import debounce from '@/util/debounce'
 import { useI18n } from 'vue-i18n-composable'
 import { useOrgStore } from '@/stores/org'
 import { useStaffStore } from '@/stores/staff'
+import { ACCOUNT_TYPE_MAP, getAccountTypeFromOrgAndAccessType, getOrgAndAccessTypeFromAccountType } from '@/util/account-type-utils'
 
 export default defineComponent({
   name: 'StaffAccountsTable',
@@ -383,38 +382,6 @@ export default defineComponent({
       headersSelection: defaultHeaders
         .filter(item => item.value !== 'action')
         .map(item => item.text),
-      accountTypeMap: {
-        [OrgAccountTypes.ALL]: {},
-        [OrgAccountTypes.PREMIUM]: {
-          accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
-          orgType: Account.PREMIUM
-        },
-        [OrgAccountTypes.PREMIUM_OUT_OF_PROVINCE]: {
-          accessType: [AccessType.EXTRA_PROVINCIAL],
-          orgType: Account.PREMIUM
-        },
-        [OrgAccountTypes.GOVM]: {
-          accessType: [AccessType.GOVM]
-        },
-        [OrgAccountTypes.GOVN]: {
-          accessType: [AccessType.GOVN]
-        },
-        [OrgAccountTypes.DIRECTOR_SEARCH]: {
-          accessType: [AccessType.ANONYMOUS]
-        },
-        [OrgAccountTypes.STAFF]: {
-          accessType: [AccessType.GOVM],
-          orgType: Account.STAFF
-        },
-        [OrgAccountTypes.SBC_STAFF]: {
-          accessType: [AccessType.GOVM],
-          orgType: Account.SBC_STAFF
-        },
-        [OrgAccountTypes.MAXIMUS_STAFF]: {
-          accessType: [AccessType.GOVM],
-          orgType: Account.MAXIMUS_STAFF
-        }
-      } as EnumDictionary<OrgAccountTypes, OrgMap>,
       accountTypes: [] as string[],
       formatDate: CommonUtils.formatDisplayDate,
       totalAccountsCount: 0,
@@ -433,7 +400,7 @@ export default defineComponent({
       } as OrgFilterParams
     })
 
-    state.accountTypes = Array.from(Object.keys(state.accountTypeMap))
+    state.accountTypes = Array.from(Object.keys(ACCOUNT_TYPE_MAP))
     const paginationOptions = computed(() => getPaginationOptions())
 
     const debouncedOrgSearch = debounce(async function (page = 1, pageLimit = state.tableDataOptions.itemsPerPage) {
@@ -590,34 +557,6 @@ export default defineComponent({
 
     function updateItemsPerPage (options: DataOptions): void {
       cachePageInfo(options, props.paginationOptionsKey)
-    }
-
-    function getOrgAndAccessTypeFromAccountType (accountType: string): object {
-      return state.accountTypeMap[accountType]
-    }
-
-    function getAccountTypeFromOrgAndAccessType (org: Organization): any {
-      const entries = Object.entries(state.accountTypeMap)
-      const byAccessTypeAndOrgType = entries.find(([, value]) =>
-        value?.accessType?.includes(org.accessType) &&
-                value?.orgType === org.orgType
-      )
-      if (byAccessTypeAndOrgType) {
-        return byAccessTypeAndOrgType[0]
-      }
-      const byAccessType = entries.find(([, value]) =>
-        value?.accessType?.includes(org.accessType)
-      )
-      if (byAccessType) {
-        return byAccessType[0]
-      }
-      const byOrgType = entries.find(([, value]) =>
-        value?.orgType === org.orgType
-      )
-      if (byOrgType) {
-        return byOrgType[0]
-      }
-      return ''
     }
 
     function getHeaderPlaceHolderText (header: any): string {
