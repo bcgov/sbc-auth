@@ -99,7 +99,7 @@
                     :placeholder="header.text"
                   >
                     <template #append>
-                      <v-icon color="primary">
+                      <v-icon>
                         mdi-calendar
                       </v-icon>
                     </template>
@@ -584,9 +584,6 @@ export default defineComponent({
       }
     }
 
-    .date-filter-wrapper .v-icon {
-      color: var(--v-primary-base) !important;
-    }
 
     th:last-child {
       padding-right: 14px !important;
@@ -662,7 +659,7 @@ export default defineComponent({
     position: sticky !important;
     position: -webkit-sticky !important;
     right: 0;
-    z-index: 2;
+    z-index: 1;
     background: white;
     text-align: right !important;
   }
