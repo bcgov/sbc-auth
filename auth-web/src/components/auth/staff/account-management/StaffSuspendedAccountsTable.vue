@@ -57,7 +57,7 @@
                 :scope="getIndexedTag('find-header-col2', i)"
               >
                 <v-text-field
-                  v-if="['name', 'decisionMadeBy'].includes(header.value)"
+                  v-if="['name', 'id', 'decisionMadeBy'].includes(header.value)"
                   :id="header.value"
                   v-model.trim="searchParams[header.value]"
                   input
@@ -69,21 +69,6 @@
                   dense
                   hide-details="auto"
                 />
-
-                <div
-                  v-else-if="header.value === 'orgType'"
-                  class="mt-0"
-                >
-                  <v-select
-                    v-model="searchParams[header.value]"
-                    :items="accountTypes"
-                    filled
-                    item-text="description"
-                    item-value="code"
-                    data-test="select-status"
-                    hide-details="auto"
-                  />
-                </div>
 
                 <div
                   v-else-if="header.value === 'suspendedOn'"
@@ -141,8 +126,8 @@
           </thead>
         </template>
 
-        <template #[`item.orgType`]="{ item }">
-          {{ getAccountTypeFromOrgAndAccessType(item) }}
+        <template #[`item.id`]="{ item }">
+          {{ item.id || 'N/A' }}
         </template>
         <template #[`item.statusCode`]="{ item }">
           {{ getStatusText(item) }}
@@ -211,10 +196,16 @@ export default defineComponent({
         value: 'name'
       },
       {
-        text: 'Type',
+        text: 'Account Number',
         align: 'left',
         sortable: false,
-        value: 'orgType'
+        value: 'id'
+      },
+      {
+        text: 'Reason',
+        align: 'left',
+        sortable: false,
+        value: 'statusCode'
       },
       {
         text: 'Suspended by',
@@ -229,17 +220,11 @@ export default defineComponent({
         value: 'suspendedOn'
       },
       {
-        text: 'Reason',
-        align: 'left',
-        sortable: false,
-        value: 'statusCode'
-      },
-      {
         text: 'Actions',
         align: 'left',
         value: 'action',
         sortable: false,
-        width: '105'
+        width: '90'
       }
     ]
 
@@ -250,6 +235,7 @@ export default defineComponent({
       suspendedOrgs: [] as Organization[],
       searchParams: {
         name: '',
+        id: '',
         decisionMadeBy: '',
         orgType: OrgAccountTypes.ALL,
         suspendedDateFrom: '',
@@ -281,6 +267,7 @@ export default defineComponent({
 
     const searchParamsExist = computed(() => {
       return (state.searchParams.name && state.searchParams.name.length > 0) ||
+        (state.searchParams.id && state.searchParams.id.length > 0) ||
         (state.searchParams.decisionMadeBy && state.searchParams.decisionMadeBy.length > 0) ||
         (state.searchParams.orgType && state.searchParams.orgType !== OrgAccountTypes.ALL) ||
         (state.searchParams.suspendedDateFrom && state.searchParams.suspendedDateFrom.length > 0) ||
@@ -325,6 +312,9 @@ export default defineComponent({
         if (isEmpty(state.searchParams.suspensionReasonCode)) {
           delete completeSearchParams.suspensionReasonCode
         }
+        if (isEmpty(state.searchParams.id)) {
+          delete completeSearchParams.id
+        }
         if (isEmpty(state.searchParams.suspendedDateFrom)) {
           delete completeSearchParams.suspendedDateFrom
         }
@@ -354,6 +344,7 @@ export default defineComponent({
       state.dateRangeReset++
       Object.assign(state.searchParams, {
         name: '',
+        id: '',
         decisionMadeBy: '',
         orgType: OrgAccountTypes.ALL,
         suspendedDateFrom: '',
@@ -698,7 +689,7 @@ export default defineComponent({
 
   table > thead > tr > th:last-child {
     width: auto !important;
-    min-width: 140px !important;
+    min-width: 90px !important;
     padding-right: 14px !important;
   }
 
