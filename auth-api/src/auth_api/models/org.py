@@ -194,12 +194,16 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         query = cls._search_by_business_identifier(query, search.business_identifier)
         query = cls._search_for_statuses(query, search.statuses)
 
+        start_date = None
+        end_date = None
         if search.suspended_date_from:
             start_date_utc = str_to_utc_dt(search.suspended_date_from, False)
-            query = query.filter(Org.suspended_on >= start_date_utc)
+            start_date = start_date_utc.date()
         if search.suspended_date_to:
             end_date_utc = str_to_utc_dt(search.suspended_date_to, True)
-            query = query.filter(Org.suspended_on <= end_date_utc)
+            end_date = end_date_utc.date()
+        if start_date or end_date:
+            query = query.filter_conditional_date_range(start_date, end_date, Org.suspended_on, cast_to_date=False)
         if search.suspension_reason_code:
             query = query.filter(Org.suspension_reason_code == search.suspension_reason_code)
 

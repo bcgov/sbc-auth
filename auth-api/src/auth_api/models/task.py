@@ -66,12 +66,16 @@ class Task(BaseModel):
             query = query.filter(Task.type == task_search.type)
         if task_search.status:
             query = query.filter(Task.status.in_(task_search.status))
+        start_date = None
+        end_date = None
         if task_search.start_date:
             start_date_utc = str_to_utc_dt(task_search.start_date, False)
-            query = query.filter(Task.date_submitted >= start_date_utc)
+            start_date = start_date_utc.date()
         if task_search.end_date:
             end_date_utc = str_to_utc_dt(task_search.end_date, True)
-            query = query.filter(Task.date_submitted <= end_date_utc)
+            end_date = end_date_utc.date()
+        if start_date or end_date:
+            query = query.filter_conditional_date_range(start_date, end_date, Task.date_submitted)
         if task_search.relationship_status:
             query = query.filter(Task.relationship_status == task_search.relationship_status)
         if task_search.modified_by:

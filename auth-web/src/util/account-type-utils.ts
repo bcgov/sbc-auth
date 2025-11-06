@@ -40,7 +40,7 @@ export function getOrgAndAccessTypeFromAccountType (accountType: string): OrgMap
 }
 
 export function getAccountTypeFromOrgAndAccessType (org: Organization): string {
-  const entries = Object.entries(ACCOUNT_TYPE_MAP) as Array<[string, OrgMap]>
+  const entries = Object.entries(ACCOUNT_TYPE_MAP)
   const byAccessTypeAndOrgType = entries.find(([, value]) =>
     value?.accessType?.includes(org.accessType) &&
     value?.orgType === org.orgType

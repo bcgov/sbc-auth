@@ -368,10 +368,10 @@ export default defineComponent({
     }
 
     const updateDateRange = (event: any) => {
-      if (!(event.endDate && event.startDate)) {
-        state.dateTxt = ''
-      } else {
+      if (event.endDate && event.startDate) {
         state.dateTxt = formatDateRange(event.startDate, event.endDate)
+      } else {
+        state.dateTxt = ''
       }
 
       state.searchParams.startDate = event.startDate
@@ -586,11 +586,10 @@ export default defineComponent({
     .date-filter-wrapper .v-icon {
       color: var(--v-primary-base) !important;
     }
-  }
 
-  .header-row-2 {
     th:last-child {
       padding-right: 14px !important;
+      background: white !important;
     }
   }
 
@@ -667,10 +666,6 @@ export default defineComponent({
     text-align: right !important;
   }
 
-  .header-row-2 th:last-child {
-    padding-right: 14px !important;
-    background: white !important;
-  }
 
   ::v-deep table > tbody > tr > td {
     border: 0px;
