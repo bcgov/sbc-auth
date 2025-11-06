@@ -77,6 +77,9 @@ def search_organizations():
             request.args.get("orgType", None),
             string_to_bool(request.args.get("includeMembers", "False")),
             request.args.get("members", None),
+            request.args.get("suspendedDateFrom", None),
+            request.args.get("suspendedDateTo", None),
+            request.args.get("suspensionReasonCode", None),
             int(request.args.get("page", 1)),
             int(request.args.get("limit", 10)),
         )
