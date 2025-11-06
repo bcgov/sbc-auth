@@ -1,8 +1,8 @@
-[tool.poetry]
+[project]
 name = "auth-api"
 version = "3.0.9"
 description = ""
-authors = ["\"BC Registries and Online Services\""]
+authors = [{ name = "BC Registries and Online Services" }]
 readme = "README.md"
 requires-python = "3.12"
 
