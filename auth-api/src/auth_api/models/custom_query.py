@@ -47,19 +47,24 @@ class CustomQuery(Query):  # pylint: disable=too-many-ancestors
 
         return self.filter(model_attribute == search_criteria)
 
-    def filter_conditional_date_range(self, start_date: date, end_date: date, model_attribute):
+    def filter_conditional_date_range(self, start_date: date, end_date: date, model_attribute, cast_to_date=True):
         """Add query filter for a date range if present."""
         # Dates in DB are stored as UTC, you may need to take into account timezones and adjust the input dates
         # depending on the needs
         query = self
 
         if start_date and end_date:
-            return query.filter(and_(func.DATE(model_attribute) >= start_date, func.DATE(model_attribute) <= end_date))
+            return query.filter(
+                and_(
+                    func.DATE(model_attribute) if cast_to_date else model_attribute >= start_date,
+                    func.DATE(model_attribute) if cast_to_date else model_attribute <= end_date,
+                )
+            )
 
         if start_date:
-            query = query.filter(func.DATE(model_attribute) >= start_date)
+            query = query.filter(func.DATE(model_attribute) if cast_to_date else model_attribute >= start_date)
 
         if end_date:
-            query = query.filter(func.DATE(model_attribute) <= end_date)
+            query = query.filter(func.DATE(model_attribute) if cast_to_date else model_attribute <= end_date)
 
         return query

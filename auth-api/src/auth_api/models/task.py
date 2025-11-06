@@ -69,13 +69,11 @@ class Task(BaseModel):
         start_date = None
         end_date = None
         if task_search.start_date:
-            start_date_utc = str_to_utc_dt(task_search.start_date, False)
-            start_date = start_date_utc.date()
+            start_date = str_to_utc_dt(task_search.start_date, False)
         if task_search.end_date:
-            end_date_utc = str_to_utc_dt(task_search.end_date, True)
-            end_date = end_date_utc.date()
+            end_date = str_to_utc_dt(task_search.end_date, True)
         if start_date or end_date:
-            query = query.filter_conditional_date_range(start_date, end_date, Task.date_submitted)
+            query = query.filter_conditional_date_range(start_date, end_date, Task.date_submitted, cast_to_date=False)
         if task_search.relationship_status:
             query = query.filter(Task.relationship_status == task_search.relationship_status)
         if task_search.modified_by:

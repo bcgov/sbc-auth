@@ -197,11 +197,9 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         start_date = None
         end_date = None
         if search.suspended_date_from:
-            start_date_utc = str_to_utc_dt(search.suspended_date_from, False)
-            start_date = start_date_utc.date()
+            start_date = str_to_utc_dt(search.suspended_date_from, False)
         if search.suspended_date_to:
-            end_date_utc = str_to_utc_dt(search.suspended_date_to, True)
-            end_date = end_date_utc.date()
+            end_date = str_to_utc_dt(search.suspended_date_to, True)
         if start_date or end_date:
             query = query.filter_conditional_date_range(start_date, end_date, Org.suspended_on, cast_to_date=False)
         if search.suspension_reason_code:
