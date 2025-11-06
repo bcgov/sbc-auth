@@ -1,9 +1,6 @@
 name: Notebook Report Job CI
 
 on:
-  pull_request:
-    paths:
-      - "jobs/notebook-report/**"
   workflow_dispatch:
 defaults:
   run:
