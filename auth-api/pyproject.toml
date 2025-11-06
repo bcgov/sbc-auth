@@ -4,10 +4,10 @@ version = "3.0.9"
 description = ""
 authors = [{ name = "BC Registries and Online Services" }]
 readme = "README.md"
-requires-python = "3.12"
+requires-python = "^3.12"
 
 [tool.poetry.dependencies]
-python = "3.12"
+python = "^3.12"
 flask-cors = "^6.0.0"
 flask-migrate = "^4.0.7"
 flask-moment = "^1.0.6"
