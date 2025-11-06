@@ -217,7 +217,7 @@ name = "auth-api"
 version = "3.0.9"
 description = ""
 optional = false
-python-versions = "^3.12"
+python-versions = ">=3.12,<3.13"
 groups = ["main"]
 files = []
 develop = false
@@ -269,7 +269,7 @@ Werkzeug = "^3.0.0"
 type = "git"
 url = "https://github.com/seeker25/sbc-auth.git"
 reference = "31183"
-resolved_reference = "948c5dc2b73ce1723659987c72080d6b563422ac"
+resolved_reference = "a9e897069cf4dfd18f1407c3281006b302ff3891"
 subdirectory = "auth-api"
 
 [[package]]

@@ -62,4 +62,3 @@ export function getAccountTypeFromOrgAndAccessType (org: Organization): string {
   }
   return ''
 }
-

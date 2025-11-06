@@ -304,8 +304,8 @@
 </template>
 
 <script lang="ts">
+import { ACCOUNT_TYPE_MAP, getAccountTypeFromOrgAndAccessType, getOrgAndAccessTypeFromAccountType } from '@/util/account-type-utils'
 import { AccountStatus, LoginSource, SessionStorageKeys } from '@/util/constants'
-
 import {
   DEFAULT_DATA_OPTIONS,
   cachePageInfo,
@@ -330,7 +330,6 @@ import debounce from '@/util/debounce'
 import { useI18n } from 'vue-i18n-composable'
 import { useOrgStore } from '@/stores/org'
 import { useStaffStore } from '@/stores/staff'
-import { ACCOUNT_TYPE_MAP, getAccountTypeFromOrgAndAccessType, getOrgAndAccessTypeFromAccountType } from '@/util/account-type-utils'
 
 export default defineComponent({
   name: 'StaffAccountsTable',

@@ -171,17 +171,6 @@
 
 <script lang="ts">
 import { AccountStatus, SessionStorageKeys, SuspensionReason, SuspensionReasonCode } from '@/util/constants'
-import { computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
-import { OrgAccountTypes, Organization } from '@/models/Organization'
-import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
-import { DataOptions } from 'vuetify'
-import { useCodesStore } from '@/stores/codes'
-import { useOrgStore } from '@/stores/org'
-import { useStaffStore } from '@/stores/staff'
-import debounce from '@/util/debounce'
-import { DatePicker } from '@/components'
-import moment from 'moment'
 import {
   DEFAULT_DATA_OPTIONS,
   cachePageInfo,
@@ -191,7 +180,18 @@ import {
   numberOfItems,
   saveItemsPerPage as saveItemsPerPageUtil
 } from '@/components/datatable/resources'
+import { OrgAccountTypes, Organization } from '@/models/Organization'
+import { computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
 import { getAccountTypeFromOrgAndAccessType, getOrgAndAccessTypeFromAccountType } from '@/util/account-type-utils'
+import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
+import { DataOptions } from 'vuetify'
+import { DatePicker } from '@/components'
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
+import { useStaffStore } from '@/stores/staff'
+import debounce from '@/util/debounce'
+import moment from 'moment'
 
 export default defineComponent({
   name: 'StaffSuspendedAccountsTable',
@@ -392,6 +392,11 @@ export default defineComponent({
       root.$router.push(`/account/${orgId}/settings`)
     }
 
+    const getSuspensionReasonCode = (org: Organization): string => {
+      return codesStore.suspensionReasonCodes?.find(suspensionReasonCode =>
+        suspensionReasonCode?.code === org?.suspensionReasonCode)?.desc || ''
+    }
+
     const getStatusText = (org: Organization) => {
       if (org.statusCode === AccountStatus.NSF_SUSPENDED) {
         return org.suspensionReasonCode === SuspensionReasonCode.OVERDUE_EFT ? SuspensionReason.OVERDUE_EFT : SuspensionReason.NSF
@@ -399,11 +404,6 @@ export default defineComponent({
       return org.statusCode === AccountStatus.SUSPENDED
         ? getSuspensionReasonCode(org)
         : org.statusCode
-    }
-
-    const getSuspensionReasonCode = (org: Organization): string => {
-      return codesStore.suspensionReasonCodes?.find(suspensionReasonCode =>
-        suspensionReasonCode?.code === org?.suspensionReasonCode)?.desc || ''
     }
 
     const saveItemsPerPage = (val: number): void => {
@@ -437,6 +437,7 @@ export default defineComponent({
           state.dateTxt = formatDateRange(state.searchParams.startDate, state.searchParams.endDate)
         }
       } catch {
+        console.error('Error parsing org search filter from session:', orgSearchFilter)
       }
 
       const initialTableOptions = {
@@ -449,7 +450,7 @@ export default defineComponent({
           Object.assign(initialTableOptions, cached)
         }
       }
-      
+
       state.tableDataOptions = initialTableOptions
       await getOrgs(initialTableOptions.page || 1, initialTableOptions.itemsPerPage || numberOfItems(SessionStorageKeys.PaginationNumberOfItems))
       isInitialized = true
@@ -665,7 +666,6 @@ export default defineComponent({
     background: white;
     text-align: right !important;
   }
-
 
   ::v-deep table > tbody > tr > td {
     border: 0px;
