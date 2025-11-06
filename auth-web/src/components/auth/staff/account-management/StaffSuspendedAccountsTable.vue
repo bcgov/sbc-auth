@@ -4,8 +4,8 @@
       v-show="showDatePicker"
       ref="datePicker"
       :reset="dateRangeReset"
-      :setEndDate="searchParams.endDate"
-      :setStartDate="searchParams.startDate"
+      :setEndDate="searchParams.suspendedDateTo"
+      :setStartDate="searchParams.suspendedDateFrom"
       @submit="updateDateRange($event)"
     />
     <v-form class="datatable-search account-suspended-search">
@@ -33,7 +33,7 @@
 
         <template #no-data>
           <div class="py-8 no-data">
-            {{ noDataMessage }}
+            <div v-html="noDataMessage" />
           </div>
         </template>
 
@@ -252,8 +252,8 @@ export default defineComponent({
         name: '',
         decisionMadeBy: '',
         orgType: OrgAccountTypes.ALL,
-        startDate: '',
-        endDate: '',
+        suspendedDateFrom: '',
+        suspendedDateTo: '',
         suspensionReasonCode: '',
         statuses: [AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED]
       } as any,
@@ -283,8 +283,8 @@ export default defineComponent({
       return (state.searchParams.name && state.searchParams.name.length > 0) ||
         (state.searchParams.decisionMadeBy && state.searchParams.decisionMadeBy.length > 0) ||
         (state.searchParams.orgType && state.searchParams.orgType !== OrgAccountTypes.ALL) ||
-        (state.searchParams.startDate && state.searchParams.startDate.length > 0) ||
-        (state.searchParams.endDate && state.searchParams.endDate.length > 0) ||
+        (state.searchParams.suspendedDateFrom && state.searchParams.suspendedDateFrom.length > 0) ||
+        (state.searchParams.suspendedDateTo && state.searchParams.suspendedDateTo.length > 0) ||
         (state.searchParams.suspensionReasonCode && state.searchParams.suspensionReasonCode.length > 0)
     })
 
@@ -325,11 +325,11 @@ export default defineComponent({
         if (isEmpty(state.searchParams.suspensionReasonCode)) {
           delete completeSearchParams.suspensionReasonCode
         }
-        if (isEmpty(state.searchParams.startDate)) {
-          delete completeSearchParams.startDate
+        if (isEmpty(state.searchParams.suspendedDateFrom)) {
+          delete completeSearchParams.suspendedDateFrom
         }
-        if (isEmpty(state.searchParams.endDate)) {
-          delete completeSearchParams.endDate
+        if (isEmpty(state.searchParams.suspendedDateTo)) {
+          delete completeSearchParams.suspendedDateTo
         }
         const activeAccountsResp: any = await staffStore.searchOrgs(completeSearchParams)
         state.suspendedOrgs = activeAccountsResp?.orgs || []
@@ -356,8 +356,8 @@ export default defineComponent({
         name: '',
         decisionMadeBy: '',
         orgType: OrgAccountTypes.ALL,
-        startDate: '',
-        endDate: '',
+        suspendedDateFrom: '',
+        suspendedDateTo: '',
         suspensionReasonCode: '',
         statuses: [AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED]
       })
@@ -374,8 +374,8 @@ export default defineComponent({
         state.dateTxt = ''
       }
 
-      state.searchParams.startDate = event.startDate
-      state.searchParams.endDate = event.endDate
+      state.searchParams.suspendedDateFrom = event.startDate
+      state.searchParams.suspendedDateTo = event.endDate
       state.showDatePicker = false
     }
 
@@ -433,11 +433,11 @@ export default defineComponent({
         if (parsed) {
           Object.assign(state.searchParams, parsed)
         }
-        if (state.searchParams.startDate && state.searchParams.endDate) {
-          state.dateTxt = formatDateRange(state.searchParams.startDate, state.searchParams.endDate)
+        if (state.searchParams.suspendedDateFrom && state.searchParams.suspendedDateTo) {
+          state.dateTxt = formatDateRange(state.searchParams.suspendedDateFrom, state.searchParams.suspendedDateTo)
         }
       } catch {
-        console.error('Error parsing org search filter from session:', orgSearchFilter)
+        console.warn('Error parsing org search filter from session:', orgSearchFilter)
       }
 
       const initialTableOptions = {
@@ -486,19 +486,47 @@ export default defineComponent({
     min-width: 210px !important;
   }
 
+  ::v-deep table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  ::v-deep table th,
+  ::v-deep table td {
+    border-right: none !important;
+    border-left: none !important;
+  }
+
   .header-row-1 {
     th {
-      padding: 6px 3px 4px 3px !important;
-      border-bottom: thin solid rgba(0, 0, 0, 0.12) !important;
-      line-height: 1.2 !important;
+      font-size: 14px;
+      font-weight: bold !important;
+      padding: 18px 3px 18px 3px !important;
+      border-bottom: thin solid rgba(0, 0, 0, 0.12);
+      border-right: none !important;
+      border-left: none !important;
+    }
+
+    th:first-child {
+      padding-left: 14px !important;
+    }
+
+    th:last-child {
+      padding-right: 20px !important;
     }
   }
 
   .header-row-2 {
     th {
       padding: 18px 3px 18px 3px !important;
-      border-bottom: thin solid rgba(0, 0, 0, 0.12) !important;
+      border-bottom: thin solid rgba(0, 0, 0, 0.12);
+      border-right: none !important;
+      border-left: none !important;
       vertical-align: top !important;
+    }
+
+    th:first-child {
+      padding-left: 14px !important;
     }
 
     .v-text-field,
@@ -520,12 +548,27 @@ export default defineComponent({
       height: 28px !important;
       margin: 0 !important;
       padding: 0 8px !important;
+      background-color: transparent !important;
+      border: none !important;
+      border-bottom: thin solid rgba(0, 0, 0, 0.12) !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
     }
 
     .v-text-field--filled .v-input__control,
     .v-select--filled .v-input__control {
       padding-top: 0 !important;
       margin-top: 0 !important;
+    }
+
+    .v-text-field--filled .v-input__slot::before,
+    .v-select--filled .v-input__slot::before {
+      display: none !important;
+    }
+
+    .v-text-field--filled .v-input__slot::after,
+    .v-select--filled .v-input__slot::after {
+      display: none !important;
     }
 
     .v-text-field input {
@@ -568,6 +611,16 @@ export default defineComponent({
         margin: 0 !important;
         height: 28px !important;
         padding: 0 8px !important;
+        background-color: transparent !important;
+        border: none !important;
+        border-bottom: thin solid rgba(0, 0, 0, 0.12) !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+
+      .v-text-field--filled .v-input__slot::before,
+      .v-text-field--filled .v-input__slot::after {
+        display: none !important;
       }
 
       input {
@@ -583,7 +636,6 @@ export default defineComponent({
         align-self: center !important;
       }
     }
-
 
     th:last-child {
       padding-right: 14px !important;
