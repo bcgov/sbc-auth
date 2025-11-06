@@ -5,7 +5,7 @@ description = "An app to detect and notify about notebook report."
 authors = [{ name = "Steven Chen", email = "steven.chen@gov.bc.ca" }]
 license = { text = "Apache-2.0" }
 readme = "README.md"
-requires-python = "3.12"
+requires-python = "^3.12"
 
 [tool.poetry]
 packages = [    
@@ -13,7 +13,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "3.12"
+python = "^3.12"
 structured_logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging" }
 flask = "^3.0.2"
 sqlalchemy = "^1.4.18"

@@ -268,8 +268,8 @@ Werkzeug = "^3.0.0"
 [package.source]
 type = "git"
 url = "https://github.com/seeker25/sbc-auth.git"
-reference = "update_deps_pg8000"
-resolved_reference = "b4d7d61c73b5d60e4a8afeda495eb3dcdb66cb87"
+reference = "31183"
+resolved_reference = "d2b871c7c97301d6984b02fa6e835a114780ca2e"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3567,4 +3567,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "bd02c8935df2489986350b47976d4c23ddf990d8e3d1a2ab78ccad30490c4598"
+content-hash = "786212372431ed2de38037f78da3bd981bf544ecc795d0312e4b1a71cbab564e"

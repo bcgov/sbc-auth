@@ -4,10 +4,10 @@ version = "0.2.0"
 description = ""
 authors = [{ name = "SBC Connect Team & Pay Team & SRE Team" }]
 readme = "README.md"
-requires-python = "3.12"
+requires-python = "^3.12"
 
 [tool.poetry.dependencies]
-python = "3.12"
+python = "^3.12"
 blinker = "1.8.2"
 charset-normalizer = "3.3.2"
 click = "8.1.7"
