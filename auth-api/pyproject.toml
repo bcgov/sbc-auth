@@ -7,10 +7,9 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 
 [tool.poetry]
-name = "auth-api"
-version = "3.0.9"
-description = ""
-authors = ["BC Registries and Online Services"]
+packages = [
+    { include = "auth_api", from = "src" }
+]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
