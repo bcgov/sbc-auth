@@ -38,7 +38,6 @@ class AffiliationInvitationSchema(BaseSchema):  # pylint: disable=too-many-ances
             "expires_on",
             "accepted_date",
             "status",
-            "token",
             "type",
             "affiliation_id",
             "additional_message",
