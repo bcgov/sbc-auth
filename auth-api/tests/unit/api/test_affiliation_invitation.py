@@ -101,7 +101,7 @@ def test_add_affiliation_invitation(
     dictionary = json.loads(rv_invitation.data)
 
     assert rv_invitation.status_code == HTTPStatus.CREATED
-    assert dictionary.get("token") is not None
+    assert dictionary.get("token") is None
     result_json = rv_invitation.json
 
     assert schema_utils.validate(result_json, "affiliation_invitation_response")[0]
@@ -168,7 +168,7 @@ def test_add_affiliation_invitation_exclude_to_org(
     dictionary = json.loads(rv_invitation.data)
 
     assert rv_invitation.status_code == HTTPStatus.CREATED
-    assert dictionary.get("token") is not None
+    assert dictionary.get("token") is None
     result_json = rv_invitation.json
 
     assert schema_utils.validate(result_json, "affiliation_invitation_response")[0]

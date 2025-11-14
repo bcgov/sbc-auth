@@ -55,7 +55,8 @@ class AffiliationInvitationSchemaPublic(AffiliationInvitationSchema):
     """This is the public schema for the Affiliation Invitation model that masks the email."""
 
     @post_dump(pass_many=False)
-    def _mask_recipient_email_field(self, data, many):  # noqa: ARG002
+    def mask_email_hide_token(self, data, many):  # noqa: ARG002
         """Mask recipient email field."""
         data["recipient_email"] = mask_email(data.get("recipient_email"))
+        data.pop("token", None)
         return data
