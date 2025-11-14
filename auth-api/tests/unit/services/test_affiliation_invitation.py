@@ -502,7 +502,7 @@ def test_update_invitation_verify_different_tokens(session, auth_mock, keycloak_
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(
             affiliation_invitation_info, User(user)
         )
-        new_invitation_id = new_invitation.as_dict().get('id')
+        new_invitation_id = new_invitation.as_dict().get("id")
         invitation_model = AffiliationInvitationModel.find_by_id(new_invitation_id)
         old_token = invitation_model.token
         with freeze_time(
