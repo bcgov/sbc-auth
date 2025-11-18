@@ -236,7 +236,6 @@ export default defineComponent({
         // redirect to account-info if account is not allowed to view transactions
         root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
       } else {
-        setAccountChangedHandler(initialize)
         setViewAll(props.extended)
         clearAllFilters(true)
         defaultSearchToOneYear()
@@ -261,6 +260,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
+      setAccountChangedHandler(initialize)
       initialize()
     })
     onBeforeUnmount(() => { beforeDestroy() })
