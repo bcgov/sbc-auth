@@ -260,7 +260,9 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      setAccountChangedHandler(initialize)
+      if (isTransactionsAllowed.value) {
+        setAccountChangedHandler(initialize)
+      }
       initialize()
     })
     onBeforeUnmount(() => { beforeDestroy() })
