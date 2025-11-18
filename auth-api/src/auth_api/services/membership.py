@@ -230,7 +230,11 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         # bceid Members cant be ADMIN's.Unless they have an affidavit approved.
         # TODO when multiple teams for bceid are present , do if the user has affidavit present check
         is_bceid_user = self._model.user.login_source == LoginSource.BCEID.value
-        if is_bceid_user and getattr(updated_fields.get("membership_type", None), "code", None) == ADMIN:
+        if (
+            is_bceid_user
+            and getattr(updated_fields.get("membership_type", None), "code", None) == ADMIN
+            and not self._model.user.verified
+        ):
             raise BusinessException(Error.BCEID_USERS_CANT_BE_OWNERS, None)
 
         # Ensure that a member does not upgrade a member to ADMIN from COORDINATOR unless they are an ADMIN themselves
