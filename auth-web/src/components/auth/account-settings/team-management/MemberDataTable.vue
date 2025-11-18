@@ -382,7 +382,8 @@ export default class MemberDataTable extends Vue {
 
   private isRoleEnabled (role: RoleInfo, member: Member): boolean {
     // BCeID delegates cannot be upgraded to admins
-    if ((member?.user?.loginSource === LoginSource.BCEID) && (role.name === MembershipType.Admin)) {
+    if ((member?.user?.loginSource === LoginSource.BCEID) && (role.name === MembershipType.Admin) &&
+      (!member?.user?.verified)) {
       return false
     }
     switch (this.currentMembership.membershipTypeCode) {
