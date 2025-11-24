@@ -28,6 +28,7 @@ from auth_api.models import Entity as EntityModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
+from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import GcpQueue, queue
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import QueueSources, Status
@@ -153,6 +154,9 @@ def _get_actioned_by() -> str | None:
 
 def publish_affiliation_event(queue_message_type: str, org_id: int, business_identifier: str):
     """Publish affiliation event to topic."""
+    if not flags.is_on("enable-publish-account-events", default=False):
+        return
+
     # Excluding this for now otherwise we need to include accept invitation event for this to be complete.
     if QueueMessageTypes.BUSINESS_AFFILIATED.value == queue_message_type:
         return
@@ -171,6 +175,9 @@ def publish_affiliation_event(queue_message_type: str, org_id: int, business_ide
 
 def publish_team_member_event(queue_message_type: str, org_id: int, user_id: int):
     """Publish team member removed event to topic."""
+    if not flags.is_on("enable-publish-account-events", default=False):
+        return
+
     user_affiliation_events = _get_team_member_unaffiliated_identifiers(user_id, org_id)
     publish_account_event(
         queue_message_type=queue_message_type,
