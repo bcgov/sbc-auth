@@ -136,11 +136,10 @@ def _get_team_member_unaffiliated_identifiers(user_id: int, org_id: int) -> list
     user_model = UserModel.query.filter_by(id=user_id).first()
     unaffiliated_identifiers = (
         db.session.query(EntityModel.business_identifier)
-        .join(AffiliationModel, AffiliationModel.org_id == org_id)
-        .join(EntityModel, AffiliationModel.entity_id == EntityModel.id)
+        .join(AffiliationModel, AffiliationModel.entity_id == EntityModel.id)
+        .filter(AffiliationModel.org_id == org_id)
         .filter(~has_access_subquery)
         .scalars()
-        .all()
     )
 
     return [UserAffiliationEvent.from_user_model(user_model, unaffiliated_identifiers=unaffiliated_identifiers)]

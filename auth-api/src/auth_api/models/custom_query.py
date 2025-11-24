@@ -68,3 +68,7 @@ class CustomQuery(Query):  # pylint: disable=too-many-ancestors
             query = query.filter(func.DATE(model_attribute) if cast_to_date else model_attribute <= end_date)
 
         return query
+
+    def scalars(self) -> list:
+        """Flatten query result tuples to a list of values."""
+        return [row[0] for row in self.all()]
