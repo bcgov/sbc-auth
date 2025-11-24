@@ -49,6 +49,7 @@ class UserAffiliationEvent(Serializable):
         unaffiliated_identifiers: list[str],
     ) -> Self:
         """Create UserAffiliationEvent from UserModel."""
+        
         return cls(
             idp_userid=user.idp_userid,
             login_source=user.login_source,
