@@ -3058,8 +3058,8 @@ def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # p
     assert orgs.get("orgs")[0].get("id") == org2.id
 
     pacific_tz = pytz.timezone("Canada/Pacific")
-    yesterday_pacific = yesterday.astimezone(pacific_tz)
-    last_week_pacific = last_week.astimezone(pacific_tz)
+    yesterday_pacific = (datetime.now(tz=pytz.UTC) - timedelta(days=1)).astimezone(pacific_tz)
+    last_week_pacific = (datetime.now(tz=pytz.UTC) - timedelta(days=7)).astimezone(pacific_tz)
 
     rv = client.get(
         f"/api/v1/orgs?status=SUSPENDED&suspendedDateFrom={yesterday_pacific.strftime('%Y-%m-%d')}",
