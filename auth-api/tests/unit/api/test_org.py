@@ -3012,7 +3012,7 @@ def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # p
     """Assert that orgs can be searched by suspended date and suspension reason code."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
 
-    today = datetime.now(tz=pytz.timezone("Canada/Pacific"))
+    today = datetime.now(tz=pytz.UTC)
     yesterday = today - timedelta(days=1)
     last_week = today - timedelta(days=7)
 
@@ -3057,8 +3057,12 @@ def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # p
     assert orgs.get("total") == 1
     assert orgs.get("orgs")[0].get("id") == org2.id
 
+    pacific_tz = pytz.timezone("Canada/Pacific")
+    yesterday_pacific = yesterday.astimezone(pacific_tz)
+    last_week_pacific = last_week.astimezone(pacific_tz)
+
     rv = client.get(
-        f"/api/v1/orgs?status=SUSPENDED&suspendedDateFrom={yesterday.strftime('%Y-%m-%d')}",
+        f"/api/v1/orgs?status=SUSPENDED&suspendedDateFrom={yesterday_pacific.strftime('%Y-%m-%d')}",
         headers=headers,
         content_type="application/json",
     )
@@ -3071,7 +3075,7 @@ def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # p
     assert org2.id not in org_ids
 
     rv = client.get(
-        f"/api/v1/orgs?status=SUSPENDED&suspendedDateTo={yesterday.strftime('%Y-%m-%d')}",
+        f"/api/v1/orgs?status=SUSPENDED&suspendedDateTo={yesterday_pacific.strftime('%Y-%m-%d')}",
         headers=headers,
         content_type="application/json",
     )
@@ -3084,7 +3088,7 @@ def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # p
     assert org3.id not in org_ids
 
     rv = client.get(
-        f"/api/v1/orgs?status=SUSPENDED&suspendedDateFrom={last_week.strftime('%Y-%m-%d')}&suspendedDateTo={yesterday.strftime('%Y-%m-%d')}",
+        f"/api/v1/orgs?status=SUSPENDED&suspendedDateFrom={last_week_pacific.strftime('%Y-%m-%d')}&suspendedDateTo={yesterday_pacific.strftime('%Y-%m-%d')}",
         headers=headers,
         content_type="application/json",
     )
@@ -3097,7 +3101,7 @@ def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # p
     assert org3.id not in org_ids
 
     rv = client.get(
-        f"/api/v1/orgs?status=SUSPENDED&suspendedDateFrom={last_week.strftime('%Y-%m-%d')}&suspendedDateTo={yesterday.strftime('%Y-%m-%d')}&suspensionReasonCode={SuspensionReasonCode.OWNER_CHANGE.name}",
+        f"/api/v1/orgs?status=SUSPENDED&suspendedDateFrom={last_week_pacific.strftime('%Y-%m-%d')}&suspendedDateTo={yesterday_pacific.strftime('%Y-%m-%d')}&suspensionReasonCode={SuspensionReasonCode.OWNER_CHANGE.name}",
         headers=headers,
         content_type="application/json",
     )
