@@ -564,7 +564,7 @@ def test_validate_token_exception(session):  # pylint:disable=unused-argument
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_accept_affiliation_invitation(
-    publish_mock, session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch
+    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Accept the affiliation invitation and add the affiliation from the invitation."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):

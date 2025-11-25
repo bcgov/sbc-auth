@@ -43,7 +43,7 @@ from tests.utilities.factory_utils import (
 )
 
 
-def test_create_affiliation(publish_mock, session, auth_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_create_affiliation(session, auth_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affiliation can be created."""
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     entity_dictionary = entity_service.as_dict()
