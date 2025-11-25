@@ -33,39 +33,33 @@ class Converter(cattrs.Converter):
 
         def register_case_hooks(type_check, field_getter):
             if snake_case_to_camel:
-                self.register_unstructure_hook_factory(
-                    type_check, self._make_case_unstructure(field_getter, self._to_camel_case)
-                )
-                self.register_structure_hook_factory(
-                    type_check, self._make_case_structure(field_getter, self._to_snake_case)
-                )
+                unstructure_fn = self._make_case_unstructure(field_getter, self._to_camel_case)
+                structure_fn = self._make_case_structure(field_getter, self._to_snake_case)
+                self.register_unstructure_hook_factory(type_check, unstructure_fn)
+                self.register_structure_hook_factory(type_check, structure_fn)
 
             if camel_to_snake_case:
-                self.register_unstructure_hook_factory(
-                    type_check, self._make_case_unstructure(field_getter, self._to_snake_case)
-                )
-                self.register_structure_hook_factory(
-                    type_check, self._make_case_structure(field_getter, self._to_camel_case)
-                )
+                unstructure_fn = self._make_case_unstructure(field_getter, self._to_snake_case)
+                structure_fn = self._make_case_structure(field_getter, self._to_camel_case)
+                self.register_unstructure_hook_factory(type_check, unstructure_fn)
+                self.register_structure_hook_factory(type_check, structure_fn)
 
         # Register for both attrs and dataclasses
         register_case_hooks(attrs_has, attrs_fields)
         register_case_hooks(dataclasses.is_dataclass, dataclasses.fields)
 
-    @staticmethod
-    def _make_case_unstructure(field_getter, rename_func):
+    def _make_case_unstructure(self, field_getter, rename_func):
         def unstructure(cls):
             return make_dict_unstructure_fn(
-                cls, Converter(), **{f.name: override(rename=rename_func(f.name)) for f in field_getter(cls)}
+                cls, self, **{f.name: override(rename=rename_func(f.name)) for f in field_getter(cls)}
             )
 
         return unstructure
 
-    @staticmethod
-    def _make_case_structure(field_getter, rename_func):
+    def _make_case_structure(self, field_getter, rename_func):
         def structure(cls):
             return make_dict_structure_fn(
-                cls, Converter(), **{f.name: override(rename=rename_func(f.name)) for f in field_getter(cls)}
+                cls, self, **{f.name: override(rename=rename_func(f.name)) for f in field_getter(cls)}
             )
 
         return structure

@@ -156,14 +156,14 @@ def _create_test_users(orgs):
     return ejected_user, unaffected_user
 
 
-def _create_business_entity(business_identifier, business_number, name):
+def _create_business_entity(business_identifier, business_number, name, corp_type_code="BC"):
     """Create a business entity for testing."""
     return factory_entity_model(
         entity_info={
             "businessIdentifier": business_identifier,
             "businessNumber": business_number,
             "name": name,
-            "corpTypeCode": "BC",
+            "corpTypeCode": corp_type_code,
             "passCode": "",
         }
     )
@@ -182,17 +182,21 @@ def _create_test_user(username, idp_userid):
     )
 
 
-def _publish_and_get_account_event(mock_publish_account_event, org_id, business_identifier):
+def _publish_and_get_account_event(mock_publish_account_event, org_id, business_identifier, should_publish=True):
     """Publish affiliation event and return the account event from the mock."""
     publish_affiliation_event(QueueMessageTypes.BUSINESS_UNAFFILIATED.value, org_id, business_identifier)
 
-    mock_publish_account_event.assert_called_once()
-    call_args = mock_publish_account_event.call_args
+    if should_publish:
+        mock_publish_account_event.assert_called_once()
+        call_args = mock_publish_account_event.call_args
 
-    assert call_args.kwargs["queue_message_type"] == QueueMessageTypes.BUSINESS_UNAFFILIATED.value
-    account_event = call_args.kwargs["data"]
+        assert call_args.kwargs["queue_message_type"] == QueueMessageTypes.BUSINESS_UNAFFILIATED.value
+        account_event = call_args.kwargs["data"]
 
-    return account_event
+        return account_event
+    else:
+        mock_publish_account_event.assert_not_called()
+        return None
 
 
 def _assert_account_event(account_event, account_id, business_identifier, actioned_by):
@@ -261,20 +265,60 @@ def _setup_unaffiliation_scenario(scenario_name):
 
         return org2, business2.business_identifier, ["idp_user1", "idp_user2"], []
 
+    elif scenario_name == "nr_business_identifier":
+        org1 = factory_org_model(org_info={"name": "Org 1", "accessType": ""})
+        org2 = factory_org_model(org_info={"name": "Org 2", "accessType": ""})
+
+        nr_business = _create_business_entity("NR 1234567", "BN1", "ABC Corp Inc.")
+
+        factory_affiliation_model(nr_business.id, org1.id)
+        factory_affiliation_model(nr_business.id, org2.id)
+
+        user1 = _create_test_user("user1", "idp_user1")
+        user2 = _create_test_user("user2", "idp_user2")
+
+        factory_membership_model(user1.id, org1.id, member_status=1)
+        factory_membership_model(user1.id, org2.id, member_status=1)
+        factory_membership_model(user2.id, org1.id, member_status=1)
+
+        return org1, nr_business.business_identifier, ["idp_user2"], ["idp_user1"]
+
+    elif scenario_name == "tmp_business_identifier":
+        org1 = factory_org_model(org_info={"name": "Org 1", "accessType": ""})
+        org2 = factory_org_model(org_info={"name": "Org 2", "accessType": ""})
+
+        tmp_business = _create_business_entity("T1234567", "BN1", "NR 1234567")
+
+        factory_affiliation_model(tmp_business.id, org1.id)
+        factory_affiliation_model(tmp_business.id, org2.id)
+
+        user1 = _create_test_user("user1", "idp_user1")
+        user2 = _create_test_user("user2", "idp_user2")
+
+        factory_membership_model(user1.id, org1.id, member_status=1)
+        factory_membership_model(user1.id, org2.id, member_status=1)
+        factory_membership_model(user2.id, org1.id, member_status=1)
+
+        return org1, tmp_business.business_identifier, ["idp_user2"], ["idp_user1"]
+
     raise ValueError(f"Unknown scenario: {scenario_name}")
 
 
 @pytest.mark.parametrize(
-    "scenario_name, expected_user_ids, expected_no_event_user_ids",
+    "scenario_name, expected_user_ids, expected_no_event_user_ids, should_publish",
     [
-        ("user_has_access_through_other_org", [], []),
-        ("multiple_users_one_loses_access", ["idp_user2"], ["idp_user1"]),
-        ("both_users_lose_access", ["idp_user1", "idp_user2"], []),
+        ("user_has_access_through_other_org", [], [], True),
+        ("multiple_users_one_loses_access", ["idp_user2"], ["idp_user1"], True),
+        ("both_users_lose_access", ["idp_user1", "idp_user2"], [], True),
+        ("nr_business_identifier", [], [], False),
+        ("tmp_business_identifier", [], [], False),
     ],
     ids=[
         "user_has_access_through_other_org",
         "multiple_users_one_loses_access",
         "both_users_lose_access",
+        "nr_business_identifier",
+        "tmp_business_identifier",
     ],
 )
 @patch("auth_api.utils.auth_event_publisher.publish_account_event")
@@ -286,44 +330,74 @@ def test_publish_affiliation_event_unaffiliation(
     scenario_name,
     expected_user_ids,
     expected_no_event_user_ids,
+    should_publish,
 ):
     """Test publish_affiliation_event for unaffiliation with various scenarios."""
     mock_get_actioned_by.return_value = "test_user_123"
 
-    target_org, target_business_identifier, expected_ids, no_event_ids = _setup_unaffiliation_scenario(scenario_name)
+    target_org, target_business_identifier, _expected_ids, _no_event_ids = _setup_unaffiliation_scenario(scenario_name)
 
     account_event = _publish_and_get_account_event(
-        mock_publish_account_event, target_org.id, target_business_identifier
+        mock_publish_account_event, target_org.id, target_business_identifier, should_publish
     )
 
-    _assert_account_event(account_event, target_org.id, target_business_identifier, "test_user_123")
+    if should_publish:
+        _assert_account_event(account_event, target_org.id, target_business_identifier, "test_user_123")
 
-    assert len(account_event.user_affiliation_events) == len(expected_user_ids)
+        assert len(account_event.user_affiliation_events) == len(expected_user_ids)
 
-    if expected_user_ids:
-        user_ids = [event.idp_userid for event in account_event.user_affiliation_events]
-        for expected_id in expected_user_ids:
-            assert expected_id in user_ids
+        if expected_user_ids:
+            user_ids = [event.idp_userid for event in account_event.user_affiliation_events]
+            for expected_id in expected_user_ids:
+                assert expected_id in user_ids
 
-        for user_event in account_event.user_affiliation_events:
-            assert isinstance(user_event, UserAffiliationEvent)
-            assert user_event.unaffiliated_identifiers == [target_business_identifier]
+            for user_event in account_event.user_affiliation_events:
+                assert isinstance(user_event, UserAffiliationEvent)
+                assert user_event.unaffiliated_identifiers == [target_business_identifier]
 
-    if expected_no_event_user_ids:
-        event_user_ids = [event.idp_userid for event in account_event.user_affiliation_events]
-        for no_event_id in expected_no_event_user_ids:
-            assert no_event_id not in event_user_ids
+        if expected_no_event_user_ids:
+            event_user_ids = [event.idp_userid for event in account_event.user_affiliation_events]
+            for no_event_id in expected_no_event_user_ids:
+                assert no_event_id not in event_user_ids
+
+
+def _setup_nr_business_identifier():
+    """Create 2 orgs with NR business identifier affiliations."""
+    org1 = factory_org_model(org_info={"name": "Org 1", "accessType": ""})
+    org2 = factory_org_model(org_info={"name": "Org 2", "accessType": ""})
+
+    nr_entity = _create_business_entity("NR 1234567", "BN1", "ABC Corp Inc.", "NR")
+    factory_affiliation_model(nr_entity.id, org1.id)
+    factory_affiliation_model(nr_entity.id, org2.id)
+
+    return [org1, org2]
+
+
+def _setup_tmp_business_identifier():
+    """Create 2 orgs with TMP business identifier affiliations."""
+    org1 = factory_org_model(org_info={"name": "Org 1", "accessType": ""})
+    org2 = factory_org_model(org_info={"name": "Org 2", "accessType": ""})
+
+    tmp_entity = _create_business_entity("QWERTYUIO", "BN1", "NR 1234567", "TMP")
+    factory_affiliation_model(tmp_entity.id, org1.id)
+    factory_affiliation_model(tmp_entity.id, org2.id)
+
+    return [org1, org2]
 
 
 @pytest.mark.parametrize(
-    "use_shared_setup, expected_user_affiliation_event",
+    "use_shared_setup, expected_user_affiliation_event, should_publish",
     [
-        (False, {"idp_userid": "idp_ejected", "unaffiliated_identifiers": ["BI1-1", "BI1-2"]}),
-        (True, {"idp_userid": "idp_ejected", "unaffiliated_identifiers": ["BI1-2"]}),
+        (False, {"idp_userid": "idp_ejected", "unaffiliated_identifiers": ["BI1-1", "BI1-2"]}, True),
+        (True, {"idp_userid": "idp_ejected", "unaffiliated_identifiers": ["BI1-2"]}, True),
+        ("nr", None, False),
+        ("tmp", None, False),
     ],
     ids=[
         "two_orgs_2_affiliations_each_org",
         "two_orgs_3_affiliations_only_1_unaffiliated",
+        "nr_business_identifier",
+        "tmp_business_identifier",
     ],
 )
 @patch("auth_api.utils.auth_event_publisher.publish_account_event")
@@ -334,11 +408,16 @@ def test_publish_team_member_event_ejection(
     session,  # pylint:disable=unused-argument
     use_shared_setup,
     expected_user_affiliation_event,
+    should_publish,
 ):
     """Test publish_team_member_event for team member ejection with various org/affiliation scenarios."""
     mock_get_actioned_by.return_value = "test_user_123"
 
-    if use_shared_setup:
+    if use_shared_setup == "nr":
+        orgs = _setup_nr_business_identifier()
+    elif use_shared_setup == "tmp":
+        orgs = _setup_tmp_business_identifier()
+    elif use_shared_setup:
         orgs = _setup_shared_business_identifier()
     else:
         orgs, _entities, _affiliations = _setup_orgs_entities_affiliations(2, 2)
@@ -348,19 +427,46 @@ def test_publish_team_member_event_ejection(
 
     publish_team_member_event(QueueMessageTypes.TEAM_MEMBER_REMOVED.value, target_org.id, ejected_user.id)
 
-    mock_publish_account_event.assert_called_once()
-    call_args = mock_publish_account_event.call_args
+    if should_publish:
+        mock_publish_account_event.assert_called_once()
+        call_args = mock_publish_account_event.call_args
 
-    assert call_args.kwargs["queue_message_type"] == QueueMessageTypes.TEAM_MEMBER_REMOVED.value
-    account_event = call_args.kwargs["data"]
+        assert call_args.kwargs["queue_message_type"] == QueueMessageTypes.TEAM_MEMBER_REMOVED.value
+        account_event = call_args.kwargs["data"]
 
-    _assert_account_event(account_event, target_org.id, None, "test_user_123")
+        _assert_account_event(account_event, target_org.id, None, "test_user_123")
 
-    assert len(account_event.user_affiliation_events) == 1
-    user_event = account_event.user_affiliation_events[0]
+        assert len(account_event.user_affiliation_events) == 1
+        user_event = account_event.user_affiliation_events[0]
 
-    assert isinstance(user_event, UserAffiliationEvent)
-    assert user_event.idp_userid == expected_user_affiliation_event["idp_userid"]
-    assert user_event.login_source == ejected_user.login_source
-    assert set(user_event.unaffiliated_identifiers) == set(expected_user_affiliation_event["unaffiliated_identifiers"])
-    assert unaffected_user.idp_userid not in [event.idp_userid for event in account_event.user_affiliation_events]
+        assert isinstance(user_event, UserAffiliationEvent)
+        assert user_event.idp_userid == expected_user_affiliation_event["idp_userid"]
+        assert user_event.login_source == ejected_user.login_source
+        assert set(user_event.unaffiliated_identifiers) == set(
+            expected_user_affiliation_event["unaffiliated_identifiers"]
+        )
+        assert unaffected_user.idp_userid not in [event.idp_userid for event in account_event.user_affiliation_events]
+    else:
+        mock_publish_account_event.assert_not_called()
+
+
+def test_account_event_to_dict_camelcase_serialization():
+    """Test that AccountEvent.to_dict() serializes unaffiliated_identifiers to camelCase."""
+    user_event = UserAffiliationEvent(
+        idp_userid="test_user_123",
+        login_source="BCSC",
+        unaffiliated_identifiers=["BI1", "BI2", "BI3"],
+    )
+
+    account_event = AccountEvent(
+        account_id=123,
+        actioned_by="admin_user",
+        business_identifier="BI1",
+        user_affiliation_events=[user_event],
+    )
+
+    serialized = account_event.to_dict()
+
+    assert "unaffiliatedIdentifiers" in serialized["userAffiliationEvents"][0]
+    assert serialized["userAffiliationEvents"][0]["unaffiliatedIdentifiers"] == ["BI1", "BI2", "BI3"]
+    assert "unaffiliated_identifiers" not in serialized["userAffiliationEvents"][0]
