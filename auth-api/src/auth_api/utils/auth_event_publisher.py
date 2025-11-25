@@ -30,7 +30,7 @@ from auth_api.models import db
 from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import GcpQueue, queue
 from auth_api.services.user import User as UserService
-from auth_api.utils.enums import QueueSources, Status
+from auth_api.utils.enums import CorpType, QueueSources, Status
 from auth_api.utils.serializable import Serializable
 
 
@@ -134,10 +134,13 @@ def _get_team_member_unaffiliated_identifiers(user_id: int, org_id: int) -> list
     """Get UserAffiliationEvent for a user losing access to an org with unaffiliated business identifiers."""
     has_access_subquery = _has_access_through_other_orgs(user_id, org_id, entity_id_column=EntityModel.id)
     user_model = UserModel.query.filter_by(id=user_id).first()
+    # DBC has no interest in NR or TMP events.
+    excluded_corp_types = [CorpType.NR.value, CorpType.TMP.value]
     unaffiliated_identifiers = (
         db.session.query(EntityModel.business_identifier)
         .join(AffiliationModel, AffiliationModel.entity_id == EntityModel.id)
         .filter(AffiliationModel.org_id == org_id)
+        .filter(~EntityModel.corp_type_code.in_(excluded_corp_types))
         .filter(~has_access_subquery)
         .scalars()
     )
@@ -154,6 +157,10 @@ def _get_actioned_by() -> str | None:
 def publish_affiliation_event(queue_message_type: str, org_id: int, business_identifier: str):
     """Publish affiliation event to topic."""
     if not flags.is_on("enable-publish-account-events", default=False):
+        return
+
+    # DBC has no interest in NR or TMP events.
+    if business_identifier.startswith("NR") or business_identifier.startswith("T"):
         return
 
     user_affiliation_events = _get_affiliation_event_users(org_id, business_identifier)
@@ -174,6 +181,9 @@ def publish_team_member_event(queue_message_type: str, org_id: int, user_id: int
         return
 
     user_affiliation_events = _get_team_member_unaffiliated_identifiers(user_id, org_id)
+    if not user_affiliation_events or not user_affiliation_events[0].unaffiliated_identifiers:
+        return
+
     publish_account_event(
         queue_message_type=queue_message_type,
         data=AccountEvent(
