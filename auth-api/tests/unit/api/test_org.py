@@ -3012,8 +3012,6 @@ def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # p
     """Assert that orgs can be searched by suspended date and suspension reason code."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
 
-    today = datetime.now(tz=pytz.UTC)
-
     org1 = factory_org_model(org_info=TestOrgInfo.org1)
     org1.status_code = OrgStatus.SUSPENDED.value
     org1.suspended_on = datetime(2025, 11, 23, tzinfo=pytz.UTC)
