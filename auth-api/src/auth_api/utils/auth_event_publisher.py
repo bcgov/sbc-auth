@@ -19,7 +19,6 @@ from datetime import UTC, datetime
 from typing import Self
 
 from flask import current_app
-from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
 from sqlalchemy import select
 
@@ -155,10 +154,6 @@ def _get_actioned_by() -> str | None:
 def publish_affiliation_event(queue_message_type: str, org_id: int, business_identifier: str):
     """Publish affiliation event to topic."""
     if not flags.is_on("enable-publish-account-events", default=False):
-        return
-
-    # Excluding this for now otherwise we need to include accept invitation event for this to be complete.
-    if QueueMessageTypes.BUSINESS_AFFILIATED.value == queue_message_type:
         return
 
     user_affiliation_events = _get_affiliation_event_users(org_id, business_identifier)

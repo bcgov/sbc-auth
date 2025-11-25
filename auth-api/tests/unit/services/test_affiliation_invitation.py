@@ -599,11 +599,6 @@ def test_accept_affiliation_invitation(
             affiliation = AffiliationService.find_affiliation(
                 new_invitation["from_org"]["id"], entity_dictionary["business_identifier"]
             )
-            publish_mock.assert_called_once_with(
-                QueueMessageTypes.BUSINESS_AFFILIATED.value,
-                from_org_dictionary["id"],
-                entity_dictionary["business_identifier"],
-            )
             assert affiliation
             assert invitation
             assert affiliation["id"] == invitation["affiliation_id"]

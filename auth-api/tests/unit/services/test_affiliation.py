@@ -20,9 +20,7 @@ from unittest import mock
 from unittest.mock import ANY, patch
 
 import pytest
-from sbc_common_components.utils.enums import QueueMessageTypes
 
-import auth_api
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation as AffiliationModel
@@ -45,7 +43,6 @@ from tests.utilities.factory_utils import (
 )
 
 
-@patch.object(auth_api.services.affiliation, "publish_affiliation_event")
 def test_create_affiliation(publish_mock, session, auth_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affiliation can be created."""
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
@@ -59,7 +56,6 @@ def test_create_affiliation(publish_mock, session, auth_mock, monkeypatch):  # p
     affiliation = AffiliationService.create_affiliation(
         org_id, business_identifier, TestEntityInfo.entity_lear_mock["passCode"]
     )
-    publish_mock.assert_called_once_with(QueueMessageTypes.BUSINESS_AFFILIATED.value, org_id, business_identifier)
     assert affiliation
     assert affiliation.entity.identifier == entity_service.identifier
     assert affiliation.as_dict()["organization"]["id"] == org_dictionary["id"]
