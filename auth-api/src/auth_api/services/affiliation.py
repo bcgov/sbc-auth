@@ -194,7 +194,6 @@ class Affiliation:
                 Activity(org_id, ActivityAction.CREATE_AFFILIATION.value, name=name, id=entity.business_identifier)
             )
 
-        publish_affiliation_event(QueueMessageTypes.BUSINESS_AFFILIATED.value, org_id, entity.business_identifier)
         return Affiliation(affiliation)
 
     @staticmethod

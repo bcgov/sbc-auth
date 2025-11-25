@@ -43,7 +43,6 @@ from auth_api.services.flags import flags
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.auth_event_publisher import publish_affiliation_event
 from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
 from auth_api.utils.roles import ADMIN, CLIENT_AUTH_ROLES, COORDINATOR, STAFF, USER
 from auth_api.utils.user_context import UserContext, user_context
@@ -711,9 +710,6 @@ class AffiliationInvitation:
             entity_model = EntityModel.find_by_entity_id(entity_id)
             if flags.is_on("enable-entity-mapping", default=False) is True:
                 EntityMappingService.populate_entity_mapping_for_identifier(entity_model.business_identifier)
-            publish_affiliation_event(
-                QueueMessageTypes.BUSINESS_AFFILIATED.value, org_id, entity_model.business_identifier
-            )
 
         affiliation_invitation.affiliation_id = affiliation_model.id
         affiliation_invitation.approver_id = user.identifier

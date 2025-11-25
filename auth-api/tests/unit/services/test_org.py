@@ -888,8 +888,6 @@ def test_delete_org_with_affiliation(publish_mock, session, auth_mock, keycloak_
     business_identifier = entity_dictionary["business_identifier"]
     AffiliationService.create_affiliation(org_id, business_identifier, TestEntityInfo.entity_lear_mock["passCode"])
 
-    publish_mock.assert_called_once_with(QueueMessageTypes.BUSINESS_AFFILIATED.value, org_id, business_identifier)
-    publish_mock.reset_mock()
     patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
     patch_pay_account_delete(monkeypatch)
     OrgService.delete_org(org_id)
