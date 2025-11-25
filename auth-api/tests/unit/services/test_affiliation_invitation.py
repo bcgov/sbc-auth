@@ -562,7 +562,6 @@ def test_validate_token_exception(session):  # pylint:disable=unused-argument
     assert exception.value.code == Error.EXPIRED_AFFILIATION_INVITATION.name
 
 
-@patch.object(auth_api.services.affiliation_invitation, "publish_affiliation_event")
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_accept_affiliation_invitation(
     publish_mock, session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch
