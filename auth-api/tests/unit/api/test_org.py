@@ -24,6 +24,7 @@ from http import HTTPStatus
 from unittest.mock import patch
 
 import pytest
+import pytz
 from faker import Faker
 
 from auth_api.exceptions import BusinessException
@@ -3011,7 +3012,7 @@ def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # p
     """Assert that orgs can be searched by suspended date and suspension reason code."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
 
-    today = datetime.now()
+    today = datetime.now(tz=pytz.timezone("Canada/Pacific"))
     yesterday = today - timedelta(days=1)
     last_week = today - timedelta(days=7)
 
