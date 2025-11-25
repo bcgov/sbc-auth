@@ -135,7 +135,13 @@ def _get_team_member_unaffiliated_identifiers(user_id: int, org_id: int) -> list
     has_access_subquery = _has_access_through_other_orgs(user_id, org_id, entity_id_column=EntityModel.id)
     user_model = UserModel.query.filter_by(id=user_id).first()
     # DBC has no interest in NR or TMP events.
-    excluded_corp_types = [CorpType.NR.value, CorpType.TMP.value]
+    excluded_corp_types = [
+        CorpType.NR.value,
+        CorpType.TMP.value,
+        CorpType.ATMP.value,
+        CorpType.CTMP.value,
+        CorpType.RTMP.value,
+    ]
     unaffiliated_identifiers = (
         db.session.query(EntityModel.business_identifier)
         .join(AffiliationModel, AffiliationModel.entity_id == EntityModel.id)
