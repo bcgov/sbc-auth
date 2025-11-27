@@ -129,6 +129,19 @@
                       "examples": [
                           "My Test Branch"
                       ]
+                  },
+                  "mailingAddress": {
+                      "$id": "#/items/anyOf/0/properties/mailingAddress",
+                      "oneOf": [
+                          {
+                              "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/contact_response"
+                          },
+                          {
+                              "type": "null"
+                          }
+                      ],
+                      "title": "Mailing Address",
+                      "description": "Mailing address information for the organization"
                   }
             }
           }

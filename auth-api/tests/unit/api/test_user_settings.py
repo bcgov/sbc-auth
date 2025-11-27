@@ -50,9 +50,11 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     claims["idp_userid"] = str(user_model.idp_userid)
     patch_token_info(claims, monkeypatch)
 
-    OrgService.create_org(TestOrgInfo.org_branch_name, user_id=user_model.id)
+    org = OrgService.create_org(TestOrgInfo.org_branch_name, user_id=user_model.id)
+    org_dict = org.as_dict()
+    org_id = org_dict["id"]
 
-    # post token with updated claims
+    # Test without org contact - mailingAddress should be None
     headers = factory_auth_header(jwt=jwt, claims=claims)
     rv = client.get(f"/api/v1/users/{kc_id}/settings", headers=headers, content_type="application/json")
     item_list = rv.json
@@ -62,6 +64,26 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(item_list, "user_settings_response")[0]
     assert account["productSettings"] == f"/account/{account['id']}/restricted-product"
+    assert "mailingAddress" in account
+    assert account["mailingAddress"] is None
+
+    # Add org contact and test with mailingAddress
+    org_contact = factory_contact_model()
+    org_contact.city = "Victoria"
+    org_contact.save()
+    org_contact_link = ContactLinkModel()
+    org_contact_link.contact = org_contact
+    org_contact_link.org = org._model  # pylint:disable=protected-access
+    org_contact_link.save()
+
+    rv = client.get(f"/api/v1/users/{kc_id}/settings", headers=headers, content_type="application/json")
+    item_list = rv.json
+    account = next(obj for obj in item_list if obj["type"] == "ACCOUNT")
+    assert account["id"] == org_id
+    assert "mailingAddress" in account
+    assert isinstance(account["mailingAddress"], dict)
+    assert "city" in account["mailingAddress"]
+    assert account["mailingAddress"]["city"] == "Victoria"
 
     kc_id_no_user = dict(TestUserInfo.user1).get("keycloak_guid")
     claims = copy.deepcopy(TestJwtClaims.updated_test.value)

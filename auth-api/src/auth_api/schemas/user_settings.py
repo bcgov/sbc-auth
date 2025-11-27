@@ -13,7 +13,7 @@
 # limitations under the License.
 """Manager for User settings schema and export."""
 
-from marshmallow import post_dump
+from marshmallow import fields, post_dump
 
 from auth_api.models import ma
 
@@ -34,7 +34,10 @@ class UserSettingsSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-a
             "account_type",
             "account_status",
             "product_settings",
+            "mailing_address",
         )
+
+    mailing_address = fields.Raw(data_key="mailingAddress")
 
     @post_dump(pass_many=True)
     def _remove_empty(self, data, many):
