@@ -54,7 +54,7 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     org_dict = org.as_dict()
     org_id = org_dict["id"]
 
-    # Test without org contact - mailingAddress should be None
+    # Test without org contact - mailingAddress should not be present (removed by schema when None)
     headers = factory_auth_header(jwt=jwt, claims=claims)
     rv = client.get(f"/api/v1/users/{kc_id}/settings", headers=headers, content_type="application/json")
     item_list = rv.json
@@ -64,8 +64,7 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(item_list, "user_settings_response")[0]
     assert account["productSettings"] == f"/account/{account['id']}/restricted-product"
-    assert "mailingAddress" in account
-    assert account["mailingAddress"] is None
+    assert "mailingAddress" not in account
 
     # Add org contact and test with mailingAddress
     org_contact = factory_contact_model()
