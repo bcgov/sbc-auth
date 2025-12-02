@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the Business Service is working as expected.
 """
+from unittest.mock import patch
 
 import pytest
 
@@ -279,3 +280,179 @@ def test_service_account_by_client_name(session):
     assert result is not None
     assert result.get("username") == "service-account-sbc-auth-admin"
     assert result.get("id") is not None
+
+
+@patch("auth_api.services.keycloak.KeycloakService._get_admin_token")
+@patch("auth_api.services.keycloak.KeycloakService.get_keycloak_users_for_role")
+@patch("auth_api.services.keycloak.KeycloakService.get_keycloak_groups_for_role")
+@patch("auth_api.services.keycloak.KeycloakService.get_keycloak_members_for_group")
+def test_get_user_emails_with_role(
+        mock_get_group_members,
+        mock_get_groups_for_role,
+        mock_get_users_for_role,
+        mock_get_admin_token,
+        session,
+):
+    """Test get_user_emails_with_role returns users from both direct role assignment and group membership."""
+    mock_get_admin_token.return_value = "mock_token"
+
+    # Set up for direct role assignment to a user and test handling logic when users are returned
+    kc_users = [
+        {
+            "id": "user1",
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john.doe@example.com"
+        },
+        {
+            "id": "user2",
+            "firstName": "Jane",
+            "lastName": "Smith",
+            "email": "jane.smith@example.com"
+        }
+    ]
+
+    # Groups and group members to test logic when inherited group roles exist
+    kc_groups = [
+        {"id": "group1", "name": "test_group_1"},
+        {"id": "group2", "name": "test_group_2"}
+    ]
+
+    group1_members = [
+        {
+            "id": "user3",
+            "firstName": "Bob",
+            "lastName": "Johnson",
+            "email": "bob.johnson@example.com"
+        },
+        {
+            "id": "user1",
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john.doe@example.com"
+        }
+    ]
+
+    group2_members = [
+        {
+            "id": "user4",
+            "firstName": "Alice",
+            "lastName": "Brown",
+            "email": "alice.brown@example.com"
+        }
+    ]
+    mock_get_users_for_role.return_value = kc_users
+    mock_get_groups_for_role.return_value = kc_groups
+
+    def mock_get_members(group_id):
+        if group_id == "group1":
+            return group1_members
+        elif group_id == "group2":
+            return group2_members
+        return []
+
+    mock_get_group_members.side_effect = mock_get_members
+
+    result = KEYCLOAK_SERVICE.get_user_emails_with_role("test_role")
+
+    mock_get_users_for_role.assert_called_once_with("test_role")
+    mock_get_groups_for_role.assert_called_once_with("test_role")
+    assert mock_get_group_members.call_count == 2
+    mock_get_group_members.assert_any_call("group1")
+    mock_get_group_members.assert_any_call("group2")
+    assert len(result) == 5
+
+    emails = [user["email"] for user in result]
+    expected_emails = [
+        "john.doe@example.com",
+        "jane.smith@example.com",
+        "bob.johnson@example.com",
+        "alice.brown@example.com"
+    ]
+
+    for email in expected_emails:
+        assert email in emails
+
+    for user in result:
+        assert "firstName" in user
+        assert "lastName" in user
+        assert "email" in user
+        assert len(user) == 3
+
+
+@patch("auth_api.services.keycloak.KeycloakService._get_admin_token")
+@patch("auth_api.services.keycloak.KeycloakService.get_keycloak_users_for_role")
+@patch("auth_api.services.keycloak.KeycloakService.get_keycloak_groups_for_role")
+@patch("auth_api.services.keycloak.KeycloakService.get_keycloak_members_for_group")
+def test_get_user_emails_with_role_empty_results(
+        mock_get_group_members,
+        mock_get_groups_for_role,
+        mock_get_users_for_role,
+        mock_get_admin_token,
+        session,
+):
+    """Test get_user_emails_with_role handles empty results correctly."""
+    mock_get_admin_token.return_value = "mock_token"
+    mock_get_users_for_role.return_value = []
+    mock_get_groups_for_role.return_value = []
+    result = KEYCLOAK_SERVICE.get_user_emails_with_role("nonexistent_role")
+
+    assert result == []
+
+    mock_get_users_for_role.assert_called_once_with("nonexistent_role")
+    mock_get_groups_for_role.assert_called_once_with("nonexistent_role")
+    mock_get_group_members.assert_not_called()
+
+
+@patch("auth_api.services.keycloak.KeycloakService._get_admin_token")
+@patch("auth_api.services.keycloak.KeycloakService.get_keycloak_users_for_role")
+@patch("auth_api.services.keycloak.KeycloakService.get_keycloak_groups_for_role")
+@patch("auth_api.services.keycloak.KeycloakService.get_keycloak_members_for_group")
+def test_get_user_emails_with_role_none_users(
+        mock_get_group_members,
+        mock_get_groups_for_role,
+        mock_get_users_for_role,
+        mock_get_admin_token,
+        session,
+):
+    """Test get_user_emails_with_role handles None return from get_keycloak_users_for_role."""
+    mock_get_admin_token.return_value = "mock_token"
+    mock_get_users_for_role.return_value = None
+
+    role_groups = [{"id": "group1", "name": "test_group"}]
+    mock_get_groups_for_role.return_value = role_groups
+
+    group_members = [
+        {
+            "id": "user1",
+            "firstName": "Test",
+            "lastName": "User",
+            "email": "test.user@example.com"
+        }
+    ]
+    mock_get_group_members.return_value = group_members
+    result = KEYCLOAK_SERVICE.get_user_emails_with_role("test_role")
+
+    assert len(result) == 1
+    assert result[0]["email"] == "test.user@example.com"
+    assert result[0]["firstName"] == "Test"
+    assert result[0]["lastName"] == "User"
+
+
+
+@patch("auth_api.services.keycloak.KeycloakService._get_admin_token")
+@patch("auth_api.services.keycloak.KeycloakService.get_keycloak_users_for_role")
+def test_get_user_emails_with_role_nonexistent_role(
+        mock_get_users_for_role,
+        mock_get_admin_token,
+        session,
+):
+    """Test get_user_emails_with_role raises BusinessException when role doesn't exist in Keycloak."""
+    mock_get_admin_token.return_value = "mock_token"
+    mock_get_users_for_role.side_effect = BusinessException(Error.DATA_NOT_FOUND, None)
+
+    with pytest.raises(BusinessException) as exc_info:
+        KEYCLOAK_SERVICE.get_user_emails_with_role("nonexistent_role")
+
+    assert exc_info.value.code == Error.DATA_NOT_FOUND.name
+    mock_get_users_for_role.assert_called_once_with("nonexistent_role")
