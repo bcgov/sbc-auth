@@ -308,7 +308,7 @@ class KeycloakService:
                     current_app.logger.error(f"Returned non 204: {task.method} - {task.url} - {task.status}")
     
     @staticmethod
-    def kc_user_to_dict(user: str) -> dict:
+    def kc_user_to_dict(user: dict) -> dict:
         """Return a dict representation of the KC user."""
         return {"firstName": user["firstName"], "lastName": user["lastName"], "email": user["email"]}
     
