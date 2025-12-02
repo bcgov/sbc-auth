@@ -37,14 +37,15 @@ from auth_api.utils.user_context import UserContext, user_context
 
 from .keycloak_user import KeycloakUser
 
+
 @dataclass
 class KCRequestConfig:
     """Used for keycloak request configuration."""
-    
+
     base_url: str
     realm: str
     timeout: int
-    
+
 class KeycloakService:
     """For Keycloak services."""
 
@@ -306,24 +307,24 @@ class KeycloakService:
                     current_app.logger.error(f"Exception: {task}")
                 elif task.status != 204:
                     current_app.logger.error(f"Returned non 204: {task.method} - {task.url} - {task.status}")
-    
+
     @staticmethod
     def kc_user_to_dict(user: dict) -> dict:
         """Return a dict representation of the KC user."""
         return {"firstName": user["firstName"], "lastName": user["lastName"], "email": user["email"]}
-    
-    
+
+
     @staticmethod
     def get_default_kc_request_config():
         """Return default request configuration for Keycloak API calls."""
         config = current_app.config
-        
+
         return KCRequestConfig(
             base_url=config.get("KEYCLOAK_BASE_URL"),
             realm=config.get("KEYCLOAK_REALMNAME"),
             timeout=config.get("CONNECT_TIMEOUT", 60)
         )
-    
+
     @staticmethod
     def get_keycloak_groups_for_role(role: str):
         """Get keycloak group representations for role name."""
@@ -365,22 +366,22 @@ class KeycloakService:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         response.raise_for_status()
         return response.json()
-        
+
     @staticmethod
     def get_user_emails_with_role(role: str):
-        """Get user emails with the role name."""        
+        """Get user emails with the role name."""
         # This does not retrieve users that inherit the role through a group, keycloak currently does
         # not support any query parameters or ways to retrieve this in a single call, we need to
         # get all the groups that contain the desired role and fetch the members.
         kc_users = KeycloakService.get_keycloak_users_for_role(role) or []
-        users = [KeycloakService.kc_user_to_dict(kc_user) for kc_user in kc_users]        
+        users = [KeycloakService.kc_user_to_dict(kc_user) for kc_user in kc_users]
         kc_groups = KeycloakService.get_keycloak_groups_for_role(role)
         group_members = []
         for kc_group in kc_groups:
             group_members.extend(
                 [
-                    KeycloakService.kc_user_to_dict(member) for member in 
-                    KeycloakService.get_keycloak_members_for_group(kc_group["id"])    
+                    KeycloakService.kc_user_to_dict(member) for member in
+                    KeycloakService.get_keycloak_members_for_group(kc_group["id"])
                 ]
             )
         users.extend(group_members)

@@ -295,7 +295,7 @@ def test_get_user_emails_with_role(
 ):
     """Test get_user_emails_with_role returns users from both direct role assignment and group membership."""
     mock_get_admin_token.return_value = "mock_token"
-    
+
     # Set up for direct role assignment to a user and test handling logic when users are returned
     kc_users = [
         {
@@ -311,7 +311,7 @@ def test_get_user_emails_with_role(
             "email": "jane.smith@example.com"
         }
     ]
-    
+
     # Groups and group members to test logic when inherited group roles exist
     kc_groups = [
         {"id": "group1", "name": "test_group_1"},
