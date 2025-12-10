@@ -279,19 +279,6 @@ export default defineComponent({
         state.errorText = ''
       }
       state.bcolInfo = {} as BcolProfile
-      // check if address info is complete if not redirect user to address page
-      const isNotAnonUser = currentUser.value?.loginSource !== LoginSource.BCROS
-      if (isNotAnonUser) {
-        // do it only if address is not already fetched.Or else try to fetch from DB
-        if (!currentOrgAddress.value || Object.keys(currentOrgAddress.value).length === 0) {
-          // sync and try again
-          await orgStore.syncAddress()
-          if (!currentOrgAddress.value || Object.keys(currentOrgAddress.value).length === 0) {
-            await root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
-            return
-          }
-        }
-      }
 
       if (isPaymentViewAllowed.value) {
         state.savedOrganizationType =
