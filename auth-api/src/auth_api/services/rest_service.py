@@ -62,8 +62,10 @@ class RestService:
         if content_type == ContentType.JSON:
             data = json.dumps(data)
 
+        safe_headers = headers.copy()
+        safe_headers.pop("Authorization", None)
         current_app.logger.debug(f"Endpoint : {endpoint}")
-        current_app.logger.debug(f"headers : {headers}")
+        current_app.logger.debug(f"headers : {safe_headers}")
         response = None
         try:
             invoke_rest_method = getattr(requests, rest_method)
@@ -217,8 +219,10 @@ class RestService:
 
         headers = RestService._generate_headers(content_type, additional_headers, token, auth_header_type)
 
+        safe_headers = headers.copy()
+        safe_headers.pop("Authorization", None)
         current_app.logger.debug(f"Endpoint : {endpoint}")
-        current_app.logger.debug(f"headers : {headers}")
+        current_app.logger.debug(f"headers : {safe_headers}")
         session = requests.Session()
         if retry_on_failure:
             session.mount(endpoint, RETRY_ADAPTER)
