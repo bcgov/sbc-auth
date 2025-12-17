@@ -432,4 +432,28 @@ describe('TransactionsDataTable tests', () => {
     expect(partialCreditItem.type).toBe('Refund as credits')
     expect(partialCreditItem.status).toBe('Partially Credited')
   })
+
+  it('canDownloadReceipt - should handle expandRow parameter correctly', async () => {
+    const paidTransaction = createTestTransaction({
+      statusCode: InvoiceStatus.PAID,
+      paymentMethod: PaymentTypes.DIRECT_PAY
+    })
+    expect(wrapper.vm.canDownloadReceipt(paidTransaction, false)).toBe(true)
+    expect(wrapper.vm.canDownloadReceipt(paidTransaction, true)).toBe(false)
+
+    const partiallyRefundedTransaction = createTestTransaction({
+      statusCode: InvoiceStatus.PAID,
+      paymentMethod: PaymentTypes.DIRECT_PAY,
+      partialRefunds: [createPartialRefund({ refundAmount: 50 })]
+    })
+    expect(wrapper.vm.canDownloadReceipt(partiallyRefundedTransaction, false)).toBe(true)
+    expect(wrapper.vm.canDownloadReceipt(partiallyRefundedTransaction, true)).toBe(true)
+
+    const creditedTransaction = createTestTransaction({
+      statusCode: InvoiceStatus.CREDITED,
+      paymentMethod: PaymentTypes.PAD
+    })
+    expect(wrapper.vm.canDownloadReceipt(creditedTransaction, false)).toBe(true)
+    expect(wrapper.vm.canDownloadReceipt(creditedTransaction, true)).toBe(true)
+  })
 })

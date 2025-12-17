@@ -44,14 +44,15 @@ export default class PaymentService {
     )
   }
 
-  static postReceipt (invoice: any, accountId: string): AxiosPromise<any> {
+  static postReceipt (invoice: any, accountId: string, isRefund: boolean = false): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${invoice.id}/receipts`
     const headers = {
       'Accept': 'application/pdf',
       'Account-Id': accountId
     }
     const body = {
-      filingDateTime: CommonUtils.formatDateToHumanReadable(invoice.createdOn)
+      filingDateTime: CommonUtils.formatDateToHumanReadable(invoice.createdOn),
+      isRefund: isRefund
     }
     return axios.post(url, body, { headers, responseType: 'blob' as 'json' })
   }
