@@ -196,9 +196,9 @@
       </template>
       <template #item-slot-downloads="{ item }">
         <div
-          v-if="item.statusCode === InvoiceStatus.COMPLETED || item.statusCode === InvoiceStatus.PAID"
+          v-if="canDownloadReceipt(item, false)"
           class="receipt"
-          @click="downloadReceipt(item)"
+          @click="downloadReceipt(item, false)"
         >
           <v-icon
             color="primary"
@@ -306,7 +306,16 @@
             v-if="isColumnVisible('downloads')"
             class="dropdown-cell"
           >
-            <!-- Empty cell for downloads column -->
+            <div
+              v-if="canDownloadReceipt(item, true)"
+              class="receipt"
+              @click="downloadReceipt(item, true)"
+            >
+              <v-icon color="primary">
+                mdi-file-pdf-outline
+              </v-icon>
+              <span>Receipt</span>
+            </div>
           </td>
           <td
             v-if="isColumnVisible('actions')"
@@ -360,21 +369,50 @@ export default defineComponent({
       return props.headers.some(header => header.col === columnName)
     }
 
-    const getInvoiceStatus = (item: Transaction) => {
+    const getInvoiceStatusForDisplay = (item: Transaction): InvoiceStatus => {
       // Special case for Online Banking - it shouldn't show NSF, should show Pending.
       if (item.paymentMethod === PaymentTypes.ONLINE_BANKING &&
         item.statusCode === InvoiceStatus.SETTLEMENT_SCHEDULED) {
-        return invoiceStatusDisplay[InvoiceStatus.PENDING]
+        return InvoiceStatus.PENDING
       }
       // Check for partial refunds - this should take priority
       if (item.partialRefunds?.length > 0) {
         if ([PaymentTypes.ONLINE_BANKING, PaymentTypes.PAD].includes(item.paymentMethod)) {
-          return invoiceStatusDisplay[InvoiceStatus.PARTIALLY_CREDITED]
+          return InvoiceStatus.PARTIALLY_CREDITED
         } else {
-          return invoiceStatusDisplay[InvoiceStatus.PARTIALLY_REFUNDED]
+          return InvoiceStatus.PARTIALLY_REFUNDED
         }
       }
-      return invoiceStatusDisplay[item.statusCode]
+      return item.statusCode
+    }
+
+    const getInvoiceStatus = (item: Transaction) => {
+      return invoiceStatusDisplay[getInvoiceStatusForDisplay(item)]
+    }
+
+    const refundStatus = new Set<InvoiceStatus>([
+      InvoiceStatus.CREDITED,
+      InvoiceStatus.REFUNDED,
+      InvoiceStatus.PARTIALLY_REFUNDED,
+      InvoiceStatus.PARTIALLY_CREDITED
+    ])
+
+    const paidStatus = new Set<InvoiceStatus>([
+      InvoiceStatus.COMPLETED,
+      InvoiceStatus.PAID
+    ])
+
+    const canDownloadReceipt = (
+      item: Transaction,
+      expandRow: boolean = false
+    ): boolean => {
+      const status = getInvoiceStatusForDisplay(item)
+
+      if (refundStatus.has(status)) {
+        return true
+      }
+
+      return !expandRow && paidStatus.has(status)
     }
 
     const hasDropdownContent = (item: Transaction): boolean => {
@@ -615,10 +653,10 @@ export default defineComponent({
       }
     })
 
-    async function downloadReceipt (item: Transaction) {
+    async function downloadReceipt (item: Transaction, isRefund: boolean = false) {
       emit('isDownloadingReceipt', true)
       const currentAccount = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
-      const receipt = await PaymentService.postReceipt(item, currentAccount.id)
+      const receipt = await PaymentService.postReceipt(item, currentAccount.id, isRefund)
       const filename = `bcregistry-receipts-${item.id}.pdf`
       CommonUtils.fileDownload(receipt.data, filename, 'application/pdf')
       emit('isDownloadingReceipt', false)
@@ -676,6 +714,7 @@ export default defineComponent({
       loadTransactionList,
       getInvoiceStatus,
       datePickerValue,
+      canDownloadReceipt,
       downloadReceipt
     }
   }
