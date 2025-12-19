@@ -223,9 +223,10 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
         { text: invoiceStatusDisplay[InvoiceStatus.APPROVED], value: InvoiceStatus.APPROVED },
         { text: invoiceStatusDisplay[InvoiceStatus.REFUNDED], value: InvoiceStatus.REFUNDED },
         { text: invoiceStatusDisplay[InvoiceStatus.REFUND_REQUESTED], value: InvoiceStatus.REFUND_REQUESTED },
+        { text: invoiceStatusDisplay[InvoiceStatus.DELETED], value: InvoiceStatus.DELETED },
         // These are FE only on the backend they are PAID
         { text: invoiceStatusDisplay[InvoiceStatus.PARTIALLY_CREDITED], value: InvoiceStatus.PARTIALLY_CREDITED },
-        { text: invoiceStatusDisplay[InvoiceStatus.PARTIALLY_REFUNDED], value: InvoiceStatus.PARTIALLY_REFUNDED }
+        { text: invoiceStatusDisplay[InvoiceStatus.PARTIALLY_REFUNDED], value: InvoiceStatus.PARTIALLY_REFUNDED },
       ],
       label: 'Status',
       type: 'select',
