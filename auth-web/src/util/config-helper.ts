@@ -96,7 +96,7 @@ export default class ConfigHelper {
   }
 
   static getPayAPIURL () {
-    return `${import.meta.env.VUE_APP_PAY_API_URL}` + `${import.meta.env.VUE_APP_PAY_API_VERSION}`
+    return `${import.meta.env.VUE_APP_PAY_API_GW_URL}` + `${import.meta.env.VUE_APP_PAY_API_VERSION}`
   }
 
   static getPaymentPayeeName () {
