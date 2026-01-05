@@ -1,8 +1,9 @@
 import '../test-utils/composition-api-setup' // important to import this first
-import { InvoiceStatus, PaymentTypes } from '@/util/constants'
+import { InvoiceStatus, PaymentTypes, LDFlags } from '@/util/constants'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components/datatable'
 import { DatePicker } from '@/components'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
@@ -76,6 +77,7 @@ const setupTestWrapper = async (headers = getTransactionTableHeaders()) => {
   const testSandbox = sinon.createSandbox()
   const get = testSandbox.stub(axios, 'post')
   get.returns(Promise.resolve({ data: transactionResponse }))
+  testSandbox.stub(LaunchDarklyService, 'getFlag').withArgs(LDFlags.EnableReceiptDownloadForRefunds).returns(true)
 
   const wrapper = mount(TransactionsDataTable, {
     localVue,
