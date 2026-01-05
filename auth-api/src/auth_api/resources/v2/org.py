@@ -18,10 +18,7 @@ from http import HTTPStatus
 from flask import Blueprint, request
 from flask_cors import cross_origin
 
-from auth_api.exceptions import BusinessException
-from auth_api.schemas import utils as schema_utils
-from auth_api.services import Org as OrgService
-from auth_api.services import User as UserService
+from auth_api.resources import org_utils
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.role_validator import validate_roles
@@ -53,37 +50,28 @@ def post_organization():
     if contact_info:
         org_info.pop("mailingAddress", None)
 
-    valid_format, errors = schema_utils.validate(org_info, "org")
-    if not valid_format:
-        return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
+    is_valid, error_response, error_status = org_utils.validate_org_schema(org_info)
+    if not is_valid:
+        return error_response, error_status
 
     if contact_info:
-        valid_contact_format, contact_errors = schema_utils.validate(contact_info, "contact")
-        if not valid_contact_format:
-            return {"message": schema_utils.serialize(contact_errors)}, HTTPStatus.BAD_REQUEST
+        is_valid, error_response, error_status = org_utils.validate_contact_schema(contact_info)
+        if not is_valid:
+            return error_response, error_status
 
-    try:
-        user = UserService.find_by_jwt_token()
-        if user is None:
-            response, status = {"message": "Not authorized to perform this action"}, HTTPStatus.UNAUTHORIZED
-            return response, status
+    user, error_response, error_status = org_utils.validate_and_get_user()
+    if error_response:
+        return error_response, error_status
 
-        org = OrgService.create_org(org_info, user.identifier)
-        org_dict = org.as_dict()
-        org_id = org_dict.get("id")
+    org_dict, error_response, error_status = org_utils.create_org_with_validation(org_info, user.identifier)
+    if error_response:
+        return error_response, error_status
 
-        if contact_info and org_id:
-            contact = OrgService.add_contact(org_id, contact_info)
-            org_dict["contact"] = contact.as_dict()
+    org_id = org_dict.get("id")
+    if contact_info and org_id:
+        contact_dict, error_response, error_status = org_utils.add_contact_with_validation(org_id, contact_info)
+        if error_response:
+            return error_response, error_status
+        org_dict["contact"] = contact_dict
 
-        response, status = org_dict, HTTPStatus.CREATED
-    except BusinessException as exception:
-        response, status = (
-            {
-                "code": exception.code,
-                "message": exception.message,
-                "detail": exception.detail,
-            },
-            exception.status_code,
-        )
-    return response, status
+    return org_dict, HTTPStatus.CREATED
