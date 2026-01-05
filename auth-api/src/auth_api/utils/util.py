@@ -89,10 +89,13 @@ def string_to_bool(val: str):
 
 
 def safe_int(value, default: int = -1) -> int:
-    """Safely convert value to int, handling 'undefined' strings and invalid values."""
-    if not value or value == "undefined":
+    """Safely convert value to int, returning default on any conversion failure."""
+    if value is None or value == "":
         return default
     try:
-        return int(value)
+        result = int(value)
+        if isinstance(value, float):
+            return default
+        return result
     except (ValueError, TypeError):
         return default
