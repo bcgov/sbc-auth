@@ -14,6 +14,7 @@
 """User Context to hold request scoped variables."""
 
 import functools
+from http import HTTPStatus
 
 from flask import abort, g, request
 
@@ -121,7 +122,10 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         if not account_id:
             account_id = request.headers["Account-Id"] if request and "Account-Id" in request.headers else None
             if account_id == "undefined":
-                abort(400, "Account-Id header contains invalid value 'undefined'")
+                abort(
+                    HTTPStatus.BAD_REQUEST,
+                    description="Account-Id header contains invalid value 'undefined'"
+                )
         return account_id
 
     @property
