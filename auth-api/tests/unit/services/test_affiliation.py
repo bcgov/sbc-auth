@@ -227,9 +227,18 @@ def test_create_affiliation_staff_sbc_staff(
             affiliation = AffiliationService.create_affiliation(org_id, business_identifier)
 
 
+@pytest.mark.parametrize(
+    "pass_code_modifier, description",
+    [
+        (lambda x: x.replace(" ", "  "), "additional spaces"),
+        (lambda x: x.replace(", ", ",  ").replace(" ", "  "), "commas and extra spaces"),
+    ],
+)
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_create_affiliation_firms_party_with_additional_space(session, auth_mock, monkeypatch):
-    """Assert that an Affiliation can be created."""
+def test_create_affiliation_firms_party_with_normalization(
+    session, auth_mock, monkeypatch, pass_code_modifier, description
+):  # pylint:disable=unused-argument
+    """Assert that an Affiliation can be created when party name has normalization issues."""
     patch_get_firms_parties(monkeypatch)
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock3)
     entity_dictionary = entity_service.as_dict()
@@ -239,8 +248,7 @@ def test_create_affiliation_firms_party_with_additional_space(session, auth_mock
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary["id"]
 
-    # When party name has additional space
-    pass_code = TestEntityInfo.entity_lear_mock3["passCode"].replace(" ", "  ")
+    pass_code = pass_code_modifier(TestEntityInfo.entity_lear_mock3["passCode"])
     affiliation = AffiliationService.create_affiliation(org_id, business_identifier, pass_code)
     assert affiliation
     assert affiliation.entity.identifier == entity_service.identifier

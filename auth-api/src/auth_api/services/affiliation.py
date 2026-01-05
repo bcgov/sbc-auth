@@ -658,6 +658,9 @@ class Affiliation:
                 party_name = officer.get("lastName") + ", " + officer.get("firstName")
                 if officer.get("middleInitial"):
                     party_name = party_name + " " + officer.get("middleInitial")
+                # commas for comparison
+                party_name_str = party_name_str.replace(",", "")
+                party_name = party_name.replace(",", "")
 
             # remove duplicate spaces
             party_name_str = " ".join(party_name_str.split())
