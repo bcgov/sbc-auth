@@ -14,7 +14,8 @@
         "examples": [
           "123 Roundabout Lane"
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^(.*)$",
+        "maxLength": 250
       },
       "streetAdditional": {
         "$id": "#/properties/street_additional",
@@ -24,7 +25,8 @@
         "examples": [
           "Unit 1"
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^(.*)$",
+        "maxLength": 250
       },
       "city": {
         "$id": "#/properties/city",
@@ -34,7 +36,8 @@
         "examples": [
           "Victoria"
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^(.*)$",
+        "maxLength": 100
       },
       "region": {
         "$id": "#/properties/region",
@@ -44,7 +47,8 @@
         "examples": [
           "British Columbia"
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^(.*)$",
+        "maxLength": 100
       },
       "country": {
         "$id": "#/properties/country",
@@ -54,7 +58,8 @@
         "examples": [
           "CA"
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^(.*)$",
+        "maxLength": 20
       },
       "postalCode": {
         "$id": "#/properties/postal_code",
@@ -64,7 +69,8 @@
         "examples": [
           "V1A 1A1"
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^(.*)$",
+        "maxLength": 15
       },
       "deliveryInstructions": {
         "$id": "#/properties/delivery_instructions",
@@ -74,7 +80,8 @@
         "examples": [
           "Ring buzzer 123"
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^(.*)$",
+        "maxLength": 4096
       },
       "phone": {
         "$id": "#/properties/phone",
@@ -84,7 +91,8 @@
         "examples": [
           "111-222-3333"
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^(.*)$",
+        "maxLength": 15
       },
       "phoneExtension": {
         "$id": "#/properties/phone_extension",
@@ -94,7 +102,8 @@
         "examples": [
           "123"
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^(.*)$",
+        "maxLength": 10
       },
       "email": {
         "$id": "#/properties/email",
@@ -104,7 +113,8 @@
         "examples": [
           "abc123@mail.com"
         ],
-        "pattern": "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+        "pattern": "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)",
+        "maxLength": 100
       }
     }
   }

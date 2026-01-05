@@ -101,6 +101,24 @@ def test_add_org(client, jwt, session, keycloak_mock, org_info):  # pylint:disab
     assert schema_utils.validate(rv.json, "org_response")[0]
 
 
+def test_add_org_v2_with_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed with contact using v2 endpoint."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+
+    org_data = TestOrgInfo.org1.copy()
+    org_data["contact"] = TestContactInfo.contact1
+
+    rv = client.post("/api/v2/orgs", data=json.dumps(org_data), headers=headers, content_type="application/json")
+    assert rv.status_code == HTTPStatus.CREATED
+    dictionary = json.loads(rv.data)
+    assert dictionary["name"] == TestOrgInfo.org1["name"]
+    assert "contact" in dictionary
+    assert dictionary["contact"]["email"] == TestContactInfo.contact1["email"]
+    assert dictionary["contact"]["phone"] == TestContactInfo.contact1["phone"]
+    assert schema_utils.validate(rv.json, "org_response")[0]
+
+
 @pytest.mark.parametrize(
     "org_info",
     [
