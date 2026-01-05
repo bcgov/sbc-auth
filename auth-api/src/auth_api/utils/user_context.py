@@ -15,7 +15,7 @@
 
 import functools
 
-from flask import g, request
+from flask import abort, g, request
 
 # from auth_api.models import User as UserModel
 from auth_api.utils.enums import LoginSource
@@ -120,6 +120,9 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         account_id = _get_token_info().get("Account-Id", None)
         if not account_id:
             account_id = request.headers["Account-Id"] if request and "Account-Id" in request.headers else None
+
+        if account_id == "undefined":
+            abort(400, "Account-Id header contains invalid value 'undefined'")
         return account_id
 
     @property
