@@ -22,11 +22,7 @@ from auth_api.services import User as UserService
 
 
 def validate_and_get_user():
-    """Validate request and get authenticated user.
-
-    Returns:
-        tuple: (user, error_response, error_status) or (user, None, None) if successful
-    """
+    """Validate request and get authenticated user."""
     user = UserService.find_by_jwt_token()
     if user is None:
         return None, {"message": "Not authorized to perform this action"}, HTTPStatus.UNAUTHORIZED
@@ -34,14 +30,7 @@ def validate_and_get_user():
 
 
 def validate_org_schema(org_info):
-    """Validate organization schema.
-
-    Args:
-        org_info: Organization data to validate
-
-    Returns:
-        tuple: (is_valid, errors) - (True, None) if valid, (False, error_dict) if invalid
-    """
+    """Validate organization schema."""
     valid_format, errors = schema_utils.validate(org_info, "org")
     if not valid_format:
         return False, {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
@@ -49,14 +38,7 @@ def validate_org_schema(org_info):
 
 
 def validate_contact_schema(contact_info):
-    """Validate contact schema.
-
-    Args:
-        contact_info: Contact data to validate
-
-    Returns:
-        tuple: (is_valid, errors) - (True, None) if valid, (False, error_dict) if invalid
-    """
+    """Validate contact schema."""
     valid_format, errors = schema_utils.validate(contact_info, "contact")
     if not valid_format:
         return False, {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
@@ -64,15 +46,7 @@ def validate_contact_schema(contact_info):
 
 
 def create_org_with_validation(org_info, user_id):
-    """Create an organization with validation.
-
-    Args:
-        org_info: Organization data
-        user_id: User identifier
-
-    Returns:
-        tuple: (org_dict, None, None) on success or (None, error_response, error_status) on failure
-    """
+    """Create an organization with validation."""
     try:
         org = OrgService.create_org(org_info, user_id)
         return org.as_dict(), None, None
@@ -89,15 +63,7 @@ def create_org_with_validation(org_info, user_id):
 
 
 def add_contact_with_validation(org_id, contact_info):
-    """Add contact to organization with validation.
-
-    Args:
-        org_id: Organization ID
-        contact_info: Contact data
-
-    Returns:
-        tuple: (contact_dict, None, None) on success or (None, error_response, error_status) on failure
-    """
+    """Add contact to organization with validation."""
     try:
         contact = OrgService.add_contact(org_id, contact_info)
         return contact.as_dict(), None, None
