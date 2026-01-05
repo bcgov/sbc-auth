@@ -92,7 +92,7 @@
           "111-222-3333"
         ],
         "pattern": "^(.*)$",
-        "maxLength": 15
+        "maxLength": 20
       },
       "phoneExtension": {
         "$id": "#/properties/phone_extension",
