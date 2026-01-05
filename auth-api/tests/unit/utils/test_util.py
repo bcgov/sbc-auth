@@ -22,7 +22,12 @@ from urllib.parse import unquote
 
 import pytest
 
-from auth_api.utils.util import camelback2snake, escape_wam_friendly_url, snake2camelback
+from auth_api.utils.util import (
+    camelback2snake,
+    escape_wam_friendly_url,
+    safe_int,
+    snake2camelback,
+)
 
 TEST_CAMEL_DATA = {"loginSource": "PASSCODE", "userName": "test name", "realmAccess": {"roles": ["basic"]}}
 
@@ -58,3 +63,40 @@ def test_escape_wam_friendly_url():
     param1 = unquote(org_name_encoded)
     org_name_actual = base64.b64decode(bytes(param1, encoding="utf-8")).decode("utf-8")
     assert org_name_actual == org_name
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (123, 123),
+        ("123", 123),
+        ("undefined", -1),
+        (None, -1),
+        ("", -1),
+        ("invalid", -1),
+        (45.67, -1),
+        ("456", 456),
+        (0, 0),
+        ("0", 0),
+    ],
+)
+def test_safe_int_default(test_input, expected):
+    """Assert that safe_int converts values correctly with default -1."""
+    assert safe_int(test_input) == expected
+
+
+@pytest.mark.parametrize(
+    "test_input,default,expected",
+    [
+        (123, 999, 123),
+        ("123", 999, 123),
+        ("undefined", 999, 999),
+        (None, 999, 999),
+        ("", 999, 999),
+        ("invalid", 0, 0),
+        ("789", 100, 789),
+    ],
+)
+def test_safe_int_custom_default(test_input, default, expected):
+    """Assert that safe_int converts values correctly with custom default."""
+    assert safe_int(test_input, default) == expected

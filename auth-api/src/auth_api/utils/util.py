@@ -86,3 +86,13 @@ def string_to_bool(val: str):
         raise ValueError(f"Invalid string value for bool: {val}")
 
     return ast.literal_eval(val.capitalize())
+
+
+def safe_int(value, default: int = -1) -> int:
+    """Safely convert value to int, handling 'undefined' strings and invalid values."""
+    if not value or value == "undefined":
+        return default
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
