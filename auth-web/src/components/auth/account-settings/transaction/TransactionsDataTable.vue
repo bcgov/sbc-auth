@@ -307,7 +307,7 @@
             class="dropdown-cell"
           >
             <div
-              v-if="canDownloadReceipt(item, true)"
+              v-if="enableReceiptDownloadForRefunds && canDownloadReceipt(item, true)"
               class="receipt"
               @click="downloadReceipt(item, true)"
             >
@@ -316,6 +316,8 @@
               </v-icon>
               <span>Receipt</span>
             </div>
+            <!-- Empty cell for downloads column -->
+            <div v-else />
           </td>
           <td
             v-if="isColumnVisible('actions')"
@@ -331,7 +333,7 @@
 
 <script lang="ts">
 import { BaseVDataTable, DatePicker, IconTooltip } from '@/components'
-import { InvoiceStatus, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { InvoiceStatus, LDFlags, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Ref, computed, defineComponent, nextTick, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { invoiceStatusDisplay, paymentTypeDisplay } from '@/resources/display-mappers'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
@@ -339,6 +341,7 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import { DataOptions } from 'vuetify'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import PaymentService from '@/services/payment.services'
 import { Transaction } from '@/models'
 import _ from 'lodash'
@@ -402,11 +405,19 @@ export default defineComponent({
       InvoiceStatus.PAID
     ])
 
+    const enableReceiptDownloadForRefunds = computed(() => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableReceiptDownloadForRefunds) || false
+    })
+
     const canDownloadReceipt = (
       item: Transaction,
       expandRow: boolean = false
     ): boolean => {
       const status = getInvoiceStatusForDisplay(item)
+
+      if (!enableReceiptDownloadForRefunds.value) {
+        return item.statusCode === InvoiceStatus.COMPLETED || item.statusCode === InvoiceStatus.PAID
+      }
 
       if (refundStatus.has(status)) {
         return true
@@ -655,6 +666,9 @@ export default defineComponent({
 
     async function downloadReceipt (item: Transaction, isRefund: boolean = false) {
       emit('isDownloadingReceipt', true)
+      if (!enableReceiptDownloadForRefunds.value) {
+        isRefund = false
+      }
       const currentAccount = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
       const receipt = await PaymentService.postReceipt(item, currentAccount.id, isRefund)
       const filename = `bcregistry-receipts-${item.id}.pdf`
