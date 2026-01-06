@@ -29,7 +29,7 @@ pyhumps = "^3.8.0"
 marshmallow-sqlalchemy = "^1.0.0"
 flask-caching = { git = "https://github.com/pallets-eco/flask-caching.git", branch = "master" }
 cachelib = "^0.13.0"
-aiohttp = "^3.12.14"
+aiohttp = "^3.13.3"
 cattrs = "^23.2.3"
 orjson = "^3.10.7"
 sqlalchemy-utils = "^0.41.2"
