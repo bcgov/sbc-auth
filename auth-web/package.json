@@ -5,6 +5,7 @@
   "sbcName": "SBC Common Components",
   "private": true,
   "scripts": {
+    "postinstall": "patch-package",
     "dev": "vite",
     "build": "vite build",
     "build-check": "vite build",
@@ -34,6 +35,7 @@
     "mime-types": "^2.1.27",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.45",
+    "patch-package": "^8.0.1",
     "pinia": "^2.1.6",
     "pinia-class": "^0.0.3",
     "sanitize-html": "^2.13.0",
