@@ -227,10 +227,53 @@ def test_create_affiliation_staff_sbc_staff(
             affiliation = AffiliationService.create_affiliation(org_id, business_identifier)
 
 
+@pytest.mark.parametrize(
+    "pass_code_modifier, description, use_middle_initial",
+    [
+        (lambda x: x.replace(" ", "  "), "additional spaces", False),
+        (lambda x: x.replace(", ", ",  ").replace(" ", "  "), "commas and extra spaces", False),
+        (
+            lambda x: x.replace("Horton, Connor", "Connor, John, Jr.").replace(" ", "  "),
+            "multiple commas and extra spaces",
+            True,
+        ),
+    ],
+)
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_create_affiliation_firms_party_with_additional_space(session, auth_mock, monkeypatch):
-    """Assert that an Affiliation can be created."""
-    patch_get_firms_parties(monkeypatch)
+def test_create_affiliation_firms_party_with_normalization(
+    session, auth_mock, monkeypatch, pass_code_modifier, description, use_middle_initial
+):  # pylint:disable=unused-argument
+    """Assert that an Affiliation can be created when party name has normalization issues."""
+    if use_middle_initial:
+
+        class MockPartiesResponse:
+            @staticmethod
+            def json():
+                return {
+                    "parties": [
+                        {
+                            "officer": {
+                                "email": "test@email.com",
+                                "firstName": "John",
+                                "lastName": "Connor",
+                                "middleInitial": "Jr.",
+                                "partyType": "person",
+                            },
+                            "roles": [
+                                {"appointmentDate": "2022-03-01", "cessationDate": "None", "roleType": "Partner"}
+                            ],
+                        }
+                    ]
+                }
+
+            def raise_for_status(self):
+                pass
+
+        monkeypatch.setattr(
+            "auth_api.services.rest_service.RestService.get", lambda *args, **kwargs: MockPartiesResponse()  # noqa: ARG005
+        )
+    else:
+        patch_get_firms_parties(monkeypatch)
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock3)
     entity_dictionary = entity_service.as_dict()
     business_identifier = entity_dictionary["business_identifier"]
@@ -239,8 +282,7 @@ def test_create_affiliation_firms_party_with_additional_space(session, auth_mock
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary["id"]
 
-    # When party name has additional space
-    pass_code = TestEntityInfo.entity_lear_mock3["passCode"].replace(" ", "  ")
+    pass_code = pass_code_modifier(TestEntityInfo.entity_lear_mock3["passCode"])
     affiliation = AffiliationService.create_affiliation(org_id, business_identifier, pass_code)
     assert affiliation
     assert affiliation.entity.identifier == entity_service.identifier

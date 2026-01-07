@@ -46,6 +46,7 @@ class KCRequestConfig:
     realm: str
     timeout: int
 
+
 class KeycloakService:
     """For Keycloak services."""
 
@@ -313,7 +314,6 @@ class KeycloakService:
         """Return a dict representation of the KC user."""
         return {"firstName": user["firstName"], "lastName": user["lastName"], "email": user["email"]}
 
-
     @staticmethod
     def get_default_kc_request_config():
         """Return default request configuration for Keycloak API calls."""
@@ -322,7 +322,7 @@ class KeycloakService:
         return KCRequestConfig(
             base_url=config.get("KEYCLOAK_BASE_URL"),
             realm=config.get("KEYCLOAK_REALMNAME"),
-            timeout=config.get("CONNECT_TIMEOUT", 60)
+            timeout=config.get("CONNECT_TIMEOUT", 60),
         )
 
     @staticmethod
@@ -380,8 +380,8 @@ class KeycloakService:
         for kc_group in kc_groups:
             group_members.extend(
                 [
-                    KeycloakService.kc_user_to_dict(member) for member in
-                    KeycloakService.get_keycloak_members_for_group(kc_group["id"])
+                    KeycloakService.kc_user_to_dict(member)
+                    for member in KeycloakService.get_keycloak_members_for_group(kc_group["id"])
                 ]
             )
         users.extend(group_members)
