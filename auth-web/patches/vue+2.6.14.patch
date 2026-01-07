@@ -1,0 +1,38 @@
+diff --git a/node_modules/vue/dist/vue.js b/node_modules/vue/dist/vue.js
+index d800532..73715d2 100644
+--- a/node_modules/vue/dist/vue.js
++++ b/node_modules/vue/dist/vue.js
+@@ -9190,10 +9190,12 @@
+ 
+   function genData (el) {
+     var data = '';
+-    if (el.staticClass) {
++    // CVE-2024-6783 fix: Use Object.prototype.hasOwnProperty.call to prevent prototype pollution
++    if (Object.prototype.hasOwnProperty.call(el, 'staticClass') && el.staticClass) {
+       data += "staticClass:" + (el.staticClass) + ",";
+     }
+-    if (el.classBinding) {
++    // CVE-2024-6783 fix: Use Object.prototype.hasOwnProperty.call to prevent prototype pollution
++    if (Object.prototype.hasOwnProperty.call(el, 'classBinding') && el.classBinding) {
+       data += "class:" + (el.classBinding) + ",";
+     }
+     return data
+diff --git a/node_modules/vue/src/platforms/web/compiler/modules/class.js b/node_modules/vue/src/platforms/web/compiler/modules/class.js
+index dcb5a22..7ae0176 100644
+--- a/node_modules/vue/src/platforms/web/compiler/modules/class.js
++++ b/node_modules/vue/src/platforms/web/compiler/modules/class.js
+@@ -33,10 +33,12 @@ function transformNode (el: ASTElement, options: CompilerOptions) {
+ 
+ function genData (el: ASTElement): string {
+   let data = ''
+-  if (el.staticClass) {
++  // CVE-2024-6783 fix: Use Object.prototype.hasOwnProperty.call to prevent prototype pollution
++  if (Object.prototype.hasOwnProperty.call(el, 'staticClass') && el.staticClass) {
+     data += `staticClass:${el.staticClass},`
+   }
+-  if (el.classBinding) {
++  // CVE-2024-6783 fix: Use Object.prototype.hasOwnProperty.call to prevent prototype pollution
++  if (Object.prototype.hasOwnProperty.call(el, 'classBinding') && el.classBinding) {
+     data += `class:${el.classBinding},`
+   }
+   return data
