@@ -729,7 +729,8 @@ export default defineComponent({
       getInvoiceStatus,
       datePickerValue,
       canDownloadReceipt,
-      downloadReceipt
+      downloadReceipt,
+      enableReceiptDownloadForRefunds
     }
   }
 })
