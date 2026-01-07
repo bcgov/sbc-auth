@@ -1,0 +1,108 @@
+diff --git a/node_modules/vuetify/dist/vuetify.js b/node_modules/vuetify/dist/vuetify.js
+index fdc015f..1c1ead6 100644
+--- a/node_modules/vuetify/dist/vuetify.js
++++ b/node_modules/vuetify/dist/vuetify.js
+@@ -12651,7 +12651,7 @@ __webpack_require__.r(__webpack_exports__);
+         }
+       }, [this.$createElement('div', {
+         domProps: {
+-          innerHTML: this.date || '&nbsp;'
++          textContent: this.date || '\u00A0'
+         },
+         key: this.value
+       })]);
+@@ -40726,6 +40726,10 @@ function mergeDeep(source, target) {
+   }
+ 
+   for (var key in target) {
++    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
++      continue;
++    }
++
+     var sourceProperty = source[key];
+     var targetProperty = target[key]; // Only continue deep merging if
+     // both properties are objects
+diff --git a/node_modules/vuetify/es5/components/VDatePicker/VDatePickerTitle.js b/node_modules/vuetify/es5/components/VDatePicker/VDatePickerTitle.js
+index 4a2ffec..c89d8e5 100644
+--- a/node_modules/vuetify/es5/components/VDatePicker/VDatePickerTitle.js
++++ b/node_modules/vuetify/es5/components/VDatePicker/VDatePickerTitle.js
+@@ -74,7 +74,7 @@ var _default = (0, _mixins.default)(_pickerButton.default
+         }
+       }, [this.$createElement('div', {
+         domProps: {
+-          innerHTML: this.date || '&nbsp;'
++          textContent: this.date || '\u00A0'
+         },
+         key: this.value
+       })]);
+diff --git a/node_modules/vuetify/es5/util/helpers.js b/node_modules/vuetify/es5/util/helpers.js
+index 51da5fb..e24f586 100644
+--- a/node_modules/vuetify/es5/util/helpers.js
++++ b/node_modules/vuetify/es5/util/helpers.js
+@@ -496,6 +496,10 @@ function mergeDeep() {
+   var target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+ 
+   for (var key in target) {
++    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
++      continue;
++    }
++
+     var sourceProperty = source[key];
+     var targetProperty = target[key]; // Only continue deep merging if
+     // both properties are objects
+diff --git a/node_modules/vuetify/lib/components/VDatePicker/VDatePickerTitle.js b/node_modules/vuetify/lib/components/VDatePicker/VDatePickerTitle.js
+index d989938..af52cc8 100644
+--- a/node_modules/vuetify/lib/components/VDatePicker/VDatePickerTitle.js
++++ b/node_modules/vuetify/lib/components/VDatePicker/VDatePickerTitle.js
+@@ -63,7 +63,7 @@ export default mixins(PickerButton
+         }
+       }, [this.$createElement('div', {
+         domProps: {
+-          innerHTML: this.date || '&nbsp;'
++          textContent: this.date || '\u00A0'
+         },
+         key: this.value
+       })]);
+diff --git a/node_modules/vuetify/lib/util/helpers.js b/node_modules/vuetify/lib/util/helpers.js
+index d53ceb4..cd52277 100644
+--- a/node_modules/vuetify/lib/util/helpers.js
++++ b/node_modules/vuetify/lib/util/helpers.js
+@@ -353,6 +353,10 @@ export function camelizeObjectKeys(obj) {
+ }
+ export function mergeDeep(source = {}, target = {}) {
+   for (const key in target) {
++    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
++      continue;
++    }
++
+     const sourceProperty = source[key];
+     const targetProperty = target[key]; // Only continue deep merging if
+     // both properties are objects
+diff --git a/node_modules/vuetify/src/components/VDatePicker/VDatePickerTitle.ts b/node_modules/vuetify/src/components/VDatePicker/VDatePickerTitle.ts
+index 060d865..f3a4fd9 100644
+--- a/node_modules/vuetify/src/components/VDatePicker/VDatePickerTitle.ts
++++ b/node_modules/vuetify/src/components/VDatePicker/VDatePickerTitle.ts
+@@ -75,7 +75,7 @@ export default mixins(
+         },
+       }, [
+         this.$createElement('div', {
+-          domProps: { innerHTML: this.date || '&nbsp;' },
++          domProps: { textContent: this.date || '\u00A0' },
+           key: this.value,
+         }),
+       ])
+diff --git a/node_modules/vuetify/src/util/helpers.ts b/node_modules/vuetify/src/util/helpers.ts
+index 0c9ff22..b3a9fbe 100644
+--- a/node_modules/vuetify/src/util/helpers.ts
++++ b/node_modules/vuetify/src/util/helpers.ts
+@@ -418,6 +418,10 @@ export function mergeDeep (
+   target: Dictionary<any> = {}
+ ) {
+   for (const key in target) {
++    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
++      continue
++    }
++
+     const sourceProperty = source[key]
+     const targetProperty = target[key]
+ 
