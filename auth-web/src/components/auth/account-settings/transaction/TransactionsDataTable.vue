@@ -635,12 +635,6 @@ export default defineComponent({
     }
 
     const getDropdownItems = (item: Transaction) => {
-      console.log(item)
-      console.log([
-        ...getAppliedCreditsItems(item),
-        ...getPartialRefundsItems(item),
-        ...getFullRefundItems(item)
-      ])
       return [
         ...getAppliedCreditsItems(item),
         ...getPartialRefundsItems(item),
