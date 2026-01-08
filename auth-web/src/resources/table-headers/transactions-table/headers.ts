@@ -5,6 +5,18 @@ import CommonUtils from '@/util/common-util'
 import { Transaction } from '@/models/transaction'
 import moment from 'moment'
 
+export const getLineItemsDescription = (val: Transaction): string => {
+  return val.lineItems.reduce((resp, lineItem) => `${resp + lineItem.description}<br/>`, '')
+}
+
+export const getTransactionDetails = (val: Transaction): string => {
+  return val.details?.reduce((resp, detail) => `${resp}${detail.label || ''} ${detail.value}<br/>`, '') || 'N/A'
+}
+
+export const getApplicationType = (val: Transaction): string => {
+  return (Object.keys(productDisplay)).includes(val.product) ? productDisplay[val.product] : ''
+}
+
 export const TransactionTableHeaders: BaseTableHeaderI[] = [
   {
     col: 'accountName',
@@ -41,7 +53,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       value: ''
     },
     hasFilter: true,
-    itemFn: (val: Transaction) => (Object.keys(productDisplay)).includes(val.product) ? productDisplay[val.product] : '',
+    itemFn: getApplicationType,
     minWidth: '200px',
     value: 'Application Type'
   },
@@ -68,7 +80,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
     },
     hasFilter: true,
     itemClass: 'line-item',
-    itemFn: (val: Transaction) => val.lineItems.reduce((resp, lineItem) => `${resp + lineItem.description}<br/>`, ''),
+    itemFn: getLineItemsDescription,
     minWidth: '200px',
     value: 'Transaction Type'
   },
@@ -81,7 +93,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       value: ''
     },
     hasFilter: true,
-    itemFn: (val: Transaction) => val.details?.reduce((resp, detail) => `${resp}${detail.label || ''} ${detail.value}<br/>`, '') || 'N/A',
+    itemFn: getTransactionDetails,
     minWidth: '200px',
     value: 'Transaction Details'
   },
@@ -226,7 +238,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
         { text: invoiceStatusDisplay[InvoiceStatus.DELETED], value: InvoiceStatus.DELETED },
         // These are FE only on the backend they are PAID
         { text: invoiceStatusDisplay[InvoiceStatus.PARTIALLY_CREDITED], value: InvoiceStatus.PARTIALLY_CREDITED },
-        { text: invoiceStatusDisplay[InvoiceStatus.PARTIALLY_REFUNDED], value: InvoiceStatus.PARTIALLY_REFUNDED },
+        { text: invoiceStatusDisplay[InvoiceStatus.PARTIALLY_REFUNDED], value: InvoiceStatus.PARTIALLY_REFUNDED }
       ],
       label: 'Status',
       type: 'select',

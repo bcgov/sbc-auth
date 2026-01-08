@@ -1,5 +1,5 @@
 import '../test-utils/composition-api-setup' // important to import this first
-import { InvoiceStatus, PaymentTypes, LDFlags } from '@/util/constants'
+import { InvoiceStatus, LDFlags, PaymentTypes } from '@/util/constants'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components/datatable'
 import { DatePicker } from '@/components'
@@ -457,5 +457,51 @@ describe('TransactionsDataTable tests', () => {
     })
     expect(wrapper.vm.canDownloadReceipt(creditedTransaction, false)).toBe(true)
     expect(wrapper.vm.canDownloadReceipt(creditedTransaction, true)).toBe(true)
+  })
+
+  it('dropdown should populate all fields from createDropdownItem correctly', async () => {
+    const transaction = createTestTransaction({
+      statusCode: InvoiceStatus.REFUNDED,
+      paymentMethod: PaymentTypes.DIRECT_PAY,
+      total: 100,
+      refundDate: '2023-01-02T10:00:00Z',
+      lineItems: [
+        { description: 'Change of Director', quantity: 1, price: 100 },
+        { description: 'Annual Report', quantity: 1, price: 50 }
+      ],
+      details: [
+        { label: 'Incorporation Number:', value: 'BC0888888' },
+        { label: 'Company Name:', value: 'Test Company' }
+      ],
+      businessIdentifier: 'BC0888888',
+      folioNumber: 'FOLIO456',
+      createdName: 'Joe Doe',
+      invoiceNumber: 'INV456'
+    })
+
+    const { wrapper: testWrapper } = await setupTransactionTest(transaction, wrapper)
+
+    const dropdownItems = testWrapper.vm.getDropdownItems(transaction)
+    expect(dropdownItems.length).toBeGreaterThan(0)
+
+    const refundItem = dropdownItems[0]
+
+    expect(refundItem.accountName).toBe(transaction.paymentAccount.accountName)
+    expect(refundItem.folioNumber).toBe(transaction.folioNumber)
+    expect(refundItem.createdName).toBe(transaction.createdName)
+    expect(refundItem.invoiceNumber).toBe(transaction.invoiceNumber)
+    expect(refundItem.lineItems).toContain('Change of Director')
+    expect(refundItem.lineItems).toContain('Annual Report')
+    expect(refundItem.lineItems).toContain('<br/>')
+    expect(refundItem.details).toContain('Incorporation Number:')
+    expect(refundItem.details).toContain('BC0888888')
+    expect(refundItem.details).toContain('Company Name:')
+    expect(refundItem.details).toContain('Test Company')
+    expect(refundItem.details).toContain('<br/>')
+    expect(refundItem.businessIdentifier).toBe('BC0888888')
+    expect(refundItem.type).toBe('Refund')
+    expect(refundItem.amount).toBe('-$100.00')
+    expect(refundItem.isRefund).toBe(true)
+    expect(refundItem.status).toBe('Refunded')
   })
 })
