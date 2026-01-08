@@ -218,6 +218,42 @@
           class="dropdown-row"
         >
           <td
+            v-if="isColumnVisible('accountName')"
+            class="dropdown-cell"
+          >
+            <span class="dropdown-item-name">{{ dropdownItem.accountName || 'N/A' }}</span>
+          </td>
+          <td
+            v-if="isColumnVisible('product')"
+            class="dropdown-cell"
+          >
+            <span class="dropdown-item-product">{{ dropdownItem.product }}</span>
+          </td>
+          <td
+            v-if="isColumnVisible('lineItems')"
+            class="dropdown-cell"
+          >
+            <span
+              class="dropdown-item-lineitems"
+              v-html="dropdownItem.lineItems"
+            />
+          </td>
+          <td
+            v-if="isColumnVisible('details')"
+            class="dropdown-cell"
+          >
+            <span
+              class="dropdown-item-details"
+              v-html="dropdownItem.details"
+            />
+          </td>
+          <td
+            v-if="isColumnVisible('businessIdentifier')"
+            class="dropdown-cell"
+          >
+            <span class="dropdown-item-businessid">{{ dropdownItem.businessIdentifier }}</span>
+          </td>
+          <td
             v-if="isColumnVisible('lineItemsAndDetails')"
             class="dropdown-cell"
           >
@@ -314,7 +350,9 @@
               <v-icon color="primary">
                 mdi-file-pdf-outline
               </v-icon>
-              <span>Receipt</span>
+              <span>
+                Receipt
+              </span>
             </div>
             <!-- Empty cell for downloads column -->
             <div v-else />
@@ -335,6 +373,7 @@
 import { BaseVDataTable, DatePicker, IconTooltip } from '@/components'
 import { InvoiceStatus, LDFlags, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Ref, computed, defineComponent, nextTick, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { getApplicationType, getLineItemsDescription, getTransactionDetails } from '@/resources/table-headers/transactions-table/headers'
 import { invoiceStatusDisplay, paymentTypeDisplay } from '@/resources/display-mappers'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
@@ -499,6 +538,11 @@ export default defineComponent({
       folioNumber: item.folioNumber,
       createdName: item.createdName,
       invoiceNumber: item.invoiceNumber,
+      accountName: item.paymentAccount.accountName,
+      lineItems: getLineItemsDescription(item),
+      details: getTransactionDetails(item),
+      businessIdentifier: item.businessIdentifier || 'N/A',
+      product: getApplicationType(item),
       ...overrides
     })
 
@@ -534,6 +578,7 @@ export default defineComponent({
       // Add remaining amount if any
       if (remainingAmount > 0) {
         items.push(createDropdownItem(item, {
+          name: item.createdName || 'N/A',
           id: `remaining-${item.id}`,
           type: '',
           date: item.appliedCredits[0].createdOn,
@@ -590,6 +635,12 @@ export default defineComponent({
     }
 
     const getDropdownItems = (item: Transaction) => {
+      console.log(item)
+      console.log([
+        ...getAppliedCreditsItems(item),
+        ...getPartialRefundsItems(item),
+        ...getFullRefundItems(item)
+      ])
       return [
         ...getAppliedCreditsItems(item),
         ...getPartialRefundsItems(item),
