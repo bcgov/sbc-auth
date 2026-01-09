@@ -35,7 +35,7 @@ semver = "3.0.2"
 six = "1.16.0"
 threadloop = "1.0.2"
 thrift = "0.20.0"
-urllib3 = "2.6.0"
+urllib3 = "2.6.3"
 zipp = "3.19.1"
 
 
