@@ -20,6 +20,7 @@ class EndpointEnum(str, Enum):
     """Endpoint route url paths."""
 
     API_V1 = "/api/v1"
+    API_V2 = "/api/v2"
     API = "/api"
     TEST_API = "/test"
     DEFAULT_API = API_V1
