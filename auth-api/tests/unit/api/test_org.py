@@ -101,21 +101,29 @@ def test_add_org(client, jwt, session, keycloak_mock, org_info):  # pylint:disab
     assert schema_utils.validate(rv.json, "org_response")[0]
 
 
-def test_add_org_v2_with_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+@pytest.mark.parametrize(
+    "has_contact, expected_status_code", [("with_contact", HTTPStatus.CREATED), ("no_contact", HTTPStatus.CREATED)]
+)
+def test_add_org_v2_with_contact(client, jwt, session, keycloak_mock, has_contact, expected_status_code):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed with contact using v2 endpoint."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
 
     org_data = TestOrgInfo.org1.copy()
-    org_data["contact"] = TestContactInfo.contact1
+
+    if has_contact == "with_contact":
+        org_data["contact"] = TestContactInfo.contact1
 
     rv = client.post("/api/v2/orgs", data=json.dumps(org_data), headers=headers, content_type="application/json")
-    assert rv.status_code == HTTPStatus.CREATED
+    assert rv.status_code == expected_status_code
     dictionary = json.loads(rv.data)
     assert dictionary["name"] == TestOrgInfo.org1["name"]
-    assert "contact" in dictionary
-    assert dictionary["contact"]["email"] == TestContactInfo.contact1["email"]
-    assert dictionary["contact"]["phone"] == TestContactInfo.contact1["phone"]
+    if has_contact == "with_contact":
+        assert "contact" in dictionary
+        assert dictionary["contact"]["email"] == TestContactInfo.contact1["email"]
+        assert dictionary["contact"]["phone"] == TestContactInfo.contact1["phone"]
+    else:
+        assert "contact" not in dictionary  # Ensure no contact is present in the response
     assert schema_utils.validate(rv.json, "org_response")[0]
 
 
