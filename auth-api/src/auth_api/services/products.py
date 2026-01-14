@@ -514,7 +514,7 @@ class Product:
         else:
             # continue but log error
             error_msg = f"No admin email record for org id {org_id}"
-            current_app.logger.error(error_msg)
+            current_app.logger.warning(error_msg)
         if is_approved:
             ActivityLogPublisher.publish_activity(
                 Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value, name=product_model.description)
@@ -576,7 +576,7 @@ class Product:
         else:
             # continue but log error
             error_msg = f"No admin email record for org id {org_id}"
-            current_app.logger.error(error_msg)
+            current_app.logger.warning(error_msg)
         if is_approved:
             ActivityLogPublisher.publish_activity(
                 Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value, name=product_model.description)
