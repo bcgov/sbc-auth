@@ -1,0 +1,77 @@
+# Copyright © 2019 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the 'License');
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an 'AS IS' BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""API endpoints for managing an Org resource - V2."""
+
+from http import HTTPStatus
+
+from flask import Blueprint, request
+from flask_cors import cross_origin
+
+from auth_api.resources import org_utils
+from auth_api.utils.auth import jwt as _jwt
+from auth_api.utils.endpoints_enums import EndpointEnum
+from auth_api.utils.role_validator import validate_roles
+from auth_api.utils.roles import Role
+
+bp = Blueprint("ORGS_V2", __name__, url_prefix=f"{EndpointEnum.API_V2.value}/orgs")
+
+
+@bp.route("", methods=["POST"])
+@cross_origin(origins="*")
+@validate_roles(
+    allowed_roles=[Role.PUBLIC_USER.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.SYSTEM.value],
+    not_allowed_roles=[Role.ANONYMOUS_USER.value],
+)
+@_jwt.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.SYSTEM.value])
+def post_organization():
+    """Post a new org with contact using the request body.
+
+    Creates an organization and then adds a contact if provided.
+    Validates both org and contact schemas before processing.
+    """
+    request_json = request.get_json()
+    if not request_json:
+        return {"message": "Request body cannot be empty"}, HTTPStatus.BAD_REQUEST
+
+    org_info = request_json.copy()
+    contact_info = org_info.pop("contact", None)
+
+    if contact_info:
+        org_info.pop("mailingAddress", None)
+
+    is_valid, error_response, error_status = org_utils.validate_org_schema(org_info)
+    if not is_valid:
+        return error_response, error_status
+
+    if contact_info:
+        is_valid, error_response, error_status = org_utils.validate_contact_schema(contact_info)
+        if not is_valid:
+            return error_response, error_status
+
+    user, error_response, error_status = org_utils.validate_and_get_user()
+    if error_response:
+        return error_response, error_status
+
+    org_dict, error_response, error_status = org_utils.create_org_with_validation(org_info, user.identifier)
+    if error_response:
+        return error_response, error_status
+
+    org_id = org_dict.get("id")
+    if contact_info and org_id:
+        contact_dict, error_response, error_status = org_utils.add_contact_with_validation(org_id, contact_info)
+        if error_response:
+            return error_response, error_status
+        org_dict["contact"] = contact_dict
+
+    return org_dict, HTTPStatus.CREATED

@@ -73,7 +73,7 @@ def upgrade():
     sa.Column('country', sa.String(length=2), nullable=True),
     sa.Column('postal_code', sa.String(length=10), nullable=True),
     sa.Column('delivery_instructions', sa.String(length=4096), nullable=True),
-    sa.Column('phone', sa.String(length=15), nullable=True),
+    sa.Column('phone', sa.String(length=20), nullable=True),
     sa.Column('phone_extension', sa.String(length=10), nullable=True),
     sa.Column('email', sa.String(length=100), nullable=True),
     sa.Column('entity_id', sa.Integer(), nullable=True),

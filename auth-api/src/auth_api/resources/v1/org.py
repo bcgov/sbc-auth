@@ -27,6 +27,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.dataclass import AffiliationSearchDetails, DeleteAffiliationRequest, SimpleOrgSearch
 from auth_api.models.org import OrgSearch  # noqa: I001
+from auth_api.resources import org_utils
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
@@ -158,25 +159,19 @@ def post_organization():
     If the org already exists, update the attributes.
     """
     request_json = request.get_json()
-    valid_format, errors = schema_utils.validate(request_json, "org")
-    if not valid_format:
-        return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
-    try:
-        user = UserService.find_by_jwt_token()
-        if user is None:
-            response, status = {"message": "Not authorized to perform this action"}, HTTPStatus.UNAUTHORIZED
-            return response, status
-        response, status = OrgService.create_org(request_json, user.identifier).as_dict(), HTTPStatus.CREATED
-    except BusinessException as exception:
-        response, status = (
-            {
-                "code": exception.code,
-                "message": exception.message,
-                "detail": exception.detail,
-            },
-            exception.status_code,
-        )
-    return response, status
+    is_valid, error_response, error_status = org_utils.validate_org_schema(request_json)
+    if not is_valid:
+        return error_response, error_status
+
+    user, error_response, error_status = org_utils.validate_and_get_user()
+    if error_response:
+        return error_response, error_status
+
+    org_dict, error_response, error_status = org_utils.create_org_with_validation(request_json, user.identifier)
+    if error_response:
+        return error_response, error_status
+
+    return org_dict, HTTPStatus.CREATED
 
 
 @bp.route("/<int:org_id>", methods=["GET", "OPTIONS"])
@@ -326,15 +321,15 @@ def get(org_id):
 def post_organization_contact(org_id):
     """Create a new contact for the specified org."""
     request_json = request.get_json()
-    valid_format, errors = schema_utils.validate(request_json, "contact")
-    if not valid_format:
-        return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
+    is_valid, error_response, error_status = org_utils.validate_contact_schema(request_json)
+    if not is_valid:
+        return error_response, error_status
 
-    try:
-        response, status = OrgService.add_contact(org_id, request_json).as_dict(), HTTPStatus.CREATED
-    except BusinessException as exception:
-        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
-    return response, status
+    contact_dict, error_response, error_status = org_utils.add_contact_with_validation(org_id, request_json)
+    if error_response:
+        return error_response, error_status
+
+    return contact_dict, HTTPStatus.CREATED
 
 
 @bp.route("/<int:org_id>/contacts", methods=["PUT"])
