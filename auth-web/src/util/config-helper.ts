@@ -41,8 +41,9 @@ export default class ConfigHelper {
     return `${import.meta.env.VUE_APP_REGISTRY_HOME_URL}`
   }
 
-  static getBcrosDashboardURL () {
-    return `${import.meta.env.VUE_APP_REGISTRY_HOME_URL}dashboard`
+  static getBcrosDashboardURL (orgId?: number) {
+    const baseUrl = `${import.meta.env.VUE_APP_REGISTRY_HOME_URL}dashboard`
+    return orgId ? `${baseUrl}/${orgId}` : baseUrl
   }
 
   static getBcrosDocumentsUiURL () {
