@@ -118,12 +118,14 @@ def handle_eft_available_notification(message_type, email_msg):
     template_name = TemplateType.EFT_AVAILABLE_NOTIFICATION_TEMPLATE_NAME.value
     org_id = email_msg.get("accountId")
     admin_emails = get_member_emails(org_id, (ADMIN,))
+    fin_email = current_app.config["FIN_EMAIL"]
+    emails = admin_emails + "," + fin_email if admin_emails else fin_email
     subject = SubjectType.EFT_AVAILABLE_NOTIFICATION.value
     context_url = f"{get_login_url()}/account/{org_id}/settings/payment-option"
     logo_url = email_msg.get("logo_url")
     email_dict = common_mailer.process(
         org_id,
-        admin_emails,
+        emails,
         template_name,
         subject,
         logo_url=logo_url,

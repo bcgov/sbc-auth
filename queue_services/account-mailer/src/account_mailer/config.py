@@ -138,6 +138,8 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     LEGISLATIVE_TIMEZONE = os.getenv("LEGISLATIVE_TIMEZONE", "America/Vancouver")
 
+    FIN_EMAIL = os.getenv("FIN_EMAIL", "")
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""
