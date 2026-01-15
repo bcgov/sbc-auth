@@ -138,7 +138,7 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     LEGISLATIVE_TIMEZONE = os.getenv("LEGISLATIVE_TIMEZONE", "America/Vancouver")
 
-    FINE_EMAIL = os.getenv("FINE_EMAIL", "BCROSRev@gov.bc.ca")
+    FINE_EMAIL = os.getenv("FINE_EMAIL", "")
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
