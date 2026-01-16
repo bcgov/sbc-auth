@@ -19,7 +19,6 @@ Test-Suite to ensure that the Business Service is working as expected.
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import aiohttp
 import pytest
 
 from auth_api.exceptions import BusinessException

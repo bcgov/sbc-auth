@@ -279,7 +279,7 @@ class KeycloakService:
                             await asyncio.sleep(1)
                             continue
                         return response
-            except (asyncio.TimeoutError, aiohttp.ClientConnectionError) as e:
+            except (TimeoutError, aiohttp.ClientConnectionError) as e:
                 if attempt < max_retries - 1:
                     current_app.logger.warning(
                         f"Retry {attempt + 1}/{max_retries} for user {kg.user_guid}: {e}"
