@@ -267,6 +267,27 @@ class KeycloakService:
         asyncio.run(KeycloakService.add_or_remove_users_from_group(remove_groups))
 
     @staticmethod
+    async def _request_with_retry(session, method, url, headers, timeout, kg, max_retries=3):
+        """Send request with retry logic - retry up to 3 times on network errors or 5xx responses."""
+        for attempt in range(max_retries):
+            try:
+                async with session.request(method, url, headers=headers, timeout=timeout) as response:
+                    if response.status == 204:
+                        return response
+                    elif 500 <= response.status < 600 and attempt < max_retries - 1:
+                        await asyncio.sleep(1)
+                    else:
+                        return response
+            except (asyncio.TimeoutError, aiohttp.ClientConnectionError) as e:
+                if attempt < max_retries - 1:
+                    current_app.logger.warning(
+                        f"Retry {attempt + 1}/{max_retries} for user {kg.user_guid}: {e}"
+                    )
+                    await asyncio.sleep(1)
+                else:
+                    raise
+
+    @staticmethod
     async def add_or_remove_users_from_group(kgs: list[KeycloakGroupSubscription]):
         """Asynchronously add/remove users from group - there can be upwards of 700+ users at once."""
         if not kgs:
@@ -289,11 +310,13 @@ class KeycloakService:
         async with aiohttp.ClientSession(connector=connector) as session:
             tasks = [
                 asyncio.create_task(
-                    session.request(
+                    KeycloakService._request_with_retry(
+                        session,
                         method,
                         f"{base_url}/auth/admin/realms/{realm}/users/{kg.user_guid}/groups/{group_ids[kg.group_name]}",
-                        headers=headers,
-                        timeout=timeout,
+                        headers,
+                        timeout,
+                        kg,
                     )
                 )
                 for kg in kgs

@@ -17,8 +17,9 @@
 Test-Suite to ensure that the Business Service is working as expected.
 """
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import aiohttp
 import pytest
 
 from auth_api.exceptions import BusinessException
@@ -419,3 +420,66 @@ def test_get_user_emails_with_role_nonexistent_role(
 
     assert exc_info.value.code == Error.DATA_NOT_FOUND.name
     mock_get_users_for_role.assert_called_once_with("nonexistent_role")
+
+
+@pytest.mark.asyncio
+@patch("auth_api.services.keycloak.asyncio.sleep")
+async def test_request_with_retry_success_after_retry(mock_sleep, session):
+    """Test _request_with_retry retries on 5xx errors and succeeds."""
+    kg = KeycloakGroupSubscription(
+        user_guid="test-user-id",
+        product_code="test",
+        group_name="test-group",
+        group_action=KeycloakGroupActions.ADD_TO_GROUP.value,
+    )
+
+    mock_response_success = MagicMock()
+    mock_response_success.status = 204
+    mock_response_success.__aenter__ = AsyncMock(return_value=mock_response_success)
+    mock_response_success.__aexit__ = AsyncMock(return_value=None)
+
+    mock_response_error = MagicMock()
+    mock_response_error.status = 500
+    mock_response_error.__aenter__ = AsyncMock(return_value=mock_response_error)
+    mock_response_error.__aexit__ = AsyncMock(return_value=None)
+
+    mock_session = AsyncMock()
+    mock_session.request = AsyncMock(side_effect=[mock_response_error, mock_response_success])
+
+    result = await KeycloakService._request_with_retry(
+        mock_session, "PUT", "http://test.com", {}, 60, kg, max_retries=3
+    )
+
+    assert result.status == 204
+    assert mock_session.request.call_count == 2
+    mock_sleep.assert_called_once()
+
+
+@pytest.mark.asyncio
+@patch("auth_api.services.keycloak.asyncio.sleep")
+async def test_request_with_retry_network_error(mock_sleep, session):
+    """Test _request_with_retry retries on network errors and succeeds."""
+    kg = KeycloakGroupSubscription(
+        user_guid="test-user-id",
+        product_code="test",
+        group_name="test-group",
+        group_action=KeycloakGroupActions.ADD_TO_GROUP.value,
+    )
+
+    mock_response_success = MagicMock()
+    mock_response_success.status = 204
+    mock_response_success.__aenter__ = AsyncMock(return_value=mock_response_success)
+    mock_response_success.__aexit__ = AsyncMock(return_value=None)
+
+    mock_session = AsyncMock()
+    mock_session.request = AsyncMock(
+        side_effect=[aiohttp.ClientConnectionError("Connection error"), mock_response_success]
+    )
+
+    result = await KeycloakService._request_with_retry(
+        mock_session, "PUT", "http://test.com", {}, 60, kg, max_retries=3
+    )
+
+    assert result.status == 204
+    assert mock_session.request.call_count == 2
+    mock_sleep.assert_called_once()
