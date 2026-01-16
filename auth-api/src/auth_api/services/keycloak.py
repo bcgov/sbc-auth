@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from string import Template
 
 import aiohttp
+from aiohttp_retry import RetryClient, ExponentialRetry
 import requests
 from flask import current_app
 
@@ -267,27 +268,6 @@ class KeycloakService:
         asyncio.run(KeycloakService.add_or_remove_users_from_group(remove_groups))
 
     @staticmethod
-    async def _request_with_retry(session, method, url, headers, kg, max_retries=3, timeout_seconds=60):
-        """Retry request with timeout context manager instead of timeout param."""
-        for attempt in range(max_retries):
-            try:
-                async with asyncio.timeout(timeout_seconds):
-                    async with session.request(method, url, headers=headers) as response:
-                        if 500 <= response.status < 600 and attempt < max_retries - 1:
-                            await asyncio.sleep(1)
-                            continue
-
-                        return response
-            except (TimeoutError, aiohttp.ClientConnectionError) as e:
-                if attempt < max_retries - 1:
-                    current_app.logger.warning(
-                        f"Retry {attempt + 1}/{max_retries} for user {kg.user_guid}: {e}"
-                    )
-                    await asyncio.sleep(1)
-                else:
-                    return e
-
-    @staticmethod
     async def add_or_remove_users_from_group(kgs: list[KeycloakGroupSubscription]):
         """Asynchronously add/remove users from group - there can be upwards of 700+ users at once."""
         if not kgs:
@@ -307,17 +287,21 @@ class KeycloakService:
         method = "PUT" if kgs[0].group_action == KeycloakGroupActions.ADD_TO_GROUP.value else "DELETE"
         # Normal limit is 100, cap this to 40, so it doesn't hit keycloak too aggressively.
         connector = aiohttp.TCPConnector(limit=40)
-        async with aiohttp.ClientSession(connector=connector) as session:
+        retry_options = ExponentialRetry(
+            attempts=3,
+            start_timeout=1,
+            statuses={500, 502, 503, 504},
+            exceptions={TimeoutError, aiohttp.ClientConnectionError}
+        )
+    
+        connector = aiohttp.TCPConnector(limit=50)
+        async with RetryClient(connector=connector, retry_options=retry_options) as session:
             tasks = [
-                asyncio.create_task(
-                    KeycloakService._request_with_retry(
-                        session,
-                        method,
-                        f"{base_url}/auth/admin/realms/{realm}/users/{kg.user_guid}/groups/{group_ids[kg.group_name]}",
-                        headers,
-                        kg,
-                        timeout_seconds=timeout,
-                    )
+                session.request(
+                    method,
+                    f"{base_url}/auth/admin/realms/{realm}/users/{kg.user_guid}/groups/{group_ids[kg.group_name]}",
+                    headers=headers,
+                    timeout=aiohttp.ClientTimeout(total=60)
                 )
                 for kg in kgs
             ]
