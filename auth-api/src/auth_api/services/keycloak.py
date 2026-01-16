@@ -273,11 +273,10 @@ class KeycloakService:
             try:
                 async with asyncio.timeout(timeout_seconds):
                     async with session.request(method, url, headers=headers) as response:
-                        if response.status == 204:
-                            return None
-                        elif 500 <= response.status < 600 and attempt < max_retries - 1:
+                        if 500 <= response.status < 600 and attempt < max_retries - 1:
                             await asyncio.sleep(1)
                             continue
+
                         return response
             except (TimeoutError, aiohttp.ClientConnectionError) as e:
                 if attempt < max_retries - 1:
