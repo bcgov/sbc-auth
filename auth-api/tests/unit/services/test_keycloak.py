@@ -17,7 +17,7 @@
 Test-Suite to ensure that the Business Service is working as expected.
 """
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
