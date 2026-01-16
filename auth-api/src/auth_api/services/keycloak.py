@@ -19,8 +19,8 @@ from dataclasses import dataclass
 from string import Template
 
 import aiohttp
-from aiohttp_retry import RetryClient, ExponentialRetry
 import requests
+from aiohttp_retry import ExponentialRetry, RetryClient
 from flask import current_app
 
 from auth_api.exceptions import BusinessException
@@ -293,7 +293,6 @@ class KeycloakService:
             statuses={500, 502, 503, 504},
             exceptions={TimeoutError, aiohttp.ClientConnectionError}
         )
-    
         connector = aiohttp.TCPConnector(limit=50)
         async with RetryClient(connector=connector, retry_options=retry_options) as session:
             tasks = [
@@ -301,7 +300,7 @@ class KeycloakService:
                     method,
                     f"{base_url}/auth/admin/realms/{realm}/users/{kg.user_guid}/groups/{group_ids[kg.group_name]}",
                     headers=headers,
-                    timeout=aiohttp.ClientTimeout(total=60)
+                    timeout=timeout
                 )
                 for kg in kgs
             ]
