@@ -316,8 +316,8 @@ class KeycloakService:
                         method,
                         f"{base_url}/auth/admin/realms/{realm}/users/{kg.user_guid}/groups/{group_ids[kg.group_name]}",
                         headers,
-                        timeout,
                         kg,
+                        timeout_seconds=timeout,
                     )
                 )
                 for kg in kgs

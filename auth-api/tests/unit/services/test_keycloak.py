@@ -422,8 +422,8 @@ def test_get_user_emails_with_role_nonexistent_role(
 
 
 @pytest.mark.asyncio
-@patch("auth_api.services.keycloak.asyncio.sleep")
-async def test_request_with_retry_returns_none_on_204(mock_sleep, session):
+@patch("auth_api.services.keycloak.asyncio.sleep", new_callable=AsyncMock)
+async def test_request_with_retry_returns_none_on_204(mock_sleep):
     """Test _request_with_retry returns None for 204 status code."""
     kg = KeycloakGroupSubscription(
         user_guid="test-user-id",
@@ -432,13 +432,13 @@ async def test_request_with_retry_returns_none_on_204(mock_sleep, session):
         group_action=KeycloakGroupActions.ADD_TO_GROUP.value,
     )
 
-    mock_response = MagicMock()
+    mock_response = AsyncMock()
     mock_response.status = 204
-    mock_response.__aenter__ = AsyncMock(return_value=mock_response)
-    mock_response.__aexit__ = AsyncMock(return_value=None)
+    mock_response.__aenter__.return_value = mock_response
+    mock_response.__aexit__.return_value = None
 
     mock_session = AsyncMock()
-    mock_session.request = AsyncMock(return_value=mock_response)
+    mock_session.request.return_value = mock_response
 
     result = await KeycloakService._request_with_retry(
         mock_session, "PUT", "http://test.com", {}, kg
@@ -446,11 +446,12 @@ async def test_request_with_retry_returns_none_on_204(mock_sleep, session):
 
     assert result is None
     mock_session.request.assert_called_once()
+    mock_sleep.assert_not_awaited()
 
 
 @pytest.mark.asyncio
-@patch("auth_api.services.keycloak.asyncio.sleep")
-async def test_request_with_retry_retries_on_5xx_error(mock_sleep, session):
+@patch("auth_api.services.keycloak.asyncio.sleep", new_callable=AsyncMock)
+async def test_request_with_retry_retries_on_5xx_error(mock_sleep):
     """Test _request_with_retry retries on 5xx errors and succeeds."""
     kg = KeycloakGroupSubscription(
         user_guid="test-user-id",
@@ -459,18 +460,18 @@ async def test_request_with_retry_retries_on_5xx_error(mock_sleep, session):
         group_action=KeycloakGroupActions.ADD_TO_GROUP.value,
     )
 
-    mock_response_success = MagicMock()
-    mock_response_success.status = 204
-    mock_response_success.__aenter__ = AsyncMock(return_value=mock_response_success)
-    mock_response_success.__aexit__ = AsyncMock(return_value=None)
-
-    mock_response_error = MagicMock()
+    mock_response_error = AsyncMock()
     mock_response_error.status = 500
-    mock_response_error.__aenter__ = AsyncMock(return_value=mock_response_error)
-    mock_response_error.__aexit__ = AsyncMock(return_value=None)
+    mock_response_error.__aenter__.return_value = mock_response_error
+    mock_response_error.__aexit__.return_value = None
+
+    mock_response_success = AsyncMock()
+    mock_response_success.status = 204
+    mock_response_success.__aenter__.return_value = mock_response_success
+    mock_response_success.__aexit__.return_value = None
 
     mock_session = AsyncMock()
-    mock_session.request = AsyncMock(side_effect=[mock_response_error, mock_response_success])
+    mock_session.request.side_effect = [mock_response_error, mock_response_success]
 
     result = await KeycloakService._request_with_retry(
         mock_session, "PUT", "http://test.com", {}, kg
@@ -478,4 +479,4 @@ async def test_request_with_retry_retries_on_5xx_error(mock_sleep, session):
 
     assert result is None
     assert mock_session.request.call_count == 2
-    mock_sleep.assert_called_once()
+    mock_sleep.assert_awaited_once()
