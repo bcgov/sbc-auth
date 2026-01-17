@@ -56,6 +56,7 @@ sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.
 cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", branch = "main" }
 gcp-queue = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/gcp-queue", branch = "main" }
 structured-logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging", branch = "main" }
+aiohttp-retry = "^2.9.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.2"
