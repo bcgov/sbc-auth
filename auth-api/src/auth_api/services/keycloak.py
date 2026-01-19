@@ -20,6 +20,7 @@ from string import Template
 
 import aiohttp
 import requests
+from aiohttp_retry import ExponentialRetry, RetryClient
 from flask import current_app
 
 from auth_api.exceptions import BusinessException
@@ -286,15 +287,19 @@ class KeycloakService:
         method = "PUT" if kgs[0].group_action == KeycloakGroupActions.ADD_TO_GROUP.value else "DELETE"
         # Normal limit is 100, cap this to 40, so it doesn't hit keycloak too aggressively.
         connector = aiohttp.TCPConnector(limit=40)
-        async with aiohttp.ClientSession(connector=connector) as session:
+        retry_options = ExponentialRetry(
+            attempts=3,
+            start_timeout=1,
+            statuses={500, 502, 503, 504},
+            exceptions={TimeoutError, aiohttp.ClientConnectionError}
+        )
+        async with RetryClient(connector=connector, retry_options=retry_options) as session:
             tasks = [
-                asyncio.create_task(
-                    session.request(
-                        method,
-                        f"{base_url}/auth/admin/realms/{realm}/users/{kg.user_guid}/groups/{group_ids[kg.group_name]}",
-                        headers=headers,
-                        timeout=timeout,
-                    )
+                session.request(
+                    method,
+                    f"{base_url}/auth/admin/realms/{realm}/users/{kg.user_guid}/groups/{group_ids[kg.group_name]}",
+                    headers=headers,
+                    timeout=timeout
                 )
                 for kg in kgs
             ]
