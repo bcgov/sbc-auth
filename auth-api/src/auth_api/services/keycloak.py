@@ -293,7 +293,6 @@ class KeycloakService:
             statuses={500, 502, 503, 504},
             exceptions={TimeoutError, aiohttp.ClientConnectionError}
         )
-        connector = aiohttp.TCPConnector(limit=50)
         async with RetryClient(connector=connector, retry_options=retry_options) as session:
             tasks = [
                 session.request(
