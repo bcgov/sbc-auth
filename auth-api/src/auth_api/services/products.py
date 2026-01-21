@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from auth_api.services.rest_service import RestService
 from flask import current_app
 from sqlalchemy import and_, case, func, literal, or_
 from sqlalchemy.exc import SQLAlchemyError
@@ -245,6 +246,7 @@ class Product:
                         ProductReviewTask(
                             org_id=org.id,
                             org_name=org.name,
+                            org_access_type=org.access_type,
                             product_code=product_subscription.product_code,
                             product_description=product_model.description,
                             product_subscription_id=product_subscription.id,
@@ -371,11 +373,14 @@ class Product:
     @staticmethod
     def _create_review_task(review_task: ProductReviewTask):
         task_type = review_task.product_description
-        action_type = (
-            TaskAction.QUALIFIED_SUPPLIER_REVIEW.value
-            if review_task.product_code in QUALIFIED_SUPPLIER_PRODUCT_CODES
-            else TaskAction.PRODUCT_REVIEW.value
-        )
+        
+        required_review_types = {AccessType.GOVM.value, AccessType.GOVN.value}
+        if review_task.org_access_type in required_review_types:
+            action_type = TaskAction.NEW_PRODUCT_FEE_REVIEW.value
+        elif review_task.product_code in QUALIFIED_SUPPLIER_PRODUCT_CODES:
+            action_type = TaskAction.QUALIFIED_SUPPLIER_REVIEW.value
+        else:
+            action_type = TaskAction.PRODUCT_REVIEW.value
 
         task_info = {
             "name": review_task.org_name,
@@ -391,18 +396,39 @@ class Product:
             "externalSourceId": review_task.external_source_id,
         }
         TaskService.create_task(task_info, False)
+    
+    @staticmethod
+    def has_product_fee(org, product_model):
+        """Check if product code exists in pay-api account fees."""
+        pay_url = current_app.config.get("PAY_API_URL")
+        # invoke pay-api
+        token = RestService.get_service_account_token()
+        response = RestService.get(endpoint=f"{pay_url}/accounts/{org.id}/fees", token=token, retry_on_failure=True)
+        
+        if response and response.status_code == 200:
+            response_data = response.json()
+            account_fees = response_data.get("accountFees", [])
+            product_code = product_model.code
+            
+            for fee in account_fees:
+                if fee.get("product") == product_code:
+                    return True
+        
+        return False
 
     @staticmethod
     def find_subscription_status(org, product_model, auto_approve=False):
         """Return the subscriptions status based on org type."""
-        # GOVM accounts has default active subscriptions
-        skip_review_types = [AccessType.GOVM.value]
-        if product_model.need_review and auto_approve is False:
-            return (
-                ProductSubscriptionStatus.ACTIVE.value
-                if (org.access_type in skip_review_types)
-                else ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
-            )
+        required_review_types = {AccessType.GOVM.value, AccessType.GOVN.value}
+        
+        needs_review = (
+            (org.access_type in required_review_types and Product.has_product_fee(org, product_model))
+            or (product_model.need_review and not auto_approve)
+        )
+        
+        if needs_review:
+            return ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
+        
         return ProductSubscriptionStatus.ACTIVE.value
 
     @staticmethod

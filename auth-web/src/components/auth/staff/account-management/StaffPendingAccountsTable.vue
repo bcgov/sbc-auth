@@ -149,7 +149,8 @@
                 {{ formatDate(item.dateSubmitted, 'MMM DD, YYYY') }}
               </template>
               <template #[`item.type`]="{ item }">
-                {{ item.relationshipType === TaskRelationshipTypeEnum.PRODUCT ? `Access Request (${item.type})` :
+                {{ item.action === TaskAction.NEW_PRODUCT_FEE_REVIEW ? 'New Product Fee Review' :
+                  item.relationshipType === TaskRelationshipTypeEnum.PRODUCT ? `Access Request (${item.type})` :
                   item.type
                 }}
               </template>
@@ -183,7 +184,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator'
-import { SessionStorageKeys, TaskRelationshipStatus, TaskRelationshipType, TaskStatus } from '@/util/constants'
+import { SessionStorageKeys, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus } from '@/util/constants'
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
 import { mapActions, mapState } from 'pinia'
 import { Action } from 'pinia-class'
@@ -268,7 +269,8 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
     { desc: 'New Account', val: 'New Account' },
     { desc: 'BCeID Admin', val: 'BCeID Admin' },
     { desc: 'GovM', val: 'GovM' },
-    { desc: 'GovN', val: 'GovN' }
+    { desc: 'GovN', val: 'GovN' },
+    { desc: 'New Product Review', val: TaskAction.NEW_PRODUCT_FEE_REVIEW }
   ]
 
   private searchParams: TaskFilterParams = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PendingAccountsSearchFilter)) ||
@@ -342,6 +344,11 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
       }
       if (this.searchParams.status) {
         this.taskFilter.statuses = [this.searchParams.status]
+      }
+      // If type is NEW_PRODUCT_FEE_REVIEW, convert it to action parameter
+      if (this.searchParams.type === TaskAction.NEW_PRODUCT_FEE_REVIEW) {
+        this.taskFilter.action = TaskAction.NEW_PRODUCT_FEE_REVIEW
+        delete this.taskFilter.type
       }
 
       const staffTasksResp = await this.fetchTasks(this.taskFilter)

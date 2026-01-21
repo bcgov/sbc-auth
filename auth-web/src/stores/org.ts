@@ -153,10 +153,17 @@ export const useOrgStore = defineStore('org', () => {
       canEditBusinessInfo.value
   })
 
+  function isProductReviewed (code) {
+    return state.currentAccountFees.some(accountFee => accountFee.product === code)
+  }
+
   function needStaffReview (code) {
-    const skipReviewTypes = [AccessType.GOVM]
+    const requireReviewTypes = [AccessType.GOVM, AccessType.GOVN]
     const product = state.productList.find(product => product.code === code)
-    return !skipReviewTypes.includes(state.currentOrganization?.accessType as AccessType) && product.needReview
+    if (!isProductReviewed(code) && requireReviewTypes.includes(state.currentOrganization?.accessType as AccessType)) {
+      return true
+    }
+    return !!product?.needReview
   }
 
   const isBusinessAccount = computed<boolean>(() => {
@@ -776,6 +783,9 @@ export const useOrgStore = defineStore('org', () => {
       setCurrentOrganizationGLInfo(response?.data?.revenueAccount)
     }
     state.currentOrgPaymentDetails = response?.data
+    if (response?.data?.accountFees) {
+      setCurrentAccountFees(response?.data?.accountFees)
+    }
     return response?.data
   }
 

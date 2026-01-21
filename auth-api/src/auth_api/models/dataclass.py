@@ -200,6 +200,7 @@ class ProductReviewTask:
 
     org_id: str
     org_name: str
+    org_access_type: str
     product_code: str
     product_description: str
     product_subscription_id: int

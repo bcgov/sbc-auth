@@ -484,8 +484,8 @@ export default defineComponent({
 
       if (!state.staffReviewClear && state.addProductOnAccountAdmin) {
         state.dialogTitle = 'Staff Review Required'
-        state.dialogText = `This product needs a review by our staff before it's added to your account. 
-          We'll notify you by email once it's approved.`
+        state.dialogText = `This product needs a review by our staff before it is added to your account. 
+        You will be notified by email once the request is reviewed.`
         confirmDialog.value.open()
       } else if (!state.addProductOnAccountAdmin) {
         state.displayRemoveProductDialog = true

@@ -40,6 +40,9 @@ export default class TaskService {
     if (taskFilter.modifiedBy) {
       params.append('modifiedBy', taskFilter.modifiedBy)
     }
+    if (taskFilter.action) {
+      params.append('action', taskFilter.action)
+    }
 
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/tasks`, { params })
   }
