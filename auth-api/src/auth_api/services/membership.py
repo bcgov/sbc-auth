@@ -42,6 +42,7 @@ from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
+from .flags import flags
 from .keycloak import KeycloakService
 from .products import Product as ProductService
 from .user import User as UserService
@@ -406,6 +407,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
     @staticmethod
     def has_nsf_or_suspended_membership(user_id):
         """Check if the user has an active membership in an NSF_SUSPENDED or SUSPENDED organization."""
+        if flags.is_on("enable-nsf-or-suspended-create-org-check", default=True) is False:
+            return False
+
         nsf_or_suspended_memberships = (
             MembershipModel.query.join(MembershipModel.org)
             .filter(
