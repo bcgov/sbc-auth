@@ -149,7 +149,7 @@
                 {{ formatDate(item.dateSubmitted, 'MMM DD, YYYY') }}
               </template>
               <template #[`item.type`]="{ item }">
-                {{ item.action === TaskAction.NEW_PRODUCT_FEE_REVIEW ? 'New Product Fee Review' :
+                {{ item.action === TaskActionEnum.NEW_PRODUCT_FEE_REVIEW ? 'New Product Fee Review' :
                   item.relationshipType === TaskRelationshipTypeEnum.PRODUCT ? `Access Request (${item.type})` :
                   item.type
                 }}
@@ -219,6 +219,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   private tableDataOptions: Partial<DataOptions> = {}
   private isTableLoading: boolean = false
   public TaskRelationshipTypeEnum = TaskRelationshipType
+  public TaskActionEnum = TaskAction
   protected searchParamsExist = false
   private datePicker = null
   private dateTxt = ''
