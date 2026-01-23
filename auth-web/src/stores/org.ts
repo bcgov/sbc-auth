@@ -153,14 +153,14 @@ export const useOrgStore = defineStore('org', () => {
       canEditBusinessInfo.value
   })
 
-  function isProductReviewed (code) {
+  function isProductFeesReviewed (code) {
     return state.currentAccountFees.some(accountFee => accountFee.product === code)
   }
 
   function needStaffReview (code) {
     const requireReviewTypes = [AccessType.GOVM, AccessType.GOVN]
     const product = state.productList.find(product => product.code === code)
-    if (!isProductReviewed(code) && requireReviewTypes.includes(state.currentOrganization?.accessType as AccessType)) {
+    if (!isProductFeesReviewed(code) && requireReviewTypes.includes(state.currentOrganization?.accessType as AccessType)) {
       return true
     }
     return !!product?.needReview
@@ -887,11 +887,14 @@ export const useOrgStore = defineStore('org', () => {
     return organization
   }
 
-  async function getOrgProducts (orgId:number): Promise<OrgProduct[]> {
+  async function getOrgProducts (orgId:number, isNewProductFeeReview = false): Promise<OrgProduct[]> {
     const response = await OrgService.getProducts(orgId)
     const result = response?.data
-    state.productList = result
-    return result
+    const filteredResult = isNewProductFeeReview
+      ? result?.filter(product => product.subscriptionStatus === ProductStatus.PENDING_STAFF_REVIEW) || []
+      : result
+    state.productList = filteredResult
+    return filteredResult
   }
 
   async function addOrgProducts (productsRequestBody: OrgProductsRequestBody): Promise<OrgProduct> {

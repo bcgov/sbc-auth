@@ -138,6 +138,7 @@
           :taskName="task.type"
           :onholdReasonCodes="onholdReasonCodes"
           :isMhrSubProductReview="isMhrSubProductReview"
+          :isNewProductFeeReview="isNewProductFeeReview"
           @approve-reject-action="saveSelection"
           @after-confirm-action="goBack()"
         />
@@ -158,6 +159,7 @@ import AgreementInformation from '@/components/auth/staff/review-task/AgreementI
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffidavit.vue'
+import { EventBus } from '@/event-bus'
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
 import PaymentInformation from '@/components/auth/staff/review-task/PaymentInformation.vue'
 import ProductFee from '@/components/auth/staff/review-task/ProductFee.vue'
@@ -249,6 +251,10 @@ export default defineComponent({
       return (task.value.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW ||
         (task.value.relationshipType === TaskRelationshipType.PRODUCT &&
         task.value.relationshipStatus === TaskRelationshipStatus.REJECTED))
+    })
+
+    const isNewProductFeeReview = computed(() => {
+      return task.value?.action === TaskAction.NEW_PRODUCT_FEE_REVIEW
     })
 
     const isPendingReviewPage = computed(() => {
@@ -503,7 +509,7 @@ export default defineComponent({
           // Since task of Product type has variable Task Type (eg, Wills Registry, PPR ) we specify in default.
           // Also, we double check by task relationship type
           if (taskRelationshipType.value === TaskRelationshipType.PRODUCT) {
-            if (task.value?.action === TaskAction.NEW_PRODUCT_FEE_REVIEW) {
+            if (isNewProductFeeReview.value) {
               return [
                 { ...componentAccountInformation(1) },
                 { ...componentAccountAdministrator(2) },
@@ -529,13 +535,12 @@ export default defineComponent({
         await staffStore.syncTaskUnderReview(task.value)
 
         // If the task type is GOVM or GOVN or NEW_PRODUCT_FEE_REVIEW, then need to populate product fee codes
-        if (task.value.type === TaskType.GOVM_REVIEW ||
-            task.value.type === TaskType.GOVN_REVIEW ||
-            task.value.action === TaskAction.NEW_PRODUCT_FEE_REVIEW) {
-          const accountId = task.value.relationshipId
+        if ([TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(task.value.type as TaskType) ||
+            isNewProductFeeReview.value) {
+          const accountId = isNewProductFeeReview.value ? task.value.accountId : task.value.relationshipId
           await orgStore.fetchCurrentOrganizationGLInfo(accountId)
           await orgStore.fetchOrgProductFeeCodes()
-          await orgStore.getOrgProducts(accountId)
+          await orgStore.getOrgProducts(accountId, isNewProductFeeReview.value)
           // For rejected accounts view
           if (!canSelect.value) {
             await orgStore.syncCurrentAccountFees(accountId)
@@ -579,7 +584,7 @@ export default defineComponent({
       }
 
       if ((task.value.type === TaskType.GOVM_REVIEW ||
-           task.value.action === TaskAction.NEW_PRODUCT_FEE_REVIEW) &&
+           isNewProductFeeReview.value) &&
           !productFeeFormValid.value) {
         // validate form before showing pop-up
         (productFeeRef.value[0] as any).validateNow()
@@ -605,6 +610,10 @@ export default defineComponent({
       toggleAccessRequestModal(isConfirmationModal.value)
 
       return true
+    }
+
+    const goBack = () => {
+      instance.proxy.$router.push(pagesEnum.STAFF_DASHBOARD)
     }
 
     const saveSelection = async (reason) => {
@@ -637,22 +646,31 @@ export default defineComponent({
 
         if (
           ([TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType) ||
-           task.value.action === TaskAction.NEW_PRODUCT_FEE_REVIEW) &&
+           isNewProductFeeReview.value) &&
           (!accountInfoAccessType.value || [AccessType.GOVN, AccessType.GOVM].includes(accountInfoAccessType.value))
         ) {
-          await orgStore.createAccountFees(task.value.relationshipId)
+          const accountId = isNewProductFeeReview.value
+            ? task.value.accountId
+            : task.value.relationshipId
+          await orgStore.createAccountFees(accountId)
         }
-        openModal(!isApprove, true, isRejecting, isMoveToPending)
+        // Skip confirmation modal for NEW_PRODUCT_FEE_REVIEW approve action
+        if (isNewProductFeeReview.value && isApprove) {
+          EventBus.$emit('show-toast', {
+            message: `${accountUnderReview.value.id}: ${accountUnderReview.value.name} - Review Approved`,
+            type: 'grey darken-3',
+            timeout: 6000
+          })
+          goBack()
+        } else {
+          openModal(!isApprove, true, isRejecting, isMoveToPending)
+        }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log(error)
       } finally {
         isSaving.value = false
       }
-    }
-
-    const goBack = () => {
-      instance.proxy.$router.push(pagesEnum.STAFF_DASHBOARD)
     }
 
     const determinePage = computed(() => {
@@ -711,7 +729,8 @@ export default defineComponent({
       goBack,
       determinePage,
       onholdReasonCodes,
-      isMhrSubProductReview
+      isMhrSubProductReview,
+      isNewProductFeeReview
     }
   }
 })
