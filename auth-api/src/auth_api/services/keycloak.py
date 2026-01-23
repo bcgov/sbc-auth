@@ -312,15 +312,7 @@ class KeycloakService:
                 elif isinstance(task, Exception):
                     current_app.logger.error(f"Exception: {task}", exc_info=task)
                 elif task.status != 204:
-                    try:
-                        response_text = await task.text()
-                        current_app.logger.error(
-                            f"Returned non 204: {task.method} - {task.url} - {task.status} - Response: {response_text}"
-                        )
-                    except Exception:
-                        current_app.logger.error(
-                            f"Returned non 204: {task.method} - {task.url} - {task.status}"
-                        )
+                    current_app.logger.error(f"Returned non 204: {task.method} - {task.url} - {task.status}")
 
     @staticmethod
     def kc_user_to_dict(user: dict) -> dict:
