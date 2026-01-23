@@ -450,6 +450,12 @@ export default defineComponent({
         props.accountType === TaskRelationshipType.PRODUCT
 
       if (props.isNewProductFeeReview) {
+        if (props.isRejectModal) {
+          return {
+            title: 'Product Changes Rejected',
+            text: 'The product changes have been rejected.'
+          }
+        }
         return {
           title: 'Product Changes Approved',
           text: 'The product changes have been approved and will take effect immediately.'
@@ -470,10 +476,7 @@ export default defineComponent({
         : `Account creation request has been approved`
 
       if (props.isRejectModal) {
-        if (props.isNewProductFeeReview) {
-          title = 'Product Changes Rejected'
-          text = 'The product changes have been rejected.'
-        } else if (isProductApproval) {
+        if (isProductApproval) {
           title = 'Request has been Rejected'
           // eslint-disable-next-line no-irregular-whitespace
           text = `The account <strong>${props.orgName}</strong> has been rejected ${productText}`
