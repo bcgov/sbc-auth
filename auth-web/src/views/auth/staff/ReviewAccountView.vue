@@ -643,19 +643,20 @@ export default defineComponent({
           })
         }
         const taskType: any = task.value.type
-
-        if (
-          ([TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType) ||
-           isNewProductFeeReview.value) &&
+        const needsAccountFees = ([TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType) ||
+          isNewProductFeeReview.value) &&
           (!accountInfoAccessType.value || [AccessType.GOVN, AccessType.GOVM].includes(accountInfoAccessType.value))
-        ) {
+
+        if (needsAccountFees) {
           const accountId = isNewProductFeeReview.value
             ? task.value.accountId
             : task.value.relationshipId
           await orgStore.createAccountFees(accountId)
         }
+
         // Skip confirmation modal for NEW_PRODUCT_FEE_REVIEW approve action
-        if (isNewProductFeeReview.value && isApprove) {
+        const shouldSkipModal = isNewProductFeeReview.value && isApprove
+        if (shouldSkipModal) {
           EventBus.$emit('show-toast', {
             message: `${accountUnderReview.value.id}: ${accountUnderReview.value.name} - Review Approved`,
             type: 'grey darken-3',
