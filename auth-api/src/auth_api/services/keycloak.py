@@ -290,7 +290,7 @@ class KeycloakService:
         retry_options = ExponentialRetry(
             attempts=3,
             start_timeout=1,
-            statuses={500, 502, 503, 504},
+            statuses={429, 500, 502, 503, 504},
             exceptions={TimeoutError, aiohttp.ClientConnectionError}
         )
         async with RetryClient(connector=connector, retry_options=retry_options) as session:
@@ -306,13 +306,21 @@ class KeycloakService:
             tasks = await asyncio.gather(*tasks, return_exceptions=True)
             for task in tasks:
                 if isinstance(task, aiohttp.ClientConnectionError):
-                    current_app.logger.error("Connection error")
+                    current_app.logger.error(f"Connection error: {task}", exc_info=task)
                 elif isinstance(task, asyncio.TimeoutError):
-                    current_app.logger.error("Timeout error")
+                    current_app.logger.error(f"Timeout error: {task}", exc_info=task)
                 elif isinstance(task, Exception):
-                    current_app.logger.error(f"Exception: {task}")
+                    current_app.logger.error(f"Exception: {task}", exc_info=task)
                 elif task.status != 204:
-                    current_app.logger.error(f"Returned non 204: {task.method} - {task.url} - {task.status}")
+                    try:
+                        response_text = await task.text()
+                        current_app.logger.error(
+                            f"Returned non 204: {task.method} - {task.url} - {task.status} - Response: {response_text}"
+                        )
+                    except Exception:
+                        current_app.logger.error(
+                            f"Returned non 204: {task.method} - {task.url} - {task.status}"
+                        )
 
     @staticmethod
     def kc_user_to_dict(user: dict) -> dict:
