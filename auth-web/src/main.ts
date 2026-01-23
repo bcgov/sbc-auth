@@ -30,7 +30,7 @@ Vue.use(VueSanitize)
 
 const i18n = initializeI18n(Vue)
 
-if (import.meta.env.VUE_APP_GTAG_ID && import.meta.env.VUE_APP_GTAG_ID !== ' ') {
+if (import.meta.env.VUE_APP_GTAG_ID?.trim()) {
   Vue.use(VueGtag, {
     config: {
       id: import.meta.env.VUE_APP_GTAG_ID
