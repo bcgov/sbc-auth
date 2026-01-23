@@ -616,6 +616,20 @@ export default defineComponent({
       instance.proxy.$router.push(pagesEnum.STAFF_DASHBOARD)
     }
 
+    const handlePostApprovalAction = (isApprove: boolean, isRejecting: boolean, isMoveToPending: boolean) => {
+      const shouldSkipModal = isNewProductFeeReview.value && isApprove
+      if (shouldSkipModal) {
+        EventBus.$emit('show-toast', {
+          message: `${accountUnderReview.value.id}: ${accountUnderReview.value.name} - Review Approved`,
+          type: 'grey darken-3',
+          timeout: 6000
+        })
+        goBack()
+      } else {
+        openModal(!isApprove, true, isRejecting, isMoveToPending)
+      }
+    }
+
     const saveSelection = async (reason) => {
       const { isValidForm, accountToBeOnHoldOrRejected, onHoldOrRejectReasons } = reason
 
@@ -654,18 +668,7 @@ export default defineComponent({
           await orgStore.createAccountFees(accountId)
         }
 
-        // Skip confirmation modal for NEW_PRODUCT_FEE_REVIEW approve action
-        const shouldSkipModal = isNewProductFeeReview.value && isApprove
-        if (shouldSkipModal) {
-          EventBus.$emit('show-toast', {
-            message: `${accountUnderReview.value.id}: ${accountUnderReview.value.name} - Review Approved`,
-            type: 'grey darken-3',
-            timeout: 6000
-          })
-          goBack()
-        } else {
-          openModal(!isApprove, true, isRejecting, isMoveToPending)
-        }
+        handlePostApprovalAction(isApprove, isRejecting, isMoveToPending)
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log(error)
