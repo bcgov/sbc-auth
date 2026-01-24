@@ -23,7 +23,6 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.services.rest_service import RestService
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
@@ -34,6 +33,7 @@ from auth_api.models import db
 from auth_api.models.dataclass import Activity, KeycloakGroupSubscription, ProductReviewTask
 from auth_api.schemas import ProductCodeSchema
 from auth_api.services.keycloak import KeycloakService
+from auth_api.services.rest_service import RestService
 from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.cache import cache
