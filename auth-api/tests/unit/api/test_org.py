@@ -454,7 +454,7 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
     list_products = json.loads(rv_products.data)
 
     vs_product = next(x for x in list_products if x.get("code") == "VS")
-    assert vs_product.get("subscriptionStatus") == "ACTIVE"
+    assert vs_product.get("subscriptionStatus") == "PENDING_STAFF_REVIEW"
 
 
 def test_add_anonymous_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
