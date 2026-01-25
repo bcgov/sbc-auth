@@ -33,11 +33,11 @@ from auth_api.models import db
 from auth_api.models.dataclass import Activity, KeycloakGroupSubscription, ProductReviewTask
 from auth_api.schemas import ProductCodeSchema
 from auth_api.services.keycloak import KeycloakService
-from auth_api.services.rest_service import RestService
 from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.cache import cache
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
+from auth_api.utils.pay import get_account_fees_dict
 from auth_api.utils.enums import (
     AccessType,
     ActivityAction,
@@ -197,7 +197,7 @@ class Product:
         if not skip_auth:
             check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
-        account_fees_dict = Product.get_account_fees_dict(org)
+        account_fees_dict = get_account_fees_dict(org)
 
         subscriptions_list = subscription_data.get("subscriptions")
         for subscription in subscriptions_list:
@@ -399,30 +399,6 @@ class Product:
         }
         TaskService.create_task(task_info, False)
 
-    @staticmethod
-    def get_account_fees_dict(org):
-        """Fetch all account fees from pay-api and return a dict mapping product codes to fee existence."""
-        pay_url = current_app.config.get("PAY_API_URL")
-        account_fees_dict = {}
-
-        try:
-            token = RestService.get_service_account_token()
-            response = RestService.get(endpoint=f"{pay_url}/accounts/{org.id}/fees", token=token, retry_on_failure=True)
-
-            if response and response.status_code == 200:
-                response_data = response.json()
-                account_fees = response_data.get("accountFees", [])
-
-                for fee in account_fees:
-                    product_code = fee.get("product")
-                    if product_code:
-                        account_fees_dict[product_code] = True
-        except Exception as e:  # NOQA # pylint: disable=broad-except
-            # Log the error but don't fail the subscription creation
-            # Return empty dict so subscription can proceed without fee-based review logic
-            current_app.logger.error(f"{Error.ACCOUNT_FEES_FETCH_FAILED.message} for org {org.id}: {e}")
-
-        return account_fees_dict
 
     @staticmethod
     def find_subscription_status(org, product_model, account_fees_dict, auto_approve=False):
@@ -513,7 +489,7 @@ class Product:
         is_approved = product_sub_info.is_approved
         is_hold = product_sub_info.is_hold
         org_id = product_sub_info.org_id
-
+        org_name = product_sub_info.org_name
         # Approve/Reject Product subscription
         product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_id(product_subscription_id)
 
@@ -542,6 +518,8 @@ class Product:
                     product_sub_model=product_subscription,
                     is_reapproved=is_reapproved,
                     remarks=product_sub_info.task_remarks,
+                    org_id=org_id,
+                    org_name=org_name,
                 )
             )
 
