@@ -254,8 +254,10 @@ export const useOrgStore = defineStore('org', () => {
     state.currentOrgGLInfo = glInfo
   }
 
-  function setCurrentAccountFees (accountFee: AccountFee[]) {
-    state.currentAccountFees = accountFee
+  function setCurrentAccountFees (accountFee: AccountFee[] | undefined) {
+    if (accountFee) {
+      state.currentAccountFees = accountFee
+    }
   }
 
   function setResetAccountTypeOnSetupAccount (resetAccountTypeOnSetupAccount:boolean) {
@@ -783,9 +785,7 @@ export const useOrgStore = defineStore('org', () => {
       setCurrentOrganizationGLInfo(response?.data?.revenueAccount)
     }
     state.currentOrgPaymentDetails = response?.data
-    if (response?.data?.accountFees) {
-      setCurrentAccountFees(response?.data?.accountFees)
-    }
+    setCurrentAccountFees(response?.data?.accountFees)
     return response?.data
   }
 

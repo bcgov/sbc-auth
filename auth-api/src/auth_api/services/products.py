@@ -37,7 +37,6 @@ from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.cache import cache
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
-from auth_api.utils.pay import get_account_fees_dict
 from auth_api.utils.enums import (
     AccessType,
     ActivityAction,
@@ -57,6 +56,7 @@ from auth_api.utils.notifications import (
     get_product_notification_data,
     get_product_notification_type,
 )
+from auth_api.utils.pay import get_account_fees_dict
 from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
