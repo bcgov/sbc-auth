@@ -1,8 +1,8 @@
 # Your request for access to {{ product_name }} has been declined.
 
-{% if org_id and org_name %}
+{% if org_id and account_name_with_branch %}
 Account Number: {{ org_id }}
-Account Name: {{ org_name }}
+Account Name: {{ account_name_with_branch }}
 {% else %}
 BC Registries staff have reviewed your request form to access {{ product_name }}, and you have been rejected.
 {% endif %}
