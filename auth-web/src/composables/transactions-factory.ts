@@ -26,6 +26,9 @@ const transactions = (reactive({
   totalResults: 0
 }) as unknown) as TransactionState
 
+// Request counter to track the latest request and ignore stale responses
+let requestCounter = 0
+
 export const useTransactions = () => {
   const orgStore = useOrgStore()
   const userStore = useUserStore()
@@ -45,6 +48,8 @@ export const useTransactions = () => {
   }
 
   const loadTransactionList = debounce(async (filterField?: string, value?: any) => {
+    requestCounter++
+    const currentRequestId = requestCounter
     transactions.loading = true
     if (filterField) {
       // new filter so set page number back to 1
@@ -72,15 +77,21 @@ export const useTransactions = () => {
     try {
       const response = await PaymentService.getTransactions(
         currentOrganization.value.id, transactions.filters, viewAll.value)
-      if (response?.data) {
-        transactions.results = response.data.items || []
-        transactions.totalResults = transactions.results.length * response.data.page + (response.data.hasMore ? 1 : 0)
-      } else throw new Error('No response from getTransactions')
+      if (currentRequestId === requestCounter) {
+        if (response?.data) {
+          transactions.results = response.data.items || []
+          transactions.totalResults = transactions.results.length * response.data.page + (response.data.hasMore ? 1 : 0)
+        } else throw new Error('No response from getTransactions')
+      }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to get transaction list.', error)
+      if (currentRequestId === requestCounter) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to get transaction list.', error)
+      }
     }
-    transactions.loading = false
+    if (currentRequestId === requestCounter) {
+      transactions.loading = false
+    }
   }, 2000, { leading: true, trailing: true }) as (filterField?: string, value?: any, viewAll?: boolean) => Promise<void>
 
   const getTransactionReport = async () => {
