@@ -117,8 +117,6 @@ def handle_eft_available_notification(message_type, email_msg):
         return
     template_name = TemplateType.EFT_AVAILABLE_NOTIFICATION_TEMPLATE_NAME.value
     org_id = email_msg.get("accountId")
-    account_name = email_msg.get("accountName", None)
-    branch_name = email_msg.get("branchName", None)
     admin_emails = get_member_emails(org_id, (ADMIN,))
     fin_email = current_app.config["FIN_EMAIL"]
     emails = admin_emails + "," + fin_email if admin_emails else fin_email
@@ -127,8 +125,6 @@ def handle_eft_available_notification(message_type, email_msg):
     logo_url = email_msg.get("logo_url")
     email_dict = common_mailer.process(
         org_id,
-        account_name,
-        branch_name,
         emails,
         template_name,
         subject,
