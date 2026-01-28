@@ -57,7 +57,7 @@ from auth_api.utils.notifications import (
     get_product_notification_type,
 )
 from auth_api.utils.pay import get_account_fees_dict
-from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
+from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, GOV_ORG_TYPES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
@@ -403,7 +403,7 @@ class Product:
     @staticmethod
     def find_subscription_status(org, product_model, account_fees_dict, auto_approve=False):
         """Return the subscriptions status based on org type."""
-        required_review_types = {AccessType.GOVM.value, AccessType.GOVN.value}
+        required_review_types = GOV_ORG_TYPES
 
         needs_review = (
             (org.access_type in required_review_types and account_fees_dict.get(product_model.code, False))

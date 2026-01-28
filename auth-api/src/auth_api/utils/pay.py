@@ -14,13 +14,16 @@
 """Pay API utility functions."""
 
 from flask import current_app
-
-from auth_api.exceptions.errors import Error
+from auth_api.models import Org as OrgModel
 from auth_api.services.rest_service import RestService
+from auth_api.exceptions.errors import Error
+from auth_api.utils.roles import GOV_ORG_TYPES
 
 
-def get_account_fees_dict(org):
+def get_account_fees_dict(org: OrgModel) -> dict:
     """Fetch all account fees from pay-api and return a dict mapping product codes to fee existence."""
+    if org.access_type not in GOV_ORG_TYPES:
+      return {}
     pay_url = current_app.config.get("PAY_API_URL")
     account_fees_dict = {}
 
