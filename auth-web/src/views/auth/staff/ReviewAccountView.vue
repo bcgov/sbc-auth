@@ -138,6 +138,7 @@
           :taskName="task.type"
           :onholdReasonCodes="onholdReasonCodes"
           :isMhrSubProductReview="isMhrSubProductReview"
+          :isNewProductFeeReview="isNewProductFeeReview"
           @approve-reject-action="saveSelection"
           @after-confirm-action="goBack()"
         />
@@ -158,6 +159,7 @@ import AgreementInformation from '@/components/auth/staff/review-task/AgreementI
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffidavit.vue'
+import { EventBus } from '@/event-bus'
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
 import PaymentInformation from '@/components/auth/staff/review-task/PaymentInformation.vue'
 import ProductFee from '@/components/auth/staff/review-task/ProductFee.vue'
@@ -249,6 +251,10 @@ export default defineComponent({
       return (task.value.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW ||
         (task.value.relationshipType === TaskRelationshipType.PRODUCT &&
         task.value.relationshipStatus === TaskRelationshipStatus.REJECTED))
+    })
+
+    const isNewProductFeeReview = computed(() => {
+      return task.value?.action === TaskAction.NEW_PRODUCT_FEE_REVIEW
     })
 
     const isPendingReviewPage = computed(() => {
@@ -436,13 +442,14 @@ export default defineComponent({
     }
 
     /*
-      5 types of Tasks:
+      6 types of Tasks:
       1. New BCeId Account -> TaskType.NEW_ACCOUNT_STAFF_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
       2. Product request -> TaskType.PRODUCT and TaskRelationshipType.PRODUCT and PRODUCT_REVIEW action
       3. GovM review -> TaskType.GOVM and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
       4. BCeId admin review -> TaskType.BCeID Admin and TaskRelationshipType.USER and ACCOUNT_REVIEW action
       5. GovN review -> 1. Bcsc flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
                         2. Bceid flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
+      6. New Product Fee Review -> TaskType.NEW_PRODUCT_FEE_REVIEW and TaskRelationshipType.PRODUCT and PRODUCT_REVIEW action
     */
 
     const componentList = computed(() => {
@@ -502,11 +509,19 @@ export default defineComponent({
           // Since task of Product type has variable Task Type (eg, Wills Registry, PPR ) we specify in default.
           // Also, we double check by task relationship type
           if (taskRelationshipType.value === TaskRelationshipType.PRODUCT) {
-            return [
-              { ...componentAccountInformation(1) },
-              { ...componentAccountAdministrator(2) },
-              { ...componentAgreementInformation(3) }
-            ]
+            if (isNewProductFeeReview.value) {
+              return [
+                { ...componentAccountInformation(1) },
+                { ...componentAccountAdministrator(2) },
+                { ...componentProductFee(3) }
+              ]
+            } else {
+              return [
+                { ...componentAccountInformation(1) },
+                { ...componentAccountAdministrator(2) },
+                { ...componentAgreementInformation(3) }
+              ]
+            }
           } else {
             return []
           }
@@ -519,12 +534,13 @@ export default defineComponent({
         taskRelationshipType.value = task.value.relationshipType
         await staffStore.syncTaskUnderReview(task.value)
 
-        // If the task type is GOVM or GOVN, then need to populate product fee codes
-        if (task.value.type === TaskType.GOVM_REVIEW || task.value.type === TaskType.GOVN_REVIEW) {
-          const accountId = task.value.relationshipId
+        // If the task type is GOVM or GOVN or NEW_PRODUCT_FEE_REVIEW, then need to populate product fee codes
+        if ([TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(task.value.type as TaskType) ||
+            isNewProductFeeReview.value) {
+          const accountId = isNewProductFeeReview.value ? task.value.accountId : task.value.relationshipId
           await orgStore.fetchCurrentOrganizationGLInfo(accountId)
           await orgStore.fetchOrgProductFeeCodes()
-          await orgStore.getOrgProducts(accountId)
+          await orgStore.getOrgProducts(accountId, isNewProductFeeReview.value)
           // For rejected accounts view
           if (!canSelect.value) {
             await orgStore.syncCurrentAccountFees(accountId)
@@ -567,7 +583,9 @@ export default defineComponent({
         return false
       }
 
-      if (task.value.type === TaskType.GOVM_REVIEW && !productFeeFormValid.value) {
+      if ((task.value.type === TaskType.GOVM_REVIEW ||
+           isNewProductFeeReview.value) &&
+          !productFeeFormValid.value) {
         // validate form before showing pop-up
         (productFeeRef.value[0] as any).validateNow()
         if (!productFeeFormValid.value) {
@@ -592,6 +610,24 @@ export default defineComponent({
       toggleAccessRequestModal(isConfirmationModal.value)
 
       return true
+    }
+
+    const goBack = () => {
+      instance.proxy.$router.push(pagesEnum.STAFF_DASHBOARD)
+    }
+
+    const handlePostApprovalAction = (isApprove: boolean, isRejecting: boolean, isMoveToPending: boolean) => {
+      const shouldSkipModal = isNewProductFeeReview.value && isApprove
+      if (shouldSkipModal) {
+        EventBus.$emit('show-toast', {
+          message: `${accountUnderReview.value.id}: ${accountUnderReview.value.name} - Review Approved`,
+          type: 'grey darken-3',
+          timeout: 6000
+        })
+        goBack()
+      } else {
+        openModal(!isApprove, true, isRejecting, isMoveToPending)
+      }
     }
 
     const saveSelection = async (reason) => {
@@ -621,24 +657,24 @@ export default defineComponent({
           })
         }
         const taskType: any = task.value.type
-
-        if (
-          [TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType) &&
+        const needsAccountFees = ([TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType) ||
+          isNewProductFeeReview.value) &&
           (!accountInfoAccessType.value || [AccessType.GOVN, AccessType.GOVM].includes(accountInfoAccessType.value))
-        ) {
-          await orgStore.createAccountFees(task.value.relationshipId)
+
+        if (needsAccountFees) {
+          const accountId = isNewProductFeeReview.value
+            ? task.value.accountId
+            : task.value.relationshipId
+          await orgStore.createAccountFees(accountId)
         }
-        openModal(!isApprove, true, isRejecting, isMoveToPending)
+
+        handlePostApprovalAction(isApprove, isRejecting, isMoveToPending)
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log(error)
       } finally {
         isSaving.value = false
       }
-    }
-
-    const goBack = () => {
-      instance.proxy.$router.push(pagesEnum.STAFF_DASHBOARD)
     }
 
     const determinePage = computed(() => {
@@ -697,7 +733,8 @@ export default defineComponent({
       goBack,
       determinePage,
       onholdReasonCodes,
-      isMhrSubProductReview
+      isMhrSubProductReview,
+      isNewProductFeeReview
     }
   }
 })

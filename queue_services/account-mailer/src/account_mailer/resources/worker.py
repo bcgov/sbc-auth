@@ -397,7 +397,7 @@ def handle_product_actions(message_type, email_msg):
     attachment_type = email_msg.get("attachmentType", None)
     email_dict = common_mailer.process(
         **{
-            "org_id": None,
+            "org_id": email_msg.get("orgId", None),
             "recipients": email_msg.get("emailAddresses"),
             "template_name": TemplateType[f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"].value,
             "subject": subject_type.format(subject_descriptor=subject_descriptor),

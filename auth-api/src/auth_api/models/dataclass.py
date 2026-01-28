@@ -182,6 +182,7 @@ class TaskSearch:  # pylint: disable=too-many-instance-attributes
     submitted_sort_order: str = "asc"
     page: int = 1
     limit: int = 10
+    action: str = ""
 
 
 @dataclass
@@ -200,6 +201,7 @@ class ProductReviewTask:
 
     org_id: str
     org_name: str
+    org_access_type: str
     product_code: str
     product_description: str
     product_subscription_id: int
