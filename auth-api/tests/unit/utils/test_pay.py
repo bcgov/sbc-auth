@@ -1,3 +1,5 @@
+"""Tests for the pay utility functions."""
+
 # Copyright © 2026 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +15,7 @@
 # limitations under the License.
 
 from unittest.mock import Mock
+
 from auth_api.utils.enums import AccessType, ProductCode
 from auth_api.utils.pay import get_account_fees_dict
 from tests.conftest import mock_token
@@ -37,7 +40,7 @@ def test_get_account_fees_dict_govm_org_success(monkeypatch, session):  # pylint
     mock_current_app.logger.error = Mock()
 
     monkeypatch.setattr("auth_api.utils.pay.RestService.get_service_account_token", mock_token)
-    monkeypatch.setattr("auth_api.utils.pay.RestService.get", lambda *args, **kwargs: mock_response)
+    monkeypatch.setattr("auth_api.utils.pay.RestService.get", lambda *_: mock_response)
     monkeypatch.setattr("auth_api.utils.pay.current_app", mock_current_app)
 
     result = get_account_fees_dict(org)
