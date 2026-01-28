@@ -16,8 +16,11 @@
 
 from unittest.mock import Mock
 
+from flask import current_app
+
 from auth_api.utils.enums import AccessType, ProductCode
 from auth_api.utils.pay import get_account_fees_dict
+from auth_api.utils.roles import GOV_ORG_TYPES
 from tests.conftest import mock_token
 from tests.utilities.factory_utils import factory_org_model
 
@@ -35,13 +38,11 @@ def test_get_account_fees_dict_govm_org_success(monkeypatch, session):  # pylint
             {"product": ProductCode.BCA.value},
         ]
     }
-    mock_current_app = Mock()
-    mock_current_app.config.get.return_value = "http://pay-api.test"
-    mock_current_app.logger.error = Mock()
+
+    current_app.config["PAY_API_URL"] = "http://pay-api.test"
 
     monkeypatch.setattr("auth_api.utils.pay.RestService.get_service_account_token", mock_token)
-    monkeypatch.setattr("auth_api.utils.pay.RestService.get", lambda *_: mock_response)
-    monkeypatch.setattr("auth_api.utils.pay.current_app", mock_current_app)
+    monkeypatch.setattr("auth_api.utils.pay.RestService.get", lambda *args, **kwargs: mock_response)
 
     result = get_account_fees_dict(org)
 
