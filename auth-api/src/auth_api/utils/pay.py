@@ -13,11 +13,11 @@
 # limitations under the License.
 """Pay API utility functions."""
 
-from flask import current_app
+from auth_api.exceptions.errors import Error
 from auth_api.models import Org as OrgModel
 from auth_api.services.rest_service import RestService
-from auth_api.exceptions.errors import Error
 from auth_api.utils.roles import GOV_ORG_TYPES
+from flask import current_app
 
 
 def get_account_fees_dict(org: OrgModel) -> dict:
