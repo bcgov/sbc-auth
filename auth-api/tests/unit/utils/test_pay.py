@@ -20,7 +20,6 @@ from flask import current_app
 
 from auth_api.utils.enums import AccessType, ProductCode
 from auth_api.utils.pay import get_account_fees_dict
-from auth_api.utils.roles import GOV_ORG_TYPES
 from tests.conftest import mock_token
 from tests.utilities.factory_utils import factory_org_model
 
@@ -42,7 +41,7 @@ def test_get_account_fees_dict_govm_org_success(monkeypatch, session):  # pylint
     current_app.config["PAY_API_URL"] = "http://pay-api.test"
 
     monkeypatch.setattr("auth_api.utils.pay.RestService.get_service_account_token", mock_token)
-    monkeypatch.setattr("auth_api.utils.pay.RestService.get", lambda *args, **kwargs: mock_response)
+    monkeypatch.setattr("auth_api.utils.pay.RestService.get", lambda *args, **kwargs: mock_response)  # noqa: ARG005
 
     result = get_account_fees_dict(org)
 
