@@ -37,7 +37,7 @@ class Contact(Versioned, BaseModel):  # pylint: disable=too-few-public-methods
     country = Column("country", String(20))
     postal_code = Column("postal_code", String(15))
     delivery_instructions = Column("delivery_instructions", String(4096))
-    phone = Column("phone", String(15))
+    phone = Column("phone", String(20))
     phone_extension = Column("phone_extension", String(10))
     email = Column("email", String(100))
     # MVP contact has been migrated over to the contact linking table (revised data model)

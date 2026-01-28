@@ -102,6 +102,56 @@ def test_add_org(client, jwt, session, keycloak_mock, org_info):  # pylint:disab
 
 
 @pytest.mark.parametrize(
+    "has_contact, expected_status_code", [("with_contact", HTTPStatus.CREATED), ("no_contact", HTTPStatus.CREATED)]
+)
+def test_add_org_v2_with_contact(client, jwt, session, keycloak_mock, has_contact, expected_status_code):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed with contact using v2 endpoint."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+
+    org_data = TestOrgInfo.org1.copy()
+
+    if has_contact == "with_contact":
+        org_data["contact"] = TestContactInfo.contact1
+
+    rv = client.post("/api/v2/orgs", data=json.dumps(org_data), headers=headers, content_type="application/json")
+    assert rv.status_code == expected_status_code
+    dictionary = json.loads(rv.data)
+    assert dictionary["name"] == TestOrgInfo.org1["name"]
+    if has_contact == "with_contact":
+        assert "contact" in dictionary
+        assert dictionary["contact"]["email"] == TestContactInfo.contact1["email"]
+        assert dictionary["contact"]["phone"] == TestContactInfo.contact1["phone"]
+    else:
+        assert "contact" not in dictionary  # Ensure no contact is present in the response
+    assert schema_utils.validate(rv.json, "org_response")[0]
+
+
+def test_add_org_v2_with_contact_fields_too_long(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org with contact fields exceeding maxLength returns 400."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+
+    org_data = TestOrgInfo.org1.copy()
+    org_data["contact"] = {
+        "email": "a" * 101,
+        "phone": "1" * 16,
+        "phoneExtension": "1" * 11,
+        "street": "a" * 251,
+        "streetAdditional": "a" * 251,
+        "city": "a" * 101,
+        "region": "a" * 101,
+        "country": "a" * 21,
+        "postalCode": "a" * 16,
+        "deliveryInstructions": "a" * 4097,
+    }
+
+    rv = client.post("/api/v2/orgs", data=json.dumps(org_data), headers=headers, content_type="application/json")
+    assert rv.status_code == HTTPStatus.BAD_REQUEST
+    assert "message" in rv.json
+
+
+@pytest.mark.parametrize(
     "org_info",
     [
         TestOrgInfo.org1,

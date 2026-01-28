@@ -118,7 +118,7 @@ def upgrade():
         sa.Column("country", sa.String(length=20), autoincrement=False, nullable=True),
         sa.Column("postal_code", sa.String(length=15), autoincrement=False, nullable=True),
         sa.Column("delivery_instructions", sa.String(length=4096), autoincrement=False, nullable=True),
-        sa.Column("phone", sa.String(length=15), autoincrement=False, nullable=True),
+        sa.Column("phone", sa.String(length=20), autoincrement=False, nullable=True),
         sa.Column("phone_extension", sa.String(length=10), autoincrement=False, nullable=True),
         sa.Column("email", sa.String(length=100), autoincrement=False, nullable=True),
         sa.Column("entity_id", sa.Integer(), autoincrement=False, nullable=True),
