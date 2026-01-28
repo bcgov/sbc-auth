@@ -50,23 +50,23 @@ def post_organization():
     if contact_info:
         org_info.pop("mailingAddress", None)
 
-    if not (result := org_utils.validate_schema(org_info, "org")).is_success:
+    if (result := org_utils.validate_schema(org_info, "org")).is_failure:
         return result.error, result.status
 
     if contact_info:
-        if not (result := org_utils.validate_schema(contact_info, "contact")).is_success:
+        if (result := org_utils.validate_schema(contact_info, "contact")).is_failure:
             return result.error, result.status
 
-    if not (result := org_utils.validate_and_get_user()).is_success:
+    if (result := org_utils.validate_and_get_user()).is_failure:
         return result.error, result.status
     user = result.value
 
-    if not (result := org_utils.create_org(org_info, user.identifier)).is_success:
+    if (result := org_utils.create_org(org_info, user.identifier)).is_failure:
         return result.error, result.status
     org_dict = result.value
 
     if contact_info and (org_id := org_dict.get("id")):
-        if not (result := org_utils.add_contact(org_id, contact_info)).is_success:
+        if (result := org_utils.add_contact(org_id, contact_info)).is_failure:
             return result.error, result.status
         org_dict["contact"] = result.value
 

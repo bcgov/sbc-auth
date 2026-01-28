@@ -159,14 +159,14 @@ def post_organization():
     If the org already exists, update the attributes.
     """
     request_json = request.get_json()
-    if not (result := org_utils.validate_schema(request_json, "org")).is_success:
+    if (result := org_utils.validate_schema(request_json, "org")).is_failure:
         return result.error, result.status
 
-    if not (result := org_utils.validate_and_get_user()).is_success:
+    if (result := org_utils.validate_and_get_user()).is_failure:
         return result.error, result.status
     user = result.value
 
-    if not (result := org_utils.create_org(request_json, user.identifier)).is_success:
+    if (result := org_utils.create_org(request_json, user.identifier)).is_failure:
         return result.error, result.status
 
     return result.value, HTTPStatus.CREATED
@@ -319,10 +319,10 @@ def get(org_id):
 def post_organization_contact(org_id):
     """Create a new contact for the specified org."""
     request_json = request.get_json()
-    if not (result := org_utils.validate_schema(request_json, "contact")).is_success:
+    if (result := org_utils.validate_schema(request_json, "contact")).is_failure:
         return result.error, result.status
 
-    if not (result := org_utils.add_contact(org_id, request_json)).is_success:
+    if (result := org_utils.add_contact(org_id, request_json)).is_failure:
         return result.error, result.status
 
     return result.value, HTTPStatus.CREATED

@@ -36,6 +36,11 @@ class Result[T]:
         """Return True if the result is successful."""
         return self.error is None
 
+    @property
+    def is_failure(self) -> bool:
+        """Return True if the result is a failure."""
+        return self.error is not None
+
     @classmethod
     def success(cls, value: T) -> Self:
         """Create a successful result with the given value."""
