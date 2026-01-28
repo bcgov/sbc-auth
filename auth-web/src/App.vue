@@ -122,7 +122,7 @@ export default class App extends Mixins(NextPageMixin) {
   }
 
   get showLoginMenu (): boolean {
-    // Don't show the login menu if the user is on login page
+    // Dont show the login menu if the user is on login page
     return this.$route.path !== `/${Pages.LOGIN}`
   }
 
@@ -220,7 +220,7 @@ export default class App extends Mixins(NextPageMixin) {
         await this.syncUser()
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.log('App.vue.setup Error: ' + e)
+        console.log('App.vue.setup Errors: ' + e)
         const userStore = useUserStore()
         await userStore.reset()
         this.appStore.loadComplete()
