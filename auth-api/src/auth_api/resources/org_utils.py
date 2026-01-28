@@ -32,11 +32,6 @@ class Result[T]:
     status: HTTPStatus = HTTPStatus.OK
 
     @property
-    def is_success(self) -> bool:
-        """Return True if the result is successful."""
-        return self.error is None
-
-    @property
     def is_failure(self) -> bool:
         """Return True if the result is a failure."""
         return self.error is not None
