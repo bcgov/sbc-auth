@@ -213,7 +213,9 @@ class Product:
                 if previously_approved:
                     auto_approve = True
 
-                subscription_status = Product.find_subscription_status(org, product_model, account_fees_dict, auto_approve)
+                subscription_status = Product.find_subscription_status(
+                    org, product_model, account_fees_dict, auto_approve
+                )
                 product_subscription = Product._subscribe_and_publish_activity(
                     SubscriptionRequest(
                         org_id=org_id,
@@ -399,16 +401,14 @@ class Product:
         }
         TaskService.create_task(task_info, False)
 
-
     @staticmethod
     def find_subscription_status(org, product_model, account_fees_dict, auto_approve=False):
         """Return the subscriptions status based on org type."""
         required_review_types = GOV_ORG_TYPES
 
         needs_review = (
-            (org.access_type in required_review_types and account_fees_dict.get(product_model.code, False))
-            or (product_model.need_review and not auto_approve)
-        )
+            org.access_type in required_review_types and account_fees_dict.get(product_model.code, False)
+        ) or (product_model.need_review and not auto_approve)
 
         if needs_review:
             return ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value

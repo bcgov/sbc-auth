@@ -24,7 +24,7 @@ from tests.utilities.factory_utils import factory_org_model
 
 def test_get_account_fees_dict_govm_org_success(monkeypatch, session):  # pylint:disable=unused-argument
     """Test that GOVM org with successful response returns dict with product codes."""
-    org = factory_org_model(access_type=AccessType.GOVM.value)
+    org = factory_org_model(org_info={"name": "Org 1", "accessType": AccessType.GOVM.value})
 
     mock_response = Mock()
     mock_response.status_code = 200
