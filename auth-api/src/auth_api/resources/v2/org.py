@@ -50,28 +50,24 @@ def post_organization():
     if contact_info:
         org_info.pop("mailingAddress", None)
 
-    is_valid, error_response, error_status = org_utils.validate_org_schema(org_info)
-    if not is_valid:
-        return error_response, error_status
+    if not (result := org_utils.validate_schema(org_info, "org")).is_success:
+        return result.error, result.status
 
     if contact_info:
-        is_valid, error_response, error_status = org_utils.validate_contact_schema(contact_info)
-        if not is_valid:
-            return error_response, error_status
+        if not (result := org_utils.validate_schema(contact_info, "contact")).is_success:
+            return result.error, result.status
 
-    user, error_response, error_status = org_utils.validate_and_get_user()
-    if error_response:
-        return error_response, error_status
+    if not (result := org_utils.validate_and_get_user()).is_success:
+        return result.error, result.status
+    user = result.value
 
-    org_dict, error_response, error_status = org_utils.create_org_with_validation(org_info, user.identifier)
-    if error_response:
-        return error_response, error_status
+    if not (result := org_utils.create_org(org_info, user.identifier)).is_success:
+        return result.error, result.status
+    org_dict = result.value
 
-    org_id = org_dict.get("id")
-    if contact_info and org_id:
-        contact_dict, error_response, error_status = org_utils.add_contact_with_validation(org_id, contact_info)
-        if error_response:
-            return error_response, error_status
-        org_dict["contact"] = contact_dict
+    if contact_info and (org_id := org_dict.get("id")):
+        if not (result := org_utils.add_contact(org_id, contact_info)).is_success:
+            return result.error, result.status
+        org_dict["contact"] = result.value
 
     return org_dict, HTTPStatus.CREATED

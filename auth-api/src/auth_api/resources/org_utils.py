@@ -13,7 +13,9 @@
 # limitations under the License.
 """Shared utility functions for org endpoints."""
 
+from dataclasses import dataclass
 from http import HTTPStatus
+from typing import Self
 
 from auth_api.exceptions import BusinessException
 from auth_api.schemas import utils as schema_utils
@@ -21,51 +23,59 @@ from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 
 
-def validate_and_get_user():
+@dataclass
+class Result[T]:
+    """Encapsulates success value or error response."""
+
+    value: T | None = None
+    error: dict | None = None
+    status: HTTPStatus = HTTPStatus.OK
+
+    @property
+    def is_success(self) -> bool:
+        """Return True if the result is successful."""
+        return self.error is None
+
+    @classmethod
+    def success(cls, value: T) -> Self:
+        """Create a successful result with the given value."""
+        return cls(value=value)
+
+    @classmethod
+    def failure(cls, message: str, status: HTTPStatus, **extras) -> Self:
+        """Create a failure result with the given error message and status."""
+        return cls(error={"message": message, **extras}, status=status)
+
+
+def validate_and_get_user() -> Result:
     """Validate request and get authenticated user."""
     user = UserService.find_by_jwt_token()
-    if user is None:
-        return None, {"message": "Not authorized to perform this action"}, HTTPStatus.UNAUTHORIZED
-    return user, None, None
+    if not user:
+        return Result.failure("Not authorized to perform this action", HTTPStatus.UNAUTHORIZED)
+    return Result.success(user)
 
 
-def validate_org_schema(org_info):
-    """Validate organization schema."""
-    valid_format, errors = schema_utils.validate(org_info, "org")
-    if not valid_format:
-        return False, {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
-    return True, None, None
+def validate_schema(data: dict, schema_name: str) -> Result:
+    """Validate data against a schema."""
+    valid, errors = schema_utils.validate(data, schema_name)
+    if not valid:
+        return Result.failure(schema_utils.serialize(errors), HTTPStatus.BAD_REQUEST)
+    return Result.success(True)
 
 
-def validate_contact_schema(contact_info):
-    """Validate contact schema."""
-    valid_format, errors = schema_utils.validate(contact_info, "contact")
-    if not valid_format:
-        return False, {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
-    return True, None, None
-
-
-def create_org_with_validation(org_info, user_id):
-    """Create an organization with validation."""
+def create_org(org_info: dict, user_id: int) -> Result:
+    """Create an organization."""
     try:
         org = OrgService.create_org(org_info, user_id)
-        return org.as_dict(), None, None
-    except BusinessException as exception:
-        return (
-            None,
-            {
-                "code": exception.code,
-                "message": exception.message,
-                "detail": exception.detail,
-            },
-            exception.status_code,
-        )
+        return Result.success(org.as_dict())
+    except BusinessException as e:
+        return Result.failure(e.message, e.status_code, code=e.code, detail=e.detail)
 
 
-def add_contact_with_validation(org_id, contact_info):
-    """Add contact to organization with validation."""
+def add_contact(org_id: int, contact_info: dict) -> Result:
+    """Add contact to organization."""
     try:
         contact = OrgService.add_contact(org_id, contact_info)
-        return contact.as_dict(), None, None
-    except BusinessException as exception:
-        return None, {"code": exception.code, "message": exception.message}, exception.status_code
+        return Result.success(contact.as_dict())
+    except BusinessException as e:
+        return Result.failure(e.message, e.status_code, code=e.code)
