@@ -399,7 +399,7 @@ class Product:
         TaskService.create_task(task_info, False)
 
     @staticmethod
-    def find_subscription_status(org, product_model, account_fees_dict, auto_approve=False):
+    def find_subscription_status(org, product_model, auto_approve=False):
         """Return the subscriptions status based on org type."""
         if not auto_approve and (org.access_type in GOV_ORG_TYPES or product_model.need_review):
             return ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
