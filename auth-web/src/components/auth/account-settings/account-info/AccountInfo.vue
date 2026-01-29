@@ -462,12 +462,10 @@ export default defineComponent({
         viewOnlyMode({ component: 'account', mode: true })
       } catch (err) {
         const normalized = normalizeError(err)
-        switch (normalized.status) {
-          case 409:
-            state.errorMessage = 'An account with this name already exists. Try a different account name.'
-            break
-          default:
-            state.errorMessage = 'An error occurred while attempting to update your account.'
+        if (normalized.status === 409) {
+          state.errorMessage = 'An account with this name already exists. Try a different account name.'
+        } else {
+          state.errorMessage = 'An error occurred while attempting to update your account.'
         }
       }
     }

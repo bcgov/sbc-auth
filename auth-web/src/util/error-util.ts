@@ -18,15 +18,18 @@ export function normalizeError (error: any): NormalizedError {
 
   const source = data.rootCause && typeof data.rootCause !== 'string' ? data.rootCause : data
 
+  const dataMessage = typeof data.message === 'string' ? data.message : undefined
+  const message = typeof data.rootCause === 'string'
+    ? data.rootCause
+    : source.message || dataMessage
+
   return {
     status,
     type: source.type,
     code: source.code,
     title: source.title || data.message?.title || data.title,
     detail: source.detail || data.message?.detail || data.detail,
-    message: typeof data.rootCause === 'string'
-      ? data.rootCause
-      : source.message || (typeof data.message === 'string' ? data.message : undefined),
+    message,
     errorMessage: data.rootCause ? data.errorMessage : undefined
   }
 }
