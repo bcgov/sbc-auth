@@ -38,6 +38,7 @@
 <script lang="ts">
 
 import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { isErrorType, normalizeError } from '@/util/error-util'
 import PaymentServices from '@/services/payment.services'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
 import { useI18n } from 'vue-i18n-composable'
@@ -75,7 +76,8 @@ export default defineComponent({
         })
         .catch(error => {
           state.errorMessage = t('payFailedMessage').toString()
-          if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') {
+          const normalized = normalizeError(error)
+          if (isErrorType(normalized, 'INVALID_TRANSACTION')) {
             // Transaction is already completed. Show as a modal.
             goToUrl(redirectUrlFixed())
           } else {

@@ -48,7 +48,6 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
-
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
@@ -58,6 +57,7 @@ import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import VonService from '@/services/von.services'
 import { defineStore } from 'pinia'
+import { normalizeError } from '@/util/error-util'
 import { useUserStore } from './user'
 
 export const useOrgStore = defineStore('org', () => {
@@ -581,12 +581,16 @@ export const useOrgStore = defineStore('org', () => {
       state.tokenError = false
       return response?.data ? response.data : undefined
     } catch (err) {
-      if (err.response.status === 400 || err.response.status === 404) {
-        state.tokenError = false
-        state.invalidInvitationToken = true
-      } else {
-        state.tokenError = true
-        state.invalidInvitationToken = false
+      const normalized = normalizeError(err)
+      switch (normalized.status) {
+        case 400:
+        case 404:
+          state.tokenError = false
+          state.invalidInvitationToken = true
+          break
+        default:
+          state.tokenError = true
+          state.invalidInvitationToken = false
       }
     }
   }

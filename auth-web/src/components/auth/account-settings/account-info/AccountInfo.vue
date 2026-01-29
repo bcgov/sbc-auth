@@ -286,6 +286,7 @@ import AccountMailingAddress from '@/components/auth/account-settings/account-in
 import { Address } from '@/models/address'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
+import { normalizeError } from '@/util/error-util'
 import { useAppStore } from '@/stores/app'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
@@ -460,7 +461,8 @@ export default defineComponent({
         }
         viewOnlyMode({ component: 'account', mode: true })
       } catch (err) {
-        switch (err.response.status) {
+        const normalized = normalizeError(err)
+        switch (normalized.status) {
           case 409:
             state.errorMessage = 'An account with this name already exists. Try a different account name.'
             break
@@ -489,10 +491,7 @@ export default defineComponent({
         }
         viewOnlyMode({ component: 'address', mode: true })
       } catch (err) {
-        switch (err.response.status) {
-          default:
-            state.errorMessage = 'An error occurred while attempting to update your mailing address.'
-        }
+        state.errorMessage = 'An error occurred while attempting to update your mailing address.'
       }
     }
 

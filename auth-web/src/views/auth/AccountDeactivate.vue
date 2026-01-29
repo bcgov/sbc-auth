@@ -203,6 +203,7 @@ import { DEACTIVATE_ACCOUNT_MESSAGE } from '@/util/constants'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
+import { normalizeError } from '@/util/error-util'
 import { useAppStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 
@@ -286,8 +287,8 @@ export default class AccountDeactivate extends Vue {
       this.message = `The account <strong>${this.currentOrganization.name}</strong> has been deactivated.`
       this.$refs.successModal.open()
     } catch (err) {
-      // eslint-disable-next-line no-console
-      this.message = this.$t(DEACTIVATE_ACCOUNT_MESSAGE.get(err.response?.data?.code || 'DEFAULT')).toString()
+      const normalized = normalizeError(err)
+      this.message = this.$t(DEACTIVATE_ACCOUNT_MESSAGE.get(normalized.code || 'DEFAULT')).toString()
       this.$refs.confirmModal.close()
       this.$refs.errorModal.open()
     }

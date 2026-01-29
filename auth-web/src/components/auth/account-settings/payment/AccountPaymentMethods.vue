@@ -143,6 +143,7 @@ import {
   CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation
 } from '@/models/Organization'
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { getErrorMessage, getErrorTitle, normalizeError } from '@/util/error-util'
 import { BcolProfile } from '@/models/bcol'
 import CommonUtils from '@/util/common-util'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -460,20 +461,14 @@ export default defineComponent({
           state.isLoading = false
           state.isBtnSaved = false
           setHasPaymentMethodChanged(false)
-          state.errorTitle = 'Error'
-          switch (error.response.status) {
-            case 409:
-            case 400:
-              state.errorText = `${formatText(error.response.data.code)}<br>` +
-                  `${formatText(error.response.data.message?.detail) || formatText(error.response.data.detail) || ''}`.trim()
 
-              state.errorTitle = formatText(error.response.data.message?.title) ||
-                  formatText(error.response.data.message) ||
-                  'Error'
-              break
-            default:
-              state.errorText = 'An error occurred while attempting to create/update your account.'
-          }
+          const normalized = normalizeError(error)
+          const code = normalized.code ? `${formatText(normalized.code)}<br>` : ''
+          const message = getErrorMessage(normalized)
+
+          state.errorText = `${code}${formatText(message)}`.trim()
+          state.errorTitle = getErrorTitle(normalized)
+
           errorDialog.value.open()
         }
       }

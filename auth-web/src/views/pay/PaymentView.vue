@@ -81,6 +81,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { isErrorType, normalizeError } from '@/util/error-util'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -226,7 +227,8 @@ export default class PaymentView extends Vue {
   }
   async doHandleError (error) {
     this.showLoading = false
-    if (error.response.data && ['COMPLETED_PAYMENT', 'INVALID_TRANSACTION'].includes(error.response.data.type)) {
+    const normalized = normalizeError(error)
+    if (isErrorType(normalized, 'COMPLETED_PAYMENT', 'INVALID_TRANSACTION')) {
       // Skip PAYBC, take directly to the "clients redirect url", this avoids transaction already done error.
       const isValid = await PaymentService.isValidRedirectUrl(this.redirectUrlFixed)
       if (!isValid) {
