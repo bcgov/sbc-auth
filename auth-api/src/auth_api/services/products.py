@@ -56,7 +56,6 @@ from auth_api.utils.notifications import (
     get_product_notification_data,
     get_product_notification_type,
 )
-from auth_api.utils.pay import get_account_fees_dict
 from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, GOV_ORG_TYPES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -171,7 +170,7 @@ class Product:
         )
         if task is None or (
             task.relationship_status != TaskRelationshipStatus.ACTIVE.value
-            and task.action == TaskAction.PRODUCT_REVIEW.value
+            and task.action in (TaskAction.PRODUCT_REVIEW.value, TaskAction.NEW_PRODUCT_FEE_REVIEW.value)
         ):
             return False, None
 
@@ -197,8 +196,6 @@ class Product:
         if not skip_auth:
             check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
-        account_fees_dict = get_account_fees_dict(org)
-
         subscriptions_list = subscription_data.get("subscriptions")
         for subscription in subscriptions_list:
             product_code = subscription.get("productCode")
@@ -214,7 +211,7 @@ class Product:
                     auto_approve = True
 
                 subscription_status = Product.find_subscription_status(
-                    org, product_model, account_fees_dict, auto_approve
+                    org, product_model, auto_approve
                 )
                 product_subscription = Product._subscribe_and_publish_activity(
                     SubscriptionRequest(
@@ -402,17 +399,10 @@ class Product:
         TaskService.create_task(task_info, False)
 
     @staticmethod
-    def find_subscription_status(org, product_model, account_fees_dict, auto_approve=False):
+    def find_subscription_status(org, product_model, auto_approve=False):
         """Return the subscriptions status based on org type."""
-        required_review_types = GOV_ORG_TYPES
-
-        needs_review = (
-            org.access_type in required_review_types and account_fees_dict.get(product_model.code, False)
-        ) or (product_model.need_review and not auto_approve)
-
-        if needs_review:
+        if not auto_approve and (org.access_type in GOV_ORG_TYPES or product_model.need_review):
             return ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
-
         return ProductSubscriptionStatus.ACTIVE.value
 
     @staticmethod
