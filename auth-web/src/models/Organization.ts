@@ -271,6 +271,7 @@ export interface OrgProduct {
   premiumOnly?:boolean
   needReview?:boolean
   parentCode?: string;
+  id?: number;
 }
 
 export interface OrgProductsRequestBody {

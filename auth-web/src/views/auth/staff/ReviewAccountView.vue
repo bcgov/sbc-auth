@@ -149,6 +149,7 @@
 
 <script lang="ts">
 import { AccessType, AffidavitStatus, DisplayModeValues, OnholdOrRejectCode, Pages,
+  Role,
   TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 import { Ref, computed, defineComponent, getCurrentInstance, onMounted, ref } from '@vue/composition-api'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
@@ -169,6 +170,7 @@ import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
 import { useStaffStore } from '@/stores/staff'
 import { useTaskStore } from '@/stores/task'
+import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'ReviewAccountView',
@@ -206,6 +208,7 @@ export default defineComponent({
     const orgStore = useOrgStore()
     const staffStore = useStaffStore()
     const taskStore = useTaskStore()
+    const userStore = useUserStore()
 
     const accountUnderReview = computed(() => {
       return staffStore.accountUnderReview
@@ -298,10 +301,21 @@ export default defineComponent({
       productFeeFormValid.value = isFormValid
     }
 
+    const isTaskAccessible = () => {
+      const { status, relationshipStatus } = task.value
+      const isOpen = status === TaskStatus.OPEN
+      const isOnHold = isTaskOnHold.value
+      const isRejectedCompletion =
+        status === TaskStatus.COMPLETED &&
+        relationshipStatus === TaskRelationshipStatus.REJECTED
+      return isOpen || isOnHold || isRejectedCompletion
+    }
+
     const canEdit = () => {
-      return task.value.status === TaskStatus.OPEN || isTaskOnHold.value ||
-        (task.value.status === TaskStatus.COMPLETED &&
-          task.value.relationshipStatus === TaskRelationshipStatus.REJECTED)
+      if (isNewProductFeeReview.value && !userStore.currentUser.roles.includes(Role.BcolStaffAdmin)) {
+        return false
+      }
+      return isTaskAccessible()
     }
 
     const formattedComponent = (tabNumber, id, component, props, event = null, ref = null) => {
@@ -540,7 +554,7 @@ export default defineComponent({
           const accountId = isNewProductFeeReview.value ? task.value.accountId : task.value.relationshipId
           await orgStore.fetchCurrentOrganizationGLInfo(accountId)
           await orgStore.fetchOrgProductFeeCodes()
-          await orgStore.getOrgProducts(accountId, isNewProductFeeReview.value)
+          await orgStore.getOrgProducts(accountId, isNewProductFeeReview.value, task.value.relationshipId)
           // For rejected accounts view
           if (!canSelect.value) {
             await orgStore.syncCurrentAccountFees(accountId)

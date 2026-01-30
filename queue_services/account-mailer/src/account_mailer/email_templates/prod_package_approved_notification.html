@@ -1,11 +1,6 @@
 # Your request for access to {{ product_name }} has been approved.
 
-{% if org_id and account_name_with_branch %}
-Account Number: {{ org_id }}
-Account Name: {{ account_name_with_branch }}
-{% else %}
-BC Registries staff have reviewed your request form to access {{ product_name }}, and you have been approved.
-{% endif %}
+Account: {{ account_name_with_branch }} (Account Number: {{ org_id }})
 
 Please [log in to your account]({{ url }}) to get started.
 
