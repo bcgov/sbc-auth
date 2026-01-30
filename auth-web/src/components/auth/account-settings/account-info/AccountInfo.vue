@@ -286,7 +286,6 @@ import AccountMailingAddress from '@/components/auth/account-settings/account-in
 import { Address } from '@/models/address'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
-import { normalizeError } from '@/util/error-util'
 import { useAppStore } from '@/stores/app'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
