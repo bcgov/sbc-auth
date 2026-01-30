@@ -301,16 +301,21 @@ export default defineComponent({
       productFeeFormValid.value = isFormValid
     }
 
+    const isTaskAccessible = () => {
+      const { status, relationshipStatus } = task.value
+      const isOpen = status === TaskStatus.OPEN
+      const isOnHold = isTaskOnHold.value
+      const isRejectedCompletion =
+        status === TaskStatus.COMPLETED &&
+        relationshipStatus === TaskRelationshipStatus.REJECTED
+      return isOpen || isOnHold || isRejectedCompletion
+    }
+
     const canEdit = () => {
       if (isNewProductFeeReview.value && !userStore.currentUser.roles.includes(Role.BcolStaffAdmin)) {
         return false
       }
-      const { status, relationshipStatus } = task.value
-      return (
-        status === TaskStatus.OPEN ||
-        isTaskOnHold.value ||
-        (status === TaskStatus.COMPLETED && relationshipStatus === TaskRelationshipStatus.REJECTED)
-      )
+      return isTaskAccessible()
     }
 
     const formattedComponent = (tabNumber, id, component, props, event = null, ref = null) => {

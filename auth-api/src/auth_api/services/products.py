@@ -468,13 +468,8 @@ class Product:
         products = Product.get_products(include_hidden=include_hidden, staff_check=False)
         for product in products:
             sub = subscription_by_code.get(product.get("code"))
-
-            product["subscriptionStatus"] = (
-                sub.status_code
-                if sub
-                else ProductSubscriptionStatus.NOT_SUBSCRIBED.value
-            )
-            product["id"] = sub.id if sub else None
+            product["subscriptionStatus"] = getattr(sub, 'status_code', ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
+            product["id"] = getattr(sub, 'id', None)
 
         return products
 
