@@ -174,6 +174,7 @@ import { AccessType, Pages } from '@/util/constants'
 import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
 import { Component, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, MembershipType, Organization } from '@/models/Organization'
+import { isErrorType, normalizeError } from '@/util/error-util'
 import { mapActions, mapState } from 'pinia'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { useOrgStore } from '@/stores/org'
@@ -278,21 +279,20 @@ export default class SetupAccountForm extends Vue {
         this.$router.push({ path: `/staff-setup-account-success/${AccessType.ANONYMOUS.toLowerCase()}/${this.accountName}` })
       } catch (err) {
         this.saving = false
-        switch (err.response.status) {
+        const normalized = normalizeError(err)
+        switch (normalized.status) {
           case 409:
-            this.errorMessage =
-              'An account with this name already exists. Try a different account name.'
+            this.errorMessage = 'An account with this name already exists. Try a different account name.'
             break
           case 400:
-            if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
+            if (isErrorType(normalized, 'MAX_NUMBER_OF_ORGS_LIMIT')) {
               this.errorMessage = 'Maximum number of accounts reached'
             } else {
               this.errorMessage = 'Invalid account name'
             }
             break
           default:
-            this.errorMessage =
-              'Something went wrong while attempting to create this account. Please try again later.'
+            this.errorMessage = 'Something went wrong while attempting to create this account. Please try again later.'
         }
         this.showEntityNotFoundModal(this.errorMessage)
         this.loader = this.saving

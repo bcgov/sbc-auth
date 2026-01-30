@@ -136,6 +136,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { isErrorType, normalizeError } from '@/util/error-util'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -207,16 +208,13 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
           }
         } catch (error) {
           this.isLoading = false
-          if (error?.response?.data?.code) {
-            switch (error.response.data.code) {
-              case 'FAILED_ADDING_USER_IN_KEYCLOAK':
-                this.showErrorModal('Failed to add the user, please try again')
-                break
-              case 409:
-                this.showErrorModal('The username has already been taken.Please try another user name.')
-                break
-              default: this.showErrorModal()
-            }
+          const normalized = normalizeError(error)
+          if (isErrorType(normalized, 'FAILED_ADDING_USER_IN_KEYCLOAK')) {
+            this.showErrorModal('Failed to add the user, please try again')
+          } else if (normalized.status === 409) {
+            this.showErrorModal('The username has already been taken. Please try another user name.')
+          } else if (normalized.code) {
+            this.showErrorModal()
           } else {
             this.$emit('show-error-message')
           }

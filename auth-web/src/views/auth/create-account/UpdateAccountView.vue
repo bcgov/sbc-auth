@@ -133,6 +133,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, OrgBusinessType, Organization } from '@/models/Organization'
 import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
 import { Pages } from '@/util/constants'
+import { normalizeError } from '@/util/error-util'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
@@ -173,17 +174,16 @@ export default class UpdateAccountView extends Vue {
       await this.updateOrg(createRequestBody)
       await this.$router.push(`/${Pages.HOME}`)
     } catch (err) {
-      switch (err.response.status) {
+      const normalized = normalizeError(err)
+      switch (normalized.status) {
         case 409:
-          this.errorMessage =
-            'An account with this branch name already exists. Try a different branch name.'
+          this.errorMessage = 'An account with this branch name already exists. Try a different branch name.'
           break
         case 400:
           this.errorMessage = 'Invalid account name'
           break
         default:
-          this.errorMessage =
-            'An error occurred while attempting to update your account.'
+          this.errorMessage = 'An error occurred while attempting to update your account.'
       }
     }
   }

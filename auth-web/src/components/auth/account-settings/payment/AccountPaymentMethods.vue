@@ -149,6 +149,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
 import { StatementNotificationSettings } from '@/models/statement'
+import { normalizeError } from '@/util/error-util'
 import { useAccount } from '@/composables/account-factory'
 import { useOrgStore } from '@/stores/org'
 import { useProductPayment } from '@/composables/product-payment-factory'
@@ -460,15 +461,17 @@ export default defineComponent({
           state.isLoading = false
           state.isBtnSaved = false
           setHasPaymentMethodChanged(false)
+
+          const normalized = normalizeError(error)
           state.errorTitle = 'Error'
-          switch (error.response.status) {
+          switch (normalized.status) {
             case 409:
             case 400:
-              state.errorText = `${formatText(error.response.data.code)}<br>` +
-                  `${formatText(error.response.data.message?.detail) || formatText(error.response.data.detail) || ''}`.trim()
+              state.errorText = `${formatText(normalized.code)}<br>` +
+                  `${formatText(normalized.detail) || ''}`.trim()
 
-              state.errorTitle = formatText(error.response.data.message?.title) ||
-                  formatText(error.response.data.message) ||
+              state.errorTitle = formatText(normalized.title) ||
+                  formatText(normalized.message) ||
                   'Error'
               break
             default:

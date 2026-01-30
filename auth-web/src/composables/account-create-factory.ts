@@ -1,4 +1,5 @@
 import { AccessType, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { getErrorMessage, isErrorType, normalizeError } from '@/util/error-util'
 import ConfigHelper from '@/util/config-helper'
 import { useOrgStore } from '@/stores'
 
@@ -23,11 +24,13 @@ export const useAccountCreate = () => {
       state.errorText = bcolAccountDetails ? null : 'Error - No account details provided for this account.'
       orgStore.setCurrentOrganizationBcolProfile(state.currentOrganization.bcolProfile)
     } catch (err) {
-      switch (err.response.status) {
+      const normalized = normalizeError(err)
+      switch (normalized.status) {
         case 409:
+          // Conflict - do nothing
           break
         case 400:
-          state.errorText = err.response.data.message?.detail || err.response.data.message
+          state.errorText = getErrorMessage(normalized)
           break
         default:
           state.errorText = 'An error occurred while attempting to create your account.'
@@ -40,26 +43,22 @@ export const useAccountCreate = () => {
   }
 
   function handleCreateAccountError (state, err) {
-    switch (err?.response?.status) {
+    const normalized = normalizeError(err)
+    switch (normalized.status) {
       case 409:
-        state.errorText =
-                'An account with this name already exists. Try a different account name.'
+        state.errorText = 'An account with this name already exists. Try a different account name.'
         break
       case 400:
-        switch (err.response.data?.code) {
-          case 'MAX_NUMBER_OF_ORGS_LIMIT':
-            state.errorText = 'Maximum number of accounts reached'
-            break
-          case 'ACTIVE_AFFIDAVIT_EXISTS':
-            state.errorText = err.response.data.message || 'Affidavit already exists'
-            break
-          default:
-            state.errorText = 'An error occurred while attempting to create your account.'
+        if (isErrorType(normalized, 'MAX_NUMBER_OF_ORGS_LIMIT')) {
+          state.errorText = 'Maximum number of accounts reached'
+        } else if (isErrorType(normalized, 'ACTIVE_AFFIDAVIT_EXISTS')) {
+          state.errorText = getErrorMessage(normalized) || 'Affidavit already exists'
+        } else {
+          state.errorText = 'An error occurred while attempting to create your account.'
         }
         break
       default:
-        state.errorText =
-                'An error occurred while attempting to create your account.'
+        state.errorText = 'An error occurred while attempting to create your account.'
     }
   }
 

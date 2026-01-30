@@ -489,10 +489,7 @@ export default defineComponent({
         }
         viewOnlyMode({ component: 'address', mode: true })
       } catch (err) {
-        switch (err.response.status) {
-          default:
-            state.errorMessage = 'An error occurred while attempting to update your mailing address.'
-        }
+        state.errorMessage = 'An error occurred while attempting to update your mailing address.'
       }
     }
 
