@@ -22,20 +22,20 @@ from flask import current_app
 from jinja2 import Template
 
 from account_mailer.email_processors import generate_template
+from account_mailer.email_processors.utils import get_account_info
 from account_mailer.pdf_utils import get_pdf_from_report_api, get_pdf_from_storage
 
 
-def process(email_msg: dict, token: str) -> dict:
+def process(email_msg: dict, org_id: str, token: str) -> dict:
     """Build the email for PAD Confirmation notification."""
     current_app.logger.debug("email_msg notification: %s", email_msg)
-    # fill in template
-
+    _, account_name_with_branch = get_account_info(org_id)
     username = email_msg.get("padTosAcceptedBy")
     pad_tos_file_name = current_app.config["PAD_TOS_FILE"]
     admin_emails, admin_name = _get_admin_emails(username)
     pdf_attachment = _get_pad_confirmation_report_pdf(email_msg, token)
     tos_attachment = _get_pdf(pad_tos_file_name)
-    html_body = _get_pad_confirmation_email_body(email_msg, admin_name)
+    html_body = _get_pad_confirmation_email_body(email_msg, admin_name, account_name_with_branch, org_id)
     return {
         "recipients": admin_emails,
         "content": {
@@ -73,11 +73,17 @@ def _get_admin_emails(username):
     return admin_emails, admin_name
 
 
-def _get_pad_confirmation_email_body(email_msg, admin_name):
+def _get_pad_confirmation_email_body(email_msg, admin_name, account_name_with_branch, account_number):
     filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), "pad_confirmation_email")
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
-    html_out = jnja_template.render(request=email_msg, admin_name=admin_name, logo_url=email_msg.get("logo_url"))
+    html_out = jnja_template.render(
+        request=email_msg,
+        admin_name=admin_name,
+        logo_url=email_msg.get("logo_url"),
+        account_name_with_branch=account_name_with_branch,
+        account_number=account_number,
+    )
     return html_out
 
 

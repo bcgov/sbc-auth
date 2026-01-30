@@ -13,29 +13,20 @@
 # limitations under the License.
 """A Template for the account suspended email."""
 
-# Local application imports
-from auth_api.models import Org as OrgModel
-
 # Third-party imports
 from flask import current_app
 from jinja2 import Template
 
 from account_mailer.auth_utils import get_dashboard_url, get_login_url, get_payment_statements_url
 from account_mailer.email_processors import generate_template
+from account_mailer.email_processors.utils import get_account_info
 
 
 def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> dict:
     """Build the email for Account notification."""
-    current_app.logger.debug("account  notification: %s", org_id)
+    current_app.logger.debug("account notification: %s", org_id)
 
-    account_name: str = None
-    account_name_with_branch: str = None
-    if org_id:
-        org: OrgModel = OrgModel.find_by_id(org_id)
-        account_name = org.name
-        account_name_with_branch = org.name
-        if org.branch_name:
-            account_name_with_branch = f"{org.name} - {org.branch_name}"
+    account_name, account_name_with_branch = get_account_info(org_id)
 
     # fill in template
     filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), template_name)

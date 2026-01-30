@@ -107,7 +107,8 @@ def handle_pad_account_create(message_type, email_msg):
         return
     email_msg["registry_logo_url"] = google_store.GoogleStoreService.get_static_resource_url("bc_registry_logo_pdf.svg")
     token = RestService.get_service_account_token()
-    email_dict = pad_confirmation.process(email_msg, token)
+    org_id = email_msg.get("accountId")
+    email_dict = pad_confirmation.process(email_msg, org_id, token)
     process_email(email_dict, token)
 
 
