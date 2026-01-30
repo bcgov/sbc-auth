@@ -254,6 +254,7 @@ def test_detailed_approved_notification(mock_mailer, session, auth_mock, keycloa
             "isReapproved": False,
             "productName": product_code_model.description,
             "emailAddresses": "test@test.com",
+            "accountId": dictionary["id"],
         }
         mock_mailer.assert_called_with(
             QueueMessageTypes.PRODUCT_APPROVED_NOTIFICATION_DETAILED.value, data=expected_data
@@ -345,6 +346,7 @@ def test_detailed_rejected_notification(
             "emailAddresses": "test@test.com",
             "contactType": contact_type,
             "remarks": task_dict["remarks"][0],
+            "accountId": dictionary["id"],
         }
         mock_mailer.assert_called_with(
             QueueMessageTypes.PRODUCT_REJECTED_NOTIFICATION_DETAILED.value, data=expected_data
@@ -479,6 +481,7 @@ def test_confirmation_notification(
             "contactType": contact_type,
             "hasAgreementAttachment": True,
             "attachmentType": NotificationAttachmentType.MHR_QS.value,
+            "accountId": dictionary["id"],
         }
 
         mock_mailer.assert_called_with(QueueMessageTypes.PRODUCT_CONFIRMATION_NOTIFICATION.value, data=expected_data)
@@ -606,6 +609,7 @@ def test_resubmission_notification(
             "contactType": contact_type,
             "hasAgreementAttachment": True,
             "attachmentType": NotificationAttachmentType.MHR_QS.value,
+            "accountId": dictionary["id"],
         }
 
         # Assert that confirmation email is re-sent on re-submission
@@ -639,6 +643,7 @@ def test_resubmission_notification(
             "isReapproved": True,
             "productName": product_code_model.description,
             "emailAddresses": "test@test.com",
+            "accountId": dictionary["id"],
         }
         mock_mailer.assert_called_with(
             QueueMessageTypes.PRODUCT_APPROVED_NOTIFICATION_DETAILED.value, data=expected_data

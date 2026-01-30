@@ -151,7 +151,6 @@ class TemplateType(Enum):
     NON_BCSC_ORG_REJECTED_NOTIFICATION_TEMPLATE_NAME = "nonbcsc_org_rejected_notification_email"
     OTP_AUTHENTICATOR_RESET_NOTIFICATION_TEMPLATE_NAME = "otp_authenticator_reset_notification_email"
     ROLE_CHANGED_NOTIFICATION_TEMPLATE_NAME = "role_changed_notification_email"
-    STAFF_REVIEW_ACCOUNT_TEMPLATE_NAME = "staff_review_account_email"
     GOVM_APPROVED_NOTIFICATION_TEMPLATE_NAME = "govm_approved_notification"
     GOVM_REJECTED_NOTIFICATION_TEMPLATE_NAME = "govm_rejected_notification"
     PROD_PACKAGE_APPROVED_NOTIFICATION_TEMPLATE_NAME = "prod_package_approved_notification"

@@ -107,7 +107,8 @@ def handle_pad_account_create(message_type, email_msg):
         return
     email_msg["registry_logo_url"] = google_store.GoogleStoreService.get_static_resource_url("bc_registry_logo_pdf.svg")
     token = RestService.get_service_account_token()
-    email_dict = pad_confirmation.process(email_msg, token)
+    org_id = email_msg.get("accountId")
+    email_dict = pad_confirmation.process(email_msg, org_id, token)
     process_email(email_dict, token)
 
 
@@ -397,7 +398,7 @@ def handle_product_actions(message_type, email_msg):
     attachment_type = email_msg.get("attachmentType", None)
     email_dict = common_mailer.process(
         **{
-            "org_id": email_msg.get("orgId", None),
+            "org_id": email_msg.get("accountId"),
             "recipients": email_msg.get("emailAddresses"),
             "template_name": TemplateType[f"{QueueMessageTypes(message_type).name}_TEMPLATE_NAME"].value,
             "subject": subject_type.format(subject_descriptor=subject_descriptor),

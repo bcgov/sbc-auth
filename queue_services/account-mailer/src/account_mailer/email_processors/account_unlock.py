@@ -17,6 +17,7 @@ from flask import current_app
 from jinja2 import Template
 
 from account_mailer.email_processors import generate_template
+from account_mailer.email_processors.utils import get_account_info
 from account_mailer.pdf_utils import get_pdf_from_report_api
 
 
@@ -42,10 +43,16 @@ def process(data: dict, token: str) -> dict:
     }
 
 
-def _get_account_unlock_email(email_msg):
-    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), email_msg.get("template_name"))
+def _get_account_unlock_email(data):
+    org_id = data.get("accountId")
+    _, account_name_with_branch = get_account_info(org_id)
+    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), data.get("template_name"))
     jnja_template = Template(filled_template, autoescape=True)
-    html_out = jnja_template.render(account_name=email_msg.get("account_name"), logo_url=email_msg.get("logo_url"))
+    html_out = jnja_template.render(
+        logo_url=data.get("logo_url"),
+        account_name_with_branch=account_name_with_branch,
+        account_number=org_id,
+    )
     return html_out
 
 

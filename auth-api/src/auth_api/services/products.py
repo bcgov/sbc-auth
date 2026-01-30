@@ -149,7 +149,7 @@ class Product:
 
             Product._send_product_subscription_confirmation(
                 ProductNotificationInfo(
-                    product_model=product_model, product_sub_model=existing_sub, is_confirmation=True
+                    product_model=product_model, product_sub_model=existing_sub, is_confirmation=True, org_id=org_id
                 ),
                 org.id,
             )
@@ -257,7 +257,7 @@ class Product:
                     )
                     Product._send_product_subscription_confirmation(
                         ProductNotificationInfo(
-                            product_model=product_model, product_sub_model=product_subscription, is_confirmation=True
+                            product_model=product_model, product_sub_model=product_subscription, is_confirmation=True, org_id=org.id
                         ),
                         org.id,
                     )
@@ -576,6 +576,7 @@ class Product:
                     product_model=product_model,
                     product_sub_model=product_subscription,
                     is_reapproved=is_reapproved,
+                    org_id=org_id
                 )
             )
         else:
