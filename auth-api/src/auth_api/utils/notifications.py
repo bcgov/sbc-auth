@@ -115,20 +115,19 @@ def get_product_notification_data(product_notification_info: ProductNotification
     is_confirmation = product_notification_info.is_confirmation
     subscription_status_code = product_notification_info.product_sub_model.status_code
     remarks = product_notification_info.remarks
-
+    org_id = product_notification_info.org_id
     if product_model.code not in DETAILED_MHR_NOTIFICATIONS:
-        org_id = product_notification_info.org_id
         org_name = product_notification_info.org_name
         return get_default_product_notification_data(product_model, recipient_emails, org_id, org_name)
 
     if is_confirmation:
-        return get_mhr_qs_confirmation_data(product_model, recipient_emails)
+        return get_mhr_qs_confirmation_data(product_model, recipient_emails, org_id)
 
     if is_reapproved or subscription_status_code == ProductSubscriptionStatus.ACTIVE.value:
-        return get_mhr_qs_approval_data(product_model, recipient_emails, is_reapproved)
+        return get_mhr_qs_approval_data(product_model, recipient_emails, org_id, is_reapproved)
 
     if subscription_status_code == ProductSubscriptionStatus.REJECTED.value:
-        return get_mhr_qs_rejected_data(product_model, recipient_emails, remarks)
+        return get_mhr_qs_rejected_data(product_model, recipient_emails, org_id, remarks)
 
     return None
 
@@ -144,7 +143,7 @@ def get_default_product_notification_data(product_model: ProductCodeModel, recip
     return data
 
 
-def get_mhr_qs_approval_data(product_model: ProductCodeModel, recipient_emails: str, is_reapproved: bool = False):
+def get_mhr_qs_approval_data(product_model: ProductCodeModel, recipient_emails: str, org_id: int, is_reapproved: bool = False):
     """Get the mhr qualified supplier product approval notification data."""
     data = {
         "subjectDescriptor": ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
@@ -153,11 +152,12 @@ def get_mhr_qs_approval_data(product_model: ProductCodeModel, recipient_emails: 
         "isReapproved": is_reapproved,
         "productName": product_model.description,
         "emailAddresses": recipient_emails,
+        "accountId": org_id
     }
     return data
 
 
-def get_mhr_qs_rejected_data(product_model: ProductCodeModel, recipient_emails: str, reject_reason: str = None):
+def get_mhr_qs_rejected_data(product_model: ProductCodeModel, recipient_emails: str, org_id: int, reject_reason: str = None):
     """Get the mhr qualified supplier product rejected notification data."""
     data = {
         "subjectDescriptor": ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
@@ -168,11 +168,12 @@ def get_mhr_qs_rejected_data(product_model: ProductCodeModel, recipient_emails: 
         "emailAddresses": recipient_emails,
         "remarks": reject_reason,
         "contactType": get_notification_contact_type(product_model.code),
+        "accountId": org_id
     }
     return data
 
 
-def get_mhr_qs_confirmation_data(product_model: ProductCodeModel, recipient_emails: str):
+def get_mhr_qs_confirmation_data(product_model: ProductCodeModel, recipient_emails: str, org_id: int):
     """Get the mhr qualified supplier product confirmation notification data."""
     data = {
         "subjectDescriptor": ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
@@ -183,6 +184,7 @@ def get_mhr_qs_confirmation_data(product_model: ProductCodeModel, recipient_emai
         "contactType": get_notification_contact_type(product_model.code),
         "hasAgreementAttachment": True,
         "attachmentType": NotificationAttachmentType.MHR_QS.value,
+        "accountId": org_id
     }
     return data
 
