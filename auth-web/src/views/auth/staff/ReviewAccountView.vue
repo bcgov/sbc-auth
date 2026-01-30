@@ -549,7 +549,7 @@ export default defineComponent({
           const accountId = isNewProductFeeReview.value ? task.value.accountId : task.value.relationshipId
           await orgStore.fetchCurrentOrganizationGLInfo(accountId)
           await orgStore.fetchOrgProductFeeCodes()
-          await orgStore.getOrgProducts(accountId, isNewProductFeeReview.value, task.value.type)
+          await orgStore.getOrgProducts(accountId, isNewProductFeeReview.value, task.value.relationshipId)
           // For rejected accounts view
           if (!canSelect.value) {
             await orgStore.syncCurrentAccountFees(accountId)
