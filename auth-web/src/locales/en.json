@@ -16,6 +16,7 @@
   "labelHoursOfOperation": "Hours of Operation:",
   "hoursOfOperation": "Monday to Friday, 8:30am - 4:30pm Pacific Time",
   "payFailedMessage": "Payment Failed due to technical reasons. Please try again.",
+  "invoiceDeletedMessage": "Invoice has been deleted, cannot be processed.",
   "downloadFailedMessage": "Download Invoice Failed due to technical reasons. Please try again.",
   "payFailedMessagePayBcDown": "Payment Failed due to technical reasons. Please use the below contacts.",
   "payNoParams": "Incorrect configuration",
