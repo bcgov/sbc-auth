@@ -36,10 +36,9 @@
 </template>
 
 <script lang="ts">
-import { InvoiceStatus, SessionStorageKeys } from '@/util/constants'
+
 import { defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { isErrorType, normalizeError } from '@/util/error-util'
-import ConfigHelper from '@/util/config-helper'
 import PaymentServices from '@/services/payment.services'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
 import { useI18n } from 'vue-i18n-composable'
@@ -65,25 +64,10 @@ export default defineComponent({
       window.location.href = url || props.redirectUrl
     }
 
-    onMounted(async () => {
+    onMounted(() => {
       if (!props.paymentId || !redirectUrlFixed()) {
         state.errorMessage = t('payNoParams').toString()
         return
-      }
-      const accountJson = ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}'
-      const account = accountJson ? JSON.parse(accountJson) : null
-      if (account?.id) {
-        try {
-          const response = await PaymentServices.getInvoice(props.paymentId, account.id)
-          const invoiceData = response?.data
-          if (invoiceData && [InvoiceStatus.DELETE_ACCEPTED, InvoiceStatus.DELETED].includes(invoiceData.statusCode as InvoiceStatus)) {
-            state.errorMessage = t('invoiceDeletedMessage').toString()
-            state.showErrorModal = true
-            return
-          }
-        } catch {
-          // If getInvoice fails, continue to createTransactionForPadPayment (existing behaviour)
-        }
       }
       PaymentServices.createTransactionForPadPayment(props.paymentId, redirectUrlFixed())
         .then(response => {
@@ -94,6 +78,7 @@ export default defineComponent({
           state.errorMessage = t('payFailedMessage').toString()
           const normalized = normalizeError(error)
           if (isErrorType(normalized, 'INVALID_TRANSACTION')) {
+            // Transaction is already completed. Show as a modal.
             goToUrl(redirectUrlFixed())
           } else {
             state.showErrorModal = true
