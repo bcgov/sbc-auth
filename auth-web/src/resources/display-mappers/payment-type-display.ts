@@ -5,7 +5,7 @@ export const paymentTypeDisplay = {
   [PaymentTypes.CASH]: 'Cash',
   [PaymentTypes.CHEQUE]: 'Cheque',
   [PaymentTypes.CREDIT_CARD]: 'Credit Card',
-  [PaymentTypes.DIRECT_PAY]: 'Direct Pay',
+  [PaymentTypes.DIRECT_PAY]: 'Credit Card',
   [PaymentTypes.EFT]: 'Electronic Funds Transfer',
   [PaymentTypes.EJV]: 'Electronic Journal Voucher',
   [PaymentTypes.INTERNAL]: 'Routing Slip',
