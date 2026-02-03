@@ -80,7 +80,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { InvoiceStatus, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { isErrorType, normalizeError } from '@/util/error-util'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
@@ -123,6 +123,7 @@ export default class PaymentView extends Vue {
   returnUrl: string = ''
   paymentCardData: any
   showPayWithOnlyCC: boolean = false
+  invoiceDeleted: boolean = false
   async mounted () {
     this.showLoading = true
     if (!this.paymentId || !this.redirectUrl) {
@@ -137,6 +138,13 @@ export default class PaymentView extends Vue {
         // get the invoice and check for OB
         try {
           const invoice = await this.getInvoice({ invoiceId: this.paymentId, accountId: accountSettings?.id })
+          if ([InvoiceStatus.DELETE_ACCEPTED, InvoiceStatus.DELETED].includes(invoice?.statusCode as InvoiceStatus)) {
+            this.errorMessage = this.$t('invoiceDeletedMessage').toString()
+            this.showErrorModal = true
+            this.showLoading = false
+            this.invoiceDeleted = true
+            return
+          }
           if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
             // get account data to show in the UI
             const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
@@ -159,7 +167,7 @@ export default class PaymentView extends Vue {
           console.error('error in accessing the invoice.Defaulting to CC flow')
         }
       }
-      if (!this.showOnlineBanking) {
+      if (!this.showOnlineBanking && !this.invoiceDeleted) {
         await this.doCreateTransaction()
       }
     } catch (error) {
