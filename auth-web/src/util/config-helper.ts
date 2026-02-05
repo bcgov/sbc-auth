@@ -188,10 +188,6 @@ export default class ConfigHelper {
     return `${import.meta.env.VUE_APP_REGISTRY_SEARCH_URL}`
   }
 
-  static getHotjarId () {
-    return `${import.meta.env.VUE_APP_HOTJAR_ID}`
-  }
-
   static getLdClientId () {
     return `${import.meta.env.VUE_APP_AUTH_LD_CLIENT_ID}`
   }

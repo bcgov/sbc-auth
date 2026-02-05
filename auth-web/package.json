@@ -43,7 +43,6 @@
     "vue-auto-resize": "^1.0.1",
     "vue-debounce-decorator": "^1.0.1",
     "vue-gtag": "^1.16.1",
-    "vue-hotjar": "^1.4.0",
     "vue-i18n": "8.28.2",
     "vue-i18n-composable": "^1.0.0",
     "vue-loader": "^15.9.2",

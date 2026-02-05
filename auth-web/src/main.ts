@@ -4,7 +4,6 @@ import { PiniaVuePlugin, createPinia, setActivePinia } from 'pinia'
 import App from './App.vue'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
-import Hotjar from 'vue-hotjar'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 // eslint-disable-next-line sort-imports
@@ -47,14 +46,6 @@ ConfigHelper.saveConfigToSessionStorage().then(async () => {
   await LaunchDarklyService.init(ConfigHelper.getLdClientId());
   // addressCompleteKey is for canada post address lookup, which is to be used in sbc-common-components
   (<any>window).addressCompleteKey = ConfigHelper.getAddressCompleteKey()
-
-  // initialize Hotjar
-  const hotjarId = ConfigHelper.getHotjarId();
-  (<any>window).hotJarId = hotjarId
-  if (hotjarId) {
-    console.info('Initializing Hotjar...') // eslint-disable-line no-console
-    Vue.use(Hotjar, { id: hotjarId })
-  }
 
   await syncSession()
   renderVue()
