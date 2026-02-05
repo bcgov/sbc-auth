@@ -48,7 +48,10 @@
         tile
       >
         <div class="banner-content d-flex align-center">
-          <v-icon class="banner-icon">
+          <v-icon
+            class="banner-icon"
+            size="28"
+          >
             mdi-information
           </v-icon>
           <div
