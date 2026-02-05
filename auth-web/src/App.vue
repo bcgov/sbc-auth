@@ -40,19 +40,26 @@
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-snackbar>
-      <BreadCrumb
-        v-if="showNavigationBar"
-        :breadcrumbs="breadcrumbs"
-      />
-
       <!-- Alert banner -->
       <v-alert
         v-if="bannerText"
+        id="alert-banner"
+        class="pa-0 ma-0"
         tile
-        dense
-        type="warning"
-        class="mb-0 text-center colour-dk-text"
-        v-html="bannerText"
+      >
+        <div class="banner-content d-flex align-center">
+          <v-icon class="banner-icon">
+            mdi-information
+          </v-icon>
+          <div
+            class="banner-text pl-2"
+            v-html="bannerText"
+          />
+        </div>
+      </v-alert>
+      <BreadCrumb
+        v-if="showNavigationBar"
+        :breadcrumbs="breadcrumbs"
       />
     </div>
     <div class="app-body">
@@ -250,6 +257,32 @@ export default class App extends Mixins(NextPageMixin) {
   .app-body {
     flex: 1 1 auto;
     position: relative;
+  }
+
+  #alert-banner {
+    background-color: #fcba19 !important;
+    border-color: #fcba19 !important;
+    box-shadow: none !important;
+
+    .banner-content {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 8px 16px;
+    }
+
+    .banner-icon {
+      color: #212429 !important;
+      flex-shrink: 0;
+    }
+
+    .banner-text {
+      color: #212429;
+      font-size: 0.875rem;
+    }
+
+    :deep(a) {
+      color: #212429 !important;
+    }
   }
 
 </style>
