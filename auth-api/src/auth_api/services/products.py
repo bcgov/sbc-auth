@@ -183,6 +183,7 @@ class Product:
         is_new_transaction: bool = True,
         skip_auth=False,
         auto_approve=False,
+        staff_review_for_create_org=False,
     ):
         """Create product subscription for the user.
 
@@ -211,7 +212,7 @@ class Product:
                     auto_approve = True
 
                 subscription_status = Product.find_subscription_status(
-                    org, product_model, auto_approve
+                    org, product_model, auto_approve, staff_review_for_create_org
                 )
                 product_subscription = Product._subscribe_and_publish_activity(
                     SubscriptionRequest(
@@ -399,10 +400,15 @@ class Product:
         TaskService.create_task(task_info, False)
 
     @staticmethod
-    def find_subscription_status(org, product_model, auto_approve=False):
+    def find_subscription_status(org, product_model, auto_approve=False, staff_review_for_create_org=False):
         """Return the subscriptions status based on org type."""
-        if not auto_approve and (org.access_type in GOV_ORG_TYPES or product_model.need_review):
-            return ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
+        skip_review = org.access_type in GOV_ORG_TYPES and staff_review_for_create_org # prevent create second task when it's already added a staff review when creating org
+        if product_model.need_review and auto_approve is False:
+            return (
+                ProductSubscriptionStatus.ACTIVE.value
+                if skip_review
+                else ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
+            )
         return ProductSubscriptionStatus.ACTIVE.value
 
     @staticmethod
