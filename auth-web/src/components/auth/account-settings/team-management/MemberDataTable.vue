@@ -502,7 +502,7 @@ export default class MemberDataTable extends Vue {
   private isRegularAccount (): boolean {
     return (
       this.currentOrganization &&
-      [AccessType.GOVM.valueOf()].indexOf(this.currentOrganization.accessType) < 0
+      ![AccessType.GOVM.valueOf()].includes(this.currentOrganization.accessType)
     )
   }
 
