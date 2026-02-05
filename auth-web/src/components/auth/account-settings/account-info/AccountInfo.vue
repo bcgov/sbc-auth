@@ -24,7 +24,7 @@
           {{ warningMessage }}
         </v-alert>
 
-        <div v-show="true">
+        <div>
           <div class="nv-list-item mb-6">
             <div
               id="accountNumber"
