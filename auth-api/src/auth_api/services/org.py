@@ -140,7 +140,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         # create the membership record for this user if its not created by staff and access_type is anonymous
         Org.create_membership(access_type, org, user_id)
-        
+
         # Send an email to staff to remind review the pending account
         is_staff_review_needed = access_type == AccessType.GOVN.value or (
             access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
