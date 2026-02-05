@@ -1,12 +1,6 @@
 <template>
   <div>
     <template v-if="!invalidInvitationToken && !tokenError && !otherError">
-      <div v-if="loginSource == loginSourceenum.BCROS">
-        <create-user-profile-landing
-          :token="token"
-          :orgName="orgName"
-        />
-      </div>
       <div v-if="loginSource == loginSourceenum.BCEID">
         <interim-landing
           v-if="affidavitNeeded"
@@ -90,7 +84,6 @@ import { LoginSource, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapState } from 'pinia'
 import BceidInviteLanding from '@/components/auth/BceidInviteLanding.vue'
 import ConfigHelper from '@/util/config-helper'
-import CreateUserProfileLanding from '@/components/auth/CreateUserProfileLanding.vue'
 import { EmptyResponse } from '@/models/global'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { useOrgStore } from '@/stores/org'
@@ -104,8 +97,7 @@ import { useOrgStore } from '@/stores/org'
   },
   components: {
     BceidInviteLanding,
-    InterimLanding,
-    CreateUserProfileLanding
+    InterimLanding
   }
 })
 export default class AcceptInviteLandingView extends Vue {
