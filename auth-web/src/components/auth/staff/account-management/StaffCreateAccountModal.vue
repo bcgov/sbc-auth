@@ -25,19 +25,6 @@
           data-test="radio-selctedAccount"
         >
           <v-radio
-            :value="accountTypes.DIRECTOR_SEARCH"
-            data-test="radio-director"
-          >
-            <template #label>
-              <div class="font font-weight-bold text--primary">
-                Director Search Account
-              </div>
-            </template>
-          </v-radio>
-          <p class="ml-8 mb-11">
-            Create an account for director search account for directors who is a member of the board of a company
-          </p>
-          <v-radio
             :value="accountTypes.GOVM_BUSINESS"
             data-test="radio-government"
           >
@@ -89,7 +76,6 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
   }
 })
 export default class StaffCreateAccountModal extends Vue {
-  private selctedAccount: string = StaffCreateAccountsTypes.DIRECTOR_SEARCH
   public accountTypes: any = StaffCreateAccountsTypes
 
   $refs: {
@@ -105,11 +91,7 @@ export default class StaffCreateAccountModal extends Vue {
   }
 
   createAccount () {
-    if (this.selctedAccount === StaffCreateAccountsTypes.DIRECTOR_SEARCH) {
-      this.$router.push({ path: `/${Pages.STAFF_SETUP_ACCOUNT}` })
-    } else {
-      this.$router.push({ path: `${Pages.STAFF_GOVM_SETUP_ACCOUNT}` })
-    }
+    this.$router.push({ path: `${Pages.STAFF_GOVM_SETUP_ACCOUNT}` })
   }
 }
 </script>

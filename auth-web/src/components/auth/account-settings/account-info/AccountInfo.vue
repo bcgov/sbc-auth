@@ -24,7 +24,7 @@
           {{ warningMessage }}
         </v-alert>
 
-        <div v-show="!anonAccount">
+        <div v-show="true">
           <div class="nv-list-item mb-6">
             <div
               id="accountNumber"
@@ -311,7 +311,6 @@ export default defineComponent({
       currentOrgPaymentType,
       currentOrgAddress,
       permissions,
-      anonAccount,
       isGovmAccount,
       isStaffAccount,
       isSbcStaffAccount
@@ -367,7 +366,7 @@ export default defineComponent({
       isAddressInfoIncomplete: computed(() => (
         currentOrgAddress.value ? Object.keys(currentOrgAddress.value).length === 0 : true
       )),
-      nameChangeNotAllowed: computed(() => (anonAccount.value || isGovmAccount.value)) &&
+      nameChangeNotAllowed: computed(() => (isGovmAccount.value)) &&
       userStore.currentUser.roles.includes(Role.ExternalStaffReadonly)
     })
 
@@ -394,17 +393,13 @@ export default defineComponent({
     const setup = async () => {
       setAccountDetails()
       await orgStore.syncAddress()
-      if (!anonAccount.value) {
-        state.originalAddress = currentOrgAddress.value
-        if (isBusinessInfoIncomplete.value || state.isAddressInfoIncomplete) {
-          state.isCompleteAccountInfo = false
-          state.warningMessage = warningMessage
-        } else {
-          state.isCompleteAccountInfo = true
-          state.warningMessage = ''
-        }
+      state.originalAddress = currentOrgAddress.value
+      if (isBusinessInfoIncomplete.value || state.isAddressInfoIncomplete) {
+        state.isCompleteAccountInfo = false
+        state.warningMessage = warningMessage
       } else {
-        state.baseAddress = null
+        state.isCompleteAccountInfo = true
+        state.warningMessage = ''
       }
     }
 
@@ -602,7 +597,6 @@ export default defineComponent({
       currentOrgPaymentType,
       suspensionSelectRules,
       isBusinessInfoIncomplete,
-      anonAccount,
       isGovmAccount,
       isStaffAccount,
       setAccountDetails,

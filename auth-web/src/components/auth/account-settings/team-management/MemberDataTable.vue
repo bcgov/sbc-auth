@@ -134,20 +134,6 @@
           <v-icon>mdi-lock-reset</v-icon>
         </v-btn>
 
-        <!-- Reset Password -->
-        <v-btn
-          v-show="anonAccount"
-          v-can:RESET_PASSWORD.hide
-          icon
-          class="mr-1"
-          aria-label="Reset User Password"
-          title="Reset User Password"
-          :data-test="getIndexedTag('reset-password-button', item.index)"
-          @click="resetPassword(item)"
-        >
-          <v-icon>mdi-lock-reset</v-icon>
-        </v-btn>
-
         <!-- Remove User -->
         <v-btn
           v-show="canRemove(item)"
@@ -399,10 +385,6 @@ export default class MemberDataTable extends Vue {
     }
   }
 
-  get anonAccount (): boolean {
-    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
-  }
-
   private canChangeRole (memberBeingChanged: Member): boolean {
     if (this.currentMembership.membershipStatus !== MembershipStatus.Active) {
       return false
@@ -517,17 +499,10 @@ export default class MemberDataTable extends Vue {
     return items
   }
 
-  private isAnonymousAccount (): boolean {
-    return (
-      this.currentOrganization &&
-      this.currentOrganization.accessType === AccessType.ANONYMOUS
-    )
-  }
-
   private isRegularAccount (): boolean {
     return (
       this.currentOrganization &&
-      [AccessType.ANONYMOUS.valueOf(), AccessType.GOVM.valueOf()].indexOf(this.currentOrganization.accessType) < 0
+      [AccessType.GOVM.valueOf()].indexOf(this.currentOrganization.accessType) < 0
     )
   }
 

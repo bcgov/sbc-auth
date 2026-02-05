@@ -249,6 +249,7 @@ export default defineComponent({
         { code: OrgAccountTypes.PREMIUM_OUT_OF_PROVINCE, description: 'Premium (out-of-province)' },
         { code: OrgAccountTypes.GOVM, description: 'GovM' },
         { code: OrgAccountTypes.GOVN, description: 'GovN' },
+        // Remove this when API is ready
         { code: OrgAccountTypes.DIRECTOR_SEARCH, description: 'Director Search' },
         { code: OrgAccountTypes.STAFF, description: 'BC Registries Staff' },
         { code: OrgAccountTypes.SBC_STAFF, description: 'Service BC Staff' },

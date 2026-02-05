@@ -32,7 +32,7 @@ describe('Account settings ProductPackage.vue', () => {
     userStore.currentUser = {
       fullName: 'user2',
       roles: [],
-      loginSource: LoginSource.BCROS
+      loginSource: LoginSource.BCSC
     } as any
     const orgStore = useOrgStore()
     orgStore.permissions = [Permission.VIEW_REQUEST_PRODUCT_PACKAGE]

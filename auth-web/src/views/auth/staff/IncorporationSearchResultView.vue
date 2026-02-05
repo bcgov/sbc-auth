@@ -177,6 +177,7 @@ export default class IncorporationSearchResultView extends Vue {
     } else {
       orgTypeDisplay = 'N/A'
     }
+    // Remove this when API is ready
     if (org?.accessType === AccessType.ANONYMOUS) {
       return 'Director Search'
     }

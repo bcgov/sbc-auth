@@ -118,7 +118,6 @@ export default class AcceptInviteLandingView extends Vue {
   @Prop({ default: LoginSource.BCSC }) loginSource: string
 
   private otherError: boolean = false
-  private isCreateUserProfile: boolean = false
   private affidavitNeeded: boolean = false
 
   public async mounted () {
@@ -131,7 +130,6 @@ export default class AcceptInviteLandingView extends Vue {
     // if loginSource =bcros , take them to create user profile
     // if loginSource bcsc , stay in the page , show inivtation accept screen
     // if loginSource = bceid ,take to bceid login page
-    this.isCreateUserProfile = this.loginSource === LoginSource.BCROS
     await this.validateToken()
     // make sure token is valid
     const allCheckPassed =

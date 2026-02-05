@@ -59,10 +59,6 @@ export default class ConfigHelper {
     return `${window.location.origin}${import.meta.env.VUE_APP_PATH}`.replace(/\/$/, '') // remove the slash at the end
   }
 
-  static getDirectorSearchURL () {
-    return `${import.meta.env.VUE_APP_DIRECTOR_SEARCH_URL}`
-  }
-
   static getNewBusinessURL () {
     // returns new business URL
     return `${import.meta.env.VUE_APP_BUSINESS_CREATE_URL}`

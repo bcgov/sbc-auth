@@ -2,24 +2,6 @@
   <v-container
     class="view-container pt-0"
   >
-    <!-- Director Search - Breadcrumbs / Back Navigation -->
-    <nav
-      v-if="isDirSearchUser"
-      class="crumbs py-6"
-      aria-label="breadcrumb"
-    >
-      <div>
-        <a :href="dirSearchUrl">
-          <v-icon
-            small
-            color="primary"
-            class="mr-1"
-          >mdi-arrow-left</v-icon>
-          <span>Director Search Home</span>
-        </a>
-      </div>
-    </nav>
-
     <!-- Staff - Breadcrumbs / Back Navigation -->
     <nav
       v-if="isStaff || isExternalStaff"
@@ -42,7 +24,7 @@
 
     <!-- Back Button -->
     <nav
-      v-if="!isDirSearchUser && !isStaff && !isExternalStaff"
+      v-if="!isStaff && !isExternalStaff"
       class="crumbs py-6"
       aria-label="breadcrumb"
     >
@@ -330,7 +312,7 @@
 </template>
 
 <script lang="ts">
-import { AccountStatus, LoginSource, Pages, Permission, Role } from '@/util/constants'
+import { AccountStatus, Pages, Permission, Role } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
@@ -371,8 +353,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   protected readonly syncOrganization!: (orgId: number) => Promise<Organization>
   protected readonly syncMembership!: (orgId: number) => Promise<Member>
   private isLoading = true
-  private isDirSearchUser: boolean = false
-  private dirSearchUrl = ConfigHelper.getDirectorSearchURL()
   private readonly pagesEnum = Pages
   private readonly permissions!: string[]
 
@@ -453,7 +433,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     await this.syncOrganization(this.orgId)
     await this.syncMembership(this.orgId)
     this.isLoading = false
-    this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
   }
 }
 </script>
