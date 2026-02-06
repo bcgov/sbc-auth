@@ -314,7 +314,8 @@ class AffiliationInvitation:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         AffiliationInvitation.check_auth_for_invitation(
-            invitation_type=affiliation_invitation_type, from_org_id=from_org_id
+            invitation_type=affiliation_invitation_type,
+            from_org_id=from_org_id,
         )
 
         entity, from_org, business = AffiliationInvitation._validate_prerequisites(
@@ -802,21 +803,18 @@ class AffiliationInvitation:
         invitation_type: AffiliationInvitationType = None,
         from_org_id: int = None,
     ):
-        """Check if the user has the right to view the invitation."""
+        """Check if the user has the right to perform the action on the invitation."""
         invitation_type = invitation_type or AffiliationInvitationType.from_value(invitation.type)
         from_org_id = from_org_id or invitation.from_org_id
         match invitation_type:
             case AffiliationInvitationType.REQUEST | AffiliationInvitationType.EMAIL:
                 check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
-            case AffiliationInvitationType.UNAFFILIATED_EMAIL:
-                # HMM I think this needs some work
-                pass  # No org auth needed - system-initiated
             case _:
                 raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
 
     @staticmethod
     def create_unaffiliated_email_invitation(entity: EntityService):
-        """Create an UNAFFILIATED_EMAIL affiliation invitation and send email to entity contact."""
+        """Create an UNAFFILIATED_EMAIL affiliation invitation and send email to entity contact. SYSTEM access only."""
         contact = entity.get_contact()
         if not contact or not contact.email:
             raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
@@ -830,7 +828,10 @@ class AffiliationInvitation:
         affiliation_invitation = AffiliationInvitationModel.create_from_dict(invitation_info, user_id=None)
 
         confirmation_token = AffiliationInvitation.generate_confirmation_token(
-            affiliation_invitation.id, None, None, entity.business_identifier
+            affiliation_invitation_id=affiliation_invitation.id,
+            from_org_id=None,
+            to_org_id=None,
+            business_identifier=entity.business_identifier,
         )
         affiliation_invitation.token = confirmation_token
         # This is required for now, because unsure how to handle BCEID users who are unvalidated.
