@@ -833,6 +833,7 @@ class AffiliationInvitation:
             affiliation_invitation.id, None, None, entity.business_identifier
         )
         affiliation_invitation.token = confirmation_token
+        # This is required for now, because unsure how to handle BCEID users who are unvalidated.
         affiliation_invitation.login_source = LoginSource.BCSC.value
         affiliation_invitation.save()
 
