@@ -45,7 +45,7 @@ class AffiliationInvitationSchema(BaseSchema):  # pylint: disable=too-many-ances
             "is_deleted",
         )
 
-    from_org = fields.Nested("OrgSchema", only=("id", "name", "org_type"), allow_none=True, required=False)
+    from_org = fields.Nested("OrgSchema", only=("id", "name", "org_type"))
     to_org = fields.Nested("OrgSchema", only=("id", "name", "org_type"), allow_none=True, required=False)
     business_identifier = fields.String(attribute="entity.business_identifier", data_key="business_identifier")
 
