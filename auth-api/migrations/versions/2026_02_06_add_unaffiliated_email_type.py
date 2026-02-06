@@ -20,7 +20,7 @@ def upgrade():
     op.execute(
         "INSERT INTO affiliation_invitation_types (code, description, \"default\") "
         "VALUES ('UNAFFILIATED_EMAIL', "
-        "'An affiliation invitation sent to entity email when no org affiliation exists yet', "
+        "'Sent when no org affiliation exists', "
         "false)"
     )
     op.alter_column('affiliation_invitations', 'from_org_id', nullable=True)
