@@ -816,7 +816,7 @@ class AffiliationInvitation:
                 raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
 
     @staticmethod
-    def create_unaffiliated_email_invitation(entity: EntityService, additional_message: str | None = None):
+    def create_unaffiliated_email_invitation(entity: EntityService):
         """Create an UNAFFILIATED_EMAIL affiliation invitation and send email to entity contact."""
         contact = entity.get_contact()
         if not contact or not contact.email:
@@ -826,7 +826,7 @@ class AffiliationInvitation:
             "entityId": entity.identifier,
             "recipientEmail": contact.email,
             "type": AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
-            "additionalMessage": additional_message,
+            "additionalMessage": "This business was migrated and requires account affiliation.",
         }
         affiliation_invitation = AffiliationInvitationModel.create_from_dict(invitation_info, user_id=None)
 

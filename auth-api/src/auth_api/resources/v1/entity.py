@@ -55,8 +55,7 @@ def post_entity():
         entity = EntityService.save_entity(request_json)
 
         if request.args.get("emailOutInvitation", "").lower() == "true":
-            additional_message = request.args.get("additionalMessage")
-            AffiliationInvitationService.create_unaffiliated_email_invitation(entity, additional_message)
+            AffiliationInvitationService.create_unaffiliated_email_invitation(entity)
 
         response, status = entity.as_dict(), HTTPStatus.CREATED
     except BusinessException as exception:
