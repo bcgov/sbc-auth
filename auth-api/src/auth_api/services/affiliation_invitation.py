@@ -189,7 +189,6 @@ class AffiliationInvitation:
             if user_from_context.login_source != affiliation_invitation.login_source:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
             org_id = user_from_context.account_id
-            affiliation_invitation.from_org_id = org_id
         else:
             org_id = affiliation_invitation.from_org_id
 
@@ -737,6 +736,9 @@ class AffiliationInvitation:
         )
 
         org_id = AffiliationInvitation._validate_and_get_org_id(affiliation_invitation, user_from_context)
+        # This was previously set to empty, because we didn't know their org id at the time.
+        if affiliation_invitation.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value:
+            affiliation_invitation.from_org_id = org_id
         entity_id = affiliation_invitation.entity_id
 
         if not (affiliation_model := AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)):
