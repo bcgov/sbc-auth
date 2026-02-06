@@ -31,9 +31,11 @@ def upgrade():
                        {'code': 'UNAFFILIATED_EMAIL', 'description': 'Invitation sent to entity email when no org affiliation exists', 'default': False}
                    ])
     op.alter_column('affiliation_invitations', 'from_org_id', nullable=True)
+    op.alter_column('affiliation_invitations', 'sender_id', nullable=True, existing_type=sa.Integer())
 
 
 def downgrade():
+    op.alter_column('affiliation_invitations', 'sender_id', nullable=False, existing_type=sa.Integer())
     op.alter_column('affiliation_invitations', 'from_org_id', nullable=False)
     op.execute("DELETE FROM affiliation_invitation_types WHERE code = 'UNAFFILIATED_EMAIL'")
     op.alter_column('affiliation_invitations', 'type', type_=sa.String(15), existing_type=sa.String(20))

@@ -40,7 +40,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     to_org_id = Column(ForeignKey("orgs.id"), nullable=True, index=True)
     entity_id = Column(ForeignKey("entities.id"), nullable=False, index=True)
     affiliation_id = Column(ForeignKey("affiliations.id"), nullable=True, index=True)
-    sender_id = Column(ForeignKey("users.id"), nullable=False)
+    sender_id = Column(ForeignKey("users.id"), nullable=True)
     approver_id = Column(ForeignKey("users.id"), nullable=True)
     recipient_email = Column(String(8000), nullable=True)
     sent_date = Column(DateTime, nullable=False)

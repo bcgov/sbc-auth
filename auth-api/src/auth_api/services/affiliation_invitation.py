@@ -185,19 +185,18 @@ class AffiliationInvitation:
             raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_STATE, None)
 
         if affiliation_invitation.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value:
-            if user_from_context.login_source != LoginSource.BCSC.value:
+            # Ideally we're just looking for BCSC for now.
+            if user_from_context.login_source != affiliation_invitation.login_source:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
             org_id = user_from_context.account_id
-            if not org_id:
-                raise BusinessException(Error.DATA_NOT_FOUND, None)
-            org_id = int(org_id)
             affiliation_invitation.from_org_id = org_id
         else:
             org_id = affiliation_invitation.from_org_id
-            if not org_id:
-                raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        return org_id
+        if not org_id:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        return int(org_id)
 
     @staticmethod
     def _validate_prerequisites(

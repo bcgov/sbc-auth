@@ -54,7 +54,7 @@ def post_entity():
     try:
         entity = EntityService.save_entity(request_json)
 
-        if request.args.get("emailOutInvitation", "").lower() == "true":
+        if bool(request_json.get("emailOutInvitation", False)) is True:
             AffiliationInvitationService.create_unaffiliated_email_invitation(entity)
 
         response, status = entity.as_dict(), HTTPStatus.CREATED

@@ -112,6 +112,15 @@
         "HISTORICAL"
       ],
       "pattern": "^(.*)$"
+    },
+    "emailOutInvitation": {
+      "$id": "#/properties/emailOutInvitation",
+      "type": "boolean",
+      "title": "Email Out Invitation",
+      "default": false,
+      "examples": [
+        true, false
+      ]
     }
   }
 }
