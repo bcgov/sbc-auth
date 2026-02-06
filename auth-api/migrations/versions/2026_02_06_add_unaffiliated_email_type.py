@@ -7,6 +7,7 @@ Create Date: 2026-02-06
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import Boolean, String
 
 
 # revision identifiers, used by Alembic.
@@ -17,12 +18,15 @@ depends_on = None
 
 
 def upgrade():
-    op.execute(
-        "INSERT INTO affiliation_invitation_types (code, description, \"default\") "
-        "VALUES ('UNAFFILIATED_EMAIL', "
-        "'Sent when no org affiliation exists', "
-        "false)"
-    )
+    ait = sa.table('affiliation_invitation_types',
+                   sa.column('code', String),
+                   sa.column('description', String),
+                   sa.column('default', Boolean)
+                   )
+    op.bulk_insert(ait,
+                   [
+                       {'code': 'UNAFFILIATED_EMAIL', 'description': 'Invitation sent to entity email when no org affiliation exists', 'default': False}
+                   ])
     op.alter_column('affiliation_invitations', 'from_org_id', nullable=True)
 
 
