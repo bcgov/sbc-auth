@@ -732,9 +732,7 @@ class AffiliationInvitation:
         """Add an affiliation from the affiliation invitation."""
         current_app.logger.debug(">accept_affiliation_invitation")
         user_from_context: UserContext = kwargs["user_context"]
-        affiliation_invitation = AffiliationInvitationModel.find_invitation_by_id(
-            affiliation_invitation_id
-        )
+        affiliation_invitation = AffiliationInvitationModel.find_invitation_by_id(affiliation_invitation_id)
 
         org_id = AffiliationInvitation._validate_and_get_org_id(affiliation_invitation, user_from_context)
         # This was previously set to empty, because we didn't know their org id at the time.
@@ -818,6 +816,9 @@ class AffiliationInvitation:
     @staticmethod
     def create_unaffiliated_email_invitation(entity: EntityService):
         """Create an UNAFFILIATED_EMAIL affiliation invitation and send email to entity contact. SYSTEM access only."""
+        if AffiliationModel.find_affiliations_by_entity_id(entity.identifier):
+            raise BusinessException(Error.AFFILIATION_ALREADY_EXISTS, None)
+
         contact = entity.get_contact()
         if not contact or not contact.email:
             raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
