@@ -106,7 +106,7 @@ def post_unaffiliated_invitation(business_identifier):
     try:
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         if not entity:
-            return {"message": f"A business for {business_identifier} was not found."}, HTTPStatus.NOT_FOUND
+            return {"message": "Business not found."}, HTTPStatus.NOT_FOUND
         AffiliationInvitationService.create_unaffiliated_email_invitation(entity)
         return {}, HTTPStatus.CREATED
     except BusinessException as exception:
