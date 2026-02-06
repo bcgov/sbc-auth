@@ -39,6 +39,8 @@ from account_mailer.enums import Constants, SubjectType, TemplateType, TitleType
 from account_mailer.services import google_store, notification_service
 from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
 
+AFFILIATION_INVITATION_UNAFFILIATED_EMAIL = "bc.registry.auth.affiliationInvitationUnaffiliatedEmail"
+
 bp = Blueprint("worker", __name__)
 
 
@@ -69,6 +71,7 @@ def worker():
         handle_payment_pending(message_type, email_msg)
         handle_reset_passcode(message_type, email_msg)
         handle_affiliation_invitation(message_type, email_msg)
+        handle_unaffiliated_email_invitation(message_type, email_msg)
         handle_product_actions(message_type, email_msg)
         handle_statement_notification(message_type, email_msg)
         handle_payment_reminder_or_due(message_type, email_msg)
@@ -384,6 +387,34 @@ def handle_affiliation_invitation(message_type, email_msg):
     process_email(email_dict)
 
 
+def handle_unaffiliated_email_invitation(message_type, email_msg):
+    """Handle the unaffiliated email invitation message."""
+    if message_type != AFFILIATION_INVITATION_UNAFFILIATED_EMAIL:
+        return
+    business_name = email_msg.get("businessName")
+    business_identifier = email_msg.get("businessIdentifier")
+    logo_url = email_msg.get("logo_url")
+    token = email_msg.get("token")
+
+    app_url = current_app.config.get("WEB_APP_URL", current_app.config.get("BUSINESS_REGISTRY_URL", ""))
+    context_url = f"{app_url}/affiliationInvitation/acceptToken?token={token}"
+
+    template_name = TemplateType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL_TEMPLATE_NAME.value
+    subject = SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value
+
+    email_dict = common_mailer.process(
+        org_id=None,
+        recipients=email_msg.get("emailAddresses"),
+        template_name=template_name,
+        subject=subject,
+        logo_url=logo_url,
+        business_name=business_name,
+        business_identifier=business_identifier,
+        context_url=context_url,
+    )
+    process_email(email_dict)
+
+
 def handle_product_actions(message_type, email_msg):
     """Handle the product actions messages."""
     if message_type not in {
@@ -497,6 +528,7 @@ def handle_other_messages(message_type, email_msg):
         QueueMessageTypes.STATEMENT_NOTIFICATION.value,
         QueueMessageTypes.PAYMENT_REMINDER_NOTIFICATION.value,
         QueueMessageTypes.PAYMENT_DUE_NOTIFICATION.value,
+        AFFILIATION_INVITATION_UNAFFILIATED_EMAIL,
     ]:
         return
 

@@ -91,6 +91,9 @@ class SubjectType(Enum):
     PAYMENT_REMINDER_NOTIFICATION = "Your BC Registries payment reminder"
     PAYMENT_DUE_NOTIFICATION = "Your BC Registries payment is due"
     EFT_AVAILABLE_NOTIFICATION = "New Payment Method Available"
+    AFFILIATION_INVITATION_UNAFFILIATED_EMAIL = (
+        "[BC Registries and Online Services] Manage Your Business on BC Registries"
+    )
 
 
 class TitleType(Enum):
@@ -166,6 +169,7 @@ class TemplateType(Enum):
     PAYMENT_REMINDER_NOTIFICATION_TEMPLATE_NAME = "payment_reminder_notification"
     PAYMENT_DUE_NOTIFICATION_TEMPLATE_NAME = "payment_due_notification"
     EFT_AVAILABLE_NOTIFICATION_TEMPLATE_NAME = "eft_available_notification"
+    AFFILIATION_INVITATION_UNAFFILIATED_EMAIL_TEMPLATE_NAME = "affiliation_invitation_unaffiliated_email"
 
 
 class Constants(Enum):

@@ -20,6 +20,7 @@ from typing import Self
 from requests import Request
 
 from auth_api.utils.enums import KeycloakGroupActions
+from auth_api.utils.serializable import Serializable
 
 
 @dataclass
@@ -207,6 +208,16 @@ class ProductReviewTask:
     product_subscription_id: int
     user_id: str
     external_source_id: str | None = None
+
+
+@dataclass
+class UnaffiliatedEmailInvitationData(Serializable):
+    """Data for sending an unaffiliated email invitation to the mailer queue."""
+
+    business_name: str
+    email_addresses: str
+    business_identifier: str
+    token: str
 
 
 @dataclass

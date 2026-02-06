@@ -20,6 +20,7 @@ from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
 from auth_api.schemas import utils as schema_utils
+from auth_api.services.affiliation_invitation import AffiliationInvitation as AffiliationInvitationService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.authorization import is_competent_authority_or_external_staff
 from auth_api.services.contact import Contact as ContactService
@@ -52,6 +53,11 @@ def post_entity():
 
     try:
         entity = EntityService.save_entity(request_json)
+
+        if request.args.get("emailOutInvitation", "").lower() == "true":
+            additional_message = request.args.get("additionalMessage")
+            AffiliationInvitationService.create_unaffiliated_email_invitation(entity, additional_message)
+
         response, status = entity.as_dict(), HTTPStatus.CREATED
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code

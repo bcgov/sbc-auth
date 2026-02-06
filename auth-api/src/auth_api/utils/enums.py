@@ -218,6 +218,7 @@ class AffiliationInvitationType(Enum):
 
     EMAIL = "EMAIL"
     REQUEST = "REQUEST"  # Used to indicate an affiliation invitation initiated through Access Request modal
+    UNAFFILIATED_EMAIL = "UNAFFILIATED_EMAIL"  # Invitation sent to entity email when no org affiliation exists yet
 
     @classmethod
     def from_value(cls, value):
@@ -382,6 +383,12 @@ class NRActionCodes(Enum):
     RENEW = "REN"  # restore with new name request
     RESTORATION = "REST"  # FUTURE: unused? delete?
     RESUBMIT = "RESUBMIT"  # FUTURE: unused? delete?
+
+
+class QueueMessageType(Enum):
+    """Local queue message types not yet in sbc_common_components."""
+
+    AFFILIATION_INVITATION_UNAFFILIATED_EMAIL = "bc.registry.auth.affiliationInvitationUnaffiliatedEmail"
 
 
 class QueueSources(Enum):
