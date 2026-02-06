@@ -188,6 +188,7 @@ class AffiliationInvitation:
             # Ideally we're just looking for BCSC for now.
             if user_from_context.login_source != affiliation_invitation.login_source:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+            check_auth(org_id=user_from_context.account_id, one_of_roles=(ADMIN, COORDINATOR, USER))
             org_id = user_from_context.account_id
         else:
             org_id = affiliation_invitation.from_org_id
@@ -731,7 +732,7 @@ class AffiliationInvitation:
         """Add an affiliation from the affiliation invitation."""
         current_app.logger.debug(">accept_affiliation_invitation")
         user_from_context: UserContext = kwargs["user_context"]
-        affiliation_invitation: AffiliationInvitationModel = AffiliationInvitationModel.find_invitation_by_id(
+        affiliation_invitation = AffiliationInvitationModel.find_invitation_by_id(
             affiliation_invitation_id
         )
 
