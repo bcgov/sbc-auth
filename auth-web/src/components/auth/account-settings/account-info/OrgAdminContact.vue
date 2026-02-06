@@ -4,22 +4,17 @@
       v-for="(member, index) in getActiveAdmins"
       :key="index"
     >
-      <div v-if="!anonAccount">
-        <div>
-          {{ member.user.firstname }} {{ member.user.lastname }}
-        </div>
-        <div v-if="member.user.contacts && member.user.contacts[0]">
-          <div v-if="member.user.contacts[0].email">
-            {{ member.user.contacts[0].email }}
-          </div>
-          <div v-if="member.user.contacts[0].phone">
-            {{ member.user.contacts[0].phone }}
-            <span v-if="member.user.contacts[0].phoneExtension">ext. {{ member.user.contacts[0].phoneExtension }}</span>
-          </div>
-        </div>
+      <div>
+        {{ member.user.firstname }} {{ member.user.lastname }}
       </div>
-      <div v-else>
-        {{ member.user.username }}
+      <div v-if="member.user.contacts && member.user.contacts[0]">
+        <div v-if="member.user.contacts[0].email">
+          {{ member.user.contacts[0].email }}
+        </div>
+        <div v-if="member.user.contacts[0].phone">
+          {{ member.user.contacts[0].phone }}
+          <span v-if="member.user.contacts[0].phoneExtension">ext. {{ member.user.contacts[0].phoneExtension }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -33,7 +28,6 @@ import {
   Organization
 } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
-import { AccessType } from '@/util/constants'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
@@ -60,10 +54,6 @@ export default class OrgAdminContact extends Vue {
 
   private get getActiveAdmins (): Member[] {
     return this.activeOrgMembers.filter(member => member.membershipTypeCode === MembershipType.Admin)
-  }
-
-  get anonAccount (): boolean {
-    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
   }
 }
 </script>

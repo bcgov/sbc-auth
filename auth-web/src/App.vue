@@ -74,12 +74,11 @@
 
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
-import { LDFlags, LoginSource, Pages } from '@/util/constants'
+import { LDFlags, Pages } from '@/util/constants'
 import { mapActions, mapState } from 'pinia'
 import { useAppStore, useOrgStore, useUserStore } from '@/stores'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
-import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -211,8 +210,7 @@ export default class App extends Mixins(NextPageMixin) {
   }
 
   private setLogOutUrl () {
-    const authStore = useAuthStore()
-    this.logoutUrl = (authStore.currentLoginSource === LoginSource.BCROS) ? ConfigHelper.getBcrosURL() : ''
+    this.logoutUrl = ''
   }
 
   private destroyed () {

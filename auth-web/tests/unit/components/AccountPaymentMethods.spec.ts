@@ -45,7 +45,7 @@ describe('AccountPaymentMethods.vue', () => {
     userStore.currentUser = {
       firstName: 'test',
       lastName: 'test',
-      loginSource: LoginSource.BCROS
+      loginSource: LoginSource.BCSC
     } as any
     wrapperFactory = (propsData) => {
       return shallowMount(AccountPaymentMethods, {

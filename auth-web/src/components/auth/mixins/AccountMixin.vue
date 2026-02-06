@@ -35,10 +35,6 @@ export default class AccountMixin extends Vue {
     return this.currentOrganization?.accessType === AccessType.REGULAR
   }
 
-  get anonAccount (): boolean {
-    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
-  }
-
   get isGovmAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.GOVM
   }

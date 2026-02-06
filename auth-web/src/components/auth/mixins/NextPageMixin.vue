@@ -1,7 +1,7 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
 import { AccountStatus, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
+import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import { useOrgStore, useUserStore } from '@/stores'
 import { AccountSettings } from '@/models/account-settings'
@@ -71,20 +71,6 @@ export default class NextPageMixin extends Vue {
         } else {
           return dashboardUrl
         }
-      case LoginSource.BCROS: {
-        let bcrosNextStep = '/'
-        if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
-          bcrosNextStep = `/${Pages.USER_PROFILE_TERMS}`
-        } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
-          if ([MembershipType.Coordinator, MembershipType.Admin].includes(this.currentMembership.membershipTypeCode)) {
-            bcrosNextStep = `/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`
-          } else {
-            bcrosNextStep = ConfigHelper.getDirectorSearchURL()
-          }
-        }
-
-        return bcrosNextStep
-      }
       // case LoginSource.IDIR:
       case LoginSource.BCSC: {
         let nextStep = '/'

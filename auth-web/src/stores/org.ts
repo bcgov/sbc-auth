@@ -635,19 +635,6 @@ export const useOrgStore = defineStore('org', () => {
     }
   }
 
-  async function deleteUser (userId: string) {
-    // Send request to update member on server and get result
-    const response = await UserService.deleteAnonymousUser(userId)
-
-    // If no response or error, throw exception to be caught
-    if (!response || response.status !== 204) {
-      throw Error('Unable to remove user')
-    } else {
-      await syncActiveOrgMembers()
-      await syncPendingOrgMembers()
-    }
-  }
-
   async function getAccountAdministrator () {
     const response = await OrgService.getOrgMembers(state.currentOrganization.id, 'ACTIVE')
     const result = response?.data?.members.find((member: Member) => member.membershipTypeCode === MembershipType.Admin)
@@ -1141,7 +1128,6 @@ export const useOrgStore = defineStore('org', () => {
     deactivateOrg,
     leaveTeam,
     updateMember,
-    deleteUser,
     getAccountAdministrator,
     syncActiveOrgMembers,
     syncAddress,

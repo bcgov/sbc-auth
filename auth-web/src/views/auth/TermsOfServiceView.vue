@@ -119,8 +119,8 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
     return this.isGovmUser && !!this.token
   }
 
-  isNotBCROSUserAndHasToken (): boolean {
-    return this.currentUser?.loginSource !== LoginSource.BCROS && !!this.token
+  hasToken (): boolean {
+    return !!this.token
   }
 
   async clickAccepted () {
@@ -146,7 +146,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
       }
       // if there is a token in the url , that means user is in the invitation flow
       // so after TOS , dont create accont , rather let him create profile if he is not bcros user
-      if (this.isNotBCROSUserAndHasToken()) {
+      if (this.hasToken()) {
       // if user is in affidavit flow we need redirect to affidavit upload instead of user profile
         if (affidavitNeeded) {
           await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}/${this.token}`)

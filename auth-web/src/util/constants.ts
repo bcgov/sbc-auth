@@ -46,7 +46,6 @@ export enum Role {
     Basic = 'basic',
     StaffCreateAccounts = 'create_accounts',
     StaffManageAccounts = 'manage_accounts',
-    AnonymousUser = 'anonymous_user',
     StaffViewAccounts = 'view_accounts',
     Tester = 'tester',
     AccountHolder = 'account_holder',
@@ -113,7 +112,6 @@ export enum Pages {
 }
 
 export enum Account {
-    // ANONYMOUS = 'ANONYMOUS',
     PREMIUM = 'PREMIUM',
     BASIC = 'BASIC',
     STAFF = 'STAFF',
@@ -158,7 +156,6 @@ export enum IdpHint {
 }
 
 export enum LoginSource {
-    BCROS = 'BCROS',
     IDIR = 'IDIR',
     BCSC = 'BCSC',
     BCEID = 'BCEID'

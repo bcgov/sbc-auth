@@ -110,7 +110,6 @@ router.beforeEach(async (to, from, next) => {
           case LoginSource.IDIR:
             break
           case LoginSource.BCSC:
-          case LoginSource.BCROS:
           case LoginSource.BCEID: {
             // eslint-disable-next-line no-console
             console.log('[Navigation Guard] Redirecting user to TOS since user has not accepted one')

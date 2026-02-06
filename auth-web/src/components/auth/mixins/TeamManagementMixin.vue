@@ -1,6 +1,6 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
-import { AccessType, LoginSource, SessionStorageKeys } from '@/util/constants'
+import { AccessType, SessionStorageKeys } from '@/util/constants'
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization, UpdateMemberPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
@@ -30,8 +30,7 @@ import { useUserStore } from '@/stores/user'
   methods: {
     ...mapActions(useOrgStore, [
       'updateMember',
-      'leaveTeam',
-      'deleteUser'
+      'leaveTeam'
     ])
   }
 })
@@ -53,7 +52,6 @@ export default class TeamManagementMixin extends Vue {
   protected readonly currentMembership!: Member
   protected readonly currentOrganization!: Organization
   protected readonly updateMember!: (updateMemberPayload: UpdateMemberPayload) => void
-  protected readonly deleteUser!: (userName: string) => void
   protected readonly leaveTeam!: (memberId: number) => void
   protected readonly dissolveTeam!: () => void
   protected readonly currentUser!: KCUserProfile
@@ -135,25 +133,18 @@ export default class TeamManagementMixin extends Vue {
   }
 
   protected async removeMember () {
-    if (this.isAnonymousUser()) {
-      await this.deleteUser(this.memberToBeRemoved.user.username)
-    } else {
-      await this.updateMember({
-        memberId: this.memberToBeRemoved.id,
-        status: MembershipStatus.Inactive
-      })
-    }
+    await this.updateMember({
+      memberId: this.memberToBeRemoved.id,
+      status: MembershipStatus.Inactive
+    })
     this.modal.close()
   }
 
-  isAnonymousUser (): boolean {
-    return this.currentUser?.loginSource === LoginSource.BCROS
-  }
   protected async changeRole () {
     await this.updateMember({
       memberId: this.roleChangeToAction.member.id,
       role: this.roleChangeToAction.targetRole.toString().toUpperCase(),
-      notifyUser: (this.currentUser?.loginSource !== LoginSource.BCROS) ? this.notifyUser : false
+      notifyUser: this.notifyUser
     })
     this.modal.close()
   }
@@ -168,11 +159,7 @@ export default class TeamManagementMixin extends Vue {
   }
 
   protected async leave () {
-    if (this.isAnonymousUser()) {
-      await this.deleteUser(this.currentMembership.user.username)
-    } else {
-      await this.leaveTeam(this.currentMembership.id)
-    }
+    await this.leaveTeam(this.currentMembership.id)
     this.modal.close()
     useAppStore().updateHeader()
     this.$router.push('/leaveteam')

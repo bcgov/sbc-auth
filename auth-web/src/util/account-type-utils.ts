@@ -18,6 +18,7 @@ export const ACCOUNT_TYPE_MAP: EnumDictionary<OrgAccountTypes, OrgMap> = {
   [OrgAccountTypes.GOVN]: {
     accessType: [AccessType.GOVN]
   },
+  // Remove this when API is ready
   [OrgAccountTypes.DIRECTOR_SEARCH]: {
     accessType: [AccessType.ANONYMOUS]
   },

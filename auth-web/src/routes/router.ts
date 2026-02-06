@@ -58,7 +58,6 @@ import RestrictedProductView from '@/views/auth/RestrictedProductView.vue'
 import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import { RouteConfig } from 'vue-router'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
-import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SetupGovmAccountView from '@/views/auth/staff/SetupGovmAccountView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
@@ -743,13 +742,6 @@ export function getRoutes (): RouteConfig[] {
       component: LeaveTeamLandingView,
       props: true,
       meta: { requiresAuth: true }
-    },
-    {
-      path: '/staff-setup-account',
-      name: 'staffsetupaccount',
-      component: SetupAccountView,
-      props: true,
-      meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
     },
     {
       path: '/staff-govm-setup-account',

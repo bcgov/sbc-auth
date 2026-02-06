@@ -192,7 +192,6 @@
 <script lang="ts">
 import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
-import { LoginSource, Pages } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
 import { useOrgStore, useUserStore } from '@/stores'
 import { AccountSettings } from '@/models/account-settings'
@@ -201,6 +200,7 @@ import InfoStepper from '@/components/auth/home/InfoStepper.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/home/LoginBCSC.vue'
 import NameRequestButton from '@/components/auth/home/NameRequestButton.vue'
+import { Pages } from '@/util/constants'
 import SbcAuthMenu from 'sbc-common-components/src/components/SbcAuthMenu.vue'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
 import { User } from '@/models/user'
@@ -223,7 +223,6 @@ export default class HomeView extends Vue {
   @State(useOrgStore) readonly currentMembership!: Member
   private noPasscodeDialog = false
   accountDialog = false
-  private isDirSearchUser: boolean = false
   @Action(useOrgStore) readonly resetCurrentOrganisation!: () => void
   readonly coopAssocUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/' +
   'managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations'
@@ -247,10 +246,6 @@ export default class HomeView extends Vue {
 
   login () {
     this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
-  }
-
-  mounted () {
-    this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
   }
 }
 </script>

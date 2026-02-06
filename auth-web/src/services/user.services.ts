@@ -55,10 +55,6 @@ export default class UserService {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/users/@me`)
   }
 
-  static async deleteAnonymousUser (userId: string): Promise<AxiosResponse<User>> {
-    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(userId)}`)
-  }
-
   static async getMembership (orgId: number): Promise<AxiosResponse<Member>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/orgs/${orgId}/membership`)
   }

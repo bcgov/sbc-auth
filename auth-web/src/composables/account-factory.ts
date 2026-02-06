@@ -20,14 +20,12 @@ export const useAccount = () => {
 
   const isPremiumAccount = computed(() => currentOrganization.value?.orgType === Account.PREMIUM)
   const isRegularAccount = computed(() => currentOrganization.value?.accessType === AccessType.REGULAR)
-  const anonAccount = computed(() => currentOrganization.value?.accessType === AccessType.ANONYMOUS)
   const isGovmAccount = computed(() => currentOrganization.value?.accessType === AccessType.GOVM)
   const isGovnAccount = computed(() => currentOrganization.value?.accessType === AccessType.GOVN)
   const isStaffAccount = computed(() => currentOrganization.value?.orgType === Account.STAFF)
   const isSbcStaffAccount = computed(() => currentOrganization.value?.orgType === Account.SBC_STAFF)
 
   return {
-    anonAccount,
     currentMembership,
     currentOrgAddress,
     currentOrganization,
