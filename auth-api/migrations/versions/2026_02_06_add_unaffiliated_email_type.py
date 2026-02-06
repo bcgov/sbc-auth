@@ -18,6 +18,9 @@ depends_on = None
 
 
 def upgrade():
+    op.alter_column('affiliation_invitation_types', 'code', type_=sa.String(20), existing_type=sa.String(15))
+    op.alter_column('affiliation_invitations', 'type', type_=sa.String(20), existing_type=sa.String(15))
+
     ait = sa.table('affiliation_invitation_types',
                    sa.column('code', String),
                    sa.column('description', String),
@@ -33,3 +36,5 @@ def upgrade():
 def downgrade():
     op.alter_column('affiliation_invitations', 'from_org_id', nullable=False)
     op.execute("DELETE FROM affiliation_invitation_types WHERE code = 'UNAFFILIATED_EMAIL'")
+    op.alter_column('affiliation_invitations', 'type', type_=sa.String(15), existing_type=sa.String(20))
+    op.alter_column('affiliation_invitation_types', 'code', type_=sa.String(15), existing_type=sa.String(20))
