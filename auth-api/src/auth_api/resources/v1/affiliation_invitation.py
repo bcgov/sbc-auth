@@ -98,6 +98,21 @@ def post_affiliation_invitation():
     return response, status
 
 
+@bp.route("/unaffiliated/<string:business_identifier>", methods=["POST"])
+@cross_origin(origins="*", methods=["POST"])
+@_jwt.has_one_of_roles([Role.SYSTEM.value])
+def post_unaffiliated_invitation(business_identifier):
+    """Send an unaffiliated email invitation for the entity."""
+    try:
+        entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+        if not entity:
+            return {"message": f"A business for {business_identifier} was not found."}, HTTPStatus.NOT_FOUND
+        AffiliationInvitationService.create_unaffiliated_email_invitation(entity)
+        return {}, HTTPStatus.CREATED
+    except BusinessException as exception:
+        return {"code": exception.code, "message": exception.message}, exception.status_code
+
+
 @bp.route("/<string:affiliation_invitation_id>", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["GET", "PATCH", "DELETE"])
 @_jwt.requires_auth
