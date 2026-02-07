@@ -24,7 +24,7 @@ def str_to_utc_dt(date: str, add_time: bool):
     naive_dt = dt.datetime.strptime(date, "%Y-%m-%d")
     local_dt = time_zone.localize(naive_dt, is_dst=None)
     if add_time:
-        local_dt = dt.datetime(local_dt.year, local_dt.month, local_dt.day, 23, 59, 59)
+        local_dt = local_dt.replace(hour=23, minute=59, second=59)
     utc_dt = local_dt.astimezone(pytz.utc)
 
     return utc_dt
