@@ -997,7 +997,7 @@ def test_unaffiliated_email_invitation_auth(
     login_source,
     expected_error,
 ):
-    """Verify check_auth_for_invitation blocks create/update/delete for UNAFFILIATED_EMAIL."""
+    """Verify flow for UNAFFILIATED_EMAIL invitations."""
     with patch.object(auth_api.services.affiliation_invitation, "publish_to_mailer"):
         entity = create_test_entity()
         user = factory_user_model(TestUserInfo.user_test)

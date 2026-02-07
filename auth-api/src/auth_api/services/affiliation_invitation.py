@@ -863,3 +863,6 @@ class AffiliationInvitation:
             notification_type=QueueMessageType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
             data=mailer_data.to_dict(),
         )
+
+        # Note this has token response
+        return AffiliationInvitation(affiliation_invitation)
