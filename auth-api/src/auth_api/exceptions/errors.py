@@ -60,6 +60,10 @@ class Error(Enum):
         "The business specified for the affiliation invitation could not be found.",
         HTTPStatus.BAD_REQUEST,
     )
+    AFFILIATION_ALREADY_EXISTS = (
+        "An affiliation already exists for this business.",
+        HTTPStatus.CONFLICT,
+    )
     FAILED_INVITATION = "Failed to dispatch the invitation", HTTPStatus.INTERNAL_SERVER_ERROR
     FAILED_NOTIFICATION = "Failed to dispatch the notification", HTTPStatus.INTERNAL_SERVER_ERROR
     DELETE_FAILED_ONLY_OWNER = (

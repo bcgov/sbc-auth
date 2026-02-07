@@ -16,6 +16,8 @@
 It defines the different types of an Affiliation Invitation.
 """
 
+from sqlalchemy import Column, String
+
 from .base_model import BaseCodeModel
 
 
@@ -23,6 +25,8 @@ class AffiliationInvitationType(BaseCodeModel):  # pylint: disable=too-few-publi
     """This is the Affiliation Invitation Type model for the Auth service."""
 
     __tablename__ = "affiliation_invitation_types"
+
+    code = Column(String(20), primary_key=True)
 
     @classmethod
     def get_default_type(cls):
