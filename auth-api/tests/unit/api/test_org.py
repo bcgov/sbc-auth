@@ -20,6 +20,8 @@ Test-Suite to ensure that the /orgs endpoint is working as expected.
 import json
 import uuid
 from datetime import datetime, timedelta
+
+import pytz
 from http import HTTPStatus
 from unittest.mock import patch
 
@@ -3114,7 +3116,7 @@ def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # p
     """Assert that orgs can be searched by suspended date and suspension reason code."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
 
-    today = datetime.now()
+    today = datetime.now(pytz.timezone("America/Vancouver"))
     yesterday = today - timedelta(days=1)
     last_week = today - timedelta(days=7)
 
