@@ -554,12 +554,29 @@ def test_validate_token_accepted(session, auth_mock, keycloak_mock, business_moc
         assert exception.value.code == Error.ACTIONED_AFFILIATION_INVITATION.name
 
 
-def test_validate_token_exception(session):  # pylint:disable=unused-argument
+@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
+def test_validate_token_exception(session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch):  # pylint:disable=unused-argument
     """Validate the affiliation invitation token with exception."""
-    with pytest.raises(BusinessException) as exception:
-        AffiliationInvitationService.validate_token(None, 1)
+    with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
+        user = factory_user_model(TestUserInfo.user_test)
+        patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
+        from_org_dictionary, to_org_dictionary, entity_dictionary = setup_org_and_entity(user)
 
-    assert exception.value.code == Error.EXPIRED_AFFILIATION_INVITATION.name
+        affiliation_invitation_info = factory_affiliation_invitation(
+            from_org_id=from_org_dictionary["id"],
+            to_org_id=to_org_dictionary["id"],
+            business_identifier=entity_dictionary["business_identifier"],
+        )
+
+        user_invitee = factory_user_model(TestUserInfo.user1)
+        new_invitation = AffiliationInvitationService.create_affiliation_invitation(
+            affiliation_invitation_info, User(user_invitee)
+        ).as_dict()
+
+        with pytest.raises(BusinessException) as exception:
+            AffiliationInvitationService.validate_token(None, new_invitation["id"])
+
+        assert exception.value.code == Error.EXPIRED_AFFILIATION_INVITATION.name
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
