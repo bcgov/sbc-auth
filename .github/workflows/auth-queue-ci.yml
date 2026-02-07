@@ -24,4 +24,4 @@ jobs:
     with:
       app_name: "auth-queue"
       working_directory: "./queue_services/auth-queue"
-      codecov_flag: "auth-queue"
+      codecov_flag: "authqueue"
