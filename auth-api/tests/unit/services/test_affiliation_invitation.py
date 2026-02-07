@@ -1050,8 +1050,12 @@ def test_unaffiliated_email_invitation_auth(
 
 def test_validate_and_get_org_id():
     """Test _validate_and_get_org_id calls check_auth for UNAFFILIATED_EMAIL."""
-    inv = mock.MagicMock(invitation_status_code="PENDING", type="UNAFFILIATED_EMAIL", login_source="BCSC")
-    user_ctx = mock.MagicMock(login_source="BCSC", account_id=5)
+    inv = mock.MagicMock(
+        invitation_status_code=InvitationStatus.PENDING.value,
+        type=AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
+        login_source=LoginSource.BCSC.value,
+    )
+    user_ctx = mock.MagicMock(login_source=LoginSource.BCSC.value, account_id=5)
 
     with mock.patch("auth_api.services.affiliation_invitation.check_auth") as mock_check_auth:
         assert AffiliationInvitationService._validate_and_get_org_id(inv, user_ctx) == 5
