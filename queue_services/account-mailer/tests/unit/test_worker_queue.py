@@ -626,4 +626,4 @@ def test_unaffiliated_email_invitation(app, session, client):
         )
         email_body = mock_send.call_args.args[0].get("content").get("body")
         assert email_body is not None
-        assert context_url in email_body
+        assert "https://localhost.com?preset=bcscUser&amp;token=ABC123" in email_body
