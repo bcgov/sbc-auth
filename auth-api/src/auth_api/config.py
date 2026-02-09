@@ -152,6 +152,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     EMAIL_TOKEN_SECRET_KEY = os.getenv("EMAIL_TOKEN_SECRET_KEY")
     TOKEN_EXPIRY_PERIOD = os.getenv("TOKEN_EXPIRY_PERIOD")
     AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS = os.getenv("AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS", "720")
+    UNAFFILIATED_EMAIL_TOKEN_EXPIRY_PERIOD_MINS = os.getenv("UNAFFILIATED_EMAIL_TOKEN_EXPIRY_PERIOD_MINS", "10080")
     STAFF_ADMIN_EMAIL = os.getenv("STAFF_ADMIN_EMAIL")
 
     # front end serves this image in this name.can be moved to openshift config as well..
@@ -312,6 +313,7 @@ NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
     API_GW_CONSUMER_EMAIL = "test.all.mc@gov.bc.ca"
     WEB_APP_URL = "https://localhost.com"
     BUSINESS_REGISTRY_URL = "https://localhost.com"
+    REGISTRY_HOME_URL = "https://localhost.com"
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

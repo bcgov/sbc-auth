@@ -36,11 +36,11 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     __tablename__ = "affiliation_invitations"
 
     id = Column(Integer, primary_key=True)
-    from_org_id = Column(ForeignKey("orgs.id"), nullable=False, index=True)
+    from_org_id = Column(ForeignKey("orgs.id"), nullable=True, index=True)
     to_org_id = Column(ForeignKey("orgs.id"), nullable=True, index=True)
     entity_id = Column(ForeignKey("entities.id"), nullable=False, index=True)
     affiliation_id = Column(ForeignKey("affiliations.id"), nullable=True, index=True)
-    sender_id = Column(ForeignKey("users.id"), nullable=False)
+    sender_id = Column(ForeignKey("users.id"), nullable=True)
     approver_id = Column(ForeignKey("users.id"), nullable=True)
     recipient_email = Column(String(8000), nullable=True)
     sent_date = Column(DateTime, nullable=False)
@@ -59,11 +59,18 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     to_org = relationship("Org", foreign_keys=[to_org_id], lazy="select")
     affiliation = relationship("Affiliation", foreign_keys=[affiliation_id], lazy="select")
 
+    def _get_expiry_minutes(self):
+        """Get expiry minutes based on invitation type."""
+        config = get_named_config()
+        if self.type == AffiliationInvitationTypeEnum.UNAFFILIATED_EMAIL.value:
+            return int(config.UNAFFILIATED_EMAIL_TOKEN_EXPIRY_PERIOD_MINS)
+        return int(config.AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS)
+
     @hybrid_property
     def expires_on(self):
         """Calculate the expiry date based on the config value."""
         if self.invitation_status_code == InvitationStatuses.PENDING.value:
-            return self.sent_date + timedelta(minutes=int(get_named_config().AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS))
+            return self.sent_date + timedelta(minutes=self._get_expiry_minutes())
         return None
 
     @hybrid_property
@@ -75,9 +82,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
             return self.invitation_status_code
 
         if self.invitation_status_code == InvitationStatuses.PENDING.value:
-            expiry_time = self.sent_date + timedelta(
-                minutes=int(get_named_config().AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS)
-            )
+            expiry_time = self.sent_date + timedelta(minutes=self._get_expiry_minutes())
             if current_time >= expiry_time:
                 return InvitationStatuses.EXPIRED.value
         return self.invitation_status_code
@@ -91,7 +96,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         affiliation_invitation = AffiliationInvitation()
         affiliation_invitation.sender_id = user_id
         affiliation_invitation.affiliation_id = affiliation_id
-        affiliation_invitation.from_org_id = invitation_info["fromOrgId"]
+        affiliation_invitation.from_org_id = invitation_info.get("fromOrgId")
         affiliation_invitation.to_org_id = invitation_info.get("toOrgId")
         affiliation_invitation.entity_id = invitation_info["entityId"]
         affiliation_invitation.recipient_email = invitation_info.get("recipientEmail")

@@ -14,7 +14,7 @@
 """Service for managing Affiliation Invitation data."""
 
 from dataclasses import fields
-from datetime import datetime
+from datetime import UTC, datetime
 from urllib.parse import urlencode
 
 from flask import current_app
@@ -32,7 +32,11 @@ from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models.affiliation import Affiliation as AffiliationModel
-from auth_api.models.dataclass import AffiliationInvitationData, AffiliationInvitationSearch
+from auth_api.models.dataclass import (
+    AffiliationInvitationData,
+    AffiliationInvitationSearch,
+    UnaffiliatedEmailInvitationData,
+)
 from auth_api.models.entity import Entity as EntityModel  # noqa: I001
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
@@ -43,7 +47,14 @@ from auth_api.services.flags import flags
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
+from auth_api.utils.enums import (
+    AccessType,
+    AffiliationInvitationType,
+    InvitationStatus,
+    LoginSource,
+    QueueMessageType,
+    Status,
+)
 from auth_api.utils.roles import ADMIN, CLIENT_AUTH_ROLES, COORDINATOR, STAFF, USER
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import escape_wam_friendly_url
@@ -157,6 +168,35 @@ class AffiliationInvitation:
             result.append(aid)
 
         return result
+
+    @staticmethod
+    def _validate_and_get_org_id(
+        affiliation_invitation: AffiliationInvitationModel,
+        user_from_context: UserContext,
+    ) -> int:
+        """Validate invitation state and resolve the org_id for acceptance."""
+        if affiliation_invitation is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        if affiliation_invitation.invitation_status_code == InvitationStatus.ACCEPTED.value:
+            raise BusinessException(Error.ACTIONED_AFFILIATION_INVITATION, None)
+        if affiliation_invitation.invitation_status_code == InvitationStatus.EXPIRED.value:
+            raise BusinessException(Error.EXPIRED_AFFILIATION_INVITATION, None)
+        if affiliation_invitation.invitation_status_code == InvitationStatus.FAILED.value:
+            raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_STATE, None)
+
+        if affiliation_invitation.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value:
+            # Ideally we're just looking for BCSC for now.
+            if user_from_context.login_source != affiliation_invitation.login_source:
+                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+            check_auth(org_id=user_from_context.account_id, one_of_roles=(ADMIN, COORDINATOR, USER))
+            org_id = user_from_context.account_id
+        else:
+            org_id = affiliation_invitation.from_org_id
+
+        if not org_id:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        return int(org_id)
 
     @staticmethod
     def _validate_prerequisites(
@@ -274,7 +314,8 @@ class AffiliationInvitation:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         AffiliationInvitation.check_auth_for_invitation(
-            invitation_type=affiliation_invitation_type, from_org_id=from_org_id
+            invitation_type=affiliation_invitation_type,
+            from_org_id=from_org_id,
         )
 
         entity, from_org, business = AffiliationInvitation._validate_prerequisites(
@@ -645,11 +686,20 @@ class AffiliationInvitation:
     def validate_token(token, affiliation_invitation_id: int):
         """Check whether the passed token is valid."""
         serializer = URLSafeTimedSerializer(CONFIG.EMAIL_TOKEN_SECRET_KEY)
-        token_valid_for = (
-            int(CONFIG.AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS) * 60
-            if CONFIG.AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS
-            else 12 * 60 * 60  # 12 hours
-        )
+
+        affiliation_invitation = AffiliationInvitationModel.find_invitation_by_id(affiliation_invitation_id)
+        if affiliation_invitation is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        if affiliation_invitation.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value:
+            token_valid_for = int(CONFIG.UNAFFILIATED_EMAIL_TOKEN_EXPIRY_PERIOD_MINS) * 60
+        else:
+            token_valid_for = (
+                int(CONFIG.AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS) * 60
+                if CONFIG.AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS
+                else 12 * 60 * 60  # 12 hours
+            )
+
         try:
             token_payload = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT, max_age=token_valid_for)
             token_invitation_id = token_payload.get("id")
@@ -661,12 +711,6 @@ class AffiliationInvitation:
         except Exception as e:  # noqa: E722
             raise BusinessException(Error.EXPIRED_AFFILIATION_INVITATION, None) from e
 
-        affiliation_invitation: AffiliationInvitationModel = AffiliationInvitationModel.find_invitation_by_id(
-            affiliation_invitation_id
-        )
-
-        if affiliation_invitation is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
         if affiliation_invitation.invitation_status_code == InvitationStatus.ACCEPTED.value:
             raise BusinessException(Error.ACTIONED_AFFILIATION_INVITATION, None)
         if affiliation_invitation.invitation_status_code == InvitationStatus.EXPIRED.value:
@@ -683,28 +727,28 @@ class AffiliationInvitation:
         # pylint:disable=unused-argument
         user: UserService,
         origin,  # noqa: ARG004
-        **kwargs,  # noqa: ARG004
+        **kwargs,
     ):
         """Add an affiliation from the affiliation invitation."""
         current_app.logger.debug(">accept_affiliation_invitation")
-        affiliation_invitation: AffiliationInvitationModel = AffiliationInvitationModel.find_invitation_by_id(
-            affiliation_invitation_id
-        )
+        user_from_context: UserContext = kwargs["user_context"]
+        affiliation_invitation = AffiliationInvitationModel.find_invitation_by_id(affiliation_invitation_id)
 
-        if affiliation_invitation is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-        if affiliation_invitation.invitation_status_code == InvitationStatus.ACCEPTED.value:
-            raise BusinessException(Error.ACTIONED_AFFILIATION_INVITATION, None)
-        if affiliation_invitation.invitation_status_code == InvitationStatus.EXPIRED.value:
-            raise BusinessException(Error.EXPIRED_AFFILIATION_INVITATION, None)
-        if affiliation_invitation.invitation_status_code == InvitationStatus.FAILED.value:
-            raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_STATE, None)
-
-        org_id = affiliation_invitation.from_org_id
+        org_id = AffiliationInvitation._validate_and_get_org_id(affiliation_invitation, user_from_context)
+        # This was previously set to empty, because we didn't know their org id at the time.
+        if affiliation_invitation.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value:
+            affiliation_invitation.from_org_id = org_id
+            if AffiliationModel.find_affiliations_by_entity_id(affiliation_invitation.entity_id):
+                raise BusinessException(Error.AFFILIATION_ALREADY_EXISTS, None)
+            AffiliationInvitationModel.query.filter(
+                AffiliationInvitationModel.entity_id == affiliation_invitation.entity_id,
+                AffiliationInvitationModel.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
+                AffiliationInvitationModel.invitation_status_code == InvitationStatus.PENDING.value,
+                AffiliationInvitationModel.id != affiliation_invitation.id,
+            ).update({AffiliationInvitationModel.invitation_status_code: InvitationStatus.EXPIRED.value})
         entity_id = affiliation_invitation.entity_id
 
         if not (affiliation_model := AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)):
-            # Create an affiliation with to_org_id
             affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=None)
             affiliation_model.save()
             entity_model = EntityModel.find_by_entity_id(entity_id)
@@ -768,7 +812,7 @@ class AffiliationInvitation:
         invitation_type: AffiliationInvitationType = None,
         from_org_id: int = None,
     ):
-        """Check if the user has the right to view the invitation."""
+        """Check if the user has the right to perform the action on the invitation."""
         invitation_type = invitation_type or AffiliationInvitationType.from_value(invitation.type)
         from_org_id = from_org_id or invitation.from_org_id
         match invitation_type:
@@ -776,3 +820,76 @@ class AffiliationInvitation:
                 check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
             case _:
                 raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
+
+    @staticmethod
+    def send_unaffiliated_email_invitation(entity: EntityService):
+        """Send an UNAFFILIATED_EMAIL affiliation invitation to entity contact. SYSTEM access only.
+
+        If a pending invitation already exists for the same email, update it and resend.
+        If the email has changed, create a new invitation row.
+        """
+        if AffiliationModel.find_affiliations_by_entity_id(entity.identifier):
+            raise BusinessException(Error.AFFILIATION_ALREADY_EXISTS, None)
+
+        contact = entity.get_contact()
+        if not contact or not contact.email:
+            raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
+
+        existing = AffiliationInvitationModel.query.filter_by(
+            entity_id=entity.identifier,
+            recipient_email=contact.email,
+            type=AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
+            invitation_status_code=InvitationStatus.PENDING.value,
+        ).first()
+
+        if existing:
+            affiliation_invitation = existing
+            affiliation_invitation.sent_date = datetime.now(tz=UTC)
+        else:
+            invitation_info = {
+                "entityId": entity.identifier,
+                "recipientEmail": contact.email,
+                "type": AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
+                "additionalMessage": "This business was migrated and requires account affiliation.",
+            }
+            affiliation_invitation = AffiliationInvitationModel.create_from_dict(invitation_info, user_id=None)
+
+        confirmation_token = AffiliationInvitation.generate_confirmation_token(
+            affiliation_invitation_id=affiliation_invitation.id,
+            from_org_id=None,
+            to_org_id=None,
+            business_identifier=entity.business_identifier,
+        )
+        affiliation_invitation.token = confirmation_token
+        # This is required for now, because unsure how to handle BCEID users who are unvalidated.
+        affiliation_invitation.login_source = LoginSource.BCSC.value
+        affiliation_invitation.save()
+
+        token = RestService.get_service_account_token(
+            config_id="ENTITY_SVC_CLIENT_ID",
+            config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
+        )
+        business = AffiliationInvitation._get_business_details(entity.business_identifier, token)
+        business_name = business["business"]["legalName"]
+        if business["business"]["legalType"] in ["SP", "GP"]:
+            business_name = AffiliationInvitation.get_business_name_from_alternative_name(
+                business, business_name, entity.business_identifier
+            )
+
+        registry_home_url = current_app.config.get("REGISTRY_HOME_URL")
+        context_url = f"{registry_home_url}?preset=bcscUser&token={confirmation_token}"
+
+        mailer_data = UnaffiliatedEmailInvitationData(
+            business_name=business_name,
+            email_addresses=contact.email,
+            business_identifier=entity.business_identifier,
+            token=confirmation_token,
+            context_url=context_url,
+        )
+        publish_to_mailer(
+            notification_type=QueueMessageType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
+            data=mailer_data.to_dict(),
+        )
+
+        # Note this has token response
+        return AffiliationInvitation(affiliation_invitation)

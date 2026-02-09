@@ -22,8 +22,11 @@ from http import HTTPStatus
 
 import pytest
 
+from auth_api.exceptions.errors import Error
+from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
+from auth_api.services import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.enums import InvitationStatus
 from auth_api.utils.util import mask_email
@@ -1044,3 +1047,184 @@ def assert_masked_email(unmasked_email: str, masked_email: str):
     """Assert the recipient email is masked."""
     assert masked_email != unmasked_email
     assert masked_email == mask_email(unmasked_email)
+
+
+def setup_entity_with_contact(client, jwt, entity_info=TestEntityInfo.entity_lear_mock):
+    """Set up an entity with a contact for unaffiliated email invitation tests."""
+    headers_entity = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv_entity = client.post(
+        "/api/v1/entities", data=json.dumps(entity_info), headers=headers_entity, content_type="application/json"
+    )
+    client.post(
+        "/api/v1/entities/{}/contacts".format(entity_info["businessIdentifier"]),
+        headers=headers_entity,
+        data=json.dumps(TestContactInfo.contact1),
+        content_type="application/json",
+    )
+    return json.loads(rv_entity.data)["businessIdentifier"]
+
+
+def test_send_unaffiliated_email_invitation(
+    client, jwt, session, keycloak_mock, business_mock, mock_service_account_token
+):
+    """Assert that an unaffiliated email invitation can be created via POST."""
+    business_identifier = setup_entity_with_contact(client, jwt)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+
+    rv = client.post(
+        f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+
+
+def test_send_unaffiliated_email_invitation_idempotent(
+    client, jwt, session, keycloak_mock, business_mock, mock_service_account_token
+):
+    """Assert that calling send twice returns CREATED both times (idempotent)."""
+    business_identifier = setup_entity_with_contact(client, jwt)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+
+    rv1 = client.post(
+        f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv1.status_code == HTTPStatus.CREATED
+
+    rv2 = client.post(
+        f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv2.status_code == HTTPStatus.CREATED
+
+
+def test_accept_unaffiliated_email_invitation(
+    client, jwt, session, keycloak_mock, business_mock, entity_mapping_mock, mock_service_account_token
+):
+    """Assert that an unaffiliated email invitation can be accepted via token endpoint."""
+    business_identifier = setup_entity_with_contact(client, jwt)
+    system_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.post(
+        f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        headers=system_headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+
+    user_claims = {**TestJwtClaims.public_user_role, "loginSource": "BCSC"}
+    user_headers = factory_auth_header(jwt=jwt, claims=user_claims)
+    client.post("/api/v1/users", headers=user_headers, content_type="application/json")
+    rv_org = client.post(
+        "/api/v1/orgs",
+        data=json.dumps(TestOrgInfo.org1),
+        headers=user_headers,
+        content_type="application/json",
+    )
+    org_id = json.loads(rv_org.data)["id"]
+
+    entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+    invitations = AffiliationInvitationModel.find_invitations_by_entity(entity.identifier)
+    invitation_id = invitations[0].id
+
+    affiliation_invitation_token = AffiliationInvitationService.generate_confirmation_token(
+        invitation_id, None, None, business_identifier
+    )
+
+    accept_headers = {**factory_auth_header(jwt=jwt, claims=user_claims), "Account-Id": str(org_id)}
+    rv_accept = client.put(
+        f"/api/v1/affiliationInvitations/{invitation_id}/token/{affiliation_invitation_token}",
+        headers=accept_headers,
+        content_type="application/json",
+    )
+    assert rv_accept.status_code == HTTPStatus.OK
+    result = json.loads(rv_accept.data)
+    assert result["status"] == InvitationStatus.ACCEPTED.value
+
+
+def test_send_after_accept_raises_affiliation_exists(
+    client, jwt, session, keycloak_mock, business_mock, entity_mapping_mock, mock_service_account_token
+):
+    """Assert that send after acceptance raises AFFILIATION_ALREADY_EXISTS and expired invitations cannot be accepted."""
+    business_identifier = setup_entity_with_contact(client, jwt)
+    system_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    headers_entity = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+
+    # Send invitation #1 (email: foo@bar.com)
+    rv = client.post(
+        f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        headers=system_headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+
+    # Change contact email and send invitation #2 (email: bar@foo.com) — creates a new row
+    client.put(
+        f"/api/v1/entities/{business_identifier}/contacts",
+        headers=headers_entity,
+        data=json.dumps(TestContactInfo.contact2),
+        content_type="application/json",
+    )
+    rv = client.post(
+        f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        headers=system_headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+
+    user_claims = {**TestJwtClaims.public_user_role, "loginSource": "BCSC"}
+    user_headers = factory_auth_header(jwt=jwt, claims=user_claims)
+    client.post("/api/v1/users", headers=user_headers, content_type="application/json")
+    rv_org = client.post(
+        "/api/v1/orgs",
+        data=json.dumps(TestOrgInfo.org1),
+        headers=user_headers,
+        content_type="application/json",
+    )
+    org_id = json.loads(rv_org.data)["id"]
+
+    entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+    invitations = AffiliationInvitationModel.find_invitations_by_entity(entity.identifier)
+    invitation_1 = next(i for i in invitations if i.recipient_email == TestContactInfo.contact1["email"])
+    invitation_2 = next(i for i in invitations if i.recipient_email == TestContactInfo.contact2["email"])
+
+    token_1 = invitation_1.token
+    token_2 = invitation_2.token
+
+    # Accept invitation #1 — should expire invitation #2
+    accept_headers = {**factory_auth_header(jwt=jwt, claims=user_claims), "Account-Id": str(org_id)}
+    rv_accept = client.put(
+        f"/api/v1/affiliationInvitations/{invitation_1.id}/token/{token_1}",
+        headers=accept_headers,
+        content_type="application/json",
+    )
+    assert rv_accept.status_code == HTTPStatus.OK
+
+    # Send again — should fail because affiliation exists
+    rv_send = client.post(
+        f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        headers=system_headers,
+        content_type="application/json",
+    )
+    assert rv_send.status_code == HTTPStatus.CONFLICT
+    result = json.loads(rv_send.data)
+    assert result["code"] == Error.AFFILIATION_ALREADY_EXISTS.name
+
+    rv_delete = client.delete(
+        f"/api/v1/orgs/{org_id}/affiliations/{business_identifier}",
+        headers=user_headers,
+        content_type="application/json",
+    )
+    assert rv_delete.status_code == HTTPStatus.OK
+
+    # Try to accept invitation #2 — should be rejected because it was expired
+    rv_accept_2 = client.put(
+        f"/api/v1/affiliationInvitations/{invitation_2.id}/token/{token_2}",
+        headers=accept_headers,
+        content_type="application/json",
+    )
+    assert rv_accept_2.status_code == HTTPStatus.BAD_REQUEST
+    result = json.loads(rv_accept_2.data)
+    assert result["code"] == Error.EXPIRED_AFFILIATION_INVITATION.name

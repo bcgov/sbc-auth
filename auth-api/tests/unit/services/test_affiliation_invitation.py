@@ -24,6 +24,7 @@ import pytest
 from freezegun import freeze_time
 from sbc_common_components.utils.enums import QueueMessageTypes
 
+import auth_api.services.affiliation_invitation
 import auth_api.services.authorization as auth
 import auth_api.utils.account_mailer
 from auth_api.exceptions import BusinessException
@@ -39,8 +40,7 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
 from auth_api.utils import roles
-from auth_api.utils.enums import InvitationStatus
-from tests.conftest import mock_token
+from auth_api.utils.enums import AffiliationInvitationType, InvitationStatus, LoginSource, QueueMessageType
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_affiliation_invitation,
@@ -170,7 +170,6 @@ def test_get_business_name_from_alternative_name(business_data, default_name, bu
     assert result == expected_name
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 @pytest.mark.parametrize(
     "business_entities,expected_names",
     [
@@ -240,7 +239,9 @@ def test_get_business_name_from_alternative_name(business_data, default_name, bu
         ),
     ],
 )
-def test_enrich_affiliation_invitations_with_business_name_logic(monkeypatch, business_entities, expected_names):
+def test_enrich_affiliation_invitations_with_business_name_logic(
+    monkeypatch, business_entities, expected_names, mock_service_account_token
+):
     """Test that enrich_affiliation_invitations_dict_list_with_business_data uses correct names for SP/GP firms."""
 
     # Mock the _get_multiple_business_details method to return our test data
@@ -286,8 +287,7 @@ def test_enrich_affiliation_invitations_empty_list():
     assert result == []
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_enrich_affiliation_invitations_missing_business_entity(monkeypatch):
+def test_enrich_affiliation_invitations_missing_business_entity(monkeypatch, mock_service_account_token):
     """Test handling when business entity is not found in the response."""
 
     # Mock to return empty list (no matching business entities)
@@ -319,8 +319,7 @@ def test_enrich_affiliation_invitations_missing_business_entity(monkeypatch):
     assert result[0].entity is None
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token):  # pylint:disable=unused-argument
     """Assert that the Affiliation Invitation is exported correctly as a dictionary."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         user = factory_user_model()
@@ -348,8 +347,9 @@ def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch):
         ("uuid"),
     ],
 )
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_create_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock, monkeypatch, create_org_with):  # pylint:disable=unused-argument
+def test_create_affiliation_invitation(
+    session, auth_mock, keycloak_mock, business_mock, monkeypatch, create_org_with, mock_service_account_token
+):  # pylint:disable=unused-argument
     """Assert that an Affiliation Invitation can be created."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -372,8 +372,9 @@ def test_create_affiliation_invitation(session, auth_mock, keycloak_mock, busine
         assert invitation_dictionary["id"]
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_find_affiliation_invitation_by_id(session, auth_mock, keycloak_mock, business_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_find_affiliation_invitation_by_id(
+    session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token
+):  # pylint:disable=unused-argument
     """Find an existing affiliation invitation with the provided id."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -402,8 +403,9 @@ def test_find_invitation_by_id_exception(session, auth_mock):  # pylint:disable=
     assert affiliation_invitation is None
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_delete_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_delete_affiliation_invitation(
+    session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token
+):  # pylint:disable=unused-argument
     """Delete the specified affiliation invitation."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -424,9 +426,8 @@ def test_delete_affiliation_invitation(session, auth_mock, keycloak_mock, busine
         assert invitation is None
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_delete_accepted_affiliation_invitation(
-    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch
+    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch, mock_service_account_token
 ):  # pylint:disable=unused-argument
     """Delete the specified accepted affiliation invitation."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
@@ -464,8 +465,9 @@ def test_delete_affiliation_invitation_exception(session, auth_mock):  # pylint:
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_update_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_update_affiliation_invitation(
+    session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token
+):  # pylint:disable=unused-argument
     """Update the specified affiliation invitation with new data."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -485,8 +487,9 @@ def test_update_affiliation_invitation(session, auth_mock, keycloak_mock, busine
         assert updated_invitation["status"] == "PENDING"
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_update_invitation_verify_different_tokens(session, auth_mock, keycloak_mock, business_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_update_invitation_verify_different_tokens(
+    session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token
+):  # pylint:disable=unused-argument
     """Update the specified affiliation invitation to check for token difference."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -521,8 +524,9 @@ def test_generate_confirmation_token(session):  # pylint:disable=unused-argument
     assert confirmation_token is not None
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_validate_token_accepted(session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_validate_token_accepted(
+    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch, mock_service_account_token
+):  # pylint:disable=unused-argument
     """Validate invalid invitation token."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -554,17 +558,34 @@ def test_validate_token_accepted(session, auth_mock, keycloak_mock, business_moc
         assert exception.value.code == Error.ACTIONED_AFFILIATION_INVITATION.name
 
 
-def test_validate_token_exception(session):  # pylint:disable=unused-argument
+def test_validate_token_exception(
+    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch, mock_service_account_token
+):  # pylint:disable=unused-argument
     """Validate the affiliation invitation token with exception."""
-    with pytest.raises(BusinessException) as exception:
-        AffiliationInvitationService.validate_token(None, 1)
+    with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
+        user = factory_user_model(TestUserInfo.user_test)
+        patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
+        from_org_dictionary, to_org_dictionary, entity_dictionary = setup_org_and_entity(user)
 
-    assert exception.value.code == Error.EXPIRED_AFFILIATION_INVITATION.name
+        affiliation_invitation_info = factory_affiliation_invitation(
+            from_org_id=from_org_dictionary["id"],
+            to_org_id=to_org_dictionary["id"],
+            business_identifier=entity_dictionary["business_identifier"],
+        )
+
+        user_invitee = factory_user_model(TestUserInfo.user1)
+        new_invitation = AffiliationInvitationService.create_affiliation_invitation(
+            affiliation_invitation_info, User(user_invitee)
+        ).as_dict()
+
+        with pytest.raises(BusinessException) as exception:
+            AffiliationInvitationService.validate_token(None, new_invitation["id"])
+
+        assert exception.value.code == Error.EXPIRED_AFFILIATION_INVITATION.name
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_accept_affiliation_invitation(
-    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch
+    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch, mock_service_account_token
 ):  # pylint:disable=unused-argument
     """Accept the affiliation invitation and add the affiliation from the invitation."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
@@ -603,9 +624,8 @@ def test_accept_affiliation_invitation(
             assert affiliation["id"] == invitation["affiliation_id"]
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_accept_invitation_exceptions(
-    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch
+    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch, mock_service_account_token
 ):  # pylint:disable=unused-argument
     """Accept the affiliation invitation exceptions."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
@@ -653,8 +673,9 @@ def test_accept_invitation_exceptions(
             assert exception.value.code == Error.EXPIRED_AFFILIATION_INVITATION.name
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_get_invitations_by_from_org_id(session, auth_mock, keycloak_mock, business_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_get_invitations_by_from_org_id(
+    session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token
+):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided from org id."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
@@ -679,8 +700,9 @@ def test_get_invitations_by_from_org_id(session, auth_mock, keycloak_mock, busin
         assert len(invitations) == 1
 
 
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_get_invitations_by_to_org_id(session, auth_mock, keycloak_mock, business_mock, monkeypatch):  # pylint:disable=unused-argument
+def test_get_invitations_by_to_org_id(
+    session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token
+):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided to org id."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
@@ -903,9 +925,16 @@ def test_send_affiliation_invitation_request_refused(
         ("test user is org user", roles.USER, True),
     ],
 )
-@mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
 def test_get_all_invitations_with_details_related_to_org(
-    session, auth_mock, keycloak_mock, business_mock, monkeypatch, test_name, member_type, expect_request_invites
+    session,
+    auth_mock,
+    keycloak_mock,
+    business_mock,
+    monkeypatch,
+    test_name,
+    member_type,
+    expect_request_invites,
+    mock_service_account_token,
 ):
     """Verify REQUEST affiliation invitations are returned only when user is org ADMIN/COORDINATOR."""
     # setup an org
@@ -952,3 +981,114 @@ def test_get_all_invitations_with_details_related_to_org(
         assert len(result) == 2
     else:
         assert result == []
+
+
+@pytest.mark.parametrize(
+    "operation,login_source,expected_error",
+    [
+        # UNAFFILIATED_EMAIL blocked by check_auth_for_invitation for create/update/delete
+        ("create", None, Error.INVALID_AFFILIATION_INVITATION_TYPE),
+        ("update", None, Error.INVALID_AFFILIATION_INVITATION_TYPE),
+        ("delete", None, Error.INVALID_AFFILIATION_INVITATION_TYPE),
+        # UNAFFILIATED_EMAIL accept checks login_source
+        ("accept", LoginSource.BCSC.value, None),
+        ("accept", LoginSource.BCEID.value, Error.INVALID_USER_CREDENTIALS),
+        ("accept", LoginSource.STAFF.value, Error.INVALID_USER_CREDENTIALS),
+        ("accept", LoginSource.BCROS.value, Error.INVALID_USER_CREDENTIALS),
+    ],
+)
+def test_unaffiliated_email_invitation_auth(
+    session,
+    auth_mock,
+    keycloak_mock,
+    business_mock,
+    entity_mapping_mock,
+    monkeypatch,
+    mock_service_account_token,
+    operation,
+    login_source,
+    expected_error,
+):
+    """Verify flow for UNAFFILIATED_EMAIL invitations."""
+    with patch.object(auth_api.services.affiliation_invitation, "publish_to_mailer"):
+        entity = create_test_entity()
+        user = factory_user_model(TestUserInfo.user_test)
+        patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
+        org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+        org_id = org.as_dict()["id"]
+
+        patch_token_info(
+            {
+                "sub": user.keycloak_guid,
+                "idp_userid": user.idp_userid,
+                "loginSource": login_source,
+                "Account-Id": org_id,
+            },
+            monkeypatch,
+        )
+
+        if expected_error:
+            with pytest.raises(BusinessException) as exception:
+                if operation == "create":
+                    AffiliationInvitationService.create_affiliation_invitation(
+                        {
+                            "fromOrgId": org_id,
+                            "businessIdentifier": entity.as_dict()["business_identifier"],
+                            "type": AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
+                        },
+                        User(user),
+                    )
+                elif operation == "update":
+                    invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
+                    invitation.update_affiliation_invitation(User(user), {})
+                elif operation == "delete":
+                    invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
+                    AffiliationInvitationService.delete_affiliation_invitation(invitation.as_dict()["id"])
+                elif operation == "accept":
+                    invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
+                    AffiliationInvitationService.accept_affiliation_invitation(
+                        invitation.as_dict()["id"], User(user), ""
+                    )
+            assert exception.value.code == expected_error.name
+        else:
+            invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
+            result = AffiliationInvitationService.accept_affiliation_invitation(
+                invitation.as_dict()["id"], User(user), ""
+            )
+            assert result.as_dict()["status"] == InvitationStatus.ACCEPTED.value
+
+
+@patch.object(auth_api.services.affiliation_invitation, "publish_to_mailer")
+def test_send_unaffiliated_email_invitation_mailer_data(
+    publish_to_mailer_mock, session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token
+):
+    """Verify UNAFFILIATED_EMAIL - data for email is correctly generated with context_url."""
+    entity = create_test_entity()
+
+    AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
+
+    publish_to_mailer_mock.assert_called_once()
+    call_kwargs = publish_to_mailer_mock.call_args
+    assert call_kwargs[1]["notification_type"] == QueueMessageType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value
+
+    data = call_kwargs[1]["data"]
+    assert data["businessName"] == "BarFoo, Inc."
+    assert data["emailAddresses"] == "foo@bar.com"
+    assert data["businessIdentifier"] == entity.as_dict()["business_identifier"]
+    assert data["contextUrl"].startswith("https://localhost.com?preset=bcscUser&token=")
+    assert data["token"] == data["contextUrl"].split("token=")[1]
+
+
+def test_validate_and_get_org_id():
+    """Test _validate_and_get_org_id calls check_auth for UNAFFILIATED_EMAIL."""
+    inv = mock.MagicMock(
+        invitation_status_code=InvitationStatus.PENDING.value,
+        type=AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
+        login_source=LoginSource.BCSC.value,
+    )
+    user_ctx = mock.MagicMock(login_source=LoginSource.BCSC.value, account_id=5)
+
+    with mock.patch("auth_api.services.affiliation_invitation.check_auth") as mock_check_auth:
+        assert AffiliationInvitationService._validate_and_get_org_id(inv, user_ctx) == 5
+        mock_check_auth.assert_called_once()
+        assert mock_check_auth.call_args[1]["org_id"] == 5
