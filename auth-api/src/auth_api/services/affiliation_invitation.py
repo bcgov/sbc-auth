@@ -14,7 +14,7 @@
 """Service for managing Affiliation Invitation data."""
 
 from dataclasses import fields
-from datetime import datetime
+from datetime import UTC, datetime
 from urllib.parse import urlencode
 
 from flask import current_app
@@ -738,6 +738,14 @@ class AffiliationInvitation:
         # This was previously set to empty, because we didn't know their org id at the time.
         if affiliation_invitation.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value:
             affiliation_invitation.from_org_id = org_id
+            if AffiliationModel.find_affiliations_by_entity_id(affiliation_invitation.entity_id):
+                raise BusinessException(Error.AFFILIATION_ALREADY_EXISTS, None)
+            AffiliationInvitationModel.query.filter(
+                AffiliationInvitationModel.entity_id == affiliation_invitation.entity_id,
+                AffiliationInvitationModel.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
+                AffiliationInvitationModel.invitation_status_code == InvitationStatus.PENDING.value,
+                AffiliationInvitationModel.id != affiliation_invitation.id,
+            ).update({AffiliationInvitationModel.invitation_status_code: InvitationStatus.EXPIRED.value})
         entity_id = affiliation_invitation.entity_id
 
         if not (affiliation_model := AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)):
@@ -814,8 +822,12 @@ class AffiliationInvitation:
                 raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
 
     @staticmethod
-    def create_unaffiliated_email_invitation(entity: EntityService):
-        """Create an UNAFFILIATED_EMAIL affiliation invitation and send email to entity contact. SYSTEM access only."""
+    def send_unaffiliated_email_invitation(entity: EntityService):
+        """Send an UNAFFILIATED_EMAIL affiliation invitation to entity contact. SYSTEM access only.
+
+        If a pending invitation already exists for the same email, update it and resend.
+        If the email has changed, create a new invitation row.
+        """
         if AffiliationModel.find_affiliations_by_entity_id(entity.identifier):
             raise BusinessException(Error.AFFILIATION_ALREADY_EXISTS, None)
 
@@ -823,13 +835,24 @@ class AffiliationInvitation:
         if not contact or not contact.email:
             raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
 
-        invitation_info = {
-            "entityId": entity.identifier,
-            "recipientEmail": contact.email,
-            "type": AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
-            "additionalMessage": "This business was migrated and requires account affiliation.",
-        }
-        affiliation_invitation = AffiliationInvitationModel.create_from_dict(invitation_info, user_id=None)
+        existing = AffiliationInvitationModel.query.filter_by(
+            entity_id=entity.identifier,
+            recipient_email=contact.email,
+            type=AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
+            invitation_status_code=InvitationStatus.PENDING.value,
+        ).first()
+
+        if existing:
+            affiliation_invitation = existing
+            affiliation_invitation.sent_date = datetime.now(tz=UTC)
+        else:
+            invitation_info = {
+                "entityId": entity.identifier,
+                "recipientEmail": contact.email,
+                "type": AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
+                "additionalMessage": "This business was migrated and requires account affiliation.",
+            }
+            affiliation_invitation = AffiliationInvitationModel.create_from_dict(invitation_info, user_id=None)
 
         confirmation_token = AffiliationInvitation.generate_confirmation_token(
             affiliation_invitation_id=affiliation_invitation.id,

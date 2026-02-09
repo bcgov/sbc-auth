@@ -36,6 +36,16 @@ def mock_token(config_id="", config_secret=""):
     return "TOKEN...."
 
 
+@pytest.fixture()
+def mock_service_account_token():
+    """Mock the RestService.get_service_account_token used by affiliation invitation service."""
+    with patch(
+        "auth_api.services.affiliation_invitation.RestService.get_service_account_token",
+        mock_token,
+    ):
+        yield
+
+
 @pytest.fixture(scope="session", autouse=True)
 def app():
     """Return a session-wide application configured in TEST mode."""
