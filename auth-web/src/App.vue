@@ -47,7 +47,7 @@
         class="pa-0 ma-0"
         tile
       >
-        <div class="banner-content d-flex align-center">
+        <div class="banner-content d-flex align-start">
           <v-icon
             class="banner-icon"
             size="28"
