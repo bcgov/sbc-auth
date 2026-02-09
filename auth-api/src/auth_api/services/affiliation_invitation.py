@@ -876,11 +876,15 @@ class AffiliationInvitation:
                 business, business_name, entity.business_identifier
             )
 
+        registry_home_url = current_app.config.get("REGISTRY_HOME_URL")
+        context_url = f"{registry_home_url}?preset=bcscUser&token={confirmation_token}"
+
         mailer_data = UnaffiliatedEmailInvitationData(
             business_name=business_name,
             email_addresses=contact.email,
             business_identifier=entity.business_identifier,
             token=confirmation_token,
+            context_url=context_url,
         )
         publish_to_mailer(
             notification_type=QueueMessageType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,

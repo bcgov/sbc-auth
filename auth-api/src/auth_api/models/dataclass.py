@@ -218,6 +218,7 @@ class UnaffiliatedEmailInvitationData(Serializable):
     email_addresses: str
     business_identifier: str
     token: str
+    context_url: str
 
 
 @dataclass

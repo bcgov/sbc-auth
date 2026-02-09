@@ -313,6 +313,7 @@ NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
     API_GW_CONSUMER_EMAIL = "test.all.mc@gov.bc.ca"
     WEB_APP_URL = "https://localhost.com"
     BUSINESS_REGISTRY_URL = "https://localhost.com"
+    REGISTRY_HOME_URL = "https://localhost.com"
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

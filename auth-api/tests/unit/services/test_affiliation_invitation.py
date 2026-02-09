@@ -24,6 +24,7 @@ import pytest
 from freezegun import freeze_time
 from sbc_common_components.utils.enums import QueueMessageTypes
 
+import auth_api.services.affiliation_invitation
 import auth_api.services.authorization as auth
 import auth_api.utils.account_mailer
 from auth_api.exceptions import BusinessException
@@ -39,7 +40,7 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
 from auth_api.utils import roles
-from auth_api.utils.enums import AffiliationInvitationType, InvitationStatus, LoginSource
+from auth_api.utils.enums import AffiliationInvitationType, InvitationStatus, LoginSource, QueueMessageType
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_affiliation_invitation,
@@ -1055,6 +1056,27 @@ def test_unaffiliated_email_invitation_auth(
                 invitation.as_dict()["id"], User(user), ""
             )
             assert result.as_dict()["status"] == InvitationStatus.ACCEPTED.value
+
+
+@patch.object(auth_api.services.affiliation_invitation, "publish_to_mailer")
+def test_send_unaffiliated_email_invitation_mailer_data(
+    publish_to_mailer_mock, session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token
+):
+    """Verify UNAFFILIATED_EMAIL - data for email is correctly generated with context_url."""
+    entity = create_test_entity()
+
+    AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
+
+    publish_to_mailer_mock.assert_called_once()
+    call_kwargs = publish_to_mailer_mock.call_args
+    assert call_kwargs[1]["notification_type"] == QueueMessageType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value
+
+    data = call_kwargs[1]["data"]
+    assert data["businessName"] == "BarFoo, Inc."
+    assert data["emailAddresses"] == "foo@bar.com"
+    assert data["businessIdentifier"] == entity.as_dict()["business_identifier"]
+    assert data["contextUrl"].startswith("https://localhost.com?preset=bcscUser&token=")
+    assert data["token"] == data["contextUrl"].split("token=")[1]
 
 
 def test_validate_and_get_org_id():

@@ -23,6 +23,7 @@ from google.cloud import storage
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 from account_mailer.enums import SubjectType
+from account_mailer.resources.worker import AFFILIATION_INVITATION_UNAFFILIATED_EMAIL
 from account_mailer.services import notification_service
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
@@ -598,3 +599,31 @@ def test_payment_due_notification_email(app, session, client):
         mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
         assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.PAYMENT_DUE_NOTIFICATION.value
+
+
+def test_unaffiliated_email_invitation(app, session, client):
+    """Assert that unaffiliated email invitation uses context_url from message data."""
+    context_url = "https://localhost.com?preset=bcscUser&token=ABC123"
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        mail_details = {
+            "businessName": "Test Corp.",
+            "emailAddresses": "test@test.com",
+            "businessIdentifier": "CP1234567",
+            "token": "ABC123",
+            "contextUrl": context_url,
+        }
+        helper_add_event_to_queue(
+            client,
+            message_type=AFFILIATION_INVITATION_UNAFFILIATED_EMAIL,
+            mail_details=mail_details,
+        )
+
+        mock_send.assert_called()
+        assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
+        assert (
+            mock_send.call_args.args[0].get("content").get("subject")
+            == SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value
+        )
+        email_body = mock_send.call_args.args[0].get("content").get("body")
+        assert email_body is not None
+        assert context_url in email_body

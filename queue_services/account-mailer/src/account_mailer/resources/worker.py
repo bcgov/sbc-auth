@@ -394,10 +394,7 @@ def handle_unaffiliated_email_invitation(message_type, email_msg):
     business_name = email_msg.get("businessName")
     business_identifier = email_msg.get("businessIdentifier")
     logo_url = email_msg.get("logo_url")
-    token = email_msg.get("token")
-
-    app_url = current_app.config.get("WEB_APP_URL", current_app.config.get("BUSINESS_REGISTRY_URL", ""))
-    context_url = f"{app_url}/affiliationInvitation/acceptToken?token={token}"
+    context_url = email_msg.get("contextUrl")
 
     template_name = TemplateType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL_TEMPLATE_NAME.value
     subject = SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value
