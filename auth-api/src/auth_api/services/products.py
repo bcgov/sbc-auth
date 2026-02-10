@@ -56,7 +56,7 @@ from auth_api.utils.notifications import (
     get_product_notification_data,
     get_product_notification_type,
 )
-from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, GOV_ORG_TYPES, STAFF
+from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, GOV_ORG_TYPES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
@@ -182,7 +182,7 @@ class Product:
         subscription_data: dict[str, Any],  # pylint: disable=too-many-locals
         is_new_transaction: bool = True,
         skip_auth=False,
-        auto_approve=False,
+        roles=None,
         staff_review_for_create_org=False,
     ):
         """Create product subscription for the user.
@@ -199,7 +199,7 @@ class Product:
 
         subscriptions_list = subscription_data.get("subscriptions")
         for subscription in subscriptions_list:
-            auto_approve_current = auto_approve
+            auto_approve_current = roles and Role.SYSTEM.value in roles if org.access_type not in GOV_ORG_TYPES else False
             product_code = subscription.get("productCode")
             if ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code):
                 raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)

@@ -60,7 +60,7 @@ def post_org_product_subscription(org_id):
         validate_organization(org_id)
         roles = g.jwt_oidc_token_info.get("realm_access").get("roles")
         subscriptions = ProductService.create_product_subscription(
-            int(org_id), request_json, skip_auth=Role.SYSTEM.value in roles, auto_approve=Role.SYSTEM.value in roles
+            int(org_id), request_json, skip_auth=Role.SYSTEM.value in roles, roles=roles
         )
         ProductService.update_org_product_keycloak_groups(int(org_id))
         response, status = {"subscriptions": subscriptions}, HTTPStatus.CREATED

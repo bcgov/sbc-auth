@@ -673,14 +673,29 @@ def test_create_govn_org_with_products_single_staff_review_task(client, jwt, ses
 
 
 def test_govn_org_add_product_esra_pending_staff_review(
-    client, jwt, session, keycloak_mock
+    client, jwt, session, keycloak_mock, monkeypatch
 ):  # pylint:disable=unused-argument
     """Assert adding ESRA product to a GOVN org creates a pending staff review task."""
-    govn_org_info = {"name": "test govn add product", "accessType": AccessType.GOVN.value}
-    org = factory_org_model(org_info=govn_org_info)
-    org_id = org.id
-
+    patch_pay_account_post(monkeypatch)
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+
+    govn_org_payload = {
+        "name": "test govn add product",
+        "accessType": AccessType.GOVN.value,
+        "typeCode": OrgType.PREMIUM.value,
+        "mailingAddress": TestOrgInfo.get_mailing_address(),
+        "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
+    }
+    rv = client.post(
+        "/api/v1/orgs",
+        data=json.dumps(govn_org_payload),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+    org_id = rv.json["id"]
+
     rv_products = client.post(
         f"/api/v1/orgs/{org_id}/products",
         data=json.dumps({"subscriptions": [{"productCode": "ESRA"}]}),
@@ -695,6 +710,56 @@ def test_govn_org_add_product_esra_pending_staff_review(
         "GOVN org adding ESRA should require staff review"
     )
 
+
+@pytest.mark.parametrize(
+    "scenario",
+    [
+        "system_role",
+        "org_admin_role",
+    ],
+)
+def test_post_org_products_skip_auth_system_vs_org_admin(
+    client, jwt, session, keycloak_mock, monkeypatch, scenario
+):  # pylint:disable=unused-argument
+    """Assert POST /orgs/{id}/products: SYSTEM vs org admin (non-GOVN/GOVM); focus on PENDING_STAFF_REVIEW for org admin."""
+    product_payload = {"subscriptions": [{"productCode": ProductCode.VS.value}]}
+
+    if scenario == "system_role":
+        regular_org = factory_org_model(org_info={"name": "regular org for system", "accessType": AccessType.REGULAR.value})
+        org_id = regular_org.id
+        headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    else:
+        patch_pay_account_post(monkeypatch)
+        headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+        client.post("/api/v1/users", headers=headers, content_type="application/json")
+        regular_payload = {
+            "name": "regular org for org admin",
+            "accessType": AccessType.REGULAR.value,
+            "typeCode": OrgType.PREMIUM.value,
+            "mailingAddress": TestOrgInfo.get_mailing_address(),
+            "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
+        }
+        rv = client.post("/api/v1/orgs", data=json.dumps(regular_payload), headers=headers, content_type="application/json")
+        assert rv.status_code == HTTPStatus.CREATED
+        org_id = rv.json["id"]
+
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps(product_payload),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    subs = rv_products.json.get("subscriptions", [])
+    product = next((p for p in subs if p.get("code") == ProductCode.VS.value), None)
+    assert product is not None
+
+    if scenario == "system_role":
+        # SYSTEM: auto_approve=True for non-GOV org → subscription ACTIVE
+        assert product["subscriptionStatus"] == ProductSubscriptionStatus.ACTIVE.value
+    else:
+        # Org admin (no SYSTEM): auto_approve=False → PENDING_STAFF_REVIEW (main assertion)
+        assert product["subscriptionStatus"] == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
 
 
 def test_add_org_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
