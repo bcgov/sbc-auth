@@ -1,9 +1,15 @@
+import { LoginSource, PaymentTypes } from '@/util/constants'
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountPaymentMethods from '@/components/auth/account-settings/payment/AccountPaymentMethods.vue'
-import { LoginSource } from '@/util/constants'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
+
+vi.mock('@/composables/product-payment-factory', () => ({
+  useProductPayment: () => ({
+    hasProductOrPaymentBackendChanges: vi.fn().mockResolvedValue(false)
+  })
+}))
 
 const vuetify = new Vuetify({})
 
@@ -76,5 +82,43 @@ describe('AccountPaymentMethods.vue', () => {
 
   it('renders the components properly and address is being shown', () => {
     expect(wrapper.findComponent(AccountPaymentMethods).exists()).toBe(true)
+  })
+
+  const bcolErrorFields = {
+    code: 'BCOL API Error',
+    detail: null,
+    message: {
+      detail: 'Invalid User ID or Password',
+      title: 'Invalid Credentials',
+      type: 'INVALID_CREDENTIALS'
+    }
+  }
+
+  async function saveWithMockError (errorData: object) {
+    const orgStore = useOrgStore()
+    orgStore.updateOrg = vi.fn().mockRejectedValue({
+      response: { status: 400, data: errorData }
+    })
+    wrapper.vm.selectedPaymentMethod = PaymentTypes.CREDIT_CARD
+    wrapper.vm.isBtnSaved = false
+    wrapper.vm.$refs.errorDialog = { open: vi.fn(), close: vi.fn() }
+    await wrapper.vm.save()
+  }
+
+  it('sets errorText and errorTitle correctly for a 400 BCOL error response', async () => {
+    await saveWithMockError(bcolErrorFields)
+
+    expect(wrapper.vm.errorTitle).toBe('Invalid Credentials')
+    expect(wrapper.vm.errorText).toBe('BCOL API Error<br>Invalid User ID or Password')
+  })
+
+  it('sets errorText and errorTitle correctly for a 400 BCOL error with rootCause', async () => {
+    await saveWithMockError({
+      errorMessage: 'API backend third party service error.',
+      rootCause: bcolErrorFields
+    })
+
+    expect(wrapper.vm.errorTitle).toBe('Invalid Credentials')
+    expect(wrapper.vm.errorText).toBe('BCOL API Error<br>Invalid User ID or Password')
   })
 })

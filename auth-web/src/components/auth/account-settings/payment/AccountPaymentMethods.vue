@@ -468,10 +468,10 @@ export default defineComponent({
             case 409:
             case 400:
               state.errorText = `${formatText(normalized.code)}<br>` +
-                  `${formatText(normalized.detail) || ''}`.trim()
+                  `${formatText(normalized.message?.detail) || ''}`.trim()
 
-              state.errorTitle = formatText(normalized.title) ||
-                  formatText(normalized.message) ||
+              state.errorTitle = formatText(normalized.message?.title) ||
+                  formatText(normalized.message?.detail) ||
                   'Error'
               break
             default:
