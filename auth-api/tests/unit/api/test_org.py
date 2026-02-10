@@ -672,6 +672,31 @@ def test_create_govn_org_with_products_single_staff_review_task(client, jwt, ses
     )
 
 
+def test_govn_org_add_product_esra_pending_staff_review(
+    client, jwt, session, keycloak_mock
+):  # pylint:disable=unused-argument
+    """Assert adding ESRA product to a GOVN org creates a pending staff review task."""
+    govn_org_info = {"name": "test govn add product", "accessType": AccessType.GOVN.value}
+    org = factory_org_model(org_info=govn_org_info)
+    org_id = org.id
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps({"subscriptions": [{"productCode": "ESRA"}]}),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    subscriptions = rv_products.json.get("subscriptions", [])
+    esra = next((p for p in subscriptions if p.get("code") == "ESRA"), None)
+    assert esra is not None
+    assert esra["subscriptionStatus"] == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value, (
+        "GOVN org adding ESRA should require staff review"
+    )
+
+
+
 def test_add_org_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that POSTing an invalid org returns a 400."""
     headers = factory_auth_header(jwt, claims=TestJwtClaims.public_user_role)
