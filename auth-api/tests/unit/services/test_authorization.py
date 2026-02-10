@@ -405,8 +405,8 @@ def test_check_auth_system_path(
     "test_desc,test_expect,additional_kwargs,is_org_member,is_entity_affiliated",
     [
         (
-            "Test UnboundLocalError (403) when no role checks provided in kwargs.",
-            pytest.raises(UnboundLocalError),
+            "Test (403) when no role checks provided in kwargs.",
+            pytest.raises(Forbidden),
             {},
             False,
             False,
