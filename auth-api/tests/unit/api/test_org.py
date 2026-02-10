@@ -672,10 +672,10 @@ def test_create_govn_org_with_products_single_staff_review_task(client, jwt, ses
     )
 
 
-def test_govn_org_add_product_esra_pending_staff_review(
+def test_govn_org_add_product_pending_staff_review(
     client, jwt, session, keycloak_mock, monkeypatch
 ):  # pylint:disable=unused-argument
-    """Assert adding ESRA product to a GOVN org creates a pending staff review task."""
+    """Assert adding a product to a GOVN org via POST /orgs/{id}/products results in PENDING_STAFF_REVIEW."""
     patch_pay_account_post(monkeypatch)
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     client.post("/api/v1/users", headers=headers, content_type="application/json")
@@ -696,18 +696,19 @@ def test_govn_org_add_product_esra_pending_staff_review(
     assert rv.status_code == HTTPStatus.CREATED
     org_id = rv.json["id"]
 
+    product_code = ProductCode.BUSINESS_SEARCH.value
     rv_products = client.post(
         f"/api/v1/orgs/{org_id}/products",
-        data=json.dumps({"subscriptions": [{"productCode": "ESRA"}]}),
+        data=json.dumps({"subscriptions": [{"productCode": product_code}]}),
         headers=headers,
         content_type="application/json",
     )
     assert rv_products.status_code == HTTPStatus.CREATED
     subscriptions = rv_products.json.get("subscriptions", [])
-    esra = next((p for p in subscriptions if p.get("code") == "ESRA"), None)
-    assert esra is not None
-    assert esra["subscriptionStatus"] == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value, (
-        "GOVN org adding ESRA should require staff review"
+    product = next((p for p in subscriptions if p.get("code") == product_code), None)
+    assert product is not None, f"Product {product_code} should appear in response"
+    assert product["subscriptionStatus"] == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value, (
+        "GOVN org adding product should require staff review"
     )
 
 
