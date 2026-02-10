@@ -239,6 +239,7 @@ def check_auth(**kwargs):
     else:
         business_identifier = kwargs.get("business_identifier", None)
         org_identifier = kwargs.get("org_id", None) or user_from_context.account_id
+        auth = None
         if business_identifier:
             auth = Authorization.get_user_authorizations_for_entity(business_identifier)
         elif org_identifier:
