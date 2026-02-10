@@ -1,6 +1,6 @@
+import { LoginSource, PaymentTypes } from '@/util/constants'
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
-import { LoginSource, PaymentTypes } from '@/util/constants'
 import AccountPaymentMethods from '@/components/auth/account-settings/payment/AccountPaymentMethods.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
