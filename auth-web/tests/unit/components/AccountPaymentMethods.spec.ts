@@ -84,61 +84,39 @@ describe('AccountPaymentMethods.vue', () => {
     expect(wrapper.findComponent(AccountPaymentMethods).exists()).toBe(true)
   })
 
-  it('sets errorText and errorTitle correctly for a 400 BCOL error response', async () => {
+  const bcolErrorFields = {
+    code: 'BCOL API Error',
+    detail: null,
+    message: {
+      detail: 'Invalid User ID or Password',
+      title: 'Invalid Credentials',
+      type: 'INVALID_CREDENTIALS'
+    }
+  }
+
+  async function saveWithMockError (errorData: object) {
     const orgStore = useOrgStore()
-
     orgStore.updateOrg = vi.fn().mockRejectedValue({
-      response: {
-        status: 400,
-        data: {
-          code: 'BCOL API Error',
-          detail: null,
-          message: {
-            detail: 'Invalid User ID or Password',
-            title: 'Invalid Credentials',
-            type: 'INVALID_CREDENTIALS'
-          }
-        }
-      }
+      response: { status: 400, data: errorData }
     })
-
-    // Set up component state so save() proceeds past validation
     wrapper.vm.selectedPaymentMethod = PaymentTypes.CREDIT_CARD
     wrapper.vm.isBtnSaved = false
     wrapper.vm.$refs.errorDialog = { open: vi.fn(), close: vi.fn() }
-
     await wrapper.vm.save()
+  }
+
+  it('sets errorText and errorTitle correctly for a 400 BCOL error response', async () => {
+    await saveWithMockError(bcolErrorFields)
 
     expect(wrapper.vm.errorTitle).toBe('Invalid Credentials')
     expect(wrapper.vm.errorText).toBe('BCOL API Error<br>Invalid User ID or Password')
   })
 
   it('sets errorText and errorTitle correctly for a 400 BCOL error with rootCause', async () => {
-    const orgStore = useOrgStore()
-
-    orgStore.updateOrg = vi.fn().mockRejectedValue({
-      response: {
-        status: 400,
-        data: {
-          errorMessage: 'API backend third party service error.',
-          rootCause: {
-            code: 'BCOL API Error',
-            detail: null,
-            message: {
-              detail: 'Invalid User ID or Password',
-              title: 'Invalid Credentials',
-              type: 'INVALID_CREDENTIALS'
-            }
-          }
-        }
-      }
+    await saveWithMockError({
+      errorMessage: 'API backend third party service error.',
+      rootCause: bcolErrorFields
     })
-
-    wrapper.vm.selectedPaymentMethod = PaymentTypes.CREDIT_CARD
-    wrapper.vm.isBtnSaved = false
-    wrapper.vm.$refs.errorDialog = { open: vi.fn(), close: vi.fn() }
-
-    await wrapper.vm.save()
 
     expect(wrapper.vm.errorTitle).toBe('Invalid Credentials')
     expect(wrapper.vm.errorText).toBe('BCOL API Error<br>Invalid User ID or Password')
