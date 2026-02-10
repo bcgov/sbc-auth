@@ -258,8 +258,8 @@ def test_check_auth(session, monkeypatch):  # pylint:disable=unused-argument
         ("Test OK when STAFF in one_of_roles.", does_not_raise(), {"one_of_roles": {"STAFF"}}, False),
         ("Test OK when STAFF IS equals_role.", does_not_raise(), {"equals_role": "STAFF"}, False),
         (
-            "Test UnboundLocalError when system_required set to true -- auth variable not set.",
-            pytest.raises(UnboundLocalError),
+            "Test (403) when system_required set to true with no org id provided.",
+            pytest.raises(Forbidden),
             {"equals_role": "STAFF", "system_required": True},
             False,
         ),
@@ -405,8 +405,8 @@ def test_check_auth_system_path(
     "test_desc,test_expect,additional_kwargs,is_org_member,is_entity_affiliated",
     [
         (
-            "Test UnboundLocalError (403) when no role checks provided in kwargs.",
-            pytest.raises(UnboundLocalError),
+            "Test (403) when no role checks provided in kwargs.",
+            pytest.raises(Forbidden),
             {},
             False,
             False,
