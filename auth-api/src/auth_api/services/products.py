@@ -199,7 +199,7 @@ class Product:
 
         subscriptions_list = subscription_data.get("subscriptions")
         for subscription in subscriptions_list:
-            auto_approve_current = auto_approve if org.access_type not in GOV_ORG_TYPES else False
+            auto_approve_current = auto_approve
             product_code = subscription.get("productCode")
             if ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code):
                 raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)
