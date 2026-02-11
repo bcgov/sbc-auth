@@ -713,54 +713,58 @@ def test_govn_org_add_product_pending_staff_review(
 
 
 @pytest.mark.parametrize(
-    "scenario",
+    "product_code,expected_status,use_factory_org,claims_attr,assert_no_product_task",
     [
-        "system_role",
-        "org_admin_role",
+        (ProductCode.NDS.value, ProductSubscriptionStatus.ACTIVE.value, True, "system_role", True),
+        (ProductCode.VS.value, ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value, False, "public_user_role", False),
     ],
 )
 def test_post_org_products_skip_auth_system_vs_org_admin(
-    client, jwt, session, keycloak_mock, monkeypatch, scenario
+    client, jwt, session, keycloak_mock, monkeypatch,
+    product_code, expected_status, use_factory_org, claims_attr, assert_no_product_task,
 ):  # pylint:disable=unused-argument
     """Assert POST /orgs/{id}/products: SYSTEM vs org admin (non-GOVN/GOVM); focus on PENDING_STAFF_REVIEW for org admin."""
-    product_payload = {"subscriptions": [{"productCode": ProductCode.VS.value}]}
+    headers = factory_auth_header(jwt=jwt, claims=getattr(TestJwtClaims, claims_attr))
 
-    if scenario == "system_role":
+    if use_factory_org:
         regular_org = factory_org_model(org_info={"name": "regular org for system", "accessType": AccessType.REGULAR.value})
         org_id = regular_org.id
-        headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     else:
         patch_pay_account_post(monkeypatch)
-        headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
         client.post("/api/v1/users", headers=headers, content_type="application/json")
-        regular_payload = {
-            "name": "regular org for org admin",
-            "accessType": AccessType.REGULAR.value,
-            "typeCode": OrgType.PREMIUM.value,
-            "mailingAddress": TestOrgInfo.get_mailing_address(),
-            "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
-        }
-        rv = client.post("/api/v1/orgs", data=json.dumps(regular_payload), headers=headers, content_type="application/json")
+        rv = client.post(
+            "/api/v1/orgs",
+            data=json.dumps({
+                "name": "regular org for org admin",
+                "accessType": AccessType.REGULAR.value,
+                "typeCode": OrgType.PREMIUM.value,
+                "mailingAddress": TestOrgInfo.get_mailing_address(),
+                "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
+            }),
+            headers=headers,
+            content_type="application/json",
+        )
         assert rv.status_code == HTTPStatus.CREATED
         org_id = rv.json["id"]
 
     rv_products = client.post(
         f"/api/v1/orgs/{org_id}/products",
-        data=json.dumps(product_payload),
+        data=json.dumps({"subscriptions": [{"productCode": product_code}]}),
         headers=headers,
         content_type="application/json",
     )
     assert rv_products.status_code == HTTPStatus.CREATED
     subs = rv_products.json.get("subscriptions", [])
-    product = next((p for p in subs if p.get("code") == ProductCode.VS.value), None)
+    product = next((p for p in subs if p.get("code") == product_code), None)
     assert product is not None
+    assert product["subscriptionStatus"] == expected_status
 
-    if scenario == "system_role":
-        # SYSTEM: auto_approve=True for non-GOV org → subscription ACTIVE
-        assert product["subscriptionStatus"] == ProductSubscriptionStatus.ACTIVE.value
-    else:
-        # Org admin (no SYSTEM): auto_approve=False → PENDING_STAFF_REVIEW (main assertion)
-        assert product["subscriptionStatus"] == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
+    if assert_no_product_task:
+        product_tasks = [
+            t for t in TaskService.fetch_tasks(TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=100))["tasks"]
+            if t.get("relationship_type") == TaskRelationshipType.PRODUCT.value and t.get("account_id") == org_id
+        ]
+        assert len(product_tasks) == 0, "SYSTEM adding product should not create a product review task"
 
 
 def test_add_org_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
