@@ -672,9 +672,7 @@ def test_create_govn_org_with_products_single_staff_review_task(client, jwt, ses
     )
 
 
-def test_govn_org_add_product_pending_staff_review(
-    client, jwt, session, keycloak_mock, monkeypatch
-):  # pylint:disable=unused-argument
+def test_govn_org_add_product_pending_staff_review(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert adding a product to a GOVN org via POST /orgs/{id}/products results in PENDING_STAFF_REVIEW."""
     patch_pay_account_post(monkeypatch)
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -720,27 +718,39 @@ def test_govn_org_add_product_pending_staff_review(
     ],
 )
 def test_post_org_products_skip_auth_system_vs_org_admin(
-    client, jwt, session, keycloak_mock, monkeypatch,
-    product_code, expected_status, use_factory_org, claims_attr, assert_no_product_task,
+    client,
+    jwt,
+    session,
+    keycloak_mock,
+    monkeypatch,
+    product_code,
+    expected_status,
+    use_factory_org,
+    claims_attr,
+    assert_no_product_task,
 ):  # pylint:disable=unused-argument
     """Assert POST /orgs/{id}/products: SYSTEM vs org admin (non-GOVN/GOVM); focus on PENDING_STAFF_REVIEW for org admin."""
     headers = factory_auth_header(jwt=jwt, claims=getattr(TestJwtClaims, claims_attr))
 
     if use_factory_org:
-        regular_org = factory_org_model(org_info={"name": "regular org for system", "accessType": AccessType.REGULAR.value})
+        regular_org = factory_org_model(
+            org_info={"name": "regular org for system", "accessType": AccessType.REGULAR.value}
+        )
         org_id = regular_org.id
     else:
         patch_pay_account_post(monkeypatch)
         client.post("/api/v1/users", headers=headers, content_type="application/json")
         rv = client.post(
             "/api/v1/orgs",
-            data=json.dumps({
-                "name": "regular org for org admin",
-                "accessType": AccessType.REGULAR.value,
-                "typeCode": OrgType.PREMIUM.value,
-                "mailingAddress": TestOrgInfo.get_mailing_address(),
-                "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
-            }),
+            data=json.dumps(
+                {
+                    "name": "regular org for org admin",
+                    "accessType": AccessType.REGULAR.value,
+                    "typeCode": OrgType.PREMIUM.value,
+                    "mailingAddress": TestOrgInfo.get_mailing_address(),
+                    "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
+                }
+            ),
             headers=headers,
             content_type="application/json",
         )
@@ -771,7 +781,8 @@ def test_post_org_products_skip_auth_system_vs_org_admin(
 
     if assert_no_product_task:
         product_tasks = [
-            t for t in TaskService.fetch_tasks(TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=100))["tasks"]
+            t
+            for t in TaskService.fetch_tasks(TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=100))["tasks"]
             if t.get("relationship_type") == TaskRelationshipType.PRODUCT.value and t.get("account_id") == org_id
         ]
         assert len(product_tasks) == 0, "SYSTEM adding product should not create a product review task"

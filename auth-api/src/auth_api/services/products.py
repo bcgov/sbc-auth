@@ -259,7 +259,10 @@ class Product:
                     )
                     Product._send_product_subscription_confirmation(
                         ProductNotificationInfo(
-                            product_model=product_model, product_sub_model=product_subscription, is_confirmation=True, org_id=org.id
+                            product_model=product_model,
+                            product_sub_model=product_subscription,
+                            is_confirmation=True,
+                            org_id=org.id,
                         ),
                         org.id,
                     )
@@ -403,7 +406,9 @@ class Product:
     @staticmethod
     def find_subscription_status(org, product_model, auto_approve=False, staff_review_for_create_org=False):
         """Return the subscriptions status based on org type."""
-        skip_review = org.access_type in GOV_ORG_TYPES and staff_review_for_create_org # prevent create second task when it's already added a staff review when creating org
+        skip_review = (
+            org.access_type in GOV_ORG_TYPES and staff_review_for_create_org
+        )  # prevent create second task when it's already added a staff review when creating org
         if (product_model.need_review or org.access_type in GOV_ORG_TYPES) and not auto_approve:
             return (
                 ProductSubscriptionStatus.ACTIVE.value
@@ -459,10 +464,7 @@ class Product:
             check_auth(one_of_roles=(*CLIENT_AUTH_ROLES, STAFF), org_id=org_id)
 
         product_subscriptions: list[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_ids([org_id])
-        subscription_by_code = {
-            sub.product_code: sub
-            for sub in product_subscriptions
-        }
+        subscription_by_code = {sub.product_code: sub for sub in product_subscriptions}
 
         # Include hidden products only for staff and SBC staff
         include_hidden = (
@@ -583,7 +585,7 @@ class Product:
                     product_model=product_model,
                     product_sub_model=product_subscription,
                     is_reapproved=is_reapproved,
-                    org_id=org_id
+                    org_id=org_id,
                 )
             )
         else:

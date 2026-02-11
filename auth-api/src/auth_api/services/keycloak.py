@@ -291,7 +291,7 @@ class KeycloakService:
             attempts=3,
             start_timeout=1,
             statuses={429, 500, 502, 503, 504},
-            exceptions={TimeoutError, aiohttp.ClientConnectionError}
+            exceptions={TimeoutError, aiohttp.ClientConnectionError},
         )
         async with RetryClient(connector=connector, retry_options=retry_options) as session:
             tasks = [
@@ -299,7 +299,7 @@ class KeycloakService:
                     method,
                     f"{base_url}/auth/admin/realms/{realm}/users/{kg.user_guid}/groups/{group_ids[kg.group_name]}",
                     headers=headers,
-                    timeout=timeout
+                    timeout=timeout,
                 )
                 for kg in kgs
             ]

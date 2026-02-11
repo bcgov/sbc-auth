@@ -150,7 +150,10 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if product_subscriptions is not None:
             ProductService.create_product_subscription(
-                org.id, subscription_data={"subscriptions": product_subscriptions}, skip_auth=True, staff_review_for_create_org=is_staff_review_needed
+                org.id,
+                subscription_data={"subscriptions": product_subscriptions},
+                skip_auth=True,
+                staff_review_for_create_org=is_staff_review_needed,
             )
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
