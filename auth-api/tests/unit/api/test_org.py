@@ -747,11 +747,8 @@ def test_post_org_products_skip_auth_system_vs_org_admin(
         assert rv.status_code == HTTPStatus.CREATED
         org_id = rv.json["id"]
 
-    products_url = f"/api/v1/orgs/{org_id}/products"
-    if assert_no_product_task:
-        products_url = f"/api/v1/orgs/{org_id}/products?include_hidden=true"
     rv_products = client.post(
-        products_url,
+        f"/api/v1/orgs/{org_id}/products",
         data=json.dumps({"subscriptions": [{"productCode": product_code}]}),
         headers=headers,
         content_type="application/json",
@@ -759,6 +756,16 @@ def test_post_org_products_skip_auth_system_vs_org_admin(
     assert rv_products.status_code == HTTPStatus.CREATED
     subs = rv_products.json.get("subscriptions", [])
     product = next((p for p in subs if p.get("code") == product_code), None)
+    if assert_no_product_task:
+        # NDS is hidden: POST response may not include it; use GET ?include_hidden=true to verify (as in prod workflow)
+        get_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_view_accounts_role)
+        rv_get = client.get(
+            f"/api/v1/orgs/{org_id}/products?include_hidden=true",
+            headers=get_headers,
+        )
+        assert rv_get.status_code == HTTPStatus.OK
+        subs = json.loads(rv_get.data)
+        product = next((p for p in subs if p.get("code") == product_code), None)
     assert product is not None
     assert product["subscriptionStatus"] == expected_status
 
