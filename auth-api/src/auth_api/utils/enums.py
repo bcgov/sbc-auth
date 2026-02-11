@@ -149,7 +149,6 @@ class AccessType(Enum):
     REGULAR = "REGULAR"
     REGULAR_BCEID = "REGULAR_BCEID"
     EXTRA_PROVINCIAL = "EXTRA_PROVINCIAL"
-    ANONYMOUS = "ANONYMOUS"
     GOVM = "GOVM"  # for govt ministry
     GOVN = "GOVN"  # for govt non-ministry
 
@@ -208,8 +207,7 @@ class SuspensionReasonCode(Enum):
 class InvitationType(Enum):
     """Invitation type."""
 
-    GOVM = "GOVM"  # Used to indicate an anonymous account invitation
-    DIRECTOR_SEARCH = "DIRECTOR_SEARCH"  # Used to indicate an anonymous account invitation
+    GOVM = "GOVM"
     STANDARD = "STANDARD"  # Used to indicate the standard email invite with admin approval
 
 
@@ -238,7 +236,6 @@ class AffiliationInvitationType(Enum):
 class IdpHint(Enum):
     """IdpHint for user login."""
 
-    BCROS = "bcros"
     BCEID = "bceid"
 
 
@@ -258,7 +255,6 @@ class LoginSource(Enum):
     BCSC = "BCSC"
     BCEID = "BCEID"
     STAFF = "IDIR"
-    BCROS = "BCROS"
     API_GW = "API_GW"
     IDIR = "IDIR"
 

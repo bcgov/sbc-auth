@@ -544,21 +544,6 @@ def test_add_anonymous_org_by_user_exception(client, jwt, session, keycloak_mock
     assert rv.status_code == HTTPStatus.UNAUTHORIZED
 
 
-def test_add_org_staff_admin_anonymous_not_passed(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an org can be POSTed."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
-    rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
-    rv = client.post(
-        "/api/v1/orgs",
-        data=json.dumps({"name": "My Test Org", "accessType": AccessType.ANONYMOUS.value}),
-        headers=headers,
-        content_type="application/json",
-    )
-    assert rv.status_code == HTTPStatus.CREATED
-    dictionary = json.loads(rv.data)
-    assert dictionary["accessType"] == "ANONYMOUS"
-
-
 def test_add_org_staff_admin_any_number_of_orgs(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)

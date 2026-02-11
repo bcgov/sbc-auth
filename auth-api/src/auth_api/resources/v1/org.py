@@ -42,7 +42,7 @@ from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.services.flags import flags
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.enums import AccessType, NotificationType, OrgStatus, OrgType, PatchActions, Status
+from auth_api.utils.enums import NotificationType, OrgStatus, OrgType, PatchActions, Status
 from auth_api.utils.role_validator import validate_roles
 from auth_api.utils.roles import (  # noqa: I001
     AFFILIATION_ALLOWED_ROLES,
@@ -194,17 +194,10 @@ def put_organization(org_id):
     """Update the org specified by the provided id with the request body."""
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "org")
-    token_info = g.jwt_oidc_token_info
     if not valid_format:
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
     try:
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
-        if (
-            org
-            and org.as_dict().get("accessType", None) == AccessType.ANONYMOUS.value
-            and Role.STAFF_CREATE_ACCOUNTS.value not in token_info.get("realm_access").get("roles")
-        ):
-            return {"message": "The organisation can only be updated by a staff admin."}, HTTPStatus.UNAUTHORIZED
         if org:
             response, status = org.update_org(org_info=request_json).as_dict(), HTTPStatus.OK
         else:

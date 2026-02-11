@@ -25,7 +25,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.dataclass import KeycloakGroupSubscription
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS
+from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_PUBLIC_USERS
 from auth_api.utils.enums import KeycloakGroupActions, LoginSource
 from auth_api.utils.roles import Role
 from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims
@@ -124,18 +124,6 @@ def test_join_users_group(app, session, monkeypatch):
     for group in user_groups:
         groups.append(group.get("name"))
     assert GROUP_PUBLIC_USERS in groups
-
-    # BCROS
-    patch_token_info(
-        {"sub": user_id, "loginSource": LoginSource.BCROS.value, "realm_access": {"roles": []}}, monkeypatch
-    )
-    KEYCLOAK_SERVICE.join_users_group()
-    # Get the user groups and verify the public_users group is in the list
-    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
-    groups = []
-    for group in user_groups:
-        groups.append(group.get("name"))
-    assert GROUP_ANONYMOUS_USERS in groups
 
 
 def test_join_users_group_for_staff_users(session, app, monkeypatch):

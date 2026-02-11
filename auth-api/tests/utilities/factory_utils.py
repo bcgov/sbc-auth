@@ -41,8 +41,6 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.utils.enums import (
-    AccessType,
-    InvitationType,
     OrgType,
     ProductSubscriptionStatus,
     TaskRelationshipStatus,
@@ -89,9 +87,7 @@ def factory_entity_service(entity_info: dict = TestEntityInfo.entity1):
 def factory_user_model(user_info: dict = dict(TestUserInfo.user1)):
     """Produce a user model."""
     roles = user_info.get("roles", None)
-    if user_info.get("access_type", None) == AccessType.ANONYMOUS.value:
-        user_type = Role.ANONYMOUS_USER.name
-    elif Role.STAFF.value in roles:
+    if Role.STAFF.value in roles:
         user_type = Role.STAFF.name
     else:
         user_type = None
@@ -113,7 +109,7 @@ def factory_user_model(user_info: dict = dict(TestUserInfo.user1)):
 
 def factory_user_model_with_contact(user_info: dict = dict(TestUserInfo.user1), keycloak_guid=None):
     """Produce a user model."""
-    user_type = Role.ANONYMOUS_USER.name if user_info.get("access_type", None) == AccessType.ANONYMOUS.value else None
+    user_type = None
     user = UserModel(
         username=user_info.get("username", user_info.get("preferred_username")),
         firstname=user_info["firstname"],
@@ -253,21 +249,6 @@ def factory_invitation(
     return {
         "recipientEmail": email,
         "sentDate": sent_date,
-        "membership": [{"membershipType": membership_type, "orgId": org_id}],
-    }
-
-
-def factory_invitation_anonymous(
-    org_id,
-    email="abc123@email.com",
-    sent_date=datetime.datetime.now().strftime("Y-%m-%d %H:%M:%S"),
-    membership_type="ADMIN",
-):
-    """Produce an invite for the given org and email."""
-    return {
-        "recipientEmail": email,
-        "sentDate": sent_date,
-        "type": InvitationType.DIRECTOR_SEARCH.value,
         "membership": [{"membershipType": membership_type, "orgId": org_id}],
     }
 

@@ -82,8 +82,7 @@ class Error(Enum):
     ORG_CANNOT_BE_DISSOLVED = "Organization cannot be dissolved", HTTPStatus.NOT_ACCEPTABLE
     FAILED_ADDING_USER_IN_KEYCLOAK = "Error adding user to keycloak", HTTPStatus.INTERNAL_SERVER_ERROR
     ACCCESS_TYPE_MANDATORY = "staff created orgs needs access type", HTTPStatus.BAD_REQUEST
-    USER_CANT_CREATE_ANONYMOUS_ORG = "Only staff can create anonymous org", HTTPStatus.UNAUTHORIZED
-    USER_CANT_CREATE_GOVM_ORG = "Only staff can create govt  ministy org", HTTPStatus.UNAUTHORIZED
+    USER_CANT_CREATE_GOVM_ORG = "Only staff can create govt ministry org", HTTPStatus.UNAUTHORIZED
 
     USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG = (
         "Only out of province users can create extra provincial org",

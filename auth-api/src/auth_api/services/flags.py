@@ -73,8 +73,7 @@ class Flags:
 
         return client
 
-    @staticmethod
-    def _get_anonymous_user():
+    def _get_anonymous_user(self):
         return Context.create("anonymous")
 
     @staticmethod

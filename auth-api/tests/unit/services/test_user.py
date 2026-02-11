@@ -108,60 +108,6 @@ def test_user_save_by_token_no_token(session):  # pylint: disable=unused-argumen
     assert user is None
 
 
-def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an owner can be added as anonymous."""
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
-    users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
-    assert len(users["users"]) == 1
-    assert users["users"][0]["username"] == IdpHint.BCROS.value + "/" + membership[0]["username"]
-    assert users["users"][0]["type"] == Role.ANONYMOUS_USER.name
-
-    members = MembershipModel.find_members_by_org_id(org.id)
-
-    # only one member should be there since its a STAFF created org
-    assert len(members) == 1
-    assert members[0].membership_type_code == ADMIN
-
-
-def test_reset_password(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that the password can be changed."""
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    user = factory_user_model()
-    factory_membership_model(user.id, org.id)
-    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
-    claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
-
-    patch_token_info(claims, monkeypatch)
-
-    membership = [TestAnonymousMembership.generate_random_user(USER)]
-    users = UserService.create_user_and_add_membership(membership, org.id)
-    user_name = users["users"][0]["username"]
-    user_info = {"username": user_name, "password": "password"}
-    kc_user = UserService.reset_password_for_anon_user(user_info, user_name)
-    # cant assert anything else since password wont be gotten back
-    assert kc_user.user_name == user_name.replace(f"{IdpHint.BCROS.value}/", "").lower()
-
-
-def test_reset_password_by_member(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that the password cant be changed by member."""
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    user = factory_user_model()
-    factory_membership_model(user.id, org.id)
-    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
-    admin_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
-    membership = [TestAnonymousMembership.generate_random_user(USER)]
-
-    patch_token_info(admin_claims, monkeypatch)
-    users = UserService.create_user_and_add_membership(membership, org.id)
-    user_name = users["users"][0]["username"]
-    user_info = {"username": user_name, "password": "password"}
-    with pytest.raises(HTTPException) as excinfo:
-        patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
-        UserService.reset_password_for_anon_user(user_info, user_name)
-    assert excinfo.value.code == 403
-
-
 def test_delete_otp_for_user(session, auth_mock, keycloak_mock, monkeypatch):
     """Assert that the otp cant be reset."""
     kc_service = KeycloakService()
@@ -182,32 +128,6 @@ def test_delete_otp_for_user(session, auth_mock, keycloak_mock, monkeypatch):
     UserService.delete_otp_for_user(user.username, org.id)
     user1 = kc_service.get_user_by_username(request.user_name)
     assert "CONFIGURE_TOTP" in json.loads(user1.value()).get("requiredActions")
-
-
-def test_create_user_and_add_same_user_name_error_in_kc(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that same user name cannot be added twice."""
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
-    keycloak_service = KeycloakService()
-    request = KeycloakScenario.create_user_request()
-    request.user_name = membership[0]["username"]
-    keycloak_service.add_user(request)
-    users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
-    assert users["users"][0]["http_status"] == 409
-    assert users["users"][0]["error"] == "The username is already taken"
-
-
-def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that same user name cannot be added twice."""
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    user = factory_user_model(TestUserInfo.user_bcros)
-    factory_membership_model(user.id, org.id)
-    new_members = TestAnonymousMembership.generate_random_user(ADMIN)
-    new_members["username"] = user.username.replace(f"{IdpHint.BCROS.value}/", "")
-    membership = [new_members]
-    users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
-    assert users["users"][0]["http_status"] == 409
-    assert users["users"][0]["error"] == "The username is already taken"
 
 
 def test_create_user_and_add_transaction_membership(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
@@ -360,55 +280,6 @@ def test_create_user_and_add_membership_admin_bulk_mode_unauthorised(session, au
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
         UserService.create_user_and_add_membership(membership, org.id)
     assert excinfo.value.code == 403
-
-
-def test_create_user_and_add_membership_admin_bulk_mode_multiple(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that an admin can add a group of members."""
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    user = factory_user_model()
-    factory_membership_model(user.id, org.id)
-    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
-    claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
-    membership = [
-        TestAnonymousMembership.generate_random_user(USER),
-        TestAnonymousMembership.generate_random_user(COORDINATOR),
-    ]
-
-    patch_token_info(claims, monkeypatch)
-    users = UserService.create_user_and_add_membership(membership, org.id)
-
-    assert len(users["users"]) == 2
-    assert users["users"][0]["username"] == IdpHint.BCROS.value + "/" + membership[0]["username"]
-    assert users["users"][0]["type"] == Role.ANONYMOUS_USER.name
-    assert users["users"][1]["username"] == IdpHint.BCROS.value + "/" + membership[1]["username"]
-    assert users["users"][1]["type"] == Role.ANONYMOUS_USER.name
-
-    members = MembershipModel.find_members_by_org_id(org.id)
-
-    # staff didnt create members..so count is count of owner+other 2 members
-    assert len(members) == 3
-
-
-def test_create_user_and_add_membership_member_error_skip_auth_mode(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an member cannot be added as anonymous in single_mode mode."""
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestAnonymousMembership.generate_random_user(USER)]
-    with pytest.raises(BusinessException) as exception:
-        UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
-    assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
-
-
-def test_create_user_and_add_membership_multiple_error_skip_auth_mode(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that multiple user cannot be created  in single_mode mode."""
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [
-        TestAnonymousMembership.generate_random_user(USER),
-        TestAnonymousMembership.generate_random_user(COORDINATOR),
-    ]
-    with pytest.raises(BusinessException) as exception:
-        patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
-        UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
-    assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
 
 
 def test_user_save_by_token_fail(session, monkeypatch):  # pylint: disable=unused-argument

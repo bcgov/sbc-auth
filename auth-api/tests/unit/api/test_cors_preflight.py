@@ -255,10 +255,6 @@ def test_preflight_user(app, client, jwt, session):
     assert rv.status_code == HTTPStatus.OK
     assert_access_control_headers(rv, "*", "GET, POST")
 
-    rv = client.options("/api/v1/users/bcros", headers={"Access-Control-Request-Method": "POST"})
-    assert rv.status_code == HTTPStatus.OK
-    assert_access_control_headers(rv, "*", "POST")
-
     rv = client.options("/api/v1/users/USERNAME/otp/1", headers={"Access-Control-Request-Method": "DELETE"})
     assert rv.status_code == HTTPStatus.OK
     assert_access_control_headers(rv, "*", "DELETE")

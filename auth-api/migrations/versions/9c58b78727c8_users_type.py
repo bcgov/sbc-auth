@@ -31,9 +31,6 @@ def upgrade():
         login_source = user.login_source
         if user.login_source in [LoginSource.BCEID.value, LoginSource.BCSC.value]:
             user_type = Role.PUBLIC_USER.name
-        elif user.login_source == LoginSource.BCROS.value or user.username.startswith("bcros/"):
-            user_type = Role.ANONYMOUS_USER.name
-            login_source = LoginSource.BCSC.value
         elif user.login_source == LoginSource.STAFF.value:
             user_type = Role.STAFF.name
 

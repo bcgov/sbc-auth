@@ -93,26 +93,6 @@ def test_add_single_org_product_vs(client, jwt, session, keycloak_mock):  # pyli
     assert vs_product.get("subscriptionStatus") == "PENDING_STAFF_REVIEW"
 
 
-def test_dir_search_doesnt_get_any_product(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert dir search doesnt get any active product subscriptions."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
-    client.post("/api/v1/users", headers=headers, content_type="application/json")
-    rv = client.post(
-        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org_anonymous), headers=headers, content_type="application/json"
-    )
-    assert rv.status_code == HTTPStatus.CREATED
-    dictionary = json.loads(rv.data)
-    assert dictionary["accessType"] == "ANONYMOUS"
-    assert schema_utils.validate(rv.json, "org_response")[0]
-
-    rv_products = client.get(
-        f"/api/v1/orgs/{dictionary.get('id')}/products", headers=headers, content_type="application/json"
-    )
-
-    list_products = json.loads(rv_products.data)
-    assert len([x for x in list_products if x.get("subscriptionStatus") != "NOT_SUBSCRIBED"]) == 0
-
-
 def test_new_dir_search_can_be_returned(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert new dir search product subscriptions can be subscribed to via system admin / returned via org user."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)

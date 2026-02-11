@@ -73,12 +73,6 @@
         "containerId": "demo"
       },
       {
-        "name": "anonymous_user",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "demo"
-      },
-      {
         "name": "account_holder",
         "composite": false,
         "clientRole": false,
@@ -354,17 +348,6 @@
       "attributes": {},
       "realmRoles": [
         "account_holder"
-      ],
-      "clientRoles": {},
-      "subGroups": []
-    },
-    {
-      "name": "anonymous_users",
-      "path": "/anonymous_users",
-      "attributes": {},
-      "realmRoles": [
-        "edit",
-        "anonymous_user"
       ],
       "clientRoles": {},
       "subGroups": []
