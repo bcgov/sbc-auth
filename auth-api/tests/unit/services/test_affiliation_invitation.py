@@ -40,7 +40,12 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
 from auth_api.utils import roles
-from auth_api.utils.enums import AffiliationInvitationType, InvitationStatus, LoginSource, QueueMessageType
+from auth_api.utils.enums import (
+    AffiliationInvitationType,
+    InvitationStatus,
+    LoginSource,
+    QueueMessageType,
+)
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_affiliation_invitation,
@@ -986,10 +991,11 @@ def test_get_all_invitations_with_details_related_to_org(
 @pytest.mark.parametrize(
     "operation,login_source,expected_error",
     [
-        # UNAFFILIATED_EMAIL blocked by check_auth_for_invitation for create/update/delete
+        # UNAFFILIATED_EMAIL blocked by check_auth_for_invitation for create/update
         ("create", None, Error.INVALID_AFFILIATION_INVITATION_TYPE),
         ("update", None, Error.INVALID_AFFILIATION_INVITATION_TYPE),
-        ("delete", None, Error.INVALID_AFFILIATION_INVITATION_TYPE),
+        # UNAFFILIATED_EMAIL delete is allowed
+        ("delete", None, None),
         # UNAFFILIATED_EMAIL accept checks login_source
         ("accept", LoginSource.BCSC.value, None),
         ("accept", LoginSource.BCEID.value, Error.INVALID_USER_CREDENTIALS),
@@ -1041,16 +1047,20 @@ def test_unaffiliated_email_invitation_auth(
                 elif operation == "update":
                     invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
                     invitation.update_affiliation_invitation(User(user), {})
-                elif operation == "delete":
-                    invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
-                    AffiliationInvitationService.delete_affiliation_invitation(invitation.as_dict()["id"])
                 elif operation == "accept":
                     invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
                     AffiliationInvitationService.accept_affiliation_invitation(
                         invitation.as_dict()["id"], User(user), ""
                     )
             assert exception.value.code == expected_error.name
-        else:
+        elif operation == "delete":
+            invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
+            invitation_id = invitation.as_dict()["id"]
+            AffiliationInvitationService.accept_affiliation_invitation(invitation_id, User(user), "")
+            AffiliationInvitationService.delete_affiliation_invitation(invitation_id)
+            updated = AffiliationInvitationModel.find_invitation_by_id(invitation_id)
+            assert updated.is_deleted is True
+        elif operation == "accept":
             invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
             result = AffiliationInvitationService.accept_affiliation_invitation(
                 invitation.as_dict()["id"], User(user), ""
