@@ -213,6 +213,14 @@ class InvitationType(Enum):
     STANDARD = "STANDARD"  # Used to indicate the standard email invite with admin approval
 
 
+class AffiliationInvitationAction(Enum):
+    """Action being performed on an affiliation invitation."""
+
+    CREATE = "CREATE"
+    UPDATE = "UPDATE"
+    DELETE = "DELETE"
+
+
 class AffiliationInvitationType(Enum):
     """Affiliation Invitation type."""
 

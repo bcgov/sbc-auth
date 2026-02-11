@@ -49,6 +49,7 @@ from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.enums import (
     AccessType,
+    AffiliationInvitationAction,
     AffiliationInvitationType,
     InvitationStatus,
     LoginSource,
@@ -316,6 +317,7 @@ class AffiliationInvitation:
         AffiliationInvitation.check_auth_for_invitation(
             invitation_type=affiliation_invitation_type,
             from_org_id=from_org_id,
+            action=AffiliationInvitationAction.CREATE,
         )
 
         entity, from_org, business = AffiliationInvitation._validate_prerequisites(
@@ -411,7 +413,9 @@ class AffiliationInvitation:
         """Update the specified affiliation invitation with new data."""
         invitation: AffiliationInvitationModel = self._model
 
-        AffiliationInvitation.check_auth_for_invitation(invitation=self._model)
+        AffiliationInvitation.check_auth_for_invitation(
+            invitation=self._model, action=AffiliationInvitationAction.UPDATE
+        )
 
         # Don't do any updates if the invitation is not in PENDING state
         if invitation.invitation_status_code != InvitationStatus.PENDING.value:
@@ -457,7 +461,9 @@ class AffiliationInvitation:
         if not (invitation := AffiliationInvitationModel.find_invitation_by_id(invitation_id)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        AffiliationInvitation.check_auth_for_invitation(invitation=invitation)
+        AffiliationInvitation.check_auth_for_invitation(
+            invitation=invitation, action=AffiliationInvitationAction.DELETE
+        )
 
         if invitation.status == InvitationStatus.ACCEPTED.value:
             invitation.is_deleted = True
@@ -811,12 +817,17 @@ class AffiliationInvitation:
         invitation: AffiliationInvitationModel = None,
         invitation_type: AffiliationInvitationType = None,
         from_org_id: int = None,
+        action: AffiliationInvitationAction = None,
     ):
         """Check if the user has the right to perform the action on the invitation."""
         invitation_type = invitation_type or AffiliationInvitationType.from_value(invitation.type)
         from_org_id = from_org_id or invitation.from_org_id
         match invitation_type:
             case AffiliationInvitationType.REQUEST | AffiliationInvitationType.EMAIL:
+                check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
+            case AffiliationInvitationType.UNAFFILIATED_EMAIL:
+                if action != AffiliationInvitationAction.DELETE:
+                    raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
                 check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF))
             case _:
                 raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
