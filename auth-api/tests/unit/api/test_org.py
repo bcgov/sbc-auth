@@ -747,8 +747,11 @@ def test_post_org_products_skip_auth_system_vs_org_admin(
         assert rv.status_code == HTTPStatus.CREATED
         org_id = rv.json["id"]
 
+    products_url = f"/api/v1/orgs/{org_id}/products"
+    if assert_no_product_task:
+        products_url = f"/api/v1/orgs/{org_id}/products?include_hidden=true"
     rv_products = client.post(
-        f"/api/v1/orgs/{org_id}/products",
+        products_url,
         data=json.dumps({"subscriptions": [{"productCode": product_code}]}),
         headers=headers,
         content_type="application/json",
