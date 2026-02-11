@@ -111,7 +111,6 @@ class DocumentType(Enum):
     """Document types."""
 
     TERMS_OF_USE = "termsofuse"
-    TERMS_OF_USE_DIRECTOR_SEARCH = "termsofuse_directorsearch"
     TERMS_OF_USE_GOVM = "termsofuse_govm"
     AFFIDAVIT = "affidavit"
     TERMS_OF_USE_PAD = "termsofuse_pad"

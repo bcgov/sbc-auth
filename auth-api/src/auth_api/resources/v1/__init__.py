@@ -24,7 +24,6 @@ from .account import bp as accounts_bp
 from .activity_log import bp as activity_log_bp
 from .affiliation_invitation import bp as affiliation_invitation_bp
 from .bcol_profiles import bp as bcol_profiles_bp
-from .bulk_user import bp as bulk_user_bp
 from .codes import bp as codes_bp
 from .documents import bp as documents_bp
 from .documents_affidavit import bp as documents_affidavit_bp
