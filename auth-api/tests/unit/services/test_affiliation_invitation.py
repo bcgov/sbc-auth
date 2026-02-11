@@ -992,10 +992,10 @@ def test_get_all_invitations_with_details_related_to_org(
     "operation,login_source,expected_error",
     [
         # UNAFFILIATED_EMAIL blocked by check_auth_for_invitation for create/update
-        ("create", None, Error.INVALID_AFFILIATION_INVITATION_TYPE),
-        ("update", None, Error.INVALID_AFFILIATION_INVITATION_TYPE),
+        ("create", LoginSource.BCSC.value, Error.INVALID_AFFILIATION_INVITATION_TYPE),
+        ("update", LoginSource.BCSC.value, Error.INVALID_AFFILIATION_INVITATION_TYPE),
         # UNAFFILIATED_EMAIL delete is allowed
-        ("delete", None, None),
+        ("delete", LoginSource.BCSC.value, None),
         # UNAFFILIATED_EMAIL accept checks login_source
         ("accept", LoginSource.BCSC.value, None),
         ("accept", LoginSource.BCEID.value, Error.INVALID_USER_CREDENTIALS),
