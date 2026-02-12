@@ -240,7 +240,6 @@ export interface OrgPaymentDetails {
   futurePaymentMethod: string
   revenueAccount?: GLInfo
   eftEnable?: boolean
-  accountFees?: AccountFee[]
 }
 
 export interface CFSAccountDetails {

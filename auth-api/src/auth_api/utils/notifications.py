@@ -32,7 +32,6 @@ class ProductSubscriptionInfo:
     is_approved: bool
     product_subscription_id: int
     org_id: int
-    org_name: str | None = None
     task_remarks: str | None = None
     is_hold: bool | None = False
     is_resubmitted: bool | None = False
@@ -48,8 +47,6 @@ class ProductNotificationInfo:
     remarks: str | None = None
     is_reapproved: bool | None = False
     is_confirmation: bool | None = False
-    org_id: int | None = None
-    org_name: str | None = None
 
 
 # e.g [BC Registries and Online Services] Your {{MHR_QUALIFIED_SUPPLIER}} Access Has Been Approved
@@ -117,8 +114,7 @@ def get_product_notification_data(product_notification_info: ProductNotification
     remarks = product_notification_info.remarks
     org_id = product_notification_info.org_id
     if product_model.code not in DETAILED_MHR_NOTIFICATIONS:
-        org_name = product_notification_info.org_name
-        return get_default_product_notification_data(product_model, recipient_emails, org_id, org_name)
+        return get_default_product_notification_data(product_model, recipient_emails)
 
     if is_confirmation:
         return get_mhr_qs_confirmation_data(product_model, recipient_emails, org_id)
@@ -132,14 +128,9 @@ def get_product_notification_data(product_notification_info: ProductNotification
     return None
 
 
-def get_default_product_notification_data(product_model: ProductCodeModel, recipient_emails: str, org_id: int = None, org_name: str = None):
+def get_default_product_notification_data(product_model: ProductCodeModel, recipient_emails: str):
     """Get the default product notification data."""
-    data = {
-        "productName": product_model.description,
-        "emailAddresses": recipient_emails,
-        "accountId": org_id,
-        "accountName": org_name,
-    }
+    data = {"productName": product_model.description, "emailAddresses": recipient_emails}
     return data
 
 

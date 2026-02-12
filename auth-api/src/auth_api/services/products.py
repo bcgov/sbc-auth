@@ -56,8 +56,7 @@ from auth_api.utils.notifications import (
     get_product_notification_data,
     get_product_notification_type,
 )
-from auth_api.utils.pay import get_account_fees_dict
-from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, GOV_ORG_TYPES, STAFF
+from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
@@ -197,8 +196,6 @@ class Product:
         if not skip_auth:
             check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
-        account_fees_dict = get_account_fees_dict(org)
-
         subscriptions_list = subscription_data.get("subscriptions")
         for subscription in subscriptions_list:
             product_code = subscription.get("productCode")
@@ -213,9 +210,7 @@ class Product:
                 if previously_approved:
                     auto_approve = True
 
-                subscription_status = Product.find_subscription_status(
-                    org, product_model, account_fees_dict, auto_approve
-                )
+                subscription_status = Product.find_subscription_status(org, product_model, auto_approve)
                 product_subscription = Product._subscribe_and_publish_activity(
                     SubscriptionRequest(
                         org_id=org_id,
@@ -250,7 +245,6 @@ class Product:
                         ProductReviewTask(
                             org_id=org.id,
                             org_name=org.name,
-                            org_access_type=org.access_type,
                             product_code=product_subscription.product_code,
                             product_description=product_model.description,
                             product_subscription_id=product_subscription.id,
@@ -377,14 +371,11 @@ class Product:
     @staticmethod
     def _create_review_task(review_task: ProductReviewTask):
         task_type = review_task.product_description
-
-        required_review_types = {AccessType.GOVM.value, AccessType.GOVN.value}
-        if review_task.product_code in QUALIFIED_SUPPLIER_PRODUCT_CODES:
-            action_type = TaskAction.QUALIFIED_SUPPLIER_REVIEW.value
-        elif review_task.org_access_type in required_review_types:
-            action_type = TaskAction.NEW_PRODUCT_FEE_REVIEW.value
-        else:
-            action_type = TaskAction.PRODUCT_REVIEW.value
+        action_type = (
+            TaskAction.QUALIFIED_SUPPLIER_REVIEW.value
+            if review_task.product_code in QUALIFIED_SUPPLIER_PRODUCT_CODES
+            else TaskAction.PRODUCT_REVIEW.value
+        )
 
         task_info = {
             "name": review_task.org_name,
@@ -402,17 +393,16 @@ class Product:
         TaskService.create_task(task_info, False)
 
     @staticmethod
-    def find_subscription_status(org, product_model, account_fees_dict, auto_approve=False):
+    def find_subscription_status(org, product_model, auto_approve=False):
         """Return the subscriptions status based on org type."""
-        required_review_types = GOV_ORG_TYPES
-
-        needs_review = (
-            org.access_type in required_review_types and account_fees_dict.get(product_model.code, False)
-        ) or (product_model.need_review and not auto_approve)
-
-        if needs_review:
-            return ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
-
+        # GOVM accounts has default active subscriptions
+        skip_review_types = [AccessType.GOVM.value]
+        if product_model.need_review and auto_approve is False:
+            return (
+                ProductSubscriptionStatus.ACTIVE.value
+                if (org.access_type in skip_review_types)
+                else ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
+            )
         return ProductSubscriptionStatus.ACTIVE.value
 
     @staticmethod
@@ -489,7 +479,7 @@ class Product:
         is_approved = product_sub_info.is_approved
         is_hold = product_sub_info.is_hold
         org_id = product_sub_info.org_id
-        org_name = product_sub_info.org_name
+
         # Approve/Reject Product subscription
         product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_id(product_subscription_id)
 
@@ -518,8 +508,6 @@ class Product:
                     product_sub_model=product_subscription,
                     is_reapproved=is_reapproved,
                     remarks=product_sub_info.task_remarks,
-                    org_id=org_id,
-                    org_name=org_name,
                 )
             )
 

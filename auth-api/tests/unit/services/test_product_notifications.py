@@ -99,12 +99,7 @@ def test_default_approved_notification(mock_mailer, session, auth_mock, keycloak
     with patch.object(UserService, "get_admin_emails_for_org", return_value="test@test.com"):
         TaskService.update_task(TaskService(task), task_info=task_info)
 
-        expected_data = {
-            "productName": product_code_model.description,
-            "emailAddresses": "test@test.com",
-            "accountId": dictionary["id"],
-            "accountName": dictionary["name"],
-        }
+        expected_data = {"productName": product_code_model.description, "emailAddresses": "test@test.com"}
         mock_mailer.assert_called_with(QueueMessageTypes.PROD_PACKAGE_APPROVED_NOTIFICATION.value, data=expected_data)
 
 
@@ -165,12 +160,7 @@ def test_default_rejected_notification(mock_mailer, session, auth_mock, keycloak
     with patch.object(UserService, "get_admin_emails_for_org", return_value="test@test.com"):
         TaskService.update_task(TaskService(task), task_info=task_info)
 
-        expected_data = {
-            "productName": product_code_model.description,
-            "emailAddresses": "test@test.com",
-            "accountId": dictionary["id"],
-            "accountName": dictionary["name"],
-        }
+        expected_data = {"productName": product_code_model.description, "emailAddresses": "test@test.com"}
         mock_mailer.assert_called_with(QueueMessageTypes.PROD_PACKAGE_REJECTED_NOTIFICATION.value, data=expected_data)
 
 
