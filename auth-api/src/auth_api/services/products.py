@@ -199,7 +199,6 @@ class Product:
 
         subscriptions_list = subscription_data.get("subscriptions")
         for subscription in subscriptions_list:
-            auto_approve_current = auto_approve
             product_code = subscription.get("productCode")
             if ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code):
                 raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)
@@ -210,10 +209,10 @@ class Product:
                     check_auth(system_required=True, org_id=org_id)
                 previously_approved, inactive_sub = Product._is_previously_approved(org_id, product_code)
                 if previously_approved:
-                    auto_approve_current = True
+                    auto_approve = True
 
                 subscription_status = Product.find_subscription_status(
-                    org, product_model, auto_approve_current, staff_review_for_create_org
+                    org, product_model, auto_approve, staff_review_for_create_org
                 )
                 product_subscription = Product._subscribe_and_publish_activity(
                     SubscriptionRequest(
@@ -404,7 +403,7 @@ class Product:
     def find_subscription_status(org, product_model, auto_approve=False, staff_review_for_create_org=False):
         """Return the subscriptions status based on org type."""
         skip_review = org.access_type in GOV_ORG_TYPES and staff_review_for_create_org # prevent create second task when it's already added a staff review when creating org
-        if (product_model.need_review or org.access_type in GOV_ORG_TYPES) and not auto_approve:
+        if product_model.need_review and auto_approve is False:
             return (
                 ProductSubscriptionStatus.ACTIVE.value
                 if skip_review
