@@ -1742,7 +1742,7 @@ def test_get_affiliation(client, jwt, session, keycloak_mock, entity_mapping_moc
     assert dictionary["business"]["businessIdentifier"] == business_identifier
 
 
-def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock, entity_mapping_mock):  # pylint:disable=unused-argument
+def test_get_affiliation_without_authorized(client, jwt, session, keycloak_mock, entity_mapping_mock):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post(
@@ -1774,7 +1774,7 @@ def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock, 
         jwt=jwt, claims=TestJwtClaims.get_test_real_user(sub="a8098c1a-f86e-11da-bd1a-00112444be1e")
     )
     rv = client.get(f"/api/v1/orgs/{org_id}/affiliations/{business_identifier}", headers=headers)
-    assert rv.status_code == HTTPStatus.FORBIDDEN
+    assert rv.status_code == HTTPStatus.UNAUTHORIZED
 
     headers = factory_auth_header(
         jwt=jwt, claims=TestJwtClaims.get_test_real_user(sub="a8098c1a-f86e-11da-bd1a-00112444be1d")

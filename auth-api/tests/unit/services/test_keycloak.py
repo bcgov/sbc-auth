@@ -29,7 +29,12 @@ from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_PUBLIC_USERS
 from auth_api.utils.enums import KeycloakGroupActions, LoginSource
 from auth_api.utils.roles import Role
 from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims
-from tests.utilities.factory_utils import keycloak_add_user, keycloak_get_user_by_username, patch_token_info
+from tests.utilities.factory_utils import (
+    keycloak_add_user,
+    keycloak_delete_user_by_username,
+    keycloak_get_user_by_username,
+    patch_token_info,
+)
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -71,7 +76,7 @@ def test_keycloak_get_token(session):
 
     response = KEYCLOAK_SERVICE.get_token(request.user_name, request.password)
     assert response.get("access_token") is not None
-    KEYCLOAK_SERVICE.delete_user_by_username(request.user_name)
+    keycloak_delete_user_by_username(request.user_name)
 
 
 def test_keycloak_get_token_user_not_exist(session):
@@ -90,7 +95,7 @@ def test_keycloak_delete_user_by_username(session):
     # with app.app_context():
     request = KeycloakScenario.create_user_request()
     keycloak_add_user(request, return_if_exists=True)
-    KEYCLOAK_SERVICE.delete_user_by_username(request.user_name)
+    keycloak_delete_user_by_username(request.user_name)
     assert True
 
 
@@ -100,7 +105,7 @@ def test_keycloak_delete_user_by_username_user_not_exist(session):
     # First delete the user if it exists
     response = None
     try:
-        response = KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
+        response = keycloak_delete_user_by_username(KeycloakScenario.create_user_request().user_name)
     except BusinessException as err:
         assert err.code == Error.DATA_NOT_FOUND.name
     assert response is None

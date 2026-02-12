@@ -516,3 +516,21 @@ def keycloak_add_user(user: KeycloakUser, return_if_exists: bool = False, throw_
     response.raise_for_status()
 
     return keycloak_get_user_by_username(user.user_name, admin_token)
+
+
+def keycloak_delete_user_by_username(username):
+    """Delete user from Keycloak by username. Test utility only."""
+    admin_token = KeycloakService._get_admin_token()
+    headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
+
+    base_url = current_app.config.get("KEYCLOAK_BASE_URL")
+    realm = current_app.config.get("KEYCLOAK_REALMNAME")
+    timeout = current_app.config.get("CONNECT_TIMEOUT", 60)
+    user = keycloak_get_user_by_username(username)
+
+    if not user:
+        raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+    delete_user_url = f"{base_url}/auth/admin/realms/{realm}/users/{user.id}"
+    response = requests.delete(delete_user_url, headers=headers, timeout=timeout)
+    response.raise_for_status()
