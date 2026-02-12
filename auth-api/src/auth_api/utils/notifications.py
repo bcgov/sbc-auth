@@ -47,6 +47,8 @@ class ProductNotificationInfo:
     remarks: str | None = None
     is_reapproved: bool | None = False
     is_confirmation: bool | None = False
+    org_id: int | None = None
+    org_name: str | None = None
 
 
 # e.g [BC Registries and Online Services] Your {{MHR_QUALIFIED_SUPPLIER}} Access Has Been Approved
