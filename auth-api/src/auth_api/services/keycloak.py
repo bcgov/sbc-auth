@@ -48,6 +48,21 @@ class KeycloakService:
     """For Keycloak services."""
 
     @staticmethod
+    def get_user_groups(user_id):
+        """Get user from Keycloak by username."""
+        base_url = current_app.config.get("KEYCLOAK_BASE_URL")
+        realm = current_app.config.get("KEYCLOAK_REALMNAME")
+        timeout = current_app.config.get("CONNECT_TIMEOUT", 60)
+        admin_token = KeycloakService._get_admin_token()
+        headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
+
+        # Get the user and return
+        query_user_url = f"{base_url}/auth/admin/realms/{realm}/users/{user_id}/groups"
+        response = requests.get(query_user_url, headers=headers, timeout=timeout)
+        response.raise_for_status()
+        return response.json()
+
+    @staticmethod
     def get_token(username, password):
         """Get user access token by username and password."""
         try:
