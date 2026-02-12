@@ -24,7 +24,7 @@
       <v-snackbar
         v-model="showNotification"
         bottom
-        :color="toastType"
+        color="primary"
         class="mb-6"
         :timeout="toastTimeout"
       >
@@ -193,7 +193,7 @@ export default class App extends Mixins(NextPageMixin) {
     EventBus.$on('show-toast', (eventInfo: Event) => {
       this.showNotification = true
       this.notificationText = eventInfo.message
-      this.toastType = eventInfo.type || 'primary'
+      this.toastType = eventInfo.type
       this.toastTimeout = eventInfo.timeout
     })
 
