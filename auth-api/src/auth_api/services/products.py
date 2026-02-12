@@ -501,7 +501,7 @@ class Product:
         product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_subscription.product_code)
         # Find admin email addresses
         admin_emails = UserService.get_admin_emails_for_org(org_id)
-        
+
         if admin_emails != "" and not is_hold:
             Product.send_product_subscription_notification(
                 ProductNotificationInfo(
