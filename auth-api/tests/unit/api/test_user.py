@@ -64,7 +64,6 @@ from tests.utilities.factory_utils import (
 from tests.utilities.sqlalchemy import clear_event_listeners
 
 
-
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a user can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)

@@ -27,9 +27,6 @@ from sqlalchemy import event
 from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.services.keycloak import KeycloakService
-from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.enums import ContentType
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
@@ -48,7 +45,10 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
+from auth_api.services.keycloak import KeycloakService
+from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils.enums import (
+    ContentType,
     OrgType,
     ProductSubscriptionStatus,
     TaskRelationshipStatus,

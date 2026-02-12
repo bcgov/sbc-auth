@@ -28,7 +28,12 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS, GROUP_PUBLIC_USERS
 from auth_api.utils.enums import LoginSource, Status
 from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims, TestOrgInfo
-from tests.utilities.factory_utils import factory_auth_header, factory_invitation, keycloak_add_user, keycloak_get_user_by_username
+from tests.utilities.factory_utils import (
+    factory_auth_header,
+    factory_invitation,
+    keycloak_add_user,
+    keycloak_get_user_by_username,
+)
 
 KEYCLOAK_SERVICE = KeycloakService()
 

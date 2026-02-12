@@ -30,7 +30,12 @@ from auth_api.utils.constants import GROUP_CONTACT_CENTRE_STAFF, GROUP_MAXIMUS_S
 from auth_api.utils.enums import LoginSource, OrgType
 from auth_api.utils.roles import ADMIN
 from tests.utilities.factory_scenarios import CONFIG, KeycloakScenario, TestJwtClaims, TestOrgInfo
-from tests.utilities.factory_utils import factory_auth_header, factory_invitation, keycloak_add_user, keycloak_get_user_by_username
+from tests.utilities.factory_utils import (
+    factory_auth_header,
+    factory_invitation,
+    keycloak_add_user,
+    keycloak_get_user_by_username,
+)
 
 fake = Faker()
 
