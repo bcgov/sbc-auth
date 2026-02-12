@@ -59,7 +59,6 @@ class V1Endpoint:  # pylint: disable=too-few-public-methods,
         self.app.register_blueprint(activity_log_bp)
         self.app.register_blueprint(affiliation_invitation_bp)
         self.app.register_blueprint(bcol_profiles_bp)
-        self.app.register_blueprint(bulk_user_bp)
         self.app.register_blueprint(codes_bp)
         self.app.register_blueprint(documents_bp)
         self.app.register_blueprint(documents_affidavit_bp)

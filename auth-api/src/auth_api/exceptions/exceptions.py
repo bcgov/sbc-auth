@@ -7,7 +7,7 @@ error - a description of the error {code / description: classname / full text}
 status_code - where possible use HTTP Error Codes
 """
 
-from auth_api.exceptions.errors import Error  # noqa: I001, I003
+from auth_api.exceptions.errors import Error  # noqa: I001
 
 
 class BusinessException(Exception):  # noqa: N818
