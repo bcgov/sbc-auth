@@ -1770,9 +1770,11 @@ def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock, 
 
     business_identifier = TestAffliationInfo.nr_affiliation["businessIdentifier"]
 
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
+    headers = factory_auth_header(
+        jwt=jwt, claims=TestJwtClaims.get_test_real_user(sub="a8098c1a-f86e-11da-bd1a-00112444be1e")
+    )
     rv = client.get(f"/api/v1/orgs/{org_id}/affiliations/{business_identifier}", headers=headers)
-    assert rv.status_code == HTTPStatus.UNAUTHORIZED
+    assert rv.status_code == HTTPStatus.FORBIDDEN
 
     headers = factory_auth_header(
         jwt=jwt, claims=TestJwtClaims.get_test_real_user(sub="a8098c1a-f86e-11da-bd1a-00112444be1d")

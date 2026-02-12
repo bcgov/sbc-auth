@@ -72,29 +72,18 @@ def test_user_save_by_token(session, monkeypatch):  # pylint: disable=unused-arg
     assert dictionary["keycloak_guid"] == TestJwtClaims.user_test["sub"]
 
 
-def test_bcros_user_save_by_token(session, monkeypatch):  # pylint: disable=unused-argument
-    """Assert that a user can be created by token."""
-    patch_token_info(TestJwtClaims.anonymous_bcros_role, monkeypatch)
+def test_user_update_by_token(session, monkeypatch):  # pylint: disable=unused-argument
+    """Assert that an existing user can be updated by token."""
+    patch_token_info(TestJwtClaims.user_test, monkeypatch)
+    user = UserService.save_from_jwt_token()
+    assert user is not None
+
+    # Save again to exercise the update path
     user = UserService.save_from_jwt_token()
     assert user is not None
     dictionary = user.as_dict()
-    assert dictionary["username"] == TestJwtClaims.anonymous_bcros_role["preferred_username"]
-    assert dictionary["keycloak_guid"] == TestJwtClaims.anonymous_bcros_role["sub"]
-
-
-def test_bcros_user_update_by_token(session, monkeypatch):  # pylint: disable=unused-argument
-    """Assert that a user can be created by token."""
-    user_model = factory_user_model(TestUserInfo.user_bcros)
-    user = UserService(user_model)
-    dictionary = user.as_dict()
-    assert dictionary.get("keycloak_guid", None) is None
-
-    patch_token_info(TestJwtClaims.anonymous_bcros_role, monkeypatch)
-    user = UserService.save_from_jwt_token()
-    assert user is not None
-    dictionary = user.as_dict()
-    assert dictionary["username"] == TestJwtClaims.anonymous_bcros_role["preferred_username"]
-    assert dictionary["keycloak_guid"] == TestJwtClaims.anonymous_bcros_role["sub"]
+    assert dictionary["username"] == TestJwtClaims.user_test["preferred_username"]
+    assert dictionary["keycloak_guid"] == TestJwtClaims.user_test["sub"]
 
 
 def test_user_save_by_token_no_token(session):  # pylint: disable=unused-argument
