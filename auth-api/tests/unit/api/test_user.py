@@ -35,7 +35,6 @@ from auth_api.models import Org as OrgModel
 from auth_api.models.org import receive_before_insert, receive_before_update
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
-from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.enums import AffidavitStatus, Status
 from auth_api.utils.roles import COORDINATOR, USER
 from tests import skip_in_pod
@@ -58,11 +57,12 @@ from tests.utilities.factory_utils import (
     factory_membership_model,
     factory_org_model,
     factory_user_model,
+    keycloak_add_user,
+    keycloak_get_user_by_username,
     patch_token_info,
 )
 from tests.utilities.sqlalchemy import clear_event_listeners
 
-KEYCLOAK_SERVICE = KeycloakService()
 
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
@@ -651,8 +651,8 @@ def test_delete_otp_for_user(client, jwt, session):  # pylint:disable=unused-arg
     user_headers = factory_auth_header(jwt=jwt, claims=user_claims)
 
     request = KeycloakScenario.create_user_by_user_info(user_info=TestJwtClaims.tester_bceid_role)
-    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    user = keycloak_get_user_by_username(request.user_name)
     assert "CONFIGURE_TOTP" not in json.loads(user.value()).get("requiredActions", None)
     user_id = user.id
     # Create user, org and membserhip in DB
@@ -664,7 +664,7 @@ def test_delete_otp_for_user(client, jwt, session):  # pylint:disable=unused-arg
     rv = client.delete(f"api/v1/users/{user.username}/otp/{org.id}", headers=headers)
     assert rv.status_code == HTTPStatus.NO_CONTENT
 
-    user1 = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    user1 = keycloak_get_user_by_username(request.user_name)
 
     assert "CONFIGURE_TOTP" in json.loads(user1.value()).get("requiredActions")
 
@@ -699,8 +699,8 @@ def test_add_bceid_user(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a user can be POSTed."""
     # Create a user in keycloak
     request = KeycloakScenario.create_user_request()
-    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    user = keycloak_get_user_by_username(request.user_name)
     user_id = user.id
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source="BCEID"))

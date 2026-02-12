@@ -31,7 +31,6 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import User as UserModel
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.enums import Status
 from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import (
@@ -49,6 +48,8 @@ from tests.utilities.factory_utils import (
     factory_org_model,
     factory_user_model,
     get_tos_latest_version,
+    keycloak_add_user,
+    keycloak_get_user_by_username,
     patch_token_info,
 )
 
@@ -99,16 +100,15 @@ def test_delete_otp_for_user(session, auth_mock, keycloak_mock, monkeypatch):
     factory_membership_model(admin_user.id, org.id)
     admin_claims = TestJwtClaims.get_test_real_user(admin_user.keycloak_guid)
 
-    keycloak_service = KeycloakService()
     request = KeycloakScenario.create_user_request()
-    keycloak_service.add_user(request)
-    user = keycloak_service.get_user_by_username(request.user_name)
+    keycloak_add_user(request)
+    user = keycloak_get_user_by_username(request.user_name)
     user = factory_user_model(TestUserInfo.get_bceid_user_with_kc_guid(user.id))
     factory_membership_model(user.id, org.id)
 
     patch_token_info(admin_claims, monkeypatch)
     UserService.delete_otp_for_user(user.username, org.id)
-    user1 = keycloak_service.get_user_by_username(request.user_name)
+    user1 = keycloak_get_user_by_username(request.user_name)
     assert "CONFIGURE_TOTP" in json.loads(user1.value()).get("requiredActions")
 
 
