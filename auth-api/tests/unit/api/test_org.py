@@ -2431,43 +2431,50 @@ def test_search_org_pagination(client, jwt, session, keycloak_mock):  # pylint:d
 
 
 def test_search_org_invitations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that org search includes invitations."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    """Assert that org search includes invitations for PENDING_ACTIVATION GOVM orgs."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     client.post("/api/v1/users", headers=headers, content_type="application/json")
 
+    # Create two GOVM orgs (created with PENDING_INVITE_ACCEPT status)
     rv = client.post(
-        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json"
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org_govm), headers=headers, content_type="application/json"
     )
+    assert rv.status_code == HTTPStatus.CREATED
     dictionary = json.loads(rv.data)
-    org_id = dictionary["id"]
-    client.post(
+    org_id_1 = dictionary["id"]
+    rv = client.post(
         "/api/v1/invitations",
-        data=json.dumps(factory_invitation(org_id=org_id)),
+        data=json.dumps(factory_invitation(org_id=org_id_1)),
         headers=headers,
         content_type="application/json",
     )
+    assert rv.status_code == HTTPStatus.CREATED
 
     rv = client.post(
-        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org2), headers=headers, content_type="application/json"
-    )
-    dictionary = json.loads(rv.data)
-    org_id = dictionary["id"]
-    client.post(
-        "/api/v1/invitations",
-        data=json.dumps(factory_invitation(org_id=org_id)),
+        "/api/v1/orgs",
+        data=json.dumps({**TestOrgInfo.org_govm, "name": "Second GOVM Org"}),
         headers=headers,
         content_type="application/json",
     )
+    assert rv.status_code == HTTPStatus.CREATED
+    dictionary = json.loads(rv.data)
+    org_id_2 = dictionary["id"]
+    rv = client.post(
+        "/api/v1/invitations",
+        data=json.dumps(factory_invitation(org_id=org_id_2)),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
 
-    # staff search
+    # Staff search with PENDING_ACTIVATION status to include invitations
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
     rv = client.get(
-        "/api/v1/orgs?page=1&limit=10",
+        "/api/v1/orgs?status=PENDING_ACTIVATION",
         headers=headers,
         content_type="application/json",
     )
     assert rv.status_code == HTTPStatus.OK
-    assert schema_utils.validate(rv.json, "paged_response")[0]
 
     orgs = json.loads(rv.data)
     assert len(orgs.get("orgs")) == 2
