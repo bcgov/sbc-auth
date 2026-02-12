@@ -479,6 +479,7 @@ class Product:
         is_approved = product_sub_info.is_approved
         is_hold = product_sub_info.is_hold
         org_id = product_sub_info.org_id
+        org_name = product_sub_info.org_name
 
         # Approve/Reject Product subscription
         product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_id(product_subscription_id)
@@ -500,6 +501,7 @@ class Product:
         product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_subscription.product_code)
         # Find admin email addresses
         admin_emails = UserService.get_admin_emails_for_org(org_id)
+        
         if admin_emails != "" and not is_hold:
             Product.send_product_subscription_notification(
                 ProductNotificationInfo(
@@ -508,6 +510,8 @@ class Product:
                     product_sub_model=product_subscription,
                     is_reapproved=is_reapproved,
                     remarks=product_sub_info.task_remarks,
+                    org_id=org_id,
+                    org_name=org_name
                 )
             )
 
