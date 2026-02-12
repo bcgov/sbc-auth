@@ -268,7 +268,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
     { desc: 'BCeID Admin', val: 'BCeID Admin' },
     { desc: 'GovM', val: 'GovM' },
     { desc: 'GovN', val: 'GovN' },
-    { desc: 'New Product Fee Review', val: TaskAction.NEW_PRODUCT_FEE_REVIEW }
+    { desc: 'New Product Review', val: TaskAction.NEW_PRODUCT_FEE_REVIEW }
   ]
 
   private searchParams: TaskFilterParams = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PendingAccountsSearchFilter)) ||

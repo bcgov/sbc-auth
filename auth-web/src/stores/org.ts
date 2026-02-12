@@ -878,11 +878,11 @@ export const useOrgStore = defineStore('org', () => {
     return organization
   }
 
-  async function getOrgProducts (orgId:number, isNewProductFeeReview = false, relationshipId = null): Promise<OrgProduct[]> {
+  async function getOrgProducts (orgId:number, isNewProductFeeReview = false): Promise<OrgProduct[]> {
     const response = await OrgService.getProducts(orgId)
     const result = response?.data
     const filteredResult = isNewProductFeeReview
-      ? result?.filter(product => product.id === relationshipId) || []
+      ? result?.filter(product => product.subscriptionStatus === ProductStatus.PENDING_STAFF_REVIEW) || []
       : result
     state.productList = filteredResult
     return filteredResult

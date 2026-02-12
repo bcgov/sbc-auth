@@ -122,7 +122,7 @@ export default defineComponent({
       if (!accountFees.value?.length) {
         // prepopulate the array with the subscribed products
         orgProducts.value.forEach((orgProduct: OrgProduct) => {
-          if ([ProductStatus.ACTIVE, ProductStatus.PENDING_STAFF_REVIEW, ProductStatus.REJECTED].includes(orgProduct.subscriptionStatus)) {
+          if (orgProduct.subscriptionStatus === ProductStatus.ACTIVE || orgProduct.subscriptionStatus === ProductStatus.PENDING_STAFF_REVIEW) {
             const accountFeeDTO: AccountFeeDTO = {
               product: orgProduct.code
             }

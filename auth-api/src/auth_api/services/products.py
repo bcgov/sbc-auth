@@ -452,10 +452,7 @@ class Product:
             check_auth(one_of_roles=(*CLIENT_AUTH_ROLES, STAFF), org_id=org_id)
 
         product_subscriptions: list[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_ids([org_id])
-        subscription_by_code = {
-            sub.product_code: sub
-            for sub in product_subscriptions
-        }
+        subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}
 
         # Include hidden products only for staff and SBC staff
         include_hidden = (
@@ -467,9 +464,9 @@ class Product:
 
         products = Product.get_products(include_hidden=include_hidden, staff_check=False)
         for product in products:
-            sub = subscription_by_code.get(product.get("code"))
-            product["subscriptionStatus"] = getattr(sub, "status_code", ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
-            product["id"] = getattr(sub, "id", None)
+            product["subscriptionStatus"] = subscriptions_dict.get(
+                product.get("code"), ProductSubscriptionStatus.NOT_SUBSCRIBED.value
+            )
 
         return products
 
