@@ -270,7 +270,8 @@ def test_create_affiliation_firms_party_with_normalization(
                 pass
 
         monkeypatch.setattr(
-            "auth_api.services.rest_service.RestService.get", lambda *args, **kwargs: MockPartiesResponse()  # noqa: ARG005
+            "auth_api.services.rest_service.RestService.get",
+            lambda *args, **kwargs: MockPartiesResponse(),  # noqa: ARG005
         )
     else:
         patch_get_firms_parties(monkeypatch)

@@ -30,7 +30,12 @@ from auth_api.utils.constants import GROUP_CONTACT_CENTRE_STAFF, GROUP_MAXIMUS_S
 from auth_api.utils.enums import LoginSource, OrgType
 from auth_api.utils.roles import ADMIN
 from tests.utilities.factory_scenarios import CONFIG, KeycloakScenario, TestJwtClaims, TestOrgInfo
-from tests.utilities.factory_utils import factory_auth_header, factory_invitation
+from tests.utilities.factory_utils import (
+    factory_auth_header,
+    factory_invitation,
+    keycloak_add_user,
+    keycloak_get_user_by_username,
+)
 
 fake = Faker()
 
@@ -51,8 +56,8 @@ def generate_gov_user_headers(jwt):
     """Create KC User and generate JWT for headers."""
     claims = generate_claims_gov_user_payload()
     request = KeycloakScenario.create_user_by_user_info(claims)
-    KeycloakService.add_user(request, return_if_exists=True)
-    kc_user = KeycloakService.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    kc_user = keycloak_get_user_by_username(request.user_name)
     claims["id"] = kc_user.id
     claims["sub"] = kc_user.id
     return kc_user, factory_auth_header(jwt=jwt, claims=claims)

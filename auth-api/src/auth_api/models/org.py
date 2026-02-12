@@ -53,7 +53,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
     status_code = Column(ForeignKey("org_statuses.code"), nullable=False)
     name = Column(String(250), index=True)
     branch_name = Column(String(100), nullable=True, default="")  # used for any additional info as branch name
-    access_type = Column(String(250), index=True, nullable=True)  # for ANONYMOUS ACCESS
+    access_type = Column(String(250), index=True, nullable=True)
     decision_made_by = Column(String(250))
     decision_made_on = Column(DateTime, nullable=True)
     bcol_user_id = Column(String(20))
@@ -259,16 +259,9 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
                 .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id)
                 .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value)
                 .filter(
-                    (
-                        (Invitation.type == InvitationType.DIRECTOR_SEARCH.value)
-                        & (Org.status_code == OrgStatusEnum.ACTIVE.value)
-                        & (Org.access_type == AccessType.ANONYMOUS.value)
-                    )
-                    | (
-                        (Invitation.type == InvitationType.GOVM.value)
-                        & (Org.status_code == OrgStatusEnum.PENDING_INVITE_ACCEPT.value)
-                        & (Org.access_type == AccessType.GOVM.value)
-                    )
+                    (Invitation.type == InvitationType.GOVM.value)
+                    & (Org.status_code == OrgStatusEnum.PENDING_INVITE_ACCEPT.value)
+                    & (Org.access_type == AccessType.GOVM.value)
                 )
             )
             query = query.filter(Org.id.notin_(pending_inv_subquery))
@@ -284,16 +277,9 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
             .options(contains_eager(Org.invitations).load_only(InvitationMembership.invitation_id))
             .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value)
             .filter(
-                (
-                    (Invitation.type == InvitationType.DIRECTOR_SEARCH.value)
-                    & (Org.status_code == OrgStatusEnum.ACTIVE.value)
-                    & (Org.access_type == AccessType.ANONYMOUS.value)
-                )
-                | (
-                    (Invitation.type == InvitationType.GOVM.value)
-                    & (Org.status_code == OrgStatusEnum.PENDING_INVITE_ACCEPT.value)
-                    & (Org.access_type == AccessType.GOVM.value)
-                )
+                (Invitation.type == InvitationType.GOVM.value)
+                & (Org.status_code == OrgStatusEnum.PENDING_INVITE_ACCEPT.value)
+                & (Org.access_type == AccessType.GOVM.value)
             )
         )
         if name:

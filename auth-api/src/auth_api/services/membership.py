@@ -284,14 +284,13 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         # Add to account_holders group in keycloak
         Membership._add_or_remove_group(self._model)
-        is_bcros_user = self._model.user.login_source == LoginSource.BCROS.value
-        # send mail if staff modifies , not applicable for bcros , only if anything is getting updated
-        if user_from_context.is_staff() and not is_bcros_user and len(updated_fields) != 0:
+        # send mail if staff modifies , only if anything is getting updated
+        if user_from_context.is_staff() and len(updated_fields) != 0:
             data = {"accountId": self._model.org.id}
             publish_to_mailer(notification_type=QueueMessageTypes.TEAM_MODIFIED.value, data=data)
 
         # send mail to the person itself who is getting removed by staff ;if he is admin and has an email on record
-        if user_from_context.is_staff() and not is_bcros_user and admin_getting_removed:
+        if user_from_context.is_staff() and admin_getting_removed:
             contact_link = ContactLinkModel.find_by_user_id(self._model.user.id)
             if contact_link and contact_link.contact.email:
                 data = {"accountId": self._model.org.id, "recipientEmail": contact_link.contact.email}

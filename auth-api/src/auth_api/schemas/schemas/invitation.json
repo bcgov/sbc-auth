@@ -29,7 +29,8 @@
       "type": "string",
       "title": "Type of Invitation.",
       "examples": [
-        "DIRECTOR_SEARCH"
+        "STANDARD",
+        "GOVM"
       ]
     },
     "sentDate": {

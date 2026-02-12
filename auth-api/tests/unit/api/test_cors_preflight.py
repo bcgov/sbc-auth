@@ -64,13 +64,6 @@ def test_preflight_bcol_profiles(app, client, jwt, session):
     assert_access_control_headers(rv, "*", "POST")
 
 
-def test_preflight_bulk_users(app, client, jwt, session):
-    """Assert preflight responses for bcol profiles are correct."""
-    rv = client.options("/api/v1/bulk/users", headers={"Access-Control-Request-Method": "POST"})
-    assert rv.status_code == HTTPStatus.OK
-    assert_access_control_headers(rv, "*", "POST")
-
-
 def test_preflight_codes(app, client, jwt, session):
     """Assert preflight responses for codes are correct."""
     rv = client.options("/api/v1/codes/CODETYPE", headers={"Access-Control-Request-Method": "GET"})
@@ -254,10 +247,6 @@ def test_preflight_user(app, client, jwt, session):
     rv = client.options("/api/v1/users", headers={"Access-Control-Request-Method": "POST"})
     assert rv.status_code == HTTPStatus.OK
     assert_access_control_headers(rv, "*", "GET, POST")
-
-    rv = client.options("/api/v1/users/bcros", headers={"Access-Control-Request-Method": "POST"})
-    assert rv.status_code == HTTPStatus.OK
-    assert_access_control_headers(rv, "*", "POST")
 
     rv = client.options("/api/v1/users/USERNAME/otp/1", headers={"Access-Control-Request-Method": "DELETE"})
     assert rv.status_code == HTTPStatus.OK

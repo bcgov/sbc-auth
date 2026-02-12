@@ -329,9 +329,7 @@ class AffiliationInvitation:
 
         affiliation_invitation_info["entityId"] = entity.identifier
 
-        if from_org.access_type == AccessType.ANONYMOUS.value:  # anonymous account never get bceid or bcsc choices
-            mandatory_login_source = LoginSource.BCROS.value
-        elif from_org.access_type == AccessType.GOVM.value:
+        if from_org.access_type == AccessType.GOVM.value:
             mandatory_login_source = LoginSource.STAFF.value
         else:
             default_login_option_based_on_accesstype = (

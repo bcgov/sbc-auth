@@ -30,7 +30,6 @@ from auth_api.services import Org
 from auth_api.services import Product as ProductService
 from auth_api.services import User as UserService
 from auth_api.services.activity_log_publisher import ActivityLogPublisher
-from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.enums import ActivityAction, KeycloakGroupActions, ProductCode, ProductSubscriptionStatus, Status
 from auth_api.utils.notifications import ProductSubscriptionInfo
 from tests.conftest import mock_token
@@ -39,6 +38,7 @@ from tests.utilities.factory_utils import (
     factory_membership_model,
     factory_product_model,
     factory_user_model,
+    keycloak_add_user,
     patch_token_info,
 )
 
@@ -109,7 +109,7 @@ def test_get_users_product_subscriptions_kc_groups(session, keycloak_mock, monke
     """Assert that our keycloak groups are returned correctly."""
     # Used these to test without the keycloak_mock.
     request = KeycloakScenario.create_user_request()
-    user = KeycloakService.add_user(request, return_if_exists=True)
+    user = keycloak_add_user(request, return_if_exists=True)
 
     # Set keycloak groups, because empty gets filtered out.
     bca_code = ProductCodeModel.find_by_code("BCA")
@@ -274,7 +274,7 @@ def test_get_users_sub_product_subscriptions_kc_groups(session, keycloak_mock, m
     """Assert that our keycloak groups are returned correctly for sub products."""
     # Used these to test without the keycloak_mock.
     request = KeycloakScenario.create_user_request()
-    user = KeycloakService.add_user(request, return_if_exists=True)
+    user = keycloak_add_user(request, return_if_exists=True)
 
     # Filter out types that are not parents or children
     bca_code = ProductCodeModel.find_by_code("BCA")

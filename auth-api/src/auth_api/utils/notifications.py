@@ -132,7 +132,9 @@ def get_product_notification_data(product_notification_info: ProductNotification
     return None
 
 
-def get_default_product_notification_data(product_model: ProductCodeModel, recipient_emails: str, org_id: int = None, org_name: str = None):
+def get_default_product_notification_data(
+    product_model: ProductCodeModel, recipient_emails: str, org_id: int = None, org_name: str = None
+):
     """Get the default product notification data."""
     data = {
         "productName": product_model.description,
@@ -143,7 +145,9 @@ def get_default_product_notification_data(product_model: ProductCodeModel, recip
     return data
 
 
-def get_mhr_qs_approval_data(product_model: ProductCodeModel, recipient_emails: str, org_id: int, is_reapproved: bool = False):
+def get_mhr_qs_approval_data(
+    product_model: ProductCodeModel, recipient_emails: str, org_id: int, is_reapproved: bool = False
+):
     """Get the mhr qualified supplier product approval notification data."""
     data = {
         "subjectDescriptor": ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
@@ -152,12 +156,14 @@ def get_mhr_qs_approval_data(product_model: ProductCodeModel, recipient_emails: 
         "isReapproved": is_reapproved,
         "productName": product_model.description,
         "emailAddresses": recipient_emails,
-        "accountId": org_id
+        "accountId": org_id,
     }
     return data
 
 
-def get_mhr_qs_rejected_data(product_model: ProductCodeModel, recipient_emails: str, org_id: int, reject_reason: str = None):
+def get_mhr_qs_rejected_data(
+    product_model: ProductCodeModel, recipient_emails: str, org_id: int, reject_reason: str = None
+):
     """Get the mhr qualified supplier product rejected notification data."""
     data = {
         "subjectDescriptor": ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
@@ -168,7 +174,7 @@ def get_mhr_qs_rejected_data(product_model: ProductCodeModel, recipient_emails: 
         "emailAddresses": recipient_emails,
         "remarks": reject_reason,
         "contactType": get_notification_contact_type(product_model.code),
-        "accountId": org_id
+        "accountId": org_id,
     }
     return data
 
@@ -184,7 +190,7 @@ def get_mhr_qs_confirmation_data(product_model: ProductCodeModel, recipient_emai
         "contactType": get_notification_contact_type(product_model.code),
         "hasAgreementAttachment": True,
         "attachmentType": NotificationAttachmentType.MHR_QS.value,
-        "accountId": org_id
+        "accountId": org_id,
     }
     return data
 

@@ -24,7 +24,7 @@ from auth_api.services import Documents as DocumentService
 from auth_api.services.google_store import GoogleStoreService
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.enums import AccessType, DocumentType, LoginSource
+from auth_api.utils.enums import DocumentType, LoginSource
 
 bp = Blueprint("DOCUMENTS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/documents")
 
@@ -37,11 +37,7 @@ def get_document_by_type(document_type):
     try:
         if document_type == DocumentType.TERMS_OF_USE.value:
             token = g.jwt_oidc_token_info
-            if token.get("accessType", None) == AccessType.ANONYMOUS.value:
-                document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value
-            elif (
-                token.get("loginSource", None) == LoginSource.STAFF.value
-            ):  # ideally for govm user who logs in with IDIR
+            if token.get("loginSource", None) == LoginSource.STAFF.value:  # ideally for govm user who logs in with IDIR
                 document_type = DocumentType.TERMS_OF_USE_GOVM.value
 
         doc = DocumentService.fetch_latest_document(document_type)

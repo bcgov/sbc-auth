@@ -26,7 +26,6 @@ class Role(Enum):
     PUBLIC_USER = "public_user"
     ACCOUNT_HOLDER = "account_holder"
     GOV_ACCOUNT_USER = "gov_account_user"
-    ANONYMOUS_USER = "anonymous_user"
     ACCOUNT_IDENTITY = "account_identity"
     MANAGE_EFT = "manage_eft"
     CHANGE_ADDRESS = "change_address"

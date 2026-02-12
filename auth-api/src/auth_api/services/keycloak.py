@@ -16,7 +16,6 @@
 import asyncio
 import json
 from dataclasses import dataclass
-from string import Template
 
 import aiohttp
 import requests
@@ -28,15 +27,12 @@ from auth_api.exceptions.errors import Error
 from auth_api.models.dataclass import KeycloakGroupSubscription
 from auth_api.utils.constants import (
     GROUP_ACCOUNT_HOLDERS,
-    GROUP_ANONYMOUS_USERS,
     GROUP_GOV_ACCOUNT_USERS,
     GROUP_PUBLIC_USERS,
 )
 from auth_api.utils.enums import ContentType, KeycloakGroupActions, LoginSource
 from auth_api.utils.roles import Role
 from auth_api.utils.user_context import UserContext, user_context
-
-from .keycloak_user import KeycloakUser
 
 
 @dataclass
@@ -52,91 +48,12 @@ class KeycloakService:
     """For Keycloak services."""
 
     @staticmethod
-    def add_user(user: KeycloakUser, return_if_exists: bool = False, throw_error_if_exists: bool = False):
-        """Add user to Keycloak."""
-        config = current_app.config
-        # Add user and set password
-        admin_token = KeycloakService._get_admin_token(upstream=True)
-
-        base_url = config.get("KEYCLOAK_BCROS_BASE_URL")
-        realm = config.get("KEYCLOAK_BCROS_REALMNAME")
-        timeout = config.get("CONNECT_TIMEOUT", 60)
-
-        # Check if the user exists
-        if return_if_exists or throw_error_if_exists:
-            existing_user = KeycloakService.get_user_by_username(user.user_name, admin_token=admin_token)
-            if existing_user:
-                if not throw_error_if_exists:
-                    return existing_user
-                raise BusinessException(Error.USER_ALREADY_EXISTS_IN_KEYCLOAK, None)
-        # Add user to the keycloak group '$group_name'
-        headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
-
-        add_user_url = f"{base_url}/auth/admin/realms/{realm}/users"
-        response = requests.post(add_user_url, data=user.value(), headers=headers, timeout=timeout)
-        response.raise_for_status()
-
-        return KeycloakService.get_user_by_username(user.user_name, admin_token)
-
-    @staticmethod
-    def update_user(user: KeycloakUser):
-        """Add user to Keycloak."""
-        config = current_app.config
-        # Add user and set password
-        admin_token = KeycloakService._get_admin_token(upstream=True)
-
-        base_url = config.get("KEYCLOAK_BCROS_BASE_URL")
-        realm = config.get("KEYCLOAK_BCROS_REALMNAME")
-        timeout = current_app.config.get("CONNECT_TIMEOUT", 60)
-
-        existing_user = KeycloakService.get_user_by_username(user.user_name, admin_token=admin_token)
-        if not existing_user:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-        headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
-
-        update_user_url = f"{base_url}/auth/admin/realms/{realm}/users/{existing_user.id}"
-        response = requests.put(update_user_url, data=user.value(), headers=headers, timeout=timeout)
-        response.raise_for_status()
-
-        return KeycloakService.get_user_by_username(user.user_name, admin_token)
-
-    @staticmethod
-    def get_user_by_username(username: str, admin_token=None) -> KeycloakUser:
+    def get_user_groups(user_id):
         """Get user from Keycloak by username."""
-        user = None
-        base_url = current_app.config.get("KEYCLOAK_BCROS_BASE_URL")
-        realm = current_app.config.get("KEYCLOAK_BCROS_REALMNAME")
+        base_url = current_app.config.get("KEYCLOAK_BASE_URL")
+        realm = current_app.config.get("KEYCLOAK_REALMNAME")
         timeout = current_app.config.get("CONNECT_TIMEOUT", 60)
-        if not admin_token:
-            admin_token = KeycloakService._get_admin_token(upstream=True)
-
-        headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
-
-        # Get the user and return
-        query_user_url = Template(f"{base_url}/auth/admin/realms/{realm}/users?username=$username").substitute(
-            username=username
-        )
-        response = requests.get(query_user_url, headers=headers, timeout=timeout)
-        response.raise_for_status()
-        if len(response.json()) == 1:
-            user = KeycloakUser(response.json()[0])
-        return user
-
-    @staticmethod
-    def get_user_groups(user_id, upstream: bool = False) -> KeycloakUser:
-        """Get user from Keycloak by username."""
-        base_url = (
-            current_app.config.get("KEYCLOAK_BCROS_BASE_URL")
-            if upstream
-            else current_app.config.get("KEYCLOAK_BASE_URL")
-        )
-        realm = (
-            current_app.config.get("KEYCLOAK_BCROS_REALMNAME")
-            if upstream
-            else current_app.config.get("KEYCLOAK_REALMNAME")
-        )
-        timeout = current_app.config.get("CONNECT_TIMEOUT", 60)
-        admin_token = KeycloakService._get_admin_token(upstream=upstream)
+        admin_token = KeycloakService._get_admin_token()
         headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
 
         # Get the user and return
@@ -144,25 +61,6 @@ class KeycloakService:
         response = requests.get(query_user_url, headers=headers, timeout=timeout)
         response.raise_for_status()
         return response.json()
-
-    @staticmethod
-    def delete_user_by_username(username):
-        """Delete user from Keycloak by username."""
-        admin_token = KeycloakService._get_admin_token(upstream=True)
-        headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
-
-        base_url = current_app.config.get("KEYCLOAK_BCROS_BASE_URL")
-        realm = current_app.config.get("KEYCLOAK_BCROS_REALMNAME")
-        timeout = current_app.config.get("CONNECT_TIMEOUT", 60)
-        user = KeycloakService.get_user_by_username(username)
-
-        if not user:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-
-        # Delete the user
-        delete_user_url = f"{base_url}/auth/admin/realms/{realm}/users/{user.id}"
-        response = requests.delete(delete_user_url, headers=headers, timeout=timeout)
-        response.raise_for_status()
 
     @staticmethod
     def get_token(username, password):
@@ -189,7 +87,7 @@ class KeycloakService:
     @staticmethod
     @user_context
     def join_users_group(**kwargs) -> str:
-        """Add user to the group (public_users or anonymous_users) if the user is public."""
+        """Add user to the group (public_users if the user is public)."""
         user_from_context: UserContext = kwargs["user_context"]
         group_name: str = None
         login_source = user_from_context.login_source
@@ -204,8 +102,6 @@ class KeycloakService:
             and Role.STAFF.value not in roles
         ):
             group_name = GROUP_GOV_ACCOUNT_USERS
-        elif login_source == LoginSource.BCROS.value and Role.ANONYMOUS_USER.value not in roles:
-            group_name = GROUP_ANONYMOUS_USERS
 
         if group_name:
             KeycloakService.add_user_to_group(user_from_context.sub, group_name)
@@ -291,7 +187,7 @@ class KeycloakService:
             attempts=3,
             start_timeout=1,
             statuses={429, 500, 502, 503, 504},
-            exceptions={TimeoutError, aiohttp.ClientConnectionError}
+            exceptions={TimeoutError, aiohttp.ClientConnectionError},
         )
         async with RetryClient(connector=connector, retry_options=retry_options) as session:
             tasks = [
@@ -299,7 +195,7 @@ class KeycloakService:
                     method,
                     f"{base_url}/auth/admin/realms/{realm}/users/{kg.user_guid}/groups/{group_ids[kg.group_name]}",
                     headers=headers,
-                    timeout=timeout
+                    timeout=timeout,
                 )
                 for kg in kgs
             ]
@@ -429,15 +325,13 @@ class KeycloakService:
         response.raise_for_status()
 
     @staticmethod
-    def _get_admin_token(upstream: bool = False):
+    def _get_admin_token():
         """Create an admin token."""
         config = current_app.config
-        base_url = config.get("KEYCLOAK_BCROS_BASE_URL") if upstream else config.get("KEYCLOAK_BASE_URL")
-        realm = config.get("KEYCLOAK_BCROS_REALMNAME") if upstream else config.get("KEYCLOAK_REALMNAME")
-        admin_client_id = (
-            config.get("KEYCLOAK_BCROS_ADMIN_CLIENTID") if upstream else config.get("KEYCLOAK_ADMIN_USERNAME")
-        )
-        admin_secret = config.get("KEYCLOAK_BCROS_ADMIN_SECRET") if upstream else config.get("KEYCLOAK_ADMIN_SECRET")
+        base_url = config.get("KEYCLOAK_BASE_URL")
+        realm = config.get("KEYCLOAK_REALMNAME")
+        admin_client_id = config.get("KEYCLOAK_ADMIN_USERNAME")
+        admin_secret = config.get("KEYCLOAK_ADMIN_SECRET")
         timeout = config.get("CONNECT_TIMEOUT", 60)
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         token_url = f"{base_url}/auth/realms/{realm}/protocol/openid-connect/token"

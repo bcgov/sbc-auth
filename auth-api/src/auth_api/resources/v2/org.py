@@ -29,10 +29,7 @@ bp = Blueprint("ORGS_V2", __name__, url_prefix=f"{EndpointEnum.API_V2.value}/org
 
 @bp.route("", methods=["POST"])
 @cross_origin(origins="*")
-@validate_roles(
-    allowed_roles=[Role.PUBLIC_USER.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.SYSTEM.value],
-    not_allowed_roles=[Role.ANONYMOUS_USER.value],
-)
+@validate_roles(allowed_roles=[Role.PUBLIC_USER.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.SYSTEM.value])
 @_jwt.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.SYSTEM.value])
 def post_organization():
     """Post a new org with contact using the request body.

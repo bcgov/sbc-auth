@@ -1000,7 +1000,6 @@ def test_get_all_invitations_with_details_related_to_org(
         ("accept", LoginSource.BCSC.value, None),
         ("accept", LoginSource.BCEID.value, Error.INVALID_USER_CREDENTIALS),
         ("accept", LoginSource.STAFF.value, Error.INVALID_USER_CREDENTIALS),
-        ("accept", LoginSource.BCROS.value, Error.INVALID_USER_CREDENTIALS),
     ],
 )
 def test_unaffiliated_email_invitation_auth(

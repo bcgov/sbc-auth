@@ -23,7 +23,7 @@
                             "sentDate": "2020-11-23T11:49:44.148559+00:00",
                             "status": "PENDING",
                             "token": "eyJpZCI6MiwidHlwZSI6IkRJUkVDVE9SX1NFQVJDSCJ9.X7wSWA.8_WvWRuAUSnk-Jsj9it869UvL-M",
-                            "type": "DIRECTOR_SEARCH"
+                            "type": "STANDARD"
                         }
                     ],
                     "loginOptions": [],
@@ -51,7 +51,7 @@
                             "sentDate": "2020-11-23T11:49:43.152821+00:00",
                             "status": "PENDING",
                             "token": "eyJpZCI6MSwidHlwZSI6IkRJUkVDVE9SX1NFQVJDSCJ9.X7wSVw.pVZrsBz7EyKxaF3GtoZbbf7fLEY",
-                            "type": "DIRECTOR_SEARCH"
+                            "type": "STANDARD"
                         }
                     ],
                     "loginOptions": [],

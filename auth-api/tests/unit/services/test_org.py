@@ -86,6 +86,8 @@ from tests.utilities.factory_utils import (
     factory_org_service,
     factory_user_model,
     factory_user_model_with_contact,
+    keycloak_add_user,
+    keycloak_get_user_by_username,
     patch_pay_account_delete,
     patch_pay_account_post,
     patch_pay_account_put,
@@ -963,8 +965,8 @@ def test_create_org_adds_user_to_account_holders_group(session, monkeypatch):  #
     # Create a user in keycloak
     keycloak_service = KeycloakService()
     request = KeycloakScenario.create_user_request()
-    keycloak_service.add_user(request, return_if_exists=True)
-    kc_user = keycloak_service.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    kc_user = keycloak_get_user_by_username(request.user_name)
     user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
@@ -983,8 +985,8 @@ def test_delete_org_removes_user_from_account_holders_group(session, auth_mock, 
     # Create a user in keycloak
     keycloak_service = KeycloakService()
     request = KeycloakScenario.create_user_request()
-    keycloak_service.add_user(request, return_if_exists=True)
-    kc_user = keycloak_service.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    kc_user = keycloak_get_user_by_username(request.user_name)
     user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
@@ -1006,8 +1008,8 @@ def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypa
     # Create a user in keycloak
     keycloak_service = KeycloakService()
     request = KeycloakScenario.create_user_request()
-    keycloak_service.add_user(request, return_if_exists=True)
-    kc_user = keycloak_service.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    kc_user = keycloak_get_user_by_username(request.user_name)
     user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
@@ -1300,8 +1302,8 @@ def test_create_product_single_subscription_qs(session, monkeypatch):
     # Create a user in keycloak
     keycloak_service = KeycloakService()
     request = KeycloakScenario.create_user_by_user_info(TestJwtClaims.public_bceid_user)
-    keycloak_service.add_user(request, return_if_exists=True)
-    kc_user = keycloak_service.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    kc_user = keycloak_get_user_by_username(request.user_name)
     user = factory_user_model(TestUserInfo.get_bceid_user_with_kc_guid(kc_guid=kc_user.id))
     patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
 

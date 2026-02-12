@@ -23,10 +23,9 @@ from http import HTTPStatus
 import pytest
 from faker import Faker
 
-from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.enums import LoginSource
 from tests.utilities.factory_scenarios import CONFIG, KeycloakScenario, TestJwtClaims, TestOrgInfo
-from tests.utilities.factory_utils import factory_auth_header
+from tests.utilities.factory_utils import factory_auth_header, keycloak_add_user, keycloak_get_user_by_username
 
 fake = Faker()
 
@@ -47,8 +46,8 @@ def generate_user_headers(jwt, claim, login_source):
     """Create KC User and generate JWT for headers."""
     claims = generate_claims_payload(claim["realm_access"], login_source)
     request = KeycloakScenario.create_user_by_user_info(claims)
-    KeycloakService.add_user(request, return_if_exists=True)
-    kc_user = KeycloakService.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    kc_user = keycloak_get_user_by_username(request.user_name)
     claims["id"] = kc_user.id
     claims["sub"] = kc_user.id
     return kc_user, factory_auth_header(jwt=jwt, claims=claims)
