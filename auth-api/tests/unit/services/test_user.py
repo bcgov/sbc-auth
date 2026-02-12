@@ -22,7 +22,6 @@ from unittest import mock
 from unittest.mock import patch
 
 import pytest
-from werkzeug.exceptions import HTTPException
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -33,9 +32,8 @@ from auth_api.models import User as UserModel
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
-from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.enums import IdpHint, ProductCode, Status
-from auth_api.utils.roles import ADMIN, COORDINATOR, USER, Role
+from auth_api.utils.enums import Status
+from auth_api.utils.roles import USER
 from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import (
     KeycloakScenario,
@@ -50,7 +48,6 @@ from tests.utilities.factory_utils import (
     factory_entity_model,
     factory_membership_model,
     factory_org_model,
-    factory_product_model,
     factory_user_model,
     get_tos_latest_version,
     patch_token_info,

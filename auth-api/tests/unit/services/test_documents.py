@@ -52,4 +52,3 @@ def test_find_latest_version_by_type(session):  # pylint: disable=unused-argumen
     """Assert that a document is rendered correctly as a dictionary."""
     terms_of_use = DocumentService.find_latest_version_by_type("termsofuse")
     assert terms_of_use == get_tos_latest_version()
-
