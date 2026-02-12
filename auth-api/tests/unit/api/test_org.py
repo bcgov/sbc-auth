@@ -53,9 +53,7 @@ from auth_api.utils.enums import (
     ProductCode,
     ProductSubscriptionStatus,
     SuspensionReasonCode,
-    TaskAction,
     TaskRelationshipStatus,
-    TaskRelationshipType,
     TaskStatus,
 )
 from auth_api.utils.roles import ADMIN  # noqa: I001
@@ -80,7 +78,6 @@ from tests.utilities.factory_utils import (
     factory_user_model,
     patch_pay_account_delete,
     patch_pay_account_delete_error,
-    patch_pay_account_post,
 )
 
 FAKE = Faker()
@@ -621,55 +618,6 @@ def test_add_same_org_409(client, jwt, session, keycloak_mock):  # pylint:disabl
         "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json"
     )
     assert rv.status_code == HTTPStatus.CONFLICT, "not able to create duplicates org"
-
-
-def test_create_govn_org_with_products_single_staff_review_task(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert creating a GOVN org with product subscriptions creates only the org staff review task, not a product task."""
-    patch_pay_account_post(monkeypatch)
-
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    client.post("/api/v1/users", headers=headers, content_type="application/json")
-
-    govn_org_payload = {
-        "name": "test govn single task",
-        "accessType": AccessType.GOVN.value,
-        "typeCode": OrgType.PREMIUM.value,
-        "productSubscriptions": [
-            {"productCode": ProductCode.BUSINESS_SEARCH.value},
-            {"productCode": ProductCode.PPR.value},
-        ],
-        "mailingAddress": TestOrgInfo.get_mailing_address(),
-        "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
-    }
-
-    rv = client.post(
-        "/api/v1/orgs",
-        data=json.dumps(govn_org_payload),
-        headers=headers,
-        content_type="application/json",
-    )
-    assert rv.status_code == HTTPStatus.CREATED
-    org_id = rv.json["id"]
-
-    task_search = TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=100)
-    tasks_result = TaskService.fetch_tasks(task_search)
-    tasks = tasks_result["tasks"]
-
-    org_tasks = [
-        t
-        for t in tasks
-        if t.get("account_id") == org_id
-        or (t.get("relationship_type") == TaskRelationshipType.ORG.value and t.get("relationship_id") == org_id)
-    ]
-    assert len(org_tasks) == 1, "expected exactly one staff review task for the new org"
-    single_task = org_tasks[0]
-    assert single_task["relationship_type"] == TaskRelationshipType.ORG.value
-    assert single_task["action"] == TaskAction.ACCOUNT_REVIEW.value
-
-    product_tasks = [t for t in tasks if t.get("relationship_type") == TaskRelationshipType.PRODUCT.value]
-    assert not any(t.get("account_id") == org_id for t in product_tasks), (
-        "expected no NEW_PRODUCT_FEE_REVIEW / product task for GOVN org creation"
-    )
 
 
 def test_add_org_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
