@@ -33,7 +33,6 @@ from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.enums import Status
-from auth_api.utils.roles import USER
 from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import (
     KeycloakScenario,
@@ -105,24 +104,22 @@ def test_user_save_by_token_no_token(session):  # pylint: disable=unused-argumen
 
 
 def test_delete_otp_for_user(session, auth_mock, keycloak_mock, monkeypatch):
-    """Assert that the otp cant be reset."""
-    kc_service = KeycloakService()
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    """Assert that the otp can be reset."""
+    org = factory_org_model(org_info=TestOrgInfo.org_regular_bceid)
     admin_user = factory_user_model()
     factory_membership_model(admin_user.id, org.id)
     admin_claims = TestJwtClaims.get_test_real_user(admin_user.keycloak_guid)
-    membership = [TestAnonymousMembership.generate_random_user(USER)]
+
     keycloak_service = KeycloakService()
     request = KeycloakScenario.create_user_request()
-    request.user_name = membership[0]["username"]
     keycloak_service.add_user(request)
-    user = kc_service.get_user_by_username(request.user_name)
+    user = keycloak_service.get_user_by_username(request.user_name)
     user = factory_user_model(TestUserInfo.get_bceid_user_with_kc_guid(user.id))
     factory_membership_model(user.id, org.id)
 
     patch_token_info(admin_claims, monkeypatch)
     UserService.delete_otp_for_user(user.username, org.id)
-    user1 = kc_service.get_user_by_username(request.user_name)
+    user1 = keycloak_service.get_user_by_username(request.user_name)
     assert "CONFIGURE_TOTP" in json.loads(user1.value()).get("requiredActions")
 
 
