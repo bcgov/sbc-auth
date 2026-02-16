@@ -320,8 +320,8 @@ export default defineComponent({
     }
 
     const compDownloadAffidavit = (tabNumber = 1) => {
-      let subTitle = 'Download the notarized affidavit associated with this account to verify the account creators ' +
-        'identity and associated information.'
+      let subTitle = 'Download the notarized or commissioned affidavit associated with this account to verify the account ' +
+        'creator’s identity and associated information.'
       if (accountUnderReviewAffidavitInfo.value?.status === AffidavitStatus.APPROVED) {
         subTitle = 'Download the notarized affidavit associated with this account that has been reviewed and approved.'
       }
@@ -375,7 +375,7 @@ export default defineComponent({
         `notary-info-${tabNumber}`,
         NotaryInformation,
         {
-          title: 'Notary Information',
+          title: 'Notary or BC Commissioner Information',
           accountNotaryContact: accountNotaryContact(),
           accountNotaryName: accountUnderReviewAffidavitInfo.value?.issuer || '-'
         }

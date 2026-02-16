@@ -13,7 +13,7 @@ describe('NotaryInformation.vue', () => {
   let wrapperFactory: any
   const props = {
     tabNumber: 5,
-    title: 'Notary Information',
+    title: 'Notary or BC Commissioner Information',
     accountNotaryName: 'test notory',
     accountNotaryContact: {
       'city': 'Langley',
