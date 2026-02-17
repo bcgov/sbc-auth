@@ -5,7 +5,7 @@
   >
     <fieldset v-if="notaryContact">
       <legend class="mb-4">
-        Notary Contact
+        Notary or BC Commissioner Contact
       </legend>
       <v-row>
         <v-col
