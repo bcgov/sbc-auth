@@ -56,6 +56,7 @@ from auth_api.utils.notifications import (
     get_product_notification_data,
     get_product_notification_type,
 )
+from auth_api.utils.pay import get_account_fees
 from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, GOV_ORG_TYPES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -157,6 +158,41 @@ class Product:
         return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
 
     @staticmethod
+    def _check_gov_org_add_product_previously_approved(
+        org_id: int,
+        product_code: str
+    ) -> tuple[bool, Any]:
+        """Check if GOV org's account fee product was previously approved (NEW_PRODUCT_FEE_REVIEW task)."""
+        inactive_sub = ProductSubscriptionModel.find_by_org_id_product_code(
+            org_id=org_id, product_code=product_code, valid_statuses=(ProductSubscriptionStatus.INACTIVE.value,)
+        )
+        if not inactive_sub:
+            return False, None
+        task_add_product = TaskModel.find_by_task_relationship_id(
+            inactive_sub.id, TaskRelationshipType.PRODUCT.value, TaskStatus.COMPLETED.value
+        )
+        task_create_org = TaskModel.find_by_task_relationship_id(
+            org_id, TaskRelationshipType.ORG.value, TaskStatus.COMPLETED.value
+        )
+        product_invalid = (
+            task_add_product is None or (
+                task_add_product.action in (TaskAction.NEW_PRODUCT_FEE_REVIEW.value, TaskAction.PRODUCT_REVIEW.value)
+                and task_add_product.relationship_status != TaskRelationshipStatus.ACTIVE.value
+            )
+        )
+        if product_invalid:
+            org_invalid = (
+                task_create_org is None or (
+                    task_create_org.action in (TaskAction.AFFIDAVIT_REVIEW.value, TaskAction.ACCOUNT_REVIEW.value)
+                    and task_create_org.relationship_status != TaskRelationshipStatus.ACTIVE.value
+                )
+            )
+
+            if org_invalid:
+                return False, None
+        return True, inactive_sub
+
+    @staticmethod
     def _is_previously_approved(org_id: int, product_code: str):
         """Check if this product has a task that was previously approved."""
         inactive_sub = ProductSubscriptionModel.find_by_org_id_product_code(
@@ -208,7 +244,12 @@ class Product:
                 # Check if product requires system admin, if yes abort
                 if product_model.need_system_admin:
                     check_auth(system_required=True, org_id=org_id)
-                previously_approved, inactive_sub = Product._is_previously_approved(org_id, product_code)
+                if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org:
+                    previously_approved, inactive_sub = Product._check_gov_org_add_product_previously_approved(
+                        org.id, product_code
+                    )
+                else:
+                    previously_approved, inactive_sub = Product._is_previously_approved(org_id, product_code)
                 if previously_approved:
                     auto_approve_current = True
 
