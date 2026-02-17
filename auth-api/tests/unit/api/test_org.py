@@ -624,7 +624,10 @@ def test_add_same_org_409(client, jwt, session, keycloak_mock):  # pylint:disabl
 
 
 def test_create_govn_org_with_products_single_staff_review_task(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert creating a GOVN org with product subscriptions creates only the org staff review task, not a product task."""
+    """Assert creating a GOVN org with product subscriptions creates only the org staff review task, not a product task.
+    Also asserts _check_gov_org_add_product_previously_approved: after approving org task, user removes
+    product then re-adds -> task_create_org (ACCOUNT_REVIEW+COMPLETED+ACTIVE).
+    """
     patch_pay_account_post(monkeypatch)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -670,6 +673,39 @@ def test_create_govn_org_with_products_single_staff_review_task(client, jwt, ses
     assert not any(t.get("account_id") == org_id for t in product_tasks), (
         "expected no NEW_PRODUCT_FEE_REVIEW / product task for GOVN org creation"
     )
+
+    # Approve org task, remove product, re-add
+    staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv_approve = client.put(
+        f"/api/v1/tasks/{single_task['id']}",
+        data=json.dumps({
+            "status": TaskStatus.COMPLETED.value,
+            "relationshipStatus": TaskRelationshipStatus.ACTIVE.value,
+        }),
+        headers=staff_headers,
+        content_type="application/json",
+    )
+    assert rv_approve.status_code == HTTPStatus.OK
+
+    product_code = ProductCode.BUSINESS_SEARCH.value
+    rv_delete = client.delete(
+        f"/api/v1/orgs/{org_id}/products/{product_code}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_delete.status_code == HTTPStatus.OK
+
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps({"subscriptions": [{"productCode": product_code}]}),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    subscriptions = rv_products.json.get("subscriptions", [])
+    product = next((p for p in subscriptions if p.get("code") == product_code), None)
+    assert product is not None
+    assert product["subscriptionStatus"] == ProductSubscriptionStatus.ACTIVE.value
 
 
 def test_govn_org_add_product_pending_staff_review(
