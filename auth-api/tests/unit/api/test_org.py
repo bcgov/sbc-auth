@@ -53,7 +53,9 @@ from auth_api.utils.enums import (
     ProductCode,
     ProductSubscriptionStatus,
     SuspensionReasonCode,
+    TaskAction,
     TaskRelationshipStatus,
+    TaskRelationshipType,
     TaskStatus,
 )
 from auth_api.utils.roles import ADMIN  # noqa: I001
@@ -77,6 +79,7 @@ from tests.utilities.factory_utils import (
     factory_user_model,
     patch_pay_account_delete,
     patch_pay_account_delete_error,
+    patch_pay_account_post,
 )
 
 FAKE = Faker()

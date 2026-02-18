@@ -514,7 +514,7 @@ class Product:
                     is_reapproved=is_reapproved,
                     remarks=product_sub_info.task_remarks,
                     org_id=org_id,
-                    org_name=org_name
+                    org_name=org_name,
                 )
             )
 
