@@ -68,10 +68,10 @@ export default class AccountInstructions extends Vue {
   readonly steps = [
     {
       number: 1,
-      stepTitle: 'Get an identity affidavit notarized or commissioned before a BC Commissioner for taking affidavits.',
-      stepDescription: '<p>Visit your local Notary or Lawyer to have this document notarized, or visit a BC Commissioner for Taking Affidavits ' +
-        'to have the affidavit commissioned before a BC Commissioner. This is to ensure that no one is impersonating you or committing identity ' +
-        'theft.</p><p><em>Only account administrators are required to verify their identity with a notary or Commissioner.</em><p>',
+      stepTitle: 'Get an identity affidavit notarized',
+      stepDescription: '<p>Visit your local notary or lawyer to have this document notarized. This is to ensure that ' +
+        'no one is impersonating you or committing identity theft.</p><p><em>Only account administrators are ' +
+        'required to verify their identity with a notary.</em><p>',
       icon: 'mdi-scale-balance'
     },
     {
