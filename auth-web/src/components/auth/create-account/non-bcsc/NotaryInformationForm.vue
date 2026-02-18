@@ -2,7 +2,7 @@
   <v-form ref="notaryInformationForm">
     <fieldset v-if="notaryInfo">
       <legend class="mb-4">
-        Notary or BC Commissioner Information
+        Notary Information
       </legend>
       <v-row>
         <v-col
@@ -12,7 +12,7 @@
           <v-text-field
             v-model.trim="notaryInfo.notaryName"
             filled
-            label="Name of Notary or BC Commissioner"
+            label="Name of Notary"
             :rules="rules.notaryName"
             :disabled="disabled"
           />
@@ -56,7 +56,7 @@ export default class NotaryInformationForm extends Vue {
   }
 
   private readonly rules = {
-    notaryName: [v => !!v || 'Name of Notary or BC Commissioner is required']
+    notaryName: [v => !!v || 'Name of Notary is required']
   }
 
   private updateNotaryAddress (val: Address) {

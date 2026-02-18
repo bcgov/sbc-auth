@@ -51,7 +51,7 @@ import { Contact } from '@/models/contact'
 @Component({})
 export default class NotaryInformation extends Vue {
   @Prop({ default: null }) private tabNumber: number
-  @Prop({ default: 'Notary or BC Commissioner Information' }) private title: string
+  @Prop({ default: 'Notary Information' }) private title: string
   @Prop({ default: {} }) accountNotaryContact: Contact
   @Prop({ default: '' }) accountNotaryName: string
 }

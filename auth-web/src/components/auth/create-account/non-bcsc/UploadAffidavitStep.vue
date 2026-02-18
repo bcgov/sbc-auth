@@ -5,7 +5,7 @@
       when authenticated.
     </p>
     <h4 class="my-4">
-      Attach your notarized or commissioned affidavit
+      Attach your Notarized Affidavit
     </h4>
     <FileUploadPreview
       :maxSize="MAX_FILE_SIZE"

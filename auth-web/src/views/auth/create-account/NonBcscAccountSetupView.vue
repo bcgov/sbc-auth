@@ -89,7 +89,7 @@ export default defineComponent({
     const accountStepperConfig =
       [
         {
-          title: 'Upload your notarized or commissioned affidavit',
+          title: 'Upload your notarized affidavit',
           stepName: 'Upload Affidavit',
           component: UploadAffidavitStep,
           componentProps: {}
