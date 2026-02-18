@@ -27,4 +27,4 @@ def test_affidavit_returns_200(client, jwt, session):  # pylint:disable=unused-a
     rv = client.get("/api/v1/documents/affidavit")
     assert rv.headers["Content-Type"] == ContentType.PDF.value
     assert rv.status_code == HTTPStatus.OK
-    assert rv.headers["Content-Disposition"] == "attachment; filename=affidavit_v1.pdf"
+    assert rv.headers["Content-Disposition"] == "attachment; filename=affidavit_v2.pdf"

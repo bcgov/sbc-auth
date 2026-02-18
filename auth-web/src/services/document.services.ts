@@ -13,7 +13,7 @@ export default class DocumentService {
 
   static async getAffidavitPdf (): Promise<AxiosResponse> {
     const instance = Axios.create()
-    return instance.get(`${ConfigHelper.getFileServerUrl()}/affidavit_v1.pdf`, {
+    return instance.get(`${ConfigHelper.getFileServerUrl()}/affidavit_v2.pdf`, {
       responseType: 'arraybuffer',
       headers: {
         'Accept': 'application/pdf'
