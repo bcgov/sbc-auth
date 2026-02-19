@@ -278,10 +278,6 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    isNewProductFeeReview: { // For NEW_PRODUCT_FEE_REVIEW tasks
-      type: Boolean,
-      default: false
-    },
     orgName: {
       type: String,
       default: ''
@@ -364,9 +360,6 @@ export default defineComponent({
     }
 
     const getTitle = (isProductApproval: boolean) => {
-      if (props.isNewProductFeeReview) {
-        return 'Approve Product Changes'
-      }
       if (isProductApproval) {
         if (props.isTaskRejected) return 'Re-Approve Access Request?'
         else return 'Approve Access Request?'
@@ -376,9 +369,6 @@ export default defineComponent({
     }
 
     const getText = (isProductApproval: boolean) => {
-      if (props.isNewProductFeeReview) {
-        return 'This change will take effect immediately.'
-      }
       if (isProductApproval) {
         let baseText = `By ${props.isTaskRejected ? 're-approving' : 'approving'} the request, this account will have`
 
@@ -411,24 +401,20 @@ export default defineComponent({
       let btnLabel = props.isTaskRejected ? 'Re-Approve' : 'Approve'
 
       if (props.isRejectModal) {
-        if (props.isNewProductFeeReview) {
-          title = 'Reject Product Changes'
-          text = 'Rejecting this will prevent the product from being selected for this user.'
-          btnLabel = 'Reject'
-        } else if (isProductApproval) {
-          title = 'Reject Access Request?'
-          const rejectionDescText = props.isMhrSubProductReview
-            ? `${localState.mhrSubProductAccessText} Enter your reason(s) for this decision. (Reasons will appear in the
-              applicant's notification email).`
-            : `access to ${props.taskName}.`
-          // eslint-disable-next-line no-irregular-whitespace
-          text = `By rejecting the request, this account will not have ${rejectionDescText}`
-          btnLabel = 'Reject'
-        } else {
-          title = 'Reject Account Creation Request?'
-          text = 'Rejecting the request will not activate this account'
-          btnLabel = 'Yes, Reject Account'
-        }
+        title = isProductApproval
+          ? 'Reject Access Request?'
+          : 'Reject Account Creation Request?'
+
+        const rejectionDescText = props.isMhrSubProductReview
+          ? `${localState.mhrSubProductAccessText} Enter your reason(s) for this decision. (Reasons will appear in the
+            applicant's notification email).`
+          : `access to ${props.taskName}.`
+
+        text = isProductApproval // eslint-disable-next-line no-irregular-whitespace
+          ? `By rejecting the request, this account will not have ${rejectionDescText}`
+          : 'Rejecting the request will not activate this account'
+
+        btnLabel = isProductApproval ? 'Reject' : 'Yes, Reject Account'
       } else if (props.isOnHoldModal) {
         // if we need to show on hold modal
         title = 'Reject or Hold Account Creation Request'
@@ -449,19 +435,6 @@ export default defineComponent({
       const isProductApproval =
         props.accountType === TaskRelationshipType.PRODUCT
 
-      if (props.isNewProductFeeReview) {
-        if (props.isRejectModal) {
-          return {
-            title: 'Product Changes Rejected',
-            text: 'The product changes have been rejected.'
-          }
-        }
-        return {
-          title: 'Product Changes Approved',
-          text: 'The product changes have been approved and will take effect immediately.'
-        }
-      }
-
       let title = isProductApproval
         ? `Request has been Approved`
         : `Account has been Approved`
@@ -476,14 +449,13 @@ export default defineComponent({
         : `Account creation request has been approved`
 
       if (props.isRejectModal) {
-        if (isProductApproval) {
-          title = 'Request has been Rejected'
-          // eslint-disable-next-line no-irregular-whitespace
-          text = `The account <strong>${props.orgName}</strong> has been rejected ${productText}`
-        } else {
-          title = 'Account has been Rejected'
-          text = 'Account creation request has been rejected'
-        }
+        title = isProductApproval
+          ? `Request has been Rejected`
+          : `Account has been Rejected`
+        // eslint-disable-next-line no-irregular-whitespace
+        text = isProductApproval
+          ? `The account <strong>${props.orgName}</strong> has been rejected ${productText}`
+          : `Account creation request has been rejected`
       } else if (props.isOnHoldModal || props.isMoveToPendingModal) {
         title = 'Request is On Hold'
         text =

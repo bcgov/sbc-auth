@@ -34,7 +34,6 @@ export interface TaskFilterParams {
     dateSubmitted?: string;
     status?: string
     modifiedBy?: string
-    action?: string
 }
 
 export interface TaskList {

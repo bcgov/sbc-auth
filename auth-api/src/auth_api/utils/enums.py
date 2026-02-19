@@ -111,7 +111,6 @@ class DocumentType(Enum):
     """Document types."""
 
     TERMS_OF_USE = "termsofuse"
-    TERMS_OF_USE_DIRECTOR_SEARCH = "termsofuse_directorsearch"
     TERMS_OF_USE_GOVM = "termsofuse_govm"
     AFFIDAVIT = "affidavit"
     TERMS_OF_USE_PAD = "termsofuse_pad"
@@ -149,7 +148,6 @@ class AccessType(Enum):
     REGULAR = "REGULAR"
     REGULAR_BCEID = "REGULAR_BCEID"
     EXTRA_PROVINCIAL = "EXTRA_PROVINCIAL"
-    ANONYMOUS = "ANONYMOUS"
     GOVM = "GOVM"  # for govt ministry
     GOVN = "GOVN"  # for govt non-ministry
 
@@ -208,8 +206,7 @@ class SuspensionReasonCode(Enum):
 class InvitationType(Enum):
     """Invitation type."""
 
-    GOVM = "GOVM"  # Used to indicate an anonymous account invitation
-    DIRECTOR_SEARCH = "DIRECTOR_SEARCH"  # Used to indicate an anonymous account invitation
+    GOVM = "GOVM"
     STANDARD = "STANDARD"  # Used to indicate the standard email invite with admin approval
 
 
@@ -238,7 +235,6 @@ class AffiliationInvitationType(Enum):
 class IdpHint(Enum):
     """IdpHint for user login."""
 
-    BCROS = "bcros"
     BCEID = "bceid"
 
 
@@ -258,7 +254,6 @@ class LoginSource(Enum):
     BCSC = "BCSC"
     BCEID = "BCEID"
     STAFF = "IDIR"
-    BCROS = "BCROS"
     API_GW = "API_GW"
     IDIR = "IDIR"
 
@@ -328,7 +323,6 @@ class TaskAction(Enum):
     ACCOUNT_REVIEW = "ACCOUNT_REVIEW"
     PRODUCT_REVIEW = "PRODUCT_REVIEW"
     QUALIFIED_SUPPLIER_REVIEW = "QUALIFIED_SUPPLIER_REVIEW"
-    NEW_PRODUCT_FEE_REVIEW = "NEW_PRODUCT_FEE_REVIEW"
 
 
 class ActivityAction(Enum):

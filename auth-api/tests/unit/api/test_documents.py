@@ -42,18 +42,6 @@ def test_documents_returns_200(client, jwt, session):  # pylint:disable=unused-a
     assert rv.status_code == HTTPStatus.OK
     assert rv.json.get("versionId") == get_tos_pad_latest_version()
 
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
-    rv = client.get("/api/v1/documents/termsofuse", headers=headers, content_type="application/json")
-
-    assert rv.status_code == HTTPStatus.OK
-    assert schema_utils.validate(rv.json, "document")[0]
-    assert rv.json.get("versionId") == "d1"
-
-    rv = client.get("/api/v1/documents/termsofuse_pad", headers=headers, content_type="application/json")
-
-    assert rv.status_code == HTTPStatus.OK
-    assert rv.json.get("versionId") == get_tos_pad_latest_version()
-
 
 def test_invalid_documents_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert get documents endpoint returns 404."""
@@ -98,20 +86,6 @@ def test_documents_returns_latest_always(client, jwt, session):  # pylint:disabl
     assert schema_utils.validate(rv.json, "document")[0]
     assert rv.json.get("content") == html_content_2
     assert rv.json.get("versionId") == version_id_2
-
-    version_id_3 = "d30"  # putting higher numbers so that version number doesnt collide with existing in db
-    factory_document_model(version_id_3, "termsofuse_directorsearch", html_content_1)
-
-    version_id_4 = "d31"  # putting higher numbers so that version number doesnt collide with existing in db
-    factory_document_model(version_id_4, "termsofuse_directorsearch", html_content_2)
-
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
-    rv = client.get("/api/v1/documents/termsofuse", headers=headers, content_type="application/json")
-
-    assert rv.status_code == HTTPStatus.OK
-    assert schema_utils.validate(rv.json, "document")[0]
-    assert rv.json.get("content") == html_content_2
-    assert rv.json.get("versionId") == version_id_4
 
 
 def test_document_signature_get_returns_200(client, jwt, session, gcs_mock):  # pylint:disable=unused-argument

@@ -15,7 +15,7 @@
 
 from enum import Enum
 
-from .enums import AccessType, OrgStatus, OrgType, ProductSubscriptionStatus, Status
+from .enums import OrgStatus, OrgType, ProductSubscriptionStatus, Status
 
 
 class Role(Enum):
@@ -26,7 +26,6 @@ class Role(Enum):
     PUBLIC_USER = "public_user"
     ACCOUNT_HOLDER = "account_holder"
     GOV_ACCOUNT_USER = "gov_account_user"
-    ANONYMOUS_USER = "anonymous_user"
     ACCOUNT_IDENTITY = "account_identity"
     MANAGE_EFT = "manage_eft"
     CHANGE_ADDRESS = "change_address"
@@ -88,5 +87,3 @@ AFFILIATION_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF, Role.EXTERNAL_STAFF_READ
 EXCLUDED_FIELDS = ("status_code", "type_code")
 
 PREMIUM_ORG_TYPES = (OrgType.PREMIUM.value, OrgType.SBC_STAFF.value, OrgType.STAFF.value)
-
-GOV_ORG_TYPES = (AccessType.GOVM.value, AccessType.GOVN.value)

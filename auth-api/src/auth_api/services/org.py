@@ -139,18 +139,11 @@ class Org:  # pylint: disable=too-many-public-methods
             Org.add_contact_to_org(mailing_address, org)
 
         # create the membership record for this user if its not created by staff and access_type is anonymous
-        Org.create_membership(access_type, org, user_id)
-
-        # Send an email to staff to remind review the pending account
-        is_staff_review_needed = access_type == AccessType.GOVN.value or (
-            access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
-            and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
-            and current_app.config.get("SKIP_STAFF_APPROVAL_BCEID") is False
-        )
+        Org.create_membership(org, user_id)
 
         if product_subscriptions is not None:
             ProductService.create_product_subscription(
-                org.id, subscription_data={"subscriptions": product_subscriptions}, skip_auth=True, staff_review_for_create_org=is_staff_review_needed
+                org.id, subscription_data={"subscriptions": product_subscriptions}, skip_auth=True
             )
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
@@ -159,6 +152,13 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
             current_app.logger.warning(f"Account update payment Error: {error}")
+
+        # Send an email to staff to remind review the pending account
+        is_staff_review_needed = access_type == AccessType.GOVN.value or (
+            access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
+            and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
+            and current_app.config.get("SKIP_STAFF_APPROVAL_BCEID") is False
+        )
 
         if is_staff_review_needed:
             Org._create_staff_review_task(org, UserModel.find_by_jwt_token())
@@ -202,10 +202,10 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     @user_context
-    def create_membership(access_type, org, user_id, **kwargs):
+    def create_membership(org, user_id, **kwargs):
         """Create membership account."""
         user: UserContext = kwargs["user_context"]
-        if not user.is_staff_admin() and access_type != AccessType.ANONYMOUS.value:
+        if not user.is_staff_admin():
             membership = MembershipModel(
                 org_id=org.id, user_id=user_id, membership_type_code="ADMIN", membership_type_status=Status.ACTIVE.value
             )
@@ -903,10 +903,7 @@ class Org:  # pylint: disable=too-many-public-methods
         is_staff_admin = Role.STAFF_CREATE_ACCOUNTS.value in roles or Role.STAFF_MANAGE_ACCOUNTS.value in roles
         if not is_staff_admin:
             if len(access_types) < 1:
-                # pass everything except DIRECTOR SEARCH
-                access_types = [item.value for item in AccessType if item != AccessType.ANONYMOUS]
-            else:
-                access_types.remove(AccessType.ANONYMOUS.value)
+                access_types = [item.value for item in AccessType]
         return access_types, is_staff_admin
 
     @staticmethod

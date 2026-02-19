@@ -82,8 +82,7 @@ class Error(Enum):
     ORG_CANNOT_BE_DISSOLVED = "Organization cannot be dissolved", HTTPStatus.NOT_ACCEPTABLE
     FAILED_ADDING_USER_IN_KEYCLOAK = "Error adding user to keycloak", HTTPStatus.INTERNAL_SERVER_ERROR
     ACCCESS_TYPE_MANDATORY = "staff created orgs needs access type", HTTPStatus.BAD_REQUEST
-    USER_CANT_CREATE_ANONYMOUS_ORG = "Only staff can create anonymous org", HTTPStatus.UNAUTHORIZED
-    USER_CANT_CREATE_GOVM_ORG = "Only staff can create govt  ministy org", HTTPStatus.UNAUTHORIZED
+    USER_CANT_CREATE_GOVM_ORG = "Only staff can create govt ministry org", HTTPStatus.UNAUTHORIZED
 
     USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG = (
         "Only out of province users can create extra provincial org",
@@ -126,7 +125,6 @@ class Error(Enum):
     )
     BCEID_USERS_CANT_BE_OWNERS = "BCEID Users cant be owners", HTTPStatus.BAD_REQUEST
     PAYMENT_ACCOUNT_UPSERT_FAILED = "Account upsert failed in Pay", HTTPStatus.INTERNAL_SERVER_ERROR
-    ACCOUNT_FEES_FETCH_FAILED = "Failed to fetch account fees from Pay API", HTTPStatus.INTERNAL_SERVER_ERROR
     GOVM_ACCOUNT_DATA_MISSING = (
         "GOVM account creation needs payment info , gl code and mailing address",
         HTTPStatus.BAD_REQUEST,

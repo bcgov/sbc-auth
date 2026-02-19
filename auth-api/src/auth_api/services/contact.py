@@ -16,7 +16,7 @@
 This module manages the Contact information for a user or entity.
 """
 
-from auth_api.schemas import ContactSchema, ContactSchemaPublic  # noqa: I001, I003, I004
+from auth_api.schemas import ContactSchema, ContactSchemaPublic  # noqa: I001
 
 
 class Contact:

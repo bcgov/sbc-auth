@@ -27,8 +27,6 @@ def validate(**kwargs) -> ValidatorResponse:
     error = None
     validator_response = ValidatorResponse()
     if access_type:
-        if not user.is_staff_admin() and access_type in AccessType.ANONYMOUS.value:
-            error = Error.USER_CANT_CREATE_ANONYMOUS_ORG
         if not user.is_staff_admin() and access_type in AccessType.GOVM.value:
             error = Error.USER_CANT_CREATE_GOVM_ORG
         if not user.is_bceid_user() and access_type in (

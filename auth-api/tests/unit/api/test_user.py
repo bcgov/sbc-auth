@@ -35,16 +35,13 @@ from auth_api.models import Org as OrgModel
 from auth_api.models.org import receive_before_insert, receive_before_update
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
-from auth_api.services import User as UserService
-from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.enums import AccessType, AffidavitStatus, IdpHint, ProductCode, Status, UserStatus
-from auth_api.utils.roles import ADMIN, COORDINATOR, USER, Role
+from auth_api.utils.enums import AffidavitStatus, Status
+from auth_api.utils.roles import COORDINATOR, USER
 from tests import skip_in_pod
 from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import (
     KeycloakScenario,
     TestAffidavit,
-    TestAnonymousMembership,
     TestContactInfo,
     TestEntityInfo,
     TestJwtClaims,
@@ -57,16 +54,14 @@ from tests.utilities.factory_utils import (
     factory_auth_header,
     factory_contact_model,
     factory_entity_model,
-    factory_invitation_anonymous,
     factory_membership_model,
     factory_org_model,
-    factory_product_model,
     factory_user_model,
+    keycloak_add_user,
+    keycloak_get_user_by_username,
     patch_token_info,
 )
 from tests.utilities.sqlalchemy import clear_event_listeners
-
-KEYCLOAK_SERVICE = KeycloakService()
 
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
@@ -106,232 +101,6 @@ def test_add_user_staff_org(client, jwt, session, keycloak_mock, monkeypatch):
 
     staff_memberships = MembershipModel.find_active_staff_org_memberships_for_user(rv.json.get("id"))
     assert len(staff_memberships) == 0  # 0, because our row was set to INACTIVE.
-
-
-def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock, monkeypatch):
-    """Assert different conditions of user deletion."""
-    admin_user = dict(TestUserInfo.user_bcros_active)
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
-    factory_membership_model(user.id, org.id)
-    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
-    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid, idp_userid=user.idp_userid)
-
-    patch_token_info(owner_claims, monkeypatch)
-    member = TestAnonymousMembership.generate_random_user(USER)
-    admin = TestAnonymousMembership.generate_random_user(COORDINATOR)
-    membership = [member, admin]
-    UserService.create_user_and_add_membership(membership, org.id)
-    owner_headers = factory_auth_header(jwt=jwt, claims=owner_claims)
-    member_username = IdpHint.BCROS.value + "/" + member["username"]
-    admin_username = IdpHint.BCROS.value + "/" + admin["username"]
-    admin_claims = TestJwtClaims.get_test_real_user(
-        uuid.uuid4(), admin_username, access_ype=AccessType.ANONYMOUS.value, roles=[Role.ANONYMOUS_USER.value]
-    )
-    admin_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
-    member_claims = TestJwtClaims.get_test_real_user(
-        uuid.uuid4(), member_username, access_ype=AccessType.ANONYMOUS.value, roles=[Role.ANONYMOUS_USER.value]
-    )
-
-    member_headers = factory_auth_header(jwt=jwt, claims=member_claims)
-
-    # set up JWTS for member and admin
-    patch_token_info(admin_claims, monkeypatch)
-    client.post(
-        "/api/v1/users", headers=admin_headers, content_type="application/json", data=json.dumps({"isLogin": True})
-    )
-
-    patch_token_info(member_claims, monkeypatch)
-    client.post(
-        "/api/v1/users", headers=member_headers, content_type="application/json", data=json.dumps({"isLogin": True})
-    )
-
-    patch_token_info(owner_claims, monkeypatch)
-    # delete only owner ;failure
-    rv = client.delete(
-        f"/api/v1/users/{admin_user['username']}", headers=owner_headers, content_type="application/json"
-    )
-    assert rv.status_code == HTTPStatus.UNAUTHORIZED
-
-    # admin trying to delete member: Failure
-    patch_token_info(admin_claims, monkeypatch)
-    rv = client.delete(f"/api/v1/users/{member_username}", headers=admin_headers, content_type="application/json")
-    assert rv.status_code == HTTPStatus.UNAUTHORIZED
-
-    # member delete admin: failure
-    patch_token_info(member_claims, monkeypatch)
-    rv = client.delete(f"/api/v1/users/{admin_username}", headers=member_headers, content_type="application/json")
-    assert rv.status_code == HTTPStatus.UNAUTHORIZED
-
-    # a self delete ;should work ;mimics leave team for anonymous user
-    patch_token_info(member_claims, monkeypatch)
-    rv = client.delete(f"/api/v1/users/{member_username}", headers=member_headers, content_type="application/json")
-    assert rv.status_code == HTTPStatus.NO_CONTENT
-
-    patch_token_info(admin_claims, monkeypatch)
-    rv = client.delete(f"/api/v1/users/{admin_username}", headers=admin_headers, content_type="application/json")
-    assert rv.status_code == HTTPStatus.NO_CONTENT
-
-    # add one more admin
-    patch_token_info(owner_claims, monkeypatch)
-    new_owner = TestAnonymousMembership.generate_random_user(ADMIN)
-    membership = [new_owner]
-    UserService.create_user_and_add_membership(membership, org.id)
-    patch_token_info(owner_claims, monkeypatch)
-    rv = client.delete(
-        f"/api/v1/users/{IdpHint.BCROS.value + '/' + new_owner['username']}",
-        headers=owner_headers,
-        content_type="application/json",
-    )
-    assert rv.status_code == HTTPStatus.NO_CONTENT
-
-
-def test_add_back_a_delete_bcros(client, jwt, session, keycloak_mock, monkeypatch):
-    """Assert different conditions of user deletion."""
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
-    factory_membership_model(user.id, org.id)
-    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
-    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid, idp_userid=user.idp_userid)
-    member = TestAnonymousMembership.generate_random_user(USER)
-    membership = [member, TestAnonymousMembership.generate_random_user(COORDINATOR)]
-    patch_token_info(owner_claims, monkeypatch)
-    UserService.create_user_and_add_membership(membership, org.id)
-    headers = factory_auth_header(jwt=jwt, claims=owner_claims)
-    member_user_id = IdpHint.BCROS.value + "/" + member.get("username")
-    rv = client.delete(f"/api/v1/users/{member_user_id}", headers=headers, content_type="application/json")
-    assert rv.status_code == HTTPStatus.NO_CONTENT
-    kc_user = KeycloakService.get_user_by_username(member.get("username"))
-    assert kc_user.enabled is False
-    user_model = UserService.find_by_username(member_user_id)
-    assert user_model.as_dict().get("user_status") == UserStatus.INACTIVE.value
-    membership = MembershipModel.find_membership_by_userid(user_model.identifier)
-    assert membership.status == Status.INACTIVE.value
-
-
-def test_reset_password(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that an anonymous admin can be Patched."""
-    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
-    factory_membership_model(user.id, org.id)
-    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
-    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
-    member = TestAnonymousMembership.generate_random_user(USER)
-    admin = TestAnonymousMembership.generate_random_user(COORDINATOR)
-    membership = [member, admin]
-
-    patch_token_info(owner_claims, monkeypatch)
-    UserService.create_user_and_add_membership(membership, org.id)
-    owner_headers = factory_auth_header(jwt=jwt, claims=owner_claims)
-    member_username = IdpHint.BCROS.value + "/" + member["username"]
-    admin_username = IdpHint.BCROS.value + "/" + admin["username"]
-    admin_claims = TestJwtClaims.get_test_real_user(
-        uuid.uuid4(), admin_username, access_ype=AccessType.ANONYMOUS.value, roles=[Role.ANONYMOUS_USER.value]
-    )
-    admin_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
-    member_claims = TestJwtClaims.get_test_real_user(
-        uuid.uuid4(), member_username, access_ype=AccessType.ANONYMOUS.value, roles=[Role.ANONYMOUS_USER.value]
-    )
-    member_headers = factory_auth_header(jwt=jwt, claims=member_claims)
-    # set up JWTS for member and admin
-    patch_token_info(admin_claims, monkeypatch)
-    client.post(
-        "/api/v1/users", headers=admin_headers, content_type="application/json", data=json.dumps({"isLogin": True})
-    )
-    patch_token_info(member_claims, monkeypatch)
-    client.post(
-        "/api/v1/users", headers=member_headers, content_type="application/json", data=json.dumps({"isLogin": True})
-    )
-
-    # reset password of admin by owner
-    input_data = json.dumps({"username": admin_username, "password": "Mysecretcode@1234"})
-
-    patch_token_info(owner_claims, monkeypatch)
-    rv = client.patch(
-        f"/api/v1/users/{admin_username}", headers=owner_headers, data=input_data, content_type="application/json"
-    )
-    assert rv.status_code == HTTPStatus.NO_CONTENT
-
-    # member cant reset password
-    patch_token_info(member_claims, monkeypatch)
-    rv = client.patch(
-        f"/api/v1/users/{admin_username}", headers=member_headers, data=input_data, content_type="application/json"
-    )
-    assert rv.status_code == HTTPStatus.FORBIDDEN
-
-    # admin cant reset password
-    patch_token_info(admin_claims, monkeypatch)
-    rv = client.patch(
-        f"/api/v1/users/{admin_username}", headers=admin_headers, data=input_data, content_type="application/json"
-    )
-    assert rv.status_code == HTTPStatus.FORBIDDEN
-
-
-def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an anonymous admin can be POSTed."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_dir_search_role)
-    rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
-    rv = client.post(
-        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org_anonymous), headers=headers, content_type="application/json"
-    )
-    dictionary = json.loads(rv.data)
-    org_id = dictionary["id"]
-    rv = client.post(
-        "/api/v1/invitations",
-        data=json.dumps(factory_invitation_anonymous(org_id=org_id)),
-        headers=headers,
-        content_type="application/json",
-    )
-    dictionary = json.loads(rv.data)
-    assert dictionary.get("token") is not None
-    assert rv.status_code == HTTPStatus.CREATED
-    rv = client.post(
-        "/api/v1/users/bcros",
-        data=json.dumps(TestUserInfo.user_anonymous_1),
-        headers={"invitation_token": dictionary.get("token")},
-        content_type="application/json",
-    )
-    dictionary = json.loads(rv.data)
-
-    assert rv.status_code == HTTPStatus.CREATED
-    assert (
-        dictionary["users"][0].get("username") == IdpHint.BCROS.value + "/" + TestUserInfo.user_anonymous_1["username"]
-    )
-    assert dictionary["users"][0].get("password") is None
-    assert dictionary["users"][0].get("type") == Role.ANONYMOUS_USER.name
-    assert schema_utils.validate(rv.json, "anonymous_user_response")[0]
-
-    # different error scenarios
-
-    # check expired invitation
-    rv = client.post(
-        "/api/v1/users/bcros",
-        data=json.dumps(TestUserInfo.user_anonymous_1),
-        headers={"invitation_token": dictionary.get("token")},
-        content_type="application/json",
-    )
-    dictionary = json.loads(rv.data)
-    assert dictionary["code"] == "EXPIRED_INVITATION"
-
-    rv = client.post(
-        "/api/v1/invitations",
-        data=json.dumps(factory_invitation_anonymous(org_id=org_id)),
-        headers=headers,
-        content_type="application/json",
-    )
-    dictionary = json.loads(rv.data)
-
-    # check duplicate user
-    rv = client.post(
-        "/api/v1/users/bcros",
-        data=json.dumps(TestUserInfo.user_anonymous_1),
-        headers={"invitation_token": dictionary.get("token")},
-        content_type="application/json",
-    )
-    dictionary = json.loads(rv.data)
-
-    assert dictionary["code"] == 409
-    assert dictionary["message"] == "The username is already taken"
 
 
 def test_add_user_no_token_returns_401(client, session):  # pylint:disable=unused-argument
@@ -881,8 +650,8 @@ def test_delete_otp_for_user(client, jwt, session):  # pylint:disable=unused-arg
     user_headers = factory_auth_header(jwt=jwt, claims=user_claims)
 
     request = KeycloakScenario.create_user_by_user_info(user_info=TestJwtClaims.tester_bceid_role)
-    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    user = keycloak_get_user_by_username(request.user_name)
     assert "CONFIGURE_TOTP" not in json.loads(user.value()).get("requiredActions", None)
     user_id = user.id
     # Create user, org and membserhip in DB
@@ -894,7 +663,7 @@ def test_delete_otp_for_user(client, jwt, session):  # pylint:disable=unused-arg
     rv = client.delete(f"api/v1/users/{user.username}/otp/{org.id}", headers=headers)
     assert rv.status_code == HTTPStatus.NO_CONTENT
 
-    user1 = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    user1 = keycloak_get_user_by_username(request.user_name)
 
     assert "CONFIGURE_TOTP" in json.loads(user1.value()).get("requiredActions")
 
@@ -929,8 +698,8 @@ def test_add_bceid_user(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a user can be POSTed."""
     # Create a user in keycloak
     request = KeycloakScenario.create_user_request()
-    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    user = keycloak_get_user_by_username(request.user_name)
     user_id = user.id
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source="BCEID"))

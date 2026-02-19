@@ -52,13 +52,13 @@ class User(Versioned, BaseModel):
         "keycloak_guid",
         UUID(as_uuid=True),
         unique=True,
-        nullable=True,  # bcros users comes with no guid
+        nullable=True,
     )
 
     is_terms_of_use_accepted = Column(Boolean(), default=False, nullable=True)
     terms_of_use_accepted_version = Column(ForeignKey("documents.version_id"), nullable=True)
 
-    # a type for the user to identify what kind of user it is..ie anonymous , bcsc etc ..similar to login source
+    # a type for the user to identify what kind of user it is..bcsc etc ..similar to login source
     type = Column("type", String(200), nullable=True)
     status = Column(ForeignKey("user_status_codes.id"))
     idp_userid = Column("idp_userid", String(256), index=True)
@@ -272,12 +272,7 @@ class User(Versioned, BaseModel):
         """Return type of the user from the token info."""
         user_type: str = None
         if user_from_context.roles:
-            if (
-                Role.ANONYMOUS_USER.value in user_from_context.roles
-                or user_from_context.login_source == LoginSource.BCROS.value
-            ):
-                user_type = Role.ANONYMOUS_USER.name
-            elif user_from_context.is_staff():
+            if user_from_context.is_staff():
                 user_type = Role.STAFF.name
             elif Role.GOV_ACCOUNT_USER.value in user_from_context.roles:
                 user_type = Role.GOV_ACCOUNT_USER.name
