@@ -153,10 +153,17 @@ export const useOrgStore = defineStore('org', () => {
       canEditBusinessInfo.value
   })
 
+  function isProductFeesReviewed (code) {
+    return state.currentAccountFees.some(accountFee => accountFee.product === code)
+  }
+
   function needStaffReview (code) {
-    const skipReviewTypes = [AccessType.GOVM]
+    const requireReviewTypes = [AccessType.GOVM, AccessType.GOVN]
     const product = state.productList.find(product => product.code === code)
-    return !skipReviewTypes.includes(state.currentOrganization?.accessType as AccessType) && product.needReview
+    if (!isProductFeesReviewed(code) && requireReviewTypes.includes(state.currentOrganization?.accessType as AccessType)) {
+      return true
+    }
+    return !!product?.needReview
   }
 
   const isBusinessAccount = computed<boolean>(() => {
@@ -247,8 +254,10 @@ export const useOrgStore = defineStore('org', () => {
     state.currentOrgGLInfo = glInfo
   }
 
-  function setCurrentAccountFees (accountFee: AccountFee[]) {
-    state.currentAccountFees = accountFee
+  function setCurrentAccountFees (accountFee: AccountFee[] | undefined) {
+    if (accountFee) {
+      state.currentAccountFees = accountFee
+    }
   }
 
   function setResetAccountTypeOnSetupAccount (resetAccountTypeOnSetupAccount:boolean) {
@@ -767,6 +776,7 @@ export const useOrgStore = defineStore('org', () => {
       setCurrentOrganizationGLInfo(response?.data?.revenueAccount)
     }
     state.currentOrgPaymentDetails = response?.data
+    setCurrentAccountFees(response?.data?.accountFees)
     return response?.data
   }
 
@@ -868,11 +878,14 @@ export const useOrgStore = defineStore('org', () => {
     return organization
   }
 
-  async function getOrgProducts (orgId:number): Promise<OrgProduct[]> {
+  async function getOrgProducts (orgId:number, isNewProductFeeReview = false, relationshipId = null): Promise<OrgProduct[]> {
     const response = await OrgService.getProducts(orgId)
     const result = response?.data
-    state.productList = result
-    return result
+    const filteredResult = isNewProductFeeReview
+      ? result?.filter(product => product.id === relationshipId) || []
+      : result
+    state.productList = filteredResult
+    return filteredResult
   }
 
   async function addOrgProducts (productsRequestBody: OrgProductsRequestBody): Promise<OrgProduct> {

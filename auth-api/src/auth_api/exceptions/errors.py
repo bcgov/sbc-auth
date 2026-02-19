@@ -125,6 +125,7 @@ class Error(Enum):
     )
     BCEID_USERS_CANT_BE_OWNERS = "BCEID Users cant be owners", HTTPStatus.BAD_REQUEST
     PAYMENT_ACCOUNT_UPSERT_FAILED = "Account upsert failed in Pay", HTTPStatus.INTERNAL_SERVER_ERROR
+    ACCOUNT_FEES_FETCH_FAILED = "Failed to fetch account fees from Pay API", HTTPStatus.INTERNAL_SERVER_ERROR
     GOVM_ACCOUNT_DATA_MISSING = (
         "GOVM account creation needs payment info , gl code and mailing address",
         HTTPStatus.BAD_REQUEST,

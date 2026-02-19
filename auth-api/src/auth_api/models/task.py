@@ -66,6 +66,8 @@ class Task(BaseModel):
             query = query.filter(Task.type == task_search.type)
         if task_search.status:
             query = query.filter(Task.status.in_(task_search.status))
+        if task_search.action:
+            query = query.filter(Task.action.in_(task_search.action))
         start_date = None
         end_date = None
         if task_search.start_date:
