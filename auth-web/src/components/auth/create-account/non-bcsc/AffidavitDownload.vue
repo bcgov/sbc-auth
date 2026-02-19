@@ -5,7 +5,8 @@
         Getting your identity affidavit notarized
       </h1>
       <p class="mt-5 mb-3">
-        Download the identity affidavit template below and visit a Notary Public or lawyer to have it notarized.
+        Download the identity affidavit template below. Then visit your Notary or Lawyer to get it notarized,
+        or see a BC Commissioner for Taking Affidavits to have it commissioned.
       </p>
     </div>
     <v-card
@@ -23,11 +24,15 @@
             You must use this template and fill out all fields.
             Failure to do so may result in a rejection of your account request.
           </li>
-          <li>Payment (most notaries and lawyers charge a fee for this service. Fees will vary.)</li>
+          <li>
+            Payment (most Notaries and Lawyers charge a fee for this service. Fees will vary.
+            There will also be a charge for having your affidavit commissioned by a BC Commissioner for Taking Affidavits).
+          </li>
         </ol>
       </div>
       <p class="mb-10">
-        Once you have your affidavit notarized, return to this website and continue to the next step.
+        Once you have your affidavit notarized, or commissioned by a BC Commissioner for taking affidavits, return
+        to this website and continue to the next step.
         <span class="lb">You will upload your affidavit later in the account creation process.</span>
       </p>
       <div class="d-inline-flex flex-column pb-2">
