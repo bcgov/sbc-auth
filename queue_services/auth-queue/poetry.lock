@@ -319,7 +319,7 @@ Werkzeug = "^3.1.5"
 type = "git"
 url = "https://github.com/seeker25/sbc-auth.git"
 reference = "32356"
-resolved_reference = "e0ddfc8e4c58e8ccee00e9aa9097df0533412b30"
+resolved_reference = "aa17019fa3384b2cfc9433b4cb2100f19e5d43b5"
 subdirectory = "auth-api"
 
 [[package]]
