@@ -22,7 +22,6 @@ from auth_api.exceptions import BusinessException
 from auth_api.schemas import MembershipSchema, OrgSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
-from auth_api.services import Invitation as InvitationService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.membership import Membership as MembershipService
@@ -31,47 +30,10 @@ from auth_api.services.user import User as UserService
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
 from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.enums import LoginSource, Status
+from auth_api.utils.enums import LoginSource
 from auth_api.utils.roles import Role
 
 bp = Blueprint("USERS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/users")
-
-
-@bp.route("/bcros", methods=["POST", "OPTIONS"])
-@cross_origin(origins="*", methods=["POST"])
-def post_anonymous_user():
-    """Post a new user using the request body who has a proper invitation."""
-    try:
-        request_json = request.get_json()
-        invitation_token = request.headers.get("invitation_token", None)
-        invitation = InvitationService.validate_token(invitation_token).as_dict()
-
-        valid_format, errors = schema_utils.validate(request_json, "anonymous_user")
-        if not valid_format:
-            return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
-
-        membership_details = {
-            "email": invitation["recipient_email"],
-            "membershipType": invitation["membership"][0]["membership_type"],
-            "update_password_on_login": False,
-        }
-        membership_details.update(request_json)
-        user = UserService.create_user_and_add_membership(
-            [membership_details], invitation["membership"][0]["org"]["id"], single_mode=True
-        )
-        user_dict = user["users"][0]
-        if user_dict["http_status"] != HTTPStatus.CREATED:
-            response, status = (
-                {"code": user_dict["http_status"], "message": user_dict["error"]},
-                user_dict["http_status"],
-            )
-        else:
-            InvitationService.accept_invitation(invitation["id"], None, None, False)
-            response, status = user, HTTPStatus.CREATED
-
-    except BusinessException as exception:
-        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
-    return response, status
 
 
 @bp.route("", methods=["GET", "OPTIONS"])
@@ -121,11 +83,6 @@ def post_user():
         # Add the user to public_users group if the user doesn't have public_user group
         if token.get("loginSource", "") != LoginSource.STAFF.value:
             KeycloakService.join_users_group()
-        # For anonymous users, there are no invitation process for members,
-        # so whenever they login perform this check and add them to corresponding groups
-        if token.get("loginSource", "") == LoginSource.BCROS.value:
-            if len(OrgService.get_orgs(user.identifier, [Status.ACTIVE.value])) > 0:
-                KeycloakService.join_account_holders_group()
         if user.type == Role.STAFF.name:
             MembershipService.add_staff_membership(user.identifier)
         else:
@@ -173,52 +130,6 @@ def get_by_username(username):
         response, status = jsonify({"message": f"User {username} does not exist."}), HTTPStatus.NOT_FOUND
     else:
         response, status = user.as_dict(), HTTPStatus.OK
-    return response, status
-
-
-@bp.route("/<path:username>", methods=["DELETE"])
-@cross_origin(origins="*")
-@_jwt.requires_auth
-def delete_by_username(username):
-    """Delete the user profile associated with the provided username."""
-    try:
-        user = UserService.find_by_username(username)
-        if user is None:
-            response, status = jsonify({"message": f"User {username} does not exist."}), HTTPStatus.NOT_FOUND
-        elif user.as_dict().get("type", None) != Role.ANONYMOUS_USER.name:
-            response, status = {"Normal users cant be deleted", HTTPStatus.NOT_IMPLEMENTED}
-        else:
-            UserService.delete_anonymous_user(username)
-            response, status = "", HTTPStatus.NO_CONTENT
-    except BusinessException as exception:
-        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
-    return response, status
-
-
-@bp.route("/<path:username>", methods=["PATCH"])
-@cross_origin(origins="*")
-@_jwt.requires_auth
-def patch_by_username(username):
-    """Patch the user profile associated with the provided username.
-
-    User only for patching the password.
-    """
-    try:
-        request_json = request.get_json()
-        valid_format, errors = schema_utils.validate(request_json, "anonymous_user")
-        if not valid_format:
-            return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
-        user = UserService.find_by_username(username)
-
-        if user is None:
-            response, status = jsonify({"message": f"User {username} does not exist."}), HTTPStatus.NOT_FOUND
-        elif user.as_dict().get("type", None) != Role.ANONYMOUS_USER.name:
-            response, status = {"Normal users cant be patched", HTTPStatus.NOT_IMPLEMENTED}
-        else:
-            UserService.reset_password_for_anon_user(request_json, username)
-            response, status = "", HTTPStatus.NO_CONTENT
-    except BusinessException as exception:
-        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status
 
 

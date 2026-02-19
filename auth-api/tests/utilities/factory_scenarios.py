@@ -209,18 +209,6 @@ class TestJwtClaims(dict, Enum):
         "loginSource": LoginSource.STAFF.value,
     }
 
-    staff_admin_dir_search_role = {
-        "iss": CONFIG.JWT_OIDC_TEST_ISSUER,
-        "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
-        "idp_userid": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
-        "firstname": fake.first_name(),
-        "lastname": fake.last_name(),
-        "preferred_username": fake.user_name(),
-        "realm_access": {"roles": ["staff", "create_accounts", "view_accounts", "edit"]},
-        "roles": ["staff", "create_accounts"],
-        "loginSource": LoginSource.STAFF.value,
-    }
-
     bcol_admin_role = {
         "iss": CONFIG.JWT_OIDC_TEST_ISSUER,
         "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
@@ -313,19 +301,6 @@ class TestJwtClaims(dict, Enum):
         "realm_access": {"roles": ["tester"]},
     }
 
-    anonymous_bcros_role = {
-        "iss": CONFIG.JWT_OIDC_TEST_ISSUER,
-        "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302069",
-        "idp_userid": "f7a4a1d3-73a8-4cbc-a40f-bb1145302069",
-        "firstname": fake.first_name(),
-        "lastname": fake.last_name(),
-        "preferred_username": f"{IdpHint.BCROS.value}/{fake.user_name()}",
-        "accessType": "ANONYMOUS",
-        "loginSource": "BCROS",
-        "realm_access": {"roles": ["edit", "anonymous_user", "public_user"]},
-        "product_code": "DIR_SEARCH",
-    }
-
     tester_bceid_role = {
         "iss": CONFIG.JWT_OIDC_TEST_ISSUER,
         "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
@@ -410,21 +385,6 @@ class TestPaymentMethodInfo(dict, Enum):
         return {"paymentInfo": {"paymentMethod": payment_method.value, "revenueAccount": revenue_account_details}}
 
 
-class TestAnonymousMembership(dict, Enum):
-    """Test scenarios of org status."""
-
-    __test__ = False
-
-    @staticmethod
-    def generate_random_user(membership: str):
-        """Return user with keycloak guid."""
-        return {
-            "username": "".join(choice(ascii_uppercase) for i in range(5)),
-            "password": "firstuser",
-            "membershipType": membership,
-        }
-
-
 class TestOrgStatusInfo(dict, Enum):
     """Test scenarios of org status."""
 
@@ -452,9 +412,7 @@ class TestOrgInfo(dict, Enum):
     org3 = {"name": "Third Orgs"}
     org4 = {"name": "fourth Orgs"}
     org5 = {"name": "fifth Orgs"}
-    org_anonymous = {"name": "My Test Anon Org", "accessType": "ANONYMOUS"}
     org_govm = {"name": "My Test Anon Org", "branchName": "Bar", "accessType": AccessType.GOVM.value}
-    org_anonymous_2 = {"name": "Another test org", "accessType": "ANONYMOUS"}
     org_premium = {"name": "Another test org", "typeCode": OrgType.PREMIUM.value}
     invalid = {"foo": "bar"}
     invalid_name_space = {"name": ""}
@@ -776,27 +734,6 @@ class TestUserInfo(dict, Enum):
         "roles": "{edit, uma_authorization, tester}",
         "keycloak_guid": "1b20db59-19a0-4727-affe-c6f64309fd04",
         "idp_userid": "1b20db59-19a0-4727-affe-c6f64309fd04",
-    }
-    user_anonymous_1 = {
-        "username": fake.user_name(),
-        "password": "Password@1234",
-    }
-    user_bcros = {
-        "username": f"{IdpHint.BCROS.value}/{fake.user_name()}",
-        "firstname": fake.first_name(),
-        "lastname": fake.last_name(),
-        "roles": "{edit, uma_authorization, staff}",
-        # dont add a kc_guid
-    }
-
-    user_bcros_active = {
-        "username": f"{IdpHint.BCROS.value}/{fake.user_name()}",
-        "firstname": fake.first_name(),
-        "lastname": fake.last_name(),
-        "roles": "{edit, uma_authorization, staff}",
-        "keycloak_guid": uuid.uuid4(),
-        "idp_userid": uuid.uuid4(),
-        "access_type": "ANONYMOUS",
     }
     user_bceid_tester = {
         "username": f"{fake.user_name()}@{IdpHint.BCEID.value}",

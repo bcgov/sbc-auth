@@ -126,7 +126,7 @@ def accept_invitation_token(invitation_token):
             response, status = (
                 InvitationService.accept_invitation(invitation_id, user, origin).as_dict(),
                 HTTPStatus.OK,
-            )  # noqa:E127
+            )
 
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code

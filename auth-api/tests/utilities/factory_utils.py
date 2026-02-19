@@ -17,11 +17,16 @@ Test Utility for creating model factory.
 """
 
 import datetime
+from string import Template
 
+import requests
+from flask import current_app
 from requests.exceptions import HTTPError
 from sqlalchemy import event
 
 from auth_api.config import get_named_config
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
@@ -40,9 +45,10 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
+from auth_api.services.keycloak import KeycloakService
+from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils.enums import (
-    AccessType,
-    InvitationType,
+    ContentType,
     OrgType,
     ProductSubscriptionStatus,
     TaskRelationshipStatus,
@@ -89,9 +95,7 @@ def factory_entity_service(entity_info: dict = TestEntityInfo.entity1):
 def factory_user_model(user_info: dict = dict(TestUserInfo.user1)):
     """Produce a user model."""
     roles = user_info.get("roles", None)
-    if user_info.get("access_type", None) == AccessType.ANONYMOUS.value:
-        user_type = Role.ANONYMOUS_USER.name
-    elif Role.STAFF.value in roles:
+    if Role.STAFF.value in roles:
         user_type = Role.STAFF.name
     else:
         user_type = None
@@ -113,7 +117,7 @@ def factory_user_model(user_info: dict = dict(TestUserInfo.user1)):
 
 def factory_user_model_with_contact(user_info: dict = dict(TestUserInfo.user1), keycloak_guid=None):
     """Produce a user model."""
-    user_type = Role.ANONYMOUS_USER.name if user_info.get("access_type", None) == AccessType.ANONYMOUS.value else None
+    user_type = None
     user = UserModel(
         username=user_info.get("username", user_info.get("preferred_username")),
         firstname=user_info["firstname"],
@@ -253,21 +257,6 @@ def factory_invitation(
     return {
         "recipientEmail": email,
         "sentDate": sent_date,
-        "membership": [{"membershipType": membership_type, "orgId": org_id}],
-    }
-
-
-def factory_invitation_anonymous(
-    org_id,
-    email="abc123@email.com",
-    sent_date=datetime.datetime.now().strftime("Y-%m-%d %H:%M:%S"),
-    membership_type="ADMIN",
-):
-    """Produce an invite for the given org and email."""
-    return {
-        "recipientEmail": email,
-        "sentDate": sent_date,
-        "type": InvitationType.DIRECTOR_SEARCH.value,
         "membership": [{"membershipType": membership_type, "orgId": org_id}],
     }
 
@@ -481,3 +470,67 @@ def convert_org_to_staff_org(org_id: int, type_code: OrgType):
     org_db.save()
     event.listen(OrgModel, "before_update", receive_before_update, raw=True)
     event.listen(OrgModel, "before_insert", receive_before_insert)
+
+
+def keycloak_get_user_by_username(username: str, admin_token=None) -> KeycloakUser:
+    """Get user from Keycloak by username. Test utility only."""
+    user = None
+    base_url = current_app.config.get("KEYCLOAK_BASE_URL")
+    realm = current_app.config.get("KEYCLOAK_REALMNAME")
+    timeout = current_app.config.get("CONNECT_TIMEOUT", 60)
+    if not admin_token:
+        admin_token = KeycloakService._get_admin_token()
+
+    headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
+
+    query_user_url = Template(f"{base_url}/auth/admin/realms/{realm}/users?username=$username").substitute(
+        username=username
+    )
+    response = requests.get(query_user_url, headers=headers, timeout=timeout)
+    response.raise_for_status()
+    if len(response.json()) == 1:
+        user = KeycloakUser(response.json()[0])
+    return user
+
+
+def keycloak_add_user(user: KeycloakUser, return_if_exists: bool = False, throw_error_if_exists: bool = False):
+    """Add user to Keycloak. Test utility only."""
+    config = current_app.config
+    admin_token = KeycloakService._get_admin_token()
+
+    base_url = config.get("KEYCLOAK_BASE_URL")
+    realm = config.get("KEYCLOAK_REALMNAME")
+    timeout = config.get("CONNECT_TIMEOUT", 60)
+
+    if return_if_exists or throw_error_if_exists:
+        existing_user = keycloak_get_user_by_username(user.user_name, admin_token=admin_token)
+        if existing_user:
+            if not throw_error_if_exists:
+                return existing_user
+            raise BusinessException(Error.USER_ALREADY_EXISTS_IN_KEYCLOAK, None)
+
+    headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
+
+    add_user_url = f"{base_url}/auth/admin/realms/{realm}/users"
+    response = requests.post(add_user_url, data=user.value(), headers=headers, timeout=timeout)
+    response.raise_for_status()
+
+    return keycloak_get_user_by_username(user.user_name, admin_token)
+
+
+def keycloak_delete_user_by_username(username):
+    """Delete user from Keycloak by username. Test utility only."""
+    admin_token = KeycloakService._get_admin_token()
+    headers = {"Content-Type": ContentType.JSON.value, "Authorization": f"Bearer {admin_token}"}
+
+    base_url = current_app.config.get("KEYCLOAK_BASE_URL")
+    realm = current_app.config.get("KEYCLOAK_REALMNAME")
+    timeout = current_app.config.get("CONNECT_TIMEOUT", 60)
+    user = keycloak_get_user_by_username(username)
+
+    if not user:
+        raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+    delete_user_url = f"{base_url}/auth/admin/realms/{realm}/users/{user.id}"
+    response = requests.delete(delete_user_url, headers=headers, timeout=timeout)
+    response.raise_for_status()

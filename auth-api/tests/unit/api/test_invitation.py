@@ -28,7 +28,12 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS, GROUP_PUBLIC_USERS
 from auth_api.utils.enums import LoginSource, Status
 from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims, TestOrgInfo
-from tests.utilities.factory_utils import factory_auth_header, factory_invitation
+from tests.utilities.factory_utils import (
+    factory_auth_header,
+    factory_invitation,
+    keycloak_add_user,
+    keycloak_get_user_by_username,
+)
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -251,8 +256,8 @@ def test_accept_public_users_invitation(
     invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
 
     request = KeycloakScenario.create_user_request()
-    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    user = keycloak_get_user_by_username(request.user_name)
     user_id = user.id
     headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source=source))
     client.post("/api/v1/users", headers=headers_invitee, content_type="application/json")
@@ -297,8 +302,8 @@ def test_accept_gov_account_invitation(client, jwt, session):  # pylint:disable=
     invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
 
     request = KeycloakScenario.create_user_request()
-    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    user = keycloak_get_user_by_username(request.user_name)
     user_id = user.id
     headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source="IDIR", roles=[]))
     client.post("/api/v1/users", headers=headers_invitee, content_type="application/json")

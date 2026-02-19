@@ -99,9 +99,7 @@ class Invitation:
         org_name = org.name
         invitation_type = Invitation._get_inv_type(org)
 
-        if org.access_type == AccessType.ANONYMOUS.value:  # anonymous account never get bceid or bcsc choices
-            mandatory_login_source = LoginSource.BCROS.value
-        elif org.access_type == AccessType.GOVM.value:
+        if org.access_type == AccessType.GOVM.value:
             mandatory_login_source = LoginSource.STAFF.value
         else:
             default_login_option_based_on_accesstype = (
@@ -156,7 +154,6 @@ class Invitation:
         """Return the correct invitation type."""
         inv_types = {
             AccessType.GOVM.value: InvitationType.GOVM.value,
-            AccessType.ANONYMOUS.value: InvitationType.DIRECTOR_SEARCH.value,
             AccessType.REGULAR.value: InvitationType.STANDARD.value,
         }
         return inv_types.get(org.access_type, InvitationType.STANDARD.value)
@@ -328,10 +325,6 @@ class Invitation:
             "token_confirm_path": token_confirm_path,
             "notification_type": QueueMessageTypes.GOVM_MEMBER_INVITATION.value,
         }
-        director_search_configs = {
-            "token_confirm_path": token_confirm_path,
-            "notification_type": QueueMessageTypes.DIRSEARCH_BUSINESS_INVITATION.value,
-        }
         bceid_configs = {
             "token_confirm_path": token_confirm_path,
             "notification_type": QueueMessageTypes.BUSINESS_INVITATION_FOR_BCEID.value,
@@ -341,7 +334,6 @@ class Invitation:
             "notification_type": QueueMessageTypes.BUSINESS_INVITATION.value,
         }
         mail_configs = {
-            "BCROS": director_search_configs,
             "BCEID": bceid_configs,
             "IDIR": govm_member_configs,
             "IDIR/ACCOUNTSETUP": govm_setup_configs,

@@ -356,7 +356,7 @@ def test_invitation_govm(session, auth_mock, keycloak_mock, monkeypatch):
 
 
 @mock.patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token", mock_token)
-def test_invitation_anonymous(session, auth_mock, keycloak_mock, monkeypatch):
+def test_invitation_regular_org(session, auth_mock, keycloak_mock, monkeypatch):
     """Assert that non government ministry organization invites can be accepted by different login sources."""
     # inviter/invitee user setup
     inviter_user = factory_user_model(TestUserInfo.user_tester)

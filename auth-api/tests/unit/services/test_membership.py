@@ -39,6 +39,8 @@ from tests.utilities.factory_utils import (
     factory_org_model,
     factory_product_model,
     factory_user_model,
+    keycloak_add_user,
+    keycloak_get_user_by_username,
 )
 
 
@@ -48,8 +50,8 @@ def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:d
     # Create a user in keycloak
     keycloak_service = KeycloakService()
     request = KeycloakScenario.create_user_request()
-    keycloak_service.add_user(request, return_if_exists=True)
-    kc_user = keycloak_service.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    kc_user = keycloak_get_user_by_username(request.user_name)
     user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
     # Patch token info
@@ -66,8 +68,8 @@ def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:d
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     # Create another user
     request = KeycloakScenario.create_user_request()
-    keycloak_service.add_user(request, return_if_exists=True)
-    kc_user2 = keycloak_service.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    kc_user2 = keycloak_get_user_by_username(request.user_name)
     user2 = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user2.id))
 
     # Add a membership to the user for the org created
@@ -96,8 +98,8 @@ def test_remove_member_removes_group_to_the_user(publish_mock, session, monkeypa
     # Create a user in keycloak
     keycloak_service = KeycloakService()
     request = KeycloakScenario.create_user_request()
-    keycloak_service.add_user(request, return_if_exists=True)
-    kc_user = keycloak_service.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    kc_user = keycloak_get_user_by_username(request.user_name)
     user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
     # Patch token info
@@ -114,8 +116,8 @@ def test_remove_member_removes_group_to_the_user(publish_mock, session, monkeypa
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     # Create another user
     request = KeycloakScenario.create_user_request()
-    keycloak_service.add_user(request, return_if_exists=True)
-    kc_user2 = keycloak_service.get_user_by_username(request.user_name)
+    keycloak_add_user(request, return_if_exists=True)
+    kc_user2 = keycloak_get_user_by_username(request.user_name)
     user2 = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user2.id))
 
     # Add a membership to the user for the org created

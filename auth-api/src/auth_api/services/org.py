@@ -139,7 +139,7 @@ class Org:  # pylint: disable=too-many-public-methods
             Org.add_contact_to_org(mailing_address, org)
 
         # create the membership record for this user if its not created by staff and access_type is anonymous
-        Org.create_membership(access_type, org, user_id)
+        Org.create_membership(org, user_id)
 
         if product_subscriptions is not None:
             ProductService.create_product_subscription(
@@ -202,10 +202,10 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     @user_context
-    def create_membership(access_type, org, user_id, **kwargs):
+    def create_membership(org, user_id, **kwargs):
         """Create membership account."""
         user: UserContext = kwargs["user_context"]
-        if not user.is_staff_admin() and access_type != AccessType.ANONYMOUS.value:
+        if not user.is_staff_admin():
             membership = MembershipModel(
                 org_id=org.id, user_id=user_id, membership_type_code="ADMIN", membership_type_status=Status.ACTIVE.value
             )
@@ -903,10 +903,7 @@ class Org:  # pylint: disable=too-many-public-methods
         is_staff_admin = Role.STAFF_CREATE_ACCOUNTS.value in roles or Role.STAFF_MANAGE_ACCOUNTS.value in roles
         if not is_staff_admin:
             if len(access_types) < 1:
-                # pass everything except DIRECTOR SEARCH
-                access_types = [item.value for item in AccessType if item != AccessType.ANONYMOUS]
-            else:
-                access_types.remove(AccessType.ANONYMOUS.value)
+                access_types = [item.value for item in AccessType]
         return access_types, is_staff_admin
 
     @staticmethod

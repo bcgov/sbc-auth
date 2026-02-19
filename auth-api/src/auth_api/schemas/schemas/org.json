@@ -52,7 +52,6 @@
       "type": "string",
       "title": "Access Type",
       "examples": [
-        "ANONYMOUS",
         "EXTRA_PROVINCIAL"
       ],
       "pattern": "^(.*)$"
