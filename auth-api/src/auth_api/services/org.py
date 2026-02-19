@@ -139,7 +139,7 @@ class Org:  # pylint: disable=too-many-public-methods
             Org.add_contact_to_org(mailing_address, org)
 
         # create the membership record for this user if its not created by staff and access_type is anonymous
-        Org.create_membership(access_type, org, user_id)
+        Org.create_membership(org, user_id)
 
         if product_subscriptions is not None:
             ProductService.create_product_subscription(
