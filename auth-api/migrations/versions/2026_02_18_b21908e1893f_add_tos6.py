@@ -1,4 +1,4 @@
-"""BC Registry and Digital Services Account Agreement ToS version 6 and affidavit version 2
+"""BC Registry and Digital Services Account Agreement ToS version 6
 
 Revision ID: b21908e1893f
 Revises: a1b2c3d4e5f6
@@ -23,14 +23,6 @@ def upgrade():
                       column('type', String),
                       column('content_type', String),
                       column('content', String))
-
-    file_name = "affidavit_v2.pdf"
-    op.bulk_insert(
-        documents,
-        [
-            {'version_id': 'a2', 'type': 'affidavit', 'content': file_name, 'content_type': 'application/pdf'}
-        ]
-    )
 
     html_content = """
       <section>
@@ -280,5 +272,4 @@ def upgrade():
 
 
 def downgrade():
-    op.execute("DELETE FROM DOCUMENTS WHERE version_id='a2'")
     op.execute("DELETE FROM DOCUMENTS WHERE version_id='6' AND type='termsofuse'")
