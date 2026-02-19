@@ -902,7 +902,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         is_staff_admin = Role.STAFF_CREATE_ACCOUNTS.value in roles or Role.STAFF_MANAGE_ACCOUNTS.value in roles
         if not is_staff_admin:
-            access_types = [item.value for item in AccessType]
+            if len(access_types) < 1:
+                access_types = [item.value for item in AccessType]
         return access_types, is_staff_admin
 
     @staticmethod
