@@ -31,7 +31,7 @@
         </ol>
       </div>
       <p class="mb-10">
-        Once you have your affidavit notarized, or commissioned by a BC Commissioner for taking affidavits, return
+        Once you have your affidavit notarized, or commissioned by a BC Commissioner for Taking Affidavits, return
         to this website and continue to the next step.
         <span class="lb">You will upload your affidavit later in the account creation process.</span>
       </p>
