@@ -545,9 +545,9 @@ def patch_pay_account_fees(monkeypatch, product_codes: list[str]):
 
     monkeypatch.setattr(
         "auth_api.utils.pay.RestService.get",
-        lambda *args, **kwargs: MockFeeResponse(),
+        lambda *_args, **_kwargs: MockFeeResponse(),
     )
     monkeypatch.setattr(
         "auth_api.utils.pay.RestService.get_service_account_token",
-        lambda *args, **kwargs: "mock-token",
+        lambda *_args, **_kwargs: "mock-token",
     )
