@@ -29,7 +29,7 @@ from auth_api.models import Org
 from auth_api.models import db as _db
 from auth_api.models.org import receive_before_update
 from auth_api.utils.auth import jwt as _jwt
-from tests.utilities.factory_utils import patch_pay_account_post
+from tests.utilities.factory_utils import patch_pay_account_post, patch_pay_account_put
 
 
 def mock_token(config_id="", config_secret=""):
@@ -176,7 +176,13 @@ def auth_mock(monkeypatch):
     monkeypatch.setattr("auth_api.services.org.check_auth", lambda *args, **kwargs: None)  # noqa: ARG005
     monkeypatch.setattr("auth_api.services.invitation.check_auth", lambda *args, **kwargs: None)  # noqa: ARG005
     monkeypatch.setattr("auth_api.services.affiliation_invitation.check_auth", lambda *args, **kwargs: None)  # noqa: ARG005
+
+
+@pytest.fixture(autouse=True)
+def pay_api_mock(monkeypatch):
+    """Mock pay-api."""
     patch_pay_account_post(monkeypatch)
+    patch_pay_account_put(monkeypatch)
 
 
 @pytest.fixture()
