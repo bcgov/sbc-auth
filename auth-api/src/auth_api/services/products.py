@@ -17,7 +17,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-from auth_api.utils.pay import get_account_fees
 from flask import current_app
 from sqlalchemy import and_, case, func, literal, or_
 from sqlalchemy.exc import SQLAlchemyError
@@ -57,6 +56,7 @@ from auth_api.utils.notifications import (
     get_product_notification_data,
     get_product_notification_type,
 )
+from auth_api.utils.pay import get_account_fees
 from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, GOV_ORG_TYPES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 

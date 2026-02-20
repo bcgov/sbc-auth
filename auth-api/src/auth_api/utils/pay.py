@@ -21,10 +21,10 @@ from auth_api.services.rest_service import RestService
 from auth_api.utils.roles import GOV_ORG_TYPES
 
 
-def get_account_fees(org: OrgModel) -> dict:
+def get_account_fees(org: OrgModel) -> list[str]:
     """Fetch all account fees from pay-api and return a dict mapping product codes to fee existence."""
     if org.access_type not in GOV_ORG_TYPES:
-        return {}
+        return []
     pay_url = current_app.config.get("PAY_API_URL")
     account_fees = []
 
@@ -45,5 +45,6 @@ def get_account_fees(org: OrgModel) -> dict:
         # Log the error but don't fail the subscription creation
         # Return empty dict so subscription can proceed without fee-based review logic
         current_app.logger.info(f"{Error.ACCOUNT_FEES_FETCH_FAILED} for org {org.id}: {e}")
+        return []
 
     return account_fees
