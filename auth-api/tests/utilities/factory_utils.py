@@ -536,18 +536,18 @@ def keycloak_delete_user_by_username(username):
     response.raise_for_status()
 
 
-def patch_pay_account_fees(monkeypatch, product_codes: list[str]):
-    """Patch GET /accounts/{id}/fees to return given product codes."""
-    class MockFeeResponse:
-        status_code = 200
-        def json(self):
-            return {"accountFees": [{"product": c} for c in product_codes]}
+#def patch_pay_account_fees(monkeypatch, product_codes: list[str]):
+#    """Patch GET /accounts/{id}/fees to return given product codes."""
+#    class MockFeeResponse:
+#        status_code = 200
+#        def json(self):
+#            return {"accountFees": [{"product": c} for c in product_codes]}
 
-    monkeypatch.setattr(
-        "auth_api.utils.pay.RestService.get",
-        lambda *_args, **_kwargs: MockFeeResponse(),
-    )
-    monkeypatch.setattr(
-        "auth_api.utils.pay.RestService.get_service_account_token",
-        lambda *_args, **_kwargs: "mock-token",
-    )
+#    monkeypatch.setattr(
+#        "auth_api.utils.pay.RestService.get",
+#        lambda *_args, **_kwargs: MockFeeResponse(),
+#    )
+#    monkeypatch.setattr(
+#        "auth_api.utils.pay.RestService.get_service_account_token",
+#        lambda *_args, **_kwargs: "mock-token",
+#    )
