@@ -178,9 +178,9 @@ def auth_mock(monkeypatch):
     monkeypatch.setattr("auth_api.services.affiliation_invitation.check_auth", lambda *args, **kwargs: None)  # noqa: ARG005
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture()
 def pay_api_mock(monkeypatch):
-    """Mock pay-api."""
+    """Mock pay-api (RestService.post/put for pay). Use when test creates org but does not use auth_mock."""
     patch_pay_account_post(monkeypatch)
     patch_pay_account_put(monkeypatch)
 

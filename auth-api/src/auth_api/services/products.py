@@ -167,7 +167,7 @@ class Product:
         inactive_sub = ProductSubscriptionModel.find_by_org_id_product_code(
             org_id=org_id, product_code=product_code, valid_statuses=(ProductSubscriptionStatus.INACTIVE.value,)
         )
-        if not inactive_sub or product_code not in account_fees:
+        if not inactive_sub:
             return False, None
         task_add_product = TaskModel.find_by_task_relationship_id(
             inactive_sub.id, TaskRelationshipType.PRODUCT.value, TaskStatus.COMPLETED.value
@@ -235,7 +235,7 @@ class Product:
             check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
         subscriptions_list = subscription_data.get("subscriptions")
-        account_fees = get_account_fees(org)
+        account_fees = []
         for subscription in subscriptions_list:
             auto_approve_current = auto_approve
             product_code = subscription.get("productCode")
