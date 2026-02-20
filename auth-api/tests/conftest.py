@@ -177,7 +177,6 @@ def auth_mock(monkeypatch):
     monkeypatch.setattr("auth_api.services.affiliation_invitation.check_auth", lambda *args, **kwargs: None)  # noqa: ARG005
 
 
-
 @pytest.fixture()
 def notify_mock(monkeypatch):
     """Mock send_email."""
