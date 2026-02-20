@@ -20,7 +20,7 @@ from _datetime import datetime
 
 from auth_api.models import Task as TaskModel
 from auth_api.models.dataclass import TaskSearch
-from auth_api.utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix
+from auth_api.utils.enums import TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix
 from tests.utilities.factory_utils import factory_task_models, factory_user_model
 
 
@@ -249,3 +249,48 @@ def test_find_by_task_for_user(session):  # pylint:disable=unused-argument
     assert found_task.name == "TEST 1"
     assert found_task.relationship_id == user.id
     assert found_task.status == TaskStatus.OPEN.value
+
+
+def test_fetch_tasks_by_action(session):  # pylint:disable=unused-argument
+    """Assert that we can fetch tasks filtered by action NEW_PRODUCT_FEE_REVIEW."""
+    user = factory_user_model()
+    task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
+
+    task1 = TaskModel(
+        name="Task 1",
+        date_submitted=datetime.now(),
+        relationship_type=TaskRelationshipType.PRODUCT.value,
+        relationship_id=10,
+        type=task_type,
+        status=TaskStatus.OPEN.value,
+        action=TaskAction.NEW_PRODUCT_FEE_REVIEW.value,
+        related_to=user.id,
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+    )
+    task1.save()
+
+    task2 = TaskModel(
+        name="Task 2",
+        date_submitted=datetime.now(),
+        relationship_type=TaskRelationshipType.PRODUCT.value,
+        relationship_id=10,
+        type=task_type,
+        status=TaskStatus.OPEN.value,
+        action=TaskAction.PRODUCT_REVIEW.value,
+        related_to=user.id,
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+    )
+    task2.save()
+
+    task_search = TaskSearch(
+        type=task_type,
+        status=[TaskStatus.OPEN.value],
+        action=[TaskAction.NEW_PRODUCT_FEE_REVIEW.value],
+        relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        page=1,
+        limit=10,
+    )
+
+    found_tasks, count = TaskModel.fetch_tasks(task_search)
+    assert count == 1
+    assert found_tasks[0].action == TaskAction.NEW_PRODUCT_FEE_REVIEW.value

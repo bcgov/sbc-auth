@@ -46,6 +46,7 @@ def get_tasks():
             relationship_status=request.args.get("relationshipStatus", None),
             type=request.args.get("type", None),
             status=request.args.getlist("status", None),
+            action=request.args.getlist("action", None),
             modified_by=request.args.get("modifiedBy", None),
             submitted_sort_order=request.args.get("submittedSortOrder", None),
             page=int(request.args.get("page", 1)),
