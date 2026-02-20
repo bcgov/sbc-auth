@@ -243,14 +243,14 @@ class Product:
                 # Check if product requires system admin, if yes abort
                 if product_model.need_system_admin:
                     check_auth(system_required=True, org_id=org_id)
-                    
+
                 if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org:
                     previously_approved, inactive_sub = Product._check_gov_org_add_product_previously_approved(
                         org.id, product_code
                     )
                 else:
                     previously_approved, inactive_sub = Product._is_previously_approved(org_id, product_code)
-                    
+
                 if previously_approved:
                     auto_approve_current = True
 

@@ -563,9 +563,10 @@ def test_add_same_org_409(client, jwt, session, keycloak_mock):  # pylint:disabl
 
 
 def test_create_govn_org_with_products_single_staff_review_task(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert creating a GOVN org with product subscriptions creates only the org staff review task, not a product task.
-    Also asserts _check_gov_org_add_product_previously_approved: after approving org task, user removes
-    product then re-adds -> task_create_org (ACCOUNT_REVIEW+COMPLETED+ACTIVE).
+    """Ensure GOVN org creation creates only a staff review task.
+
+    Verify task status updates correctly when a product is re-added
+    after approval.
     """
     patch_pay_account_post(monkeypatch)
 
