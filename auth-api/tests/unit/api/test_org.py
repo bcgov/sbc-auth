@@ -79,7 +79,6 @@ from tests.utilities.factory_utils import (
     factory_user_model,
     patch_pay_account_delete,
     patch_pay_account_delete_error,
-    #patch_pay_account_fees,
     patch_pay_account_post,
 )
 
@@ -570,7 +569,6 @@ def test_create_govn_org_with_products_single_staff_review_task(client, jwt, ses
     after approval.
     """
     patch_pay_account_post(monkeypatch)
-    #patch_pay_account_fees(monkeypatch, [ProductCode.BUSINESS_SEARCH.value, ProductCode.PPR.value])
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     client.post("/api/v1/users", headers=headers, content_type="application/json")
