@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from auth_api.utils.pay import get_account_fees
 from flask import current_app
 from sqlalchemy import and_, case, func, literal, or_
 from sqlalchemy.exc import SQLAlchemyError
@@ -159,13 +160,14 @@ class Product:
     @staticmethod
     def _check_gov_org_add_product_previously_approved(
         org_id: int,
-        product_code: str
+        product_code: str,
+        account_fees: list[str]
     ) -> tuple[bool, Any]:
         """Check if GOV org's account fee product was previously approved (NEW_PRODUCT_FEE_REVIEW task)."""
         inactive_sub = ProductSubscriptionModel.find_by_org_id_product_code(
             org_id=org_id, product_code=product_code, valid_statuses=(ProductSubscriptionStatus.INACTIVE.value,)
         )
-        if not inactive_sub:
+        if not inactive_sub or product_code not in account_fees:
             return False, None
         task_add_product = TaskModel.find_by_task_relationship_id(
             inactive_sub.id, TaskRelationshipType.PRODUCT.value, TaskStatus.COMPLETED.value
@@ -233,6 +235,7 @@ class Product:
             check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
         subscriptions_list = subscription_data.get("subscriptions")
+        account_fees = get_account_fees(org) if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org else []
         for subscription in subscriptions_list:
             auto_approve_current = auto_approve
             product_code = subscription.get("productCode")
@@ -246,7 +249,7 @@ class Product:
 
                 if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org:
                     previously_approved, inactive_sub = Product._check_gov_org_add_product_previously_approved(
-                        org.id, product_code
+                        org.id, product_code, account_fees
                     )
                 else:
                     previously_approved, inactive_sub = Product._is_previously_approved(org_id, product_code)
