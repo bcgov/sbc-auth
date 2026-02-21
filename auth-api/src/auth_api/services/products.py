@@ -17,7 +17,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-from auth_api.utils.pay import get_account_fees
 from flask import current_app
 from sqlalchemy import and_, case, func, literal, or_
 from sqlalchemy.exc import SQLAlchemyError
