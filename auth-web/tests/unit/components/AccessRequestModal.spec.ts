@@ -21,7 +21,7 @@ describe('AccessRequestModal.vue', () => {
     isSaving: false,
     isOnHoldModal: false,
     taskName: 'testprod',
-    onholdReasons: [
+    onholdReasonCodes: [
       {
         'code': 'BLANKAFFIDAVIT',
         'default': false,
@@ -33,7 +33,6 @@ describe('AccessRequestModal.vue', () => {
         'desc': 'Affidavit is missing seal'
       }
     ]
-
   }
 
   beforeEach(() => {
@@ -106,6 +105,40 @@ describe('AccessRequestModal.vue', () => {
     await accessRequest.vm.open()
 
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject Access Request?`)
+  })
+
+  it('Should show Approve Product Changes modal when isNewProductFeeReview is true', async () => {
+    await wrapper.setProps({ isNewProductFeeReview: true, accountType: 'PRODUCT' })
+    await accessRequest.vm.open()
+
+    expect(wrapper.find('[data-test="dialog-header"]').text()).toBe('Approve Product Changes')
+    expect(wrapper.find('[data-test="p-modal-text"]').text()).toBe('This change will take effect immediately.')
+  })
+
+  it('Should show Reject Product Changes modal when isNewProductFeeReview is true', async () => {
+    await wrapper.setProps({ isNewProductFeeReview: true, isRejectModal: true, accountType: 'PRODUCT' })
+    await accessRequest.vm.open()
+
+    expect(wrapper.find('[data-test="dialog-header"]').text()).toBe('Reject Product Changes')
+    expect(wrapper.find('[data-test="p-modal-text"]').text()).toBe('Rejecting this will prevent the product from being selected for this user.')
+  })
+
+  it('Should show Product Changes Approved confirmation modal when isNewProductFeeReview is true', async () => {
+    await wrapper.setProps({ isNewProductFeeReview: true, accountType: 'PRODUCT' })
+    await wrapper.vm.$nextTick()
+
+    const confirmData = wrapper.vm.getConfirmModalData
+    expect(confirmData.title).toBe('Product Changes Approved')
+    expect(confirmData.text).toBe('The product changes have been approved and will take effect immediately.')
+  })
+
+  it('Should show Product Changes Rejected confirmation modal when isNewProductFeeReview is true', async () => {
+    await wrapper.setProps({ isNewProductFeeReview: true, isRejectModal: true, accountType: 'PRODUCT' })
+    await wrapper.vm.$nextTick()
+
+    const confirmData = wrapper.vm.getConfirmModalData
+    expect(confirmData.title).toBe('Product Changes Rejected')
+    expect(confirmData.text).toBe('The product changes have been rejected.')
   })
 
   it('render on hold reasons properly ', async () => {

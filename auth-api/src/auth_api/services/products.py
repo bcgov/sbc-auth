@@ -56,7 +56,8 @@ from auth_api.utils.notifications import (
     get_product_notification_data,
     get_product_notification_type,
 )
-from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
+from auth_api.utils.pay import get_account_fees
+from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, GOV_ORG_TYPES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
@@ -157,6 +158,42 @@ class Product:
         return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
 
     @staticmethod
+    def _check_gov_org_add_product_previously_approved(
+        org_id: int,
+        product_code: str,
+        account_fees: list[str]
+    ) -> tuple[bool, Any]:
+        """Check if GOV org's account fee product was previously approved (NEW_PRODUCT_FEE_REVIEW task)."""
+        inactive_sub = ProductSubscriptionModel.find_by_org_id_product_code(
+            org_id=org_id, product_code=product_code, valid_statuses=(ProductSubscriptionStatus.INACTIVE.value,)
+        )
+        if not inactive_sub or product_code not in account_fees:
+            return False, None
+        task_add_product = TaskModel.find_by_task_relationship_id(
+            inactive_sub.id, TaskRelationshipType.PRODUCT.value, TaskStatus.COMPLETED.value
+        )
+        task_create_org = TaskModel.find_by_task_relationship_id(
+            org_id, TaskRelationshipType.ORG.value, TaskStatus.COMPLETED.value
+        )
+        product_invalid = (
+            task_add_product is None or (
+                task_add_product.action in (TaskAction.NEW_PRODUCT_FEE_REVIEW.value, TaskAction.PRODUCT_REVIEW.value)
+                and task_add_product.relationship_status != TaskRelationshipStatus.ACTIVE.value
+            )
+        )
+        if product_invalid:
+            org_invalid = (
+                task_create_org is None or (
+                    task_create_org.action in (TaskAction.AFFIDAVIT_REVIEW.value, TaskAction.ACCOUNT_REVIEW.value)
+                    and task_create_org.relationship_status != TaskRelationshipStatus.ACTIVE.value
+                )
+            )
+
+            if org_invalid:
+                return False, None
+        return True, inactive_sub
+
+    @staticmethod
     def _is_previously_approved(org_id: int, product_code: str):
         """Check if this product has a task that was previously approved."""
         inactive_sub = ProductSubscriptionModel.find_by_org_id_product_code(
@@ -170,7 +207,7 @@ class Product:
         )
         if task is None or (
             task.relationship_status != TaskRelationshipStatus.ACTIVE.value
-            and task.action == TaskAction.PRODUCT_REVIEW.value
+            and task.action in (TaskAction.PRODUCT_REVIEW.value, TaskAction.NEW_PRODUCT_FEE_REVIEW.value)
         ):
             return False, None
 
@@ -183,6 +220,7 @@ class Product:
         is_new_transaction: bool = True,
         skip_auth=False,
         auto_approve=False,
+        staff_review_for_create_org=False,
     ):
         """Create product subscription for the user.
 
@@ -197,7 +235,9 @@ class Product:
             check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
         subscriptions_list = subscription_data.get("subscriptions")
+        account_fees = get_account_fees(org) if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org else []
         for subscription in subscriptions_list:
+            auto_approve_current = auto_approve
             product_code = subscription.get("productCode")
             if ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code):
                 raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)
@@ -206,11 +246,20 @@ class Product:
                 # Check if product requires system admin, if yes abort
                 if product_model.need_system_admin:
                     check_auth(system_required=True, org_id=org_id)
-                previously_approved, inactive_sub = Product._is_previously_approved(org_id, product_code)
-                if previously_approved:
-                    auto_approve = True
 
-                subscription_status = Product.find_subscription_status(org, product_model, auto_approve)
+                if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org:
+                    previously_approved, inactive_sub = Product._check_gov_org_add_product_previously_approved(
+                        org.id, product_code, account_fees
+                    )
+                else:
+                    previously_approved, inactive_sub = Product._is_previously_approved(org_id, product_code)
+
+                if previously_approved:
+                    auto_approve_current = True
+
+                subscription_status = Product.find_subscription_status(
+                    org, product_model, auto_approve_current, staff_review_for_create_org
+                )
                 product_subscription = Product._subscribe_and_publish_activity(
                     SubscriptionRequest(
                         org_id=org_id,
@@ -245,6 +294,7 @@ class Product:
                         ProductReviewTask(
                             org_id=org.id,
                             org_name=org.name,
+                            org_access_type=org.access_type,
                             product_code=product_subscription.product_code,
                             product_description=product_model.description,
                             product_subscription_id=product_subscription.id,
@@ -374,11 +424,14 @@ class Product:
     @staticmethod
     def _create_review_task(review_task: ProductReviewTask):
         task_type = review_task.product_description
-        action_type = (
-            TaskAction.QUALIFIED_SUPPLIER_REVIEW.value
-            if review_task.product_code in QUALIFIED_SUPPLIER_PRODUCT_CODES
-            else TaskAction.PRODUCT_REVIEW.value
-        )
+
+        required_review_types = {AccessType.GOVM.value, AccessType.GOVN.value}
+        if review_task.product_code in QUALIFIED_SUPPLIER_PRODUCT_CODES:
+            action_type = TaskAction.QUALIFIED_SUPPLIER_REVIEW.value
+        elif review_task.org_access_type in required_review_types:
+            action_type = TaskAction.NEW_PRODUCT_FEE_REVIEW.value
+        else:
+            action_type = TaskAction.PRODUCT_REVIEW.value
 
         task_info = {
             "name": review_task.org_name,
@@ -396,14 +449,13 @@ class Product:
         TaskService.create_task(task_info, False)
 
     @staticmethod
-    def find_subscription_status(org, product_model, auto_approve=False):
+    def find_subscription_status(org, product_model, auto_approve=False, staff_review_for_create_org=False):
         """Return the subscriptions status based on org type."""
-        # GOVM accounts has default active subscriptions
-        skip_review_types = [AccessType.GOVM.value]
-        if product_model.need_review and auto_approve is False:
+        skip_review = org.access_type in GOV_ORG_TYPES and staff_review_for_create_org # prevent create second task when it's already added a staff review when creating org
+        if (product_model.need_review or org.access_type in GOV_ORG_TYPES) and not auto_approve:
             return (
                 ProductSubscriptionStatus.ACTIVE.value
-                if (org.access_type in skip_review_types)
+                if skip_review
                 else ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
             )
         return ProductSubscriptionStatus.ACTIVE.value
@@ -455,7 +507,10 @@ class Product:
             check_auth(one_of_roles=(*CLIENT_AUTH_ROLES, STAFF), org_id=org_id)
 
         product_subscriptions: list[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_ids([org_id])
-        subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}
+        subscription_by_code = {
+            sub.product_code: sub
+            for sub in product_subscriptions
+        }
 
         # Include hidden products only for staff and SBC staff
         include_hidden = (
@@ -467,9 +522,9 @@ class Product:
 
         products = Product.get_products(include_hidden=include_hidden, staff_check=False)
         for product in products:
-            product["subscriptionStatus"] = subscriptions_dict.get(
-                product.get("code"), ProductSubscriptionStatus.NOT_SUBSCRIBED.value
-            )
+            sub = subscription_by_code.get(product.get("code"))
+            product["subscriptionStatus"] = getattr(sub, "status_code", ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
+            product["id"] = getattr(sub, "id", None)
 
         return products
 
@@ -483,7 +538,6 @@ class Product:
         is_hold = product_sub_info.is_hold
         org_id = product_sub_info.org_id
         org_name = product_sub_info.org_name
-
         # Approve/Reject Product subscription
         product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_id(product_subscription_id)
 
@@ -504,7 +558,6 @@ class Product:
         product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_subscription.product_code)
         # Find admin email addresses
         admin_emails = UserService.get_admin_emails_for_org(org_id)
-
         if admin_emails != "" and not is_hold:
             Product.send_product_subscription_notification(
                 ProductNotificationInfo(

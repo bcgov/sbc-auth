@@ -15,7 +15,7 @@
 
 from enum import Enum
 
-from .enums import OrgStatus, OrgType, ProductSubscriptionStatus, Status
+from .enums import AccessType, OrgStatus, OrgType, ProductSubscriptionStatus, Status
 
 
 class Role(Enum):
@@ -87,3 +87,5 @@ AFFILIATION_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF, Role.EXTERNAL_STAFF_READ
 EXCLUDED_FIELDS = ("status_code", "type_code")
 
 PREMIUM_ORG_TYPES = (OrgType.PREMIUM.value, OrgType.SBC_STAFF.value, OrgType.STAFF.value)
+
+GOV_ORG_TYPES = (AccessType.GOVM.value, AccessType.GOVN.value)

@@ -141,9 +141,16 @@ class Org:  # pylint: disable=too-many-public-methods
         # create the membership record for this user if its not created by staff and access_type is anonymous
         Org.create_membership(org, user_id)
 
+        # Send an email to staff to remind review the pending account
+        is_staff_review_needed = access_type == AccessType.GOVN.value or (
+            access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
+            and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
+            and current_app.config.get("SKIP_STAFF_APPROVAL_BCEID") is False
+        )
+
         if product_subscriptions is not None:
             ProductService.create_product_subscription(
-                org.id, subscription_data={"subscriptions": product_subscriptions}, skip_auth=True
+                org.id, subscription_data={"subscriptions": product_subscriptions}, skip_auth=True, staff_review_for_create_org=is_staff_review_needed
             )
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
@@ -152,13 +159,6 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
             current_app.logger.warning(f"Account update payment Error: {error}")
-
-        # Send an email to staff to remind review the pending account
-        is_staff_review_needed = access_type == AccessType.GOVN.value or (
-            access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
-            and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
-            and current_app.config.get("SKIP_STAFF_APPROVAL_BCEID") is False
-        )
 
         if is_staff_review_needed:
             Org._create_staff_review_task(org, UserModel.find_by_jwt_token())

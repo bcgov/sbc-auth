@@ -97,7 +97,7 @@
                       >
                         <v-select
                           v-model="searchParams[header.value]"
-                          :items="accountTypes"
+                          :items="reviewTaskTypes"
                           filled
                           v-bind="$attrs"
                           hide-details="auto"
@@ -158,6 +158,11 @@
                   View
                 </v-btn>
               </template>
+              <template #[`item.type`]="{ item }">
+                {{ item?.action === TaskActionEnum.NEW_PRODUCT_FEE_REVIEW ? 'New Product Fee Review' :
+                  item.type
+                }}
+              </template>
             </v-data-table>
           </transition>
         </v-col>
@@ -168,7 +173,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator'
-import { SessionStorageKeys, TaskRelationshipStatus, TaskStatus } from '@/util/constants'
+import { SessionStorageKeys, TaskAction, TaskRelationshipStatus, TaskStatus } from '@/util/constants'
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
 import { mapActions, mapState } from 'pinia'
 import { Action } from 'pinia-class'
@@ -245,12 +250,13 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
     }
   ]
 
-  private accountTypes = [
+  private reviewTaskTypes = [
     { desc: 'All', val: '' },
     { desc: 'New Account', val: 'New Account' },
     { desc: 'BCeID Admin', val: 'BCeID Admin' },
     { desc: 'GovM', val: 'GovM' },
-    { desc: 'GovN', val: 'GovN' }
+    { desc: 'GovN', val: 'GovN' },
+    { desc: 'New Product Fee Review', val: TaskAction.NEW_PRODUCT_FEE_REVIEW }
   ]
 
   private searchParams: TaskFilterParams = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.RejectedAccountsSearchFilter)) || {
@@ -273,6 +279,8 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
   }
 
   private formatDate = CommonUtils.formatDisplayDate
+
+  public TaskActionEnum = TaskAction
 
   @Watch('searchParams', { deep: true, immediate: true })
   async searchChanged (value: TaskFilterParams) {
@@ -299,7 +307,7 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
     await this.getProducts()
     if (this.products) {
       this.products.forEach((element) => {
-        this.accountTypes.push({ desc: `Access Request (${element.desc})`, val: element.desc })
+        this.reviewTaskTypes.push({ desc: `Access Request (${element.desc})`, val: element.desc })
       })
     }
     try {
@@ -320,6 +328,11 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
         pageNumber: page,
         pageLimit: pageLimit,
         statuses: [TaskStatus.COMPLETED]
+      }
+      // If type is NEW_PRODUCT_FEE_REVIEW, convert it to action parameter
+      if (this.taskFilter.type === TaskAction.NEW_PRODUCT_FEE_REVIEW) {
+        this.taskFilter.action = TaskAction.NEW_PRODUCT_FEE_REVIEW
+        delete this.taskFilter.type
       }
       const rejectedTasksResp = await this.fetchTasks(this.taskFilter)
       this.rejectedTasks = rejectedTasksResp.tasks

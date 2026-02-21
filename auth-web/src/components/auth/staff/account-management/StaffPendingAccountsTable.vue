@@ -97,7 +97,7 @@
                       >
                         <v-select
                           v-model="searchParams[header.value]"
-                          :items="accountTypes"
+                          :items="reviewTaskTypes"
                           filled
                           v-bind="$attrs"
                           hide-details="auto"
@@ -149,9 +149,7 @@
                 {{ formatDate(item.dateSubmitted, 'MMM DD, YYYY') }}
               </template>
               <template #[`item.type`]="{ item }">
-                {{ item.relationshipType === TaskRelationshipTypeEnum.PRODUCT ? `Access Request (${item.type})` :
-                  item.type
-                }}
+                {{ getTaskTypeDisplay(item) }}
               </template>
               <template #[`item.status`]="{ item }">
                 <span
@@ -183,7 +181,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator'
-import { SessionStorageKeys, TaskRelationshipStatus, TaskRelationshipType, TaskStatus } from '@/util/constants'
+import { SessionStorageKeys, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus } from '@/util/constants'
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
 import { mapActions, mapState } from 'pinia'
 import { Action } from 'pinia-class'
@@ -218,6 +216,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   private tableDataOptions: Partial<DataOptions> = {}
   private isTableLoading: boolean = false
   public TaskRelationshipTypeEnum = TaskRelationshipType
+  public TaskActionEnum = TaskAction
   protected searchParamsExist = false
   private datePicker = null
   private dateTxt = ''
@@ -263,12 +262,13 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   protected readonly statuses = [
     { text: 'All', code: '' }, { text: 'Open', code: TaskStatus.OPEN }, { text: 'Hold', code: TaskStatus.HOLD }]
 
-  private accountTypes = [
+  private reviewTaskTypes = [
     { desc: 'All', val: '' },
     { desc: 'New Account', val: 'New Account' },
     { desc: 'BCeID Admin', val: 'BCeID Admin' },
     { desc: 'GovM', val: 'GovM' },
-    { desc: 'GovN', val: 'GovN' }
+    { desc: 'GovN', val: 'GovN' },
+    { desc: 'New Product Fee Review', val: TaskAction.NEW_PRODUCT_FEE_REVIEW }
   ]
 
   private searchParams: TaskFilterParams = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PendingAccountsSearchFilter)) ||
@@ -314,7 +314,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
     await this.getProducts()
     if (this.products) {
       this.products.forEach((element) => {
-        this.accountTypes.push({ desc: `Access Request (${element.desc})`, val: element.desc })
+        this.reviewTaskTypes.push({ desc: `Access Request (${element.desc})`, val: element.desc })
       })
     }
     try {
@@ -330,6 +330,16 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
     return `${tag}-${index}`
   }
 
+  public getTaskTypeDisplay (item: Task): string {
+    if (item.action === this.TaskActionEnum.NEW_PRODUCT_FEE_REVIEW) {
+      return 'New Product Fee Review'
+    }
+    if (item.relationshipType === this.TaskRelationshipTypeEnum.PRODUCT) {
+      return `Access Request (${item.type})`
+    }
+    return item.type
+  }
+
   private async searchStaffTasks (page: number = 1, pageLimit: number = this.numberOfItems) {
     // set this variable so that the chip is shown
     try {
@@ -342,6 +352,11 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
       }
       if (this.searchParams.status) {
         this.taskFilter.statuses = [this.searchParams.status]
+      }
+      // If type is NEW_PRODUCT_FEE_REVIEW, convert it to action parameter
+      if (this.searchParams.type === TaskAction.NEW_PRODUCT_FEE_REVIEW) {
+        this.taskFilter.action = TaskAction.NEW_PRODUCT_FEE_REVIEW
+        delete this.taskFilter.type
       }
 
       const staffTasksResp = await this.fetchTasks(this.taskFilter)

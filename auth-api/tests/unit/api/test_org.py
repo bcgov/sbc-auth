@@ -53,7 +53,9 @@ from auth_api.utils.enums import (
     ProductCode,
     ProductSubscriptionStatus,
     SuspensionReasonCode,
+    TaskAction,
     TaskRelationshipStatus,
+    TaskRelationshipType,
     TaskStatus,
 )
 from auth_api.utils.roles import ADMIN  # noqa: I001
@@ -77,6 +79,8 @@ from tests.utilities.factory_utils import (
     factory_user_model,
     patch_pay_account_delete,
     patch_pay_account_delete_error,
+    patch_pay_account_fees,
+    patch_pay_account_post,
 )
 
 FAKE = Faker()
@@ -482,7 +486,7 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
     list_products = json.loads(rv_products.data)
 
     vs_product = next(x for x in list_products if x.get("code") == "VS")
-    assert vs_product.get("subscriptionStatus") == "ACTIVE"
+    assert vs_product.get("subscriptionStatus") == "PENDING_STAFF_REVIEW"
 
 
 def test_add_govm_org_by_user_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -557,6 +561,198 @@ def test_add_same_org_409(client, jwt, session, keycloak_mock):  # pylint:disabl
         "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json"
     )
     assert rv.status_code == HTTPStatus.CONFLICT, "not able to create duplicates org"
+
+
+def test_create_govn_org_with_products_single_staff_review_task(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Ensure GOVN org creation creates only a staff review task.
+
+    Verify task status updates correctly when a product is re-added
+    after approval.
+    """
+    patch_pay_account_post(monkeypatch)
+    patch_pay_account_fees(monkeypatch, [ProductCode.BUSINESS_SEARCH.value, ProductCode.PPR.value])
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+
+    govn_org_payload = {
+        "name": "test govn single task",
+        "accessType": AccessType.GOVN.value,
+        "typeCode": OrgType.PREMIUM.value,
+        "productSubscriptions": [
+            {"productCode": ProductCode.BUSINESS_SEARCH.value},
+            {"productCode": ProductCode.PPR.value},
+        ],
+        "mailingAddress": TestOrgInfo.get_mailing_address(),
+        "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
+    }
+
+    rv = client.post(
+        "/api/v1/orgs",
+        data=json.dumps(govn_org_payload),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+    org_id = rv.json["id"]
+
+    task_search = TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=100)
+    tasks_result = TaskService.fetch_tasks(task_search)
+    tasks = tasks_result["tasks"]
+
+    org_tasks = [
+        t
+        for t in tasks
+        if t.get("account_id") == org_id
+        or (t.get("relationship_type") == TaskRelationshipType.ORG.value and t.get("relationship_id") == org_id)
+    ]
+    assert len(org_tasks) == 1, "expected exactly one staff review task for the new org"
+    single_task = org_tasks[0]
+    assert single_task["relationship_type"] == TaskRelationshipType.ORG.value
+    assert single_task["action"] == TaskAction.ACCOUNT_REVIEW.value
+
+    product_tasks = [t for t in tasks if t.get("relationship_type") == TaskRelationshipType.PRODUCT.value]
+    assert not any(t.get("account_id") == org_id for t in product_tasks), (
+        "expected no NEW_PRODUCT_FEE_REVIEW / product task for GOVN org creation"
+    )
+
+    # Approve org task, remove product, re-add
+    staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv_approve = client.put(
+        f"/api/v1/tasks/{single_task['id']}",
+        data=json.dumps({
+            "status": TaskStatus.COMPLETED.value,
+            "relationshipStatus": TaskRelationshipStatus.ACTIVE.value,
+        }),
+        headers=staff_headers,
+        content_type="application/json",
+    )
+    assert rv_approve.status_code == HTTPStatus.OK
+
+    product_code = ProductCode.BUSINESS_SEARCH.value
+    rv_delete = client.delete(
+        f"/api/v1/orgs/{org_id}/products/{product_code}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_delete.status_code == HTTPStatus.OK
+
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps({"subscriptions": [{"productCode": product_code}]}),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    subscriptions = rv_products.json.get("subscriptions", [])
+    product = next((p for p in subscriptions if p.get("code") == product_code), None)
+    assert product is not None
+    assert product["subscriptionStatus"] == ProductSubscriptionStatus.ACTIVE.value
+
+
+def test_govn_org_add_product_pending_staff_review(
+    client, jwt, session, keycloak_mock, monkeypatch
+):  # pylint:disable=unused-argument
+    """Assert adding a product to a GOVN org via POST /orgs/{id}/products results in PENDING_STAFF_REVIEW."""
+    patch_pay_account_post(monkeypatch)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+
+    govn_org_payload = {
+        "name": "test govn add product",
+        "accessType": AccessType.GOVN.value,
+        "typeCode": OrgType.PREMIUM.value,
+        "mailingAddress": TestOrgInfo.get_mailing_address(),
+        "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
+    }
+    rv = client.post(
+        "/api/v1/orgs",
+        data=json.dumps(govn_org_payload),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+    org_id = rv.json["id"]
+
+    product_code = ProductCode.BUSINESS_SEARCH.value
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps({"subscriptions": [{"productCode": product_code}]}),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    subscriptions = rv_products.json.get("subscriptions", [])
+    product = next((p for p in subscriptions if p.get("code") == product_code), None)
+    assert product is not None, f"Product {product_code} should appear in response"
+    assert product["subscriptionStatus"] == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value, (
+        "GOVN org adding product should require staff review"
+    )
+
+
+@pytest.mark.parametrize(
+    "product_code,expected_status,use_factory_org,claims_attr,assert_no_product_task",
+    [
+        (ProductCode.NDS.value, ProductSubscriptionStatus.ACTIVE.value, True, "system_role", True),
+        (ProductCode.VS.value, ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value, False, "public_user_role", False),
+    ],
+)
+def test_post_org_products_skip_auth_system_vs_org_admin(
+    client, jwt, session, keycloak_mock, monkeypatch,
+    product_code, expected_status, use_factory_org, claims_attr, assert_no_product_task,
+):  # pylint:disable=unused-argument
+    """Assert POST /orgs/{id}/products: SYSTEM vs org admin (non-GOVN/GOVM); focus on PENDING_STAFF_REVIEW for org admin."""
+    headers = factory_auth_header(jwt=jwt, claims=getattr(TestJwtClaims, claims_attr))
+
+    if use_factory_org:
+        regular_org = factory_org_model(org_info={"name": "regular org for system", "accessType": AccessType.REGULAR.value})
+        org_id = regular_org.id
+    else:
+        patch_pay_account_post(monkeypatch)
+        client.post("/api/v1/users", headers=headers, content_type="application/json")
+        rv = client.post(
+            "/api/v1/orgs",
+            data=json.dumps({
+                "name": "regular org for org admin",
+                "accessType": AccessType.REGULAR.value,
+                "typeCode": OrgType.PREMIUM.value,
+                "mailingAddress": TestOrgInfo.get_mailing_address(),
+                "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
+            }),
+            headers=headers,
+            content_type="application/json",
+        )
+        assert rv.status_code == HTTPStatus.CREATED
+        org_id = rv.json["id"]
+
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps({"subscriptions": [{"productCode": product_code}]}),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    subs = rv_products.json.get("subscriptions", [])
+    product = next((p for p in subs if p.get("code") == product_code), None)
+    if assert_no_product_task:
+        # NDS is hidden: POST response may not include it; use GET ?include_hidden=true to verify (as in prod workflow)
+        get_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_view_accounts_role)
+        rv_get = client.get(
+            f"/api/v1/orgs/{org_id}/products?include_hidden=true",
+            headers=get_headers,
+        )
+        assert rv_get.status_code == HTTPStatus.OK
+        subs = json.loads(rv_get.data)
+        product = next((p for p in subs if p.get("code") == product_code), None)
+    assert product is not None
+    assert product["subscriptionStatus"] == expected_status
+
+    if assert_no_product_task:
+        product_tasks = [
+            t for t in TaskService.fetch_tasks(TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=100))["tasks"]
+            if t.get("relationship_type") == TaskRelationshipType.PRODUCT.value and t.get("account_id") == org_id
+        ]
+        assert len(product_tasks) == 0, "SYSTEM adding product should not create a product review task"
 
 
 def test_add_org_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
