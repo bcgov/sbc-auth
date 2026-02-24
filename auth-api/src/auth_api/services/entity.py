@@ -21,6 +21,7 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
@@ -265,6 +266,9 @@ class Entity:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         if self._model.affiliations:
             raise BusinessException(Error.ENTITY_DELETE_FAILED, None)
+
+        for invitation in AffiliationInvitationModel.find_invitations_by_entity(self._model.id):
+            invitation.delete()
 
         if self._model.contacts:
             self.delete_contact()

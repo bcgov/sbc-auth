@@ -1,4 +1,4 @@
-FROM python:3.12.5-bullseye as development_build
+FROM python:3.12.5-bookworm as development_build
 USER root
 
 ARG VCS_REF="missing"
@@ -38,7 +38,7 @@ ENV APP_ENV=${APP_ENV} \
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
-RUN apt-get update && apt-get upgrade -y \
+RUN apt-get update \
   && apt-get install --no-install-recommends -y \
     bash \
     build-essential \

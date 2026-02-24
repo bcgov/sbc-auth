@@ -16,17 +16,22 @@
 Test suite to ensure that the Entity service routines are working as expected.
 """
 
+from datetime import datetime
+
 import pytest
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.services.entity import Entity as EntityService
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_contact_model,
     factory_entity_model,
+    factory_org_model,
     factory_org_service,
+    factory_user_model,
     patch_token_info,
 )
 
@@ -342,7 +347,7 @@ def test_validate_invalid_pass_code(app, session):  # pylint:disable=unused-argu
 
 
 def test_delete_entity(app, session):  # pylint:disable=unused-argument
-    """Assert that an entity can be deleted."""
+    """Assert that an entity can be deleted and its affiliation invitations are removed."""
     entity_model = factory_entity_model()
     entity = EntityService(entity_model)
 
@@ -356,11 +361,28 @@ def test_delete_entity(app, session):  # pylint:disable=unused-argument
     contact_link.org = org._model  # pylint:disable=protected-access
     contact_link.save()
 
+    user = factory_user_model()
+    from_org = factory_org_model()
+    to_org = factory_org_model(org_info={"name": "Test Org 2"})
+
+    invitation = AffiliationInvitationModel()
+    invitation.sender = user
+    invitation.from_org_id = from_org.id
+    invitation.to_org_id = to_org.id
+    invitation.entity_id = entity._model.id  # pylint:disable=protected-access
+    invitation.recipient_email = "test@test.com"
+    invitation.sent_date = datetime.now()
+    invitation.invitation_status_code = "PENDING"
+    invitation.save()
+
+    invitation_id = invitation.id
+    assert AffiliationInvitationModel.find_invitation_by_id(invitation_id) is not None
+
     entity.delete()
 
     entity = EntityService.find_by_entity_id(entity.identifier)
-
     assert entity is None
+    assert AffiliationInvitationModel.find_invitation_by_id(invitation_id) is None
 
 
 def test_reset_pass_code(app, session, monkeypatch):  # pylint:disable=unused-argument
