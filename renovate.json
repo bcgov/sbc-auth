@@ -29,12 +29,6 @@
       "additionalBranchPrefix": "jobs-"
     },
     {
-      "matchFileNames": ["status-api/**"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "status-api non-major updates",
-      "additionalBranchPrefix": "status-api-"
-    },
-    {
       "matchUpdateTypes": ["major"],
       "labels": ["dependencies", "breaking"]
     },
