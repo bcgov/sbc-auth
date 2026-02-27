@@ -1915,13 +1915,13 @@ test-filesource = ["pyyaml (>=5.3.1)", "watchdog (>=3.0.0)"]
 
 [[package]]
 name = "lovely-pytest-docker"
-version = "0.3.1"
+version = "1.0.0"
 description = "Pytest testing utilities with docker containers."
 optional = false
 python-versions = "*"
 groups = ["dev"]
 files = [
-    {file = "lovely-pytest-docker-0.3.1.tar.gz", hash = "sha256:4326a180bfd4dd4ad69c2ef3e3643c41075d965f40068488b40204602e6df85e"},
+    {file = "lovely_pytest_docker-1.0.0.tar.gz", hash = "sha256:7283abfe400c31ecc7155f9338c6f5af476f2ab506e1aadb9f7e9a5005e491d6"},
 ]
 
 [package.dependencies]
@@ -3645,4 +3645,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "6f768ff77fedd2fb28f2a70f84b59dc76ab60c18e230d2ccd375cb5b8ab6180d"
+content-hash = "323489e64738f23fdfe0836ac1bf28a7f1067a748df845ddcf0b96d9c96a483d"

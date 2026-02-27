@@ -1815,13 +1815,13 @@ test-filesource = ["pyyaml (>=5.3.1)", "watchdog (>=3.0.0)"]
 
 [[package]]
 name = "lovely-pytest-docker"
-version = "0.3.1"
+version = "1.0.0"
 description = "Pytest testing utilities with docker containers."
 optional = false
 python-versions = "*"
 groups = ["test"]
 files = [
-    {file = "lovely-pytest-docker-0.3.1.tar.gz", hash = "sha256:4326a180bfd4dd4ad69c2ef3e3643c41075d965f40068488b40204602e6df85e"},
+    {file = "lovely_pytest_docker-1.0.0.tar.gz", hash = "sha256:7283abfe400c31ecc7155f9338c6f5af476f2ab506e1aadb9f7e9a5005e491d6"},
 ]
 
 [package.dependencies]
@@ -3516,4 +3516,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "72890b7dd1d59dd839c7f7c1bb3473e70b275091545963ec38d3df66402b5e01"
+content-hash = "3beaa654a07af1513866caf9f82a8639b4934cfd1e3bcfbd1132e71071aa748b"
