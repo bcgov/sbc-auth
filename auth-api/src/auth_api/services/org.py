@@ -1005,12 +1005,13 @@ class Org:  # pylint: disable=too-many-public-methods
         org.save()
         # Find admin email addresses
         admin_emails = UserService.get_admin_emails_for_org(org_id)
+        origin_url = current_app.config.get("WEB_APP_URL")
         if admin_emails != "":
             if org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
                 Org.send_approved_rejected_notification(admin_emails, org.name, org.id, org.status_code, client_id)
             elif org.access_type in (AccessType.GOVM.value, AccessType.GOVN.value):
                 Org.send_approved_rejected_govm_govn_notification(
-                    admin_emails, org.name, org.id, org.status_code, client_id
+                    admin_emails, org.name, org.id, org.status_code, origin_url, client_id
                 )
         else:
             # continue but log error
