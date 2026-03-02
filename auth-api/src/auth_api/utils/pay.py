@@ -19,14 +19,12 @@ from auth_api.exceptions.errors import Error
 from auth_api.models import Org as OrgModel
 from auth_api.services.rest_service import RestService
 from auth_api.utils.roles import GOV_ORG_TYPES
-from auth_api.utils.user_context import UserContext
 
 
-def get_account_fees(org: OrgModel) -> list[str]:
+def get_account_fees(org: OrgModel, bearer_token: str) -> list[str]:
     """Fetch all account fees from pay-api using the caller's JWT token."""
     if org.access_type not in GOV_ORG_TYPES:
         return []
-    bearer_token = UserContext().bearer_token
     if not bearer_token:
         current_app.logger.warning(f"No bearer token available for account fees fetch, org {org.id}")
         return []
