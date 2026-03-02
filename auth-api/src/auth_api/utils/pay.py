@@ -19,7 +19,6 @@ from auth_api.exceptions.errors import Error
 from auth_api.models import Org as OrgModel
 from auth_api.services.rest_service import RestService
 from auth_api.utils.roles import GOV_ORG_TYPES
-from auth_api.utils.user_context import UserContext
 
 
 def get_account_fees(org: OrgModel, bearer_token: str) -> list[str]:
