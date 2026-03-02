@@ -238,6 +238,7 @@ class Product:
 
         subscriptions_list = subscription_data.get("subscriptions")
         user_from_context: UserContext = kwargs["user_context"]
+        current_app.logger.info(f"user_from_context: {user_from_context}")
         account_fees = get_account_fees(org, bearer_token=user_from_context.bearer_token) if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org else []
         for subscription in subscriptions_list:
             auto_approve_current = auto_approve
