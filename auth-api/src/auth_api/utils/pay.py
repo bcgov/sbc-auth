@@ -19,18 +19,24 @@ from auth_api.exceptions.errors import Error
 from auth_api.models import Org as OrgModel
 from auth_api.services.rest_service import RestService
 from auth_api.utils.roles import GOV_ORG_TYPES
+from auth_api.utils.user_context import UserContext
 
 
 def get_account_fees(org: OrgModel) -> list[str]:
-    """Fetch all account fees from pay-api and return a dict mapping product codes to fee existence."""
+    """Fetch all account fees from pay-api using the caller's JWT token."""
     if org.access_type not in GOV_ORG_TYPES:
+        return []
+    bearer_token = UserContext().bearer_token
+    if not bearer_token:
+        current_app.logger.warning(f"No bearer token available for account fees fetch, org {org.id}")
         return []
     pay_url = current_app.config.get("PAY_API_URL")
     account_fees = []
 
     try:
-        token = RestService.get_service_account_token()
-        response = RestService.get(endpoint=f"{pay_url}/accounts/{org.id}/fees", token=token, retry_on_failure=True)
+        response = RestService.get(
+            endpoint=f"{pay_url}/accounts/{org.id}/fees", token=bearer_token, retry_on_failure=True
+        )
 
         if response and response.status_code == 200:
             response_data = response.json()
@@ -44,7 +50,7 @@ def get_account_fees(org: OrgModel) -> list[str]:
     except Exception as e:  # NOQA # pylint: disable=broad-except
         # Log the error but don't fail the subscription creation
         # Return empty dict so subscription can proceed without fee-based review logic
-        current_app.logger.info(f"{Error.ACCOUNT_FEES_FETCH_FAILED} for org {org.id}: {e}")
+        current_app.logger.warning(f"{Error.ACCOUNT_FEES_FETCH_FAILED} for org {org.id}: {e}")
         return []
 
     return account_fees
