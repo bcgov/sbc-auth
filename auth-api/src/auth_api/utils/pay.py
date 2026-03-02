@@ -23,9 +23,16 @@ from auth_api.utils.roles import GOV_ORG_TYPES
 
 def _get_bearer_token() -> str | None:
     """Get bearer token from the request Authorization header."""
-    if request and "Authorization" in request.headers:
-        token = request.headers.get("Authorization", "")
-        return token.replace("Bearer ", "", 1) if token.startswith("Bearer ") else token
+    if request:
+        auth = getattr(request, "authorization", None)
+        if auth and getattr(auth, "type", None) == "bearer":
+            token = getattr(auth, "token", None)
+            if token:
+                return token
+
+        raw = request.headers.get("Authorization", "")
+        if raw.startswith("Bearer "):
+            return raw.replace("Bearer ", "", 1)
     return None
 
 
