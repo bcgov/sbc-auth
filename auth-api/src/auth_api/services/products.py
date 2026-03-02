@@ -214,6 +214,7 @@ class Product:
         return True, inactive_sub
 
     @staticmethod
+    @user_context
     def create_product_subscription(
         org_id,
         subscription_data: dict[str, Any],  # pylint: disable=too-many-locals
@@ -221,6 +222,7 @@ class Product:
         skip_auth=False,
         auto_approve=False,
         staff_review_for_create_org=False,
+        **kwargs
     ):
         """Create product subscription for the user.
 
@@ -235,7 +237,8 @@ class Product:
             check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
         subscriptions_list = subscription_data.get("subscriptions")
-        account_fees = get_account_fees(org) if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org else []
+        user_from_context: UserContext = kwargs["user_context"]
+        account_fees = get_account_fees(org, bearer_token=user_from_context.bearer_token) if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org else []
         for subscription in subscriptions_list:
             auto_approve_current = auto_approve
             product_code = subscription.get("productCode")
