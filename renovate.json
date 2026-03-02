@@ -13,6 +13,12 @@
       "postUpdateOptions": ["poetryLockUpdate"]
     },
     {
+      "matchManagers": ["dockerfile"],
+      "matchPackageNames": ["python"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
       "matchFileNames": ["auth-api/**"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "auth-api updates",
