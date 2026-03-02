@@ -40,7 +40,11 @@ def test_get_account_fees_govm_org_success(monkeypatch, session):  # pylint:disa
 
     current_app.config["PAY_API_URL"] = "http://pay-api.test"
 
-    monkeypatch.setattr("auth_api.utils.pay.RestService.get", lambda *args, **kwargs: mock_response)  # noqa: ARG005
+    def capture_get(*args, **kwargs):
+        assert kwargs.get("endpoint") == f"http://pay-api.test/accounts/{org.id}"
+        return mock_response
+
+    monkeypatch.setattr("auth_api.utils.pay.RestService.get", capture_get)
 
     result = get_account_fees(org, bearer_token=mock_token())
 

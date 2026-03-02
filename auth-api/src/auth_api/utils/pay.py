@@ -33,7 +33,7 @@ def get_account_fees(org: OrgModel, bearer_token: str) -> list[str]:
 
     try:
         response = RestService.get(
-            endpoint=f"{pay_url}/accounts/{org.id}/fees", token=bearer_token, retry_on_failure=True
+            endpoint=f"{pay_url}/accounts/{org.id}", token=bearer_token, retry_on_failure=True
         )
 
         if response and response.status_code == 200:

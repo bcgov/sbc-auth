@@ -537,7 +537,7 @@ def keycloak_delete_user_by_username(username):
 
 
 def patch_pay_account_fees(monkeypatch, product_codes: list[str]):
-    """Patch GET /accounts/{id}/fees to return given product codes."""
+    """Patch GET /accounts/{id} (account detail) to return given product codes in accountFees."""
     class MockFeeResponse:
         status_code = 200
         def json(self):
