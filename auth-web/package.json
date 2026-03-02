@@ -54,6 +54,9 @@
     "vuelidate": "0.6.2",
     "vuetify": "2.2.7"
   },
+  "overrides": {
+    "serialize-javascript": "^7.0.3"
+  },
   "devDependencies": {
     "@intlify/vue-i18n-loader": "^1.1.0",
     "@pinia/testing": "^0.1.3",
