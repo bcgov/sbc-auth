@@ -15,8 +15,8 @@
     {
       "matchManagers": ["dockerfile"],
       "matchPackageNames": ["python"],
-      "matchUpdateTypes": ["major"],
-      "enabled": false
+      "enabled": false,
+      "description": "Disable all automated updates for Python in Dockerfiles"
     },
     {
       "matchFileNames": ["auth-api/**"],
