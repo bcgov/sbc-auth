@@ -81,7 +81,7 @@
     "postcss-nesting": "^12.0.1",
     "sass": "^1.22.10",
     "sinon": "^6.3.5",
-    "stylus": "^0.54.7",
+    "stylus": "^0.64.0",
     "typescript": "^4.9.5",
     "unplugin-vue2-script-setup": "^0.11.4",
     "vite": "^4.5.14",
@@ -91,7 +91,7 @@
     "vitest": "^1.6.1",
     "vue-class-component": "^7.1.0",
     "vue-cli-plugin-vuetify": "^2.0.3",
-    "vue-template-compiler": "2.6.14",
+    "vue-template-compiler": "2.7.16",
     "vue-test-utils-helpers": "git+https://github.com/AmpleOrganics/vue-test-utils-helpers.git",
     "vuelidate-property-decorators": "^1.0.28"
   }
