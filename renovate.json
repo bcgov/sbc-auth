@@ -9,7 +9,7 @@
   "postUpdateOptions": ["poetryLockUpdate"],
   "packageRules": [
     {
-      "matchManagers": ["poetry", "dockerfile"],
+      "matchManagers": ["poetry"],
       "postUpdateOptions": ["poetryLockUpdate"]
     },
     {
@@ -49,9 +49,8 @@
     },
     {
       "matchManagers": ["dockerfile"],
-      "matchPackageNames": ["python"],
       "enabled": false,
-      "description": "Disable all automated updates for Python in Dockerfiles"
+      "description": "Disable all Dockerfile updates"
     }
   ],
   "vulnerabilityAlerts": {
