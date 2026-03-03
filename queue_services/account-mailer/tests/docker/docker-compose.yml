@@ -68,7 +68,7 @@ services:
         - notify
 
     notify:
-      image: stoplight/prism:3.3.0
+      image: stoplight/prism:3.3.7
       command: >
         mock -p 4010 --host 0.0.0.0
         https://raw.githubusercontent.com/bcgov/sbc-auth/main/docs/docs/api_contract/notify-api-1.0.0.yaml
