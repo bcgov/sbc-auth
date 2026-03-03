@@ -13,12 +13,6 @@
       "postUpdateOptions": ["poetryLockUpdate"]
     },
     {
-      "matchManagers": ["dockerfile"],
-      "matchPackageNames": ["python"],
-      "enabled": false,
-      "description": "Disable all automated updates for Python in Dockerfiles"
-    },
-    {
       "matchFileNames": ["auth-api/**"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "auth-api updates",
@@ -52,6 +46,12 @@
     {
       "matchDepTypes": ["devDependencies"],
       "groupName": "dev dependencies"
+    },
+    {
+      "matchManagers": ["dockerfile"],
+      "matchPackageNames": ["python"],
+      "enabled": false,
+      "description": "Disable all automated updates for Python in Dockerfiles"
     }
   ],
   "vulnerabilityAlerts": {
