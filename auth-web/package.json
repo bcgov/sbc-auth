@@ -76,7 +76,7 @@
     "eslint-plugin-vue": "^8.7.1",
     "eslint-plugin-vuetify": "^1.1.0",
     "flush-promises": "^1.0.2",
-    "jsdom": "^22.1.0",
+    "jsdom": "^28.1.0",
     "patch-package": "^8.0.1",
     "postcss-nesting": "^12.0.1",
     "sass": "^1.22.10",
