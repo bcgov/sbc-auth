@@ -11,6 +11,7 @@ export const invoiceStatusDisplay = {
   [InvoiceStatus.OVERDUE]: 'Overdue',
   [InvoiceStatus.PAID]: 'Completed',
   [InvoiceStatus.PARTIAL]: 'Partial Paid',
+  [InvoiceStatus.MANUAL_REFUNDED]: 'Manual Refunded',
   // Frontend only
   [InvoiceStatus.PENDING]: 'Pending',
   [InvoiceStatus.REFUNDED]: 'Refunded',
