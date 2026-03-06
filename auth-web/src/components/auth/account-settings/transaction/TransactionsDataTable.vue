@@ -449,7 +449,7 @@ export default defineComponent({
       InvoiceStatus.PAID,
       InvoiceStatus.REFUNDED,
       InvoiceStatus.CREDITED,
-      InvoiceStatus.MANUAL_REFUNDED
+      InvoiceStatus.MANUALLY_REFUNDED
     ])
 
     const enableReceiptDownloadForRefunds = computed(() => {
