@@ -10,7 +10,9 @@
   "labels": [
     "dependencies"
   ],
-  "ignoreDeps": ["python"],
+  "ignorePaths": [
+    "**/Dockerfile"
+  ],
   "postUpdateOptions": [
     "poetryLockUpdate"
   ],
