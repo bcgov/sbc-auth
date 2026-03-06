@@ -10,6 +10,7 @@
   "labels": [
     "dependencies"
   ],
+  "ignoreDeps": ["python"],
   "postUpdateOptions": [
     "poetryLockUpdate"
   ],
@@ -32,10 +33,7 @@
       ],
       "groupName": "auth-api updates",
       "additionalBranchPrefix": "auth-api-",
-      "prPriority": 10,
-      "matchPackageNames": [
-        "!python"
-      ]
+      "prPriority": 10
     },
     {
       "matchFileNames": [
@@ -49,10 +47,7 @@
       "groupName": "auth-api dependents updates",
       "additionalBranchPrefix": "auth-api-deps-",
       "prPriority": -1,
-      "dependencyDashboardApproval": true,
-      "matchPackageNames": [
-        "!python"
-      ]
+      "dependencyDashboardApproval": true
     },
     {
       "matchFileNames": [
@@ -74,10 +69,7 @@
         "patch"
       ],
       "groupName": "jobs non-major updates",
-      "additionalBranchPrefix": "jobs-",
-      "matchPackageNames": [
-        "!python"
-      ]
+      "additionalBranchPrefix": "jobs-"
     },
     {
       "matchUpdateTypes": [
@@ -93,22 +85,6 @@
         "devDependencies"
       ],
       "groupName": "dev dependencies"
-    },
-    {
-      "matchManagers": [
-        "dockerfile"
-      ],
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchPackageNames": [
-        "python"
-      ],
-      "matchFileNames": [
-        "**/*"
-      ],
-      "enabled": false,
-      "description": "Disable Python Docker image updates everywhere"
     },
     {
       "matchPackageNames": [
