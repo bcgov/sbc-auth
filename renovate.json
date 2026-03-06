@@ -54,6 +54,10 @@
       "matchFileNames": ["**/*"],
       "enabled": false,
       "description": "Disable Python Docker image updates everywhere"
+    },
+    {
+      "matchPackageNames": ["ruff"],
+      "rangeStrategy": "pin"
     }
   ],
   "vulnerabilityAlerts": {
