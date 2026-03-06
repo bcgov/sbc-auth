@@ -70,7 +70,7 @@ lovely-pytest-docker = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 bandit = "^1.7.9"
-ruff = "^0.14.1"
+ruff = "0.14.1"
 
 [tool.bandit]
 exclude_dirs = [".venv","tests"]
