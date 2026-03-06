@@ -56,6 +56,10 @@ class Error(Enum):
         "Failed to dispatch the affiliation invitation",
         HTTPStatus.INTERNAL_SERVER_ERROR,
     )
+    AFFILIATION_INVITATION_NOT_FOUND = (
+        "The affiliation invitation was not found. It may have been cancelled or deleted.",
+        HTTPStatus.BAD_REQUEST,
+    )
     AFFILIATION_INVITATION_BUSINESS_NOT_FOUND = (
         "The business specified for the affiliation invitation could not be found.",
         HTTPStatus.BAD_REQUEST,
