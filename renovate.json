@@ -49,10 +49,12 @@
     },
     {
       "matchManagers": ["dockerfile"],
+      "matchDatasources": ["docker"],
       "matchPackageNames": ["python"],
+      "matchFileNames": ["**/*"],
       "enabled": false,
-      "description": "Disable all automated updates for Python in Dockerfiles"
-    },
+      "description": "Disable Python Docker image updates everywhere"
+    }
   ],
   "vulnerabilityAlerts": {
     "enabled": true,
