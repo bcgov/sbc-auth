@@ -159,7 +159,7 @@
         <v-row no-gutters>
           <v-col cols="auto">
             <v-icon
-              v-if="[InvoiceStatus.COMPLETED, InvoiceStatus.PAID, InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED].includes(item.statusCode)"
+              v-if="successStatuses.has(item.statusCode)"
               color="success"
               :style="{ 'margin-top': '-6px', 'margin-right': '2px' }"
             >
@@ -436,12 +436,21 @@ export default defineComponent({
       InvoiceStatus.CREDITED,
       InvoiceStatus.REFUNDED,
       InvoiceStatus.PARTIALLY_REFUNDED,
-      InvoiceStatus.PARTIALLY_CREDITED
+      InvoiceStatus.PARTIALLY_CREDITED,
+      InvoiceStatus.MANUAL_REFUNDED
     ])
 
     const paidStatus = new Set<InvoiceStatus>([
       InvoiceStatus.COMPLETED,
       InvoiceStatus.PAID
+    ])
+
+    const successStatuses = new Set<InvoiceStatus>([
+      InvoiceStatus.COMPLETED,
+      InvoiceStatus.PAID,
+      InvoiceStatus.REFUNDED,
+      InvoiceStatus.CREDITED,
+      InvoiceStatus.MANUAL_REFUNDED
     ])
 
     const enableReceiptDownloadForRefunds = computed(() => {
@@ -775,7 +784,8 @@ export default defineComponent({
       datePickerValue,
       canDownloadReceipt,
       downloadReceipt,
-      enableReceiptDownloadForRefunds
+      enableReceiptDownloadForRefunds,
+      successStatuses
     }
   }
 })
