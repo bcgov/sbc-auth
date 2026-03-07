@@ -933,6 +933,19 @@ def test_reject_authorize_affiliation_invitation(client, jwt, session, keycloak_
     assert dictionary["status"] == "FAILED"
 
 
+def test_authorize_affiliation_invitation_not_found(client, jwt, session, keycloak_mock):
+    """Assert that authorizing a non-existent affiliation invitation returns 400."""
+    headers, _, _, _ = setup_affiliation_invitation_data(client, jwt, session, keycloak_mock)
+
+    rv = client.patch(
+        "/api/v1/affiliationInvitations/99999/authorization/accept",
+        headers=headers,
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.BAD_REQUEST
+
+
 def _create_affiliations_for_test(
     client, headers, org_id1, org_id2, org_id3, org_id4, business_identifier1, business_identifier2
 ):
