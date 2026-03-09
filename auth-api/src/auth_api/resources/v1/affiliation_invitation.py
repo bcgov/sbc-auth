@@ -239,7 +239,7 @@ def _verify_permissions(user, affiliation_invitation_id):
 
     affiliation_invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(affiliation_invitation_id)
     if not affiliation_invitation:
-        raise BusinessException(Error.AFFILIATION_INVITATION_NOT_FOUND, None)
+        raise BusinessException(Error.DATA_NOT_FOUND, None)
 
     to_org_id = affiliation_invitation.as_dict()["to_org"]["id"]
     # Prevent users from accepting or rejecting.

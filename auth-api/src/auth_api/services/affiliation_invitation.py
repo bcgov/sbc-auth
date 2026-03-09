@@ -463,7 +463,7 @@ class AffiliationInvitation:
             invitation=invitation, action=AffiliationInvitationAction.DELETE
         )
 
-        if invitation.status == InvitationStatus.ACCEPTED.value:
+        if invitation.status in [InvitationStatus.ACCEPTED.value, InvitationStatus.FAILED.value]:
             invitation.is_deleted = True
             invitation.save()
         else:
