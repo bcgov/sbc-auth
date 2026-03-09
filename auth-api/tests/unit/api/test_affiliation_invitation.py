@@ -933,6 +933,44 @@ def test_reject_authorize_affiliation_invitation(client, jwt, session, keycloak_
     assert dictionary["status"] == "FAILED"
 
 
+def test_accept_deleted_affiliation_invitation_returns_bad_request(client, jwt, session, keycloak_mock, business_mock):
+    """Assert that accepting a deleted (cancelled) affiliation invitation returns 400, not 404."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(
+        client, jwt, session, keycloak_mock
+    )
+
+    rv_invitation = client.post(
+        "/api/v1/affiliationInvitations",
+        data=json.dumps(
+            factory_affiliation_invitation(
+                from_org_id=from_org_id, to_org_id=to_org_id, business_identifier=business_identifier
+            )
+        ),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_invitation.status_code == HTTPStatus.CREATED
+
+    invitation_dictionary = json.loads(rv_invitation.data)
+    affiliation_invitation_id = invitation_dictionary["id"]
+
+    rv_delete = client.delete(
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_delete.status_code == HTTPStatus.OK
+
+    rv_accept = client.patch(
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}/authorization/accept",
+        headers=headers,
+        content_type="application/json",
+    )
+
+    # This should no longer provide 404.
+    assert rv_accept.status_code == HTTPStatus.BAD_REQUEST
+
+
 def _create_affiliations_for_test(
     client, headers, org_id1, org_id2, org_id3, org_id4, business_identifier1, business_identifier2
 ):

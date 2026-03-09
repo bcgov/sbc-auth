@@ -409,7 +409,7 @@ class AffiliationInvitation:
 
     def update_affiliation_invitation(self, user, affiliation_invitation_info: dict):
         """Update the specified affiliation invitation with new data."""
-        invitation: AffiliationInvitationModel = self._model
+        invitation = self._model
 
         AffiliationInvitation.check_auth_for_invitation(
             invitation=self._model, action=AffiliationInvitationAction.UPDATE
@@ -428,7 +428,7 @@ class AffiliationInvitation:
             )
             self._model.token = confirmation_token
             invitation = self._model.update_invitation_as_retried(user.identifier)
-            entity: EntityModel = invitation.entity
+            entity = invitation.entity
 
             token = RestService.get_service_account_token(
                 config_id="ENTITY_SVC_CLIENT_ID",
@@ -463,11 +463,8 @@ class AffiliationInvitation:
             invitation=invitation, action=AffiliationInvitationAction.DELETE
         )
 
-        if invitation.status == InvitationStatus.ACCEPTED.value:
-            invitation.is_deleted = True
-            invitation.save()
-        else:
-            invitation.delete()
+        invitation.is_deleted = True
+        invitation.save()
 
     @staticmethod
     def _filter_request_invites_role_based(

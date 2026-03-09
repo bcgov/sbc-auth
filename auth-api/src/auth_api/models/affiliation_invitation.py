@@ -15,7 +15,7 @@
 
 from datetime import datetime, timedelta
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, or_
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, or_, and_
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
@@ -201,7 +201,10 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
             .filter(AffiliationInvitation.entity_id == int(entity_id or -1))
             .filter(
                 or_(
-                    AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value,
+                    and_(
+                        AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value,
+                        AffiliationInvitation.is_deleted.is_(False)
+                    ),
                     AffiliationInvitation.invitation_status_code == InvitationStatuses.ACCEPTED.value,
                 )
             )
