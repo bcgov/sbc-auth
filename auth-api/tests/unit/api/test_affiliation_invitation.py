@@ -933,17 +933,52 @@ def test_reject_authorize_affiliation_invitation(client, jwt, session, keycloak_
     assert dictionary["status"] == "FAILED"
 
 
-def test_authorize_affiliation_invitation_not_found(client, jwt, session, keycloak_mock):
-    """Assert that authorizing a non-existent affiliation invitation returns 400."""
-    headers, _, _, _ = setup_affiliation_invitation_data(client, jwt, session, keycloak_mock)
+def test_accept_rejected_then_deleted_affiliation_invitation_returns_bad_request(
+    client, jwt, session, keycloak_mock, business_mock, entity_mapping_mock
+):
+    """Assert that accepting an invitation that was rejected then deleted returns 400, not 404."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(
+        client, jwt, session, keycloak_mock
+    )
 
-    rv = client.patch(
-        "/api/v1/affiliationInvitations/99999/authorization/accept",
+    rv_invitation = client.post(
+        "/api/v1/affiliationInvitations",
+        data=json.dumps(
+            factory_affiliation_invitation(
+                from_org_id=from_org_id, to_org_id=to_org_id, business_identifier=business_identifier
+            )
+        ),
         headers=headers,
         content_type="application/json",
     )
+    assert rv_invitation.status_code == HTTPStatus.CREATED
 
-    assert rv.status_code == HTTPStatus.BAD_REQUEST
+    invitation_dictionary = json.loads(rv_invitation.data)
+    affiliation_invitation_id = invitation_dictionary["id"]
+
+    # Reject the invitation (sets status to FAILED)
+    rv_refuse = client.patch(
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}/authorization/refuse",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_refuse.status_code == HTTPStatus.OK
+    assert json.loads(rv_refuse.data)["status"] == "FAILED"
+
+    rv_delete = client.delete(
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_delete.status_code == HTTPStatus.OK
+
+    # Try to accept the deleted invitation — should return 400, not 404
+    rv_accept = client.patch(
+        f"/api/v1/affiliationInvitations/{affiliation_invitation_id}/authorization/accept",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_accept.status_code == HTTPStatus.BAD_REQUEST
 
 
 def _create_affiliations_for_test(
