@@ -470,7 +470,8 @@ export default defineComponent({
         return true
       }
 
-      return !expandRow && paidStatus.has(status)
+      // Manual refund: show original receipt on main row only (no refund receipt in expanded row).
+      return !expandRow && (paidStatus.has(status) || item.statusCode === InvoiceStatus.MANUALLY_REFUNDED)
     }
 
     const hasDropdownContent = (item: Transaction): boolean => {
@@ -483,7 +484,8 @@ export default defineComponent({
       }
 
       const hasRefundStatus = item.statusCode === InvoiceStatus.CREDITED ||
-                              item.statusCode === InvoiceStatus.REFUNDED
+                              item.statusCode === InvoiceStatus.REFUNDED ||
+                              item.statusCode === InvoiceStatus.MANUALLY_REFUNDED
       return hasPartialRefunds || hasAppliedCreditsWithRemaining || hasRefundStatus
     }
 
@@ -624,10 +626,20 @@ export default defineComponent({
     }
 
     const getFullRefundItems = (item: Transaction) => {
-      if (![InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED].includes(item.statusCode)) return []
+      if (![InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED, InvoiceStatus.MANUALLY_REFUNDED].includes(item.statusCode)) return []
 
       const refundAsCredits = isRefundAsCredits(item)
       const isCredited = item.statusCode === InvoiceStatus.CREDITED
+      const isManuallyRefunded = item.statusCode === InvoiceStatus.MANUALLY_REFUNDED
+
+      let dropdownStatus: string
+      if (isManuallyRefunded) {
+        dropdownStatus = invoiceStatusDisplay[InvoiceStatus.MANUALLY_REFUNDED]
+      } else if (refundAsCredits) {
+        dropdownStatus = invoiceStatusDisplay[InvoiceStatus.CREDITED]
+      } else {
+        dropdownStatus = invoiceStatusDisplay[InvoiceStatus.REFUNDED]
+      }
 
       return [createDropdownItem(item, {
         id: `full-${item.id}`,
@@ -637,7 +649,7 @@ export default defineComponent({
         amount: `-$${item.total.toFixed(2)}`,
         paymentMethod: refundAsCredits ? paymentTypeDisplay[PaymentTypes.CREDIT] : item.paymentMethod,
         isRefund: true,
-        status: refundAsCredits ? invoiceStatusDisplay[InvoiceStatus.CREDITED] : invoiceStatusDisplay[InvoiceStatus.REFUNDED],
+        status: dropdownStatus,
         transactionId: item.id
       })]
     }
