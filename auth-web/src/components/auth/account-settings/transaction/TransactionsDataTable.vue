@@ -470,6 +470,7 @@ export default defineComponent({
         return true
       }
 
+      // Manual refund: show original receipt on main row only (no refund receipt in expanded row).
       return !expandRow && (paidStatus.has(status) || item.statusCode === InvoiceStatus.MANUALLY_REFUNDED)
     }
 
