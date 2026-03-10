@@ -435,7 +435,6 @@ export default defineComponent({
     const refundStatus = new Set<InvoiceStatus>([
       InvoiceStatus.CREDITED,
       InvoiceStatus.REFUNDED,
-      InvoiceStatus.MANUALLY_REFUNDED,
       InvoiceStatus.PARTIALLY_REFUNDED,
       InvoiceStatus.PARTIALLY_CREDITED
     ])
@@ -471,7 +470,7 @@ export default defineComponent({
         return true
       }
 
-      return !expandRow && paidStatus.has(status)
+      return !expandRow && (paidStatus.has(status) || item.statusCode === InvoiceStatus.MANUALLY_REFUNDED)
     }
 
     const hasDropdownContent = (item: Transaction): boolean => {
