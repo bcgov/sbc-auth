@@ -6,12 +6,15 @@
   >
     <div class="view-header flex-column">
       <v-row no-gutters>
-        <v-col class="col">
+        <v-col cols="7">
           <h2 class="view-header__title">
             Administrative BN
           </h2>
         </v-col>
-        <v-col class="pr-0 col align">
+        <v-col
+          class="pr-0 text-right"
+          cols="5"
+        >
           <v-btn
             v-if="businessDetails"
             link
@@ -75,34 +78,30 @@
     </div>
     <template v-else>
       <div class="business-details">
+
         <v-row no-gutters>
           <v-col
             cols="4"
             class="pr-4"
           >
-            <strong>Business Name</strong>
+            <strong>Legal Name</strong>
           </v-col>
-          <v-col cols="5">
+          <v-col cols="8">
             {{ businessDetails.legalName }}
           </v-col>
+        </v-row>
+        <v-row
+          v-if="showOperatingName()"
+          no-gutters
+        >
           <v-col
-            class="align"
-            cols="3"
+            cols="4"
+            class="pr-4"
           >
-            <v-btn
-              small
-              text
-              color="primary"
-              @click="downloadBusinessSummary(businessDetails.identifier)"
-              v-on="on"
-            >
-              <img
-                src="@/assets/img/business_summary_icon.svg"
-                alt=""
-                class="pa-1"
-              >
-              <span class="font-13 ml-1">Business Summary</span>
-            </v-btn>
+            <strong>Operating Name</strong>
+          </v-col>
+          <v-col cols="8">
+            {{ operatingName() }}
           </v-col>
         </v-row>
         <v-row no-gutters>
@@ -110,7 +109,7 @@
             cols="4"
             class="pr-4"
           >
-            <strong>Incorporation Number or Registration Number</strong>
+            <strong>Identifier</strong>
           </v-col>
           <v-col cols="8">
             {{ businessDetails.identifier }}
@@ -127,6 +126,56 @@
             {{ businessDetails.taxId || '(Not Available)' }}
           </v-col>
         </v-row>
+                <v-row no-gutters>
+          <v-col
+            cols="4"
+            class="pr-4"
+          >
+            <strong>Business Summary</strong>
+          </v-col>
+          <v-col
+            class="align"
+            cols="8"
+          >
+            <v-btn
+              small
+              text
+              color="primary"
+              class="mr-2"
+              :loading="previewActive"
+              @click="previewBusinessSummary()"
+            >
+              <v-icon left>mdi-eye</v-icon>
+            </v-btn>
+            <v-btn
+              small
+              text
+              color="primary"
+              :loading="downloadActive"
+              @click="downloadSummary()"
+            >
+              <img
+                src="@/assets/img/business_summary_icon.svg"
+                alt=""
+                class="pa-1"
+              >
+            </v-btn>
+          </v-col>
+        </v-row>
+      </div>
+
+      <div v-if="pdfDialog">
+        <v-card>
+          <v-card-title class="d-flex justify-space-between align-center">
+            <span>Business Summary Preview</span>
+            <v-btn icon @click="closePdfDialog">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text class="pa-0" v-if="pdfUrl">
+            <iframe :src="pdfUrl" width="100%" height="500" frameborder="0"></iframe>
+          </v-card-text>
+        </v-card>
       </div>
 
       <div class="mt-10">
@@ -203,7 +252,7 @@ import CommonUtils from '@/util/common-util'
 import { Component } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import { LearBusiness } from '@/models/business'
-import { SessionStorageKeys } from '@/util/constants'
+import { CorpTypes, SessionStorageKeys } from '@/util/constants'
 import Vue from 'vue'
 import { mask } from 'vue-the-mask'
 import { useBusinessStore } from '@/stores/business'
@@ -223,6 +272,7 @@ export default class AdministrativeBN extends Vue {
   @Action(useBusinessStore) readonly searchBusiness!: (businessIdentifier: string) => Promise<LearBusiness>
   @Action(useBusinessStore) readonly createBNRequest!: (request: BNRequest) => Promise<any>
   @Action(useBusinessStore) readonly downloadBusinessSummary!: (businessIdentifier: string) => Promise<void>
+  @Action(useBusinessStore) readonly fetchBusinessSummaryPdfUrl!: (businessIdentifier: string) => Promise<string>
 
   // local variables
   businessIdentifier = ''
@@ -236,6 +286,11 @@ export default class AdministrativeBN extends Vue {
   submitActive = false
   submitBNRequestErrorMessage = ''
   requestQueued = false
+
+  pdfDialog = false
+  pdfUrl = ''
+  previewActive = false
+  downloadActive = false
 
   readonly businessIdentifierRules = [
     v => !!v || 'Incorporation Number or Registration Number is required',
@@ -292,6 +347,14 @@ export default class AdministrativeBN extends Vue {
       CommonUtils.formatIncorporationNumber(this.businessIdentifier)
   }
 
+  operatingName (): string {
+    return this.businessDetails.alternateNames?.find(name => name.type === 'DBA')?.name || ''
+  }
+
+  showOperatingName (): boolean {
+    return [CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP].includes(this.businessDetails.legalType)
+  }
+
   canRequestNewBN (): boolean {
     return this.businessDetails &&
     (!this.businessDetails.taxId || this.businessDetails.taxId.length < 15)
@@ -318,6 +381,37 @@ export default class AdministrativeBN extends Vue {
       } finally {
         this.submitActive = false
       }
+    }
+  }
+
+  async previewBusinessSummary () {
+    try {
+      this.previewActive = true
+      this.pdfUrl = await this.fetchBusinessSummaryPdfUrl(this.businessDetails.identifier)
+      this.pdfDialog = true
+    } catch (error) {
+      console.error('Failed to preview PDF', error)
+    } finally {
+      this.previewActive = false
+    }
+  }
+
+  async downloadSummary () {
+    try {
+      this.downloadActive = true
+      await this.downloadBusinessSummary(this.businessDetails.identifier)
+    } catch (error) {
+      console.error('Failed to download PDF', error)
+    } finally {
+      this.downloadActive = false
+    }
+  }
+
+  closePdfDialog () {
+    this.pdfDialog = false
+    if (this.pdfUrl) {
+      window.URL.revokeObjectURL(this.pdfUrl)
+      this.pdfUrl = ''
     }
   }
 }

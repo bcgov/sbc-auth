@@ -470,6 +470,14 @@ export const useBusinessStore = defineStore('business', () => {
     await BusinessService.fetchBusinessSummary(businessIdentifier).catch(() => null)
   }
 
+  async function fetchBusinessSummaryPdfUrl (businessIdentifier: string): Promise<string> {
+    const blob = await BusinessService.fetchBusinessSummaryPdfBlob(businessIdentifier).catch(() => null)
+    if (blob) {
+      return window.URL.createObjectURL(blob)
+    }
+    return ''
+  }
+
   async function resubmitBNRequest (resubmitRequest: ResubmitBNRequest): Promise<any> {
     const response = await BusinessService.resubmitBNRequest(resubmitRequest).catch(() => null)
     return response?.status === 200
@@ -604,6 +612,7 @@ export const useBusinessStore = defineStore('business', () => {
     createBNRequest,
     getBNRequests,
     downloadBusinessSummary,
+    fetchBusinessSummaryPdfUrl,
     resubmitBNRequest,
     getRequestTracker,
     isAffiliated,
