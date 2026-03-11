@@ -55,13 +55,13 @@ describe('Search Business Form: Result', () => {
       taxId: '123456789BC0001' }
     })
     await flushPromises()
-    
+
     const mockFetch = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(() => resolve('http://test.com'), 50)))
     wrapper.vm.fetchBusinessSummaryPdfUrl = mockFetch
 
     const promise = wrapper.vm.previewBusinessSummary()
     expect(wrapper.vm.previewActive).toBe(true)
-    
+
     await promise
     expect(wrapper.vm.previewActive).toBe(false)
     expect(wrapper.vm.pdfDialog).toBe(true)
@@ -75,13 +75,13 @@ describe('Search Business Form: Result', () => {
       taxId: '123456789BC0001' }
     })
     await flushPromises()
-    
+
     const mockDownload = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 50)))
     wrapper.vm.downloadBusinessSummary = mockDownload
 
     const promise = wrapper.vm.downloadSummary()
     expect(wrapper.vm.downloadActive).toBe(true)
-    
+
     await promise
     expect(wrapper.vm.downloadActive).toBe(false)
   })

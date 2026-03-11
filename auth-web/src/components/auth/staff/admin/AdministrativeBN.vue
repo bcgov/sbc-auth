@@ -78,7 +78,6 @@
     </div>
     <template v-else>
       <div class="business-details">
-
         <v-row no-gutters>
           <v-col
             cols="4"
@@ -126,7 +125,7 @@
             {{ businessDetails.taxId || '(Not Available)' }}
           </v-col>
         </v-row>
-                <v-row no-gutters>
+        <v-row no-gutters>
           <v-col
             cols="4"
             class="pr-4"
@@ -145,7 +144,9 @@
               :loading="previewActive"
               @click="previewBusinessSummary()"
             >
-              <v-icon left>mdi-eye</v-icon>
+              <v-icon left>
+                mdi-eye
+              </v-icon>
             </v-btn>
             <v-btn
               small
@@ -164,16 +165,27 @@
         </v-row>
       </div>
 
-      <div v-if="pdfDialog">
+      <div v-if="pdfDialog" class="mt-4">
         <v-card>
           <v-card-title class="d-flex justify-space-between align-center">
             <span>Business Summary Preview</span>
-            <v-btn icon @click="closePdfDialog">
+            <v-btn
+              icon
+              @click="closePdfDialog"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-card-title>
-          <v-card-text class="pa-0" v-if="pdfUrl">
-            <iframe :src="pdfUrl" width="100%" height="500" frameborder="0"></iframe>
+          <v-card-text
+            v-if="pdfUrl"
+            class="pa-0"
+          >
+            <iframe
+              title="Business Summary Preview"
+              :src="pdfUrl"
+              width="100%"
+              height="500"
+            />
           </v-card-text>
         </v-card>
       </div>
@@ -245,6 +257,7 @@
 </template>
 
 <script lang="ts">
+import { CorpTypes, SessionStorageKeys } from '@/util/constants'
 import { Action } from 'pinia-class'
 import { BNRequest } from '@/models/request-tracker'
 import BNRequestManager from '@/components/auth/staff/admin/BNRequestManager.vue'
@@ -252,7 +265,6 @@ import CommonUtils from '@/util/common-util'
 import { Component } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import { LearBusiness } from '@/models/business'
-import { CorpTypes, SessionStorageKeys } from '@/util/constants'
 import Vue from 'vue'
 import { mask } from 'vue-the-mask'
 import { useBusinessStore } from '@/stores/business'
