@@ -47,4 +47,42 @@ describe('Search Business Form: Result', () => {
     await flushPromises()
     expect(wrapper.find('.business-details').isVisible()).toBe(true)
   })
+
+  it('shows loading state during preview', async () => {
+    wrapper.setData({ businessDetails: {
+      legalName: 'Business Name',
+      identifier: 'FM1234567',
+      taxId: '123456789BC0001' }
+    })
+    await flushPromises()
+
+    const mockFetch = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(() => resolve('http://test.com'), 50)))
+    wrapper.vm.fetchBusinessSummaryPdfUrl = mockFetch
+
+    const promise = wrapper.vm.previewBusinessSummary()
+    expect(wrapper.vm.previewActive).toBe(true)
+
+    await promise
+    expect(wrapper.vm.previewActive).toBe(false)
+    expect(wrapper.vm.pdfDialog).toBe(true)
+    expect(wrapper.vm.pdfUrl).toBe('http://test.com')
+  })
+
+  it('shows loading state during download', async () => {
+    wrapper.setData({ businessDetails: {
+      legalName: 'Business Name',
+      identifier: 'FM1234567',
+      taxId: '123456789BC0001' }
+    })
+    await flushPromises()
+
+    const mockDownload = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 50)))
+    wrapper.vm.downloadBusinessSummary = mockDownload
+
+    const promise = wrapper.vm.downloadSummary()
+    expect(wrapper.vm.downloadActive).toBe(true)
+
+    await promise
+    expect(wrapper.vm.downloadActive).toBe(false)
+  })
 })

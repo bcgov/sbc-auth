@@ -99,6 +99,17 @@ export default class BusinessService {
     CommonUtils.fileDownload(data?.data, `${businessIdentifier} Summary.pdf`, data?.headers['content-type'])
   }
 
+  static async fetchBusinessSummaryPdfBlob (businessIdentifier: string): Promise<Blob> {
+    const config = {
+      headers: { 'Accept': 'application/pdf' },
+      responseType: 'blob' as 'json'
+    }
+
+    const response = await axios.get(
+      `${ConfigHelper.getLegalAPIV2Url()}/businesses/${businessIdentifier}/documents/summary`, config)
+    return new Blob([response?.data], { type: 'application/pdf' })
+  }
+
   /**
    * Fetches a filing by its URL.
    * @param url the full URL of the filing
