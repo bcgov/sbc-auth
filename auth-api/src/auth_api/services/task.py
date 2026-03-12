@@ -122,7 +122,10 @@ class Task:  # pylint: disable=too-many-instance-attributes
 
             if not is_hold:
                 self._update_org(
-                    is_approved=is_approved, org_id=org_id, client_id=task_model.created_by_id, task_action=task_model.action
+                    is_approved=is_approved,
+                    org_id=org_id,
+                    client_id=task_model.created_by_id,
+                    task_action=task_model.action,
                 )
             else:
                 # Task with ACCOUNT_REVIEW action cannot be put on hold
@@ -212,7 +215,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
             "applicationDate": f"{task_model.created.strftime('%m/%d/%Y')}",
             "accountId": account_id,
             "emailAddresses": admin_emails,
-            "contextUrl": f"{current_app.config.get("WEB_APP_URL")}"
+            "contextUrl": f"{current_app.config.get('WEB_APP_URL')}"
             f"/{current_app.config.get('BCEID_SIGNIN_ROUTE')}/"
             f"{create_account_signin_route}",
         }

@@ -32,9 +32,7 @@ def get_account_fees(org: OrgModel, bearer_token: str) -> list[str]:
     account_fees = []
 
     try:
-        response = RestService.get(
-            endpoint=f"{pay_url}/accounts/{org.id}", token=bearer_token, retry_on_failure=True
-        )
+        response = RestService.get(endpoint=f"{pay_url}/accounts/{org.id}", token=bearer_token, retry_on_failure=True)
 
         if response and response.status_code == 200:
             response_data = response.json()

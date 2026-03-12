@@ -159,9 +159,7 @@ class Product:
 
     @staticmethod
     def _check_gov_org_add_product_previously_approved(
-        org_id: int,
-        product_code: str,
-        account_fees: list[str]
+        org_id: int, product_code: str, account_fees: list[str]
     ) -> tuple[bool, Any]:
         """Check if GOV org's account fee product was previously approved (NEW_PRODUCT_FEE_REVIEW task)."""
         inactive_sub = ProductSubscriptionModel.find_by_org_id_product_code(
@@ -175,18 +173,14 @@ class Product:
         task_create_org = TaskModel.find_by_task_relationship_id(
             org_id, TaskRelationshipType.ORG.value, TaskStatus.COMPLETED.value
         )
-        product_invalid = (
-            task_add_product is None or (
-                task_add_product.action in (TaskAction.NEW_PRODUCT_FEE_REVIEW.value, TaskAction.PRODUCT_REVIEW.value)
-                and task_add_product.relationship_status != TaskRelationshipStatus.ACTIVE.value
-            )
+        product_invalid = task_add_product is None or (
+            task_add_product.action in (TaskAction.NEW_PRODUCT_FEE_REVIEW.value, TaskAction.PRODUCT_REVIEW.value)
+            and task_add_product.relationship_status != TaskRelationshipStatus.ACTIVE.value
         )
         if product_invalid:
-            org_invalid = (
-                task_create_org is None or (
-                    task_create_org.action in (TaskAction.AFFIDAVIT_REVIEW.value, TaskAction.ACCOUNT_REVIEW.value)
-                    and task_create_org.relationship_status != TaskRelationshipStatus.ACTIVE.value
-                )
+            org_invalid = task_create_org is None or (
+                task_create_org.action in (TaskAction.AFFIDAVIT_REVIEW.value, TaskAction.ACCOUNT_REVIEW.value)
+                and task_create_org.relationship_status != TaskRelationshipStatus.ACTIVE.value
             )
 
             if org_invalid:
@@ -222,7 +216,7 @@ class Product:
         skip_auth=False,
         auto_approve=False,
         staff_review_for_create_org=False,
-        **kwargs
+        **kwargs,
     ):
         """Create product subscription for the user.
 
@@ -238,7 +232,11 @@ class Product:
 
         subscriptions_list = subscription_data.get("subscriptions")
         user_from_context: UserContext = kwargs["user_context"]
-        account_fees = get_account_fees(org, bearer_token=user_from_context.bearer_token) if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org else []
+        account_fees = (
+            get_account_fees(org, bearer_token=user_from_context.bearer_token)
+            if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org
+            else []
+        )
         for subscription in subscriptions_list:
             auto_approve_current = auto_approve
             product_code = subscription.get("productCode")
@@ -454,7 +452,9 @@ class Product:
     @staticmethod
     def find_subscription_status(org, product_model, auto_approve=False, staff_review_for_create_org=False):
         """Return the subscriptions status based on org type."""
-        skip_review = org.access_type in GOV_ORG_TYPES and staff_review_for_create_org # prevent create second task when it's already added a staff review when creating org
+        skip_review = (
+            org.access_type in GOV_ORG_TYPES and staff_review_for_create_org
+        )  # prevent create second task when it's already added a staff review when creating org
         if (product_model.need_review or org.access_type in GOV_ORG_TYPES) and not auto_approve:
             return (
                 ProductSubscriptionStatus.ACTIVE.value
@@ -510,10 +510,7 @@ class Product:
             check_auth(one_of_roles=(*CLIENT_AUTH_ROLES, STAFF), org_id=org_id)
 
         product_subscriptions: list[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_ids([org_id])
-        subscription_by_code = {
-            sub.product_code: sub
-            for sub in product_subscriptions
-        }
+        subscription_by_code = {sub.product_code: sub for sub in product_subscriptions}
 
         # Include hidden products only for staff and SBC staff
         include_hidden = (

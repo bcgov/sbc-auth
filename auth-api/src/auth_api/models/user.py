@@ -30,6 +30,7 @@ from auth_api.utils.roles import Role
 from auth_api.utils.user_context import UserContext, user_context
 
 from .base_model import BaseModel
+from .contact_link import ContactLink as ContactLinkModel
 from .db import db
 from .membership import Membership as MembershipModel
 from .org import Org as OrgModel
@@ -259,7 +260,7 @@ class User(Versioned, BaseModel):
             )
             .join(OrgModel)
             .filter(OrgModel.id == int(org_id or -1))
-            .options(subqueryload(User.contacts).subqueryload("contact"))
+            .options(subqueryload(User.contacts).subqueryload(ContactLinkModel.contact))
             .all()
         )
 
