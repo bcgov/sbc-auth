@@ -6,95 +6,10 @@
   "gitIgnoredAuthors": [
     "travis8814@gmail.com"
   ],
-  "automerge": false,
-  "labels": [
-    "dependencies"
-  ],
   "ignorePaths": [
     "**/Dockerfile"
   ],
-  "postUpdateOptions": [
-    "poetryLockUpdate"
-  ],
-  "packageRules": [
-    {
-      "matchManagers": [
-        "poetry"
-      ],
-      "postUpdateOptions": [
-        "poetryLockUpdate"
-      ]
-    },
-    {
-      "matchFileNames": [
-        "auth-api/**"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "auth-api updates",
-      "additionalBranchPrefix": "auth-api-",
-      "prPriority": 10
-    },
-    {
-      "matchFileNames": [
-        "queue_services/account-mailer/**",
-        "queue_services/auth-queue/**"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "auth-api dependents updates",
-      "additionalBranchPrefix": "auth-api-deps-",
-      "prPriority": -1,
-      "dependencyDashboardApproval": true
-    },
-    {
-      "matchFileNames": [
-        "auth-web/**"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "auth-web non-major updates",
-      "additionalBranchPrefix": "auth-web-"
-    },
-    {
-      "matchFileNames": [
-        "jobs/**"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "jobs non-major updates",
-      "additionalBranchPrefix": "jobs-"
-    },
-    {
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "labels": [
-        "dependencies",
-        "breaking"
-      ]
-    },
-    {
-      "matchDepTypes": [
-        "devDependencies"
-      ],
-      "groupName": "dev dependencies"
-    },
-    {
-      "matchPackageNames": [
-        "ruff"
-      ],
-      "rangeStrategy": "pin"
-    }
-  ],
+  "enabled": false,
   "vulnerabilityAlerts": {
     "enabled": true,
     "labels": [
