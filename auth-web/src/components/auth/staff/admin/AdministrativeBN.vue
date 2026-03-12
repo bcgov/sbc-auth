@@ -143,6 +143,7 @@
               class="mr-2"
               :loading="previewActive"
               @click="previewBusinessSummary()"
+              :disabled="pdfDialog"
             >
               <v-icon left>
                 mdi-eye
