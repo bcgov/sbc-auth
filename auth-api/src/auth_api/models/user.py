@@ -23,7 +23,7 @@ from flask import current_app
 from sql_versioning import Versioned
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, or_
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, subqueryload
 
 from auth_api.utils.enums import LoginSource, Status, UserStatus
 from auth_api.utils.roles import Role
@@ -92,22 +92,21 @@ class User(Versioned, BaseModel):
 
     @classmethod
     @user_context
-    def find_by_jwt_token(cls, **kwargs):
+    def find_by_jwt_token(cls, load_options=None, **kwargs):
         """Find an existing user by the keycloak GUID and (idpUserId is null or from token) in the provided token."""
         user_from_context: UserContext = kwargs["user_context"]
-        return (
-            db.session.query(User)
-            .filter(
-                and_(
-                    User.keycloak_guid == user_from_context.sub,
-                    or_(
-                        User.idp_userid == user_from_context.token_info.get("idp_userid", None),
-                        User.idp_userid.is_(None),
-                    ),
-                )
+        query = db.session.query(User).filter(
+            and_(
+                User.keycloak_guid == user_from_context.sub,
+                or_(
+                    User.idp_userid == user_from_context.token_info.get("idp_userid", None),
+                    User.idp_userid.is_(None),
+                ),
             )
-            .one_or_none()
         )
+        if load_options:
+            query = query.options(*load_options)
+        return query.one_or_none()
 
     @classmethod
     @user_context
@@ -260,6 +259,7 @@ class User(Versioned, BaseModel):
             )
             .join(OrgModel)
             .filter(OrgModel.id == int(org_id or -1))
+            .options(subqueryload(User.contacts).subqueryload("contact"))
             .all()
         )
 

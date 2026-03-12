@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from sql_versioning import Versioned
 from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import contains_eager, relationship
 
 from auth_api.utils.enums import LoginSource, OrgType, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_ORG_STATUSES, VALID_STATUSES
@@ -106,6 +106,7 @@ class Membership(Versioned, BaseModel):  # pylint: disable=too-few-public-method
         """Find the orgs for a user."""
         records = (
             cls.query.join(OrgModel)
+            .options(contains_eager(Membership.org))
             .filter(cls.user_id == int(user_id or -1))
             .filter(cls.status.in_(valid_statuses))
             .filter(OrgModel.status_code.in_(VALID_ORG_STATUSES))

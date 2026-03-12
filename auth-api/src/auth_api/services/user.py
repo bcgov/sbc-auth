@@ -20,6 +20,7 @@ from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from requests import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
+from sqlalchemy.orm import subqueryload
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -189,7 +190,9 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
     def get_contacts():
         """Get the contact associated with this user."""
         current_app.logger.debug("get_contact")
-        user = UserModel.find_by_jwt_token()
+        user = UserModel.find_by_jwt_token(
+            load_options=[subqueryload(UserModel.contacts).subqueryload(ContactLinkModel.contact)]
+        )
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 

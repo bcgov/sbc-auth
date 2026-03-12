@@ -22,7 +22,7 @@ from flask import current_app
 from sql_versioning import Versioned
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, desc, event, func, text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import contains_eager, relationship
+from sqlalchemy.orm import contains_eager, relationship, subqueryload
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -121,6 +121,15 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
     def find_by_org_id(cls, org_id: int) -> Self:
         """Find an Org instance that matches the provided id."""
         return cls.query.filter_by(id=int(org_id or -1)).first()
+
+    @classmethod
+    def find_by_org_id_with_contacts(cls, org_id: int) -> Self:
+        """Find an Org instance with contacts eagerly loaded."""
+        return (
+            cls.query.filter_by(id=int(org_id or -1))
+            .options(subqueryload(Org.contacts).subqueryload(ContactLink.contact))
+            .first()
+        )
 
     @classmethod
     def find_by_org_ids_and_org_types(cls, org_ids: list[int], org_types: list[str]):
