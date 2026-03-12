@@ -34,7 +34,7 @@ class Affiliation(Versioned, BaseModel):  # pylint: disable=too-few-public-metho
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     entity_id = Column(ForeignKey("entities.id"), nullable=False, index=True)
-    org_id = Column(ForeignKey("orgs.id"), nullable=False)
+    org_id = Column(ForeignKey("orgs.id"), nullable=False, index=True)
     certified_by_name = Column(String(100), nullable=True)
 
     entity = relationship("Entity", foreign_keys=[entity_id], lazy="select")
