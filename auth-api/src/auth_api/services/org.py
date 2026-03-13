@@ -62,7 +62,7 @@ from auth_api.utils.enums import (
     TaskStatus,
     TaskTypePrefix,
 )
-from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I001
+from auth_api.utils.roles import ADMIN, COORDINATOR, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I001
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
 
@@ -150,7 +150,10 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if product_subscriptions is not None:
             ProductService.create_product_subscription(
-                org.id, subscription_data={"subscriptions": product_subscriptions}, skip_auth=True, staff_review_for_create_org=is_staff_review_needed
+                org.id,
+                subscription_data={"subscriptions": product_subscriptions},
+                skip_auth=True,
+                staff_review_for_create_org=is_staff_review_needed,
             )
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
@@ -798,6 +801,7 @@ class Org:  # pylint: disable=too-many-public-methods
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
         current_app.logger.debug(">add_contact")
+        check_auth(one_of_roles=(ADMIN, COORDINATOR, STAFF), org_id=org_id)
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -821,6 +825,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def update_contact(org_id, contact_info):
         """Update the existing contact for this org."""
         current_app.logger.debug(">update_contact ")
+        check_auth(one_of_roles=(ADMIN, COORDINATOR, STAFF), org_id=org_id)
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -842,6 +847,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def delete_contact(org_id):
         """Delete the contact for this org."""
         current_app.logger.debug(">delete_contact ")
+        check_auth(one_of_roles=(ADMIN, COORDINATOR, STAFF), org_id=org_id)
         org = OrgModel.find_by_org_id(org_id)
         if not org or not org.contacts:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -1056,7 +1062,9 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
-    def send_approved_rejected_notification(receipt_admin_emails, org_name, org_id, org_status: OrgStatus, client_id: int):
+    def send_approved_rejected_notification(
+        receipt_admin_emails, org_name, org_id, org_status: OrgStatus, client_id: int
+    ):
         """Send Approved/Rejected notification to the user."""
         current_app.logger.debug("<send_approved_rejected_notification")
 
@@ -1073,7 +1081,7 @@ class Org:  # pylint: disable=too-many-public-methods
             "emailAddresses": receipt_admin_emails,
             "contextUrl": app_url,
             "orgName": org_name,
-            "loginSource": client.login_source
+            "loginSource": client.login_source,
         }
         try:
             publish_to_mailer(notification_type, data=data)
@@ -1097,7 +1105,13 @@ class Org:  # pylint: disable=too-many-public-methods
             return  # Don't send mail for any other status change
         app_url = f"{origin_url}/"
         client: UserModel = UserModel.find_by_id(client_id)
-        data = {"accountId": org_id, "emailAddresses": receipt_admin_email, "contextUrl": app_url, "orgName": org_name, "loginSource": client.login_source}
+        data = {
+            "accountId": org_id,
+            "emailAddresses": receipt_admin_email,
+            "contextUrl": app_url,
+            "orgName": org_name,
+            "loginSource": client.login_source,
+        }
         try:
             publish_to_mailer(notification_type, data=data)
             current_app.logger.debug("send_approved_rejected_govm_govn_notification>")

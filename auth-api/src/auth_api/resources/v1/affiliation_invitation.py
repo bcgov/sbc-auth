@@ -56,7 +56,7 @@ def get_affiliation_invitations():
         auth_check_org_id = org_id or search_filter.from_org_id or search_filter.to_org_id
         if auth_check_org_id is None:
             raise BusinessException(Error.INVALID_INPUT, None)
-        if not UserService.is_context_user_staff() and check_auth(org_id=auth_check_org_id, disabled_roles=[None]):
+        if not UserService.is_context_user_staff() and check_auth(org_id=auth_check_org_id):
             raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
 
         if org_id:
