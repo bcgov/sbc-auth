@@ -726,7 +726,7 @@ def test_find_org_by_name_branch_name(session, auth_mock):  # pylint:disable=unu
     assert found_org.get("orgs")[0].get("branch_name") == branch_name
 
 
-def test_add_contact(session):  # pylint:disable=unused-argument
+def test_add_contact(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     org = factory_org_service()
     org_dictionary = org.as_dict()
@@ -735,7 +735,7 @@ def test_add_contact(session):  # pylint:disable=unused-argument
     assert dictionary["email"] == TestContactInfo.contact1["email"]
 
 
-def test_add_contact_duplicate(session):  # pylint:disable=unused-argument
+def test_add_contact_duplicate(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that a contact cannot be added to an Org if that Org already has a contact."""
     org = factory_org_service()
     org_dictionary = org.as_dict()
@@ -746,7 +746,7 @@ def test_add_contact_duplicate(session):  # pylint:disable=unused-argument
     assert exception.value.code == Error.DATA_ALREADY_EXISTS.name
 
 
-def test_update_contact(session):  # pylint:disable=unused-argument
+def test_update_contact(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that a contact for an existing Org can be updated."""
     org = factory_org_service()
     org_dictionary = org.as_dict()
@@ -761,7 +761,7 @@ def test_update_contact(session):  # pylint:disable=unused-argument
     assert dictionary["email"] == TestContactInfo.contact2["email"]
 
 
-def test_update_contact_no_contact(session):  # pylint:disable=unused-argument
+def test_update_contact_no_contact(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that a contact for a non-existent contact cannot be updated."""
     org = factory_org_service()
     org_dictionary = org.as_dict()
