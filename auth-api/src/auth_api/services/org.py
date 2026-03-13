@@ -801,10 +801,10 @@ class Org:  # pylint: disable=too-many-public-methods
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
         current_app.logger.debug(">add_contact")
-        check_auth(one_of_roles=(ADMIN, COORDINATOR, STAFF), org_id=org_id)
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+        check_auth(one_of_roles=(ADMIN, COORDINATOR, STAFF), org_id=org_id)
 
         contact_link = ContactLinkModel.find_by_org_id(org_id)
         if contact_link is not None:
@@ -825,10 +825,10 @@ class Org:  # pylint: disable=too-many-public-methods
     def update_contact(org_id, contact_info):
         """Update the existing contact for this org."""
         current_app.logger.debug(">update_contact ")
-        check_auth(one_of_roles=(ADMIN, COORDINATOR, STAFF), org_id=org_id)
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+        check_auth(one_of_roles=(ADMIN, COORDINATOR, STAFF), org_id=org_id)
 
         # find the contact link for this org
         contact_link = ContactLinkModel.find_by_org_id(org_id)
@@ -847,10 +847,10 @@ class Org:  # pylint: disable=too-many-public-methods
     def delete_contact(org_id):
         """Delete the contact for this org."""
         current_app.logger.debug(">delete_contact ")
-        check_auth(one_of_roles=(ADMIN, COORDINATOR, STAFF), org_id=org_id)
         org = OrgModel.find_by_org_id(org_id)
         if not org or not org.contacts:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+        check_auth(one_of_roles=(ADMIN, COORDINATOR, STAFF), org_id=org_id)
 
         deleted_contact = Org.__delete_contact(org)
         current_app.logger.debug("<delete_contact ")
