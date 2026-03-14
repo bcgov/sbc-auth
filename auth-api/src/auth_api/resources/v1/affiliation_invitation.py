@@ -24,7 +24,7 @@ from auth_api.schemas import utils as schema_utils
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
 from auth_api.services import Entity as EntityService
 from auth_api.services import User as UserService
-from auth_api.services.authorization import check_auth, check_auth_one_of_orgs
+from auth_api.services.authorization import check_auth_one_of_orgs
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER, Role

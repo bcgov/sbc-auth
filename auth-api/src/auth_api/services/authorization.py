@@ -256,15 +256,15 @@ def check_auth(**kwargs):
 
 
 def check_auth_one_of_orgs(*org_ids, one_of_roles):
-    """Require user to have one_of_roles on at least one of the given orgs."""
     for raw in org_ids:
-        if raw in (None, "", "NaN"):
+        if raw is None:
             continue
         try:
             check_auth(org_id=int(raw), one_of_roles=one_of_roles)
             return
         except Exception:
-            pass
+            continue
+
     abort(403)
 
 
