@@ -263,7 +263,8 @@ def check_auth_one_of_orgs(*org_ids, one_of_roles):
         try:
             check_auth(org_id=int(raw), one_of_roles=one_of_roles)
             return
-        except Exception:
+        except Exception as e:  # noqa: S110
+            current_app.logger.debug("No access for org_id=%s, trying next: %s", raw, e)
             continue
 
     abort(403)

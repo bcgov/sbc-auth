@@ -450,6 +450,31 @@ def test_get_affiliation_invitation_by_id(client, jwt, session, keycloak_mock, b
     assert_masked_email(TestContactInfo.contact1["email"], result_json["recipientEmail"])
 
 
+def test_get_affiliation_invitation_by_id_returns_403_when_user_has_no_org_access(
+    client, jwt, session, keycloak_mock, business_mock
+):
+    """GET by ID returns 403 when the user has no role on from_org or to_org."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(
+        client, jwt, session, keycloak_mock
+    )
+    rv_invitation = client.post(
+        "/api/v1/affiliationInvitations",
+        data=json.dumps(
+            factory_affiliation_invitation(
+                from_org_id=from_org_id, to_org_id=to_org_id, business_identifier=business_identifier
+            )
+        ),
+        headers=headers,
+        content_type="application/json",
+    )
+    invitation_id = json.loads(rv_invitation.data)["id"]
+    other_user_claims = {**TestJwtClaims.public_user_role, "sub": "00000000-0000-0000-0000-000000000099", "idp_userid": "00000000-0000-0000-0000-000000000099"}
+    other_user_headers = factory_auth_header(jwt=jwt, claims=other_user_claims)
+    client.post("/api/v1/users", headers=other_user_headers, content_type="application/json")
+    rv = client.get(f"/api/v1/affiliationInvitations/{invitation_id}", headers=other_user_headers)
+    assert rv.status_code == HTTPStatus.FORBIDDEN
+
+
 def test_update_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock):
     """Assert that an affiliation invitation can be updated."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(
