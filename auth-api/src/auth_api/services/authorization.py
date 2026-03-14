@@ -256,6 +256,7 @@ def check_auth(**kwargs):
 
 
 def check_auth_one_of_orgs(*org_ids, one_of_roles):
+    """Check if user is authorized to perform action on the service for one of the given orgs."""
     for raw in org_ids:
         if raw is None:
             continue
