@@ -255,6 +255,19 @@ def check_auth(**kwargs):
         _check_for_roles(auth.get("orgMembership", None) if auth else None, kwargs)
 
 
+def check_auth_one_of_orgs(*org_ids, one_of_roles):
+    """Require user to have one_of_roles on at least one of the given orgs."""
+    for raw in org_ids:
+        if raw in (None, "", "NaN"):
+            continue
+        try:
+            check_auth(org_id=int(raw), one_of_roles=one_of_roles)
+            return
+        except Exception:
+            pass
+    abort(403)
+
+
 def _check_for_roles(role: str, kwargs):
     is_authorized: bool = False
     # If role is found

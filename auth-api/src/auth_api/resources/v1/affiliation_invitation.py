@@ -24,7 +24,7 @@ from auth_api.schemas import utils as schema_utils
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
 from auth_api.services import Entity as EntityService
 from auth_api.services import User as UserService
-from auth_api.services.authorization import check_auth
+from auth_api.services.authorization import check_auth, check_auth_one_of_orgs
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER, Role
@@ -56,7 +56,10 @@ def get_affiliation_invitations():
         auth_check_org_id = org_id or search_filter.from_org_id or search_filter.to_org_id
         if auth_check_org_id is None:
             raise BusinessException(Error.INVALID_INPUT, None)
-        if not UserService.is_context_user_staff() and check_auth(org_id=auth_check_org_id, one_of_roles=(ADMIN, COORDINATOR, USER, STAFF)):
+        if not UserService.is_context_user_staff() and check_auth_one_of_orgs(
+            org_id, search_filter.from_org_id, search_filter.to_org_id,
+            one_of_roles=(ADMIN, COORDINATOR, USER, STAFF),
+        ):
             raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
 
         if org_id:
@@ -124,12 +127,11 @@ def get_affiliation_invitation(affiliation_invitation_id):
         response, status = {"message": "The requested affiliation invitation could not be found."}, HTTPStatus.NOT_FOUND
     else:
         _model = affiliation_invitation._model
-        if not UserService.is_context_user_staff():
-            roles = (ADMIN, COORDINATOR, USER, STAFF)
-            try:
-                check_auth(org_id=_model.from_org_id, one_of_roles=roles)
-            except Exception:
-                check_auth(org_id=_model.to_org_id, one_of_roles=roles)
+        if not UserService.is_context_user_staff() and check_auth_one_of_orgs(
+            _model.from_org_id, _model.to_org_id,
+            one_of_roles=(ADMIN, COORDINATOR, USER, STAFF),
+        ):
+            raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
         dictionary = affiliation_invitation.as_dict(mask_email=True)
         response, status = dictionary, HTTPStatus.OK
     return response, status
