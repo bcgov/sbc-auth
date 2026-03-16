@@ -118,23 +118,20 @@ def post_unaffiliated_invitation(business_identifier):
 @_jwt.requires_auth
 def get_affiliation_invitation(affiliation_invitation_id):
     """Get the affiliation invitation specified by the provided id."""
-    try:
-        affiliation_invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(affiliation_invitation_id)
+    affiliation_invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(affiliation_invitation_id)
 
-        if affiliation_invitation and not UserService.is_context_user_staff():
-            _model = affiliation_invitation._model
-            check_auth_one_of_orgs(
-                _model.from_org_id, _model.to_org_id,
-                one_of_roles=(ADMIN, COORDINATOR, USER, STAFF),
-            )
+    if affiliation_invitation and not UserService.is_context_user_staff():
+        _model = affiliation_invitation._model
+        check_auth_one_of_orgs(
+            _model.from_org_id, _model.to_org_id,
+            one_of_roles=(ADMIN, COORDINATOR, USER, STAFF),
+        )
 
-        if not affiliation_invitation or affiliation_invitation.as_dict().get("is_deleted"):
-            response, status = {"message": "The requested affiliation invitation could not be found."}, HTTPStatus.NOT_FOUND
-        else:
-            dictionary = affiliation_invitation.as_dict(mask_email=True)
-            response, status = dictionary, HTTPStatus.OK
-    except BusinessException as exception:
-        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
+    if not affiliation_invitation or affiliation_invitation.as_dict().get("is_deleted"):
+        response, status = {"message": "The requested affiliation invitation could not be found."}, HTTPStatus.NOT_FOUND
+    else:
+        dictionary = affiliation_invitation.as_dict(mask_email=True)
+        response, status = dictionary, HTTPStatus.OK
     return response, status
 
 
