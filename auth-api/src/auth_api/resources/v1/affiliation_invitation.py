@@ -115,7 +115,7 @@ def post_unaffiliated_invitation(business_identifier):
 
 @bp.route("/<string:affiliation_invitation_id>", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["GET", "PATCH", "DELETE"])
-@_jwt.requires_auth
+@_jwt.has_one_of_roles([Role.SYSTEM.value])
 def get_affiliation_invitation(affiliation_invitation_id):
     """Get the affiliation invitation specified by the provided id."""
     affiliation_invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(affiliation_invitation_id)

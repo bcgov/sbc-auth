@@ -339,7 +339,7 @@ def test_delete_affiliation_invitation(client, jwt, session, keycloak_mock, busi
 
     rv_invitation = client.get(
         f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
-        headers=headers,
+        headers=factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role),
         content_type="application/json",
     )
     assert rv_invitation.status_code == HTTPStatus.NOT_FOUND
@@ -395,7 +395,7 @@ def test_delete_accepted_affiliation_inv(client, jwt, session, keycloak_mock, bu
 
     rv_invitation = client.get(
         f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
-        headers=headers,
+        headers=factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role),
         content_type="application/json",
     )
     assert rv_invitation.status_code == HTTPStatus.NOT_FOUND
@@ -437,7 +437,7 @@ def test_get_affiliation_invitation_by_id(client, jwt, session, keycloak_mock, b
 
     rv = client.get(
         f"/api/v1/affiliationInvitations/{affiliation_invitation_id}",
-        headers=headers,
+        headers=factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role),
         content_type="application/json",
     )
 
