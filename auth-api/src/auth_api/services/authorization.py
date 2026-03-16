@@ -17,7 +17,9 @@ This module is to handle authorization related queries.
 """
 
 from flask import abort, current_app
+from werkzeug.exceptions import Forbidden
 
+from auth_api.exceptions import BusinessException, Error
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.services.permissions import Permissions as PermissionsService
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
@@ -263,11 +265,11 @@ def check_auth_one_of_orgs(*org_ids, one_of_roles):
         try:
             check_auth(org_id=int(raw), one_of_roles=one_of_roles)
             return
-        except Exception as e:  # noqa: S110
-            current_app.logger.debug("No access for org_id=%s, trying next: %s", raw, e)
+        except (TypeError, ValueError):
+            # Ignore invalid/empty ids and try other candidates.
             continue
 
-    abort(403)
+    raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
 
 
 def _check_for_roles(role: str, kwargs):
