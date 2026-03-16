@@ -17,7 +17,6 @@ This module is to handle authorization related queries.
 """
 
 from flask import abort, current_app
-from werkzeug.exceptions import Forbidden
 
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models.views.authorization import Authorization as AuthorizationView
