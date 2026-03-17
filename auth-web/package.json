@@ -4,6 +4,9 @@
   "appName": "Auth Web",
   "sbcName": "SBC Common Components",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "postinstall": "patch-package",
     "dev": "vite",
@@ -82,7 +85,7 @@
     "sass": "^1.22.10",
     "sinon": "^6.3.5",
     "stylus": "^0.54.7",
-    "typescript": "^4.9.5",
+    "typescript": "^5.9.3",
     "unplugin-vue2-script-setup": "^0.11.4",
     "vite": "^4.5.14",
     "vite-plugin-environment": "^1.1.3",
