@@ -18,7 +18,7 @@ jobs:
   account-ui-ci:
     uses: bcgov/bcregistry-sre/.github/workflows/frontend-ci.yaml@main
     with:
-      node_version: "26"
+      node_version: "24"
       app_name: "account-ui"
       working_directory: "./auth-web"
       codecov_flag: "authweb"

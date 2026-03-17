@@ -9,7 +9,7 @@
 BC Registries authentication and authorization interface.
 
 ## Prerequisites
-- Node.js (>= 26)
+- Node.js (>= 24)
 - [VITE v4.4.9](https://vitejs.dev/)
 
 ## Development setup
