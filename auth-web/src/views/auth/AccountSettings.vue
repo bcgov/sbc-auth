@@ -145,27 +145,6 @@
                 </v-list-item-icon>
                 <v-list-item-title>Team Members</v-list-item-title>
               </v-list-item>
-              <!-- now this menu dispalying for regular/GOVN account will add bceid also if needed later -->
-              <v-list-item
-                v-if="isRegularAccount || isGovnAccount"
-                v-can:VIEW_AUTH_OPTIONS.hide
-                dense
-                class="py-1 px-4"
-                aria-label="Team Member Authentication Methods"
-                role="listitem"
-                :to="accountAuthUrl"
-                data-test="user-auth-nav-item"
-              >
-                <v-list-item-icon>
-                  <v-icon
-                    color="link"
-                    left
-                  >
-                    mdi-shield-account-outline
-                  </v-icon>
-                </v-list-item-icon>
-                <v-list-item-title>Authentication</v-list-item-title>
-              </v-list-item>
               <v-list-item
                 v-can:VIEW_REQUEST_PRODUCT_PACKAGE.hide
                 dense
@@ -376,10 +355,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   private get teamMembersUrl (): string {
     return `/account/${this.orgId}/settings/team-members`
-  }
-
-  private get accountAuthUrl (): string {
-    return `/account/${this.orgId}/settings/login-option`
   }
 
   private get transactionUrl (): string {

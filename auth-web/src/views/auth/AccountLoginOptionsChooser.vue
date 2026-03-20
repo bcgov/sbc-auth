@@ -72,7 +72,7 @@ export default class AccountLoginOptionsChooser extends Mixins(AccountChangeMixi
   }
 
   private goToAccountSettings () {
-    this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/login-option`)
+    this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
   }
 }
 </script>

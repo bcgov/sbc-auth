@@ -21,7 +21,6 @@ import AccountSwitching from '@/views/auth/AccountSwitching.vue'
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
-import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
 import CcPaymentView from '@/views/pay/CcPaymentView.vue'
@@ -131,8 +130,6 @@ export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import('../views/auth/AccountSettings.vue')
   const accountInfo = () => import('../components/auth/account-settings/account-info/AccountInfo.vue')
   const teamManagement = () => import('../components/auth/account-settings/team-management/TeamManagement.vue')
-  const accountLoginOption = () =>
-    import('../components/auth/account-settings/login-options/AccountSettingsLoginOption.vue')
   const transaction = () => import('../components/auth/account-settings/transaction/Transactions.vue')
   const statements = () => import('../components/auth/account-settings/statement/Statements.vue')
   const productPackage = () => import('../components/auth/account-settings/product/ProductPayment.vue')
@@ -261,8 +258,7 @@ export function getRoutes (): RouteConfig[] {
         {
           path: 'login-option',
           name: 'login-option',
-          props: (route) => ({ orgId: route.params.orgId }),
-          component: accountLoginOption
+          redirect: (to) => `/account/${to.params.orgId}/settings/account-info`
         },
         {
           path: 'transactions',
@@ -441,12 +437,6 @@ export function getRoutes (): RouteConfig[] {
       path: '/account-login-options-info',
       component: AccountLoginOptionsInfo,
       meta: { requiresAuth: true, requiresProfile: true },
-      props: true
-    },
-    {
-      path: '/authentication-options',
-      component: AuthenticationOptionsView,
-      meta: { requiresAuth: false },
       props: true
     },
     {
