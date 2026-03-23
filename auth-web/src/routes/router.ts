@@ -14,8 +14,6 @@ import AccountFreezeUnlockView from '@/views/auth/account-freeze/AccountFreezeUn
 import AccountFreezeView from '@/views/auth/account-freeze/AccountFreezeView.vue'
 import AccountHoldView from '@/views/auth/account-freeze/AccountHoldView.vue'
 import AccountInstructions from '@/components/auth/create-account/non-bcsc/AccountInstructions.vue'
-import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.vue'
-import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
 import AccountSetupLanding from '@/views/auth/create-account/AccountSetupLanding.vue'
 import AccountSwitching from '@/views/auth/AccountSwitching.vue'
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
@@ -425,18 +423,6 @@ export function getRoutes (): RouteConfig[] {
         ],
         showNavBar: true
       },
-      props: true
-    },
-    {
-      path: '/account-login-options-chooser',
-      component: AccountLoginOptionsChooser,
-      meta: { requiresAuth: true, requiresProfile: true },
-      props: true
-    },
-    {
-      path: '/account-login-options-info',
-      component: AccountLoginOptionsInfo,
-      meta: { requiresAuth: true, requiresProfile: true },
       props: true
     },
     {
