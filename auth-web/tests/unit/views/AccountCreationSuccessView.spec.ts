@@ -12,8 +12,7 @@ Vue.use(VueRouter)
 
 const vuetify = new Vuetify({})
 
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
+document.body.dataset.app = 'true'
 
 describe('AccountCreationSuccessView.vue', () => {
   it('routes set up team directly to team members', async () => {
