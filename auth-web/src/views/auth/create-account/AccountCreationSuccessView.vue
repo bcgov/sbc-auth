@@ -79,9 +79,9 @@ export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
     switch (page) {
       case 'home': window.location.assign(`${ConfigHelper.getRegistryHomeURL()}dashboard/?accountid=${this.currentOrganization.id}`)
         break
-      case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
-        break
-      case 'setup-team': this.$router.push(`account-login-options-info`)
+      case 'setup-team': 
+      case 'team-members':
+        this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
         break
     }
   }
