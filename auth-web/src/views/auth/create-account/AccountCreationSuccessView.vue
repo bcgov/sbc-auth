@@ -35,7 +35,6 @@
           </v-btn>
           <span class="mx-3">or</span>
           <v-btn
-            v-if="isRegularAccount"
             large
             color="primary"
             class="action-btn font-weight-bold"
@@ -43,16 +42,6 @@
             @click="goTo('setup-team')"
           >
             Set up team
-          </v-btn>
-          <v-btn
-            v-if="!isRegularAccount"
-            large
-            color="primary"
-            class="action-btn font-weight-bold"
-            data-test="btn-add-team-members"
-            @click="goTo('team-members')"
-          >
-            Add Team Members
           </v-btn>
         </div>
       </v-col>
@@ -79,9 +68,8 @@ export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
     switch (page) {
       case 'home': window.location.assign(`${ConfigHelper.getRegistryHomeURL()}dashboard/?accountid=${this.currentOrganization.id}`)
         break
-      case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
-        break
-      case 'setup-team': this.$router.push(`account-login-options-info`)
+      case 'setup-team':
+        this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
         break
     }
   }

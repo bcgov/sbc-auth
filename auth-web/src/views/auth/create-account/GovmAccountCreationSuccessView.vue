@@ -40,8 +40,6 @@
 
 import { Component, Mixins } from 'vue-property-decorator'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { Organization } from '@/models/Organization'
-import { Pages } from '@/util/constants'
 import { mapState } from 'pinia'
 import { useOrgStore } from '@/stores/org'
 
@@ -51,15 +49,9 @@ import { useOrgStore } from '@/stores/org'
   }
 })
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
-  protected readonly currentOrganization!: Organization
-
   goTo (page) {
     switch (page) {
       case 'home': this.$router.push('/')
-        break
-      case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
-        break
-      case 'setup-team': this.$router.push(`account-login-options-info`)
         break
     }
   }
