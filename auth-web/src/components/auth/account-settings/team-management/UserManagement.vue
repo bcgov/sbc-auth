@@ -218,7 +218,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { LoginSource, Pages, SearchFilterCodes } from '@/util/constants'
+import { LoginSource, SearchFilterCodes } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
@@ -226,7 +226,6 @@ import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { Invitation } from '@/models/Invitation'
 import InvitationsDataTable from '@/components/auth/account-settings/team-management/InvitationsDataTable.vue'
 import InviteUsersForm from '@/components/auth/account-settings/team-management/InviteUsersForm.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import MemberDataTable from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PendingMemberDataTable from '@/components/auth/account-settings/team-management/PendingMemberDataTable.vue'
@@ -252,8 +251,7 @@ import { useUserStore } from '@/stores/user'
     ...mapState(useOrgStore, [
       'resending',
       'sentInvitations',
-      'pendingOrgMembers',
-      'memberLoginOption'
+      'pendingOrgMembers'
     ]),
     ...mapState(useBusinessStore, ['currentBusiness'])
   },
@@ -263,8 +261,7 @@ import { useUserStore } from '@/stores/user'
       'deleteInvitation',
       'syncPendingOrgInvitations',
       'syncPendingOrgMembers',
-      'syncActiveOrgMembers',
-      'syncMemberLoginOption'
+      'syncActiveOrgMembers'
     ])
   }
 })
@@ -277,15 +274,12 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private invitationToBeRemoved: Invitation
 
   private readonly sentInvitations!: Invitation[]
-  private readonly memberLoginOption!: string
-  private readonly syncMemberLoginOption!: (currentAccount: number) => string
 
   private readonly resendInvitation!: (invitation: Invitation) => void
   private readonly deleteInvitation!: (invitationId: number) => void
   private readonly syncPendingOrgMembers!: () => Member[]
   private readonly syncPendingOrgInvitations!: () => Invitation[]
   private readonly syncActiveOrgMembers!: () => Member[]
-  readonly currentUser!: KCUserProfile
   private appliedFilterValue: string = ''
   private teamMembersCount = 0
   private pendingMembersCount = 0
@@ -324,18 +318,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
     await this.syncActiveOrgMembers()
     await this.syncPendingOrgInvitations()
     await this.syncPendingOrgMembers()
-    // await this.redirectIfNoAuthMethodSetup()
     this.isLoading = false
-  }
-
-  // unused for now..Keeping it there for some time if requirement again changes
-  private async redirectIfNoAuthMethodSetup () {
-    if (!this.memberLoginOption) {
-      await this.syncMemberLoginOption(this.currentOrganization.id)
-    }
-    if (!this.memberLoginOption) {
-      await this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/login-option`)
-    }
   }
 
   private showInviteUsersModal () {
