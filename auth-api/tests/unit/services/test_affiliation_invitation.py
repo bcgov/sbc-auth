@@ -1110,7 +1110,7 @@ def test_send_unaffiliated_email_invitation_mailer_data(
     assert data["contextUrl"].startswith("https://localhost.com?preset=bcscUser&token=")
     # NOTE: 'https://localhost.com' is the brd url and will contain a slash at the end in dev/test/prod
     assert data["contextUrl"].endswith("&return=https://localhost.comaffiliationInvitation/acceptToken")
-    assert data["token"] == data["contextUrl"].split("token=")[1]
+    assert data["token"] == data["contextUrl"].split("token=")[1].split("&return=")[0]
 
 
 def test_validate_and_get_org_id():
