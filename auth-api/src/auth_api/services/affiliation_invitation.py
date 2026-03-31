@@ -886,7 +886,8 @@ class AffiliationInvitation:
             )
 
         registry_home_url = current_app.config.get("REGISTRY_HOME_URL")
-        context_url = f"{registry_home_url}?preset=bcscUser&token={confirmation_token}"
+        business_registry_url = current_app.config.get("BUSINESS_REGISTRY_URL")
+        context_url = f"{registry_home_url}?preset=bcscUser&token={confirmation_token}&return={business_registry_url}affiliationInvitation/acceptToken"
 
         mailer_data = UnaffiliatedEmailInvitationData(
             business_name=business_name,
