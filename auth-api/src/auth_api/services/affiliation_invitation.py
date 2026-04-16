@@ -14,7 +14,7 @@
 """Service for managing Affiliation Invitation data."""
 
 from dataclasses import fields
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from urllib.parse import urlencode
 
 from flask import current_app
@@ -889,12 +889,17 @@ class AffiliationInvitation:
         business_registry_url = current_app.config.get("BUSINESS_REGISTRY_URL")
         context_url = f"{registry_home_url}?preset=bcscUser&token={confirmation_token}&return={business_registry_url}affiliationInvitation/acceptToken"
 
+        token_valid_for = int(CONFIG.UNAFFILIATED_EMAIL_TOKEN_EXPIRY_PERIOD_MINS) * 60
+        expiry_datetime = affiliation_invitation.sent_date + timedelta(seconds=token_valid_for)
+        display_datetime = expiry_datetime - timedelta(days=1)
+
         mailer_data = UnaffiliatedEmailInvitationData(
             business_name=business_name,
             email_addresses=contact.email,
             business_identifier=entity.business_identifier,
             token=confirmation_token,
             context_url=context_url,
+            expiry_date=display_datetime
         )
         publish_to_mailer(
             notification_type=QueueMessageType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
