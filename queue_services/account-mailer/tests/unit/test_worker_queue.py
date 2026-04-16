@@ -23,7 +23,7 @@ from google.cloud import storage
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 from account_mailer.enums import SubjectType
-from account_mailer.resources.worker import AFFILIATION_INVITATION_UNAFFILIATED_EMAIL
+from account_mailer.resources.worker import AFFILIATION_INVITATION_UNAFFILIATED_EMAIL, AFFILIATION_CONFIRMATION_EMAIL
 from account_mailer.services import notification_service
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
@@ -602,7 +602,7 @@ def test_payment_due_notification_email(app, session, client):
 
 
 def test_unaffiliated_email_invitation(app, session, client):
-    """Assert that unaffiliated email invitation uses context_url from message data."""
+    """Assert that unaffiliated email invitation uses context_url and expiry_date from message data."""
     context_url = "https://localhost.com?preset=bcscUser&token=ABC123"
     with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         mail_details = {
@@ -611,6 +611,7 @@ def test_unaffiliated_email_invitation(app, session, client):
             "businessIdentifier": "CP1234567",
             "token": "ABC123",
             "contextUrl": context_url,
+            "expiryDate": datetime(2026, 4, 16)
         }
         helper_add_event_to_queue(
             client,
@@ -627,3 +628,33 @@ def test_unaffiliated_email_invitation(app, session, client):
         email_body = mock_send.call_args.args[0].get("content").get("body")
         assert email_body is not None
         assert "https://localhost.com?preset=bcscUser&amp;token=ABC123" in email_body
+        assert "April 16, 2026" in email_body
+
+def test_affiliation_confirmation_email(app, session, client):
+    """Assert that unaffiliated email invitation uses context_url and completion_date from message data."""
+    context_url = "https://localhost.com/login"
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        mail_details = {
+            "businessName": "Test Corp.",
+            "emailAddresses": "test@test.com",
+            "businessIdentifier": "CP1234567",
+            "token": "ABC123",
+            "contextUrl": context_url,
+            "completionDate": datetime(2026, 4, 16)
+        }
+        helper_add_event_to_queue(
+            client,
+            message_type=AFFILIATION_CONFIRMATION_EMAIL,
+            mail_details=mail_details,
+        )
+
+        mock_send.assert_called()
+        assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
+        assert (
+            mock_send.call_args.args[0].get("content").get("subject")
+            == SubjectType.AFFILIATION_CONFIRMATION_EMAIL.value
+        )
+        email_body = mock_send.call_args.args[0].get("content").get("body")
+        assert email_body is not None
+        assert "https://localhost.com/login" in email_body
+        assert "April 16, 2026" in email_body

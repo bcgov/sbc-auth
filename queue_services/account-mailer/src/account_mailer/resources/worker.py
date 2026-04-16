@@ -40,6 +40,7 @@ from account_mailer.services import google_store, notification_service
 from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
 
 AFFILIATION_INVITATION_UNAFFILIATED_EMAIL = "bc.registry.auth.affiliationInvitationUnaffiliatedEmail"
+AFFILIATION_CONFIRMATION_EMAIL = "bc.registry.auth.affiliationInvitationConfirmationEmail"
 
 bp = Blueprint("worker", __name__)
 
@@ -72,6 +73,7 @@ def worker():
         handle_reset_passcode(message_type, email_msg)
         handle_affiliation_invitation(message_type, email_msg)
         handle_unaffiliated_email_invitation(message_type, email_msg)
+        handle_affiliation_confirmation_email(message_type, email_msg)
         handle_product_actions(message_type, email_msg)
         handle_statement_notification(message_type, email_msg)
         handle_payment_reminder_or_due(message_type, email_msg)
@@ -413,6 +415,32 @@ def handle_unaffiliated_email_invitation(message_type, email_msg):
     )
     process_email(email_dict)
 
+def handle_affiliation_confirmation_email(message_type, email_msg):
+    """Handle the affiliation confirmation email message."""
+    if message_type != AFFILIATION_CONFIRMATION_EMAIL:
+        return
+    business_name = email_msg.get("businessName")
+    business_identifier = email_msg.get("businessIdentifier")
+    logo_url = email_msg.get("logo_url")
+    context_url = email_msg.get("contextUrl")
+    completion_date = get_local_formatted_date(email_msg.get("completionDate"), "%B %d, %Y")
+
+    template_name = TemplateType.AFFILIATION_CONFIRMATION_EMAIL_TEMPLATE_NAME.value
+    subject = SubjectType.AFFILIATION_CONFIRMATION_EMAIL.value
+
+    email_dict = common_mailer.process(
+        org_id=None,
+        recipients=email_msg.get("emailAddresses"),
+        template_name=template_name,
+        subject=subject,
+        logo_url=logo_url,
+        business_name=business_name,
+        business_identifier=business_identifier,
+        context_url=context_url,
+        completion_date=completion_date,
+    )
+    process_email(email_dict)
+
 
 def handle_product_actions(message_type, email_msg):
     """Handle the product actions messages."""
@@ -528,6 +556,7 @@ def handle_other_messages(message_type, email_msg):
         QueueMessageTypes.PAYMENT_REMINDER_NOTIFICATION.value,
         QueueMessageTypes.PAYMENT_DUE_NOTIFICATION.value,
         AFFILIATION_INVITATION_UNAFFILIATED_EMAIL,
+        AFFILIATION_CONFIRMATION_EMAIL
     ]:
         return
 

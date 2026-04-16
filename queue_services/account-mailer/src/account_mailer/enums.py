@@ -95,6 +95,7 @@ class SubjectType(Enum):
     AFFILIATION_INVITATION_UNAFFILIATED_EMAIL = (
         "[BC Registries and Online Services] Manage Your Business on BC Registries"
     )
+    AFFILIATION_CONFIRMATION_EMAIL = "[BC Registries and Online Services] You’re Ready to Manage Your Business in the BC Business Registry"
 
 
 class TitleType(Enum):
@@ -174,6 +175,7 @@ class TemplateType(Enum):
     PAYMENT_DUE_NOTIFICATION_TEMPLATE_NAME = "payment_due_notification"
     EFT_AVAILABLE_NOTIFICATION_TEMPLATE_NAME = "eft_available_notification"
     AFFILIATION_INVITATION_UNAFFILIATED_EMAIL_TEMPLATE_NAME = "affiliation_invitation_unaffiliated_email"
+    AFFILIATION_CONFIRMATION_EMAIL_TEMPLATE_NAME = "affiliation_confirmation_email"
 
 
 class Constants(Enum):
