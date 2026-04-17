@@ -397,7 +397,8 @@ def handle_unaffiliated_email_invitation(message_type, email_msg):
     business_identifier = email_msg.get("businessIdentifier")
     logo_url = email_msg.get("logo_url")
     context_url = email_msg.get("contextUrl")
-    expiry_date = get_local_formatted_date(email_msg.get("expiryDate"), "%B %d, %Y")
+    expiry_date = datetime.fromisoformat(email_msg.get("expiryDate"))
+    display_date = get_local_formatted_date(expiry_date, "%B %d, %Y")
 
     template_name = TemplateType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL_TEMPLATE_NAME.value
     subject = SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value
@@ -411,7 +412,7 @@ def handle_unaffiliated_email_invitation(message_type, email_msg):
         business_name=business_name,
         business_identifier=business_identifier,
         context_url=context_url,
-        expiry_date=expiry_date,
+        expiry_date=display_date,
     )
     process_email(email_dict)
 
@@ -423,7 +424,8 @@ def handle_affiliation_confirmation_email(message_type, email_msg):
     business_identifier = email_msg.get("businessIdentifier")
     logo_url = email_msg.get("logo_url")
     context_url = email_msg.get("contextUrl")
-    completion_date = get_local_formatted_date(email_msg.get("completionDate"), "%B %d, %Y")
+    completion_date = datetime.fromisoformat(email_msg.get("completionDate"))
+    display_date = get_local_formatted_date(completion_date, "%B %d, %Y")
 
     template_name = TemplateType.AFFILIATION_CONFIRMATION_EMAIL_TEMPLATE_NAME.value
     subject = SubjectType.AFFILIATION_CONFIRMATION_EMAIL.value
@@ -437,7 +439,7 @@ def handle_affiliation_confirmation_email(message_type, email_msg):
         business_name=business_name,
         business_identifier=business_identifier,
         context_url=context_url,
-        completion_date=completion_date,
+        completion_date=display_date,
     )
     process_email(email_dict)
 
