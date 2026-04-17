@@ -337,8 +337,6 @@ def test_create_affiliation_sends_confirmation_email(mock_publish, session, auth
         org_id, business_identifier, TestEntityInfo.entity_lear_mock["passCode"]
     )
 
-    print(affiliation.as_dict())
-
     assert affiliation
     mock_publish.assert_called_once()
 
