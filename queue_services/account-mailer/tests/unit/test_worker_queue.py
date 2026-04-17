@@ -611,7 +611,7 @@ def test_unaffiliated_email_invitation(app, session, client):
             "businessIdentifier": "CP1234567",
             "token": "ABC123",
             "contextUrl": context_url,
-            "expiryDate": datetime(2026, 4, 16).isoformat()
+            "expiryDate": "2026-04-16 00:00:00"
         }
         helper_add_event_to_queue(
             client,
@@ -640,7 +640,7 @@ def test_affiliation_confirmation_email(app, session, client):
             "businessIdentifier": "CP1234567",
             "token": "ABC123",
             "contextUrl": context_url,
-            "completionDate": datetime(2026, 4, 16).isoformat()
+            "completionDate": "2026-04-16 00:00:00"
         }
         helper_add_event_to_queue(
             client,
