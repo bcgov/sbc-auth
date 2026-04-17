@@ -18,12 +18,15 @@ Test suite to ensure that the Affiliation service routines are working as expect
 
 from unittest import mock
 from unittest.mock import ANY, patch
+from freezegun import freeze_time
+from datetime import datetime
 
 import pytest
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation as AffiliationModel
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.org import Org as OrgModel
@@ -314,6 +317,38 @@ def test_create_affiliation_firms_party_not_valid(session, auth_mock, monkeypatc
         AffiliationService.create_affiliation(org_id, business_identifier, "test user")
 
     assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
+
+@mock.patch('auth_api.services.affiliation.publish_to_mailer')
+@freeze_time("2026-04-17 11:12:13+00:00")
+def test_create_affiliation_sends_confirmation_email(mock_publish, session, auth_mock, monkeypatch):
+    """Assert that creating an affiliation sends a confirmation email."""
+    entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
+    business_identifier = entity_service.business_identifier
+
+    user = factory_user_model_with_contact()
+    contact = user.contacts[0].contact
+    org_service = factory_org_service()
+    org_id = org_service.as_dict()['id']
+
+    contact_link = ContactLinkModel(org_id=org_id, contact_id=contact.id)
+    contact_link.save()
+
+    affiliation = AffiliationService.create_affiliation(
+        org_id, business_identifier, TestEntityInfo.entity_lear_mock["passCode"]
+    )
+
+    print(affiliation.as_dict())
+
+    assert affiliation
+    mock_publish.assert_called_once()
+
+    call_args = mock_publish.call_args
+    data = call_args[1]['data']
+    assert call_args[1]['notification_type'] == 'bc.registry.auth.affiliationInvitationConfirmationEmail'
+    assert data['businessName'] == entity_service.name
+    assert data['emailAddresses'] == contact.email
+    assert data['businessIdentifier'] == business_identifier
+    assert data['completionDate'].replace(microsecond=0) == datetime.fromisoformat(affiliation.as_dict()['created']).replace(tzinfo=None)
 
 
 def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disable=unused-argument
