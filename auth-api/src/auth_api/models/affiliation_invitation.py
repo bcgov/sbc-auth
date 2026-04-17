@@ -70,20 +70,25 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     def expires_on(self):
         """Calculate the expiry date based on the config value."""
         if self.invitation_status_code == InvitationStatuses.PENDING.value:
-            return self.sent_date + timedelta(minutes=self._get_expiry_minutes())
+            expiry_minutes = self._get_expiry_minutes()
+            expiry_datetime = self.sent_date + timedelta(minutes=expiry_minutes)
+
+            # set expiry to end of day if type is UNAFFILIATED_EMAIL
+            if self.type == AffiliationInvitationTypeEnum.UNAFFILIATED_EMAIL.value:
+                return expiry_datetime.replace(hour=23, minute=59, second=59)
+
+            return expiry_datetime
         return None
 
     @hybrid_property
     def status(self):
         """Calculate the status based on the config value."""
-        current_time = datetime.now()
         # if type is REQUEST do not expire (only cancel through todo)
         if self.type == AffiliationInvitationTypeEnum.REQUEST.value:
             return self.invitation_status_code
 
         if self.invitation_status_code == InvitationStatuses.PENDING.value:
-            expiry_time = self.sent_date + timedelta(minutes=self._get_expiry_minutes())
-            if current_time >= expiry_time:
+            if self.expires_on and datetime.now() >= self.expires_on:
                 return InvitationStatuses.EXPIRED.value
         return self.invitation_status_code
 
