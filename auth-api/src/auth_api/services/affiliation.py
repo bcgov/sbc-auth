@@ -28,7 +28,7 @@ from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.affiliation_invitation import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models.contact_link import ContactLink
-from auth_api.models.dataclass import Activity, AffiliationBase, AffiliationSearchDetails, DeleteAffiliationRequest
+from auth_api.models.dataclass import Activity, AffiliationBase, AffiliationSearchDetails, DeleteAffiliationRequest, ConfirmationEmailData
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
@@ -41,6 +41,8 @@ from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRName
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import AFFILIATION_ALLOWED_ROLES, ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
+from auth_api.utils.account_mailer import publish_to_mailer
+from auth_api.utils.enums import QueueMessageType
 
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
@@ -192,6 +194,27 @@ class Affiliation:
             name = entity.name if len(entity.name) > 0 else entity.business_identifier
             ActivityLogPublisher.publish_activity(
                 Activity(org_id, ActivityAction.CREATE_AFFILIATION.value, name=name, id=entity.business_identifier)
+            )
+
+        email_address = None
+        contact_link = ContactLink.find_by_org_id(org_id)
+        if contact_link and contact_link.contact:
+            email_address = contact_link.contact.email
+
+        if email_address:
+            registry_home_url = current_app.config.get("REGISTRY_HOME_URL")
+            context_url = f"{registry_home_url}login"
+
+            mailer_data = ConfirmationEmailData(
+                business_name=entity.name,
+                email_addresses=email_address,
+                business_identifier=entity.business_identifier,
+                context_url=context_url,
+                completion_date=affiliation.created
+            )
+            publish_to_mailer(
+                notification_type=QueueMessageType.AFFILIATION_INVITATION_CONFIRMATION_EMAIL.value,
+                data=mailer_data.to_dict(),
             )
 
         return Affiliation(affiliation)

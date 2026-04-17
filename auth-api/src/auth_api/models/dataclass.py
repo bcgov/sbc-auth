@@ -219,6 +219,17 @@ class UnaffiliatedEmailInvitationData(Serializable):
     business_identifier: str
     token: str
     context_url: str
+    expiry_date: str
+
+@dataclass
+class ConfirmationEmailData(Serializable):
+    """Data for sending an affiliation confirmation email to the mailer queue."""
+
+    business_name: str
+    email_addresses: str
+    business_identifier: str
+    context_url: str
+    completion_date: str
 
 
 @dataclass
