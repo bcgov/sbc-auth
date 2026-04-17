@@ -28,7 +28,13 @@ from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.affiliation_invitation import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models.contact_link import ContactLink
-from auth_api.models.dataclass import Activity, AffiliationBase, AffiliationSearchDetails, DeleteAffiliationRequest, ConfirmationEmailData
+from auth_api.models.dataclass import (
+    Activity,
+    AffiliationBase,
+    AffiliationSearchDetails,
+    ConfirmationEmailData,
+    DeleteAffiliationRequest,
+)
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
@@ -36,13 +42,12 @@ from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
+from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.auth_event_publisher import publish_affiliation_event
-from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus
+from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus, QueueMessageType
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import AFFILIATION_ALLOWED_ROLES, ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
-from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import QueueMessageType
 
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService

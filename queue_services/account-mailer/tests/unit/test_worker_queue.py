@@ -23,7 +23,7 @@ from google.cloud import storage
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 from account_mailer.enums import SubjectType
-from account_mailer.resources.worker import AFFILIATION_INVITATION_UNAFFILIATED_EMAIL, AFFILIATION_CONFIRMATION_EMAIL
+from account_mailer.resources.worker import AFFILIATION_CONFIRMATION_EMAIL, AFFILIATION_INVITATION_UNAFFILIATED_EMAIL
 from account_mailer.services import notification_service
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact

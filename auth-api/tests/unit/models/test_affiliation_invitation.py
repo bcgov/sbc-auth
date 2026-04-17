@@ -18,6 +18,7 @@ Test suite to ensure that the  model routines are working as expected.
 
 from _datetime import datetime, timedelta
 from uuid import uuid4
+
 from freezegun import freeze_time
 
 from auth_api.config import get_named_config

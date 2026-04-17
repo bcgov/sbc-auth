@@ -697,7 +697,7 @@ class AffiliationInvitation:
 
         expiry_date = affiliation_invitation.expires_on
         sent_date = affiliation_invitation.sent_date
-    
+
         if expiry_date:
             duration = expiry_date - sent_date
             token_valid_for = int(duration.total_seconds())
