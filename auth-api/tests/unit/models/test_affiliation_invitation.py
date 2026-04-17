@@ -18,6 +18,7 @@ Test suite to ensure that the  model routines are working as expected.
 
 from _datetime import datetime, timedelta
 from uuid import uuid4
+from freezegun import freeze_time
 
 from auth_api.config import get_named_config
 from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
@@ -464,3 +465,50 @@ def test_find_all_sent_to_org_affiliated_with_entity(session):
         AffiliationInvitationSearch(to_org_id="1", entity_id="1")
     )
     assert len(affiliation_invitations) == affiliation_invitation_count - 1
+
+
+@freeze_time("2026-04-21 14:30:00")
+def test_expires_on_property_standard_invitation(session):
+    """Assert expires_on for standard invitations matches exact minutes."""
+    invitation = factory_affiliation_invitation_model(
+        session=session,
+        status=InvitationStatus.PENDING.value
+    )
+    invitation.sent_date = datetime.now()
+
+    expiry_mins = int(get_named_config().AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS)
+    expected_expiry = datetime.now() + timedelta(minutes=expiry_mins)
+
+    assert invitation.expires_on == expected_expiry
+    assert invitation.expires_on.hour == expected_expiry.hour
+    assert invitation.expires_on.minute == expected_expiry.minute
+
+
+@freeze_time("2026-04-21 14:30:00")
+def test_expires_on_property_unaffiliated_type_invitation(session):
+    """Assert expires_on for UNAFFILIATED_EMAIL ends at 23:59:59 on the expiry date."""
+    invitation = factory_affiliation_invitation_model(
+        session=session,
+        status=InvitationStatus.PENDING.value,
+        invitation_type=AffiliationInvitationType.UNAFFILIATED_EMAIL.value
+    )
+    invitation.sent_date = datetime.now()
+
+    expiry_mins = int(get_named_config().UNAFFILIATED_EMAIL_TOKEN_EXPIRY_PERIOD_MINS)
+    expiry_date = datetime.now() + timedelta(minutes=expiry_mins)
+    expiry_date_eod = expiry_date.replace(hour=23, minute=59, second=59)
+
+    assert invitation.expires_on == expiry_date_eod
+    assert invitation.expires_on.hour == 23
+    assert invitation.expires_on.minute == 59
+    assert invitation.expires_on.second == 59
+
+
+def test_expires_on_property_returns_none_when_not_pending(session):
+    """Assert expires_on returns None if the invitation is already accepted/failed."""
+    invitation = factory_affiliation_invitation_model(
+        session=session,
+        status=InvitationStatus.ACCEPTED.value
+    )
+
+    assert invitation.expires_on is None

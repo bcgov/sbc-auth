@@ -1098,7 +1098,7 @@ def test_send_unaffiliated_email_invitation_mailer_data(
     """Verify UNAFFILIATED_EMAIL - data for email is correctly generated with context_url."""
     entity = create_test_entity()
 
-    invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
+    AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
 
     publish_to_mailer_mock.assert_called_once()
     call_kwargs = publish_to_mailer_mock.call_args
@@ -1112,13 +1112,8 @@ def test_send_unaffiliated_email_invitation_mailer_data(
     # NOTE: 'https://localhost.com' is the brd url and will contain a slash at the end in dev/test/prod
     assert data["contextUrl"].endswith("&return=https://localhost.comaffiliationInvitation/acceptToken")
     assert data["token"] == data["contextUrl"].split("token=")[1].split("&return=")[0]
-
     # sent date == 21/04/2026 12:00:00 with @freeze_time
-    token_valid_for = int(get_named_config().UNAFFILIATED_EMAIL_TOKEN_EXPIRY_PERIOD_MINS) * 60
-    expected_expiry = invitation.sent_date + timedelta(seconds=token_valid_for)
-    # should show the first full day before the sent date + the expiry period
-    expected_display = expected_expiry - timedelta(days=1)
-    assert data["expiryDate"] == expected_display
+    assert data["expiryDate"] == datetime(2026, 4, 28, 23, 59, 59) # April 28, 2026 11:59:59pm
 
 
 def test_validate_and_get_org_id():

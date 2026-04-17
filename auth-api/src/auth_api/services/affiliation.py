@@ -202,8 +202,8 @@ class Affiliation:
             email_address = contact_link.contact.email
 
         if email_address:
-            registry_home_url = current_app.config.get("REGISTRY_HOME_URL")
-            context_url = f"{registry_home_url}login"
+            bc_registry_home_url = current_app.config.get("BC_REGISTRY_HOME_URL")
+            context_url = f"{bc_registry_home_url}login"
 
             mailer_data = ConfirmationEmailData(
                 business_name=entity.name,

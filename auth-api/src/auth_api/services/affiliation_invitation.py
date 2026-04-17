@@ -14,7 +14,7 @@
 """Service for managing Affiliation Invitation data."""
 
 from dataclasses import fields
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from urllib.parse import urlencode
 
 from flask import current_app
