@@ -40,7 +40,7 @@ from account_mailer.services import google_store, notification_service
 from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
 
 AFFILIATION_INVITATION_UNAFFILIATED_EMAIL = "bc.registry.auth.affiliationInvitationUnaffiliatedEmail"
-AFFILIATION_CONFIRMATION_EMAIL = "bc.registry.auth.affiliationInvitationConfirmationEmail"
+AFFILIATION_CONFIRMATION_EMAIL = "bc.registry.auth.affiliationConfirmationEmail"
 
 bp = Blueprint("worker", __name__)
 

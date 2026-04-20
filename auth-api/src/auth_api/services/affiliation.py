@@ -218,7 +218,7 @@ class Affiliation:
                 completion_date=affiliation.created
             )
             publish_to_mailer(
-                notification_type=QueueMessageType.AFFILIATION_INVITATION_CONFIRMATION_EMAIL.value,
+                notification_type=QueueMessageType.AFFILIATION_CONFIRMATION_EMAIL.value,
                 data=mailer_data.to_dict(),
             )
 

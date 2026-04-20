@@ -392,7 +392,7 @@ class QueueMessageType(Enum):
     """Local queue message types not yet in sbc_common_components."""
 
     AFFILIATION_INVITATION_UNAFFILIATED_EMAIL = "bc.registry.auth.affiliationInvitationUnaffiliatedEmail"
-    AFFILIATION_INVITATION_CONFIRMATION_EMAIL = "bc.registry.auth.affiliationInvitationConfirmationEmail"
+    AFFILIATION_CONFIRMATION_EMAIL = "bc.registry.auth.affiliationConfirmationEmail"
 
 
 

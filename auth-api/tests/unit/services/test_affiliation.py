@@ -342,7 +342,7 @@ def test_create_affiliation_sends_confirmation_email(mock_publish, session, auth
 
     call_args = mock_publish.call_args
     data = call_args[1]["data"]
-    assert call_args[1]["notification_type"] == "bc.registry.auth.affiliationInvitationConfirmationEmail"
+    assert call_args[1]["notification_type"] == "bc.registry.auth.affiliationConfirmationEmail"
     assert data["businessName"] == entity_service.name
     assert data["emailAddresses"] == contact.email
     assert data["businessIdentifier"] == business_identifier
