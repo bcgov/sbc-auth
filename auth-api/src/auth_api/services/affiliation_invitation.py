@@ -695,8 +695,12 @@ class AffiliationInvitation:
         if affiliation_invitation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        if affiliation_invitation.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value:
-            token_valid_for = int(CONFIG.UNAFFILIATED_EMAIL_TOKEN_EXPIRY_PERIOD_MINS) * 60
+        expiry_date = affiliation_invitation.expires_on
+        sent_date = affiliation_invitation.sent_date
+
+        if expiry_date:
+            duration = expiry_date - sent_date
+            token_valid_for = int(duration.total_seconds())
         else:
             token_valid_for = (
                 int(CONFIG.AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS) * 60
@@ -886,7 +890,9 @@ class AffiliationInvitation:
             )
 
         registry_home_url = current_app.config.get("REGISTRY_HOME_URL")
-        context_url = f"{registry_home_url}?preset=bcscUser&token={confirmation_token}"
+        business_registry_url = current_app.config.get("BUSINESS_REGISTRY_URL")
+        context_url = f"{registry_home_url}?preset=bcscUser&token={confirmation_token}&return={business_registry_url}affiliationInvitation/acceptToken"
+        expiry_date = affiliation_invitation.expires_on
 
         mailer_data = UnaffiliatedEmailInvitationData(
             business_name=business_name,
@@ -894,6 +900,7 @@ class AffiliationInvitation:
             business_identifier=entity.business_identifier,
             token=confirmation_token,
             context_url=context_url,
+            expiry_date=expiry_date
         )
         publish_to_mailer(
             notification_type=QueueMessageType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,

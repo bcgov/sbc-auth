@@ -1090,6 +1090,7 @@ def test_unaffiliated_email_invitation_auth(
             assert result.as_dict()["status"] == InvitationStatus.ACCEPTED.value
 
 
+@freeze_time("2026-04-21 12:00:00")
 @patch.object(auth_api.services.affiliation_invitation, "publish_to_mailer")
 def test_send_unaffiliated_email_invitation_mailer_data(
     publish_to_mailer_mock, session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token
@@ -1108,7 +1109,11 @@ def test_send_unaffiliated_email_invitation_mailer_data(
     assert data["emailAddresses"] == "foo@bar.com"
     assert data["businessIdentifier"] == entity.as_dict()["business_identifier"]
     assert data["contextUrl"].startswith("https://localhost.com?preset=bcscUser&token=")
-    assert data["token"] == data["contextUrl"].split("token=")[1]
+    # NOTE: 'https://localhost.com' is the brd url and will contain a slash at the end in dev/test/prod
+    assert data["contextUrl"].endswith("&return=https://localhost.comaffiliationInvitation/acceptToken")
+    assert data["token"] == data["contextUrl"].split("token=")[1].split("&return=")[0]
+    # sent date == 21/04/2026 12:00:00 with @freeze_time
+    assert data["expiryDate"] == datetime(2026, 4, 28, 23, 59, 59) # April 28, 2026 11:59:59pm
 
 
 def test_validate_and_get_org_id():
