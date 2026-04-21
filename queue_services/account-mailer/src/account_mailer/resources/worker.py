@@ -57,6 +57,7 @@ def worker():
         if is_message_processed(event_message):
             current_app.logger.info("Event message already processed, skipping.")
             return {}, HTTPStatus.OK
+
         message_type, email_msg = event_message.type, event_message.data
         email_msg["logo_url"] = google_store.GoogleStoreService.get_static_resource_url("bc_logo_for_email.png")
 
