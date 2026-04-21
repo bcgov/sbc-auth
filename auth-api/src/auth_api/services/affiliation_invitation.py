@@ -597,6 +597,11 @@ class AffiliationInvitation:
         from_org_id = affiliation_invitation.from_org_id
         to_org_name = affiliation_invitation.to_org.name if affiliation_invitation.to_org else None
         business_identifier = affiliation_invitation.entity.business_identifier
+        user: UserService = UserService.find_by_jwt_token()
+        user_data = user.as_dict() if user else {}
+
+        user_first_name = user_data.get("firstname", "")
+        user_last_name = user_data.get("lastname", "Unknown Name")
 
         data = {
             "accountId": from_org_id,
@@ -605,6 +610,8 @@ class AffiliationInvitation:
             "orgName": from_org_name,
             "businessIdentifier": business_identifier,
             "expiryText": AffiliationInvitation._get_expiry_text(),
+            "userFirstName": user_first_name,
+            "userLastName": user_last_name,
         }
         notification_type = QueueMessageTypes.AFFILIATION_INVITATION.value
 
