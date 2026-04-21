@@ -846,6 +846,8 @@ def test_send_affiliation_invitation_request_sent(
         "toOrgBranchName": affiliation_invitation.to_org.branch_name,
         "additionalMessage": additional_message,
         "expiryText": "12 hours",
+        "userFirstName": "",
+        "userLastName": "Unknown Name",
     }
     notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value
     publish_to_mailer_mock.assert_called_with(notification_type=notification_type, data=expected_data)
@@ -894,6 +896,8 @@ def test_send_affiliation_invitation_request_authorized(
         "toOrgBranchName": affiliation_invitation.to_org.branch_name,
         "isAuthorized": True,
         "expiryText": "12 hours",
+        "userFirstName": "",
+        "userLastName": "Unknown Name",
     }
 
     notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value
@@ -945,6 +949,8 @@ def test_send_affiliation_invitation_request_refused(
         "toOrgBranchName": affiliation_invitation.to_org.branch_name,
         "isAuthorized": False,
         "expiryText": "12 hours",
+        "userFirstName": "",
+        "userLastName": "Unknown Name",
     }
 
     notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value
