@@ -124,6 +124,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     WEB_APP_URL = os.getenv("WEB_APP_URL", "localhost")
     WEB_APP_STATEMENT_PATH_URL = os.getenv("WEB_APP_STATEMENT_PATH_URL", "account/orgId/settings/statements")
     DASHBOARD_URL = os.getenv("DASHBOARD_URL", "localhost")
+    BUSINESS_REGISTRY_URL = os.getenv("BUSINESS_REGISTRY_URL", "localhost")
     # PAD TOS PDF file name.
     PAD_TOS_FILE = os.getenv("PAD_TOS_FILE", "BCROS-Business-Pre-Authorized-Debit-Agreement.pdf")
     # MHR QUALIFIED SUPPLIER PDF File name

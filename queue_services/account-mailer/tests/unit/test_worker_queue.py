@@ -603,12 +603,16 @@ def test_payment_due_notification_email(app, session, client):
 
 def test_affiliation_invitation_email(app, session, client):
     """Assert that the affiliation invitation sends the correct email content."""
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+
     with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         mail_details = {
-            "accountId": 1,
+            "accountId": org.id,
             "businessName": "Test Business",
             "emailAddresses": "test@example.com",
-            "orgName": "From Org",
+            "orgName": org.name,
             "businessIdentifier": "BC1234567",
             "expiryText": "12 hours",
             "userFirstName": "John",
@@ -631,6 +635,7 @@ def test_affiliation_invitation_email(app, session, client):
         assert "John Doe" in email_body
         assert "Test Business" in email_body
         assert "https://localhost.com/affiliationInvitation/acceptToken" in email_body
+        assert org.name in email_body
 
 
 def test_unaffiliated_email_invitation(app, session, client):
