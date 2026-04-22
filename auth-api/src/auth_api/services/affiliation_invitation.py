@@ -36,11 +36,14 @@ from auth_api.models.dataclass import (
     AffiliationInvitationData,
     AffiliationInvitationSearch,
     UnaffiliatedEmailInvitationData,
+    ConfirmationEmailData,
 )
 from auth_api.models.entity import Entity as EntityModel  # noqa: I001
 from auth_api.models.org import Org as OrgModel
+from auth_api.models.user import User as UserModel
 from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
+from auth_api.services.affiliation import Affiliation as AffiliationService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.services.flags import flags
@@ -760,8 +763,14 @@ class AffiliationInvitation:
             affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=None)
             affiliation_model.save()
             entity_model = EntityModel.find_by_entity_id(entity_id)
+
             if flags.is_on("enable-entity-mapping", default=False) is True:
                 EntityMappingService.populate_entity_mapping_for_identifier(entity_model.business_identifier)
+            if recipient_email := AffiliationInvitation.get_affiliation_confirmation_recipients(
+                affiliation_invitation, user
+            ):
+                AffiliationService.send_affiliation_confirmation_email(entity_model, affiliation_invitation, 
+                                                                       recipient_email)
 
         affiliation_invitation.affiliation_id = affiliation_model.id
         affiliation_invitation.approver_id = user.identifier
@@ -778,6 +787,24 @@ class AffiliationInvitation:
 
         current_app.logger.debug("<accept_affiliation_invitation")
         return AffiliationInvitation(affiliation_invitation)
+
+    @staticmethod
+    def get_affiliation_confirmation_recipients(
+        affiliation_invitation: AffiliationInvitationModel, user: UserService = None
+    ):
+        """Get the recipients of the affiliation confirmation email."""
+        user_model = None
+
+        # For email and request types, the sender will get the confirmation email when it has been accepted.
+        if affiliation_invitation.type in (
+            AffiliationInvitationType.EMAIL.value,
+            AffiliationInvitationType.REQUEST.value,
+        ):
+            user_model = UserModel.find_by_id(affiliation_invitation.sender_id)
+        # For unaffiliated email type, the current user is accepting the invitation..
+        elif affiliation_invitation.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value:
+            user_model = user._model
+        return user_model.email if user_model else None
 
     @classmethod
     def get_all_invitations_with_details_related_to_org(
@@ -890,8 +917,7 @@ class AffiliationInvitation:
             )
 
         registry_home_url = current_app.config.get("REGISTRY_HOME_URL")
-        business_registry_url = current_app.config.get("BUSINESS_REGISTRY_URL")
-        context_url = f"{registry_home_url}?preset=bcscUser&token={confirmation_token}&return={business_registry_url}affiliationInvitation/acceptToken"
+        context_url = f"{registry_home_url}?preset=bcscUser&token={confirmation_token}"
         expiry_date = affiliation_invitation.expires_on
 
         mailer_data = UnaffiliatedEmailInvitationData(
@@ -900,7 +926,7 @@ class AffiliationInvitation:
             business_identifier=entity.business_identifier,
             token=confirmation_token,
             context_url=context_url,
-            expiry_date=expiry_date
+            expiry_date=expiry_date,
         )
         publish_to_mailer(
             notification_type=QueueMessageType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
