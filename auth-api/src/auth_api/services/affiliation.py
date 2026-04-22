@@ -201,15 +201,21 @@ class Affiliation:
                 Activity(org_id, ActivityAction.CREATE_AFFILIATION.value, name=name, id=entity.business_identifier)
             )
 
-        # Only send if not a staff user and does't have SKIP_AFFILIATION_AUTH role
-        if not Affiliation.has_role_to_skip_auth():
-            user_context = UserService.find_by_jwt_token(silent_mode=True)
-            user_model = user_context._model if user_context else None
-            contact_email = user_model.contacts[0].contact.email if user_model and user_model.contacts else None
-            if contact_email:
-                Affiliation.send_affiliation_confirmation_email(entity, affiliation, contact_email)
+        Affiliation._handle_affiliation_confirmation_email(entity, affiliation)
 
         return Affiliation(affiliation)
+
+    @staticmethod
+    def _handle_affiliation_confirmation_email(entity: Entity, affiliation: AffiliationModel):
+        """Send affiliation confirmation email to the current user if applicable."""
+        # Only send if not a staff user and does't have SKIP_AFFILIATION_AUTH role
+        if Affiliation.has_role_to_skip_auth():
+            return
+        user_context = UserService.find_by_jwt_token(silent_mode=True)
+        user_model = user_context._model if user_context else None
+        contact_email = user_model.contacts[0].contact.email if user_model and user_model.contacts else None
+        if contact_email:
+            Affiliation.send_affiliation_confirmation_email(entity, affiliation, contact_email)
 
     @staticmethod
     def send_affiliation_confirmation_email(entity: Entity, affiliation: AffiliationModel, recipients):
