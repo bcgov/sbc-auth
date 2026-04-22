@@ -54,6 +54,7 @@ from tests.utilities.factory_utils import (
     factory_entity_model,
     factory_membership_model,
     factory_user_model,
+    factory_user_model_with_contact,
     patch_token_info,
 )
 
@@ -611,9 +612,10 @@ def test_validate_token_expiry(session, auth_mock, expired):  # pylint:disable=u
         assert result is not None
         assert result.as_dict()["id"] == invitation.id
 
-
+@patch.object(auth_api.services.affiliation, "publish_to_mailer")
 def test_accept_affiliation_invitation(
-    session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock, monkeypatch, mock_service_account_token
+        mock_publish, session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock,
+        monkeypatch, mock_service_account_token
 ):  # pylint:disable=unused-argument
     """Accept the affiliation invitation and add the affiliation from the invitation."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
@@ -634,12 +636,13 @@ def test_accept_affiliation_invitation(
 
             user_with_token_invitee = dict(TestUserInfo.user1)
             user_with_token_invitee["keycloak_guid"] = TestJwtClaims.edit_role_2["sub"]
-            user_invitee = factory_user_model(user_with_token_invitee)
+            # contact defaults using TestContactInfo.contact1 in factory method
+            user_invitee = factory_user_model_with_contact(user_with_token_invitee)
 
             new_invitation = AffiliationInvitationService.create_affiliation_invitation(
                 affiliation_invitation_info, User(user_invitee)
             ).as_dict()
-
+            
             invitation = AffiliationInvitationService.accept_affiliation_invitation(
                 new_invitation["id"], User(user_invitee), ""
             ).as_dict()
@@ -650,6 +653,15 @@ def test_accept_affiliation_invitation(
             assert affiliation
             assert invitation
             assert affiliation["id"] == invitation["affiliation_id"]
+
+            mock_publish.assert_called_once()
+            call_args = mock_publish.call_args
+            data = call_args[1]["data"]
+            assert call_args[1]["notification_type"] == "bc.registry.auth.affiliationConfirmationEmail"
+            assert data["businessName"] == entity_dictionary['name']
+            assert data["emailAddresses"] == TestContactInfo.contact1["email"]
+            assert data["businessIdentifier"] == entity_dictionary["business_identifier"]
+            assert data["completionDate"].replace(microsecond=0) == datetime.fromisoformat(affiliation["created"]).replace(tzinfo=None)
 
 
 def test_accept_invitation_exceptions(

@@ -34,7 +34,10 @@ from auth_api.services import ActivityLogPublisher
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.utils.enums import ActivityAction, OrgType
 from tests.conftest import mock_token
-from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgInfo, TestOrgTypeInfo, TestUserInfo
+from tests.utilities.factory_scenarios import (
+    TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, 
+    TestOrgTypeInfo, TestUserInfo,
+)
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
     factory_entity_service,
@@ -325,14 +328,14 @@ def test_create_affiliation_sends_confirmation_email(mock_publish, session, auth
     user_with_token = dict(TestUserInfo.user_bceid_tester)
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
+    # contact defaults using TestContactInfo.contact1 in factory method
     user = factory_user_model_with_contact(user_with_token)
 
     patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
     
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     business_identifier = entity_service.business_identifier
-
-    user = factory_user_model_with_contact()
+    
     org_service = factory_org_service()
     org_id = org_service.as_dict()["id"]
 
@@ -347,7 +350,7 @@ def test_create_affiliation_sends_confirmation_email(mock_publish, session, auth
     data = call_args[1]["data"]
     assert call_args[1]["notification_type"] == "bc.registry.auth.affiliationConfirmationEmail"
     assert data["businessName"] == entity_service.name
-    assert data["emailAddresses"] == user.email
+    assert data["emailAddresses"] == TestContactInfo.contact1["email"]
     assert data["businessIdentifier"] == business_identifier
     assert data["completionDate"].replace(microsecond=0) == datetime.fromisoformat(affiliation.as_dict()["created"]).replace(tzinfo=None)
 

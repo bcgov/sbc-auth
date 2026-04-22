@@ -206,9 +206,10 @@ class Affiliation:
         # Only send if not a staff user and does't have SKIP_AFFILIATION_AUTH role
         if not Affiliation.has_role_to_skip_auth():
             user_context = UserService.find_by_jwt_token(silent_mode=True)
-            email_address = user_context._model.email if user_context else None
-            if email_address:
-                Affiliation.send_affiliation_confirmation_email(entity, affiliation, email_address)
+            user_model = user_context._model if user_context else None
+            contact_email = user_model.contacts[0].contact.email if user_model and user_model.contacts else None
+            if contact_email:
+                Affiliation.send_affiliation_confirmation_email(entity, affiliation, contact_email)
 
         return Affiliation(affiliation)
 

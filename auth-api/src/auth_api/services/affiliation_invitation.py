@@ -794,7 +794,6 @@ class AffiliationInvitation:
     ):
         """Get the recipients of the affiliation confirmation email."""
         user_model = None
-
         # For email and request types, the sender will get the confirmation email when it has been accepted.
         if affiliation_invitation.type in (
             AffiliationInvitationType.EMAIL.value,
@@ -804,7 +803,10 @@ class AffiliationInvitation:
         # For unaffiliated email type, the current user is accepting the invitation..
         elif affiliation_invitation.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value:
             user_model = user._model
-        return user_model.email if user_model else None
+         
+        if user_model and user_model.contacts:
+            return user_model.contacts[0].contact.email
+        return None
 
     @classmethod
     def get_all_invitations_with_details_related_to_org(
