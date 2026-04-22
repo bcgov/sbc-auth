@@ -36,7 +36,6 @@ from auth_api.models.dataclass import (
     AffiliationInvitationData,
     AffiliationInvitationSearch,
     UnaffiliatedEmailInvitationData,
-    ConfirmationEmailData,
 )
 from auth_api.models.entity import Entity as EntityModel  # noqa: I001
 from auth_api.models.org import Org as OrgModel

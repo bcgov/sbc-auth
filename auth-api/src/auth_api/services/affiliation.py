@@ -158,14 +158,12 @@ class Affiliation:
         return Affiliation(affiliation).as_dict()
 
     @staticmethod
-    @user_context
     def create_affiliation(
         org_id,
         business_identifier,
         pass_code=None,
         certified_by_name=None,
         skip_membership_check=False,
-        **kwargs,
     ):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.

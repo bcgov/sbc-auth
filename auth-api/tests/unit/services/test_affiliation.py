@@ -25,7 +25,6 @@ from freezegun import freeze_time
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.models.dataclass import Affiliation as AffiliationData
@@ -334,7 +333,7 @@ def test_create_affiliation_sends_confirmation_email(mock_publish, session, auth
     user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
     user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
     # contact defaults using TestContactInfo.contact1 in factory method
-    user = factory_user_model_with_contact(user_with_token)
+    factory_user_model_with_contact(user_with_token)
 
     patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
 
