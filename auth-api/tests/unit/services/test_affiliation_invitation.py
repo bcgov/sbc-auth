@@ -786,6 +786,10 @@ def test_send_affiliation_invitation_magic_link(
     publish_to_mailer_mock, session, auth_mock, keycloak_mock, business_mock, monkeypatch
 ):
     """Verify Magic link data for email is correctly generated."""
+    user = factory_user_model(TestUserInfo.user_test)
+
+    patch_token_info({"sub": user.keycloak_guid, "idp_userid": user.idp_userid}, monkeypatch)
+
     affiliation_invitation = _setup_affiliation_invitation_data()
     business_name = "Busy Inc."
     affiliation_invitation.token = "ABCD"  # noqa: S105
@@ -805,6 +809,8 @@ def test_send_affiliation_invitation_magic_link(
         "contextUrl": "https://localhost.com//affiliationInvitation/acceptToken"
         "?token=ABCD&orgName=RnJvbSB0aGUgbW9vbiBpbmMu",
         "expiryText": "12 hours",
+        "userFirstName": user.firstname,
+        "userLastName": user.lastname,
     }
 
     publish_to_mailer_mock.assert_called_with(
@@ -840,6 +846,8 @@ def test_send_affiliation_invitation_request_sent(
         "toOrgBranchName": affiliation_invitation.to_org.branch_name,
         "additionalMessage": additional_message,
         "expiryText": "12 hours",
+        "userFirstName": "",
+        "userLastName": "Unknown Name",
     }
     notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value
     publish_to_mailer_mock.assert_called_with(notification_type=notification_type, data=expected_data)
@@ -888,6 +896,8 @@ def test_send_affiliation_invitation_request_authorized(
         "toOrgBranchName": affiliation_invitation.to_org.branch_name,
         "isAuthorized": True,
         "expiryText": "12 hours",
+        "userFirstName": "",
+        "userLastName": "Unknown Name",
     }
 
     notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value
@@ -939,6 +949,8 @@ def test_send_affiliation_invitation_request_refused(
         "toOrgBranchName": affiliation_invitation.to_org.branch_name,
         "isAuthorized": False,
         "expiryText": "12 hours",
+        "userFirstName": "",
+        "userLastName": "Unknown Name",
     }
 
     notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value

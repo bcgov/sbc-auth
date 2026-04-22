@@ -17,7 +17,7 @@
 from flask import current_app
 from jinja2 import Template
 
-from account_mailer.auth_utils import get_dashboard_url, get_login_url, get_payment_statements_url
+from account_mailer.auth_utils import get_brd_url, get_dashboard_url, get_login_url, get_payment_statements_url
 from account_mailer.email_processors import generate_template
 from account_mailer.email_processors.utils import get_account_info
 
@@ -40,6 +40,7 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
         "logo_url": logo_url,
         "dashboard_url": get_dashboard_url(),
         "payment_statement_url": get_payment_statements_url(org_id),
+        "brd_url": get_brd_url(),
         **kwargs,
     }
     current_app.logger.debug("notification args: %s", jinja_kwargs)

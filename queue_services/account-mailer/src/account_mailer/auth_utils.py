@@ -59,3 +59,8 @@ def get_payment_statements_url(org_id: str) -> str:
     statement_path_url = web_app_url + web_app_statement_path_url
 
     return statement_path_url
+
+def get_brd_url():
+    """Get business registry dashboard url."""
+    brd_url = current_app.config.get("BUSINESS_REGISTRY_URL")
+    return brd_url
