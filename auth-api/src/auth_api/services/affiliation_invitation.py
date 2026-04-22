@@ -769,8 +769,9 @@ class AffiliationInvitation:
             if recipient_email := AffiliationInvitation.get_affiliation_confirmation_recipients(
                 affiliation_invitation, user
             ):
-                AffiliationService.send_affiliation_confirmation_email(entity_model, affiliation_invitation, 
-                                                                       recipient_email)
+                AffiliationService.send_affiliation_confirmation_email(
+                    entity_model, affiliation_invitation, recipient_email
+                )
 
         affiliation_invitation.affiliation_id = affiliation_model.id
         affiliation_invitation.approver_id = user.identifier
@@ -803,7 +804,7 @@ class AffiliationInvitation:
         # For unaffiliated email type, the current user is accepting the invitation..
         elif affiliation_invitation.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value:
             user_model = user._model
-         
+
         if user_model and user_model.contacts:
             return user_model.contacts[0].contact.email
         return None

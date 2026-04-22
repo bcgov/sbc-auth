@@ -35,8 +35,12 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.utils.enums import ActivityAction, OrgType
 from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import (
-    TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, 
-    TestOrgTypeInfo, TestUserInfo,
+    TestContactInfo,
+    TestEntityInfo,
+    TestJwtClaims,
+    TestOrgInfo,
+    TestOrgTypeInfo,
+    TestUserInfo,
 )
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
@@ -321,6 +325,7 @@ def test_create_affiliation_firms_party_not_valid(session, auth_mock, monkeypatc
 
     assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
 
+
 @mock.patch("auth_api.services.affiliation.publish_to_mailer")
 @freeze_time("2026-04-17 11:12:13+00:00")
 def test_create_affiliation_sends_confirmation_email(mock_publish, session, auth_mock, monkeypatch):
@@ -332,10 +337,10 @@ def test_create_affiliation_sends_confirmation_email(mock_publish, session, auth
     user = factory_user_model_with_contact(user_with_token)
 
     patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
-    
+
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     business_identifier = entity_service.business_identifier
-    
+
     org_service = factory_org_service()
     org_id = org_service.as_dict()["id"]
 
@@ -352,7 +357,9 @@ def test_create_affiliation_sends_confirmation_email(mock_publish, session, auth
     assert data["businessName"] == entity_service.name
     assert data["emailAddresses"] == TestContactInfo.contact1["email"]
     assert data["businessIdentifier"] == business_identifier
-    assert data["completionDate"].replace(microsecond=0) == datetime.fromisoformat(affiliation.as_dict()["created"]).replace(tzinfo=None)
+    assert data["completionDate"].replace(microsecond=0) == datetime.fromisoformat(
+        affiliation.as_dict()["created"]
+    ).replace(tzinfo=None)
 
 
 def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disable=unused-argument

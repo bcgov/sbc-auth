@@ -612,10 +612,17 @@ def test_validate_token_expiry(session, auth_mock, expired):  # pylint:disable=u
         assert result is not None
         assert result.as_dict()["id"] == invitation.id
 
+
 @patch.object(auth_api.services.affiliation, "publish_to_mailer")
 def test_accept_affiliation_invitation(
-        mock_publish, session, auth_mock, keycloak_mock, business_mock, entity_mapping_mock,
-        monkeypatch, mock_service_account_token
+    mock_publish,
+    session,
+    auth_mock,
+    keycloak_mock,
+    business_mock,
+    entity_mapping_mock,
+    monkeypatch,
+    mock_service_account_token,
 ):  # pylint:disable=unused-argument
     """Accept the affiliation invitation and add the affiliation from the invitation."""
     with patch.object(AffiliationInvitationService, "send_affiliation_invitation", return_value=None):
@@ -642,7 +649,7 @@ def test_accept_affiliation_invitation(
             new_invitation = AffiliationInvitationService.create_affiliation_invitation(
                 affiliation_invitation_info, User(user_invitee)
             ).as_dict()
-            
+
             invitation = AffiliationInvitationService.accept_affiliation_invitation(
                 new_invitation["id"], User(user_invitee), ""
             ).as_dict()
@@ -658,10 +665,12 @@ def test_accept_affiliation_invitation(
             call_args = mock_publish.call_args
             data = call_args[1]["data"]
             assert call_args[1]["notification_type"] == "bc.registry.auth.affiliationConfirmationEmail"
-            assert data["businessName"] == entity_dictionary['name']
+            assert data["businessName"] == entity_dictionary["name"]
             assert data["emailAddresses"] == TestContactInfo.contact1["email"]
             assert data["businessIdentifier"] == entity_dictionary["business_identifier"]
-            assert data["completionDate"].replace(microsecond=0) == datetime.fromisoformat(affiliation["created"]).replace(tzinfo=None)
+            assert data["completionDate"].replace(microsecond=0) == datetime.fromisoformat(
+                affiliation["created"]
+            ).replace(tzinfo=None)
 
 
 def test_accept_invitation_exceptions(
@@ -1123,7 +1132,7 @@ def test_send_unaffiliated_email_invitation_mailer_data(
     assert data["contextUrl"].startswith("https://localhost.com?preset=bcscUser&token=")
     assert data["token"] == data["contextUrl"].split("token=")[1]
     # sent date == 21/04/2026 12:00:00 with @freeze_time
-    assert data["expiryDate"] == datetime(2026, 4, 28, 23, 59, 59) # April 28, 2026 11:59:59pm
+    assert data["expiryDate"] == datetime(2026, 4, 28, 23, 59, 59)  # April 28, 2026 11:59:59pm
 
 
 def test_validate_and_get_org_id():
