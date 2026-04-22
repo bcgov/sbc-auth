@@ -1109,9 +1109,7 @@ def test_send_unaffiliated_email_invitation_mailer_data(
     assert data["emailAddresses"] == "foo@bar.com"
     assert data["businessIdentifier"] == entity.as_dict()["business_identifier"]
     assert data["contextUrl"].startswith("https://localhost.com?preset=bcscUser&token=")
-    # NOTE: 'https://localhost.com' is the brd url and will contain a slash at the end in dev/test/prod
-    assert data["contextUrl"].endswith("&return=https://localhost.comaffiliationInvitation/acceptToken")
-    assert data["token"] == data["contextUrl"].split("token=")[1].split("&return=")[0]
+    assert data["token"] == data["contextUrl"].split("token=")[1]
     # sent date == 21/04/2026 12:00:00 with @freeze_time
     assert data["expiryDate"] == datetime(2026, 4, 28, 23, 59, 59) # April 28, 2026 11:59:59pm
 
