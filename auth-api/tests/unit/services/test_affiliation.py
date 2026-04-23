@@ -25,7 +25,6 @@ from freezegun import freeze_time
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.dataclass import Activity, DeleteAffiliationRequest
 from auth_api.models.dataclass import Affiliation as AffiliationData
@@ -34,7 +33,14 @@ from auth_api.services import ActivityLogPublisher
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.utils.enums import ActivityAction, OrgType
 from tests.conftest import mock_token
-from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgInfo, TestOrgTypeInfo, TestUserInfo
+from tests.utilities.factory_scenarios import (
+    TestContactInfo,
+    TestEntityInfo,
+    TestJwtClaims,
+    TestOrgInfo,
+    TestOrgTypeInfo,
+    TestUserInfo,
+)
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
     factory_entity_service,
@@ -318,20 +324,24 @@ def test_create_affiliation_firms_party_not_valid(session, auth_mock, monkeypatc
 
     assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
 
+
 @mock.patch("auth_api.services.affiliation.publish_to_mailer")
 @freeze_time("2026-04-17 11:12:13+00:00")
 def test_create_affiliation_sends_confirmation_email(mock_publish, session, auth_mock, monkeypatch):
     """Assert that creating an affiliation sends a confirmation email."""
+    user_with_token = dict(TestUserInfo.user_bceid_tester)
+    user_with_token["keycloak_guid"] = TestJwtClaims.public_bceid_user["sub"]
+    user_with_token["idp_userid"] = TestJwtClaims.public_bceid_user["idp_userid"]
+    # contact defaults using TestContactInfo.contact1 in factory method
+    factory_user_model_with_contact(user_with_token)
+
+    patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
+
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     business_identifier = entity_service.business_identifier
 
-    user = factory_user_model_with_contact()
-    contact = user.contacts[0].contact
     org_service = factory_org_service()
     org_id = org_service.as_dict()["id"]
-
-    contact_link = ContactLinkModel(org_id=org_id, contact_id=contact.id)
-    contact_link.save()
 
     affiliation = AffiliationService.create_affiliation(
         org_id, business_identifier, TestEntityInfo.entity_lear_mock["passCode"]
@@ -344,9 +354,11 @@ def test_create_affiliation_sends_confirmation_email(mock_publish, session, auth
     data = call_args[1]["data"]
     assert call_args[1]["notification_type"] == "bc.registry.auth.affiliationConfirmationEmail"
     assert data["businessName"] == entity_service.name
-    assert data["emailAddresses"] == contact.email
+    assert data["emailAddresses"] == TestContactInfo.contact1["email"]
     assert data["businessIdentifier"] == business_identifier
-    assert data["completionDate"].replace(microsecond=0) == datetime.fromisoformat(affiliation.as_dict()["created"]).replace(tzinfo=None)
+    assert data["completionDate"].replace(microsecond=0) == datetime.fromisoformat(
+        affiliation.as_dict()["created"]
+    ).replace(tzinfo=None)
 
 
 def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disable=unused-argument

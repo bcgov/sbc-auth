@@ -201,28 +201,38 @@ class Affiliation:
                 Activity(org_id, ActivityAction.CREATE_AFFILIATION.value, name=name, id=entity.business_identifier)
             )
 
-        email_address = None
-        contact_link = ContactLink.find_by_org_id(org_id)
-        if contact_link and contact_link.contact:
-            email_address = contact_link.contact.email
-
-        if email_address:
-            bc_registry_home_url = current_app.config.get("BC_REGISTRY_HOME_URL")
-            context_url = f"{bc_registry_home_url}login"
-
-            mailer_data = ConfirmationEmailData(
-                business_name=entity.name,
-                email_addresses=email_address,
-                business_identifier=entity.business_identifier,
-                context_url=context_url,
-                completion_date=affiliation.created
-            )
-            publish_to_mailer(
-                notification_type=QueueMessageType.AFFILIATION_CONFIRMATION_EMAIL.value,
-                data=mailer_data.to_dict(),
-            )
+        Affiliation._handle_affiliation_confirmation_email(entity, affiliation)
 
         return Affiliation(affiliation)
+
+    @staticmethod
+    def _handle_affiliation_confirmation_email(entity: Entity, affiliation: AffiliationModel):
+        """Send affiliation confirmation email to the current user if applicable."""
+        # Only send if not a staff user and does't have SKIP_AFFILIATION_AUTH role
+        if Affiliation.has_role_to_skip_auth():
+            return
+        user_context = UserService.find_by_jwt_token(silent_mode=True)
+        user_model = user_context._model if user_context else None
+        contact_email = user_model.contacts[0].contact.email if user_model and user_model.contacts else None
+        if contact_email:
+            Affiliation.send_affiliation_confirmation_email(entity, affiliation, contact_email)
+
+    @staticmethod
+    def send_affiliation_confirmation_email(entity: Entity, affiliation: AffiliationModel, recipients):
+        """Send confirmation email to the user."""
+        bc_registry_home_url = current_app.config.get("BC_REGISTRY_HOME_URL")
+        context_url = f"{bc_registry_home_url}login"
+        mailer_data = ConfirmationEmailData(
+            business_name=entity.name,
+            email_addresses=recipients,
+            business_identifier=entity.business_identifier,
+            context_url=context_url,
+            completion_date=affiliation.created,
+        )
+        publish_to_mailer(
+            notification_type=QueueMessageType.AFFILIATION_CONFIRMATION_EMAIL.value,
+            data=mailer_data.to_dict(),
+        )
 
     @staticmethod
     def is_authorized(entity: Entity, pass_code: str) -> bool:

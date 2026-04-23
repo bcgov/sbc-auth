@@ -25,6 +25,7 @@ from auth_api.utils.enums import QueueSources
 
 def publish_to_mailer(notification_type, data=None, source=QueueSources.AUTH_API.value):
     """Publish to Account Mailer."""
+    current_app.logger.debug(">publish_to_mailer")
     cloud_event = SimpleCloudEvent(
         id=str(uuid.uuid4()),
         source=source,
@@ -38,3 +39,4 @@ def publish_to_mailer(notification_type, data=None, source=QueueSources.AUTH_API
     except Exception as e:  # NOQA # pylint: disable=broad-except
         error_msg = f"Failed to publish to mailer {e}"
         current_app.logger.error(error_msg)
+    current_app.logger.debug("<publish_to_mailer")
