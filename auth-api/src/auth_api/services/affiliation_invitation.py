@@ -793,6 +793,7 @@ class AffiliationInvitation:
         affiliation_invitation: AffiliationInvitationModel, user: UserService = None
     ):
         """Get the recipients of the affiliation confirmation email."""
+        current_app.logger.debug("<get_affiliation_confirmation_recipients")
         user_model = None
         # For email and request types, the sender will get the confirmation email when it has been accepted.
         if affiliation_invitation.type in (
@@ -806,6 +807,8 @@ class AffiliationInvitation:
 
         if user_model and user_model.contacts:
             return user_model.contacts[0].contact.email
+
+        current_app.logger.debug(">get_affiliation_confirmation_recipients - has no recipients")
         return None
 
     @classmethod
