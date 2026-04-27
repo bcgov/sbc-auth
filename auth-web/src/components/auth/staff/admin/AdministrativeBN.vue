@@ -317,6 +317,7 @@ export default class AdministrativeBN extends Vue {
   }]
 
   private async mounted () {
+    this.closePdfDialog() // prevent displaying information for the previously loaded business
     const identifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
     if (identifier) {
       this.businessIdentifier = identifier
@@ -345,6 +346,7 @@ export default class AdministrativeBN extends Vue {
   }
 
   resetSearch () {
+    this.closePdfDialog() // prevent displaying information for the previously loaded business
     this.businessDetails = null
     this.searchedBusinessIdentifier = null
     this.businessIdentifier = null
