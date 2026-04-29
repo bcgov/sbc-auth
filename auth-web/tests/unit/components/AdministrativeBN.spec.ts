@@ -85,4 +85,26 @@ describe('Search Business Form: Result', () => {
     await promise
     expect(wrapper.vm.downloadActive).toBe(false)
   })
+
+  it('clears business summary pdf data when searching a new business', async () => {
+    // mock the window.URL.revokeObjectURL function
+    delete window.URL.revokeObjectURL
+    window.location = { pathname: vi.fn() } as any
+    window.URL.revokeObjectURL = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 50)))
+
+    wrapper.setData({
+      businessDetails: {
+        legalName: 'Business Name',
+        identifier: 'FM1234567',
+        taxId: '123456789BC0001'
+      },
+      pdfDialog: true,
+      pdfUrl: 'fake'
+    })
+    await flushPromises()
+
+    await wrapper.vm.resetSearch()
+    expect(wrapper.vm.pdfDialog).toBe(false)
+    expect(wrapper.vm.pdfUrl).toBe('')
+  })
 })
