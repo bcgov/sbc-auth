@@ -207,6 +207,15 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 notification_type_for_mailer = QueueMessageTypes.MEMBERSHIP_APPROVED_NOTIFICATION.value
 
             data = {"accountId": org_id, "emailAddresses": recipient, "contextUrl": app_url, "orgName": org_name}
+        elif notification_type == NotificationType.MEMBERSHIP_REJECTED.value:
+            notification_type_for_mailer = QueueMessageTypes.NON_BCSC_ORG_REJECTED_NOTIFICATION.value
+            data = {
+                "accountId": org_id,
+                "emailAddresses": recipient,
+                "contextUrl": app_url,
+                "orgName": org_name,
+                "loginSource": self._model.user.login_source,
+            }
         else:
             data = {"accountId": org_id}
 

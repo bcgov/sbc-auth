@@ -591,9 +591,11 @@ def patch_organization_member(org_id, membership_id):  # noqa: ARG001
                 HTTPStatus.OK,
             )
 
-            # if user status changed to active , mail the user
+            # if user status changed to active/rejected, mail the user
             if membership_status == Status.ACTIVE.name:
                 membership.send_notification_to_member(origin, NotificationType.MEMBERSHIP_APPROVED.value)
+            elif membership_status == Status.REJECTED.name:
+                membership.send_notification_to_member(origin, NotificationType.MEMBERSHIP_REJECTED.value)
             elif notify_user and updated_role and updated_role.code != USER and not is_own_membership:
                 membership.send_notification_to_member(origin, NotificationType.ROLE_CHANGED.value)
 

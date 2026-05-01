@@ -31,7 +31,7 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import ActivityAction, OrgStatus, ProductCode, Status
+from auth_api.utils.enums import ActivityAction, NotificationType, OrgStatus, ProductCode, Status
 from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
@@ -39,6 +39,7 @@ from tests.utilities.factory_utils import (
     factory_org_model,
     factory_product_model,
     factory_user_model,
+    factory_user_model_with_contact,
     keycloak_add_user,
     keycloak_get_user_by_username,
 )
@@ -212,3 +213,27 @@ def test_has_nsf_or_suspended_membership_returns_false(session, monkeypatch):
     result = MembershipService.has_nsf_or_suspended_membership(user_id=user_id)
 
     assert result is False
+
+
+@patch.object(auth_api.services.membership, "publish_to_mailer")
+def test_send_notification_to_member_rejected(publish_to_mailer_mock):
+    """Assert membership rejection sends rejected notification."""
+    user = factory_user_model_with_contact(TestUserInfo.user_bceid_tester)
+    org = factory_org_model()
+    membership_model = factory_membership_model(user_id=user.id, org_id=org.id, member_type="USER", member_status=4)
+
+    MembershipService(membership_model).send_notification_to_member(
+        "https://auth-web.dev", NotificationType.MEMBERSHIP_REJECTED.value
+    )
+
+    expected_data = {
+        "accountId": org.id,
+        "emailAddresses": user.contacts[0].contact.email,
+        "contextUrl": "https://auth-web.dev/",
+        "orgName": org.name,
+        "loginSource": "BCEID",
+    }
+    publish_to_mailer_mock.assert_called_once_with(
+        QueueMessageTypes.NON_BCSC_ORG_REJECTED_NOTIFICATION.value,
+        data=expected_data,
+    )
