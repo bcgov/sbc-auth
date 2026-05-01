@@ -18,6 +18,7 @@ Test suite to ensure that the Membership service routines are working as expecte
 
 from unittest import mock
 from unittest.mock import ANY, patch
+from uuid import uuid4
 
 from sbc_common_components.utils.enums import QueueMessageTypes
 
@@ -218,7 +219,12 @@ def test_has_nsf_or_suspended_membership_returns_false(session, monkeypatch):
 @patch.object(auth_api.services.membership, "publish_to_mailer")
 def test_send_notification_to_member_rejected(publish_to_mailer_mock):
     """Assert membership rejection sends rejected notification."""
-    user = factory_user_model_with_contact(TestUserInfo.user_bceid_tester)
+    user_info = {**TestUserInfo.user_bceid_tester}
+    unique_id = str(uuid4())
+    user_info["keycloak_guid"] = unique_id
+    user_info["idp_userid"] = unique_id
+    user_info["username"] = f"{unique_id[:8]}@bceid"
+    user = factory_user_model_with_contact(user_info)
     org = factory_org_model()
     membership_model = factory_membership_model(user_id=user.id, org_id=org.id, member_type="USER", member_status=4)
 
