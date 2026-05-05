@@ -19,6 +19,7 @@ Test suite to ensure that the Membership service routines are working as expecte
 from unittest import mock
 from unittest.mock import ANY, patch
 
+import pytest
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 import auth_api
@@ -216,24 +217,61 @@ def test_has_nsf_or_suspended_membership_returns_false(session, monkeypatch):
 
 
 @patch.object(auth_api.services.membership, "publish_to_mailer")
-def test_send_notification_to_member_rejected(publish_to_mailer_mock, session):  # pylint:disable=unused-argument
-    """Assert membership rejection sends rejected notification."""
+@pytest.mark.parametrize(
+    "notification_type,member_type,expected_queue,scenario",
+    [
+        (
+            NotificationType.MEMBERSHIP_APPROVED.value,
+            "USER",
+            QueueMessageTypes.MEMBERSHIP_APPROVED_NOTIFICATION.value,
+            "simple",
+        ),
+        (
+            NotificationType.MEMBERSHIP_REJECTED.value,
+            "USER",
+            QueueMessageTypes.MEMBERSHIP_REJECTED_NOTIFICATION.value,
+            "simple",
+        ),
+        (
+            NotificationType.ROLE_CHANGED.value,
+            "COORDINATOR",
+            QueueMessageTypes.ROLE_CHANGED_NOTIFICATION.value,
+            "role_changed",
+        ),
+    ],
+    ids=["approved", "rejected", "role_changed"],
+)
+def test_send_notification_to_member(  # pylint: disable=unused-argument
+    publish_to_mailer_mock,
+    session,
+    notification_type,
+    member_type,
+    expected_queue,
+    scenario,
+):
+    """Cover queue payload for each branch of send_notification_to_member."""
     user = factory_user_model_with_contact(TestUserInfo.user_bceid_tester)
     org = factory_org_model()
-    membership_model = factory_membership_model(user_id=user.id, org_id=org.id, member_type="USER", member_status=4)
-
-    MembershipService(membership_model).send_notification_to_member(
-        "https://auth-web.dev", NotificationType.MEMBERSHIP_REJECTED.value
+    membership_model = factory_membership_model(
+        user_id=user.id, org_id=org.id, member_type=member_type, member_status=4
     )
 
-    expected_data = {
+    MembershipService(membership_model).send_notification_to_member("https://auth-web.dev", notification_type)
+
+    simple_payload = {
         "accountId": org.id,
         "emailAddresses": user.contacts[0].contact.email,
         "contextUrl": "https://auth-web.dev/",
         "orgName": org.name,
-        "loginSource": "BCEID",
     }
-    publish_to_mailer_mock.assert_called_once_with(
-        QueueMessageTypes.NON_BCSC_ORG_REJECTED_NOTIFICATION.value,
-        data=expected_data,
-    )
+    if scenario == "role_changed":
+        expected_data = {
+            **simple_payload,
+            "role": membership_model.membership_type.code,
+            "label": membership_model.membership_type.label,
+            "loginSource": user.login_source,
+        }
+    else:
+        expected_data = simple_payload
+
+    publish_to_mailer_mock.assert_called_once_with(expected_queue, data=expected_data)

@@ -46,10 +46,8 @@ class SubjectType(Enum):
         "[BC Registries and Online Services] You’ve been invited to create a BC Registries account"
     )
     GOVM_MEMBER_INVITATION = "[BC Registries and Online Services] You have been added as a team member"
-    MEMBERSHIP_APPROVED_NOTIFICATION = "Welcome to BC Registries and Online Services"
-    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = (
-        "Welcome to BC Registries and Online Services"
-    )
+    MEMBERSHIP_APPROVED_NOTIFICATION = "Team member access approved"
+    MEMBERSHIP_REJECTED_NOTIFICATION = "Team member access rejected"
     NON_BCSC_ORG_APPROVED_NOTIFICATION = "Welcome to BC Registries and Online Services"
     NON_BCSC_ORG_REJECTED_NOTIFICATION = (
         "Account Creation Declined"
@@ -107,8 +105,8 @@ class TitleType(Enum):
     DIRSEARCH_BUSINESS_INVITATION = "Invitation to Join an Account at Business Registry"
     GOVM_BUSINESS_INVITATION = "Invitation to Join an Account at Business Registry"
     GOVM_MEMBER_INVITATION = "Invitation to Join an Account at Business Registry"
-    MEMBERSHIP_APPROVED_NOTIFICATION = "Your BC Registries and Online Services account has been approved."
-    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = "Your BC Registries and Online Services account has been approved."
+    MEMBERSHIP_REJECTED_NOTIFICATION = "Your Team Member Request to the account has been rejected."
+    MEMBERSHIP_APPROVED_NOTIFICATION = "Your Team Member Request to the account has been approved."
     NON_BCSC_ORG_APPROVED_NOTIFICATION = "Your BC Registries and Online Services account has been approved."
     NON_BCSC_ORG_REJECTED_NOTIFICATION = "Your BC Registries and Online Services account has been declined."
     ACCOUNT_CREATED_NOTIFICATION = "Your BC Registries and Online Services account has been approved"
@@ -152,7 +150,7 @@ class TemplateType(Enum):
     GOVM_BUSINESS_INVITATION_TEMPLATE_NAME = "govm_business_invitation_email"
     GOVM_MEMBER_INVITATION_TEMPLATE_NAME = "govm_member_invitation_email"
     MEMBERSHIP_APPROVED_NOTIFICATION_TEMPLATE_NAME = "membership_approved_notification_email"
-    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID_TEMPLATE_NAME = "membership_approved_notification_email_for_bceid"
+    MEMBERSHIP_REJECTED_NOTIFICATION_TEMPLATE_NAME = "membership_rejected_notification_email"
     NON_BCSC_ORG_APPROVED_NOTIFICATION_TEMPLATE_NAME = "nonbcsc_org_approved_notification_email"
     NON_BCSC_ORG_REJECTED_NOTIFICATION_TEMPLATE_NAME = "nonbcsc_org_rejected_notification_email"
     ACCOUNT_CREATED_NOTIFICATION_TEMPLATE_NAME = "account_created_notification"
