@@ -634,6 +634,7 @@ class AffiliationInvitation:
             data["fromOrgBranchName"] = affiliation_invitation.from_org.branch_name
             data["toOrgName"] = to_org_name
             data["toOrgBranchName"] = affiliation_invitation.to_org.branch_name
+            data["toOrgId"] = affiliation_invitation.to_org_id
 
             if is_authorized is not None:
                 notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value

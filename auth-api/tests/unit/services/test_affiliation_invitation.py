@@ -869,6 +869,7 @@ def test_send_affiliation_invitation_request_sent(
         "expiryText": "12 hours",
         "userFirstName": "",
         "userLastName": "Unknown Name",
+        "toOrgId": affiliation_invitation.to_org.id
     }
     notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value
     publish_to_mailer_mock.assert_called_with(notification_type=notification_type, data=expected_data)
