@@ -638,6 +638,49 @@ def test_affiliation_invitation_email(app, session, client):
         assert org.name in email_body
 
 
+def test_affiliation_invitation_email_request(app, session, client):
+    """Assert that the affiliation invitation request sends the correct email content."""
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+
+    identifier = "BC1234567"
+    name = "Test Business"
+    to_org_id = 123
+    message_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value
+    subject = SubjectType[QueueMessageTypes(message_type).name].value.format(business_name=name)
+
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        mail_details = {
+            "businessName": name,
+            "businessIdentifier": identifier,
+            "toOrgId": to_org_id,
+            "fromOrgName": "From Org",
+            "toOrgName": "To Org",
+            "emailAddresses": "test@example.com",
+            "isAuthorized": False,
+            "additionalMessage": "Some Additional Text",
+        }
+
+        helper_add_event_to_queue(
+            client,
+            QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value,
+            mail_details=mail_details,
+        )
+
+        mock_send.assert_called()
+        call_args = mock_send.call_args.args[0]
+        assert call_args.get("recipients") == "test@example.com"
+        assert call_args.get("content").get("subject") == subject
+
+        email_body = call_args.get("content").get("body")
+        assert "From Org" in email_body
+        assert "To Org" in email_body
+        assert "Test Business" in email_body
+        assert "Some Additional Text" in email_body
+        assert f"{identifier}?accountid={to_org_id}" in email_body
+
+
 def test_unaffiliated_email_invitation(app, session, client):
     """Assert that unaffiliated email invitation uses context_url and expiry_date from message data."""
     context_url = "https://localhost.com?preset=bcscUser&token=ABC123"
@@ -666,6 +709,7 @@ def test_unaffiliated_email_invitation(app, session, client):
         assert email_body is not None
         assert "https://localhost.com?preset=bcscUser&amp;token=ABC123" in email_body
         assert "April 16, 2026" in email_body
+
 
 def test_affiliation_confirmation_email(app, session, client):
     """Assert that unaffiliated email invitation uses context_url and completion_date from message data."""

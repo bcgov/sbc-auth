@@ -27,7 +27,7 @@ from auth_api.utils.roles import ADMIN, COORDINATOR
 from flask import Blueprint, current_app, request
 from sbc_common_components.utils.enums import QueueMessageTypes
 
-from account_mailer.auth_utils import get_login_url, get_member_emails, get_transaction_url
+from account_mailer.auth_utils import get_dashboard_url, get_login_url, get_member_emails, get_transaction_url
 from account_mailer.email_processors import (
     account_unlock,
     common_mailer,
@@ -370,6 +370,10 @@ def handle_affiliation_invitation(message_type, email_msg):
     if to_branch_name := email_msg.get("toOrgBranchName"):
         account += " - " + to_branch_name
 
+    context_url = f"{get_dashboard_url()}{business_identifier}"
+    if to_org_id := email_msg.get("toOrgId"):
+        context_url += f"?accountid={to_org_id}"
+
     email_dict = common_mailer.process(
         **{
             "org_id": None,
@@ -384,6 +388,7 @@ def handle_affiliation_invitation(message_type, email_msg):
             "is_authorized": email_msg.get("isAuthorized", None),
             "additional_message": email_msg.get("additionalMessage", None),
             "expiry_text": email_msg.get("expiryText"),
+            "context_url": context_url,
         }
     )
     process_email(email_dict)
