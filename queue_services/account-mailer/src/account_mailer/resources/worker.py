@@ -370,10 +370,9 @@ def handle_affiliation_invitation(message_type, email_msg):
     if to_branch_name := email_msg.get("toOrgBranchName"):
         account += " - " + to_branch_name
 
-    to_org_id = email_msg.get("toOrgId")
-    context_url = ""
-    if to_org_id:
-        context_url = f"{get_dashboard_url()}{business_identifier}?accountid={to_org_id}"
+    context_url = f"{get_dashboard_url()}{business_identifier}"
+    if to_org_id := email_msg.get("toOrgId"):
+        context_url += f"?accountid={to_org_id}"
 
     email_dict = common_mailer.process(
         **{
