@@ -19,6 +19,7 @@ Test suite to ensure that the Membership service routines are working as expecte
 from unittest import mock
 from unittest.mock import ANY, patch
 
+import pytest
 from sbc_common_components.utils.enums import QueueMessageTypes
 
 import auth_api
@@ -31,7 +32,7 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import ActivityAction, OrgStatus, ProductCode, Status
+from auth_api.utils.enums import ActivityAction, NotificationType, OrgStatus, ProductCode, Status
 from tests.conftest import mock_token
 from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
@@ -39,6 +40,7 @@ from tests.utilities.factory_utils import (
     factory_org_model,
     factory_product_model,
     factory_user_model,
+    factory_user_model_with_contact,
     keycloak_add_user,
     keycloak_get_user_by_username,
 )
@@ -212,3 +214,64 @@ def test_has_nsf_or_suspended_membership_returns_false(session, monkeypatch):
     result = MembershipService.has_nsf_or_suspended_membership(user_id=user_id)
 
     assert result is False
+
+
+@patch.object(auth_api.services.membership, "publish_to_mailer")
+@pytest.mark.parametrize(
+    "notification_type,member_type,expected_queue,scenario",
+    [
+        (
+            NotificationType.MEMBERSHIP_APPROVED.value,
+            "USER",
+            QueueMessageTypes.MEMBERSHIP_APPROVED_NOTIFICATION.value,
+            "simple",
+        ),
+        (
+            NotificationType.MEMBERSHIP_REJECTED.value,
+            "USER",
+            QueueMessageTypes.MEMBERSHIP_REJECTED_NOTIFICATION.value,
+            "simple",
+        ),
+        (
+            NotificationType.ROLE_CHANGED.value,
+            "COORDINATOR",
+            QueueMessageTypes.ROLE_CHANGED_NOTIFICATION.value,
+            "role_changed",
+        ),
+    ],
+    ids=["approved", "rejected", "role_changed"],
+)
+def test_send_notification_to_member(  # pylint: disable=unused-argument
+    publish_to_mailer_mock,
+    session,
+    notification_type,
+    member_type,
+    expected_queue,
+    scenario,
+):
+    """Cover queue payload for each branch of send_notification_to_member."""
+    user = factory_user_model_with_contact(TestUserInfo.user_bceid_tester)
+    org = factory_org_model()
+    membership_model = factory_membership_model(
+        user_id=user.id, org_id=org.id, member_type=member_type, member_status=4
+    )
+
+    MembershipService(membership_model).send_notification_to_member("https://auth-web.dev", notification_type)
+
+    simple_payload = {
+        "accountId": org.id,
+        "emailAddresses": user.contacts[0].contact.email,
+        "contextUrl": "https://auth-web.dev/",
+        "orgName": org.name,
+    }
+    if scenario == "role_changed":
+        expected_data = {
+            **simple_payload,
+            "role": membership_model.membership_type.code,
+            "label": membership_model.membership_type.label,
+            "loginSource": user.login_source,
+        }
+    else:
+        expected_data = simple_payload
+
+    publish_to_mailer_mock.assert_called_once_with(expected_queue, data=expected_data)

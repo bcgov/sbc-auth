@@ -199,14 +199,16 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 "loginSource": self._model.user.login_source,
             }
         elif notification_type == NotificationType.MEMBERSHIP_APPROVED.value:
-            # TODO how to check properly if user is bceid user
-            is_bceid_user = self._model.user.username.find("@bceid") > 0
-            if is_bceid_user:
-                notification_type_for_mailer = QueueMessageTypes.MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID.value
-            else:
-                notification_type_for_mailer = QueueMessageTypes.MEMBERSHIP_APPROVED_NOTIFICATION.value
-
+            notification_type_for_mailer = QueueMessageTypes.MEMBERSHIP_APPROVED_NOTIFICATION.value
             data = {"accountId": org_id, "emailAddresses": recipient, "contextUrl": app_url, "orgName": org_name}
+        elif notification_type == NotificationType.MEMBERSHIP_REJECTED.value:
+            notification_type_for_mailer = QueueMessageTypes.MEMBERSHIP_REJECTED_NOTIFICATION.value
+            data = {
+                "accountId": org_id,
+                "emailAddresses": recipient,
+                "contextUrl": app_url,
+                "orgName": org_name,
+            }
         else:
             data = {"accountId": org_id}
 
