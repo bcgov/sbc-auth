@@ -86,9 +86,12 @@ class User(Versioned, BaseModel):
     user_status = relationship("UserStatusCode", foreign_keys=[status], lazy="subquery")
 
     @classmethod
-    def find_by_username(cls, username):
+    def find_by_username(cls, username, for_update=False):
         """Return the first user with the provided username."""
-        return cls.query.filter_by(username=username).first()
+        query = cls.query.filter_by(username=username)
+        if for_update:
+            query = query.with_for_update()
+        return query.first()
 
     @classmethod
     @user_context
@@ -114,8 +117,12 @@ class User(Versioned, BaseModel):
     def find_by_jwt_idp_userid(cls, **kwargs):
         """Find an existing user by idp_userid."""
         user_from_context: UserContext = kwargs["user_context"]
+        for_update = kwargs.get("for_update", False)
         if idp_userid := user_from_context.token_info.get("idp_userid", None):
-            return db.session.query(User).filter(User.idp_userid == idp_userid).one_or_none()
+            query = db.session.query(User).filter(User.idp_userid == idp_userid)
+            if for_update:
+                query = query.with_for_update()
+            return query.one_or_none()
         if not idp_userid:
             current_app.logger.error("No idp_userid provided from token_info.")
         return None
