@@ -1,4 +1,4 @@
-FROM python:3.12.5-bookworm as development_build
+FROM python:3.12.5-slim-bookworm AS development_build
 
 ARG VCS_REF="missing"
 ARG BUILD_DATE="missing"
@@ -25,7 +25,6 @@ ENV APP_ENV=${APP_ENV} \
   PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
   PYTHONHASHSEED=random \
-  PYTHONDONTWRITEBYTECODE=1 \
   # pip:
   PIP_NO_CACHE_DIR=1 \
   PIP_DISABLE_PIP_VERSION_CHECK=1 \
@@ -72,10 +71,8 @@ COPY --chown=web:web ./README.md /code
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   echo "$APP_ENV" \
   && poetry version \
-  # Install deps:
-  && poetry update \
   && poetry install \
-    $(if [ -z ${APP_ENV+x} ] || [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
+    $(if [ -z "$APP_ENV" ] || [ "$APP_ENV" = 'production' ]; then echo '--only main'; fi) \
     --no-interaction --no-ansi
 
 # Running as non-root user:
