@@ -30,6 +30,13 @@ axios.interceptors.request.use(
     if (payApiKey && request.url.includes(payApiUrl)) {
       request.headers['x-apikey'] = payApiKey
     }
+
+    const businessApiUrl = ConfigHelper.getLegalAPIV2Url()
+    const businessApiKey = import.meta.env.VUE_APP_BUSINESS_API_KEY
+    if (businessApiKey && request.url.includes(businessApiUrl)) {
+      request.headers['x-apikey'] = businessApiKey
+    }
+
     return request
   },
   error => Promise.reject(error)
