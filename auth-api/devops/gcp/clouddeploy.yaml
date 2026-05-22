@@ -83,4 +83,5 @@ serialPipeline:
       resources-memory: "2Gi"
       cloudsql-instances: "gtksf3-prod:northamerica-northeast1:auth-db-prod"
       service-account: "sa-api@gtksf3-prod.iam.gserviceaccount.com"
-      max-scale: "10"
+      max-scale: "30"
+      min-scale: "2"
