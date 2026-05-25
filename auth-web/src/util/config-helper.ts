@@ -109,7 +109,7 @@ export default class ConfigHelper {
   }
 
   static getLegalAPIV2Url () {
-    return `${import.meta.env.VUE_APP_LEGAL_API_URL}` + `${import.meta.env.VUE_APP_LEGAL_API_VERSION_2}`
+    return `${import.meta.env.VUE_APP_BUSINESS_API_GW_URL}` + `${import.meta.env.VUE_APP_BUSINESS_API_VERSION_2}`
   }
 
   static getVonAPIUrl () {
