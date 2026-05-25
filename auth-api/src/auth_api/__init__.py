@@ -17,6 +17,7 @@ This module is the API for the Authroization system.
 """
 
 import os
+import threading
 import traceback
 
 from cloud_sql_connector import DBConfig, setup_search_path_event_listener
@@ -150,18 +151,24 @@ def register_shellcontext(app):
 
 
 def build_cache(app):
-    """Build cache."""
+    """Build cache in a background thread so gunicorn can start accepting requests immediately."""
     cache.init_app(app)
-    with app.app_context():
-        cache.clear()
-        if not app.config.get("TESTING", False):
+
+    if app.config.get("TESTING", False):
+        return
+
+    def _build():
+        with app.app_context():
             try:
                 # pylint: disable=import-outside-toplevel
                 from auth_api.services.permissions import Permissions as PermissionService
                 from auth_api.services.products import Product as ProductService
 
+                cache.clear()
                 PermissionService.build_all_permission_cache()
                 ProductService.build_all_products_cache()
+                app.logger.info("Cache build complete.")
             except Exception as e:  # NOQA # pylint:disable=broad-except
-                error_msg = f"Error on caching {e}"
-                app.logger.error(error_msg)
+                app.logger.error(f"Error on caching {e}")
+
+    threading.Thread(target=_build, daemon=True).start()
