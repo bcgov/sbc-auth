@@ -103,8 +103,12 @@ def create_app(run_mode=None):
 
 
 def setup_tracing(app):
-    """Register OTEL tracing hooks. No-op when OTEL_SDK_DISABLED=true."""
-    if os.getenv("OTEL_SDK_DISABLED", "true").lower() != "false":
+    """Register OTEL tracing hooks. No-op when OTEL_SDK_DISABLED=true.
+
+    Controlled via OTEL_SDK_DISABLED in config.py (default: True).
+    Override per environment via op://CD/$APP_ENV/auth-api/OTEL_SDK_DISABLED in vaults.gcp.env.
+    """
+    if app.config.get("OTEL_SDK_DISABLED", True):
         return
 
     @app.before_request
