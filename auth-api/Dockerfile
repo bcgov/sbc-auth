@@ -85,6 +85,8 @@ COPY --chown=web:web . /code
 ENV OTEL_SDK_DISABLED=true \
     OTEL_SERVICE_NAME=auth-api \
     OTEL_TRACES_EXPORTER=gcp_trace \
+    OTEL_METRICS_EXPORTER=none \
+    OTEL_LOGS_EXPORTER=none \
     OTEL_TRACES_SAMPLER=always_on \
     OTEL_TRACES_SAMPLER_ARG=1.0
 
