@@ -22,6 +22,7 @@ import traceback
 
 from cloud_sql_connector import DBConfig, setup_search_path_event_listener
 from flask import Flask, request  # noqa: TC002
+from opentelemetry import baggage, context, trace
 from flask_cors import CORS
 from flask_migrate import Migrate, upgrade
 from sbc_common_components.utils.camel_case_response import convert_to_camel
@@ -90,6 +91,17 @@ def create_app(run_mode=None):
         endpoints.init_app(app)
 
         app.after_request(convert_to_camel)
+
+        if os.getenv('OTEL_SDK_DISABLED', 'true').lower() == 'false':
+            @app.before_request
+            def attach_frontend_trace_id():
+                registries_trace_id = request.headers.get('registries-trace-id')
+                if registries_trace_id:
+                    ctx = baggage.set_baggage('registries_trace_id', registries_trace_id)
+                    context.attach(ctx)
+                    span = trace.get_current_span()
+                    if span.is_recording():
+                        span.set_attribute('app.registries_trace_id', registries_trace_id)
 
         ExceptionHandler(app)
         setup_403_logging(app)
