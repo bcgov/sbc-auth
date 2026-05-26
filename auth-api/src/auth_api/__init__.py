@@ -92,24 +92,30 @@ def create_app(run_mode=None):
 
         app.after_request(convert_to_camel)
 
-        if os.getenv("OTEL_SDK_DISABLED", "true").lower() == "false":
-            @app.before_request
-            def attach_frontend_trace_id():
-                registries_trace_id = request.headers.get("registries-trace-id")
-                if registries_trace_id:
-                    ctx = baggage.set_baggage("registries_trace_id", registries_trace_id)
-                    context.attach(ctx)
-                    span = trace.get_current_span()
-                    if span.is_recording():
-                        span.set_attribute("app.registries_trace_id", registries_trace_id)
-
         ExceptionHandler(app)
+        setup_tracing(app)
         setup_403_logging(app)
         setup_jwt_manager(app, jwt)
         register_shellcontext(app)
         build_cache(app)
 
     return app
+
+
+def setup_tracing(app):
+    """Register OTEL tracing hooks. No-op when OTEL_SDK_DISABLED=true."""
+    if os.getenv("OTEL_SDK_DISABLED", "true").lower() != "false":
+        return
+
+    @app.before_request
+    def attach_frontend_trace_id():
+        registries_trace_id = request.headers.get("registries-trace-id")
+        if registries_trace_id:
+            ctx = baggage.set_baggage("registries_trace_id", registries_trace_id)
+            context.attach(ctx)
+            span = trace.get_current_span()
+            if span.is_recording():
+                span.set_attribute("app.registries_trace_id", registries_trace_id)
 
 
 def setup_403_logging(app):
