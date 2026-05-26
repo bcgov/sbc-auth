@@ -22,7 +22,7 @@ from auth_api.services.flags import flags
 from auth_api.services.gcp_queue import queue
 from auth_api.utils.cache import cache
 from auth_api.utils.logging import setup_logging
-from cloud_sql_connector import DBConfig, setup_search_path_event_listener
+from cloud_sql_connector import DBConfig, setup_pg8000_close_event_listener, setup_search_path_event_listener
 from flask import Flask
 from google.cloud.sql.connector import Connector
 
@@ -71,6 +71,7 @@ def create_app(run_mode=None) -> Flask:
         with app.app_context():
             engine = db.engine
             setup_search_path_event_listener(engine, schema)
+            setup_pg8000_close_event_listener(engine)
 
     flags.init_app(app)
     cache.init_app(app)
