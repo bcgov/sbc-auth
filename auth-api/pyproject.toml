@@ -57,8 +57,8 @@ cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git",
 gcp-queue = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/gcp-queue", branch = "main" }
 structured-logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging", branch = "main" }
 aiohttp-retry = "^2.9.1"
-opentelemetry-distro = "^0.63b1"
-opentelemetry-exporter-gcp-trace = "^1.12.0"
+opentelemetry-sdk = "^1.42.0"
+opentelemetry-exporter-otlp-proto-grpc = "^1.42.0"
 opentelemetry-instrumentation-flask = "^0.63b1"
 opentelemetry-instrumentation-sqlalchemy = "^0.63b1"
 opentelemetry-instrumentation-requests = "^0.63b1"

@@ -1471,25 +1471,6 @@ protobuf = ["protobuf (<6.0.0.dev0)"]
 tracing = ["opentelemetry-api (>=1.1.0)"]
 
 [[package]]
-name = "google-cloud-trace"
-version = "1.19.0"
-description = "Google Cloud Trace API client library"
-optional = false
-python-versions = ">=3.9"
-groups = ["main"]
-files = [
-    {file = "google_cloud_trace-1.19.0-py3-none-any.whl", hash = "sha256:59604c4c775c40af31b367df6bada0af34518cc35ac8cfedecd43898a120c51d"},
-    {file = "google_cloud_trace-1.19.0.tar.gz", hash = "sha256:58293c6efcee6c74bb854ff01b008823bef66845c14f15ffa5209d545098a65d"},
-]
-
-[package.dependencies]
-google-api-core = {version = ">=2.11.0,<3.0.0", extras = ["grpc"]}
-google-auth = ">=2.14.1,<2.24.0 || >2.24.0,<2.25.0 || >2.25.0,<3.0.0"
-grpcio = ">=1.33.2,<2.0.0"
-proto-plus = ">=1.22.3,<2.0.0"
-protobuf = ">=4.25.8,<8.0.0"
-
-[[package]]
 name = "google-crc32c"
 version = "1.8.0"
 description = "A python wrapper of the C library 'Google CRC32C'"
@@ -2338,42 +2319,43 @@ files = [
 typing-extensions = ">=4.5.0"
 
 [[package]]
-name = "opentelemetry-distro"
-version = "0.63b1"
-description = "OpenTelemetry Python Distro"
+name = "opentelemetry-exporter-otlp-proto-common"
+version = "1.42.1"
+description = "OpenTelemetry Protobuf encoding"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "opentelemetry_distro-0.63b1-py3-none-any.whl", hash = "sha256:b405b04ad70e430390265eb38e82e067a84ca1f49a21429eaadb930c13330d66"},
-    {file = "opentelemetry_distro-0.63b1.tar.gz", hash = "sha256:f435098abc7953f58226e8bf79e4c90bc6b32e50aa75d6fa074201db8243b577"},
+    {file = "opentelemetry_exporter_otlp_proto_common-1.42.1-py3-none-any.whl", hash = "sha256:f48d395ab815b444da118868977e9798ea354c25737d5cf39578ae894011c140"},
+    {file = "opentelemetry_exporter_otlp_proto_common-1.42.1.tar.gz", hash = "sha256:04f1f01fb597c4249dfcd7f8b861c902c2102369d376d9d346ff38de4469a2ee"},
 ]
 
 [package.dependencies]
-opentelemetry-api = ">=1.12,<2.0"
-opentelemetry-instrumentation = "0.63b1"
-opentelemetry-sdk = ">=1.13,<2.0"
-
-[package.extras]
-otlp = ["opentelemetry-exporter-otlp (==1.42.1)"]
+opentelemetry-proto = "1.42.1"
 
 [[package]]
-name = "opentelemetry-exporter-gcp-trace"
-version = "1.12.0"
-description = "Google Cloud Trace exporter for OpenTelemetry"
+name = "opentelemetry-exporter-otlp-proto-grpc"
+version = "1.42.1"
+description = "OpenTelemetry Collector Protobuf over gRPC Exporter"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "opentelemetry_exporter_gcp_trace-1.12.0-py3-none-any.whl", hash = "sha256:1538dab654bcb25e757ed34c94f27a2e30d90dc7deb3630f8d46d1111fcb3bad"},
-    {file = "opentelemetry_exporter_gcp_trace-1.12.0.tar.gz", hash = "sha256:18c6e56fe123eed020d5005fdd819b196d64f651545bce1ca7e2e2cbaf9d343b"},
+    {file = "opentelemetry_exporter_otlp_proto_grpc-1.42.1-py3-none-any.whl", hash = "sha256:0ae1177e2038b18a929b3098215243631ef91136cba26b7e2b12790ceb7e87cc"},
+    {file = "opentelemetry_exporter_otlp_proto_grpc-1.42.1.tar.gz", hash = "sha256:975c4461f167dd8ed8857d68d3b6b25f3d272eab896f6a9470d0f5b90e2faf15"},
 ]
 
 [package.dependencies]
-google-cloud-trace = ">=1.1,<2.0"
-opentelemetry-api = ">=1.30,<2.0"
-opentelemetry-resourcedetector-gcp = ">=1.5.0.dev0,<2.dev0"
-opentelemetry-sdk = ">=1.30,<2.0"
+googleapis-common-protos = ">=1.57,<2.0"
+grpcio = {version = ">=1.63.2,<2.0.0", markers = "python_version < \"3.13\""}
+opentelemetry-api = ">=1.15,<2.0"
+opentelemetry-exporter-otlp-proto-common = "1.42.1"
+opentelemetry-proto = "1.42.1"
+opentelemetry-sdk = ">=1.42.1,<1.43.0"
+typing-extensions = ">=4.6.0"
+
+[package.extras]
+gcp-auth = ["opentelemetry-exporter-credential-provider-gcp (>=0.59b0)"]
 
 [[package]]
 name = "opentelemetry-instrumentation"
@@ -2478,22 +2460,19 @@ opentelemetry-semantic-conventions = "0.63b1"
 opentelemetry-util-http = "0.63b1"
 
 [[package]]
-name = "opentelemetry-resourcedetector-gcp"
-version = "1.12.0a0"
-description = "Google Cloud resource detector for OpenTelemetry"
+name = "opentelemetry-proto"
+version = "1.42.1"
+description = "OpenTelemetry Python Proto"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "opentelemetry_resourcedetector_gcp-1.12.0a0-py3-none-any.whl", hash = "sha256:e803688d14e2969fe816077be81f7b034368314d485863f12ce49daba7c81919"},
-    {file = "opentelemetry_resourcedetector_gcp-1.12.0a0.tar.gz", hash = "sha256:d5e3f78283a272eb92547e00bbeff45b7332a34ae791a70ab4eba81af9bc3baf"},
+    {file = "opentelemetry_proto-1.42.1-py3-none-any.whl", hash = "sha256:dedb74cba2886c59c7789b227a7a670613025a07489040050aedff6e5c0fb43c"},
+    {file = "opentelemetry_proto-1.42.1.tar.gz", hash = "sha256:c6a51e6b4f05ae63565f3a113217f3d2bfaec68f78c02d7a6c85f9010d1cfca6"},
 ]
 
 [package.dependencies]
-opentelemetry-api = ">=1.30,<2.0"
-opentelemetry-sdk = ">=1.30,<2.0"
-requests = ">=2.24,<3.0"
-typing_extensions = ">=4.0,<5.0"
+protobuf = ">=5.0,<7.0"
 
 [[package]]
 name = "opentelemetry-sdk"
@@ -3892,4 +3871,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "f220f1dde5ef3b8b13c921632938836861eaab8ff5068405c612fcc383b8b398"
+content-hash = "40906fd1db71f25bb98d5e6fab51fa847b3ad9ea17123a436727b78dd3d44f22"
