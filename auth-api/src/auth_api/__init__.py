@@ -72,6 +72,7 @@ def create_app(run_mode=None):
         with app.app_context():
             engine = db.engine
             setup_search_path_event_listener(engine, schema)
+            # Suppress pg8000 InterfaceError on connection close during teardown
             setup_pg8000_close_event_listener(engine)
 
     if run_mode == "migration":
