@@ -128,7 +128,7 @@ def setup_tracing(app):
         grpc.metadata_call_credentials(AuthMetadataPlugin(credentials, GoogleAuthRequest())),
     )
     exporter = OTLPSpanExporter(
-        endpoint="cloudtrace.googleapis.com:443",
+        endpoint="telemetry.googleapis.com:443",
         credentials=channel_credentials,
     )
     provider = TracerProvider(resource=Resource.create())
