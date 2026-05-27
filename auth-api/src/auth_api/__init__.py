@@ -20,16 +20,12 @@ import os
 import threading
 import traceback
 
-import grpc
 from cloud_sql_connector import DBConfig, setup_search_path_event_listener
 from flask import Flask, request  # noqa: TC002
 from flask_cors import CORS
 from flask_migrate import Migrate, upgrade
-from google.auth import default as google_auth_default
-from google.auth.transport.grpc import AuthMetadataPlugin
-from google.auth.transport.requests import Request as GoogleAuthRequest
 from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
@@ -114,7 +110,7 @@ def create_app(run_mode=None):
 
 
 def setup_tracing(app):
-    """Set up OTEL tracing with OTLP/gRPC export to Google Cloud Trace.
+    """Set up OTEL tracing with export to Google Cloud Trace.
 
     Controlled via OTEL_SDK_DISABLED in config.py (default: True).
     Override per environment via op://relationship/$APP_ENV/auth-api/OTEL_SDK_DISABLED in vaults.gcp.env.
@@ -122,15 +118,7 @@ def setup_tracing(app):
     if app.config.get("OTEL_SDK_DISABLED", True):
         return
 
-    credentials, _ = google_auth_default()
-    channel_credentials = grpc.composite_channel_credentials(
-        grpc.ssl_channel_credentials(),
-        grpc.metadata_call_credentials(AuthMetadataPlugin(credentials, GoogleAuthRequest())),
-    )
-    exporter = OTLPSpanExporter(
-        endpoint="telemetry.googleapis.com:443",
-        credentials=channel_credentials,
-    )
+    exporter = CloudTraceSpanExporter()
     provider = TracerProvider(resource=Resource.create())
     provider.add_span_processor(BatchSpanProcessor(exporter))
     trace.set_tracer_provider(provider)
