@@ -20,6 +20,11 @@ axios.interceptors.request.use(
     if (token) {
       request.headers.Authorization = `Bearer ${token}`
     }
+    const account = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
+    const accountId = account?.id
+    if (accountId) {
+      request.headers['Account-Id'] = accountId
+    }
     const authApiUrl = ConfigHelper.getAuthAPIUrl()
     const authApiKey = import.meta.env.VUE_APP_AUTH_API_KEY
     if (authApiKey && request.url.includes(authApiUrl)) {
