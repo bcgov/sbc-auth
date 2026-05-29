@@ -2442,6 +2442,28 @@ opentelemetry-util-http = "0.63b1"
 instruments = ["requests (>=2.0,<3.0)"]
 
 [[package]]
+name = "opentelemetry-instrumentation-sqlalchemy"
+version = "0.63b1"
+description = "OpenTelemetry SQLAlchemy instrumentation"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "opentelemetry_instrumentation_sqlalchemy-0.63b1-py3-none-any.whl", hash = "sha256:d417414f6517963e9c1ee91ec971b94938b46904499114d035a43937bd62b6a1"},
+    {file = "opentelemetry_instrumentation_sqlalchemy-0.63b1.tar.gz", hash = "sha256:621f9eb800ea24a98b4eda968373e3909bfede0ff47f77b96f8b8a18bc2a2a1a"},
+]
+
+[package.dependencies]
+opentelemetry-api = ">=1.12,<2.0"
+opentelemetry-instrumentation = "0.63b1"
+opentelemetry-semantic-conventions = "0.63b1"
+packaging = ">=21.0"
+wrapt = ">=1.11.2"
+
+[package.extras]
+instruments = ["sqlalchemy (>=1.0.0,<2.1.0)"]
+
+[[package]]
 name = "opentelemetry-instrumentation-wsgi"
 version = "0.63b1"
 description = "WSGI Middleware for OpenTelemetry"
@@ -3874,4 +3896,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "50d4161cc407a25211ceaa275894798d6410eb47f826f6517206a9e97b2079a2"
+content-hash = "80c19626efe9ef84713f9ec9041c2df7f2580dd230b8658c4d445ece408816f8"
