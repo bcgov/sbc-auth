@@ -1353,23 +1353,23 @@ name = "gcp-tracing"
 version = "0.1.0"
 description = "OpenTelemetry tracing utilities for GCP Cloud Trace integration with Flask applications"
 optional = false
-python-versions = "^3.12"
+python-versions = ">=3.12"
 groups = ["main"]
 files = []
 develop = false
 
 [package.dependencies]
 flask = ">=3"
-opentelemetry-exporter-gcp-trace = "^1.12.0"
-opentelemetry-instrumentation-flask = "^0.63b1"
-opentelemetry-instrumentation-requests = "^0.63b1"
-opentelemetry-sdk = "^1.42.0"
+opentelemetry-exporter-gcp-trace = ">=1.12.0,<2"
+opentelemetry-instrumentation-flask = ">=0.63b1"
+opentelemetry-instrumentation-requests = ">=0.63b1"
+opentelemetry-sdk = ">=1.42.0,<2"
 
 [package.source]
 type = "git"
-url = "https://github.com/sumesh85/sbc-connect-common.git"
-reference = "tracing"
-resolved_reference = "336fe8a386bc43e80c447b738831bb66f77d9f50"
+url = "https://github.com/bcgov/sbc-connect-common.git"
+reference = "main"
+resolved_reference = "2d6857ee4cfea96d8ef7415553dcd6402f4a2775"
 subdirectory = "python/gcp-tracing"
 
 [[package]]
@@ -3896,4 +3896,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "80c19626efe9ef84713f9ec9041c2df7f2580dd230b8658c4d445ece408816f8"
+content-hash = "00c23176b017c7bcb1b50f7f8072b3e45daec4a6eff54d3843ef602fd2646855"
