@@ -24,6 +24,7 @@ from cloud_sql_connector import DBConfig, setup_pg8000_close_event_listener, set
 from flask import Flask, request  # noqa: TC002
 from flask_cors import CORS
 from flask_migrate import Migrate, upgrade
+from gcp_tracing import tracing
 from sbc_common_components.utils.camel_case_response import convert_to_camel
 
 import auth_api.config as config  # pylint:disable=consider-using-from-import
@@ -94,6 +95,7 @@ def create_app(run_mode=None):
         app.after_request(convert_to_camel)
 
         ExceptionHandler(app)
+        tracing.init_app(app, db=db)
         setup_403_logging(app)
         setup_jwt_manager(app, jwt)
         register_shellcontext(app)
