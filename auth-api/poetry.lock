@@ -1349,6 +1349,30 @@ resolved_reference = "9a760cf5ea31d3f95806c2dcac15ca9d9800df51"
 subdirectory = "python/gcp-queue"
 
 [[package]]
+name = "gcp-tracing"
+version = "0.1.0"
+description = "OpenTelemetry tracing utilities for GCP Cloud Trace integration with Flask applications"
+optional = false
+python-versions = "^3.12"
+groups = ["main"]
+files = []
+develop = false
+
+[package.dependencies]
+flask = ">=3"
+opentelemetry-exporter-gcp-trace = "^1.12.0"
+opentelemetry-instrumentation-flask = "^0.63b1"
+opentelemetry-instrumentation-requests = "^0.63b1"
+opentelemetry-sdk = "^1.42.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/sumesh85/sbc-connect-common.git"
+reference = "tracing"
+resolved_reference = "336fe8a386bc43e80c447b738831bb66f77d9f50"
+subdirectory = "python/gcp-tracing"
+
+[[package]]
 name = "google-api-core"
 version = "2.30.3"
 description = "Google API client core library"
@@ -2416,28 +2440,6 @@ opentelemetry-util-http = "0.63b1"
 
 [package.extras]
 instruments = ["requests (>=2.0,<3.0)"]
-
-[[package]]
-name = "opentelemetry-instrumentation-sqlalchemy"
-version = "0.63b1"
-description = "OpenTelemetry SQLAlchemy instrumentation"
-optional = false
-python-versions = ">=3.10"
-groups = ["main"]
-files = [
-    {file = "opentelemetry_instrumentation_sqlalchemy-0.63b1-py3-none-any.whl", hash = "sha256:d417414f6517963e9c1ee91ec971b94938b46904499114d035a43937bd62b6a1"},
-    {file = "opentelemetry_instrumentation_sqlalchemy-0.63b1.tar.gz", hash = "sha256:621f9eb800ea24a98b4eda968373e3909bfede0ff47f77b96f8b8a18bc2a2a1a"},
-]
-
-[package.dependencies]
-opentelemetry-api = ">=1.12,<2.0"
-opentelemetry-instrumentation = "0.63b1"
-opentelemetry-semantic-conventions = "0.63b1"
-packaging = ">=21.0"
-wrapt = ">=1.11.2"
-
-[package.extras]
-instruments = ["sqlalchemy (>=1.0.0,<2.1.0)"]
 
 [[package]]
 name = "opentelemetry-instrumentation-wsgi"
@@ -3872,4 +3874,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "9675d7a4ec45283c8bafc1f8a01085bec3812a8295613087308500ca5dd9add2"
+content-hash = "50d4161cc407a25211ceaa275894798d6410eb47f826f6517206a9e97b2079a2"
