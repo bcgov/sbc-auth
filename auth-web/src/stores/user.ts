@@ -1,11 +1,10 @@
 import { DocumentUpload, User, UserProfileData, UserSettings } from '@/models/user'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
 import { computed, reactive, toRefs } from '@vue/composition-api'
+import { ApiErrorCode } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import { Contact } from '@/models/contact'
-import DocumentService from '@/services/document.services'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { RoleInfo } from '@/models/Organization'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import UserService from '@/services/user.services'
@@ -15,9 +14,6 @@ export interface UserTerms {
   isTermsOfUseAccepted: boolean
   termsOfUseAcceptedVersion: string
 }
-
-const CONTACT_EXISTS_CODE = 'DATA_ALREADY_EXISTS'
-const CONTACT_NOT_FOUND_CODE = 'DATA_NOT_FOUND'
 
 export const useUserStore = defineStore('user', () => {
   const state = reactive({
@@ -175,7 +171,7 @@ export const useUserStore = defineStore('user', () => {
       return saveContactFromResponse(await UserService.createContact(userContact), 201)
     } catch (error: any) {
       // Idempotency guard: if contact already exists, convert create -> update.
-      if (error?.response?.data?.code === CONTACT_EXISTS_CODE) {
+      if (error?.response?.data?.code === ApiErrorCode.DATA_ALREADY_EXISTS) {
         return saveContactFromResponse(await UserService.updateContact(userContact), 200)
       }
       throw error
@@ -193,7 +189,7 @@ export const useUserStore = defineStore('user', () => {
       return saveContactFromResponse(await UserService.updateContact(userContact), 200)
     } catch (error: any) {
       // Idempotency guard: if contact does not exist yet, convert update -> create.
-      if (error?.response?.data?.code === CONTACT_NOT_FOUND_CODE) {
+      if (error?.response?.data?.code === ApiErrorCode.DATA_NOT_FOUND) {
         return saveContactFromResponse(await UserService.createContact(userContact), 201)
       }
       throw error
