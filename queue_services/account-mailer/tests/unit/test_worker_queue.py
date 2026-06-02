@@ -792,5 +792,5 @@ def test_get_admin_emails_falls_back_to_user_email_when_contact_email_blank(app,
 
 def test_get_admin_emails_user_not_found_raises(app, session):
     """Assert that a missing username raises ValueError."""
-    with pytest.raises(ValueError, match="Admin user not found, cannot determine email address."):
+    with pytest.raises(ValueError, match="Admin user not found for username"):
         _get_admin_emails("bcsc/doesnotexist")
