@@ -716,3 +716,8 @@ export enum OrgNameLabel {
     BUSINESS = 'Legal Business Name',
     REGULAR = 'Account Name'
 }
+
+export enum ApiErrorCode {
+    DATA_ALREADY_EXISTS = 'DATA_ALREADY_EXISTS',
+    DATA_NOT_FOUND = 'DATA_NOT_FOUND'
+}

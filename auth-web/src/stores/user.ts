@@ -1,11 +1,10 @@
 import { DocumentUpload, User, UserProfileData, UserSettings } from '@/models/user'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
 import { computed, reactive, toRefs } from '@vue/composition-api'
+import { ApiErrorCode } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import { Contact } from '@/models/contact'
-import DocumentService from '@/services/document.services'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { RoleInfo } from '@/models/Organization'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import UserService from '@/services/user.services'
@@ -150,17 +149,32 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  async function createUserContact (contact?: Contact) {
+  function buildUserContact (contact?: Contact): Contact {
     const userProfile = state.userProfileData
-    const userContact: Contact = contact || {
+    return contact || {
       phone: userProfile?.phone,
       email: userProfile?.email,
       phoneExtension: userProfile?.phoneExtension
     }
-    const response = await UserService.createContact(userContact)
-    if (response?.data && response.status === 201) {
+  }
+
+  function saveContactFromResponse (response: any, successStatus: number) {
+    if (response?.data && response.status === successStatus) {
       state.userContact = response.data
       return response.data
+    }
+  }
+
+  async function createUserContact (contact?: Contact) {
+    const userContact = buildUserContact(contact)
+    try {
+      return saveContactFromResponse(await UserService.createContact(userContact), 201)
+    } catch (error: any) {
+      // Idempotency guard: if contact already exists, convert create -> update.
+      if (error?.response?.data?.code === ApiErrorCode.DATA_ALREADY_EXISTS) {
+        return saveContactFromResponse(await UserService.updateContact(userContact), 200)
+      }
+      throw error
     }
   }
 
@@ -170,16 +184,15 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function updateUserContact (contact?: Contact) {
-    const userProfile = state.userProfileData
-    const userContact: Contact = contact || {
-      phone: userProfile?.phone,
-      email: userProfile?.email,
-      phoneExtension: userProfile?.phoneExtension
-    }
-    const response = await UserService.updateContact(userContact)
-    if (response?.data && response.status === 200) {
-      state.userContact = response.data
-      return response.data
+    const userContact = buildUserContact(contact)
+    try {
+      return saveContactFromResponse(await UserService.updateContact(userContact), 200)
+    } catch (error: any) {
+      // Idempotency guard: if contact does not exist yet, convert update -> create.
+      if (error?.response?.data?.code === ApiErrorCode.DATA_NOT_FOUND) {
+        return saveContactFromResponse(await UserService.createContact(userContact), 201)
+      }
+      throw error
     }
   }
 

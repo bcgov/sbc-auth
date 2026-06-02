@@ -28,6 +28,7 @@ from account_mailer.pdf_utils import get_pdf_from_report_api, get_pdf_from_stora
 
 def process(email_msg: dict, org_id: str, token: str) -> dict:
     """Build the email for PAD Confirmation notification."""
+    current_app.logger.debug("account notification: %s", org_id)
     current_app.logger.debug("email_msg notification: %s", email_msg)
     _, account_name_with_branch = get_account_info(org_id)
     username = email_msg.get("padTosAcceptedBy")
@@ -61,14 +62,16 @@ def process(email_msg: dict, org_id: str, token: str) -> dict:
 
 def _get_admin_emails(username):
     admin_user = UserModel.find_by_username(username)
-    if admin_user:
-        admin_name = admin_user.firstname + " " + admin_user.lastname
-        if admin_user.contacts:
-            admin_emails = admin_user.contacts[0].contact.email
-        else:
-            admin_emails = admin_user.email
-    else:
-        raise ValueError("Admin user not found, cannot determine email address.")
+    if not admin_user:
+        raise ValueError(f"Admin user not found for username {username}, cannot determine email address.")
+
+    firstname = admin_user.firstname or ""
+    lastname = admin_user.lastname or ""
+    admin_name = f"{firstname} {lastname}".strip()
+
+    admin_emails = (admin_user.contacts[0].contact.email if admin_user.contacts else None) or admin_user.email or None
+    if not admin_emails:
+        raise ValueError(f"No email address found for user {username}, cannot send PAD confirmation.")
 
     return admin_emails, admin_name
 
