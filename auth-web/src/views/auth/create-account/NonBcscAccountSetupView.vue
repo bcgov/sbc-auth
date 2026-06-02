@@ -204,8 +204,9 @@ export default defineComponent({
             await userStore.createAffidavit()
           }
           await userStore.updateUserFirstAndLastName()
-          const organization = await orgStore.createOrg()
+          // Save contact before createOrg; otherwise PAD email can fail due to missing recipient data.
           await saveOrUpdateContact()
+          const organization = await orgStore.createOrg()
           await userStore.getUserProfile('@me')
           await orgStore.syncOrganization(organization.id)
           await orgStore.syncMembership(organization.id)

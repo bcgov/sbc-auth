@@ -95,6 +95,35 @@ def factory_contact_model():
     return contact
 
 
+def factory_user_model_for_email_test(
+    username: str,
+    firstname: str | None,
+    lastname: str | None,
+    user_email: str | None = None,
+    with_contact: bool = False,
+    contact_email: str = "foo@bar.com",
+):
+    """Create a user with optional linked contact for email processor tests."""
+    user = UserModel(
+        username=username,
+        firstname=firstname,
+        lastname=lastname,
+        email=user_email,
+        keycloak_guid=uuid.uuid4(),
+    )
+    user.save()
+    if with_contact:
+        contact = factory_contact_model()
+        if contact_email != "foo@bar.com":
+            contact.email = contact_email
+            contact.save()
+        contact_link = ContactLinkModel()
+        contact_link.contact = contact
+        contact_link.user = user
+        contact_link.save()
+    return user
+
+
 class TestUserInfo(dict, Enum):
     """Test scenarios of user."""
 

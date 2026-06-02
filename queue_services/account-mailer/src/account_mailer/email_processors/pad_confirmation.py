@@ -61,14 +61,18 @@ def process(email_msg: dict, org_id: str, token: str) -> dict:
 
 def _get_admin_emails(username):
     admin_user = UserModel.find_by_username(username)
-    if admin_user:
-        admin_name = admin_user.firstname + " " + admin_user.lastname
-        if admin_user.contacts:
-            admin_emails = admin_user.contacts[0].contact.email
-        else:
-            admin_emails = admin_user.email
-    else:
+    if not admin_user:
         raise ValueError("Admin user not found, cannot determine email address.")
+
+    firstname = admin_user.firstname or ""
+    lastname = admin_user.lastname or ""
+    admin_name = f"{firstname} {lastname}".strip()
+
+    admin_emails = admin_user.contacts[0].contact.email if admin_user.contacts else None
+    if not admin_emails:
+        admin_emails = admin_user.email
+    if not admin_emails:
+        raise ValueError(f"No email address found for user {username}, cannot send PAD confirmation.")
 
     return admin_emails, admin_name
 

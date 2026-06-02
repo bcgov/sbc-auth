@@ -16,6 +16,9 @@ export interface UserTerms {
   termsOfUseAcceptedVersion: string
 }
 
+const CONTACT_EXISTS_CODE = 'DATA_ALREADY_EXISTS'
+const CONTACT_NOT_FOUND_CODE = 'DATA_NOT_FOUND'
+
 export const useUserStore = defineStore('user', () => {
   const state = reactive({
     currentUser: undefined as KCUserProfile,
@@ -150,17 +153,32 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  async function createUserContact (contact?: Contact) {
+  function buildUserContact (contact?: Contact): Contact {
     const userProfile = state.userProfileData
-    const userContact: Contact = contact || {
+    return contact || {
       phone: userProfile?.phone,
       email: userProfile?.email,
       phoneExtension: userProfile?.phoneExtension
     }
-    const response = await UserService.createContact(userContact)
-    if (response?.data && response.status === 201) {
+  }
+
+  function saveContactFromResponse (response: any, successStatus: number) {
+    if (response?.data && response.status === successStatus) {
       state.userContact = response.data
       return response.data
+    }
+  }
+
+  async function createUserContact (contact?: Contact) {
+    const userContact = buildUserContact(contact)
+    try {
+      return saveContactFromResponse(await UserService.createContact(userContact), 201)
+    } catch (error: any) {
+      // Idempotency guard: if contact already exists, convert create -> update.
+      if (error?.response?.data?.code === CONTACT_EXISTS_CODE) {
+        return saveContactFromResponse(await UserService.updateContact(userContact), 200)
+      }
+      throw error
     }
   }
 
@@ -170,16 +188,15 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function updateUserContact (contact?: Contact) {
-    const userProfile = state.userProfileData
-    const userContact: Contact = contact || {
-      phone: userProfile?.phone,
-      email: userProfile?.email,
-      phoneExtension: userProfile?.phoneExtension
-    }
-    const response = await UserService.updateContact(userContact)
-    if (response?.data && response.status === 200) {
-      state.userContact = response.data
-      return response.data
+    const userContact = buildUserContact(contact)
+    try {
+      return saveContactFromResponse(await UserService.updateContact(userContact), 200)
+    } catch (error: any) {
+      // Idempotency guard: if contact does not exist yet, convert update -> create.
+      if (error?.response?.data?.code === CONTACT_NOT_FOUND_CODE) {
+        return saveContactFromResponse(await UserService.createContact(userContact), 201)
+      }
+      throw error
     }
   }
 

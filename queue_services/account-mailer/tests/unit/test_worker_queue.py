@@ -18,15 +18,22 @@ import types
 from datetime import datetime
 from unittest.mock import patch
 
+import pytest
 from auth_api.services.rest_service import RestService
 from google.cloud import storage
 from sbc_common_components.utils.enums import QueueMessageTypes
 
+from account_mailer.email_processors.pad_confirmation import _get_admin_emails
 from account_mailer.enums import SubjectType
 from account_mailer.resources.worker import AFFILIATION_CONFIRMATION_EMAIL, AFFILIATION_INVITATION_UNAFFILIATED_EMAIL
 from account_mailer.services import notification_service
 
-from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
+from . import (
+    factory_membership_model,
+    factory_org_model,
+    factory_user_model_for_email_test,
+    factory_user_model_with_contact,
+)
 from .utils import helper_add_event_to_queue
 
 
@@ -739,3 +746,51 @@ def test_affiliation_confirmation_email(app, session, client):
         assert email_body is not None
         assert "https://localhost.com/login" in email_body
         assert "April 16, 2026" in email_body
+
+
+def test_get_admin_emails_null_firstname(app, session):
+    """Assert that a user with a null firstname does not raise TypeError."""
+    factory_user_model_for_email_test(
+        username="bcsc/nullfirst",
+        firstname=None,
+        lastname="Smith",
+        with_contact=True,
+    )
+
+    emails, name = _get_admin_emails("bcsc/nullfirst")
+    assert emails == "foo@bar.com"
+    assert name == "Smith"
+
+
+def test_get_admin_emails_no_email_raises(app, session):
+    """Assert that a user with no contact and no user email raises ValueError."""
+    factory_user_model_for_email_test(
+        username="bcsc/noemail",
+        firstname="John",
+        lastname="Smith",
+    )
+
+    with pytest.raises(ValueError, match="No email address found for user bcsc/noemail"):
+        _get_admin_emails("bcsc/noemail")
+
+
+def test_get_admin_emails_falls_back_to_user_email_when_contact_email_blank(app, session):
+    """Assert that blank contact email falls back to users.email."""
+    factory_user_model_for_email_test(
+        username="bcsc/fallback",
+        firstname="John",
+        lastname="Smith",
+        user_email="john.smith@example.com",
+        with_contact=True,
+        contact_email="",
+    )
+
+    emails, name = _get_admin_emails("bcsc/fallback")
+    assert emails == "john.smith@example.com"
+    assert name == "John Smith"
+
+
+def test_get_admin_emails_user_not_found_raises(app, session):
+    """Assert that a missing username raises ValueError."""
+    with pytest.raises(ValueError, match="Admin user not found, cannot determine email address."):
+        _get_admin_emails("bcsc/doesnotexist")
