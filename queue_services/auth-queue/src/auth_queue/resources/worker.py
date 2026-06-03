@@ -175,16 +175,13 @@ def process_name_events(event_message: SimpleCloudEvent):
     request_data = event_message.data.get("request") or event_message.data.get("name")
     nr_number = request_data["nrNum"]
     nr_status = request_data["newState"]
-    nr_entity = EntityModel.find_by_business_identifier(nr_number)
-    if nr_entity is None:
-        current_app.logger.info("Entity doesn't exist, creating a new entity.")
-        nr_entity = EntityModel(business_identifier=nr_number, corp_type_code=CorpType.NR.value)
 
-    nr_entity.status = nr_status
-    nr_entity.name = request_data.get("name", "")  # its not part of event now, this is to handle if they include it.
-    nr_entity.last_modified_by = None  # TODO not present in event message.
-    nr_entity.last_modified = parser.parse(event_message.time)
-    # Future - None needs to be replaced with whatever we decide to fill the data with.
+    # Do the DRAFT affiliation work BEFORE loading the entity for the final save.
+    # The PAY API call can take several seconds; loading the entity earlier would leave
+    # it dirty in the session for that whole window, creating a race condition where a
+    # concurrent auth-api delete causes StaleDataError on the final UPDATE.
+    affiliated_org: OrgModel | None = None
+    nr_entity: EntityModel | None = None
     if nr_status == "DRAFT" and not AffiliationModel.find_affiliations_by_business_identifier(nr_number):
         current_app.logger.info("Status is DRAFT, getting invoices for account")
         token = None
@@ -208,27 +205,49 @@ def process_name_events(event_message: SimpleCloudEvent):
             org: OrgModel = db.session.query(OrgModel).filter(OrgModel.id == int(auth_account_id or -1)).one_or_none()
             # If account is present and is not a gov account, then affiliate.
             if org and org.access_type != AccessType.GOVM.value:
+                # Load/create entity HERE (after the slow PAY API call) so it stays
+                # in the session for the shortest possible time before being saved.
+                nr_entity = EntityModel.find_by_business_identifier(nr_number)
+                if nr_entity is None:
+                    nr_entity = EntityModel(business_identifier=nr_number, corp_type_code=CorpType.NR.value)
                 nr_entity.pass_code_claimed = True
                 current_app.logger.info(
                     "Creating affiliation between Entity : %s and Org : %s",
                     nr_entity,
                     org,
                 )
-                affiliation: AffiliationModel = AffiliationModel(entity=nr_entity, org=org)
-                affiliation.flush()
-                activity: ActivityLogModel = ActivityLogModel(
-                    org_id=org.id,
-                    action=ActivityAction.CREATE_AFFILIATION.value,
-                    item_name=nr_entity.business_identifier,
-                    item_id=nr_entity.business_identifier,
-                    item_type=None,
-                    item_value=None,
-                    actor_id=None,
-                )
-                activity.flush()
+                AffiliationModel(entity=nr_entity, org=org).flush()
+                affiliated_org = org  # remembered for the activity log written at the end
 
+    # Only look up the entity if the DRAFT block above didn't already load or create it.
+    # This avoids a redundant SELECT and guarantees we use the same object that was
+    # flushed with the affiliation (preserving pass_code_claimed and the session state).
+    if nr_entity is None:
+        nr_entity = EntityModel.find_by_business_identifier(nr_number)
+        if nr_entity is None:
+            current_app.logger.info("Entity doesn't exist, creating a new entity.")
+            nr_entity = EntityModel(business_identifier=nr_number, corp_type_code=CorpType.NR.value)
+    nr_entity.status = nr_status
+    nr_entity.name = request_data.get("name", "")  # its not part of event now, this is to handle if they include it.
+    nr_entity.last_modified_by = None  # TODO not present in event message.
+    nr_entity.last_modified = parser.parse(event_message.time)
     nr_entity.save()
+
+    # Activity log is a pure audit event — write it last so it never blocks the core
+    # entity/affiliation work and is easy to see at the bottom of the function.
+    if affiliated_org:
+        ActivityLogModel(
+            org_id=affiliated_org.id,
+            action=ActivityAction.CREATE_AFFILIATION.value,
+            item_name=nr_entity.business_identifier,
+            item_id=nr_entity.business_identifier,
+            item_type=None,
+            item_value=None,
+            actor_id=None,
+        ).save()
+
     if flags.is_on("enable-entity-mapping", default=False) is True:
         entity_details = {"nrNumber": nr_number}
         EntityMappingService.from_entity_details(entity_details, skip_auth=True)
     current_app.logger.debug("<<<<<<<process_name_events<<<<<<<<<<")
+
