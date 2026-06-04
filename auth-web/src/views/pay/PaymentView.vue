@@ -134,7 +134,7 @@ export default class PaymentView extends Vue {
     try {
       const accountSettings = this.getAccountFromSession()
       // user should be signed in and should have account as well
-      if (this.isUserSignedIn && !!accountSettings) {
+      if (this.isUserSignedIn() && !!accountSettings) {
         // get the invoice and check for OB
         try {
           const invoice = await this.getInvoice({ invoiceId: this.paymentId, accountId: accountSettings?.id })
@@ -236,6 +236,10 @@ export default class PaymentView extends Vue {
   async doHandleError (error) {
     this.showLoading = false
     const normalized = normalizeError(error)
+    if (isErrorType(normalized, 'PAYMENT_REQUIRES_LOGIN')) {
+      this.errorMessage = this.$t('paymentLoginRequiredMessage').toString()
+      return
+    }
     if (isErrorType(normalized, 'COMPLETED_PAYMENT', 'INVALID_TRANSACTION')) {
       // Skip PAYBC, take directly to the "clients redirect url", this avoids transaction already done error.
       const isValid = await PaymentService.isValidRedirectUrl(this.redirectUrlFixed)
