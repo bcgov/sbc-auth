@@ -77,6 +77,10 @@ class _Config:  # pylint: disable=too-few-public-methods
     DB_SCHEMA = os.getenv("DATABASE_SCHEMA", "public")
     DB_IP_TYPE = os.getenv("DATABASE_IP_TYPE", "private")
     DATABASE_OWNER = os.getenv("DATABASE_OWNER", "postgres")
+    DB_MIN_POOL_SIZE = int(os.getenv("DATABASE_MIN_POOL_SIZE", "2"))
+    DB_MAX_POOL_SIZE = int(os.getenv("DATABASE_MAX_POOL_SIZE", "10"))
+    DB_CONN_WAIT_TIMEOUT = int(os.getenv("DATABASE_CONN_WAIT_TIMEOUT", "5"))
+    DB_CONN_TIMEOUT = int(os.getenv("DATABASE_CONN_TIMEOUT", "900"))
 
     if DB_INSTANCE_CONNECTION_NAME := os.getenv("DATABASE_INSTANCE_CONNECTION_NAME", None):
         SQLALCHEMY_DATABASE_URI = "postgresql+pg8000://"

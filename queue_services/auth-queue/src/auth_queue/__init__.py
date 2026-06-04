@@ -60,7 +60,10 @@ def create_app(run_mode=None) -> Flask:
             user=app.config.get("DB_USER"),
             ip_type=app.config.get("DB_IP_TYPE"),
             schema=schema,
-            pool_recycle=300,
+            pool_size=app.config.get("DB_MIN_POOL_SIZE"),
+            max_overflow=(app.config.get("DB_MAX_POOL_SIZE") - app.config.get("DB_MIN_POOL_SIZE")),
+            pool_timeout=app.config.get("DB_CONN_WAIT_TIMEOUT"),
+            pool_recycle=app.config.get("DB_CONN_TIMEOUT"),
         )
 
         app.config["SQLALCHEMY_ENGINE_OPTIONS"] = db_config.get_engine_options()
