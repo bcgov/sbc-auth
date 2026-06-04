@@ -250,4 +250,3 @@ def process_name_events(event_message: SimpleCloudEvent):
         entity_details = {"nrNumber": nr_number}
         EntityMappingService.from_entity_details(entity_details, skip_auth=True)
     current_app.logger.debug("<<<<<<<process_name_events<<<<<<<<<<")
-

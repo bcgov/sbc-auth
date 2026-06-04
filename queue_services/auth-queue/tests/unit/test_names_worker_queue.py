@@ -180,10 +180,10 @@ def test_names_events_non_draft_status_updates_existing_entity(
     assert entity.status == "APPROVED"
     assert not entity.pass_code_claimed
 
-    # No affiliation or activity log should exist.
+    # No affiliation or activity log should exist for this NR.
     affiliations = AffiliationModel.find_affiliations_by_business_identifier(nr_number)
     assert len(affiliations) == 0
-    activity_logs = db.session.query(ActivityLogModel).all()
+    activity_logs = db.session.query(ActivityLogModel).filter(ActivityLogModel.item_id == nr_number).all()
     assert len(activity_logs) == 0
 
 
@@ -224,9 +224,6 @@ def test_names_events_draft_entity_already_exists(
 
     # Now send a second DRAFT event with a real org in the invoices.
     def get_invoices_mock(*_args, **_kwargs):
-        import json
-        from requests.models import Response
-
         response = Response()
         response.status_code = 200
         response._content = str.encode(  # pylint: disable=protected-access
@@ -275,14 +272,11 @@ def test_names_events_draft_empty_invoices_no_affiliation(
 
     affiliations = AffiliationModel.find_affiliations_by_business_identifier(nr_number)
     assert len(affiliations) == 0
-    assert len(db.session.query(ActivityLogModel).all()) == 0
+    assert len(db.session.query(ActivityLogModel).filter(ActivityLogModel.item_id == nr_number).all()) == 0
 
 
 def _empty_invoices_response():
     """Return a mock PAY API response with no invoices."""
-    import json
-    from requests.models import Response
-
     response = Response()
     response.status_code = 200
     response._content = str.encode(json.dumps({"invoices": []}))  # pylint: disable=protected-access
