@@ -205,7 +205,7 @@ def process_name_events(event_message: SimpleCloudEvent):
             org: OrgModel = db.session.query(OrgModel).filter(OrgModel.id == int(auth_account_id or -1)).one_or_none()
             # If account is present and is not a gov account, then affiliate.
             if org and org.access_type != AccessType.GOVM.value:
-                # Load/create entity HERE (after the slow PAY API call) so it stays
+                # Load/create entity HERE (after the PAY API calls) so it stays
                 # in the session for the shortest possible time before being saved.
                 nr_entity = EntityModel.find_by_business_identifier(nr_number)
                 if nr_entity is None:
