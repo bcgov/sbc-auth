@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from sql_versioning import Versioned
 from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
-from sqlalchemy.orm import contains_eager, joinedload, relationship
+from sqlalchemy.orm import joinedload, relationship
 
 from auth_api.utils.enums import LoginSource, OrgType, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_ORG_STATUSES, VALID_STATUSES
