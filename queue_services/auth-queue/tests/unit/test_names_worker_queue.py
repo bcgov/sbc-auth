@@ -140,3 +140,144 @@ def test_names_events_listener_queue(  # pylint: disable=too-many-arguments
     entity: EntityModel = EntityModel.find_by_business_identifier(nr_number)
     assert entity
     assert not entity.pass_code_claimed
+
+
+def test_names_events_non_draft_status_updates_existing_entity(
+    app,  # pylint: disable=unused-argument
+    session,  # pylint: disable=unused-argument
+    client,
+    monkeypatch,
+):
+    """Assert that a non-DRAFT state change updates an existing entity without creating an affiliation.
+
+    This covers the path that previously caused StaleDataError: entity already in DB,
+    status changes to APPROVED/CONSUMED/etc., no PAY API call, just an UPDATE.
+    """
+    monkeypatch.setattr(
+        "auth_api.services.rest_service.RestService.get_service_account_token",
+        lambda *_args, **_kwargs: None,
+    )
+
+    nr_number = f"NR {get_random_number()}"
+
+    # First event: create the entity via a DRAFT with no matching invoices.
+    monkeypatch.setattr(
+        "auth_api.services.rest_service.RestService.get",
+        lambda *_args, **_kwargs: _empty_invoices_response(),
+    )
+    helper_add_nr_event_to_queue(client, nr_number, "DRAFT", "TEST")
+
+    entity: EntityModel = EntityModel.find_by_business_identifier(nr_number)
+    assert entity
+    assert entity.status == "DRAFT"
+    assert not entity.pass_code_claimed
+
+    # Second event: status moves to APPROVED — this is the UPDATE path that hit StaleDataError.
+    helper_add_nr_event_to_queue(client, nr_number, "APPROVED", "DRAFT")
+
+    entity = EntityModel.find_by_business_identifier(nr_number)
+    assert entity
+    assert entity.status == "APPROVED"
+    assert not entity.pass_code_claimed
+
+    # No affiliation or activity log should exist for this NR.
+    affiliations = AffiliationModel.find_affiliations_by_business_identifier(nr_number)
+    assert len(affiliations) == 0
+    activity_logs = db.session.query(ActivityLogModel).filter(ActivityLogModel.item_id == nr_number).all()
+    assert len(activity_logs) == 0
+
+
+def test_names_events_draft_entity_already_exists(
+    app,  # pylint: disable=unused-argument
+    session,  # pylint: disable=unused-argument
+    client,
+    monkeypatch,
+):
+    """Assert that a DRAFT event affiliates correctly when the entity already exists in the DB.
+
+    Exercises the find_by_business_identifier branch inside the DRAFT block (not the new-entity path).
+    """
+    org = OrgModel(
+        name="Test",
+        org_type=OrgTypeModel.get_default_type(),
+        org_status=OrgStatusModel.get_default_status(),
+        access_type=AccessType.REGULAR.value,
+    ).save()
+    org_id = org.id
+
+    nr_number = f"NR {get_random_number()}"
+
+    # Pre-create the entity so the DRAFT block finds an existing row.
+    monkeypatch.setattr(
+        "auth_api.services.rest_service.RestService.get_service_account_token",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        "auth_api.services.rest_service.RestService.get",
+        lambda *_args, **_kwargs: _empty_invoices_response(),
+    )
+    helper_add_nr_event_to_queue(client, nr_number, "DRAFT", "TEST")
+
+    entity: EntityModel = EntityModel.find_by_business_identifier(nr_number)
+    assert entity
+    assert not entity.pass_code_claimed
+
+    # Now send a second DRAFT event with a real org in the invoices.
+    def get_invoices_mock(*_args, **_kwargs):
+        response = Response()
+        response.status_code = 200
+        response._content = str.encode(  # pylint: disable=protected-access
+            json.dumps({"invoices": [{"businessIdentifier": nr_number, "paymentAccount": {"accountId": org_id}}]})
+        )
+        return response
+
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.get", get_invoices_mock)
+    helper_add_nr_event_to_queue(client, nr_number, "DRAFT", "TEST")
+
+    entity = EntityModel.find_by_business_identifier(nr_number)
+    assert entity
+    assert entity.pass_code_claimed
+
+    affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
+    assert len(affiliations) == 1
+    assert affiliations[0].entity_id == entity.id
+
+    activity_logs = db.session.query(ActivityLogModel).filter(ActivityLogModel.org_id == org_id).all()
+    assert len(activity_logs) == 1
+
+
+def test_names_events_draft_empty_invoices_no_affiliation(
+    app,  # pylint: disable=unused-argument
+    session,  # pylint: disable=unused-argument
+    client,
+    monkeypatch,
+):
+    """Assert that a DRAFT event with empty invoices creates the entity but no affiliation."""
+    monkeypatch.setattr(
+        "auth_api.services.rest_service.RestService.get_service_account_token",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        "auth_api.services.rest_service.RestService.get",
+        lambda *_args, **_kwargs: _empty_invoices_response(),
+    )
+
+    nr_number = f"NR {get_random_number()}"
+    helper_add_nr_event_to_queue(client, nr_number, "DRAFT", "TEST")
+
+    entity: EntityModel = EntityModel.find_by_business_identifier(nr_number)
+    assert entity
+    assert entity.status == "DRAFT"
+    assert not entity.pass_code_claimed
+
+    affiliations = AffiliationModel.find_affiliations_by_business_identifier(nr_number)
+    assert len(affiliations) == 0
+    assert len(db.session.query(ActivityLogModel).filter(ActivityLogModel.item_id == nr_number).all()) == 0
+
+
+def _empty_invoices_response():
+    """Return a mock PAY API response with no invoices."""
+    response = Response()
+    response.status_code = 200
+    response._content = str.encode(json.dumps({"invoices": []}))  # pylint: disable=protected-access
+    return response
