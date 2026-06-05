@@ -23,7 +23,7 @@ from flask import current_app
 from sql_versioning import Versioned
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, or_
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import joinedload, relationship
 
 from auth_api.utils.enums import LoginSource, Status, UserStatus
 from auth_api.utils.roles import Role
@@ -250,6 +250,8 @@ class User(Versioned, BaseModel):
     @classmethod
     def find_users_by_org_id_by_status_by_roles(cls, org_id: int, roles, status=Status.ACTIVE.value):
         """Find all members of the org with a status."""
+        from .contact_link import ContactLink  # local import to avoid circular dependency
+
         return (
             db.session.query(User)
             .join(
@@ -260,6 +262,7 @@ class User(Versioned, BaseModel):
             )
             .join(OrgModel)
             .filter(OrgModel.id == int(org_id or -1))
+            .options(joinedload(User.contacts).joinedload(ContactLink.contact))
             .all()
         )
 

@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from sql_versioning import Versioned
 from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import contains_eager, joinedload, relationship
 
 from auth_api.utils.enums import LoginSource, OrgType, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_ORG_STATUSES, VALID_STATUSES
@@ -66,7 +66,20 @@ class Membership(Versioned, BaseModel):  # pylint: disable=too-few-public-method
     @classmethod
     def find_membership_by_id(cls, membership_id: int) -> Membership:
         """Find the first membership with the given id and return it."""
-        return cls.query.filter_by(id=int(membership_id or -1)).first()
+        from .contact_link import ContactLink  # local imports to avoid circular dependency
+        from .user import User
+
+        return (
+            db.session.query(Membership)
+            .filter(Membership.id == int(membership_id or -1))
+            .options(
+                joinedload(Membership.user).joinedload(User.contacts).joinedload(ContactLink.contact),
+                joinedload(Membership.org),
+                joinedload(Membership.membership_type),
+                joinedload(Membership.membership_status),
+            )
+            .first()
+        )
 
     @classmethod
     def find_members_by_org_id(cls, org_id: int) -> list[Membership]:
@@ -92,12 +105,20 @@ class Membership(Versioned, BaseModel):  # pylint: disable=too-few-public-method
         cls, org_id: int, roles, status=Status.ACTIVE.value
     ) -> list[Membership]:
         """Return all members of the org with a status."""
+        from .contact_link import ContactLink  # local imports to avoid circular dependency
+        from .user import User
+
         return (
             db.session.query(Membership)
             .filter(and_(Membership.status == status, Membership.membership_type_code.in_(roles)))
             .join(OrgModel)
             .filter(OrgModel.id == int(org_id or -1))
             .filter(~Membership.user.has(login_source=LoginSource.API_GW.value))
+            .options(
+                joinedload(Membership.user).joinedload(User.contacts).joinedload(ContactLink.contact),
+                joinedload(Membership.membership_type),
+                joinedload(Membership.membership_status),
+            )
             .all()
         )
 

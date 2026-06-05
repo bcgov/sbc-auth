@@ -141,10 +141,7 @@ class Affiliation:
                 subqueryload(Entity.created_by),
                 subqueryload(Entity.modified_by),
             )
-            .filter(
-                AffiliationModel.org_id == int(org_id or -1),
-                Entity.affiliations.any(AffiliationModel.org_id == int(org_id or -1)),
-            )
+            .filter(AffiliationModel.org_id == int(org_id or -1))
         )
         entities = entities.order_by(AffiliationModel.created.desc()).all()
         return [EntityService(entity).as_dict() for entity in entities]

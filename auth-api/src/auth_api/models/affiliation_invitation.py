@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, or_
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import joinedload, relationship
 
 from auth_api.config import get_named_config
 from auth_api.utils.enums import AffiliationInvitationType as AffiliationInvitationTypeEnum
@@ -165,12 +165,25 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         if not filter_set:
             raise ValueError("At least one filter has to be set!")
 
-        return results.all()
+        return results.options(
+            joinedload(AffiliationInvitation.entity),
+            joinedload(AffiliationInvitation.from_org),
+            joinedload(AffiliationInvitation.to_org),
+        ).all()
 
     @classmethod
     def find_invitation_by_id(cls, invitation_id: int):
         """Find an affiliation invitation record that matches the id."""
-        return cls.query.filter_by(id=int(invitation_id or -1)).first()
+        return (
+            db.session.query(AffiliationInvitation)
+            .filter(AffiliationInvitation.id == int(invitation_id or -1))
+            .options(
+                joinedload(AffiliationInvitation.entity),
+                joinedload(AffiliationInvitation.from_org),
+                joinedload(AffiliationInvitation.to_org),
+            )
+            .first()
+        )
 
     @classmethod
     def find_invitations_from_org(cls, org_id: int, status=None):
