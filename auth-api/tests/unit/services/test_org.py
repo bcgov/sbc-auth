@@ -22,6 +22,7 @@ from unittest.mock import ANY, Mock, patch
 
 import pytest
 from requests import Response
+from requests.exceptions import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
 from werkzeug.exceptions import HTTPException
 
@@ -1376,3 +1377,20 @@ def test_create_product_single_subscription_qs(session, monkeypatch):
     # Confirm account has the expected groups
     assert "mhr_search_user" in groups
     assert "mhr_qualified_user" in groups
+
+
+def test_handle_pay_http_error_known_pay_api_code(app):
+    """Assert that a known pay-api error type maps to the correct auth Error enum and status."""
+    response = Response()
+    response.status_code = 400
+    response._content = b'{"type": "CFS_ACCOUNT_SETUP_IN_PROGRESS", "detail": "Please wait a few minutes."}'
+
+    http_error = HTTPError(response=response)
+
+    with app.app_context():
+        with pytest.raises(BusinessException) as exc_info:
+            OrgService._handle_pay_http_error_raise_business_exception(http_error)
+
+    assert exc_info.value.code == Error.CFS_ACCOUNT_SETUP_IN_PROGRESS.name
+    assert exc_info.value.status_code == HTTPStatus.BAD_REQUEST
+    assert exc_info.value.detail == "Please wait a few minutes."
