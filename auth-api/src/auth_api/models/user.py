@@ -252,6 +252,8 @@ class User(Versioned, BaseModel):
         """Find all members of the org with a status."""
         from .contact_link import ContactLink  # local import to avoid circular dependency
 
+        # get_admin_emails_for_org accesses x.contacts[0].contact.email for every user returned.
+        # Without eager loading that's 2 lazy SELECTs per admin (contacts, then contact.email).
         return (
             db.session.query(User)
             .join(

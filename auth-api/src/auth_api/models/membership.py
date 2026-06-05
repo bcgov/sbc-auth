@@ -69,6 +69,7 @@ class Membership(Versioned, BaseModel):  # pylint: disable=too-few-public-method
         from .contact_link import ContactLink  # local imports to avoid circular dependency
         from .user import User
 
+        # Eagerly load all relationships touched by send_notification_to_member and the PATCH handler
         return (
             db.session.query(Membership)
             .filter(Membership.id == int(membership_id or -1))
@@ -108,6 +109,9 @@ class Membership(Versioned, BaseModel):  # pylint: disable=too-few-public-method
         from .contact_link import ContactLink  # local imports to avoid circular dependency
         from .user import User
 
+        # MembershipSchema serializes user (with contacts), membership_type, and membership_status.
+        # All four relationships default to lazy="select", so without eager loading each member
+        # triggers ~4 extra SELECTs. 
         return (
             db.session.query(Membership)
             .filter(and_(Membership.status == status, Membership.membership_type_code.in_(roles)))

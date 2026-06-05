@@ -165,6 +165,8 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         if not filter_set:
             raise ValueError("At least one filter has to be set!")
 
+        # entity, from_org, and to_org are lazy="select" by default. Without eager loading,
+        # serializing N invitations fires 3N extra SELECTs — one per relationship per row.
         return results.options(
             joinedload(AffiliationInvitation.entity),
             joinedload(AffiliationInvitation.from_org),
@@ -174,6 +176,9 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     @classmethod
     def find_invitation_by_id(cls, invitation_id: int):
         """Find an affiliation invitation record that matches the id."""
+        # Eagerly load entity, from_org, and to_org so the PATCH handler and
+        # send_affiliation_invitation (which accesses entity.business_identifier and org fields)
+        # don't each trigger a separate lazy SELECT after the initial fetch.
         return (
             db.session.query(AffiliationInvitation)
             .filter(AffiliationInvitation.id == int(invitation_id or -1))
