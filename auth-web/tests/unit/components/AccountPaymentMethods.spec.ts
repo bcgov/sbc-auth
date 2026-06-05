@@ -121,4 +121,16 @@ describe('AccountPaymentMethods.vue', () => {
     expect(wrapper.vm.errorTitle).toBe('Invalid Credentials')
     expect(wrapper.vm.errorText).toBe('BCOL API Error<br>Invalid User ID or Password')
   })
+
+  it('sets errorText and errorTitle correctly for a 400 pay-api error response', async () => {
+    const payApiDetail = 'Payment account setup is still in progress. Please wait a few minutes and try updating your bank details again.'
+    await saveWithMockError({
+      code: 'CFS_ACCOUNT_SETUP_IN_PROGRESS',
+      message: 'CFS_ACCOUNT_SETUP_IN_PROGRESS',
+      detail: payApiDetail
+    })
+
+    expect(wrapper.vm.errorTitle).toBe(payApiDetail)
+    expect(wrapper.vm.errorText).toBe(`Cfs Account Setup In Progress<br>${payApiDetail}`)
+  })
 })

@@ -261,14 +261,13 @@ class Org:  # pylint: disable=too-many-public-methods
     def _handle_pay_http_error_raise_business_exception(http_error: HTTPError) -> None:
         """Handle HTTP error by extracting error info and raising BusinessException."""
         error_payload = http_error.response.json()
-        error_code = next(
-            (error_payload[key] for key in ["error", "code"] if key in error_payload),
-            Error.PAYMENT_ACCOUNT_UPSERT_FAILED,
-        )
+        # Map pay-api error type/code to an auth Error enum; unknown codes fall back to generic 500.
+        pay_error_code = next((error_payload[k] for k in ("error", "code", "type") if k in error_payload), "")
+        error_code = getattr(Error, pay_error_code, Error.PAYMENT_ACCOUNT_UPSERT_FAILED)
         error_details = next(
             (
                 error_payload[key]
-                for key in ["error_description", "message", "description", "type"]
+                for key in ["detail", "error_description", "message", "description"]
                 if key in error_payload
             ),
             "",
