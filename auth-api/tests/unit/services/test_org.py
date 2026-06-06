@@ -1380,7 +1380,7 @@ def test_create_product_single_subscription_qs(session, monkeypatch):
 
 
 def test_handle_pay_http_error_known_pay_api_code(app):
-    """Assert pay-api type-only response maps to auth Error enum and uses auth message as detail."""
+    """Assert pay-api type-only response maps to auth Error enum; user message is on exception.message."""
     response = Response()
     response.status_code = 400
     response._content = b'{"type": "CFS_ACCOUNT_SETUP_IN_PROGRESS"}'
@@ -1393,4 +1393,4 @@ def test_handle_pay_http_error_known_pay_api_code(app):
 
     assert exc_info.value.code == Error.CFS_ACCOUNT_SETUP_IN_PROGRESS.name
     assert exc_info.value.status_code == HTTPStatus.BAD_REQUEST
-    assert exc_info.value.detail == Error.CFS_ACCOUNT_SETUP_IN_PROGRESS.message
+    assert exc_info.value.message == Error.CFS_ACCOUNT_SETUP_IN_PROGRESS.message
