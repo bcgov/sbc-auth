@@ -468,7 +468,7 @@ export default defineComponent({
             case 409:
             case 400:
               state.errorText = `${formatText(normalized.code)}<br>` +
-                  `${formatText(normalized.message?.detail) || formatText(normalized.message) || ''}`.trim()
+                  `${formatText(normalized.message?.detail) || formatText(normalized.detail) || ''}`.trim()
 
               state.errorTitle = formatText(normalized.message?.title) ||
                   formatText(normalized.message?.detail) ||

@@ -130,6 +130,6 @@ describe('AccountPaymentMethods.vue', () => {
     })
 
     expect(wrapper.vm.errorTitle).toBe(authApiMessage)
-    expect(wrapper.vm.errorText).toBe(`Cfs Account Setup In Progress<br>${authApiMessage}`)
+    expect(wrapper.vm.errorText).toBe('Cfs Account Setup In Progress<br>')
   })
 })
