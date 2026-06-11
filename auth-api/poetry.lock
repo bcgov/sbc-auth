@@ -1369,7 +1369,7 @@ opentelemetry-sdk = ">=1.42.0,<2"
 type = "git"
 url = "https://github.com/bcgov/sbc-connect-common.git"
 reference = "main"
-resolved_reference = "2d6857ee4cfea96d8ef7415553dcd6402f4a2775"
+resolved_reference = "42a520b3fc6f989d9401a34aa2267907ec1dc75f"
 subdirectory = "python/gcp-tracing"
 
 [[package]]
