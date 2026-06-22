@@ -17,6 +17,7 @@ Test Utility for creating model factory.
 """
 
 import datetime
+import secrets
 from string import Template
 
 import requests
@@ -27,6 +28,7 @@ from sqlalchemy import event
 from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import AccountLinkingKey as AccountLinkingKeyModel
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
@@ -345,6 +347,26 @@ def factory_activity_log_model(
     activity_log.save()
 
 
+def factory_linking_key_model(
+    account_id: int,
+    vendor_account_id: int | None = None,
+    status: str = "ACTIVE",
+    expires_on=None,
+) -> AccountLinkingKeyModel:
+    """Produce a templated AccountLinkingKey model."""
+    from datetime import UTC, datetime, timedelta
+
+    record = AccountLinkingKeyModel(
+        linking_key=secrets.token_urlsafe(32),
+        account_id=account_id,
+        vendor_account_id=vendor_account_id,
+        status=status,
+        expires_on=expires_on or datetime.now(UTC) + timedelta(days=365),
+    )
+    record.save()
+    return record
+
+
 def patch_token_info(claims, monkeypatch):
     """Patch token info to mimic g."""
 
@@ -538,8 +560,10 @@ def keycloak_delete_user_by_username(username):
 
 def patch_pay_account_fees(monkeypatch, product_codes: list[str]):
     """Patch GET /accounts/{id} (account detail) to return given product codes in accountFees."""
+
     class MockFeeResponse:
         status_code = 200
+
         def json(self):
             return {"accountFees": [{"product": c} for c in product_codes]}
 

@@ -13,6 +13,7 @@
 # limitations under the License.
 """Schema package."""
 
+from .account_linking_key import AccountLinkingKeySchema
 from .activity_log import ActivityLogSchema
 from .affidavit import AffidavitSchema
 from .affidavit_status import AffidavitStatusSchema

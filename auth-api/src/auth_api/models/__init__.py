@@ -18,6 +18,7 @@
 from sqlalchemy import event  # noqa: I001, TC002
 from sqlalchemy.engine import Engine  # noqa: I001, TC002
 
+from .account_linking_key import AccountLinkingKey
 from .account_login_options import AccountLoginOptions
 from .activity_log import ActivityLog
 from .affidavit import Affidavit

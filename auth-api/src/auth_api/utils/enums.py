@@ -351,6 +351,15 @@ class ActivityAction(Enum):
     REMOVE_PRODUCT_AND_SERVICE = "REMOVE_PRODUCT_AND_SERVICE"
     STATEMENT_INTERVAL_CHANGE = "STATEMENT_INTERVAL_CHANGE"
     STATEMENT_RECIPIENT_CHANGE = "STATEMENT_RECIPIENT_CHANGE"
+    LINKING_KEY_GENERATED = "LINKING_KEY_GENERATED"
+    LINKING_KEY_REVOKED = "LINKING_KEY_REVOKED"
+
+
+class LinkingKeyStatus(Enum):
+    """Linking key status values."""
+
+    ACTIVE = "ACTIVE"
+    REVOKED = "REVOKED"
 
 
 class PatchActions(Enum):
@@ -394,7 +403,6 @@ class QueueMessageType(Enum):
 
     AFFILIATION_INVITATION_UNAFFILIATED_EMAIL = "bc.registry.auth.affiliationInvitationUnaffiliatedEmail"
     AFFILIATION_CONFIRMATION_EMAIL = "bc.registry.auth.affiliationConfirmationEmail"
-
 
 
 class QueueSources(Enum):

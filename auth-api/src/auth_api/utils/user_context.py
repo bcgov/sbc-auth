@@ -126,6 +126,11 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         return account_id
 
     @property
+    def linking_key(self) -> str | None:
+        """Return the linking key from the request header."""
+        return request.headers.get("Linking-Key") if request else None
+
+    @property
     def login_source(self) -> str:
         """Return the login source."""
         return self._login_source
