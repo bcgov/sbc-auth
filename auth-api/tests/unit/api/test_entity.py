@@ -549,7 +549,8 @@ def test_authorizations_for_expanded_result(client, jwt, session):  # pylint:dis
     assert rv.status_code == HTTPStatus.OK
     assert schema_utils.validate(rv.json, "account_response")[0]
     assert rv.json.get("orgMembership") == "ADMIN"
-    assert rv.json.get("account", None) is None
+    assert rv.json.get("account", {}).get("paymentAccountId") == org.id
+    assert rv.json.get("account", {}).get("name") is None  # expanded fields absent
 
     rv = client.get(
         f"/api/v1/entities/{entity.business_identifier}/authorizations?expanded=true",
