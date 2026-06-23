@@ -35,6 +35,7 @@ from tests.utilities.factory_utils import (
     factory_affiliation_model_by_identifier,
     factory_auth_header,
     factory_entity_model,
+    factory_linking_key_model,
     factory_membership_model,
     factory_org_model,
     factory_user_model,
@@ -719,3 +720,27 @@ def test_get_entity_authentication(client, jwt, session):
     assert data["contactEmail"] != TestContactInfo.contact1["email"]
     assert data["contactEmail"] == "fo*@ba*****"
     assert "hasValidPassCode" in data
+
+
+def test_authorization_via_account_linking_key_header(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a vendor can access a lawfirm's entity using the Account-Linking-Key header."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    lawfirm_member = factory_user_model()
+    factory_membership_model(lawfirm_member.id, lawfirm.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, lawfirm.id)
+    linking_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
+    claims["Account-Id"] = str(vendor.id)
+    headers = {**factory_auth_header(jwt=jwt, claims=claims), "Account-Linking-Key": linking_key.linking_key}
+
+    rv = client.get(
+        f"/api/v1/entities/{entity.business_identifier}/authorizations",
+        headers=headers,
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json.get("account", {}).get("paymentAccountId") == vendor.id
