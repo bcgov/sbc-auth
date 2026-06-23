@@ -42,7 +42,7 @@ def test_generate_linking_key(client, jwt, session):  # pylint:disable=unused-ar
     factory_membership_model(user.id, org.id)
 
     rv = client.post(
-        f"/api/v1/orgs/{org.id}/linking-key",
+        f"/api/v1/orgs/{org.id}/linking-keys",
         headers=_account_holder_headers(jwt, user),
         content_type="application/json",
         data=json.dumps({"vendorAccountId": vendor.id}),
@@ -65,7 +65,7 @@ def test_generate_linking_key_without_vendor_returns_400(client, jwt, session): 
     factory_membership_model(user.id, org.id)
 
     rv = client.post(
-        f"/api/v1/orgs/{org.id}/linking-key",
+        f"/api/v1/orgs/{org.id}/linking-keys",
         headers=_account_holder_headers(jwt, user),
         content_type="application/json",
         data=json.dumps({}),
@@ -82,7 +82,7 @@ def test_generate_linking_key_with_vendor(client, jwt, session):  # pylint:disab
     factory_membership_model(user.id, lawfirm.id)
 
     rv = client.post(
-        f"/api/v1/orgs/{lawfirm.id}/linking-key",
+        f"/api/v1/orgs/{lawfirm.id}/linking-keys",
         headers=_account_holder_headers(jwt, user),
         content_type="application/json",
         data=json.dumps({"vendorAccountId": vendor.id}),
@@ -101,7 +101,7 @@ def test_generate_multiple_keys_for_different_vendors(client, jwt, session):  # 
     factory_membership_model(user.id, lawfirm.id)
 
     headers = _account_holder_headers(jwt, user)
-    url = f"/api/v1/orgs/{lawfirm.id}/linking-key"
+    url = f"/api/v1/orgs/{lawfirm.id}/linking-keys"
 
     rv_a = client.post(
         url, headers=headers, content_type="application/json", data=json.dumps({"vendorAccountId": vendor_a.id})
@@ -129,7 +129,7 @@ def test_regenerate_key_for_same_vendor_revokes_previous(client, jwt, session): 
     factory_membership_model(user.id, lawfirm.id)
 
     headers = _account_holder_headers(jwt, user)
-    url = f"/api/v1/orgs/{lawfirm.id}/linking-key"
+    url = f"/api/v1/orgs/{lawfirm.id}/linking-keys"
     payload = json.dumps({"vendorAccountId": vendor.id})
 
     first = client.post(url, headers=headers, content_type="application/json", data=payload)
@@ -149,7 +149,7 @@ def test_get_linking_keys_empty(client, jwt, session):  # pylint:disable=unused-
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
 
-    rv = client.get(f"/api/v1/orgs/{org.id}/linking-key", headers=_account_holder_headers(jwt, user))
+    rv = client.get(f"/api/v1/orgs/{org.id}/linking-keys", headers=_account_holder_headers(jwt, user))
 
     assert rv.status_code == HTTPStatus.OK
     assert rv.json.get("linkingKeys") == []
@@ -162,7 +162,7 @@ def test_get_linking_keys_hides_key_value(client, jwt, session):  # pylint:disab
     factory_membership_model(user.id, org.id)
     factory_linking_key_model(account_id=org.id)
 
-    rv = client.get(f"/api/v1/orgs/{org.id}/linking-key", headers=_account_holder_headers(jwt, user))
+    rv = client.get(f"/api/v1/orgs/{org.id}/linking-keys", headers=_account_holder_headers(jwt, user))
 
     assert rv.status_code == HTTPStatus.OK
     keys = rv.json.get("linkingKeys")
@@ -178,10 +178,10 @@ def test_revoke_linking_key_by_id(client, jwt, session):  # pylint:disable=unuse
     record = factory_linking_key_model(account_id=org.id)
 
     headers = _account_holder_headers(jwt, user)
-    rv = client.delete(f"/api/v1/orgs/{org.id}/linking-key/{record.id}", headers=headers)
+    rv = client.delete(f"/api/v1/orgs/{org.id}/linking-keys/{record.id}", headers=headers)
     assert rv.status_code == HTTPStatus.OK
 
-    rv_list = client.get(f"/api/v1/orgs/{org.id}/linking-key", headers=headers)
+    rv_list = client.get(f"/api/v1/orgs/{org.id}/linking-keys", headers=headers)
     assert rv_list.json.get("linkingKeys") == []
 
 
@@ -195,7 +195,7 @@ def test_revoke_wrong_org_returns_404(client, jwt, session):  # pylint:disable=u
     record = factory_linking_key_model(account_id=org_b.id)
 
     headers = _account_holder_headers(jwt, user)
-    rv = client.delete(f"/api/v1/orgs/{org_a.id}/linking-key/{record.id}", headers=headers)
+    rv = client.delete(f"/api/v1/orgs/{org_a.id}/linking-keys/{record.id}", headers=headers)
     assert rv.status_code == HTTPStatus.NOT_FOUND
 
 
@@ -206,6 +206,6 @@ def test_generate_linking_key_forbidden_without_role(client, jwt, session):  # p
     factory_membership_model(user.id, org.id)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post(f"/api/v1/orgs/{org.id}/linking-key", headers=headers)
+    rv = client.post(f"/api/v1/orgs/{org.id}/linking-keys", headers=headers)
 
     assert rv.status_code == HTTPStatus.UNAUTHORIZED

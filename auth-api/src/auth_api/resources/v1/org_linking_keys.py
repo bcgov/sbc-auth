@@ -26,7 +26,7 @@ from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import ADMIN, COORDINATOR, Role
 
-bp = Blueprint("LINKING_KEYS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs/<int:org_id>/linking-key")
+bp = Blueprint("LINKING_KEYS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs/<int:org_id>/linking-keys")
 
 _OWNER_ROLES = (COORDINATOR, ADMIN)
 

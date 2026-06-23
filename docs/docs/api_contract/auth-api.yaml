@@ -582,7 +582,7 @@ paths:
                 type: string
               description: Access-Control-Allow-Headers
       description: Retrieve the set of contacts associated with the specified org.
-  '/orgs/{org_id}/linking-key':
+  '/orgs/{org_id}/linking-keys':
     parameters:
       - name: org_id
         in: path
@@ -596,8 +596,8 @@ paths:
       summary: List all active linking keys for the org.
       description: >
         Returns all active linking key records for the org. Key values are never returned —
-        only metadata (status, expiry, vendor binding, last-used, reset count).
-        A lawfirm may have one key per vendor.
+        only metadata (status, expiry, vendor binding, last-used).
+        A lawfirm may have at most one active key per vendor.
       responses:
         '200':
           description: Success
@@ -622,20 +622,22 @@ paths:
         - orgs
       summary: Generate a new linking key for the org.
       description: >
-        Creates a new active linking key. If `vendorAccountId` is provided the key is immediately
-        bound to that vendor (any existing active key for the same vendor is revoked first).
-        If omitted the key is unbound and locks to the first vendor that uses it.
+        Creates a new active linking key bound to the specified vendor. Any existing active key
+        for the same (org, vendor) pair is revoked first.
         The key value is returned **once** in this response and never again.
         Restricted to org ADMIN or COORDINATOR.
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - vendorAccountId
               properties:
                 vendorAccountId:
                   type: integer
-                  description: Optional. The vendor org to bind this key to immediately.
+                  description: The vendor org to bind this key to.
       responses:
         '201':
           description: Created
@@ -643,6 +645,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/linkingKey'
+        '400':
+          description: Bad Request — vendorAccountId missing or invalid.
         '401':
           description: Unauthorized
         '403':
@@ -651,7 +655,7 @@ paths:
           description: Not Found — org does not exist.
       security:
         - JWT: []
-  '/orgs/{org_id}/linking-key/{key_id}':
+  '/orgs/{org_id}/linking-keys/{key_id}':
     parameters:
       - name: org_id
         in: path
@@ -2033,7 +2037,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      description: Get authorizations endpoint for the entity by business indentifier
+      description: Get authorizations endpoint for the entity by business identifier
     parameters:
       - schema:
           type: string
@@ -2041,6 +2045,21 @@ paths:
         in: path
         required: true
         description: Corp Num/Incorporation Number of the entity
+      - schema:
+          type: string
+        name: Account-Linking-Key
+        in: header
+        required: false
+        description: >
+          Linking key issued by the source org (e.g. lawfirm). When present with Account-Id,
+          grants the vendor access to the source org's affiliated businesses.
+          The response paymentAccountId will be set to the vendor's account ID.
+      - schema:
+          type: string
+        name: Account-Id
+        in: header
+        required: false
+        description: Numeric org ID of the calling vendor account. Required when Account-Linking-Key is present.
         examples:
           CP0001234:
             value: CP0001234
@@ -4096,11 +4115,15 @@ components:
           type: integer
         accountId:
           type: integer
-          description: The org (lawfirm) that owns this key.
+          description: The source org (e.g. lawfirm) that owns this key.
         vendorAccountId:
           type: integer
           nullable: true
-          description: The vendor org bound to this key on first use.
+          description: The vendor org authorized to use this key.
+        vendorAccountName:
+          type: string
+          nullable: true
+          description: Display name of the vendor org.
         status:
           type: string
           enum: [ACTIVE, REVOKED]
@@ -4111,9 +4134,13 @@ components:
           type: string
           format: date-time
           nullable: true
-        resetCount:
-          type: integer
-          description: Number of times this key has been reset.
+        createdOn:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          nullable: true
+          description: Full name of the user who generated the key.
     linkingKey:
       title: linkingKey
       allOf:
