@@ -36,14 +36,30 @@ class AccountLinkingKey(BaseModel):
     __tablename__ = "account_linking_keys"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    linking_key = Column(String(100), nullable=False, unique=True, index=True)
-    # Source account whose businesses are shared (e.g. lawfirm)
-    account_id = Column(ForeignKey("orgs.id"), nullable=False, index=True)
-    # Vendor account that uses the key (e.g. ALF); bound at generation or locked on first use
-    vendor_account_id = Column(ForeignKey("orgs.id"), nullable=True, index=True)
-    status = Column(String(20), nullable=False, default=LinkingKeyStatus.ACTIVE.value)
-    expires_on = Column(DateTime(timezone=True), nullable=False)
-    last_used = Column(DateTime(timezone=True), nullable=True)
+    linking_key = Column(
+        String(100), nullable=False, unique=True, index=True,
+        comment="Cryptographically random URL-safe secret shared with the vendor",
+    )
+    account_id = Column(
+        ForeignKey("orgs.id"), nullable=False, index=True,
+        comment="Source account (e.g. lawfirm) whose affiliated businesses are accessible via this key",
+    )
+    vendor_account_id = Column(
+        ForeignKey("orgs.id"), nullable=True, index=True,
+        comment="Vendor account (e.g. ALF) that is authorized to use this key; set at generation time",
+    )
+    status = Column(
+        String(20), nullable=False, default=LinkingKeyStatus.ACTIVE.value,
+        comment="ACTIVE or REVOKED",
+    )
+    expires_on = Column(
+        DateTime(timezone=True), nullable=False,
+        comment="UTC timestamp after which the key is no longer valid",
+    )
+    last_used = Column(
+        DateTime(timezone=True), nullable=True,
+        comment="UTC timestamp of the most recent successful validation",
+    )
     account = relationship("Org", foreign_keys=[account_id], lazy="select")
     vendor_account = relationship("Org", foreign_keys=[vendor_account_id], lazy="select")
 
