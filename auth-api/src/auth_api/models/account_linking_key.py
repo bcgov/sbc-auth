@@ -23,7 +23,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import joinedload, relationship
 
 from auth_api.utils.enums import LinkingKeyStatus
 
@@ -75,7 +75,11 @@ class AccountLinkingKey(BaseModel):
     @classmethod
     def find_active_by_account_id(cls, account_id: int) -> list[AccountLinkingKey]:
         """Return all active linking keys for the given source account."""
-        return cls.query.filter_by(account_id=account_id, status=LinkingKeyStatus.ACTIVE.value).all()
+        return (
+            cls.query.filter_by(account_id=account_id, status=LinkingKeyStatus.ACTIVE.value)
+            .options(joinedload(cls.vendor_account), joinedload(cls.created_by))
+            .all()
+        )
 
     @classmethod
     def find_active_by_id(cls, key_id: int, account_id: int) -> AccountLinkingKey | None:
