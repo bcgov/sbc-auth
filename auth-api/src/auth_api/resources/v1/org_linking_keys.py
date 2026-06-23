@@ -22,6 +22,7 @@ from auth_api.schemas import AccountLinkingKeySchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
 from auth_api.services.account_linking_key import AccountLinkingKey as AccountLinkingKeyService
+from auth_api.services.flags import flags
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import ADMIN, COORDINATOR, Role
@@ -29,6 +30,12 @@ from auth_api.utils.roles import ADMIN, COORDINATOR, Role
 bp = Blueprint("LINKING_KEYS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs/<int:org_id>/linking-keys")
 
 _OWNER_ROLES = (COORDINATOR, ADMIN)
+
+
+@bp.before_request
+def _check_feature_enabled():
+    if flags.is_on("disable-account-linking", default=False):
+        return {"message": "Account linking is not available."}, HTTPStatus.NOT_IMPLEMENTED
 
 
 @bp.route("", methods=["GET", "OPTIONS"])

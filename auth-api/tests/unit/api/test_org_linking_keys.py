@@ -209,3 +209,17 @@ def test_generate_linking_key_forbidden_without_role(client, jwt, session):  # p
     rv = client.post(f"/api/v1/orgs/{org.id}/linking-keys", headers=headers)
 
     assert rv.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_linking_keys_disabled_by_flag(client, jwt, session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that all linking-keys endpoints return 501 when disable-account-linking flag is on."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    headers = _account_holder_headers(jwt, user)
+
+    monkeypatch.setattr("auth_api.resources.v1.org_linking_keys.flags.is_on", lambda *a, **kw: True)
+
+    assert client.get(f"/api/v1/orgs/{org.id}/linking-keys", headers=headers).status_code == HTTPStatus.NOT_IMPLEMENTED
+    assert client.post(f"/api/v1/orgs/{org.id}/linking-keys", headers=headers).status_code == HTTPStatus.NOT_IMPLEMENTED
+    assert client.delete(f"/api/v1/orgs/{org.id}/linking-keys/1", headers=headers).status_code == HTTPStatus.NOT_IMPLEMENTED
