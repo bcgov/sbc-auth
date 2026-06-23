@@ -119,7 +119,7 @@ class Authorization:
                     if not linked:
                         abort(403)
                     business_access_org_id = linked.account_id
-                    payment_account_id = int(user_from_context.account_id)  # vendor (e.g. ALF) pays
+                    payment_account_id = linked.vendor_account_id  # vendor (e.g. ALF) pays
 
                 # With a linking key the caller isn't a member of the source org, so omit keycloak_guid
                 if keycloak_guid := (user_from_context.sub if not payment_account_id else None):
