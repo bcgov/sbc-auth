@@ -218,7 +218,7 @@ def test_linking_keys_disabled_by_flag(client, jwt, session, monkeypatch):  # py
     factory_membership_model(user.id, org.id)
     headers = _account_holder_headers(jwt, user)
 
-    monkeypatch.setattr("auth_api.resources.v1.org_linking_keys.flags.is_on", lambda *a, **kw: True)
+    monkeypatch.setattr("auth_api.resources.v1.org_linking_keys.flags.is_on", lambda *_, **__: True)
 
     assert client.get(f"/api/v1/orgs/{org.id}/linking-keys", headers=headers).status_code == HTTPStatus.NOT_IMPLEMENTED
     assert client.post(f"/api/v1/orgs/{org.id}/linking-keys", headers=headers).status_code == HTTPStatus.NOT_IMPLEMENTED
