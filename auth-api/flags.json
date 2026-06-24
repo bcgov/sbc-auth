@@ -4,6 +4,7 @@
         "bool-flag": true,
         "integer-flag": 10,
         "enable-publish-account-events": true,
-        "enable-entity-mapping": true
+        "enable-entity-mapping": true,
+        "disable-account-linking": false
     }
 }

@@ -19,6 +19,7 @@ This module is to handle authorization related queries.
 from flask import abort, current_app
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
+from auth_api.services.account_linking_key import AccountLinkingKey as LinkingKeyService
 from auth_api.services.permissions import Permissions as PermissionsService
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
@@ -110,19 +111,34 @@ class Authorization:
                     auth_response["roles"] = permissions
         else:
             if business_identifier:
-                # Check if the user has access to the resource
-                if keycloak_guid := user_from_context.sub:
+                business_access_org_id = user_from_context.account_id
+                payment_account_id = None
+
+                if (linking_key := user_from_context.linking_key) and user_from_context.account_id:
+                    linked = LinkingKeyService.validate(linking_key, user_from_context.account_id)
+                    if not linked:
+                        abort(403)
+                    business_access_org_id = linked.account_id
+                    payment_account_id = linked.vendor_account_id  # vendor (e.g. ALF) pays
+
+                # With a linking key the caller isn't a member of the source org, so omit keycloak_guid
+                if keycloak_guid := (user_from_context.sub if not payment_account_id else None):
                     auth = AuthorizationView.find_user_authorization_by_business_number(
                         business_identifier=business_identifier,
                         keycloak_guid=keycloak_guid,
-                        org_id=user_from_context.account_id,
+                        org_id=business_access_org_id,
+                    )
+                else:
+                    auth = AuthorizationView.find_user_authorization_by_business_number(
+                        business_identifier=business_identifier,
+                        org_id=business_access_org_id,
                     )
 
                 if auth:
                     permissions = PermissionsService.get_permissions_for_membership(
                         auth.status_code, auth.org_membership
                     )
-                    auth_response = Authorization(auth).as_dict(expanded)
+                    auth_response = Authorization(auth).as_dict(expanded, payment_account_id=payment_account_id)
                     auth_response["roles"] = permissions
 
         return auth_response
@@ -158,7 +174,7 @@ class Authorization:
 
         return auth_response
 
-    def as_dict(self, expanded: bool = False):
+    def as_dict(self, expanded: bool = False, payment_account_id: int | None = None):
         """Return the authorization as a python dictionary."""
         auth_dict = {}
 
@@ -179,6 +195,7 @@ class Authorization:
                     "bcOnlineAccountId": self._model.bcol_account_id,
                 },
             }
+        auth_dict.setdefault("account", {})["paymentAccountId"] = payment_account_id or self._model.org_id
         return auth_dict
 
     @staticmethod

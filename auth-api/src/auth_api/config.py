@@ -151,6 +151,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     TOKEN_EXPIRY_PERIOD = os.getenv("TOKEN_EXPIRY_PERIOD")
     AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS = os.getenv("AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS", "720")
     UNAFFILIATED_EMAIL_TOKEN_EXPIRY_PERIOD_MINS = os.getenv("UNAFFILIATED_EMAIL_TOKEN_EXPIRY_PERIOD_MINS", "10080")
+    LINKING_KEY_EXPIRY_DAYS = int(os.getenv("LINKING_KEY_EXPIRY_DAYS", "365"))
     STAFF_ADMIN_EMAIL = os.getenv("STAFF_ADMIN_EMAIL")
 
     # front end serves this image in this name.can be moved to openshift config as well..
