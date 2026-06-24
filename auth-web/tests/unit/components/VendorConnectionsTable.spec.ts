@@ -1,17 +1,16 @@
 
 import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
+import LinkingKeysService from '@/services/linkingKeys.services'
+import { MembershipType } from '@/models/Organization'
+import { Role } from '@/util/constants'
 import VendorConnectionsTable from '@/components/auth/account-settings/advance-settings/VendorConnectionsTable.vue'
-
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import { createI18n } from 'vue-i18n-composable'
-import { createPinia, setActivePinia } from 'pinia'
-import LinkingKeysService from '@/services/linkingKeys.services'
+import moment from 'moment'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
-import { MembershipType } from '@/models/Organization'
-import { Role } from '@/util/constants'
-import moment from 'moment'
 
 const vuetify = new Vuetify({})
 

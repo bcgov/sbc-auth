@@ -1,7 +1,7 @@
-import { MembershipType } from '@/models/Organization'
-import { canAccessVendorConnections, mapLinkingKeyToVendorConnection } from '@/util/vendor-connection-util'
 import { LDFlags, Role } from '@/util/constants'
+import { canAccessVendorConnections, mapLinkingKeyToVendorConnection } from '@/util/vendor-connection-util'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { MembershipType } from '@/models/Organization'
 
 describe('vendor-connection-util', () => {
   afterEach(() => {

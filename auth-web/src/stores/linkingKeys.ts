@@ -3,6 +3,16 @@ import { AccountLinkingKey } from '@/models/vendorConnection'
 import LinkingKeysService from '@/services/linkingKeys.services'
 import { defineStore } from 'pinia'
 
+async function revokeLinkingKey (linkingKeyDetails) {
+  const response = await LinkingKeysService.revokeOrgLinkingKey(linkingKeyDetails)
+  return response?.data || {}
+}
+
+async function extendLinkingKey (linkingKeyDetails) {
+  const response = await LinkingKeysService.extendOrgLinkingKey(linkingKeyDetails)
+  return response?.data || {}
+}
+
 export const useLinkingKeysStore = defineStore('linkingKeys', () => {
   const state = reactive({
     linkingKeys: [] as AccountLinkingKey[],
@@ -18,16 +28,6 @@ export const useLinkingKeysStore = defineStore('linkingKeys', () => {
     } finally {
       state.isLoading = false
     }
-  }
-
-  async function revokeLinkingKey (linkingKeyDetails) {
-    const response = await LinkingKeysService.revokeOrgLinkingKey(linkingKeyDetails)
-    return response?.data || {}
-  }
-
-  async function extendLinkingKey (linkingKeyDetails) {
-    const response = await LinkingKeysService.extendOrgLinkingKey(linkingKeyDetails)
-    return response?.data || {}
   }
 
   function $reset () {

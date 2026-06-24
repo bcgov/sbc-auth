@@ -1,16 +1,16 @@
 
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-import VendorConnections from '@/components/auth/account-settings/advance-settings/VendorConnections.vue'
-import VendorConnectionsTable from '@/components/auth/account-settings/advance-settings/VendorConnectionsTable.vue'
-
-import VueRouter from 'vue-router'
-import Vuetify from 'vuetify'
 import { createPinia, setActivePinia } from 'pinia'
-import { useOrgStore } from '@/stores/org'
-import { useUserStore } from '@/stores/user'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { MembershipType } from '@/models/Organization'
 import { Role } from '@/util/constants'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import VendorConnections from '@/components/auth/account-settings/advance-settings/VendorConnections.vue'
+import VendorConnectionsTable from '@/components/auth/account-settings/advance-settings/VendorConnectionsTable.vue'
+import VueRouter from 'vue-router'
+import Vuetify from 'vuetify'
+
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 const vuetify = new Vuetify({})
 

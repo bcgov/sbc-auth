@@ -332,7 +332,6 @@
 
 <script lang="ts">
 import { AccountStatus, Pages, Permission, Role } from '@/util/constants'
-import { canAccessVendorConnections } from '@/util/vendor-connection-util'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
@@ -341,6 +340,7 @@ import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { canAccessVendorConnections } from '@/util/vendor-connection-util'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 

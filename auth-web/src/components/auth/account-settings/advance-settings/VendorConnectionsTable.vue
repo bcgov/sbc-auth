@@ -180,25 +180,25 @@
 </template>
 
 <script lang="ts">
+import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref } from '@vue/composition-api'
 import {
   canAccessVendorConnections,
   getDaysUntilExpiry,
   getVendorConnectionStatus,
   mapLinkingKeyToVendorConnection
 } from '@/util/vendor-connection-util'
-import CommonUtils from '@/util/common-util'
-import moment from 'moment'
-import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref } from '@vue/composition-api'
-import { BaseVDataTable } from '@/components'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
-import { useAccountChangeHandler } from '@/composables'
+import { BaseVDataTable } from '@/components'
+import CommonUtils from '@/util/common-util'
 import { EventBus } from '@/event-bus'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { VendorConnection } from '@/models/vendorConnection'
+import moment from 'moment'
+import { useAccountChangeHandler } from '@/composables'
+import { useI18n } from 'vue-i18n-composable'
 import { useLinkingKeysStore } from '@/stores/linkingKeys'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
-import { useI18n } from 'vue-i18n-composable'
 
 const TABLE_HEADERS: BaseTableHeaderI[] = [
   {
