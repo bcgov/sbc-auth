@@ -312,23 +312,36 @@ export default defineComponent({
       extendDialog.value?.open?.()
     }
 
-    const confirmRemove = () => {
+    const confirmRemove = async () => {
       if (!selectedConnection.value) {
         return
       }
 
       const providerName = selectedConnection.value.serviceProviderName
-      connectionsList.value = connectionsList.value
-        .filter(connection => connection.id !== selectedConnection.value?.id)
+      const connectionId = selectedConnection.value.id
+      const orgId = orgStore.currentOrganization?.id
+      if (!orgId) {
+        return
+      }
 
-      EventBus.$emit('show-toast', {
-        message: t('vendorConnectionsRemovedToast', { providerName }),
-        type: 'primary',
-        timeout: 3000
-      })
+      try {
+        await linkingKeysStore.revokeLinkingKey({
+          orgId,
+          keyId: Number(connectionId)
+        })
+        await loadConnections()
 
-      selectedConnection.value = null
-      removeDialog.value?.close?.()
+        EventBus.$emit('show-toast', {
+          message: t('vendorConnectionsRemovedToast', { providerName }),
+          type: 'primary',
+          timeout: 3000
+        })
+      } catch {
+        return
+      } finally {
+        selectedConnection.value = null
+        removeDialog.value?.close?.()
+      }
     }
 
     const confirmExtend = async () => {
@@ -344,16 +357,11 @@ export default defineComponent({
       }
 
       try {
-        const updatedKey = await linkingKeysStore.extendLinkingKey({
+        await linkingKeysStore.extendLinkingKey({
           orgId,
           keyId: Number(connectionId)
         })
-        connectionsList.value = connectionsList.value.map(connection => {
-          if (connection.id !== connectionId) {
-            return connection
-          }
-          return mapLinkingKeyToVendorConnection(updatedKey)
-        })
+        await loadConnections()
 
         EventBus.$emit('show-toast', {
           message: t('vendorConnectionsExtendedToast', { providerName }),

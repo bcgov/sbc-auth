@@ -1,8 +1,7 @@
-import { reactive, toRefs } from '@vue/composition-api'
-import { AccountLinkingKey } from '@/models/vendorConnection'
 import LinkingKeysService from '@/services/linkingKeys.services'
 import { defineStore } from 'pinia'
 
+// Note: defined outside store to avoid SonarQube S7721 (nested async functions)
 async function revokeLinkingKey (linkingKeyDetails) {
   const response = await LinkingKeysService.revokeOrgLinkingKey(linkingKeyDetails)
   return response?.data || {}
@@ -14,29 +13,16 @@ async function extendLinkingKey (linkingKeyDetails) {
 }
 
 export const useLinkingKeysStore = defineStore('linkingKeys', () => {
-  const state = reactive({
-    linkingKeys: [] as AccountLinkingKey[],
-    isLoading: false
-  })
-
   async function fetchLinkingKeys (orgId: number) {
-    state.isLoading = true
-    try {
-      const response = await LinkingKeysService.getOrgLinkingKeys(orgId)
-      state.linkingKeys = response?.data?.linkingKeys || []
-      return response?.data || {}
-    } finally {
-      state.isLoading = false
-    }
+    const response = await LinkingKeysService.getOrgLinkingKeys(orgId)
+    return response?.data || {}
   }
 
   function $reset () {
-    state.linkingKeys = []
-    state.isLoading = false
+    // no-op: store holds no cached state
   }
 
   return {
-    ...toRefs(state),
     fetchLinkingKeys,
     revokeLinkingKey,
     extendLinkingKey,

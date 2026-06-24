@@ -120,18 +120,44 @@ describe('VendorConnectionsTable.vue', () => {
     expect(activeConnection).toBeTruthy()
   })
 
+  it('confirmRemove removes connection after API call', async () => {
+    const activeConnection = wrapper.vm.connectionsList.find(
+      connection => wrapper.vm.getConnectionStatus(connection) === 'active'
+    )
+    vi.spyOn(LinkingKeysService, 'revokeOrgLinkingKey').mockResolvedValue({ data: {} } as any)
+    vi.mocked(LinkingKeysService.getOrgLinkingKeys).mockResolvedValueOnce({
+      data: {
+        linkingKeys: getMockLinkingKeysResponse().data.linkingKeys.filter(
+          key => key.id !== Number(activeConnection.id)
+        )
+      }
+    } as any)
+
+    wrapper.vm.openRemoveModal(activeConnection)
+    await wrapper.vm.confirmRemove()
+
+    expect(LinkingKeysService.revokeOrgLinkingKey).toHaveBeenCalledWith({
+      orgId: 1,
+      keyId: Number(activeConnection.id)
+    })
+    expect(LinkingKeysService.getOrgLinkingKeys).toHaveBeenCalledTimes(2)
+    expect(wrapper.vm.connectionsList).toHaveLength(2)
+    expect(wrapper.vm.connectionsList.find(connection => connection.id === activeConnection.id)).toBeUndefined()
+  })
+
   it('confirmExtend updates connection expiry from API response', async () => {
     const expiringConnection = wrapper.vm.connectionsList.find(
       connection => wrapper.vm.getConnectionStatus(connection) === 'expiring'
     )
-    vi.spyOn(LinkingKeysService, 'extendOrgLinkingKey').mockResolvedValue({
+    vi.spyOn(LinkingKeysService, 'extendOrgLinkingKey').mockResolvedValue({ data: {} } as any)
+    vi.mocked(LinkingKeysService.getOrgLinkingKeys).mockResolvedValueOnce({
       data: {
-        id: Number(expiringConnection.id),
-        accountId: 1,
-        vendorAccountName: expiringConnection.serviceProviderName,
-        createdOn: expiringConnection.dateAdded,
-        createdBy: expiringConnection.createdBy,
-        expiresOn: '2028-06-01T00:00:00Z'
+        linkingKeys: getMockLinkingKeysResponse().data.linkingKeys.map(key => {
+          if (key.id !== Number(expiringConnection.id)) {
+            return key
+          }
+          return { ...key, expiresOn: '2028-06-01T00:00:00Z' }
+        })
       }
     } as any)
 
@@ -145,6 +171,7 @@ describe('VendorConnectionsTable.vue', () => {
       orgId: 1,
       keyId: Number(expiringConnection.id)
     })
+    expect(LinkingKeysService.getOrgLinkingKeys).toHaveBeenCalledTimes(2)
     expect(updatedConnection.expiryDate).toBe('2028-06-01T00:00:00Z')
   })
 })

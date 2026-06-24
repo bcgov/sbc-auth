@@ -8,7 +8,7 @@ describe('linkingKeys store', () => {
     vi.restoreAllMocks()
   })
 
-  it('fetchLinkingKeys stores linking keys from API response', async () => {
+  it('fetchLinkingKeys returns linking keys from API response', async () => {
     vi.spyOn(LinkingKeysService, 'getOrgLinkingKeys').mockResolvedValue({
       data: {
         linkingKeys: [{
@@ -25,10 +25,9 @@ describe('linkingKeys store', () => {
     const store = useLinkingKeysStore()
     const response = await store.fetchLinkingKeys(10)
 
+    expect(LinkingKeysService.getOrgLinkingKeys).toHaveBeenCalledWith(10)
     expect(response.linkingKeys).toHaveLength(1)
-    expect(store.linkingKeys).toHaveLength(1)
-    expect(store.linkingKeys[0].vendorAccountName).toBe('ABC API Service')
-    expect(store.isLoading).toBe(false)
+    expect(response.linkingKeys[0].vendorAccountName).toBe('ABC API Service')
   })
 
   it('revokeLinkingKey calls LinkingKeysService with linking key details', async () => {
@@ -56,16 +55,8 @@ describe('linkingKeys store', () => {
     expect(response.expiresOn).toBe('2028-01-15T00:00:00Z')
   })
 
-  it('$reset clears linking keys state', () => {
+  it('$reset is a no-op', () => {
     const store = useLinkingKeysStore()
-    store.$patch({
-      linkingKeys: [{ id: 1 } as any],
-      isLoading: true
-    })
-
-    store.$reset()
-
-    expect(store.linkingKeys).toEqual([])
-    expect(store.isLoading).toBe(false)
+    expect(() => store.$reset()).not.toThrow()
   })
 })
