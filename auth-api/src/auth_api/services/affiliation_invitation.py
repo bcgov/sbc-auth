@@ -56,10 +56,9 @@ from auth_api.utils.enums import (
     InvitationStatus,
     LoginSource,
     QueueMessageType,
-    Role,
     Status,
 )
-from auth_api.utils.roles import ADMIN, CLIENT_AUTH_ROLES, COORDINATOR, STAFF, USER
+from auth_api.utils.roles import ADMIN, CLIENT_AUTH_ROLES, COORDINATOR, Role, STAFF, USER
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import escape_wam_friendly_url
 
