@@ -441,7 +441,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     return this.isPremiumAccount && [Permission.VIEW_DEVELOPER_ACCESS].some(per => this.permissions.includes(per))
   }
 
-  // show menu header if developer access and premium account present
   get advancedSettingsPermission () {
     return this.vendorConnectionsPermission || this.developerAccessPermission
   }
