@@ -13,7 +13,7 @@ describe('vendor-connection-util', () => {
       vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(true)
 
       expect(canAccessVendorConnections(MembershipType.Admin, [Role.AccountHolder])).toBe(false)
-      expect(LaunchDarklyService.getFlag).toHaveBeenCalledWith(LDFlags.DisableAccountLinking, false)
+      expect(LaunchDarklyService.getFlag).toHaveBeenCalledWith(LDFlags.DisableAccountLinking, true)
     })
 
     it('returns false without account_holder or manage_accounts JWT role', () => {

@@ -17,7 +17,7 @@ export function canAccessVendorConnections (
   membershipTypeCode: MembershipType | undefined,
   userRoles: string[] = []
 ): boolean {
-  if (LaunchDarklyService.getFlag(LDFlags.DisableAccountLinking, false)) {
+  if (LaunchDarklyService.getFlag(LDFlags.DisableAccountLinking, true)) {
     return false
   }
 
