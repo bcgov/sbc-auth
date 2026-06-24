@@ -16,10 +16,10 @@
 </template>
 
 <script lang="ts">
-import VendorConnectionsTable from '@/components/auth/account-settings/advance-settings/VendorConnectionsTable.vue'
-import { Pages } from '@/util/constants'
-import { canAccessVendorConnections } from '@/util/vendor-connection-util'
 import { defineComponent, onMounted } from '@vue/composition-api'
+import { Pages } from '@/util/constants'
+import VendorConnectionsTable from '@/components/auth/account-settings/advance-settings/VendorConnectionsTable.vue'
+import { canAccessVendorConnections } from '@/util/vendor-connection-util'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 

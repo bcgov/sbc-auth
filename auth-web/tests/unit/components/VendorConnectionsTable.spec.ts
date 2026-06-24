@@ -6,22 +6,62 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import { createI18n } from 'vue-i18n-composable'
 import { createPinia, setActivePinia } from 'pinia'
+import LinkingKeysService from '@/services/linkingKeys.services'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 import { MembershipType } from '@/models/Organization'
 import { Role } from '@/util/constants'
+import moment from 'moment'
 
 const vuetify = new Vuetify({})
 
 document.body.setAttribute('data-app', 'true')
 
+function getMockLinkingKeysResponse () {
+  const today = moment()
+
+  return {
+    data: {
+      linkingKeys: [
+        {
+          id: 1,
+          accountId: 1,
+          vendorAccountName: 'ABC API Service',
+          createdOn: today.clone().subtract(2, 'months').hour(11).minute(20).toISOString(),
+          createdBy: 'William Smith',
+          expiresOn: today.clone().add(1, 'year').toISOString()
+        },
+        {
+          id: 2,
+          accountId: 1,
+          vendorAccountName: 'Beta Legal Vendor',
+          createdOn: today.clone().subtract(6, 'months').hour(9).minute(15).toISOString(),
+          createdBy: 'William Smith',
+          expiresOn: today.clone().add(20, 'days').toISOString()
+        },
+        {
+          id: 3,
+          accountId: 1,
+          vendorAccountName: 'Legacy Vendor App',
+          createdOn: today.clone().subtract(2, 'years').hour(14).minute(30).toISOString(),
+          createdBy: 'William Smith',
+          expiresOn: today.clone().subtract(1, 'month').toISOString()
+        }
+      ]
+    }
+  }
+}
+
 describe('VendorConnectionsTable.vue', () => {
   let wrapper: any
 
-  beforeEach(() => {
+  beforeEach(async () => {
     setActivePinia(createPinia())
+    vi.spyOn(LinkingKeysService, 'getOrgLinkingKeys').mockResolvedValue(getMockLinkingKeysResponse() as any)
+
     const orgStore = useOrgStore()
     orgStore.$patch({
+      currentOrganization: { id: 1 } as any,
       currentMembership: {
         membershipTypeCode: MembershipType.Admin
       } as any
@@ -60,6 +100,7 @@ describe('VendorConnectionsTable.vue', () => {
       vuetify,
       i18n
     })
+    await vi.waitFor(() => expect(wrapper.vm.connectionsList.length).toBe(3))
   })
 
   afterEach(() => {
@@ -68,8 +109,9 @@ describe('VendorConnectionsTable.vue', () => {
     wrapper?.destroy()
   })
 
-  it('loads mock vendor connections on mount', () => {
-    expect(wrapper.vm.connectionsList.length).toBeGreaterThan(0)
+  it('loads vendor connections from API on mount', () => {
+    expect(LinkingKeysService.getOrgLinkingKeys).toHaveBeenCalledWith(1)
+    expect(wrapper.vm.connectionsList.length).toBe(3)
   })
 
   it('shows remove button for active connections when user can manage', () => {
@@ -77,5 +119,33 @@ describe('VendorConnectionsTable.vue', () => {
       connection => wrapper.vm.getConnectionStatus(connection) === 'active'
     )
     expect(activeConnection).toBeTruthy()
+  })
+
+  it('confirmExtend updates connection expiry from API response', async () => {
+    const expiringConnection = wrapper.vm.connectionsList.find(
+      connection => wrapper.vm.getConnectionStatus(connection) === 'expiring'
+    )
+    vi.spyOn(LinkingKeysService, 'extendOrgLinkingKey').mockResolvedValue({
+      data: {
+        id: Number(expiringConnection.id),
+        accountId: 1,
+        vendorAccountName: expiringConnection.serviceProviderName,
+        createdOn: expiringConnection.dateAdded,
+        createdBy: expiringConnection.createdBy,
+        expiresOn: '2028-06-01T00:00:00Z'
+      }
+    } as any)
+
+    wrapper.vm.openExtendModal(expiringConnection)
+    await wrapper.vm.confirmExtend()
+
+    const updatedConnection = wrapper.vm.connectionsList.find(
+      connection => connection.id === expiringConnection.id
+    )
+    expect(LinkingKeysService.extendOrgLinkingKey).toHaveBeenCalledWith({
+      orgId: 1,
+      keyId: Number(expiringConnection.id)
+    })
+    expect(updatedConnection.expiryDate).toBe('2028-06-01T00:00:00Z')
   })
 })

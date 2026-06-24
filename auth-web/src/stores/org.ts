@@ -1037,16 +1037,6 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data || {}
   }
 
-  async function getOrgLinkingKeys (orgId: number) {
-    const response = await OrgService.getOrgLinkingKeys(orgId)
-    return response?.data || {}
-  }
-
-  async function revokeOrgLinkingKey (orgId: number, keyId: number) {
-    const response = await OrgService.revokeOrgLinkingKey(orgId, keyId)
-    return response?.data || {}
-  }
-
   async function updateOrganizationAccessType (accessType: string, orgId: number = null, syncOrg = true): Promise<boolean> {
     if (!orgId) orgId = state.currentOrganization?.id as number
     if (orgId && accessType) {
@@ -1180,8 +1170,6 @@ export const useOrgStore = defineStore('org', () => {
     setCurrentOrganizationFromUserAccountSettings,
     getOrgApiKeys,
     revokeOrgApiKeys,
-    getOrgLinkingKeys,
-    revokeOrgLinkingKey,
     updateOrganizationAccessType,
     $reset,
     isStaffOrSbcStaff,

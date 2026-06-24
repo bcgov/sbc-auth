@@ -183,9 +183,8 @@
 import {
   canAccessVendorConnections,
   getDaysUntilExpiry,
-  getMockVendorConnections,
-  getVendorConnectionStatus
-  // mapLinkingKeyToVendorConnection,
+  getVendorConnectionStatus,
+  mapLinkingKeyToVendorConnection
 } from '@/util/vendor-connection-util'
 import CommonUtils from '@/util/common-util'
 import moment from 'moment'
@@ -196,6 +195,7 @@ import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { useAccountChangeHandler } from '@/composables'
 import { EventBus } from '@/event-bus'
 import { VendorConnection } from '@/models/vendorConnection'
+import { useLinkingKeysStore } from '@/stores/linkingKeys'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 import { useI18n } from 'vue-i18n-composable'
@@ -244,6 +244,7 @@ export default defineComponent({
   setup () {
     const { t } = useI18n()
     const orgStore = useOrgStore()
+    const linkingKeysStore = useLinkingKeysStore()
     const userStore = useUserStore()
     const { setAccountChangedHandler, beforeDestroy } = useAccountChangeHandler()
 
@@ -269,23 +270,20 @@ export default defineComponent({
       isLoading.value = true
       connectionsList.value = []
 
-      // TODO(#33662): Uncomment once auth-api PR #3819 is merged.
-      // try {
-      //   const orgId = orgStore.currentOrganization?.id
-      //   if (!orgId) {
-      //     return
-      //   }
-      //   const response = await orgStore.getOrgLinkingKeys(orgId)
-      //   connectionsList.value = (response?.linkingKeys || []).map(mapLinkingKeyToVendorConnection)
-      // } catch {
-      //   connectionsList.value = []
-      // } finally {
-      //   isLoading.value = false
-      // }
-      // return
+      const orgId = orgStore.currentOrganization?.id
+      if (!orgId) {
+        isLoading.value = false
+        return
+      }
 
-      connectionsList.value = getMockVendorConnections()
-      isLoading.value = false
+      try {
+        const response = await linkingKeysStore.fetchLinkingKeys(orgId)
+        connectionsList.value = (response?.linkingKeys || []).map(mapLinkingKeyToVendorConnection)
+      } catch {
+        connectionsList.value = []
+      } finally {
+        isLoading.value = false
+      }
     }
 
     const initialize = () => {
@@ -306,12 +304,12 @@ export default defineComponent({
 
     const openRemoveModal = (connection: VendorConnection) => {
       selectedConnection.value = connection
-      removeDialog.value?.open()
+      removeDialog.value?.open?.()
     }
 
     const openExtendModal = (connection: VendorConnection) => {
       selectedConnection.value = connection
-      extendDialog.value?.open()
+      extendDialog.value?.open?.()
     }
 
     const confirmRemove = () => {
@@ -330,41 +328,48 @@ export default defineComponent({
       })
 
       selectedConnection.value = null
-      removeDialog.value?.close()
+      removeDialog.value?.close?.()
     }
 
-    const confirmExtend = () => {
+    const confirmExtend = async () => {
       if (!selectedConnection.value) {
         return
       }
 
       const providerName = selectedConnection.value.serviceProviderName
       const connectionId = selectedConnection.value.id
+      const orgId = orgStore.currentOrganization?.id
+      if (!orgId) {
+        return
+      }
 
-      connectionsList.value = connectionsList.value.map(connection => {
-        if (connection.id !== connectionId) {
-          return connection
-        }
-        return {
-          ...connection,
-          expiryDate: CommonUtils.formatDatePickerDate(
-            moment(connection.expiryDate).add(1, 'year').toDate()
-          )
-        }
-      })
+      try {
+        const updatedKey = await linkingKeysStore.extendLinkingKey({
+          orgId,
+          keyId: Number(connectionId)
+        })
+        connectionsList.value = connectionsList.value.map(connection => {
+          if (connection.id !== connectionId) {
+            return connection
+          }
+          return mapLinkingKeyToVendorConnection(updatedKey)
+        })
 
-      EventBus.$emit('show-toast', {
-        message: t('vendorConnectionsExtendedToast', { providerName }),
-        type: 'primary',
-        timeout: 3000
-      })
-
-      selectedConnection.value = null
-      extendDialog.value?.close()
+        EventBus.$emit('show-toast', {
+          message: t('vendorConnectionsExtendedToast', { providerName }),
+          type: 'primary',
+          timeout: 3000
+        })
+      } catch {
+        return
+      } finally {
+        selectedConnection.value = null
+        extendDialog.value?.close?.()
+      }
     }
 
     const closeDialog = (dialog: InstanceType<typeof ModalDialog> | null) => {
-      dialog?.close()
+      dialog?.close?.()
       selectedConnection.value = null
     }
 
