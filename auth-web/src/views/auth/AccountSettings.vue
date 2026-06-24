@@ -276,8 +276,27 @@
               <v-subheader class="mt-2 px-0">
                 ADVANCED SETTINGS
               </v-subheader>
-              <!-- v-can:MANAGE_STATEMENTS.hide -->
               <v-list-item
+                v-if="vendorConnectionsPermission"
+                dense
+                class="py-1 px-4"
+                aria-label="Third-Party Connections"
+                role="listitem"
+                :to="{ name: 'vendor-connections', params: { orgId: `${orgId}` } }"
+                data-test="vendor-connections-nav-item"
+              >
+                <v-list-item-icon>
+                  <v-icon
+                    color="link"
+                    left
+                  >
+                    mdi-link-variant
+                  </v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Third-Party Connections</v-list-item-title>
+              </v-list-item>
+              <v-list-item
+                v-if="developerAccessPermission"
                 v-can:VIEW_DEVELOPER_ACCESS.hide
                 dense
                 class="py-1 px-4"
@@ -313,6 +332,7 @@
 
 <script lang="ts">
 import { AccountStatus, Pages, Permission, Role } from '@/util/constants'
+import { canAccessVendorConnections } from '@/util/vendor-connection-util'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
@@ -409,9 +429,21 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   get accountActivityMenuPermission () {
     return [Permission.VIEW_ACTIVITYLOG, Permission.MANAGE_STATEMENTS].some(per => this.permissions.includes(per))
   }
-  // show menu header if developer acvess and premium account
-  get advancedSettingsPermission () {
+  // Admin/Coordinator (or staff) can access linking-keys API — see auth-api org_linking_keys.py
+  get vendorConnectionsPermission () {
+    return canAccessVendorConnections(
+      this.currentMembership?.membershipTypeCode,
+      this.currentUser?.roles
+    )
+  }
+
+  get developerAccessPermission () {
     return this.isPremiumAccount && [Permission.VIEW_DEVELOPER_ACCESS].some(per => this.permissions.includes(per))
+  }
+
+  // show menu header if developer access and premium account present
+  get advancedSettingsPermission () {
+    return this.vendorConnectionsPermission || this.developerAccessPermission
   }
 
   // show baner for staff user and account suspended
@@ -433,6 +465,8 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     await this.syncOrganization(this.orgId)
     await this.syncMembership(this.orgId)
     this.isLoading = false
+    // LaunchDarkly flags load async; refresh nav once membership data is ready
+    this.$nextTick(() => this.$forceUpdate())
   }
 }
 </script>

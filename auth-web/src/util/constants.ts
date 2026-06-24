@@ -476,6 +476,7 @@ export enum LDFlags {
     AffiliationInvitationRequestAccess = 'enable-affiliation-invitation-request-access',
     BannerText = 'banner-text',
     BusSearchLink = 'bus-search-staff-link',
+    DisableAccountLinking = 'disable-account-linking',
     EnableBcCccUlc = 'enable-bc-ccc-ulc',
     EnableBusinessNrSearch = 'enable-business-nr-search',
     EnableBusinessRegistryDashboard = 'enable-business-registry-dashboard',

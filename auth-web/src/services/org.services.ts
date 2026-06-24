@@ -186,4 +186,12 @@ export default class OrgService {
     const { orgId, apiKey } = ApiDetails
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/${apiKey}`)
   }
+
+  public static async getOrgLinkingKeys (orgId: number) {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/linking-keys`)
+  }
+
+  public static async revokeOrgLinkingKey (orgId: number, keyId: number) {
+    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/linking-keys/${keyId}`)
+  }
 }
