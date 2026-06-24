@@ -45,6 +45,9 @@ class Role(Enum):
     # Used by Business-AR / Contact Centre Staff / Maximus Staff to create affiliations (and bypass passcode check)
     SKIP_AFFILIATION_AUTH = "skip_affiliation_auth"
 
+    # Used by entities data migration client. Bypasses business detail calls.
+    SKIP_UNAFFILIATED_BUSINESS_CHECK = "skip_unaffiliated_business_check"
+
     STAFF_TASK_SEARCH = "staff_task_search"
     VIEW_TASK_DETAILS = "view_task_details"
     VIEW_ACCOUNT_PENDING_INVITATIONS = "view_account_pending_invitations"
