@@ -23,4 +23,9 @@ export interface AccountLinkingKeysResponse {
   linkingKeys: AccountLinkingKey[]
 }
 
+export interface LinkingKeyActionDetails {
+  orgId: number
+  keyId: number
+}
+
 export type VendorConnectionStatus = 'active' | 'expiring' | 'expired'
