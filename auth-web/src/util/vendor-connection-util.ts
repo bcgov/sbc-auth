@@ -75,9 +75,6 @@ export function canManageVendorConnections (
   return [MembershipType.Admin, MembershipType.Coordinator].includes(membershipTypeCode)
 }
 
-/** @deprecated Use canViewVendorConnections */
-export const canAccessVendorConnections = canViewVendorConnections
-
 export function mapLinkingKeyToVendorConnection (linkingKey: AccountLinkingKey): VendorConnection {
   return {
     id: String(linkingKey.id),
@@ -91,7 +88,7 @@ export function mapLinkingKeyToVendorConnection (linkingKey: AccountLinkingKey):
 
 /**
  * Expiry date overrides API status when expired.
- * PENDING keys await vendor bind; ACTIVE keys use expiry warning fallback.
+ * EXPIRING is UI-derived for ACTIVE keys within the warning window; other statuses pass through.
  */
 export function getVendorConnectionStatus (expiryDate: string, keyStatus?: string): string {
   const today = moment().startOf('day')
@@ -102,21 +99,16 @@ export function getVendorConnectionStatus (expiryDate: string, keyStatus?: strin
   }
 
   const normalizedStatus = keyStatus?.toUpperCase()
-  if (normalizedStatus === VendorConnectionStatuses.Pending) {
-    return VendorConnectionStatuses.Pending
-  }
-  if (normalizedStatus === VendorConnectionStatuses.Active) {
-    if (expiry.diff(today, 'days') <= VENDOR_CONNECTION_EXPIRY_WARNING_DAYS) {
-      return VendorConnectionStatuses.Expiring
-    }
-    return VendorConnectionStatuses.Active
-  }
-  if (keyStatus) {
-    return keyStatus
-  }
-  if (expiry.diff(today, 'days') <= VENDOR_CONNECTION_EXPIRY_WARNING_DAYS) {
+  const isNearExpiry = expiry.diff(today, 'days') <= VENDOR_CONNECTION_EXPIRY_WARNING_DAYS
+
+  if ((!normalizedStatus || normalizedStatus === VendorConnectionStatuses.Active) && isNearExpiry) {
     return VendorConnectionStatuses.Expiring
   }
+
+  if (normalizedStatus) {
+    return normalizedStatus
+  }
+
   return VendorConnectionStatuses.Active
 }
 

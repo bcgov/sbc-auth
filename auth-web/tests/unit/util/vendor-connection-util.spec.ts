@@ -183,7 +183,7 @@ describe('vendor-connection-util', () => {
     it('returns key status when not expired', () => {
       const expiryDate = today.clone().add(1, 'year').format('YYYY-MM-DD')
 
-      expect(getVendorConnectionStatus(expiryDate, 'suspended')).toBe('suspended')
+      expect(getVendorConnectionStatus(expiryDate, 'suspended')).toBe('SUSPENDED')
     })
 
     it('returns pending for unbound linking keys', () => {
