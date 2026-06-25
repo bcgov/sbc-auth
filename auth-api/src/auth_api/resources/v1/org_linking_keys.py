@@ -25,12 +25,12 @@ from auth_api.services.account_linking_key import AccountLinkingKey as AccountLi
 from auth_api.services.flags import flags
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.roles import ADMIN, COORDINATOR, Role
+from auth_api.utils.roles import ADMIN, COORDINATOR, USER, Role
 from auth_api.utils.user_context import UserContext, user_context
 
 bp = Blueprint("LINKING_KEYS", __name__, url_prefix=EndpointEnum.API_V1.value)
 
-_OWNER_ROLES = (COORDINATOR, ADMIN)
+_OWNER_ROLES = (USER, COORDINATOR, ADMIN)
 
 
 @bp.before_request
