@@ -1,0 +1,16 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/linking_key_bind",
+    "type": "object",
+    "title": "Linking Key Bind",
+    "additionalProperties": false,
+    "required": ["linkingKey"],
+    "properties": {
+        "linkingKey": {
+            "$id": "#/properties/linkingKey",
+            "type": "string",
+            "title": "The pending linking key value received from the source account"
+        }
+    }
+}

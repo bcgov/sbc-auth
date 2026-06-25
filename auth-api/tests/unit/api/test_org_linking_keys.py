@@ -58,8 +58,8 @@ def test_generate_linking_key(client, jwt, session):  # pylint:disable=unused-ar
     assert data.get("lastUsed") is None
 
 
-def test_generate_linking_key_without_vendor_returns_400(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that omitting vendorAccountId returns 400."""
+def test_generate_pending_linking_key_without_vendor(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that omitting vendorAccountId creates a PENDING key."""
     user = factory_user_model(TestUserInfo.user1)
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
@@ -71,7 +71,10 @@ def test_generate_linking_key_without_vendor_returns_400(client, jwt, session): 
         data=json.dumps({}),
     )
 
-    assert rv.status_code == HTTPStatus.BAD_REQUEST
+    assert rv.status_code == HTTPStatus.CREATED
+    assert rv.json.get("linkingKey") is not None
+    assert rv.json.get("status") == "PENDING"
+    assert rv.json.get("vendorAccountId") is None
 
 
 def test_generate_linking_key_with_vendor(client, jwt, session):  # pylint:disable=unused-argument
@@ -141,6 +144,45 @@ def test_regenerate_key_for_same_vendor_revokes_previous(client, jwt, session): 
 
     rv_list = client.get(url, headers=headers)
     assert len(rv_list.json.get("linkingKeys")) == 1
+
+
+def test_generate_pending_key_revokes_existing_pending(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that generating a second PENDING key revokes the first — one unbound key per account."""
+    user = factory_user_model(TestUserInfo.user1)
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    headers = _account_holder_headers(jwt, user)
+    url = f"/api/v1/orgs/{org.id}/linking-keys"
+
+    first = client.post(url, headers=headers, content_type="application/json", data=json.dumps({}))
+    second = client.post(url, headers=headers, content_type="application/json", data=json.dumps({}))
+
+    assert first.status_code == HTTPStatus.CREATED
+    assert second.status_code == HTTPStatus.CREATED
+    assert first.json.get("linkingKey") != second.json.get("linkingKey")
+    assert len(client.get(url, headers=headers).json.get("linkingKeys")) == 1
+
+
+def test_generate_bound_key_revokes_existing_pending(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that generating a vendor-bound key revokes any existing PENDING key."""
+    user = factory_user_model(TestUserInfo.user1)
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    factory_membership_model(user.id, lawfirm.id)
+    headers = _account_holder_headers(jwt, user)
+    url = f"/api/v1/orgs/{lawfirm.id}/linking-keys"
+
+    pending = client.post(url, headers=headers, content_type="application/json", data=json.dumps({}))
+    assert pending.json.get("status") == "PENDING"
+
+    bound = client.post(
+        url, headers=headers, content_type="application/json", data=json.dumps({"vendorAccountId": vendor.id})
+    )
+    assert bound.json.get("status") == "ACTIVE"
+
+    keys = client.get(url, headers=headers).json.get("linkingKeys")
+    assert len(keys) == 1
+    assert keys[0].get("status") == "ACTIVE"
 
 
 def test_get_linking_keys_empty(client, jwt, session):  # pylint:disable=unused-argument
@@ -222,4 +264,7 @@ def test_linking_keys_disabled_by_flag(client, jwt, session, monkeypatch):  # py
 
     assert client.get(f"/api/v1/orgs/{org.id}/linking-keys", headers=headers).status_code == HTTPStatus.NOT_IMPLEMENTED
     assert client.post(f"/api/v1/orgs/{org.id}/linking-keys", headers=headers).status_code == HTTPStatus.NOT_IMPLEMENTED
-    assert client.delete(f"/api/v1/orgs/{org.id}/linking-keys/1", headers=headers).status_code == HTTPStatus.NOT_IMPLEMENTED
+    assert (
+        client.delete(f"/api/v1/orgs/{org.id}/linking-keys/1", headers=headers).status_code
+        == HTTPStatus.NOT_IMPLEMENTED
+    )

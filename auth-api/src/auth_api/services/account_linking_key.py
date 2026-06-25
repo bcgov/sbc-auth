@@ -31,21 +31,30 @@ class AccountLinkingKey:
     """Service for managing account linking keys."""
 
     @staticmethod
-    def generate(account_id: int, vendor_account_id: int) -> AccountLinkingKeyModel:
-        """Generate a new linking key bound to the given vendor.
+    def generate(account_id: int, vendor_account_id: int | None = None) -> AccountLinkingKeyModel:
+        """Generate a new linking key for the source account.
 
-        Each (account, vendor) pair can have at most one active key — any existing one is revoked.
+        If vendor_account_id is provided the key is ACTIVE and immediately usable.
+        If omitted a PENDING key is created — the vendor must call bind() to activate it.
+        In both cases any existing PENDING key for the account is revoked first (one PENDING at a time).
         """
-        existing = AccountLinkingKeyModel.find_active_by_account_and_vendor(account_id, vendor_account_id)
-        if existing:
-            existing.status = LinkingKeyStatus.REVOKED.value
+        existing_pending = AccountLinkingKeyModel.find_pending_by_account(account_id)
+        if existing_pending:
+            existing_pending.status = LinkingKeyStatus.REVOKED.value
             db.session.flush()
 
+        if vendor_account_id:
+            existing_active = AccountLinkingKeyModel.find_active_by_account_and_vendor(account_id, vendor_account_id)
+            if existing_active:
+                existing_active.status = LinkingKeyStatus.REVOKED.value
+                db.session.flush()
+
+        status = LinkingKeyStatus.ACTIVE.value if vendor_account_id else LinkingKeyStatus.PENDING.value
         record = AccountLinkingKeyModel(
             linking_key=secrets.token_urlsafe(32),
             account_id=account_id,
             vendor_account_id=vendor_account_id,
-            status=LinkingKeyStatus.ACTIVE.value,
+            status=status,
             expires_on=datetime.now(UTC) + timedelta(days=current_app.config.get("LINKING_KEY_EXPIRY_DAYS", 365)),
         )
         record.save()
@@ -56,20 +65,20 @@ class AccountLinkingKey:
                 action=ActivityAction.LINKING_KEY_GENERATED.value,
                 name=str(account_id),
                 id=str(record.id),
-                value=str(vendor_account_id),
+                value=str(vendor_account_id) if vendor_account_id else None,
             )
         )
         return record
 
     @staticmethod
     def get_all(account_id: int) -> list[AccountLinkingKeyModel]:
-        """Return all active linking keys for the account."""
-        return AccountLinkingKeyModel.find_active_by_account_id(account_id)
+        """Return all non-revoked (ACTIVE and PENDING) linking keys for the account."""
+        return AccountLinkingKeyModel.find_by_account_id(account_id)
 
     @staticmethod
     def revoke(key_id: int, account_id: int) -> bool:
         """Soft-delete (revoke) a linking key by ID, scoped to the account. Returns False if not found."""
-        record = AccountLinkingKeyModel.find_active_by_id(key_id, account_id)
+        record = AccountLinkingKeyModel.find_by_id(key_id, account_id)
         if not record:
             return False
         record.status = LinkingKeyStatus.REVOKED.value
@@ -87,9 +96,10 @@ class AccountLinkingKey:
 
     @staticmethod
     def validate(key: str, vendor_account_id: int) -> AccountLinkingKeyModel | None:
-        """Validate a linking key for the given vendor and return the record if authorized.
+        """Validate an ACTIVE linking key for the given vendor and return the record if authorized.
 
-        Returns None if the key is not found, expired, revoked, or the vendor does not match.
+        PENDING keys are not valid for authorization — the vendor must call bind() first.
+        Returns None if the key is not found, expired, revoked, PENDING, or the vendor does not match.
         Updates last_used on every successful call.
         """
         record = AccountLinkingKeyModel.find_active_by_key(key)
@@ -102,4 +112,29 @@ class AccountLinkingKey:
 
         record.last_used = datetime.now(UTC)
         record.save()
+        return record
+
+    @staticmethod
+    def bind(key: str, vendor_account_id: int) -> AccountLinkingKeyModel | None:
+        """Bind a PENDING key to the given vendor, activating it.
+
+        Returns the updated record, or None if the key is not found, expired, or not in PENDING state.
+        """
+        record = AccountLinkingKeyModel.find_pending_by_key(key)
+        if not record:
+            return None
+
+        record.vendor_account_id = int(vendor_account_id)
+        record.status = LinkingKeyStatus.ACTIVE.value
+        record.save()
+
+        ActivityLogPublisher.publish_activity(
+            Activity(
+                org_id=record.account_id,
+                action=ActivityAction.LINKING_KEY_BOUND.value,
+                name=str(record.account_id),
+                id=str(record.id),
+                value=str(vendor_account_id),
+            )
+        )
         return record

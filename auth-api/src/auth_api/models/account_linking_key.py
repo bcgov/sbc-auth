@@ -37,27 +37,38 @@ class AccountLinkingKey(BaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     linking_key = Column(
-        String(100), nullable=False, unique=True, index=True,
+        String(100),
+        nullable=False,
+        unique=True,
+        index=True,
         comment="Cryptographically random URL-safe secret shared with the vendor",
     )
     account_id = Column(
-        ForeignKey("orgs.id"), nullable=False, index=True,
+        ForeignKey("orgs.id"),
+        nullable=False,
+        index=True,
         comment="Source account (e.g. lawfirm) whose affiliated businesses are accessible via this key",
     )
     vendor_account_id = Column(
-        ForeignKey("orgs.id"), nullable=True, index=True,
+        ForeignKey("orgs.id"),
+        nullable=True,
+        index=True,
         comment="Vendor account (e.g. ALF) that is authorized to use this key; set at generation time",
     )
     status = Column(
-        String(20), nullable=False, default=LinkingKeyStatus.ACTIVE.value,
-        comment="ACTIVE or REVOKED",
+        String(20),
+        nullable=False,
+        default=LinkingKeyStatus.ACTIVE.value,
+        comment="ACTIVE (bound and usable), PENDING (unbound, awaiting vendor), or REVOKED",
     )
     expires_on = Column(
-        DateTime(timezone=True), nullable=False,
+        DateTime(timezone=True),
+        nullable=False,
         comment="UTC timestamp after which the key is no longer valid",
     )
     last_used = Column(
-        DateTime(timezone=True), nullable=True,
+        DateTime(timezone=True),
+        nullable=True,
         comment="UTC timestamp of the most recent successful validation",
     )
     account = relationship("Org", foreign_keys=[account_id], lazy="select")
@@ -73,18 +84,25 @@ class AccountLinkingKey(BaseModel):
         )
 
     @classmethod
-    def find_active_by_account_id(cls, account_id: int) -> list[AccountLinkingKey]:
-        """Return all active linking keys for the given source account."""
+    def find_by_account_id(cls, account_id: int) -> list[AccountLinkingKey]:
+        """Return all non-revoked (ACTIVE and PENDING) linking keys for the given source account."""
         return (
-            cls.query.filter_by(account_id=account_id, status=LinkingKeyStatus.ACTIVE.value)
+            cls.query.filter(
+                cls.account_id == account_id,
+                cls.status.in_([LinkingKeyStatus.ACTIVE.value, LinkingKeyStatus.PENDING.value]),
+            )
             .options(joinedload(cls.vendor_account), joinedload(cls.created_by))
             .all()
         )
 
     @classmethod
-    def find_active_by_id(cls, key_id: int, account_id: int) -> AccountLinkingKey | None:
-        """Return an active key by ID, scoped to the account for ownership check."""
-        return cls.query.filter_by(id=key_id, account_id=account_id, status=LinkingKeyStatus.ACTIVE.value).one_or_none()
+    def find_by_id(cls, key_id: int, account_id: int) -> AccountLinkingKey | None:
+        """Return a non-revoked (ACTIVE or PENDING) key by ID, scoped to the account."""
+        return cls.query.filter(
+            cls.id == key_id,
+            cls.account_id == account_id,
+            cls.status.in_([LinkingKeyStatus.ACTIVE.value, LinkingKeyStatus.PENDING.value]),
+        ).one_or_none()
 
     @classmethod
     def find_active_by_account_and_vendor(cls, account_id: int, vendor_account_id: int) -> AccountLinkingKey | None:
@@ -93,3 +111,16 @@ class AccountLinkingKey(BaseModel):
             account_id=account_id, vendor_account_id=vendor_account_id, status=LinkingKeyStatus.ACTIVE.value
         ).one_or_none()
 
+    @classmethod
+    def find_pending_by_account(cls, account_id: int) -> AccountLinkingKey | None:
+        """Return the single unbound (PENDING) key for an account, if any."""
+        return cls.query.filter_by(account_id=account_id, status=LinkingKeyStatus.PENDING.value).one_or_none()
+
+    @classmethod
+    def find_pending_by_key(cls, key: str) -> AccountLinkingKey | None:
+        """Return a non-expired PENDING key matching the given value."""
+        return cls.query.filter(
+            cls.linking_key == key,
+            cls.status == LinkingKeyStatus.PENDING.value,
+            cls.expires_on > datetime.now(UTC),
+        ).one_or_none()
