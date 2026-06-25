@@ -19,7 +19,7 @@
 import { defineComponent, onMounted } from '@vue/composition-api'
 import { Pages } from '@/util/constants'
 import VendorConnectionsTable from '@/components/auth/account-settings/advance-settings/VendorConnectionsTable.vue'
-import { canAccessVendorConnections } from '@/util/vendor-connection-util'
+import { canViewVendorConnections } from '@/util/vendor-connection-util'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
@@ -33,7 +33,7 @@ export default defineComponent({
     const userStore = useUserStore()
 
     onMounted(() => {
-      if (!canAccessVendorConnections(
+      if (!canViewVendorConnections(
         orgStore.currentMembership?.membershipTypeCode,
         userStore.currentUser?.roles
       )) {

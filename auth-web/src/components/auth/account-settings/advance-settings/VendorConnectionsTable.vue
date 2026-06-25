@@ -15,19 +15,25 @@
     >
       <template #item-slot-serviceProviderName="{ item }">
         <div class="font-weight-bold">
-          {{ item.serviceProviderName }}
+          {{ getServiceProviderDisplayName(item) }}
         </div>
         <span
-          v-if="getConnectionStatus(item) === 'expiring'"
+          v-if="getConnectionStatus(item) === VendorConnectionStatuses.Expiring"
           class="label expiring mt-1 d-inline-block"
         >
           {{ $t('vendorConnectionsExpiresInDays', { days: getDaysUntilExpiry(item.expiryDate) }) }}
         </span>
         <span
-          v-else-if="getConnectionStatus(item) === 'expired'"
+          v-else-if="getConnectionStatus(item) === VendorConnectionStatuses.Expired"
           class="label expired mt-1 d-inline-block"
         >
           {{ $t('vendorConnectionsExpired') }}
+        </span>
+        <span
+          v-else-if="getConnectionStatus(item) === VendorConnectionStatuses.Pending"
+          class="label pending mt-1 d-inline-block"
+        >
+          {{ $t('vendorConnectionsPending') }}
         </span>
       </template>
 
@@ -45,16 +51,16 @@
           class="action-buttons d-flex justify-end"
         >
           <v-btn
-            v-if="getConnectionStatus(item) === 'active'"
+            v-if="showsStandaloneRemoveAction(getConnectionStatus(item))"
             color="primary"
             depressed
             class="vendor-connection-action-btn vendor-connection-action-btn--standalone"
-            aria-label="Remove connection"
-            title="Remove connection"
+            :aria-label="$t('vendorConnectionsRemoveAria')"
+            :title="$t('vendorConnectionsRemoveAria')"
             :data-test="getIndexedTag('remove-button', item.id)"
             @click="openRemoveModal(item)"
           >
-            Remove
+            {{ $t('vendorConnectionsRemove') }}
           </v-btn>
 
           <span
@@ -65,12 +71,12 @@
               color="primary"
               depressed
               class="vendor-connection-action-btn vendor-connection-action-btn--split-main"
-              aria-label="Extend connection"
-              title="Extend connection"
+              :aria-label="$t('vendorConnectionsExtendAria')"
+              :title="$t('vendorConnectionsExtendAria')"
               :data-test="getIndexedTag('extend-button', item.id)"
               @click="openExtendModal(item)"
             >
-              Extend
+              {{ $t('vendorConnectionsExtend') }}
             </v-btn>
             <v-menu
               v-model="actionMenuOpen[item.id]"
@@ -82,8 +88,8 @@
                   color="primary"
                   depressed
                   class="vendor-connection-action-btn vendor-connection-action-btn--split-menu"
-                  aria-label="More actions"
-                  title="More actions"
+                  :aria-label="$t('vendorConnectionsMoreActionsAria')"
+                  :title="$t('vendorConnectionsMoreActionsAria')"
                   v-bind="attrs"
                   :data-test="getIndexedTag('actions-menu', item.id)"
                   v-on="on"
@@ -96,7 +102,7 @@
                   :data-test="getIndexedTag('remove-menu-item', item.id)"
                   @click="openRemoveModal(item)"
                 >
-                  <v-list-item-title>Remove</v-list-item-title>
+                  <v-list-item-title>{{ $t('vendorConnectionsRemove') }}</v-list-item-title>
                 </v-list-item>
               </v-list>
             </v-menu>
@@ -126,7 +132,7 @@
             data-test="vendor-connections-remove-cancel"
             @click="closeDialog(removeDialog)"
           >
-            Cancel
+            {{ $t('vendorConnectionsCancel') }}
           </v-btn>
           <v-btn
             large
@@ -135,7 +141,7 @@
             data-test="vendor-connections-remove-confirm"
             @click="confirmRemove()"
           >
-            Remove Connection
+            {{ $t('vendorConnectionsRemoveConnection') }}
           </v-btn>
         </div>
       </template>
@@ -162,7 +168,7 @@
             data-test="vendor-connections-extend-cancel"
             @click="closeDialog(extendDialog)"
           >
-            Cancel
+            {{ $t('vendorConnectionsCancel') }}
           </v-btn>
           <v-btn
             large
@@ -171,7 +177,7 @@
             data-test="vendor-connections-extend-confirm"
             @click="confirmExtend()"
           >
-            Extend Connection
+            {{ $t('vendorConnectionsExtendConnection') }}
           </v-btn>
         </div>
       </template>
@@ -181,18 +187,19 @@
 
 <script lang="ts">
 import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref } from '@vue/composition-api'
+import { VendorConnection, VendorConnectionStatuses } from '@/models/vendorConnection'
 import {
-  canAccessVendorConnections,
+  canManageVendorConnections,
   getDaysUntilExpiry,
   getVendorConnectionStatus,
-  mapLinkingKeyToVendorConnection
+  mapLinkingKeyToVendorConnection,
+  showsStandaloneRemoveAction
 } from '@/util/vendor-connection-util'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import { EventBus } from '@/event-bus'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { VendorConnection } from '@/models/vendorConnection'
 import moment from 'moment'
 import { useAccountChangeHandler } from '@/composables'
 import { useI18n } from 'vue-i18n-composable'
@@ -258,7 +265,7 @@ export default defineComponent({
     const currentMembership = computed(() => orgStore.currentMembership)
 
     const canManageConnections = computed(() => {
-      return canAccessVendorConnections(
+      return canManageVendorConnections(
         currentMembership.value?.membershipTypeCode,
         userStore.currentUser?.roles
       )
@@ -291,7 +298,11 @@ export default defineComponent({
     }
 
     const getConnectionStatus = (connection: VendorConnection) => {
-      return getVendorConnectionStatus(connection.expiryDate)
+      return getVendorConnectionStatus(connection.expiryDate, connection.status)
+    }
+
+    const getServiceProviderDisplayName = (connection: VendorConnection) => {
+      return connection.serviceProviderName || t('vendorConnectionsPendingProviderName')
     }
 
     const formatDateAdded = (dateAdded: string): string => {
@@ -337,6 +348,11 @@ export default defineComponent({
           timeout: 3000
         })
       } catch {
+        EventBus.$emit('show-toast', {
+          message: t('vendorConnectionsRemoveFailedToast', { providerName }),
+          type: 'error',
+          timeout: 3000
+        })
         return
       } finally {
         selectedConnection.value = null
@@ -369,6 +385,11 @@ export default defineComponent({
           timeout: 3000
         })
       } catch {
+        EventBus.$emit('show-toast', {
+          message: t('vendorConnectionsExtendFailedToast', { providerName }),
+          type: 'error',
+          timeout: 3000
+        })
         return
       } finally {
         selectedConnection.value = null
@@ -407,12 +428,16 @@ export default defineComponent({
       getConnectionStatus,
       getDaysUntilExpiry,
       getIndexedTag,
+      getServiceProviderDisplayName,
       isLoading,
+      loadConnections,
       noDataText,
       openExtendModal,
       openRemoveModal,
       removeDialog,
-      tableHeaders: TABLE_HEADERS
+      showsStandaloneRemoveAction,
+      tableHeaders: TABLE_HEADERS,
+      VendorConnectionStatuses
     }
   }
 })
@@ -433,6 +458,10 @@ export default defineComponent({
 
   &.expired {
     background: $gray7;
+  }
+
+  &.pending {
+    background: $app-blue;
   }
 }
 

@@ -1,9 +1,11 @@
 
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { EventBus } from '@/event-bus'
 import LinkingKeysService from '@/services/linkingKeys.services'
 import { MembershipType } from '@/models/Organization'
 import { Role } from '@/util/constants'
+import { VendorConnectionStatuses } from '@/models/vendorConnection'
 import VendorConnectionsTable from '@/components/auth/account-settings/advance-settings/VendorConnectionsTable.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -83,12 +85,24 @@ describe('VendorConnectionsTable.vue', () => {
           vendorConnectionsEmpty: 'No connected service provider.',
           vendorConnectionsExpiresInDays: 'EXPIRES IN {days} DAYS',
           vendorConnectionsExpired: 'EXPIRED',
+          vendorConnectionsPending: 'PENDING',
+          vendorConnectionsPendingProviderName: 'Pending vendor connection',
           vendorConnectionsRemoveTitle: 'Caution: Remove Connection',
           vendorConnectionsRemoveBody: 'Remove body',
           vendorConnectionsExtendTitle: 'Extend Service Provider Connection',
           vendorConnectionsExtendBody: 'Extend body',
           vendorConnectionsRemovedToast: '{providerName} connection removed.',
-          vendorConnectionsExtendedToast: '{providerName} connection extended.'
+          vendorConnectionsExtendedToast: '{providerName} connection extended.',
+          vendorConnectionsRemoveFailedToast: 'Unable to remove {providerName} connection. Please try again.',
+          vendorConnectionsExtendFailedToast: 'Unable to extend {providerName} connection. Please try again.',
+          vendorConnectionsRemove: 'Remove',
+          vendorConnectionsExtend: 'Extend',
+          vendorConnectionsCancel: 'Cancel',
+          vendorConnectionsRemoveConnection: 'Remove Connection',
+          vendorConnectionsExtendConnection: 'Extend Connection',
+          vendorConnectionsRemoveAria: 'Remove connection',
+          vendorConnectionsExtendAria: 'Extend connection',
+          vendorConnectionsMoreActionsAria: 'More actions'
         }
       }
     })
@@ -113,16 +127,51 @@ describe('VendorConnectionsTable.vue', () => {
     expect(wrapper.vm.connectionsList.length).toBe(3)
   })
 
+  it('hides action buttons for read-only User membership', () => {
+    const orgStore = useOrgStore()
+    orgStore.$patch({
+      currentMembership: {
+        membershipTypeCode: MembershipType.User
+      } as any
+    })
+
+    expect(wrapper.vm.canManageConnections).toBe(false)
+  })
+
   it('shows remove button for active connections when user can manage', () => {
     const activeConnection = wrapper.vm.connectionsList.find(
-      connection => wrapper.vm.getConnectionStatus(connection) === 'active'
+      connection => wrapper.vm.getConnectionStatus(connection) === VendorConnectionStatuses.Active
     )
     expect(activeConnection).toBeTruthy()
+    expect(wrapper.vm.showsStandaloneRemoveAction(wrapper.vm.getConnectionStatus(activeConnection))).toBe(true)
+  })
+
+  it('shows pending badge and remove-only action for pending connection', async () => {
+    const today = moment()
+    vi.mocked(LinkingKeysService.getOrgLinkingKeys).mockResolvedValueOnce({
+      data: {
+        linkingKeys: [{
+          id: 4,
+          accountId: 1,
+          createdOn: today.toISOString(),
+          createdBy: 'William Smith',
+          expiresOn: today.clone().add(1, 'year').toISOString(),
+          status: 'PENDING'
+        }]
+      }
+    } as any)
+
+    await wrapper.vm.loadConnections()
+    const pendingConnection = wrapper.vm.connectionsList[0]
+
+    expect(wrapper.vm.getConnectionStatus(pendingConnection)).toBe(VendorConnectionStatuses.Pending)
+    expect(wrapper.vm.getServiceProviderDisplayName(pendingConnection)).toBe('Pending vendor connection')
+    expect(wrapper.vm.showsStandaloneRemoveAction(wrapper.vm.getConnectionStatus(pendingConnection))).toBe(true)
   })
 
   it('confirmRemove removes connection after API call', async () => {
     const activeConnection = wrapper.vm.connectionsList.find(
-      connection => wrapper.vm.getConnectionStatus(connection) === 'active'
+      connection => wrapper.vm.getConnectionStatus(connection) === VendorConnectionStatuses.Active
     )
     vi.spyOn(LinkingKeysService, 'revokeOrgLinkingKey').mockResolvedValue({ data: {} } as any)
     vi.mocked(LinkingKeysService.getOrgLinkingKeys).mockResolvedValueOnce({
@@ -147,7 +196,7 @@ describe('VendorConnectionsTable.vue', () => {
 
   it('confirmExtend updates connection expiry from API response', async () => {
     const expiringConnection = wrapper.vm.connectionsList.find(
-      connection => wrapper.vm.getConnectionStatus(connection) === 'expiring'
+      connection => wrapper.vm.getConnectionStatus(connection) === VendorConnectionStatuses.Expiring
     )
     vi.spyOn(LinkingKeysService, 'extendOrgLinkingKey').mockResolvedValue({ data: {} } as any)
     vi.mocked(LinkingKeysService.getOrgLinkingKeys).mockResolvedValueOnce({
@@ -173,5 +222,41 @@ describe('VendorConnectionsTable.vue', () => {
     })
     expect(LinkingKeysService.getOrgLinkingKeys).toHaveBeenCalledTimes(2)
     expect(updatedConnection.expiryDate).toBe('2028-06-01T00:00:00Z')
+  })
+
+  it('confirmRemove shows error toast when API call fails', async () => {
+    const activeConnection = wrapper.vm.connectionsList.find(
+      connection => wrapper.vm.getConnectionStatus(connection) === VendorConnectionStatuses.Active
+    )
+    const toastSpy = vi.spyOn(EventBus, '$emit')
+    vi.spyOn(LinkingKeysService, 'revokeOrgLinkingKey').mockRejectedValue(new Error('API error'))
+
+    wrapper.vm.openRemoveModal(activeConnection)
+    await wrapper.vm.confirmRemove()
+
+    expect(toastSpy).toHaveBeenCalledWith('show-toast', {
+      message: `Unable to remove ${activeConnection.serviceProviderName} connection. Please try again.`,
+      type: 'error',
+      timeout: 3000
+    })
+    expect(wrapper.vm.connectionsList).toHaveLength(3)
+  })
+
+  it('confirmExtend shows error toast when API call fails', async () => {
+    const expiringConnection = wrapper.vm.connectionsList.find(
+      connection => wrapper.vm.getConnectionStatus(connection) === VendorConnectionStatuses.Expiring
+    )
+    const toastSpy = vi.spyOn(EventBus, '$emit')
+    vi.spyOn(LinkingKeysService, 'extendOrgLinkingKey').mockRejectedValue(new Error('API error'))
+
+    wrapper.vm.openExtendModal(expiringConnection)
+    await wrapper.vm.confirmExtend()
+
+    expect(toastSpy).toHaveBeenCalledWith('show-toast', {
+      message: `Unable to extend ${expiringConnection.serviceProviderName} connection. Please try again.`,
+      type: 'error',
+      timeout: 3000
+    })
+    expect(LinkingKeysService.getOrgLinkingKeys).toHaveBeenCalledTimes(1)
   })
 })

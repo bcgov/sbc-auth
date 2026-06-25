@@ -4,6 +4,7 @@ export interface VendorConnection {
   dateAdded: string
   createdBy: string
   expiryDate: string
+  status?: string
 }
 
 /** GET /orgs/{orgId}/linking-keys response item — see auth-api AccountLinkingKeySchema. */
@@ -28,4 +29,16 @@ export interface LinkingKeyActionDetails {
   keyId: number
 }
 
-export type VendorConnectionStatus = 'active' | 'expiring' | 'expired'
+/**
+ * Linking key status values — API (see LinkingKeyStatus enum) plus UI-derived expiry states.
+ * Badge labels in UX are all uppercase (EXPIRED, EXPIRES IN X DAYS, PENDING).
+ */
+export const VendorConnectionStatuses = {
+  Active: 'ACTIVE',
+  Pending: 'PENDING',
+  Revoked: 'REVOKED',
+  Expiring: 'EXPIRING',
+  Expired: 'EXPIRED'
+} as const
+
+export type VendorConnectionStatus = typeof VendorConnectionStatuses[keyof typeof VendorConnectionStatuses]
