@@ -90,7 +90,7 @@ export function mapLinkingKeyToVendorConnection (linkingKey: AccountLinkingKey):
  * Expiry date overrides API status when expired.
  * EXPIRING is UI-derived for ACTIVE keys within the warning window; other statuses pass through.
  */
-export function getVendorConnectionStatus (expiryDate: string, keyStatus?: string): string {
+export function getVendorConnectionStatus (expiryDate: string, keyStatus?: string): string | undefined {
   const today = moment().startOf('day')
   const expiry = moment(expiryDate).startOf('day')
 
@@ -101,18 +101,14 @@ export function getVendorConnectionStatus (expiryDate: string, keyStatus?: strin
   const normalizedStatus = keyStatus?.toUpperCase()
   const isNearExpiry = expiry.diff(today, 'days') <= VENDOR_CONNECTION_EXPIRY_WARNING_DAYS
 
-  if ((!normalizedStatus || normalizedStatus === VendorConnectionStatuses.Active) && isNearExpiry) {
+  if (normalizedStatus === VendorConnectionStatuses.Active && isNearExpiry) {
     return VendorConnectionStatuses.Expiring
   }
 
-  if (normalizedStatus) {
-    return normalizedStatus
-  }
-
-  return VendorConnectionStatuses.Active
+  return normalizedStatus
 }
 
-export function showsStandaloneRemoveAction (connectionStatus: string): boolean {
+export function showsStandaloneRemoveAction (connectionStatus?: string): boolean {
   return connectionStatus === VendorConnectionStatuses.Active ||
     connectionStatus === VendorConnectionStatuses.Pending
 }

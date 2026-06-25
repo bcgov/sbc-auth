@@ -207,16 +207,16 @@ describe('vendor-connection-util', () => {
         .toBe(VendorConnectionStatuses.Active)
     })
 
-    it('falls back to expiring when key status is omitted and within warning window', () => {
-      const expiryDate = today.clone().add(20, 'days').format('YYYY-MM-DD')
-
-      expect(getVendorConnectionStatus(expiryDate)).toBe(VendorConnectionStatuses.Expiring)
-    })
-
-    it('falls back to active when key status is omitted and outside warning window', () => {
+    it('returns undefined when key status is omitted', () => {
       const expiryDate = today.clone().add(1, 'year').format('YYYY-MM-DD')
 
-      expect(getVendorConnectionStatus(expiryDate)).toBe(VendorConnectionStatuses.Active)
+      expect(getVendorConnectionStatus(expiryDate)).toBeUndefined()
+    })
+
+    it('returns undefined when key status is omitted even within warning window', () => {
+      const expiryDate = today.clone().add(20, 'days').format('YYYY-MM-DD')
+
+      expect(getVendorConnectionStatus(expiryDate)).toBeUndefined()
     })
   })
 })

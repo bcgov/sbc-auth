@@ -30,7 +30,8 @@ function getMockLinkingKeysResponse () {
           vendorAccountName: 'ABC API Service',
           createdOn: today.clone().subtract(2, 'months').hour(11).minute(20).toISOString(),
           createdBy: 'William Smith',
-          expiresOn: today.clone().add(1, 'year').toISOString()
+          expiresOn: today.clone().add(1, 'year').toISOString(),
+          status: 'ACTIVE'
         },
         {
           id: 2,
@@ -38,7 +39,8 @@ function getMockLinkingKeysResponse () {
           vendorAccountName: 'Beta Legal Vendor',
           createdOn: today.clone().subtract(6, 'months').hour(9).minute(15).toISOString(),
           createdBy: 'William Smith',
-          expiresOn: today.clone().add(20, 'days').toISOString()
+          expiresOn: today.clone().add(20, 'days').toISOString(),
+          status: 'ACTIVE'
         },
         {
           id: 3,
@@ -46,7 +48,8 @@ function getMockLinkingKeysResponse () {
           vendorAccountName: 'Legacy Vendor App',
           createdOn: today.clone().subtract(2, 'years').hour(14).minute(30).toISOString(),
           createdBy: 'William Smith',
-          expiresOn: today.clone().subtract(1, 'month').toISOString()
+          expiresOn: today.clone().subtract(1, 'month').toISOString(),
+          status: 'ACTIVE'
         }
       ]
     }
