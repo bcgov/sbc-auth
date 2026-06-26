@@ -59,13 +59,14 @@ class AccountLinkingKey:
         )
         record.save()
 
+        vendor_name = f"{record.vendor_account.name} ({vendor_account_id})" if vendor_account_id else None
         ActivityLogPublisher.publish_activity(
             Activity(
                 org_id=account_id,
                 action=ActivityAction.LINKING_KEY_GENERATED.value,
                 name=str(account_id),
                 id=str(record.id),
-                value=str(vendor_account_id) if vendor_account_id else None,
+                value=vendor_name,
             )
         )
         return record
@@ -83,13 +84,14 @@ class AccountLinkingKey:
             return False
         record.status = LinkingKeyStatus.REVOKED.value
         record.save()
+        vendor_name = f"{record.vendor_account.name} ({record.vendor_account_id})" if record.vendor_account_id else None
         ActivityLogPublisher.publish_activity(
             Activity(
                 org_id=account_id,
                 action=ActivityAction.LINKING_KEY_REVOKED.value,
                 name=str(account_id),
                 id=str(record.id),
-                value=str(record.vendor_account_id) if record.vendor_account_id else None,
+                value=vendor_name,
             )
         )
         return True
@@ -134,7 +136,7 @@ class AccountLinkingKey:
                 action=ActivityAction.LINKING_KEY_BOUND.value,
                 name=str(record.account_id),
                 id=str(record.id),
-                value=str(vendor_account_id),
+                value=f"{record.vendor_account.name} ({record.vendor_account_id})",
             )
         )
         return record
