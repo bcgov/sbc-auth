@@ -71,6 +71,29 @@ def test_bind_already_active_key_returns_404(client, jwt, session):  # pylint:di
     assert rv.status_code == HTTPStatus.NOT_FOUND
 
 
+def test_bind_revokes_existing_active_key_for_same_vendor(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that binding a PENDING key revokes any existing ACTIVE key for the same vendor."""
+    from auth_api.models.account_linking_key import AccountLinkingKey as AccountLinkingKeyModel
+    from auth_api.utils.enums import LinkingKeyStatus
+
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    existing_active = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+    pending_key = factory_linking_key_model(account_id=lawfirm.id, status=LinkingKeyStatus.PENDING.value)
+
+    rv = client.post(
+        _BIND_URL,
+        headers=_vendor_headers(jwt, vendor.id),
+        content_type="application/json",
+        data=json.dumps({"linkingKey": pending_key.linking_key}),
+    )
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json.get("status") == "ACTIVE"
+    old = AccountLinkingKeyModel.query.get(existing_active.id)
+    assert old.status == LinkingKeyStatus.REVOKED.value
+
+
 def test_bind_nonexistent_key_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a key value that doesn't exist returns 404."""
     vendor = factory_org_model()

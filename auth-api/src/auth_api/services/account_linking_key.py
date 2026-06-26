@@ -38,16 +38,12 @@ class AccountLinkingKey:
         If omitted a PENDING key is created — the vendor must call bind() to activate it.
         In both cases any existing PENDING key for the account is revoked first (one PENDING at a time).
         """
-        existing_pending = AccountLinkingKeyModel.find_pending_by_account(account_id)
-        if existing_pending:
-            existing_pending.status = LinkingKeyStatus.REVOKED.value
-            db.session.flush()
+        AccountLinkingKey._revoke_superseded(AccountLinkingKeyModel.find_pending_by_account(account_id))
 
         if vendor_account_id:
-            existing_active = AccountLinkingKeyModel.find_active_by_account_and_vendor(account_id, vendor_account_id)
-            if existing_active:
-                existing_active.status = LinkingKeyStatus.REVOKED.value
-                db.session.flush()
+            AccountLinkingKey._revoke_superseded(
+                AccountLinkingKeyModel.find_active_by_account_and_vendor(account_id, vendor_account_id)
+            )
 
         status = LinkingKeyStatus.ACTIVE.value if vendor_account_id else LinkingKeyStatus.PENDING.value
         record = AccountLinkingKeyModel(
@@ -59,16 +55,7 @@ class AccountLinkingKey:
         )
         record.save()
 
-        vendor_name = f"{record.vendor_account.name} ({vendor_account_id})" if vendor_account_id else None
-        ActivityLogPublisher.publish_activity(
-            Activity(
-                org_id=account_id,
-                action=ActivityAction.LINKING_KEY_GENERATED.value,
-                name=str(account_id),
-                id=str(record.id),
-                value=vendor_name,
-            )
-        )
+        AccountLinkingKey._publish(ActivityAction.LINKING_KEY_GENERATED.value, record)
         return record
 
     @staticmethod
@@ -84,16 +71,7 @@ class AccountLinkingKey:
             return False
         record.status = LinkingKeyStatus.REVOKED.value
         record.save()
-        vendor_name = f"{record.vendor_account.name} ({record.vendor_account_id})" if record.vendor_account_id else None
-        ActivityLogPublisher.publish_activity(
-            Activity(
-                org_id=account_id,
-                action=ActivityAction.LINKING_KEY_REVOKED.value,
-                name=str(account_id),
-                id=str(record.id),
-                value=vendor_name,
-            )
-        )
+        AccountLinkingKey._publish(ActivityAction.LINKING_KEY_REVOKED.value, record)
         return True
 
     @staticmethod
@@ -126,17 +104,42 @@ class AccountLinkingKey:
         if not record:
             return None
 
+        AccountLinkingKey._revoke_superseded(
+            AccountLinkingKeyModel.find_active_by_account_and_vendor(record.account_id, vendor_account_id)
+        )
+
         record.vendor_account_id = int(vendor_account_id)
         record.status = LinkingKeyStatus.ACTIVE.value
         record.save()
 
+        AccountLinkingKey._publish(ActivityAction.LINKING_KEY_BOUND.value, record)
+        return record
+
+    # -- private helpers --
+
+    @staticmethod
+    def _revoke_superseded(record: AccountLinkingKeyModel | None) -> None:
+        """Mark a superseded key REVOKED and flush it within the current transaction."""
+        if record:
+            record.status = LinkingKeyStatus.REVOKED.value
+            db.session.flush()
+
+    @staticmethod
+    def _vendor_label(record: AccountLinkingKeyModel) -> str | None:
+        """Return 'Name (ID)' for the bound vendor account, or None if unbound."""
+        if not record.vendor_account_id:
+            return None
+        return f"{record.vendor_account.name} ({record.vendor_account_id})"
+
+    @staticmethod
+    def _publish(action: str, record: AccountLinkingKeyModel) -> None:
+        """Publish an activity log event for the given action and key record."""
         ActivityLogPublisher.publish_activity(
             Activity(
                 org_id=record.account_id,
-                action=ActivityAction.LINKING_KEY_BOUND.value,
+                action=action,
                 name=str(record.account_id),
                 id=str(record.id),
-                value=f"{record.vendor_account.name} ({record.vendor_account_id})",
+                value=AccountLinkingKey._vendor_label(record),
             )
         )
-        return record
