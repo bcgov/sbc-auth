@@ -30,7 +30,7 @@ from auth_api.utils.user_context import UserContext, user_context
 
 bp = Blueprint("LINKING_KEYS", __name__, url_prefix=EndpointEnum.API_V1.value)
 
-_OWNER_ROLES = (USER, COORDINATOR, ADMIN)
+_OWNER_ROLES = (COORDINATOR, ADMIN)
 
 
 @bp.before_request
@@ -44,7 +44,7 @@ def _check_feature_enabled():
 @_jwt.has_one_of_roles([Role.ACCOUNT_HOLDER.value, Role.STAFF_MANAGE_ACCOUNTS.value])
 def get_linking_keys(org_id):
     """List all active linking keys for the org (key values are never returned)."""
-    org = OrgService.find_by_org_id(org_id, allowed_roles=_OWNER_ROLES)
+    org = OrgService.find_by_org_id(org_id, allowed_roles=(*_OWNER_ROLES, USER))
     if org is None:
         return {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
     records = AccountLinkingKeyService.get_all(org_id)
