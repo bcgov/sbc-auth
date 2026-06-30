@@ -12,8 +12,9 @@ document.body.setAttribute('data-app', 'true')
 const vendorLinkingMessages = {
   vendorLinkingLoginAlertTitle: 'Connecting to a Third-Party Service Account',
   vendorLinkingLoginAlertBody: 'Logging in will link your account to the service provider account.',
-  vendorLinkingLoginAlertNote: 'Note: You must have an account administrator or coordinator role to establish this connection.',
-  vendorLinkingAccountSelectAlert: 'You have multiple accounts associated with your profile. Only accounts where you are an administrator or coordinator are shown below.',
+  vendorLinkingLoginAlertNote: 'You must have an account administrator or coordinator role to establish this connection.',
+  vendorLinkingAccountSelectAlertBody: 'You have multiple accounts associated with your profile.',
+  vendorLinkingAccountSelectAlertNote: 'Only accounts where you are an administrator or coordinator are shown below.',
   vendorLinkingAccessDeniedTitle: 'Access Denied: Unable to Connect',
   vendorLinkingAccessDeniedBodyIntro: 'You must have an account administrator or coordinator role to establish this connection. If you believe this is an error, please contact your account administrator at',
   vendorLinkingAccessDeniedClose: 'Close'
