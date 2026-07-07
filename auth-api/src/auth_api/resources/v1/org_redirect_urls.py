@@ -33,7 +33,7 @@ _OWNER_ROLES = (COORDINATOR, ADMIN)
 
 @bp.route("", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["GET", "POST"])
-@_jwt.has_one_of_roles([Role.ACCOUNT_HOLDER.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.STAFF.value])
+@_jwt.has_one_of_roles([Role.ACCOUNT_HOLDER.value, Role.STAFF_MANAGE_ACCOUNTS.value])
 def get_redirect_urls(org_id):
     """List all redirect URLs for the org."""
     org = OrgService.find_by_org_id(org_id)
