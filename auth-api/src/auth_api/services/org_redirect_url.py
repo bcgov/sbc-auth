@@ -44,9 +44,7 @@ class OrgRedirectUrl:
 
     @staticmethod
     def update(url_id: int, org_id: int, url: str) -> OrgRedirectUrlModel | None:
-        """Update an existing redirect URL. Raises BusinessException on validation failure.
-
-        """
+        """Update an existing redirect URL. Raises BusinessException on validation failure."""
         record = OrgRedirectUrlModel.find_by_id_and_org(url_id, org_id)
         if not record:
             return None

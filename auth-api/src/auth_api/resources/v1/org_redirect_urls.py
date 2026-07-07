@@ -25,19 +25,20 @@ from auth_api.services import Org as OrgService
 from auth_api.services.org_redirect_url import OrgRedirectUrl as OrgRedirectUrlService
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.roles import ADMIN, COORDINATOR, Role
+from auth_api.utils.roles import ADMIN, COORDINATOR, USER, Role
 
 bp = Blueprint("REDIRECT_URLS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs/<int:org_id>/redirect-urls")
 
 _OWNER_ROLES = (COORDINATOR, ADMIN)
+_VIEWER_ROLES = (COORDINATOR, ADMIN, USER)
 
 
 @bp.route("", methods=["GET", "OPTIONS"])
 @cross_origin(origins="*", methods=["GET", "POST"])
-@_jwt.has_one_of_roles([Role.ACCOUNT_HOLDER.value, Role.STAFF_MANAGE_ACCOUNTS.value])
+@_jwt.has_one_of_roles([Role.ACCOUNT_HOLDER.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.STAFF.value])
 def get_redirect_urls(org_id):
     """List all redirect URLs for the org."""
-    org = OrgService.find_by_org_id(org_id)
+    org = OrgService.find_by_org_id(org_id, allowed_roles=_VIEWER_ROLES)
     if org is None:
         return {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
     records = OrgRedirectUrlService.get_all(org_id)
