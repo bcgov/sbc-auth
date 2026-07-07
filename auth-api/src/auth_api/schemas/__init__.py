@@ -30,6 +30,7 @@ from .membership import MembershipSchema
 from .membership_status_code import MembershipStatusCodeSchema
 from .membership_types import MembershipTypeSchema
 from .org import OrgSchema
+from .org_redirect_url import OrgRedirectUrlSchema
 from .org_status import OrgStatusSchema
 from .org_type import OrgTypeSchema
 from .product_code import ProductCodeSchema

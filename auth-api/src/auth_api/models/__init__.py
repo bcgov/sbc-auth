@@ -42,6 +42,7 @@ from .membership import Membership
 from .membership_status_code import MembershipStatusCode
 from .membership_type import MembershipType
 from .org import Org
+from .org_redirect_url import OrgRedirectUrl
 from .org_settings import OrgSettings
 from .org_status import OrgStatus
 from .org_type import OrgType
