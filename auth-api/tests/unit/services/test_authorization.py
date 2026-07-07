@@ -670,6 +670,61 @@ def test_linking_key_grants_access_to_lawfirm_businesses(session, monkeypatch): 
 
     assert authorization is not None
     assert authorization.get("account", {}).get("paymentAccountId") == vendor.id
+    assert authorization.get("orgMembership") is not None
+    assert authorization.get("roles") is not None
+
+
+def test_linking_key_without_account_id_falls_through_to_membership(
+    session, monkeypatch
+):  # pylint:disable=unused-argument
+    """Assert that a linking key sent without Account-Id is ignored and normal membership auth applies."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+    vendor = factory_org_model()
+    linking_key = factory_linking_key_model(account_id=org.id, vendor_account_id=vendor.id)
+
+    patch_token_info(
+        {"sub": str(user.keycloak_guid), "realm_access": {"roles": ["basic"]}},
+        monkeypatch,
+    )
+    monkeypatch.setattr(
+        "auth_api.utils.user_context.UserContext.linking_key",
+        property(lambda _: linking_key.linking_key),
+    )
+
+    authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+
+    assert authorization is not None
+    assert authorization.get("orgMembership") is not None
+    assert authorization.get("account", {}).get("paymentAccountId") == org.id
+
+
+def test_linking_key_revoked_returns_no_auth(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that a revoked (non-expired) linking key results in a 403."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, lawfirm.id)
+    revoked_key = factory_linking_key_model(
+        account_id=lawfirm.id,
+        vendor_account_id=vendor.id,
+        status="REVOKED",
+    )
+
+    patch_token_info(
+        {"sub": str(uuid.uuid4()), "realm_access": {"roles": ["account_holder"]}, "Account-Id": str(vendor.id)},
+        monkeypatch,
+    )
+    monkeypatch.setattr(
+        "auth_api.utils.user_context.UserContext.linking_key",
+        property(lambda _: revoked_key.linking_key),
+    )
+
+    with pytest.raises(Forbidden):
+        Authorization.get_user_authorizations_for_entity(entity.business_identifier)
 
 
 def test_linking_key_invalid_key_returns_no_auth(session, monkeypatch):  # pylint:disable=unused-argument
