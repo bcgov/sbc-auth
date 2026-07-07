@@ -17,6 +17,8 @@ from __future__ import annotations
 
 from urllib.parse import urlparse
 
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.models.org_redirect_url import OrgRedirectUrl as OrgRedirectUrlModel
 
 
@@ -29,45 +31,35 @@ class OrgRedirectUrl:
         return OrgRedirectUrlModel.find_by_org_id(org_id)
 
     @staticmethod
-    def create(org_id: int, url: str) -> tuple[OrgRedirectUrlModel | None, str | None]:
-        """Create a new redirect URL for the org.
-
-        Returns (record, None) on success, or (None, error_message) on failure.
-        """
-        url = url.strip()
-        error = OrgRedirectUrl._validate(url)
-        if error:
-            return None, error
+    def create(org_id: int, url: str) -> OrgRedirectUrlModel:
+        """Create a new redirect URL for the org. Raises BusinessException on validation failure."""
+        url = OrgRedirectUrl._validate(url)
 
         if OrgRedirectUrlModel.find_active_by_org_and_url(org_id, url):
-            return None, "This URL has already been added."
+            raise BusinessException(Error.REDIRECT_URL_ALREADY_EXISTS, None)
 
         record = OrgRedirectUrlModel(org_id=org_id, redirect_url=url)
         record.save()
-        return record, None
+        return record
 
     @staticmethod
-    def update(url_id: int, org_id: int, url: str) -> tuple[OrgRedirectUrlModel | None, str | None]:
-        """Update an existing redirect URL.
+    def update(url_id: int, org_id: int, url: str) -> OrgRedirectUrlModel | None:
+        """Update an existing redirect URL. Raises BusinessException on validation failure.
 
-        Returns (record, None) on success, or (None, error_message) on failure.
         """
         record = OrgRedirectUrlModel.find_by_id_and_org(url_id, org_id)
         if not record:
-            return None, "not_found"
+            return None
 
-        url = url.strip()
-        error = OrgRedirectUrl._validate(url)
-        if error:
-            return None, error
+        url = OrgRedirectUrl._validate(url)
 
         existing = OrgRedirectUrlModel.find_active_by_org_and_url(org_id, url)
         if existing and existing.id != url_id:
-            return None, "This URL has already been added."
+            raise BusinessException(Error.REDIRECT_URL_ALREADY_EXISTS, None)
 
         record.redirect_url = url
         record.save()
-        return record, None
+        return record
 
     @staticmethod
     def delete(url_id: int, org_id: int) -> bool:
@@ -84,11 +76,12 @@ class OrgRedirectUrl:
         return OrgRedirectUrlModel.is_valid_redirect_url(org_id, url)
 
     @staticmethod
-    def _validate(url: str) -> str | None:
-        """Return an error message if the URL is invalid, else None."""
+    def _validate(url: str) -> str:
+        """Return the trimmed URL, or raise BusinessException if invalid."""
+        url = url.strip()
         if not url:
-            return "Enter a redirect URL."
+            raise BusinessException(Error.REDIRECT_URL_REQUIRED, None)
         parsed = urlparse(url)
         if parsed.scheme not in ("http", "https") or not parsed.netloc:
-            return "Enter a valid URL beginning with http:// or https://."
-        return None
+            raise BusinessException(Error.INVALID_REDIRECT_URL, None)
+        return url

@@ -13,6 +13,10 @@
 # limitations under the License.
 """Tests for the OrgRedirectUrl service."""
 
+import pytest
+
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.models.org_redirect_url import OrgRedirectUrl as OrgRedirectUrlModel
 from auth_api.services.org_redirect_url import OrgRedirectUrl as OrgRedirectUrlService
 from tests.utilities.factory_utils import (
@@ -25,9 +29,8 @@ def test_create_adds_url(session):  # pylint:disable=unused-argument
     """Assert that create adds a new redirect URL for the org."""
     org = factory_org_model()
 
-    record, error = OrgRedirectUrlService.create(org.id, "https://vendor.example.com/callback")
+    record = OrgRedirectUrlService.create(org.id, "https://vendor.example.com/callback")
 
-    assert error is None
     assert record.id is not None
     assert record.org_id == org.id
     assert record.redirect_url == "https://vendor.example.com/callback"
@@ -37,9 +40,8 @@ def test_create_trims_whitespace(session):  # pylint:disable=unused-argument
     """Assert that leading/trailing whitespace is trimmed before save."""
     org = factory_org_model()
 
-    record, error = OrgRedirectUrlService.create(org.id, "  https://vendor.example.com/callback  ")
+    record = OrgRedirectUrlService.create(org.id, "  https://vendor.example.com/callback  ")
 
-    assert error is None
     assert record.redirect_url == "https://vendor.example.com/callback"
 
 
@@ -47,20 +49,20 @@ def test_create_rejects_empty_url(session):  # pylint:disable=unused-argument
     """Assert that an empty URL is rejected."""
     org = factory_org_model()
 
-    record, error = OrgRedirectUrlService.create(org.id, "   ")
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.create(org.id, "   ")
 
-    assert record is None
-    assert error == "Enter a redirect URL."
+    assert exc_info.value.code == Error.REDIRECT_URL_REQUIRED.name
 
 
 def test_create_rejects_invalid_url(session):  # pylint:disable=unused-argument
     """Assert that a non-http(s) URL is rejected."""
     org = factory_org_model()
 
-    record, error = OrgRedirectUrlService.create(org.id, "not-a-url")
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.create(org.id, "not-a-url")
 
-    assert record is None
-    assert "valid URL" in error
+    assert exc_info.value.code == Error.INVALID_REDIRECT_URL.name
 
 
 def test_create_rejects_duplicate_url(session):  # pylint:disable=unused-argument
@@ -68,10 +70,10 @@ def test_create_rejects_duplicate_url(session):  # pylint:disable=unused-argumen
     org = factory_org_model()
     factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback")
 
-    record, error = OrgRedirectUrlService.create(org.id, "https://vendor.example.com/callback")
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.create(org.id, "https://vendor.example.com/callback")
 
-    assert record is None
-    assert "already been added" in error
+    assert exc_info.value.code == Error.REDIRECT_URL_ALREADY_EXISTS.name
 
 
 def test_create_allows_same_url_for_different_orgs(session):  # pylint:disable=unused-argument
@@ -80,9 +82,8 @@ def test_create_allows_same_url_for_different_orgs(session):  # pylint:disable=u
     org_b = factory_org_model()
     factory_redirect_url_model(org_id=org_a.id, redirect_url="https://vendor.example.com/callback")
 
-    record, error = OrgRedirectUrlService.create(org_b.id, "https://vendor.example.com/callback")
+    record = OrgRedirectUrlService.create(org_b.id, "https://vendor.example.com/callback")
 
-    assert error is None
     assert record.org_id == org_b.id
 
 
@@ -108,9 +109,8 @@ def test_update_changes_url(session):  # pylint:disable=unused-argument
     org = factory_org_model()
     record = factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/old")
 
-    updated, error = OrgRedirectUrlService.update(record.id, org.id, "https://vendor.example.com/new")
+    updated = OrgRedirectUrlService.update(record.id, org.id, "https://vendor.example.com/new")
 
-    assert error is None
     assert updated.redirect_url == "https://vendor.example.com/new"
 
 
@@ -119,10 +119,10 @@ def test_update_rejects_invalid_url(session):  # pylint:disable=unused-argument
     org = factory_org_model()
     record = factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/old")
 
-    updated, error = OrgRedirectUrlService.update(record.id, org.id, "not-a-url")
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.update(record.id, org.id, "not-a-url")
 
-    assert updated is None
-    assert "valid URL" in error
+    assert exc_info.value.code == Error.INVALID_REDIRECT_URL.name
     unchanged = OrgRedirectUrlModel.query.get(record.id)
     assert unchanged.redirect_url == "https://vendor.example.com/old"
 
@@ -133,10 +133,10 @@ def test_update_rejects_duplicate_of_another_row(session):  # pylint:disable=unu
     factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/existing")
     record = factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/old")
 
-    updated, error = OrgRedirectUrlService.update(record.id, org.id, "https://vendor.example.com/existing")
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.update(record.id, org.id, "https://vendor.example.com/existing")
 
-    assert updated is None
-    assert "already been added" in error
+    assert exc_info.value.code == Error.REDIRECT_URL_ALREADY_EXISTS.name
 
 
 def test_update_allows_saving_unchanged_value(session):  # pylint:disable=unused-argument
@@ -144,22 +144,20 @@ def test_update_allows_saving_unchanged_value(session):  # pylint:disable=unused
     org = factory_org_model()
     record = factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/same")
 
-    updated, error = OrgRedirectUrlService.update(record.id, org.id, "https://vendor.example.com/same")
+    updated = OrgRedirectUrlService.update(record.id, org.id, "https://vendor.example.com/same")
 
-    assert error is None
     assert updated.redirect_url == "https://vendor.example.com/same"
 
 
-def test_update_wrong_org_returns_not_found(session):  # pylint:disable=unused-argument
-    """Assert that updating a url scoped to a different org returns not_found."""
+def test_update_wrong_org_returns_none(session):  # pylint:disable=unused-argument
+    """Assert that updating a url scoped to a different org returns None."""
     org_a = factory_org_model()
     org_b = factory_org_model()
     record = factory_redirect_url_model(org_id=org_b.id)
 
-    updated, error = OrgRedirectUrlService.update(record.id, org_a.id, "https://vendor.example.com/new")
+    updated = OrgRedirectUrlService.update(record.id, org_a.id, "https://vendor.example.com/new")
 
     assert updated is None
-    assert error == "not_found"
 
 
 def test_delete_removes_url(session):  # pylint:disable=unused-argument

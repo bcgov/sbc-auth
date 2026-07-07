@@ -18,6 +18,7 @@ from http import HTTPStatus
 from flask import Blueprint, request
 from flask_cors import cross_origin
 
+from auth_api.exceptions import BusinessException
 from auth_api.schemas import OrgRedirectUrlSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
@@ -55,9 +56,10 @@ def post_redirect_url(org_id):
     org = OrgService.find_by_org_id(org_id, allowed_roles=_OWNER_ROLES)
     if org is None:
         return {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
-    record, error = OrgRedirectUrlService.create(org_id, request_json["redirectUrl"])
-    if error:
-        return {"message": error}, HTTPStatus.CONFLICT if "already" in error else HTTPStatus.BAD_REQUEST
+    try:
+        record = OrgRedirectUrlService.create(org_id, request_json["redirectUrl"])
+    except BusinessException as exception:
+        return {"code": exception.code, "message": exception.message}, exception.status_code
     return OrgRedirectUrlSchema().dump(record), HTTPStatus.CREATED
 
 
@@ -73,11 +75,12 @@ def patch_redirect_url(org_id, url_id):
     org = OrgService.find_by_org_id(org_id, allowed_roles=_OWNER_ROLES)
     if org is None:
         return {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
-    record, error = OrgRedirectUrlService.update(url_id, org_id, request_json["redirectUrl"])
-    if error == "not_found":
+    try:
+        record = OrgRedirectUrlService.update(url_id, org_id, request_json["redirectUrl"])
+    except BusinessException as exception:
+        return {"code": exception.code, "message": exception.message}, exception.status_code
+    if not record:
         return {}, HTTPStatus.NOT_FOUND
-    if error:
-        return {"message": error}, HTTPStatus.CONFLICT if "already" in error else HTTPStatus.BAD_REQUEST
     return OrgRedirectUrlSchema().dump(record), HTTPStatus.OK
 
 
