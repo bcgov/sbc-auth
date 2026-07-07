@@ -4,6 +4,7 @@ import { useActivityStore } from './activityLog'
 import { useAppStore } from './app'
 import { useBusinessStore } from './business'
 import { useCodesStore } from './codes'
+import { useLinkingKeysStore } from './linkingKeys'
 import { useOrgStore } from './org'
 import { useStaffStore } from './staff'
 import { useTaskStore } from './task'
@@ -22,6 +23,7 @@ export * from './app'
 export * from './activityLog'
 export * from './business'
 export * from './codes'
+export * from './linkingKeys'
 export * from './org'
 export * from './staff'
 export * from './task'
@@ -34,6 +36,7 @@ export function resetAllStores () {
     useActivityStore(),
     useBusinessStore(),
     useCodesStore(),
+    useLinkingKeysStore(),
     useOrgStore(),
     useStaffStore(),
     useTaskStore(),
