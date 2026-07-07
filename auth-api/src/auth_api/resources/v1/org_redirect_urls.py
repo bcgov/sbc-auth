@@ -19,6 +19,7 @@ from flask import Blueprint, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.schemas import OrgRedirectUrlSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
@@ -40,7 +41,7 @@ def get_redirect_urls(org_id):
     """List all redirect URLs for the org."""
     org = OrgService.find_by_org_id(org_id, allowed_roles=_VIEWER_ROLES)
     if org is None:
-        return {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
+        return {"message": Error.DATA_NOT_FOUND.message}, HTTPStatus.NOT_FOUND
     records = OrgRedirectUrlService.get_all(org_id)
     return {"redirectUrls": OrgRedirectUrlSchema(many=True).dump(records)}, HTTPStatus.OK
 
@@ -56,7 +57,7 @@ def post_redirect_url(org_id):
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
     org = OrgService.find_by_org_id(org_id, allowed_roles=_OWNER_ROLES)
     if org is None:
-        return {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
+        return {"message": Error.DATA_NOT_FOUND.message}, HTTPStatus.NOT_FOUND
     try:
         record = OrgRedirectUrlService.create(org_id, request_json["redirectUrl"])
     except BusinessException as exception:
@@ -75,7 +76,7 @@ def patch_redirect_url(org_id, url_id):
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
     org = OrgService.find_by_org_id(org_id, allowed_roles=_OWNER_ROLES)
     if org is None:
-        return {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
+        return {"message": Error.DATA_NOT_FOUND.message}, HTTPStatus.NOT_FOUND
     try:
         record = OrgRedirectUrlService.update(url_id, org_id, request_json["redirectUrl"])
     except BusinessException as exception:
@@ -92,7 +93,7 @@ def delete_redirect_url(org_id, url_id):
     """Delete a redirect URL."""
     org = OrgService.find_by_org_id(org_id, allowed_roles=_OWNER_ROLES)
     if org is None:
-        return {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
+        return {"message": Error.DATA_NOT_FOUND.message}, HTTPStatus.NOT_FOUND
     found = OrgRedirectUrlService.delete(url_id, org_id)
     if not found:
         return {}, HTTPStatus.NOT_FOUND
