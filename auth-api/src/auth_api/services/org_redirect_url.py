@@ -35,7 +35,7 @@ class OrgRedirectUrl:
         """Create a new redirect URL for the org. Raises BusinessException on validation failure."""
         url = OrgRedirectUrl._validate(url)
 
-        if OrgRedirectUrlModel.find_active_by_org_and_url(org_id, url):
+        if OrgRedirectUrlModel.find_by_org_and_url(org_id, url):
             raise BusinessException(Error.REDIRECT_URL_ALREADY_EXISTS, None)
 
         record = OrgRedirectUrlModel(org_id=org_id, redirect_url=url)
@@ -51,7 +51,7 @@ class OrgRedirectUrl:
 
         url = OrgRedirectUrl._validate(url)
 
-        existing = OrgRedirectUrlModel.find_active_by_org_and_url(org_id, url)
+        existing = OrgRedirectUrlModel.find_by_org_and_url(org_id, url)
         if existing and existing.id != url_id:
             raise BusinessException(Error.REDIRECT_URL_ALREADY_EXISTS, None)
 
@@ -75,11 +75,18 @@ class OrgRedirectUrl:
 
     @staticmethod
     def _validate(url: str) -> str:
-        """Return the trimmed URL, or raise BusinessException if invalid."""
+        """Return the trimmed URL, or raise BusinessException if invalid.
+
+        A trailing ``/*`` is allowed to mark the URL as a path-prefix wildcard match.
+        A ``*`` anywhere else in the URL is rejected.
+        """
         url = url.strip()
         if not url:
             raise BusinessException(Error.REDIRECT_URL_REQUIRED, None)
-        parsed = urlparse(url)
+        if "*" in url and not url.endswith("/*"):
+            raise BusinessException(Error.INVALID_REDIRECT_URL, None)
+        base_url = url[:-1] if url.endswith("/*") else url
+        parsed = urlparse(base_url)
         if parsed.scheme not in ("http", "https") or not parsed.netloc:
             raise BusinessException(Error.INVALID_REDIRECT_URL, None)
         return url

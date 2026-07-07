@@ -65,6 +65,25 @@ def test_create_rejects_invalid_url(session):  # pylint:disable=unused-argument
     assert exc_info.value.code == Error.INVALID_REDIRECT_URL.name
 
 
+def test_create_allows_trailing_wildcard(session):  # pylint:disable=unused-argument
+    """Assert that a trailing /* wildcard is accepted."""
+    org = factory_org_model()
+
+    record = OrgRedirectUrlService.create(org.id, "https://vendor.example.com/callback/*")
+
+    assert record.redirect_url == "https://vendor.example.com/callback/*"
+
+
+def test_create_rejects_wildcard_not_at_end(session):  # pylint:disable=unused-argument
+    """Assert that a wildcard anywhere other than the trailing path segment is rejected."""
+    org = factory_org_model()
+
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.create(org.id, "https://vendor.example.com/*/callback")
+
+    assert exc_info.value.code == Error.INVALID_REDIRECT_URL.name
+
+
 def test_create_rejects_duplicate_url(session):  # pylint:disable=unused-argument
     """Assert that duplicate URLs for the same org are rejected."""
     org = factory_org_model()
@@ -203,3 +222,20 @@ def test_is_valid_redirect_url_false_for_unregistered_url(session):  # pylint:di
     org = factory_org_model()
 
     assert OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/unknown") is False
+
+
+def test_is_valid_redirect_url_matches_wildcard_prefix(session):  # pylint:disable=unused-argument
+    """Assert that a registered wildcard URL matches any URL sharing its path prefix."""
+    org = factory_org_model()
+    factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback/*")
+
+    assert OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/callback/success") is True
+    assert OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/callback/abc/123") is True
+
+
+def test_is_valid_redirect_url_wildcard_does_not_match_other_prefix(session):  # pylint:disable=unused-argument
+    """Assert that a registered wildcard URL does not match a different path prefix."""
+    org = factory_org_model()
+    factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback/*")
+
+    assert OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/other/success") is False

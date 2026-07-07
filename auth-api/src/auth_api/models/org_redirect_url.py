@@ -51,11 +51,21 @@ class OrgRedirectUrl(BaseModel):
         return cls.query.filter_by(id=url_id, org_id=org_id).one_or_none()
 
     @classmethod
-    def find_active_by_org_and_url(cls, org_id: int, url: str) -> OrgRedirectUrl | None:
+    def find_by_org_and_url(cls, org_id: int, url: str) -> OrgRedirectUrl | None:
         """Return an existing redirect URL record matching the given url for the org."""
         return cls.query.filter_by(org_id=org_id, redirect_url=url).one_or_none()
 
     @classmethod
     def is_valid_redirect_url(cls, org_id: int, url: str) -> bool:
-        """Return True if the given URL is registered for the org."""
-        return cls.find_active_by_org_and_url(org_id, url) is not None
+        """Return True if the given URL matches a redirect URL registered for the org.
+
+        A registered URL ending in ``/*`` matches any URL sharing that path prefix.
+        """
+        for record in cls.find_by_org_id(org_id):
+            pattern = record.redirect_url
+            if pattern.endswith("/*"):
+                if url.startswith(pattern[:-1]):
+                    return True
+            elif url == pattern:
+                return True
+        return False
