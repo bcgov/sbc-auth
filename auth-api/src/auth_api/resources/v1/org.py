@@ -37,6 +37,7 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import SimpleOrg as SimpleOrgService
 from auth_api.services import User as UserService
+from auth_api.services.account_linking_key import AccountLinkingKey as LinkingKeyService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.services.flags import flags
@@ -52,6 +53,7 @@ from auth_api.utils.roles import (  # noqa: I001
     USER,
     Role,
 )
+from auth_api.utils.user_context import UserContext
 from auth_api.utils.util import extract_numbers, string_to_bool
 
 bp = Blueprint("ORGS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs")
@@ -436,27 +438,42 @@ def post_organization_affiliation(org_id):
     business_identifier = request_json.get("businessIdentifier")
     if not any(character.isdigit() for character in business_identifier):
         return {"message": "Business identifier requires at least 1 digit."}, HTTPStatus.BAD_REQUEST
+
+    # Vendor callers pass a linking key issued by a source org (e.g. a lawfirm) in the
+    # Account-Linking-Key header. When present, the org_id in the URL is the vendor;
+    # the affiliation must be created against the source org the key was issued for.
+    affiliation_org_id = org_id
+    skip_membership_check = _jwt.has_one_of_roles([Role.SKIP_AFFILIATION_AUTH.value])
+    if linking_key := UserContext().linking_key:
+        linked = LinkingKeyService.validate(linking_key, org_id)
+        if not linked:
+            return {"message": "Invalid or unauthorized linking key."}, HTTPStatus.FORBIDDEN
+        affiliation_org_id = linked.account_id
+        skip_membership_check = True
+
     try:
         if is_new_business:
             affiliation_data = AffiliationData(
-                org_id=org_id,
+                org_id=affiliation_org_id,
                 business_identifier=business_identifier,
                 email=request_json.get("email"),
                 phone=request_json.get("phone"),
                 certified_by_name=request_json.get("certifiedByName"),
             )
             response, status = (
-                AffiliationService.create_new_business_affiliation(affiliation_data).as_dict(),
+                AffiliationService.create_new_business_affiliation(
+                    affiliation_data, skip_membership_check=skip_membership_check
+                ).as_dict(),
                 HTTPStatus.CREATED,
             )
         else:
             response, status = (
                 AffiliationService.create_affiliation(
-                    org_id,
+                    affiliation_org_id,
                     business_identifier,
                     request_json.get("passCode"),
                     request_json.get("certifiedByName"),
-                    skip_membership_check=_jwt.has_one_of_roles([Role.SKIP_AFFILIATION_AUTH.value]),
+                    skip_membership_check=skip_membership_check,
                 ).as_dict(),
                 HTTPStatus.CREATED,
             )
@@ -464,7 +481,7 @@ def post_organization_affiliation(org_id):
         if entity_details:
             if flags.is_on("enable-entity-mapping", default=False) is True:
                 EntityMappingService.from_entity_details(entity_details)
-            AffiliationService.fix_stale_affiliations(org_id, entity_details)
+            AffiliationService.fix_stale_affiliations(affiliation_org_id, entity_details)
         # Auth-queue handles the row creation for new business (NR only), this handles passcode missing info
         elif is_new_business is False:
             if flags.is_on("enable-entity-mapping", default=False) is True:
