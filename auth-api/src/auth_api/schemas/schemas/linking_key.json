@@ -5,7 +5,6 @@
     "type": "object",
     "title": "Linking Key",
     "additionalProperties": false,
-    "required": ["vendorAccountId"],
     "properties": {
         "vendorAccountId": {
             "$id": "#/properties/vendorAccountId",

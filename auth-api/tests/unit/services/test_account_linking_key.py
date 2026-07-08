@@ -80,7 +80,7 @@ def test_generate_different_vendors_coexist(session):  # pylint:disable=unused-a
     assert key_b.status == LinkingKeyStatus.ACTIVE.value
     assert key_a.linking_key != key_b.linking_key
 
-    active = AccountLinkingKeyModel.find_active_by_account_id(lawfirm.id)
+    active = AccountLinkingKeyModel.find_by_account_id(lawfirm.id)
     assert len(active) == 2
 
 
