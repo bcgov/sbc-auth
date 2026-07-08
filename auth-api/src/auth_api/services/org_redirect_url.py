@@ -70,8 +70,18 @@ class OrgRedirectUrl:
 
     @staticmethod
     def is_valid_redirect_url(org_id: int, url: str) -> bool:
-        """Return True if the URL is registered for the org."""
-        return OrgRedirectUrlModel.is_valid_redirect_url(org_id, url)
+        """Return True if the given URL matches a redirect URL registered for the org.
+
+        A registered URL ending in ``/*`` matches any URL sharing that path prefix.
+        """
+        for record in OrgRedirectUrlModel.find_by_org_id(org_id):
+            pattern = record.redirect_url
+            if pattern.endswith("/*"):
+                if url.startswith(pattern[:-1]):
+                    return True
+            elif url == pattern:
+                return True
+        return False
 
     @staticmethod
     def _validate(url: str) -> str:
