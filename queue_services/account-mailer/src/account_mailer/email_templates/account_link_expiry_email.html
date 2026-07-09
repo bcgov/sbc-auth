@@ -1,0 +1,28 @@
+{% if is_reminder %}
+    {% set title = 'Action Required: Upcoming Expiry of Third-Party Service Provider Connection'%}
+    {% set expiry_information = 'For security purposes, third-party connections are valid for one year. Your connection with ' ~ service_provider_name ~ ' will expire in 30 days.'%}
+{% else %}
+    {% set title = 'Expired Third-Party Service Provider Connection'%}
+    {% set expiry_information = 'Your connection with ' ~ service_provider_name ~ ' is expired.'%}
+{% endif %}
+
+**Service Provider Name:** {{ service_provider_name }}
+**Date Added:** {{ link_date }}
+**Expiration Date:** {{ expiry_date }}
+**Account Number:** {{ account_number }}
+**Account Name:** {{ account_name_with_branch }}
+
+You are receiving this email because you are listed as the account administrator or coordinator for this account.
+
+
+**What this change means for you:**
+* {{ expiry_information }}
+* To prevent a disruption in service, please log in to renew this connection.
+* To view connection details or manage service provider access, visit your account settings page and [manage third-party connections]({{ context_url }}).
+
+If you did not authorize this action, please secure your account and manage the connection immediately.
+
+---
+
+**BC Registries and Digital Services**
+Email: [BCRegistries@gov.bc.ca](BCRegistries@gov.bc.ca)

@@ -19,11 +19,14 @@ import secrets
 from datetime import UTC, datetime, timedelta
 
 from flask import current_app
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api.models.account_linking_key import AccountLinkingKey as AccountLinkingKeyModel
 from auth_api.models.dataclass import Activity
 from auth_api.models.db import db
 from auth_api.services.activity_log_publisher import ActivityLogPublisher
+from auth_api.utils.account_mailer import publish_to_mailer
+from auth_api.utils.date import pacific_today_isoformat
 from auth_api.utils.enums import ActivityAction, LinkingKeyStatus
 
 
@@ -56,6 +59,9 @@ class AccountLinkingKey:
         record.save()
 
         AccountLinkingKey._publish(ActivityAction.LINKING_KEY_GENERATED.value, record)
+        if record.status == LinkingKeyStatus.ACTIVE.value:
+            data = {"linkDate": pacific_today_isoformat()}
+            AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_CREATED.value, record, data)
         return record
 
     @staticmethod
@@ -69,9 +75,13 @@ class AccountLinkingKey:
         record = AccountLinkingKeyModel.find_by_id(key_id, account_id)
         if not record:
             return False
+        was_active = record.status == LinkingKeyStatus.ACTIVE.value
         record.status = LinkingKeyStatus.REVOKED.value
         record.save()
         AccountLinkingKey._publish(ActivityAction.LINKING_KEY_REVOKED.value, record)
+        if was_active:
+            data = {"linkRemovalDate": pacific_today_isoformat()}
+            AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_REMOVED.value, record, data)
         return True
 
     @staticmethod
@@ -113,6 +123,8 @@ class AccountLinkingKey:
         record.save()
 
         AccountLinkingKey._publish(ActivityAction.LINKING_KEY_BOUND.value, record)
+        data = {"linkDate": pacific_today_isoformat()}
+        AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_CREATED.value, record, data)
         return record
 
     # -- private helpers --
@@ -143,3 +155,19 @@ class AccountLinkingKey:
                 value=AccountLinkingKey._vendor_label(record),
             )
         )
+
+    @staticmethod
+    def _publish_mailer_notification(
+        notification_type: str, record: AccountLinkingKeyModel, additional_data: dict[str, str]
+    ) -> None:
+        """Publish an account-link email notification to the account mailer."""
+        data = {
+            "accountId": record.account_id,
+            "serviceProviderName": record.vendor_account.name,
+            **additional_data,
+        }
+        try:
+            publish_to_mailer(notification_type, data=data)
+        except Exception as e:  # noqa: B901
+            current_app.logger.warning(f"AccountLinkingKey._publish_mailer_notification failed: {e}")
+
