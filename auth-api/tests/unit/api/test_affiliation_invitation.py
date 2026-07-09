@@ -19,6 +19,7 @@ Test-Suite to ensure that the /affiliationsInvitations endpoint is working as ex
 
 import json
 from http import HTTPStatus
+from unittest.mock import patch
 
 import pytest
 
@@ -1125,6 +1126,30 @@ def test_send_unaffiliated_email_invitation(
         content_type="application/json",
     )
     assert rv.status_code == HTTPStatus.CREATED
+
+
+def test_send_unaffiliated_email_invitation_skips_business_check_with_role(client, jwt, session, keycloak_mock):
+    """Assert that business details service calls are skipped when SKIP_UNAFFILIATED_BUSINESS_CHECK role is present."""
+    business_identifier = setup_entity_with_contact(client, jwt)
+    claims = {
+        **TestJwtClaims.system_role,
+        "realm_access": {"roles": ["system", "skip_unaffiliated_business_check"]},
+    }
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+
+    with (
+        patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token") as mock_token,
+        patch("auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details") as mock_business,
+    ):
+        rv = client.post(
+            f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+            headers=headers,
+            content_type="application/json",
+        )
+
+    assert rv.status_code == HTTPStatus.CREATED
+    mock_token.assert_not_called()
+    mock_business.assert_not_called()
 
 
 def test_send_unaffiliated_email_invitation_idempotent(
