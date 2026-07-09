@@ -36,6 +36,7 @@ from .org_api_keys import bp as org_api_keys_bp
 from .org_authorizations import bp as org_authorizations_bp
 from .org_linking_keys import bp as org_linking_keys_bp
 from .org_products import bp as org_products_bp
+from .org_redirect_urls import bp as org_redirect_urls_bp
 from .permissions import bp as permissions_bp
 from .products import bp as products_bp
 from .task import bp as task_bp
@@ -74,6 +75,7 @@ class V1Endpoint:  # pylint: disable=too-few-public-methods,
         self.app.register_blueprint(org_linking_keys_bp)
         self.app.register_blueprint(org_authorizations_bp)
         self.app.register_blueprint(org_products_bp)
+        self.app.register_blueprint(org_redirect_urls_bp)
         self.app.register_blueprint(permissions_bp)
         self.app.register_blueprint(products_bp)
         self.app.register_blueprint(task_bp)

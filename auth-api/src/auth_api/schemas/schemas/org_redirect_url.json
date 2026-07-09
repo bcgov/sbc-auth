@@ -1,0 +1,16 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/org_redirect_url",
+    "type": "object",
+    "title": "Org Redirect URL",
+    "additionalProperties": false,
+    "required": ["redirectUrl"],
+    "properties": {
+        "redirectUrl": {
+            "$id": "#/properties/redirectUrl",
+            "type": "string",
+            "title": "The redirect URL to register for this vendor org"
+        }
+    }
+}
