@@ -53,7 +53,7 @@ from auth_api.utils.roles import (  # noqa: I001
     USER,
     Role,
 )
-from auth_api.utils.user_context import UserContext
+from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import extract_numbers, string_to_bool
 
 bp = Blueprint("ORGS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs")
@@ -427,7 +427,8 @@ def affiliation_search(org_id, use_entity_mapping=False):
 @bp.route("/<int:org_id>/affiliations", methods=["POST"])
 @cross_origin(origins="*")
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
-def post_organization_affiliation(org_id):
+@user_context
+def post_organization_affiliation(org_id, **kwargs):
     """Post a new Affiliation for an org using the request body."""
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "affiliation")
@@ -442,9 +443,10 @@ def post_organization_affiliation(org_id):
     # Vendor callers pass a linking key issued by a source org (e.g. a lawfirm) in the
     # Account-Linking-Key header. When present, the org_id in the URL is the vendor;
     # the affiliation must be created against the source org the key was issued for.
+    user: UserContext = kwargs["user_context"]
     affiliation_org_id = org_id
     skip_membership_check = _jwt.has_one_of_roles([Role.SKIP_AFFILIATION_AUTH.value])
-    if linking_key := UserContext().linking_key:
+    if linking_key := user.linking_key:
         linked = LinkingKeyService.validate(linking_key, org_id)
         if not linked:
             return {"message": "Invalid or unauthorized linking key."}, HTTPStatus.FORBIDDEN
