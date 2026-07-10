@@ -748,6 +748,153 @@ def test_affiliation_confirmation_email(app, session, client):
         assert "April 16, 2026" in email_body
 
 
+def test_account_link_created_email(app, session, client):
+    """Assert that the account link created event sends the correct email content."""
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    id = org.id
+
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        mail_details = {
+            "accountId": id,
+            "serviceProviderName": "Test Provider",
+            "linkDate": "2026-04-16",
+        }
+        helper_add_event_to_queue(
+            client,
+            message_type=QueueMessageTypes.ACCOUNT_LINK_CREATED.value,
+            mail_details=mail_details,
+        )
+
+        mock_send.assert_called()
+        assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.ACCOUNT_LINK_CREATED.value
+        assert mock_send.call_args.args[0].get("attachments") is None
+        email_body = mock_send.call_args.args[0].get("content").get("body")
+        assert email_body is not None
+        assert "Test Provider" in email_body
+        assert "2026-04-16" in email_body
+        assert f"/account/{org.id}/settings/vendor-connections" in email_body
+
+
+def test_account_link_removed_email(app, session, client):
+    """Assert that the account link removed event sends the correct email content."""
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    id = org.id
+
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        mail_details = {
+            "accountId": id,
+            "serviceProviderName": "Test Provider",
+            "linkRemovalDate": "2026-04-16",
+        }
+        helper_add_event_to_queue(
+            client,
+            message_type=QueueMessageTypes.ACCOUNT_LINK_REMOVED.value,
+            mail_details=mail_details,
+        )
+
+        mock_send.assert_called()
+        assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.ACCOUNT_LINK_REMOVED.value
+        assert mock_send.call_args.args[0].get("attachments") is None
+        email_body = mock_send.call_args.args[0].get("content").get("body")
+        assert email_body is not None
+        assert "Test Provider" in email_body
+        assert "2026-04-16" in email_body
+        assert f"/account/{org.id}/settings/vendor-connections" in email_body
+
+
+def test_account_link_expiry_reminder_email(app, session, client):
+    """Assert that the account link expiry event sends a reminder email when isReminder is True."""
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    id = org.id
+
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        mail_details = {
+            "accountId": id,
+            "serviceProviderName": "Test Provider",
+            "linkDate": "2025-04-16",
+            "isReminder": True,
+        }
+        helper_add_event_to_queue(
+            client,
+            message_type=QueueMessageTypes.ACCOUNT_LINK_EXPIRY.value,
+            mail_details=mail_details,
+        )
+
+        mock_send.assert_called()
+        assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
+        assert (
+            mock_send.call_args.args[0].get("content").get("subject")
+            == SubjectType.ACCOUNT_LINK_EXPIRY_REMINDER.value
+        )
+        email_body = mock_send.call_args.args[0].get("content").get("body")
+        assert email_body is not None
+        assert "Test Provider" in email_body
+        assert "will expire in 30 days" in email_body
+        assert "is expired" not in email_body
+        assert SubjectType.ACCOUNT_LINK_EXPIRED.value not in email_body
+
+
+def test_account_link_expiry_expired_email(app, session, client):
+    """Assert that the account link expiry event sends an expired email when isReminder is False."""
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    id = org.id
+
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        mail_details = {
+            "accountId": id,
+            "serviceProviderName": "Test Provider",
+            "linkDate": "2025-04-16",
+            "isReminder": False,
+        }
+        helper_add_event_to_queue(
+            client,
+            message_type=QueueMessageTypes.ACCOUNT_LINK_EXPIRY.value,
+            mail_details=mail_details,
+        )
+
+        mock_send.assert_called()
+        assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.ACCOUNT_LINK_EXPIRED.value
+        email_body = mock_send.call_args.args[0].get("content").get("body")
+        assert email_body is not None
+        assert "Test Provider" in email_body
+        assert "is expired" in email_body
+        assert "will expire in 30 days" not in email_body
+        assert SubjectType.ACCOUNT_LINK_EXPIRY_REMINDER.value not in email_body
+
+
+def test_account_link_expiry_email_default_is_reminder_false(app, session, client):
+    """Assert that isReminder defaults to False when omitted from the message."""
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    id = org.id
+
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        mail_details = {
+            "accountId": id,
+            "serviceProviderName": "Test Provider",
+        }
+        helper_add_event_to_queue(
+            client,
+            message_type=QueueMessageTypes.ACCOUNT_LINK_EXPIRY.value,
+            mail_details=mail_details,
+        )
+
+        mock_send.assert_called()
+        assert mock_send.call_args.args[0].get("content").get("subject") == SubjectType.ACCOUNT_LINK_EXPIRED.value
+
+
 def test_get_admin_emails_null_firstname(app, session):
     """Assert that a user with a null firstname does not raise TypeError."""
     factory_user_model_for_email_test(

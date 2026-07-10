@@ -18,6 +18,11 @@ import datetime as dt
 import pytz
 
 
+def pacific_today_isoformat() -> str:
+    """Return today's date in Canada/Pacific time, as an ISO date string."""
+    return dt.datetime.now(pytz.timezone("Canada/Pacific")).date().isoformat()
+
+
 def str_to_utc_dt(date: str, add_time: bool):
     """Convert ISO formatted dates into dateTime objects in UTC."""
     time_zone = pytz.timezone("Canada/Pacific")

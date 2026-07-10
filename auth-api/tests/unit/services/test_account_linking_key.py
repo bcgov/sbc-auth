@@ -14,6 +14,10 @@
 """Tests for the AccountLinkingKey service."""
 
 from datetime import UTC, datetime, timedelta
+from unittest.mock import patch
+
+from freezegun import freeze_time
+from sbc_common_components.utils.enums import QueueMessageTypes
 
 from auth_api.models.account_linking_key import AccountLinkingKey as AccountLinkingKeyModel
 from auth_api.services.account_linking_key import AccountLinkingKey as AccountLinkingKeyService
@@ -98,7 +102,8 @@ def test_get_all_returns_active_keys(session):  # pylint:disable=unused-argument
 def test_revoke_sets_status_to_revoked(session):  # pylint:disable=unused-argument
     """Assert that revoke changes the key status to REVOKED."""
     org = factory_org_model()
-    record = factory_linking_key_model(account_id=org.id)
+    vendor = factory_org_model()
+    record = factory_linking_key_model(account_id=org.id, vendor_account_id=vendor.id)
 
     found = AccountLinkingKeyService.revoke(record.id, org.id)
 
@@ -190,3 +195,81 @@ def test_validate_updates_last_used(session):  # pylint:disable=unused-argument
 
     updated = AccountLinkingKeyModel.query.get(record.id)
     assert updated.last_used is not None
+
+
+@freeze_time("2026-07-01 12:00:00+00:00")
+def test_generate_with_vendor_publishes_link_created(session):  # pylint:disable=unused-argument
+    """Assert that generating an immediately-active key publishes an ACCOUNT_LINK_CREATED notification."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+
+    with patch("auth_api.services.account_linking_key.publish_to_mailer") as mock_publish:
+        record = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id)
+
+    mock_publish.assert_called_once()
+    notification_type, kwargs = mock_publish.call_args.args[0], mock_publish.call_args.kwargs
+    assert notification_type == QueueMessageTypes.ACCOUNT_LINK_CREATED.value
+    assert kwargs["data"]["accountId"] == lawfirm.id
+    assert kwargs["data"]["serviceProviderName"] == vendor.name
+    assert kwargs["data"]["linkDate"] == "2026-07-01"
+    assert record.status == LinkingKeyStatus.ACTIVE.value
+
+
+def test_generate_without_vendor_does_not_publish(session):  # pylint:disable=unused-argument
+    """Assert that generating a PENDING key does not publish a mailer notification."""
+    lawfirm = factory_org_model()
+
+    with patch("auth_api.services.account_linking_key.publish_to_mailer") as mock_publish:
+        AccountLinkingKeyService.generate(lawfirm.id)
+
+    mock_publish.assert_not_called()
+
+
+@freeze_time("2026-07-01 12:00:00+00:00")
+def test_bind_publishes_link_created(session):  # pylint:disable=unused-argument
+    """Assert that binding a PENDING key publishes an ACCOUNT_LINK_CREATED notification."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    pending_key = factory_linking_key_model(account_id=lawfirm.id, status=LinkingKeyStatus.PENDING.value)
+
+    with patch("auth_api.services.account_linking_key.publish_to_mailer") as mock_publish:
+        record = AccountLinkingKeyService.bind(pending_key.linking_key, vendor.id)
+
+    mock_publish.assert_called_once()
+    notification_type, kwargs = mock_publish.call_args.args[0], mock_publish.call_args.kwargs
+    assert notification_type == QueueMessageTypes.ACCOUNT_LINK_CREATED.value
+    assert kwargs["data"]["accountId"] == lawfirm.id
+    assert kwargs["data"]["serviceProviderName"] == vendor.name
+    assert kwargs["data"]["linkDate"] == "2026-07-01"
+    assert record.status == LinkingKeyStatus.ACTIVE.value
+
+
+@freeze_time("2026-07-01 12:00:00+00:00")
+def test_revoke_active_key_publishes_link_removed(session):  # pylint:disable=unused-argument
+    """Assert that revoking an ACTIVE key publishes an ACCOUNT_LINK_REMOVED notification."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    record = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+
+    with patch("auth_api.services.account_linking_key.publish_to_mailer") as mock_publish:
+        found = AccountLinkingKeyService.revoke(record.id, lawfirm.id)
+
+    assert found is True
+    mock_publish.assert_called_once()
+    notification_type, kwargs = mock_publish.call_args.args[0], mock_publish.call_args.kwargs
+    assert notification_type == QueueMessageTypes.ACCOUNT_LINK_REMOVED.value
+    assert kwargs["data"]["accountId"] == lawfirm.id
+    assert kwargs["data"]["serviceProviderName"] == vendor.name
+    assert kwargs["data"]["linkRemovalDate"] == "2026-07-01"
+
+
+def test_revoke_pending_key_does_not_publish(session):  # pylint:disable=unused-argument
+    """Assert that revoking a PENDING key (never active) does not publish a mailer notification."""
+    lawfirm = factory_org_model()
+    record = factory_linking_key_model(account_id=lawfirm.id, status=LinkingKeyStatus.PENDING.value)
+
+    with patch("auth_api.services.account_linking_key.publish_to_mailer") as mock_publish:
+        found = AccountLinkingKeyService.revoke(record.id, lawfirm.id)
+
+    assert found is True
+    mock_publish.assert_not_called()

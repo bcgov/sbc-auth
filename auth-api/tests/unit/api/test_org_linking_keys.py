@@ -17,6 +17,7 @@ import copy
 import json
 from http import HTTPStatus
 
+from auth_api.utils.enums import LinkingKeyStatus
 from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_auth_header,
@@ -216,8 +217,24 @@ def test_revoke_linking_key_by_id(client, jwt, session):  # pylint:disable=unuse
     """Assert that DELETE revokes a specific linking key by ID."""
     user = factory_user_model(TestUserInfo.user1)
     org = factory_org_model()
+    vendor = factory_org_model()
     factory_membership_model(user.id, org.id)
-    record = factory_linking_key_model(account_id=org.id)
+    record = factory_linking_key_model(account_id=org.id, vendor_account_id=vendor.id)
+
+    headers = _account_holder_headers(jwt, user)
+    rv = client.delete(f"/api/v1/orgs/{org.id}/linking-keys/{record.id}", headers=headers)
+    assert rv.status_code == HTTPStatus.OK
+
+    rv_list = client.get(f"/api/v1/orgs/{org.id}/linking-keys", headers=headers)
+    assert rv_list.json.get("linkingKeys") == []
+
+
+def test_revoke_pending_linking_key_by_id(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that DELETE revokes a PENDING (unbound) linking key by ID."""
+    user = factory_user_model(TestUserInfo.user1)
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    record = factory_linking_key_model(account_id=org.id, status=LinkingKeyStatus.PENDING.value)
 
     headers = _account_holder_headers(jwt, user)
     rv = client.delete(f"/api/v1/orgs/{org.id}/linking-keys/{record.id}", headers=headers)

@@ -27,7 +27,13 @@ from auth_api.utils.roles import ADMIN, COORDINATOR
 from flask import Blueprint, current_app, request
 from sbc_common_components.utils.enums import QueueMessageTypes
 
-from account_mailer.auth_utils import get_dashboard_url, get_login_url, get_member_emails, get_transaction_url
+from account_mailer.auth_utils import (
+    get_dashboard_url,
+    get_login_url,
+    get_member_emails,
+    get_transaction_url,
+    get_vendor_connections_url,
+)
 from account_mailer.email_processors import (
     account_unlock,
     common_mailer,
@@ -77,6 +83,7 @@ def worker():
         handle_product_actions(message_type, email_msg)
         handle_statement_notification(message_type, email_msg)
         handle_payment_reminder_or_due(message_type, email_msg)
+        handle_account_link_notification(message_type, email_msg)
 
         # Note if you're extending above, make sure to include the new type in handle_other_messages below.
         handle_other_messages(message_type, email_msg)
@@ -533,6 +540,44 @@ def handle_payment_reminder_or_due(message_type, email_msg):
     )
     process_email(email_dict)
 
+def handle_account_link_notification(message_type, email_msg):
+    """Handle account link notification message."""
+    is_reminder = email_msg.get("isReminder", False)
+    match message_type:
+        case QueueMessageTypes.ACCOUNT_LINK_CREATED.value:
+            template_name = TemplateType.ACCOUNT_LINK_CREATED_TEMPLATE_NAME.value
+            subject = SubjectType.ACCOUNT_LINK_CREATED.value
+        case QueueMessageTypes.ACCOUNT_LINK_REMOVED.value:
+            template_name = TemplateType.ACCOUNT_LINK_REMOVED_TEMPLATE_NAME.value
+            subject = SubjectType.ACCOUNT_LINK_REMOVED.value
+        case QueueMessageTypes.ACCOUNT_LINK_EXPIRY.value:
+            template_name = TemplateType.ACCOUNT_LINK_EXPIRY_TEMPLATE_NAME.value
+            subject = SubjectType.ACCOUNT_LINK_EXPIRY_REMINDER.value if is_reminder \
+                else SubjectType.ACCOUNT_LINK_EXPIRED.value
+        case _:
+            return
+
+    org_id = email_msg.get("accountId")
+    recipients = get_member_emails(org_id, (ADMIN,COORDINATOR))
+
+    context_url = get_vendor_connections_url(org_id)
+    logo_url = email_msg.get("logo_url")
+    args = {"is_reminder": is_reminder,
+            "service_provider_name": email_msg.get("serviceProviderName", None),
+            "link_date": email_msg.get("linkDate", None),
+            "link_removal_date": email_msg.get("linkRemovalDate", None)
+            }
+    email_dict = common_mailer.process(
+        org_id,
+        recipients,
+        template_name,
+        subject,
+        logo_url=logo_url,
+        context_url=context_url,
+        **args
+    )
+    process_email(email_dict)
+
 
 def handle_other_messages(message_type, email_msg):
     """Handle the other messages not in the list."""
@@ -562,6 +607,9 @@ def handle_other_messages(message_type, email_msg):
         QueueMessageTypes.STATEMENT_NOTIFICATION.value,
         QueueMessageTypes.PAYMENT_REMINDER_NOTIFICATION.value,
         QueueMessageTypes.PAYMENT_DUE_NOTIFICATION.value,
+        QueueMessageTypes.ACCOUNT_LINK_CREATED.value,
+        QueueMessageTypes.ACCOUNT_LINK_REMOVED.value,
+        QueueMessageTypes.ACCOUNT_LINK_EXPIRY.value,
         AFFILIATION_INVITATION_UNAFFILIATED_EMAIL,
         AFFILIATION_CONFIRMATION_EMAIL
     ]:
