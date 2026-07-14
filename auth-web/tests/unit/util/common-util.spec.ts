@@ -53,6 +53,21 @@ describe('Common Util Test', () => {
     expect(CommonUtil.isUrl('/confirmtoken/xxxxx.Y-qrVg.jqfdfdfdfd')).toBe(false)
   })
 
+  it('is isValidHttpsUrl [positive]', () => {
+    expect(CommonUtil.isValidHttpsUrl('https://example.com')).toBe(true)
+    expect(CommonUtil.isValidHttpsUrl('https://example.com/callback?code=1')).toBe(true)
+    expect(CommonUtil.isValidHttpsUrl('https://sub.domain.example.com:8080/path')).toBe(true)
+  })
+
+  it('is isValidHttpsUrl [negative]', () => {
+    expect(CommonUtil.isValidHttpsUrl('https://api.managebusiness7')).toBe(false)
+    expect(CommonUtil.isValidHttpsUrl('https://managebusiness')).toBe(false)
+    expect(CommonUtil.isValidHttpsUrl('http://example.com')).toBe(false)
+    expect(CommonUtil.isValidHttpsUrl('https://example .com')).toBe(false)
+    expect(CommonUtil.isValidHttpsUrl('example.com')).toBe(false)
+    expect(CommonUtil.isValidHttpsUrl('')).toBe(false)
+  })
+
   it('formatIncorporationNumber returns null', () => {
     expect(CommonUtil.formatIncorporationNumber(null)).toBeNull()
     expect(CommonUtil.formatIncorporationNumber('')).toBeNull()
