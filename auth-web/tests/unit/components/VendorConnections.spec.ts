@@ -1,9 +1,8 @@
 
+import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { MembershipType } from '@/models/Organization'
-import { Role } from '@/util/constants'
 import VendorConnections from '@/components/auth/account-settings/advance-settings/VendorConnections.vue'
 import VendorConnectionsTable from '@/components/auth/account-settings/advance-settings/VendorConnectionsTable.vue'
 import VueRouter from 'vue-router'
@@ -22,7 +21,9 @@ describe('VendorConnections.vue', () => {
 
   beforeEach(() => {
     setActivePinia(createPinia())
-    vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(false)
+    sessionStorage.setItem(SessionStorageKeys.LaunchDarklyFlags, JSON.stringify({
+      [LDFlags.DisableAccountLinking]: false
+    }))
 
     const orgStore = useOrgStore()
     orgStore.$patch({
@@ -60,6 +61,7 @@ describe('VendorConnections.vue', () => {
     vi.resetModules()
     vi.clearAllMocks()
     vi.restoreAllMocks()
+    sessionStorage.removeItem(SessionStorageKeys.LaunchDarklyFlags)
     wrapper.destroy()
   })
 
