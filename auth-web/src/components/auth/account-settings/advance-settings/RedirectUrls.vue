@@ -1,11 +1,11 @@
 <template>
   <div class="pb-10">
-    <header class="view-header align-center mb-7">
+    <header class="view-header mb-7">
       <h2 class="view-header__title">
         Redirect URLs
       </h2>
       <v-btn
-        v-if="!isAddingUrl"
+        v-if="canManageUrls && !isAddingUrl"
         large
         depressed
         class="px-6"
@@ -56,7 +56,7 @@
           large
           depressed
           color="primary"
-          class="ml-3 px-8"
+          class="ml-3 px-8 font-weight-bold"
           aria-label="Add"
           data-test="confirm-add-url-button"
           :disabled="isLoading"
@@ -268,7 +268,7 @@
 <script lang="ts">
 import { Action, State } from 'pinia-class'
 import { Component, Mixins } from 'vue-property-decorator'
-import { OrgRedirectUrl, Organization } from '@/models/Organization'
+import { Member, MembershipType, OrgRedirectUrl, Organization } from '@/models/Organization'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
 import { Event } from '@/models/event'
@@ -291,6 +291,7 @@ export interface RedirectUrlItem {
 })
 export default class RedirectUrls extends Mixins(AccountChangeMixin) {
   @State(useOrgStore) readonly currentOrganization!: Organization
+  @State(useOrgStore) readonly currentMembership!: Member
   @Action(useOrgStore) readonly getOrgRedirectUrls!: (orgId: number) => Promise<{ redirectUrls: OrgRedirectUrl[] }>
   @Action(useOrgStore) readonly createOrgRedirectUrl!: (details: { orgId: number, redirectUrl: string }) => Promise<OrgRedirectUrl>
   @Action(useOrgStore) readonly updateOrgRedirectUrl!:
@@ -317,37 +318,48 @@ export default class RedirectUrls extends Mixins(AccountChangeMixin) {
 
   public formatDate = CommonUtils.formatDisplayDate
 
-  public readonly redirectUrlHeaders = [
-    {
-      text: 'Redirect URL',
-      align: 'left',
-      sortable: false,
-      value: 'url',
-      class: 'bold-header'
-    },
-    {
-      text: 'Created By',
-      align: 'left',
-      sortable: false,
-      value: 'createdBy',
-      class: 'bold-header'
-    },
-    {
-      text: 'Created Date',
-      align: 'left',
-      sortable: false,
-      value: 'createdDate',
-      class: 'bold-header'
-    },
-    {
-      text: 'Action',
-      align: 'left',
-      sortable: false,
-      value: 'action',
-      class: 'bold-header',
-      width: '150px'
-    }
-  ]
+  // add/edit/remove is restricted to Admin/Coordinator
+  // other roles get a read-only table
+  public get canManageUrls (): boolean {
+    return [MembershipType.Admin, MembershipType.Coordinator]
+      .includes(this.currentMembership?.membershipTypeCode)
+  }
+
+  public get redirectUrlHeaders () {
+    const headers = [
+      {
+        text: 'Redirect URL',
+        align: 'left',
+        sortable: false,
+        value: 'url',
+        class: 'bold-header'
+      },
+      {
+        text: 'Created By',
+        align: 'left',
+        sortable: false,
+        value: 'createdBy',
+        class: 'bold-header'
+      },
+      {
+        text: 'Created Date',
+        align: 'left',
+        sortable: false,
+        value: 'createdDate',
+        class: 'bold-header'
+      },
+      {
+        text: 'Action',
+        align: 'left',
+        sortable: false,
+        value: 'action',
+        class: 'bold-header',
+        width: '150px'
+      }
+    ]
+    // filter out action column for users that are not allowed to manage urls
+    return this.canManageUrls ? headers : headers.filter(header => header.value !== 'action')
+  }
 
   public async mounted () {
     this.setAccountChangedHandler(this.initialize)

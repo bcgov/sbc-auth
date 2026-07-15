@@ -1,4 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+import { MembershipType } from '@/models/Organization'
 import RedirectUrls from '@/components/auth/account-settings/advance-settings/RedirectUrls.vue'
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
@@ -58,6 +59,7 @@ describe('Account settings RedirectUrls.vue', () => {
 
     orgStore = useOrgStore()
     orgStore.currentOrganization = { id: 123, name: 'test org' } as any
+    orgStore.currentMembership = { membershipTypeCode: MembershipType.Admin } as any
     orgStore.getOrgRedirectUrls = vi.fn().mockResolvedValue({ redirectUrls: [] }) as any
     orgStore.createOrgRedirectUrl = vi.fn().mockResolvedValue({ id: 100 }) as any
     orgStore.updateOrgRedirectUrl = vi.fn().mockResolvedValue({ id: 1 }) as any
@@ -224,5 +226,40 @@ describe('Account settings RedirectUrls.vue', () => {
     expect(orgStore.createOrgRedirectUrl).not.toHaveBeenCalled()
     expect(findByTest('url-input').exists()).toBe(true)
     expect(wrapper.find('.v-messages__message').text()).toBe('This URL has already been added.')
+  })
+
+  const tableHeaders = () => wrapper.findAll('th').wrappers.map(th => th.text())
+
+  it.each([
+    MembershipType.Admin,
+    MembershipType.Coordinator
+  ])('shows the add and row action controls for %s membership', async (membershipType) => {
+    orgStore.currentMembership = { membershipTypeCode: membershipType } as any
+    await setExistingUrls([existingUrl])
+
+    expect(tableHeaders()).toEqual(['Redirect URL', 'Created By', 'Created Date', 'Action'])
+    expect(findByTest('add-url-button').exists()).toBe(true)
+    expect(findByTest('remove-url-button-0').exists()).toBe(true)
+    expect(findByTest('more-actions-button-0').exists()).toBe(true)
+  })
+
+  it.each([
+    ['a regular team member', { membershipTypeCode: MembershipType.User }],
+    ['a staff membership', { membershipTypeCode: MembershipType.Staff }],
+    ['staff without a membership', undefined]
+  ])('renders a read-only table for %s', async (_, membership) => {
+    orgStore.currentMembership = membership as any
+    await setExistingUrls([existingUrl])
+
+    expect(tableHeaders()).toEqual(['Redirect URL', 'Created By', 'Created Date'])
+    expect(findByTest('add-url-button').exists()).toBe(false)
+    expect(findByTest('remove-url-button-0').exists()).toBe(false)
+    expect(findByTest('more-actions-button-0').exists()).toBe(false)
+
+    // existing rows are still displayed
+    const rowText = wrapper.find('tbody tr').text()
+    expect(rowText).toContain('https://example.com/existing')
+    expect(rowText).toContain('Jane Doe')
+    expect(rowText).toContain('Mar 22, 2027')
   })
 })
