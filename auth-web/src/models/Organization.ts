@@ -292,7 +292,7 @@ export interface OrgRedirectUrl {
   orgId: number
   redirectUrl: string
   createdDate: string
-  createdBy: string | null
+  createdBy: string
 }
 
 export interface OrgRedirectUrls {
