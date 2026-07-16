@@ -698,7 +698,7 @@ def test_unaffiliated_email_invitation(app, session, client):
             "businessIdentifier": "CP1234567",
             "token": "ABC123",
             "contextUrl": context_url,
-            "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}"
+            "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}",
         }
         helper_add_event_to_queue(
             client,
@@ -728,7 +728,7 @@ def test_affiliation_confirmation_email(app, session, client):
             "businessIdentifier": "CP1234567",
             "token": "ABC123",
             "contextUrl": context_url,
-            "completionDate": f"{datetime(2026, 4, 16, 12, 0, 0)}"
+            "completionDate": f"{datetime(2026, 4, 16, 12, 0, 0)}",
         }
         helper_add_event_to_queue(
             client,
@@ -760,6 +760,7 @@ def test_account_link_created_email(app, session, client):
             "accountId": id,
             "serviceProviderName": "Test Provider",
             "linkDate": "2026-04-16",
+            "expiryDate": "2027-04-16",
         }
         helper_add_event_to_queue(
             client,
@@ -774,7 +775,8 @@ def test_account_link_created_email(app, session, client):
         email_body = mock_send.call_args.args[0].get("content").get("body")
         assert email_body is not None
         assert "Test Provider" in email_body
-        assert "2026-04-16" in email_body
+        assert "**Date Added:** 2026-04-16" in email_body
+        assert "will expire on 2027-04-16." in email_body
         assert f"/account/{org.id}/settings/vendor-connections" in email_body
 
 
@@ -820,6 +822,7 @@ def test_account_link_expiry_reminder_email(app, session, client):
             "accountId": id,
             "serviceProviderName": "Test Provider",
             "linkDate": "2025-04-16",
+            "expiryDate": "2026-05-16",
             "isReminder": True,
         }
         helper_add_event_to_queue(
@@ -831,8 +834,7 @@ def test_account_link_expiry_reminder_email(app, session, client):
         mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
         assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.ACCOUNT_LINK_EXPIRY_REMINDER.value
+            mock_send.call_args.args[0].get("content").get("subject") == SubjectType.ACCOUNT_LINK_EXPIRY_REMINDER.value
         )
         email_body = mock_send.call_args.args[0].get("content").get("body")
         assert email_body is not None
@@ -840,6 +842,8 @@ def test_account_link_expiry_reminder_email(app, session, client):
         assert "will expire in 30 days" in email_body
         assert "is expired" not in email_body
         assert SubjectType.ACCOUNT_LINK_EXPIRED.value not in email_body
+        assert "**Date Added:** 2025-04-16" in email_body
+        assert "**Expiration Date:** 2026-05-16" in email_body
 
 
 def test_account_link_expiry_expired_email(app, session, client):
@@ -854,6 +858,7 @@ def test_account_link_expiry_expired_email(app, session, client):
             "accountId": id,
             "serviceProviderName": "Test Provider",
             "linkDate": "2025-04-16",
+            "expiryDate": "2026-04-16",
             "isReminder": False,
         }
         helper_add_event_to_queue(
@@ -871,6 +876,8 @@ def test_account_link_expiry_expired_email(app, session, client):
         assert "is expired" in email_body
         assert "will expire in 30 days" not in email_body
         assert SubjectType.ACCOUNT_LINK_EXPIRY_REMINDER.value not in email_body
+        assert "**Date Added:** 2025-04-16" in email_body
+        assert "**Expiration Date:** 2026-04-16" in email_body
 
 
 def test_account_link_expiry_email_default_is_reminder_false(app, session, client):

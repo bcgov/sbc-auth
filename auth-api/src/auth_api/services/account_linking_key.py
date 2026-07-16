@@ -26,7 +26,7 @@ from auth_api.models.dataclass import Activity
 from auth_api.models.db import db
 from auth_api.services.activity_log_publisher import ActivityLogPublisher
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.date import pacific_today_isoformat
+from auth_api.utils.date import pacific_today_isoformat, utc_to_pacific_isoformat
 from auth_api.utils.enums import ActivityAction, LinkingKeyStatus
 
 
@@ -60,7 +60,7 @@ class AccountLinkingKey:
 
         AccountLinkingKey._publish(ActivityAction.LINKING_KEY_GENERATED.value, record)
         if record.status == LinkingKeyStatus.ACTIVE.value:
-            data = {"linkDate": pacific_today_isoformat()}
+            data = {"linkDate": pacific_today_isoformat(), "expiryDate": utc_to_pacific_isoformat(record.expires_on)}
             AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_CREATED.value, record, data)
         return record
 
@@ -123,7 +123,7 @@ class AccountLinkingKey:
         record.save()
 
         AccountLinkingKey._publish(ActivityAction.LINKING_KEY_BOUND.value, record)
-        data = {"linkDate": pacific_today_isoformat()}
+        data = {"linkDate": pacific_today_isoformat(), "expiryDate": utc_to_pacific_isoformat(record.expires_on)}
         AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_CREATED.value, record, data)
         return record
 
