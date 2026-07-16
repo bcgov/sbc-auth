@@ -1,0 +1,39 @@
+name: Auth Jobs CD GCP
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "jobs/auth-jobs/**"
+      - "auth-api/src/auth_api/models/**"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Deploy To"
+        required: true
+        type: choice
+        options:
+        - dev
+        - test
+        - sandbox
+        - prod
+      redeploy:
+        description: "Redeploy Application"
+        required: true
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  auth-jobs-cd:
+    uses: bcgov/bcregistry-sre/.github/workflows/backend-job-cd.yaml@main
+    with:
+      target: ${{ inputs.target }}
+      app_name: "auth-jobs"
+      working_directory: "./jobs/auth-jobs"
+      redeploy: ${{ inputs.redeploy }}
+    secrets:
+      WORKLOAD_IDENTIFY_POOLS_PROVIDER: ${{ secrets.WORKLOAD_IDENTIFY_POOLS_PROVIDER }}
+      GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
