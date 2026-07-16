@@ -1,0 +1,114 @@
+name: Auth Jobs CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - release/*
+    paths:
+      - "jobs/auth-jobs/**"
+      - "auth-api/src/auth_api/models/**"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./jobs/auth-jobs
+
+jobs:
+  setup-job:
+    runs-on: ubuntu-24.04
+
+    if: github.repository == 'bcgov/sbc-auth'
+
+    steps:
+      - uses: actions/checkout@v6
+      - run: "true"
+
+  linting:
+    needs: setup-job
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        python-version: [3.12]
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          make setup
+      - name: Lint with ruff
+        run: |
+          make ruff-check
+
+  testing:
+    needs: setup-job
+    env:
+      DATABASE_TEST_URL: "postgresql+pg8000://postgres:postgres@localhost:5432/auth-test"
+      USE_DOCKER_MOCK: "YES"
+
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        python-version: [3.12]
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: auth-test
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install docker-compose
+        run: |
+          sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose version
+      - name: Install dependencies
+        run: |
+          make setup
+      - name: Test with pytest
+        id: test
+        run: |
+          make test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          file: ./jobs/auth-jobs/coverage.xml
+          flags: authjobs
+          name: codecov-auth-jobs
+          fail_ci_if_error: false
+
+  build-check:
+    needs: setup-job
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        python-version: [3.12]
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: build to check strictness
+        id: build
+        run: |
+          make build-nc

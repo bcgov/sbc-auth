@@ -428,6 +428,7 @@ def handle_unaffiliated_email_invitation(message_type, email_msg):
     )
     process_email(email_dict)
 
+
 def handle_affiliation_confirmation_email(message_type, email_msg):
     """Handle the affiliation confirmation email message."""
     if message_type != AFFILIATION_CONFIRMATION_EMAIL:
@@ -540,6 +541,7 @@ def handle_payment_reminder_or_due(message_type, email_msg):
     )
     process_email(email_dict)
 
+
 def handle_account_link_notification(message_type, email_msg):
     """Handle account link notification message."""
     is_reminder = email_msg.get("isReminder", False)
@@ -552,29 +554,28 @@ def handle_account_link_notification(message_type, email_msg):
             subject = SubjectType.ACCOUNT_LINK_REMOVED.value
         case QueueMessageTypes.ACCOUNT_LINK_EXPIRY.value:
             template_name = TemplateType.ACCOUNT_LINK_EXPIRY_TEMPLATE_NAME.value
-            subject = SubjectType.ACCOUNT_LINK_EXPIRY_REMINDER.value if is_reminder \
+            subject = (
+                SubjectType.ACCOUNT_LINK_EXPIRY_REMINDER.value
+                if is_reminder
                 else SubjectType.ACCOUNT_LINK_EXPIRED.value
+            )
         case _:
             return
 
     org_id = email_msg.get("accountId")
-    recipients = get_member_emails(org_id, (ADMIN,COORDINATOR))
+    recipients = get_member_emails(org_id, (ADMIN, COORDINATOR))
 
     context_url = get_vendor_connections_url(org_id)
     logo_url = email_msg.get("logo_url")
-    args = {"is_reminder": is_reminder,
-            "service_provider_name": email_msg.get("serviceProviderName", None),
-            "link_date": email_msg.get("linkDate", None),
-            "link_removal_date": email_msg.get("linkRemovalDate", None)
-            }
+    args = {
+        "is_reminder": is_reminder,
+        "service_provider_name": email_msg.get("serviceProviderName", None),
+        "link_date": email_msg.get("linkDate", None),
+        "link_removal_date": email_msg.get("linkRemovalDate", None),
+        "expiry_date": email_msg.get("expiryDate", None),
+    }
     email_dict = common_mailer.process(
-        org_id,
-        recipients,
-        template_name,
-        subject,
-        logo_url=logo_url,
-        context_url=context_url,
-        **args
+        org_id, recipients, template_name, subject, logo_url=logo_url, context_url=context_url, **args
     )
     process_email(email_dict)
 
@@ -611,7 +612,7 @@ def handle_other_messages(message_type, email_msg):
         QueueMessageTypes.ACCOUNT_LINK_REMOVED.value,
         QueueMessageTypes.ACCOUNT_LINK_EXPIRY.value,
         AFFILIATION_INVITATION_UNAFFILIATED_EMAIL,
-        AFFILIATION_CONFIRMATION_EMAIL
+        AFFILIATION_CONFIRMATION_EMAIL,
     ]:
         return
 

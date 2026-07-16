@@ -23,6 +23,13 @@ def pacific_today_isoformat() -> str:
     return dt.datetime.now(pytz.timezone("Canada/Pacific")).date().isoformat()
 
 
+def utc_to_pacific_isoformat(utc_dt: dt.datetime) -> str:
+    """Convert a UTC (or naive, assumed UTC) datetime to its Canada/Pacific date, as an ISO date string."""
+    if utc_dt.tzinfo is None:
+        utc_dt = utc_dt.replace(tzinfo=dt.UTC)
+    return utc_dt.astimezone(pytz.timezone("Canada/Pacific")).date().isoformat()
+
+
 def str_to_utc_dt(date: str, add_time: bool):
     """Convert ISO formatted dates into dateTime objects in UTC."""
     time_zone = pytz.timezone("Canada/Pacific")

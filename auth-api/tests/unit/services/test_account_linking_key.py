@@ -212,6 +212,7 @@ def test_generate_with_vendor_publishes_link_created(session):  # pylint:disable
     assert kwargs["data"]["accountId"] == lawfirm.id
     assert kwargs["data"]["serviceProviderName"] == vendor.name
     assert kwargs["data"]["linkDate"] == "2026-07-01"
+    assert kwargs["data"]["expiryDate"] == "2027-07-01"
     assert record.status == LinkingKeyStatus.ACTIVE.value
 
 
@@ -241,6 +242,7 @@ def test_bind_publishes_link_created(session):  # pylint:disable=unused-argument
     assert kwargs["data"]["accountId"] == lawfirm.id
     assert kwargs["data"]["serviceProviderName"] == vendor.name
     assert kwargs["data"]["linkDate"] == "2026-07-01"
+    assert kwargs["data"]["expiryDate"] == "2027-07-01"
     assert record.status == LinkingKeyStatus.ACTIVE.value
 
 

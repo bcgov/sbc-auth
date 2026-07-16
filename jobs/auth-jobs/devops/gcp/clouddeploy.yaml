@@ -1,0 +1,73 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: deploy.cloud.google.com/v1
+kind: DeliveryPipeline
+metadata:
+ name: auth-jobs-pipeline
+description: Deployment pipeline
+serialPipeline:
+ stages:
+ - targetId: gtksf3-dev
+   profiles: [dev]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "development"
+      deploy-project-id: "gtksf3-dev"
+      job-name: "auth-jobs-dev"
+      cloudsql-instances: "gtksf3-dev:northamerica-northeast1:auth-db-dev"
+      run-command: "./run.sh"
+      service-account: "sa-job@gtksf3-dev.iam.gserviceaccount.com"
+ - targetId: gtksf3-test
+   profiles: [test]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "development"
+      deploy-project-id: "gtksf3-test"
+      job-name: "auth-jobs-test"
+      cloudsql-instances: "gtksf3-test:northamerica-northeast1:auth-db-test"
+      run-command: "./run.sh"
+      service-account: "sa-job@gtksf3-test.iam.gserviceaccount.com"
+ - targetId: gtksf3-sandbox
+   profiles: [sandbox]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "sandbox"
+      deploy-project-id: "gtksf3-tools"
+      job-name: "auth-jobs-sandbox"
+      cloudsql-instances: "gtksf3-tools:northamerica-northeast1:auth-db-sandbox"
+      run-command: "./run.sh"
+      service-account: "sa-job@gtksf3-tools.iam.gserviceaccount.com"
+ - targetId: gtksf3-prod
+   profiles: [prod]
+   strategy:
+    standard:
+      verify: false
+   deployParameters:
+   - values:
+      deploy-env: "production"
+      deploy-project-id: "gtksf3-prod"
+      job-name: "auth-jobs-prod"
+      cloudsql-instances: "gtksf3-prod:northamerica-northeast1:auth-db-prod"
+      run-command: "./run.sh"
+      service-account: "sa-job@gtksf3-prod.iam.gserviceaccount.com"

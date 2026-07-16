@@ -362,6 +362,7 @@ class LinkingKeyStatus(Enum):
     ACTIVE = "ACTIVE"
     PENDING = "PENDING"
     REVOKED = "REVOKED"
+    EXPIRED = "EXPIRED"
 
 
 class PatchActions(Enum):
@@ -412,3 +413,4 @@ class QueueSources(Enum):
 
     AUTH_API = "auth-api"
     AUTH_QUEUE = "auth-queue"
+    AUTH_JOBS = "auth-jobs"
