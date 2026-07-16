@@ -2,9 +2,6 @@ name: Auth Jobs CI
 
 on:
   pull_request:
-    branches:
-      - main
-      - release/*
     paths:
       - "jobs/auth-jobs/**"
       - "auth-api/src/auth_api/models/**"
