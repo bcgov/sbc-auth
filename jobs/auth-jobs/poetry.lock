@@ -299,7 +299,7 @@ pyhumps = "^3.8.0"
 python-dotenv = "^1.0.1"
 pytz = "^2024.2"
 requests = "2.32.4"
-sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", rev = "ae0f031d40d51d86a7ac9e500be0b97fc10f19a7", subdirectory = "python"}
+sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", rev = "d6e4ff25af28a1d46666550683349fdeb3907c67", subdirectory = "python"}
 sql-versioning = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "add_column_exclusion", subdirectory = "python/sql-versioning"}
 sqlalchemy-utils = "^0.41.2"
 structured-logging = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/structured-logging"}
@@ -308,8 +308,8 @@ Werkzeug = "^3.1.5"
 [package.source]
 type = "git"
 url = "https://github.com/ochiu/sbc-auth.git"
-reference = "main"
-resolved_reference = "0ecdc6066faca2a60399cc004bae113761001901"
+reference = "34138-Account-link-notification-job"
+resolved_reference = "b02b28734c683cb1bdb1358e034587b3d4b01348"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3098,8 +3098,8 @@ jaeger-client = "*"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-common-components.git"
-reference = "ae0f031d40d51d86a7ac9e500be0b97fc10f19a7"
-resolved_reference = "ae0f031d40d51d86a7ac9e500be0b97fc10f19a7"
+reference = "d6e4ff25af28a1d46666550683349fdeb3907c67"
+resolved_reference = "d6e4ff25af28a1d46666550683349fdeb3907c67"
 subdirectory = "python"
 
 [[package]]
@@ -3712,4 +3712,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "96203b4bb730c1d604db3959a309d37684e24a63ff199c384fc1a8692ccd5ed4"
+content-hash = "8fa2e7e2b675e6bd4a3ad3b528fc3c3611ea5149da04765b9993291468358794"

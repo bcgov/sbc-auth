@@ -14,7 +14,6 @@
 """All of the configuration for the service is captured here. All items are loaded, or have Constants defined here that are loaded into the Flask configuration. All modules and lookups get their configuration from the Flask config, rather than reading environment variables directly or by accessing this configuration directly."""
 
 import os
-import sys
 
 from cloud_sql_connector import DBConfig
 from dotenv import find_dotenv, load_dotenv
