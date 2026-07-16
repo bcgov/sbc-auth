@@ -148,7 +148,9 @@
                 :data-test="`edit-url-menu-item-${item.index}`"
                 @click="editUrl(item.id)"
               >
-                <v-list-item-subtitle class="primary--text px-8">
+                <v-list-item-subtitle
+                  class="primary--text text-left"
+                >
                   Edit URL
                 </v-list-item-subtitle>
               </v-list-item>
@@ -580,6 +582,10 @@ export default class RedirectUrls extends Mixins(AccountChangeMixin) {
     padding-top: 1rem !important;
     padding-bottom: 1rem !important;
     height: auto;
+  }
+
+  .v-list-item__subtitle {
+    width: 120px;
   }
 }
 
