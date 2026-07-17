@@ -83,7 +83,7 @@
       </template>
       <template #[`item.url`]="{ item }">
         <div
-          class="font-weight-bold"
+          class="font-weight-bold text-break"
           :data-test="`url-row-${item.index}`"
         >
           {{ item.url }}
@@ -330,7 +330,8 @@ export default defineComponent({
           align: 'left',
           sortable: false,
           value: 'url',
-          class: 'bold-header'
+          class: 'bold-header',
+          width: '40%'
         },
         {
           text: 'Created By',
@@ -616,6 +617,7 @@ export default defineComponent({
     padding-top: 1rem !important;
     padding-bottom: 1rem !important;
     height: auto;
+    vertical-align: top;
   }
 
   .v-list-item__subtitle {
