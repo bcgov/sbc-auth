@@ -73,7 +73,6 @@
       :headers="redirectUrlHeaders"
       :items="indexedRedirectUrls"
       :items-per-page="PAGE_LIMIT"
-      :disabled="isLoading"
       :loading="isLoading"
       loading-text="Loading..."
       no-data-text="No Redirect URLs"
@@ -200,7 +199,7 @@
           class="px-7"
           aria-label="Cancel"
           data-test="cancel-edit-url-button"
-          @click="$refs.editUrlDialog.close()"
+          @click="editUrlDialog.close()"
         >
           Cancel
         </v-btn>
@@ -245,7 +244,7 @@
           class="px-7"
           aria-label="Cancel"
           data-test="cancel-remove-url-button"
-          @click="$refs.removeUrlDialog.close()"
+          @click="removeUrlDialog.close()"
         >
           Cancel
         </v-btn>
@@ -268,16 +267,16 @@
 </template>
 
 <script lang="ts">
-import { Action, State } from 'pinia-class'
-import { Component, Mixins } from 'vue-property-decorator'
-import { Member, MembershipType, OrgRedirectUrl, Organization } from '@/models/Organization'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { MembershipType, OrgRedirectUrl, OrgRedirectUrls } from '@/models/Organization'
+import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, ref } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { normalizeError } from '@/util/error-util'
+import { useAccountChangeHandler } from '@/composables'
 import { useOrgStore } from '@/stores/org'
+import { useRedirectUrlsStore } from '@/stores/redirectUrls'
 
 export interface RedirectUrlItem {
   id: number
@@ -286,256 +285,291 @@ export interface RedirectUrlItem {
   createdDate: string
 }
 
-@Component({
+const PAGE_LIMIT = 5
+
+// only lowercase the scheme and host name, the path and query are case-sensitive
+// and the backend compares URLs as exact strings
+const normalizeUrl = (value: string): string =>
+  value.trim().replace(/^(https:\/\/[^/?#]*)/i, part => part.toLowerCase())
+
+export default defineComponent({
+  name: 'RedirectUrls',
   components: {
     ModalDialog
+  },
+  setup () {
+    const orgStore = useOrgStore()
+    const redirectUrlsStore = useRedirectUrlsStore()
+    const { setAccountChangedHandler, beforeDestroy } = useAccountChangeHandler()
+
+    const isAddingUrl = ref(false)
+    const isLoading = ref(true)
+    const newUrl = ref('')
+    const newUrlError = ref('')
+    const editedUrl = ref('')
+    const editedUrlError = ref('')
+    const redirectUrls = ref<RedirectUrlItem[]>([])
+    const editingId = ref<number | null>(null)
+    const removingId = ref<number | null>(null)
+    const recentlyAddedId = ref<number | null>(null)
+    const recentlyChangedId = ref<number | null>(null)
+    const editUrlDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const removeUrlDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+
+    // add/edit/remove is restricted to Admin/Coordinator
+    // other roles get a read-only table
+    const canManageUrls = computed<boolean>(() => {
+      return [MembershipType.Admin, MembershipType.Coordinator]
+        .includes(orgStore.currentMembership?.membershipTypeCode)
+    })
+
+    const redirectUrlHeaders = computed(() => {
+      const headers = [
+        {
+          text: 'Redirect URL',
+          align: 'left',
+          sortable: false,
+          value: 'url',
+          class: 'bold-header'
+        },
+        {
+          text: 'Created By',
+          align: 'left',
+          sortable: false,
+          value: 'createdBy',
+          class: 'bold-header'
+        },
+        {
+          text: 'Created Date',
+          align: 'left',
+          sortable: false,
+          value: 'createdDate',
+          class: 'bold-header'
+        },
+        {
+          text: 'Action',
+          align: 'left',
+          sortable: false,
+          value: 'action',
+          class: 'bold-header',
+          width: '150px'
+        }
+      ]
+      // filter out action column for users that are not allowed to manage urls
+      return canManageUrls.value ? headers : headers.filter(header => header.value !== 'action')
+    })
+
+    const indexedRedirectUrls = computed(() => {
+      return redirectUrls.value.map((item, index) => ({
+        index,
+        ...item,
+        added: item.id === recentlyAddedId.value,
+        changed: item.id === recentlyChangedId.value
+      }))
+    })
+
+    const showToast = (message: string) => {
+      const event: Event = { message, type: 'success', timeout: 3000 }
+      EventBus.$emit('show-toast', event)
+    }
+
+    const showErrorToast = () => {
+      const event: Event = { message: 'Something went wrong. Please try again.', type: 'error', timeout: 3000 }
+      EventBus.$emit('show-toast', event)
+    }
+
+    const getServerErrorMessage = (e: any): string => {
+      const normalized = normalizeError(e)
+      if ((normalized.status === 400 || normalized.status === 409) && typeof normalized.message === 'string') {
+        return normalized.message
+      }
+      return 'An error occurred while saving the redirect URL. Please try again.'
+    }
+
+    const validateUrl = (url: string): string => {
+      if (!url) {
+        return 'Enter a redirect URL.'
+      }
+      if (!CommonUtils.isValidHttpsUrl(url)) {
+        return 'Enter a valid URL beginning with https://.'
+      }
+      if (redirectUrls.value.some(item => item.url === url && item.id !== editingId.value)) {
+        return 'This URL has already been added.'
+      }
+      return ''
+    }
+
+    const loadRedirectUrls = async () => {
+      isLoading.value = true
+      try {
+        const resp = await redirectUrlsStore.getOrgRedirectUrls(orgStore.currentOrganization.id) as OrgRedirectUrls
+        redirectUrls.value = (resp?.redirectUrls || []).map(item => ({
+          id: item.id,
+          url: item.redirectUrl,
+          createdBy: item.createdBy,
+          createdDate: item.createdDate
+        }))
+      } catch (e) {
+        showErrorToast()
+        redirectUrls.value = []
+      }
+      isLoading.value = false
+    }
+
+    const showAddUrlInput = () => {
+      isAddingUrl.value = true
+    }
+
+    const cancelAddUrl = () => {
+      newUrl.value = ''
+      newUrlError.value = ''
+      isAddingUrl.value = false
+    }
+
+    const initialize = async () => {
+      recentlyAddedId.value = null
+      recentlyChangedId.value = null
+      // an account switch invalidates any in-progress add/edit/remove state
+      cancelAddUrl()
+      editUrlDialog.value?.close()
+      removeUrlDialog.value?.close()
+      await loadRedirectUrls()
+    }
+
+    const addUrl = async () => {
+      const url = normalizeUrl(newUrl.value)
+      newUrlError.value = validateUrl(url)
+      if (newUrlError.value) {
+        return
+      }
+      isLoading.value = true
+      try {
+        const created = await redirectUrlsStore.createOrgRedirectUrl({
+          orgId: orgStore.currentOrganization.id,
+          redirectUrl: url
+        }) as OrgRedirectUrl
+        recentlyAddedId.value = created.id
+        recentlyChangedId.value = null
+        newUrl.value = ''
+        isAddingUrl.value = false
+        await loadRedirectUrls()
+        showToast('Redirect URL added.')
+      } catch (e) {
+        newUrlError.value = getServerErrorMessage(e)
+        isLoading.value = false
+      }
+    }
+
+    const editUrl = (id: number) => {
+      const item = redirectUrls.value.find(item => item.id === id)
+      if (!item) {
+        return
+      }
+      editedUrl.value = item.url
+      editedUrlError.value = ''
+      editingId.value = id
+      editUrlDialog.value.open()
+    }
+
+    const saveEditedUrl = async () => {
+      const url = normalizeUrl(editedUrl.value)
+      editedUrlError.value = validateUrl(url)
+      if (editedUrlError.value) {
+        return
+      }
+      const current = redirectUrls.value.find(item => item.id === editingId.value)
+      // missing entry or unchanged value — close with no API call
+      if (!current || url === current.url) {
+        editUrlDialog.value.close()
+        return
+      }
+      isLoading.value = true
+      try {
+        const updated = await redirectUrlsStore.updateOrgRedirectUrl({
+          orgId: orgStore.currentOrganization.id,
+          urlId: current.id,
+          redirectUrl: url
+        }) as OrgRedirectUrl
+        recentlyChangedId.value = updated.id
+        recentlyAddedId.value = null
+        editUrlDialog.value.close()
+        await loadRedirectUrls()
+        showToast('Redirect URL updated.')
+      } catch (e) {
+        isLoading.value = false
+        showErrorToast()
+      }
+    }
+
+    const cancelEditUrl = () => {
+      editedUrl.value = ''
+      editedUrlError.value = ''
+      editingId.value = null
+    }
+
+    const confirmRemoveUrl = (id: number) => {
+      removingId.value = id
+      removeUrlDialog.value.open()
+    }
+
+    const removeUrl = async () => {
+      const target = redirectUrls.value.find(item => item.id === removingId.value)
+      if (!target) {
+        removeUrlDialog.value.close()
+        return
+      }
+      isLoading.value = true
+      try {
+        await redirectUrlsStore.deleteOrgRedirectUrl({ orgId: orgStore.currentOrganization.id, urlId: target.id })
+        removeUrlDialog.value.close()
+        await loadRedirectUrls()
+        showToast('Redirect URL removed.')
+      } catch (e) {
+        isLoading.value = false
+        showErrorToast()
+      }
+    }
+
+    onMounted(() => {
+      setAccountChangedHandler(initialize)
+      initialize()
+    })
+
+    onBeforeUnmount(() => {
+      beforeDestroy()
+    })
+
+    return {
+      PAGE_LIMIT,
+      addUrl,
+      canManageUrls,
+      cancelAddUrl,
+      cancelEditUrl,
+      confirmRemoveUrl,
+      editUrl,
+      editUrlDialog,
+      editedUrl,
+      editedUrlError,
+      editingId,
+      formatDate: CommonUtils.formatDisplayDate,
+      indexedRedirectUrls,
+      isAddingUrl,
+      isLoading,
+      loadRedirectUrls,
+      newUrl,
+      newUrlError,
+      recentlyAddedId,
+      recentlyChangedId,
+      redirectUrlHeaders,
+      redirectUrls,
+      removeUrl,
+      removeUrlDialog,
+      removingId,
+      saveEditedUrl,
+      showAddUrlInput
+    }
   }
 })
-export default class RedirectUrls extends Mixins(AccountChangeMixin) {
-  @State(useOrgStore) readonly currentOrganization!: Organization
-  @State(useOrgStore) readonly currentMembership!: Member
-  @Action(useOrgStore) readonly getOrgRedirectUrls!: (orgId: number) => Promise<{ redirectUrls: OrgRedirectUrl[] }>
-  @Action(useOrgStore) readonly createOrgRedirectUrl!: (details: { orgId: number, redirectUrl: string }) => Promise<OrgRedirectUrl>
-  @Action(useOrgStore) readonly updateOrgRedirectUrl!:
-    (details: { orgId: number, urlId: number, redirectUrl: string }) => Promise<OrgRedirectUrl>
-  @Action(useOrgStore) readonly deleteOrgRedirectUrl!: (details: { orgId: number, urlId: number }) => Promise<any>
-
-  public isAddingUrl = false
-  public isLoading = true
-  public newUrl = ''
-  public newUrlError = ''
-  public editedUrl = ''
-  public editedUrlError = ''
-  public redirectUrls: RedirectUrlItem[] = []
-  public editingId: number | null = null
-  public removingId: number | null = null
-  public recentlyAddedId: number | null = null
-  public recentlyChangedId: number | null = null
-  public readonly PAGE_LIMIT: number = 5
-
-  $refs: {
-    editUrlDialog: InstanceType<typeof ModalDialog>
-    removeUrlDialog: InstanceType<typeof ModalDialog>
-  }
-
-  public formatDate = CommonUtils.formatDisplayDate
-
-  // add/edit/remove is restricted to Admin/Coordinator
-  // other roles get a read-only table
-  public get canManageUrls (): boolean {
-    return [MembershipType.Admin, MembershipType.Coordinator]
-      .includes(this.currentMembership?.membershipTypeCode)
-  }
-
-  public get redirectUrlHeaders () {
-    const headers = [
-      {
-        text: 'Redirect URL',
-        align: 'left',
-        sortable: false,
-        value: 'url',
-        class: 'bold-header'
-      },
-      {
-        text: 'Created By',
-        align: 'left',
-        sortable: false,
-        value: 'createdBy',
-        class: 'bold-header'
-      },
-      {
-        text: 'Created Date',
-        align: 'left',
-        sortable: false,
-        value: 'createdDate',
-        class: 'bold-header'
-      },
-      {
-        text: 'Action',
-        align: 'left',
-        sortable: false,
-        value: 'action',
-        class: 'bold-header',
-        width: '150px'
-      }
-    ]
-    // filter out action column for users that are not allowed to manage urls
-    return this.canManageUrls ? headers : headers.filter(header => header.value !== 'action')
-  }
-
-  public async mounted () {
-    this.setAccountChangedHandler(this.initialize)
-    this.initialize()
-  }
-
-  public async initialize () {
-    this.recentlyAddedId = null
-    this.recentlyChangedId = null
-    // an account switch invalidates any in-progress add/edit/remove state
-    this.cancelAddUrl()
-    this.$refs.editUrlDialog?.close()
-    this.$refs.removeUrlDialog?.close()
-    await this.loadRedirectUrls()
-  }
-
-  public async loadRedirectUrls () {
-    this.isLoading = true
-    try {
-      const resp = await this.getOrgRedirectUrls(this.currentOrganization.id)
-      this.redirectUrls = (resp?.redirectUrls || []).map(item => ({
-        id: item.id,
-        url: item.redirectUrl,
-        createdBy: item.createdBy,
-        createdDate: item.createdDate
-      }))
-    } catch (e) {
-      this.showErrorToast()
-      this.redirectUrls = []
-    }
-    this.isLoading = false
-  }
-
-  public get indexedRedirectUrls () {
-    return this.redirectUrls.map((item, index) => ({
-      index,
-      ...item,
-      added: item.id === this.recentlyAddedId,
-      changed: item.id === this.recentlyChangedId
-    }))
-  }
-
-  public showAddUrlInput () {
-    this.isAddingUrl = true
-  }
-
-  public cancelAddUrl () {
-    this.newUrl = ''
-    this.newUrlError = ''
-    this.isAddingUrl = false
-  }
-
-  public async addUrl () {
-    const url = this.newUrl.trim().toLowerCase()
-    this.newUrlError = this.validateUrl(url)
-    if (this.newUrlError) {
-      return
-    }
-    this.isLoading = true
-    try {
-      const created = await this.createOrgRedirectUrl({ orgId: this.currentOrganization.id, redirectUrl: url })
-      this.recentlyAddedId = created.id
-      this.recentlyChangedId = null
-      this.newUrl = ''
-      this.isAddingUrl = false
-      await this.loadRedirectUrls()
-      this.showToast('Redirect URL added.')
-    } catch (e) {
-      this.newUrlError = this.getServerErrorMessage(e)
-      this.isLoading = false
-    }
-  }
-
-  public editUrl (id: number) {
-    const item = this.redirectUrls.find(item => item.id === id)
-    if (!item) {
-      return
-    }
-    this.editedUrl = item.url
-    this.editedUrlError = ''
-    this.editingId = id
-    this.$refs.editUrlDialog.open()
-  }
-
-  public async saveEditedUrl () {
-    const url = this.editedUrl.trim().toLowerCase()
-    this.editedUrlError = this.validateUrl(url)
-    if (this.editedUrlError) {
-      return
-    }
-    const current = this.redirectUrls.find(item => item.id === this.editingId)
-    // missing entry or unchanged value — close with no API call
-    if (!current || url === current.url) {
-      this.$refs.editUrlDialog.close()
-      return
-    }
-    this.isLoading = true
-    try {
-      const updated = await this.updateOrgRedirectUrl({
-        orgId: this.currentOrganization.id,
-        urlId: current.id,
-        redirectUrl: url
-      })
-      this.recentlyChangedId = updated.id
-      this.recentlyAddedId = null
-      this.$refs.editUrlDialog.close()
-      await this.loadRedirectUrls()
-      this.showToast('Redirect URL updated.')
-    } catch (e) {
-      this.isLoading = false
-      this.showErrorToast()
-    }
-  }
-
-  public cancelEditUrl () {
-    this.editedUrl = ''
-    this.editedUrlError = ''
-    this.editingId = null
-  }
-
-  public confirmRemoveUrl (id: number) {
-    this.removingId = id
-    this.$refs.removeUrlDialog.open()
-  }
-
-  public async removeUrl () {
-    const target = this.redirectUrls.find(item => item.id === this.removingId)
-    if (!target) {
-      this.$refs.removeUrlDialog.close()
-      return
-    }
-    this.isLoading = true
-    try {
-      await this.deleteOrgRedirectUrl({ orgId: this.currentOrganization.id, urlId: target.id })
-      this.$refs.removeUrlDialog.close()
-      await this.loadRedirectUrls()
-      this.showToast('Redirect URL removed.')
-    } catch (e) {
-      this.isLoading = false
-      this.showErrorToast()
-    }
-  }
-
-  private showToast (message: string) {
-    const event: Event = { message, type: 'success', timeout: 3000 }
-    EventBus.$emit('show-toast', event)
-  }
-
-  private showErrorToast () {
-    const event: Event = { message: 'Something went wrong. Please try again.', type: 'error', timeout: 3000 }
-    EventBus.$emit('show-toast', event)
-  }
-
-  private getServerErrorMessage (e: any): string {
-    const normalized = normalizeError(e)
-    if ((normalized.status === 400 || normalized.status === 409) && typeof normalized.message === 'string') {
-      return normalized.message
-    }
-    return 'An error occurred while saving the redirect URL. Please try again.'
-  }
-
-  private validateUrl (url: string): string {
-    if (!url) {
-      return 'Enter a redirect URL.'
-    }
-    if (!CommonUtils.isValidHttpsUrl(url)) {
-      return 'Enter a valid URL beginning with https://.'
-    }
-    if (this.redirectUrls.some(item => item.url.toLowerCase() === url && item.id !== this.editingId)) {
-      return 'This URL has already been added.'
-    }
-    return ''
-  }
-}
 </script>
 
 <style lang="scss" scoped>

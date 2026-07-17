@@ -4,6 +4,7 @@ import RedirectUrls from '@/components/auth/account-settings/advance-settings/Re
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
 import { useOrgStore } from '@/stores/org'
+import { useRedirectUrlsStore } from '@/stores/redirectUrls'
 import { useUserStore } from '@/stores/user'
 
 const vuetify = new Vuetify({})
@@ -21,6 +22,7 @@ const existingUrl = {
 describe('Account settings RedirectUrls.vue', () => {
   let wrapper: any
   let orgStore: ReturnType<typeof useOrgStore>
+  let redirectUrlsStore: ReturnType<typeof useRedirectUrlsStore>
 
   const $t = () => 'test trans data'
 
@@ -60,10 +62,12 @@ describe('Account settings RedirectUrls.vue', () => {
     orgStore = useOrgStore()
     orgStore.currentOrganization = { id: 123, name: 'test org' } as any
     orgStore.currentMembership = { membershipTypeCode: MembershipType.Admin } as any
-    orgStore.getOrgRedirectUrls = vi.fn().mockResolvedValue({ redirectUrls: [] }) as any
-    orgStore.createOrgRedirectUrl = vi.fn().mockResolvedValue({ id: 100 }) as any
-    orgStore.updateOrgRedirectUrl = vi.fn().mockResolvedValue({ id: 1 }) as any
-    orgStore.deleteOrgRedirectUrl = vi.fn().mockResolvedValue({}) as any
+
+    redirectUrlsStore = useRedirectUrlsStore()
+    redirectUrlsStore.getOrgRedirectUrls = vi.fn().mockResolvedValue({ redirectUrls: [] }) as any
+    redirectUrlsStore.createOrgRedirectUrl = vi.fn().mockResolvedValue({ id: 100 }) as any
+    redirectUrlsStore.updateOrgRedirectUrl = vi.fn().mockResolvedValue({ id: 1 }) as any
+    redirectUrlsStore.deleteOrgRedirectUrl = vi.fn().mockResolvedValue({}) as any
 
     wrapper = mount(RedirectUrls, {
       localVue,
@@ -110,13 +114,13 @@ describe('Account settings RedirectUrls.vue', () => {
     expect(wrapper.vm.newUrlError).toBe('')
   })
 
-  it('trims and lowercases the URL, then creates it and closes the form', async () => {
+  it('trims and lowercases the scheme and host but preserves path case, then creates it and closes the form', async () => {
     await submitNewUrl('  HTTPS://Example.COM/Callback  ')
     await flushPromises()
 
-    expect(orgStore.createOrgRedirectUrl).toHaveBeenCalledWith({
+    expect(redirectUrlsStore.createOrgRedirectUrl).toHaveBeenCalledWith({
       orgId: 123,
-      redirectUrl: 'https://example.com/callback'
+      redirectUrl: 'https://example.com/Callback'
     })
     expect(wrapper.vm.recentlyAddedId).toBe(100)
     expect(findByTest('url-input').exists()).toBe(false)
@@ -140,7 +144,7 @@ describe('Account settings RedirectUrls.vue', () => {
     queryByTest('confirm-remove-url-button').click()
     await flushPromises()
 
-    expect(orgStore.deleteOrgRedirectUrl).toHaveBeenCalledWith({ orgId: 123, urlId: 1 })
+    expect(redirectUrlsStore.deleteOrgRedirectUrl).toHaveBeenCalledWith({ orgId: 123, urlId: 1 })
   })
 
   it('opens the edit dialog prefilled from the dropdown menu', async () => {
@@ -167,7 +171,7 @@ describe('Account settings RedirectUrls.vue', () => {
     queryByTest('save-edit-url-button').click()
     await flushPromises()
 
-    expect(orgStore.updateOrgRedirectUrl).toHaveBeenCalledWith({
+    expect(redirectUrlsStore.updateOrgRedirectUrl).toHaveBeenCalledWith({
       orgId: 123,
       urlId: 1,
       redirectUrl: 'https://example.com/updated'
@@ -182,7 +186,7 @@ describe('Account settings RedirectUrls.vue', () => {
     queryByTest('save-edit-url-button').click()
     await flushPromises()
 
-    expect(orgStore.updateOrgRedirectUrl).not.toHaveBeenCalled()
+    expect(redirectUrlsStore.updateOrgRedirectUrl).not.toHaveBeenCalled()
     expect(wrapper.vm.editingId).toBe(null)
   })
 
@@ -199,7 +203,7 @@ describe('Account settings RedirectUrls.vue', () => {
     queryByTest('save-edit-url-button').click()
     await flushPromises()
 
-    expect(orgStore.updateOrgRedirectUrl).not.toHaveBeenCalled()
+    expect(redirectUrlsStore.updateOrgRedirectUrl).not.toHaveBeenCalled()
     expect(document.querySelector('.v-messages__message').textContent).toBe('This URL has already been added.')
   })
 
@@ -211,19 +215,19 @@ describe('Account settings RedirectUrls.vue', () => {
   ])('shows an error and does not add "%s"', async (invalidUrl, message) => {
     await submitNewUrl(invalidUrl)
 
-    expect(orgStore.createOrgRedirectUrl).not.toHaveBeenCalled()
+    expect(redirectUrlsStore.createOrgRedirectUrl).not.toHaveBeenCalled()
     expect(findByTest('url-input').exists()).toBe(true)
     expect(wrapper.find('.v-messages__message').text()).toBe(message)
   })
 
   it.each([
     'https://example.com/callback',
-    'HTTPS://EXAMPLE.COM/Callback'
+    'HTTPS://EXAMPLE.COM/callback'
   ])('shows an error and does not add a duplicate URL (%s)', async (input) => {
     await setExistingUrls([{ ...existingUrl, url: 'https://example.com/callback' }])
     await submitNewUrl(input)
 
-    expect(orgStore.createOrgRedirectUrl).not.toHaveBeenCalled()
+    expect(redirectUrlsStore.createOrgRedirectUrl).not.toHaveBeenCalled()
     expect(findByTest('url-input').exists()).toBe(true)
     expect(wrapper.find('.v-messages__message').text()).toBe('This URL has already been added.')
   })

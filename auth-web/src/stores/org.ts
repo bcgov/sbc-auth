@@ -1037,29 +1037,6 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data || {}
   }
 
-  async function getOrgRedirectUrls (orgId) {
-    const response = await OrgService.getOrgRedirectUrls(orgId)
-    return response?.data || {}
-  }
-
-  async function createOrgRedirectUrl (details) {
-    const { orgId, redirectUrl } = details
-    const response = await OrgService.createOrgRedirectUrl(orgId, { redirectUrl })
-    return response?.data || {}
-  }
-
-  async function updateOrgRedirectUrl (details) {
-    const { orgId, urlId, redirectUrl } = details
-    const response = await OrgService.updateOrgRedirectUrl(orgId, urlId, { redirectUrl })
-    return response?.data || {}
-  }
-
-  async function deleteOrgRedirectUrl (details) {
-    const { orgId, urlId } = details
-    const response = await OrgService.deleteOrgRedirectUrl(orgId, urlId)
-    return response?.data || {}
-  }
-
   async function updateOrganizationAccessType (accessType: string, orgId: number = null, syncOrg = true): Promise<boolean> {
     if (!orgId) orgId = state.currentOrganization?.id as number
     if (orgId && accessType) {
@@ -1193,10 +1170,6 @@ export const useOrgStore = defineStore('org', () => {
     setCurrentOrganizationFromUserAccountSettings,
     getOrgApiKeys,
     revokeOrgApiKeys,
-    getOrgRedirectUrls,
-    createOrgRedirectUrl,
-    updateOrgRedirectUrl,
-    deleteOrgRedirectUrl,
     updateOrganizationAccessType,
     $reset,
     isStaffOrSbcStaff,
