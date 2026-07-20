@@ -35,6 +35,7 @@ from auth_api.models import Affidavit as AffidavitModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
+from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
@@ -691,10 +692,11 @@ def test_govn_org_add_bca_product_skips_fee_review_task(client, jwt, session, ke
         content_type="application/json",
     )
     assert rv_products.status_code == HTTPStatus.CREATED
-    subscriptions = rv_products.json.get("subscriptions", [])
-    product = next((p for p in subscriptions if p.get("code") == ProductCode.BCA.value), None)
-    assert product is not None
-    assert product["subscriptionStatus"] == ProductSubscriptionStatus.ACTIVE.value
+
+    # BCA is hidden from non-staff responses, so verify the subscription directly.
+    bca_sub = ProductSubscriptionModel.find_by_org_id_product_code(org_id, ProductCode.BCA.value)
+    assert bca_sub is not None
+    assert bca_sub.status_code == ProductSubscriptionStatus.ACTIVE.value
 
     tasks = TaskService.fetch_tasks(TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=100))["tasks"]
     assert not any(
