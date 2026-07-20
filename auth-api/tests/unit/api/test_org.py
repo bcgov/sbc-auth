@@ -34,6 +34,7 @@ from auth_api.exceptions.errors import Error
 from auth_api.models import Affidavit as AffidavitModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
+from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
@@ -653,6 +654,55 @@ def test_create_govn_org_with_products_single_staff_review_task(client, jwt, ses
     product = next((p for p in subscriptions if p.get("code") == product_code), None)
     assert product is not None
     assert product["subscriptionStatus"] == ProductSubscriptionStatus.ACTIVE.value
+
+
+def test_govn_org_add_bca_product_skips_fee_review_task(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Assert GOVN org subscribing to BCA (skip_gov_review=True) is ACTIVE and creates no fee review task."""
+    patch_pay_account_post(monkeypatch)
+
+    bca = ProductCodeModel.find_by_code(ProductCode.BCA.value)
+    bca.skip_gov_review = True
+    bca.save()
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+
+    rv = client.post(
+        "/api/v1/orgs",
+        data=json.dumps(
+            {
+                "name": "test govn bca skip fee review",
+                "accessType": AccessType.GOVN.value,
+                "typeCode": OrgType.PREMIUM.value,
+                "mailingAddress": TestOrgInfo.get_mailing_address(),
+                "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
+            }
+        ),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+    org_id = rv.json["id"]
+
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps({"subscriptions": [{"productCode": ProductCode.BCA.value}]}),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+    subscriptions = rv_products.json.get("subscriptions", [])
+    product = next((p for p in subscriptions if p.get("code") == ProductCode.BCA.value), None)
+    assert product is not None
+    assert product["subscriptionStatus"] == ProductSubscriptionStatus.ACTIVE.value
+
+    tasks = TaskService.fetch_tasks(TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=100))["tasks"]
+    assert not any(
+        t.get("account_id") == org_id
+        and t.get("relationship_type") == TaskRelationshipType.PRODUCT.value
+        and t.get("action") == TaskAction.NEW_PRODUCT_FEE_REVIEW.value
+        for t in tasks
+    ), "BCA subscription for GOVN org should not create a NEW_PRODUCT_FEE_REVIEW task"
 
 
 def test_govn_org_add_product_pending_staff_review(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument

@@ -50,6 +50,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
             "need_system_admin",
             "parent_code",
             "premium_only",
+            "skip_gov_review",
             "type_code",
             "url",
         ]
@@ -62,6 +63,8 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     need_review = Column(Boolean(), default=False, nullable=True)  # Need a review from staff for activating product
     need_system_admin = Column(Boolean(), default=False, nullable=True)  # Needs system admin for activating product
     hidden = Column(Boolean(), default=False, nullable=True)  # Flag to hide from the UI
+    # When True, GOVM/GOVN orgs bypass the NEW_PRODUCT_FEE_REVIEW task (fees reviewed in the downstream app).
+    skip_gov_review = Column(Boolean(), default=False, nullable=True)
     linked_product_code = Column(
         String(100), nullable=True
     )  # Product linked to to another product, like business and NR
