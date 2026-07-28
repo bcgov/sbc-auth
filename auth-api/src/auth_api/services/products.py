@@ -456,6 +456,8 @@ class Product:
         """Return the subscriptions status based on org type."""
         skip_review = org.access_type in GOV_ORG_TYPES and staff_review_for_create_org # prevent create second task when it's already added a staff review when creating org
         if (product_model.need_review or org.access_type in GOV_ORG_TYPES) and not auto_approve:
+            if org.access_type in GOV_ORG_TYPES and product_model.skip_gov_review:
+                return ProductSubscriptionStatus.ACTIVE.value
             return (
                 ProductSubscriptionStatus.ACTIVE.value
                 if skip_review

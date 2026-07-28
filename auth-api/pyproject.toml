@@ -52,7 +52,7 @@ Werkzeug = "^3.1.5"
 # VCS dependencies
 sql-versioning = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/sql-versioning", branch = "add_column_exclusion" }
 flask-jwt-oidc = {git = "https://github.com/seeker25/flask-jwt-oidc.git", branch = "main" }
-sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", rev = "d6e4ff25af28a1d46666550683349fdeb3907c67", subdirectory = "python" }
+sbc-common-components = { git = "https://github.com/bcgov/sbc-common-components.git", rev = "595ce093116b6e23af798ef8386b63b723ac5c12", subdirectory = "python" }
 cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", branch = "main" }
 gcp-queue = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/gcp-queue", branch = "main" }
 structured-logging = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/structured-logging", branch = "main" }

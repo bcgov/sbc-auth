@@ -1127,14 +1127,22 @@ def test_unaffiliated_email_invitation_auth(
 
 
 @freeze_time("2026-04-21 12:00:00")
+@pytest.mark.parametrize("is_reminder", [True, False])
 @patch.object(auth_api.services.affiliation_invitation, "publish_to_mailer")
 def test_send_unaffiliated_email_invitation_mailer_data(
-    publish_to_mailer_mock, session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token
+    publish_to_mailer_mock,
+    session,
+    auth_mock,
+    keycloak_mock,
+    business_mock,
+    monkeypatch,
+    mock_service_account_token,
+    is_reminder,
 ):
     """Verify UNAFFILIATED_EMAIL - data for email is correctly generated with context_url."""
     entity = create_test_entity()
 
-    AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
+    AffiliationInvitationService.send_unaffiliated_email_invitation(entity, is_reminder=is_reminder)
 
     publish_to_mailer_mock.assert_called_once()
     call_kwargs = publish_to_mailer_mock.call_args
@@ -1148,6 +1156,7 @@ def test_send_unaffiliated_email_invitation_mailer_data(
     assert data["token"] == data["contextUrl"].split("token=")[1]
     # sent date == 21/04/2026 12:00:00 with @freeze_time
     assert data["expiryDate"] == datetime(2026, 4, 28, 23, 59, 59)  # April 28, 2026 11:59:59pm
+    assert data["isReminder"] == is_reminder
 
 
 def test_validate_and_get_org_id():

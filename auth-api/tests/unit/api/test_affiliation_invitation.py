@@ -1113,19 +1113,39 @@ def setup_entity_with_contact(client, jwt, entity_info=TestEntityInfo.entity_lea
     return json.loads(rv_entity.data)["businessIdentifier"]
 
 
+@pytest.mark.parametrize(
+    "body, expects_reminder_prefix",
+    [
+        (None, False),
+        ({"isReminder": False}, False),
+        ({"isReminder": True}, True),
+    ],
+)
 def test_send_unaffiliated_email_invitation(
-    client, jwt, session, keycloak_mock, business_mock, mock_service_account_token
+    client,
+    jwt,
+    session,
+    keycloak_mock,
+    business_mock,
+    mock_service_account_token,
+    body,
+    expects_reminder_prefix,
 ):
-    """Assert that an unaffiliated email invitation can be created via POST."""
+    """Assert that an unaffiliated email invitation can be created via POST, honouring isReminder."""
     business_identifier = setup_entity_with_contact(client, jwt)
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
 
     rv = client.post(
         f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        data=json.dumps(body) if body else None,
         headers=headers,
         content_type="application/json",
     )
     assert rv.status_code == HTTPStatus.CREATED
+
+    entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+    invitations = AffiliationInvitationModel.find_invitations_by_entity(entity.identifier)
+    assert invitations[0].additional_message.startswith("Reminder:") is expects_reminder_prefix
 
 
 def test_send_unaffiliated_email_invitation_skips_business_check_with_role(client, jwt, session, keycloak_mock):
