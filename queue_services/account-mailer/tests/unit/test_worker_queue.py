@@ -25,7 +25,6 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 
 from account_mailer.email_processors.pad_confirmation import _get_admin_emails
 from account_mailer.enums import SubjectType
-from account_mailer.resources.worker import AFFILIATION_CONFIRMATION_EMAIL, AFFILIATION_INVITATION_UNAFFILIATED_EMAIL
 from account_mailer.services import notification_service
 
 from . import (
@@ -688,8 +687,15 @@ def test_affiliation_invitation_email_request(app, session, client):
         assert f"{identifier}?accountid={to_org_id}" in email_body
 
 
-def test_unaffiliated_email_invitation(app, session, client):
-    """Assert that unaffiliated email invitation uses context_url and expiry_date from message data."""
+@pytest.mark.parametrize(
+    "is_reminder,expected_subject",
+    [
+        (False, SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value),
+        (True, f"Reminder: {SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value}"),
+    ],
+)
+def test_unaffiliated_email_invitation(app, session, client, is_reminder, expected_subject):
+    """Assert that unaffiliated email invitation uses context_url, expiry_date, and isReminder from message data."""
     context_url = "https://localhost.com?preset=bcscUser&token=ABC123"
     with patch.object(notification_service, "send_email", return_value=None) as mock_send:
         mail_details = {
@@ -698,20 +704,18 @@ def test_unaffiliated_email_invitation(app, session, client):
             "businessIdentifier": "CP1234567",
             "token": "ABC123",
             "contextUrl": context_url,
-            "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}"
+            "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}",
+            "isReminder": is_reminder,
         }
         helper_add_event_to_queue(
             client,
-            message_type=AFFILIATION_INVITATION_UNAFFILIATED_EMAIL,
+            message_type=QueueMessageTypes.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
             mail_details=mail_details,
         )
 
         mock_send.assert_called()
         assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
-        assert (
-            mock_send.call_args.args[0].get("content").get("subject")
-            == SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value
-        )
+        assert mock_send.call_args.args[0].get("content").get("subject") == expected_subject
         email_body = mock_send.call_args.args[0].get("content").get("body")
         assert email_body is not None
         assert "https://localhost.com?preset=bcscUser&amp;token=ABC123" in email_body
@@ -732,7 +736,7 @@ def test_affiliation_confirmation_email(app, session, client):
         }
         helper_add_event_to_queue(
             client,
-            message_type=AFFILIATION_CONFIRMATION_EMAIL,
+            message_type=QueueMessageTypes.AFFILIATION_CONFIRMATION_EMAIL.value,
             mail_details=mail_details,
         )
 
