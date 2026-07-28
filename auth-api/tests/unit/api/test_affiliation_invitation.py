@@ -1114,11 +1114,11 @@ def setup_entity_with_contact(client, jwt, entity_info=TestEntityInfo.entity_lea
 
 
 @pytest.mark.parametrize(
-    "query_string, expects_reminder_prefix",
+    "body, expects_reminder_prefix",
     [
-        ("", False),
-        ("?isReminder=false", False),
-        ("?isReminder=true", True),
+        (None, False),
+        ({"isReminder": False}, False),
+        ({"isReminder": True}, True),
     ],
 )
 def test_send_unaffiliated_email_invitation(
@@ -1128,7 +1128,7 @@ def test_send_unaffiliated_email_invitation(
     keycloak_mock,
     business_mock,
     mock_service_account_token,
-    query_string,
+    body,
     expects_reminder_prefix,
 ):
     """Assert that an unaffiliated email invitation can be created via POST, honouring isReminder."""
@@ -1136,7 +1136,8 @@ def test_send_unaffiliated_email_invitation(
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
 
     rv = client.post(
-        f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}{query_string}",
+        f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        data=json.dumps(body) if body else None,
         headers=headers,
         content_type="application/json",
     )

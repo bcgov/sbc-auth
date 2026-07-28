@@ -104,7 +104,8 @@ def post_affiliation_invitation():
 def post_unaffiliated_invitation(business_identifier):
     """Send an unaffiliated email invitation for the entity."""
     try:
-        is_reminder = request.args.get("isReminder", "false").lower() == "true"
+        request_json = request.get_json(silent=True) or {}
+        is_reminder = request_json.get("isReminder", False)
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         if not entity:
             return {"message": "Business not found."}, HTTPStatus.NOT_FOUND
