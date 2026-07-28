@@ -896,11 +896,11 @@ class AffiliationInvitation:
             type=AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
             invitation_status_code=InvitationStatus.PENDING.value,
         ).first()
-        
+
         additional_message = "This business was migrated and requires account affiliation."
         if is_reminder:
             additional_message = f"Reminder: {additional_message}"
-        
+
         if existing:
             affiliation_invitation = existing
             affiliation_invitation.sent_date = datetime.now(tz=UTC)
