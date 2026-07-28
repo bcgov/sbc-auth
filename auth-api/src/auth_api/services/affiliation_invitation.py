@@ -876,7 +876,7 @@ class AffiliationInvitation:
 
     @staticmethod
     @user_context
-    def send_unaffiliated_email_invitation(entity: EntityService, **kwargs):
+    def send_unaffiliated_email_invitation(entity: EntityService, is_reminder: bool = False, **kwargs):
         """Send an UNAFFILIATED_EMAIL affiliation invitation to entity contact. SYSTEM access only.
 
         If a pending invitation already exists for the same email, update it and resend.
@@ -901,11 +901,14 @@ class AffiliationInvitation:
             affiliation_invitation = existing
             affiliation_invitation.sent_date = datetime.now(tz=UTC)
         else:
+            additional_message = "This business was migrated and requires account affiliation."
+            if is_reminder:
+                additional_message = f"Reminder: {additional_message}"
             invitation_info = {
                 "entityId": entity.identifier,
                 "recipientEmail": contact.email,
                 "type": AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
-                "additionalMessage": "This business was migrated and requires account affiliation.",
+                "additionalMessage": additional_message,
             }
             affiliation_invitation = AffiliationInvitationModel.create_from_dict(invitation_info, user_id=None)
 
@@ -944,6 +947,7 @@ class AffiliationInvitation:
             token=confirmation_token,
             context_url=context_url,
             expiry_date=expiry_date,
+            is_reminder=is_reminder,
         )
         publish_to_mailer(
             notification_type=QueueMessageType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,

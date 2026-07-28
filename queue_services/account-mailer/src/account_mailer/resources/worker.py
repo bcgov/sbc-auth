@@ -39,9 +39,6 @@ from account_mailer.enums import Constants, LoginTypes, SubjectType, TemplateTyp
 from account_mailer.services import google_store, notification_service
 from account_mailer.utils import format_currency, format_day_with_suffix, get_local_formatted_date
 
-AFFILIATION_INVITATION_UNAFFILIATED_EMAIL = "bc.registry.auth.affiliationInvitationUnaffiliatedEmail"
-AFFILIATION_CONFIRMATION_EMAIL = "bc.registry.auth.affiliationConfirmationEmail"
-
 bp = Blueprint("worker", __name__)
 
 
@@ -396,7 +393,7 @@ def handle_affiliation_invitation(message_type, email_msg):
 
 def handle_unaffiliated_email_invitation(message_type, email_msg):
     """Handle the unaffiliated email invitation message."""
-    if message_type != AFFILIATION_INVITATION_UNAFFILIATED_EMAIL:
+    if message_type != QueueMessageTypes.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value:
         return
     business_name = email_msg.get("businessName")
     business_identifier = email_msg.get("businessIdentifier")
@@ -404,9 +401,13 @@ def handle_unaffiliated_email_invitation(message_type, email_msg):
     context_url = email_msg.get("contextUrl")
     expiry_date = datetime.fromisoformat(email_msg.get("expiryDate"))
     display_date = get_local_formatted_date(expiry_date, "%B %d, %Y")
+    is_reminder = email_msg.get("isReminder", False)
 
     template_name = TemplateType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL_TEMPLATE_NAME.value
     subject = SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value
+
+    if is_reminder:
+        subject = f"Reminder: {subject}"
 
     email_dict = common_mailer.process(
         org_id=None,
@@ -423,7 +424,7 @@ def handle_unaffiliated_email_invitation(message_type, email_msg):
 
 def handle_affiliation_confirmation_email(message_type, email_msg):
     """Handle the affiliation confirmation email message."""
-    if message_type != AFFILIATION_CONFIRMATION_EMAIL:
+    if message_type != QueueMessageTypes.AFFILIATION_CONFIRMATION_EMAIL.value:
         return
     business_name = email_msg.get("businessName")
     business_identifier = email_msg.get("businessIdentifier")
@@ -562,8 +563,8 @@ def handle_other_messages(message_type, email_msg):
         QueueMessageTypes.STATEMENT_NOTIFICATION.value,
         QueueMessageTypes.PAYMENT_REMINDER_NOTIFICATION.value,
         QueueMessageTypes.PAYMENT_DUE_NOTIFICATION.value,
-        AFFILIATION_INVITATION_UNAFFILIATED_EMAIL,
-        AFFILIATION_CONFIRMATION_EMAIL
+        QueueMessageTypes.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
+        QueueMessageTypes.AFFILIATION_CONFIRMATION_EMAIL.value,
     ]:
         return
 
