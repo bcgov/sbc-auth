@@ -22,7 +22,7 @@ from auth_api.models.views.authorization import Authorization as AuthorizationVi
 from auth_api.services.account_linking_key import AccountLinkingKey as LinkingKeyService
 from auth_api.services.permissions import Permissions as PermissionsService
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
-from auth_api.utils.roles import AFFILIATION_ALLOWED_ROLES, STAFF, Role
+from auth_api.utils.roles import STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
 
@@ -273,22 +273,22 @@ def check_auth(**kwargs):
 
 
 @user_context
-def check_affiliation_read_auth(org_id: int, **kwargs):
-    """Authorize a read of org_id's affiliations.
+def linking_key_authorizes(org_id: int, **kwargs) -> bool:
+    """Return True if a valid Account-Linking-Key authorizes reads of org_id.
 
-    Accepts EITHER a valid Account-Linking-Key bound to a vendor whose source
-    account matches org_id, OR standard org membership (AFFILIATION_ALLOWED_ROLES).
-    A key that is sent but fails to authorize aborts 403 without falling through.
+    Returns False when no linking key was sent — caller should apply its normal
+    membership check. Aborts 403 if a key was sent but fails to validate for the
+    given org_id (wrong vendor, wrong source, expired, revoked).
     """
     user_from_context: UserContext = kwargs["user_context"]
 
-    if user_from_context.linking_key and user_from_context.account_id:
-        linked = LinkingKeyService.validate(user_from_context.linking_key, user_from_context.account_id)
-        if linked and linked.account_id == org_id:
-            return
-        abort(403)
+    if not user_from_context.linking_key or not user_from_context.account_id:
+        return False
 
-    check_auth(one_of_roles=AFFILIATION_ALLOWED_ROLES, org_id=org_id)
+    linked = LinkingKeyService.validate(user_from_context.linking_key, user_from_context.account_id)
+    if linked and linked.account_id == org_id:
+        return True
+    abort(403)
 
 
 def _check_for_roles(role: str, kwargs):

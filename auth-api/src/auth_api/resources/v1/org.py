@@ -39,7 +39,6 @@ from auth_api.services import SimpleOrg as SimpleOrgService
 from auth_api.services import User as UserService
 from auth_api.services.account_linking_key import AccountLinkingKey as LinkingKeyService
 from auth_api.services.authorization import Authorization as AuthorizationService
-from auth_api.services.authorization import check_affiliation_read_auth
 from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.services.flags import flags
 from auth_api.utils.auth import jwt as _jwt
@@ -47,6 +46,7 @@ from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import NotificationType, OrgStatus, OrgType, PatchActions, Status
 from auth_api.utils.role_validator import validate_roles
 from auth_api.utils.roles import (  # noqa: I001
+    AFFILIATION_ALLOWED_ROLES,
     ALL_ALLOWED_ROLES,
     CLIENT_ADMIN_ROLES,
     STAFF,
@@ -385,8 +385,8 @@ def get_organization_affiliations(org_id):
 
 def affiliation_search(org_id, use_entity_mapping=False):
     """Get all affiliated entities for the given org by calling into Names and LEAR."""
-    check_affiliation_read_auth(org_id)
-    if OrgModel.find_by_org_id(org_id) is None:
+    org = OrgService.find_by_org_id(org_id, allowed_roles=AFFILIATION_ALLOWED_ROLES, allow_linking_key=True)
+    if org is None:
         raise BusinessException(Error.DATA_NOT_FOUND, None)
     search_details = AffiliationSearchDetails.from_request_args(request)
     if use_entity_mapping:
