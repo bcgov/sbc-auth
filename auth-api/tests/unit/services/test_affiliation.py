@@ -43,8 +43,12 @@ from tests.utilities.factory_scenarios import (
 )
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
+    factory_affiliation_model,
+    factory_entity_model,
     factory_entity_service,
+    factory_linking_key_model,
     factory_membership_model,
+    factory_org_model,
     factory_org_service,
     factory_user_model_with_contact,
     patch_get_firms_parties,
@@ -407,6 +411,32 @@ def test_find_affiliated_entities_by_org_id_no_affiliation(session, auth_mock): 
     with patch.object(AffiliationModel, "find_affiliations_by_org_id", return_value=[]):
         affiliations = AffiliationService.find_visible_affiliations_by_org_id(org_id)
         assert not affiliations
+
+
+def test_find_affiliated_entities_by_org_id_with_linking_key(session, monkeypatch):  # pylint:disable=unused-argument
+    """Vendor with a valid linking key gets the lawfirm's affiliations from find_visible_affiliations_by_org_id."""
+    import uuid
+
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+    factory_affiliation_model(entity.id, lawfirm.id)
+    linking_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+
+    patch_token_info(
+        {"sub": str(uuid.uuid4()), "realm_access": {"roles": ["account_holder"]}, "Account-Id": str(vendor.id)},
+        monkeypatch,
+    )
+    monkeypatch.setattr(
+        "auth_api.utils.user_context.UserContext.linking_key",
+        property(lambda _: linking_key.linking_key),
+    )
+
+    affiliations = AffiliationService.find_visible_affiliations_by_org_id(lawfirm.id)
+
+    assert affiliations
+    assert len(affiliations) == 1
+    assert affiliations[0]["business_identifier"] == entity.business_identifier
 
 
 def test_delete_affiliation(session, auth_mock, monkeypatch):  # pylint:disable=unused-argument

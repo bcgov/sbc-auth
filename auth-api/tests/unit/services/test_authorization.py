@@ -22,7 +22,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 from werkzeug.exceptions import Forbidden, HTTPException
 
-from auth_api.services.authorization import Authorization, check_auth
+from auth_api.services.authorization import Authorization, check_affiliation_read_auth, check_auth
 from auth_api.utils.enums import ProductCode
 from auth_api.utils.roles import ADMIN, STAFF, USER
 from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestUserInfo
@@ -767,3 +767,26 @@ def test_linking_key_expired_returns_no_auth(session, monkeypatch):  # pylint:di
 
     with pytest.raises(Forbidden):
         Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+
+
+def test_check_affiliation_read_auth_with_linking_key(session, monkeypatch):  # pylint:disable=unused-argument
+    """Vendor with a valid linking key can read the lawfirm's affiliations; wrong URL org is 403."""
+    lawfirm = factory_org_model()
+    other_org = factory_org_model()
+    vendor = factory_org_model()
+    linking_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+
+    patch_token_info(
+        {"sub": str(uuid.uuid4()), "realm_access": {"roles": ["account_holder"]}, "Account-Id": str(vendor.id)},
+        monkeypatch,
+    )
+    monkeypatch.setattr(
+        "auth_api.utils.user_context.UserContext.linking_key",
+        property(lambda _: linking_key.linking_key),
+    )
+
+    with does_not_raise():
+        check_affiliation_read_auth(lawfirm.id)
+
+    with pytest.raises(Forbidden):
+        check_affiliation_read_auth(other_org.id)

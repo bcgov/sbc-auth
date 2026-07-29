@@ -28,6 +28,7 @@ from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.affiliation_invitation import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models.contact_link import ContactLink
+from auth_api.models.org import Org as OrgModel
 from auth_api.models.dataclass import (
     Activity,
     AffiliationBase,
@@ -39,6 +40,7 @@ from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
+from auth_api.services.authorization import check_affiliation_read_auth
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
@@ -46,7 +48,7 @@ from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.auth_event_publisher import publish_affiliation_event
 from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus, QueueMessageType
 from auth_api.utils.passcode import validate_passcode
-from auth_api.utils.roles import AFFILIATION_ALLOWED_ROLES, ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
@@ -86,8 +88,8 @@ class Affiliation:
     def find_visible_affiliations_by_org_id(org_id):
         """Given an org_id, this will return the entities affiliated with it."""
         current_app.logger.debug(f"<find_visible_affiliations_by_org_id for org_id {org_id}")
-        org = OrgService.find_by_org_id(org_id, allowed_roles=AFFILIATION_ALLOWED_ROLES)
-        if org is None:
+        check_affiliation_read_auth(org_id)
+        if OrgModel.find_by_org_id(org_id) is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         data = Affiliation.find_affiliations_by_org_id(org_id)
