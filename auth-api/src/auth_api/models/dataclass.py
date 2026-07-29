@@ -220,6 +220,7 @@ class UnaffiliatedEmailInvitationData(Serializable):
     token: str
     context_url: str
     expiry_date: str
+    is_reminder: bool = False
 
 @dataclass
 class ConfirmationEmailData(Serializable):

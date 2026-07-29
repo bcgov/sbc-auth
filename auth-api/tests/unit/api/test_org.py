@@ -17,6 +17,7 @@
 Test-Suite to ensure that the /orgs endpoint is working as expected.
 """
 
+import copy
 import json
 import uuid
 from datetime import datetime, timedelta
@@ -34,6 +35,8 @@ from auth_api.exceptions.errors import Error
 from auth_api.models import Affidavit as AffidavitModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
+from auth_api.models import ProductCode as ProductCodeModel
+from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
@@ -75,7 +78,9 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
     factory_auth_header,
+    factory_entity_model,
     factory_invitation,
+    factory_linking_key_model,
     factory_membership_model,
     factory_org_model,
     factory_user_model,
@@ -653,6 +658,56 @@ def test_create_govn_org_with_products_single_staff_review_task(client, jwt, ses
     product = next((p for p in subscriptions if p.get("code") == product_code), None)
     assert product is not None
     assert product["subscriptionStatus"] == ProductSubscriptionStatus.ACTIVE.value
+
+
+def test_govn_org_add_bca_product_skips_fee_review_task(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Assert GOVN org subscribing to BCA (skip_gov_review=True) is ACTIVE and creates no fee review task."""
+    patch_pay_account_post(monkeypatch)
+
+    bca = ProductCodeModel.find_by_code(ProductCode.BCA.value)
+    bca.skip_gov_review = True
+    bca.save()
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+
+    rv = client.post(
+        "/api/v1/orgs",
+        data=json.dumps(
+            {
+                "name": "test govn bca skip fee review",
+                "accessType": AccessType.GOVN.value,
+                "typeCode": OrgType.PREMIUM.value,
+                "mailingAddress": TestOrgInfo.get_mailing_address(),
+                "paymentInfo": {"paymentMethod": PaymentMethod.DIRECT_PAY.value},
+            }
+        ),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+    org_id = rv.json["id"]
+
+    rv_products = client.post(
+        f"/api/v1/orgs/{org_id}/products",
+        data=json.dumps({"subscriptions": [{"productCode": ProductCode.BCA.value}]}),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv_products.status_code == HTTPStatus.CREATED
+
+    # BCA is hidden from non-staff responses, so verify the subscription directly.
+    bca_sub = ProductSubscriptionModel.find_by_org_id_product_code(org_id, ProductCode.BCA.value)
+    assert bca_sub is not None
+    assert bca_sub.status_code == ProductSubscriptionStatus.ACTIVE.value
+
+    tasks = TaskService.fetch_tasks(TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=100))["tasks"]
+    assert not any(
+        t.get("account_id") == org_id
+        and t.get("relationship_type") == TaskRelationshipType.PRODUCT.value
+        and t.get("action") == TaskAction.NEW_PRODUCT_FEE_REVIEW.value
+        for t in tasks
+    ), "BCA subscription for GOVN org should not create a NEW_PRODUCT_FEE_REVIEW task"
 
 
 def test_govn_org_add_product_pending_staff_review(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
@@ -1735,6 +1790,95 @@ def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):
         )
         assert rv.status_code == 400
         assert schema_utils.validate(rv.json, "exception")[0]
+
+
+def test_add_affiliation_with_linking_key_creates_against_source(
+    client, jwt, session, keycloak_mock, entity_mapping_mock
+):  # pylint:disable=unused-argument
+    """Assert that when a linking key is sent, the affiliation is created on the source org (lawfirm), not the vendor."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+    linking_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
+    claims["Account-Id"] = str(vendor.id)
+    headers = {**factory_auth_header(jwt=jwt, claims=claims), "Account-Linking-Key": linking_key.linking_key}
+
+    payload = {
+        "businessIdentifier": entity.business_identifier,
+        "passCode": TestEntityInfo.entity_lear_mock["passCode"],
+    }
+    rv = client.post(
+        f"/api/v1/orgs/{vendor.id}/affiliations",
+        headers=headers,
+        data=json.dumps(payload),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.CREATED
+    assert rv.json["organization"]["id"] == lawfirm.id
+
+
+def test_add_new_business_affiliation_with_linking_key_creates_against_source(
+    client, jwt, session, keycloak_mock, nr_mock, entity_mapping_mock
+):  # pylint:disable=unused-argument
+    """Assert that incorporation filings via a vendor with a linking key affiliate the new business to the source org."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    linking_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
+    claims["Account-Id"] = str(vendor.id)
+    headers = {**factory_auth_header(jwt=jwt, claims=claims), "Account-Linking-Key": linking_key.linking_key}
+
+    rv = client.post(
+        f"/api/v1/orgs/{vendor.id}/affiliations?newBusiness=true",
+        headers=headers,
+        data=json.dumps(TestAffliationInfo.new_business_affiliation),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.CREATED
+    assert rv.json["organization"]["id"] == lawfirm.id
+
+
+def test_add_affiliation_with_invalid_linking_key_returns_403(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a bad linking key is rejected with a 403 before any affiliation work happens."""
+    vendor = factory_org_model()
+
+    claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
+    claims["Account-Id"] = str(vendor.id)
+    headers = {**factory_auth_header(jwt=jwt, claims=claims), "Account-Linking-Key": "not-a-real-key"}
+
+    rv = client.post(
+        f"/api/v1/orgs/{vendor.id}/affiliations",
+        headers=headers,
+        data=json.dumps(TestAffliationInfo.affiliation3),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_add_affiliation_with_revoked_linking_key_returns_403(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a REVOKED linking key is rejected with a 403 even if it hasn't expired."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    revoked_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id, status="REVOKED")
+
+    claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
+    claims["Account-Id"] = str(vendor.id)
+    headers = {**factory_auth_header(jwt=jwt, claims=claims), "Account-Linking-Key": revoked_key.linking_key}
+
+    rv = client.post(
+        f"/api/v1/orgs/{vendor.id}/affiliations",
+        headers=headers,
+        data=json.dumps(TestAffliationInfo.affiliation3),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.FORBIDDEN
 
 
 def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock, nr_mock, entity_mapping_mock):

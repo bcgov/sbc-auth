@@ -58,7 +58,7 @@ from auth_api.utils.enums import (
     QueueMessageType,
     Status,
 )
-from auth_api.utils.roles import ADMIN, CLIENT_AUTH_ROLES, COORDINATOR, STAFF, USER
+from auth_api.utils.roles import ADMIN, CLIENT_AUTH_ROLES, COORDINATOR, STAFF, USER, Role
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import escape_wam_friendly_url
 
@@ -875,12 +875,14 @@ class AffiliationInvitation:
                 raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
 
     @staticmethod
-    def send_unaffiliated_email_invitation(entity: EntityService):
+    @user_context
+    def send_unaffiliated_email_invitation(entity: EntityService, is_reminder: bool = False, **kwargs):
         """Send an UNAFFILIATED_EMAIL affiliation invitation to entity contact. SYSTEM access only.
 
         If a pending invitation already exists for the same email, update it and resend.
         If the email has changed, create a new invitation row.
         """
+        user_from_context: UserContext = kwargs["user_context"]
         if AffiliationModel.find_affiliations_by_entity_id(entity.identifier):
             raise BusinessException(Error.AFFILIATION_ALREADY_EXISTS, None)
 
@@ -895,15 +897,20 @@ class AffiliationInvitation:
             invitation_status_code=InvitationStatus.PENDING.value,
         ).first()
 
+        additional_message = "This business was migrated and requires account affiliation."
+        if is_reminder:
+            additional_message = f"Reminder: {additional_message}"
+
         if existing:
             affiliation_invitation = existing
             affiliation_invitation.sent_date = datetime.now(tz=UTC)
+            affiliation_invitation.additional_message = additional_message
         else:
             invitation_info = {
                 "entityId": entity.identifier,
                 "recipientEmail": contact.email,
                 "type": AffiliationInvitationType.UNAFFILIATED_EMAIL.value,
-                "additionalMessage": "This business was migrated and requires account affiliation.",
+                "additionalMessage": additional_message,
             }
             affiliation_invitation = AffiliationInvitationModel.create_from_dict(invitation_info, user_id=None)
 
@@ -918,16 +925,18 @@ class AffiliationInvitation:
         affiliation_invitation.login_source = LoginSource.BCSC.value
         affiliation_invitation.save()
 
-        token = RestService.get_service_account_token(
-            config_id="ENTITY_SVC_CLIENT_ID",
-            config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
-        )
-        business = AffiliationInvitation._get_business_details(entity.business_identifier, token)
-        business_name = business["business"]["legalName"]
-        if business["business"]["legalType"] in ["SP", "GP"]:
-            business_name = AffiliationInvitation.get_business_name_from_alternative_name(
-                business, business_name, entity.business_identifier
+        business_name = entity.name
+        if not user_from_context.has_role(Role.SKIP_UNAFFILIATED_BUSINESS_CHECK.value):
+            token = RestService.get_service_account_token(
+                config_id="ENTITY_SVC_CLIENT_ID",
+                config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
             )
+            business = AffiliationInvitation._get_business_details(entity.business_identifier, token)
+            business_name = business["business"]["legalName"]
+            if business["business"]["legalType"] in ["SP", "GP"]:
+                business_name = AffiliationInvitation.get_business_name_from_alternative_name(
+                    business, business_name, entity.business_identifier
+                )
 
         registry_home_url = current_app.config.get("REGISTRY_HOME_URL")
         context_url = f"{registry_home_url}?preset=bcscUser&token={confirmation_token}"
@@ -940,6 +949,7 @@ class AffiliationInvitation:
             token=confirmation_token,
             context_url=context_url,
             expiry_date=expiry_date,
+            is_reminder=is_reminder,
         )
         publish_to_mailer(
             notification_type=QueueMessageType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,

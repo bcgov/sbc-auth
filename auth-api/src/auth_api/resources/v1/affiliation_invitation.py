@@ -104,10 +104,12 @@ def post_affiliation_invitation():
 def post_unaffiliated_invitation(business_identifier):
     """Send an unaffiliated email invitation for the entity."""
     try:
+        request_json = request.get_json(silent=True) or {}
+        is_reminder = request_json.get("isReminder", False)
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         if not entity:
             return {"message": "Business not found."}, HTTPStatus.NOT_FOUND
-        AffiliationInvitationService.send_unaffiliated_email_invitation(entity)
+        AffiliationInvitationService.send_unaffiliated_email_invitation(entity, is_reminder=is_reminder)
         return {}, HTTPStatus.CREATED
     except BusinessException as exception:
         return {"code": exception.code, "message": exception.message}, exception.status_code

@@ -10,6 +10,9 @@ import {
   OrgPaymentDetails,
   OrgProduct,
   OrgProductsRequestBody,
+  OrgRedirectUrl,
+  OrgRedirectUrlRequestBody,
+  OrgRedirectUrls,
   Organization,
   PatchOrgPayload,
   UpdateMemberPayload
@@ -18,6 +21,7 @@ import {
 import { Address } from '@/models/address'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
+import { EmptyResponse } from '@/models/global'
 import { Invitations } from '@/models/Invitation'
 import { OrgsDetails } from '@/models/affiliation-invitation'
 import { axios } from '@/util/http-util'
@@ -185,5 +189,24 @@ export default class OrgService {
   public static async revokeOrgApiKeys (ApiDetails): Promise<AxiosResponse<OrgProduct>> {
     const { orgId, apiKey } = ApiDetails
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/${apiKey}`)
+  }
+
+  public static async getOrgRedirectUrls (orgId: number): Promise<AxiosResponse<OrgRedirectUrls>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/redirect-urls`)
+  }
+
+  public static async createOrgRedirectUrl (orgId: number, requestBody: OrgRedirectUrlRequestBody):
+    Promise<AxiosResponse<OrgRedirectUrl>> {
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/redirect-urls`, requestBody)
+  }
+
+  public static async updateOrgRedirectUrl (orgId: number, urlId: number, requestBody: OrgRedirectUrlRequestBody):
+    Promise<AxiosResponse<OrgRedirectUrl>> {
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/redirect-urls/${urlId}`, requestBody)
+  }
+
+  public static async deleteOrgRedirectUrl (orgId: number, urlId: number):
+    Promise<AxiosResponse<EmptyResponse>> {
+    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/redirect-urls/${urlId}`)
   }
 }

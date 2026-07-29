@@ -23,6 +23,7 @@ import time
 import uuid
 from http import HTTPStatus
 from unittest import mock
+from unittest.mock import patch
 
 from sqlalchemy import event
 
@@ -35,6 +36,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models.org import receive_before_insert, receive_before_update
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
+from auth_api.services.documents import Documents as DocumentService
 from auth_api.utils.enums import AffidavitStatus, Status
 from auth_api.utils.roles import COORDINATOR, USER
 from tests import skip_in_pod
@@ -153,11 +155,80 @@ def test_update_user_terms_of_use(client, jwt, session):  # pylint:disable=unuse
     assert user["userTerms"]["termsOfUseAcceptedVersion"] == "1"
 
     # version 1 is old version ; so api should return terms of service accepted as false
-    rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+    with patch.object(DocumentService, "find_latest_version_by_type", return_value="2"):
+        rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
     assert rv.status_code == HTTPStatus.CREATED
     assert schema_utils.validate(rv.json, "user_response")[0]
     user = json.loads(rv.data)
     assert user["userTerms"]["isTermsOfUseAccepted"] is False
+
+
+def test_update_gov_user_terms_of_use(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a PATCH to an existing user updates that user."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.gov_account_holder_user)
+    rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+    assert rv.status_code == HTTPStatus.CREATED
+    user = json.loads(rv.data)
+    assert user["firstname"] is not None
+
+    # post token with updated claims
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.updated_test)
+    input_data = json.dumps({"termsversion": "1", "istermsaccepted": True})
+    rv = client.patch("/api/v1/users/@me", headers=headers, data=input_data, content_type="application/json")
+    assert rv.status_code == HTTPStatus.OK
+    assert schema_utils.validate(rv.json, "user_response")[0]
+    user = json.loads(rv.data)
+    assert user["userTerms"]["termsOfUseAcceptedVersion"] == "1"
+
+    # version 1 is old version ; so api should return terms of service accepted as false
+    with patch.object(DocumentService, "find_latest_version_by_type", return_value="2"):
+        rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+    assert rv.status_code == HTTPStatus.CREATED
+    assert schema_utils.validate(rv.json, "user_response")[0]
+    user = json.loads(rv.data)
+    assert user["userTerms"]["isTermsOfUseAccepted"] is False
+
+
+def test_idir_user_post_uses_govm_terms_of_use(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an IDIR user POST /users checks GOVM TOS, not regular TOS."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.gov_account_holder_user)
+    rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+    assert rv.status_code == HTTPStatus.CREATED
+
+    # Accept GOVM terms of service
+    input_data = json.dumps({"termsversion": "1", "istermsaccepted": True})
+    rv = client.patch("/api/v1/users/@me", headers=headers, data=input_data, content_type="application/json")
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json["userTerms"]["isTermsOfUseAccepted"] is True
+
+    # When the GOVM TOS latest version matches what the user accepted, POST should return True
+    with patch.object(DocumentService, "find_latest_version_by_type", return_value="1"):
+        rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+        assert rv.status_code == HTTPStatus.CREATED
+        assert rv.json["userTerms"]["isTermsOfUseAccepted"] is True
+
+    # When the GOVM TOS has a newer version, POST should return False
+    with patch.object(DocumentService, "find_latest_version_by_type", return_value="2"):
+        rv = client.post("/api/v1/users", headers=headers, content_type="application/json")
+        assert rv.status_code == HTTPStatus.CREATED
+        assert rv.json["userTerms"]["isTermsOfUseAccepted"] is False
+
+
+def test_post_and_get_me_terms_consistent_for_idir_user(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that POST /users and GET /users/@me return consistent isTermsOfUseAccepted for IDIR users."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.gov_account_holder_user)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+
+    # Accept terms
+    input_data = json.dumps({"termsversion": "1", "istermsaccepted": True})
+    client.patch("/api/v1/users/@me", headers=headers, data=input_data, content_type="application/json")
+
+    # Both POST and GET should agree on the TOS status
+    with patch.object(DocumentService, "find_latest_version_by_type", return_value="1"):
+        rv_post = client.post("/api/v1/users", headers=headers, content_type="application/json")
+        rv_get = client.get("/api/v1/users/@me", headers=headers, content_type="application/json")
+
+    assert rv_post.json["userTerms"]["isTermsOfUseAccepted"] == rv_get.json["userTerms"]["isTermsOfUseAccepted"]
 
 
 def test_update_user_terms_of_use_invalid_input(client, jwt, session):  # pylint:disable=unused-argument

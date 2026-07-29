@@ -1,14 +1,14 @@
 
 import { AccountLinkingKey, VendorConnection, VendorConnectionStatuses } from '@/models/vendorConnection'
 import { LDFlags, Role } from '@/util/constants'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { MembershipType } from '@/models/Organization'
+import { getLdFlag } from '@/util/flag-util'
 import moment from 'moment'
 
 export const VENDOR_CONNECTION_EXPIRY_WARNING_DAYS = 30
 
 function isAccountLinkingDisabled (): boolean {
-  return LaunchDarklyService.getFlag(LDFlags.DisableAccountLinking, true)
+  return getLdFlag(LDFlags.DisableAccountLinking, true)
 }
 
 function hasLinkingKeysJwtRole (userRoles: string[] = []): boolean {

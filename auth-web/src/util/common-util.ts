@@ -34,6 +34,11 @@ export default class CommonUtils {
     return value?.startsWith('http')
   }
 
+  // check that a value is a valid https:// url
+  static isValidHttpsUrl (value: string): boolean {
+    return /^https:\/\/([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:\d{1,5})?([/?#]\S*)?$/.test(value)
+  }
+
   static formatAccountDisplayName (item: any) {
     return `${item?.accountId} ${item?.accountName}`
   }

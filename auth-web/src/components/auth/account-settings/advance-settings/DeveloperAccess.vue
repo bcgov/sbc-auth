@@ -18,6 +18,7 @@
         class="font-weight-bold mb-12 "
         data-test="btn-create-api"
       >Create an API Key</v-btn> -->
+    <RedirectUrls />
     <ExistingAPIKeys />
   </v-container>
 </template>
@@ -29,10 +30,12 @@ import { Component, Mixins } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import ConfigHelper from '@/util/config-helper'
 import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings/ExistingAPIKeys.vue'
+import RedirectUrls from '@/components/auth/account-settings/advance-settings/RedirectUrls.vue'
 
 @Component({
   components: {
-    ExistingAPIKeys
+    ExistingAPIKeys,
+    RedirectUrls
   }
 })
 export default class DeveloperAccess extends Mixins(AccountChangeMixin) {

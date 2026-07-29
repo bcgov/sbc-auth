@@ -1,4 +1,4 @@
-import { LDFlags, Role } from '@/util/constants'
+import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
 import {
   canManageVendorConnections,
   canViewVendorConnections,
@@ -6,33 +6,41 @@ import {
   mapLinkingKeyToVendorConnection,
   showsStandaloneRemoveAction
 } from '@/util/vendor-connection-util'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { MembershipType } from '@/models/Organization'
 import { VendorConnectionStatuses } from '@/models/vendorConnection'
 import moment from 'moment'
 
+function setDisableAccountLinkingFlag (value: boolean) {
+  sessionStorage.setItem(SessionStorageKeys.LaunchDarklyFlags, JSON.stringify({
+    [LDFlags.DisableAccountLinking]: value
+  }))
+}
+
 describe('vendor-connection-util', () => {
   afterEach(() => {
-    vi.restoreAllMocks()
+    sessionStorage.removeItem(SessionStorageKeys.LaunchDarklyFlags)
   })
 
   describe('canViewVendorConnections', () => {
     it('returns false when disable-account-linking flag is on', () => {
-      vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(true)
+      setDisableAccountLinkingFlag(true)
 
       expect(canViewVendorConnections(MembershipType.Admin, [Role.AccountHolder])).toBe(false)
-      expect(LaunchDarklyService.getFlag).toHaveBeenCalledWith(LDFlags.DisableAccountLinking, true)
+    })
+
+    it('returns false when the flag is missing (safe default)', () => {
+      expect(canViewVendorConnections(MembershipType.Admin, [Role.AccountHolder])).toBe(false)
     })
 
     it('returns false without account_holder or manage_accounts JWT role', () => {
-      vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(false)
+      setDisableAccountLinkingFlag(false)
 
       expect(canViewVendorConnections(MembershipType.Admin, [])).toBe(false)
       expect(canViewVendorConnections(MembershipType.Admin, [Role.Staff])).toBe(false)
     })
 
     it('returns true for Admin with account_holder role', () => {
-      vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(false)
+      setDisableAccountLinkingFlag(false)
 
       expect(canViewVendorConnections(
         MembershipType.Admin,
@@ -41,7 +49,7 @@ describe('vendor-connection-util', () => {
     })
 
     it('returns true for Coordinator with account_holder role', () => {
-      vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(false)
+      setDisableAccountLinkingFlag(false)
 
       expect(canViewVendorConnections(
         MembershipType.Coordinator,
@@ -50,7 +58,7 @@ describe('vendor-connection-util', () => {
     })
 
     it('returns true for regular User with account_holder role', () => {
-      vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(false)
+      setDisableAccountLinkingFlag(false)
 
       expect(canViewVendorConnections(
         MembershipType.User,
@@ -59,7 +67,7 @@ describe('vendor-connection-util', () => {
     })
 
     it('returns true for staff with manage_accounts role', () => {
-      vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(false)
+      setDisableAccountLinkingFlag(false)
 
       expect(canViewVendorConnections(
         undefined,
@@ -68,7 +76,7 @@ describe('vendor-connection-util', () => {
     })
 
     it('returns true for external staff with manage_accounts role', () => {
-      vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(false)
+      setDisableAccountLinkingFlag(false)
 
       expect(canViewVendorConnections(
         undefined,
@@ -79,7 +87,7 @@ describe('vendor-connection-util', () => {
 
   describe('canManageVendorConnections', () => {
     beforeEach(() => {
-      vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(false)
+      setDisableAccountLinkingFlag(false)
     })
 
     it('returns true for Admin with account_holder role', () => {

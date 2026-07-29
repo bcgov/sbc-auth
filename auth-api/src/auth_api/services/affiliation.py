@@ -253,7 +253,7 @@ class Affiliation:
         return True
 
     @staticmethod
-    def create_new_business_affiliation(affiliation_data: AffiliationData):  # pylint: disable=too-many-locals
+    def create_new_business_affiliation(affiliation_data: AffiliationData, skip_membership_check: bool = False):  # pylint: disable=too-many-locals
         """Initiate a new incorporation."""
         org_id = affiliation_data.org_id
         business_identifier = affiliation_data.business_identifier
@@ -261,7 +261,9 @@ class Affiliation:
 
         current_app.logger.info(f"<create_affiliation org_id:{org_id} business_identifier:{business_identifier}")
 
-        entity, nr_json = Affiliation.validate_new_business_affiliation(affiliation_data)
+        entity, nr_json = Affiliation.validate_new_business_affiliation(
+            affiliation_data, skip_membership_check=skip_membership_check
+        )
         status = nr_json.get("state")
         # Create an entity with the Name from NR if entity doesn't exist
         if not entity:
@@ -310,7 +312,7 @@ class Affiliation:
         return Affiliation(affiliation_model)
 
     @staticmethod
-    def validate_new_business_affiliation(affiliation_data: AffiliationData):
+    def validate_new_business_affiliation(affiliation_data: AffiliationData, skip_membership_check: bool = False):
         """Validate the new business affiliation."""
         org_id = affiliation_data.org_id
         business_identifier = affiliation_data.business_identifier
@@ -321,7 +323,8 @@ class Affiliation:
         if not user_is_staff and not (email or phone):
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
-        Affiliation._validate_org_exists(org_id)
+        if not skip_membership_check:
+            Affiliation._validate_org_exists(org_id)
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         nr_json = Affiliation._get_and_validate_nr_details(business_identifier)
 

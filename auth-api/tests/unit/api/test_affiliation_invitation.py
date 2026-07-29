@@ -18,9 +18,12 @@ Test-Suite to ensure that the /affiliationsInvitations endpoint is working as ex
 """
 
 import json
+from datetime import datetime
 from http import HTTPStatus
+from unittest.mock import patch
 
 import pytest
+from freezegun import freeze_time
 
 from auth_api.exceptions.errors import Error
 from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
@@ -1112,19 +1115,63 @@ def setup_entity_with_contact(client, jwt, entity_info=TestEntityInfo.entity_lea
     return json.loads(rv_entity.data)["businessIdentifier"]
 
 
+@pytest.mark.parametrize(
+    "body, expects_reminder_prefix",
+    [
+        (None, False),
+        ({"isReminder": False}, False),
+        ({"isReminder": True}, True),
+    ],
+)
 def test_send_unaffiliated_email_invitation(
-    client, jwt, session, keycloak_mock, business_mock, mock_service_account_token
+    client,
+    jwt,
+    session,
+    keycloak_mock,
+    business_mock,
+    mock_service_account_token,
+    body,
+    expects_reminder_prefix,
 ):
-    """Assert that an unaffiliated email invitation can be created via POST."""
+    """Assert that an unaffiliated email invitation can be created via POST, honouring isReminder."""
     business_identifier = setup_entity_with_contact(client, jwt)
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
 
     rv = client.post(
         f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        data=json.dumps(body) if body else None,
         headers=headers,
         content_type="application/json",
     )
     assert rv.status_code == HTTPStatus.CREATED
+
+    entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+    invitations = AffiliationInvitationModel.find_invitations_by_entity(entity.identifier)
+    assert invitations[0].additional_message.startswith("Reminder:") is expects_reminder_prefix
+
+
+def test_send_unaffiliated_email_invitation_skips_business_check_with_role(client, jwt, session, keycloak_mock):
+    """Assert that business details service calls are skipped when SKIP_UNAFFILIATED_BUSINESS_CHECK role is present."""
+    business_identifier = setup_entity_with_contact(client, jwt)
+    claims = {
+        **TestJwtClaims.system_role,
+        "realm_access": {"roles": ["system", "skip_unaffiliated_business_check"]},
+    }
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+
+    with (
+        patch("auth_api.services.affiliation_invitation.RestService.get_service_account_token") as mock_token,
+        patch("auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details") as mock_business,
+    ):
+        rv = client.post(
+            f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+            headers=headers,
+            content_type="application/json",
+        )
+
+    assert rv.status_code == HTTPStatus.CREATED
+    mock_token.assert_not_called()
+    mock_business.assert_not_called()
 
 
 def test_send_unaffiliated_email_invitation_idempotent(
@@ -1147,6 +1194,40 @@ def test_send_unaffiliated_email_invitation_idempotent(
         content_type="application/json",
     )
     assert rv2.status_code == HTTPStatus.CREATED
+
+
+def test_send_unaffiliated_email_invitation_reminder_on_existing_invitation(
+    client, jwt, session, keycloak_mock, business_mock, mock_service_account_token
+):
+    """Assert that resending with isReminder=True updates both the message and sent_date on an existing invitation."""
+    business_identifier = setup_entity_with_contact(client, jwt)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+
+    with freeze_time("2026-04-21 12:00:00"):
+        rv1 = client.post(
+            f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+            headers=headers,
+            content_type="application/json",
+        )
+    assert rv1.status_code == HTTPStatus.CREATED
+
+    entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+    invitations = AffiliationInvitationModel.find_invitations_by_entity(entity.identifier)
+    assert not invitations[0].additional_message.startswith("Reminder:")
+    assert invitations[0].sent_date == datetime(2026, 4, 21, 12, 0, 0)
+
+    with freeze_time("2026-04-22 08:30:00"):
+        rv2 = client.post(
+            f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+            data=json.dumps({"isReminder": True}),
+            headers=headers,
+            content_type="application/json",
+        )
+    assert rv2.status_code == HTTPStatus.CREATED
+
+    invitations = AffiliationInvitationModel.find_invitations_by_entity(entity.identifier)
+    assert invitations[0].additional_message.startswith("Reminder:")
+    assert invitations[0].sent_date == datetime(2026, 4, 22, 8, 30, 0)
 
 
 def test_accept_unaffiliated_email_invitation(

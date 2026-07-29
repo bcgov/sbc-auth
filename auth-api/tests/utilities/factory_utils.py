@@ -36,6 +36,7 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Documents as DocumentsModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
+from auth_api.models import OrgRedirectUrl as OrgRedirectUrlModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import Task as TaskModel
@@ -363,6 +364,16 @@ def factory_linking_key_model(
         status=status,
         expires_on=expires_on or datetime.now(UTC) + timedelta(days=365),
     )
+    record.save()
+    return record
+
+
+def factory_redirect_url_model(
+    org_id: int,
+    redirect_url: str = "https://vendor.example.com/callback",
+) -> OrgRedirectUrlModel:
+    """Produce a templated OrgRedirectUrl model."""
+    record = OrgRedirectUrlModel(org_id=org_id, redirect_url=redirect_url)
     record.save()
     return record
 
