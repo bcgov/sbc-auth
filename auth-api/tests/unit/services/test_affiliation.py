@@ -21,6 +21,7 @@ from unittest import mock
 from unittest.mock import ANY, patch
 
 import pytest
+import uuid
 from freezegun import freeze_time
 
 from auth_api.exceptions import BusinessException
@@ -415,8 +416,6 @@ def test_find_affiliated_entities_by_org_id_no_affiliation(session, auth_mock): 
 
 def test_find_affiliated_entities_by_org_id_with_linking_key(session, monkeypatch):  # pylint:disable=unused-argument
     """Vendor with a valid linking key gets the lawfirm's affiliations from find_visible_affiliations_by_org_id."""
-    import uuid
-
     lawfirm = factory_org_model()
     vendor = factory_org_model()
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
