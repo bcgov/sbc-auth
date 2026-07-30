@@ -16,12 +16,12 @@
 Test suite to ensure that the Affiliation service routines are working as expected.
 """
 
+import uuid
 from datetime import datetime
 from unittest import mock
 from unittest.mock import ANY, patch
 
 import pytest
-import uuid
 from freezegun import freeze_time
 
 from auth_api.exceptions import BusinessException
