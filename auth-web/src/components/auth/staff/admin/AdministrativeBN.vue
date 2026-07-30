@@ -142,8 +142,8 @@
               color="primary"
               class="mr-2"
               :loading="previewActive"
-              @click="previewBusinessSummary()"
               :disabled="pdfDialog"
+              @click="previewBusinessSummary()"
             >
               <v-icon left>
                 mdi-eye
@@ -166,7 +166,10 @@
         </v-row>
       </div>
 
-      <div v-if="pdfDialog" class="mt-4">
+      <div
+        v-if="pdfDialog"
+        class="mt-4"
+      >
         <v-card>
           <v-card-title class="d-flex justify-space-between align-center">
             <span>Business Summary Preview</span>
