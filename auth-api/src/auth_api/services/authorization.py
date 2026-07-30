@@ -272,6 +272,25 @@ def check_auth(**kwargs):
         _check_for_roles(auth.get("orgMembership", None) if auth else None, kwargs)
 
 
+@user_context
+def linking_key_authorizes(org_id: int, **kwargs) -> bool:
+    """Return True if a valid Account-Linking-Key authorizes reads of org_id.
+
+    Returns False when no linking key was sent — caller should apply its normal
+    membership check. Aborts 403 if a key was sent but fails to validate for the
+    given org_id (wrong vendor, wrong source, expired, revoked).
+    """
+    user_from_context: UserContext = kwargs["user_context"]
+
+    if not user_from_context.linking_key or not user_from_context.account_id:
+        return False
+
+    linked = LinkingKeyService.validate(user_from_context.linking_key, user_from_context.account_id)
+    if linked and linked.account_id == org_id:
+        return True
+    abort(403)
+
+
 def _check_for_roles(role: str, kwargs):
     is_authorized: bool = False
     # If role is found

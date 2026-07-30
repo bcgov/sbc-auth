@@ -86,7 +86,7 @@ class Affiliation:
     def find_visible_affiliations_by_org_id(org_id):
         """Given an org_id, this will return the entities affiliated with it."""
         current_app.logger.debug(f"<find_visible_affiliations_by_org_id for org_id {org_id}")
-        org = OrgService.find_by_org_id(org_id, allowed_roles=AFFILIATION_ALLOWED_ROLES)
+        org = OrgService.find_by_org_id(org_id, allowed_roles=AFFILIATION_ALLOWED_ROLES, allow_linking_key=True)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 

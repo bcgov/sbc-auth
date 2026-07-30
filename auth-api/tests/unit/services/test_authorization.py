@@ -22,7 +22,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 from werkzeug.exceptions import Forbidden, HTTPException
 
-from auth_api.services.authorization import Authorization, check_auth
+from auth_api.services.authorization import Authorization, check_auth, linking_key_authorizes
 from auth_api.utils.enums import ProductCode
 from auth_api.utils.roles import ADMIN, STAFF, USER
 from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestUserInfo
@@ -767,3 +767,36 @@ def test_linking_key_expired_returns_no_auth(session, monkeypatch):  # pylint:di
 
     with pytest.raises(Forbidden):
         Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+
+
+def test_linking_key_authorizes(session, monkeypatch):  # pylint:disable=unused-argument
+    """Valid key returns True for the source org; wrong URL org is 403; no key returns False."""
+    lawfirm = factory_org_model()
+    other_org = factory_org_model()
+    vendor = factory_org_model()
+    linking_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+
+    patch_token_info(
+        {"sub": str(uuid.uuid4()), "realm_access": {"roles": ["account_holder"]}, "Account-Id": str(vendor.id)},
+        monkeypatch,
+    )
+    monkeypatch.setattr(
+        "auth_api.utils.user_context.UserContext.linking_key",
+        property(lambda _: linking_key.linking_key),
+    )
+
+    assert linking_key_authorizes(lawfirm.id) is True
+
+    with pytest.raises(Forbidden):
+        linking_key_authorizes(other_org.id)
+
+
+def test_linking_key_authorizes_returns_false_when_no_key(session, monkeypatch):  # pylint:disable=unused-argument
+    """No linking key header → returns False so caller can fall through to membership check."""
+    org = factory_org_model()
+    patch_token_info(
+        {"sub": str(uuid.uuid4()), "realm_access": {"roles": ["basic"]}},
+        monkeypatch,
+    )
+
+    assert linking_key_authorizes(org.id) is False
