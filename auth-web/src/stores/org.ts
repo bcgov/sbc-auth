@@ -160,8 +160,9 @@ export const useOrgStore = defineStore('org', () => {
   function needStaffReview (code) {
     const requireReviewTypes = [AccessType.GOVM, AccessType.GOVN]
     const product = state.productList.find(product => product.code === code)
-    if (!isProductFeesReviewed(code) && requireReviewTypes.includes(state.currentOrganization?.accessType as AccessType)) {
-      return true
+    if (requireReviewTypes.includes(state.currentOrganization?.accessType as AccessType)) {
+      if (product?.skipGovReview) return false
+      if (!isProductFeesReviewed(code)) return true
     }
     return !!product?.needReview
   }

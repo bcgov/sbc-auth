@@ -32,3 +32,4 @@ class ProductCodeSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-an
     parent_code = fields.String(data_key="parentCode")
     premium_only = fields.Boolean(data_key="premiumOnly")
     need_review = fields.Boolean(data_key="needReview")
+    skip_gov_review = fields.Boolean(data_key="skipGovReview")

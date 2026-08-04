@@ -170,7 +170,17 @@ export default class BusinessService {
   }
 
   /**
-   * Downloads a Minio document from Legal API and prompts browser to open/save it.
+   * Whether the document key is a DRS key (eg, "CORP-DS0100001003")
+   * vs a legacy Minio key (a UUID).
+   * @param key the document key
+   */
+  private static isDrsDocumentKey (key: string): boolean {
+    return /^[A-Z]+-DS\d+$/i.test(key)
+  }
+
+  /**
+   * Downloads a document from Legal API (DRS or legacy Minio, depending on the key format)
+   * and prompts browser to open/save it.
    * @param documentKey the document key
    * @param documentName the document filename
    * @returns a promise to return the axios response or the error response
@@ -180,7 +190,9 @@ export default class BusinessService {
     // safety checks
     if (!documentKey || !documentName) throw new Error('Invalid parameters')
 
-    const url = `${ConfigHelper.getLegalAPIV2Url()}/documents/${documentKey}`
+    const url = this.isDrsDocumentKey(documentKey)
+      ? `${ConfigHelper.getLegalAPIV2Url()}/documents/client/${documentKey}`
+      : `${ConfigHelper.getLegalAPIV2Url()}/documents/${documentKey}`
     const config = {
       headers: { 'Accept': 'application/pdf' },
       responseType: 'blob' as 'json'
