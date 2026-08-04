@@ -270,6 +270,7 @@ export interface OrgProduct {
   hidden?:boolean
   premiumOnly?:boolean
   needReview?:boolean
+  skipGovReview?:boolean
   parentCode?: string;
   id?: number;
 }
