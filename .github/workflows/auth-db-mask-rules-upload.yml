@@ -17,5 +17,5 @@ jobs:
         PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
       with:
-        args: cp -r "jobs/gcp-db-data-masking/sql/*" "gs://auth-db-dump-prod/"
-        cli: gsutil
+        args: storage cp -r "jobs/gcp-db-data-masking/sql/*" "gs://auth-db-dump-prod/"
+        cli: gcloud
