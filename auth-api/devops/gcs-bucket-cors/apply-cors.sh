@@ -1,26 +1,26 @@
 #!/bin/bash
 
 # dev
-gsutil cors set gcs-auth-accounts-dev-cors.json gs://auth-accounts-dev
-gsutil cors get gs://auth-accounts-dev
+gcloud storage buckets update gs://auth-accounts-dev --cors-file=gcs-auth-accounts-dev-cors.json
+gcloud storage buckets describe gs://auth-accounts-dev --format="default(cors_config)"
 
-gsutil cors set gcs-auth-static-resources-dev-cors.json gs://auth-static-resources-dev
-gsutil cors get gs://auth-static-resources-dev
+gcloud storage buckets update gs://auth-static-resources-dev --cors-file=gcs-auth-static-resources-dev-cors.json
+gcloud storage buckets describe gs://auth-static-resources-dev --format="default(cors_config)"
 
 # test
-gsutil cors set gcs-auth-accounts-test-cors.json gs://auth-accounts-test
-gsutil cors get gs://auth-accounts-test
+gcloud storage buckets update gs://auth-accounts-test --cors-file=gcs-auth-accounts-test-cors.json
+gcloud storage buckets describe gs://auth-accounts-test --format="default(cors_config)"
 
-gsutil cors set gcs-auth-static-resources-test-cors.json gs://auth-static-resources-test
-gsutil cors get gs://auth-static-resources-test
+gcloud storage buckets update gs://auth-static-resources-test --cors-file=gcs-auth-static-resources-test-cors.json
+gcloud storage buckets describe gs://auth-static-resources-test --format="default(cors_config)"
 
 # prod
-gsutil cors set gcs-auth-accounts-prod-cors.json gs://auth-accounts-prod
-gsutil cors get gs://auth-accounts-prod
+gcloud storage buckets update gs://auth-accounts-prod --cors-file=gcs-auth-accounts-prod-cors.json
+gcloud storage buckets describe gs://auth-accounts-prod --format="default(cors_config)"
 
-gsutil cors set gcs-auth-static-resources-prod-cors.json gs://auth-static-resources-prod
-gsutil cors get gs://auth-static-resources-prod
+gcloud storage buckets update gs://auth-static-resources-prod --cors-file=gcs-auth-static-resources-prod-cors.json
+gcloud storage buckets describe gs://auth-static-resources-prod --format="default(cors_config)"
 
 # sandbox
-gsutil cors set gcs-auth-accounts-sandbox-cors.json gs://auth-accounts-sandbox
-gsutil cors get gs://auth-accounts-sandbox
+gcloud storage buckets update gs://auth-accounts-sandbox --cors-file=gcs-auth-accounts-sandbox-cors.json
+gcloud storage buckets describe gs://auth-accounts-sandbox --format="default(cors_config)"
