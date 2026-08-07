@@ -17,6 +17,7 @@
 Test-Suite to ensure that the /orgs endpoint is working as expected.
 """
 
+import copy
 import json
 import uuid
 from datetime import datetime, timedelta
@@ -77,7 +78,9 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
     factory_auth_header,
+    factory_entity_model,
     factory_invitation,
+    factory_linking_key_model,
     factory_membership_model,
     factory_org_model,
     factory_user_model,
@@ -1787,6 +1790,95 @@ def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):
         )
         assert rv.status_code == 400
         assert schema_utils.validate(rv.json, "exception")[0]
+
+
+def test_add_affiliation_with_linking_key_creates_against_source(
+    client, jwt, session, keycloak_mock, entity_mapping_mock
+):  # pylint:disable=unused-argument
+    """Assert that when a linking key is sent, the affiliation is created on the source org (lawfirm), not the vendor."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+    linking_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
+    claims["Account-Id"] = str(vendor.id)
+    headers = {**factory_auth_header(jwt=jwt, claims=claims), "Account-Linking-Key": linking_key.linking_key}
+
+    payload = {
+        "businessIdentifier": entity.business_identifier,
+        "passCode": TestEntityInfo.entity_lear_mock["passCode"],
+    }
+    rv = client.post(
+        f"/api/v1/orgs/{vendor.id}/affiliations",
+        headers=headers,
+        data=json.dumps(payload),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.CREATED
+    assert rv.json["organization"]["id"] == lawfirm.id
+
+
+def test_add_new_business_affiliation_with_linking_key_creates_against_source(
+    client, jwt, session, keycloak_mock, nr_mock, entity_mapping_mock
+):  # pylint:disable=unused-argument
+    """Assert that incorporation filings via a vendor with a linking key affiliate the new business to the source org."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    linking_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
+    claims["Account-Id"] = str(vendor.id)
+    headers = {**factory_auth_header(jwt=jwt, claims=claims), "Account-Linking-Key": linking_key.linking_key}
+
+    rv = client.post(
+        f"/api/v1/orgs/{vendor.id}/affiliations?newBusiness=true",
+        headers=headers,
+        data=json.dumps(TestAffliationInfo.new_business_affiliation),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.CREATED
+    assert rv.json["organization"]["id"] == lawfirm.id
+
+
+def test_add_affiliation_with_invalid_linking_key_returns_403(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a bad linking key is rejected with a 403 before any affiliation work happens."""
+    vendor = factory_org_model()
+
+    claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
+    claims["Account-Id"] = str(vendor.id)
+    headers = {**factory_auth_header(jwt=jwt, claims=claims), "Account-Linking-Key": "not-a-real-key"}
+
+    rv = client.post(
+        f"/api/v1/orgs/{vendor.id}/affiliations",
+        headers=headers,
+        data=json.dumps(TestAffliationInfo.affiliation3),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_add_affiliation_with_revoked_linking_key_returns_403(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a REVOKED linking key is rejected with a 403 even if it hasn't expired."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    revoked_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id, status="REVOKED")
+
+    claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
+    claims["Account-Id"] = str(vendor.id)
+    headers = {**factory_auth_header(jwt=jwt, claims=claims), "Account-Linking-Key": revoked_key.linking_key}
+
+    rv = client.post(
+        f"/api/v1/orgs/{vendor.id}/affiliations",
+        headers=headers,
+        data=json.dumps(TestAffliationInfo.affiliation3),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.FORBIDDEN
 
 
 def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock, nr_mock, entity_mapping_mock):

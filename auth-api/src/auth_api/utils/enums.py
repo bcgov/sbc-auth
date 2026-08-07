@@ -351,6 +351,18 @@ class ActivityAction(Enum):
     REMOVE_PRODUCT_AND_SERVICE = "REMOVE_PRODUCT_AND_SERVICE"
     STATEMENT_INTERVAL_CHANGE = "STATEMENT_INTERVAL_CHANGE"
     STATEMENT_RECIPIENT_CHANGE = "STATEMENT_RECIPIENT_CHANGE"
+    LINKING_KEY_GENERATED = "LINKING_KEY_GENERATED"
+    LINKING_KEY_REVOKED = "LINKING_KEY_REVOKED"
+    LINKING_KEY_BOUND = "LINKING_KEY_BOUND"
+
+
+class LinkingKeyStatus(Enum):
+    """Linking key status values."""
+
+    ACTIVE = "ACTIVE"
+    PENDING = "PENDING"
+    REVOKED = "REVOKED"
+    EXPIRED = "EXPIRED"
 
 
 class PatchActions(Enum):
@@ -396,9 +408,9 @@ class QueueMessageType(Enum):
     AFFILIATION_CONFIRMATION_EMAIL = "bc.registry.auth.affiliationConfirmationEmail"
 
 
-
 class QueueSources(Enum):
     """Queue sources for PAY."""
 
     AUTH_API = "auth-api"
     AUTH_QUEUE = "auth-queue"
+    AUTH_JOBS = "auth-jobs"

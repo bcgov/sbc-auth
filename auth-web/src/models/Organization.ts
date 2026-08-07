@@ -288,6 +288,22 @@ export interface OrgProductFeeCode {
   code: string;
 }
 
+export interface OrgRedirectUrl {
+  id: number
+  orgId: number
+  redirectUrl: string
+  createdDate: string
+  createdBy: string
+}
+
+export interface OrgRedirectUrls {
+  redirectUrls: OrgRedirectUrl[]
+}
+
+export interface OrgRedirectUrlRequestBody {
+  redirectUrl: string
+}
+
 // Named similiar to Pay-Api
 export interface AccountFee {
   product: string;

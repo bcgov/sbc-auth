@@ -113,6 +113,9 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
             ActivityAction.REMOVE_PRODUCT_AND_SERVICE.value: ActivityLog._removing_products_and_services,
             ActivityAction.STATEMENT_INTERVAL_CHANGE.value: ActivityLog._statement_interval_change,
             ActivityAction.STATEMENT_RECIPIENT_CHANGE.value: ActivityLog._statement_recipient_change,
+            ActivityAction.LINKING_KEY_GENERATED.value: ActivityLog._linking_key_generated,
+            ActivityAction.LINKING_KEY_REVOKED.value: ActivityLog._linking_key_revoked,
+            ActivityAction.LINKING_KEY_BOUND.value: ActivityLog._linking_key_bound,
         }.get(activity.action)
         return mapping(activity) if (mapping) else activity.action
 
@@ -276,6 +279,22 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
                 )
         display_str += f"Statement notification emails are {statement_notification_enabled}"
         return display_str
+
+    @staticmethod
+    def _linking_key_generated(activity: ActivityLogModel) -> str:
+        if activity.item_value:
+            return f"Generated a linking key for vendor account {activity.item_value}"
+        return "Generated a pending linking key"
+
+    @staticmethod
+    def _linking_key_revoked(activity: ActivityLogModel) -> str:
+        if activity.item_value:
+            return f"Revoked a linking key for vendor account {activity.item_value}"
+        return "Revoked a pending linking key"
+
+    @staticmethod
+    def _linking_key_bound(activity: ActivityLogModel) -> str:
+        return f"Bound a pending linking key to vendor account {activity.item_value}"
 
     @staticmethod
     def _mask_user_name(is_staff_access, user):

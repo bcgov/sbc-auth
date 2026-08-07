@@ -1,0 +1,173 @@
+# Copyright © 2026 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Service for managing account linking keys."""
+
+from __future__ import annotations
+
+import secrets
+from datetime import UTC, datetime, timedelta
+
+from flask import current_app
+from sbc_common_components.utils.enums import QueueMessageTypes
+
+from auth_api.models.account_linking_key import AccountLinkingKey as AccountLinkingKeyModel
+from auth_api.models.dataclass import Activity
+from auth_api.models.db import db
+from auth_api.services.activity_log_publisher import ActivityLogPublisher
+from auth_api.utils.account_mailer import publish_to_mailer
+from auth_api.utils.date import pacific_today_isoformat, utc_to_pacific_isoformat
+from auth_api.utils.enums import ActivityAction, LinkingKeyStatus
+
+
+class AccountLinkingKey:
+    """Service for managing account linking keys."""
+
+    @staticmethod
+    def generate(account_id: int, vendor_account_id: int | None = None) -> AccountLinkingKeyModel:
+        """Generate a new linking key for the source account.
+
+        If vendor_account_id is provided the key is ACTIVE and immediately usable.
+        If omitted a PENDING key is created — the vendor must call bind() to activate it.
+        In both cases any existing PENDING key for the account is revoked first (one PENDING at a time).
+        """
+        AccountLinkingKey._revoke_superseded(AccountLinkingKeyModel.find_pending_by_account(account_id))
+
+        if vendor_account_id:
+            AccountLinkingKey._revoke_superseded(
+                AccountLinkingKeyModel.find_active_by_account_and_vendor(account_id, vendor_account_id)
+            )
+
+        status = LinkingKeyStatus.ACTIVE.value if vendor_account_id else LinkingKeyStatus.PENDING.value
+        record = AccountLinkingKeyModel(
+            linking_key=secrets.token_urlsafe(32),
+            account_id=account_id,
+            vendor_account_id=vendor_account_id,
+            status=status,
+            expires_on=datetime.now(UTC) + timedelta(days=current_app.config.get("LINKING_KEY_EXPIRY_DAYS", 365)),
+        )
+        record.save()
+
+        AccountLinkingKey._publish(ActivityAction.LINKING_KEY_GENERATED.value, record)
+        if record.status == LinkingKeyStatus.ACTIVE.value:
+            data = {"linkDate": pacific_today_isoformat(), "expiryDate": utc_to_pacific_isoformat(record.expires_on)}
+            AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_CREATED.value, record, data)
+        return record
+
+    @staticmethod
+    def get_all(account_id: int) -> list[AccountLinkingKeyModel]:
+        """Return all non-revoked (ACTIVE and PENDING) linking keys for the account."""
+        return AccountLinkingKeyModel.find_by_account_id(account_id)
+
+    @staticmethod
+    def revoke(key_id: int, account_id: int) -> bool:
+        """Soft-delete (revoke) a linking key by ID, scoped to the account. Returns False if not found."""
+        record = AccountLinkingKeyModel.find_by_id(key_id, account_id)
+        if not record:
+            return False
+        was_active = record.status == LinkingKeyStatus.ACTIVE.value
+        record.status = LinkingKeyStatus.REVOKED.value
+        record.save()
+        AccountLinkingKey._publish(ActivityAction.LINKING_KEY_REVOKED.value, record)
+        if was_active:
+            data = {"linkRemovalDate": pacific_today_isoformat()}
+            AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_REMOVED.value, record, data)
+        return True
+
+    @staticmethod
+    def validate(key: str, vendor_account_id: int) -> AccountLinkingKeyModel | None:
+        """Validate an ACTIVE linking key for the given vendor and return the record if authorized.
+
+        PENDING keys are not valid for authorization — the vendor must call bind() first.
+        Returns None if the key is not found, expired, revoked, PENDING, or the vendor does not match.
+        Updates last_used on every successful call.
+        """
+        record = AccountLinkingKeyModel.find_active_by_key(key)
+        if not record:
+            return None
+
+        if record.vendor_account_id != int(vendor_account_id):
+            current_app.logger.debug("Linking key rejected: vendor account does not match.")
+            return None
+
+        record.last_used = datetime.now(UTC)
+        record.save()
+        return record
+
+    @staticmethod
+    def bind(key: str, vendor_account_id: int) -> AccountLinkingKeyModel | None:
+        """Bind a PENDING key to the given vendor, activating it.
+
+        Returns the updated record, or None if the key is not found, expired, or not in PENDING state.
+        """
+        record = AccountLinkingKeyModel.find_pending_by_key(key)
+        if not record:
+            return None
+
+        AccountLinkingKey._revoke_superseded(
+            AccountLinkingKeyModel.find_active_by_account_and_vendor(record.account_id, vendor_account_id)
+        )
+
+        record.vendor_account_id = int(vendor_account_id)
+        record.status = LinkingKeyStatus.ACTIVE.value
+        record.save()
+
+        AccountLinkingKey._publish(ActivityAction.LINKING_KEY_BOUND.value, record)
+        data = {"linkDate": pacific_today_isoformat(), "expiryDate": utc_to_pacific_isoformat(record.expires_on)}
+        AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_CREATED.value, record, data)
+        return record
+
+    # -- private helpers --
+
+    @staticmethod
+    def _revoke_superseded(record: AccountLinkingKeyModel | None) -> None:
+        """Mark a superseded key REVOKED and flush it within the current transaction."""
+        if record:
+            record.status = LinkingKeyStatus.REVOKED.value
+            db.session.flush()
+
+    @staticmethod
+    def _vendor_label(record: AccountLinkingKeyModel) -> str | None:
+        """Return 'Name (ID)' for the bound vendor account, or None if unbound."""
+        if not record.vendor_account_id:
+            return None
+        return f"{record.vendor_account.name} ({record.vendor_account_id})"
+
+    @staticmethod
+    def _publish(action: str, record: AccountLinkingKeyModel) -> None:
+        """Publish an activity log event for the given action and key record."""
+        ActivityLogPublisher.publish_activity(
+            Activity(
+                org_id=record.account_id,
+                action=action,
+                name=str(record.account_id),
+                id=str(record.id),
+                value=AccountLinkingKey._vendor_label(record),
+            )
+        )
+
+    @staticmethod
+    def _publish_mailer_notification(
+        notification_type: str, record: AccountLinkingKeyModel, additional_data: dict[str, str]
+    ) -> None:
+        """Publish an account-link email notification to the account mailer."""
+        data = {
+            "accountId": record.account_id,
+            "serviceProviderName": record.vendor_account.name,
+            **additional_data,
+        }
+        try:
+            publish_to_mailer(notification_type, data=data)
+        except Exception as e:  # noqa: B901
+            current_app.logger.warning(f"AccountLinkingKey._publish_mailer_notification failed: {e}")
+

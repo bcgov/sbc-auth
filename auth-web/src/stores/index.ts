@@ -4,7 +4,9 @@ import { useActivityStore } from './activityLog'
 import { useAppStore } from './app'
 import { useBusinessStore } from './business'
 import { useCodesStore } from './codes'
+import { useLinkingKeysStore } from './linkingKeys'
 import { useOrgStore } from './org'
+import { useRedirectUrlsStore } from './redirectUrls'
 import { useStaffStore } from './staff'
 import { useTaskStore } from './task'
 import { useUserStore } from './user'
@@ -22,7 +24,9 @@ export * from './app'
 export * from './activityLog'
 export * from './business'
 export * from './codes'
+export * from './linkingKeys'
 export * from './org'
+export * from './redirectUrls'
 export * from './staff'
 export * from './task'
 export * from './user'
@@ -34,7 +38,9 @@ export function resetAllStores () {
     useActivityStore(),
     useBusinessStore(),
     useCodesStore(),
+    useLinkingKeysStore(),
     useOrgStore(),
+    useRedirectUrlsStore(),
     useStaffStore(),
     useTaskStore(),
     useUserStore(),

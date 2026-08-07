@@ -40,6 +40,12 @@ def get_transaction_url(org_id: str) -> str:
     transaction_url = f"{web_app_url}/account/{org_id}/settings/transactions"
     return transaction_url
 
+def get_vendor_connections_url(org_id: str) -> str:
+    """Get vendor connections url."""
+    web_app_url = current_app.config.get("WEB_APP_URL")
+    connections_url = f"{web_app_url}/account/{org_id}/settings/vendor-connections"
+    return connections_url
+
 
 def get_dashboard_url():
     """Get application dashboard url."""
