@@ -25,6 +25,6 @@ echo "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO auth;"
 echo "GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO auth;" >> readonly.sql
 
 echo "applying readonly user changes ..."
-gsutil cp readonly.sql "gs://${DB_NAME}-dump-${ENV}/"
+gcloud storage cp readonly.sql "gs://${DB_NAME}-dump-${ENV}/"
 gcloud --quiet sql import sql "${DB_NAME}-sandbox" "gs://${DB_NAME}-dump-${ENV}/readonly.sql" --database=$DB_NAME --user=$DB_USER
 gcloud --quiet sql import sql "${DB_NAME}-sandbox" "gs://${DB_NAME}-dump-${ENV}/mask.sql" --database=$DB_NAME --user=$DB_USER
