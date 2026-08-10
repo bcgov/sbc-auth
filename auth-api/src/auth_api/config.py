@@ -133,6 +133,12 @@ class _Config:  # pylint: disable=too-few-public-methods
     LEGAL_API_VERSION = os.getenv("LEGAL_API_VERSION")
     LEGAL_API_VERSION_2 = os.getenv("LEGAL_API_VERSION_2", "")
 
+    COLIN_API_URL = os.getenv("COLIN_API_URL", "") + os.getenv("COLIN_API_VERSION", "")
+    # Corp types that can be affiliated from COLIN while not loaded in LEAR.
+    COLIN_AFFILIATION_CORP_TYPES: list[str] = (
+        os.getenv("COLIN_AFFILIATION_CORP_TYPES", "BC,ULC,CC").replace(" ", "").split(",")
+    )
+
     LEAR_AFFILIATION_DETAILS_URL = f"{LEGAL_API_URL + LEGAL_API_VERSION_2}/businesses/search"
     NAMEX_AFFILIATION_DETAILS_URL = f"{NAMEX_API_URL}/requests/search"
 
@@ -217,6 +223,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DB_PORT = os.getenv("DATABASE_TEST_PORT", "5432")
     SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"
 
+    COLIN_API_URL = "http://COLIN_TEST_URL"
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use
     JWT_OIDC_TEST_MODE = True

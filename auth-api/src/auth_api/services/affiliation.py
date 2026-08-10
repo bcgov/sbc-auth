@@ -20,6 +20,7 @@ from dataclasses import asdict
 from flask import current_app
 from requests.exceptions import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
+from sqlalchemy import func
 from sqlalchemy.orm import contains_eager, subqueryload
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
@@ -50,6 +51,7 @@ from auth_api.utils.roles import AFFILIATION_ALLOWED_ROLES, ALL_ALLOWED_ROLES, C
 from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
+from .colin import Colin as ColinService
 from .rest_service import RestService
 
 
@@ -171,6 +173,11 @@ class Affiliation:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+        # COLIN businesses are not loaded in LEAR, so the entity is created on demand and
+        # refreshed on every affiliation attempt to keep the passcode and registered office
+        # email in step with COLIN.
+        if (entity is None or not entity.is_loaded_lear) and ColinService.is_colin_identifier(business_identifier):
+            entity = EntityService.sync_from_colin(business_identifier) or entity
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         current_app.logger.debug("<create_affiliation entity found")
@@ -247,6 +254,11 @@ class Affiliation:
         if pass_code:
             return validate_passcode(pass_code, entity.pass_code)
         if entity.pass_code:
+            return False
+        # A COLIN business is only in auth because someone is trying to affiliate it. If COLIN
+        # had no passcode on file there is nothing to check, so deny rather than fall through to
+        # the open-affiliation path below - those users go through the email invitation instead.
+        if not entity.is_loaded_lear:
             return False
         return True
 
@@ -490,10 +502,60 @@ class Affiliation:
     @staticmethod
     def _affiliation_details_url(identifier: str) -> str:
         """Determine url to call for affiliation details."""
-        # only have LEAR and NAMEX affiliations
+        # only have LEAR and NAMEX affiliations. COLIN businesses are filtered out before
+        # this point and served from auth data - see _get_colin_affiliation_details.
         if identifier.startswith("NR"):
             return current_app.config.get("NAMEX_AFFILIATION_DETAILS_URL")
         return current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
+
+    @staticmethod
+    def _get_colin_identifiers(identifiers: list[str]) -> set[str]:
+        """Return the subset of identifiers belonging to businesses that aren't loaded in LEAR."""
+        candidates = [identifier for identifier in identifiers if ColinService.is_colin_identifier(identifier)]
+        if not candidates:
+            return set()
+        rows = (
+            db.session.query(Entity.business_identifier)
+            .filter(Entity.business_identifier.in_(candidates), Entity.is_loaded_lear.is_(False))
+            .all()
+        )
+        return {row[0] for row in rows}
+
+    @staticmethod
+    def _get_colin_affiliation_details(identifiers: set[str], search_details: AffiliationSearchDetails) -> list[dict]:
+        """Build affiliation details from auth data for businesses that are only in COLIN.
+
+        LEAR has no record of these businesses, so the auth entity - refreshed from COLIN each
+        time a user starts the affiliation process - is the only source for the dashboard row.
+        Filtering normally happens in LEAR/NAMEX, so it is applied here against the entity.
+        """
+        if not identifiers:
+            return []
+
+        query = db.session.query(Entity).filter(
+            Entity.business_identifier.in_(identifiers), Entity.is_loaded_lear.is_(False)
+        )
+        if search_details.identifier:
+            query = query.filter(Entity.business_identifier.ilike(f"%{search_details.identifier}%"))
+        if search_details.name:
+            query = query.filter(Entity.name.ilike(f"%{search_details.name}%"))
+        if search_details.type:
+            query = query.filter(Entity.corp_type_code.in_(search_details.type))
+        if search_details.status:
+            query = query.filter(func.upper(Entity.status).in_([status.upper() for status in search_details.status]))
+
+        return [
+            {
+                "identifier": entity.business_identifier,
+                "legalName": entity.name,
+                "legalType": entity.corp_type_code,
+                "state": (entity.status or "ACTIVE").upper(),
+                "adminFreeze": False,
+                # lets the dashboard tell these apart from modernized businesses
+                "isLoadedLear": False,
+            }
+            for entity in query.all()
+        ]
 
     @staticmethod
     def affiliation_to_affiliation_base(affiliations: list[AffiliationModel]) -> list[AffiliationBase]:
@@ -516,7 +578,14 @@ class Affiliation:
         if not any([search_details.status, search_details.name, search_details.type, search_details.identifier]):
             search_details.page = 1
         search_dict = asdict(search_details)
+        # COLIN businesses have no LEAR record, so they are served from auth data instead of
+        # being sent to LEAR (which would simply drop them from the response).
+        colin_identifiers = Affiliation._get_colin_identifiers(
+            [affiliation_base.identifier for affiliation_base in affiliation_bases]
+        )
         for affiliation_base in affiliation_bases:
+            if affiliation_base.identifier in colin_identifiers:
+                continue
             url = Affiliation._affiliation_details_url(affiliation_base.identifier)
             url_identifiers.setdefault(url, []).append(affiliation_base.identifier)
         call_info = [
@@ -538,6 +607,7 @@ class Affiliation:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
             has_more_apis = any(r.get("hasMore", False) for r in responses if isinstance(r, dict))
             combined = Affiliation._combine_affiliation_details(responses, remove_stale_drafts)
+            combined.extend(Affiliation._get_colin_affiliation_details(colin_identifiers, search_details))
             combined = Affiliation._sort_affiliations_by_created(combined, affiliation_bases)
 
             Affiliation._handle_affiliation_debug(affiliation_bases, combined)

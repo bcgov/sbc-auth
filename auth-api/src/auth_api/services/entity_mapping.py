@@ -61,7 +61,6 @@ class EntityMappingService:
             db.session.query(Entity.business_identifier)
             .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
             .filter(AffiliationModel.org_id == org_id)
-            .filter(Entity.is_loaded_lear.is_(True))
             .cte("affiliated_identifiers")
         )
 
@@ -141,7 +140,6 @@ class EntityMappingService:
                 filtered_mappings.c.bootstrap_identifier.isnot(None),
                 filtered_mappings.c.nr_identifier.isnot(None),
                 AffiliationModel.org_id == org_id,
-                Entity.is_loaded_lear.is_(True),
             )
             .cte("complete_mappings")
         )
@@ -157,7 +155,6 @@ class EntityMappingService:
                     filtered_mappings.c.nr_identifier == Entity.business_identifier,
                 ),
             )
-            .filter(Entity.is_loaded_lear.is_(True))
             .join(AffiliationModel, AffiliationModel.entity_id == Entity.id)
             .filter(
                 AffiliationModel.org_id == org_id,
@@ -348,6 +345,12 @@ class EntityMappingService:
         """Populate the entity mapping for the identifier."""
         if entity_mapping := EntityMappingService.fetch_entity_mapping_details(identifier):
             EntityMappingService.from_entity_details(entity_mapping[0], skip_auth=True)
+            return
+        # COLIN businesses aren't in LEAR, so there are no mappings to fetch. They are always
+        # a standalone business row - no NR and no bootstrap - so map them directly.
+        entity = Entity.find_by_business_identifier(identifier)
+        if entity and not entity.is_loaded_lear:
+            EntityMappingService.from_entity_details({"identifier": identifier}, skip_auth=True)
 
     @staticmethod
     def fetch_entity_mapping_details(identifier: str):

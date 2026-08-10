@@ -20,6 +20,7 @@ from .affiliation import Affiliation
 from .affiliation_invitation import AffiliationInvitation
 from .api_gateway import ApiGateway
 from .codes import Codes
+from .colin import Colin
 from .contact import Contact
 from .documents import Documents
 from .entity import Entity

@@ -22,6 +22,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.schemas import utils as schema_utils
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.authorization import is_competent_authority_or_external_staff
+from auth_api.services.colin import Colin as ColinService
 from auth_api.services.contact import Contact as ContactService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.utils.auth import jwt as _jwt
@@ -157,6 +158,36 @@ def get_entity_authentication(business_identifier):
         jsonify({"message": f"Authentication for {business_identifier} was not found."}),
         HTTPStatus.NOT_FOUND,
     )
+
+
+@bp.route("/<string:business_identifier>/sync-from-colin", methods=["POST", "OPTIONS"])
+@cross_origin(origins="*", methods=["POST"])
+@_jwt.requires_auth
+def sync_entity_from_colin(business_identifier):
+    """Create or refresh the entity for a COLIN business that is not loaded in LEAR.
+
+    Called by the business dashboard when a user selects a COLIN business from the search,
+    before the manage-business modal reads /contacts and /authentication to decide which
+    authentication options to offer - without this the entity does not exist yet and the
+    modal would show no options at all.
+    """
+    if not ColinService.is_colin_identifier(business_identifier):
+        return (
+            jsonify({"message": f"{business_identifier} is not a COLIN business identifier."}),
+            HTTPStatus.BAD_REQUEST,
+        )
+
+    entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+    # A LEAR loaded business needs no COLIN data - succeed without touching COLIN.
+    if entity is None or not entity.is_loaded_lear:
+        entity = EntityService.sync_from_colin(business_identifier) or entity
+
+    if entity is None:
+        return (
+            jsonify({"message": f"A business for {business_identifier} was not found."}),
+            HTTPStatus.NOT_FOUND,
+        )
+    return {}, HTTPStatus.NO_CONTENT
 
 
 @bp.route("/<string:business_identifier>/contacts", methods=["GET", "OPTIONS"])

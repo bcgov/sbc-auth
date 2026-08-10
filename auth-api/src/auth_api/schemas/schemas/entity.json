@@ -112,6 +112,16 @@
         "HISTORICAL"
       ],
       "pattern": "^(.*)$"
+    },
+    "isLoadedLear": {
+      "$id": "#/properties/isLoadedLear",
+      "type": "boolean",
+      "title": "Is Loaded in LEAR",
+      "description": "False for businesses that are still managed in COLIN only. Set to true once the business has been migrated into LEAR.",
+      "default": true,
+      "examples": [
+        true, false
+      ]
     }
   }
 }

@@ -249,7 +249,11 @@ def test_populate_entity_mapping_for_identifier_no_data(session):
 
 
 def test_get_filtered_affiliations_identifier_matches_not_loaded_lear(session):
-    """Test that affiliations are not returned when is_loaded_lear is False."""
+    """Test that affiliations are returned when is_loaded_lear is False.
+
+    COLIN businesses that are not loaded in LEAR are affiliated with is_loaded_lear=False
+    and must still show on the dashboard.
+    """
     entity_mapping_data = [
         {"identifier": "BC1234567", "bootstrapIdentifier": None, "nrNumber": None},
         {"identifier": None, "bootstrapIdentifier": "Tyyyyyyy", "nrNumber": None},
@@ -265,7 +269,8 @@ def test_get_filtered_affiliations_identifier_matches_not_loaded_lear(session):
     search_details = AffiliationSearchDetails(page=1, limit=1000)
     results, _ = service.paginate_from_affiliations(org_id, search_details)
 
-    assert len(results) == 0
+    assert len(results) == 3
+    assert [result[0] for result in results] == [["NR1234567"], ["Tyyyyyyy"], ["BC1234567"]]
 
 
 def test_get_filtered_affiliations_pagination_limit_one(session):
