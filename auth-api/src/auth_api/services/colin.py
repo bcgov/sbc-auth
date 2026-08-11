@@ -40,7 +40,7 @@ class Colin:
     @staticmethod
     def is_affiliation_eligible_type(corp_type: str) -> bool:
         """Return True for corp types that are eligible for affiliation from COLIN.
-        
+
         Configured in COLIN_AFFILIATION_CORP_TYPES.
         """
         if not corp_type:
