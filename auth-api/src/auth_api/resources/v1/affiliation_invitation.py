@@ -83,9 +83,7 @@ def get_affiliation_invitations():
 )
 def post_affiliation_invitation():
     """Send a new affiliation invitation using the details in request and saves the affiliation invitation."""
-    print('here')
     request_json = request.get_json()
-    print(f"request_json: {request_json}")
     valid_format, errors = schema_utils.validate(request_json, "affiliation_invitation")
     if not valid_format:
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
