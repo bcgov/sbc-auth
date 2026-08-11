@@ -218,14 +218,25 @@ class AffiliationInvitation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         # COLIN businesses are created in auth on demand, and refreshed on every affiliation
-        # attempt so the registered office email used for the invitation matches COLIN.
+        # attempt so the registered office email used for the invitation matches COLIN. Access
+        # requests are excluded - they must not create or refresh COLIN entities (see below).
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
-        if (entity is None or not entity.is_loaded_lear) and ColinService.is_colin_identifier(business_identifier):
+        if (
+            (entity is None or not entity.is_loaded_lear)
+            and ColinService.is_colin_identifier(business_identifier)
+            and affiliation_invitation_type != AffiliationInvitationType.REQUEST
+        ):
             entity = EntityService.sync_from_colin(business_identifier) or entity
 
         # Validate that entity exists
         if not entity:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # An access request delegates access from an account that already manages the business.
+        # A business not loaded in LEAR must be affiliated with its passcode or through its
+        # registered office email instead, so the request flow stays closed for it.
+        if not entity.is_loaded_lear and affiliation_invitation_type == AffiliationInvitationType.REQUEST:
+            raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
 
         if not entity.is_loaded_lear:
             # Not in LEAR, so there are no business details to fetch - use what COLIN gave us.

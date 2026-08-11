@@ -13,20 +13,28 @@
 # limitations under the License.
 """Tests for affiliating COLIN businesses that are not loaded in LEAR.
 
-Covers the on demand entity creation/re-sync from COLIN, the passcode guard, and the
-affiliation details fallback used to render these businesses on the dashboard.
+Covers the on demand entity creation/re-sync from COLIN, the passcode guard, the
+access-request (delegation) block, and the affiliation details fallback used to render
+these businesses on the dashboard.
 """
+
+from unittest.mock import patch
 
 import pytest
 
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.models.dataclass import AffiliationSearchDetails
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.services.affiliation import Affiliation as AffiliationService
+from auth_api.services.affiliation_invitation import AffiliationInvitation as AffiliationInvitationService
 from auth_api.services.colin import Colin as ColinService
 from auth_api.services.entity import Entity as EntityService
+from auth_api.services.org import Org as OrgService
+from auth_api.utils.enums import AffiliationInvitationType
 from auth_api.utils.passcode import passcode_hash
-from tests.utilities.factory_scenarios import TestJwtClaims
-from tests.utilities.factory_utils import patch_token_info
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
+from tests.utilities.factory_utils import factory_affiliation_model, factory_org_model, patch_token_info
 
 COLIN_IDENTIFIER = "BC0870226"
 
@@ -279,3 +287,92 @@ def test_get_colin_identifiers_only_matches_unloaded_entities(session, monkeypat
     result = AffiliationService._get_colin_identifiers([COLIN_IDENTIFIER, "BC3333333", "CP1234567", "NR 1234567"])
 
     assert result == {COLIN_IDENTIFIER}
+
+
+def test_access_request_rejected_for_colin_entity(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert the access-request flow cannot affiliate a business not loaded in LEAR.
+
+    Even with another account already managing the COLIN business, a new account must
+    affiliate with the passcode or the registered office email - never by delegation.
+    """
+    monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info()))
+    entity = EntityService.sync_from_colin(COLIN_IDENTIFIER)
+    managing_org = factory_org_model()
+    factory_affiliation_model(entity.identifier, managing_org.id)
+    requesting_org = factory_org_model(org_info=TestOrgInfo.org2)
+
+    with pytest.raises(BusinessException) as exception:
+        AffiliationInvitationService._validate_prerequisites(
+            business_identifier=COLIN_IDENTIFIER,
+            from_org_id=requesting_org.id,
+            to_org_id=managing_org.id,
+            affiliation_invitation_type=AffiliationInvitationType.REQUEST,
+        )
+
+    assert exception.value.code == Error.INVALID_AFFILIATION_INVITATION_TYPE.name
+
+
+def test_access_request_does_not_sync_colin_entity(session):  # pylint:disable=unused-argument
+    """Assert an access request never creates or refreshes an entity from COLIN."""
+    requesting_org = factory_org_model()
+
+    with patch.object(ColinService, "fetch_auth_info") as mock_fetch:
+        with pytest.raises(BusinessException) as exception:
+            AffiliationInvitationService._validate_prerequisites(
+                business_identifier=COLIN_IDENTIFIER,
+                from_org_id=requesting_org.id,
+                to_org_id=None,
+                affiliation_invitation_type=AffiliationInvitationType.REQUEST,
+            )
+
+    assert exception.value.code == Error.DATA_NOT_FOUND.name
+    mock_fetch.assert_not_called()
+
+
+def test_email_invitation_prerequisites_pass_for_colin_entity(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert the access-request block leaves the email invitation path working."""
+    monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info()))
+    requesting_org = factory_org_model()
+
+    entity, _, business = AffiliationInvitationService._validate_prerequisites(
+        business_identifier=COLIN_IDENTIFIER,
+        from_org_id=requesting_org.id,
+        to_org_id=None,
+        affiliation_invitation_type=AffiliationInvitationType.EMAIL,
+    )
+
+    assert entity.business_identifier == COLIN_IDENTIFIER
+    assert business["business"]["legalName"] == "COLIN TEST COMPANY LTD."
+
+
+def test_search_orgs_by_affiliation_hides_colin_entities(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert accounts managing a COLIN business are not revealed.
+
+    The dashboard only offers the access-request option when this search returns accounts,
+    so an empty result keeps the option hidden for businesses not loaded in LEAR.
+    """
+    monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info()))
+    entity = EntityService.sync_from_colin(COLIN_IDENTIFIER)
+    org = factory_org_model()
+    factory_affiliation_model(entity.identifier, org.id)
+
+    assert OrgService.search_orgs_by_affiliation(COLIN_IDENTIFIER, []) == {"orgs": [], "total": 0}
+
+
+def test_search_orgs_by_affiliation_still_returns_lear_orgs(session):  # pylint:disable=unused-argument
+    """Assert the org search is unchanged for businesses loaded in LEAR."""
+    entity_model = EntityModel.create_from_dict(
+        {
+            "businessIdentifier": "BC4444444",
+            "name": "LEAR COMPANY LTD.",
+            "corpTypeCode": "BC",
+            "passCode": None,
+        }
+    )
+    org = factory_org_model()
+    factory_affiliation_model(entity_model.id, org.id)
+
+    result = OrgService.search_orgs_by_affiliation("BC4444444", [])
+
+    assert result["total"] == 1
+    assert result["orgs"][0].id == org.id
