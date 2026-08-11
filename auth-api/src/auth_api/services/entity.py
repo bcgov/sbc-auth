@@ -154,9 +154,7 @@ class Entity:
     def sync_from_colin(business_identifier: str):
         """Create or refresh an entity from COLIN for a business that is not loaded in LEAR.
 
-        Called whenever a user starts the affiliation process (passcode or email) so the
-        passcode and registered office email always match what COLIN holds today. Returns
-        None when COLIN has no record of the business or the corp type is out of scope.
+        Returns None when COLIN has no record of the business or the corp type is invalid for this flow.
         """
         colin_info = ColinService.fetch_auth_info(business_identifier)
         if not colin_info:

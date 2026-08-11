@@ -20,7 +20,6 @@ from dataclasses import asdict
 from flask import current_app
 from requests.exceptions import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
-from sqlalchemy import func
 from sqlalchemy.orm import contains_eager, subqueryload
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
@@ -509,40 +508,36 @@ class Affiliation:
         return current_app.config.get("LEAR_AFFILIATION_DETAILS_URL")
 
     @staticmethod
-    def _get_colin_identifiers(identifiers: list[str]) -> set[str]:
-        """Return the subset of identifiers belonging to businesses that aren't loaded in LEAR."""
+    def _get_colin_entities_not_loaded_in_lear(identifiers: list[str]) -> list[Entity]:
+        """Return the entities that aren't loaded in LEAR for the given identifiers."""
         candidates = [identifier for identifier in identifiers if ColinService.is_colin_identifier(identifier)]
         if not candidates:
-            return set()
-        rows = (
-            db.session.query(Entity.business_identifier)
+            return []
+        return (
+            db.session.query(Entity)
             .filter(Entity.business_identifier.in_(candidates), Entity.is_loaded_lear.is_(False))
             .all()
         )
-        return {row[0] for row in rows}
 
     @staticmethod
-    def _get_colin_affiliation_details(identifiers: set[str], search_details: AffiliationSearchDetails) -> list[dict]:
-        """Build affiliation details from auth data for businesses that are only in COLIN.
+    def _get_colin_affiliation_details(entities: list[Entity], search_details: AffiliationSearchDetails) -> list[dict]:
+        """Return affiliation details for COLIN entities that match on the search details."""
 
-        LEAR has no record of these businesses, so the auth entity - refreshed from COLIN each
-        time a user starts the affiliation process - is the only source for the dashboard row.
-        Filtering normally happens in LEAR/NAMEX, so it is applied here against the entity.
-        """
-        if not identifiers:
-            return []
-
-        query = db.session.query(Entity).filter(
-            Entity.business_identifier.in_(identifiers), Entity.is_loaded_lear.is_(False)
-        )
-        if search_details.identifier:
-            query = query.filter(Entity.business_identifier.ilike(f"%{search_details.identifier}%"))
-        if search_details.name:
-            query = query.filter(Entity.name.ilike(f"%{search_details.name}%"))
-        if search_details.type:
-            query = query.filter(Entity.corp_type_code.in_(search_details.type))
-        if search_details.status:
-            query = query.filter(func.upper(Entity.status).in_([status.upper() for status in search_details.status]))
+        def matches_search(entity: Entity) -> bool:
+            if (
+                search_details.identifier
+                and search_details.identifier.upper() not in entity.business_identifier.upper()
+            ):
+                return False
+            if search_details.name and search_details.name.upper() not in (entity.name or "").upper():
+                return False
+            if search_details.type and entity.corp_type_code not in search_details.type:
+                return False
+            if search_details.status and (entity.status or "").upper() not in [
+                status.upper() for status in search_details.status
+            ]:
+                return False
+            return True
 
         return [
             {
@@ -554,7 +549,8 @@ class Affiliation:
                 # lets the dashboard tell these apart from modernized businesses
                 "isLoadedLear": False,
             }
-            for entity in query.all()
+            for entity in entities
+            if matches_search(entity)
         ]
 
     @staticmethod
@@ -580,9 +576,10 @@ class Affiliation:
         search_dict = asdict(search_details)
         # COLIN businesses have no LEAR record, so they are served from auth data instead of
         # being sent to LEAR (which would simply drop them from the response).
-        colin_identifiers = Affiliation._get_colin_identifiers(
+        colin_entities = Affiliation._get_colin_entities_not_loaded_in_lear(
             [affiliation_base.identifier for affiliation_base in affiliation_bases]
         )
+        colin_identifiers = {entity.business_identifier for entity in colin_entities}
         for affiliation_base in affiliation_bases:
             if affiliation_base.identifier in colin_identifiers:
                 continue
@@ -607,7 +604,7 @@ class Affiliation:
             responses = await RestService.call_posts_in_parallel(call_info, token, org_id)
             has_more_apis = any(r.get("hasMore", False) for r in responses if isinstance(r, dict))
             combined = Affiliation._combine_affiliation_details(responses, remove_stale_drafts)
-            combined.extend(Affiliation._get_colin_affiliation_details(colin_identifiers, search_details))
+            combined.extend(Affiliation._get_colin_affiliation_details(colin_entities, search_details))
             combined = Affiliation._sort_affiliations_by_created(combined, affiliation_bases)
 
             Affiliation._handle_affiliation_debug(affiliation_bases, combined)

@@ -223,9 +223,10 @@ def test_get_colin_affiliation_details(session, monkeypatch):  # pylint:disable=
     """Assert dashboard rows are built from auth data for businesses not in LEAR."""
     monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info()))
     EntityService.sync_from_colin(COLIN_IDENTIFIER)
+    entities = AffiliationService._get_colin_entities_not_loaded_in_lear([COLIN_IDENTIFIER])
 
     search_details = AffiliationSearchDetails(page=1, limit=100)
-    details = AffiliationService._get_colin_affiliation_details({COLIN_IDENTIFIER}, search_details)
+    details = AffiliationService._get_colin_affiliation_details(entities, search_details)
 
     assert len(details) == 1
     assert details[0] == {
@@ -242,21 +243,22 @@ def test_get_colin_affiliation_details_applies_filters(session, monkeypatch):  #
     """Assert search filters are applied locally, since LEAR cannot filter these."""
     monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info()))
     EntityService.sync_from_colin(COLIN_IDENTIFIER)
+    entities = AffiliationService._get_colin_entities_not_loaded_in_lear([COLIN_IDENTIFIER])
 
     matching = AffiliationSearchDetails(page=1, limit=100, name="COLIN TEST")
-    assert len(AffiliationService._get_colin_affiliation_details({COLIN_IDENTIFIER}, matching)) == 1
+    assert len(AffiliationService._get_colin_affiliation_details(entities, matching)) == 1
 
     non_matching = AffiliationSearchDetails(page=1, limit=100, name="SOMETHING ELSE")
-    assert AffiliationService._get_colin_affiliation_details({COLIN_IDENTIFIER}, non_matching) == []
+    assert AffiliationService._get_colin_affiliation_details(entities, non_matching) == []
 
     wrong_status = AffiliationSearchDetails(page=1, limit=100, status=["HISTORICAL"])
-    assert AffiliationService._get_colin_affiliation_details({COLIN_IDENTIFIER}, wrong_status) == []
+    assert AffiliationService._get_colin_affiliation_details(entities, wrong_status) == []
 
     right_status = AffiliationSearchDetails(page=1, limit=100, status=["ACTIVE"])
-    assert len(AffiliationService._get_colin_affiliation_details({COLIN_IDENTIFIER}, right_status)) == 1
+    assert len(AffiliationService._get_colin_affiliation_details(entities, right_status)) == 1
 
 
-def test_get_colin_affiliation_details_excludes_lear_entities(session):  # pylint:disable=unused-argument
+def test_get_colin_entities_excludes_lear_entities(session):  # pylint:disable=unused-argument
     """Assert businesses loaded in LEAR are never served from the auth fallback."""
     EntityModel.create_from_dict(
         {
@@ -267,11 +269,10 @@ def test_get_colin_affiliation_details_excludes_lear_entities(session):  # pylin
         }
     )
 
-    search_details = AffiliationSearchDetails(page=1, limit=100)
-    assert AffiliationService._get_colin_affiliation_details({"BC2222222"}, search_details) == []
+    assert AffiliationService._get_colin_entities_not_loaded_in_lear(["BC2222222"]) == []
 
 
-def test_get_colin_identifiers_only_matches_unloaded_entities(session, monkeypatch):  # pylint:disable=unused-argument
+def test_get_colin_entities_only_matches_unloaded_entities(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert identifier partitioning picks out only the COLIN businesses."""
     monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info()))
     EntityService.sync_from_colin(COLIN_IDENTIFIER)
@@ -284,9 +285,11 @@ def test_get_colin_identifiers_only_matches_unloaded_entities(session, monkeypat
         }
     )
 
-    result = AffiliationService._get_colin_identifiers([COLIN_IDENTIFIER, "BC3333333", "CP1234567", "NR 1234567"])
+    result = AffiliationService._get_colin_entities_not_loaded_in_lear(
+        [COLIN_IDENTIFIER, "BC3333333", "CP1234567", "NR 1234567"]
+    )
 
-    assert result == {COLIN_IDENTIFIER}
+    assert [entity.business_identifier for entity in result] == [COLIN_IDENTIFIER]
 
 
 def test_access_request_rejected_for_colin_entity(session, monkeypatch):  # pylint:disable=unused-argument

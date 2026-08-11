@@ -223,7 +223,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DB_PORT = os.getenv("DATABASE_TEST_PORT", "5432")
     SQLALCHEMY_DATABASE_URI = f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}"
 
-    COLIN_API_URL = "http://COLIN_TEST_URL"
+    COLIN_API_URL = "https://COLIN_TEST_URL"
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use
     JWT_OIDC_TEST_MODE = True

@@ -29,29 +29,29 @@ from auth_api.services.rest_service import RestService
 class Colin:
     """Fetch business details from the COLIN API."""
 
-    # BC, ULC and CC corps are all held in auth/search with the BC prefix plus 7 digits.
+    # FUTURE: This pattern will need to be updated in the future if we want to reuse the same flow for expros etc.
     COLIN_IDENTIFIER_PATTERN = re.compile(r"^BC\d{7}$")
 
     @staticmethod
     def is_colin_identifier(business_identifier: str) -> bool:
-        """Return True if the identifier could belong to a COLIN corp managed outside LEAR.
-
-        Used to keep COLIN lookups off unrelated identifiers (NRs, temp registrations, firms).
-        """
+        """Return True if the identifier could belong to a COLIN business not loaded in LEAR."""
         return bool(business_identifier and Colin.COLIN_IDENTIFIER_PATTERN.match(business_identifier))
 
     @staticmethod
     def is_affiliation_eligible_type(corp_type: str) -> bool:
-        """Return True if the corp type may be affiliated from COLIN while not in LEAR."""
+        """Return True for corp types that are eligible for affiliation from COLIN.
+        
+        Configured in COLIN_AFFILIATION_CORP_TYPES.
+        """
         if not corp_type:
             return False
         return corp_type.upper() in current_app.config.get("COLIN_AFFILIATION_CORP_TYPES", [])
 
     @staticmethod
     def fetch_auth_info(business_identifier: str) -> dict | None:
-        """Return the auth info COLIN holds for a business, or None when not found.
+        """Return the COLIN info auth is interested in for a business, or None when not found.
 
-        The response contains the business passcode. Never log the returned dict, and never
+        Contains the business passcode. Never log the returned dict, and never
         pass it back to a caller outside of entity creation/sync.
         """
         colin_api_url = current_app.config.get("COLIN_API_URL")

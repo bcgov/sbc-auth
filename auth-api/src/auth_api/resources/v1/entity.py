@@ -19,6 +19,7 @@ from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.schemas import utils as schema_utils
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.authorization import is_competent_authority_or_external_staff
@@ -160,34 +161,26 @@ def get_entity_authentication(business_identifier):
     )
 
 
-@bp.route("/<string:business_identifier>/sync-from-colin", methods=["POST", "OPTIONS"])
+@bp.route("/<string:business_identifier>/synchronizations/colin", methods=["POST", "OPTIONS"])
 @cross_origin(origins="*", methods=["POST"])
 @_jwt.requires_auth
 def sync_entity_from_colin(business_identifier):
-    """Create or refresh the entity for a COLIN business that is not loaded in LEAR.
+    """Create or resync entity details for COLIN businesses not loaded in LEAR."""
+    try:
+        if not ColinService.is_colin_identifier(business_identifier):
+            raise BusinessException(Error.INVALID_BUSINESS_IDENTIFIER, None)
 
-    Called by the business dashboard when a user selects a COLIN business from the search,
-    before the manage-business modal reads /contacts and /authentication to decide which
-    authentication options to offer - without this the entity does not exist yet and the
-    modal would show no options at all.
-    """
-    if not ColinService.is_colin_identifier(business_identifier):
-        return (
-            jsonify({"message": f"{business_identifier} is not a COLIN business identifier."}),
-            HTTPStatus.BAD_REQUEST,
-        )
+        entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+        # A LEAR loaded business needs no COLIN data - succeed without touching COLIN.
+        if entity is None or not entity.is_loaded_lear:
+            entity = EntityService.sync_from_colin(business_identifier) or entity
 
-    entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
-    # A LEAR loaded business needs no COLIN data - succeed without touching COLIN.
-    if entity is None or not entity.is_loaded_lear:
-        entity = EntityService.sync_from_colin(business_identifier) or entity
-
-    if entity is None:
-        return (
-            jsonify({"message": f"A business for {business_identifier} was not found."}),
-            HTTPStatus.NOT_FOUND,
-        )
-    return {}, HTTPStatus.NO_CONTENT
+        if entity is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        response, status = {}, HTTPStatus.NO_CONTENT
+    except BusinessException as exception:
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
+    return response, status
 
 
 @bp.route("/<string:business_identifier>/contacts", methods=["GET", "OPTIONS"])

@@ -741,7 +741,7 @@ def test_sync_entity_from_colin(client, jwt, session):  # pylint:disable=unused-
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
 
     with patch.object(ColinService, "fetch_auth_info", return_value=dict(COLIN_SYNC_AUTH_INFO)):
-        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/sync-from-colin", headers=headers)
+        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin", headers=headers)
     assert rv.status_code == HTTPStatus.NO_CONTENT
 
     # the modal reads these two endpoints to decide which auth options to offer
@@ -768,7 +768,7 @@ def test_sync_entity_from_colin_lear_business_untouched(client, jwt, session):  
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
 
     with patch.object(ColinService, "fetch_auth_info") as mock_fetch:
-        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/sync-from-colin", headers=headers)
+        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin", headers=headers)
 
     assert rv.status_code == HTTPStatus.NO_CONTENT
     mock_fetch.assert_not_called()
@@ -779,9 +779,11 @@ def test_sync_entity_from_colin_not_found(client, jwt, session):  # pylint:disab
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
 
     with patch.object(ColinService, "fetch_auth_info", return_value=None):
-        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/sync-from-colin", headers=headers)
+        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin", headers=headers)
 
     assert rv.status_code == HTTPStatus.NOT_FOUND
+    assert rv.json["code"] == "DATA_NOT_FOUND"
+    assert rv.json["message"]
 
 
 def test_sync_entity_from_colin_rejects_non_colin_identifier(client, jwt, session):  # pylint:disable=unused-argument
@@ -789,14 +791,16 @@ def test_sync_entity_from_colin_rejects_non_colin_identifier(client, jwt, sessio
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
 
     with patch.object(ColinService, "fetch_auth_info") as mock_fetch:
-        rv = client.post("/api/v1/entities/CP1234567/sync-from-colin", headers=headers)
+        rv = client.post("/api/v1/entities/CP1234567/synchronizations/colin", headers=headers)
 
     assert rv.status_code == HTTPStatus.BAD_REQUEST
+    assert rv.json["code"] == "INVALID_BUSINESS_IDENTIFIER"
+    assert rv.json["message"]
     mock_fetch.assert_not_called()
 
 
 def test_sync_entity_from_colin_requires_auth(client, session):  # pylint:disable=unused-argument
     """Assert the sync endpoint requires a logged in user."""
-    rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/sync-from-colin")
+    rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin")
 
     assert rv.status_code == HTTPStatus.UNAUTHORIZED
