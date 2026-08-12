@@ -34,6 +34,7 @@ from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
+from .colin import Colin as ColinService
 
 
 class Entity:
@@ -80,6 +81,11 @@ class Entity:
     def status(self):
         """Return the status for this entity."""
         return self._model.status
+
+    @property
+    def is_loaded_lear(self):
+        """Return whether this entity is loaded in LEAR."""
+        return self._model.is_loaded_lear
 
     def set_pass_code_claimed(self, pass_code_claimed):
         """Set the pass_code_claimed status."""
@@ -143,6 +149,65 @@ class Entity:
 
         entity = Entity(entity_model)
         return entity
+
+    @staticmethod
+    def sync_from_colin(business_identifier: str):
+        """Create or refresh an entity from COLIN for a business that is not loaded in LEAR.
+
+        Returns None when COLIN has no record of the business.
+        Raises BusinessException when the corp type is not eligible for this flow.
+        """
+        colin_info = ColinService.fetch_auth_info(business_identifier)
+        if not colin_info:
+            return None
+
+        corp_type = colin_info.get("legalType")
+        if not ColinService.is_affiliation_eligible_type(corp_type):
+            current_app.logger.debug(f"COLIN corp type {corp_type} is not eligible for affiliation")
+            raise BusinessException(Error.INVALID_BUSINESS_TYPE, None)
+
+        pass_code = colin_info.get("passCode")
+        # COLIN reports the state description (ex. 'Active'); auth stores LEAR style states.
+        status = (colin_info.get("status") or "").upper() or None
+        entity_model = EntityModel.find_by_business_identifier(business_identifier)
+        if entity_model is None:
+            entity_model = EntityModel.create_from_dict(
+                {
+                    "businessIdentifier": business_identifier,
+                    "name": colin_info.get("legalName") or business_identifier,
+                    "corpTypeCode": corp_type,
+                    "businessNumber": colin_info.get("businessNumber"),
+                    "status": status,
+                    "passCode": pass_code,
+                    "isLoadedLear": False,
+                }
+            )
+        else:
+            entity_model.name = colin_info.get("legalName") or entity_model.name
+            entity_model.corp_type_code = corp_type
+            entity_model.business_number = colin_info.get("businessNumber")
+            entity_model.status = status
+            entity_model.is_loaded_lear = False
+            # Only overwrite the stored hash when COLIN actually has a passcode, so a
+            # transient empty value can't silently clear the credential.
+            if pass_code:
+                entity_model.pass_code = passcode_hash(pass_code)
+            entity_model.save()
+
+        entity = Entity(entity_model)
+        Entity._sync_colin_contact(entity, colin_info.get("email"))
+        return entity
+
+    @staticmethod
+    def _sync_colin_contact(entity, email: str):
+        """Store the COLIN registered office email as the entity contact."""
+        if not email:
+            return
+        existing_contact = entity.get_contact()
+        if existing_contact is None:
+            entity.add_contact({"email": email})
+        elif existing_contact.email != email:
+            entity.update_contact({"email": email})
 
     @staticmethod
     @user_context

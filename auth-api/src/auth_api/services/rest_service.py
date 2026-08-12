@@ -213,8 +213,13 @@ class RestService:
         retry_on_failure: bool = False,
         additional_headers: dict = None,
         skip_404_logging: bool = False,
+        skip_response_logging: bool = False,
     ):
-        """GET service."""
+        """GET service.
+
+        Set skip_response_logging when the response carries sensitive data (ex. a passcode)
+        that must never be written to the logs.
+        """
         current_app.logger.debug("<GET")
 
         headers = RestService._generate_headers(content_type, additional_headers, token, auth_header_type)
@@ -244,7 +249,10 @@ class RestService:
             raise exc
         finally:
             current_app.logger.debug(response.headers if response else "Empty Response Headers")
-            current_app.logger.info(f"response : {response.text if response else ''}")
+            if skip_response_logging:
+                current_app.logger.info(f"response status : {response.status_code if response else ''}")
+            else:
+                current_app.logger.info(f"response : {response.text if response else ''}")
 
         current_app.logger.debug(">GET")
         return response

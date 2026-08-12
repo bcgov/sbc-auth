@@ -29,6 +29,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Entity as EntityService
+from auth_api.services.colin import Colin as ColinService
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims
 from tests.utilities.factory_utils import (
     factory_affiliation_model,
@@ -718,3 +719,90 @@ def test_get_entity_authentication(client, jwt, session):
     assert data["contactEmail"] != TestContactInfo.contact1["email"]
     assert data["contactEmail"] == "fo*@ba*****"
     assert "hasValidPassCode" in data
+
+
+COLIN_SYNC_IDENTIFIER = "BC0870226"
+
+COLIN_SYNC_AUTH_INFO = {
+    "identifier": "0870226",
+    "legalName": "COLIN TEST COMPANY LTD.",
+    "legalType": "BC",
+    "status": "Active",
+    "goodStanding": True,
+    "businessNumber": "791861078BC0001",
+    "adminFreeze": False,
+    "email": "registered.office@test.com",
+    "passCode": "111111111",
+}
+
+
+def test_sync_entity_from_colin(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert syncing a COLIN business creates the entity the manage-business modal depends on."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+
+    with patch.object(ColinService, "fetch_auth_info", return_value=dict(COLIN_SYNC_AUTH_INFO)):
+        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin", headers=headers)
+    assert rv.status_code == HTTPStatus.NO_CONTENT
+
+    # the modal reads these two endpoints to decide which auth options to offer
+    rv = client.get(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/contacts", headers=headers)
+    assert rv.status_code == HTTPStatus.OK
+    assert json.loads(rv.data)["email"] == "re***************@te******"
+
+    rv = client.get(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/authentication", headers=headers)
+    assert rv.status_code == HTTPStatus.OK
+    assert json.loads(rv.data)["hasValidPassCode"] is True
+
+
+def test_sync_entity_from_colin_lear_business_untouched(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert a LEAR loaded business succeeds as a no-op without calling COLIN."""
+    factory_entity_model(
+        {
+            "businessIdentifier": COLIN_SYNC_IDENTIFIER,
+            "businessNumber": "791861078BC0001",
+            "name": "LEAR TEST COMPANY LTD.",
+            "passCode": "",
+            "corpTypeCode": "BC",
+        }
+    )
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+
+    with patch.object(ColinService, "fetch_auth_info") as mock_fetch:
+        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin", headers=headers)
+
+    assert rv.status_code == HTTPStatus.NO_CONTENT
+    mock_fetch.assert_not_called()
+
+
+def test_sync_entity_from_colin_not_found(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert a business COLIN does not know returns a 404."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+
+    with patch.object(ColinService, "fetch_auth_info", return_value=None):
+        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin", headers=headers)
+
+    assert rv.status_code == HTTPStatus.NOT_FOUND
+    assert rv.json["code"] == "DATA_NOT_FOUND"
+    assert rv.json["message"]
+
+
+def test_sync_entity_from_colin_rejects_out_of_scope_corp_type(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert a business COLIN reports with an out of scope corp type is rejected and not created."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+
+    with patch.object(ColinService, "fetch_auth_info", return_value=dict(COLIN_SYNC_AUTH_INFO, legalType="BEN")):
+        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin", headers=headers)
+
+    assert rv.status_code == HTTPStatus.BAD_REQUEST
+    assert rv.json["code"] == "INVALID_BUSINESS_TYPE"
+    assert rv.json["message"]
+
+    rv = client.get(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/authentication", headers=headers)
+    assert rv.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_sync_entity_from_colin_requires_auth(client, session):  # pylint:disable=unused-argument
+    """Assert the sync endpoint requires a logged in user."""
+    rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin")
+
+    assert rv.status_code == HTTPStatus.UNAUTHORIZED
