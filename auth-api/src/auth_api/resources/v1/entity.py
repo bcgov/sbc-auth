@@ -19,6 +19,7 @@ from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.schemas import utils as schema_utils
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.authorization import is_competent_authority_or_external_staff
@@ -157,6 +158,25 @@ def get_entity_authentication(business_identifier):
         jsonify({"message": f"Authentication for {business_identifier} was not found."}),
         HTTPStatus.NOT_FOUND,
     )
+
+
+@bp.route("/<string:business_identifier>/synchronizations/colin", methods=["POST", "OPTIONS"])
+@cross_origin(origins="*", methods=["POST"])
+@_jwt.requires_auth
+def sync_entity_from_colin(business_identifier):
+    """Create or resync entity details for COLIN businesses not loaded in LEAR."""
+    try:
+        entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+        if entity is None or not entity.is_loaded_lear:
+            # COLIN businesses that are not loaded in LEAR can be synced from COLIN.
+            entity = EntityService.sync_from_colin(business_identifier) or entity
+
+        if entity is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        response, status = {}, HTTPStatus.NO_CONTENT
+    except BusinessException as exception:
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
+    return response, status
 
 
 @bp.route("/<string:business_identifier>/contacts", methods=["GET", "OPTIONS"])

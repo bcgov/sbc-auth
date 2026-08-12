@@ -216,17 +216,40 @@ class AffiliationInvitation:
         if to_org_id and not OrgModel.find_by_org_id(to_org_id):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        # Validate business exists in LEAR
-        # Fetch the up-to-date business details from legal API - Business exception raised if failure
-        token = RestService.get_service_account_token(
-            config_id="ENTITY_SVC_CLIENT_ID",
-            config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
-        )
-        business = AffiliationInvitation._get_business_details(business_identifier, token)
+        # COLIN businesses are created in auth on demand, and refreshed on every affiliation to prevent stale data
+        entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+        if (
+            business_identifier
+            and (entity is None or not entity.is_loaded_lear)
+            and affiliation_invitation_type != AffiliationInvitationType.REQUEST
+        ):
+            entity = EntityService.sync_from_colin(business_identifier) or entity
 
         # Validate that entity exists
-        if not (entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)):
+        if not entity:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # A business not loaded in LEAR must be affiliated with its passcode or email.
+        if not entity.is_loaded_lear and affiliation_invitation_type == AffiliationInvitationType.REQUEST:
+            raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_TYPE, None)
+
+        if not entity.is_loaded_lear:
+            # Not in LEAR, so there are no business details to fetch - use what COLIN gave us.
+            business = {
+                "business": {
+                    "legalName": entity.name,
+                    "legalType": entity.corp_type,
+                    "identifier": entity.business_identifier,
+                }
+            }
+        else:
+            # Validate business exists in LEAR
+            # Fetch the up-to-date business details from legal API - Business exception raised if failure
+            token = RestService.get_service_account_token(
+                config_id="ENTITY_SVC_CLIENT_ID",
+                config_secret="ENTITY_SVC_CLIENT_SECRET",  # noqa: S106
+            )
+            business = AffiliationInvitation._get_business_details(business_identifier, token)
 
         # Validate that entity contact exists
         if not (contact := entity.get_contact()) and affiliation_invitation_type != AffiliationInvitationType.REQUEST:

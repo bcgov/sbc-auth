@@ -28,6 +28,7 @@ from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
+from auth_api.models import Entity as EntityModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import Task as TaskModel
@@ -924,6 +925,13 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def search_orgs_by_affiliation(business_identifier, excluded_org_types):
         """Search for orgs based on input parameters."""
+        # This search backs the manage-business access-request option, which lets a user ask
+        # an account that already manages the business for access. That flow is closed for
+        # businesses not loaded in LEAR, so don't reveal which accounts manage them.
+        entity = EntityModel.find_by_business_identifier(business_identifier)
+        if entity and not entity.is_loaded_lear:
+            return {"orgs": [], "total": 0}
+
         orgs, total = OrgModel.search_orgs_by_business_identifier(business_identifier, excluded_org_types)
 
         return {"orgs": orgs, "total": total}
