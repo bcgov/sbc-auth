@@ -94,6 +94,10 @@ class SubjectType(Enum):
         "[BC Registries and Online Services] Manage Your Business on BC Registries"
     )
     AFFILIATION_CONFIRMATION_EMAIL = "[BC Registries and Online Services] You’re Ready to Manage Your Business in the BC Business Registry"
+    ACCOUNT_LINK_CREATED = "New Third-Party Service Provider Connected"
+    ACCOUNT_LINK_REMOVED = "Third-Party Service Provider Removed"
+    ACCOUNT_LINK_EXPIRY_REMINDER = "Action Required: Upcoming Expiry of Third-Party Service Provider Connection"
+    ACCOUNT_LINK_EXPIRED = "Expired Third-Party Service Provider Connection"
 
 
 class TitleType(Enum):
@@ -174,6 +178,9 @@ class TemplateType(Enum):
     EFT_AVAILABLE_NOTIFICATION_TEMPLATE_NAME = "eft_available_notification"
     AFFILIATION_INVITATION_UNAFFILIATED_EMAIL_TEMPLATE_NAME = "affiliation_invitation_unaffiliated_email"
     AFFILIATION_CONFIRMATION_EMAIL_TEMPLATE_NAME = "affiliation_confirmation_email"
+    ACCOUNT_LINK_CREATED_TEMPLATE_NAME = "account_link_created_email"
+    ACCOUNT_LINK_REMOVED_TEMPLATE_NAME = "account_link_removed_email"
+    ACCOUNT_LINK_EXPIRY_TEMPLATE_NAME = "account_link_expiry_email"
 
 
 class Constants(Enum):

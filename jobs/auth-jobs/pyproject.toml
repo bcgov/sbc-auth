@@ -1,0 +1,123 @@
+[tool.poetry]
+name = "auth-jobs"
+version = "0.1.0"
+description = ""
+authors = ["BC Registries and Online Services"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+auth-api = { git = "https://github.com/ochiu/sbc-auth.git", branch = "34138-Account-link-notification-job", subdirectory = "auth-api" }
+flask = "^3.0.2"
+flask-sqlalchemy = "^3.1.1"
+sqlalchemy = "^2.0.28"
+python-dotenv = "^1.0.1"
+pg8000 = "^1.31.5"
+werkzeug = "^3.1.5"
+ruff = "^0.14.1"
+cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/cloud-sql-connector", branch = "main" }
+gcp-queue = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/gcp-queue", branch = "main" }
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.2"
+pytest-mock = "^3.12.0"
+pytest-cov = "^4.1.0"
+sqlalchemy-utils = "^0.41.2"
+flask-migrate = "^4.0.7"
+freezegun = "^1.5.1"
+
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations",
+]
+
+line-length = 120
+indent-width = 4
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "W",
+    "B",
+    "C4",
+    "UP",
+    "ARG",
+    "D",
+    "I",
+    "N",
+    "Q",
+    "S",
+    "TID",
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["PLR2004", "S101", "TID252", "ARG001", "B006", "B008", "S311"]
+"**/test_*.py" = ["PLR2004", "S101", "TID252", "ARG001", "B006", "B008", "S311"]
+"conftest.py" = ["PLR2004", "S101", "TID252", "ARG001", "B006", "B008", "S311"]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["auth_api"]
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.pytest.ini_options]
+minversion = "2.0"
+testpaths = [
+   "tests",
+]
+addopts = "--verbose --strict -p no:warnings --cov=tasks --cov-report html:htmlcov --cov-report xml:coverage.xml"
+python_files = [
+   "test*.py"
+]
+norecursedirs = [
+   ".git", ".tox", "venv*", "requirements*", "build",
+]
+filterwarnings = [
+   "ignore::UserWarning"
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

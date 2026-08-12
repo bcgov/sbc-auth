@@ -17,10 +17,24 @@ import datetime as dt
 
 import pytz
 
+PACIFIC_TZ = "Canada/Pacific"
+
+
+def pacific_today_isoformat() -> str:
+    """Return today's date in Canada/Pacific time, as an ISO date string."""
+    return dt.datetime.now(pytz.timezone(PACIFIC_TZ)).date().isoformat()
+
+
+def utc_to_pacific_isoformat(utc_dt: dt.datetime) -> str:
+    """Convert a UTC (or naive, assumed UTC) datetime to its Canada/Pacific date, as an ISO date string."""
+    if utc_dt.tzinfo is None:
+        utc_dt = utc_dt.replace(tzinfo=dt.UTC)
+    return utc_dt.astimezone(pytz.timezone(PACIFIC_TZ)).date().isoformat()
+
 
 def str_to_utc_dt(date: str, add_time: bool):
     """Convert ISO formatted dates into dateTime objects in UTC."""
-    time_zone = pytz.timezone("Canada/Pacific")
+    time_zone = pytz.timezone(PACIFIC_TZ)
     naive_dt = dt.datetime.strptime(date, "%Y-%m-%d")
     local_dt = time_zone.localize(naive_dt, is_dst=None)
     if add_time:

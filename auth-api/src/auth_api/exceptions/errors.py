@@ -153,6 +153,9 @@ class Error(Enum):
         "Clients with NSF or SUSPENDED statuses cannot create new accounts.",
         HTTPStatus.FORBIDDEN,
     )
+    REDIRECT_URL_REQUIRED = "Enter a redirect URL.", HTTPStatus.BAD_REQUEST
+    INVALID_REDIRECT_URL = "Enter a valid URL beginning with http:// or https://.", HTTPStatus.BAD_REQUEST
+    REDIRECT_URL_ALREADY_EXISTS = "This URL has already been added.", HTTPStatus.CONFLICT
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

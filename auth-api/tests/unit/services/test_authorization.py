@@ -22,7 +22,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 from werkzeug.exceptions import Forbidden, HTTPException
 
-from auth_api.services.authorization import Authorization, check_auth
+from auth_api.services.authorization import Authorization, check_auth, linking_key_authorizes
 from auth_api.utils.enums import ProductCode
 from auth_api.utils.roles import ADMIN, STAFF, USER
 from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestUserInfo
@@ -31,6 +31,7 @@ from tests.utilities.factory_utils import (
     TestOrgTypeInfo,
     factory_affiliation_model,
     factory_entity_model,
+    factory_linking_key_model,
     factory_membership_model,
     factory_org_model,
     factory_product_model,
@@ -644,3 +645,158 @@ def test_get_user_authorizations_for_entity_with_multiple_affiliations(
     authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
     assert authorization is not None
     assert authorization.get("orgMembership", None) == membership.membership_type_code
+
+
+def test_linking_key_grants_access_to_lawfirm_businesses(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that a valid linking key allows a vendor to access the lawfirm's affiliated entities."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    lawfirm_member = factory_user_model()
+    factory_membership_model(lawfirm_member.id, lawfirm.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, lawfirm.id)
+    linking_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+
+    patch_token_info(
+        {"sub": str(uuid.uuid4()), "realm_access": {"roles": ["account_holder"]}, "Account-Id": str(vendor.id)},
+        monkeypatch,
+    )
+    monkeypatch.setattr(
+        "auth_api.utils.user_context.UserContext.linking_key",
+        property(lambda _: linking_key.linking_key),
+    )
+
+    authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+
+    assert authorization is not None
+    assert authorization.get("account", {}).get("paymentAccountId") == vendor.id
+    assert authorization.get("orgMembership") is not None
+    assert authorization.get("roles") is not None
+
+
+def test_linking_key_without_account_id_falls_through_to_membership(
+    session, monkeypatch
+):  # pylint:disable=unused-argument
+    """Assert that a linking key sent without Account-Id is ignored and normal membership auth applies."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+    vendor = factory_org_model()
+    linking_key = factory_linking_key_model(account_id=org.id, vendor_account_id=vendor.id)
+
+    patch_token_info(
+        {"sub": str(user.keycloak_guid), "realm_access": {"roles": ["basic"]}},
+        monkeypatch,
+    )
+    monkeypatch.setattr(
+        "auth_api.utils.user_context.UserContext.linking_key",
+        property(lambda _: linking_key.linking_key),
+    )
+
+    authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+
+    assert authorization is not None
+    assert authorization.get("orgMembership") is not None
+    assert authorization.get("account", {}).get("paymentAccountId") == org.id
+
+
+def test_linking_key_revoked_returns_no_auth(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that a revoked (non-expired) linking key results in a 403."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, lawfirm.id)
+    revoked_key = factory_linking_key_model(
+        account_id=lawfirm.id,
+        vendor_account_id=vendor.id,
+        status="REVOKED",
+    )
+
+    patch_token_info(
+        {"sub": str(uuid.uuid4()), "realm_access": {"roles": ["account_holder"]}, "Account-Id": str(vendor.id)},
+        monkeypatch,
+    )
+    monkeypatch.setattr(
+        "auth_api.utils.user_context.UserContext.linking_key",
+        property(lambda _: revoked_key.linking_key),
+    )
+
+    with pytest.raises(Forbidden):
+        Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+
+
+def test_linking_key_invalid_key_returns_no_auth(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an invalid linking key results in a 403."""
+    patch_token_info(
+        {"sub": str(uuid.uuid4()), "realm_access": {"roles": ["account_holder"]}, "Account-Id": "999"},
+        monkeypatch,
+    )
+    monkeypatch.setattr(
+        "auth_api.utils.user_context.UserContext.linking_key",
+        property(lambda _: "invalid-key-that-does-not-exist"),
+    )
+
+    with pytest.raises(Forbidden):
+        Authorization.get_user_authorizations_for_entity("BC1234567")
+
+
+def test_linking_key_expired_returns_no_auth(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an expired linking key results in a 403."""
+    from datetime import UTC, datetime, timedelta
+
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, lawfirm.id)
+    expired_key = factory_linking_key_model(
+        account_id=lawfirm.id,
+        vendor_account_id=vendor.id,
+        expires_on=datetime.now(UTC) - timedelta(days=1),
+    )
+
+    patch_token_info(
+        {"sub": str(uuid.uuid4()), "realm_access": {"roles": ["account_holder"]}, "Account-Id": str(vendor.id)},
+        monkeypatch,
+    )
+    monkeypatch.setattr(
+        "auth_api.utils.user_context.UserContext.linking_key",
+        property(lambda _: expired_key.linking_key),
+    )
+
+    with pytest.raises(Forbidden):
+        Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+
+
+def test_linking_key_authorizes(session, monkeypatch):  # pylint:disable=unused-argument
+    """Valid key returns True for the source org; wrong URL org is 403; no key returns False."""
+    lawfirm = factory_org_model()
+    other_org = factory_org_model()
+    vendor = factory_org_model()
+    linking_key = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id)
+
+    patch_token_info(
+        {"sub": str(uuid.uuid4()), "realm_access": {"roles": ["account_holder"]}, "Account-Id": str(vendor.id)},
+        monkeypatch,
+    )
+    monkeypatch.setattr(
+        "auth_api.utils.user_context.UserContext.linking_key",
+        property(lambda _: linking_key.linking_key),
+    )
+
+    assert linking_key_authorizes(lawfirm.id) is True
+
+    with pytest.raises(Forbidden):
+        linking_key_authorizes(other_org.id)
+
+
+def test_linking_key_authorizes_returns_false_when_no_key(session, monkeypatch):  # pylint:disable=unused-argument
+    """No linking key header → returns False so caller can fall through to membership check."""
+    org = factory_org_model()
+    patch_token_info(
+        {"sub": str(uuid.uuid4()), "realm_access": {"roles": ["basic"]}},
+        monkeypatch,
+    )
+
+    assert linking_key_authorizes(org.id) is False

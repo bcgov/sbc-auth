@@ -18,6 +18,7 @@
 from sqlalchemy import event  # noqa: I001, TC002
 from sqlalchemy.engine import Engine  # noqa: I001, TC002
 
+from .account_linking_key import AccountLinkingKey
 from .account_login_options import AccountLoginOptions
 from .activity_log import ActivityLog
 from .affidavit import Affidavit
@@ -41,6 +42,7 @@ from .membership import Membership
 from .membership_status_code import MembershipStatusCode
 from .membership_type import MembershipType
 from .org import Org
+from .org_redirect_url import OrgRedirectUrl
 from .org_settings import OrgSettings
 from .org_status import OrgStatus
 from .org_type import OrgType

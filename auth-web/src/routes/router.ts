@@ -138,6 +138,7 @@ export function getRoutes (): RouteConfig[] {
   const productPackage = () => import('../components/auth/account-settings/product/ProductPayment.vue')
   const activityLog = () => import('../components/auth/account-settings/activity-log/ActivityLog.vue')
   const developerAccess = () => import('../components/auth/account-settings/advance-settings/DeveloperAccess.vue')
+  const vendorConnections = () => import('../components/auth/account-settings/advance-settings/VendorConnections.vue')
 
   const routes = [
     { path: '/', name: 'root', redirect: 'decide-business' },
@@ -287,6 +288,11 @@ export function getRoutes (): RouteConfig[] {
           path: 'activity-log',
           name: 'activity-log',
           component: activityLog
+        },
+        {
+          path: 'vendor-connections',
+          name: 'vendor-connections',
+          component: vendorConnections
         },
         {
           path: 'developer-access',

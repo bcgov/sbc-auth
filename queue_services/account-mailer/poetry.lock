@@ -319,9 +319,9 @@ Werkzeug = "^3.1.5"
 
 [package.source]
 type = "git"
-url = "https://github.com/ochiu/sbc-auth.git"
-reference = "34378-unaffiliated-invite-reminder"
-resolved_reference = "bdc2b3ac8e8aee3fcb2b94e5a24739c1ff740a6d"
+url = "https://github.com/bcgov/sbc-auth.git"
+reference = "feature-linking-key"
+resolved_reference = "fd9f9193c04603e88f0f2236eea2c62fb2c7cd53"
 subdirectory = "auth-api"
 
 [[package]]
@@ -2313,20 +2313,21 @@ opentelemetry-util-http = "0.63b1"
 
 [[package]]
 name = "opentelemetry-resourcedetector-gcp"
-version = "1.14.0"
-description = "Google Cloud Resource Detector for OpenTelemetry"
+version = "1.12.0a0"
+description = "Google Cloud resource detector for OpenTelemetry"
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "opentelemetry_resourcedetector_gcp-1.14.0-py3-none-any.whl", hash = "sha256:cc4818570933b5c651aef80fbf6e8fbe26d63fe6fbc24ce22ae37e78744d30eb"},
-    {file = "opentelemetry_resourcedetector_gcp-1.14.0.tar.gz", hash = "sha256:10b41802acf815838a85c9fe1dae02f5d27ebc17527b77441111c010bead95bc"},
+    {file = "opentelemetry_resourcedetector_gcp-1.12.0a0-py3-none-any.whl", hash = "sha256:e803688d14e2969fe816077be81f7b034368314d485863f12ce49daba7c81919"},
+    {file = "opentelemetry_resourcedetector_gcp-1.12.0a0.tar.gz", hash = "sha256:d5e3f78283a272eb92547e00bbeff45b7332a34ae791a70ab4eba81af9bc3baf"},
 ]
 
 [package.dependencies]
 opentelemetry-api = ">=1.30,<2.0"
 opentelemetry-sdk = ">=1.30,<2.0"
 requests = ">=2.24,<3.0"
+typing_extensions = ">=4.0,<5.0"
 
 [[package]]
 name = "opentelemetry-sdk"
@@ -3615,4 +3616,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "7b127828511d4aa087c21ea56311c09c7f7caeaef1a0a1427642f08740511935"
+content-hash = "61ac0e2c88e085d01970bb859b0738bf867248476d3214ec263ad88507c77c7b"

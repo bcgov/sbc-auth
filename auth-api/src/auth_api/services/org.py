@@ -69,7 +69,7 @@ from auth_api.utils.util import camelback2snake
 
 from .activity_log_publisher import ActivityLogPublisher
 from .affidavit import Affidavit as AffidavitService
-from .authorization import check_auth
+from .authorization import check_auth, linking_key_authorizes
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
 from .products import Product as ProductService
@@ -695,8 +695,12 @@ class Org:  # pylint: disable=too-many-public-methods
         return user_from_context.is_staff() or user_from_context.is_external_staff()
 
     @staticmethod
-    def find_by_org_id(org_id, allowed_roles: tuple = None, **kwargs):  # noqa: ARG004
-        """Find and return an existing organization with the provided id."""
+    def find_by_org_id(org_id, allowed_roles: tuple = None, allow_linking_key: bool = False, **kwargs):  # noqa: ARG004
+        """Find and return an existing organization with the provided id.
+
+        When allow_linking_key is True, a valid Account-Linking-Key from a vendor whose
+        source account matches org_id is also accepted as authorization.
+        """
         if org_id is None:
             return None
 
@@ -705,8 +709,8 @@ class Org:  # pylint: disable=too-many-public-methods
             return None
 
         if not Org.is_staff_or_external_staff():
-            # Check authorization for the user
-            check_auth(one_of_roles=allowed_roles, org_id=org_id)
+            if not (allow_linking_key and linking_key_authorizes(org_id)):
+                check_auth(one_of_roles=allowed_roles, org_id=org_id)
 
         return Org(org_model)
 
