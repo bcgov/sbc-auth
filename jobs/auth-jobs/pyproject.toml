@@ -20,7 +20,7 @@ cloud-sql-connector = { git = "https://github.com/bcgov/sbc-connect-common.git",
 gcp-queue = { git = "https://github.com/bcgov/sbc-connect-common.git", subdirectory = "python/gcp-queue", branch = "main" }
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.4.2"
+pytest = ">=8.4.2,<10.0.0"
 pytest-mock = "^3.12.0"
 pytest-cov = "^4.1.0"
 sqlalchemy-utils = "^0.41.2"
