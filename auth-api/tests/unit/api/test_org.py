@@ -39,11 +39,11 @@ from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
-from auth_api.services.colin import Colin as ColinService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services import User as UserService
+from auth_api.services.colin import Colin as ColinService
 from auth_api.utils.enums import (
     AccessType,
     AffidavitStatus,
