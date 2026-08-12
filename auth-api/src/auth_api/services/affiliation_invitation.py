@@ -43,7 +43,6 @@ from auth_api.models.user import User as UserModel
 from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.schemas.affiliation_invitation import AffiliationInvitationSchemaPublic
 from auth_api.services.affiliation import Affiliation as AffiliationService
-from auth_api.services.colin import Colin as ColinService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.entity_mapping import EntityMappingService
 from auth_api.services.flags import flags
@@ -220,8 +219,8 @@ class AffiliationInvitation:
         # COLIN businesses are created in auth on demand, and refreshed on every affiliation to prevent stale data
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         if (
-            (entity is None or not entity.is_loaded_lear)
-            and ColinService.is_colin_identifier(business_identifier)
+            business_identifier
+            and (entity is None or not entity.is_loaded_lear)
             and affiliation_invitation_type != AffiliationInvitationType.REQUEST
         ):
             entity = EntityService.sync_from_colin(business_identifier) or entity

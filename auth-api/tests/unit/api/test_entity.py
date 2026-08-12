@@ -786,17 +786,19 @@ def test_sync_entity_from_colin_not_found(client, jwt, session):  # pylint:disab
     assert rv.json["message"]
 
 
-def test_sync_entity_from_colin_rejects_non_colin_identifier(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert non COLIN style identifiers are rejected without calling COLIN."""
+def test_sync_entity_from_colin_rejects_out_of_scope_corp_type(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert a business COLIN reports with an out of scope corp type is rejected and not created."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
 
-    with patch.object(ColinService, "fetch_auth_info") as mock_fetch:
-        rv = client.post("/api/v1/entities/CP1234567/synchronizations/colin", headers=headers)
+    with patch.object(ColinService, "fetch_auth_info", return_value=dict(COLIN_SYNC_AUTH_INFO, legalType="BEN")):
+        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin", headers=headers)
 
     assert rv.status_code == HTTPStatus.BAD_REQUEST
-    assert rv.json["code"] == "INVALID_BUSINESS_IDENTIFIER"
+    assert rv.json["code"] == "INVALID_BUSINESS_TYPE"
     assert rv.json["message"]
-    mock_fetch.assert_not_called()
+
+    rv = client.get(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/authentication", headers=headers)
+    assert rv.status_code == HTTPStatus.NOT_FOUND
 
 
 def test_sync_entity_from_colin_requires_auth(client, session):  # pylint:disable=unused-argument

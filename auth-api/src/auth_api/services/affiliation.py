@@ -50,7 +50,6 @@ from auth_api.utils.roles import AFFILIATION_ALLOWED_ROLES, ALL_ALLOWED_ROLES, C
 from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
-from .colin import Colin as ColinService
 from .rest_service import RestService
 
 
@@ -175,7 +174,7 @@ class Affiliation:
         # COLIN businesses are not loaded in LEAR, so the entity is created on demand and
         # refreshed on every affiliation attempt to keep the passcode and registered office
         # email in step with COLIN.
-        if (entity is None or not entity.is_loaded_lear) and ColinService.is_colin_identifier(business_identifier):
+        if business_identifier and (entity is None or not entity.is_loaded_lear):
             entity = EntityService.sync_from_colin(business_identifier) or entity
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -510,12 +509,11 @@ class Affiliation:
     @staticmethod
     def _get_colin_entities_not_loaded_in_lear(identifiers: list[str]) -> list[Entity]:
         """Return the entities that aren't loaded in LEAR for the given identifiers."""
-        candidates = [identifier for identifier in identifiers if ColinService.is_colin_identifier(identifier)]
-        if not candidates:
+        if not identifiers:
             return []
         return (
             db.session.query(Entity)
-            .filter(Entity.business_identifier.in_(candidates), Entity.is_loaded_lear.is_(False))
+            .filter(Entity.business_identifier.in_(identifiers), Entity.is_loaded_lear.is_(False))
             .all()
         )
 

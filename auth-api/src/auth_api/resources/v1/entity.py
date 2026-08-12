@@ -23,7 +23,6 @@ from auth_api.exceptions.errors import Error
 from auth_api.schemas import utils as schema_utils
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.authorization import is_competent_authority_or_external_staff
-from auth_api.services.colin import Colin as ColinService
 from auth_api.services.contact import Contact as ContactService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.utils.auth import jwt as _jwt
@@ -167,12 +166,9 @@ def get_entity_authentication(business_identifier):
 def sync_entity_from_colin(business_identifier):
     """Create or resync entity details for COLIN businesses not loaded in LEAR."""
     try:
-        if not ColinService.is_colin_identifier(business_identifier):
-            raise BusinessException(Error.INVALID_BUSINESS_IDENTIFIER, None)
-
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
-        # A LEAR loaded business needs no COLIN data - succeed without touching COLIN.
         if entity is None or not entity.is_loaded_lear:
+            # COLIN businesses that are not loaded in LEAR can be synced from COLIN.
             entity = EntityService.sync_from_colin(business_identifier) or entity
 
         if entity is None:

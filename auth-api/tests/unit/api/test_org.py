@@ -39,6 +39,7 @@ from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
+from auth_api.services.colin import Colin as ColinService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
@@ -1753,12 +1754,14 @@ def test_add_affiliation_invalid_format_returns_400(client, jwt, session, keyclo
 def test_add_affiliation_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding a contact to a non-existant org returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post(
-        f"/api/v1/orgs/{99}/affiliations",
-        headers=headers,
-        data=json.dumps(TestAffliationInfo.affiliation1),
-        content_type="application/json",
-    )
+    # a business auth does not know triggers an on demand COLIN lookup - not found there either
+    with patch.object(ColinService, "fetch_auth_info", return_value=None):
+        rv = client.post(
+            f"/api/v1/orgs/{99}/affiliations",
+            headers=headers,
+            data=json.dumps(TestAffliationInfo.affiliation1),
+            content_type="application/json",
+        )
     assert rv.status_code == HTTPStatus.NOT_FOUND
 
 

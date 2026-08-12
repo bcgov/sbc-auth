@@ -17,7 +17,6 @@ Used to source entity details for businesses that are managed in COLIN and are n
 loaded in LEAR, so they can be affiliated from the business registry dashboard.
 """
 
-import re
 from http import HTTPStatus
 
 from flask import current_app
@@ -28,14 +27,6 @@ from auth_api.services.rest_service import RestService
 
 class Colin:
     """Fetch business details from the COLIN API."""
-
-    # FUTURE: This pattern will need to be updated in the future if we want to reuse the same flow for expros etc.
-    COLIN_IDENTIFIER_PATTERN = re.compile(r"^BC\d{7}$")
-
-    @staticmethod
-    def is_colin_identifier(business_identifier: str) -> bool:
-        """Return True if the identifier could belong to a COLIN business not loaded in LEAR."""
-        return bool(business_identifier and Colin.COLIN_IDENTIFIER_PATTERN.match(business_identifier))
 
     @staticmethod
     def is_affiliation_eligible_type(corp_type: str) -> bool:

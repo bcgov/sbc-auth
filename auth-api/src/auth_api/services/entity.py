@@ -154,7 +154,8 @@ class Entity:
     def sync_from_colin(business_identifier: str):
         """Create or refresh an entity from COLIN for a business that is not loaded in LEAR.
 
-        Returns None when COLIN has no record of the business or the corp type is invalid for this flow.
+        Returns None when COLIN has no record of the business.
+        Raises BusinessException when the corp type is not eligible for this flow.
         """
         colin_info = ColinService.fetch_auth_info(business_identifier)
         if not colin_info:
@@ -163,7 +164,7 @@ class Entity:
         corp_type = colin_info.get("legalType")
         if not ColinService.is_affiliation_eligible_type(corp_type):
             current_app.logger.debug(f"COLIN corp type {corp_type} is not eligible for affiliation")
-            return None
+            raise BusinessException(Error.INVALID_BUSINESS_TYPE, None)
 
         pass_code = colin_info.get("passCode")
         # COLIN reports the state description (ex. 'Active'); auth stores LEAR style states.

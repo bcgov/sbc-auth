@@ -57,26 +57,6 @@ def _colin_info(**overrides):
 
 
 @pytest.mark.parametrize(
-    "identifier, expected",
-    [
-        ("BC0870226", True),
-        ("BC1234567", True),
-        ("CP1234567", False),  # coop
-        ("FM1234567", False),  # firm
-        ("NR 1234567", False),  # name request
-        ("T7654321", False),  # temp registration
-        ("BC123456", False),  # too few digits
-        ("BC12345678", False),  # too many digits
-        ("", False),
-        (None, False),
-    ],
-)
-def test_is_colin_identifier(identifier, expected):
-    """Assert only BC style corp numbers are treated as COLIN candidates."""
-    assert ColinService.is_colin_identifier(identifier) is expected
-
-
-@pytest.mark.parametrize(
     "corp_type, expected",
     [
         ("BC", True),
@@ -143,12 +123,31 @@ def test_sync_from_colin_refreshes_existing_entity(session, monkeypatch):  # pyl
     assert entity.is_loaded_lear is False
 
 
-def test_sync_from_colin_ignores_out_of_scope_corp_type(session, monkeypatch):  # pylint:disable=unused-argument
+def test_sync_from_colin_rejects_out_of_scope_corp_type(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert corp types outside BC/ULC/CC are not created from COLIN."""
     monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info(legalType="BEN")))
 
-    assert EntityService.sync_from_colin(COLIN_IDENTIFIER) is None
+    with pytest.raises(BusinessException) as exception:
+        EntityService.sync_from_colin(COLIN_IDENTIFIER)
+
+    assert exception.value.code == Error.INVALID_BUSINESS_TYPE.name
     assert EntityModel.find_by_business_identifier(COLIN_IDENTIFIER) is None
+
+
+def test_sync_from_colin_rejects_refresh_with_out_of_scope_corp_type(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert a re-sync raises when COLIN now reports an out of scope corp type.
+
+    The existing affiliations still render from auth data, but new affiliations and
+    affiliation invitations re-sync first and so are blocked.
+    """
+    monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info()))
+    EntityService.sync_from_colin(COLIN_IDENTIFIER)
+
+    monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info(legalType="BEN")))
+    with pytest.raises(BusinessException) as exception:
+        EntityService.sync_from_colin(COLIN_IDENTIFIER)
+
+    assert exception.value.code == Error.INVALID_BUSINESS_TYPE.name
 
 
 def test_sync_from_colin_handles_missing_business(session, monkeypatch):  # pylint:disable=unused-argument
@@ -273,7 +272,7 @@ def test_get_colin_entities_excludes_lear_entities(session):  # pylint:disable=u
 
 
 def test_get_colin_entities_only_matches_unloaded_entities(session, monkeypatch):  # pylint:disable=unused-argument
-    """Assert identifier partitioning picks out only the COLIN businesses."""
+    """Assert only entities not loaded in LEAR are picked out; identifiers auth does not know are ignored."""
     monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info()))
     EntityService.sync_from_colin(COLIN_IDENTIFIER)
     EntityModel.create_from_dict(
