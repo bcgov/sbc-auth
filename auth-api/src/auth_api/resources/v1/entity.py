@@ -21,6 +21,7 @@ from flask_cors import cross_origin
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.schemas import utils as schema_utils
+from auth_api.services.affiliation import Affiliation as AffiliationService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.authorization import is_competent_authority_or_external_staff
 from auth_api.services.contact import Contact as ContactService
@@ -259,3 +260,18 @@ def get_entity_authorizations(business_identifier):
     expanded: bool = request.args.get("expanded", False)
     authorisations = AuthorizationService.get_user_authorizations_for_entity(business_identifier, expanded)
     return authorisations, HTTPStatus.OK
+
+
+@bp.route("/<string:business_identifier>/authorized-accounts", methods=["GET", "OPTIONS"])
+@cross_origin(origins="*", methods=["GET"])
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+def get_entity_authorized_accounts(business_identifier):
+    """Return the accounts that have access to view and manage the passed business identifier."""
+    try:
+        if not AuthorizationService.get_user_authorizations_for_entity(business_identifier):
+            return {"message": "Not authorized to perform this action"}, HTTPStatus.UNAUTHORIZED
+
+        response, status = AffiliationService.find_authorized_accounts(business_identifier), HTTPStatus.OK
+    except BusinessException as exception:
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
+    return response, status
