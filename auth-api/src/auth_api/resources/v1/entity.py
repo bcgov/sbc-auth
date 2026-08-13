@@ -144,14 +144,14 @@ def get_entity_authentication(business_identifier):
     """Get passcode or password for the Entity identified by the provided business identifier."""
     # This route allows public users to see if businesses have a form of authentication.
     # It's used by the business dashboard for magic link.
-    if (entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)) and (
-        contact := entity.get_contact()
-    ):
+    if entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True):
+        # COLIN businesses synced into auth may have no contact email on file
+        contact = entity.get_contact()
         has_valid_pass_code = (
             entity.pass_code_claimed is False and entity.pass_code is not None
         ) or entity.corp_type in ["SP", "GP"]
         return {
-            "contactEmail": mask_email(contact.email),
+            "contactEmail": mask_email(contact.email) if contact else "",
             "hasValidPassCode": has_valid_pass_code,
         }, HTTPStatus.OK
     return (

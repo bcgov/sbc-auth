@@ -158,6 +158,49 @@ def test_sync_from_colin_handles_missing_business(session, monkeypatch):  # pyli
     assert EntityModel.find_by_business_identifier(COLIN_IDENTIFIER) is None
 
 
+def test_sync_from_colin_without_email_creates_no_contact(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert a COLIN business with no registered office email still syncs, just without a contact."""
+    monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info(email=None)))
+
+    entity = EntityService.sync_from_colin(COLIN_IDENTIFIER)
+
+    assert entity is not None
+    assert entity.get_contact() is None
+    assert entity.pass_code is not None
+
+
+def test_affiliation_confirmation_email_suppressed_for_colin_entity(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert no affiliation confirmation email goes out for a business still managed in COLIN."""
+    monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info()))
+    entity = EntityService.sync_from_colin(COLIN_IDENTIFIER)
+
+    with patch("auth_api.services.affiliation.publish_to_mailer") as mock_mailer:
+        AffiliationService.send_affiliation_confirmation_email(entity, None, "user@test.com")
+
+    mock_mailer.assert_not_called()
+
+
+def test_affiliation_confirmation_email_still_sent_for_lear_entity(session):  # pylint:disable=unused-argument
+    """Assert the COLIN suppression does not stop confirmation emails for LEAR businesses."""
+    entity_model = EntityModel.create_from_dict(
+        {
+            "businessIdentifier": "BC5555555",
+            "name": "LEAR COMPANY LTD.",
+            "corpTypeCode": "BC",
+            "passCode": None,
+        }
+    )
+    org = factory_org_model()
+    affiliation = factory_affiliation_model(entity_model.id, org.id)
+
+    with patch("auth_api.services.affiliation.publish_to_mailer") as mock_mailer:
+        AffiliationService.send_affiliation_confirmation_email(
+            EntityService(entity_model), affiliation, "user@test.com"
+        )
+
+    mock_mailer.assert_called_once()
+
+
 def test_sync_from_colin_keeps_passcode_when_colin_has_none(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert an empty COLIN passcode does not silently clear the stored credential."""
     monkeypatch.setattr(ColinService, "fetch_auth_info", staticmethod(lambda _: _colin_info()))

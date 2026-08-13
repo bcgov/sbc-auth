@@ -248,6 +248,30 @@ def test_populate_entity_mapping_for_identifier_no_data(session):
         assert mapping is None
 
 
+def test_colin_entity_reaches_paginate_from_affiliations(session):
+    """Test a synced COLIN business shows on the paginated dashboard end to end.
+
+    The paginated search is driven off entity_mappings, so a COLIN business only shows
+    if populate_entity_mapping_for_identifier created its mapping row.
+    """
+    org_id, _ = _setup_orgs()
+    entity = Entity(business_identifier="BC0870226", corp_type_code="BC", is_loaded_lear=False).save()
+    AffiliationModel(org_id=org_id, entity_id=entity.id).save()
+
+    # LEAR is never asked about a business it does not have - a LEAR outage raises, which
+    # would otherwise leave the business with no mapping row and invisible on the dashboard
+    with patch.object(EntityMappingService, "fetch_entity_mapping_details") as mock_fetch:
+        EntityMappingService.populate_entity_mapping_for_identifier("BC0870226")
+    mock_fetch.assert_not_called()
+
+    assert session.query(EntityMapping).filter(EntityMapping.business_identifier == "BC0870226").one_or_none()
+
+    search_details = AffiliationSearchDetails(page=1, limit=1000)
+    results, _ = EntityMappingService.paginate_from_affiliations(org_id, search_details)
+
+    assert [result[0] for result in results] == [["BC0870226"]]
+
+
 def test_get_filtered_affiliations_identifier_matches_not_loaded_lear(session):
     """Test that affiliations are returned when is_loaded_lear is False.
 
