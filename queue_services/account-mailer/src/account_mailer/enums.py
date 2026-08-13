@@ -93,6 +93,9 @@ class SubjectType(Enum):
     AFFILIATION_INVITATION_UNAFFILIATED_EMAIL = (
         "[BC Registries and Online Services] Manage Your Business on BC Registries"
     )
+    AFFILIATION_INVITATION_UNAFFILIATED_REMINDER_EMAIL = (
+        "Action Required: Managing your company and access to the BC Business Registry"
+    )
     AFFILIATION_CONFIRMATION_EMAIL = "[BC Registries and Online Services] You’re Ready to Manage Your Business in the BC Business Registry"
     ACCOUNT_LINK_CREATED = "New Third-Party Service Provider Connected"
     ACCOUNT_LINK_REMOVED = "Third-Party Service Provider Removed"
