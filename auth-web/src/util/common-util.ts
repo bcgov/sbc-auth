@@ -68,7 +68,7 @@ export default class CommonUtils {
 
   static validateIncorporationNumber (value: string):boolean {
     if (!value) return false
-    const match = value.toUpperCase().match(/^([A-Z]+[-/]?)?(\d+)$/)
+    const match = /^([A-Z]+[-/]?)?(\d+)$/.exec(value.toUpperCase())
     if (!match) return false
 
     const VALID_PREFIXES = new Set([
