@@ -739,7 +739,7 @@ def _send_unaffiliated_email_invitation(client, mail_details):
                 "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}",
                 "isReminder": True,
             },
-            f"Reminder: {SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value}",
+            f"Action Required: {SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value}",
         ),
     ],
 )
