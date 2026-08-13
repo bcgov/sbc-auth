@@ -82,6 +82,10 @@ describe('Common Util Test', () => {
     expect(CommonUtil.validateIncorporationNumber('BC0000033')).toBe(true)
   })
 
+  it('validateIncorporationNumber returns True with valid RLY (railway) number', () => {
+    expect(CommonUtil.validateIncorporationNumber('RLY0000005')).toBe(true)
+  })
+
   it('validateIncorporationNumber returns False with invalid incorp number', () => {
     expect(CommonUtil.validateIncorporationNumber(null)).toBe(false)
     expect(CommonUtil.validateIncorporationNumber('XX000033')).toBe(false)
