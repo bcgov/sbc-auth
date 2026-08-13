@@ -67,8 +67,16 @@ export default class CommonUtils {
   }
 
   static validateIncorporationNumber (value: string):boolean {
-    const VALID_FORMAT = new RegExp(/^(A|B|BC|C|CP|EPR|FM|FOR|LIC|LL|LLC|LP|MF|QA|QB|QC|QD|QE|REG|RLY|S|S-|S\/|XL|XP|XS|XS-|XS\/|CS|CS-|CS\/)?\d+$/)
-    return VALID_FORMAT.test(value?.toUpperCase())
+    if (!value) return false
+    const match = value.toUpperCase().match(/^([A-Z]+[-/]?)?(\d+)$/)
+    if (!match) return false
+
+    const VALID_PREFIXES = new Set([
+      '', 'A', 'B', 'BC', 'C', 'CP', 'EPR', 'FM', 'FOR', 'LIC', 'LL', 'LLC', 'LP',
+      'MF', 'QA', 'QB', 'QC', 'QD', 'QE', 'REG', 'RLY', 'S', 'S-', 'S/',
+      'XL', 'XP', 'XS', 'XS-', 'XS/', 'CS', 'CS-', 'CS/'
+    ])
+    return VALID_PREFIXES.has(match[1] || '')
   }
 
   static isCooperativeNumber (value: string):boolean {
