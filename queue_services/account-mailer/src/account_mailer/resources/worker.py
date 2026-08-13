@@ -415,6 +415,7 @@ def handle_unaffiliated_email_invitation(message_type, email_msg):
 
     if is_reminder:
         subject = f"Reminder: {subject}"
+        template_name = TemplateType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL_REMINDER_TEMPLATE_NAME.value
 
     email_dict = common_mailer.process(
         org_id=None,

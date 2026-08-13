@@ -687,39 +687,113 @@ def test_affiliation_invitation_email_request(app, session, client):
         assert f"{identifier}?accountid={to_org_id}" in email_body
 
 
-@pytest.mark.parametrize(
-    "is_reminder,expected_subject",
-    [
-        (False, SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value),
-        (True, f"Reminder: {SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value}"),
-    ],
-)
-def test_unaffiliated_email_invitation(app, session, client, is_reminder, expected_subject):
-    """Assert that unaffiliated email invitation uses context_url, expiry_date, and isReminder from message data."""
-    context_url = "https://localhost.com?preset=bcscUser&token=ABC123"
+UNAFFILIATED_EMAIL_ONLY_TEXT = "BC Registry Services has moved your company from Corporate Online"
+UNAFFILIATED_REMINDER_ONLY_TEXT = "Our records show that you have not yet completed these steps."
+
+
+def _send_unaffiliated_email_invitation(client, mail_details):
+    """Publish an unaffiliated email invitation event and return the sent email dict."""
     with patch.object(notification_service, "send_email", return_value=None) as mock_send:
-        mail_details = {
-            "businessName": "Test Corp.",
-            "emailAddresses": "test@test.com",
-            "businessIdentifier": "CP1234567",
-            "token": "ABC123",
-            "contextUrl": context_url,
-            "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}",
-            "isReminder": is_reminder,
-        }
         helper_add_event_to_queue(
             client,
             message_type=QueueMessageTypes.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
             mail_details=mail_details,
         )
-
         mock_send.assert_called()
-        assert mock_send.call_args.args[0].get("recipients") == "test@test.com"
-        assert mock_send.call_args.args[0].get("content").get("subject") == expected_subject
-        email_body = mock_send.call_args.args[0].get("content").get("body")
-        assert email_body is not None
-        assert "https://localhost.com?preset=bcscUser&amp;token=ABC123" in email_body
-        assert "April 16, 2026" in email_body
+        return mock_send.call_args.args[0]
+
+
+@pytest.mark.parametrize(
+    "mail_details,expected_subject",
+    [
+        (
+            {
+                "businessName": "Test Corp.",
+                "emailAddresses": "test@test.com",
+                "businessIdentifier": "CP1234567",
+                "token": "ABC123",
+                "contextUrl": "https://localhost.com?preset=bcscUser&token=ABC123",
+                "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}",
+                "isReminder": False,
+            },
+            SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
+        ),
+        (
+            {
+                "businessName": "Test Corp.",
+                "emailAddresses": "test@test.com",
+                "businessIdentifier": "CP1234567",
+                "token": "ABC123",
+                "contextUrl": "https://localhost.com?preset=bcscUser&token=ABC123",
+                "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}",
+            },
+            SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
+        ),
+        (
+            {
+                "businessName": "Test Corp.",
+                "emailAddresses": "test@test.com",
+                "businessIdentifier": "CP1234567",
+                "token": "ABC123",
+                "contextUrl": "https://localhost.com?preset=bcscUser&token=ABC123",
+                "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}",
+                "isReminder": True,
+            },
+            f"Reminder: {SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value}",
+        ),
+    ],
+)
+def test_unaffiliated_email_invitation(app, session, client, mail_details, expected_subject):
+    """Assert that unaffiliated email invitation uses context_url, expiry_date, and isReminder from message data."""
+    email = _send_unaffiliated_email_invitation(client, mail_details)
+
+    assert email.get("recipients") == "test@test.com"
+    assert email.get("content").get("subject") == expected_subject
+    email_body = email.get("content").get("body")
+    assert email_body is not None
+    assert "Test Corp." in email_body
+    assert "CP1234567" in email_body
+    assert "https://localhost.com?preset=bcscUser&amp;token=ABC123" in email_body
+    assert "April 16, 2026" in email_body
+
+
+def test_unaffiliated_email_invitation_uses_standard_template(app, session, client):
+    """Assert that a non-reminder invitation renders the standard (non-reminder) template."""
+    mail_details = {
+        "businessName": "Test Corp.",
+        "emailAddresses": "test@test.com",
+        "businessIdentifier": "CP1234567",
+        "contextUrl": "https://localhost.com?preset=bcscUser&token=ABC123",
+        "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}",
+        "isReminder": False,
+    }
+    email = _send_unaffiliated_email_invitation(client, mail_details)
+
+    email_body = email.get("content").get("body")
+    assert "# Managing your company and access to the BC Business Registry" in email_body
+    assert UNAFFILIATED_EMAIL_ONLY_TEXT in email_body
+    assert UNAFFILIATED_REMINDER_ONLY_TEXT not in email_body
+    assert "Action Required:" not in email_body
+
+
+def test_unaffiliated_email_invitation_uses_reminder_template(app, session, client):
+    """Assert that a reminder invitation renders the reminder template."""
+    mail_details = {
+        "businessName": "Test Corp.",
+        "emailAddresses": "test@test.com",
+        "businessIdentifier": "CP1234567",
+        "contextUrl": "https://localhost.com?preset=bcscUser&token=ABC123",
+        "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}",
+        "isReminder": True,
+    }
+    email = _send_unaffiliated_email_invitation(client, mail_details)
+
+    email_body = email.get("content").get("body")
+    assert "# Action Required: Managing your company and access to the BC Business Registry" in email_body
+    assert UNAFFILIATED_REMINDER_ONLY_TEXT in email_body
+    assert UNAFFILIATED_EMAIL_ONLY_TEXT not in email_body
+    # Reminder-only support details.
+    assert "**Need Help?**" in email_body
 
 
 def test_affiliation_confirmation_email(app, session, client):
