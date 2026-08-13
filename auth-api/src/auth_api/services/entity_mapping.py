@@ -343,14 +343,13 @@ class EntityMappingService:
     @staticmethod
     def populate_entity_mapping_for_identifier(identifier: str):
         """Populate the entity mapping for the identifier."""
-        if entity_mapping := EntityMappingService.fetch_entity_mapping_details(identifier):
-            EntityMappingService.from_entity_details(entity_mapping[0], skip_auth=True)
-            return
-        # COLIN businesses aren't in LEAR, so there are no mappings to fetch. They are always
-        # a standalone business row - no NR and no bootstrap - so map them directly.
         entity = Entity.find_by_business_identifier(identifier)
         if entity and not entity.is_loaded_lear:
+            # COLIN businesses aren't in LEAR, so there are no extra mappings details to fetch.
             EntityMappingService.from_entity_details({"identifier": identifier}, skip_auth=True)
+            return
+        if entity_mapping := EntityMappingService.fetch_entity_mapping_details(identifier):
+            EntityMappingService.from_entity_details(entity_mapping[0], skip_auth=True)
 
     @staticmethod
     def fetch_entity_mapping_details(identifier: str):

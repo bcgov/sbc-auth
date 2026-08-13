@@ -780,6 +780,26 @@ def test_sync_entity_from_colin(client, jwt, session):  # pylint:disable=unused-
     assert json.loads(rv.data)["hasValidPassCode"] is True
 
 
+def test_sync_entity_from_colin_without_email_still_offers_passcode(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert a COLIN business with no registered office email still exposes its passcode option."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+
+    with patch.object(ColinService, "fetch_auth_info", return_value=dict(COLIN_SYNC_AUTH_INFO, email=None)):
+        rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin", headers=headers)
+    assert rv.status_code == HTTPStatus.NO_CONTENT
+
+    # no contact was created, so the email option stays hidden in the modal
+    rv = client.get(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/contacts", headers=headers)
+    assert rv.status_code == HTTPStatus.NOT_FOUND
+
+    # but the passcode option is still offered
+    rv = client.get(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/authentication", headers=headers)
+    assert rv.status_code == HTTPStatus.OK
+    data = json.loads(rv.data)
+    assert data["hasValidPassCode"] is True
+    assert data["contactEmail"] == ""
+
+
 def test_sync_entity_from_colin_lear_business_untouched(client, jwt, session):  # pylint:disable=unused-argument
     """Assert a LEAR loaded business succeeds as a no-op without calling COLIN."""
     factory_entity_model(

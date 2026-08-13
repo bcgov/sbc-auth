@@ -222,6 +222,9 @@ class Affiliation:
     @staticmethod
     def send_affiliation_confirmation_email(entity: Entity, affiliation: AffiliationModel, recipients):
         """Send confirmation email to the user."""
+        # businesses still managed in COLIN are not sent affiliation confirmation emails
+        if not entity.is_loaded_lear:
+            return
         bc_registry_home_url = current_app.config.get("BC_REGISTRY_HOME_URL")
         context_url = f"{bc_registry_home_url}login"
         mailer_data = ConfirmationEmailData(
