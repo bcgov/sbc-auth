@@ -42,7 +42,7 @@ COLIN_ENTITY_INFO = {
     "identifier": "0870226",
     "legalName": "COLIN TEST COMPANY LTD.",
     "legalType": "BC",
-    "status": "Active",
+    "status": "ACTIVE",
     "goodStanding": True,
     "businessNumber": "791861078BC0001",
     "adminFreeze": False,
@@ -84,7 +84,7 @@ def test_sync_from_colin_creates_entity(session, monkeypatch):  # pylint:disable
     assert entity.business_identifier == COLIN_IDENTIFIER
     assert entity.name == "COLIN TEST COMPANY LTD."
     assert entity.corp_type == "BC"
-    # COLIN reports 'Active'; auth stores LEAR style states
+    # colin-api maps COLIN op-state to the LEAR style ACTIVE/HISTORICAL
     assert entity.status == "ACTIVE"
     assert entity.is_loaded_lear is False
     # the passcode is stored hashed, never in the clear
@@ -110,6 +110,7 @@ def test_sync_from_colin_refreshes_existing_entity(session, monkeypatch):  # pyl
                 legalName="RENAMED COMPANY LTD.",
                 passCode="999999999",
                 email="new.office@test.com",
+                # mixed case on purpose - pins sync_from_colin's upper() normalization
                 status="Historical",
             )
         ),

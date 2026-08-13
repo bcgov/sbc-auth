@@ -753,7 +753,7 @@ COLIN_SYNC_AUTH_INFO = {
     "identifier": "0870226",
     "legalName": "COLIN TEST COMPANY LTD.",
     "legalType": "BC",
-    "status": "Active",
+    "status": "ACTIVE",
     "goodStanding": True,
     "businessNumber": "791861078BC0001",
     "adminFreeze": False,

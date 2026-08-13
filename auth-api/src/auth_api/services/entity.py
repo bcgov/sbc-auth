@@ -167,7 +167,8 @@ class Entity:
             raise BusinessException(Error.INVALID_BUSINESS_TYPE, None)
 
         pass_code = colin_info.get("passCode")
-        # COLIN reports the state description (ex. 'Active'); auth stores LEAR style states.
+        # colin-api maps COLIN op-state to the LEAR-style ACTIVE/HISTORICAL auth stores;
+        # upper() is kept as belt-and-suspenders normalization only.
         status = (colin_info.get("status") or "").upper() or None
         entity_model = EntityModel.find_by_business_identifier(business_identifier)
         if entity_model is None:
