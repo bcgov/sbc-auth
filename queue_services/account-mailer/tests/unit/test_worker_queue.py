@@ -739,7 +739,7 @@ def _send_unaffiliated_email_invitation(client, mail_details):
                 "expiryDate": f"{datetime(2026, 4, 16, 12, 0, 0)}",
                 "isReminder": True,
             },
-            f"Action Required: {SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value}",
+            SubjectType.AFFILIATION_INVITATION_UNAFFILIATED_REMINDER_EMAIL.value,
         ),
     ],
 )
@@ -789,9 +789,9 @@ def test_unaffiliated_email_invitation_uses_reminder_template(app, session, clie
     email = _send_unaffiliated_email_invitation(client, mail_details)
 
     email_body = email.get("content").get("body")
-    assert "# Action Required: Managing your company and access to the BC Business Registry" in email_body
     assert UNAFFILIATED_REMINDER_ONLY_TEXT in email_body
     assert UNAFFILIATED_EMAIL_ONLY_TEXT not in email_body
+    assert "Corporation Name: **Test Corp.**" in email_body
     # Reminder-only support details.
     assert "**Need Help?**" in email_body
 
