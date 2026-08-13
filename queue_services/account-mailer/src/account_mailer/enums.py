@@ -177,6 +177,9 @@ class TemplateType(Enum):
     PAYMENT_DUE_NOTIFICATION_TEMPLATE_NAME = "payment_due_notification"
     EFT_AVAILABLE_NOTIFICATION_TEMPLATE_NAME = "eft_available_notification"
     AFFILIATION_INVITATION_UNAFFILIATED_EMAIL_TEMPLATE_NAME = "affiliation_invitation_unaffiliated_email"
+    AFFILIATION_INVITATION_UNAFFILIATED_EMAIL_REMINDER_TEMPLATE_NAME = (
+        "affiliation_invitation_unaffiliated_reminder_email"
+    )
     AFFILIATION_CONFIRMATION_EMAIL_TEMPLATE_NAME = "affiliation_confirmation_email"
     ACCOUNT_LINK_CREATED_TEMPLATE_NAME = "account_link_created_email"
     ACCOUNT_LINK_REMOVED_TEMPLATE_NAME = "account_link_removed_email"
