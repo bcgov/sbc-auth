@@ -183,6 +183,7 @@ class Affiliation:
             "authorizedAccounts": [
                 {
                     "name": affiliation.org.name,
+                    "branchName": affiliation.org.branch_name,
                     "uuid": affiliation.org.uuid,
                     "dateAdded": affiliation.created.isoformat() if affiliation.created else None,
                 }

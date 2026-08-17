@@ -864,6 +864,29 @@ def test_authorized_accounts_returns_affiliated_accounts(client, jwt, session): 
         assert account["dateAdded"]
 
 
+def test_authorized_accounts_returns_branch_name(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert the branch name is returned, since a premium account is identified by name and branch."""
+    user = factory_user_model()
+    org = factory_org_model()
+    org.branch_name = "Victoria Branch"
+    org.save()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims["sub"] = str(user.keycloak_guid)
+
+    rv = client.get(
+        f"/api/v1/entities/{entity.business_identifier}/authorized-accounts",
+        headers=factory_auth_header(jwt=jwt, claims=claims),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json.get("authorizedAccounts")[0]["branchName"] == "Victoria Branch"
+
+
 @pytest.mark.parametrize(
     "staff_org_type",
     [
