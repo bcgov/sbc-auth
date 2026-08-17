@@ -184,6 +184,7 @@ class Affiliation:
                 {
                     "name": affiliation.org.name,
                     "branchName": affiliation.org.branch_name,
+                    "isBusinessAccount": bool(affiliation.org.is_business_account),
                     "uuid": affiliation.org.uuid,
                     "dateAdded": affiliation.created.isoformat() if affiliation.created else None,
                 }

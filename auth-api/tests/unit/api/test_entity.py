@@ -888,6 +888,33 @@ def test_authorized_accounts_returns_branch_name(client, jwt, session):  # pylin
 
 
 @pytest.mark.parametrize(
+    "stored_value, expected",
+    [(True, True), (False, False), (None, False)],
+)
+def test_authorized_accounts_returns_is_business_account(client, jwt, session, stored_value, expected):  # pylint:disable=unused-argument
+    """Assert isBusinessAccount is always a boolean, so the UI can pick an icon without a null check."""
+    user = factory_user_model()
+    org = factory_org_model()
+    org.is_business_account = stored_value
+    org.save()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims["sub"] = str(user.keycloak_guid)
+
+    rv = client.get(
+        f"/api/v1/entities/{entity.business_identifier}/authorized-accounts",
+        headers=factory_auth_header(jwt=jwt, claims=claims),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json.get("authorizedAccounts")[0]["isBusinessAccount"] is expected
+
+
+@pytest.mark.parametrize(
     "staff_org_type",
     [
         OrgType.STAFF.value,
