@@ -295,7 +295,7 @@ def test_enrich_affiliation_invitations_empty_list():
     assert result == []
 
 
-def test_enrich_affiliation_invitations_missing_business_entity(monkeypatch, mock_service_account_token):
+def test_enrich_affiliation_invitations_missing_business_entity(session, monkeypatch, mock_service_account_token):
     """Test handling when business entity is not found in the response."""
 
     # Mock to return empty list (no matching business entities)
@@ -325,6 +325,62 @@ def test_enrich_affiliation_invitations_missing_business_entity(monkeypatch, moc
     # Should still create the object but with None entity
     assert len(result) == 1
     assert result[0].entity is None
+
+
+def test_enrich_affiliation_invitations_colin_entity_fallback(session, monkeypatch, mock_service_account_token):
+    """Assert entity details fall back to auth entity data for a business not loaded in LEAR."""
+
+    # LEAR has no record of either business
+    def mock_get_multiple_business_details(business_identifiers, token):
+        return []
+
+    monkeypatch.setattr(
+        "auth_api.services.affiliation_invitation.AffiliationInvitation._get_multiple_business_details",
+        mock_get_multiple_business_details,
+    )
+
+    factory_entity_model(
+        {
+            "businessIdentifier": "BC0000777",
+            "name": "COLIN ONLY CORP",
+            "corpTypeCode": "BC",
+            "status": "ACTIVE",
+            "isLoadedLear": False,
+            "passCode": "111222333",
+        }
+    )
+    # a LEAR-loaded entity the lookup missed keeps the null entity - the fallback is COLIN-only
+    factory_entity_model(
+        {
+            "businessIdentifier": "BC0000778",
+            "name": "LEAR CORP",
+            "corpTypeCode": "BC",
+            "isLoadedLear": True,
+            "passCode": "111222333",
+        }
+    )
+
+    def _invite_dict(invite_id, business_identifier):
+        return {
+            "id": invite_id,
+            "business_identifier": business_identifier,
+            "from_org": {"id": 100, "name": "Test Org", "org_type": "PREMIUM"},
+            "to_org": None,
+            "status": "PENDING",
+            "type": "EMAIL",
+        }
+
+    result = AffiliationInvitationService.enrich_affiliation_invitations_dict_list_with_business_data(
+        [_invite_dict(1, "BC0000777"), _invite_dict(2, "BC0000778")]
+    )
+
+    assert len(result) == 2
+    assert result[0].entity is not None
+    assert result[0].entity.business_identifier == "BC0000777"
+    assert result[0].entity.name == "COLIN ONLY CORP"
+    assert result[0].entity.corp_type == "BC"
+    assert result[0].entity.state == "ACTIVE"
+    assert result[1].entity is None
 
 
 def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch, mock_service_account_token):  # pylint:disable=unused-argument

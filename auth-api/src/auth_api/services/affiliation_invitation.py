@@ -159,6 +159,20 @@ class AffiliationInvitation:
                     corp_type=entity_legal_type,
                     corp_sub_type=business_entity.get("legalSubType", None),
                 )
+            elif (
+                entity_model := EntityModel.find_by_business_identifier(
+                    affiliation_invitation_dict["business_identifier"]
+                )
+            ) and not entity_model.is_loaded_lear:
+                # a business not loaded in LEAR (eg. still managed in COLIN) can't be enriched
+                # from legal-api - serve the auth entity data instead of a null entity
+                entity_details = AffiliationInvitationData.EntityDetails(
+                    business_identifier=entity_model.business_identifier,
+                    name=entity_model.name,
+                    state=entity_model.status,
+                    corp_type=entity_model.corp_type_code,
+                    corp_sub_type=entity_model.corp_sub_type_code,
+                )
 
             aid = AffiliationInvitationData(
                 **{
