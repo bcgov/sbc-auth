@@ -19,7 +19,7 @@ from marshmallow import Schema, fields
 class AuthorizedAccountSchema(Schema):  # pylint: disable=too-few-public-methods
     """Schema for an account on the View Access screen.
 
-    A flat projection over an affiliation and its org rather than a dump of a single model. 
+    A flat projection over an affiliation and its org rather than a dump of a single model.
     dateAdded comes from the affiliation (when the account was given access),
     not from the org (when it was opened).
     """
