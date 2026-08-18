@@ -30,8 +30,10 @@ from auth_api.exceptions.errors import Error
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Entity as EntityService
 from auth_api.services.colin import Colin as ColinService
+from auth_api.utils.enums import OrgType
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims
 from tests.utilities.factory_utils import (
+    convert_org_to_staff_org,
     factory_affiliation_model,
     factory_affiliation_model_by_identifier,
     factory_auth_header,
@@ -850,5 +852,140 @@ def test_sync_entity_from_colin_rejects_out_of_scope_corp_type(client, jwt, sess
 def test_sync_entity_from_colin_requires_auth(client, session):  # pylint:disable=unused-argument
     """Assert the sync endpoint requires a logged in user."""
     rv = client.post(f"/api/v1/entities/{COLIN_SYNC_IDENTIFIER}/synchronizations/colin")
+
+    assert rv.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_authorized_accounts_returns_affiliated_accounts(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert the accounts affiliated to a business are returned with the date they were added."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    other_org = factory_org_model(org_info={"name": "Another Test Org"})
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+    factory_affiliation_model(entity.id, other_org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims["sub"] = str(user.keycloak_guid)
+
+    rv = client.get(
+        f"/api/v1/entities/{entity.business_identifier}/authorized-accounts",
+        headers=factory_auth_header(jwt=jwt, claims=claims),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.OK
+    accounts = rv.json.get("authorizedAccounts")
+    assert len(accounts) == 2
+    assert [account["name"] for account in accounts] == ["Another Test Org", "My Test Org"]
+    for account in accounts:
+        assert account["uuid"]
+        assert account["dateAdded"]
+
+
+def test_authorized_accounts_returns_branch_name(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert the branch name is returned, since a premium account is identified by name and branch."""
+    user = factory_user_model()
+    org = factory_org_model()
+    org.branch_name = "Victoria Branch"
+    org.save()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims["sub"] = str(user.keycloak_guid)
+
+    rv = client.get(
+        f"/api/v1/entities/{entity.business_identifier}/authorized-accounts",
+        headers=factory_auth_header(jwt=jwt, claims=claims),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json.get("authorizedAccounts")[0]["branchName"] == "Victoria Branch"
+
+
+@pytest.mark.parametrize(
+    "stored_value, expected",
+    [(True, True), (False, False), (None, False)],
+)
+def test_authorized_accounts_returns_is_business_account(client, jwt, session, stored_value, expected):  # pylint:disable=unused-argument
+    """Assert isBusinessAccount is always a boolean, so the UI can pick an icon without a null check."""
+    user = factory_user_model()
+    org = factory_org_model()
+    org.is_business_account = stored_value
+    org.save()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims["sub"] = str(user.keycloak_guid)
+
+    rv = client.get(
+        f"/api/v1/entities/{entity.business_identifier}/authorized-accounts",
+        headers=factory_auth_header(jwt=jwt, claims=claims),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json.get("authorizedAccounts")[0]["isBusinessAccount"] is expected
+
+
+@pytest.mark.parametrize(
+    "staff_org_type",
+    [
+        OrgType.STAFF.value,
+        OrgType.SBC_STAFF.value,
+        OrgType.MAXIMUS_STAFF.value,
+        OrgType.CC_STAFF.value,
+    ],
+)
+def test_authorized_accounts_excludes_staff_orgs(client, jwt, session, staff_org_type):  # pylint:disable=unused-argument
+    """Assert staff accounts affiliated to a business are not exposed on the View Access screen.
+
+    Staff access comes from their role rather than an affiliation, so every staff org type is excluded.
+    """
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    staff_org = factory_org_model(org_info={"name": "Staff Org"})
+    convert_org_to_staff_org(staff_org.id, staff_org_type)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+    factory_affiliation_model(entity.id, staff_org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims["sub"] = str(user.keycloak_guid)
+
+    rv = client.get(
+        f"/api/v1/entities/{entity.business_identifier}/authorized-accounts",
+        headers=factory_auth_header(jwt=jwt, claims=claims),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.OK
+    assert [account["name"] for account in rv.json.get("authorizedAccounts")] == ["My Test Org"]
+
+
+def test_authorized_accounts_for_unaffiliated_user_returns_401(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert a user who does not manage the business cannot see who has access to it."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    affiliated_org = factory_org_model(org_info={"name": "Affiliated Org"})
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, affiliated_org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims["sub"] = str(user.keycloak_guid)
+
+    rv = client.get(
+        f"/api/v1/entities/{entity.business_identifier}/authorized-accounts",
+        headers=factory_auth_header(jwt=jwt, claims=claims),
+        content_type="application/json",
+    )
 
     assert rv.status_code == HTTPStatus.UNAUTHORIZED

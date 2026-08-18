@@ -38,7 +38,8 @@ from auth_api.models.dataclass import (
 from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
-from auth_api.schemas import AffiliationSchema
+from auth_api.models.org import Org as OrgModel
+from auth_api.schemas import AffiliationSchema, AuthorizedAccountSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
@@ -46,7 +47,14 @@ from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.auth_event_publisher import publish_affiliation_event
 from auth_api.utils.enums import ActivityAction, CorpType, NRActionCodes, NRNameStatus, NRStatus, QueueMessageType
 from auth_api.utils.passcode import validate_passcode
-from auth_api.utils.roles import AFFILIATION_ALLOWED_ROLES, ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF, Role
+from auth_api.utils.roles import (
+    AFFILIATION_ALLOWED_ROLES,
+    ALL_ALLOWED_ROLES,
+    CLIENT_AUTH_ROLES,
+    INVALID_ORG_CREATE_TYPE_CODES,
+    STAFF,
+    Role,
+)
 from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
@@ -153,6 +161,24 @@ class Affiliation:
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         return Affiliation(affiliation).as_dict()
+
+    @staticmethod
+    def find_authorized_accounts(business_identifier):
+        """Return the accounts that have access to view and manage the given business."""
+        # Accomplished in service instead of model (easier to avoid circular reference issues).
+        # Staff orgs are excluded: staff access comes from their role, not from an affiliation, so
+        # listing the ones that happen to have affiliated the business implies the rest have no access.
+        affiliations = (
+            db.session.query(AffiliationModel)
+            .join(Entity, AffiliationModel.entity_id == Entity.id)
+            .join(OrgModel, AffiliationModel.org_id == OrgModel.id)
+            .options(contains_eager(AffiliationModel.org))
+            .filter(Entity.business_identifier == business_identifier)
+            .filter(OrgModel.type_code.notin_(INVALID_ORG_CREATE_TYPE_CODES))
+            .order_by(OrgModel.name.asc())
+            .all()
+        )
+        return {"authorizedAccounts": AuthorizedAccountSchema().dump(affiliations, many=True)}
 
     @staticmethod
     def create_affiliation(
