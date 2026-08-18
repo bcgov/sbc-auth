@@ -39,7 +39,7 @@ from auth_api.models.dataclass import Affiliation as AffiliationData
 from auth_api.models.entity import Entity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
-from auth_api.schemas import AffiliationSchema
+from auth_api.schemas import AffiliationSchema, AuthorizedAccountSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
@@ -166,7 +166,6 @@ class Affiliation:
     def find_authorized_accounts(business_identifier):
         """Return the accounts that have access to view and manage the given business."""
         # Accomplished in service instead of model (easier to avoid circular reference issues).
-        # dateAdded is affiliations.created, not orgs.created (when the account itself was opened).
         # Staff orgs are excluded: staff access comes from their role, not from an affiliation, so
         # listing the ones that happen to have affiliated the business implies the rest have no access.
         affiliations = (
@@ -179,18 +178,7 @@ class Affiliation:
             .order_by(OrgModel.name.asc())
             .all()
         )
-        return {
-            "authorizedAccounts": [
-                {
-                    "name": affiliation.org.name,
-                    "branchName": affiliation.org.branch_name,
-                    "isBusinessAccount": bool(affiliation.org.is_business_account),
-                    "uuid": affiliation.org.uuid,
-                    "dateAdded": affiliation.created.isoformat() if affiliation.created else None,
-                }
-                for affiliation in affiliations
-            ]
-        }
+        return {"authorizedAccounts": AuthorizedAccountSchema().dump(affiliations, many=True)}
 
     @staticmethod
     def create_affiliation(
