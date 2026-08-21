@@ -166,7 +166,7 @@ enum LinkStep {
   Error = 'ERROR'
 }
 
-const ELIGIBLE_MEMBERSHIP_TYPES = [MembershipType.Admin, MembershipType.Coordinator]
+const ELIGIBLE_MEMBERSHIP_TYPES = new Set([MembershipType.Admin, MembershipType.Coordinator])
 const RESULT_COUNTDOWN_SECONDS = 5
 const REDIRECT_URL_INVALID_CODE = 'REDIRECT_URL_INVALID'
 
@@ -231,7 +231,7 @@ export default class VendorLinkingView extends Vue {
 
     const orgStore = useOrgStore()
     const candidates = await Promise.all(settings.map(async (accountSetting) => {
-      const orgId = parseInt(accountSetting.id)
+      const orgId = Number.parseInt(accountSetting.id)
       const [address, membershipResponse] = await Promise.all([
         orgStore.getOrgAdminContact(orgId),
         UserService.getMembership(orgId)
@@ -240,7 +240,7 @@ export default class VendorLinkingView extends Vue {
     }))
 
     this.eligibleAccounts = candidates
-      .filter((candidate) => ELIGIBLE_MEMBERSHIP_TYPES.includes(candidate.membershipTypeCode))
+      .filter((candidate) => ELIGIBLE_MEMBERSHIP_TYPES.has(candidate.membershipTypeCode))
       .map((candidate): OrgWithAddress => ({
         id: candidate.orgId,
         name: candidate.name,
