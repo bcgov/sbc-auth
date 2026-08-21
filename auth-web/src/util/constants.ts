@@ -108,7 +108,8 @@ export enum Pages {
     LOGIN = 'login',
     PAY_OUTSTANDING_BALANCE = 'pay-outstanding-balance',
     ACCOUNT_HOLD = 'account-hold',
-    PRODUCT_SETTINGS = 'product-settings'
+    PRODUCT_SETTINGS = 'product-settings',
+    VENDOR_LINKING = 'vendor-linking'
 }
 
 export enum Account {

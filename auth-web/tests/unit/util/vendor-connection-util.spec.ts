@@ -1,5 +1,6 @@
 import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
 import {
+  buildSigninPath,
   canManageVendorConnections,
   canViewVendorConnections,
   getVendorConnectionStatus,
@@ -225,6 +226,30 @@ describe('vendor-connection-util', () => {
       const expiryDate = today.clone().add(20, 'days').format('YYYY-MM-DD')
 
       expect(getVendorConnectionStatus(expiryDate)).toBeUndefined()
+    })
+  })
+
+  describe('buildSigninPath', () => {
+    // The /signin/:idpHint/:redirectUrl(.*) route decodes its param twice before use: once
+    // by vue-router's own param matching, once by SigninView.vue's explicit
+    // decodeURIComponent. Confirms final result is what we expect.
+    function decodeAsProductionDoes (encoded: string): string {
+      return decodeURIComponent(decodeURIComponent(encoded))
+    }
+
+    it('prefixes the path with /signin/:idpHint/', () => {
+      const path = buildSigninPath('bcsc', 'https://example.com/confirm')
+      expect(path.startsWith('/signin/bcsc/')).toBe(true)
+    })
+
+    it('round-trips a destination URL with its own & -joined query params intact', () => {
+      const destinationUrl = 'https://example.com/confirm?vendorAccountId=123&returnUrl=' +
+        encodeURIComponent('https://vendor.example.com/callback?ref=abc&x=1')
+
+      const path = buildSigninPath('bcsc', destinationUrl)
+      const encoded = path.replace('/signin/bcsc/', '')
+
+      expect(decodeAsProductionDoes(encoded)).toBe(destinationUrl)
     })
   })
 })

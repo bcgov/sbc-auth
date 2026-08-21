@@ -18,6 +18,7 @@ from http import HTTPStatus
 from flask import Blueprint, request
 from flask_cors import cross_origin
 
+from auth_api.exceptions import BusinessException
 from auth_api.schemas import AccountLinkingKeySchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
@@ -63,7 +64,12 @@ def post_linking_key(org_id):
     org = OrgService.find_by_org_id(org_id, allowed_roles=_OWNER_ROLES)
     if org is None:
         return {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
-    record = AccountLinkingKeyService.generate(org_id, request_json.get("vendorAccountId"))
+    try:
+        record = AccountLinkingKeyService.generate(
+            org_id, request_json.get("vendorAccountId"), request_json.get("redirectUrl")
+        )
+    except BusinessException as exception:
+        return {"code": exception.code, "message": exception.message}, exception.status_code
     return AccountLinkingKeySchema().dump(record), HTTPStatus.CREATED
 
 

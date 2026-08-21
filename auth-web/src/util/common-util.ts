@@ -43,6 +43,15 @@ export default class CommonUtils {
     return `${item?.accountId} ${item?.accountName}`
   }
 
+  static formatAddressLine (address: Address): string | null {
+    if (!address) {
+      return null
+    }
+    const parts = [address.street, address.city, address.region, address.postalCode, address.country]
+      .filter((part) => !!part)
+    return parts.length ? parts.join(' ') : null
+  }
+
   // formatting incorporation number according to the length of numbers
   static formatIncorporationNumber (incorpNum: string, numLength = 7):string {
     if (!incorpNum) return null

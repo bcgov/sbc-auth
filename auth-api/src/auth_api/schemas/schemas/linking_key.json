@@ -10,6 +10,11 @@
             "$id": "#/properties/vendorAccountId",
             "type": "integer",
             "title": "Vendor account ID to bind this linking key to"
+        },
+        "redirectUrl": {
+            "$id": "#/properties/redirectUrl",
+            "type": "string",
+            "title": "URL to validate against the vendor account's registered redirect URLs"
         }
     }
 }

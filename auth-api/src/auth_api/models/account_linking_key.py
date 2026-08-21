@@ -55,6 +55,11 @@ class AccountLinkingKey(BaseModel):
         index=True,
         comment="Vendor account (e.g. ALF) that is authorized to use this key; set at generation time",
     )
+    redirect_url = Column(
+        String(2048),
+        nullable=True,
+        comment="Redirect URL validated against the vendor account's registered redirect URLs at generation time",
+    )
     status = Column(
         String(20),
         nullable=False,

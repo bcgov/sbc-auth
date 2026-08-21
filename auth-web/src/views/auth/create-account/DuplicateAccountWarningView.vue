@@ -36,45 +36,11 @@
         md="7"
         class="text-center"
       >
-        <v-card
-          v-for="(org, index) in orgsOfUser"
-          :key="index"
-          flat
-          class="my-4 d-flex justify-space-between align-center pa-8"
-        >
-          <div class="d-flex align-center">
-            <div>
-              <v-avatar
-                tile
-                left
-                color="#4d7094"
-                size="32"
-                class="user-avatar"
-              >
-                <strong>{{ org.name && org.name.slice(0,1) && org.name.slice(0,1).toUpperCase() }}</strong>
-              </v-avatar>
-            </div>
-            <div class="text-left ml-2">
-              <h4 class="font-weight-bold ">
-                {{ org.name }}
-              </h4>
-              <p class="mb-0">
-                {{ org.addressLine }}
-              </p>
-            </div>
-          </div>
-          <div class="text-right">
-            <v-btn
-              large
-              color="primary"
-              title="Access Account"
-              data-test="goto-access-account-button"
-              @click="navigateToRedirectUrl(org.id)"
-            >
-              Access Account
-            </v-btn>
-          </div>
-        </v-card>
+        <account-select-list
+          :accounts="orgsOfUser"
+          action-label="Access Account"
+          @select="navigateToRedirectUrl"
+        />
       </v-col>
     </v-row>
     <v-row justify="center">
@@ -102,14 +68,20 @@
 import { Action, State } from 'pinia-class'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { OrgWithAddress, Organization } from '@/models/Organization'
+import AccountSelectList from '@/components/auth/common/AccountSelectList.vue'
 import { Address } from '@/models/address'
+import CommonUtils from '@/util/common-util'
 import { Pages } from '@/util/constants'
 import { UserSettings } from '@/models/user'
 import { useAppStore } from '@/stores'
 import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
-@Component({})
+@Component({
+  components: {
+    AccountSelectList
+  }
+})
 export default class DuplicateAccountWarningView extends Vue {
     @State(useUserStore) private currentUserAccountSettings!: UserSettings[]
     @Action(useUserStore) private getUserAccountSettings!: () => Promise<any>
@@ -140,8 +112,7 @@ export default class DuplicateAccountWarningView extends Vue {
               const orgOfUser: OrgWithAddress = {
                 id: orgId,
                 name: accountsetting.label,
-                addressLine: orgAdminContact ? `${orgAdminContact.street} ${orgAdminContact.city} ` +
-                `${orgAdminContact.region} ${orgAdminContact.postalCode} ${orgAdminContact.country}` : null
+                addressLine: CommonUtils.formatAddressLine(orgAdminContact)
               }
               return orgOfUser
             }
@@ -179,12 +150,5 @@ export default class DuplicateAccountWarningView extends Vue {
 
     .v-list-item__subtitle {
       line-height: 1rem;
-    }
-    .user-avatar {
-      margin-right: 0.75rem;
-      color: var(--v-accent-lighten5);
-      border-radius: 0.15rem;
-      font-size: 1.1875rem;
-      font-weight: 700;
     }
 </style>
