@@ -3,7 +3,23 @@
     class="view-container"
     data-test="div-account-setup-success-container"
   >
-    <v-row justify="center">
+    <template v-if="redirectToUrl">
+      <v-row justify="center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
+          <v-progress-circular
+            indeterminate
+            color="primary"
+          />
+        </v-col>
+      </v-row>
+    </template>
+    <v-row
+      v-else
+      justify="center"
+    >
       <v-col
         cols="12"
         sm="6"
@@ -62,7 +78,7 @@
 
 <script lang="ts">
 
-import { Component, Mixins } from 'vue-property-decorator'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import ConfigHelper from '@/util/config-helper'
 import { Pages } from '@/util/constants'
@@ -75,6 +91,17 @@ import { useOrgStore } from '@/stores/org'
   }
 })
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
+  @Prop({ default: '' }) redirectToUrl: string
+
+  mounted () {
+    // redirectToUrl is only ever present when this screen is reached via a flow (like
+    // vendor-linking) that needs to resume elsewhere after account creation — every other
+    // caller leaves it unset.
+    if (this.redirectToUrl) {
+      this.$router.push(this.redirectToUrl)
+    }
+  }
+
   goTo (page) {
     switch (page) {
       case 'home': window.location.assign(`${ConfigHelper.getRegistryHomeURL()}dashboard/?accountid=${this.currentOrganization.id}`)

@@ -182,7 +182,10 @@ export default defineComponent({
         // remove GOVN account type from session
         ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
         useAppStore().updateHeader()
-        root.$router.push('/setup-account-success')
+        const successPath = props.redirectToUrl
+          ? `/setup-account-success?redirectToUrl=${encodeURIComponent(props.redirectToUrl)}`
+          : '/setup-account-success'
+        root.$router.push(successPath)
       } catch (err) {
       // eslint-disable-next-line no-console
         console.error(err)

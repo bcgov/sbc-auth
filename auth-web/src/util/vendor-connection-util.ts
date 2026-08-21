@@ -7,7 +7,7 @@ import moment from 'moment'
 
 export const VENDOR_CONNECTION_EXPIRY_WARNING_DAYS = 30
 
-function isAccountLinkingDisabled (): boolean {
+export function isAccountLinkingDisabled (): boolean {
   return getLdFlag(LDFlags.DisableAccountLinking, true)
 }
 
@@ -117,4 +117,32 @@ export function getDaysUntilExpiry (expiryDate: string): number {
   const today = moment().startOf('day')
   const expiry = moment(expiryDate).startOf('day')
   return Math.max(0, expiry.diff(today, 'days'))
+}
+
+export function isValidVendorLinkingParams (vendorAccountId: string, returnUrl: string): boolean {
+  if (!vendorAccountId || !/^\d+$/.test(vendorAccountId)) {
+    return false
+  }
+  if (!returnUrl) {
+    return false
+  }
+  try {
+    return ['http:', 'https:'].includes(new URL(returnUrl).protocol)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Builds the /signin/:idpHint/:redirectUrl(.*) path for a given destination URL.
+ *
+ * That route decodes its :redirectUrl(.*) param twice before use — once by vue-router's own
+ * param matching, then again by SigninView.vue's explicit decodeURIComponent — so a
+ * destinationUrl that itself carries a query string (as ours does, e.g. vendorAccountId +
+ * returnUrl) must be encoded twice going in, or its own `&`-separated params get misread as
+ * extra route path segments and silently truncated after the first `&`. See
+ * VendorLinkingLoginCard.spec.ts for a test that decodes the result exactly as production does.
+ */
+export function buildSigninPath (idpHint: string, destinationUrl: string): string {
+  return `/signin/${idpHint}/${encodeURIComponent(encodeURIComponent(destinationUrl))}`
 }

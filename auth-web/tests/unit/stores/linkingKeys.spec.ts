@@ -30,6 +30,37 @@ describe('linkingKeys store', () => {
     expect(response.linkingKeys[0].vendorAccountName).toBe('ABC API Service')
   })
 
+  it('createLinkingKey calls LinkingKeysService with the create request and returns its data', async () => {
+    const createSpy = vi.spyOn(LinkingKeysService, 'createOrgLinkingKey').mockResolvedValue({
+      data: {
+        id: 1,
+        accountId: 10,
+        vendorAccountId: 20,
+        linkingKey: 'the-key-value',
+        expiresOn: '2027-01-15T00:00:00Z',
+        createdOn: '2026-01-15T11:20:00Z',
+        status: 'ACTIVE'
+      }
+    } as any)
+
+    const store = useLinkingKeysStore()
+    const request = { orgId: 10, vendorAccountId: 20, returnUrl: 'https://vendor.example.com/callback' }
+    const response = await store.createLinkingKey(request)
+
+    expect(createSpy).toHaveBeenCalledWith(request)
+    expect(response.linkingKey).toBe('the-key-value')
+    expect(response.status).toBe('ACTIVE')
+  })
+
+  it('createLinkingKey propagates rejection so callers can read the error response', async () => {
+    const error = { response: { status: 400, data: { code: 'REDIRECT_URL_INVALID', message: 'not allowed' } } }
+    vi.spyOn(LinkingKeysService, 'createOrgLinkingKey').mockRejectedValue(error)
+
+    const store = useLinkingKeysStore()
+    await expect(store.createLinkingKey({ orgId: 10, vendorAccountId: 20, returnUrl: 'https://bad.example.com' }))
+      .rejects.toBe(error)
+  })
+
   it('revokeLinkingKey calls LinkingKeysService with linking key details', async () => {
     const revokeSpy = vi.spyOn(LinkingKeysService, 'revokeOrgLinkingKey').mockResolvedValue({ data: {} } as any)
 

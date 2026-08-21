@@ -1,6 +1,7 @@
 import {
   AccountLinkingKey,
   AccountLinkingKeysResponse,
+  CreateLinkingKeyRequest,
   LinkingKeyActionDetails
 } from '@/models/vendorConnection'
 import LinkingKeysService from '@/services/linkingKeys.services'
@@ -10,6 +11,11 @@ import { defineStore } from 'pinia'
 async function fetchLinkingKeys (orgId: number): Promise<AccountLinkingKeysResponse> {
   const response = await LinkingKeysService.getOrgLinkingKeys(orgId)
   return response?.data || { linkingKeys: [] }
+}
+
+async function createLinkingKey (request: CreateLinkingKeyRequest): Promise<AccountLinkingKey> {
+  const response = await LinkingKeysService.createOrgLinkingKey(request)
+  return response?.data
 }
 
 async function revokeLinkingKey (linkingKeyDetails: LinkingKeyActionDetails): Promise<Record<string, never>> {
@@ -29,6 +35,7 @@ function $reset () {
 export const useLinkingKeysStore = defineStore('linkingKeys', () => {
   return {
     fetchLinkingKeys,
+    createLinkingKey,
     revokeLinkingKey,
     extendLinkingKey,
     $reset

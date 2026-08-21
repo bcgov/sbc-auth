@@ -24,8 +24,11 @@ from tests.utilities.factory_utils import (
     factory_linking_key_model,
     factory_membership_model,
     factory_org_model,
+    factory_redirect_url_model,
     factory_user_model,
 )
+
+_REDIRECT_URL = "https://vendor.example.com/callback"
 
 
 def _account_holder_headers(jwt, user):
@@ -41,12 +44,13 @@ def test_generate_linking_key(client, jwt, session):  # pylint:disable=unused-ar
     org = factory_org_model()
     vendor = factory_org_model()
     factory_membership_model(user.id, org.id)
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
 
     rv = client.post(
         f"/api/v1/orgs/{org.id}/linking-keys",
         headers=_account_holder_headers(jwt, user),
         content_type="application/json",
-        data=json.dumps({"vendorAccountId": vendor.id}),
+        data=json.dumps({"vendorAccountId": vendor.id, "redirectUrl": _REDIRECT_URL}),
     )
 
     assert rv.status_code == HTTPStatus.CREATED
@@ -57,6 +61,7 @@ def test_generate_linking_key(client, jwt, session):  # pylint:disable=unused-ar
     assert data.get("status") == "ACTIVE"
     assert data.get("expiresOn")
     assert data.get("lastUsed") is None
+    assert data.get("redirectUrl") == _REDIRECT_URL
 
 
 def test_generate_pending_linking_key_without_vendor(client, jwt, session):  # pylint:disable=unused-argument
@@ -76,6 +81,7 @@ def test_generate_pending_linking_key_without_vendor(client, jwt, session):  # p
     assert rv.json.get("linkingKey") is not None
     assert rv.json.get("status") == "PENDING"
     assert rv.json.get("vendorAccountId") is None
+    assert rv.json.get("redirectUrl") is None
 
 
 def test_generate_linking_key_with_vendor(client, jwt, session):  # pylint:disable=unused-argument
@@ -84,6 +90,26 @@ def test_generate_linking_key_with_vendor(client, jwt, session):  # pylint:disab
     lawfirm = factory_org_model()
     vendor = factory_org_model()
     factory_membership_model(user.id, lawfirm.id)
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
+
+    rv = client.post(
+        f"/api/v1/orgs/{lawfirm.id}/linking-keys",
+        headers=_account_holder_headers(jwt, user),
+        content_type="application/json",
+        data=json.dumps({"vendorAccountId": vendor.id, "redirectUrl": _REDIRECT_URL}),
+    )
+
+    assert rv.status_code == HTTPStatus.CREATED
+    assert rv.json.get("vendorAccountId") == vendor.id
+
+
+def test_generate_linking_key_vendor_without_redirect_url_rejected(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that vendorAccountId without redirectUrl is rejected."""
+    user = factory_user_model(TestUserInfo.user1)
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    factory_membership_model(user.id, lawfirm.id)
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
 
     rv = client.post(
         f"/api/v1/orgs/{lawfirm.id}/linking-keys",
@@ -92,8 +118,27 @@ def test_generate_linking_key_with_vendor(client, jwt, session):  # pylint:disab
         data=json.dumps({"vendorAccountId": vendor.id}),
     )
 
-    assert rv.status_code == HTTPStatus.CREATED
-    assert rv.json.get("vendorAccountId") == vendor.id
+    assert rv.status_code == HTTPStatus.BAD_REQUEST
+    assert rv.json.get("code") == "REDIRECT_URL_INVALID"
+
+
+def test_generate_linking_key_unregistered_redirect_url_rejected(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a redirectUrl not registered for the vendor is rejected."""
+    user = factory_user_model(TestUserInfo.user1)
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    factory_membership_model(user.id, lawfirm.id)
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
+
+    rv = client.post(
+        f"/api/v1/orgs/{lawfirm.id}/linking-keys",
+        headers=_account_holder_headers(jwt, user),
+        content_type="application/json",
+        data=json.dumps({"vendorAccountId": vendor.id, "redirectUrl": "https://not-registered.example.com/cb"}),
+    )
+
+    assert rv.status_code == HTTPStatus.BAD_REQUEST
+    assert rv.json.get("code") == "REDIRECT_URL_INVALID"
 
 
 def test_generate_multiple_keys_for_different_vendors(client, jwt, session):  # pylint:disable=unused-argument
@@ -103,15 +148,23 @@ def test_generate_multiple_keys_for_different_vendors(client, jwt, session):  # 
     vendor_a = factory_org_model()
     vendor_b = factory_org_model()
     factory_membership_model(user.id, lawfirm.id)
+    factory_redirect_url_model(org_id=vendor_a.id, redirect_url=_REDIRECT_URL)
+    factory_redirect_url_model(org_id=vendor_b.id, redirect_url=_REDIRECT_URL)
 
     headers = _account_holder_headers(jwt, user)
     url = f"/api/v1/orgs/{lawfirm.id}/linking-keys"
 
     rv_a = client.post(
-        url, headers=headers, content_type="application/json", data=json.dumps({"vendorAccountId": vendor_a.id})
+        url,
+        headers=headers,
+        content_type="application/json",
+        data=json.dumps({"vendorAccountId": vendor_a.id, "redirectUrl": _REDIRECT_URL}),
     )
     rv_b = client.post(
-        url, headers=headers, content_type="application/json", data=json.dumps({"vendorAccountId": vendor_b.id})
+        url,
+        headers=headers,
+        content_type="application/json",
+        data=json.dumps({"vendorAccountId": vendor_b.id, "redirectUrl": _REDIRECT_URL}),
     )
 
     assert rv_a.status_code == HTTPStatus.CREATED
@@ -131,10 +184,11 @@ def test_regenerate_key_for_same_vendor_revokes_previous(client, jwt, session): 
     lawfirm = factory_org_model()
     vendor = factory_org_model()
     factory_membership_model(user.id, lawfirm.id)
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
 
     headers = _account_holder_headers(jwt, user)
     url = f"/api/v1/orgs/{lawfirm.id}/linking-keys"
-    payload = json.dumps({"vendorAccountId": vendor.id})
+    payload = json.dumps({"vendorAccountId": vendor.id, "redirectUrl": _REDIRECT_URL})
 
     first = client.post(url, headers=headers, content_type="application/json", data=payload)
     assert first.status_code == HTTPStatus.CREATED
@@ -170,6 +224,7 @@ def test_generate_bound_key_revokes_existing_pending(client, jwt, session):  # p
     lawfirm = factory_org_model()
     vendor = factory_org_model()
     factory_membership_model(user.id, lawfirm.id)
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
     headers = _account_holder_headers(jwt, user)
     url = f"/api/v1/orgs/{lawfirm.id}/linking-keys"
 
@@ -177,7 +232,10 @@ def test_generate_bound_key_revokes_existing_pending(client, jwt, session):  # p
     assert pending.json.get("status") == "PENDING"
 
     bound = client.post(
-        url, headers=headers, content_type="application/json", data=json.dumps({"vendorAccountId": vendor.id})
+        url,
+        headers=headers,
+        content_type="application/json",
+        data=json.dumps({"vendorAccountId": vendor.id, "redirectUrl": _REDIRECT_URL}),
     )
     assert bound.json.get("status") == "ACTIVE"
 
