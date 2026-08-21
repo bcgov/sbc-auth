@@ -276,7 +276,6 @@
   "vendorLinkingResultFailureGenericBody": "We could not complete this connection. Please try again, or contact support if this keeps happening.",
   "vendorLinkingResultFailureRedirectTitle": "Redirect URL Error",
   "vendorLinkingResultFailureRedirectBody": "We could not complete this connection because of a setup issue. Please try again or contact your service provider for support.",
-  "vendorLinkingResultReturnToProvider": "Return to Service Provider",
   "redirectUrlHelperText": "Enter the redirect URL for your application. Users can be redirected back to your application after they have completed the service provider account linking.",
   "editRedirectUrlHelperText": "Edit the redirect URL for your application. Users will be redirected back to your application after they have completed the service provider account linking.",
   "removeRedirectUrlText": "If you remove this URL, users relying on it will not be able to be redirected back to your application to complete the service provider connection.",

@@ -52,14 +52,22 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { PropType, defineComponent } from '@vue/composition-api'
 import { OrgWithAddress } from '@/models/Organization'
 
-@Component({})
-export default class AccountSelectList extends Vue {
-  @Prop({ default: () => [] }) accounts: OrgWithAddress[]
-  @Prop({ required: true }) actionLabel: string
-}
+export default defineComponent({
+  name: 'AccountSelectList',
+  props: {
+    accounts: {
+      type: Array as PropType<OrgWithAddress[]>,
+      default: () => []
+    },
+    actionLabel: {
+      type: String,
+      required: true
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>

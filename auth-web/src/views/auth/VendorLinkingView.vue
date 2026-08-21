@@ -35,13 +35,13 @@
               {{ $t('vendorLinkingAccountSelectAlertNote') }}
             </p>
 
-            <account-select-list
+            <AccountSelectList
               v-if="eligibleAccounts.length > 0"
               :accounts="eligibleAccounts"
               :action-label="$t('vendorLinkingUseThisAccount')"
               @select="onAccountSelected"
             />
-            <vendor-linking-warning-alert
+            <VendorLinkingWarningAlert
               v-else
               data-test="vendor-linking-no-eligible-accounts-alert"
               :body="$t('vendorLinkingNoEligibleAccountsAlert')"
@@ -108,15 +108,6 @@
                 {{ failureBody }}
               </p>
             </div>
-            <v-btn
-              v-if="resultErrorCode !== REDIRECT_URL_INVALID_CODE"
-              large
-              color="primary"
-              data-test="vendor-linking-result-return"
-              @click="redirectNow"
-            >
-              {{ $t('vendorLinkingResultReturnToProvider') }}
-            </v-btn>
           </template>
         </v-col>
       </v-row>
@@ -147,8 +138,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
 import { MembershipType, OrgWithAddress } from '@/models/Organization'
+import { Ref, computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, ref } from '@vue/composition-api'
 import { useLinkingKeysStore, useOrgStore, useUserStore } from '@/stores'
 import AccountSelectList from '@/components/auth/common/AccountSelectList.vue'
 import CommonUtils from '@/util/common-util'
@@ -170,145 +161,165 @@ const ELIGIBLE_MEMBERSHIP_TYPES = new Set([MembershipType.Admin, MembershipType.
 const RESULT_COUNTDOWN_SECONDS = 5
 const REDIRECT_URL_INVALID_CODE = 'REDIRECT_URL_INVALID'
 
-@Component({
+export default defineComponent({
+  name: 'VendorLinkingView',
   components: {
     AccountSelectList,
     VendorLinkingWarningAlert
-  }
-})
-export default class VendorLinkingView extends Vue {
-  @Prop({ default: '' }) vendorAccountId: string
-  @Prop({ default: '' }) returnUrl: string
-
-  readonly LinkStep = LinkStep
-  readonly REDIRECT_URL_INVALID_CODE = REDIRECT_URL_INVALID_CODE
-
-  step: LinkStep = LinkStep.Loading
-  eligibleAccounts: OrgWithAddress[] = []
-  selectedOrgId: number = null
-  resultSuccess: boolean = false
-  resultLinkingKey: string = ''
-  resultErrorCode: string = ''
-  remainingSeconds: number = RESULT_COUNTDOWN_SECONDS
-  private countdownTimer: ReturnType<typeof setInterval> = null
-
-  get failureTitle (): string {
-    return this.resultErrorCode === REDIRECT_URL_INVALID_CODE
-      ? this.$t('vendorLinkingResultFailureRedirectTitle').toString()
-      : this.$t('vendorLinkingResultFailureGenericTitle').toString()
-  }
-
-  get failureBody (): string {
-    return this.resultErrorCode === REDIRECT_URL_INVALID_CODE
-      ? this.$t('vendorLinkingResultFailureRedirectBody').toString()
-      : this.$t('vendorLinkingResultFailureGenericBody').toString()
-  }
-
-  beforeDestroy () {
-    this.clearCountdown()
-  }
-
-  async mounted () {
-    // Re-validated here, not just trusted from the landing page — a bookmarked or
-    // back-navigated visit to this route bypasses the landing page's check entirely.
-    if (!isValidVendorLinkingParams(this.vendorAccountId, this.returnUrl)) {
-      this.step = LinkStep.Error
-      return
+  },
+  props: {
+    vendorAccountId: {
+      type: String,
+      default: ''
+    },
+    returnUrl: {
+      type: String,
+      default: ''
     }
-    try {
-      await this.loadEligibleAccounts()
-    } catch {
-      this.step = LinkStep.Error
+  },
+  setup (props) {
+    const instance = getCurrentInstance()
+
+    const step: Ref<LinkStep> = ref(LinkStep.Loading)
+    const eligibleAccounts: Ref<OrgWithAddress[]> = ref([])
+    const selectedOrgId: Ref<number> = ref(null)
+    const resultSuccess: Ref<boolean> = ref(false)
+    const resultLinkingKey: Ref<string> = ref('')
+    const resultErrorCode: Ref<string> = ref('')
+    const remainingSeconds: Ref<number> = ref(RESULT_COUNTDOWN_SECONDS)
+    let countdownTimer: ReturnType<typeof setInterval> = null
+
+    const failureTitle = computed(() => {
+      return resultErrorCode.value === REDIRECT_URL_INVALID_CODE
+        ? instance.proxy.$t('vendorLinkingResultFailureRedirectTitle').toString()
+        : instance.proxy.$t('vendorLinkingResultFailureGenericTitle').toString()
+    })
+
+    const failureBody = computed(() => {
+      return resultErrorCode.value === REDIRECT_URL_INVALID_CODE
+        ? instance.proxy.$t('vendorLinkingResultFailureRedirectBody').toString()
+        : instance.proxy.$t('vendorLinkingResultFailureGenericBody').toString()
+    })
+
+    const clearCountdown = (): void => {
+      if (countdownTimer) {
+        clearInterval(countdownTimer)
+        countdownTimer = null
+      }
     }
-  }
 
-  private async loadEligibleAccounts (): Promise<void> {
-    const userStore = useUserStore()
-    if (!userStore.currentUserAccountSettings?.length) {
-      await userStore.getUserAccountSettings()
+    const buildCallbackUrl = (): string => {
+      const url = new URL(props.returnUrl)
+      if (resultSuccess.value) {
+        url.searchParams.set('linkingKey', resultLinkingKey.value)
+        url.searchParams.set('accountId', String(selectedOrgId.value))
+      }
+      return url.toString()
     }
-    const settings: UserSettings[] = userStore.currentUserAccountSettings || []
 
-    const orgStore = useOrgStore()
-    const candidates = await Promise.all(settings.map(async (accountSetting) => {
-      const orgId = Number.parseInt(accountSetting.id)
-      const [address, membershipResponse] = await Promise.all([
-        orgStore.getOrgAdminContact(orgId),
-        UserService.getMembership(orgId)
-      ])
-      return { orgId, name: accountSetting.label, address, membershipTypeCode: membershipResponse?.data?.membershipTypeCode }
-    }))
+    const redirectNow = (): void => {
+      clearCountdown()
+      window.location.replace(buildCallbackUrl())
+    }
 
-    this.eligibleAccounts = candidates
-      .filter((candidate) => ELIGIBLE_MEMBERSHIP_TYPES.has(candidate.membershipTypeCode))
-      .map((candidate): OrgWithAddress => ({
-        id: candidate.orgId,
-        name: candidate.name,
-        addressLine: CommonUtils.formatAddressLine(candidate.address)
+    const startCountdown = (): void => {
+      remainingSeconds.value = RESULT_COUNTDOWN_SECONDS
+      countdownTimer = setInterval(() => {
+        remainingSeconds.value -= 1
+        if (remainingSeconds.value <= 0) {
+          redirectNow()
+        }
+      }, 1000)
+    }
+
+    const loadEligibleAccounts = async (): Promise<void> => {
+      const userStore = useUserStore()
+      if (!userStore.currentUserAccountSettings?.length) {
+        await userStore.getUserAccountSettings()
+      }
+      const settings: UserSettings[] = userStore.currentUserAccountSettings || []
+
+      const orgStore = useOrgStore()
+      const candidates = await Promise.all(settings.map(async (accountSetting) => {
+        const orgId = Number.parseInt(accountSetting.id)
+        const [address, membershipResponse] = await Promise.all([
+          orgStore.getOrgAdminContact(orgId),
+          UserService.getMembership(orgId)
+        ])
+        return { orgId, name: accountSetting.label, address, membershipTypeCode: membershipResponse?.data?.membershipTypeCode }
       }))
 
-    this.step = LinkStep.SelectAccount
-  }
+      eligibleAccounts.value = candidates
+        .filter((candidate) => ELIGIBLE_MEMBERSHIP_TYPES.has(candidate.membershipTypeCode))
+        .map((candidate): OrgWithAddress => ({
+          id: candidate.orgId,
+          name: candidate.name,
+          addressLine: CommonUtils.formatAddressLine(candidate.address)
+        }))
 
-  private async onAccountSelected (orgId: number): Promise<void> {
-    this.selectedOrgId = orgId
-    this.step = LinkStep.Loading
-    try {
-      const record = await useLinkingKeysStore().createLinkingKey({
-        orgId,
-        vendorAccountId: Number(this.vendorAccountId),
-        returnUrl: this.returnUrl
-      })
-      this.resultSuccess = true
-      this.resultLinkingKey = record.linkingKey
-      this.startCountdown()
-    } catch (error) {
-      const normalized = normalizeError(error)
-      this.resultSuccess = false
-      this.resultErrorCode = normalized.code || ''
-    } finally {
-      this.step = LinkStep.Result
+      step.value = LinkStep.SelectAccount
     }
-  }
 
-  private startCountdown (): void {
-    this.remainingSeconds = RESULT_COUNTDOWN_SECONDS
-    this.countdownTimer = setInterval(() => {
-      this.remainingSeconds -= 1
-      if (this.remainingSeconds <= 0) {
-        this.redirectNow()
+    const onAccountSelected = async (orgId: number): Promise<void> => {
+      selectedOrgId.value = orgId
+      step.value = LinkStep.Loading
+      try {
+        const record = await useLinkingKeysStore().createLinkingKey({
+          orgId,
+          vendorAccountId: Number(props.vendorAccountId),
+          returnUrl: props.returnUrl
+        })
+        resultSuccess.value = true
+        resultLinkingKey.value = record.linkingKey
+        startCountdown()
+      } catch (error) {
+        const normalized = normalizeError(error)
+        resultSuccess.value = false
+        resultErrorCode.value = normalized.code || ''
+      } finally {
+        step.value = LinkStep.Result
       }
-    }, 1000)
-  }
+    }
 
-  private clearCountdown (): void {
-    if (this.countdownTimer) {
-      clearInterval(this.countdownTimer)
-      this.countdownTimer = null
+    const createAccount = (): void => {
+      // Include full confirm path to continue linking after account creation
+      const confirmPath = `/${Pages.VENDOR_LINKING}/confirm` +
+        `?vendorAccountId=${props.vendorAccountId}&returnUrl=${encodeURIComponent(props.returnUrl)}`
+      instance.proxy.$router.push(`/${Pages.CREATE_ACCOUNT}?skipConfirmation=true&redirectToUrl=${encodeURIComponent(confirmPath)}`)
+    }
+
+    onMounted(async () => {
+      // Re-validated here, not just trusted from the landing page — a bookmarked or
+      // back-navigated visit to this route bypasses the landing page's check entirely.
+      if (!isValidVendorLinkingParams(props.vendorAccountId, props.returnUrl)) {
+        step.value = LinkStep.Error
+        return
+      }
+      try {
+        await loadEligibleAccounts()
+      } catch {
+        step.value = LinkStep.Error
+      }
+    })
+
+    onBeforeUnmount(() => {
+      clearCountdown()
+    })
+
+    return {
+      LinkStep,
+      step,
+      eligibleAccounts,
+      resultSuccess,
+      remainingSeconds,
+      failureTitle,
+      failureBody,
+      onAccountSelected,
+      redirectNow,
+      createAccount
     }
   }
-
-  private redirectNow (): void {
-    this.clearCountdown()
-    window.location.replace(this.buildCallbackUrl())
-  }
-
-  private buildCallbackUrl (): string {
-    const url = new URL(this.returnUrl)
-    if (this.resultSuccess) {
-      url.searchParams.set('linkingKey', this.resultLinkingKey)
-      url.searchParams.set('accountId', String(this.selectedOrgId))
-    }
-    return url.toString()
-  }
-
-  private createAccount (): void {
-    // Include full confirm path to continue linking after account creation
-    const confirmPath = `/${Pages.VENDOR_LINKING}/confirm` +
-      `?vendorAccountId=${this.vendorAccountId}&returnUrl=${encodeURIComponent(this.returnUrl)}`
-    this.$router.push(`/${Pages.CREATE_ACCOUNT}?skipConfirmation=true&redirectToUrl=${encodeURIComponent(confirmPath)}`)
-  }
-}
+})
 </script>
 
 <style lang="scss" scoped>

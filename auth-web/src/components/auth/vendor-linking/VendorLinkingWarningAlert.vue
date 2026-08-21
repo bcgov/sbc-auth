@@ -20,14 +20,25 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { defineComponent } from '@vue/composition-api'
 
-@Component
-export default class VendorLinkingWarningAlert extends Vue {
-  @Prop({ default: '' }) title: string
-  @Prop({ required: true }) body: string
-  @Prop({ default: '' }) note: string
-}
+export default defineComponent({
+  name: 'VendorLinkingWarningAlert',
+  props: {
+    title: {
+      type: String,
+      default: ''
+    },
+    body: {
+      type: String,
+      required: true
+    },
+    note: {
+      type: String,
+      default: ''
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>

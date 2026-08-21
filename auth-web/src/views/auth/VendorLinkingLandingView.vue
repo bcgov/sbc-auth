@@ -24,7 +24,7 @@
       </v-col>
     </v-row>
   </v-container>
-  <vendor-linking-login-card
+  <VendorLinkingLoginCard
     v-else
     :vendor-account-id="vendorAccountId"
     :return-url="returnUrl"
@@ -32,32 +32,44 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Pages, SessionStorageKeys } from '@/util/constants'
+import { computed, defineComponent, getCurrentInstance, onMounted } from '@vue/composition-api'
 import ConfigHelper from '@/util/config-helper'
 import VendorLinkingLoginCard from '@/components/auth/vendor-linking/VendorLinkingLoginCard.vue'
 import { isValidVendorLinkingParams } from '@/util/vendor-connection-util'
 
-@Component({
+export default defineComponent({
+  name: 'VendorLinkingLandingView',
   components: {
     VendorLinkingLoginCard
-  }
-})
-export default class VendorLinkingLandingView extends Vue {
-  @Prop({ default: '' }) vendorAccountId: string
-  @Prop({ default: '' }) returnUrl: string
+  },
+  props: {
+    vendorAccountId: {
+      type: String,
+      default: ''
+    },
+    returnUrl: {
+      type: String,
+      default: ''
+    }
+  },
+  setup (props) {
+    const instance = getCurrentInstance()
 
-  get paramsInvalid (): boolean {
-    return !isValidVendorLinkingParams(this.vendorAccountId, this.returnUrl)
-  }
+    const paramsInvalid = computed(() => !isValidVendorLinkingParams(props.vendorAccountId, props.returnUrl))
 
-  private mounted () {
-    if (!this.paramsInvalid && ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
-      this.$router.push({
-        path: `/${Pages.VENDOR_LINKING}/confirm`,
-        query: { vendorAccountId: this.vendorAccountId, returnUrl: this.returnUrl }
-      })
+    onMounted(() => {
+      if (!paramsInvalid.value && ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
+        instance.proxy.$router.push({
+          path: `/${Pages.VENDOR_LINKING}/confirm`,
+          query: { vendorAccountId: props.vendorAccountId, returnUrl: props.returnUrl }
+        })
+      }
+    })
+
+    return {
+      paramsInvalid
     }
   }
-}
+})
 </script>

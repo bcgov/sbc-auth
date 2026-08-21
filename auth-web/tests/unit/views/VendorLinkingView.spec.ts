@@ -70,7 +70,7 @@ describe('VendorLinkingView.vue', () => {
     )
   })
 
-  it('shows the redirect-URL-specific failure copy and callback params when the API rejects the URL', async () => {
+  it('shows the redirect-URL-specific failure title/body and callback params when the API rejects the URL', async () => {
     vi.spyOn(LinkingKeysService, 'createOrgLinkingKey').mockRejectedValue({
       response: { status: 400, data: { code: 'REDIRECT_URL_INVALID', message: 'not registered for this vendor' } }
     })
@@ -80,13 +80,10 @@ describe('VendorLinkingView.vue', () => {
     expect(wrapper.vm.resultSuccess).toBe(false)
     expect(wrapper.vm.failureTitle).toBe('vendorLinkingResultFailureRedirectTitle')
     expect(wrapper.vm.failureBody).toBe('vendorLinkingResultFailureRedirectBody')
-
-    // The rejected returnUrl is untrusted (unregistered for this vendor) so we don't provide the return button
-    expect(wrapper.find("[data-test='vendor-linking-result-return']").exists()).toBe(false)
     expect(window.location.replace).not.toHaveBeenCalled()
   })
 
-  it('shows the generic failure copy and a working return button for a non-redirect-URL error', async () => {
+  it('shows the generic failure title/body for a non-redirect-URL error', async () => {
     vi.spyOn(LinkingKeysService, 'createOrgLinkingKey').mockRejectedValue({
       response: { status: 500, data: { message: 'server exploded' } }
     })
@@ -95,7 +92,6 @@ describe('VendorLinkingView.vue', () => {
 
     expect(wrapper.vm.failureTitle).toBe('vendorLinkingResultFailureGenericTitle')
     expect(wrapper.vm.failureBody).toBe('vendorLinkingResultFailureGenericBody')
-    expect(wrapper.find("[data-test='vendor-linking-result-return']").exists()).toBe(true)
   })
 
   it('shows the inline no-eligible-accounts message with no auto-redirect when the user has no accounts at all', async () => {

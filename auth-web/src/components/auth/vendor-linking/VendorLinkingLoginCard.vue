@@ -9,7 +9,7 @@
           {{ $t('vendorLinkingLoginTitle') }}
         </h1>
         <div class="vendor-linking-login-card-content mx-auto text-left">
-          <vendor-linking-warning-alert
+          <VendorLinkingWarningAlert
             data-test="vendor-linking-login-alert"
             :title="$t('vendorLinkingLoginAlertTitle')"
             :body="$t('vendorLinkingLoginAlertBody')"
@@ -69,27 +69,41 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { defineComponent, getCurrentInstance } from '@vue/composition-api'
 import ConfigHelper from '@/util/config-helper'
 import { Pages } from '@/util/constants'
 import VendorLinkingWarningAlert from '@/components/auth/vendor-linking/VendorLinkingWarningAlert.vue'
 import { buildSigninPath } from '@/util/vendor-connection-util'
 
-@Component({
+export default defineComponent({
+  name: 'VendorLinkingLoginCard',
   components: {
     VendorLinkingWarningAlert
+  },
+  props: {
+    vendorAccountId: {
+      type: String,
+      required: true
+    },
+    returnUrl: {
+      type: String,
+      required: true
+    }
+  },
+  setup (props) {
+    const instance = getCurrentInstance()
+
+    const redirectToSignin = (idpHint: string) => {
+      const confirmUrl = `${ConfigHelper.getSelfURL()}/${Pages.VENDOR_LINKING}/confirm` +
+        `?vendorAccountId=${props.vendorAccountId}&returnUrl=${encodeURIComponent(props.returnUrl)}`
+      instance.proxy.$router.push(buildSigninPath(idpHint, confirmUrl))
+    }
+
+    return {
+      redirectToSignin
+    }
   }
 })
-export default class VendorLinkingLoginCard extends Vue {
-  @Prop({ required: true }) vendorAccountId: string
-  @Prop({ required: true }) returnUrl: string
-
-  redirectToSignin (idpHint: string) {
-    const confirmUrl = `${ConfigHelper.getSelfURL()}/${Pages.VENDOR_LINKING}/confirm` +
-      `?vendorAccountId=${this.vendorAccountId}&returnUrl=${encodeURIComponent(this.returnUrl)}`
-    this.$router.push(buildSigninPath(idpHint, confirmUrl))
-  }
-}
 </script>
 
 <style lang="scss" scoped>
