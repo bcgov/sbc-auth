@@ -110,7 +110,7 @@ def test_generate_without_vendor_leaves_redirect_url_unset(session):  # pylint:d
 
 
 def test_generate_vendor_without_redirect_url_rejected(session):  # pylint:disable=unused-argument
-    """Assert that vendor_account_id without redirect_url is rejected."""
+    """Assert that vendor_account_id without redirect_url is rejected as a missing redirect URL."""
     lawfirm = factory_org_model()
     vendor = factory_org_model()
     factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
@@ -118,7 +118,7 @@ def test_generate_vendor_without_redirect_url_rejected(session):  # pylint:disab
     with pytest.raises(BusinessException) as exc_info:
         AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id)
 
-    assert exc_info.value.code == Error.REDIRECT_URL_INVALID.name
+    assert exc_info.value.code == Error.REDIRECT_URL_REQUIRED.name
 
 
 def test_generate_redirect_url_without_vendor_rejected(session):  # pylint:disable=unused-argument
@@ -128,7 +128,7 @@ def test_generate_redirect_url_without_vendor_rejected(session):  # pylint:disab
     with pytest.raises(BusinessException) as exc_info:
         AccountLinkingKeyService.generate(lawfirm.id, redirect_url=_REDIRECT_URL)
 
-    assert exc_info.value.code == Error.REDIRECT_URL_INVALID.name
+    assert exc_info.value.code == Error.VENDOR_ACCOUNT_ID_REQUIRED.name
 
 
 def test_generate_unregistered_redirect_url_rejected(session):  # pylint:disable=unused-argument

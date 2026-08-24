@@ -104,7 +104,7 @@ def test_generate_linking_key_with_vendor(client, jwt, session):  # pylint:disab
 
 
 def test_generate_linking_key_vendor_without_redirect_url_rejected(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that vendorAccountId without redirectUrl is rejected."""
+    """Assert that vendorAccountId without redirectUrl is rejected as a missing redirect URL."""
     user = factory_user_model(TestUserInfo.user1)
     lawfirm = factory_org_model()
     vendor = factory_org_model()
@@ -119,7 +119,7 @@ def test_generate_linking_key_vendor_without_redirect_url_rejected(client, jwt, 
     )
 
     assert rv.status_code == HTTPStatus.BAD_REQUEST
-    assert rv.json.get("code") == "REDIRECT_URL_INVALID"
+    assert rv.json.get("code") == "REDIRECT_URL_REQUIRED"
 
 
 def test_generate_linking_key_unregistered_redirect_url_rejected(client, jwt, session):  # pylint:disable=unused-argument

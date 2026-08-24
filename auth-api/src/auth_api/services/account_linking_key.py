@@ -50,10 +50,7 @@ class AccountLinkingKey:
         rejected attempt doesn't revoke an existing key.
         In all cases any existing PENDING key for the account is revoked first (one PENDING at a time).
         """
-        if bool(vendor_account_id) != bool(redirect_url):
-            raise BusinessException(Error.REDIRECT_URL_INVALID, None)
-        if redirect_url and not OrgRedirectUrlService.is_valid_redirect_url(vendor_account_id, redirect_url):
-            raise BusinessException(Error.REDIRECT_URL_INVALID, None)
+        AccountLinkingKey._validate_vendor_redirect(vendor_account_id, redirect_url)
 
         AccountLinkingKey._revoke_superseded(AccountLinkingKeyModel.find_pending_by_account(account_id))
 
@@ -145,6 +142,22 @@ class AccountLinkingKey:
     # -- private helpers --
 
     @staticmethod
+    def _validate_vendor_redirect(vendor_account_id: int | None, redirect_url: str | None) -> None:
+        """Raise BusinessException if vendor_account_id/redirect_url are missing or unregistered.
+
+        Both omitted is valid (PENDING key). Otherwise both are required, and redirect_url
+        must be one of vendor_account_id's registered redirect URLs.
+        """
+        if not vendor_account_id and not redirect_url:
+            return
+        if not redirect_url:
+            raise BusinessException(Error.REDIRECT_URL_REQUIRED, None)
+        if not vendor_account_id:
+            raise BusinessException(Error.VENDOR_ACCOUNT_ID_REQUIRED, None)
+        if not OrgRedirectUrlService.is_valid_redirect_url(vendor_account_id, redirect_url):
+            raise BusinessException(Error.REDIRECT_URL_INVALID, None)
+
+    @staticmethod
     def _revoke_superseded(record: AccountLinkingKeyModel | None) -> None:
         """Mark a superseded key REVOKED and flush it within the current transaction."""
         if record:
@@ -185,4 +198,3 @@ class AccountLinkingKey:
             publish_to_mailer(notification_type, data=data)
         except Exception as e:  # noqa: B901
             current_app.logger.warning(f"AccountLinkingKey._publish_mailer_notification failed: {e}")
-
