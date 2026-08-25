@@ -84,6 +84,26 @@ def test_create_rejects_wildcard_not_at_end(session):  # pylint:disable=unused-a
     assert exc_info.value.code == Error.INVALID_REDIRECT_URL.name
 
 
+def test_create_rejects_url_with_query_string(session):  # pylint:disable=unused-argument
+    """Assert that a URL carrying a query string is rejected."""
+    org = factory_org_model()
+
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.create(org.id, "https://vendor.example.com/callback?ref=abc")
+
+    assert exc_info.value.code == Error.INVALID_REDIRECT_URL.name
+
+
+def test_create_rejects_url_with_fragment(session):  # pylint:disable=unused-argument
+    """Assert that a URL carrying a fragment is rejected."""
+    org = factory_org_model()
+
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.create(org.id, "https://vendor.example.com/callback#section")
+
+    assert exc_info.value.code == Error.INVALID_REDIRECT_URL.name
+
+
 def test_create_rejects_duplicate_url(session):  # pylint:disable=unused-argument
     """Assert that duplicate URLs for the same org are rejected."""
     org = factory_org_model()
@@ -239,3 +259,45 @@ def test_is_valid_redirect_url_wildcard_does_not_match_other_prefix(session):  #
     factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback/*")
 
     assert OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/other/success") is False
+
+
+def test_is_valid_redirect_url_ignores_query_string(session):  # pylint:disable=unused-argument
+    """Assert that a query string on the incoming URL does not affect matching."""
+    org = factory_org_model()
+    factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback")
+
+    assert (
+        OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/callback?ref=abc&x=1") is True
+    )
+
+
+def test_is_valid_redirect_url_ignores_fragment(session):  # pylint:disable=unused-argument
+    """Assert that a fragment on the incoming URL does not affect matching."""
+    org = factory_org_model()
+    factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback")
+
+    assert OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/callback#section") is True
+
+
+def test_is_valid_redirect_url_wildcard_ignores_query_string(session):  # pylint:disable=unused-argument
+    """Assert that a wildcard match also ignores the query string on the incoming URL."""
+    org = factory_org_model()
+    factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback/*")
+
+    assert OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/callback/ok?ref=abc") is True
+
+
+def test_is_valid_redirect_url_does_not_match_sibling_path(session):  # pylint:disable=unused-argument
+    """Assert that a registered URL does not match a path that merely starts with it."""
+    org = factory_org_model()
+    factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback")
+
+    assert OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/callback-other") is False
+
+
+def test_is_valid_redirect_url_wildcard_does_not_match_sibling_path(session):  # pylint:disable=unused-argument
+    """Assert that the trailing slash in a wildcard acts as a path boundary."""
+    org = factory_org_model()
+    factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback/*")
+
+    assert OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/callback-other/x") is False

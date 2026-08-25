@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -72,14 +72,18 @@ class OrgRedirectUrl:
     def is_valid_redirect_url(org_id: int, url: str) -> bool:
         """Return True if the given URL matches a redirect URL registered for the org.
 
-        A registered URL ending in ``/*`` matches any URL sharing that path prefix.
+        The incoming URL's query string and fragment are ignored, so a registered
+        ``/callback`` accepts ``/callback?ref=abc``. A registered URL ending in ``/*`` also
+        matches any URL sharing that path prefix. The trailing slash acts as a boundary,
+        so ``/callback/*`` never matches ``/callback-other``.
         """
+        incoming = urlunparse(urlparse(url)._replace(query="", fragment=""))
         for record in OrgRedirectUrlModel.find_by_org_id(org_id):
             pattern = record.redirect_url
             if pattern.endswith("/*"):
-                if url.startswith(pattern[:-1]):
+                if incoming.startswith(pattern[:-1]):
                     return True
-            elif url == pattern:
+            elif incoming == pattern:
                 return True
         return False
 
@@ -89,6 +93,8 @@ class OrgRedirectUrl:
 
         A trailing ``/*`` is allowed to mark the URL as a path-prefix wildcard match.
         A ``*`` anywhere else in the URL is rejected.
+        A query string or fragment is rejected — query params can be dynamic, we will validate
+        on the path itself.
         """
         url = url.strip()
         if not url:
@@ -98,5 +104,7 @@ class OrgRedirectUrl:
         base_url = url[:-1] if url.endswith("/*") else url
         parsed = urlparse(base_url)
         if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            raise BusinessException(Error.INVALID_REDIRECT_URL, None)
+        if parsed.query or parsed.fragment:
             raise BusinessException(Error.INVALID_REDIRECT_URL, None)
         return url
