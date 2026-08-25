@@ -56,6 +56,7 @@ from .pubsub_message_processing import PubSubMessageProcessing
 from .staff_remark_code import StaffRemarkCode
 from .suspension_reason_code import SuspensionReasonCode
 from .task import Task
+from .tenant import Tenant
 from .user import User
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode

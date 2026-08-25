@@ -51,6 +51,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
             "parent_code",
             "premium_only",
             "skip_gov_review",
+            "tenant_key",
             "type_code",
             "url",
         ]
@@ -70,6 +71,9 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     )  # Product linked to to another product, like business and NR
     keycloak_group = Column(String(100), nullable=True)
     url = Column(String(100), nullable=True)
+    tenant_key = Column(
+        String(50), ForeignKey("tenants.tenant_key"), nullable=True, index=True
+    )  # Owning tenant; nullable during rollout
 
     @classmethod
     def find_by_code(cls, code: str) -> ProductCode:
