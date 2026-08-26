@@ -18,6 +18,7 @@ export interface AccountLinkingKey {
   createdBy?: string
   lastUsed?: string
   status?: string
+  linkingKey?: string
 }
 
 export interface AccountLinkingKeysResponse {
@@ -27,6 +28,12 @@ export interface AccountLinkingKeysResponse {
 export interface LinkingKeyActionDetails {
   orgId: number
   keyId: number
+}
+
+export interface CreateLinkingKeyRequest {
+  orgId: number
+  vendorAccountId: number
+  returnUrl: string
 }
 
 /**

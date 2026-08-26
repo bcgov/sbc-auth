@@ -1,3 +1,4 @@
+import * as VendorConnectionUtil from '@/util/vendor-connection-util'
 import {
   CreatAccountBreadcrumb,
   InvoluntaryDissolutionBreadcrumb,
@@ -73,6 +74,8 @@ import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import UpdateAccountView from '@/views/auth/create-account/UpdateAccountView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
+import VendorLinkingLandingView from '@/views/auth/VendorLinkingLandingView.vue'
+import VendorLinkingView from '@/views/auth/VendorLinkingView.vue'
 import { ViewAllTransactions } from '@/views'
 
 function redirectToBusinessDashboard (to) {
@@ -84,6 +87,13 @@ function redirectToBusinessDashboard (to) {
 
   window.location.href = redirectUrl
   return false // Stop the navigation, as we're redirecting externally
+}
+
+function requireAccountLinkingEnabled (to, from, next) {
+  if (VendorConnectionUtil.isAccountLinkingDisabled()) {
+    return next({ path: '/notfound' })
+  }
+  next()
 }
 
 function mapReturnPayVars (route: any) {
@@ -302,6 +312,28 @@ export function getRoutes (): RouteConfig[] {
       ]
     },
     {
+      path: `/${Pages.VENDOR_LINKING}`,
+      name: 'vendor-linking',
+      component: VendorLinkingLandingView,
+      props: (route) => ({
+        vendorAccountId: route.query.vendorAccountId,
+        returnUrl: route.query.returnUrl
+      }),
+      meta: { requiresAuth: false, showNavBar: true },
+      beforeEnter: requireAccountLinkingEnabled
+    },
+    {
+      path: `/${Pages.VENDOR_LINKING}/confirm`,
+      name: 'vendor-linking-confirm',
+      component: VendorLinkingView,
+      props: (route) => ({
+        vendorAccountId: route.query.vendorAccountId,
+        returnUrl: route.query.returnUrl
+      }),
+      meta: { requiresAuth: true, requiresProfile: true },
+      beforeEnter: requireAccountLinkingEnabled
+    },
+    {
       path: '/account-switching',
       name: 'accountswitching',
       component: AccountSwitching,
@@ -366,6 +398,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/setup-account-success',
       name: 'setup-account-success',
       component: AccountCreationSuccessView,
+      props: (route) => ({ redirectToUrl: route.query.redirectToUrl }),
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {

@@ -1,5 +1,6 @@
 import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
 import { useOrgStore, useUserStore } from '@/stores'
+import AccountSelectList from '@/components/auth/common/AccountSelectList.vue'
 import { AccountStatus } from '@/util/constants'
 import DuplicateAccountWarningView from '@/views/auth/create-account/DuplicateAccountWarningView.vue'
 import { OrgWithAddress } from '@/models/Organization'
@@ -110,8 +111,8 @@ describe('DuplicateAccountWarningView.vue', () => {
     await Vue.nextTick()
     const stub = vi.fn()
     wrapper.setMethods({ navigateToRedirectUrl: stub })
-    wrapper.find("[data-test='goto-access-account-button']").trigger('click')
-    expect(wrapper.vm.navigateToRedirectUrl).toBeCalled()
+    wrapper.findComponent(AccountSelectList).vm.$emit('select', 2446)
+    expect(wrapper.vm.navigateToRedirectUrl).toBeCalledWith(2446)
 
     wrapper.setMethods({ createAccount: stub })
     wrapper.find("[data-test='goto-create-account-button']").trigger('click')

@@ -16,24 +16,31 @@
 from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
+import pytest
 from freezegun import freeze_time
 from sbc_common_components.utils.enums import QueueMessageTypes
 
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.models.account_linking_key import AccountLinkingKey as AccountLinkingKeyModel
 from auth_api.services.account_linking_key import AccountLinkingKey as AccountLinkingKeyService
 from auth_api.utils.enums import LinkingKeyStatus
 from tests.utilities.factory_utils import (
     factory_linking_key_model,
     factory_org_model,
+    factory_redirect_url_model,
 )
+
+_REDIRECT_URL = "https://vendor.example.com/callback"
 
 
 def test_generate_creates_key(session):  # pylint:disable=unused-argument
     """Assert that generate creates a new active key bound to a vendor."""
     lawfirm = factory_org_model()
     vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
 
-    record = AccountLinkingKeyService.generate(lawfirm.id, vendor.id)
+    record = AccountLinkingKeyService.generate(lawfirm.id, vendor.id, _REDIRECT_URL)
 
     assert record.id is not None
     assert record.linking_key
@@ -42,14 +49,16 @@ def test_generate_creates_key(session):  # pylint:disable=unused-argument
     assert record.status == LinkingKeyStatus.ACTIVE.value
     assert record.expires_on > datetime.now(UTC)
     assert record.last_used is None
+    assert record.redirect_url == _REDIRECT_URL
 
 
 def test_generate_with_vendor_binds_immediately(session):  # pylint:disable=unused-argument
     """Assert that vendor_account_id is set at generation."""
     lawfirm = factory_org_model()
     vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
 
-    record = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id)
+    record = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id, redirect_url=_REDIRECT_URL)
 
     assert record.vendor_account_id == vendor.id
 
@@ -58,11 +67,12 @@ def test_generate_for_same_vendor_revokes_previous(session):  # pylint:disable=u
     """Assert that regenerating for the same vendor revokes the old key."""
     lawfirm = factory_org_model()
     vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
 
-    first = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id)
+    first = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id, redirect_url=_REDIRECT_URL)
     first_key = first.linking_key
 
-    second = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id)
+    second = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id, redirect_url=_REDIRECT_URL)
 
     assert second.linking_key != first_key
     assert second.status == LinkingKeyStatus.ACTIVE.value
@@ -76,9 +86,11 @@ def test_generate_different_vendors_coexist(session):  # pylint:disable=unused-a
     lawfirm = factory_org_model()
     vendor_a = factory_org_model()
     vendor_b = factory_org_model()
+    factory_redirect_url_model(org_id=vendor_a.id, redirect_url=_REDIRECT_URL)
+    factory_redirect_url_model(org_id=vendor_b.id, redirect_url=_REDIRECT_URL)
 
-    key_a = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor_a.id)
-    key_b = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor_b.id)
+    key_a = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor_a.id, redirect_url=_REDIRECT_URL)
+    key_b = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor_b.id, redirect_url=_REDIRECT_URL)
 
     assert key_a.status == LinkingKeyStatus.ACTIVE.value
     assert key_b.status == LinkingKeyStatus.ACTIVE.value
@@ -86,6 +98,68 @@ def test_generate_different_vendors_coexist(session):  # pylint:disable=unused-a
 
     active = AccountLinkingKeyModel.find_by_account_id(lawfirm.id)
     assert len(active) == 2
+
+
+def test_generate_without_vendor_leaves_redirect_url_unset(session):  # pylint:disable=unused-argument
+    """Assert that a PENDING key created without a vendor has no redirect_url persisted."""
+    lawfirm = factory_org_model()
+
+    record = AccountLinkingKeyService.generate(lawfirm.id)
+
+    assert record.redirect_url is None
+
+
+def test_generate_vendor_without_redirect_url_rejected(session):  # pylint:disable=unused-argument
+    """Assert that vendor_account_id without redirect_url is rejected as a missing redirect URL."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
+
+    with pytest.raises(BusinessException) as exc_info:
+        AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id)
+
+    assert exc_info.value.code == Error.REDIRECT_URL_REQUIRED.name
+
+
+def test_generate_redirect_url_without_vendor_rejected(session):  # pylint:disable=unused-argument
+    """Assert that redirect_url without vendor_account_id is rejected."""
+    lawfirm = factory_org_model()
+
+    with pytest.raises(BusinessException) as exc_info:
+        AccountLinkingKeyService.generate(lawfirm.id, redirect_url=_REDIRECT_URL)
+
+    assert exc_info.value.code == Error.VENDOR_ACCOUNT_ID_REQUIRED.name
+
+
+def test_generate_unregistered_redirect_url_rejected(session):  # pylint:disable=unused-argument
+    """Assert that a redirect_url not registered for the vendor is rejected."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
+
+    with pytest.raises(BusinessException) as exc_info:
+        AccountLinkingKeyService.generate(
+            lawfirm.id, vendor_account_id=vendor.id, redirect_url="https://not-registered.example.com/cb"
+        )
+
+    assert exc_info.value.code == Error.REDIRECT_URL_INVALID.name
+
+
+def test_generate_rejected_attempt_does_not_revoke_existing_key(session):  # pylint:disable=unused-argument
+    """Assert that a rejected generate() call leaves an existing key untouched."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
+
+    existing = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id, redirect_url=_REDIRECT_URL)
+
+    with pytest.raises(BusinessException):
+        AccountLinkingKeyService.generate(
+            lawfirm.id, vendor_account_id=vendor.id, redirect_url="https://not-registered.example.com/cb"
+        )
+
+    unchanged = AccountLinkingKeyModel.query.get(existing.id)
+    assert unchanged.status == LinkingKeyStatus.ACTIVE.value
 
 
 def test_get_all_returns_active_keys(session):  # pylint:disable=unused-argument
@@ -202,9 +276,10 @@ def test_generate_with_vendor_publishes_link_created(session):  # pylint:disable
     """Assert that generating an immediately-active key publishes an ACCOUNT_LINK_CREATED notification."""
     lawfirm = factory_org_model()
     vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
 
     with patch("auth_api.services.account_linking_key.publish_to_mailer") as mock_publish:
-        record = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id)
+        record = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id, redirect_url=_REDIRECT_URL)
 
     mock_publish.assert_called_once()
     notification_type, kwargs = mock_publish.call_args.args[0], mock_publish.call_args.kwargs

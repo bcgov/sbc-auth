@@ -21,10 +21,13 @@ from datetime import UTC, datetime, timedelta
 from flask import current_app
 from sbc_common_components.utils.enums import QueueMessageTypes
 
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.models.account_linking_key import AccountLinkingKey as AccountLinkingKeyModel
 from auth_api.models.dataclass import Activity
 from auth_api.models.db import db
 from auth_api.services.activity_log_publisher import ActivityLogPublisher
+from auth_api.services.org_redirect_url import OrgRedirectUrl as OrgRedirectUrlService
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.date import pacific_today_isoformat, utc_to_pacific_isoformat
 from auth_api.utils.enums import ActivityAction, LinkingKeyStatus
@@ -34,13 +37,21 @@ class AccountLinkingKey:
     """Service for managing account linking keys."""
 
     @staticmethod
-    def generate(account_id: int, vendor_account_id: int | None = None) -> AccountLinkingKeyModel:
+    def generate(
+        account_id: int, vendor_account_id: int | None = None, redirect_url: str | None = None
+    ) -> AccountLinkingKeyModel:
         """Generate a new linking key for the source account.
 
-        If vendor_account_id is provided the key is ACTIVE and immediately usable.
-        If omitted a PENDING key is created — the vendor must call bind() to activate it.
-        In both cases any existing PENDING key for the account is revoked first (one PENDING at a time).
+        If vendor_account_id is provided the key is ACTIVE and immediately usable, and
+        redirect_url is then required and must match one of vendor_account_id's registered
+        redirect URLs. If both are omitted a PENDING key is created — the vendor must call
+        bind() to activate it. Raises BusinessException if only one of the two is provided,
+        or if redirect_url doesn't match — checked before any other side effect, so a
+        rejected attempt doesn't revoke an existing key.
+        In all cases any existing PENDING key for the account is revoked first (one PENDING at a time).
         """
+        AccountLinkingKey._validate_vendor_redirect(vendor_account_id, redirect_url)
+
         AccountLinkingKey._revoke_superseded(AccountLinkingKeyModel.find_pending_by_account(account_id))
 
         if vendor_account_id:
@@ -53,6 +64,7 @@ class AccountLinkingKey:
             linking_key=secrets.token_urlsafe(32),
             account_id=account_id,
             vendor_account_id=vendor_account_id,
+            redirect_url=redirect_url,
             status=status,
             expires_on=datetime.now(UTC) + timedelta(days=current_app.config.get("LINKING_KEY_EXPIRY_DAYS", 365)),
         )
@@ -130,6 +142,22 @@ class AccountLinkingKey:
     # -- private helpers --
 
     @staticmethod
+    def _validate_vendor_redirect(vendor_account_id: int | None, redirect_url: str | None) -> None:
+        """Raise BusinessException if vendor_account_id/redirect_url are missing or unregistered.
+
+        Both omitted is valid (PENDING key). Otherwise both are required, and redirect_url
+        must be one of vendor_account_id's registered redirect URLs.
+        """
+        if not vendor_account_id and not redirect_url:
+            return
+        if not redirect_url:
+            raise BusinessException(Error.REDIRECT_URL_REQUIRED, None)
+        if not vendor_account_id:
+            raise BusinessException(Error.VENDOR_ACCOUNT_ID_REQUIRED, None)
+        if not OrgRedirectUrlService.is_valid_redirect_url(vendor_account_id, redirect_url):
+            raise BusinessException(Error.REDIRECT_URL_INVALID, None)
+
+    @staticmethod
     def _revoke_superseded(record: AccountLinkingKeyModel | None) -> None:
         """Mark a superseded key REVOKED and flush it within the current transaction."""
         if record:
@@ -170,4 +198,3 @@ class AccountLinkingKey:
             publish_to_mailer(notification_type, data=data)
         except Exception as e:  # noqa: B901
             current_app.logger.warning(f"AccountLinkingKey._publish_mailer_notification failed: {e}")
-

@@ -33,6 +33,7 @@ class AccountLinkingKeySchema(BaseSchema):  # pylint: disable=too-many-ancestors
     account_id = fields.Integer(data_key="accountId")
     vendor_account_id = fields.Integer(data_key="vendorAccountId", allow_none=True)
     vendor_account_name = fields.Method("get_vendor_account_name", data_key="vendorAccountName")
+    redirect_url = fields.String(data_key="redirectUrl", allow_none=True)
     expires_on = fields.DateTime(data_key="expiresOn")
     last_used = fields.DateTime(data_key="lastUsed", allow_none=True)
     created = fields.DateTime(data_key="createdOn")
