@@ -205,6 +205,42 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
             "PAD",
             "Updated the account PAD information",
         ),
+        (
+            ActivityAction.LINKING_KEY_GENERATED.value,
+            "",
+            "Super Vendor ABC (55)",
+            "Generated a linking key for vendor account Super Vendor ABC (55)",
+        ),
+        (
+            ActivityAction.LINKING_KEY_GENERATED.value,
+            "",
+            "",
+            "Generated a pending linking key",
+        ),
+        (
+            ActivityAction.LINKING_KEY_REVOKED.value,
+            "",
+            "Super Vendor ABC (55)",
+            "Revoked a linking key for vendor account Super Vendor ABC (55)",
+        ),
+        (
+            ActivityAction.LINKING_KEY_REVOKED.value,
+            "",
+            "",
+            "Revoked a pending linking key",
+        ),
+        (
+            ActivityAction.LINKING_KEY_BOUND.value,
+            "",
+            "Super Vendor ABC (55)",
+            "Bound a pending linking key to vendor account Super Vendor ABC (55)",
+        ),
+        (
+            ActivityAction.LINKING_KEY_EXTENDED.value,
+            "",
+            "Super Vendor ABC (55)",
+            "Extended a linking key for vendor account Super Vendor ABC (55)",
+        ),
     ],
 )
 def test_activity_log_actions(client, jwt, session, action, item_name, item_value, expected_message):  # pylint:disable=unused-argument

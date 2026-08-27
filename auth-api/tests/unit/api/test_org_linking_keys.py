@@ -15,7 +15,10 @@
 
 import copy
 import json
+from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
+
+from dateutil.relativedelta import relativedelta
 
 from auth_api.utils.enums import LinkingKeyStatus
 from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo
@@ -343,3 +346,88 @@ def test_linking_keys_disabled_by_flag(client, jwt, session, monkeypatch):  # py
         client.delete(f"/api/v1/orgs/{org.id}/linking-keys/1", headers=headers).status_code
         == HTTPStatus.NOT_IMPLEMENTED
     )
+    assert (
+        client.patch(f"/api/v1/orgs/{org.id}/linking-keys/1", headers=headers).status_code == HTTPStatus.NOT_IMPLEMENTED
+    )
+
+
+def test_extend_linking_key(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that PATCH with the extend action pushes the expiry out by a year."""
+    user = factory_user_model(TestUserInfo.user1)
+    org = factory_org_model()
+    vendor = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    original_expiry = datetime.now(UTC) + timedelta(days=10)
+    record = factory_linking_key_model(account_id=org.id, vendor_account_id=vendor.id, expires_on=original_expiry)
+
+    rv = client.patch(
+        f"/api/v1/orgs/{org.id}/linking-keys/{record.id}",
+        headers=_account_holder_headers(jwt, user),
+        content_type="application/json",
+        data=json.dumps({"action": "extend"}),
+    )
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json.get("linkingKey") is None
+    assert datetime.fromisoformat(rv.json.get("expiresOn")).date() == (original_expiry + relativedelta(years=1)).date()
+
+
+def test_extend_linking_key_invalid_action_rejected(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an unrecognised action is rejected."""
+    user = factory_user_model(TestUserInfo.user1)
+    org = factory_org_model()
+    vendor = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    record = factory_linking_key_model(
+        account_id=org.id, vendor_account_id=vendor.id, expires_on=datetime.now(UTC) + timedelta(days=10)
+    )
+
+    rv = client.patch(
+        f"/api/v1/orgs/{org.id}/linking-keys/{record.id}",
+        headers=_account_holder_headers(jwt, user),
+        content_type="application/json",
+        data=json.dumps({"action": "bogus"}),
+    )
+
+    assert rv.status_code == HTTPStatus.BAD_REQUEST
+    assert rv.json.get("code") == "PATCH_INVALID_ACTION"
+
+
+def test_extend_linking_key_outside_window_rejected(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a key well outside the eligibility window cannot be extended."""
+    user = factory_user_model(TestUserInfo.user1)
+    org = factory_org_model()
+    vendor = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    record = factory_linking_key_model(
+        account_id=org.id, vendor_account_id=vendor.id, expires_on=datetime.now(UTC) + timedelta(days=90)
+    )
+
+    rv = client.patch(
+        f"/api/v1/orgs/{org.id}/linking-keys/{record.id}",
+        headers=_account_holder_headers(jwt, user),
+        content_type="application/json",
+        data=json.dumps({"action": "extend"}),
+    )
+
+    assert rv.status_code == HTTPStatus.BAD_REQUEST
+    assert rv.json.get("code") == "LINKING_KEY_NOT_NEAR_EXPIRY"
+
+
+def test_extend_wrong_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that PATCH returns 404 when the key does not belong to the given org."""
+    user = factory_user_model(TestUserInfo.user1)
+    org_a = factory_org_model()
+    org_b = factory_org_model()
+    factory_membership_model(user.id, org_a.id)
+    factory_membership_model(user.id, org_b.id)
+    record = factory_linking_key_model(account_id=org_b.id, expires_on=datetime.now(UTC) + timedelta(days=10))
+
+    rv = client.patch(
+        f"/api/v1/orgs/{org_a.id}/linking-keys/{record.id}",
+        headers=_account_holder_headers(jwt, user),
+        content_type="application/json",
+        data=json.dumps({"action": "extend"}),
+    )
+
+    assert rv.status_code == HTTPStatus.NOT_FOUND

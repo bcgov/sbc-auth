@@ -18,6 +18,7 @@ from __future__ import annotations
 import secrets
 from datetime import UTC, datetime, timedelta
 
+from dateutil.relativedelta import relativedelta
 from flask import current_app
 from sbc_common_components.utils.enums import QueueMessageTypes
 
@@ -95,6 +96,24 @@ class AccountLinkingKey:
             data = {"linkRemovalDate": pacific_today_isoformat()}
             AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_REMOVED.value, record, data)
         return True
+
+    @staticmethod
+    def extend(key_id: int, account_id: int) -> AccountLinkingKeyModel | None:
+        """Extend an ACTIVE key by one year from its current expiry for an account."""
+        record = AccountLinkingKeyModel.find_by_id(key_id, account_id)
+        if not record:
+            return None
+        if record.status != LinkingKeyStatus.ACTIVE.value:
+            raise BusinessException(Error.INVALID_LINKING_KEY_STATE, None)
+        window_days = current_app.config.get("ACCOUNT_LINK_EXPIRY_REMINDER_DAYS", 30)
+        if record.expires_on > datetime.now(UTC) + timedelta(days=window_days):
+            raise BusinessException(Error.LINKING_KEY_NOT_NEAR_EXPIRY, None)
+
+        record.expires_on = record.expires_on + relativedelta(years=1)
+        record.save()
+
+        AccountLinkingKey._publish(ActivityAction.LINKING_KEY_EXTENDED.value, record)
+        return record
 
     @staticmethod
     def validate(key: str, vendor_account_id: int) -> AccountLinkingKeyModel | None:
