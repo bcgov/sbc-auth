@@ -65,7 +65,7 @@ from auth_api.utils.enums import (
 )
 from auth_api.utils.roles import ADMIN, COORDINATOR, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I001
 from auth_api.utils.user_context import UserContext, user_context
-from auth_api.utils.util import camelback2snake
+from auth_api.utils.util import camelback2snake, snake2camelback
 
 from .activity_log_publisher import ActivityLogPublisher
 from .affidavit import Affidavit as AffidavitService
@@ -284,9 +284,15 @@ class Org:  # pylint: disable=too-many-public-methods
         payment_method: str,
         mailing_address=None,
         is_new_org: bool = True,
+        scope: str = None,
         **kwargs,
     ):
-        """Add payment settings for the org."""
+        """Add payment settings for the org.
+
+        :param scope: optional. Forwarded to pay-api as a `?scope=` query param.
+            `cfs_account` tells pay-api to provision the CfsAccount for the
+            requested method but leave the org's default payment_method alone.
+        """
         try:
             pay_url = current_app.config.get("PAY_API_URL")
             pay_request = Org._build_payment_request(org_model, payment_info, payment_method, mailing_address, **kwargs)
@@ -308,8 +314,11 @@ class Org:  # pylint: disable=too-many-public-methods
                     additional_headers=additional_headers,
                 )
             else:
+                put_endpoint = f"{pay_url}/accounts/{org_model.id}"
+                if scope:
+                    put_endpoint = f"{put_endpoint}?scope={scope}"
                 response = RestService.put(
-                    endpoint=f"{pay_url}/accounts/{org_model.id}",
+                    endpoint=put_endpoint,
                     data=pay_request,
                     token=token,
                     raise_for_status=True,
@@ -345,8 +354,9 @@ class Org:  # pylint: disable=too-many-public-methods
         if payment_method:
             pay_request["paymentInfo"] = {"methodOfPayment": payment_method}
 
-        if mailing_address:
-            pay_request["contactInfo"] = mailing_address
+        contact_info = mailing_address or Org._get_org_contact_for_pay(org_model)
+        if contact_info:
+            pay_request["contactInfo"] = Org._to_pay_contact_shape(contact_info)
 
         if payment_method and org_model.bcol_account_id:
             pay_request["bcolAccountNumber"] = org_model.bcol_account_id
@@ -367,6 +377,24 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request["padTosAcceptedBy"] = kwargs["user_context"].user_name
 
         return pay_request
+
+    @staticmethod
+    def _get_org_contact_for_pay(org_model: OrgModel):
+        """Return the org's stored contact in auth's mailing_address shape, or None."""
+        if not org_model.contacts or org_model.contacts[0].contact is None:
+            return None
+        return snake2camelback(ContactSchema().dump(org_model.contacts[0].contact))
+
+    @staticmethod
+    def _to_pay_contact_shape(auth_contact: dict) -> dict:
+        """Translate auth's mailing_address keys to pay-api's contact_info keys."""
+        return {
+            "addressLine1": auth_contact.get("street"),
+            "city": auth_contact.get("city"),
+            "province": auth_contact.get("region"),
+            "postalCode": auth_contact.get("postalCode"),
+            "country": auth_contact.get("country"),
+        }
 
     @staticmethod
     def _validate_and_raise_error(org_info: dict):
@@ -434,8 +462,13 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.org = org
         contact_link.add_to_session()
 
-    def update_org(self, org_info):  # pylint: disable=too-many-locals, too-many-statements
-        """Update the passed organization with the new info."""
+    def update_org(self, org_info, scope: str = None):  # pylint: disable=too-many-locals, too-many-statements
+        """Update the passed organization with the new info.
+
+        :param scope: optional request-modifier forwarded to pay-api. Currently
+            supports `cfs_account` — provision the CfsAccount for the given
+            paymentMethod but do not change the org's default payment_method.
+        """
         current_app.logger.debug("<update_org ")
 
         has_org_updates: bool = False  # update the org table if this variable is set true
@@ -504,7 +537,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if name_updated or payment_info:
             payment_account_status, error = Org._create_payment_for_org(
-                mailing_address, self._model, payment_info, False
+                mailing_address, self._model, payment_info, False, scope=scope
             )
             if payment_account_status == PaymentAccountStatus.FAILED and error is not None:
                 current_app.logger.warning(f"Account update payment Error: {error}")
@@ -559,7 +592,7 @@ class Org:  # pylint: disable=too-many-public-methods
             )
 
     @staticmethod
-    def _create_payment_for_org(mailing_address, org, payment_info, is_new_org: bool = True):
+    def _create_payment_for_org(mailing_address, org, payment_info, is_new_org: bool = True, scope: str = None):
         """Create Or update payment info for org."""
         selected_payment_method = payment_info.get("paymentMethod", None)
         payment_method = None
@@ -571,7 +604,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if is_new_org or selected_payment_method:
             validator_obj = payment_type_validate(is_fatal=True, **arg_dict)
             payment_method = validator_obj.info.get("payment_type")
-        return Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org)
+        return Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org, scope=scope)
 
     @staticmethod
     def _create_gov_account_task(org_model: OrgModel):
