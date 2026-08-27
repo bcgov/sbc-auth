@@ -354,6 +354,7 @@ class ActivityAction(Enum):
     LINKING_KEY_GENERATED = "LINKING_KEY_GENERATED"
     LINKING_KEY_REVOKED = "LINKING_KEY_REVOKED"
     LINKING_KEY_BOUND = "LINKING_KEY_BOUND"
+    LINKING_KEY_EXTENDED = "LINKING_KEY_EXTENDED"
 
 
 class LinkingKeyStatus(Enum):
@@ -363,6 +364,12 @@ class LinkingKeyStatus(Enum):
     PENDING = "PENDING"
     REVOKED = "REVOKED"
     EXPIRED = "EXPIRED"
+
+
+class LinkingKeyPatchActions(Enum):
+    """Linking key patch actions."""
+
+    EXTEND = "extend"
 
 
 class PatchActions(Enum):

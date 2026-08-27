@@ -116,6 +116,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
             ActivityAction.LINKING_KEY_GENERATED.value: ActivityLog._linking_key_generated,
             ActivityAction.LINKING_KEY_REVOKED.value: ActivityLog._linking_key_revoked,
             ActivityAction.LINKING_KEY_BOUND.value: ActivityLog._linking_key_bound,
+            ActivityAction.LINKING_KEY_EXTENDED.value: ActivityLog._linking_key_extended,
         }.get(activity.action)
         return mapping(activity) if (mapping) else activity.action
 
@@ -295,6 +296,10 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _linking_key_bound(activity: ActivityLogModel) -> str:
         return f"Bound a pending linking key to vendor account {activity.item_value}"
+
+    @staticmethod
+    def _linking_key_extended(activity: ActivityLogModel) -> str:
+        return f"Extended a linking key for vendor account {activity.item_value}"
 
     @staticmethod
     def _mask_user_name(is_staff_access, user):

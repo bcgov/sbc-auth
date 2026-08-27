@@ -164,6 +164,14 @@ class Error(Enum):
         "This redirect URL is not valid for this service provider.",
         HTTPStatus.BAD_REQUEST,
     )
+    INVALID_LINKING_KEY_STATE = (
+        "This connection is not in a valid state for this action.",
+        HTTPStatus.BAD_REQUEST,
+    )
+    LINKING_KEY_NOT_NEAR_EXPIRY = (
+        "This connection can only be extended within 30 days of its expiry date.",
+        HTTPStatus.BAD_REQUEST,
+    )
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

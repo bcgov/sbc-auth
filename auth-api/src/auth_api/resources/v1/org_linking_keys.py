@@ -19,6 +19,7 @@ from flask import Blueprint, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.schemas import AccountLinkingKeySchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
@@ -26,6 +27,7 @@ from auth_api.services.account_linking_key import AccountLinkingKey as AccountLi
 from auth_api.services.flags import flags
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
+from auth_api.utils.enums import LinkingKeyPatchActions
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, Role
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -85,6 +87,30 @@ def delete_linking_key(org_id, key_id):
     if not found:
         return {}, HTTPStatus.NOT_FOUND
     return {}, HTTPStatus.OK
+
+
+@bp.route("/orgs/<int:org_id>/linking-keys/<int:key_id>", methods=["PATCH"])
+@cross_origin(origins="*")
+@_jwt.has_one_of_roles([Role.ACCOUNT_HOLDER.value, Role.STAFF_MANAGE_ACCOUNTS.value])
+def patch_linking_key(org_id, key_id):
+    """Perform an action on a linking key."""
+    org = OrgService.find_by_org_id(org_id, allowed_roles=_OWNER_ROLES)
+    if org is None:
+        return {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
+    request_json = request.get_json()
+    if request_json.get("action") != LinkingKeyPatchActions.EXTEND.value:
+        return {
+            "code": Error.PATCH_INVALID_ACTION.name,
+            "message": Error.PATCH_INVALID_ACTION.message,
+        }, HTTPStatus.BAD_REQUEST
+    try:
+        # Only supporting extend right now.
+        record = AccountLinkingKeyService.extend(key_id, org_id)
+    except BusinessException as exception:
+        return {"code": exception.code, "message": exception.message}, exception.status_code
+    if not record:
+        return {}, HTTPStatus.NOT_FOUND
+    return AccountLinkingKeySchema(exclude=["linking_key"]).dump(record), HTTPStatus.OK
 
 
 @bp.route("/linking-keys/bind", methods=["POST"])

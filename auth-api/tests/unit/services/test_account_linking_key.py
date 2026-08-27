@@ -17,6 +17,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
+from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 from sbc_common_components.utils.enums import QueueMessageTypes
 
@@ -24,7 +25,8 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.account_linking_key import AccountLinkingKey as AccountLinkingKeyModel
 from auth_api.services.account_linking_key import AccountLinkingKey as AccountLinkingKeyService
-from auth_api.utils.enums import LinkingKeyStatus
+from auth_api.services.activity_log_publisher import ActivityLogPublisher
+from auth_api.utils.enums import ActivityAction, LinkingKeyStatus
 from tests.utilities.factory_utils import (
     factory_linking_key_model,
     factory_org_model,
@@ -350,3 +352,107 @@ def test_revoke_pending_key_does_not_publish(session):  # pylint:disable=unused-
 
     assert found is True
     mock_publish.assert_not_called()
+
+
+def test_extend_moves_expiry_one_year_from_original(session):  # pylint:disable=unused-argument
+    """Assert that extend adds a year to the existing expiry, not to today."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    original_expiry = datetime.now(UTC) + timedelta(days=10)
+    record = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id, expires_on=original_expiry)
+
+    updated = AccountLinkingKeyService.extend(record.id, lawfirm.id)
+
+    assert updated is not None
+    assert updated.expires_on == original_expiry + relativedelta(years=1)
+
+
+def test_extend_allowed_on_the_thirtieth_day(session):  # pylint:disable=unused-argument
+    """Assert that the eligibility window is inclusive of the 30th day before expiry."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    record = factory_linking_key_model(
+        account_id=lawfirm.id,
+        vendor_account_id=vendor.id,
+        expires_on=datetime.now(UTC) + timedelta(days=30) - timedelta(minutes=1),
+    )
+
+    assert AccountLinkingKeyService.extend(record.id, lawfirm.id) is not None
+
+
+def test_extend_rejected_outside_the_window(session):  # pylint:disable=unused-argument
+    """Assert that a key more than 30 days from expiry cannot be extended."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    record = factory_linking_key_model(
+        account_id=lawfirm.id, vendor_account_id=vendor.id, expires_on=datetime.now(UTC) + timedelta(days=31)
+    )
+
+    with pytest.raises(BusinessException) as exc_info:
+        AccountLinkingKeyService.extend(record.id, lawfirm.id)
+
+    assert exc_info.value.code == Error.LINKING_KEY_NOT_NEAR_EXPIRY.name
+
+
+def test_extend_allowed_when_past_expiry_but_not_yet_swept(session):  # pylint:disable=unused-argument
+    """Assert that a key past its expiry is still extendable while auth-jobs has not run yet."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    original_expiry = datetime.now(UTC) - timedelta(days=2)
+    record = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id, expires_on=original_expiry)
+
+    updated = AccountLinkingKeyService.extend(record.id, lawfirm.id)
+
+    assert updated is not None
+    assert updated.expires_on == original_expiry + relativedelta(years=1)
+
+
+def test_extend_rejects_pending_key(session):  # pylint:disable=unused-argument
+    """Assert that an unbound PENDING key cannot be extended."""
+    lawfirm = factory_org_model()
+    record = factory_linking_key_model(
+        account_id=lawfirm.id, status=LinkingKeyStatus.PENDING.value, expires_on=datetime.now(UTC) + timedelta(days=5)
+    )
+
+    with pytest.raises(BusinessException) as exc_info:
+        AccountLinkingKeyService.extend(record.id, lawfirm.id)
+
+    assert exc_info.value.code == Error.INVALID_LINKING_KEY_STATE.name
+
+
+def test_extend_revoked_key_returns_none(session):  # pylint:disable=unused-argument
+    """Assert that a REVOKED key is not found by extend."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    record = factory_linking_key_model(
+        account_id=lawfirm.id, vendor_account_id=vendor.id, status=LinkingKeyStatus.REVOKED.value
+    )
+
+    assert AccountLinkingKeyService.extend(record.id, lawfirm.id) is None
+
+
+def test_extend_wrong_account_returns_none(session):  # pylint:disable=unused-argument
+    """Assert that a key belonging to another account is not found by extend."""
+    lawfirm = factory_org_model()
+    other = factory_org_model()
+    vendor = factory_org_model()
+    record = factory_linking_key_model(
+        account_id=other.id, vendor_account_id=vendor.id, expires_on=datetime.now(UTC) + timedelta(days=5)
+    )
+
+    assert AccountLinkingKeyService.extend(record.id, lawfirm.id) is None
+
+
+def test_extend_publishes_activity(session):  # pylint:disable=unused-argument
+    """Assert that extending logs an activity."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    record = factory_linking_key_model(
+        account_id=lawfirm.id, vendor_account_id=vendor.id, expires_on=datetime.now(UTC) + timedelta(days=5)
+    )
+
+    with patch.object(ActivityLogPublisher, "publish_activity") as mock_activity:
+        AccountLinkingKeyService.extend(record.id, lawfirm.id)
+
+    mock_activity.assert_called_once()
+    assert mock_activity.call_args.args[0].action == ActivityAction.LINKING_KEY_EXTENDED.value
