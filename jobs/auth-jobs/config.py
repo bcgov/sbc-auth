@@ -88,6 +88,7 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     # GCP PubSub
     ACCOUNT_MAILER_TOPIC = os.getenv("ACCOUNT_MAILER_TOPIC", "account-mailer-dev")
+    AUTH_EVENT_TOPIC = os.getenv("AUTH_EVENT_TOPIC", "auth-event-dev")
 
     # Account linking key notifications
     ACCOUNT_LINK_EXPIRY_REMINDER_DAYS = int(os.getenv("ACCOUNT_LINK_EXPIRY_REMINDER_DAYS", "30"))
