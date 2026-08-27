@@ -308,9 +308,9 @@ Werkzeug = "^3.1.5"
 
 [package.source]
 type = "git"
-url = "https://github.com/ochiu/sbc-auth.git"
-reference = "34061-Link-Expire-Activity"
-resolved_reference = "c2589100e4262d41145c82a32e4f26942daa0736"
+url = "https://github.com/bcgov/sbc-auth.git"
+reference = "main"
+resolved_reference = "570912f824c8085593a02853e588989ef0f74a9c"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3713,4 +3713,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "c6f86a3a0c4d79189a7130bb64b2c058e265ab05e73db4c8c85eb41bfbcd4f0a"
+content-hash = "9781cb92046db3bf46e44ddafa52e8e73ca2f60e57d628b7ad439fbdf8696414"
