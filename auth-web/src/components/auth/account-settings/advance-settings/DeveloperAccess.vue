@@ -12,13 +12,7 @@
         v-html="$t('developerAccessSubtitle',{ url: APIDOCUMENTATION_URL } )"
       />
     </div>
-    <!-- <v-btn
-        large
-        color="primary"
-        class="font-weight-bold mb-12 "
-        data-test="btn-create-api"
-      >Create an API Key</v-btn> -->
-    <RedirectUrls />
+    <RedirectUrls v-if="!isAccountLinkingDisabled" />
     <ExistingAPIKeys />
   </v-container>
 </template>
@@ -31,6 +25,7 @@ import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import ConfigHelper from '@/util/config-helper'
 import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings/ExistingAPIKeys.vue'
 import RedirectUrls from '@/components/auth/account-settings/advance-settings/RedirectUrls.vue'
+import { isAccountLinkingDisabled } from '@/util/vendor-connection-util'
 
 @Component({
   components: {
@@ -40,6 +35,10 @@ import RedirectUrls from '@/components/auth/account-settings/advance-settings/Re
 })
 export default class DeveloperAccess extends Mixins(AccountChangeMixin) {
   APIDOCUMENTATION_URL = ConfigHelper.apiDocumentationUrl() || ''
+
+  get isAccountLinkingDisabled (): boolean {
+    return isAccountLinkingDisabled()
+  }
 }
 </script>
 
