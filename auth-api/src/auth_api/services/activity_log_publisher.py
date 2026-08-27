@@ -16,7 +16,7 @@
 import uuid
 from datetime import UTC, datetime
 
-from flask import current_app, g, request
+from flask import current_app, g, has_request_context, request
 from sbc_common_components.utils.enums import QueueMessageTypes
 from simple_cloudevent import SimpleCloudEvent
 
@@ -47,7 +47,7 @@ class ActivityLogPublisher:  # pylint: disable=too-many-instance-attributes, too
                 "itemId": activity.id,
                 "itemValue": activity.value,
                 "orgId": activity.org_id,
-                "remoteAddr": request.remote_addr,
+                "remoteAddr": request.remote_addr if has_request_context() else None,
                 "createdAt": f"{datetime.now()}",
             }
             cloud_event = SimpleCloudEvent(

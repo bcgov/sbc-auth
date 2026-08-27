@@ -241,6 +241,12 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
             "Super Vendor ABC (55)",
             "Extended a linking key for vendor account Super Vendor ABC (55)",
         ),
+        (
+            ActivityAction.LINKING_KEY_EXPIRED.value,
+            "",
+            "Super Vendor ABC (55)",
+            "Expired a linking key for vendor account Super Vendor ABC (55)",
+        ),
     ],
 )
 def test_activity_log_actions(client, jwt, session, action, item_name, item_value, expected_message):  # pylint:disable=unused-argument

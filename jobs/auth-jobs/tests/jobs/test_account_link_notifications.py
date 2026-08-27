@@ -27,7 +27,7 @@ from auth_api.models.account_linking_key import AccountLinkingKey as AccountLink
 from auth_api.models.org import Org as OrgModel
 from auth_api.models.org_status import OrgStatus as OrgStatusModel
 from auth_api.models.org_type import OrgType as OrgTypeModel
-from auth_api.utils.enums import LinkingKeyStatus
+from auth_api.utils.enums import ActivityAction, LinkingKeyStatus
 from tasks.account_link_notifications import AccountLinkNotificationsTask
 
 CREATED_ON = datetime(2026, 1, 15, 18, 0, 0, tzinfo=UTC)
@@ -76,7 +76,11 @@ def test_expiring_soon_key_sends_reminder(session, app):
         source_org.id, vendor_org.id, LinkingKeyStatus.ACTIVE.value, EXPIRES_ON_30_DAYS, CREATED_ON
     )
 
-    with freeze_time(NOW), patch("tasks.account_link_notifications.publish_to_mailer") as mock_publish:
+    with (
+        freeze_time(NOW),
+        patch("tasks.account_link_notifications.publish_to_mailer") as mock_publish,
+        patch("tasks.account_link_notifications.ActivityLogPublisher.publish_activity") as mock_activity,
+    ):
         AccountLinkNotificationsTask.notify()
 
     mock_publish.assert_called_once()
@@ -87,6 +91,7 @@ def test_expiring_soon_key_sends_reminder(session, app):
     assert kwargs["data"]["linkDate"] == CREATED_ON_PACIFIC_ISO
     assert kwargs["data"]["expiryDate"] == EXPIRES_ON_30_DAYS_PACIFIC_ISO
     assert key.status == LinkingKeyStatus.ACTIVE.value
+    mock_activity.assert_not_called()
 
 
 def test_expired_key_sends_expiry_notice_and_updates_status(session, app):
@@ -95,7 +100,11 @@ def test_expired_key_sends_expiry_notice_and_updates_status(session, app):
     vendor_org = _factory_org("Vendor Org")
     key = _factory_linking_key(source_org.id, vendor_org.id, LinkingKeyStatus.ACTIVE.value, EXPIRES_ON_PAST, CREATED_ON)
 
-    with freeze_time(NOW), patch("tasks.account_link_notifications.publish_to_mailer") as mock_publish:
+    with (
+        freeze_time(NOW),
+        patch("tasks.account_link_notifications.publish_to_mailer") as mock_publish,
+        patch("tasks.account_link_notifications.ActivityLogPublisher.publish_activity") as mock_activity,
+    ):
         AccountLinkNotificationsTask.notify()
 
     mock_publish.assert_called_once()
@@ -106,6 +115,14 @@ def test_expired_key_sends_expiry_notice_and_updates_status(session, app):
     assert kwargs["data"]["expiryDate"] == EXPIRES_ON_PAST_PACIFIC_ISO
     assert key.status == LinkingKeyStatus.EXPIRED.value
 
+    mock_activity.assert_called_once()
+    activity = mock_activity.call_args.args[0]
+    assert activity.org_id == source_org.id
+    assert activity.action == ActivityAction.LINKING_KEY_EXPIRED.value
+    assert activity.name == str(source_org.id)
+    assert activity.id == str(key.id)
+    assert activity.value == f"{vendor_org.name} ({vendor_org.id})"
+
 
 def test_key_not_near_expiry_is_untouched(session, app):
     """Assert that a key expiring well outside the reminder window is left alone."""
@@ -115,10 +132,15 @@ def test_key_not_near_expiry_is_untouched(session, app):
         source_org.id, vendor_org.id, LinkingKeyStatus.ACTIVE.value, EXPIRES_IN_FUTURE, CREATED_ON
     )
 
-    with freeze_time(NOW), patch("tasks.account_link_notifications.publish_to_mailer") as mock_publish:
+    with (
+        freeze_time(NOW),
+        patch("tasks.account_link_notifications.publish_to_mailer") as mock_publish,
+        patch("tasks.account_link_notifications.ActivityLogPublisher.publish_activity") as mock_activity,
+    ):
         AccountLinkNotificationsTask.notify()
 
     mock_publish.assert_not_called()
+    mock_activity.assert_not_called()
     assert key.status == LinkingKeyStatus.ACTIVE.value
 
 
@@ -133,9 +155,14 @@ def test_revoked_expired_key_is_excluded(session, app):
         source_org.id, vendor_org.id, LinkingKeyStatus.EXPIRED.value, EXPIRES_ON_PAST, CREATED_ON
     )
 
-    with freeze_time(NOW), patch("tasks.account_link_notifications.publish_to_mailer") as mock_publish:
+    with (
+        freeze_time(NOW),
+        patch("tasks.account_link_notifications.publish_to_mailer") as mock_publish,
+        patch("tasks.account_link_notifications.ActivityLogPublisher.publish_activity") as mock_activity,
+    ):
         AccountLinkNotificationsTask.notify()
 
     mock_publish.assert_not_called()
+    mock_activity.assert_not_called()
     assert revoked_key.status == LinkingKeyStatus.REVOKED.value
     assert expired_key.status == LinkingKeyStatus.EXPIRED.value

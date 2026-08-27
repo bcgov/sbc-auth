@@ -20,9 +20,11 @@ from sbc_common_components.utils.enums import QueueMessageTypes
 from sqlalchemy.orm import joinedload
 
 from auth_api.models.account_linking_key import AccountLinkingKey as AccountLinkingKeyModel
+from auth_api.models.dataclass import Activity
+from auth_api.services.activity_log_publisher import ActivityLogPublisher
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.date import utc_to_pacific_isoformat
-from auth_api.utils.enums import LinkingKeyStatus, QueueSources
+from auth_api.utils.enums import ActivityAction, LinkingKeyStatus, QueueSources
 
 
 class AccountLinkNotificationsTask:  # pylint: disable=too-few-public-methods
@@ -43,6 +45,7 @@ class AccountLinkNotificationsTask:  # pylint: disable=too-few-public-methods
         for key in expired_keys:
             key.status = LinkingKeyStatus.EXPIRED.value
             key.save()
+            cls._publish_expired_activity(key)
             cls._notify(key, is_reminder=False)
 
     @staticmethod
@@ -72,6 +75,19 @@ class AccountLinkNotificationsTask:  # pylint: disable=too-few-public-methods
                 AccountLinkingKeyModel.expires_on < window_end,
             )
             .all()
+        )
+
+    @staticmethod
+    def _publish_expired_activity(key: AccountLinkingKeyModel) -> None:
+        """Publish an activity log event for a key that has just been marked EXPIRED."""
+        ActivityLogPublisher.publish_activity(
+            Activity(
+                org_id=key.account_id,
+                action=ActivityAction.LINKING_KEY_EXPIRED.value,
+                name=str(key.account_id),
+                id=str(key.id),
+                value=f"{key.vendor_account.name} ({key.vendor_account_id})",
+            )
         )
 
     @staticmethod
