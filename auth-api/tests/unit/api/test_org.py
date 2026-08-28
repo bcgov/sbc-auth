@@ -1115,6 +1115,88 @@ def test_update_org_payment_method_for_org(client, jwt, session, keycloak_mock):
     assert rv.status_code == HTTPStatus.OK
 
 
+def test_put_organization_forwards_scope_query_param(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert ?scope=cfs_account on PUT /orgs/{id} is forwarded to OrgService.update_org."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json"
+    )
+    org_id = json.loads(rv.data)["id"]
+
+    new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.ONLINE_BANKING)
+    with patch.object(OrgService, "update_org", autospec=True) as spy:
+        spy.return_value.as_dict.return_value = {"id": org_id}
+        rv = client.put(
+            f"/api/v1/orgs/{org_id}?scope=cfs_account",
+            data=json.dumps(new_payment_method),
+            headers=headers,
+            content_type="application/json",
+        )
+        assert rv.status_code == HTTPStatus.OK
+        assert spy.call_args.kwargs.get("scope") == "cfs_account"
+
+
+def test_put_organization_no_scope_passes_none(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert PUT /orgs/{id} without ?scope=... passes scope=None to OrgService.update_org (regression)."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json"
+    )
+    org_id = json.loads(rv.data)["id"]
+
+    new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.ONLINE_BANKING)
+    with patch.object(OrgService, "update_org", autospec=True) as spy:
+        spy.return_value.as_dict.return_value = {"id": org_id}
+        rv = client.put(
+            f"/api/v1/orgs/{org_id}",
+            data=json.dumps(new_payment_method),
+            headers=headers,
+            content_type="application/json",
+        )
+        assert rv.status_code == HTTPStatus.OK
+        assert spy.call_args.kwargs.get("scope") is None
+
+
+def test_put_organization_pay_request_includes_stored_contact_info(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert PUT /orgs/{id} pay-api payload includes contactInfo derived from the org's stored contact."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json"
+    )
+    org_id = json.loads(rv.data)["id"]
+
+    # Attach a mailing address to the org (does not itself trigger a pay-api call).
+    stored_address = TestOrgInfo.update_org_with_mailing_address()["mailingAddress"]
+    rv = client.put(
+        f"/api/v1/orgs/{org_id}",
+        data=json.dumps({"mailingAddress": stored_address}),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.OK
+
+    new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.ONLINE_BANKING)
+    with patch("auth_api.services.rest_service.RestService.put") as mock_put:
+        rv = client.put(
+            f"/api/v1/orgs/{org_id}",
+            data=json.dumps(new_payment_method),
+            headers=headers,
+            content_type="application/json",
+        )
+        mock_put.assert_called()
+        actual_data = mock_put.call_args.kwargs.get("data")
+        assert actual_data["contactInfo"] == {
+            "addressLine1": stored_address["street"],
+            "city": stored_address["city"],
+            "province": stored_address["region"],
+            "postalCode": stored_address["postalCode"],
+            "country": stored_address["country"],
+        }
+
+
 def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
