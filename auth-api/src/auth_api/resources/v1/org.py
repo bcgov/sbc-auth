@@ -190,15 +190,21 @@ def get_organization(org_id):
     [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value, Role.STAFF_MANAGE_ACCOUNTS.value]
 )
 def put_organization(org_id):
-    """Update the org specified by the provided id with the request body."""
+    """Update the org specified by the provided id with the request body.
+
+    Optional query param `scope`:
+      - `cfs_account` — provision the CfsAccount for the given paymentMethod
+        without changing the org's default payment_method. Used by express-checkout.
+    """
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, "org")
     if not valid_format:
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
+    scope = request.args.get("scope", None)
     try:
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
         if org:
-            response, status = org.update_org(org_info=request_json).as_dict(), HTTPStatus.OK
+            response, status = org.update_org(org_info=request_json, scope=scope).as_dict(), HTTPStatus.OK
         else:
             response, status = {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
     except BusinessException as exception:

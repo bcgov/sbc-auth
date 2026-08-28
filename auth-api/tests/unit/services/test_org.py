@@ -343,7 +343,7 @@ def test_put_basic_org_assert_pay_request_is_govm(session, keycloak_mock, staff_
                 "methodOfPayment": "EJV",
                 "revenueAccount": payment_details.get("paymentInfo").get("revenueAccount"),
             },
-            "contactInfo": TestOrgInfo.get_mailing_address(),
+            "contactInfo": TestOrgInfo.get_pay_contact_info(),
         }
         assert expected_data == actual_data
 
@@ -377,7 +377,7 @@ def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock
             "paymentInfo": {"methodOfPayment": PaymentMethod.BCOL.value},
             "bcolAccountNumber": dictionary.get("bcol_account_id"),
             "bcolUserId": dictionary.get("bcol_user_id"),
-            "contactInfo": TestOrgInfo.bcol_linked().get("mailingAddress"),
+            "contactInfo": TestOrgInfo.get_pay_contact_info(),
         }
         assert actual_data == expected_data
 

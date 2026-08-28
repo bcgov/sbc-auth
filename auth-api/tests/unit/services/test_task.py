@@ -243,7 +243,7 @@ def test_create_task_govm(session, keycloak_mock, monkeypatch):  # pylint:disabl
                 "methodOfPayment": "EJV",
                 "revenueAccount": payment_details.get("paymentInfo").get("revenueAccount"),
             },
-            "contactInfo": TestOrgInfo.get_mailing_address(),
+            "contactInfo": TestOrgInfo.get_pay_contact_info(),
         }
         assert expected_data == actual_data
 
