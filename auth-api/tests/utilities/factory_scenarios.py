@@ -498,6 +498,18 @@ class TestOrgInfo(dict, Enum):
         return {"street": "1234 Abcd Street", "city": "Test", "region": "BC", "postalCode": "T1T1T1", "country": "CA"}
 
     @staticmethod
+    def get_pay_contact_info():
+        """Return the pay-api contactInfo shape for the default mailing address."""
+        address = TestOrgInfo.get_mailing_address()
+        return {
+            "addressLine1": address["street"],
+            "city": address["city"],
+            "province": address["region"],
+            "postalCode": address["postalCode"],
+            "country": address["country"],
+        }
+
+    @staticmethod
     def org_with_mailing_address(name: str = "BC ONLINE TECHNICAL TEAM DEVL"):
         """Return org info for bcol linked info."""
         return {"name": name, "mailingAddress": TestOrgInfo.get_mailing_address()}
