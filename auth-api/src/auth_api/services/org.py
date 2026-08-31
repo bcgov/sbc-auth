@@ -45,7 +45,7 @@ from auth_api.services.validators.bcol_credentials import validate as bcol_crede
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.constants import NO_FEE_CODE
+from auth_api.utils.constants import NO_FEE_CODE, SERVICE_ACCOUNT_GOVM_FREE_PRODUCTS
 from auth_api.utils.enums import (
     AccessType,
     ActivityAction,
@@ -56,7 +56,6 @@ from auth_api.utils.enums import (
     PatchActions,
     PaymentAccountStatus,
     PaymentMethod,
-    ProductCode,
     Status,
     SuspensionReasonCode,
     TaskAction,
@@ -619,9 +618,9 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def _apply_service_account_govm_fees(org: OrgModel):
         """Apply the fee overrides granted to service-account-provisioned GOVM accounts."""
-        PayApi.create_account_fee(
+        PayApi.create_account_fees(
             org_id=org.id,
-            product_code=ProductCode.BUSINESS_SEARCH.value,
+            product_codes=SERVICE_ACCOUNT_GOVM_FREE_PRODUCTS,
             apply_filing_fees=False,
             service_fee_code=NO_FEE_CODE,
         )

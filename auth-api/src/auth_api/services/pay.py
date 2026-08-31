@@ -25,8 +25,10 @@ class PayApi:
     """Wrapper for pay-api HTTP calls."""
 
     @staticmethod
-    def create_account_fee(org_id: int, product_code: str, apply_filing_fees: bool, service_fee_code: str) -> bool:
-        """Create or update an account fee override in pay-api for a single product."""
+    def create_account_fees(
+        org_id: int, product_codes: list[str], apply_filing_fees: bool, service_fee_code: str
+    ) -> bool:
+        """Create or update account fee overrides in pay-api for one or more products."""
         pay_url = current_app.config.get("PAY_API_URL")
         token = RestService.get_service_account_token()
         payload = {
@@ -36,6 +38,7 @@ class PayApi:
                     "applyFilingFees": apply_filing_fees,
                     "serviceFeeCode": service_fee_code,
                 }
+                for product_code in product_codes
             ]
         }
         try:
@@ -48,7 +51,7 @@ class PayApi:
             if response and response.status_code == 200:
                 return True
             current_app.logger.warning(
-                f"Account fee override create failed for org {org_id} product {product_code}: "
+                f"Account fee override create failed for org {org_id} products {product_codes}: "
                 f"{response.status_code if response is not None else 'no response'}"
             )
         except Exception as e:  # NOQA # pylint: disable=broad-except
