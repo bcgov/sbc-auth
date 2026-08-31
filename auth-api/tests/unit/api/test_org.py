@@ -45,7 +45,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services import User as UserService
 from auth_api.services.colin import Colin as ColinService
-from auth_api.utils.constants import NO_FEE_CODE, SERVICE_ACCOUNT_GOVM_FREE_PRODUCTS
+from auth_api.utils.constants import AUTO_PROVISIONED_GOVM_FREE_PRODUCTS, NO_FEE_CODE
 from auth_api.utils.enums import (
     AccessType,
     AffidavitStatus,
@@ -509,8 +509,8 @@ def test_add_govm_org_by_user_exception(client, jwt, session, keycloak_mock):  #
     assert rv.status_code == HTTPStatus.UNAUTHORIZED
 
 
-def test_add_govm_org_service_account_auto_activates(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Service-account GOVM creation lands ACTIVE and creates no staff review task."""
+def test_add_govm_org_auto_provisioned_activates(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Auto-provisioned GOVM creation lands ACTIVE and creates no staff review task."""
     patch_pay_account_post(monkeypatch)
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     client.post("/api/v1/users", headers=headers, content_type="application/json")
@@ -527,8 +527,8 @@ def test_add_govm_org_service_account_auto_activates(client, jwt, session, keycl
     assert not org_tasks
 
 
-def test_govm_service_account_applies_free_product_fee_overrides(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Service-account GOVM creation invokes the pay-api fee-override helper for the configured free products."""
+def test_auto_provisioned_govm_applies_free_product_fee_overrides(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Auto-provisioned GOVM creation invokes the pay-api fee-override helper for the configured free products."""
     patch_pay_account_post(monkeypatch)
     with patch("auth_api.services.pay.PayApi.create_account_fees") as mock_create_fees:
         headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
@@ -539,14 +539,14 @@ def test_govm_service_account_applies_free_product_fee_overrides(client, jwt, se
         assert rv.status_code == HTTPStatus.CREATED
         mock_create_fees.assert_called_once_with(
             org_id=rv.json["id"],
-            product_codes=SERVICE_ACCOUNT_GOVM_FREE_PRODUCTS,
+            product_codes=AUTO_PROVISIONED_GOVM_FREE_PRODUCTS,
             apply_filing_fees=False,
             service_fee_code=NO_FEE_CODE,
         )
 
 
 def test_govm_staff_admin_flow_unchanged_no_fee_override(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Staff-created GOVM still lands PENDING_INVITE_ACCEPT and skips the service-account fee override."""
+    """Staff-created GOVM still lands PENDING_INVITE_ACCEPT and skips the auto-provisioning fee override."""
     patch_pay_account_post(monkeypatch)
     with patch("auth_api.services.pay.PayApi.create_account_fees") as mock_create_fees:
         headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
