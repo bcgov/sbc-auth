@@ -26,6 +26,9 @@ GROUP_SBC_STAFF = "sbc_staff"
 # Affidavit folder
 AFFIDAVIT_FOLDER_NAME = "Affidavits"
 
+# Pay-api service fee code applied to service-account-provisioned GOVM accounts.
+NO_FEE_CODE = "TRF04"
+
 # BCol profile to product mapping, this will grow as and when more products are onboarded.
 BCOL_PROFILE_PRODUCT_MAP = {
     "VS": "VS",

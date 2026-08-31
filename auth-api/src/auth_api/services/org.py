@@ -45,6 +45,7 @@ from auth_api.services.validators.bcol_credentials import validate as bcol_crede
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.account_mailer import publish_to_mailer
+from auth_api.utils.constants import NO_FEE_CODE
 from auth_api.utils.enums import (
     AccessType,
     ActivityAction,
@@ -55,6 +56,7 @@ from auth_api.utils.enums import (
     PatchActions,
     PaymentAccountStatus,
     PaymentMethod,
+    ProductCode,
     Status,
     SuspensionReasonCode,
     TaskAction,
@@ -72,6 +74,7 @@ from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth, linking_key_authorizes
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
+from .pay import PayApi
 from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
@@ -100,9 +103,11 @@ class Org:  # pylint: disable=too-many-public-methods
         return obj
 
     @staticmethod
-    def create_org(org_info: dict, user_id):
+    @user_context
+    def create_org(org_info: dict, user_id, **kwargs):
         """Create a new organization."""
         current_app.logger.debug("<create_org ")
+        user_from_context: UserContext = kwargs["user_context"]
         if Membership.has_nsf_or_suspended_membership(user_id):
             raise BusinessException(Error.NSF_OR_SUSPENDED_CLIENT_CANNOT_CREATE_ACCOUNT, None)
         # bcol is treated like an access type as well;so its outside the scheme
@@ -120,6 +125,7 @@ class Org:  # pylint: disable=too-many-public-methods
             bcol_profile_flags = bcol_details.get("profileFlags")
 
         access_type = response.get("access_type")
+        is_service_account_govm = access_type == AccessType.GOVM.value and user_from_context.is_system()
 
         # set premium for GOVM accounts..TODO remove if not needed this logic
         # Depreciating BASIC accounts with backwards compatibility
@@ -132,7 +138,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # Set the status based on access type
         # Check if the user is APPROVED else set the org status to PENDING
 
-        if access_type == AccessType.GOVM.value:
+        if access_type == AccessType.GOVM.value and not is_service_account_govm:
             org.status_code = OrgStatus.PENDING_INVITE_ACCEPT.value
 
         # If mailing address is provided, save it
@@ -155,6 +161,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 subscription_data={"subscriptions": product_subscriptions},
                 skip_auth=True,
                 staff_review_for_create_org=is_staff_review_needed,
+                auto_approve=is_service_account_govm,
             )
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
@@ -166,6 +173,9 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if is_staff_review_needed:
             Org._create_staff_review_task(org, UserModel.find_by_jwt_token())
+        elif is_service_account_govm:
+            if payment_account_status != PaymentAccountStatus.FAILED:
+                Org._apply_service_account_govm_fees(org)
         else:
             Org._send_account_created_notification(org, UserModel.find_by_jwt_token())
 
@@ -605,6 +615,16 @@ class Org:  # pylint: disable=too-many-public-methods
             validator_obj = payment_type_validate(is_fatal=True, **arg_dict)
             payment_method = validator_obj.info.get("payment_type")
         return Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org, scope=scope)
+
+    @staticmethod
+    def _apply_service_account_govm_fees(org: OrgModel):
+        """Apply the fee overrides granted to service-account-provisioned GOVM accounts."""
+        PayApi.create_account_fee(
+            org_id=org.id,
+            product_code=ProductCode.BUSINESS_SEARCH.value,
+            apply_filing_fees=False,
+            service_fee_code=NO_FEE_CODE,
+        )
 
     @staticmethod
     def _create_gov_account_task(org_model: OrgModel):

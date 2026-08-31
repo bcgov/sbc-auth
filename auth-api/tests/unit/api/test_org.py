@@ -64,6 +64,7 @@ from auth_api.utils.enums import (
     TaskRelationshipType,
     TaskStatus,
 )
+from auth_api.utils.constants import NO_FEE_CODE
 from auth_api.utils.roles import ADMIN  # noqa: I001
 from tests.utilities.factory_scenarios import (
     DeleteAffiliationPayload,
@@ -506,6 +507,56 @@ def test_add_govm_org_by_user_exception(client, jwt, session, keycloak_mock):  #
         "/api/v1/orgs", data=json.dumps(TestOrgInfo.org_govm), headers=headers, content_type="application/json"
     )
     assert rv.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_add_govm_org_service_account_auto_activates(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Service-account GOVM creation lands ACTIVE and creates no staff review task."""
+    patch_pay_account_post(monkeypatch)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org_govm), headers=headers, content_type="application/json"
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+    body = rv.json
+    assert body["accessType"] == AccessType.GOVM.value
+    assert body["orgStatus"] == OrgStatus.ACTIVE.value
+
+    tasks = TaskService.fetch_tasks(TaskSearch(status=[TaskStatus.OPEN.value], page=1, limit=100))["tasks"]
+    org_tasks = [t for t in tasks if t.get("relationship_id") == body["id"]]
+    assert not org_tasks
+
+
+def test_govm_service_account_applies_business_search_fee_override(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Service-account GOVM creation invokes the pay-api fee-override helper with BUSINESS_SEARCH."""
+    patch_pay_account_post(monkeypatch)
+    with patch("auth_api.services.pay.PayApi.create_account_fee") as mock_create_fee:
+        headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+        client.post("/api/v1/users", headers=headers, content_type="application/json")
+        rv = client.post(
+            "/api/v1/orgs", data=json.dumps(TestOrgInfo.org_govm), headers=headers, content_type="application/json"
+        )
+        assert rv.status_code == HTTPStatus.CREATED
+        mock_create_fee.assert_called_once_with(
+            org_id=rv.json["id"],
+            product_code=ProductCode.BUSINESS_SEARCH.value,
+            apply_filing_fees=False,
+            service_fee_code=NO_FEE_CODE,
+        )
+
+
+def test_govm_staff_admin_flow_unchanged_no_fee_override(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Staff-created GOVM still lands PENDING_INVITE_ACCEPT and skips the service-account fee override."""
+    patch_pay_account_post(monkeypatch)
+    with patch("auth_api.services.pay.PayApi.create_account_fee") as mock_create_fee:
+        headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+        client.post("/api/v1/users", headers=headers, content_type="application/json")
+        rv = client.post(
+            "/api/v1/orgs", data=json.dumps(TestOrgInfo.org_govm), headers=headers, content_type="application/json"
+        )
+        assert rv.status_code == HTTPStatus.CREATED
+        assert rv.json["orgStatus"] == OrgStatus.PENDING_INVITE_ACCEPT.value
+        mock_create_fee.assert_not_called()
 
 
 def test_add_org_staff_admin_any_number_of_orgs(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument

@@ -29,6 +29,7 @@ from .google_store import GoogleStoreService
 from .invitation import Invitation
 from .membership import Membership
 from .org import Org
+from .pay import PayApi
 from .permissions import Permissions
 from .products import Product
 from .simple_org import SimpleOrg
