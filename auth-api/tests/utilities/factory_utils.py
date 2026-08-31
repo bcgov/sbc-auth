@@ -579,10 +579,10 @@ def patch_pay_account_fees(monkeypatch, product_codes: list[str]):
             return {"accountFees": [{"product": c} for c in product_codes]}
 
     monkeypatch.setattr(
-        "auth_api.utils.pay.RestService.get",
+        "auth_api.services.pay.RestService.get",
         lambda *_args, **_kwargs: MockFeeResponse(),
     )
     monkeypatch.setattr(
-        "auth_api.utils.pay.RestService.get_service_account_token",
+        "auth_api.services.pay.RestService.get_service_account_token",
         lambda *_args, **_kwargs: "mock-token",
     )

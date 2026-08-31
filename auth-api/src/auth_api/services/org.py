@@ -45,6 +45,7 @@ from auth_api.services.validators.bcol_credentials import validate as bcol_crede
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.account_mailer import publish_to_mailer
+from auth_api.utils.constants import AUTO_PROVISIONED_GOVM_FREE_PRODUCTS, NO_FEE_CODE
 from auth_api.utils.enums import (
     AccessType,
     ActivityAction,
@@ -72,6 +73,7 @@ from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth, linking_key_authorizes
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
+from .pay import PayApi
 from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
@@ -100,9 +102,11 @@ class Org:  # pylint: disable=too-many-public-methods
         return obj
 
     @staticmethod
-    def create_org(org_info: dict, user_id):
+    @user_context
+    def create_org(org_info: dict, user_id, **kwargs):
         """Create a new organization."""
         current_app.logger.debug("<create_org ")
+        user_from_context: UserContext = kwargs["user_context"]
         if Membership.has_nsf_or_suspended_membership(user_id):
             raise BusinessException(Error.NSF_OR_SUSPENDED_CLIENT_CANNOT_CREATE_ACCOUNT, None)
         # bcol is treated like an access type as well;so its outside the scheme
@@ -120,6 +124,7 @@ class Org:  # pylint: disable=too-many-public-methods
             bcol_profile_flags = bcol_details.get("profileFlags")
 
         access_type = response.get("access_type")
+        is_auto_provisioned_govm = access_type == AccessType.GOVM.value and user_from_context.is_system()
 
         # set premium for GOVM accounts..TODO remove if not needed this logic
         # Depreciating BASIC accounts with backwards compatibility
@@ -132,7 +137,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # Set the status based on access type
         # Check if the user is APPROVED else set the org status to PENDING
 
-        if access_type == AccessType.GOVM.value:
+        if access_type == AccessType.GOVM.value and not is_auto_provisioned_govm:
             org.status_code = OrgStatus.PENDING_INVITE_ACCEPT.value
 
         # If mailing address is provided, save it
@@ -142,12 +147,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # create the membership record for this user if its not created by staff and access_type is anonymous
         Org.create_membership(org, user_id)
 
-        # Send an email to staff to remind review the pending account
-        is_staff_review_needed = access_type == AccessType.GOVN.value or (
-            access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
-            and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
-            and current_app.config.get("SKIP_STAFF_APPROVAL_BCEID") is False
-        )
+        is_staff_review_needed = Org._needs_staff_review(access_type, user_id)
 
         if product_subscriptions is not None:
             ProductService.create_product_subscription(
@@ -155,6 +155,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 subscription_data={"subscriptions": product_subscriptions},
                 skip_auth=True,
                 staff_review_for_create_org=is_staff_review_needed,
+                auto_approve=is_auto_provisioned_govm,
             )
 
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
@@ -166,8 +167,11 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if is_staff_review_needed:
             Org._create_staff_review_task(org, UserModel.find_by_jwt_token())
-        else:
+        elif not is_auto_provisioned_govm:
             Org._send_account_created_notification(org, UserModel.find_by_jwt_token())
+
+        if is_auto_provisioned_govm and payment_account_status != PaymentAccountStatus.FAILED:
+            Org._apply_auto_provisioned_govm_fees(org)
 
         org.commit()
 
@@ -605,6 +609,27 @@ class Org:  # pylint: disable=too-many-public-methods
             validator_obj = payment_type_validate(is_fatal=True, **arg_dict)
             payment_method = validator_obj.info.get("payment_type")
         return Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org, scope=scope)
+
+    @staticmethod
+    def _needs_staff_review(access_type: str, user_id: int) -> bool:
+        """Return whether an org with the given access_type needs a staff review at creation."""
+        if access_type == AccessType.GOVN.value:
+            return True
+        if access_type not in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
+            return False
+        if current_app.config.get("SKIP_STAFF_APPROVAL_BCEID") is not False:
+            return False
+        return not AffidavitModel.find_approved_by_user_id(user_id=user_id)
+
+    @staticmethod
+    def _apply_auto_provisioned_govm_fees(org: OrgModel):
+        """Apply the fee overrides granted to auto-provisioned GOVM accounts."""
+        PayApi.create_account_fees(
+            org_id=org.id,
+            product_codes=AUTO_PROVISIONED_GOVM_FREE_PRODUCTS,
+            apply_filing_fees=False,
+            service_fee_code=NO_FEE_CODE,
+        )
 
     @staticmethod
     def _create_gov_account_task(org_model: OrgModel):

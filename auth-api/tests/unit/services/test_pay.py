@@ -1,4 +1,4 @@
-"""Tests for the pay utility functions."""
+"""Tests for the pay-api client service."""
 
 # Copyright © 2026 Province of British Columbia
 #
@@ -18,8 +18,8 @@ from unittest.mock import Mock
 
 from flask import current_app
 
+from auth_api.services.pay import PayApi
 from auth_api.utils.enums import AccessType, ProductCode
-from auth_api.utils.pay import get_account_fees
 from tests.conftest import mock_token
 from tests.utilities.factory_utils import factory_org_model
 
@@ -38,15 +38,15 @@ def test_get_account_fees_govm_org_success(monkeypatch, session):  # pylint:disa
         ]
     }
 
-    current_app.config["PAY_API_URL"] = "http://pay-api.test"
+    monkeypatch.setitem(current_app.config, "PAY_API_URL", "http://pay-api.test")
 
     def capture_get(*args, **kwargs):
         assert kwargs.get("endpoint") == f"http://pay-api.test/accounts/{org.id}"
         return mock_response
 
-    monkeypatch.setattr("auth_api.utils.pay.RestService.get", capture_get)
+    monkeypatch.setattr("auth_api.services.pay.RestService.get", capture_get)
 
-    result = get_account_fees(org, bearer_token=mock_token())
+    result = PayApi.get_account_fees(org, bearer_token=mock_token())
 
     assert result == [
         ProductCode.BUSINESS.value,

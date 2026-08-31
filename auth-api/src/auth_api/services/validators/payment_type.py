@@ -16,7 +16,7 @@
 from auth_api.exceptions import BusinessException, Error
 from auth_api.services.validators.validator_response import ValidatorResponse
 from auth_api.utils.enums import AccessType, OrgType, PaymentMethod
-from auth_api.utils.user_context import user_context
+from auth_api.utils.user_context import UserContext, user_context
 
 
 @user_context
@@ -25,6 +25,7 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     selected_payment_method: str = kwargs.get("selected_payment_method")
     access_type: str = kwargs.get("access_type")
     org_type: str = kwargs.get("org_type")
+    user: UserContext = kwargs["user_context"]
     default_cc_method = PaymentMethod.DIRECT_PAY.value
     validator_response = ValidatorResponse()
     non_ejv_payment_methods = (
@@ -42,7 +43,9 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     }
     payment_type = None
     if access_type == AccessType.GOVM.value:
-        payment_type = PaymentMethod.EJV.value
+        payment_type = (
+            selected_payment_method or default_cc_method if user.is_system() else PaymentMethod.EJV.value
+        )
     elif selected_payment_method:
         valid_types = org_payment_method_mapping.get(org_type, [])
         if selected_payment_method in valid_types:

@@ -56,12 +56,12 @@ from auth_api.utils.notifications import (
     get_product_notification_data,
     get_product_notification_type,
 )
-from auth_api.utils.pay import get_account_fees
 from auth_api.utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, GOV_ORG_TYPES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
+from .pay import PayApi
 from .task import Task as TaskService
 
 
@@ -238,7 +238,7 @@ class Product:
 
         subscriptions_list = subscription_data.get("subscriptions")
         user_from_context: UserContext = kwargs["user_context"]
-        account_fees = get_account_fees(org, bearer_token=user_from_context.bearer_token) if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org else []
+        account_fees = PayApi.get_account_fees(org, bearer_token=user_from_context.bearer_token) if org.access_type in GOV_ORG_TYPES and not staff_review_for_create_org else []
         for subscription in subscriptions_list:
             auto_approve_current = auto_approve
             product_code = subscription.get("productCode")
