@@ -45,6 +45,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services import User as UserService
 from auth_api.services.colin import Colin as ColinService
+from auth_api.utils.constants import NO_FEE_CODE, SERVICE_ACCOUNT_GOVM_FREE_PRODUCTS
 from auth_api.utils.enums import (
     AccessType,
     AffidavitStatus,
@@ -64,7 +65,6 @@ from auth_api.utils.enums import (
     TaskRelationshipType,
     TaskStatus,
 )
-from auth_api.utils.constants import NO_FEE_CODE, SERVICE_ACCOUNT_GOVM_FREE_PRODUCTS
 from auth_api.utils.roles import ADMIN  # noqa: I001
 from tests.utilities.factory_scenarios import (
     DeleteAffiliationPayload,
