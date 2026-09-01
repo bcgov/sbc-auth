@@ -86,6 +86,26 @@ describe('Common Util Test', () => {
     expect(CommonUtil.validateIncorporationNumber('RLY0000005')).toBe(true)
   })
 
+  it('validateIncorporationNumber returns True with valid LIB (library) number', () => {
+    expect(CommonUtil.validateIncorporationNumber('LIB0000005')).toBe(true)
+  })
+
+  it('validateIncorporationNumber returns True with valid CEM (cemetery) number', () => {
+    expect(CommonUtil.validateIncorporationNumber('CEM0000005')).toBe(true)
+  })
+
+  it('validateIncorporationNumber returns True with valid SB (society branch) number', () => {
+    expect(CommonUtil.validateIncorporationNumber('SB0000005')).toBe(true)
+  })
+
+  it('validateIncorporationNumber returns True with valid TMY (tramway) number', () => {
+    expect(CommonUtil.validateIncorporationNumber('TMY0000005')).toBe(true)
+  })
+
+  it('validateIncorporationNumber returns True with valid PFS (pension funded society) number', () => {
+    expect(CommonUtil.validateIncorporationNumber('PFS0000005')).toBe(true)
+  })
+
   it('validateIncorporationNumber returns False with invalid incorp number', () => {
     expect(CommonUtil.validateIncorporationNumber(null)).toBe(false)
     expect(CommonUtil.validateIncorporationNumber('XX000033')).toBe(false)
