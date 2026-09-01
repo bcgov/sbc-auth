@@ -78,37 +78,23 @@ describe('Common Util Test', () => {
     expect(CommonUtil.formatIncorporationNumber('CP1234567')).toBe('CP1234567')
   })
 
-  it('validateIncorporationNumber returns True with valid incorp number', () => {
-    expect(CommonUtil.validateIncorporationNumber('BC0000033')).toBe(true)
+  it.each([
+    ['BC0000033', 'standard incorporation'],
+    ['RLY0000005', 'railway'],
+    ['LIB0000005', 'library'],
+    ['CEM0000005', 'cemetery'],
+    ['SB0000005', 'society branch'],
+    ['TMY0000005', 'tramway'],
+    ['PFS0000005', 'pension funded society']
+  ])('validateIncorporationNumber returns true for %s (%s)', (identifier) => {
+    expect(CommonUtil.validateIncorporationNumber(identifier)).toBe(true)
   })
 
-  it('validateIncorporationNumber returns True with valid RLY (railway) number', () => {
-    expect(CommonUtil.validateIncorporationNumber('RLY0000005')).toBe(true)
-  })
-
-  it('validateIncorporationNumber returns True with valid LIB (library) number', () => {
-    expect(CommonUtil.validateIncorporationNumber('LIB0000005')).toBe(true)
-  })
-
-  it('validateIncorporationNumber returns True with valid CEM (cemetery) number', () => {
-    expect(CommonUtil.validateIncorporationNumber('CEM0000005')).toBe(true)
-  })
-
-  it('validateIncorporationNumber returns True with valid SB (society branch) number', () => {
-    expect(CommonUtil.validateIncorporationNumber('SB0000005')).toBe(true)
-  })
-
-  it('validateIncorporationNumber returns True with valid TMY (tramway) number', () => {
-    expect(CommonUtil.validateIncorporationNumber('TMY0000005')).toBe(true)
-  })
-
-  it('validateIncorporationNumber returns True with valid PFS (pension funded society) number', () => {
-    expect(CommonUtil.validateIncorporationNumber('PFS0000005')).toBe(true)
-  })
-
-  it('validateIncorporationNumber returns False with invalid incorp number', () => {
-    expect(CommonUtil.validateIncorporationNumber(null)).toBe(false)
-    expect(CommonUtil.validateIncorporationNumber('XX000033')).toBe(false)
+  it.each([
+    [null, 'null value'],
+    ['XX000033', 'invalid prefix']
+  ])('validateIncorporationNumber returns false for %s (%s)', (identifier) => {
+    expect(CommonUtil.validateIncorporationNumber(identifier)).toBe(false)
   })
 
   it('isCooperativeNumber returns True with valid coop number', () => {
