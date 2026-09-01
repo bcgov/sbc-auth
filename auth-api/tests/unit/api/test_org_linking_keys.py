@@ -319,6 +319,32 @@ def test_revoke_wrong_org_returns_404(client, jwt, session):  # pylint:disable=u
     assert rv.status_code == HTTPStatus.NOT_FOUND
 
 
+def test_revoke_forbidden_for_coordinator(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a COORDINATOR cannot revoke a linking key (revoke is ADMIN only)."""
+    user = factory_user_model(TestUserInfo.user1)
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id, member_type="COORDINATOR")
+    record = factory_linking_key_model(account_id=org.id)
+
+    headers = _account_holder_headers(jwt, user)
+    rv = client.delete(f"/api/v1/orgs/{org.id}/linking-keys/{record.id}", headers=headers)
+
+    assert rv.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_revoke_forbidden_for_staff_manage_accounts(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that staff with manage_accounts cannot revoke a linking key (revoke is ADMIN only)."""
+    user = factory_user_model(TestUserInfo.user1)
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    record = factory_linking_key_model(account_id=org.id)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
+    rv = client.delete(f"/api/v1/orgs/{org.id}/linking-keys/{record.id}", headers=headers)
+
+    assert rv.status_code == HTTPStatus.UNAUTHORIZED
+
+
 def test_generate_linking_key_forbidden_without_role(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a user without account_holder role cannot generate a key."""
     user = factory_user_model(TestUserInfo.user1)

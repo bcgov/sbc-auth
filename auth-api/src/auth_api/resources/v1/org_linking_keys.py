@@ -34,6 +34,7 @@ from auth_api.utils.user_context import UserContext, user_context
 bp = Blueprint("LINKING_KEYS", __name__, url_prefix=EndpointEnum.API_V1.value)
 
 _OWNER_ROLES = (COORDINATOR, ADMIN)
+_REVOKE_ROLES = (ADMIN,)
 
 
 @bp.before_request
@@ -77,10 +78,10 @@ def post_linking_key(org_id):
 
 @bp.route("/orgs/<int:org_id>/linking-keys/<int:key_id>", methods=["DELETE"])
 @cross_origin(origins="*")
-@_jwt.has_one_of_roles([Role.ACCOUNT_HOLDER.value, Role.STAFF_MANAGE_ACCOUNTS.value])
+@_jwt.has_one_of_roles([Role.ACCOUNT_HOLDER.value])
 def delete_linking_key(org_id, key_id):
-    """Revoke a specific linking key by ID (soft delete)."""
-    org = OrgService.find_by_org_id(org_id, allowed_roles=_OWNER_ROLES)
+    """Revoke a specific linking key by ID (soft delete). Admin only."""
+    org = OrgService.find_by_org_id(org_id, allowed_roles=_REVOKE_ROLES)
     if org is None:
         return {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
     found = AccountLinkingKeyService.revoke(key_id, org_id)
