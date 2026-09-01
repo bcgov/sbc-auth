@@ -5,7 +5,7 @@
   >
     <div
       v-if="title"
-      class="font-weight-bold mb-2"
+      class="vendor-linking-warning-alert-title font-weight-bold mb-2"
     >
       {{ title }}
     </div>
@@ -48,7 +48,11 @@ export default defineComponent({
   border-radius: 4px;
   border: 1px solid $BCgovGold5 !important;
   background: $BCgovGold0 !important;
-  color: $gray7;
+  color: $gray7 !important;
+}
+
+.vendor-linking-warning-alert-title {
+  color: $gray9 !important;
 }
 
 ::v-deep .v-icon {

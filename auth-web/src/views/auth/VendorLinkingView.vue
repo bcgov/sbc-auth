@@ -24,8 +24,9 @@
             <h1 class="text-left mb-10">
               {{ $t('vendorLinkingSelectAccountTitle') }}
             </h1>
-            <p class="text-left font-weight-bold mb-4">
-              {{ $t('vendorLinkingSelectAccountHeading') }} ({{ eligibleAccounts.length }})
+            <p class="vendor-linking-select-account-heading text-left font-weight-bold mb-4">
+              {{ $t('vendorLinkingSelectAccountHeading') }}
+              <span class="font-weight-regular">({{ eligibleAccounts.length }})</span>
             </p>
             <p class="text-left mb-1">
               {{ $t('vendorLinkingSelectAccountBody') }}
@@ -83,8 +84,11 @@
             <h2 class="mb-4">
               {{ $t('vendorLinkingResultSuccessTitle') }}
             </h2>
+            <p class="mb-1">
+              {{ $t('vendorLinkingResultSuccessBody') }}
+            </p>
             <p class="mb-10">
-              {{ $t('vendorLinkingResultSuccessBody', { seconds: remainingSeconds }) }}
+              {{ $t('vendorLinkingResultSuccessRedirect', { seconds: remainingSeconds }) }}
             </p>
             <v-btn
               large
@@ -327,6 +331,10 @@ export default defineComponent({
 
 .vendor-linking-select-account-content {
   max-width: 58rem;
+}
+
+.vendor-linking-select-account-heading {
+  color: $gray9;
 }
 
 .vendor-linking-result-failure-box {
