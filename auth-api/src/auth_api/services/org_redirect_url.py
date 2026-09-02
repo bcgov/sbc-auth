@@ -23,7 +23,7 @@ from auth_api.exceptions.errors import Error
 from auth_api.models.org_redirect_url import OrgRedirectUrl as OrgRedirectUrlModel
 
 # For sanitizing accepted redirect urls
-SAFE_HOST_CHARS = re.compile(r"[A-Za-z0-9.-]+(:[0-9]+)?")
+SAFE_HOST_CHARS = re.compile(r"[A-Za-z0-9.-]+(:\d+)?", re.ASCII)
 SAFE_PATH_CHARS = re.compile(r"[A-Za-z0-9\-._~/*]*")
 
 
