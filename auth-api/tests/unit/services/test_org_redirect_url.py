@@ -301,3 +301,120 @@ def test_is_valid_redirect_url_wildcard_does_not_match_sibling_path(session):  #
     factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback/*")
 
     assert OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/callback-other/x") is False
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://vendor.example.com/<script>alert('xss')</script>",
+        "https://vendor.example.com/callback🎉",
+        "https://vendor.example.com/call back",
+        'https://vendor.example.com/"quoted"',
+        "https://vendor.example.com/call\nback",
+        "https://vendor.example.com/callback\r\nLocation: https://bad.example.com",
+        "https://vendor.example.com/call%20back",
+        "https://vendor.example.com/%3Cscript%3Ealert(1)%3C/script%3E",
+        "https://vendor.example.com/callback@v2",
+        "https://vendor.example.com/callback,extra",
+        "https://vendor.example.com/callback;a=abc",
+    ],
+)
+def test_create_rejects_url_with_disallowed_path_characters(session, url):  # pylint:disable=unused-argument
+    """Assert that a path outside the allowed character set is rejected, percent-encoding included."""
+    org = factory_org_model()
+
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.create(org.id, url)
+
+    assert exc_info.value.code == Error.INVALID_REDIRECT_URL.name
+
+
+def test_create_rejects_userinfo_in_host(session):  # pylint:disable=unused-argument
+    """Assert that a host carrying userinfo is rejected — it reads as the trusted host but is not."""
+    org = factory_org_model()
+
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.create(org.id, "https://vendor.example.com@bad.example.com/callback")
+
+    assert exc_info.value.code == Error.INVALID_REDIRECT_URL.name
+
+
+def test_create_allows_host_with_port(session):  # pylint:disable=unused-argument
+    """Assert that a host carrying a port is accepted."""
+    org = factory_org_model()
+
+    record = OrgRedirectUrlService.create(org.id, "https://vendor.example.com:8443/callback")
+
+    assert record.redirect_url == "https://vendor.example.com:8443/callback"
+
+
+def test_create_rejects_http_scheme(session):  # pylint:disable=unused-argument
+    """Assert that http is rejected — redirecting a user over plaintext is a downgrade."""
+    org = factory_org_model()
+
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.create(org.id, "http://vendor.example.com/callback")
+
+    assert exc_info.value.code == Error.INVALID_REDIRECT_URL.name
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://vendor.example.com/callback/<script>alert('xss')</script>",
+        "https://vendor.example.com/callback/done🎉",
+        "https://vendor.example.com/callback/done\r\nLocation: https://bad.example.com",
+        "https://vendor.example.com/callback/%20ok",
+        "https://vendor.example.com/callback/ok;a=abc",
+    ],
+)
+def test_is_valid_redirect_url_rejects_disallowed_characters_via_wildcard(session, url):  # pylint:disable=unused-argument
+    """Assert that a wildcard match does not let disallowed characters through the suffix."""
+    org = factory_org_model()
+    factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback/*")
+
+    assert OrgRedirectUrlService.is_valid_redirect_url(org.id, url) is False
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://vendor.example.com/callback/../../admin",
+        "https://vendor.example.com/callback/%2e%2e%2f%2e%2e%2fadmin",
+    ],
+)
+def test_is_valid_redirect_url_rejects_path_traversal_via_wildcard(session, url):  # pylint:disable=unused-argument
+    """Assert that traversal cannot escape the path boundary a wildcard is meant to guarantee."""
+    org = factory_org_model()
+    factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback/*")
+
+    assert OrgRedirectUrlService.is_valid_redirect_url(org.id, url) is False
+
+
+def test_create_rejects_path_traversal(session):  # pylint:disable=unused-argument
+    """Assert that a registered URL cannot contain a traversal segment."""
+    org = factory_org_model()
+
+    with pytest.raises(BusinessException) as exc_info:
+        OrgRedirectUrlService.create(org.id, "https://vendor.example.com/callback/../admin")
+
+    assert exc_info.value.code == Error.INVALID_REDIRECT_URL.name
+
+
+def test_is_valid_redirect_url_false_for_empty_url(session):  # pylint:disable=unused-argument
+    """Assert that an empty URL is not considered valid."""
+    org = factory_org_model()
+    factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback")
+
+    assert OrgRedirectUrlService.is_valid_redirect_url(org.id, "") is False
+
+
+def test_is_valid_redirect_url_still_ignores_encoded_query_string(session):  # pylint:disable=unused-argument
+    """Assert that the query string stays exempt — it is dropped before matching."""
+    org = factory_org_model()
+    factory_redirect_url_model(org_id=org.id, redirect_url="https://vendor.example.com/callback")
+
+    assert (
+        OrgRedirectUrlService.is_valid_redirect_url(org.id, "https://vendor.example.com/callback?next=%2Fhome&a=b")
+        is True
+    )

@@ -51,7 +51,7 @@
           class="action-buttons d-flex justify-end"
         >
           <v-btn
-            v-if="showsStandaloneRemoveAction(getConnectionStatus(item))"
+            v-if="showsStandaloneRemoveAction(getConnectionStatus(item)) && canRevokeConnections"
             color="primary"
             depressed
             class="vendor-connection-action-btn vendor-connection-action-btn--standalone"
@@ -64,7 +64,7 @@
           </v-btn>
 
           <span
-            v-else
+            v-else-if="!showsStandaloneRemoveAction(getConnectionStatus(item))"
             class="vendor-connection-split-actions d-inline-flex align-center"
           >
             <v-btn
@@ -79,6 +79,7 @@
               {{ $t('vendorConnectionsExtend') }}
             </v-btn>
             <v-menu
+              v-if="canRevokeConnections"
               v-model="actionMenuOpen[item.id]"
               offset-y
               left
@@ -190,6 +191,7 @@ import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, reactive, r
 import { VendorConnection, VendorConnectionStatuses } from '@/models/vendorConnection'
 import {
   canManageVendorConnections,
+  canRevokeVendorConnection,
   getDaysUntilExpiry,
   getVendorConnectionStatus,
   mapLinkingKeyToVendorConnection,
@@ -266,6 +268,13 @@ export default defineComponent({
 
     const canManageConnections = computed(() => {
       return canManageVendorConnections(
+        currentMembership.value?.membershipTypeCode,
+        userStore.currentUser?.roles
+      )
+    })
+
+    const canRevokeConnections = computed(() => {
+      return canRevokeVendorConnection(
         currentMembership.value?.membershipTypeCode,
         userStore.currentUser?.roles
       )
@@ -418,6 +427,7 @@ export default defineComponent({
     return {
       actionMenuOpen,
       canManageConnections,
+      canRevokeConnections,
       closeDialog,
       confirmExtend,
       confirmRemove,

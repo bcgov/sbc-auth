@@ -1,10 +1,10 @@
 
+import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { EventBus } from '@/event-bus'
 import LinkingKeysService from '@/services/linkingKeys.services'
 import { MembershipType } from '@/models/Organization'
-import { Role } from '@/util/constants'
 import { VendorConnectionStatuses } from '@/models/vendorConnection'
 import VendorConnectionsTable from '@/components/auth/account-settings/advance-settings/VendorConnectionsTable.vue'
 import VueRouter from 'vue-router'
@@ -61,6 +61,9 @@ describe('VendorConnectionsTable.vue', () => {
 
   beforeEach(async () => {
     setActivePinia(createPinia())
+    sessionStorage.setItem(SessionStorageKeys.LaunchDarklyFlags, JSON.stringify({
+      [LDFlags.DisableAccountLinking]: false
+    }))
     vi.spyOn(LinkingKeysService, 'getOrgLinkingKeys').mockResolvedValue(getMockLinkingKeysResponse() as any)
 
     const orgStore = useOrgStore()
@@ -122,6 +125,7 @@ describe('VendorConnectionsTable.vue', () => {
   afterEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
+    sessionStorage.removeItem(SessionStorageKeys.LaunchDarklyFlags)
     wrapper?.destroy()
   })
 
@@ -139,6 +143,19 @@ describe('VendorConnectionsTable.vue', () => {
     })
 
     expect(wrapper.vm.canManageConnections).toBe(false)
+  })
+
+  it('hides remove actions for Coordinator membership but keeps extend', async () => {
+    const orgStore = useOrgStore()
+    orgStore.$patch({
+      currentMembership: {
+        membershipTypeCode: MembershipType.Coordinator
+      } as any
+    })
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.vm.canManageConnections).toBe(true)
+    expect(wrapper.vm.canRevokeConnections).toBe(false)
   })
 
   it('shows remove button for active connections when user can manage', () => {

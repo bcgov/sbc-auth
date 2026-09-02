@@ -34,6 +34,7 @@ from tests.utilities.factory_utils import (
 )
 
 _REDIRECT_URL = "https://vendor.example.com/callback"
+_REDIRECT_URL_WILDCARD = "https://vendor.example.com/callback/*"
 
 
 def test_generate_creates_key(session):  # pylint:disable=unused-argument
@@ -143,6 +144,80 @@ def test_generate_unregistered_redirect_url_rejected(session):  # pylint:disable
         AccountLinkingKeyService.generate(
             lawfirm.id, vendor_account_id=vendor.id, redirect_url="https://not-registered.example.com/cb"
         )
+
+    assert exc_info.value.code == Error.REDIRECT_URL_INVALID.name
+
+
+def test_generate_filled_in_wildcard(session):  # pylint:disable=unused-argument
+    """Assert that a concrete path matching a registered wildcard is accepted at generation."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL_WILDCARD)
+
+    record = AccountLinkingKeyService.generate(
+        lawfirm.id, vendor_account_id=vendor.id, redirect_url="https://vendor.example.com/callback/abc123"
+    )
+
+    assert record.redirect_url == "https://vendor.example.com/callback/abc123"
+
+
+def test_generate_wildcard_matches_bare_boundary(session):  # pylint:disable=unused-argument
+    """Assert that the wildcard's own path boundary is accepted at generation."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL_WILDCARD)
+
+    record = AccountLinkingKeyService.generate(
+        lawfirm.id, vendor_account_id=vendor.id, redirect_url="https://vendor.example.com/callback/"
+    )
+
+    assert record.redirect_url == "https://vendor.example.com/callback/"
+
+
+def test_generate_persists_query_string_on_wildcard_fill(session):  # pylint:disable=unused-argument
+    """Assert that query params tacked on at generation survive into the persisted URL.
+
+    The vendor needs them passed back, and storing them verbatim is what makes the record
+    an audit of exactly what came in.
+    """
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL_WILDCARD)
+    passed = "https://vendor.example.com/callback/abc123?state=xyz&code=123"
+
+    record = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id, redirect_url=passed)
+
+    assert record.redirect_url == passed
+
+
+def test_generate_persists_query_string_on_exact_match(session):  # pylint:disable=unused-argument
+    """Assert that a query string is ignored for matching but retained on an exact registration."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL)
+    passed = f"{_REDIRECT_URL}?state=xyz"
+
+    record = AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id, redirect_url=passed)
+
+    assert record.redirect_url == passed
+
+
+@pytest.mark.parametrize(
+    "redirect_url",
+    [
+        "https://vendor.example.com/callback-other/x",
+        "https://vendor.example.com/callback/<script>alert(1)</script>",
+        "https://vendor.example.com/callback/../../admin",
+    ],
+)
+def test_generate_rejects_url_failing_wildcard_validation(session, redirect_url):  # pylint:disable=unused-argument
+    """Assert that a wildcard registration does not let a sibling path, markup or traversal through."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    factory_redirect_url_model(org_id=vendor.id, redirect_url=_REDIRECT_URL_WILDCARD)
+
+    with pytest.raises(BusinessException) as exc_info:
+        AccountLinkingKeyService.generate(lawfirm.id, vendor_account_id=vendor.id, redirect_url=redirect_url)
 
     assert exc_info.value.code == Error.REDIRECT_URL_INVALID.name
 

@@ -2,6 +2,7 @@ import { LDFlags, Role, SessionStorageKeys } from '@/util/constants'
 import {
   buildSigninPath,
   canManageVendorConnections,
+  canRevokeVendorConnection,
   canViewVendorConnections,
   getVendorConnectionStatus,
   mapLinkingKeyToVendorConnection,
@@ -124,6 +125,56 @@ describe('vendor-connection-util', () => {
         undefined,
         [Role.ExternalStaffReadonly, Role.StaffManageAccounts]
       )).toBe(true)
+    })
+  })
+
+  describe('canRevokeVendorConnection', () => {
+    beforeEach(() => {
+      setDisableAccountLinkingFlag(false)
+    })
+
+    it('returns true for Admin with account_holder role', () => {
+      expect(canRevokeVendorConnection(
+        MembershipType.Admin,
+        [Role.AccountHolder]
+      )).toBe(true)
+    })
+
+    it('returns false for Coordinator even with account_holder role', () => {
+      expect(canRevokeVendorConnection(
+        MembershipType.Coordinator,
+        [Role.AccountHolder]
+      )).toBe(false)
+    })
+
+    it('returns false for regular User', () => {
+      expect(canRevokeVendorConnection(
+        MembershipType.User,
+        [Role.AccountHolder]
+      )).toBe(false)
+    })
+
+    it('returns false for staff with manage_accounts role', () => {
+      expect(canRevokeVendorConnection(
+        undefined,
+        [Role.Staff, Role.StaffManageAccounts]
+      )).toBe(false)
+    })
+
+    it('returns false for external staff readonly with manage_accounts role', () => {
+      expect(canRevokeVendorConnection(
+        undefined,
+        [Role.ExternalStaffReadonly, Role.StaffManageAccounts]
+      )).toBe(false)
+    })
+
+    it('returns false when the disable-account-linking flag is on', () => {
+      setDisableAccountLinkingFlag(true)
+
+      expect(canRevokeVendorConnection(
+        MembershipType.Admin,
+        [Role.AccountHolder]
+      )).toBe(false)
     })
   })
 

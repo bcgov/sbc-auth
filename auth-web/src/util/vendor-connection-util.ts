@@ -57,7 +57,7 @@ export function canViewVendorConnections (
 }
 
 /**
- * Remove/extend linking keys — Admin/Coordinator (account_holder JWT),
+ * Extend linking keys — Admin/Coordinator (account_holder JWT),
  * or staff/external staff with manage_accounts (matches org_linking_keys PR #3819).
  */
 export function canManageVendorConnections (
@@ -73,6 +73,17 @@ export function canManageVendorConnections (
   }
 
   return [MembershipType.Admin, MembershipType.Coordinator].includes(membershipTypeCode)
+}
+
+export function canRevokeVendorConnection (
+  membershipTypeCode: MembershipType | undefined,
+  userRoles: string[] = []
+): boolean {
+  if (!canViewVendorConnections(membershipTypeCode, userRoles)) {
+    return false
+  }
+
+  return membershipTypeCode === MembershipType.Admin
 }
 
 export function mapLinkingKeyToVendorConnection (linkingKey: AccountLinkingKey): VendorConnection {

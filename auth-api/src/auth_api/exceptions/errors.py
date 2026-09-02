@@ -158,7 +158,7 @@ class Error(Enum):
         "A service provider account ID is required with a redirect URL.",
         HTTPStatus.BAD_REQUEST,
     )
-    INVALID_REDIRECT_URL = "Enter a valid URL beginning with http:// or https://.", HTTPStatus.BAD_REQUEST
+    INVALID_REDIRECT_URL = "Enter a valid URL beginning with https://.", HTTPStatus.BAD_REQUEST
     REDIRECT_URL_ALREADY_EXISTS = "This URL has already been added.", HTTPStatus.CONFLICT
     REDIRECT_URL_INVALID = (
         "This redirect URL is not valid for this service provider.",
