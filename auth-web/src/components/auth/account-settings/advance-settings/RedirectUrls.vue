@@ -36,6 +36,7 @@
           hide-details="auto"
           placeholder="Enter URL"
           aria-label="Enter URL"
+          maxlength="250"
           data-test="url-input"
           :error-messages="newUrlError"
           @input="newUrlError = ''"
@@ -185,6 +186,7 @@
           filled
           hide-details="auto"
           aria-label="Enter redirect URL"
+          maxlength="250"
           data-test="edit-url-input"
           :error-messages="editedUrlError"
           @input="editedUrlError = ''"
