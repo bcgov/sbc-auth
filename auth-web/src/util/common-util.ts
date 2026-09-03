@@ -81,9 +81,9 @@ export default class CommonUtils {
     if (!match) return false
 
     const VALID_PREFIXES = new Set([
-      '', 'A', 'B', 'BC', 'C', 'CP', 'EPR', 'FM', 'FOR', 'LIC', 'LL', 'LLC', 'LP',
-      'MF', 'QA', 'QB', 'QC', 'QD', 'QE', 'REG', 'RLY', 'S', 'S-', 'S/',
-      'XL', 'XP', 'XS', 'XS-', 'XS/', 'CS', 'CS-', 'CS/'
+      '', 'A', 'B', 'BC', 'C', 'CEM', 'CP', 'EPR', 'FM', 'FOR', 'LIC', 'LIB', 'LL', 'LLC', 'LP',
+      'MF', 'PFS', 'QA', 'QB', 'QC', 'QD', 'QE', 'REG', 'RLY', 'S', 'S-', 'S/', 'SB',
+      'XL', 'XP', 'XS', 'XS-', 'XS/', 'CS', 'CS-', 'CS/', 'TMY'
     ])
     return VALID_PREFIXES.has(match[1] || '')
   }
