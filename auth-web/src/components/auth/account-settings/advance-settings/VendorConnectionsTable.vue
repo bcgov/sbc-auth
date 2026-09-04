@@ -50,27 +50,15 @@
           v-if="canManageConnections"
           class="action-buttons d-flex justify-end"
         >
-          <v-btn
-            v-if="showsStandaloneRemoveAction(getConnectionStatus(item)) && canRevokeConnections"
-            color="primary"
-            depressed
-            class="vendor-connection-action-btn vendor-connection-action-btn--standalone"
-            :aria-label="$t('vendorConnectionsRemoveAria')"
-            :title="$t('vendorConnectionsRemoveAria')"
-            :data-test="getIndexedTag('remove-button', item.id)"
-            @click="openRemoveModal(item)"
-          >
-            {{ $t('vendorConnectionsRemove') }}
-          </v-btn>
-
-          <span
-            v-else-if="!showsStandaloneRemoveAction(getConnectionStatus(item))"
-            class="vendor-connection-split-actions d-inline-flex align-center"
-          >
+          <span class="vendor-connection-split-actions d-inline-flex align-center">
             <v-btn
+              v-if="getLinkActions(item).showExtend"
               color="primary"
               depressed
-              class="vendor-connection-action-btn vendor-connection-action-btn--split-main"
+              class="vendor-connection-action-btn"
+              :class="getLinkActions(item).showRemove
+                ? 'vendor-connection-action-btn--split-main'
+                : 'vendor-connection-action-btn--standalone'"
               :aria-label="$t('vendorConnectionsExtendAria')"
               :title="$t('vendorConnectionsExtendAria')"
               :data-test="getIndexedTag('extend-button', item.id)"
@@ -78,8 +66,9 @@
             >
               {{ $t('vendorConnectionsExtend') }}
             </v-btn>
+
             <v-menu
-              v-if="canRevokeConnections"
+              v-if="getLinkActions(item).showExtend && getLinkActions(item).showRemove"
               v-model="actionMenuOpen[item.id]"
               offset-y
               left
@@ -107,6 +96,19 @@
                 </v-list-item>
               </v-list>
             </v-menu>
+
+            <v-btn
+              v-else-if="getLinkActions(item).showRemove"
+              color="primary"
+              depressed
+              class="vendor-connection-action-btn vendor-connection-action-btn--standalone"
+              :aria-label="$t('vendorConnectionsRemoveAria')"
+              :title="$t('vendorConnectionsRemoveAria')"
+              :data-test="getIndexedTag('remove-button', item.id)"
+              @click="openRemoveModal(item)"
+            >
+              {{ $t('vendorConnectionsRemove') }}
+            </v-btn>
           </span>
         </div>
       </template>
@@ -188,14 +190,14 @@
 
 <script lang="ts">
 import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, reactive, ref } from '@vue/composition-api'
-import { VendorConnection, VendorConnectionStatuses } from '@/models/vendorConnection'
+import { VendorConnection, VendorConnectionActions, VendorConnectionStatuses } from '@/models/vendorConnection'
 import {
   canManageVendorConnections,
   canRevokeVendorConnection,
   getDaysUntilExpiry,
+  getVendorConnectionActions,
   getVendorConnectionStatus,
-  mapLinkingKeyToVendorConnection,
-  showsStandaloneRemoveAction
+  mapLinkingKeyToVendorConnection
 } from '@/util/vendor-connection-util'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { BaseVDataTable } from '@/components'
@@ -308,6 +310,15 @@ export default defineComponent({
 
     const getConnectionStatus = (connection: VendorConnection) => {
       return getVendorConnectionStatus(connection.expiryDate, connection.status)
+    }
+
+    const getLinkActions = (connection: VendorConnection): VendorConnectionActions => {
+      const actions = getVendorConnectionActions(getConnectionStatus(connection))
+
+      return {
+        showExtend: actions.showExtend,
+        showRemove: actions.showRemove && canRevokeConnections.value
+      }
     }
 
     const getServiceProviderDisplayName = (connection: VendorConnection) => {
@@ -438,6 +449,7 @@ export default defineComponent({
       getConnectionStatus,
       getDaysUntilExpiry,
       getIndexedTag,
+      getLinkActions,
       getServiceProviderDisplayName,
       isLoading,
       loadConnections,
@@ -445,7 +457,6 @@ export default defineComponent({
       openExtendModal,
       openRemoveModal,
       removeDialog,
-      showsStandaloneRemoveAction,
       tableHeaders: TABLE_HEADERS,
       VendorConnectionStatuses
     }

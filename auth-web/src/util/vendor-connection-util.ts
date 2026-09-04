@@ -1,5 +1,10 @@
 
-import { AccountLinkingKey, VendorConnection, VendorConnectionStatuses } from '@/models/vendorConnection'
+import {
+  AccountLinkingKey,
+  VendorConnection,
+  VendorConnectionActions,
+  VendorConnectionStatuses
+} from '@/models/vendorConnection'
 import { LDFlags, Role } from '@/util/constants'
 import { MembershipType } from '@/models/Organization'
 import { getLdFlag } from '@/util/flag-util'
@@ -26,6 +31,13 @@ function isOrgMember (membershipTypeCode: MembershipType | undefined): boolean {
     MembershipType.Admin,
     MembershipType.Coordinator,
     MembershipType.User
+  ].includes(membershipTypeCode)
+}
+
+function isAdminOrCoordinator (membershipTypeCode: MembershipType | undefined): boolean {
+  return [
+    MembershipType.Admin,
+    MembershipType.Coordinator
   ].includes(membershipTypeCode)
 }
 
@@ -72,7 +84,7 @@ export function canManageVendorConnections (
     return true
   }
 
-  return [MembershipType.Admin, MembershipType.Coordinator].includes(membershipTypeCode)
+  return isAdminOrCoordinator(membershipTypeCode)
 }
 
 export function canRevokeVendorConnection (
@@ -83,7 +95,7 @@ export function canRevokeVendorConnection (
     return false
   }
 
-  return membershipTypeCode === MembershipType.Admin
+  return isAdminOrCoordinator(membershipTypeCode)
 }
 
 export function mapLinkingKeyToVendorConnection (linkingKey: AccountLinkingKey): VendorConnection {
@@ -119,9 +131,14 @@ export function getVendorConnectionStatus (expiryDate: string, keyStatus?: strin
   return normalizedStatus
 }
 
-export function showsStandaloneRemoveAction (connectionStatus?: string): boolean {
-  return connectionStatus === VendorConnectionStatuses.Active ||
-    connectionStatus === VendorConnectionStatuses.Pending
+export function getVendorConnectionActions (connectionStatus?: string): VendorConnectionActions {
+  return {
+    showExtend: connectionStatus === VendorConnectionStatuses.Expiring ||
+      connectionStatus === VendorConnectionStatuses.Expired,
+    showRemove: connectionStatus === VendorConnectionStatuses.Active ||
+      connectionStatus === VendorConnectionStatuses.Pending ||
+      connectionStatus === VendorConnectionStatuses.Expiring
+  }
 }
 
 export function getDaysUntilExpiry (expiryDate: string): number {
