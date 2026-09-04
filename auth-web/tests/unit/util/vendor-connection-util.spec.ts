@@ -4,9 +4,9 @@ import {
   canManageVendorConnections,
   canRevokeVendorConnection,
   canViewVendorConnections,
+  getVendorConnectionActions,
   getVendorConnectionStatus,
-  mapLinkingKeyToVendorConnection,
-  showsStandaloneRemoveAction
+  mapLinkingKeyToVendorConnection
 } from '@/util/vendor-connection-util'
 import { MembershipType } from '@/models/Organization'
 import { VendorConnectionStatuses } from '@/models/vendorConnection'
@@ -140,11 +140,11 @@ describe('vendor-connection-util', () => {
       )).toBe(true)
     })
 
-    it('returns false for Coordinator even with account_holder role', () => {
+    it('returns true for Coordinator with account_holder role', () => {
       expect(canRevokeVendorConnection(
         MembershipType.Coordinator,
         [Role.AccountHolder]
-      )).toBe(false)
+      )).toBe(true)
     })
 
     it('returns false for regular User', () => {
@@ -218,15 +218,27 @@ describe('vendor-connection-util', () => {
     })
   })
 
-  describe('showsStandaloneRemoveAction', () => {
-    it('returns true for active and pending connections', () => {
-      expect(showsStandaloneRemoveAction(VendorConnectionStatuses.Active)).toBe(true)
-      expect(showsStandaloneRemoveAction(VendorConnectionStatuses.Pending)).toBe(true)
+  describe('getVendorConnectionActions', () => {
+    it('remove but not extend for active and pending connections', () => {
+      expect(getVendorConnectionActions(VendorConnectionStatuses.Active))
+        .toEqual({ showExtend: false, showRemove: true })
+      expect(getVendorConnectionActions(VendorConnectionStatuses.Pending))
+        .toEqual({ showExtend: false, showRemove: true })
     })
 
-    it('returns false for expiring and expired connections', () => {
-      expect(showsStandaloneRemoveAction(VendorConnectionStatuses.Expiring)).toBe(false)
-      expect(showsStandaloneRemoveAction(VendorConnectionStatuses.Expired)).toBe(false)
+    it('both actions for expiring connections', () => {
+      expect(getVendorConnectionActions(VendorConnectionStatuses.Expiring))
+        .toEqual({ showExtend: true, showRemove: true })
+    })
+
+    it('extend but not remove for expired connections', () => {
+      expect(getVendorConnectionActions(VendorConnectionStatuses.Expired))
+        .toEqual({ showExtend: true, showRemove: false })
+    })
+
+    it('no actions for an unknown status', () => {
+      expect(getVendorConnectionActions(undefined))
+        .toEqual({ showExtend: false, showRemove: false })
     })
   })
 

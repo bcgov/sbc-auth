@@ -145,7 +145,7 @@ describe('VendorConnectionsTable.vue', () => {
     expect(wrapper.vm.canManageConnections).toBe(false)
   })
 
-  it('hides remove actions for Coordinator membership but keeps extend', async () => {
+  it('allows remove and extend actions for Coordinator membership', async () => {
     const orgStore = useOrgStore()
     orgStore.$patch({
       currentMembership: {
@@ -155,7 +155,7 @@ describe('VendorConnectionsTable.vue', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.vm.canManageConnections).toBe(true)
-    expect(wrapper.vm.canRevokeConnections).toBe(false)
+    expect(wrapper.vm.canRevokeConnections).toBe(true)
   })
 
   it('shows remove button for active connections when user can manage', () => {
@@ -163,7 +163,15 @@ describe('VendorConnectionsTable.vue', () => {
       connection => wrapper.vm.getConnectionStatus(connection) === VendorConnectionStatuses.Active
     )
     expect(activeConnection).toBeTruthy()
-    expect(wrapper.vm.showsStandaloneRemoveAction(wrapper.vm.getConnectionStatus(activeConnection))).toBe(true)
+    expect(wrapper.vm.getLinkActions(activeConnection)).toEqual({ showExtend: false, showRemove: true })
+  })
+
+  it('hides remove for an expired connection but still offers extend', () => {
+    const expiredConnection = wrapper.vm.connectionsList.find(
+      connection => wrapper.vm.getConnectionStatus(connection) === VendorConnectionStatuses.Expired
+    )
+    expect(expiredConnection).toBeTruthy()
+    expect(wrapper.vm.getLinkActions(expiredConnection)).toEqual({ showExtend: true, showRemove: false })
   })
 
   it('shows pending badge and remove-only action for pending connection', async () => {
@@ -186,7 +194,7 @@ describe('VendorConnectionsTable.vue', () => {
 
     expect(wrapper.vm.getConnectionStatus(pendingConnection)).toBe(VendorConnectionStatuses.Pending)
     expect(wrapper.vm.getServiceProviderDisplayName(pendingConnection)).toBe('Pending vendor connection')
-    expect(wrapper.vm.showsStandaloneRemoveAction(wrapper.vm.getConnectionStatus(pendingConnection))).toBe(true)
+    expect(wrapper.vm.getLinkActions(pendingConnection)).toEqual({ showExtend: false, showRemove: true })
   })
 
   it('confirmRemove removes connection after API call', async () => {

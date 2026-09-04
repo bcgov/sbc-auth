@@ -18,6 +18,7 @@ import json
 from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
 
+import pytest
 from dateutil.relativedelta import relativedelta
 
 from auth_api.utils.enums import LinkingKeyStatus
@@ -274,28 +275,16 @@ def test_get_linking_keys_hides_key_value(client, jwt, session):  # pylint:disab
     assert "linkingKey" not in keys[0], "Raw key must not be exposed on GET"
 
 
-def test_revoke_linking_key_by_id(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that DELETE revokes a specific linking key by ID."""
+@pytest.mark.parametrize("key_status", [LinkingKeyStatus.ACTIVE.value, LinkingKeyStatus.PENDING.value])
+def test_revoke_linking_key_by_id(client, jwt, session, key_status):  # pylint:disable=unused-argument
+    """Assert that DELETE revokes a specific linking key by ID, for both ACTIVE and PENDING keys."""
     user = factory_user_model(TestUserInfo.user1)
     org = factory_org_model()
     vendor = factory_org_model()
     factory_membership_model(user.id, org.id)
-    record = factory_linking_key_model(account_id=org.id, vendor_account_id=vendor.id)
-
-    headers = _account_holder_headers(jwt, user)
-    rv = client.delete(f"/api/v1/orgs/{org.id}/linking-keys/{record.id}", headers=headers)
-    assert rv.status_code == HTTPStatus.OK
-
-    rv_list = client.get(f"/api/v1/orgs/{org.id}/linking-keys", headers=headers)
-    assert rv_list.json.get("linkingKeys") == []
-
-
-def test_revoke_pending_linking_key_by_id(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that DELETE revokes a PENDING (unbound) linking key by ID."""
-    user = factory_user_model(TestUserInfo.user1)
-    org = factory_org_model()
-    factory_membership_model(user.id, org.id)
-    record = factory_linking_key_model(account_id=org.id, status=LinkingKeyStatus.PENDING.value)
+    # a PENDING key is one no vendor has bound yet
+    vendor_account_id = vendor.id if key_status == LinkingKeyStatus.ACTIVE.value else None
+    record = factory_linking_key_model(account_id=org.id, vendor_account_id=vendor_account_id, status=key_status)
 
     headers = _account_holder_headers(jwt, user)
     rv = client.delete(f"/api/v1/orgs/{org.id}/linking-keys/{record.id}", headers=headers)
@@ -319,21 +308,30 @@ def test_revoke_wrong_org_returns_404(client, jwt, session):  # pylint:disable=u
     assert rv.status_code == HTTPStatus.NOT_FOUND
 
 
-def test_revoke_forbidden_for_coordinator(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that a COORDINATOR cannot revoke a linking key (revoke is ADMIN only)."""
+@pytest.mark.parametrize(
+    "member_type, expected_status",
+    [
+        ("ADMIN", HTTPStatus.OK),
+        ("COORDINATOR", HTTPStatus.OK),
+        ("USER", HTTPStatus.FORBIDDEN),
+    ],
+)
+def test_revoke_by_membership_type(client, jwt, session, member_type, expected_status):  # pylint:disable=unused-argument
+    """Assert that only ADMIN and COORDINATOR members can revoke a linking key."""
     user = factory_user_model(TestUserInfo.user1)
     org = factory_org_model()
-    factory_membership_model(user.id, org.id, member_type="COORDINATOR")
-    record = factory_linking_key_model(account_id=org.id)
+    vendor = factory_org_model()
+    factory_membership_model(user.id, org.id, member_type=member_type)
+    record = factory_linking_key_model(account_id=org.id, vendor_account_id=vendor.id)
 
     headers = _account_holder_headers(jwt, user)
     rv = client.delete(f"/api/v1/orgs/{org.id}/linking-keys/{record.id}", headers=headers)
 
-    assert rv.status_code == HTTPStatus.FORBIDDEN
+    assert rv.status_code == expected_status
 
 
 def test_revoke_forbidden_for_staff_manage_accounts(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that staff with manage_accounts cannot revoke a linking key (revoke is ADMIN only)."""
+    """Assert that staff with manage_accounts cannot revoke a linking key (revoke is ADMIN/COORDINATOR)."""
     user = factory_user_model(TestUserInfo.user1)
     org = factory_org_model()
     factory_membership_model(user.id, org.id)

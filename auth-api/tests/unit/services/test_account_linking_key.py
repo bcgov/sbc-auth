@@ -469,17 +469,31 @@ def test_extend_rejected_outside_the_window(session):  # pylint:disable=unused-a
     assert exc_info.value.code == Error.LINKING_KEY_NOT_NEAR_EXPIRY.name
 
 
-def test_extend_allowed_when_past_expiry_but_not_yet_swept(session):  # pylint:disable=unused-argument
-    """Assert that a key past its expiry is still extendable while auth-jobs has not run yet."""
+def test_extend_allowed_within_the_buffer_past_expiry(session):  # pylint:disable=unused-argument
+    """Assert that a key can be extended within the last day with a buffer."""
     lawfirm = factory_org_model()
     vendor = factory_org_model()
-    original_expiry = datetime.now(UTC) - timedelta(days=2)
+    original_expiry = datetime.now(UTC) - timedelta(hours=12)
     record = factory_linking_key_model(account_id=lawfirm.id, vendor_account_id=vendor.id, expires_on=original_expiry)
 
     updated = AccountLinkingKeyService.extend(record.id, lawfirm.id)
 
     assert updated is not None
     assert updated.expires_on == original_expiry + relativedelta(years=1)
+
+
+def test_extend_rejected_past_the_buffer(session):  # pylint:disable=unused-argument
+    """Assert that a key more than a day past its expiry can no longer be extended."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    record = factory_linking_key_model(
+        account_id=lawfirm.id, vendor_account_id=vendor.id, expires_on=datetime.now(UTC) - timedelta(days=2)
+    )
+
+    with pytest.raises(BusinessException) as exc_info:
+        AccountLinkingKeyService.extend(record.id, lawfirm.id)
+
+    assert exc_info.value.code == Error.INVALID_LINKING_KEY_STATE.name
 
 
 def test_extend_rejects_pending_key(session):  # pylint:disable=unused-argument

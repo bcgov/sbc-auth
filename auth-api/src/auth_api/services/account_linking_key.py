@@ -106,8 +106,13 @@ class AccountLinkingKey:
         if record.status != LinkingKeyStatus.ACTIVE.value:
             raise BusinessException(Error.INVALID_LINKING_KEY_STATE, None)
         window_days = current_app.config.get("ACCOUNT_LINK_EXPIRY_REMINDER_DAYS", 30)
-        if record.expires_on > datetime.now(UTC) + timedelta(days=window_days):
+        now = datetime.now(UTC)
+        if record.expires_on > now + timedelta(days=window_days):
             raise BusinessException(Error.LINKING_KEY_NOT_NEAR_EXPIRY, None)
+        # If the status is still ACTIVE (auth-job will toggle to EXPIRED), the expiry notification
+        # has not gone out so we allow for a 1-day buffer period for extending
+        if now > record.expires_on + timedelta(days=1):
+            raise BusinessException(Error.INVALID_LINKING_KEY_STATE, None)
 
         record.expires_on = record.expires_on + relativedelta(years=1)
         record.save()

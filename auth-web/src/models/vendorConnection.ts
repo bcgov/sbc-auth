@@ -49,3 +49,8 @@ export const VendorConnectionStatuses = {
 } as const
 
 export type VendorConnectionStatus = typeof VendorConnectionStatuses[keyof typeof VendorConnectionStatuses]
+
+export interface VendorConnectionActions {
+  showExtend: boolean
+  showRemove: boolean
+}
