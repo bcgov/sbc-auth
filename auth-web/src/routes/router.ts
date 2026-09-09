@@ -19,6 +19,7 @@ import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.
 import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
 import AccountSetupLanding from '@/views/auth/create-account/AccountSetupLanding.vue'
 import AccountSwitching from '@/views/auth/AccountSwitching.vue'
+import AccountTermsOfUse from '@/views/auth/AccountTermsOfUse.vue'
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
@@ -815,6 +816,13 @@ export function getRoutes (): RouteConfig[] {
       name: 'account-deactivate',
       props: true,
       component: AccountDeactivate,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/account-terms-of-use',
+      name: 'account-terms-of-use',
+      props: true,
+      component: AccountTermsOfUse,
       meta: { requiresAuth: true }
     },
     {
