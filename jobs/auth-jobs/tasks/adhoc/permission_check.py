@@ -44,3 +44,14 @@ class AuthJobPermissionCheckTask:  # pylint: disable=too-few-public-methods
             data={"hello": "world"},
         )
         queue.publish(current_app.config.get("ACCOUNT_MAILER_TOPIC"), GcpQueue.to_queue_message(cloud_event))
+
+        # test activity log pubsub publish permissions
+        cloud_event = SimpleCloudEvent(
+            id=str(uuid.uuid4()),
+            source=QueueSources.AUTH_JOBS.value,
+            subject=None,
+            time=datetime.now(tz=UTC).isoformat(),
+            type="HELLO",
+            data={"hello": "world"},
+        )
+        queue.publish(current_app.config.get("AUTH_EVENT_TOPIC"), GcpQueue.to_queue_message(cloud_event))
