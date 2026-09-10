@@ -27,6 +27,7 @@ from auth_api.models.account_linking_key import AccountLinkingKey as AccountLink
 from auth_api.models.org import Org as OrgModel
 from auth_api.models.org_status import OrgStatus as OrgStatusModel
 from auth_api.models.org_type import OrgType as OrgTypeModel
+from auth_api.models.user import User as UserModel
 from auth_api.utils.enums import ActivityAction, LinkingKeyStatus
 from tasks.account_link_notifications import AccountLinkNotificationsTask
 
@@ -55,8 +56,19 @@ def _factory_org(name: str) -> OrgModel:
     return org
 
 
+def _factory_user(firstname: str, lastname: str) -> UserModel:
+    user = UserModel(username=f"{firstname}{lastname}", firstname=firstname, lastname=lastname)
+    user.save()
+    return user
+
+
 def _factory_linking_key(
-    account_id: int, vendor_account_id: int, status: str, expires_on: datetime, created_on: datetime
+    account_id: int,
+    vendor_account_id: int,
+    status: str,
+    expires_on: datetime,
+    created_on: datetime,
+    created_by_id: int | None = None,
 ) -> AccountLinkingKeyModel:
     record = AccountLinkingKeyModel(
         linking_key=secrets.token_urlsafe(32),
@@ -64,6 +76,7 @@ def _factory_linking_key(
         vendor_account_id=vendor_account_id,
         status=status,
         expires_on=expires_on,
+        created_by_id=created_by_id,
     )
     record.save()
     record.created = created_on
@@ -75,8 +88,9 @@ def test_expiring_soon_key_sends_reminder(session, app):
     """Assert that a key expiring in exactly the reminder window sends a reminder without changing status."""
     source_org = _factory_org("Source Org")
     vendor_org = _factory_org("Vendor Org")
+    created_by_user = _factory_user("Jane", "Doe")
     key = _factory_linking_key(
-        source_org.id, vendor_org.id, LinkingKeyStatus.ACTIVE.value, EXPIRES_ON_30_DAYS, CREATED_ON
+        source_org.id, vendor_org.id, LinkingKeyStatus.ACTIVE.value, EXPIRES_ON_30_DAYS, CREATED_ON, created_by_user.id
     )
 
     with (
@@ -93,6 +107,7 @@ def test_expiring_soon_key_sends_reminder(session, app):
     assert kwargs["data"]["isReminder"] is True
     assert kwargs["data"]["linkDate"] == CREATED_ON_PACIFIC_ISO
     assert kwargs["data"]["expiryDate"] == EXPIRES_ON_30_DAYS_PACIFIC_ISO
+    assert kwargs["data"]["linkedByName"] == "Jane Doe"
     assert key.status == LinkingKeyStatus.ACTIVE.value
     mock_activity.assert_not_called()
 
