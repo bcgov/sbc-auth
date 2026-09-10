@@ -238,7 +238,7 @@ export default defineComponent({
     isCreateAccount: { type: Boolean, default: false },
     paymentMethods: { type: Array as PropType<string[]>, default: () => [] }
   },
-  setup (props, { emit }) {
+  setup (props, { emit, root }) {
     const orgStore = useOrgStore()
     const state = reactive({
       count: 0,
@@ -296,6 +296,10 @@ export default defineComponent({
           switch (status) {
             case ProductStatus.ACTIVE: {
               subTitle = `${code?.toLowerCase()}CodeActiveSubtitle`
+              const activeDetails = `${code?.toLowerCase()}CodeActiveDescription`
+              if (root.$te(activeDetails)) {
+                details = activeDetails
+              }
               decisionMadeIcon = 'mdi-check-circle'
               decisionMadeColorCode = 'success'
               break

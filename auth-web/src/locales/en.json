@@ -166,6 +166,7 @@
   "vsCodeDescriptionLink": "https://www2.gov.bc.ca/gov/content/life-events/death/wills-registry",
   "strrCodeDescription": "<p><ul><li>Register a short-term rental property</li><li>Register a platform service provider</li><li>Register a strata-titled hotel or motel</li><li>Manage and renew registrations</li></ul></p>",
   "bcaCodeDescription": "Three reports are available for purchase:<ul><li>Owner Location Report</li><li>Assessment Roll Report</li><li>Assessment Inventory Report</li></ul>",
+  "bcaCodeActiveDescription": "BC Assessment provides our customers with convenient and affordable access to property data by making our records available through BC Registries and Online Services.<p>Three reports are available for purchase:</p><ul><li>Owner Location Report</li><li>Assessment Roll Report</li><li>Assessment Inventory Report</li></ul>",
   "esraCodeDescription": "Search by the following:<ul><li>Parcel ID (PID)</li><li>Crown Lands PIN</li><li>Crown Lands File Number</li><li>Site ID</li><li>Address</li><li>Area</li></ul>",
   "accountBusinessTypeText": "Select a user type for your BC Registries and Online Service Account:",
   "businessCodeActiveSubtitle": "This account has access to Business Registry & Name Request.",
