@@ -163,6 +163,27 @@
         </template>
         <div>
           <v-divider class="mt-3 mb-10" />
+
+          <h2>
+            Terms of Use
+          </h2>
+
+          <h4 class="mt-12 mb-2">
+            Name
+          </h4>
+
+          <v-divider class="mb-6" />
+
+          <router-link
+            class="terms-of-use-link font-weight-bold"
+            data-test="link-terms-of-use"
+            to="/account-terms-of-use"
+          >
+            Terms of Use
+          </router-link>
+
+          <v-divider class="mt-6 mb-10" />
+
           <div class="form__btns">
             <v-btn
               v-if="isDeactivateButtonVisible"
@@ -737,6 +758,7 @@ export default defineComponent({
 }
 .deactivate-btn {
   height: auto !important;
+  width: auto !important;
   padding: 0.2rem 0.2rem !important;
   font-size: 1rem !important;
   text-decoration: underline;
@@ -752,5 +774,8 @@ export default defineComponent({
   .custom-warning .v-icon {
     color: $app-alert-orange !important;
   }
+}
+.terms-of-use-link {
+  color: var(--v-primary-base);
 }
 </style>

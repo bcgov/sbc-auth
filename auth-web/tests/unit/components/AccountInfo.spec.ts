@@ -4,6 +4,8 @@ import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
 import AccountInfo from '@/components/auth/account-settings/account-info/AccountInfo.vue'
 import OrgService from '@/services/org.services'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import Vue from 'vue'
+import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
 import flushPromises from 'flush-promises'
@@ -11,6 +13,9 @@ import { useOrgStore } from '@/stores/org'
 import { useUserStore } from '@/stores/user'
 
 document.body.setAttribute('data-app', 'true')
+
+Vue.use(VueRouter)
+const router = new VueRouter()
 
 describe('AccountInfo.vue', () => {
   let wrapper: any
@@ -181,6 +186,7 @@ describe('AccountInfo.vue', () => {
     wrapper = mount(AccountInfo, {
       localVue,
       vuetify,
+      router,
       mixins: [Steppable],
       methods: {
         getAccountFromSession: vi.fn(() => {
