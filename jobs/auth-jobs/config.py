@@ -91,7 +91,11 @@ class _Config:  # pylint: disable=too-few-public-methods
     AUTH_EVENT_TOPIC = os.getenv("AUTH_EVENT_TOPIC", "auth-event-dev")
 
     # Account linking key notifications
-    ACCOUNT_LINK_EXPIRY_REMINDER_DAYS = int(os.getenv("ACCOUNT_LINK_EXPIRY_REMINDER_DAYS", "30"))
+    ACCOUNT_LINK_EXPIRY_REMINDER_DAYS_LIST: list[int] = [
+        int(day)
+        for day in os.getenv("ACCOUNT_LINK_EXPIRY_REMINDER_DAYS_LIST", "30,7").replace(" ", "").split(",")
+        if day
+    ]
 
     TESTING = False
     DEBUG = True

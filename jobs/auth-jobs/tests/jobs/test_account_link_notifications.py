@@ -38,6 +38,9 @@ NOW = datetime(2026, 7, 15, 18, 0, 0, tzinfo=UTC)
 EXPIRES_ON_30_DAYS = datetime(2026, 8, 14, 18, 0, 0, tzinfo=UTC)
 EXPIRES_ON_30_DAYS_PACIFIC_ISO = "2026-08-14"
 
+EXPIRES_ON_7_DAYS = datetime(2026, 7, 22, 18, 0, 0, tzinfo=UTC)
+EXPIRES_ON_7_DAYS_PACIFIC_ISO = "2026-07-22"
+
 EXPIRES_ON_PAST = datetime(2026, 7, 14, 18, 0, 0, tzinfo=UTC)
 EXPIRES_ON_PAST_PACIFIC_ISO = "2026-07-14"
 
@@ -91,6 +94,35 @@ def test_expiring_soon_key_sends_reminder(session, app):
     assert kwargs["data"]["linkDate"] == CREATED_ON_PACIFIC_ISO
     assert kwargs["data"]["expiryDate"] == EXPIRES_ON_30_DAYS_PACIFIC_ISO
     assert key.status == LinkingKeyStatus.ACTIVE.value
+    mock_activity.assert_not_called()
+
+
+def test_sends_configured_reminders(session, app, monkeypatch):
+    """Assert that a reminder is sent for every remaining days reminder in a single run."""
+    monkeypatch.setitem(app.config, "ACCOUNT_LINK_EXPIRY_REMINDER_DAYS_LIST", [30, 7])
+    source_org = _factory_org("Source Org")
+    vendor_org = _factory_org("Vendor Org")
+    _factory_linking_key(source_org.id, vendor_org.id, LinkingKeyStatus.ACTIVE.value, EXPIRES_ON_30_DAYS, CREATED_ON)
+    _factory_linking_key(source_org.id, vendor_org.id, LinkingKeyStatus.ACTIVE.value, EXPIRES_ON_7_DAYS, CREATED_ON)
+
+    with (
+        freeze_time(NOW),
+        patch("tasks.account_link_notifications.publish_to_mailer") as mock_publish,
+        patch("tasks.account_link_notifications.ActivityLogPublisher.publish_activity") as mock_activity,
+    ):
+        AccountLinkNotificationsTask.notify()
+
+    assert mock_publish.call_count == 2
+    thirty_day_data = mock_publish.call_args_list[0].kwargs["data"]
+    assert thirty_day_data["isReminder"] is True
+    assert thirty_day_data["daysUntilExpiry"] == 30
+    assert thirty_day_data["expiryDate"] == EXPIRES_ON_30_DAYS_PACIFIC_ISO
+
+    seven_day_data = mock_publish.call_args_list[1].kwargs["data"]
+    assert seven_day_data["isReminder"] is True
+    assert seven_day_data["daysUntilExpiry"] == 7
+    assert seven_day_data["expiryDate"] == EXPIRES_ON_7_DAYS_PACIFIC_ISO
+
     mock_activity.assert_not_called()
 
 

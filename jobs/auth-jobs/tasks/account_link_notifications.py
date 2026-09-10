@@ -35,10 +35,14 @@ class AccountLinkNotificationsTask:  # pylint: disable=too-few-public-methods
         """Find expiring and expired linking keys, update status, and publish mailer notifications."""
         now = datetime.now(UTC)
 
-        expiring_keys = cls._find_expiring_soon(now)
-        current_app.logger.info(f"account_link_notifications: {len(expiring_keys)} key(s) expiring soon")
-        for key in expiring_keys:
-            cls._notify(key, is_reminder=True)
+        reminder_days_list = current_app.config.get("ACCOUNT_LINK_EXPIRY_REMINDER_DAYS_LIST", [30, 7])
+        for reminder_days in reminder_days_list:
+            expiring_keys = cls._find_expiring_soon(now, reminder_days)
+            current_app.logger.info(
+                f"account_link_notifications: {len(expiring_keys)} key(s) expiring in {reminder_days} day(s)"
+            )
+            for key in expiring_keys:
+                cls._notify(key, is_reminder=True, days_until_expiry=reminder_days)
 
         expired_keys = cls._find_expired(now)
         current_app.logger.info(f"account_link_notifications: {len(expired_keys)} key(s) expired")
@@ -61,14 +65,16 @@ class AccountLinkNotificationsTask:  # pylint: disable=too-few-public-methods
         )
 
     @staticmethod
-    def _find_expiring_soon(now: datetime) -> list[AccountLinkingKeyModel]:
-        """Return ACTIVE keys expiring exactly ACCOUNT_LINK_EXPIRY_REMINDER_DAYS from now (day-bucketed)."""
-        reminder_days = current_app.config.get("ACCOUNT_LINK_EXPIRY_REMINDER_DAYS", 30)
+    def _find_expiring_soon(now: datetime, reminder_days: int) -> list[AccountLinkingKeyModel]:
+        """Return ACTIVE keys expiring exactly reminder_days from now."""
         target = now + timedelta(days=reminder_days)
         window_start = target.replace(hour=0, minute=0, second=0, microsecond=0)
         window_end = window_start + timedelta(days=1)
         return (
-            AccountLinkingKeyModel.query.options(joinedload(AccountLinkingKeyModel.vendor_account))
+            AccountLinkingKeyModel.query.options(
+                joinedload(AccountLinkingKeyModel.vendor_account),
+                joinedload(AccountLinkingKeyModel.created_by),
+            )
             .filter(
                 AccountLinkingKeyModel.status == LinkingKeyStatus.ACTIVE.value,
                 AccountLinkingKeyModel.expires_on >= window_start,
@@ -91,7 +97,14 @@ class AccountLinkNotificationsTask:  # pylint: disable=too-few-public-methods
         )
 
     @staticmethod
-    def _notify(key: AccountLinkingKeyModel, is_reminder: bool) -> None:
+    def _created_by_name(key: AccountLinkingKeyModel) -> str | None:
+        """Return the display name of the user who created the key."""
+        if not (user := key.created_by):
+            return None
+        return f"{user.firstname or ''} {user.lastname or ''}".strip() or None
+
+    @classmethod
+    def _notify(cls, key: AccountLinkingKeyModel, is_reminder: bool, days_until_expiry: int | None = None) -> None:
         """Publish an account-link expiry email notification to the account mailer."""
         data = {
             "accountId": key.account_id,
@@ -99,6 +112,8 @@ class AccountLinkNotificationsTask:  # pylint: disable=too-few-public-methods
             "linkDate": utc_to_pacific_isoformat(key.created),
             "expiryDate": utc_to_pacific_isoformat(key.expires_on),
             "isReminder": is_reminder,
+            "daysUntilExpiry": days_until_expiry,
+            "linkedByName": cls._created_by_name(key),
         }
         try:
             publish_to_mailer(
