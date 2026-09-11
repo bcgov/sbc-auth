@@ -575,6 +575,9 @@ def handle_account_link_notification(message_type, email_msg):
         "link_date": email_msg.get("linkDate", None),
         "link_removal_date": email_msg.get("linkRemovalDate", None),
         "expiry_date": email_msg.get("expiryDate", None),
+        "days_until_expiry": email_msg.get("daysUntilExpiry", None),
+        "linked_by_name": email_msg.get("linkedByName", None),
+        "removed_by_name": email_msg.get("removedByName", None),
     }
     email_dict = common_mailer.process(
         org_id, recipients, template_name, subject, logo_url=logo_url, context_url=context_url, **args

@@ -27,6 +27,7 @@ from auth_api.exceptions.errors import Error
 from auth_api.models.account_linking_key import AccountLinkingKey as AccountLinkingKeyModel
 from auth_api.models.dataclass import Activity
 from auth_api.models.db import db
+from auth_api.models.user import User as UserModel
 from auth_api.services.activity_log_publisher import ActivityLogPublisher
 from auth_api.services.org_redirect_url import OrgRedirectUrl as OrgRedirectUrlService
 from auth_api.utils.account_mailer import publish_to_mailer
@@ -73,7 +74,11 @@ class AccountLinkingKey:
 
         AccountLinkingKey._publish(ActivityAction.LINKING_KEY_GENERATED.value, record)
         if record.status == LinkingKeyStatus.ACTIVE.value:
-            data = {"linkDate": pacific_today_isoformat(), "expiryDate": utc_to_pacific_isoformat(record.expires_on)}
+            data = {
+                "linkDate": pacific_today_isoformat(),
+                "expiryDate": utc_to_pacific_isoformat(record.expires_on),
+                "linkedByName": AccountLinkingKey._display_name(record.created_by),
+            }
             AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_CREATED.value, record, data)
         return record
 
@@ -93,7 +98,10 @@ class AccountLinkingKey:
         record.save()
         AccountLinkingKey._publish(ActivityAction.LINKING_KEY_REVOKED.value, record)
         if was_active:
-            data = {"linkRemovalDate": pacific_today_isoformat()}
+            data = {
+                "linkRemovalDate": pacific_today_isoformat(),
+                "removedByName": AccountLinkingKey._display_name(UserModel.find_by_jwt_token()),
+            }
             AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_REMOVED.value, record, data)
         return True
 
@@ -159,7 +167,11 @@ class AccountLinkingKey:
         record.save()
 
         AccountLinkingKey._publish(ActivityAction.LINKING_KEY_BOUND.value, record)
-        data = {"linkDate": pacific_today_isoformat(), "expiryDate": utc_to_pacific_isoformat(record.expires_on)}
+        data = {
+            "linkDate": pacific_today_isoformat(),
+            "expiryDate": utc_to_pacific_isoformat(record.expires_on),
+            "linkedByName": AccountLinkingKey._display_name(record.created_by),
+        }
         AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_CREATED.value, record, data)
         return record
 
@@ -187,6 +199,13 @@ class AccountLinkingKey:
         if record:
             record.status = LinkingKeyStatus.REVOKED.value
             db.session.flush()
+
+    @staticmethod
+    def _display_name(user: UserModel | None) -> str | None:
+        """Return 'First Last' for the user, or None if unknown."""
+        if not user:
+            return None
+        return f"{user.firstname or ''} {user.lastname or ''}".strip() or None
 
     @staticmethod
     def _vendor_label(record: AccountLinkingKeyModel) -> str | None:

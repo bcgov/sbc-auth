@@ -17,10 +17,15 @@
 Test-Suite to ensure that the AuthJobPermissionCheckTask can be invoked.
 """
 
+from unittest.mock import patch
+
 from tasks.adhoc.permission_check import AuthJobPermissionCheckTask
 
 
-def test_permission_check(session):
-    """Test permission check."""
-    AuthJobPermissionCheckTask.check()
-    assert True
+def test_permission_check(session, app):
+    """Test permission check publishes to both the account mailer and activity log topics."""
+    with patch("tasks.adhoc.permission_check.queue.publish") as mock_publish:
+        AuthJobPermissionCheckTask.check()
+
+    published_topics = [call.args[0] for call in mock_publish.call_args_list]
+    assert published_topics == [app.config.get("ACCOUNT_MAILER_TOPIC"), app.config.get("AUTH_EVENT_TOPIC")]
