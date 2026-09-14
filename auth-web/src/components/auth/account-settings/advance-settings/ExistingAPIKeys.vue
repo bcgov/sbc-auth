@@ -8,12 +8,12 @@
 
     <div>
       <v-data-table
-        class="apikey-list"
+        class="apikey-list mb-10"
         :headers="activityHeader"
-        :items="apliKeyList"
+        :items="apiKeyList"
         no-data-text="No API Keys"
         :loading="isLoading"
-        loading-text="loading text"
+        loading-text="Loading..."
         disable-pagination
         hide-default-footer
       >
@@ -162,7 +162,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     confirmActionDialog: InstanceType<typeof ModalDialog>
   }
 
-  public apliKeyList = []
+  public apiKeyList = []
 
   public readonly activityHeader = [
     {
@@ -207,11 +207,11 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 
   public async loadApiKeys () {
     this.isLoading = true
-    this.apliKeyList = []
+    this.apiKeyList = []
     this.totalApiKeyCount = 0
     try {
       const resp: any = await this.getOrgApiKeys(this.currentOrganization.id)
-      this.apliKeyList = resp?.consumer?.consumerKey || []
+      this.apiKeyList = resp?.consumer?.consumerKey || []
       this.totalApiKeyCount = resp?.consumer?.consumerKey.length || 0
       this.isLoading = false
     } catch (e) {
