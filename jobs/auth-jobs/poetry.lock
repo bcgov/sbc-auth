@@ -308,9 +308,9 @@ Werkzeug = "^3.1.5"
 
 [package.source]
 type = "git"
-url = "https://github.com/ochiu/sbc-auth.git"
-reference = "34061-date-display-updates"
-resolved_reference = "e3356bba966956f1d7fbcf8f6907626e7c434b5a"
+url = "https://github.com/bcgov/sbc-auth.git"
+reference = "main"
+resolved_reference = "ac596c74f3a1c56da36577f4e3d7dfa7e863f294"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3713,4 +3713,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "105173fd0361f03d4c96cfb73a498a6fcce9926143aca3ab5e53d95133f74a91"
+content-hash = "9781cb92046db3bf46e44ddafa52e8e73ca2f60e57d628b7ad439fbdf8696414"
