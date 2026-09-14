@@ -23,7 +23,7 @@ from auth_api.models.account_linking_key import AccountLinkingKey as AccountLink
 from auth_api.models.dataclass import Activity
 from auth_api.services.activity_log_publisher import ActivityLogPublisher
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.date import utc_to_pacific_isoformat
+from auth_api.utils.date import utc_to_pacific_display_date
 from auth_api.utils.enums import ActivityAction, LinkingKeyStatus, QueueSources
 
 
@@ -109,8 +109,8 @@ class AccountLinkNotificationsTask:  # pylint: disable=too-few-public-methods
         data = {
             "accountId": key.account_id,
             "serviceProviderName": key.vendor_account.name,
-            "linkDate": utc_to_pacific_isoformat(key.created),
-            "expiryDate": utc_to_pacific_isoformat(key.expires_on),
+            "linkDate": utc_to_pacific_display_date(key.created),
+            "expiryDate": utc_to_pacific_display_date(key.expires_on),
             "isReminder": is_reminder,
             "daysUntilExpiry": days_until_expiry,
             "linkedByName": cls._created_by_name(key),

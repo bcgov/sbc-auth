@@ -32,18 +32,18 @@ from auth_api.utils.enums import ActivityAction, LinkingKeyStatus
 from tasks.account_link_notifications import AccountLinkNotificationsTask
 
 CREATED_ON = datetime(2026, 1, 15, 18, 0, 0, tzinfo=UTC)
-CREATED_ON_PACIFIC_ISO = "2026-01-15"
+CREATED_ON_PACIFIC_DISPLAY = "January 15, 2026"
 
 NOW = datetime(2026, 7, 15, 18, 0, 0, tzinfo=UTC)
 
 EXPIRES_ON_30_DAYS = datetime(2026, 8, 14, 18, 0, 0, tzinfo=UTC)
-EXPIRES_ON_30_DAYS_PACIFIC_ISO = "2026-08-14"
+EXPIRES_ON_30_DAYS_PACIFIC_DISPLAY = "August 14, 2026"
 
 EXPIRES_ON_7_DAYS = datetime(2026, 7, 22, 18, 0, 0, tzinfo=UTC)
-EXPIRES_ON_7_DAYS_PACIFIC_ISO = "2026-07-22"
+EXPIRES_ON_7_DAYS_PACIFIC_DISPLAY = "July 22, 2026"
 
 EXPIRES_ON_PAST = datetime(2026, 7, 14, 18, 0, 0, tzinfo=UTC)
-EXPIRES_ON_PAST_PACIFIC_ISO = "2026-07-14"
+EXPIRES_ON_PAST_PACIFIC_DISPLAY = "July 14, 2026"
 
 EXPIRES_IN_FUTURE = datetime(2027, 1, 31, 18, 0, 0, tzinfo=UTC)
 
@@ -105,8 +105,8 @@ def test_expiring_soon_key_sends_reminder(session, app):
     assert kwargs["data"]["accountId"] == source_org.id
     assert kwargs["data"]["serviceProviderName"] == vendor_org.name
     assert kwargs["data"]["isReminder"] is True
-    assert kwargs["data"]["linkDate"] == CREATED_ON_PACIFIC_ISO
-    assert kwargs["data"]["expiryDate"] == EXPIRES_ON_30_DAYS_PACIFIC_ISO
+    assert kwargs["data"]["linkDate"] == CREATED_ON_PACIFIC_DISPLAY
+    assert kwargs["data"]["expiryDate"] == EXPIRES_ON_30_DAYS_PACIFIC_DISPLAY
     assert kwargs["data"]["linkedByName"] == "Jane Doe"
     assert key.status == LinkingKeyStatus.ACTIVE.value
     mock_activity.assert_not_called()
@@ -131,12 +131,12 @@ def test_sends_configured_reminders(session, app, monkeypatch):
     thirty_day_data = mock_publish.call_args_list[0].kwargs["data"]
     assert thirty_day_data["isReminder"] is True
     assert thirty_day_data["daysUntilExpiry"] == 30
-    assert thirty_day_data["expiryDate"] == EXPIRES_ON_30_DAYS_PACIFIC_ISO
+    assert thirty_day_data["expiryDate"] == EXPIRES_ON_30_DAYS_PACIFIC_DISPLAY
 
     seven_day_data = mock_publish.call_args_list[1].kwargs["data"]
     assert seven_day_data["isReminder"] is True
     assert seven_day_data["daysUntilExpiry"] == 7
-    assert seven_day_data["expiryDate"] == EXPIRES_ON_7_DAYS_PACIFIC_ISO
+    assert seven_day_data["expiryDate"] == EXPIRES_ON_7_DAYS_PACIFIC_DISPLAY
 
     mock_activity.assert_not_called()
 
@@ -158,8 +158,8 @@ def test_expired_key_sends_expiry_notice_and_updates_status(session, app):
     _, kwargs = mock_publish.call_args
     assert kwargs["data"]["accountId"] == source_org.id
     assert kwargs["data"]["isReminder"] is False
-    assert kwargs["data"]["linkDate"] == CREATED_ON_PACIFIC_ISO
-    assert kwargs["data"]["expiryDate"] == EXPIRES_ON_PAST_PACIFIC_ISO
+    assert kwargs["data"]["linkDate"] == CREATED_ON_PACIFIC_DISPLAY
+    assert kwargs["data"]["expiryDate"] == EXPIRES_ON_PAST_PACIFIC_DISPLAY
     assert key.status == LinkingKeyStatus.EXPIRED.value
 
     mock_activity.assert_called_once()
