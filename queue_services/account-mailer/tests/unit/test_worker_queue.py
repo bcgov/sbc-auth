@@ -922,7 +922,7 @@ def test_account_link_expiry_reminder_email(app, session, client):
         assert "Test Provider" in email_body
         assert "will expire in 7 days" in email_body
         assert "is expired" not in email_body
-        assert "please log in to renew this connection" in email_body
+        assert "please log in to extend this connection" in email_body
         assert "If you did not authorize this action" in email_body
         assert SubjectType.ACCOUNT_LINK_EXPIRED.value not in email_body
         assert "**Date Added:** 2025-04-16" in email_body
@@ -962,7 +962,7 @@ def test_account_link_expiry_expired_email(app, session, client):
         assert SubjectType.ACCOUNT_LINK_EXPIRY_REMINDER.value not in email_body
         assert "**Date Added:** 2025-04-16 by **Jane Doe**" in email_body
         assert "**Expiration Date:** 2026-04-16" in email_body
-        assert "please log in to renew this connection" not in email_body
+        assert "please log in to extend this connection" not in email_body
         assert "If you did not authorize this action" not in email_body
 
 
