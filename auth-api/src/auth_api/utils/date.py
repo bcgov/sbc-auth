@@ -32,6 +32,13 @@ def utc_to_pacific_isoformat(utc_dt: dt.datetime) -> str:
     return utc_dt.astimezone(pytz.timezone(PACIFIC_TZ)).date().isoformat()
 
 
+def utc_to_pacific_display_date(utc_dt: dt.datetime) -> str:
+    """Convert a UTC (or naive, assumed UTC) datetime to its Canada/Pacific display date format."""
+    if utc_dt.tzinfo is None:
+        utc_dt = utc_dt.replace(tzinfo=dt.UTC)
+    return utc_dt.astimezone(pytz.timezone(PACIFIC_TZ)).strftime("%B %-d, %Y")
+
+
 def str_to_utc_dt(date: str, add_time: bool):
     """Convert ISO formatted dates into dateTime objects in UTC."""
     time_zone = pytz.timezone(PACIFIC_TZ)

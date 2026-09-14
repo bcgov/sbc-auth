@@ -31,7 +31,7 @@ from auth_api.models.user import User as UserModel
 from auth_api.services.activity_log_publisher import ActivityLogPublisher
 from auth_api.services.org_redirect_url import OrgRedirectUrl as OrgRedirectUrlService
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.date import pacific_today_isoformat, utc_to_pacific_isoformat
+from auth_api.utils.date import utc_to_pacific_display_date
 from auth_api.utils.enums import ActivityAction, LinkingKeyStatus
 
 
@@ -75,8 +75,8 @@ class AccountLinkingKey:
         AccountLinkingKey._publish(ActivityAction.LINKING_KEY_GENERATED.value, record)
         if record.status == LinkingKeyStatus.ACTIVE.value:
             data = {
-                "linkDate": pacific_today_isoformat(),
-                "expiryDate": utc_to_pacific_isoformat(record.expires_on),
+                "linkDate": utc_to_pacific_display_date(datetime.now(UTC)),
+                "expiryDate": utc_to_pacific_display_date(record.expires_on),
                 "linkedByName": AccountLinkingKey._display_name(record.created_by),
             }
             AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_CREATED.value, record, data)
@@ -99,7 +99,7 @@ class AccountLinkingKey:
         AccountLinkingKey._publish(ActivityAction.LINKING_KEY_REVOKED.value, record)
         if was_active:
             data = {
-                "linkRemovalDate": pacific_today_isoformat(),
+                "linkRemovalDate": utc_to_pacific_display_date(datetime.now(UTC)),
                 "removedByName": AccountLinkingKey._display_name(UserModel.find_by_jwt_token()),
             }
             AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_REMOVED.value, record, data)
@@ -168,8 +168,8 @@ class AccountLinkingKey:
 
         AccountLinkingKey._publish(ActivityAction.LINKING_KEY_BOUND.value, record)
         data = {
-            "linkDate": pacific_today_isoformat(),
-            "expiryDate": utc_to_pacific_isoformat(record.expires_on),
+            "linkDate": utc_to_pacific_display_date(datetime.now(UTC)),
+            "expiryDate": utc_to_pacific_display_date(record.expires_on),
             "linkedByName": AccountLinkingKey._display_name(record.created_by),
         }
         AccountLinkingKey._publish_mailer_notification(QueueMessageTypes.ACCOUNT_LINK_CREATED.value, record, data)

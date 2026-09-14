@@ -363,8 +363,8 @@ def test_generate_with_vendor_publishes_link_created(session):  # pylint:disable
     assert notification_type == QueueMessageTypes.ACCOUNT_LINK_CREATED.value
     assert kwargs["data"]["accountId"] == lawfirm.id
     assert kwargs["data"]["serviceProviderName"] == vendor.name
-    assert kwargs["data"]["linkDate"] == "2026-07-01"
-    assert kwargs["data"]["expiryDate"] == "2027-07-01"
+    assert kwargs["data"]["linkDate"] == "July 1, 2026"
+    assert kwargs["data"]["expiryDate"] == "July 1, 2027"
     assert record.status == LinkingKeyStatus.ACTIVE.value
 
 
@@ -393,8 +393,8 @@ def test_bind_publishes_link_created(session):  # pylint:disable=unused-argument
     assert notification_type == QueueMessageTypes.ACCOUNT_LINK_CREATED.value
     assert kwargs["data"]["accountId"] == lawfirm.id
     assert kwargs["data"]["serviceProviderName"] == vendor.name
-    assert kwargs["data"]["linkDate"] == "2026-07-01"
-    assert kwargs["data"]["expiryDate"] == "2027-07-01"
+    assert kwargs["data"]["linkDate"] == "July 1, 2026"
+    assert kwargs["data"]["expiryDate"] == "July 1, 2027"
     assert record.status == LinkingKeyStatus.ACTIVE.value
 
 
@@ -414,7 +414,7 @@ def test_revoke_active_key_publishes_link_removed(session):  # pylint:disable=un
     assert notification_type == QueueMessageTypes.ACCOUNT_LINK_REMOVED.value
     assert kwargs["data"]["accountId"] == lawfirm.id
     assert kwargs["data"]["serviceProviderName"] == vendor.name
-    assert kwargs["data"]["linkRemovalDate"] == "2026-07-01"
+    assert kwargs["data"]["linkRemovalDate"] == "July 1, 2026"
 
 
 def test_revoke_pending_key_does_not_publish(session):  # pylint:disable=unused-argument
