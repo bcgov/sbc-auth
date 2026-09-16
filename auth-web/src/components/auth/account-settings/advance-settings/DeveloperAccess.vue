@@ -12,8 +12,8 @@
         v-html="$t('developerAccessSubtitle',{ url: APIDOCUMENTATION_URL } )"
       />
     </div>
-    <RedirectUrls v-if="!isAccountLinkingDisabled" />
     <ExistingAPIKeys />
+    <RedirectUrls v-if="!isAccountLinkingDisabled" />
   </v-container>
 </template>
 

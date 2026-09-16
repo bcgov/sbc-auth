@@ -4,6 +4,21 @@
       <h2 class="view-header__title">
         Existing API Keys
       </h2>
+      <v-btn
+        v-if="isCreateApiKeyEnabled"
+        large
+        depressed
+        class="px-6"
+        color="primary"
+        aria-label="Create API Key"
+        data-test="create-api-key-button"
+        @click="openCreateKeyDialog()"
+      >
+        <v-icon class="mr-1">
+          mdi-plus
+        </v-icon>
+        Create API Key
+      </v-btn>
     </header>
 
     <div>
@@ -24,18 +39,38 @@
           <div class=" font-weight-bold">
             {{ item.apiKeyName }}
           </div>
+          <v-chip
+            v-if="item.isNewlyAdded"
+            small
+            label
+            color="primary"
+            text-color="white"
+            class="font-weight-bold mt-1"
+            data-test="new-api-key-chip"
+          >
+            ADDED
+          </v-chip>
         </template>
         <template #[`item.environment`]="{ item }">
           <div class="text-capitalize">
             {{ item.environment }}
           </div>
         </template>
+        <template #[`item.createdDate`]="{ item }">
+          {{ item.createdDate ? formatDate(item.createdDate, 'MMMM DD, YYYY') : '-' }}
+        </template>
+        <template #[`item.apiKey`]="{ item }">
+          <span>{{ maskApiKey(item.apiKey) }}</span>
+        </template>
+        <template #[`item.keyStatus`]="{ item }">
+          <span data-test="key-status-chip">{{ isKeyActive(item) ? 'Active' : 'Revoked' }}</span>
+        </template>
         <template #[`item.action`]="{ item }">
           <!-- Revoke -->
           <v-btn
-            outlined
+            v-if="isKeyActive(item)"
+            depressed
             aria-label="Revoke"
-            title="Revoke"
             color="primary"
             :data-test="getIndexedTag('confirm-button', item.apiKeyName)"
             @click="confirmationModal(item)"
@@ -125,6 +160,17 @@
         </v-btn>
       </template>
     </ModalDialog>
+
+    <CreateApiKeyModal
+      ref="createKeyModal"
+      @create="onCreateKey"
+    />
+
+    <CreateApiKeySuccessModal
+      ref="createKeySuccessModal"
+      :api-key="generatedApiKey"
+      :environment-label="createdKeyEnvLabel"
+    />
   </div>
 </template>
 
@@ -132,13 +178,20 @@
 import { Action, State } from 'pinia-class'
 import { Component, Mixins } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import CommonUtils from '@/util/common-util'
+import CreateApiKeyModal from '@/components/auth/account-settings/advance-settings/CreateApiKeyModal.vue'
+import CreateApiKeySuccessModal from '@/components/auth/account-settings/advance-settings/CreateApiKeySuccessModal.vue'
+import { LDFlags } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
-    ModalDialog
+    ModalDialog,
+    CreateApiKeyModal,
+    CreateApiKeySuccessModal
   }
 })
 export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
@@ -156,10 +209,20 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   public notificationColor = 'success'
   public totalApiKeyCount: number = 0
   public selectedApi: any = {}
+  public generatedApiKey = ''
+  public createdKeyEnvLabel = ''
+
+  get isCreateApiKeyEnabled (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableCreateApiKey)
+  }
+
+  private formatDate = CommonUtils.formatDisplayDate
 
   $refs: {
     successDialog: InstanceType<typeof ModalDialog>
     confirmActionDialog: InstanceType<typeof ModalDialog>
+    createKeyModal: InstanceType<typeof CreateApiKeyModal>
+    createKeySuccessModal: InstanceType<typeof CreateApiKeySuccessModal>
   }
 
   public apiKeyList = []
@@ -185,6 +248,20 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       align: 'left',
       sortable: false,
       value: 'apiKey',
+      class: 'bold-header'
+    },
+    {
+      text: 'Created Date',
+      align: 'left',
+      sortable: false,
+      value: 'createdDate',
+      class: 'bold-header'
+    },
+    {
+      text: 'Status',
+      align: 'left',
+      sortable: false,
+      value: 'keyStatus',
       class: 'bold-header'
     },
     {
@@ -217,6 +294,46 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     } catch (e) {
       this.isLoading = false
     }
+  }
+
+  public openCreateKeyDialog () {
+    this.$refs.createKeyModal.open()
+  }
+
+  public onCreateKey ({ apiKeyName, environment }: { apiKeyName: string; environment: string }) {
+    this.createdKeyEnvLabel = environment.charAt(0).toUpperCase() + environment.slice(1)
+
+    // create a mock api key until backed in wired up in upcoming work
+    this.generatedApiKey = this.generateMockApiKey()
+    this.apiKeyList = [
+      {
+        apiKeyName,
+        environment,
+        apiKey: this.generatedApiKey,
+        createdDate: new Date(),
+        keyStatus: 'approved',
+        isNewlyAdded: true
+      },
+      ...this.apiKeyList
+    ]
+    this.totalApiKeyCount = this.apiKeyList.length
+    this.$refs.createKeyModal.close()
+    this.$refs.createKeySuccessModal.open()
+  }
+
+  public generateMockApiKey (): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    const randomSegment = (length: number) => Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+    return [5, 6, 9, 16].map(randomSegment).join('-')
+  }
+
+  public isKeyActive (item: any): boolean {
+    return item.keyStatus === 'approved'
+  }
+
+  // mask the key as it is only shown once in success dialog
+  public maskApiKey (key: string): string {
+    return !key ? '' : `${'*'.repeat(4)}${key.slice(-4)}`
   }
 
   public confirmationModal (apiKey) {
@@ -280,7 +397,10 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   }
 
   .v-data-table td {
-    height: 71px;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    height: auto;
+    vertical-align: top;
   }
 
   .v-badge--inline .v-badge__wrapper {
