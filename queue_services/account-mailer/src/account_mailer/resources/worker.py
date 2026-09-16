@@ -81,6 +81,7 @@ def worker():
         handle_statement_notification(message_type, email_msg)
         handle_payment_reminder_or_due(message_type, email_msg)
         handle_account_link_notification(message_type, email_msg)
+        handle_express_checkout_reminder(message_type, email_msg)
 
         # Note if you're extending above, make sure to include the new type in handle_other_messages below.
         handle_other_messages(message_type, email_msg)
@@ -544,6 +545,25 @@ def handle_payment_reminder_or_due(message_type, email_msg):
     process_email(email_dict)
 
 
+def handle_express_checkout_reminder(message_type, email_msg):
+    """Handle the express-checkout payer payment reminder message."""
+    if message_type != QueueMessageTypes.EXPRESS_CHECKOUT_PAYMENT_REMINDER.value:
+        return
+    email_dict = common_mailer.process(
+        org_id=None,
+        recipients=email_msg.get("emailAddresses"),
+        template_name=TemplateType.EXPRESS_CHECKOUT_PAYMENT_REMINDER_TEMPLATE_NAME.value,
+        subject=SubjectType.EXPRESS_CHECKOUT_PAYMENT_REMINDER.value,
+        logo_url=email_msg.get("logo_url"),
+        payment_url=email_msg.get("paymentUrl"),
+        total=email_msg.get("total"),
+        description=email_msg.get("description", ""),
+        expiry_days=email_msg.get("expiryDays", 0),
+        expiry_date=email_msg.get("expiryDate", ""),
+    )
+    process_email(email_dict)
+
+
 def handle_account_link_notification(message_type, email_msg):
     """Handle account link notification message."""
     is_reminder = email_msg.get("isReminder", False)
@@ -618,6 +638,7 @@ def handle_other_messages(message_type, email_msg):
         QueueMessageTypes.ACCOUNT_LINK_EXPIRY.value,
         QueueMessageTypes.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
         QueueMessageTypes.AFFILIATION_CONFIRMATION_EMAIL.value,
+        QueueMessageTypes.EXPRESS_CHECKOUT_PAYMENT_REMINDER.value,
     ]:
         return
 
