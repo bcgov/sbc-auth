@@ -3305,8 +3305,8 @@ jaeger-client = "*"
 [package.source]
 type = "git"
 url = "https://github.com/bcgov/sbc-common-components.git"
-reference = "595ce093116b6e23af798ef8386b63b723ac5c12"
-resolved_reference = "595ce093116b6e23af798ef8386b63b723ac5c12"
+reference = "master"
+resolved_reference = "67bb5e775370970aa7b674b1185d195a51fd7eeb"
 subdirectory = "python"
 
 [[package]]
@@ -3931,4 +3931,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "e46d1ef4b1b2bd96d3688504f7e656b24e0e5757f57bb6b1604137298c05650d"
+content-hash = "0cd7336723a7e789d3c6d0320b09ba70ae25d1fb1634b2751d1dc05c3cdd8287"

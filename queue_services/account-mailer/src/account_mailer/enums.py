@@ -28,6 +28,7 @@ class SubjectType(Enum):
     TEAM_MODIFIED_SUBJECT = "[BC Registries and Online Services] Change in Team members"
     ONLINE_BANKING_PAYMENT_SUBJECT = "[BC Registries and Online Services] Online Banking payment has been received"
     PAD_SETUP_FAILED = "[BC Registries and Online Services] Your Account is Temporarily Suspended"
+    EXPRESS_CHECKOUT_PAYMENT_REMINDER = "[BC Registries and Online Services] Your payment is pending"
     PAYMENT_PENDING = "[BC Registries and Online Services] Payment is now due for pending transaction on your account"
     RESET_PASSCODE = "BC Registries Account Passcode Reset"
     ADMIN_NOTIFICATION = (
@@ -147,6 +148,7 @@ class TemplateType(Enum):
     ONLINE_BANKING_OVER_PAYMENT_TEMPLATE_NAME = "online_banking_over_payment"
     ONLINE_BANKING_UNDER_PAYMENT_TEMPLATE_NAME = "online_banking_under_payment"
     PAD_SETUP_FAILED_TEMPLATE_NAME = "pad_setup_failed"
+    EXPRESS_CHECKOUT_PAYMENT_REMINDER_TEMPLATE_NAME = "express_checkout_reminder"
     PAYMENT_PENDING_TEMPLATE_NAME = "paymanet_pending"
     RESET_PASSCODE_TEMPLATE_NAME = "reset_passcode"
     ADMIN_NOTIFICATION_TEMPLATE_NAME = "admin_notification_email"
