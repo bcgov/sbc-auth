@@ -455,7 +455,10 @@ export default defineComponent({
     }
 
     const isTempBusiness = (identifier: string) => {
-      return identifier.charAt(0).toUpperCase() === 'T'
+      // Temp bootstrap ids start with "T". Real tramways are TMY + 7 digits (e.g. TMY0000008).
+      const id = (identifier || '').toUpperCase()
+      if (/^TMY\d{7}$/.test(id)) return false
+      return id.charAt(0) === 'T'
     }
 
     const updateCurrentBusiness = async () => {
