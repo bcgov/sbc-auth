@@ -320,9 +320,9 @@ Werkzeug = "^3.1.5"
 
 [package.source]
 type = "git"
-url = "https://github.com/sumesh85/sbc-auth.git"
-reference = "34533"
-resolved_reference = "4252ef7e27a394e8eb147c3789b5bff53c7cb079"
+url = "https://github.com/bcgov/sbc-auth.git"
+reference = "main"
+resolved_reference = "ac596c74f3a1c56da36577f4e3d7dfa7e863f294"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3649,4 +3649,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "c4c94425e37212b1ad27c93dcdbf8c0fcd1f90a02ef534997d020a35572ae6be"
+content-hash = "d6bd68ffaee1f56253cc63a9c3cd202c606cb71a41531aee819ca33f5fcfcbdb"
