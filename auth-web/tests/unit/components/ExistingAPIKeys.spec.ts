@@ -87,6 +87,19 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.find('[data-test="confirm-button-key1"]').exists()).toBe(true)
   })
 
+  it('Should show Active status and revoke button for approved keys', async () => {
+    await wrapper.vm.loadApiKeys()
+    expect(wrapper.find('[data-test="key-status-chip"]').text()).toBe('Active')
+    expect(wrapper.find('[data-test="confirm-button-key1"]').exists()).toBe(true)
+  })
+
+  it('Should show Revoked status and hide revoke button for revoked keys', async () => {
+    wrapper.vm.apiKeyList = [{ ...consumerKey[0], keyStatus: 'revoked' }]
+    await Vue.nextTick()
+    expect(wrapper.find('[data-test="key-status-chip"]').text()).toBe('Revoked')
+    expect(wrapper.find('[data-test="confirm-button-key1"]').exists()).toBe(false)
+  })
+
   it('Should open Confirmation modal on revoke button click', async () => {
     await wrapper.vm.loadApiKeys()
     const stub = vi.fn(() => consumerKey)

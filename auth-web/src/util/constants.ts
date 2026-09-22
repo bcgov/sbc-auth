@@ -479,6 +479,7 @@ export enum LDFlags {
     BusSearchLink = 'bus-search-staff-link',
     DisableAccountLinking = 'disable-account-linking',
     EnableBcCccUlc = 'enable-bc-ccc-ulc',
+    EnableCreateApiKey = 'enable-create-api-key',
     EnableBusinessNrSearch = 'enable-business-nr-search',
     EnableBusinessRegistryDashboard = 'enable-business-registry-dashboard',
     EnableDetailsFilter = 'enable-transactions-detail-filter',
