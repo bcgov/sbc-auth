@@ -36,9 +36,9 @@ def get_organization_api_keys(org_id):
     return ApiGatewayService.get_api_keys(org_id), HTTPStatus.OK
 
 
-@bp.route("", methods=["POST"])
+@bp.route("", methods=["POST", "OPTIONS"])
 @cross_origin(origins="*")
-@_jwt.has_one_of_roles([Role.SYSTEM.value])
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
 def post_organization_api_key(org_id):
     """Create new api key for the org."""
     request_json = request.get_json()

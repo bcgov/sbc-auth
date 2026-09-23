@@ -270,6 +270,7 @@ def test_revoke_api_key(client, jwt, session, keycloak_mock, mock_create_payment
 
     # Mock RestService.patch for revoking API keys
     def mock_patch(*_args, **_kwargs):
+        assert _kwargs["data"] == {}
         mock_response = Mock()
         mock_response.json.return_value = {}
         mock_response.raise_for_status = lambda: None

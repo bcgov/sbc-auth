@@ -163,6 +163,7 @@
 
     <CreateApiKeyModal
       ref="createKeyModal"
+      :loading="isCreating"
       @create="onCreateKey"
     />
 
@@ -197,9 +198,11 @@ import { useOrgStore } from '@/stores/org'
 export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   @State(useOrgStore) readonly currentOrganization!: Organization
   @Action(useOrgStore) readonly getOrgApiKeys!: (orgId: any) => Promise<any>
+  @Action(useOrgStore) readonly createOrgApiKey!: (orgId: any, payload: any) => Promise<any>
   @Action(useOrgStore) readonly revokeOrgApiKeys!: (orgId: any) => Promise<any>
 
   public isLoading = true
+  public isCreating = false
   public confirmActionTitle = 'Revoke API Key?'
   public confirmActionTextLine1 = ''
   public confirmActionTextLine2 = ''
@@ -300,31 +303,34 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     this.$refs.createKeyModal.open()
   }
 
-  public onCreateKey ({ apiKeyName, environment }: { apiKeyName: string; environment: string }) {
-    this.createdKeyEnvLabel = environment.charAt(0).toUpperCase() + environment.slice(1)
+  public async onCreateKey ({ apiKeyName }: { apiKeyName: string }) {
+    this.isCreating = true
+    const existingKeys = this.apiKeyList
+    try {
+      // the env is not sent - the API gets it from the env the user logged into
+      const resp: any = await this.createOrgApiKey(this.currentOrganization.id, { keyName: apiKeyName })
+      const [newKey] = resp?.consumer?.consumerKey ?? []
 
-    // create a mock api key until backed in wired up in upcoming work
-    this.generatedApiKey = this.generateMockApiKey()
-    this.apiKeyList = [
-      {
-        apiKeyName,
-        environment,
-        apiKey: this.generatedApiKey,
-        createdDate: new Date(),
-        keyStatus: 'approved',
-        isNewlyAdded: true
-      },
-      ...this.apiKeyList
-    ]
-    this.totalApiKeyCount = this.apiKeyList.length
-    this.$refs.createKeyModal.close()
-    this.$refs.createKeySuccessModal.open()
-  }
+      newKey.isNewlyAdded = true
+      this.apiKeyList = [newKey, ...existingKeys]
+      this.totalApiKeyCount = this.apiKeyList.length
+      this.generatedApiKey = newKey.apiKey
+      const environmentLabel = newKey.environment || ''
+      this.createdKeyEnvLabel = environmentLabel.charAt(0).toUpperCase() + environmentLabel.slice(1)
 
-  public generateMockApiKey (): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    const randomSegment = (length: number) => Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-    return [5, 6, 9, 16].map(randomSegment).join('-')
+      this.$refs.createKeyModal.close()
+      await this.$nextTick()
+      this.$refs.createKeySuccessModal.open()
+    } catch (e) {
+      this.alertIcon = 'mdi-alert-circle-outline'
+      this.alertTitle = 'API key has not been created'
+      this.alertText = ''
+      this.notificationColor = 'error'
+      this.$refs.createKeyModal.close()
+      this.$refs.successDialog.open()
+    } finally {
+      this.isCreating = false
+    }
   }
 
   public isKeyActive (item: any): boolean {

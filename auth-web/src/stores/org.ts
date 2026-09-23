@@ -1033,6 +1033,11 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data || {}
   }
 
+  async function createOrgApiKey (orgId, payload) {
+    const response = await OrgService.createOrgApiKey(orgId, payload)
+    return response?.data
+  }
+
   async function revokeOrgApiKeys (ApiDetails) {
     const response = await OrgService.revokeOrgApiKeys(ApiDetails)
     return response?.data || {}
@@ -1170,6 +1175,7 @@ export const useOrgStore = defineStore('org', () => {
     getOrgAdminContact,
     setCurrentOrganizationFromUserAccountSettings,
     getOrgApiKeys,
+    createOrgApiKey,
     revokeOrgApiKeys,
     updateOrganizationAccessType,
     $reset,
