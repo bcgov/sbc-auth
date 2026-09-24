@@ -322,6 +322,8 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       await this.$nextTick()
       this.$refs.createKeySuccessModal.open()
     } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e)
       this.alertIcon = 'mdi-alert-circle-outline'
       this.alertTitle = 'API key has not been created'
       this.alertText = ''

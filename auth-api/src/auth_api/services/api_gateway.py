@@ -31,11 +31,6 @@ from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_API_GW_SANDBOX
 from auth_api.utils.roles import ADMIN, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
-CONSUMERS_BASE_PATH = "mc/v1"
-DEV_CONSUMERS_BASE_PATH = "mc-dev/v1"
-# The dev Apigee proxy uses its own basepath. Local development points at the dev gateway.
-DEV_BASE_PATH_ENVIRONMENTS = {"dev", "development", "local"}
-
 
 class ApiGateway:
     """Manages all aspects of the API gateway integration."""
@@ -200,16 +195,11 @@ class ApiGateway:
                 _add_key_to_response(key)
 
     @classmethod
-    def _consumers_base_path(cls) -> str:
-        """Return the API gateway consumers basepath for this deployment's environment."""
-        env = current_app.config.get("ENVIRONMENT_NAME")
-        return DEV_CONSUMERS_BASE_PATH if env in DEV_BASE_PATH_ENVIRONMENTS else CONSUMERS_BASE_PATH
-
-    @classmethod
     def _consumers_url(cls) -> str:
         """Return the base URL for API gateway consumer calls."""
         consumer_endpoint: str = current_app.config.get("API_GW_CONSUMERS_API_URL")
-        return f"{consumer_endpoint}/{cls._consumers_base_path()}/consumers"
+        base_path: str = current_app.config.get("API_GW_CONSUMERS_BASE_PATH")
+        return f"{consumer_endpoint}/{base_path}/consumers"
 
     @classmethod
     def _get_email_id(cls, org_id, env) -> str:
