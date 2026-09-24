@@ -75,7 +75,7 @@ class ApiGateway:
             gateway_response = api_key_response.json()
 
         response = {"consumer": {"consumerKey": []}}
-        created_keys = gateway_response.get("consumer", {}).get("consumerKey", [])
+        created_keys = gateway_response.get("consumer", {}).get("consumerKey", gateway_response)
         cls._filter_and_add_keys(response, created_keys, email)
 
         cls._create_user_and_membership_for_api_user(org_id, env)
@@ -185,7 +185,8 @@ class ApiGateway:
         def _add_key_to_response(_key):
             if _key["keyStatus"] == "approved":
                 _key["email"] = email
-                _key["environment"] = "prod" if _key["environment"] == "prod" else "sandbox"
+                if "environment" in _key:
+                    _key["environment"] = "prod" if _key["environment"] == "prod" else "sandbox"
                 api_keys_response["consumer"]["consumerKey"].append(_key)
 
         if isinstance(keys, dict):

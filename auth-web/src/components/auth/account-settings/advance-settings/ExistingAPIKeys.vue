@@ -56,8 +56,8 @@
             {{ item.environment }}
           </div>
         </template>
-        <template #[`item.createdDate`]="{ item }">
-          {{ item.createdDate ? formatDate(item.createdDate, 'MMMM DD, YYYY') : '-' }}
+        <template #[`item.keyCreatedDate`]="{ item }">
+          {{ item.keyCreatedDate ? formatDate(item.keyCreatedDate, 'MMMM DD, YYYY') : '-' }}
         </template>
         <template #[`item.apiKey`]="{ item }">
           <span>{{ maskApiKey(item.apiKey) }}</span>
@@ -257,7 +257,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       text: 'Created Date',
       align: 'left',
       sortable: false,
-      value: 'createdDate',
+      value: 'keyCreatedDate',
       class: 'bold-header'
     },
     {
