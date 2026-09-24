@@ -1,0 +1,24 @@
+# This email confirms your recent transaction of ${{ amount }}
+
+Transaction date: {{ transaction_date }}
+Invoice reference number: {{ invoice_number }}
+
+Transaction amount: ${{ amount }}
+Transaction detail: {{ transaction_detail }}
+Payment Method: {{ payment_method }}
+{% if account_number %}
+Account name: {{ account_name_with_branch }}
+Account number: {{ account_number }}
+{% endif %}
+---
+## Attachments
+
+The receipt is attached to this email. If receipt is pending, it will be available once payment is processed.
+{% if account_number %}
+These documents are also available through your [BC Business Registry account]({{ transactions_url }}).
+{% endif %}
+---
+**BC Registries and Online Services**
+Toll Free: [1-877-526-1526](1-877-526-1526)
+Victoria Office: [250-387-7848](250-387-7848)
+Email: [BCRegistries@gov.bc.ca](BCRegistries@gov.bc.ca)

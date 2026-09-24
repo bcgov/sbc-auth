@@ -13,6 +13,7 @@
 # limitations under the License.
 """Test Suite to ensure the worker routines are working as expected."""
 
+import base64
 import os
 import types
 from datetime import datetime
@@ -1034,3 +1035,102 @@ def test_get_admin_emails_user_not_found_raises(app, session):
     """Assert that a missing username raises ValueError."""
     with pytest.raises(ValueError, match="Admin user not found for username"):
         _get_admin_emails("bcsc/doesnotexist")
+
+
+RECEIPT_MESSAGE = {
+    "invoiceId": 42,
+    "amount": "30.00",
+    "invoiceNumber": "REG0123456",
+    "paymentMethod": "CC",
+    "transactionDetail": "Annual Report",
+    "transactionDate": "September 23, 2026",
+    "templateVars": {"invoiceNumber": "REG0123456", "invoice": {"id": 42}},
+}
+
+
+def _pdf_response():
+    response = types.SimpleNamespace()
+    response.status_code = 200
+    response.content = b"%PDF-fake"
+    return response
+
+
+def test_payment_receipt_goes_to_account_members_with_the_pdf(app, session, client):
+    """An account payment reaches its admins and carries the receipt report-api rendered."""
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        with patch.object(RestService, "post", return_value=_pdf_response()) as mock_report:
+            helper_add_event_to_queue(
+                client,
+                message_type=QueueMessageTypes.PAYMENT_RECEIPT.value,
+                mail_details={**RECEIPT_MESSAGE, "accountId": org.id},
+            )
+
+    assert mock_report.call_args.kwargs["data"]["templateVars"] == RECEIPT_MESSAGE["templateVars"]
+    email = mock_send.call_args.args[0]
+    assert email["recipients"] == "foo@bar.com"
+    assert email["content"]["subject"] == "Payment received for invoice 42"
+    assert f"Account number: {org.id}" in email["content"]["body"]
+    assert f"/account/{org.id}/settings/transactions" in email["content"]["body"]
+    assert email["content"]["attachments"] == [
+        {
+            "fileName": "bcregistry-receipt-42.pdf",
+            "fileBytes": base64.b64encode(b"%PDF-fake").decode("utf-8"),
+            "attachOrder": "1",
+        }
+    ]
+
+
+def test_payment_receipt_goes_to_the_guest_email(app, session, client):
+    """A guest has no account, so the partner-supplied address gets it without account rows."""
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        with patch.object(RestService, "post", return_value=_pdf_response()):
+            helper_add_event_to_queue(
+                client,
+                message_type=QueueMessageTypes.PAYMENT_RECEIPT.value,
+                mail_details={**RECEIPT_MESSAGE, "emailAddresses": "payer@example.com"},
+            )
+
+    email = mock_send.call_args.args[0]
+    assert email["recipients"] == "payer@example.com"
+    assert "Account number" not in email["content"]["body"]
+
+
+def test_payment_receipt_skipped_when_nobody_to_tell(app, session, client):
+    """No account and no guest address — nothing is sent."""
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        helper_add_event_to_queue(
+            client, message_type=QueueMessageTypes.PAYMENT_RECEIPT.value, mail_details=RECEIPT_MESSAGE
+        )
+
+    mock_send.assert_not_called()
+
+
+def test_payment_receipt_still_sends_when_report_api_fails(app, session, client):
+    """report-api failing must not cost the payer their confirmation email."""
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        with patch.object(RestService, "post", side_effect=Exception("report-api down")):
+            helper_add_event_to_queue(
+                client,
+                message_type=QueueMessageTypes.PAYMENT_RECEIPT.value,
+                mail_details={**RECEIPT_MESSAGE, "emailAddresses": "payer@example.com"},
+            )
+
+    assert mock_send.call_args.args[0]["content"]["attachments"] == []
+
+
+def test_payment_receipt_without_template_vars_skips_the_pdf(app, session, client):
+    """pay-api couldn't describe the receipt, so report-api isn't called and the email still goes."""
+    with patch.object(notification_service, "send_email", return_value=None) as mock_send:
+        with patch.object(RestService, "post") as mock_report:
+            helper_add_event_to_queue(
+                client,
+                message_type=QueueMessageTypes.PAYMENT_RECEIPT.value,
+                mail_details={**RECEIPT_MESSAGE, "templateVars": None, "emailAddresses": "payer@example.com"},
+            )
+
+    mock_report.assert_not_called()
+    assert mock_send.call_args.args[0]["content"]["attachments"] == []

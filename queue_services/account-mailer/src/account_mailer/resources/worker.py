@@ -38,6 +38,7 @@ from account_mailer.email_processors import (
     account_unlock,
     common_mailer,
     pad_confirmation,
+    payment_receipt,
     product_confirmation,
     refund_requested,
 )
@@ -82,6 +83,7 @@ def worker():
         handle_payment_reminder_or_due(message_type, email_msg)
         handle_account_link_notification(message_type, email_msg)
         handle_express_checkout_reminder(message_type, email_msg)
+        handle_payment_receipt(message_type, email_msg)
 
         # Note if you're extending above, make sure to include the new type in handle_other_messages below.
         handle_other_messages(message_type, email_msg)
@@ -564,6 +566,15 @@ def handle_express_checkout_reminder(message_type, email_msg):
     process_email(email_dict)
 
 
+def handle_payment_receipt(message_type, email_msg):
+    """Handle the receipt sent once a payment settles."""
+    if message_type != QueueMessageTypes.PAYMENT_RECEIPT.value:
+        return
+    token = RestService.get_service_account_token()
+    if email_dict := payment_receipt.process(email_msg, token):
+        process_email(email_dict, token)
+
+
 def handle_account_link_notification(message_type, email_msg):
     """Handle account link notification message."""
     is_reminder = email_msg.get("isReminder", False)
@@ -639,6 +650,7 @@ def handle_other_messages(message_type, email_msg):
         QueueMessageTypes.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
         QueueMessageTypes.AFFILIATION_CONFIRMATION_EMAIL.value,
         QueueMessageTypes.EXPRESS_CHECKOUT_PAYMENT_REMINDER.value,
+        QueueMessageTypes.PAYMENT_RECEIPT.value,
     ]:
         return
 
