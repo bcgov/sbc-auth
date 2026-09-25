@@ -57,3 +57,20 @@ def test_user_settings(session, auth_mock, keycloak_mock, monkeypatch):  # pylin
     assert len(usersettings) == 4
     org = [x for x in usersettings if x.type == "ACCOUNT" and x.label == org_with_branch_dictionary.get("name")]
     assert org[0].additional_label == org_with_branch_dictionary.get("branch_name"), "additional label matches"
+
+    # address is only populated when expand=["address"] is requested (default response is unchanged)
+    org_with_address = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.identifier)
+    org_with_address_id = org_with_address.as_dict()["id"]
+
+    usersettings = UserSettingsService.fetch_user_settings(user.identifier)
+    account = next(x for x in usersettings if x.type == "ACCOUNT" and x.id == org_with_address_id)
+    assert account.address is None, "address is not populated unless expand=['address'] is requested"
+
+    usersettings = UserSettingsService.fetch_user_settings(user.identifier, expand=["address"])
+    account = next(x for x in usersettings if x.type == "ACCOUNT" and x.id == org_with_address_id)
+    mailing_address = TestOrgInfo.get_mailing_address()
+    assert account.address["street"] == mailing_address["street"]
+    assert account.address["city"] == mailing_address["city"]
+    assert account.address["region"] == mailing_address["region"]
+    assert account.address["postalCode"] == mailing_address["postalCode"]
+    assert account.address["country"] == mailing_address["country"]

@@ -36,6 +36,7 @@ class UserSettings:  # pylint: disable=too-few-public-methods, too-many-instance
         account_status=None,
         product_settings=None,
         additional_label=None,
+        address=None,
     ):
         """Return a usersettings."""
         self.id = id_
@@ -47,3 +48,4 @@ class UserSettings:  # pylint: disable=too-few-public-methods, too-many-instance
         self.account_status = account_status
         self.product_settings = product_settings
         self.additional_label = additional_label  # used for org branch name
+        self.address = address  # only populated when ?expand=address is requested

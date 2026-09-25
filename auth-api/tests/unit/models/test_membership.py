@@ -16,6 +16,8 @@
 Test suite to ensure that the Org model routines are working as expected.
 """
 
+from auth_api.models import Contact as ContactModel
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
@@ -67,3 +69,24 @@ def test_get_count_active_owner_org_id_multiple(session):  # pylint:disable=unus
     membership2.save()
 
     assert MembershipModel.get_count_active_owner_org_id(membership2.org_id) == 2
+
+
+def test_find_orgs_for_user_expand_address(session):  # pylint:disable=unused-argument
+    """Assert that expand=['address'] eager-loads each org's contact/address."""
+    membership = factory_membersip_model(session)
+
+    contact = ContactModel(street="1234 Abcd Street", city="Test", region="BC", postal_code="T1T1T1", country="CA")
+    contact.save()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.org = membership.org
+    contact_link.save()
+
+    orgs = MembershipModel.find_orgs_for_user(membership.user_id, expand=["address"])
+    org = next(o for o in orgs if o.id == membership.org_id)
+    assert org.contacts[0].contact.street == "1234 Abcd Street"
+
+    # omitting expand still returns the org (address relations just aren't eager-loaded)
+    orgs = MembershipModel.find_orgs_for_user(membership.user_id)
+    org = next(o for o in orgs if o.id == membership.org_id)
+    assert org.contacts[0].contact.city == "Test"

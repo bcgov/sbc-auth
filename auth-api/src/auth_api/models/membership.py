@@ -26,6 +26,7 @@ from auth_api.utils.enums import LoginSource, OrgType, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_ORG_STATUSES, VALID_STATUSES
 
 from .base_model import BaseModel
+from .contact_link import ContactLink
 from .db import db
 from .membership_status_code import MembershipStatusCode
 from .membership_type import MembershipType
@@ -127,15 +128,21 @@ class Membership(Versioned, BaseModel):  # pylint: disable=too-few-public-method
         )
 
     @classmethod
-    def find_orgs_for_user(cls, user_id: int, valid_statuses=VALID_STATUSES) -> list[OrgModel]:
-        """Find the orgs for a user."""
-        records = (
+    def find_orgs_for_user(cls, user_id: int, valid_statuses=VALID_STATUSES, expand: list = None) -> list[OrgModel]:
+        """Find the orgs for a user. expand: optional relations to eager-load, e.g. ["address"]."""
+        query = (
             cls.query.join(OrgModel)
             .filter(cls.user_id == int(user_id or -1))
             .filter(cls.status.in_(valid_statuses))
             .filter(OrgModel.status_code.in_(VALID_ORG_STATUSES))
-            .all()
         )
+
+        if expand and "address" in expand:
+            query = query.options(
+                joinedload(Membership.org).joinedload(OrgModel.contacts).joinedload(ContactLink.contact)
+            )
+
+        records = query.all()
 
         return [x.org for x in records]
 
