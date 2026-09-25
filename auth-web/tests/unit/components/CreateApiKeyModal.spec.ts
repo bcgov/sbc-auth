@@ -31,16 +31,23 @@ describe('CreateApiKeyModal.vue', () => {
     expect(wrapper.vm).toBeTruthy()
   })
 
-  it('emits create event with the entered name and environment on valid submission', async () => {
+  it('emits create event with the entered name on valid submission', async () => {
     wrapper.vm.newKeyName = 'My Key'
-    wrapper.vm.newKeyEnvironment = 'sandbox'
 
     wrapper.vm.createKey()
 
     expect(wrapper.emitted('create')).toBeTruthy()
     expect(wrapper.emitted('create')[0][0]).toEqual({
-      apiKeyName: 'My Key',
-      environment: 'sandbox'
+      apiKeyName: 'My Key'
     })
+  })
+
+  it('does not require an environment to be selected', async () => {
+    wrapper.vm.newKeyName = 'My Key'
+    wrapper.vm.newKeyEnvironment = ''
+
+    wrapper.vm.createKey()
+
+    expect(wrapper.emitted('create')).toBeTruthy()
   })
 })

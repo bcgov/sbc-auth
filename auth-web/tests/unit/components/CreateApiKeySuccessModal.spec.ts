@@ -46,4 +46,26 @@ describe('CreateApiKeySuccessModal.vue', () => {
 
     expect(navigator.clipboard.writeText).toBeCalledWith('test-api-key-123')
   })
+
+  it('shows the key in full only once in the success modal', () => {
+    const rendered = mount(CreateApiKeySuccessModal, {
+      localVue: createLocalVue(),
+      vuetify,
+      propsData: {
+        apiKey: 'mock-success-api-key',
+        environmentLabel: 'Sandbox'
+      },
+      stubs: {
+        ModalDialog: {
+          template: '<div><slot name="text" /><slot name="actions" /></div>'
+        }
+      }
+    })
+
+    expect(rendered.find('[data-test="created-key-row"]').text())
+      .toContain('mock-success-api-key')
+    expect(rendered.find('[data-test="created-key-summary"]').text()).toBe('Sandbox key')
+
+    rendered.destroy()
+  })
 })

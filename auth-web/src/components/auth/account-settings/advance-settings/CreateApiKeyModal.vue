@@ -34,8 +34,6 @@
         hide-details="auto"
         class="environment-radio-group"
         data-test="key-environment-radio-group"
-        :error-messages="environmentErrorMessages"
-        @change="newKeyEnvironmentError = false"
       >
         <v-radio
           value="sandbox"
@@ -88,6 +86,8 @@
         class="px-7"
         aria-label="Cancel"
         data-test="cancel-create-key-button"
+        :loading="loading"
+        :disabled="loading"
         @click="close()"
       >
         Cancel
@@ -99,6 +99,8 @@
         class="ml-3 px-8 font-weight-bold"
         aria-label="Create"
         data-test="confirm-create-key-button"
+        :loading="loading"
+        :disabled="loading"
         @click="createKey()"
       >
         Create
@@ -108,7 +110,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
 @Component({
@@ -117,10 +119,12 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
   }
 })
 export default class CreateApiKeyModal extends Vue {
+  @Prop({ default: false }) readonly loading: boolean
+
   public newKeyName = ''
   public newKeyNameError = false
+  // not validated and not sent to the API yet - UI only until the new design is done
   public newKeyEnvironment = ''
-  public newKeyEnvironmentError = false
 
   $refs: {
     createKeyDialog: InstanceType<typeof ModalDialog>
@@ -128,10 +132,6 @@ export default class CreateApiKeyModal extends Vue {
 
   get nameErrorMessages (): string[] {
     return this.newKeyNameError ? ['Enter an API key name.'] : []
-  }
-
-  get environmentErrorMessages (): string[] {
-    return this.newKeyEnvironmentError ? ['You must select an environment before creating a key.'] : []
   }
 
   public open () {
@@ -147,7 +147,6 @@ export default class CreateApiKeyModal extends Vue {
     this.newKeyName = ''
     this.newKeyNameError = false
     this.newKeyEnvironment = ''
-    this.newKeyEnvironmentError = false
   }
 
   public createKey () {
@@ -155,13 +154,8 @@ export default class CreateApiKeyModal extends Vue {
       this.newKeyNameError = true
       return
     }
-    if (!this.newKeyEnvironment) {
-      this.newKeyEnvironmentError = true
-      return
-    }
     this.$emit('create', {
-      apiKeyName: this.newKeyName,
-      environment: this.newKeyEnvironment
+      apiKeyName: this.newKeyName
     })
   }
 }
