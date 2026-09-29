@@ -1,7 +1,11 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+import CreateApiKeyModal from '@/components/auth/account-settings/advance-settings/CreateApiKeyModal.vue'
 import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings/ExistingAPIKeys.vue'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import Vue from 'vue'
+import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
+import flushPromises from 'flush-promises'
 import { useOrgStore } from '@/stores/org'
 
 const vuetify = new Vuetify({})
@@ -24,6 +28,8 @@ describe('Account settings ExistingAPIKeys.vue', () => {
   let wrapper: any
   let wrapperFactory: any
   let createOrgApiKey: any
+  let getApiTermsStatus: any
+  let router: VueRouter
 
   const $t = () => 'test trans data'
   const apikeyList = {
@@ -32,7 +38,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
       'consumerStatus': 'approved'
     }
   }
-  beforeEach(() => {
+  beforeEach(async () => {
     const localVue = createLocalVue()
 
     const orgStore = useOrgStore()
@@ -41,19 +47,23 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     }) as any
     createOrgApiKey = vi.fn(() => Promise.resolve({}))
     orgStore.createOrgApiKey = createOrgApiKey as any
+    getApiTermsStatus = vi.fn(() => Promise.resolve({ isAccepted: true }))
+    orgStore.getApiTermsStatus = getApiTermsStatus as any
     orgStore.currentOrganization = {
       id: 123,
       name: 'test org'
     }
 
-    wrapperFactory = (propsData) => {
+    // params that aren't in the path are only kept when navigating to a named route
+    wrapperFactory = async (routeParams = {}) => {
+      router = new VueRouter({ routes: [{ name: 'developer-access', path: '/developer-access' }] })
+      await router.push({ name: 'developer-access', params: routeParams })
+      vi.spyOn(router, 'push').mockImplementation(() => Promise.resolve() as any)
       return mount(ExistingAPIKeys, {
         localVue,
         vuetify,
+        router,
         mocks: { $t },
-        propsData: {
-          ...propsData
-        },
         stubs: {
           'v-btn': {
             template: `<button @click='$listeners.click'></button>`
@@ -63,14 +73,22 @@ describe('Account settings ExistingAPIKeys.vue', () => {
       })
     }
 
-    wrapper = wrapperFactory({})
+    wrapper = await wrapperFactory()
   })
 
   afterEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
+    vi.restoreAllMocks()
     wrapper.destroy()
   })
+
+  // replace the modals so tests can check which ones were opened or closed
+  function mockModals () {
+    for (const ref of ['createKeyModal', 'createKeySuccessModal', 'successDialog']) {
+      wrapper.vm.$refs[ref] = { open: vi.fn(), close: vi.fn() }
+    }
+  }
 
   it('is a Vue instance', () => {
     expect(wrapper.vm).toBeTruthy()
@@ -105,8 +123,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
   it('Should not send the environment when creating a key', async () => {
     await wrapper.vm.loadApiKeys()
-    wrapper.vm.$refs.createKeyModal = { open: vi.fn(), close: vi.fn() }
-    wrapper.vm.$refs.createKeySuccessModal = { open: vi.fn(), close: vi.fn() }
+    mockModals()
     createOrgApiKey.mockResolvedValue({
       consumer: {
         consumerKey: [
@@ -135,8 +152,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
   it('Should show the created key when the response is the created key in a list', async () => {
     await wrapper.vm.loadApiKeys()
-    wrapper.vm.$refs.createKeyModal = { open: vi.fn(), close: vi.fn() }
-    wrapper.vm.$refs.createKeySuccessModal = { open: vi.fn(), close: vi.fn() }
+    mockModals()
     // the create endpoint always wraps the created key(s) in consumer.consumerKey
     createOrgApiKey.mockResolvedValue({ consumer: { consumerKey: [createdKey] } })
 
@@ -152,9 +168,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
   it('Should not show an existing key when the response has no new key id', async () => {
     await wrapper.vm.loadApiKeys()
-    wrapper.vm.$refs.createKeyModal = { open: vi.fn(), close: vi.fn() }
-    wrapper.vm.$refs.createKeySuccessModal = { open: vi.fn(), close: vi.fn() }
-    wrapper.vm.$refs.successDialog = { open: vi.fn(), close: vi.fn() }
+    mockModals()
     createOrgApiKey.mockResolvedValue({ consumer: { consumerKey: [] } })
 
     await wrapper.vm.onCreateKey({ apiKeyName: 'key1', environment: 'sandbox' })
@@ -166,13 +180,13 @@ describe('Account settings ExistingAPIKeys.vue', () => {
   })
 
   it('Should say the key was not created when the request fails', async () => {
-    wrapper.vm.$refs.createKeyModal = { open: vi.fn(), close: vi.fn() }
-    wrapper.vm.$refs.successDialog = { open: vi.fn(), close: vi.fn() }
+    mockModals()
     createOrgApiKey.mockRejectedValue(new Error('create failed'))
 
     await wrapper.vm.onCreateKey({ apiKeyName: 'key1', environment: 'sandbox' })
 
     expect(wrapper.vm.alertTitle).toBe('API key has not been created')
+    expect(wrapper.vm.alertText).toBe('')
     expect(wrapper.vm.$refs.successDialog.open).toHaveBeenCalled()
   })
 
@@ -188,4 +202,81 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.vm.confirmationModal).toBeCalled()
     expect(wrapper.find("[data-test='confirmation-modal']").exists()).toBe(true)
   })
+
+  const apiTermsRoute = { name: 'api-terms-of-use', params: { orgId: '123' } }
+
+  describe('with creating API keys enabled', () => {
+    beforeEach(async () => {
+      vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(true)
+      wrapper.destroy()
+      wrapper = await wrapperFactory()
+      await flushPromises()
+      mockModals()
+    })
+
+    async function clickCreateKey () {
+      wrapper.find('[data-test="create-api-key-button"]').trigger('click')
+      await flushPromises()
+    }
+
+    it('Should open the create key dialog when the latest API terms are accepted', async () => {
+      await clickCreateKey()
+
+      expect(getApiTermsStatus).toHaveBeenCalledWith(123)
+      expect(wrapper.vm.$refs.createKeyModal.open).toHaveBeenCalled()
+      expect(router.push).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      ['the latest API terms are not accepted', () => Promise.resolve({ isAccepted: false })],
+      ['the terms status can not be loaded', () => Promise.reject(new Error('status failed'))]
+    ])('Should go to the API terms page when %s', async (_, status) => {
+      getApiTermsStatus.mockImplementation(status)
+
+      await clickCreateKey()
+
+      expect(wrapper.vm.$refs.createKeyModal.open).not.toHaveBeenCalled()
+      expect(router.push).toHaveBeenCalledWith(apiTermsRoute)
+    })
+  })
+
+  it('Should go to the API terms page when creating a key fails because the terms are not accepted', async () => {
+    mockModals()
+    createOrgApiKey.mockRejectedValue({ response: { data: { code: 'API_TERMS_NOT_ACCEPTED' } } })
+
+    await wrapper.vm.onCreateKey({ apiKeyName: 'key1', environment: 'sandbox' })
+
+    expect(wrapper.vm.$refs.createKeyModal.close).toHaveBeenCalled()
+    expect(router.push).toHaveBeenCalledWith(apiTermsRoute)
+    expect(wrapper.vm.$refs.successDialog.open).not.toHaveBeenCalled()
+  })
+
+  it('Should show the error message when creating a key fails because the terms are missing', async () => {
+    const message = 'API Terms of Use are missing. API keys cannot be created until they are available.'
+    mockModals()
+    createOrgApiKey.mockRejectedValue({ response: { data: { code: 'API_TERMS_NOT_FOUND', message } } })
+
+    await wrapper.vm.onCreateKey({ apiKeyName: 'key1', environment: 'sandbox' })
+
+    expect(wrapper.vm.alertTitle).toBe('API key has not been created')
+    expect(wrapper.vm.alertText).toBe(message)
+    expect(wrapper.vm.$refs.successDialog.open).toHaveBeenCalled()
+    expect(router.push).not.toHaveBeenCalled()
+  })
+
+  // the terms page routes back with openCreateKey after the terms are accepted
+  it.each([
+    [true, { openCreateKey: 'true' }, true],
+    [true, {}, false],
+    [false, { openCreateKey: 'true' }, false]
+  ])('With creating keys enabled %s and route params %j, the create key dialog opens on load: %s',
+    async (enabled, routeParams, opens) => {
+      vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(enabled)
+      const openModal = vi.spyOn((CreateApiKeyModal as any).options.methods, 'open').mockImplementation(() => {})
+      wrapper.destroy()
+      wrapper = await wrapperFactory(routeParams)
+      await flushPromises()
+
+      expect(openModal).toHaveBeenCalledTimes(opens ? 1 : 0)
+    })
 })
