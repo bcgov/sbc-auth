@@ -34,6 +34,7 @@ class UserSettingsSchema(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-a
             "account_type",
             "account_status",
             "product_settings",
+            "address",
         )
 
     @post_dump(pass_many=True)

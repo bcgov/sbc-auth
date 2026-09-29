@@ -63,6 +63,27 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     assert schema_utils.validate(item_list, "user_settings_response")[0]
     assert account["productSettings"] == f"/account/{account['id']}/restricted-product"
 
+    # address is only included when ?expand=address is requested
+    org_with_address = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user_model.id)
+    org_with_address_id = org_with_address.as_dict()["id"]
+
+    rv = client.get(f"/api/v1/users/{kc_id}/settings", headers=headers, content_type="application/json")
+    item_list = rv.json
+    account = next(obj for obj in item_list if obj["type"] == "ACCOUNT" and obj["id"] == org_with_address_id)
+    assert "address" not in account
+
+    rv = client.get(
+        f"/api/v1/users/{kc_id}/settings?expand=address", headers=headers, content_type="application/json"
+    )
+    item_list = rv.json
+    account = next(obj for obj in item_list if obj["type"] == "ACCOUNT" and obj["id"] == org_with_address_id)
+    mailing_address = TestOrgInfo.get_mailing_address()
+    assert account["address"]["street"] == mailing_address["street"]
+    assert account["address"]["city"] == mailing_address["city"]
+    assert account["address"]["region"] == mailing_address["region"]
+    assert account["address"]["postalCode"] == mailing_address["postalCode"]
+    assert account["address"]["country"] == mailing_address["country"]
+
     kc_id_no_user = dict(TestUserInfo.user1).get("keycloak_guid")
     claims = copy.deepcopy(TestJwtClaims.updated_test.value)
     claims["sub"] = str(kc_id_no_user)

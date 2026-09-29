@@ -935,9 +935,9 @@ class Org:  # pylint: disable=too-many-public-methods
         return None
 
     @staticmethod
-    def get_orgs(user_id, valid_statuses=VALID_STATUSES):
+    def get_orgs(user_id, valid_statuses=VALID_STATUSES, expand: list = None):
         """Return the orgs associated with this user."""
-        return MembershipModel.find_orgs_for_user(user_id, valid_statuses)
+        return MembershipModel.find_orgs_for_user(user_id, valid_statuses, expand=expand)
 
     @staticmethod
     @user_context

@@ -27,15 +27,26 @@ class UserSettings:  # pylint: disable=too-few-public-methods
         self._model = model
 
     @staticmethod
-    def fetch_user_settings(user_id):
-        """Create a new organization."""
+    def fetch_user_settings(user_id, expand: list = None):
+        """Create a new organization. expand: optional extra fields to include, e.g. ["address"]."""
         current_app.logger.info("<fetch_user_settings ")
 
         all_settings = []
         url_origin = current_app.config.get("WEB_APP_URL")
         if user_id:
-            all_orgs = OrgService.get_orgs(user_id)
+            all_orgs = OrgService.get_orgs(user_id, expand=expand)
             for org in all_orgs:
+                address = None
+                if expand and "address" in expand and org.contacts:
+                    contact = org.contacts[0].contact
+                    address = {
+                        "street": contact.street,
+                        "streetAdditional": contact.street_additional,
+                        "city": contact.city,
+                        "region": contact.region,
+                        "postalCode": contact.postal_code,
+                        "country": contact.country,
+                    }
                 all_settings.append(
                     UserSettingsModel(
                         org.id,
@@ -47,6 +58,7 @@ class UserSettings:  # pylint: disable=too-few-public-methods
                         org.status_code,
                         "/account/" + str(org.id) + "/restricted-product",
                         org.branch_name,  # added as additonal label
+                        address,
                     )
                 )
 

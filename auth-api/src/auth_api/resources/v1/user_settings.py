@@ -16,7 +16,7 @@
 import json
 from http import HTTPStatus
 
-from flask import Blueprint, g, jsonify
+from flask import Blueprint, g, jsonify, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
@@ -43,9 +43,11 @@ def get_user_settings(user_id):
         return {"message": "Unauthorized"}, HTTPStatus.UNAUTHORIZED
 
     try:
+        expand = request.args.get("expand")
+        expand = [item.strip() for item in expand.split(",")] if expand else None
         user = UserService.find_by_jwt_token(silent_mode=True)
         user_id = user.identifier if user else None
-        all_settings = UserSettingsService.fetch_user_settings(user_id)
+        all_settings = UserSettingsService.fetch_user_settings(user_id, expand=expand)
         response, status = jsonify(UserSettingsSchema(many=True).dump(all_settings)), HTTPStatus.OK
 
     except BusinessException:
