@@ -34,13 +34,6 @@
         <h1 class="view-header__title text-center">
           API Terms of Use for all products
         </h1>
-        <div
-          v-if="termsVersionId"
-          class="api-terms-version mt-1"
-          data-test="api-terms-version"
-        >
-          Version {{ termsVersionId }}
-        </div>
       </v-card-title>
       <v-card-text>
         <div
@@ -209,11 +202,6 @@ export default defineComponent({
   span {
     text-decoration: underline;
   }
-}
-
-.api-terms-version {
-  font-size: 0.875rem;
-  color: rgba(0, 0, 0, 0.6);
 }
 
 .api-terms-alert {

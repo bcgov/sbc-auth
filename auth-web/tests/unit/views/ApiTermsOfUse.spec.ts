@@ -66,12 +66,12 @@ describe('ApiTermsOfUse.vue', () => {
     expect(agreeButton().attributes('disabled')).toBeDefined()
   })
 
-  it('renders the latest terms and their version', async () => {
+  it('renders the latest terms', async () => {
     await mountAndLoad()
 
     expect(getTermsOfService).toHaveBeenCalledWith('termsofuse_api')
     expect(wrapper.find('[data-test="api-terms-content"]').html()).toContain('<p>The API terms</p>')
-    expect(wrapper.find('[data-test="api-terms-version"]').text()).toBe('Version k01')
+    expect(wrapper.find('[data-test="api-terms-version"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="api-terms-load-error"]').exists()).toBe(false)
     expect(agreeButton().attributes('disabled')).toBeUndefined()
   })
