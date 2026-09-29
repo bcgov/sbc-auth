@@ -42,6 +42,7 @@ import { StatementFilterParams, StatementNotificationSettings, StatementSettings
 import { computed, reactive, toRefs } from '@vue/composition-api'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
+import { ApiTermsStatus } from '@/models/ApiTermsStatus'
 import { AutoCompleteResponse } from '@/models/AutoComplete'
 import BcolService from '@/services/bcol.services'
 import CommonUtils from '@/util/common-util'
@@ -1043,6 +1044,16 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data || {}
   }
 
+  async function getApiTermsStatus (orgId: number): Promise<ApiTermsStatus> {
+    const response = await OrgService.getApiTermsStatus(orgId)
+    return response?.data
+  }
+
+  async function acceptApiTerms (orgId: number, versionId: string): Promise<ApiTermsStatus> {
+    const response = await OrgService.acceptApiTerms(orgId, versionId)
+    return response?.data
+  }
+
   async function updateOrganizationAccessType (accessType: string, orgId: number = null, syncOrg = true): Promise<boolean> {
     if (!orgId) orgId = state.currentOrganization?.id as number
     if (orgId && accessType) {
@@ -1177,6 +1188,8 @@ export const useOrgStore = defineStore('org', () => {
     getOrgApiKeys,
     createOrgApiKey,
     revokeOrgApiKeys,
+    getApiTermsStatus,
+    acceptApiTerms,
     updateOrganizationAccessType,
     $reset,
     isStaffOrSbcStaff,

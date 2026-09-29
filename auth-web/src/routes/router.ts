@@ -23,6 +23,7 @@ import AccountTermsOfUse from '@/views/auth/AccountTermsOfUse.vue'
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
+import ApiTermsOfUse from '@/views/auth/ApiTermsOfUse.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
@@ -824,6 +825,13 @@ export function getRoutes (): RouteConfig[] {
       props: true,
       component: AccountTermsOfUse,
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/account/:orgId/api-terms-of-use',
+      name: 'api-terms-of-use',
+      props: true,
+      component: ApiTermsOfUse,
+      meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true }
     },
     {
       path: '/duplicate-account-warning',

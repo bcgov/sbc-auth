@@ -22,6 +22,7 @@ from auth_api.exceptions import BusinessException, Error
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.models.user import User as UserModel
+from auth_api.services.api_terms import ApiTerms as ApiTermsService
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.membership import Membership as MembershipService
@@ -54,6 +55,9 @@ class ApiGateway:
         user_from_context: UserContext = kwargs["user_context"]
         if not user_from_context.is_system():
             check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
+            # system callers don't go through the UI terms page, so the terms are only enforced for UI users
+            if not ApiTermsService.is_latest_accepted(org_id):
+                raise BusinessException(Error.API_TERMS_NOT_ACCEPTED, None)
         env = current_app.config.get("ENVIRONMENT_NAME")
         name = request_json.get("keyName")
         org: OrgModel = OrgModel.find_by_id(org_id)
@@ -77,6 +81,9 @@ class ApiGateway:
         response = {"consumer": {"consumerKey": []}}
         created_keys = gateway_response.get("consumer", {}).get("consumerKey", gateway_response)
         cls._filter_and_add_keys(response, created_keys, email)
+        # the gateway's create api key response doesn't include the environment, so set it from the env the key was created in
+        for key in response["consumer"]["consumerKey"]:
+            key.setdefault("environment", cls._normalize_environment(env))
 
         cls._create_user_and_membership_for_api_user(org_id, env)
         return response
@@ -180,13 +187,18 @@ class ApiGateway:
 
         return api_keys_response
 
+    @staticmethod
+    def _normalize_environment(env: str | None) -> str:
+        """Map an environment name to the key environment, accepting both 'prod' and 'production' for prod."""
+        return "prod" if env in ("prod", "production") else "sandbox"
+
     @classmethod
     def _filter_and_add_keys(cls, api_keys_response, keys, email):
         def _add_key_to_response(_key):
             if _key["keyStatus"] == "approved":
                 _key["email"] = email
                 if "environment" in _key:
-                    _key["environment"] = "prod" if _key["environment"] == "prod" else "sandbox"
+                    _key["environment"] = cls._normalize_environment(_key["environment"])
                 api_keys_response["consumer"]["consumerKey"].append(_key)
 
         if isinstance(keys, dict):

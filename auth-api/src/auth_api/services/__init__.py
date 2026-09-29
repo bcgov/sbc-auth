@@ -19,6 +19,7 @@ from .affidavit import Affidavit
 from .affiliation import Affiliation
 from .affiliation_invitation import AffiliationInvitation
 from .api_gateway import ApiGateway
+from .api_terms import ApiTerms
 from .codes import Codes
 from .colin import Colin
 from .contact import Contact
