@@ -76,7 +76,7 @@ class ApiTerms:
 
     @staticmethod
     def is_latest_accepted(org_id: int) -> bool:
-        """Return True if the org accepted the latest terms"""
+        """Return True if the org accepted the latest terms."""
         latest = ApiTerms._latest_version()
         if not latest:
             current_app.logger.error("No API Terms of Use document found; API key creation is blocked")
