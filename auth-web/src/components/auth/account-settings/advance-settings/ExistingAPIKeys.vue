@@ -335,7 +335,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     const existingKeys = this.apiKeyList
     try {
       // the env is not sent - the API gets it from the env the user logged into
-      const resp: any = await this.createOrgApiKey(this.currentOrganization.id, { keyName: apiKeyName })
+      const resp: any = await this.createOrgApiKey(this.currentOrganization.id, { apiKeyName })
       const [newKey] = resp?.consumer?.consumerKey ?? []
 
       newKey.isNewlyAdded = true

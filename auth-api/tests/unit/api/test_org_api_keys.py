@@ -124,7 +124,7 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, mock_create_paymen
         f"/api/v1/orgs/{org_id}/api-keys",
         headers=headers,
         content_type="application/json",
-        data=json.dumps({"keyName": "TEST"}),
+        data=json.dumps({"apiKeyName": "TEST"}),
     )
     assert rv.json["consumer"]["consumerKey"]
 
@@ -429,3 +429,27 @@ def test_create_api_key_requires_terms_acceptance(client, jwt, session, keycloak
 
     assert rv.status_code == HTTPStatus.BAD_REQUEST
     assert rv.json["code"] == Error.API_TERMS_NOT_ACCEPTED.name
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        pytest.param({}, id="no_name"),
+        pytest.param({"apiKeyName": ""}, id="empty_name"),
+        pytest.param({"apiKeyName": " TEST"}, id="leading_whitespace"),
+    ],
+)
+def test_create_api_key_invalid_payload(client, jwt, session, keycloak_mock, mock_create_payment_settings, payload):  # pylint:disable=unused-argument
+    """Assert that a create key payload without a valid key name is rejected by the schema."""
+    org_id, headers = _create_org_as_account_holder(client, jwt)
+
+    rv = client.post(
+        f"/api/v1/orgs/{org_id}/api-keys",
+        headers=headers,
+        content_type="application/json",
+        data=json.dumps(payload),
+    )
+
+    assert rv.status_code == HTTPStatus.BAD_REQUEST
+    # schema errors have no code, unlike the terms check which also returns 400
+    assert "code" not in rv.json

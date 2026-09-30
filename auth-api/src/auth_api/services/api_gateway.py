@@ -59,7 +59,8 @@ class ApiGateway:
             if not ApiTermsService.is_latest_accepted(org_id):
                 raise BusinessException(Error.API_TERMS_NOT_ACCEPTED, None)
         env = current_app.config.get("ENVIRONMENT_NAME")
-        name = request_json.get("keyName")
+        # accept keyName (deprecated) for existing callers
+        name = request_json.get("apiKeyName") or request_json.get("keyName")
         org: OrgModel = OrgModel.find_by_id(org_id)
         # first find if there is a consumer created for this account.
         gw_api_key = current_app.config.get("API_GW_KEY")

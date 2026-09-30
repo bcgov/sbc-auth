@@ -135,7 +135,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     await wrapper.vm.onCreateKey({ apiKeyName: 'key1', environment: 'sandbox' })
 
     // the API gets the environment from the env the user logged into
-    expect(createOrgApiKey).toHaveBeenCalledWith(123, { keyName: 'key1' })
+    expect(createOrgApiKey).toHaveBeenCalledWith(123, { apiKeyName: 'key1' })
     expect(wrapper.vm.generatedApiKey).toBe('new-key-value')
   })
 
