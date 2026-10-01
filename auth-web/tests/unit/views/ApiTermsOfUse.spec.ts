@@ -8,8 +8,7 @@ import { useOrgStore } from '@/stores/org'
 
 document.body.setAttribute('data-app', 'true')
 
-const TERMS_MISSING_MESSAGE = 'API Terms of Use are missing. API keys cannot be created until they are available.'
-const TERMS_LOAD_FAILED_MESSAGE = 'The API Terms of Use could not be loaded. Please refresh the page to try again.'
+const TERMS_LOAD_FAILED_MESSAGE = 'We were not able to load the terms of use. Please refresh the page or try again later.'
 
 const httpError = (response: any) => Object.assign(new Error('request failed'), { response })
 
@@ -85,15 +84,16 @@ describe('ApiTermsOfUse.vue', () => {
   })
 
   it.each([
-    ['the document has no version', () => Promise.resolve({ data: {} }), TERMS_MISSING_MESSAGE],
-    ['the document is not found', () => Promise.reject(httpError({ status: 404 })), TERMS_MISSING_MESSAGE],
+    ['the document has no version', () => Promise.resolve({ data: {} }), TERMS_LOAD_FAILED_MESSAGE],
+    ['the document is not found', () => Promise.reject(httpError({ status: 404 })), TERMS_LOAD_FAILED_MESSAGE],
     ['loading fails for another reason', () => Promise.reject(httpError({ status: 500 })), TERMS_LOAD_FAILED_MESSAGE]
-  ])('shows an error and disables Agree when %s', async (_, response, message) => {
+  ])('shows an error and hides the terms when %s', async (_, response, message) => {
     getTermsOfService.mockImplementation(response)
     await mountAndLoad()
 
-    expect(wrapper.find('[data-test="api-terms-load-error"]').text()).toBe(message)
-    expect(agreeButton().attributes('disabled')).toBeDefined()
+    expect(wrapper.find('[data-test="api-terms-load-error"]').text()).toBe(`Error: ${message}`)
+    expect(wrapper.find('[data-test="api-terms-card"]').exists()).toBe(false)
+    expect(agreeButton().exists()).toBe(false)
   })
 
   it('accepts the displayed version and returns to developer access to create a key', async () => {
@@ -118,7 +118,7 @@ describe('ApiTermsOfUse.vue', () => {
     [
       'the terms are missing on the server',
       httpError({ data: { code: 'API_TERMS_NOT_FOUND' } }),
-      TERMS_MISSING_MESSAGE
+      'The API Terms of Use could not be accepted. Please try again.'
     ],
     ['accepting fails for another reason', new Error('network error'), 'The API Terms of Use could not be accepted. Please try again.']
   ])('shows an error and stays on the page when %s', async (_, error, message) => {
@@ -127,7 +127,7 @@ describe('ApiTermsOfUse.vue', () => {
 
     await clickAgree()
 
-    expect(wrapper.find('[data-test="api-terms-accept-error"]').text()).toBe(message)
+    expect(wrapper.find('[data-test="api-terms-accept-error"]').text()).toBe(`Error: ${message}`)
     expect(router.push).not.toHaveBeenCalled()
     expect(wrapper.vm.isAccepting).toBe(false)
   })

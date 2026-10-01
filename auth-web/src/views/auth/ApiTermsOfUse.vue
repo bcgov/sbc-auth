@@ -29,7 +29,33 @@
       Please review the Terms of Use before you continue.
     </v-alert>
 
-    <v-card class="py-4 px-4">
+    <v-alert
+      v-if="loadErrorMessage"
+      outlined
+      color="error"
+      icon="mdi-alert"
+      class="api-terms-error-alert mb-6"
+      data-test="api-terms-load-error"
+    >
+      <strong>Error:</strong> {{ loadErrorMessage }}
+    </v-alert>
+
+    <v-alert
+      v-if="acceptErrorMessage"
+      outlined
+      color="error"
+      icon="mdi-alert"
+      class="api-terms-error-alert mb-6"
+      data-test="api-terms-accept-error"
+    >
+      <strong>Error:</strong> {{ acceptErrorMessage }}
+    </v-alert>
+
+    <v-card
+      v-if="!loadErrorMessage"
+      class="py-4 px-4"
+      data-test="api-terms-card"
+    >
       <v-card-title class="flex-column align-center">
         <h1 class="view-header__title text-center">
           API Terms of Use for all products
@@ -46,29 +72,12 @@
             data-test="api-terms-loading"
           />
         </div>
-        <v-alert
-          v-else-if="loadErrorMessage"
-          type="error"
-          text
-          data-test="api-terms-load-error"
-        >
-          {{ loadErrorMessage }}
-        </v-alert>
         <!-- eslint-disable-next-line vue/no-v-html -->
         <div
           v-else
           data-test="api-terms-content"
           v-html="termsContent"
         />
-        <v-alert
-          v-if="acceptErrorMessage"
-          type="error"
-          text
-          class="mt-4 mb-0"
-          data-test="api-terms-accept-error"
-        >
-          {{ acceptErrorMessage }}
-        </v-alert>
       </v-card-text>
       <v-divider class="mt-3" />
       <v-card-actions class="pt-6 px-4">
@@ -89,7 +98,7 @@
           color="primary"
           class="font-weight-bold px-8"
           data-test="accept-api-terms-button"
-          :disabled="isLoading || !!loadErrorMessage"
+          :disabled="isLoading"
           :loading="isAccepting"
           @click="accept()"
         >
@@ -104,12 +113,10 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import DocumentService from '@/services/document.services'
-import { StatusCodes } from 'http-status-codes'
 import { useOrgStore } from '@/stores/org'
 
 const API_TERMS_DOCUMENT_TYPE = 'termsofuse_api'
-const TERMS_MISSING_MESSAGE = 'API Terms of Use are missing. API keys cannot be created until they are available.'
-const TERMS_LOAD_FAILED_MESSAGE = 'The API Terms of Use could not be loaded. Please refresh the page to try again.'
+const TERMS_LOAD_FAILED_MESSAGE = 'We were not able to load the terms of use. Please refresh the page or try again later.'
 const TERMS_VERSION_MISMATCH_MESSAGE = 'The API Terms of Use have been updated. Please refresh the page to review the latest version.'
 const TERMS_ACCEPT_FAILED_MESSAGE = 'The API Terms of Use could not be accepted. Please try again.'
 
@@ -140,14 +147,12 @@ export default defineComponent({
         state.termsContent = response?.data?.content || ''
         state.termsVersionId = response?.data?.versionId || ''
         if (!state.termsVersionId) {
-          state.loadErrorMessage = TERMS_MISSING_MESSAGE
+          state.loadErrorMessage = TERMS_LOAD_FAILED_MESSAGE
         }
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error(e)
-        state.loadErrorMessage = e?.response?.status === StatusCodes.NOT_FOUND
-          ? TERMS_MISSING_MESSAGE
-          : TERMS_LOAD_FAILED_MESSAGE
+        state.loadErrorMessage = TERMS_LOAD_FAILED_MESSAGE
       }
     }
 
@@ -166,14 +171,9 @@ export default defineComponent({
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error(e)
-        const code = e?.response?.data?.code
-        if (code === 'API_TERMS_VERSION_MISMATCH') {
-          state.acceptErrorMessage = TERMS_VERSION_MISMATCH_MESSAGE
-        } else if (code === 'API_TERMS_NOT_FOUND') {
-          state.acceptErrorMessage = TERMS_MISSING_MESSAGE
-        } else {
-          state.acceptErrorMessage = TERMS_ACCEPT_FAILED_MESSAGE
-        }
+        state.acceptErrorMessage = e?.response?.data?.code === 'API_TERMS_VERSION_MISMATCH'
+          ? TERMS_VERSION_MISMATCH_MESSAGE
+          : TERMS_ACCEPT_FAILED_MESSAGE
       } finally {
         state.isAccepting = false
       }
@@ -206,6 +206,15 @@ export default defineComponent({
 
 .api-terms-alert {
   background-color: #fff !important;
+  font-size: 14px;
+
+  ::v-deep .v-alert__content {
+    color: rgba(0, 0, 0, 0.87);
+  }
+}
+
+.api-terms-error-alert {
+  background-color: #f9e7e7 !important;
   font-size: 14px;
 
   ::v-deep .v-alert__content {
