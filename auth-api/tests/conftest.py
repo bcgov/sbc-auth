@@ -27,8 +27,10 @@ from auth_api import create_app, setup_jwt_manager
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models import Org
 from auth_api.models import db as _db
+from auth_api.models.documents import Documents
 from auth_api.models.org import receive_before_update
 from auth_api.utils.auth import jwt as _jwt
+from auth_api.utils.enums import DocumentType
 
 
 def mock_token(config_id="", config_secret=""):
@@ -373,3 +375,13 @@ def entity_mapping_mock(monkeypatch):
         "auth_api.services.entity_mapping.EntityMappingService.fetch_entity_mapping_details",
         lambda *args, **kwargs: None,  # noqa: ARG005
     )
+
+
+@pytest.fixture
+def api_terms_document(session):  # pylint: disable=redefined-outer-name, unused-argument
+    """Publish a 'k01' API Terms of Use document, as the migrations don't seed one."""
+    document = Documents(
+        version_id="k01", type=DocumentType.TERMS_OF_USE_API.value, content="<p>Terms</p>", content_type="text/html"
+    )
+    document.save()
+    return document

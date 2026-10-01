@@ -13,7 +13,7 @@
 # limitations under the License.
 """Tests for the ApiTerms service.
 
-The migrations seed the 'k01' termsofuse_api document, so it is the latest version unless a test adds another.
+The api_terms_document fixture publishes the 'k01' termsofuse_api document, so it is the latest version unless a test adds another.
 """
 
 from unittest.mock import patch
@@ -23,7 +23,6 @@ import pytest
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.dataclass import Activity
-from auth_api.models.documents import Documents as DocumentsModel
 from auth_api.models.org_api_terms_acceptance import OrgApiTermsAcceptance as OrgApiTermsAcceptanceModel
 from auth_api.services.activity_log_publisher import ActivityLogPublisher
 from auth_api.services.api_terms import ApiTerms as ApiTermsService
@@ -56,7 +55,7 @@ def _setup_account_admin(monkeypatch):
     return user, org
 
 
-def test_accept_latest_version(session, monkeypatch):  # pylint:disable=unused-argument
+def test_accept_latest_version(session, api_terms_document, monkeypatch):  # pylint:disable=unused-argument
     """Assert that accepting the latest version records the acceptance and logs the activity."""
     user, org = _setup_account_admin(monkeypatch)
 
@@ -81,7 +80,7 @@ def test_accept_latest_version(session, monkeypatch):  # pylint:disable=unused-a
     assert ApiTermsService.is_latest_accepted(org.id) is True
 
 
-def test_accept_version_mismatch(session, monkeypatch):  # pylint:disable=unused-argument
+def test_accept_version_mismatch(session, api_terms_document, monkeypatch):  # pylint:disable=unused-argument
     """Assert that accepting a version other than the latest is rejected and nothing is recorded."""
     _, org = _setup_account_admin(monkeypatch)
     factory_document_model("k02", DocumentType.TERMS_OF_USE_API.value, "<p>Updated terms</p>")
@@ -95,7 +94,7 @@ def test_accept_version_mismatch(session, monkeypatch):  # pylint:disable=unused
     mock_activity.assert_not_called()
 
 
-def test_accept_older_version_is_not_latest_accepted(session, monkeypatch):  # pylint:disable=unused-argument
+def test_accept_older_version_is_not_latest_accepted(session, api_terms_document, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an acceptance of an older version doesn't count once a newer version is published."""
     _, org = _setup_account_admin(monkeypatch)
     with patch.object(ActivityLogPublisher, "publish_activity"):
@@ -109,7 +108,7 @@ def test_accept_older_version_is_not_latest_accepted(session, monkeypatch):  # p
     assert ApiTermsService.is_latest_accepted(org.id) is False
 
 
-def test_accept_twice(session, monkeypatch):  # pylint:disable=unused-argument
+def test_accept_twice(session, api_terms_document, monkeypatch):  # pylint:disable=unused-argument
     """Assert that accepting the same version again is a no-op that returns the existing acceptance."""
     _, org = _setup_account_admin(monkeypatch)
 
@@ -122,7 +121,7 @@ def test_accept_twice(session, monkeypatch):  # pylint:disable=unused-argument
     mock_activity.assert_called_once()
 
 
-def test_accept_concurrent_duplicate(session, monkeypatch):  # pylint:disable=unused-argument
+def test_accept_concurrent_duplicate(session, api_terms_document, monkeypatch):  # pylint:disable=unused-argument
     """Assert that losing a race to record the same acceptance is treated as already accepted."""
     _, org = _setup_account_admin(monkeypatch)
     with patch.object(ActivityLogPublisher, "publish_activity"):
@@ -143,7 +142,6 @@ def test_accept_concurrent_duplicate(session, monkeypatch):  # pylint:disable=un
 def test_no_terms_document(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that with no terms document the terms can't be accepted and key creation is blocked."""
     _, org = _setup_account_admin(monkeypatch)
-    DocumentsModel.query.filter_by(type=DocumentType.TERMS_OF_USE_API.value).delete()
 
     # the terms page already loaded the document, so a missing one is reported as a version mismatch
     with pytest.raises(BusinessException) as exc_info:

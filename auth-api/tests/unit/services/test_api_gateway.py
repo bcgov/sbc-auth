@@ -8,11 +8,9 @@ from flask import current_app
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.models.documents import Documents as DocumentsModel
 from auth_api.models.org_api_terms_acceptance import OrgApiTermsAcceptance as OrgApiTermsAcceptanceModel
 from auth_api.services.api_gateway import ApiGateway
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.enums import DocumentType
 from tests.utilities.factory_scenarios import TestUserInfo
 from tests.utilities.factory_utils import (
     factory_membership_model,
@@ -65,7 +63,7 @@ def _setup_create_key(monkeypatch, claims_roles, member_type=None):
     ],
     ids=["account_holder", "staff"],
 )
-def test_create_key_requires_terms_acceptance(session, monkeypatch, claims_roles, member_type):  # pylint:disable=unused-argument
+def test_create_key_requires_terms_acceptance(session, api_terms_document, monkeypatch, claims_roles, member_type):  # pylint:disable=unused-argument
     """Assert that account holders and staff can only create a key once the latest API terms are accepted."""
     org, gateway_post = _setup_create_key(monkeypatch, claims_roles, member_type)
 
@@ -75,8 +73,7 @@ def test_create_key_requires_terms_acceptance(session, monkeypatch, claims_roles
     gateway_post.assert_not_called()
 
     # acceptance is admin-only, so record it directly to cover the staff case too
-    latest = DocumentsModel.find_latest_version_by_type(DocumentType.TERMS_OF_USE_API.value)
-    OrgApiTermsAcceptanceModel(org_id=org.id, version_id=latest).save()
+    OrgApiTermsAcceptanceModel(org_id=org.id, version_id=api_terms_document.version_id).save()
     response = ApiGateway.create_key(org.id, {"keyName": "TEST"})
 
     gateway_post.assert_called_once()
@@ -86,7 +83,6 @@ def test_create_key_requires_terms_acceptance(session, monkeypatch, claims_roles
 def test_create_key_no_terms_document(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that no key can be created when there is no API terms document."""
     org, gateway_post = _setup_create_key(monkeypatch, ["public_user", "account_holder"], "ADMIN")
-    DocumentsModel.query.filter_by(type=DocumentType.TERMS_OF_USE_API.value).delete()
 
     with pytest.raises(BusinessException) as exc_info:
         ApiGateway.create_key(org.id, {"keyName": "TEST"})
