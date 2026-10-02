@@ -19,6 +19,7 @@ import {
 } from '@/models/Organization'
 
 import { Address } from '@/models/address'
+import { ApiTermsStatus } from '@/models/ApiTermsStatus'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
@@ -186,13 +187,21 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys`)
   }
 
-  public static async createOrgApiKey (orgId: number, payload: { keyName: string }): Promise<AxiosResponse<any>> {
+  public static async createOrgApiKey (orgId: number, payload: { apiKeyName: string }): Promise<AxiosResponse<any>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys`, payload)
   }
 
   public static async revokeOrgApiKeys (ApiDetails): Promise<AxiosResponse<OrgProduct>> {
     const { orgId, apiKey } = ApiDetails
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/${apiKey}`)
+  }
+
+  public static async getApiTermsStatus (orgId: number): Promise<AxiosResponse<ApiTermsStatus>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/terms`)
+  }
+
+  public static async acceptApiTerms (orgId: number, versionId: string): Promise<AxiosResponse<ApiTermsStatus>> {
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/terms`, { versionId })
   }
 
   public static async getOrgRedirectUrls (orgId: number): Promise<AxiosResponse<OrgRedirectUrls>> {

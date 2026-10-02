@@ -12,7 +12,7 @@
         color="primary"
         aria-label="Create API Key"
         data-test="create-api-key-button"
-        @click="openCreateKeyDialog()"
+        @click="startCreateKey()"
       >
         <v-icon class="mr-1">
           mdi-plus
@@ -179,6 +179,7 @@
 import { Action, State } from 'pinia-class'
 import { Component, Mixins } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { ApiTermsStatus } from '@/models/ApiTermsStatus'
 import CommonUtils from '@/util/common-util'
 import CreateApiKeyModal from '@/components/auth/account-settings/advance-settings/CreateApiKeyModal.vue'
 import CreateApiKeySuccessModal from '@/components/auth/account-settings/advance-settings/CreateApiKeySuccessModal.vue'
@@ -200,6 +201,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   @Action(useOrgStore) readonly getOrgApiKeys!: (orgId: any) => Promise<any>
   @Action(useOrgStore) readonly createOrgApiKey!: (orgId: any, payload: any) => Promise<any>
   @Action(useOrgStore) readonly revokeOrgApiKeys!: (orgId: any) => Promise<any>
+  @Action(useOrgStore) readonly getApiTermsStatus!: (orgId: number) => Promise<ApiTermsStatus>
 
   public isLoading = true
   public isCreating = false
@@ -279,6 +281,11 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   public async mounted () {
     this.setAccountChangedHandler(this.initialize)
     this.initialize()
+    // user is routed back with openCreateKey param after accepting the API terms of use
+    if (this.$route?.params?.openCreateKey === 'true' && this.isCreateApiKeyEnabled) {
+      await this.$nextTick()
+      this.openCreateKeyDialog()
+    }
   }
 
   public async initialize () {
@@ -299,6 +306,26 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     }
   }
 
+  // skip the terms page when the latest API terms already accepted
+  public async startCreateKey () {
+    try {
+      const status = await this.getApiTermsStatus(this.currentOrganization.id)
+      if (status?.isAccepted) {
+        this.openCreateKeyDialog()
+        return
+      }
+    } catch (e) {
+      // the API enforces acceptance when creating a key
+      // eslint-disable-next-line no-console
+      console.error(e)
+    }
+    this.goToApiTerms()
+  }
+
+  public goToApiTerms () {
+    this.$router.push({ name: 'api-terms-of-use', params: { orgId: String(this.currentOrganization.id) } })
+  }
+
   public openCreateKeyDialog () {
     this.$refs.createKeyModal.open()
   }
@@ -308,7 +335,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     const existingKeys = this.apiKeyList
     try {
       // the env is not sent - the API gets it from the env the user logged into
-      const resp: any = await this.createOrgApiKey(this.currentOrganization.id, { keyName: apiKeyName })
+      const resp: any = await this.createOrgApiKey(this.currentOrganization.id, { apiKeyName })
       const [newKey] = resp?.consumer?.consumerKey ?? []
 
       newKey.isNewlyAdded = true
@@ -324,9 +351,16 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e)
+      const errorCode = e?.response?.data?.code
+      if (errorCode === 'API_TERMS_NOT_ACCEPTED') {
+        // e.g. a new terms version was published since the terms page was shown
+        this.$refs.createKeyModal.close()
+        this.goToApiTerms()
+        return
+      }
       this.alertIcon = 'mdi-alert-circle-outline'
       this.alertTitle = 'API key has not been created'
-      this.alertText = ''
+      this.alertText = errorCode === 'API_TERMS_NOT_FOUND' ? e.response.data.message : ''
       this.notificationColor = 'error'
       this.$refs.createKeyModal.close()
       this.$refs.successDialog.open()

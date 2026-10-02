@@ -115,6 +115,7 @@ class DocumentType(Enum):
     TERMS_OF_USE_GOVM = "termsofuse_govm"
     AFFIDAVIT = "affidavit"
     TERMS_OF_USE_PAD = "termsofuse_pad"
+    TERMS_OF_USE_API = "termsofuse_api"
 
 
 class NRStatus(Enum):
@@ -356,6 +357,7 @@ class ActivityAction(Enum):
     LINKING_KEY_BOUND = "LINKING_KEY_BOUND"
     LINKING_KEY_EXTENDED = "LINKING_KEY_EXTENDED"
     LINKING_KEY_EXPIRED = "LINKING_KEY_EXPIRED"
+    API_TERMS_ACCEPTED = "API_TERMS_ACCEPTED"
 
 
 class LinkingKeyStatus(Enum):

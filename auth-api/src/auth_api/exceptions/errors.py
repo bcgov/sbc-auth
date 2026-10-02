@@ -172,6 +172,12 @@ class Error(Enum):
         "This connection can only be extended within 30 days of its expiry date.",
         HTTPStatus.BAD_REQUEST,
     )
+    API_TERMS_NOT_ACCEPTED = "API Terms of Use must be accepted before creating an API key.", HTTPStatus.BAD_REQUEST
+    API_TERMS_VERSION_MISMATCH = "API Terms of Use version is not the latest.", HTTPStatus.BAD_REQUEST
+    API_TERMS_NOT_FOUND = (
+        "API Terms of Use are missing. API keys cannot be created until they are available.",
+        HTTPStatus.INTERNAL_SERVER_ERROR,
+    )
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

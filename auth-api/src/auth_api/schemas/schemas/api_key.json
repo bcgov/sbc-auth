@@ -5,14 +5,25 @@
     "type": "object",
     "title": "API Key",
     "additionalProperties": false,
-    "required": [
-      "keyName"
+    "anyOf": [
+      {"required": ["apiKeyName"]},
+      {"required": ["keyName"], "$comment": "keyName is deprecated, accepted for existing callers"}
     ],
     "properties": {
+      "apiKeyName": {
+        "$id": "#/properties/apiKeyName",
+        "type": "string",
+        "title": "Name of the key",
+        "default": "",
+        "examples": [
+          "UAT API Key"
+        ],
+        "pattern": "^[^\\s]+(\\s+[^\\s]+)*$"
+      },
       "keyName": {
         "$id": "#/properties/keyName",
         "type": "string",
-        "title": "Name of the key",
+        "title": "Name of the key (deprecated, use apiKeyName)",
         "default": "",
         "examples": [
           "prod-1-key-main"
@@ -21,4 +32,3 @@
       }
     }
   }
-  

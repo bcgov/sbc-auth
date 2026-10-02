@@ -21,6 +21,7 @@ from flask_cors import cross_origin
 from auth_api.exceptions import BusinessException
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import ApiGateway as ApiGatewayService
+from auth_api.services import ApiTerms as ApiTermsService
 from auth_api.utils.auth import jwt as _jwt
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import Role
@@ -48,6 +49,31 @@ def post_organization_api_key(org_id):
         return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
     try:
         response, status = ApiGatewayService.create_key(org_id, request_json), HTTPStatus.CREATED
+    except BusinessException as exception:
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
+    return response, status
+
+
+@bp.route("/terms", methods=["GET", "OPTIONS"])
+@cross_origin(origins="*", methods=["GET", "POST"])
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
+def get_organization_api_terms(org_id):
+    """Get the account's API Terms of Use acceptance status."""
+    return ApiTermsService.get_status(org_id), HTTPStatus.OK
+
+
+@bp.route("/terms", methods=["POST", "OPTIONS"])
+@cross_origin(origins="*")
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.ACCOUNT_HOLDER.value])
+def post_organization_api_terms(org_id):
+    """Accept the latest API Terms of Use for the account."""
+    request_json = request.get_json()
+    valid_format, errors = schema_utils.validate(request_json, "api_terms_acceptance")
+
+    if not valid_format:
+        return {"message": schema_utils.serialize(errors)}, HTTPStatus.BAD_REQUEST
+    try:
+        response, status = ApiTermsService.accept(org_id, request_json["versionId"]), HTTPStatus.CREATED
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
     return response, status
