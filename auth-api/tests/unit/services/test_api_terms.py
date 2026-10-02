@@ -13,7 +13,7 @@
 # limitations under the License.
 """Tests for the ApiTerms service.
 
-The api_terms_document fixture publishes the 'k01' termsofuse_api document, so it is the latest version unless a test adds another.
+Each test publishes the 'k01' termsofuse_api document, so it is the latest version unless a test adds another.
 """
 
 from unittest.mock import patch
@@ -55,8 +55,9 @@ def _setup_account_admin(monkeypatch):
     return user, org
 
 
-def test_accept_latest_version(session, api_terms_document, monkeypatch):  # pylint:disable=unused-argument
+def test_accept_latest_version(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that accepting the latest version records the acceptance and logs the activity."""
+    factory_document_model(_LATEST_VERSION, DocumentType.TERMS_OF_USE_API.value, "<p>Terms</p>")
     user, org = _setup_account_admin(monkeypatch)
 
     with patch.object(ActivityLogPublisher, "publish_activity") as mock_activity:
@@ -80,8 +81,9 @@ def test_accept_latest_version(session, api_terms_document, monkeypatch):  # pyl
     assert ApiTermsService.is_latest_accepted(org.id) is True
 
 
-def test_accept_version_mismatch(session, api_terms_document, monkeypatch):  # pylint:disable=unused-argument
+def test_accept_version_mismatch(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that accepting a version other than the latest is rejected and nothing is recorded."""
+    factory_document_model(_LATEST_VERSION, DocumentType.TERMS_OF_USE_API.value, "<p>Terms</p>")
     _, org = _setup_account_admin(monkeypatch)
     factory_document_model("k02", DocumentType.TERMS_OF_USE_API.value, "<p>Updated terms</p>")
 
@@ -94,8 +96,9 @@ def test_accept_version_mismatch(session, api_terms_document, monkeypatch):  # p
     mock_activity.assert_not_called()
 
 
-def test_accept_older_version_is_not_latest_accepted(session, api_terms_document, monkeypatch):  # pylint:disable=unused-argument
+def test_accept_older_version_is_not_latest_accepted(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an acceptance of an older version doesn't count once a newer version is published."""
+    factory_document_model(_LATEST_VERSION, DocumentType.TERMS_OF_USE_API.value, "<p>Terms</p>")
     _, org = _setup_account_admin(monkeypatch)
     with patch.object(ActivityLogPublisher, "publish_activity"):
         ApiTermsService.accept(org.id, _LATEST_VERSION)
@@ -108,8 +111,9 @@ def test_accept_older_version_is_not_latest_accepted(session, api_terms_document
     assert ApiTermsService.is_latest_accepted(org.id) is False
 
 
-def test_accept_twice(session, api_terms_document, monkeypatch):  # pylint:disable=unused-argument
+def test_accept_twice(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that accepting the same version again is a no-op that returns the existing acceptance."""
+    factory_document_model(_LATEST_VERSION, DocumentType.TERMS_OF_USE_API.value, "<p>Terms</p>")
     _, org = _setup_account_admin(monkeypatch)
 
     with patch.object(ActivityLogPublisher, "publish_activity") as mock_activity:
@@ -121,8 +125,9 @@ def test_accept_twice(session, api_terms_document, monkeypatch):  # pylint:disab
     mock_activity.assert_called_once()
 
 
-def test_accept_concurrent_duplicate(session, api_terms_document, monkeypatch):  # pylint:disable=unused-argument
+def test_accept_concurrent_duplicate(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that losing a race to record the same acceptance is treated as already accepted."""
+    factory_document_model(_LATEST_VERSION, DocumentType.TERMS_OF_USE_API.value, "<p>Terms</p>")
     _, org = _setup_account_admin(monkeypatch)
     with patch.object(ActivityLogPublisher, "publish_activity"):
         ApiTermsService.accept(org.id, _LATEST_VERSION)

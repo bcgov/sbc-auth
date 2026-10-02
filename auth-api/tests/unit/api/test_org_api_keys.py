@@ -335,10 +335,9 @@ def _post_terms(client, org_id, headers, payload):
     )
 
 
-def test_get_and_accept_api_terms(
-    client, jwt, session, api_terms_document, keycloak_mock, mock_create_payment_settings
-):  # pylint:disable=unused-argument
+def test_get_and_accept_api_terms(client, jwt, session, keycloak_mock, mock_create_payment_settings):  # pylint:disable=unused-argument
     """Assert that the account holder can read the terms status and accept the terms."""
+    factory_document_model("k01", DocumentType.TERMS_OF_USE_API.value, "<p>Terms</p>")
     org_id, headers = _create_org_as_account_holder(client, jwt)
     claims = TestJwtClaims.public_account_holder_user
 
@@ -357,10 +356,9 @@ def test_get_and_accept_api_terms(
     assert rv.json == _post_terms(client, org_id, headers, {"versionId": "k01"}).json
 
 
-def test_staff_cannot_accept_api_terms(
-    client, jwt, session, api_terms_document, keycloak_mock, mock_create_payment_settings
-):  # pylint:disable=unused-argument
+def test_staff_cannot_accept_api_terms(client, jwt, session, keycloak_mock, mock_create_payment_settings):  # pylint:disable=unused-argument
     """Assert that staff can read the terms status but cannot accept the terms on the account's behalf."""
+    factory_document_model("k01", DocumentType.TERMS_OF_USE_API.value, "<p>Terms</p>")
     org_id, _ = _create_org_as_account_holder(client, jwt)
     # the scenario's staff claims share the account holder's sub, so use a separate staff user
     staff_claims = {**TestJwtClaims.staff_manage_accounts_role, "sub": _STAFF_SUB, "idp_userid": _STAFF_SUB}
@@ -389,10 +387,9 @@ def test_accept_api_terms_invalid_payload(client, jwt, session, keycloak_mock, m
     assert rv.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_accept_api_terms_version_mismatch(
-    client, jwt, session, api_terms_document, keycloak_mock, mock_create_payment_settings
-):  # pylint:disable=unused-argument
+def test_accept_api_terms_version_mismatch(client, jwt, session, keycloak_mock, mock_create_payment_settings):  # pylint:disable=unused-argument
     """Assert that accepting a version that isn't the latest is rejected with its error code."""
+    factory_document_model("k01", DocumentType.TERMS_OF_USE_API.value, "<p>Terms</p>")
     org_id, headers = _create_org_as_account_holder(client, jwt)
     factory_document_model("k02", DocumentType.TERMS_OF_USE_API.value, "<p>Updated terms</p>")
 
@@ -404,9 +401,10 @@ def test_accept_api_terms_version_mismatch(
 
 @pytest.mark.parametrize("member_type", ["USER", "COORDINATOR"])
 def test_api_terms_forbidden_for_non_admin_member(
-    client, jwt, session, api_terms_document, keycloak_mock, mock_create_payment_settings, member_type
+    client, jwt, session, keycloak_mock, mock_create_payment_settings, member_type
 ):  # pylint:disable=unused-argument
     """Assert that a member who isn't an admin of the account gets a 403 reading or accepting the terms."""
+    factory_document_model("k01", DocumentType.TERMS_OF_USE_API.value, "<p>Terms</p>")
     org_id, _ = _create_org_as_account_holder(client, jwt)
     # an account holder of some other account, who is only a member of this one
     member_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), roles=["account_holder"])
@@ -422,10 +420,9 @@ def test_api_terms_forbidden_for_non_admin_member(
     assert OrgApiTermsAcceptanceModel.find_latest_by_org(org_id) is None
 
 
-def test_create_api_key_requires_terms_acceptance(
-    client, jwt, session, api_terms_document, keycloak_mock, mock_create_payment_settings
-):  # pylint:disable=unused-argument
+def test_create_api_key_requires_terms_acceptance(client, jwt, session, keycloak_mock, mock_create_payment_settings):  # pylint:disable=unused-argument
     """Assert that creating a key before the latest terms are accepted is rejected with its error code."""
+    factory_document_model("k01", DocumentType.TERMS_OF_USE_API.value, "<p>Terms</p>")
     org_id, headers = _create_org_as_account_holder(client, jwt)
 
     rv = client.post(
