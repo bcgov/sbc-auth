@@ -38,7 +38,10 @@ class ApiTerms:
     def get_status(org_id: int) -> dict:
         """Return whether the org has accepted the latest API terms, with details of its last acceptance."""
         check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
-        return ApiTerms._build_status(org_id, ApiTerms._latest_version())
+        return ApiTerms._build_status(
+            OrgApiTermsAcceptanceModel.find_latest_by_org(org_id),
+            ApiTerms._is_accepted(org_id, ApiTerms._latest_version()),
+        )
 
     @staticmethod
     def accept(org_id: int, version_id: str) -> dict:
@@ -48,11 +51,13 @@ class ApiTerms:
         # Check if accepted version is the latest (in case new version published after user accepted)
         if version_id != latest:
             raise BusinessException(Error.API_TERMS_VERSION_MISMATCH, None)
-        if not OrgApiTermsAcceptanceModel.find_by_org_and_version(org_id, version_id):
+        accepted = OrgApiTermsAcceptanceModel.find_by_org_and_version(org_id, version_id)
+        if not accepted:
             try:
-                OrgApiTermsAcceptanceModel(org_id=org_id, version_id=version_id).save()
+                accepted = OrgApiTermsAcceptanceModel(org_id=org_id, version_id=version_id).save()
             except IntegrityError:
                 db.session.rollback()
+                accepted = OrgApiTermsAcceptanceModel.find_by_org_and_version(org_id, version_id)
             else:
                 ActivityLogPublisher.publish_activity(
                     Activity(
@@ -62,13 +67,12 @@ class ApiTerms:
                         value=version_id,
                     )
                 )
-        return ApiTerms._build_status(org_id, latest)
+        return ApiTerms._build_status(accepted, is_accepted=accepted is not None)
 
     @staticmethod
-    def _build_status(org_id: int, latest: str | None) -> dict:
-        accepted = OrgApiTermsAcceptanceModel.find_latest_by_org(org_id)
+    def _build_status(accepted: OrgApiTermsAcceptanceModel | None, is_accepted: bool) -> dict:
         return {
-            "isAccepted": ApiTerms._is_accepted(org_id, latest),
+            "isAccepted": is_accepted,
             "acceptedVersionId": accepted.version_id if accepted else None,
             "acceptedBy": accepted.created_by.username if accepted and accepted.created_by else None,
             "acceptedOn": accepted.created.isoformat() if accepted and accepted.created else None,

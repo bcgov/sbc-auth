@@ -131,10 +131,11 @@ def test_accept_concurrent_duplicate(session, monkeypatch):  # pylint:disable=un
     _, org = _setup_account_admin(monkeypatch)
     with patch.object(ActivityLogPublisher, "publish_activity"):
         ApiTermsService.accept(org.id, _LATEST_VERSION)
+    existing = OrgApiTermsAcceptanceModel.find_by_org_and_version(org.id, _LATEST_VERSION)
 
     # simulate a concurrent request that inserted the row after this request checked for it
     with (
-        patch.object(OrgApiTermsAcceptanceModel, "find_by_org_and_version", return_value=None),
+        patch.object(OrgApiTermsAcceptanceModel, "find_by_org_and_version", side_effect=[None, existing]),
         patch.object(ActivityLogPublisher, "publish_activity") as mock_activity,
     ):
         status = ApiTermsService.accept(org.id, _LATEST_VERSION)
