@@ -1,7 +1,8 @@
-import { AccountStatus, Role } from '@/util/constants'
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { AccountStatus, LDFlags, Role } from '@/util/constants'
+import { RouterLinkStub, createLocalVue, mount, shallowMount } from '@vue/test-utils'
 
 import AccountInfo from '@/components/auth/account-settings/account-info/AccountInfo.vue'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgService from '@/services/org.services'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import Vue from 'vue'
@@ -72,7 +73,7 @@ describe('AccountInfo.vue', () => {
       },
       stubs: {
         'v-btn': {
-          template: `<button @click='$listeners.click'></button>`
+          template: '<button v-on="$listeners"></button>'
         },
         ModalDialog: true
       }
@@ -94,7 +95,7 @@ describe('AccountInfo.vue', () => {
       },
       stubs: {
         'v-btn': {
-          template: `<button @click='$listeners.click'></button>`
+          template: '<button v-on="$listeners"></button>'
         },
         ModalDialog: true
       }
@@ -200,7 +201,7 @@ describe('AccountInfo.vue', () => {
         'OrgAdminContact': MyStub,
         'LinkedBCOLBanner': MyStub,
         'v-btn': {
-          template: `<button @click='$listeners.click'></button>`
+          template: '<button v-on="$listeners"></button>'
         }
       },
       mocks: { $t }
@@ -273,6 +274,89 @@ describe('AccountInfo.vue', () => {
     expect(mockUpdateOrg).toHaveBeenCalledWith({
       name: 'New Name 2',
       isBusinessAccount: false
+    })
+  })
+
+  describe('Terms of Use section', () => {
+    afterEach(() => {
+      wrapper?.destroy()
+    })
+
+    const mountAccountInfo = () => shallowMount(AccountInfo, {
+      localVue,
+      vuetify,
+      mixins: [Steppable],
+      methods: {
+        getAccountFromSession: vi.fn(() => ({ id: 1 }))
+      },
+      stubs: { RouterLink: RouterLinkStub }
+    })
+
+    beforeEach(() => {
+      LaunchDarklyService.getFlag = vi.fn((flag: string) => flag === LDFlags.EnableCreateApiKey)
+    })
+
+    it('does not load API terms when the create API key flag is off', async () => {
+      LaunchDarklyService.getFlag = vi.fn().mockReturnValue(false)
+      const getApiTermsStatus = vi.fn().mockResolvedValue({ isAccepted: true })
+      useOrgStore().getApiTermsStatus = getApiTermsStatus as any
+      wrapper = mountAccountInfo()
+      await flushPromises()
+
+      expect(getApiTermsStatus).not.toHaveBeenCalled()
+      expect(wrapper.find('[data-test="link-api-terms-of-use"]').exists()).toBe(false)
+    })
+
+    it('always links to the account terms of use', async () => {
+      useOrgStore().getApiTermsStatus = vi.fn().mockResolvedValue({ isAccepted: false }) as any
+      wrapper = mountAccountInfo()
+      await flushPromises()
+
+      const link = wrapper.find('[data-test="link-terms-of-use"]')
+      expect(link.props('to')).toEqual({ name: 'terms-of-use', params: { termsType: 'account' } })
+      expect(wrapper.find('[data-test="terms-of-use-accepted-date"]').text()).toBe('N/A')
+    })
+
+    it('hides API terms link when the API terms are not accepted', async () => {
+      const getApiTermsStatus = vi.fn().mockResolvedValue({ isAccepted: false })
+      useOrgStore().getApiTermsStatus = getApiTermsStatus as any
+      wrapper = mountAccountInfo()
+      await flushPromises()
+
+      expect(getApiTermsStatus).toHaveBeenCalledWith(1234)
+      expect(wrapper.find('[data-test="link-api-terms-of-use"]').exists()).toBe(false)
+    })
+
+    it('shows the API terms link and accepted date when the API terms are accepted', async () => {
+      useOrgStore().getApiTermsStatus = vi.fn().mockResolvedValue({
+        isAccepted: true,
+        acceptedOn: '2026-03-15T10:00:00'
+      }) as any
+      wrapper = mountAccountInfo()
+      await flushPromises()
+
+      const link = wrapper.find('[data-test="link-api-terms-of-use"]')
+      expect(link.exists()).toBe(true)
+      expect(link.props('to')).toEqual({ name: 'terms-of-use', params: { termsType: 'api' } })
+      expect(wrapper.find('[data-test="api-terms-accepted-date"]').text()).toBe('March 15, 2026')
+    })
+
+    it('shows the API terms link with N/A when no accepted date is returned', async () => {
+      useOrgStore().getApiTermsStatus = vi.fn().mockResolvedValue({ isAccepted: true, acceptedOn: null }) as any
+      wrapper = mountAccountInfo()
+      await flushPromises()
+
+      expect(wrapper.find('[data-test="link-api-terms-of-use"]').exists()).toBe(true)
+      expect(wrapper.find('[data-test="api-terms-accepted-date"]').text()).toBe('N/A')
+    })
+
+    it('hides API terms link when loading the terms fails', async () => {
+      useOrgStore().getApiTermsStatus = vi.fn().mockRejectedValue(new Error('403')) as any
+      wrapper = mountAccountInfo()
+      await flushPromises()
+
+      expect(wrapper.find('[data-test="link-terms-of-use"]').exists()).toBe(true)
+      expect(wrapper.find('[data-test="link-api-terms-of-use"]').exists()).toBe(false)
     })
   })
 })

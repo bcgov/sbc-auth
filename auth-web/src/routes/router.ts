@@ -19,7 +19,6 @@ import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.
 import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
 import AccountSetupLanding from '@/views/auth/create-account/AccountSetupLanding.vue'
 import AccountSwitching from '@/views/auth/AccountSwitching.vue'
-import AccountTermsOfUse from '@/views/auth/AccountTermsOfUse.vue'
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
@@ -73,6 +72,7 @@ import StaffRejectedAccountsTable from '@/components/auth/staff/account-manageme
 import StaffSuspendedAccountsTable from '@/components/auth/staff/account-management/StaffSuspendedAccountsTable.vue'
 import TermsOfServiceDeclineView from '@/views/auth/TermsOfServiceDeclineView.vue'
 import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
+import TermsOfUseDocumentView from '@/views/auth/TermsOfUseDocumentView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import UpdateAccountView from '@/views/auth/create-account/UpdateAccountView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
@@ -820,12 +820,13 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true }
     },
     {
-      path: '/account-terms-of-use',
-      name: 'account-terms-of-use',
+      path: '/terms-of-use/:termsType',
+      name: 'terms-of-use',
       props: true,
-      component: AccountTermsOfUse,
+      component: TermsOfUseDocumentView,
       meta: { requiresAuth: true }
     },
+    { path: '/terms-of-use', redirect: '/terms-of-use/account' }, // fallback to general account terms of use
     {
       path: '/account/:orgId/api-terms-of-use',
       name: 'api-terms-of-use',

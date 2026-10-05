@@ -168,19 +168,59 @@
             Terms of Use
           </h2>
 
-          <h4 class="mt-12 mb-2">
-            Name
-          </h4>
+          <v-row
+            no-gutters
+            class="mt-12 mb-2"
+          >
+            <v-col cols="6">
+              <h4>Name</h4>
+            </v-col>
+            <v-col cols="6">
+              <h4>Date Accepted</h4>
+            </v-col>
+          </v-row>
 
           <v-divider class="mb-6" />
 
-          <router-link
-            class="terms-of-use-link font-weight-bold"
-            data-test="link-terms-of-use"
-            to="/account-terms-of-use"
+          <v-row no-gutters>
+            <v-col cols="6">
+              <router-link
+                class="terms-of-use-link"
+                data-test="link-terms-of-use"
+                :to="{ name: 'terms-of-use', params: { termsType: 'account' } }"
+              >
+                Terms of Use
+              </router-link>
+            </v-col>
+            <v-col
+              cols="6"
+              data-test="terms-of-use-accepted-date"
+            >
+              N/A
+            </v-col>
+          </v-row>
+
+          <v-row
+            v-if="hasAcceptedApiTerms"
+            no-gutters
+            class="mt-4"
           >
-            Terms of Use
-          </router-link>
+            <v-col cols="6">
+              <router-link
+                class="terms-of-use-link"
+                data-test="link-api-terms-of-use"
+                :to="{ name: 'terms-of-use', params: { termsType: 'api' } }"
+              >
+                API Terms of Use
+              </router-link>
+            </v-col>
+            <v-col
+              cols="6"
+              data-test="api-terms-accepted-date"
+            >
+              {{ apiTermsAcceptedDate }}
+            </v-col>
+          </v-row>
 
           <v-divider class="mt-6 mb-10" />
 
@@ -297,7 +337,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, AccountStatus, Permission, Role, SuspensionReason } from '@/util/constants'
+import { AccessType, AccountStatus, LDFlags, Permission, Role, SuspensionReason } from '@/util/constants'
 import { CreateRequestBody, OrgAccountTypes, OrgBusinessType } from '@/models/Organization'
 import { computed, defineComponent, onBeforeUnmount, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { useAccount, useAccountChangeHandler } from '@/composables'
@@ -305,6 +345,8 @@ import AccountAccessType from '@/components/auth/account-settings/account-info/A
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
 import AccountMailingAddress from '@/components/auth/account-settings/account-info/AccountMailingAddress.vue'
 import { Address } from '@/models/address'
+import CommonUtils from '@/util/common-util'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
 import { useAppStore } from '@/stores/app'
@@ -358,6 +400,8 @@ export default defineComponent({
       suspendAccountDialog: null,
       suspensionCompleteDialog: null,
       suspensionReasonForm: null,
+      hasAcceptedApiTerms: false,
+      apiTermsAcceptedDate: 'N/A',
 
       suspensionReasonCodes: computed(() => codesStore.suspensionReasonCodes),
       currentUser: computed(() => userStore.currentUser),
@@ -411,8 +455,26 @@ export default defineComponent({
 
     const warningMessage = 'Your account info is incomplete. Please update any missing account details or address.'
 
+    const loadApiTerms = async () => {
+      const orgId = currentOrganization.value?.id
+      state.hasAcceptedApiTerms = false
+      state.apiTermsAcceptedDate = 'N/A'
+      // do not fetch the API Terms if feature flag is disabled
+      if (!orgId || !LaunchDarklyService.getFlag(LDFlags.EnableCreateApiKey)) return
+      try {
+        const status = await orgStore.getApiTermsStatus(orgId)
+        if (orgId !== currentOrganization.value?.id) return // return if account is switched during the request
+        // isAccepted only covers the latest version, acceptedOn is set when any version was accepted
+        state.hasAcceptedApiTerms = !!status?.isAccepted || !!status?.acceptedOn
+        state.apiTermsAcceptedDate = CommonUtils.formatUtcToPacificDate(status?.acceptedOn, 'MMMM DD, YYYY') || 'N/A'
+      } catch (e) {
+        // ignore errors as the API Terms row stays hidden
+      }
+    }
+
     const setup = async () => {
       setAccountDetails()
+      loadApiTerms()
       await orgStore.syncAddress()
       state.originalAddress = currentOrgAddress.value
       if (isBusinessInfoIncomplete.value || state.isAddressInfoIncomplete) {
