@@ -19,7 +19,7 @@
     </nav>
     <div class="view-header flex-column">
       <h1 class="view-header__title">
-        {{ terms.title || $t(isGovmUser ? 'govm_tos_title' : 'tos_title') }}
+        {{ terms.title || $t(isGovmAccount ? 'govm_tos_title' : 'tos_title') }}
       </h1>
     </div>
 
@@ -69,11 +69,8 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import DocumentService from '@/services/document.services'
-import { LoginSource } from '@/util/constants'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
-import { storeToRefs } from 'pinia'
-import { useOrgStore } from '@/stores/org'
-import { useUserStore } from '@/stores/user'
+import { useAccount } from '@/composables/account-factory'
 
 const TERMS_LOAD_FAILED_MESSAGE = 'We were not able to load the terms of use. Please refresh the page or try again later.'
 
@@ -94,8 +91,7 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const { currentOrganization } = storeToRefs(useOrgStore())
-    const { currentUser } = storeToRefs(useUserStore())
+    const { currentOrganization, isGovmAccount } = useAccount()
     const state = reactive({
       isLoading: true,
       loadErrorMessage: '',
@@ -103,7 +99,6 @@ export default defineComponent({
     })
 
     const accountInfoUrl = computed(() => `/account/${currentOrganization.value?.id}/settings`)
-    const isGovmUser = computed(() => currentUser.value?.loginSource?.toUpperCase() === LoginSource.IDIR.toUpperCase())
     const terms = computed(() => TERMS_TYPES[props.termsType] || TERMS_TYPES.account)
 
     const loadTerms = async () => {
@@ -134,7 +129,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       accountInfoUrl,
-      isGovmUser,
+      isGovmAccount,
       terms
     }
   }

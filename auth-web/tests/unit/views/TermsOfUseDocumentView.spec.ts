@@ -1,5 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 
+import { AccessType } from '@/util/constants'
 import DocumentService from '@/services/document.services'
 import TermsOfUseDocumentView from '@/views/auth/TermsOfUseDocumentView.vue'
 import Vue from 'vue'
@@ -60,6 +61,18 @@ describe('TermsOfUseDocumentView.vue', () => {
 
     it('renders the page title', () => {
       expect(wrapper.find('h1').text()).toBe('BC Registry Terms and Conditions')
+    })
+
+    it('renders the GOVM title for a GOVM account', async () => {
+      const orgStore = useOrgStore()
+      orgStore.currentOrganization = {
+        id: 1234,
+        name: 'testOrg',
+        accessType: AccessType.GOVM
+      } as any
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('h1').text()).toContain('Ministry Use Memorandum of Understanding')
     })
 
     it('renders the TermsOfUse component', () => {
