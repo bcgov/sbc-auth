@@ -106,12 +106,12 @@ describe('TermsOfUseDocumentView.vue', () => {
     let apiWrapper: any
     let getTermsOfService: any
 
-    const mountApi = (termsType = 'api') => mount(TermsOfUseDocumentView, {
+    const mountApi = (termsType = 'api', versionId?: string) => mount(TermsOfUseDocumentView, {
       localVue: createLocalVue(),
       router,
       vuetify,
       i18n: createI18n({ locale: 'en', messages: { en: { tos_title: 'BC Registry Terms and Conditions' } } }),
-      propsData: { termsType },
+      propsData: { termsType, versionId },
       stubs: { TermsOfUse: true }
     })
 
@@ -138,11 +138,19 @@ describe('TermsOfUseDocumentView.vue', () => {
       apiWrapper = mountApi()
       await flushPromises()
 
-      expect(getTermsOfService).toHaveBeenCalledWith('termsofuse_api')
+      expect(getTermsOfService).toHaveBeenCalledWith('termsofuse_api', '')
       expect(apiWrapper.find('h1').text()).toBe('API Terms of Use for all products')
       expect(apiWrapper.find('[data-test="terms-content"]').html()).toContain('<p>The API terms</p>')
       expect(apiWrapper.find('[data-test="terms-loading"]').exists()).toBe(false)
       expect(apiWrapper.findComponent({ name: 'TermsOfUse' }).exists()).toBe(false)
+    })
+
+    it('loads the requested version of the API terms', async () => {
+      apiWrapper = mountApi('api', '2')
+      await flushPromises()
+
+      expect(getTermsOfService).toHaveBeenCalledWith('termsofuse_api', '2')
+      expect(apiWrapper.find('[data-test="terms-content"]').html()).toContain('<p>The API terms</p>')
     })
 
     it('shows an error when the terms request fails', async () => {
@@ -170,7 +178,7 @@ describe('TermsOfUseDocumentView.vue', () => {
       await apiWrapper.setProps({ termsType: 'api' })
       await flushPromises()
 
-      expect(getTermsOfService).toHaveBeenCalledWith('termsofuse_api')
+      expect(getTermsOfService).toHaveBeenCalledWith('termsofuse_api', '')
       expect(apiWrapper.find('[data-test="terms-loading"]').exists()).toBe(false)
       expect(apiWrapper.find('[data-test="terms-content"]').html()).toContain('<p>The API terms</p>')
     })
