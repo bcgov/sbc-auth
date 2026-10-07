@@ -337,8 +337,24 @@ describe('AccountInfo.vue', () => {
 
       const link = wrapper.find('[data-test="link-api-terms-of-use"]')
       expect(link.exists()).toBe(true)
-      expect(link.props('to')).toEqual({ name: 'terms-of-use', params: { termsType: 'api' } })
+      expect(link.props('to')).toEqual({ name: 'terms-of-use', params: { termsType: 'api' }, query: {} })
       expect(wrapper.find('[data-test="api-terms-accepted-date"]').text()).toBe('March 15, 2026')
+    })
+
+    it('links to the accepted version of the API terms', async () => {
+      useOrgStore().getApiTermsStatus = vi.fn().mockResolvedValue({
+        isAccepted: false,
+        acceptedVersionId: '1',
+        acceptedOn: '2026-03-15T10:00:00'
+      }) as any
+      wrapper = mountAccountInfo()
+      await flushPromises()
+
+      expect(wrapper.find('[data-test="link-api-terms-of-use"]').props('to')).toEqual({
+        name: 'terms-of-use',
+        params: { termsType: 'api' },
+        query: { versionId: '1' }
+      })
     })
 
     it('shows the API terms link with N/A when no accepted date is returned', async () => {

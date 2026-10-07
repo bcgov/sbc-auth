@@ -209,7 +209,11 @@
               <router-link
                 class="terms-of-use-link"
                 data-test="link-api-terms-of-use"
-                :to="{ name: 'terms-of-use', params: { termsType: 'api' } }"
+                :to="{
+                  name: 'terms-of-use',
+                  params: { termsType: 'api' },
+                  query: apiTermsVersionId ? { versionId: apiTermsVersionId } : {}
+                }"
               >
                 API Terms of Use
               </router-link>
@@ -402,6 +406,7 @@ export default defineComponent({
       suspensionReasonForm: null,
       hasAcceptedApiTerms: false,
       apiTermsAcceptedDate: 'N/A',
+      apiTermsVersionId: null,
 
       suspensionReasonCodes: computed(() => codesStore.suspensionReasonCodes),
       currentUser: computed(() => userStore.currentUser),
@@ -459,6 +464,7 @@ export default defineComponent({
       const orgId = currentOrganization.value?.id
       state.hasAcceptedApiTerms = false
       state.apiTermsAcceptedDate = 'N/A'
+      state.apiTermsVersionId = null
       // do not fetch the API Terms if feature flag is disabled
       if (!orgId || !LaunchDarklyService.getFlag(LDFlags.EnableCreateApiKey)) return
       try {
@@ -467,6 +473,8 @@ export default defineComponent({
         // isAccepted only covers the latest version, acceptedOn is set when any version was accepted
         state.hasAcceptedApiTerms = !!status?.isAccepted || !!status?.acceptedOn
         state.apiTermsAcceptedDate = CommonUtils.formatUtcToPacificDate(status?.acceptedOn, 'MMMM DD, YYYY') || 'N/A'
+        // link to the accepted version of API Terms or fallback to the latest
+        state.apiTermsVersionId = status?.acceptedVersionId || null
       } catch (e) {
         // ignore errors as the API Terms row stays hidden
       }

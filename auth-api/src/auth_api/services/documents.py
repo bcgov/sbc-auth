@@ -50,6 +50,14 @@ class Documents:
             return Documents(doc)
         return None
 
+    @classmethod
+    def fetch_document_by_version(cls, document_type, version_id):
+        """Get a document by the given document type and version."""
+        doc = DocumentsModel.find_by_type_and_version(file_type=document_type, version_id=version_id)
+        if doc:
+            return Documents(doc)
+        return None
+
     @staticmethod
     def find_latest_version_by_type(document_type):
         """Get the latest version for the given document type."""
