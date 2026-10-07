@@ -47,6 +47,15 @@ class Documents(BaseModel):
         )
 
     @classmethod
+    def find_by_type_and_version(cls, file_type, version_id) -> Documents | None:
+        """Fetch the document of specified type and version."""
+        return (
+            db.session.query(Documents)
+            .filter(Documents.type == file_type, Documents.version_id == version_id)
+            .one_or_none()
+        )
+
+    @classmethod
     def find_latest_version_by_type(cls, file_type) -> Documents:
         """Fetch latest document of any time."""
         return (

@@ -16,7 +16,7 @@
 from datetime import datetime
 from http import HTTPStatus
 
-from flask import Blueprint, g, jsonify
+from flask import Blueprint, g, jsonify, request
 from flask_cors import cross_origin
 
 from auth_api.exceptions import BusinessException
@@ -33,14 +33,19 @@ bp = Blueprint("DOCUMENTS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/d
 @cross_origin(origins="*", methods=["GET"])
 @_jwt.requires_auth
 def get_document_by_type(document_type):
-    """Return the latest terms of use."""
+    """Return the latest terms of use or specific version (via query param)."""
     try:
         if document_type == DocumentType.TERMS_OF_USE.value:
             token = g.jwt_oidc_token_info
             if token.get("loginSource", None) == LoginSource.STAFF.value:  # ideally for govm user who logs in with IDIR
                 document_type = DocumentType.TERMS_OF_USE_GOVM.value
 
-        doc = DocumentService.fetch_latest_document(document_type)
+        # fetch specific version if versionId is passed, otherwise the latest doc
+        version_id = request.args.get("versionId")
+        if version_id:
+            doc = DocumentService.fetch_document_by_version(document_type, version_id)
+        else:
+            doc = DocumentService.fetch_latest_document(document_type)
         if doc is not None:
             doc_dict = doc.as_dict()
             if document_type == DocumentType.TERMS_OF_USE_PAD.value:

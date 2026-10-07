@@ -822,7 +822,11 @@ export function getRoutes (): RouteConfig[] {
     {
       path: '/terms-of-use/:termsType',
       name: 'terms-of-use',
-      props: true,
+      props: route => ({
+        termsType: route.params.termsType,
+        // ignore repeated query param and get latest terms document
+        versionId: typeof route.query.versionId === 'string' ? route.query.versionId : undefined
+      }),
       component: TermsOfUseDocumentView,
       meta: { requiresAuth: true }
     },
