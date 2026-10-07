@@ -65,6 +65,7 @@ class ApiTerms:
                         action=ActivityAction.API_TERMS_ACCEPTED.value,
                         name=OrgModel.find_by_id(org_id).name,
                         value=version_id,
+                        id=accepted.id,
                     )
                 )
         return ApiTerms._build_status(accepted, is_accepted=accepted is not None)
