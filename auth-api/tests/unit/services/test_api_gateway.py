@@ -92,3 +92,26 @@ def test_create_key_no_terms_document(session, monkeypatch):  # pylint:disable=u
 
     assert exc_info.value.code == Error.API_TERMS_NOT_FOUND.name
     gateway_post.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "include_all, expected_keys",
+    [(False, ["approved-key"]), (True, ["approved-key", "revoked-key"])],
+    ids=["default_approved_only", "all_includes_revoked"],
+)
+def test_get_api_keys_status_filter(monkeypatch, include_all, expected_keys):
+    """Assert revoked keys are only returned when include_all is set."""
+    gateway_get = Mock()
+    gateway_get.return_value.json.return_value = {
+        "consumer": {
+            "consumerKey": [
+                {"apiKey": "approved-key", "keyStatus": "approved"},
+                {"apiKey": "revoked-key", "keyStatus": "revoked"},
+            ]
+        }
+    }
+    monkeypatch.setattr("auth_api.services.api_gateway.RestService.get", gateway_get)
+
+    response = ApiGateway.get_api_keys(1, skip_auth=True, include_all=include_all)
+
+    assert [key["apiKey"] for key in response["consumer"]["consumerKey"]] == expected_keys

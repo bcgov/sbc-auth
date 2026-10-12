@@ -1029,8 +1029,8 @@ export const useOrgStore = defineStore('org', () => {
     }
   }
 
-  async function getOrgApiKeys (orgId) {
-    const response = await OrgService.getOrgApiKeys(orgId)
+  async function getOrgApiKeys (orgId, all = false) {
+    const response = await OrgService.getOrgApiKeys(orgId, all)
     return response?.data || {}
   }
 
