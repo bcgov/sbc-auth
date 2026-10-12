@@ -17,6 +17,7 @@
 Test-Suite to ensure that the /orgs/api-keys endpoint is working as expected.
 """
 
+import copy
 import json
 import random
 import uuid
@@ -310,6 +311,52 @@ def test_revoke_api_key(client, jwt, session, keycloak_mock, mock_create_payment
         f"/api/v1/orgs/{org_id}/api-keys/{key}-INVALID", headers=user_headers, content_type="application/json"
     )
     assert rv.status_code == 404
+
+
+@pytest.mark.parametrize(
+    "gateway_keys",
+    [
+        [
+            {"apiKey": "approved-key", "keyStatus": "approved"},
+            {"apiKey": "revoked-key", "keyStatus": "revoked"},
+        ],
+        # the gateway returns a single key as an object rather than a list
+        {"apiKey": "revoked-key", "keyStatus": "revoked"},
+    ],
+    ids=["list", "single_dict"],
+)
+def test_list_api_keys_all_param(
+    client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch, gateway_keys
+):  # pylint:disable=unused-argument
+    """Assert revoked keys are only listed with ?all=true."""
+    org_id = random.randint(1000, 999999)
+    set_random_org_id_sequence(session, org_id)
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
+    client.post("/api/v1/users", headers=user_headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=user_headers, content_type="application/json"
+    )
+    assert rv.json.get("id") == org_id
+
+    def mock_get(*_args, **_kwargs):
+        mock_response = Mock()
+        mock_response.json.return_value = {"consumer": {"consumerKey": copy.deepcopy(gateway_keys)}}
+        mock_response.raise_for_status = lambda: None
+        return mock_response
+
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.get", mock_get)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    all_keys = [gateway_keys] if isinstance(gateway_keys, dict) else gateway_keys
+    approved = [key["apiKey"] for key in all_keys if key["keyStatus"] == "approved"]
+
+    rv = client.get(f"/api/v1/orgs/{org_id}/api-keys", headers=headers, content_type="application/json")
+    assert rv.status_code == 200
+    assert [key["apiKey"] for key in rv.json["consumer"]["consumerKey"]] == approved
+
+    rv = client.get(f"/api/v1/orgs/{org_id}/api-keys?all=true", headers=headers, content_type="application/json")
+    assert rv.status_code == 200
+    assert [key["apiKey"] for key in rv.json["consumer"]["consumerKey"]] == [key["apiKey"] for key in all_keys]
 
 
 _STAFF_SUB = str(uuid.uuid4())

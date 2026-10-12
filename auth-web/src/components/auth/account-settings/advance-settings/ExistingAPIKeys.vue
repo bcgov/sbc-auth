@@ -71,8 +71,10 @@
         no-data-text="No API Keys"
         :loading="isLoading"
         loading-text="Loading..."
-        disable-pagination
-        hide-default-footer
+        sort-by="keyCreatedDate"
+        :sort-desc="true"
+        :items-per-page="PAGE_LIMIT"
+        :hide-default-footer="apiKeyList.length <= PAGE_LIMIT"
       >
         <template #loading>
           Loading...
@@ -240,11 +242,12 @@ import { useOrgStore } from '@/stores/org'
 })
 export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   @State(useOrgStore) readonly currentOrganization!: Organization
-  @Action(useOrgStore) readonly getOrgApiKeys!: (orgId: any) => Promise<any>
+  @Action(useOrgStore) readonly getOrgApiKeys!: (orgId: any, all?: boolean) => Promise<any>
   @Action(useOrgStore) readonly createOrgApiKey!: (orgId: any, payload: any) => Promise<any>
   @Action(useOrgStore) readonly revokeOrgApiKeys!: (orgId: any) => Promise<any>
   @Action(useOrgStore) readonly getApiTermsStatus!: (orgId: number) => Promise<ApiTermsStatus>
 
+  public readonly PAGE_LIMIT = 5
   public isLoading = true
   public isCreating = false
   public confirmActionTitle = 'Revoke API Key?'
@@ -371,7 +374,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     this.apiKeyList = []
     this.totalApiKeyCount = 0
     try {
-      const resp: any = await this.getOrgApiKeys(this.currentOrganization.id)
+      const resp: any = await this.getOrgApiKeys(this.currentOrganization.id, true)
       this.apiKeyList = resp?.consumer?.consumerKey || []
       this.totalApiKeyCount = resp?.consumer?.consumerKey.length || 0
       this.isLoading = false

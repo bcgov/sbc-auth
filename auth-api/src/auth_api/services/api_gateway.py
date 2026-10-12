@@ -165,8 +165,8 @@ class ApiGateway:
         )
 
     @classmethod
-    def get_api_keys(cls, org_id: int, skip_auth=False) -> list[dict[str, any]]:
-        """Get all api keys."""
+    def get_api_keys(cls, org_id: int, skip_auth=False, include_all=False) -> list[dict[str, any]]:
+        """Get approved api keys by default or all (including revoked) via include_all."""
         current_app.logger.debug("<get_api_keys ")
         if skip_auth is False:
             check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
@@ -181,7 +181,7 @@ class ApiGateway:
                 skip_404_logging=True,
             )
             keys = consumers_response.json()["consumer"]["consumerKey"]
-            cls._filter_and_add_keys(api_keys_response, keys, email)
+            cls._filter_and_add_keys(api_keys_response, keys, email, include_all)
         except HTTPError as exc:
             if exc.response.status_code != 404:  # If consumer doesn't exist
                 raise exc
@@ -194,13 +194,14 @@ class ApiGateway:
         return "prod" if env in ("prod", "production") else "sandbox"
 
     @classmethod
-    def _filter_and_add_keys(cls, api_keys_response, keys, email):
+    def _filter_and_add_keys(cls, api_keys_response, keys, email, include_all=False):
         def _add_key_to_response(_key):
-            if _key["keyStatus"] == "approved":
-                _key["email"] = email
-                if "environment" in _key:
-                    _key["environment"] = cls._normalize_environment(_key["environment"])
-                api_keys_response["consumer"]["consumerKey"].append(_key)
+            if not include_all and _key["keyStatus"] != "approved":
+                return
+            _key["email"] = email
+            if "environment" in _key:
+                _key["environment"] = cls._normalize_environment(_key["environment"])
+            api_keys_response["consumer"]["consumerKey"].append(_key)
 
         if isinstance(keys, dict):
             _add_key_to_response(keys)

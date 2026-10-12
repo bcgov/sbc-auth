@@ -183,8 +183,8 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/products`)
   }
 
-  public static async getOrgApiKeys (orgId: number): Promise<AxiosResponse<OrgProduct>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys`)
+  public static async getOrgApiKeys (orgId: number, all = false): Promise<AxiosResponse<OrgProduct>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys`, { params: all ? { all: true } : {} })
   }
 
   public static async createOrgApiKey (orgId: number, payload: { apiKeyName: string }): Promise<AxiosResponse<any>> {
