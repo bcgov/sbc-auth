@@ -81,7 +81,7 @@
         </template>
         <template #[`item.apiKeyName`]="{ item }">
           <div class=" font-weight-bold">
-            {{ item.apiKeyName }}
+            {{ getKeyName(item) }}
           </div>
           <v-chip
             v-if="item.isNewlyAdded"
@@ -450,6 +450,10 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     return item.keyStatus === 'approved'
   }
 
+  public getKeyName (item: any): string {
+    return item?.apiKeyName?.trim() || 'Unnamed Key'
+  }
+
   // mask the key as it is only shown once in success dialog
   public maskApiKey (key: string): string {
     return !key ? '' : `${'*'.repeat(4)}${key.slice(-4)}`
@@ -457,7 +461,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 
   public confirmationModal (apiKey) {
     this.selectedApi = apiKey
-    const { apiKeyName } = apiKey
+    const apiKeyName = this.getKeyName(apiKey)
     // eslint-disable-next-line no-irregular-whitespace
     this.confirmActionTextLine1 = `Revoking an API key will immediately disable and remove this API key.`
     // eslint-disable-next-line no-irregular-whitespace
@@ -467,7 +471,8 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 
   public async revokeApi () {
     const orgId = this.currentOrganization.id
-    const { apiKey, apiKeyName } = this.selectedApi
+    const { apiKey } = this.selectedApi
+    const apiKeyName = this.getKeyName(this.selectedApi)
     const apiKeys = { orgId, apiKey }
     this.alertIcon = 'mdi-alert-circle-outline'
     this.alertTitle = 'API key has not been Revoked'
