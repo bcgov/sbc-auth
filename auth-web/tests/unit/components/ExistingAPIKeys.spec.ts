@@ -121,6 +121,26 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.find('[data-test="confirm-button-key1"]').exists()).toBe(false)
   })
 
+  it('Should load all keys, including revoked ones', async () => {
+    const getOrgApiKeys = useOrgStore().getOrgApiKeys as any
+    await wrapper.vm.loadApiKeys()
+    expect(getOrgApiKeys).toHaveBeenLastCalledWith(123, true)
+  })
+
+  it('Should reload all keys after a revoke', async () => {
+    const orgStore = useOrgStore()
+    orgStore.revokeOrgApiKeys = vi.fn(() => Promise.resolve({})) as any
+    wrapper.vm.$refs.confirmActionDialog = { close: vi.fn() }
+    wrapper.vm.$refs.successDialog = { open: vi.fn() }
+    wrapper.vm.selectedApi = consumerKey[0]
+    vi.mocked(orgStore.getOrgApiKeys).mockClear()
+
+    await wrapper.vm.revokeApi()
+
+    expect(orgStore.revokeOrgApiKeys).toHaveBeenCalledWith({ orgId: 123, apiKey: 'mock-api-key-1234' })
+    expect(orgStore.getOrgApiKeys).toHaveBeenCalledWith(123, true)
+  })
+
   it('Should not send the environment when creating a key', async () => {
     await wrapper.vm.loadApiKeys()
     mockModals()
@@ -279,4 +299,16 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
       expect(openModal).toHaveBeenCalledTimes(opens ? 1 : 0)
     })
+
+  it('Should sort by created date, newest first by default', async () => {
+    wrapper.vm.apiKeyList = [1, 2, 3].map(day => ({
+      ...consumerKey[0],
+      apiKeyName: `key${day}`,
+      keyCreatedDate: `2026-01-0${day}T00:00:00`
+    }))
+    await Vue.nextTick()
+
+    const names = wrapper.findAll('tbody tr .font-weight-bold').wrappers.map(r => r.text())
+    expect(names).toEqual(['key3', 'key2', 'key1'])
+  })
 })

@@ -33,8 +33,9 @@ bp = Blueprint("KEYS", __name__, url_prefix=f"{EndpointEnum.API_V1.value}/orgs/<
 @cross_origin(origins="*", methods=["GET", "POST"])
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
 def get_organization_api_keys(org_id):
-    """Get all API keys for the account."""
-    return ApiGatewayService.get_api_keys(org_id), HTTPStatus.OK
+    """Get approved API keys for the account by default or all (including revoked) via request arg."""
+    include_all = request.args.get("all", "false").lower() == "true"
+    return ApiGatewayService.get_api_keys(org_id, include_all=include_all), HTTPStatus.OK
 
 
 @bp.route("", methods=["POST", "OPTIONS"])
