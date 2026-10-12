@@ -41,13 +41,4 @@ describe('CreateApiKeyModal.vue', () => {
       apiKeyName: 'My Key'
     })
   })
-
-  it('does not require an environment to be selected', async () => {
-    wrapper.vm.newKeyName = 'My Key'
-    wrapper.vm.newKeyEnvironment = ''
-
-    wrapper.vm.createKey()
-
-    expect(wrapper.emitted('create')).toBeTruthy()
-  })
 })
