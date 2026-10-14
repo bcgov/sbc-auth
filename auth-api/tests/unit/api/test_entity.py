@@ -41,8 +41,32 @@ from tests.utilities.factory_utils import (
     factory_linking_key_model,
     factory_membership_model,
     factory_org_model,
+    factory_product_model,
     factory_user_model,
 )
+
+
+def test_get_entity_ca_account_header_requires_membership(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert a non member can't skip auth by sending a competent authority account in the Account-Id header."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    client.post(
+        "/api/v1/entities", data=json.dumps(TestEntityInfo.entity1), headers=headers, content_type="application/json"
+    )
+    member = factory_user_model()
+    ca_org = factory_org_model()
+    factory_membership_model(member.id, ca_org.id)
+    factory_product_model(ca_org.id, product_code="CA_SEARCH")
+
+    # public_user_role is a different user who is not a member of the competent authority account.
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    headers["Account-Id"] = str(ca_org.id)
+    rv = client.get(
+        "/api/v1/entities/{}".format(TestEntityInfo.entity1["businessIdentifier"]),
+        headers=headers,
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.FORBIDDEN
 
 
 def test_add_entity(client, jwt, session):  # pylint:disable=unused-argument

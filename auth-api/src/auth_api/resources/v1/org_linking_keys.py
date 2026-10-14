@@ -125,7 +125,7 @@ def bind_linking_key(**kwargs):
     On success the key transitions from PENDING to ACTIVE.
     """
     user: UserContext = kwargs["user_context"]
-    vendor_account_id = user.account_id
+    vendor_account_id = user.account_id_claim
     if not vendor_account_id:
         return {"message": "Account-Id is required in the token."}, HTTPStatus.BAD_REQUEST
 

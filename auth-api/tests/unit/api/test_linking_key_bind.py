@@ -136,3 +136,21 @@ def test_bind_without_account_id_in_token_returns_400(client, jwt, session):  # 
     )
 
     assert rv.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_bind_with_account_id_header_only_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that the Account-Id header is not accepted in place of the token claim."""
+    lawfirm = factory_org_model()
+    vendor = factory_org_model()
+    pending_key = factory_linking_key_model(account_id=lawfirm.id, status=LinkingKeyStatus.PENDING.value)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user.value)
+    headers["Account-Id"] = str(vendor.id)
+
+    rv = client.post(
+        _BIND_URL,
+        headers=headers,
+        content_type="application/json",
+        data=json.dumps({"linkingKey": pending_key.linking_key}),
+    )
+
+    assert rv.status_code == HTTPStatus.BAD_REQUEST
