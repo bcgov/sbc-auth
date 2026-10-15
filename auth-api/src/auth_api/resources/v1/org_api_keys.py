@@ -80,13 +80,28 @@ def post_organization_api_terms(org_id):
     return response, status
 
 
-@bp.route("/<string:key>", methods=["DELETE", "OPTIONS"])
-@cross_origin(origins="*", methods=["DELETE"])
+@bp.route("/<string:key>", methods=["PATCH", "OPTIONS"])
+@cross_origin(origins="*", methods=["PATCH", "DELETE"])
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
-def delete_organization_api_key(org_id, key):
+def revoke_organization_api_key(org_id, key):
     """Revoke API Key."""
+    if request.args.get("action") != "revoke":
+        return {"message": "Invalid action."}, HTTPStatus.BAD_REQUEST
     try:
         ApiGatewayService.revoke_key(org_id, key)
+        response, status = {}, HTTPStatus.OK
+    except BusinessException as exception:
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
+    return response, status
+
+
+@bp.route("/<string:key>", methods=["DELETE"])
+@cross_origin(origins="*")
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
+def delete_organization_api_key(org_id, key):
+    """Delete API Key."""
+    try:
+        ApiGatewayService.delete_api_key(org_id, key)
         response, status = {}, HTTPStatus.OK
     except BusinessException as exception:
         response, status = {"code": exception.code, "message": exception.message}, exception.status_code
