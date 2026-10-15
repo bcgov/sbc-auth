@@ -55,3 +55,6 @@ BCOL_PROFILE_PRODUCT_MAP = {
     # "EMERGIS",
     # "LOCATION_CODE"
 }
+
+# maximum number of named api keys an org can have including active and revoked keys
+MAX_NAMED_API_KEYS = 10
