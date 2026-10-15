@@ -14,6 +14,7 @@
 """This module manages API gateway service integrations."""
 
 import re
+from typing import Any
 
 from flask import current_app
 from requests.exceptions import HTTPError
@@ -199,7 +200,7 @@ class ApiGateway:
         cls._publish_key_activity(ActivityAction.API_KEY_DELETED.value, org_id, cls._get_key_display_name(key), api_key)
 
     @classmethod
-    def _find_key(cls, org_id: int, api_key: str, include_all=False) -> dict[str, any]:
+    def _find_key(cls, org_id: int, api_key: str, include_all=False) -> dict[str, Any]:
         """Return the org's key matching api_key, the key has the consumer email it belongs to."""
         for key in cls.get_api_keys(org_id, skip_auth=True, include_all=include_all)["consumer"]["consumerKey"]:
             if key["apiKey"] == api_key:
@@ -207,7 +208,7 @@ class ApiGateway:
         raise BusinessException(Error.DATA_NOT_FOUND, Exception())
 
     @staticmethod
-    def _get_key_display_name(key: dict[str, any]) -> str:
+    def _get_key_display_name(key: dict[str, Any]) -> str:
         """Return the name of the key, empty for a key created without a name (unnamed key)."""
         return (key.get("apiKeyName") or "").strip()
 
@@ -219,7 +220,7 @@ class ApiGateway:
         )
 
     @classmethod
-    def get_api_keys(cls, org_id: int, skip_auth=False, include_all=False) -> list[dict[str, any]]:
+    def get_api_keys(cls, org_id: int, skip_auth=False, include_all=False) -> dict:
         """Get approved api keys by default or all (including revoked) via include_all."""
         current_app.logger.debug("<get_api_keys ")
         if skip_auth is False:
