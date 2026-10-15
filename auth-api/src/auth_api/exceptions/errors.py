@@ -19,6 +19,8 @@ Standardize error message to display user friendly messages.
 from enum import Enum
 from http import HTTPStatus
 
+from auth_api.utils.constants import MAX_NAMED_API_KEYS
+
 
 class Error(Enum):
     """Error Codes."""
@@ -177,6 +179,15 @@ class Error(Enum):
     API_TERMS_NOT_FOUND = (
         "API Terms of Use are missing. API keys cannot be created until they are available.",
         HTTPStatus.INTERNAL_SERVER_ERROR,
+    )
+    API_KEY_NOT_REVOKED = (
+        "API key must be revoked before it can be deleted.",
+        HTTPStatus.BAD_REQUEST,
+    )
+    API_KEY_NAMED_LIMIT_REACHED = (
+        f"You have reached the maximum of {MAX_NAMED_API_KEYS} named API keys. To create another named key, "
+        "delete one you no longer use. You can still create unnamed keys.",
+        HTTPStatus.BAD_REQUEST,
     )
 
     def __new__(cls, message, status_code):
