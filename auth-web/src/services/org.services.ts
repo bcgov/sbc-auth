@@ -187,11 +187,18 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys`, { params: all ? { all: true } : {} })
   }
 
-  public static async createOrgApiKey (orgId: number, payload: { apiKeyName: string }): Promise<AxiosResponse<any>> {
+  public static async createOrgApiKey (orgId: number, payload: { apiKeyName?: string }): Promise<AxiosResponse<any>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys`, payload)
   }
 
   public static async revokeOrgApiKeys (ApiDetails): Promise<AxiosResponse<OrgProduct>> {
+    const { orgId, apiKey } = ApiDetails
+    return axios.patch(
+      `${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/${apiKey}`, {}, { params: { action: 'revoke' } }
+    )
+  }
+
+  public static async deleteOrgApiKey (ApiDetails): Promise<AxiosResponse<any>> {
     const { orgId, apiKey } = ApiDetails
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/${apiKey}`)
   }

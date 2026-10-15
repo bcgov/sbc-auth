@@ -1044,6 +1044,11 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data || {}
   }
 
+  async function deleteOrgApiKey (ApiDetails) {
+    const response = await OrgService.deleteOrgApiKey(ApiDetails)
+    return response?.data || {}
+  }
+
   async function getApiTermsStatus (orgId: number): Promise<ApiTermsStatus> {
     const response = await OrgService.getApiTermsStatus(orgId)
     return response?.data
@@ -1188,6 +1193,7 @@ export const useOrgStore = defineStore('org', () => {
     getOrgApiKeys,
     createOrgApiKey,
     revokeOrgApiKeys,
+    deleteOrgApiKey,
     getApiTermsStatus,
     acceptApiTerms,
     updateOrganizationAccessType,
