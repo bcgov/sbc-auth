@@ -104,7 +104,7 @@ class ApiGateway:
 
     @classmethod
     def _check_named_key_limit(cls, org_id: int):
-        """Raise an error if the org already has the maximum number of named keys including revoked keys"""
+        """Raise an error if the org already has the maximum number of named keys including revoked keys."""
         keys = cls.get_api_keys(org_id, skip_auth=True, include_all=True)["consumer"]["consumerKey"]
         named_key_count = sum(1 for key in keys if cls._get_key_display_name(key))
         if named_key_count >= MAX_NAMED_API_KEYS:
