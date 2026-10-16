@@ -88,6 +88,44 @@ def test_documents_returns_latest_always(client, jwt, session):  # pylint:disabl
     assert rv.json.get("versionId") == version_id_2
 
 
+def test_documents_returns_requested_version(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert get documents endpoint returns the version passed in versionId query param."""
+    factory_document_model("v1", "sometype", "<HTML>old</HTML>")
+    factory_document_model("v2", "sometype", "<HTML>new</HTML>")
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.get("/api/v1/documents/sometype?versionId=v1", headers=headers, content_type="application/json")
+
+    assert rv.status_code == HTTPStatus.OK
+    assert schema_utils.validate(rv.json, "document")[0]
+    assert rv.json.get("content") == "<HTML>old</HTML>"
+    assert rv.json.get("versionId") == "v1"
+
+
+def test_documents_returns_latest_for_empty_version(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert get documents endpoint returns the latest version when versionId is empty."""
+    factory_document_model("v1", "sometype", "<HTML>old</HTML>")
+    factory_document_model("v2", "sometype", "<HTML>new</HTML>")
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.get("/api/v1/documents/sometype?versionId=", headers=headers, content_type="application/json")
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json.get("versionId") == "v2"
+
+
+def test_documents_invalid_version_returns_not_found(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert get documents endpoint returns 404 for a version that does not exist for the type."""
+    factory_document_model("v1", "sometype", "<HTML>old</HTML>")
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.get("/api/v1/documents/sometype?versionId=v9", headers=headers, content_type="application/json")
+    assert rv.status_code == HTTPStatus.NOT_FOUND
+
+    rv = client.get("/api/v1/documents/termsofuse_pad?versionId=v1", headers=headers, content_type="application/json")
+    assert rv.status_code == HTTPStatus.NOT_FOUND
+
+
 def test_document_signature_get_returns_200(client, jwt, session, gcs_mock):  # pylint:disable=unused-argument
     """Assert get documents/filename/signatures endpoint returns 200."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)

@@ -43,7 +43,6 @@
       <v-card-text>
         <TermsOfUse
           v-if="!terms.docType"
-          @tos-version-updated="false"
         />
         <div
           v-else-if="isLoading"
@@ -88,6 +87,10 @@ export default defineComponent({
     termsType: {
       type: String,
       required: true
+    },
+    versionId: {
+      type: String,
+      default: ''
     }
   },
   setup (props) {
@@ -108,7 +111,7 @@ export default defineComponent({
       state.isLoading = !!docType
       if (!docType) return
       try {
-        const response = await DocumentService.getTermsOfService(docType)
+        const response = await DocumentService.getTermsOfService(docType, props.versionId)
         if (docType !== terms.value.docType) return // return if terms type is switched during the request
         state.termsContent = response?.data?.content || ''
         if (!state.termsContent) {
@@ -123,8 +126,8 @@ export default defineComponent({
       state.isLoading = false
     }
 
-    // load Terms document when termsType (route param) changes
-    watch(() => props.termsType, loadTerms, { immediate: true })
+    // load Terms document when termsType (route param) or versionId (route query) changes
+    watch(() => [props.termsType, props.versionId], loadTerms, { immediate: true })
 
     return {
       ...toRefs(state),

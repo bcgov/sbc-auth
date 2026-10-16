@@ -7,8 +7,10 @@ import { axios } from '@/util/http-util'
 import mime from 'mime-types'
 
 export default class DocumentService {
-  static async getTermsOfService (identifier: string): Promise<AxiosResponse<TermsOfUseDocument>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/documents/${identifier}`)
+  static async getTermsOfService (identifier: string, versionId?: string): Promise<AxiosResponse<TermsOfUseDocument>> {
+    // return latest version if versionId is not passed
+    const params = versionId ? { versionId } : undefined
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/documents/${identifier}`, { params })
   }
 
   static async getAffidavitPdf (): Promise<AxiosResponse> {

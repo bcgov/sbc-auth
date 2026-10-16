@@ -75,6 +75,7 @@ def test_accept_latest_version(session, monkeypatch):  # pylint:disable=unused-a
             action=ActivityAction.API_TERMS_ACCEPTED.value,
             name=org.name,
             value=_LATEST_VERSION,
+            id=record.id,
         )
     )
     assert ApiTermsService.get_status(org.id) == status
