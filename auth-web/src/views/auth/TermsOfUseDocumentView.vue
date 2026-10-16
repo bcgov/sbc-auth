@@ -17,9 +17,13 @@
         </router-link>
       </div>
     </nav>
-    <div class="view-header flex-column">
+    <!-- documents with a docType include their own title in the content -->
+    <div
+      v-if="!terms.docType"
+      class="view-header flex-column"
+    >
       <h1 class="view-header__title">
-        {{ terms.title || $t(isGovmAccount ? 'govm_tos_title' : 'tos_title') }}
+        {{ $t(isGovmAccount ? 'govm_tos_title' : 'tos_title') }}
       </h1>
     </div>
 
@@ -58,6 +62,7 @@
         <!-- eslint-disable-next-line vue/no-v-html -->
         <div
           v-else
+          class="terms-container"
           data-test="terms-content"
           v-html="termsContent"
         />
@@ -74,9 +79,9 @@ import { useAccount } from '@/composables/account-factory'
 
 const TERMS_LOAD_FAILED_MESSAGE = 'We were not able to load the terms of use. Please refresh the page or try again later.'
 
-const TERMS_TYPES: Record<string, { docType?: string, title?: string }> = {
+const TERMS_TYPES: Record<string, { docType?: string }> = {
   account: {}, // no docType so the TermsOfUse component renders default 'termsofuse' doc
-  api: { docType: 'termsofuse_api', title: 'API Terms of Use for all products' }
+  api: { docType: 'termsofuse_api' }
 }
 
 export default defineComponent({
@@ -154,6 +159,23 @@ export default defineComponent({
 .crumbs a:hover {
   span {
     text-decoration: underline;
+  }
+}
+
+.terms-container {
+  ::v-deep {
+    section {
+      header {
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+      }
+
+      // document title
+      &:first-child header {
+        text-align: center;
+        font-size: 2rem;
+      }
+    }
   }
 }
 </style>
