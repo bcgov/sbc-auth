@@ -194,7 +194,7 @@ def test_preflight_org_api_keys(app, client, jwt, session):
 
     rv = client.options("/api/v1/orgs/1/api-keys/KEY", headers={"Access-Control-Request-Method": "DELETE"})
     assert rv.status_code == HTTPStatus.OK
-    assert_access_control_headers(rv, "*", "DELETE")
+    assert_access_control_headers(rv, "*", "DELETE, PATCH")
 
 
 def test_preflight_org_authorizations(app, client, jwt, session):

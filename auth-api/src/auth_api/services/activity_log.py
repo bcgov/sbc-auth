@@ -119,6 +119,8 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
             ActivityAction.LINKING_KEY_EXTENDED.value: ActivityLog._linking_key_extended,
             ActivityAction.LINKING_KEY_EXPIRED.value: ActivityLog._linking_key_expired,
             ActivityAction.API_TERMS_ACCEPTED.value: ActivityLog._api_terms_accepted,
+            ActivityAction.API_KEY_REVOKED.value: ActivityLog._api_key_revoked,
+            ActivityAction.API_KEY_DELETED.value: ActivityLog._api_key_deleted,
         }.get(activity.action)
         return mapping(activity) if (mapping) else activity.action
 
@@ -310,6 +312,23 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _api_terms_accepted(activity: ActivityLogModel) -> str:
         return f"Accepted API Terms of Use version {activity.item_value}"
+
+    @staticmethod
+    def _api_key_revoked(activity: ActivityLogModel) -> str:
+        """User X revoked API Key [key name] - [masked key]."""
+        return f"Revoked {ActivityLog._api_key_label(activity)}"
+
+    @staticmethod
+    def _api_key_deleted(activity: ActivityLogModel) -> str:
+        """User X deleted API Key [key name] - [masked key]."""
+        return f"Deleted {ActivityLog._api_key_label(activity)}"
+
+    @staticmethod
+    def _api_key_label(activity: ActivityLogModel) -> str:
+        """Return the key name with the masked key, a key without a name is an unnamed key."""
+        if activity.item_name:
+            return f"API Key {activity.item_name} - {activity.item_value}"
+        return f"Unnamed API Key - {activity.item_value}"
 
     @staticmethod
     def _mask_user_name(is_staff_access, user):

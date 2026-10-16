@@ -1,43 +1,147 @@
 <template>
   <div>
     <header class="view-header align-center mt-n1 mb-7">
-      <h2 class="view-header__title">
-        Existing API Keys
-      </h2>
+      <div>
+        <h2 class="view-header__title">
+          API Keys
+        </h2>
+        <p
+          class="mb-0 mt-1"
+          data-test="api-key-counts"
+        >
+          <strong>{{ namedKeyCount }}/{{ maxNamedKeys }}</strong> Named Keys |
+          <strong>{{ unnamedKeyCount }}</strong> Unnamed Keys
+        </p>
+      </div>
       <v-btn
         v-if="isCreateApiKeyEnabled"
         large
         depressed
         class="px-6"
         color="primary"
-        aria-label="Create API Key"
+        aria-label="Create Key"
         data-test="create-api-key-button"
+        :disabled="isCreateFormOpen || isNamedKeyLimitNoticeShown"
         @click="startCreateKey()"
       >
-        <v-icon class="mr-1">
-          mdi-plus
+        <v-icon
+          class="mr-2"
+          size="18"
+        >
+          mdi-key-outline
         </v-icon>
-        Create API Key
+        Create Key
       </v-btn>
     </header>
+
+    <!-- Create key -->
+    <div
+      v-if="isCreateFormOpen"
+      class="d-flex align-start mb-7"
+      data-test="create-api-key-form"
+    >
+      <v-text-field
+        v-model="newKeyName"
+        filled
+        dense
+        class="key-name-input"
+        hide-details="auto"
+        placeholder="Enter an API Key Name (Optional)"
+        aria-label="Enter an API Key Name (Optional)"
+        maxlength="100"
+        hint="This will help you identify the key in the list later"
+        persistent-hint
+        data-test="key-name-input"
+        @keyup.enter="createKey()"
+      />
+      <v-btn
+        outlined
+        large
+        depressed
+        color="primary"
+        class="ml-6 px-7"
+        aria-label="Cancel"
+        data-test="cancel-create-key-button"
+        :disabled="isCreating"
+        @click="closeCreateForm()"
+      >
+        Cancel
+      </v-btn>
+      <v-btn
+        large
+        depressed
+        color="primary"
+        class="ml-3 px-8 font-weight-bold"
+        aria-label="Create"
+        data-test="confirm-create-key-button"
+        :loading="isCreating"
+        :disabled="isCreating"
+        @click="createKey()"
+      >
+        Create
+      </v-btn>
+    </div>
+
+    <!-- Named key limit reached -->
+    <div
+      v-if="isNamedKeyLimitNoticeShown"
+      class="mb-7"
+      data-test="named-key-limit-notice"
+    >
+      <p class="mb-5">
+        You have reached the maximum of {{ maxNamedKeys }} named API keys. To create another named key,
+        delete one you no longer use. You can still create unnamed keys.
+      </p>
+      <div class="d-flex justify-end">
+        <v-btn
+          outlined
+          large
+          depressed
+          color="primary"
+          class="px-7"
+          aria-label="Cancel"
+          data-test="cancel-unnamed-key-button"
+          :disabled="isCreating"
+          @click="isNamedKeyLimitNoticeOpen = false"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          large
+          depressed
+          color="primary"
+          class="ml-3 px-8 font-weight-bold"
+          aria-label="Create"
+          data-test="create-unnamed-key-button"
+          :loading="isCreating"
+          :disabled="isCreating"
+          @click="createUnnamedKey()"
+        >
+          Create
+        </v-btn>
+      </div>
+    </div>
 
     <div>
       <v-data-table
         class="apikey-list mb-10"
         :headers="activityHeader"
         :items="apiKeyList"
+        item-key="apiKey"
         no-data-text="No API Keys"
         :loading="isLoading"
         loading-text="Loading..."
-        disable-pagination
-        hide-default-footer
+        sort-by="keyCreatedDate"
+        :sort-desc="true"
+        :items-per-page="PAGE_LIMIT"
+        :hide-default-footer="apiKeyList.length <= PAGE_LIMIT"
       >
         <template #loading>
           Loading...
         </template>
         <template #[`item.apiKeyName`]="{ item }">
           <div class=" font-weight-bold">
-            {{ item.apiKeyName }}
+            {{ getKeyName(item) }}
           </div>
           <v-chip
             v-if="item.isNewlyAdded"
@@ -63,7 +167,7 @@
           <span>{{ maskApiKey(item.apiKey) }}</span>
         </template>
         <template #[`item.keyStatus`]="{ item }">
-          <span data-test="key-status-chip">{{ isKeyActive(item) ? 'Active' : 'Revoked' }}</span>
+          <span data-test="key-status-chip">{{ getKeyStatusLabel(item) }}</span>
         </template>
         <template #[`item.action`]="{ item }">
           <!-- Revoke -->
@@ -72,82 +176,180 @@
             depressed
             aria-label="Revoke"
             color="primary"
-            :data-test="getIndexedTag('confirm-button', item.apiKeyName)"
+            :data-test="getIndexedTag('confirm-button', item.apiKey)"
             @click="confirmationModal(item)"
           >
             Revoke
+          </v-btn>
+          <!-- Delete, only revoked keys can be deleted -->
+          <v-btn
+            v-else-if="isKeyRevoked(item)"
+            depressed
+            aria-label="Delete"
+            color="primary"
+            :data-test="getIndexedTag('delete-button', item.apiKey)"
+            @click="confirmDelete(item)"
+          >
+            Delete
           </v-btn>
         </template>
       </v-data-table>
     </div>
 
-    <!-- Confirm Action Dialog -->
+    <!-- Confirm Revoke Dialog -->
     <ModalDialog
       ref="confirmActionDialog"
-      :title="confirmActionTitle"
-      dialog-class="notify-dialog"
+      title="Revoke API Key?"
+      dialog-class="info-dialog"
       max-width="650"
+      :show-icon="false"
+      show-close-icon
       data-test="confirmation-modal"
     >
-      <template #icon>
-        <v-icon
-          large
-          color="error"
-        >
-          mdi-alert-circle-outline
-        </v-icon>
-      </template>
       <template #text>
-        <p
-          class="mb-0 px-6"
-          v-html="confirmActionTextLine1"
-        />
-        <p
-          class="mx-4 px-10 mb-0"
-          v-html="confirmActionTextLine2"
-        />
+        <p class="mb-0">
+          Revoking will immediately disable this API key. Are you sure you wish to revoke API Key:
+          <strong>{{ getKeyName(selectedApi) }}</strong> ?
+        </p>
       </template>
       <template #actions>
-        <div class="modal-class-override">
-          <v-btn
-            large
-            color="primary"
-            class="font-weight-bold px-8"
-            :loading="isLoading"
-            @click="revokeApi()"
-          >
-            Revoke
-          </v-btn>
-          <v-btn
-            outlined
-            large
-            depressed
-            color="primary"
-            class="ml-3 px-7"
-            @click="close($refs.confirmActionDialog)"
-          >
-            Cancel
-          </v-btn>
-        </div>
+        <v-btn
+          outlined
+          large
+          depressed
+          color="primary"
+          class="px-7"
+          aria-label="Cancel"
+          data-test="cancel-revoke-key-button"
+          :disabled="isLoading"
+          @click="close($refs.confirmActionDialog)"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          large
+          depressed
+          color="primary"
+          class="ml-3 px-8 font-weight-bold"
+          aria-label="Revoke"
+          data-test="confirm-revoke-key-button"
+          :loading="isLoading"
+          :disabled="isLoading"
+          @click="revokeApi()"
+        >
+          Revoke
+        </v-btn>
+      </template>
+    </ModalDialog>
+
+    <!-- Confirm Delete Dialog -->
+    <ModalDialog
+      ref="confirmDeleteDialog"
+      title="Delete API Key?"
+      dialog-class="info-dialog"
+      max-width="650"
+      :show-icon="false"
+      show-close-icon
+      data-test="confirm-delete-modal"
+    >
+      <template #text>
+        <p class="mb-0">
+          Deleting this API key will permanently remove it. This action cannot be undone.
+        </p>
+        <p class="mb-0">
+          Are you sure you want to delete API Key: <strong>{{ getKeyName(selectedApi) }}</strong> ?
+        </p>
+      </template>
+      <template #actions>
+        <v-btn
+          outlined
+          large
+          depressed
+          color="primary"
+          class="px-7"
+          aria-label="Cancel"
+          data-test="cancel-delete-key-button"
+          :disabled="isLoading"
+          @click="close($refs.confirmDeleteDialog)"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          large
+          depressed
+          color="error"
+          class="ml-3 px-8 font-weight-bold"
+          aria-label="Delete"
+          data-test="confirm-delete-key-button"
+          :loading="isLoading"
+          :disabled="isLoading"
+          @click="deleteApi()"
+        >
+          Delete
+        </v-btn>
+      </template>
+    </ModalDialog>
+
+    <!-- Revoke Success Dialog -->
+    <ModalDialog
+      ref="revokeSuccessDialog"
+      dialog-class="info-dialog"
+      max-width="650"
+      :show-icon="false"
+      show-close-icon
+      data-test="revoke-success-modal"
+    >
+      <template #title>
+        <v-icon
+          color="success"
+          class="mr-2"
+        >
+          mdi-check
+        </v-icon>
+        API Key Has Been Revoked
+      </template>
+      <template #text>
+        <p class="mb-0">
+          <strong>{{ revokedKeyName }}</strong> has been revoked.
+        </p>
+      </template>
+      <template #actions>
+        <v-btn
+          large
+          depressed
+          color="primary"
+          class="px-8 font-weight-bold"
+          aria-label="Close"
+          data-test="close-revoke-success-button"
+          @click="close($refs.revokeSuccessDialog)"
+        >
+          Close
+        </v-btn>
       </template>
     </ModalDialog>
 
     <!-- Alert Dialog (Success) -->
     <ModalDialog
       ref="successDialog"
-      :title="alertTitle"
-      :text="alertText"
-      dialog-class="notify-dialog"
-      max-width="600"
+      dialog-class="info-dialog"
+      max-width="650"
+      :show-icon="false"
+      show-close-icon
       data-test="alert-modal"
     >
-      <template #icon>
+      <template #title>
         <v-icon
-          large
           :color="notificationColor"
+          class="mr-2"
         >
           {{ alertIcon }}
         </v-icon>
+        {{ alertTitle }}
+      </template>
+      <template #text>
+        <p class="mb-0">
+          <strong v-if="alertKeyName">{{ alertKeyName }}</strong> {{ alertText }}
+        </p>
       </template>
       <template #actions>
         <v-btn
@@ -160,12 +362,6 @@
         </v-btn>
       </template>
     </ModalDialog>
-
-    <CreateApiKeyModal
-      ref="createKeyModal"
-      :loading="isCreating"
-      @create="onCreateKey"
-    />
 
     <CreateApiKeySuccessModal
       ref="createKeySuccessModal"
@@ -181,7 +377,6 @@ import { Component, Mixins } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { ApiTermsStatus } from '@/models/ApiTermsStatus'
 import CommonUtils from '@/util/common-util'
-import CreateApiKeyModal from '@/components/auth/account-settings/advance-settings/CreateApiKeyModal.vue'
 import CreateApiKeySuccessModal from '@/components/auth/account-settings/advance-settings/CreateApiKeySuccessModal.vue'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -192,28 +387,32 @@ import { useOrgStore } from '@/stores/org'
 @Component({
   components: {
     ModalDialog,
-    CreateApiKeyModal,
     CreateApiKeySuccessModal
   }
 })
 export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   @State(useOrgStore) readonly currentOrganization!: Organization
-  @Action(useOrgStore) readonly getOrgApiKeys!: (orgId: any) => Promise<any>
+  @Action(useOrgStore) readonly getOrgApiKeys!: (orgId: any, all?: boolean) => Promise<any>
   @Action(useOrgStore) readonly createOrgApiKey!: (orgId: any, payload: any) => Promise<any>
   @Action(useOrgStore) readonly revokeOrgApiKeys!: (orgId: any) => Promise<any>
+  @Action(useOrgStore) readonly deleteOrgApiKey!: (apiDetails: any) => Promise<any>
   @Action(useOrgStore) readonly getApiTermsStatus!: (orgId: number) => Promise<ApiTermsStatus>
 
+  public readonly PAGE_LIMIT = 5
+  // the limit comes from the API with the key list, it's null until the keys are loaded
+  public maxNamedKeys: number = null
   public isLoading = true
   public isCreating = false
-  public confirmActionTitle = 'Revoke API Key?'
-  public confirmActionTextLine1 = ''
-  public confirmActionTextLine2 = ''
+  public isCreateFormOpen = false
+  public newKeyName = ''
+  public isNamedKeyLimitNoticeOpen = false
   public alertText = ''
+  public alertKeyName = ''
   public alertTitle = ''
   public alertIcon = 'mdi-check'
   public notificationColor = 'success'
-  public totalApiKeyCount: number = 0
   public selectedApi: any = {}
+  public revokedKeyName = ''
   public generatedApiKey = ''
   public createdKeyEnvLabel = ''
 
@@ -221,12 +420,31 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     return LaunchDarklyService.getFlag(LDFlags.EnableCreateApiKey)
   }
 
+  // counts include revoked keys, as they are listed until deleted
+  get namedKeyCount (): number {
+    return this.apiKeyList.filter(key => this.isKeyNamed(key)).length
+  }
+
+  get unnamedKeyCount (): number {
+    return this.apiKeyList.length - this.namedKeyCount
+  }
+
+  get isNamedKeyLimitReached (): boolean {
+    return this.maxNamedKeys !== null && this.namedKeyCount >= this.maxNamedKeys
+  }
+
+  // the notice goes away once a named key is deleted
+  get isNamedKeyLimitNoticeShown (): boolean {
+    return this.isNamedKeyLimitNoticeOpen && this.isNamedKeyLimitReached
+  }
+
   private formatDate = CommonUtils.formatDisplayDate
 
   $refs: {
     successDialog: InstanceType<typeof ModalDialog>
     confirmActionDialog: InstanceType<typeof ModalDialog>
-    createKeyModal: InstanceType<typeof CreateApiKeyModal>
+    confirmDeleteDialog: InstanceType<typeof ModalDialog>
+    revokeSuccessDialog: InstanceType<typeof ModalDialog>
     createKeySuccessModal: InstanceType<typeof CreateApiKeySuccessModal>
   }
 
@@ -280,11 +498,12 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 
   public async mounted () {
     this.setAccountChangedHandler(this.initialize)
-    this.initialize()
+    // keys are loaded first so we know the named key limit
+    await this.initialize()
     // user is routed back with openCreateKey param after accepting the API terms of use
     if (this.$route?.params?.openCreateKey === 'true' && this.isCreateApiKeyEnabled) {
       await this.$nextTick()
-      this.openCreateKeyDialog()
+      this.openCreateKeyForm()
     }
   }
 
@@ -295,11 +514,10 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   public async loadApiKeys () {
     this.isLoading = true
     this.apiKeyList = []
-    this.totalApiKeyCount = 0
     try {
-      const resp: any = await this.getOrgApiKeys(this.currentOrganization.id)
+      const resp: any = await this.getOrgApiKeys(this.currentOrganization.id, true)
       this.apiKeyList = resp?.consumer?.consumerKey || []
-      this.totalApiKeyCount = resp?.consumer?.consumerKey.length || 0
+      this.maxNamedKeys = resp?.maxNamedKeys ?? null
       this.isLoading = false
     } catch (e) {
       this.isLoading = false
@@ -311,7 +529,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     try {
       const status = await this.getApiTermsStatus(this.currentOrganization.id)
       if (status?.isAccepted) {
-        this.openCreateKeyDialog()
+        this.openCreateKeyForm()
         return
       }
     } catch (e) {
@@ -326,26 +544,60 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     this.$router.push({ name: 'api-terms-of-use', params: { orgId: String(this.currentOrganization.id) } })
   }
 
-  public openCreateKeyDialog () {
-    this.$refs.createKeyModal.open()
+  public openCreateKeyForm () {
+    // only unnamed keys can be created once the named key limit is reached
+    if (this.isNamedKeyLimitReached) {
+      this.isNamedKeyLimitNoticeOpen = true
+      return
+    }
+    this.newKeyName = ''
+    this.isCreateFormOpen = true
   }
 
-  public async onCreateKey ({ apiKeyName }: { apiKeyName: string }) {
+  public closeCreateForm () {
+    this.isCreateFormOpen = false
+    this.newKeyName = ''
+  }
+
+  // the name is optional - a key created without it is an unnamed key
+  public async createKey () {
+    if (this.isCreating) return
+    await this.onCreateKey({ apiKeyName: this.newKeyName.trim() || undefined })
+  }
+
+  public async createUnnamedKey () {
+    await this.onCreateKey({})
+    this.isNamedKeyLimitNoticeOpen = false
+  }
+
+  public async onCreateKey ({ apiKeyName }: { apiKeyName?: string }) {
     this.isCreating = true
     const existingKeys = this.apiKeyList
     try {
       // the env is not sent - the API gets it from the env the user logged into
       const resp: any = await this.createOrgApiKey(this.currentOrganization.id, { apiKeyName })
       const [newKey] = resp?.consumer?.consumerKey ?? []
+      if (!newKey) {
+        this.closeCreateForm()
+        await this.loadApiKeys()
+        this.alertIcon = 'mdi-alert-outline'
+        this.alertTitle = 'API key has been created'
+        this.alertKeyName = ''
+        this.alertText = 'The key value could not be displayed. If you need it, revoke this key and create a new one.'
+        this.notificationColor = 'warning'
+        this.$refs.successDialog.open()
+        return
+      }
 
       newKey.isNewlyAdded = true
+      // the create response may not have the date, it's needed to sort the new key to the top
+      newKey.keyCreatedDate ??= new Date().toISOString()
       this.apiKeyList = [newKey, ...existingKeys]
-      this.totalApiKeyCount = this.apiKeyList.length
       this.generatedApiKey = newKey.apiKey
       const environmentLabel = newKey.environment || ''
       this.createdKeyEnvLabel = environmentLabel.charAt(0).toUpperCase() + environmentLabel.slice(1)
 
-      this.$refs.createKeyModal.close()
+      this.closeCreateForm()
       await this.$nextTick()
       this.$refs.createKeySuccessModal.open()
     } catch (e) {
@@ -354,23 +606,56 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       const errorCode = e?.response?.data?.code
       if (errorCode === 'API_TERMS_NOT_ACCEPTED') {
         // e.g. a new terms version was published since the terms page was shown
-        this.$refs.createKeyModal.close()
+        this.closeCreateForm()
         this.goToApiTerms()
         return
       }
+      this.closeCreateForm()
+      if (errorCode === 'API_KEY_NAMED_LIMIT_REACHED') {
+        // eg: if a named key was created in another tab
+        await this.loadApiKeys()
+        if (this.isNamedKeyLimitReached) {
+          this.isNamedKeyLimitNoticeOpen = true
+          return
+        }
+      }
       this.alertIcon = 'mdi-alert-circle-outline'
       this.alertTitle = 'API key has not been created'
-      this.alertText = errorCode === 'API_TERMS_NOT_FOUND' ? e.response.data.message : ''
+      this.alertKeyName = ''
+      this.alertText = this.getErrorMessage(e, ['API_TERMS_NOT_FOUND', 'API_KEY_NAMED_LIMIT_REACHED'])
       this.notificationColor = 'error'
-      this.$refs.createKeyModal.close()
       this.$refs.successDialog.open()
     } finally {
       this.isCreating = false
     }
   }
 
+  public getErrorMessage (e: any, codes: string[]): string {
+    const data = e?.response?.data
+    return codes.includes(data?.code) ? data.message : ''
+  }
+
   public isKeyActive (item: any): boolean {
     return item.keyStatus === 'approved'
+  }
+
+  public isKeyRevoked (item: any): boolean {
+    return item.keyStatus === 'revoked'
+  }
+
+  public getKeyStatusLabel (item: any): string {
+    if (this.isKeyActive(item)) return 'Active'
+    if (this.isKeyRevoked(item)) return 'Revoked'
+    const status = item.keyStatus || ''
+    return status.charAt(0).toUpperCase() + status.slice(1)
+  }
+
+  public isKeyNamed (item: any): boolean {
+    return !!item?.apiKeyName?.trim()
+  }
+
+  public getKeyName (item: any): string {
+    return this.isKeyNamed(item) ? item.apiKeyName.trim() : 'Unnamed Key'
   }
 
   // mask the key as it is only shown once in success dialog
@@ -380,39 +665,60 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 
   public confirmationModal (apiKey) {
     this.selectedApi = apiKey
-    const { apiKeyName } = apiKey
-    // eslint-disable-next-line no-irregular-whitespace
-    this.confirmActionTextLine1 = `Revoking an API key will immediately disable and remove this API key.`
-    // eslint-disable-next-line no-irregular-whitespace
-    this.confirmActionTextLine2 = `This action cannot be reversed. Are you sure you wish to remove <strong>${apiKeyName}</strong> API key?`
     this.$refs.confirmActionDialog.open()
   }
 
+  public confirmDelete (apiKey) {
+    this.selectedApi = apiKey
+    this.$refs.confirmDeleteDialog.open()
+  }
+
   public async revokeApi () {
+    await this.runKeyAction(this.revokeOrgApiKeys, 'Revoked', this.$refs.confirmActionDialog)
+  }
+
+  public async deleteApi () {
+    await this.runKeyAction(this.deleteOrgApiKey, 'Deleted', this.$refs.confirmDeleteDialog)
+  }
+
+  private async runKeyAction (
+    keyAction: (apiDetails: any) => Promise<any>, result: 'Revoked' | 'Deleted', confirmDialog: any
+  ) {
     const orgId = this.currentOrganization.id
-    const { apiKey, apiKeyName } = this.selectedApi
+    const { apiKey } = this.selectedApi
+    const apiKeyName = this.getKeyName(this.selectedApi)
     const apiKeys = { orgId, apiKey }
     this.alertIcon = 'mdi-alert-circle-outline'
-    this.alertTitle = 'API key has not been Revoked'
-    this.alertText = `<strong>${apiKeyName}</strong> API Key has not been Revoked`
+    this.alertTitle = `API key has not been ${result}`
+    this.alertKeyName = apiKeyName
+    this.alertText = `API Key has not been ${result}`
     this.notificationColor = 'error'
     this.isLoading = true
+    let isSuccess = false
     try {
-      const resp: any = await this.revokeOrgApiKeys(apiKeys)
+      const resp: any = await keyAction(apiKeys)
       if (resp) {
+        isSuccess = true
         this.alertIcon = 'mdi-check'
-        this.alertTitle = 'API key has been Revoked'
-        this.alertText = `<strong>${apiKeyName}</strong> API Key has been Revoked`
+        this.alertTitle = `API key has been ${result}`
+        this.alertText = `API Key has been ${result}`
         this.notificationColor = 'success'
       }
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log('error', e)
+      this.alertText = this.getErrorMessage(e, ['API_KEY_NOT_REVOKED', 'DATA_NOT_FOUND']) || this.alertText
     }
     this.isLoading = false
     await this.loadApiKeys()
     this.selectedApi = {}
-    this.$refs.confirmActionDialog.close()
+    confirmDialog.close()
+    // a revoked key has its own success dialog
+    if (isSuccess && result === 'Revoked') {
+      this.revokedKeyName = apiKeyName
+      this.$refs.revokeSuccessDialog.open()
+      return
+    }
     this.$refs.successDialog.open()
   }
 
@@ -454,8 +760,9 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     }
   }
 }
-.modal-class-override{
-  margin-top: -13px;
+// match the height of the large buttons (44px) next to the input
+.key-name-input ::v-deep .v-input__slot {
+  min-height: 44px;
 }
 .notify-checkbox {
   justify-content: center;
