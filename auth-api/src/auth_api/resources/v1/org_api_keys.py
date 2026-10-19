@@ -63,6 +63,18 @@ def get_organization_api_terms(org_id):
     return ApiTermsService.get_status(org_id), HTTPStatus.OK
 
 
+@bp.route("/eligibility", methods=["GET", "OPTIONS"])
+@cross_origin(origins="*", methods=["GET"])
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
+def get_organization_api_eligibility(org_id):
+    """Get the account's API access eligibility status."""
+    try:
+        response, status = ApiGatewayService.get_eligibility(org_id), HTTPStatus.OK
+    except BusinessException as exception:
+        response, status = {"code": exception.code, "message": exception.message}, exception.status_code
+    return response, status
+
+
 @bp.route("/terms", methods=["POST", "OPTIONS"])
 @cross_origin(origins="*")
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.ACCOUNT_HOLDER.value])
