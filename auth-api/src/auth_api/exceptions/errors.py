@@ -189,6 +189,10 @@ class Error(Enum):
         "delete one you no longer use. You can still create unnamed keys.",
         HTTPStatus.BAD_REQUEST,
     )
+    API_ACCESS_NOT_ELIGIBLE = (
+        "Account is not eligible for API access. The account must be active and have a valid payment method.",
+        HTTPStatus.BAD_REQUEST,
+    )
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
