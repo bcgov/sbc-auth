@@ -105,9 +105,13 @@ class PayApi:
                 skip_404_logging=True
             )
         except HTTPError as exc:
-            if exc.response is not None and exc.response.status_code == 404:
+            status_code = exc.response.status_code if exc.response is not None else None
+            if status_code == 404:
                 return None
-            raise BusinessException(Error.SERVICE_UNAVAILABLE, exc) from exc
+            if status_code is None or status_code >= 500:
+                raise BusinessException(Error.SERVICE_UNAVAILABLE, exc) from exc
+            current_app.logger.error(f"Pay account lookup failed for org {org_id} with status code {status_code}")
+            raise BusinessException(Error.PAY_ACCOUNT_FETCH_FAILED, exc) from exc
         except ServiceUnavailableException as exc:
             # raised so a pay-api outage isn't reported as not eligible
             raise BusinessException(Error.SERVICE_UNAVAILABLE, exc) from exc
