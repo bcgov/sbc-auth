@@ -74,8 +74,8 @@ class ApiGateway:
         org: OrgModel = OrgModel.find_by_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        # eligibility is only enforced for users creating api keys in prod (skipped for system callers)
-        if not is_system and cls._normalize_environment(env) == "prod" and not cls._eligibility(org)["isApiEligible"]:
+        # eligibility is only enforced for users creating api keys (skipped for system callers)
+        if not is_system and not cls._eligibility(org)["isApiEligible"]:
             raise BusinessException(Error.API_ACCESS_NOT_ELIGIBLE, None)
         # accept keyName (deprecated) for existing callers
         name = request_json.get("apiKeyName") or request_json.get("keyName")
@@ -319,10 +319,16 @@ class ApiGateway:
     def _eligibility(cls, org: OrgModel) -> dict:
         """Return the org's eligibility, it has to be active and use one of the eligible payment methods."""
         is_account_active = org.status_code == OrgStatus.ACTIVE.value
-        payment_method = PayApi.get_payment_method(org.id)
-        is_payment_method_valid = payment_method in API_ELIGIBLE_PAYMENT_METHODS
+        if cls._normalize_environment(current_app.config.get("ENVIRONMENT_NAME")) != "prod":
+            # in sandbox - check only for active account
+            is_api_eligible, payment_method, is_payment_method_valid = is_account_active, None, None
+        else:
+            # in prod - check all criteria
+            payment_method = PayApi.get_payment_method(org.id)
+            is_payment_method_valid = payment_method in API_ELIGIBLE_PAYMENT_METHODS
+            is_api_eligible = is_account_active and is_payment_method_valid
         return {
-            "isApiEligible": is_account_active and is_payment_method_valid,
+            "isApiEligible": is_api_eligible,
             "isAccountActive": is_account_active,
             "isPaymentMethodValid": is_payment_method_valid,
             "paymentMethod": payment_method,
