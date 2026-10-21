@@ -214,11 +214,25 @@ def test_get_eligibility_inactive_account(session, monkeypatch):  # pylint:disab
     }
 
 
-def test_create_key_eligibility_not_enforced(session, monkeypatch):  # pylint:disable=unused-argument
-    """Assert eligibility isn't checked for sandbox keys."""
+def test_create_key_sandbox_account_status_checked(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert the only account status is checked for pay-api in sandbox env."""
     org, gateway_post = _setup_api_key_in_env(monkeypatch, "sandbox")
 
     ApiGateway.create_key(org.id, {"keyName": "TEST"})
 
     PayApi.get_payment_method.assert_not_called()
     gateway_post.assert_called_once()
+
+
+def test_create_key_sandbox_inactive_account(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that a sandbox key not created for an inactive account."""
+    org, gateway_post = _setup_api_key_in_env(monkeypatch, "sandbox")
+    org.status_code = OrgStatus.SUSPENDED.value
+    org.save()
+
+    with pytest.raises(BusinessException) as exc_info:
+        ApiGateway.create_key(org.id, {"keyName": "TEST"})
+
+    assert exc_info.value.code == Error.API_ACCESS_NOT_ELIGIBLE.name
+    PayApi.get_payment_method.assert_not_called()
+    gateway_post.assert_not_called()
