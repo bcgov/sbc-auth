@@ -108,13 +108,39 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.find('[data-test="confirm-button-key1"]').exists()).toBe(true)
   })
 
+  // create API key feature flag switches between the legacy and the new table
+  async function mountWithCreateApiKeyFF (featureFlagEnabled: boolean) {
+    vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(featureFlagEnabled)
+    wrapper.destroy()
+    wrapper = await wrapperFactory()
+    await flushPromises()
+  }
+
+  // legacy table - feature flag off
+  it('Should show the legacy table when creating API keys is disabled', async () => {
+    await mountWithCreateApiKeyFF(false)
+    const tableHeaders = wrapper.findAll('.apikey-list th').wrappers.map((th: any) => th.text())
+    expect(tableHeaders).toEqual(['Name', 'Environment', 'API Key', 'Actions'])
+    expect(wrapper.find('[data-test="key-status-chip"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="create-api-key-button"]').exists()).toBe(false)
+  })
+
+  // legacy table - feature flag off
+  it('Should show the full API key when creating API keys is disabled', async () => {
+    await mountWithCreateApiKeyFF(false)
+    expect(wrapper.find('.apikey-list tbody').text()).toContain(consumerKey[0].apiKey)
+  })
+
+  // new table - feature flag on
   it('Should show Active status and revoke button for approved keys', async () => {
-    await wrapper.vm.loadApiKeys()
+    await mountWithCreateApiKeyFF(true)
     expect(wrapper.find('[data-test="key-status-chip"]').text()).toBe('Active')
     expect(wrapper.find('[data-test="confirm-button-key1"]').exists()).toBe(true)
   })
 
+  // new table - feature flag on
   it('Should show Revoked status and hide revoke button for revoked keys', async () => {
+    await mountWithCreateApiKeyFF(true)
     wrapper.vm.apiKeyList = [{ ...consumerKey[0], keyStatus: 'revoked' }]
     await Vue.nextTick()
     expect(wrapper.find('[data-test="key-status-chip"]').text()).toBe('Revoked')
