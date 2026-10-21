@@ -22,7 +22,49 @@
     </header>
 
     <div>
+      <!-- current (legacy) table when EnableCreateApiKey feature flag is disabled -->
       <v-data-table
+        v-if="!isCreateApiKeyEnabled"
+        class="apikey-list"
+        :headers="legacyActivityHeader"
+        :items="apiKeyList"
+        no-data-text="No API Keys"
+        :loading="isLoading"
+        loading-text="loading text"
+        disable-pagination
+        hide-default-footer
+      >
+        <template #loading>
+          Loading...
+        </template>
+        <template #[`item.apiKeyName`]="{ item }">
+          <div class=" font-weight-bold">
+            {{ item.apiKeyName }}
+          </div>
+        </template>
+        <template #[`item.environment`]="{ item }">
+          <div class="text-capitalize">
+            {{ item.environment }}
+          </div>
+        </template>
+        <template #[`item.action`]="{ item }">
+          <!-- Revoke -->
+          <v-btn
+            outlined
+            aria-label="Revoke"
+            title="Revoke"
+            color="primary"
+            :data-test="getIndexedTag('confirm-button', item.apiKeyName)"
+            @click="confirmationModal(item)"
+          >
+            Revoke
+          </v-btn>
+        </template>
+      </v-data-table>
+
+      <!-- new table when EnableCreateApiKey feature flag is enabled -->
+      <v-data-table
+        v-else
         class="apikey-list mb-10"
         :headers="activityHeader"
         :items="apiKeyList"
@@ -231,6 +273,38 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   }
 
   public apiKeyList = []
+
+  // headers of the old table, shown when EnableCreateApiKey feature flag is disabled
+  public readonly legacyActivityHeader = [
+    {
+      text: 'Name',
+      align: 'left',
+      sortable: false,
+      value: 'apiKeyName',
+      class: 'bold-header'
+    },
+    {
+      text: 'Environment',
+      align: 'left',
+      sortable: false,
+      value: 'environment',
+      class: 'bold-header'
+    },
+    {
+      text: 'API Key',
+      align: 'left',
+      sortable: false,
+      value: 'apiKey',
+      class: 'bold-header'
+    },
+    {
+      text: 'Actions',
+      align: 'right',
+      sortable: false,
+      value: 'action',
+      class: 'bold-header'
+    }
+  ]
 
   public readonly activityHeader = [
     {
