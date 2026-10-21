@@ -137,3 +137,40 @@ def test_authorizations_for_extended_returns_200(app, client, jwt, session):  # 
     assert schema_utils.validate(rv.json, "account_response")[0]
     assert len(rv.json.get("roles")) > 0
     assert rv.json.get("account").get("name") == org.name
+
+
+def test_authorizations_for_account_ignores_account_id_header(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert a non member gets no authorizations by sending the account in the Account-Id header."""
+    product_code = "PPR"
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    factory_product_model(org.id)
+
+    # public_user_role is a different user who is not a member of the org.
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role.value)
+    headers["Account-Id"] = str(org.id)
+    rv = client.get(
+        f"/api/v1/accounts/{org.id}/products/{product_code}/authorizations?expanded=true",
+        headers=headers,
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.OK
+    assert len(rv.json.get("roles")) == 0
+    assert rv.json.get("account") is None
+
+    # A member sending the header for their own account is still authorized.
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims["sub"] = str(user.keycloak_guid)
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    headers["Account-Id"] = str(org.id)
+    rv = client.get(
+        f"/api/v1/accounts/{org.id}/products/{product_code}/authorizations?expanded=true",
+        headers=headers,
+        content_type="application/json",
+    )
+
+    assert rv.status_code == HTTPStatus.OK
+    assert len(rv.json.get("roles")) > 0
+    assert rv.json.get("account").get("name") == org.name

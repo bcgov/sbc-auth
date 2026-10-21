@@ -159,7 +159,8 @@ class Authorization:
     def get_account_authorizations_for_product(account_id: str, product_code: str, expanded: bool = False, **kwargs):
         """Get account authorizations for the product."""
         user_from_context: UserContext = kwargs["user_context"]
-        account_id_claim = user_from_context.account_id
+        # Only the token claim (api gw users) skips the membership lookup, the Account-Id header is caller supplied.
+        account_id_claim = user_from_context.account_id_claim
         if account_id_claim:
             auth = AuthorizationView.find_account_authorization_by_org_id_and_product(account_id_claim, product_code)
         else:
@@ -223,7 +224,13 @@ def is_competent_authority_or_external_staff(**kwargs) -> bool:
     if account_id is None:
         return False
 
-    authorization = AuthorizationView.find_account_authorization_by_org_id_and_product(account_id, "CA_SEARCH")
+    # The Account-Id header is caller supplied, so users must also be a member of the account.
+    if user_from_context.account_id_claim or user_from_context.is_system():
+        authorization = AuthorizationView.find_account_authorization_by_org_id_and_product(account_id, "CA_SEARCH")
+    else:
+        authorization = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(
+            user_from_context.sub, account_id, "CA_SEARCH"
+        )
 
     return authorization is not None
 
