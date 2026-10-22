@@ -79,11 +79,10 @@ class ApiGateway:
             org.has_api_access = True
             org.save()
         else:
-            if name:
-                cls._check_named_key_limit(org_id)
             # Create additional API Key if a consumer exists
             api_key_payload = {"apiAccess": ["ALL_API"]}
             if name:
+                cls._check_named_key_limit(org_id)
                 api_key_payload["apiKeyName"] = name
             api_key_response = RestService.post(
                 f"{cls._consumers_url()}/{email}/apikeys",
