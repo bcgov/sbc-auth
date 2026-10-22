@@ -138,7 +138,7 @@ describe('TermsOfUseDocumentView.vue', () => {
       apiWrapper = mountApi()
       await flushPromises()
 
-      expect(getTermsOfService).toHaveBeenCalledWith('termsofuse_api')
+      expect(getTermsOfService).toHaveBeenCalledWith('termsofuse_api', '')
       expect(apiWrapper.find('[data-test="terms-content"]').html()).toContain('<p>The API terms</p>')
       expect(apiWrapper.find('[data-test="terms-loading"]').exists()).toBe(false)
       expect(apiWrapper.findComponent({ name: 'TermsOfUse' }).exists()).toBe(false)
