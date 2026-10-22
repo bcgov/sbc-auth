@@ -129,6 +129,59 @@
 				}
 			],
 			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "{{auth-api-base-url}}/api/v1/orgs/{{account-id}}/api-keys/{{key}}?action=revoke",
+					"host": [
+						"{{auth-api-base-url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs",
+						"{{account-id}}",
+						"api-keys",
+						"{{key}}"
+					],
+					"query": [
+						{
+							"key": "action",
+							"value": "revoke"
+						}
+					]
+				},
+				"description": "Revoke an active API key"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete API Key",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
 				"method": "DELETE",
 				"header": [
 					{
@@ -156,7 +209,7 @@
 						"{{key}}"
 					]
 				},
-				"description": "Calculate fees by Corp Type and Filing type"
+				"description": "Permanently delete a revoked API key"
 			},
 			"response": []
 		}

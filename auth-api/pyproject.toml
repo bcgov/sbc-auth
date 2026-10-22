@@ -1,6 +1,6 @@
 [project]
 name = "auth-api"
-version = "3.0.15"
+version = "3.0.16"
 description = ""
 authors = [{ name = "BC Registries and Online Services" }]
 readme = "README.md"
