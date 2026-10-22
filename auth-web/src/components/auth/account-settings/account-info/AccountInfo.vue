@@ -228,9 +228,9 @@
             <v-btn
               v-if="isDeactivateButtonVisible"
               v-can:DEACTIVATE_ACCOUNT.hide
-              text
-              color="primary"
-              class="deactivate-btn font-weight-bold"
+              outlined
+              large
+              color="error"
               data-test="deactivate-btn"
               to="/account-deactivate"
             >
@@ -744,16 +744,7 @@ export default defineComponent({
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  align-items: center;
-  margin-top: 2rem;
-
-  .v-btn {
-    width: 6rem;
-  }
 }
-// .form__btns > *:first-child {
-//   margin-right: auto;
-// }
 
 .account-nav-container {
   height: 100%;
@@ -817,14 +808,6 @@ export default defineComponent({
 .btn-dialog {
   height: 2.75em;
   width: 6.25em;
-}
-.deactivate-btn {
-  height: auto !important;
-  width: auto !important;
-  padding: 0.2rem 0.2rem !important;
-  font-size: 1rem !important;
-  text-decoration: underline;
-  margin-right: auto;
 }
 .custom-warning {
   border-radius: 4px;
