@@ -73,6 +73,8 @@ describe('Account settings ExistingAPIKeys.vue', () => {
       })
     }
 
+    // the new table is shown by default, legacy table tests turn the flag off
+    vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(true)
     wrapper = await wrapperFactory()
   })
 
