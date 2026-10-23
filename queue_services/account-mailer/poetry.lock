@@ -322,7 +322,7 @@ Werkzeug = "^3.1.5"
 type = "git"
 url = "https://github.com/sumesh85/sbc-auth.git"
 reference = "35158"
-resolved_reference = "2cace53f910eb9e323eb7a81afcdeba3d47384f1"
+resolved_reference = "621000e5a05036f897a9ed674a80e6957151ef42"
 subdirectory = "auth-api"
 
 [[package]]
