@@ -263,7 +263,7 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 
 [[package]]
 name = "auth-api"
-version = "3.0.12"
+version = "3.0.15"
 description = ""
 optional = false
 python-versions = ">=3.12,<3.13"
@@ -282,10 +282,10 @@ cachetools = "5.5.0"
 cattrs = "^23.2.3"
 certifi = "2026.1.4"
 cloud-sql-connector = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/cloud-sql-connector"}
-flask = "3.0.2"
+flask = "3.1.3"
 flask-caching = "^2.3.0"
 flask-cors = "^6.0.0"
-flask-jwt-oidc = {git = "https://github.com/seeker25/flask-jwt-oidc.git", branch = "main"}
+flask-jwt-oidc = "^0.9.0"
 flask-mail = "^0.10.0"
 flask-marshmallow = "^1.2.1"
 flask-migrate = "^4.0.7"
@@ -320,9 +320,9 @@ Werkzeug = "^3.1.5"
 
 [package.source]
 type = "git"
-url = "https://github.com/bcgov/sbc-auth.git"
-reference = "main"
-resolved_reference = "ac596c74f3a1c56da36577f4e3d7dfa7e863f294"
+url = "https://github.com/sumesh85/sbc-auth.git"
+reference = "35158"
+resolved_reference = "2cace53f910eb9e323eb7a81afcdeba3d47384f1"
 subdirectory = "auth-api"
 
 [[package]]
@@ -942,22 +942,23 @@ tests = ["coverage", "coveralls", "dill", "mock", "nose"]
 
 [[package]]
 name = "flask"
-version = "3.0.2"
+version = "3.1.3"
 description = "A simple framework for building complex web applications."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "flask-3.0.2-py3-none-any.whl", hash = "sha256:3232e0e9c850d781933cf0207523d1ece087eb8d87b23777ae38456e2fbe7c6e"},
-    {file = "flask-3.0.2.tar.gz", hash = "sha256:822c03f4b799204250a7ee84b1eddc40665395333973dfb9deebfe425fefcb7d"},
+    {file = "flask-3.1.3-py3-none-any.whl", hash = "sha256:f4bcbefc124291925f1a26446da31a5178f9483862233b23c0c96a20701f670c"},
+    {file = "flask-3.1.3.tar.gz", hash = "sha256:0ef0e52b8a9cd932855379197dd8f94047b359ca0a78695144304cb45f87c9eb"},
 ]
 
 [package.dependencies]
-blinker = ">=1.6.2"
+blinker = ">=1.9.0"
 click = ">=8.1.3"
-itsdangerous = ">=2.1.2"
-Jinja2 = ">=3.1.2"
-Werkzeug = ">=3.0.0"
+itsdangerous = ">=2.2.0"
+jinja2 = ">=3.1.2"
+markupsafe = ">=2.1.1"
+werkzeug = ">=3.1.0"
 
 [package.extras]
 async = ["asgiref (>=3.2)"]
@@ -1001,26 +1002,21 @@ Werkzeug = ">=0.7"
 
 [[package]]
 name = "flask-jwt-oidc"
-version = "0.8.1"
+version = "0.9.0"
 description = "Opinionated flask oidc client"
 optional = false
-python-versions = ">=3.9,<4"
+python-versions = "<4,>=3.9.2"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "flask_jwt_oidc-0.9.0-py3-none-any.whl", hash = "sha256:7ce75f002e7a1ef3639366bf03f62b86e9a3afbd2d1818cbcb71a196b027e55c"},
+    {file = "flask_jwt_oidc-0.9.0.tar.gz", hash = "sha256:6c6169b52b73dbdc06f2e11b9481f382c4125a1b181f88f7270992200cda69a3"},
+]
 
 [package.dependencies]
-cachelib = "^0.13.0"
-cryptography = ">=3.4.0"
-Flask = ">=2"
-pyjwt = "^2.8.0"
-six = "^1.16.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/seeker25/flask-jwt-oidc.git"
-reference = "main"
-resolved_reference = "bba7bb26625b213f4be817b01f28fb8bbb5b05d1"
+cachelib = ">=0.13.0"
+cryptography = ">=44.0.0"
+Flask = ">=3.1.3"
+pyjwt = ">=2.12.1"
 
 [[package]]
 name = "flask-mail"
@@ -2778,21 +2774,18 @@ files = [
 
 [[package]]
 name = "pyjwt"
-version = "2.12.0"
+version = "2.15.1"
 description = "JSON Web Token implementation in Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pyjwt-2.12.0-py3-none-any.whl", hash = "sha256:9bb459d1bdd0387967d287f5656bf7ec2b9a26645d1961628cda1764e087fd6e"},
-    {file = "pyjwt-2.12.0.tar.gz", hash = "sha256:2f62390b667cd8257de560b850bb5a883102a388829274147f1d724453f8fb02"},
+    {file = "pyjwt-2.15.1-py3-none-any.whl", hash = "sha256:42d59d631f7768a1028a64c7ff581a9bf7519804daf91fc5b6c56e30eec5e193"},
+    {file = "pyjwt-2.15.1.tar.gz", hash = "sha256:4f259e80cdfb6b3fc18a7de51fd1ef9ec79652f25019bae68975ca2468a34df8"},
 ]
 
 [package.extras]
 crypto = ["cryptography (>=3.4.0)"]
-dev = ["coverage[toml] (==7.10.7)", "cryptography (>=3.4.0)", "pre-commit", "pytest (>=8.4.2,<9.0.0)", "sphinx", "sphinx-rtd-theme", "zope.interface"]
-docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
-tests = ["coverage[toml] (==7.10.7)", "pytest (>=8.4.2,<9.0.0)"]
 
 [[package]]
 name = "pyrfc3339"
@@ -3649,4 +3642,4 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-it
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "d6bd68ffaee1f56253cc63a9c3cd202c606cb71a41531aee819ca33f5fcfcbdb"
+content-hash = "bcba1d28cc97d55641e72360ad0ac56f7185b6a27982ad116aec85ee291d30c2"
