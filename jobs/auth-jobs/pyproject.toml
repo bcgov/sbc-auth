@@ -8,7 +8,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-auth-api = { git = "https://github.com/sumesh85/sbc-auth.git", branch = "35158", subdirectory = "auth-api" }
+auth-api = { git = "https://github.com/bcgov/sbc-auth.git", branch = "main", subdirectory = "auth-api" }
 flask = "^3.1.3"
 flask-sqlalchemy = "^3.1.1"
 sqlalchemy = "^2.0.28"

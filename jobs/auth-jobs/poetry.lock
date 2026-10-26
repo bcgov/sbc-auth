@@ -308,9 +308,9 @@ Werkzeug = "^3.1.5"
 
 [package.source]
 type = "git"
-url = "https://github.com/sumesh85/sbc-auth.git"
-reference = "35158"
-resolved_reference = "2cace53f910eb9e323eb7a81afcdeba3d47384f1"
+url = "https://github.com/bcgov/sbc-auth.git"
+reference = "main"
+resolved_reference = "bd46906d6534c552508b24e85390b6f9f98416b9"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3709,4 +3709,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "b58b1a5421092fa9af3015125602212405a5b71d61ea6ad69753701a80e12db5"
+content-hash = "8598e1d5e756d9e835ff6ee25b3fc873e1c65c91ca74a154c8e07abf51cdfcb3"
