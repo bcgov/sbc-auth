@@ -45,7 +45,10 @@ RUN apt-get update \
     curl \
     git \
     libpq-dev \
-  && curl -sSL 'https://install.python-poetry.org' | python3 - \
+  # Poetry from PyPI at the pinned POETRY_VERSION, in its own venv (no remote installer script):
+  && python3 -m venv /opt/poetry \
+  && /opt/poetry/bin/pip install "poetry==${POETRY_VERSION}" \
+  && ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry \
   && poetry --version \
   && poetry config installer.max-workers 1 \
   # Cleaning cache:
