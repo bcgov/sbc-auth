@@ -61,7 +61,7 @@ describe('HomeView.vue', () => {
     const manageBusinessBtn = wrapper.findAll('.cta-btn-auth').at(0)
 
     expect(nameRequestBtn.exists()).toBe(true)
-    expect(nameRequestBtn.text()).toContain('Request a Name')
+    expect(nameRequestBtn.text()).toContain('Start a Business in B.C.')
 
     expect(manageBusinessBtn.exists()).toBe(true)
     expect(manageBusinessBtn.text()).toContain('Manage my Business')
@@ -81,7 +81,7 @@ describe('HomeView.vue', () => {
     expect(loginBtn.text()).toContain('Create a BC Registries Account')
 
     expect(nameRequestBtn.exists()).toBe(true)
-    expect(nameRequestBtn.text()).toContain('Request a Name')
+    expect(nameRequestBtn.text()).toContain('Start a Business in B.C.')
 
     expect(createAccountLink.exists()).toBe(true)
     expect(createAccountLink.text()).toContain('Create a BC Registries Account')

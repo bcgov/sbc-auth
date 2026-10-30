@@ -7,7 +7,7 @@
     :class="{'btn-name-request-wide': isWide, 'btn-name-request-inverse': isInverse}"
     @click="goToNameRequest()"
   >
-    <span class="btn-text">Request a Name</span>
+    <span class="btn-text">{{ label }}</span>
   </v-btn>
 </template>
 
@@ -24,6 +24,10 @@ export default defineComponent({
     },
     isInverse: {
       default: false
+    },
+    label: {
+      type: String,
+      default: 'Request a Name'
     }
   },
   setup () {
@@ -43,7 +47,7 @@ export default defineComponent({
   .btn-name-request {
     font-weight: bold;
     min-height: 2.75rem;
-    width: 10rem;
+    min-width: 10rem;
     color: $BCgovBlue5;
     border: 2px solid $BCgovBlue5;
   }

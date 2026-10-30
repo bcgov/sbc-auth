@@ -25,12 +25,15 @@
               >
                 Manage my Business
               </v-btn>
-              <NameRequestButton :isWide="true" />
+              <NameRequestButton
+                :isWide="true"
+                :label="startBusinessLabel"
+              />
             </div>
 
             <!-- Non-authenticated -->
             <div v-else>
-              <div>
+              <div class="cta-btns-unauthenticated">
                 <!-- Login Menu -->
                 <v-menu
                   bottom
@@ -54,7 +57,7 @@
                   </template>
                   <sbc-auth-menu />
                 </v-menu>
-                <name-request-button />
+                <name-request-button :label="startBusinessLabel" />
               </div>
               <div class="d-flex mt-8">
                 <span class="body-1">New to BC Registries?</span>
@@ -223,6 +226,7 @@ export default class HomeView extends Vue {
   @State(useOrgStore) readonly currentMembership!: Member
   private noPasscodeDialog = false
   accountDialog = false
+  readonly startBusinessLabel = 'Start a Business in B.C.'
   @Action(useOrgStore) readonly resetCurrentOrganisation!: () => void
   readonly coopAssocUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/' +
   'managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations'
@@ -322,19 +326,31 @@ export default class HomeView extends Vue {
     }
   }
 
+  // Below lg: anchor the image's left edge beside the text column and let the right side run
+  // off-screen, so the image never slides under the buttons as the viewport narrows.
+  @media (min-width: 641px) and (max-width: 1263px) {
+    .hero-banner {
+      background-size: 900px;
+      background-position: left max(360px, calc(50% + 360px)) bottom 0;
+    }
+
+    .hero-banner.auth {
+      background-size: 1100px;
+      background-position: left max(360px, calc(50% + 460px)) bottom 0;
+    }
+  }
+
   @media (min-width: 960px) {
     .hero-banner {
       height: 30rem;
-      background-size: 900px;
     }
 
     .hero-banner.auth {
       height: 38rem;
-      background-size: 1100px;
     }
   }
 
-  @media (min-width: 1200px) {
+  @media (min-width: 1264px) {
     .hero-banner {
       height: 30rem;
       background-size: 900px;
@@ -395,15 +411,10 @@ export default class HomeView extends Vue {
       flex: 0 0 100%;
     }
 
-    .cta-btns-authenticated, .cta-btns-authenticated > div {
+    .cta-btns-authenticated, .cta-btns-unauthenticated {
       display: flex;
-      max-width: 200px;
-      margin-bottom: 13px;
-
-      .v-btn {
-        flex: 0 0 100%;
-        margin-bottom: 13px;
-      }
+      flex-wrap: wrap;
+      row-gap: 0.8125rem;
     }
   }
 
