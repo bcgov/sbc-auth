@@ -336,7 +336,7 @@ export default class HomeView extends Vue {
     .hero-banner__img {
       display: block;
       width: 100%;
-      max-width: 900px;
+      max-width: 36rem;
       margin-left: auto;
     }
   }
