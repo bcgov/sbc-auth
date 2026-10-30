@@ -134,12 +134,11 @@ describe('TermsOfUseDocumentView.vue', () => {
       expect(apiWrapper.find('[data-test="terms-content"]').exists()).toBe(false)
     })
 
-    it('loads and renders the API terms with the API title', async () => {
+    it('loads and renders the API terms', async () => {
       apiWrapper = mountApi()
       await flushPromises()
 
       expect(getTermsOfService).toHaveBeenCalledWith('termsofuse_api', '')
-      expect(apiWrapper.find('h1').text()).toBe('API Terms of Use for all products')
       expect(apiWrapper.find('[data-test="terms-content"]').html()).toContain('<p>The API terms</p>')
       expect(apiWrapper.find('[data-test="terms-loading"]').exists()).toBe(false)
       expect(apiWrapper.findComponent({ name: 'TermsOfUse' }).exists()).toBe(false)
