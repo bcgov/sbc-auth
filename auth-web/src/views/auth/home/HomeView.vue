@@ -96,11 +96,6 @@
             </LoginBCSC>
           </v-dialog>
         </v-container>
-        <img
-          class="hero-banner__img d-lg-none"
-          src="@/assets/img/hero-img-min.jpg"
-          alt=""
-        >
       </header>
       <div class="how-to-container py-6">
         <v-container class="py-10">
@@ -325,19 +320,33 @@ export default class HomeView extends Vue {
     }
   }
 
-  // Below lg: drop the background image and show it as a block under the text/buttons instead,
-  // so it scales with the viewport and never overlaps the buttons.
-  @media only screen and (max-width: 1263px) {
+  @media only screen and (max-width: 640px) {
     .hero-banner {
-      flex-direction: column;
       background-image: none;
     }
+  }
 
-    .hero-banner__img {
-      display: block;
-      width: 100%;
-      max-width: 36rem;
-      margin-left: auto;
+  // Below lg: anchor the image's left edge beside the text column and let the right side run
+  // off-screen, so the image never slides under the buttons as the viewport narrows.
+  @media (min-width: 641px) and (max-width: 1263px) {
+    .hero-banner {
+      background-size: 900px;
+      background-position: left max(360px, calc(50% + 360px)) bottom 0;
+    }
+
+    .hero-banner.auth {
+      background-size: 1100px;
+      background-position: left max(360px, calc(50% + 460px)) bottom 0;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .hero-banner {
+      height: 30rem;
+    }
+
+    .hero-banner.auth {
+      height: 38rem;
     }
   }
 
