@@ -97,7 +97,7 @@
           </v-dialog>
         </v-container>
         <img
-          class="hero-banner__img d-md-none"
+          class="hero-banner__img d-lg-none"
           src="@/assets/img/hero-img-min.jpg"
           alt=""
         >
@@ -325,9 +325,9 @@ export default class HomeView extends Vue {
     }
   }
 
-  // Below md: drop the background image and show it as a block under the text/buttons instead,
+  // Below lg: drop the background image and show it as a block under the text/buttons instead,
   // so it scales with the viewport and never overlaps the buttons.
-  @media only screen and (max-width: 959px) {
+  @media only screen and (max-width: 1263px) {
     .hero-banner {
       flex-direction: column;
       background-image: none;
@@ -336,22 +336,12 @@ export default class HomeView extends Vue {
     .hero-banner__img {
       display: block;
       width: 100%;
+      max-width: 900px;
+      margin-left: auto;
     }
   }
 
-  @media (min-width: 960px) {
-    .hero-banner {
-      height: 30rem;
-      background-size: 900px;
-    }
-
-    .hero-banner.auth {
-      height: 38rem;
-      background-size: 1100px;
-    }
-  }
-
-  @media (min-width: 1200px) {
+  @media (min-width: 1264px) {
     .hero-banner {
       height: 30rem;
       background-size: 900px;
