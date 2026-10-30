@@ -25,12 +25,15 @@
               >
                 Manage my Business
               </v-btn>
-              <NameRequestButton :isWide="true" />
+              <NameRequestButton
+                :isWide="true"
+                :label="startBusinessLabel"
+              />
             </div>
 
             <!-- Non-authenticated -->
             <div v-else>
-              <div>
+              <div class="cta-btns-unauthenticated">
                 <!-- Login Menu -->
                 <v-menu
                   bottom
@@ -54,7 +57,7 @@
                   </template>
                   <sbc-auth-menu />
                 </v-menu>
-                <name-request-button />
+                <name-request-button :label="startBusinessLabel" />
               </div>
               <div class="d-flex mt-8">
                 <span class="body-1">New to BC Registries?</span>
@@ -93,6 +96,11 @@
             </LoginBCSC>
           </v-dialog>
         </v-container>
+        <img
+          class="hero-banner__img d-md-none"
+          src="@/assets/img/hero-img-min.jpg"
+          alt=""
+        >
       </header>
       <div class="how-to-container py-6">
         <v-container class="py-10">
@@ -223,6 +231,7 @@ export default class HomeView extends Vue {
   @State(useOrgStore) readonly currentMembership!: Member
   private noPasscodeDialog = false
   accountDialog = false
+  readonly startBusinessLabel = 'Start a Business in B.C.'
   @Action(useOrgStore) readonly resetCurrentOrganisation!: () => void
   readonly coopAssocUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/' +
   'managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations'
@@ -316,9 +325,17 @@ export default class HomeView extends Vue {
     }
   }
 
-  @media only screen and (max-width: 640px) {
+  // Below md: drop the background image and show it as a block under the text/buttons instead,
+  // so it scales with the viewport and never overlaps the buttons.
+  @media only screen and (max-width: 959px) {
     .hero-banner {
+      flex-direction: column;
       background-image: none;
+    }
+
+    .hero-banner__img {
+      display: block;
+      width: 100%;
     }
   }
 
@@ -395,15 +412,10 @@ export default class HomeView extends Vue {
       flex: 0 0 100%;
     }
 
-    .cta-btns-authenticated, .cta-btns-authenticated > div {
+    .cta-btns-authenticated, .cta-btns-unauthenticated {
       display: flex;
-      max-width: 200px;
-      margin-bottom: 13px;
-
-      .v-btn {
-        flex: 0 0 100%;
-        margin-bottom: 13px;
-      }
+      flex-wrap: wrap;
+      row-gap: 0.8125rem;
     }
   }
 

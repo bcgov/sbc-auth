@@ -44,4 +44,9 @@ describe('NameRequestButton.vue', () => {
     expect(wrapper.find('.btn-name-request').classes()).toContain('btn-name-request-wide')
     expect(wrapper.find('.btn-name-request').classes()).toContain('btn-name-request-inverse')
   })
+
+  it('it renders a custom label', () => {
+    wrapper = wrapperFactory({ label: 'Start a Business in B.C.' })
+    expect(wrapper.find('.btn-text').text()).toBe('Start a Business in B.C.')
+  })
 })
