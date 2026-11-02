@@ -72,12 +72,12 @@ export default defineComponent({
     const state = reactive({
       invoices: [],
       suspendedDate: (currentOrganization.value?.suspendedOn) ? formatDate(moment(currentOrganization.value.suspendedOn)) : '',
-      accountAdministratorEmail: {}
+      accountAdministratorEmail: ''
     })
 
     async function setAdminContact () {
       const adminContact = await getAccountAdministrator()
-      state.accountAdministratorEmail = adminContact.user.contacts[0].email
+      state.accountAdministratorEmail = adminContact?.user?.contacts?.[0]?.email || ''
     }
 
     const accountAdministratorEmail = computed(() => {
