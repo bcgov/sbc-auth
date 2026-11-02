@@ -247,6 +247,30 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
             "Super Vendor ABC (55)",
             "Expired a linking key for vendor account Super Vendor ABC (55)",
         ),
+        (
+            ActivityAction.API_KEY_REVOKED.value,
+            "Test Key",
+            "...09A1",
+            "Revoked API Key Test Key - ...09A1",
+        ),
+        (
+            ActivityAction.API_KEY_REVOKED.value,
+            "",
+            "...09A1",
+            "Revoked Unnamed API Key - ...09A1",
+        ),
+        (
+            ActivityAction.API_KEY_DELETED.value,
+            "Test Key",
+            "...09A1",
+            "Deleted API Key Test Key - ...09A1",
+        ),
+        (
+            ActivityAction.API_KEY_DELETED.value,
+            "",
+            "...09A1",
+            "Deleted Unnamed API Key - ...09A1",
+        ),
     ],
 )
 def test_activity_log_actions(client, jwt, session, action, item_name, item_value, expected_message):  # pylint:disable=unused-argument
