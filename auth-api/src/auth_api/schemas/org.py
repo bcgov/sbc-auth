@@ -43,6 +43,8 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
     suspension_reason_code = fields.String(data_key="suspension_reason_code")
     business_size = fields.String(data_key="business_size")
     business_type = fields.String(data_key="business_type")
+    # FK column: auto schemas skip FKs (include_fk=False), so declare it explicitly.
+    business_identifier = fields.String(data_key="business_identifier")
     contacts = fields.Pluck("ContactLinkSchema", "contact", many=True, data_key="contacts")
 
     @post_dump(pass_many=False)
