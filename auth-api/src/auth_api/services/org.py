@@ -116,6 +116,7 @@ class Org:  # pylint: disable=too-many-public-methods
         type_code = org_info.get("typeCode", None)
 
         bcol_profile_flags = None
+        Org._validate_business_identifier(org_info)
         response = Org._validate_and_raise_error(org_info)
         # If the account is created using BCOL credential, verify its valid bc online account
         bcol_details_response = response.get("bcol_response", None)
@@ -401,6 +402,18 @@ class Org:  # pylint: disable=too-many-public-methods
         }
 
     @staticmethod
+    def _validate_business_identifier(org_info: dict, org_model: OrgModel | None = None):
+        """Allow a businessIdentifier only on business accounts, and only if no other ACTIVE org uses it."""
+        if not (business_identifier := org_info.get("businessIdentifier")):
+            return  # not sent, or being cleared
+        is_business_account = org_info.get("isBusinessAccount", org_model.is_business_account if org_model else False)
+        if not is_business_account:
+            raise BusinessException(Error.ORG_BUSINESS_IDENTIFIER_NOT_ALLOWED, None)
+        existing = OrgModel.find_active_by_business_identifier(business_identifier)
+        if existing and (org_model is None or existing.id != org_model.id):
+            raise BusinessException(Error.ORG_BUSINESS_IDENTIFIER_ALREADY_EXISTS, None)
+
+    @staticmethod
     def _validate_and_raise_error(org_info: dict):
         """Execute the validators in chain and raise error or return."""
         validators = [account_limit_validate, access_type_validate, duplicate_org_name_validate]
@@ -479,6 +492,7 @@ class Org:  # pylint: disable=too-many-public-methods
         has_status_changing: bool = False
 
         org_model: OrgModel = self._model
+        Org._validate_business_identifier(org_info, org_model)
         # to enforce necessary details for govm account creation
         is_govm_account = org_model.access_type == AccessType.GOVM.value
         is_govm_account_creation = is_govm_account and org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value

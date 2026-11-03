@@ -20,7 +20,21 @@ from typing import Self
 
 from flask import current_app
 from sql_versioning import Versioned
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, desc, event, func, text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    and_,
+    cast,
+    desc,
+    event,
+    func,
+    text,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import contains_eager, relationship
 
@@ -77,6 +91,7 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         nullable=True,
     )
     is_business_account = Column("is_business_account", Boolean(), default=False)
+    business_identifier = Column(String(75), nullable=True)
 
     contacts = relationship("ContactLink", lazy="select", back_populates="org")
     org_type = relationship("OrgType")
@@ -126,6 +141,15 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
     def find_by_org_ids_and_org_types(cls, org_ids: list[int], org_types: list[str]):
         """Find all Org instances that match the provided ids and org types."""
         return cls.query.filter(Org.id.in_(org_ids), Org.type_code.in_(org_types)).all()
+
+    @classmethod
+    def find_active_by_business_identifier(cls, business_identifier: str) -> Self | None:
+        """Find the ACTIVE Org with the given business identifier (at most one, see ix_orgs_business_identifier)."""
+        if not business_identifier:
+            return None
+        return cls.query.filter(
+            Org.business_identifier == business_identifier, Org.status_code == OrgStatusEnum.ACTIVE.value
+        ).one_or_none()
 
     @classmethod
     def find_by_bcol_id(cls, bcol_account_id):
@@ -347,6 +371,16 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
             self.save()
         else:
             super().reset()
+
+
+# Only one ACTIVE org per business identifier.
+# Declared outside the class so Versioned doesn't copy it to orgs_history (many rows per org there).
+Index(
+    "ix_orgs_business_identifier",
+    Org.business_identifier,
+    unique=True,
+    postgresql_where=and_(Org.business_identifier.isnot(None), Org.status_code == OrgStatusEnum.ACTIVE.value),
+)
 
 
 @event.listens_for(Org, "before_insert")

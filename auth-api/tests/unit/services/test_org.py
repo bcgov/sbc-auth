@@ -24,6 +24,7 @@ import pytest
 from requests import Response
 from requests.exceptions import HTTPError
 from sbc_common_components.utils.enums import QueueMessageTypes
+from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import HTTPException
 
 import auth_api
@@ -1394,3 +1395,53 @@ def test_handle_pay_http_error_known_pay_api_code(app):
     assert exc_info.value.code == Error.CFS_ACCOUNT_SETUP_IN_PROGRESS.name
     assert exc_info.value.status_code == HTTPStatus.BAD_REQUEST
     assert exc_info.value.message == Error.CFS_ACCOUNT_SETUP_IN_PROGRESS.message
+
+
+def test_org_business_identifier(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert business identifier is only for business accounts, unique across ACTIVE orgs, and clearable."""
+    org1 = factory_org_model(org_info=TestOrgInfo.org1)
+    org2 = factory_org_model(org_info=TestOrgInfo.org2)
+
+    def update(org_model, org_info):
+        with patch.object(ProductService, "update_org_product_keycloak_groups"):
+            OrgService(org_model).update_org(org_info)
+
+    # Not allowed on a non-business account.
+    with pytest.raises(BusinessException) as exc_info:
+        update(org1, {"businessIdentifier": "BC1234567"})
+    assert exc_info.value.code == Error.ORG_BUSINESS_IDENTIFIER_NOT_ALLOWED.name
+
+    # Allowed when the account is (or becomes, in the same request) a business account.
+    update(org1, {"isBusinessAccount": True, "businessIdentifier": "BC1234567"})
+    assert OrgModel.find_active_by_business_identifier("BC1234567").id == org1.id
+
+    # Same identifier on another business account is rejected; re-saving the org's own identifier is fine.
+    update(org2, {"isBusinessAccount": True})
+    with pytest.raises(BusinessException) as exc_info:
+        update(org2, {"businessIdentifier": "BC1234567"})
+    assert exc_info.value.code == Error.ORG_BUSINESS_IDENTIFIER_ALREADY_EXISTS.name
+    update(org1, {"businessIdentifier": "BC1234567"})
+
+    # Clearing frees the identifier for another org.
+    update(org1, {"businessIdentifier": None})
+    update(org2, {"businessIdentifier": "BC1234567"})
+    assert OrgModel.find_active_by_business_identifier("BC1234567").id == org2.id
+
+    # Only ACTIVE orgs count: once org2 is inactive, org1 can take the identifier while org2 keeps it.
+    org2.status_code = OrgStatus.INACTIVE.value
+    org2.save()
+    update(org1, {"businessIdentifier": "BC1234567"})
+    assert OrgModel.find_active_by_business_identifier("BC1234567").id == org1.id
+    assert OrgModel.find_by_org_id(org2.id).business_identifier == "BC1234567"
+
+    # The database enforces it too: re-activating org2 would make two ACTIVE orgs with the same identifier.
+    org2.status_code = OrgStatus.ACTIVE.value
+    with pytest.raises(IntegrityError):
+        org2.save()
+    session.rollback()
+
+    # On create, the request itself must mark the account as a business account.
+    with pytest.raises(BusinessException) as exc_info:
+        OrgService._validate_business_identifier({"businessIdentifier": "BC7654321"})
+    assert exc_info.value.code == Error.ORG_BUSINESS_IDENTIFIER_NOT_ALLOWED.name
+    OrgService._validate_business_identifier({"isBusinessAccount": True, "businessIdentifier": "BC7654321"})

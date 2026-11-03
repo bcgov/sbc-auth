@@ -112,6 +112,16 @@
       "title": "Is business account",
       "pattern": "^(.*)$"
     },
+    "businessIdentifier": {
+      "$id": "#/properties/businessIdentifier",
+      "type": ["string", "null"],
+      "title": "Business identifier this account represents (unique across accounts). Send null to clear.",
+      "minLength": 1,
+      "maxLength": 75,
+      "examples": [
+        "BC1234567"
+      ]
+    },
     "uuid": {
       "$id": "#/properties/uuid",
       "type": "string",
