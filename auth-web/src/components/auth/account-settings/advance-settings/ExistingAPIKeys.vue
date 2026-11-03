@@ -48,7 +48,7 @@
 
     <p
       v-if="isApiKeyListDisplayed"
-      class="mb-0 mt-1"
+      class="mb-6 mt-1"
       data-test="api-key-counts"
     >
       <strong>{{ namedKeyCount }}/{{ maxNamedKeys }}</strong> Named Keys |
