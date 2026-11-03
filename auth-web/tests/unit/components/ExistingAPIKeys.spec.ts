@@ -221,7 +221,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     orgStore.deleteOrgApiKey = vi.fn(() => Promise.resolve({})) as any
     orgStore.revokeOrgApiKeys = vi.fn(() => Promise.resolve({})) as any
     wrapper.vm.$refs.confirmDeleteDialog = { close: vi.fn() }
-    wrapper.vm.$refs.successDialog = { open: vi.fn() }
+    mockModals()
     wrapper.vm.selectedApi = { ...consumerKey[0], keyStatus: 'revoked' }
     vi.mocked(orgStore.getOrgApiKeys).mockClear()
 
@@ -230,8 +230,13 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(orgStore.deleteOrgApiKey).toHaveBeenCalledWith({ orgId: 123, apiKey: 'mock-api-key-1234' })
     expect(orgStore.revokeOrgApiKeys).not.toHaveBeenCalled()
     expect(orgStore.getOrgApiKeys).toHaveBeenCalledWith(123, true)
-    expect(wrapper.vm.alertTitle).toBe('API key has been Deleted')
+    expect(wrapper.vm.alertIcon).toBe('mdi-check')
+    expect(wrapper.vm.alertTitle).toBe('API Key Has Been Deleted')
+    expect(wrapper.vm.alertKeyName).toBe('key1')
+    expect(wrapper.vm.alertText).toBe('has been deleted.')
+    expect(wrapper.vm.notificationColor).toBe('success')
     expect(wrapper.vm.$refs.confirmDeleteDialog.close).toHaveBeenCalled()
+    expect(wrapper.vm.$refs.successDialog.open).toHaveBeenCalled()
   })
 
   it('Should load all keys, including revoked ones', async () => {
@@ -258,18 +263,24 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.vm.$refs.successDialog.open).not.toHaveBeenCalled()
   })
 
-  it('Should show the alert modal instead of the revoke success modal when a revoke fails', async () => {
+  it('Should show the revoke error and reload the keys when a revoke fails', async () => {
     const orgStore = useOrgStore()
     orgStore.revokeOrgApiKeys = vi.fn(() => Promise.reject(new Error('revoke failed'))) as any
     wrapper.vm.$refs.confirmActionDialog = { close: vi.fn() }
     mockModals()
     wrapper.vm.selectedApi = consumerKey[0]
+    vi.mocked(orgStore.getOrgApiKeys).mockClear()
 
     await wrapper.vm.revokeApi()
 
-    expect(wrapper.vm.alertTitle).toBe('API key has not been Revoked')
+    expect(wrapper.vm.$refs.confirmActionDialog.close).toHaveBeenCalled()
+    expect(wrapper.vm.alertTitle).toBe('Unable to Revoke API Key')
+    expect(wrapper.vm.alertKeyName).toBe('key1')
+    expect(wrapper.vm.alertText).toBe('The API key could not be revoked at this time. Please try again.')
+    expect(wrapper.vm.notificationColor).toBe('error')
     expect(wrapper.vm.$refs.successDialog.open).toHaveBeenCalled()
     expect(wrapper.vm.$refs.revokeSuccessDialog.open).not.toHaveBeenCalled()
+    expect(orgStore.getOrgApiKeys).toHaveBeenCalledWith(123, true)
   })
 
   it('Should not send the environment when creating a key', async () => {
@@ -337,15 +348,17 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.vm.$refs.successDialog.open).toHaveBeenCalled()
   })
 
-  it('Should say the key was not created when the request fails', async () => {
+  it('Should show the create error and not reload the keys when the request fails', async () => {
     mockModals()
     createOrgApiKey.mockRejectedValue(new Error('create failed'))
+    vi.mocked(useOrgStore().getOrgApiKeys).mockClear()
 
     await wrapper.vm.onCreateKey({ apiKeyName: 'key1', environment: 'sandbox' })
 
-    expect(wrapper.vm.alertTitle).toBe('API key has not been created')
-    expect(wrapper.vm.alertText).toBe('')
+    expect(wrapper.vm.alertTitle).toBe('Unable to Create API Key')
+    expect(wrapper.vm.alertText).toBe('The API key could not be created at this time. Please try again.')
     expect(wrapper.vm.$refs.successDialog.open).toHaveBeenCalled()
+    expect(useOrgStore().getOrgApiKeys).not.toHaveBeenCalled()
   })
 
   it('Should open Confirmation modal on revoke button click', async () => {
@@ -484,7 +497,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
     await wrapper.vm.onCreateKey({ apiKeyName: 'key1', environment: 'sandbox' })
 
-    expect(wrapper.vm.alertTitle).toBe('API key has not been created')
+    expect(wrapper.vm.alertTitle).toBe('Unable to Create API Key')
     expect(wrapper.vm.alertText).toBe(message)
     expect(wrapper.vm.$refs.successDialog.open).toHaveBeenCalled()
     expect(router.push).not.toHaveBeenCalled()
@@ -575,18 +588,27 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     })
   })
 
-  it('Should show the error message when deleting a key that is not revoked', async () => {
-    const message = 'API key must be revoked before it can be deleted.'
+  it.each([
+    ['the key is not revoked', { code: 'API_KEY_NOT_REVOKED', message: 'API key must be revoked before it can be deleted.' },
+      'API key must be revoked before it can be deleted.'],
+    ['the key no longer exists', { code: 'DATA_NOT_FOUND', message: 'No matching record found.' }, 'No matching record found.'],
+    ['the error is unknown', {}, 'The API key could not be deleted at this time. Please try again.']
+  ])('Should show the delete error and reload the keys when %s', async (_, data, alertText) => {
     const orgStore = useOrgStore()
-    orgStore.deleteOrgApiKey = vi.fn().mockRejectedValue({ response: { data: { code: 'API_KEY_NOT_REVOKED', message } } }) as any
+    orgStore.deleteOrgApiKey = vi.fn().mockRejectedValue({ response: { data } }) as any
     wrapper.vm.$refs.confirmDeleteDialog = { close: vi.fn() }
-    wrapper.vm.$refs.successDialog = { open: vi.fn() }
+    mockModals()
     wrapper.vm.selectedApi = { ...consumerKey[0] }
+    vi.mocked(orgStore.getOrgApiKeys).mockClear()
 
     await wrapper.vm.deleteApi()
 
-    expect(wrapper.vm.alertTitle).toBe('API key has not been Deleted')
-    expect(wrapper.vm.alertText).toBe(message)
+    expect(orgStore.getOrgApiKeys).toHaveBeenCalledWith(123, true)
+    expect(wrapper.vm.$refs.confirmDeleteDialog.close).toHaveBeenCalled()
+    expect(wrapper.vm.alertTitle).toBe('Unable to Delete API Key')
+    expect(wrapper.vm.alertKeyName).toBe('key1')
+    expect(wrapper.vm.alertText).toBe(alertText)
+    expect(wrapper.vm.notificationColor).toBe('error')
     expect(wrapper.vm.$refs.successDialog.open).toHaveBeenCalled()
   })
 })

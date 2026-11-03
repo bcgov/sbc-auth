@@ -370,7 +370,7 @@
       </template>
     </ModalDialog>
 
-    <!-- Alert Dialog (Success) -->
+    <!-- Alert Dialog (Success / Error) -->
     <ModalDialog
       ref="successDialog"
       dialog-class="info-dialog"
@@ -398,9 +398,10 @@
           large
           depressed
           color="primary"
+          class="px-8 font-weight-bold"
           @click="close($refs.successDialog)"
         >
-          Ok
+          Close
         </v-btn>
       </template>
     </ModalDialog>
@@ -693,15 +694,21 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
           return
         }
       }
-      this.alertIcon = 'mdi-alert-circle-outline'
-      this.alertTitle = 'API key has not been created'
-      this.alertKeyName = ''
-      this.alertText = this.getErrorMessage(e, ['API_TERMS_NOT_FOUND', 'API_KEY_NAMED_LIMIT_REACHED'])
-      this.notificationColor = 'error'
-      this.$refs.successDialog.open()
+      this.alertText = this.getErrorMessage(e, ['API_TERMS_NOT_FOUND', 'API_KEY_NAMED_LIMIT_REACHED']) ||
+        'The API key could not be created at this time. Please try again.'
+      this.showErrorAlert('Unable to Create API Key', '', this.alertText)
     } finally {
       this.isCreating = false
     }
+  }
+
+  private showErrorAlert (title: string, keyName: string, text: string) {
+    this.alertIcon = 'mdi-alert'
+    this.alertTitle = title
+    this.alertKeyName = keyName
+    this.alertText = text
+    this.notificationColor = 'error'
+    this.$refs.successDialog.open()
   }
 
   public getErrorMessage (e: any, codes: string[]): string {
@@ -762,37 +769,37 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     const { apiKey } = this.selectedApi
     const apiKeyName = this.getKeyName(this.selectedApi)
     const apiKeys = { orgId, apiKey }
-    this.alertIcon = 'mdi-alert-circle-outline'
-    this.alertTitle = `API key has not been ${result}`
-    this.alertKeyName = apiKeyName
-    this.alertText = `API Key has not been ${result}`
-    this.notificationColor = 'error'
     this.isLoading = true
     let isSuccess = false
+    let errorMessage = ''
     try {
-      const resp: any = await keyAction(apiKeys)
-      if (resp) {
-        isSuccess = true
-        this.alertIcon = 'mdi-check'
-        this.alertTitle = `API key has been ${result}`
-        this.alertText = `API Key has been ${result}`
-        this.notificationColor = 'success'
-      }
+      isSuccess = !!(await keyAction(apiKeys))
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log('error', e)
-      this.alertText = this.getErrorMessage(e, ['API_KEY_NOT_REVOKED', 'DATA_NOT_FOUND']) || this.alertText
+      console.error(e)
+      errorMessage = this.getErrorMessage(e, ['API_KEY_NOT_REVOKED', 'DATA_NOT_FOUND'])
     }
-    this.isLoading = false
-    await this.loadApiKeys()
     this.selectedApi = {}
     confirmDialog.close()
+    // always reload, as a failed request may still have changed the key (e.g. changed in another tab)
+    await this.loadApiKeys()
+    if (!isSuccess) {
+      this.alertTitle = `Unable to ${result === 'Revoked' ? 'Revoke' : 'Delete'} API Key`
+      this.alertText = errorMessage || `The API key could not be ${result.toLowerCase()} at this time. Please try again.`
+      this.showErrorAlert(this.alertTitle, apiKeyName, this.alertText)
+      return
+    }
     // a revoked key has its own success dialog
-    if (isSuccess && result === 'Revoked') {
+    if (result === 'Revoked') {
       this.revokedKeyName = apiKeyName
       this.$refs.revokeSuccessDialog.open()
       return
     }
+    this.alertIcon = 'mdi-check'
+    this.alertTitle = 'API Key Has Been Deleted'
+    this.alertKeyName = apiKeyName
+    this.alertText = 'has been deleted.'
+    this.notificationColor = 'success'
     this.$refs.successDialog.open()
   }
 
