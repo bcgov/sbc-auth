@@ -1411,6 +1411,7 @@ def test_org_business_identifier(session, monkeypatch):  # pylint:disable=unused
 
     update({"businessIdentifier": entity.business_identifier})
     assert OrgModel.find_by_org_id(org.id).business_identifier == entity.business_identifier
+    assert OrgService(org).as_dict()["business_identifier"] == entity.business_identifier
 
     update({"businessIdentifier": None})
     assert OrgModel.find_by_org_id(org.id).business_identifier is None
