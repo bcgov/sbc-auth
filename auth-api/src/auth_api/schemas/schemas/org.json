@@ -115,7 +115,7 @@
     "businessIdentifier": {
       "$id": "#/properties/businessIdentifier",
       "type": ["string", "null"],
-      "title": "Business identifier this account represents (unique across accounts). Send null to clear.",
+      "title": "Business identifier this account represents. Send null to clear.",
       "minLength": 1,
       "maxLength": 75,
       "examples": [
