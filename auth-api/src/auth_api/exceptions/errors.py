@@ -162,6 +162,7 @@ class Error(Enum):
     )
     INVALID_REDIRECT_URL = "Enter a valid URL beginning with https://.", HTTPStatus.BAD_REQUEST
     REDIRECT_URL_ALREADY_EXISTS = "This URL has already been added.", HTTPStatus.CONFLICT
+    ORG_BUSINESS_IDENTIFIER_NOT_FOUND = "No business found for the provided business identifier.", HTTPStatus.BAD_REQUEST
     REDIRECT_URL_INVALID = (
         "This redirect URL is not valid for this service provider.",
         HTTPStatus.BAD_REQUEST,

@@ -95,7 +95,8 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
     #  - only allow it when is_business_account is True
     #  - only one ACTIVE org per business_identifier (make ix_orgs_business_identifier a unique partial index
     #    WHERE business_identifier IS NOT NULL AND status_code = 'ACTIVE', and check status changes to ACTIVE too)
-    business_identifier = Column(String(75), nullable=True)
+    # Must reference an existing entity (entities.business_identifier is unique).
+    business_identifier = Column(String(75), ForeignKey("entities.business_identifier"), nullable=True)
 
     contacts = relationship("ContactLink", lazy="select", back_populates="org")
     org_type = relationship("OrgType")

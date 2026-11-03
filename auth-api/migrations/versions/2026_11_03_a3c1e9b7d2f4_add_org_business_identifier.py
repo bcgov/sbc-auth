@@ -26,9 +26,13 @@ def upgrade():
         unique=False,
         postgresql_where=sa.text("business_identifier IS NOT NULL"),
     )
+    op.create_foreign_key(
+        "orgs_business_identifier_fkey", "orgs", "entities", ["business_identifier"], ["business_identifier"]
+    )
 
 
 def downgrade():
+    op.drop_constraint("orgs_business_identifier_fkey", "orgs", type_="foreignkey")
     op.drop_index("ix_orgs_business_identifier", table_name="orgs")
     op.drop_column("orgs_history", "business_identifier")
     op.drop_column("orgs", "business_identifier")
