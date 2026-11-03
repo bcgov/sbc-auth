@@ -23,8 +23,8 @@ def upgrade():
         "ix_orgs_business_identifier",
         "orgs",
         ["business_identifier"],
-        unique=True,
-        postgresql_where=sa.text("business_identifier IS NOT NULL AND status_code = 'ACTIVE'"),
+        unique=False,
+        postgresql_where=sa.text("business_identifier IS NOT NULL"),
     )
 
 

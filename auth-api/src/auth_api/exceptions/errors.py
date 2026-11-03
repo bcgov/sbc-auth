@@ -162,14 +162,6 @@ class Error(Enum):
     )
     INVALID_REDIRECT_URL = "Enter a valid URL beginning with https://.", HTTPStatus.BAD_REQUEST
     REDIRECT_URL_ALREADY_EXISTS = "This URL has already been added.", HTTPStatus.CONFLICT
-    ORG_BUSINESS_IDENTIFIER_NOT_ALLOWED = (
-        "A business identifier can only be set on a business account.",
-        HTTPStatus.BAD_REQUEST,
-    )
-    ORG_BUSINESS_IDENTIFIER_ALREADY_EXISTS = (
-        "This business identifier is already linked to another active account.",
-        HTTPStatus.CONFLICT,
-    )
     REDIRECT_URL_INVALID = (
         "This redirect URL is not valid for this service provider.",
         HTTPStatus.BAD_REQUEST,

@@ -889,21 +889,6 @@ paths:
                     type: string
                     description: Description of the error.
                 description: Contains details of an error that was encountered.
-        '409':
-          description: Conflict - the business identifier is already used by another ACTIVE account.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    description: Identifier representing the type of error that occurred.
-                    example: ORG_BUSINESS_IDENTIFIER_ALREADY_EXISTS
-                  message:
-                    type: string
-                    description: Description of the error.
-                description: Contains details of an error that was encountered.
       operationId: put_org
       tags:
         - orgs
@@ -935,11 +920,7 @@ paths:
                   minLength: 1
                   maxLength: 75
                   title: Business Identifier
-                  description: >-
-                    Business identifier this account represents. Only allowed when the account is a business
-                    account (isBusinessAccount is true in the request or already true on the account).
-                    At most one ACTIVE account can hold a given identifier; matching is exact.
-                    Send null to clear it.
+                  description: Business identifier this account represents. Send null to clear it.
                   example: BC1234567
               required:
                 - name
@@ -1058,21 +1039,6 @@ paths:
                     type: string
                     description: Description of the error.
                 description: Contains details of an error that was encountered.
-        '409':
-          description: Conflict - the business identifier is already used by another ACTIVE account.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    description: Identifier representing the type of error that occurred.
-                    example: ORG_BUSINESS_IDENTIFIER_ALREADY_EXISTS
-                  message:
-                    type: string
-                    description: Description of the error.
-                description: Contains details of an error that was encountered.
       operationId: post_orgs
       tags:
         - orgs
@@ -1104,11 +1070,7 @@ paths:
                   minLength: 1
                   maxLength: 75
                   title: Business Identifier
-                  description: >-
-                    Business identifier this account represents. Only allowed when the account is a business
-                    account (isBusinessAccount is true in the request or already true on the account).
-                    At most one ACTIVE account can hold a given identifier; matching is exact.
-                    Send null to clear it.
+                  description: Business identifier this account represents. Send null to clear it.
                   example: BC1234567
               required:
                 - name
